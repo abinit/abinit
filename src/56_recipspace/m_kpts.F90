@@ -39,7 +39,7 @@ module m_kpts
  use m_numeric_tools,  only : wrap2_pmhalf
  use m_geometry,       only : metric
  use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
- use m_symkpt,     only : symkpt
+ use m_symkpt,         only : symkpt
 
  implicit none
 
@@ -353,15 +353,9 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  if (ierr /= 0) msg = errorstring
 
  10 continue
- if (allocated(indkk)) then
-   ABI_FREE(indkk)
- end if
- if (allocated(kfull)) then
-   ABI_FREE(kfull)
- end if
- if (allocated(new_shiftk)) then
-   ABI_FREE(new_shiftk)
- end if
+ ABI_SFREE(indkk)
+ ABI_SFREE(kfull)
+ ABI_SFREE(new_shiftk)
 
 end function tetra_from_kptrlatt
 !!***
@@ -421,7 +415,7 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 !scalars
  integer :: identi,ii,ikpt,ikpt2,imatch,isym,jj,tident
  real(dp) :: difk,reduce
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: ksym(3)
 
@@ -515,9 +509,9 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
      end do ! End loop on isym
    end do ! End primary loop over k-points
 
-   write(message,'(a)')' symkchk : k-point set has full space-group symmetry.'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg,'(a)')' symkchk : k-point set has full space-group symmetry.'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
  end if
 
 end function symkchk
@@ -570,9 +564,8 @@ end function symkchk
 !!  The tolerances tol12 and tol8 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
 !!  The tolerance tol12 is used for each component of the k vectors,
-!!  and for the length of the vectors
-!!  while the tolerance tol8 is used for the comparison of the squared lengths
-!!  of the separate vectors.
+!!  and for the length of the vectors while the tolerance tol8 is used for
+!!  the comparison of the squared lengths of the separate vectors.
 !!
 !! PARENTS
 !!      initberry,initorbmag,inwffil,m_dvdb,m_ebands,m_eprenorms,m_exc_diago
@@ -613,7 +606,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime,limit
  integer :: nsym_used,timrev_used
  real(dp) :: dksq,dksqmn,lk2,llarger,ldiff,lsmaller,ltrial,min_l
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: dkint(3),jdkint(3),k1int(3),k2int(3)
  integer, allocatable :: isort(:)
@@ -624,33 +617,33 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
 ! *************************************************************************
 
-!write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
+ !write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
  call timab(1021,1,tsec)
 
  if(sppoldbl<1 .or. sppoldbl>2)then
-   write(message, '(a,i0,3a)' )&
+   write(msg, '(a,i0,3a)' )&
 &   'The value of sppoldbl is',sppoldbl,',',ch10,&
 &   'but it should be either 1 or 2.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
-!When usesym=0, the old way of converting the wavefunctions (without using the symmetries), is recovered.
+ ! When usesym=0, the old way of converting the wavefunctions (without using the symmetries), is recovered.
  nsym_used=nsym
  timrev_used=timrev
  if(usesym==0)nsym_used=1
  if(usesym==0)timrev_used=0
 
-!Precompute the length of the kpt1 vectors, also taking into account possible umpklapp vectors
+ ! Precompute the length of the kpt1 vectors, also taking into account possible umpklapp vectors
  limit=1 ; l3 = (2*limit+1)**3
  ABI_ALLOCATE(lkpg1,(l3*nkpt1))
  ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1))
  ABI_ALLOCATE(isort,(l3*nkpt1))
-!write(std_out,*)' List of kpt1 vectors '
-!write(std_out,*)' Length of the kpt1 vectors :'
+ !write(std_out,*)' List of kpt1 vectors'
+ !write(std_out,*)' Length of the kpt1 vectors:'
 
  do ikpt1=1,nkpt1
    k1(:)=kptns1(:,ikpt1)
-!  write(std_out,*)ikpt1,k1(:)
+   !write(std_out,*)ikpt1,k1(:)
    k1int(:)=nint(k1(:)+tol12)
    k1(:)=k1(:)-k1int(:)
    do ig1=-limit,limit
@@ -661,13 +654,13 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
          kpg1(3)=k1(3)+ig3
 
          ikpg1=ig1+limit+1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
-!        Compute the norm of the vector (also taking into account possible umklapp)
+         ! Compute the norm of the vector (also taking into account possible umklapp)
          lkpg1(ikpg1)=sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2+&
 &         gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1)+&
 &         gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
          lkpg1_sorted(ikpg1)=lkpg1(ikpg1)
          isort(ikpg1)=ikpg1
-!        write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
+         ! write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
        end do
      end do
    end do
@@ -675,35 +668,33 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
  call sort_dp( l3*nkpt1,lkpg1_sorted,isort,tol12)
 
-!DEBUG
 !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
 !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
 !do ii=1,l3*nkpt1
 !ikpt1=(isort(ii)-1)/l3+1
 !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
 !enddo
-!stop
-!ENDDEBUG
 
  dksqmax=zero
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
 
      ikpt2_done=0
-!    Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
+     ! Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
      k2(:)=kptns2(:,ikpt2)
      k2int(:)=nint(k2(:)+tol12)
      k2(:)=k2(:)-k2int(:)
      lk2=sqrt(gmet(1,1)*k2(1)**2+gmet(2,2)*k2(2)**2+&
 &     gmet(3,3)*k2(3)**2+two*(gmet(2,1)*k2(2)*k2(1)+&
 &     gmet(3,2)*k2(3)*k2(2)+gmet(3,1)*k2(3)*k2(1)))
-!    write(std_out, '(a,i4,7es16.6)' )' listkk : ikpt2,kptns2(:,ikpt2),k2(:),lk2=',ikpt2,kptns2(:,ikpt2),k2(:),lk2
+     ! write(std_out, '(a,i4,7es16.6)' )' listkk : ikpt2,kptns2(:,ikpt2),k2(:),lk2=',ikpt2,kptns2(:,ikpt2),k2(:),lk2
 
-!    Find the kpt1 vector whose length is the most similar to the length of lk2
-!    up to a tolerance. Use a bissection algorithm.
+     ! Find the kpt1 vector whose length is the most similar to the length of lk2 up to a tolerance.
+     ! Use a bissection algorithm.
      ismaller=0       ; lsmaller=zero
      ilarger=l3*nkpt1+1 ; llarger=huge(one)
-!    This loop should never reach l3*nkpt1, since this is a bissection algorithm
+
+     ! This loop should never reach l3*nkpt1, since this is a bissection algorithm
      do ii=1,l3*nkpt1
        if((ilarger-ismaller)<2 .or. (llarger-lsmaller)<2*tol12)exit
        itrial=(ilarger+ismaller)/2 ; ltrial=lkpg1_sorted(itrial)
@@ -720,49 +711,46 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
      if(abs(llarger-lk2)<abs(lsmaller-lk2)-tol12)itrial=ilarger
      if(itrial==0)itrial=ilarger
      ismaller=itrial ; ilarger=itrial
-!    write(std_out,*)' listkk : starting search at itrial=',itrial
+     ! write(std_out,*)' listkk : starting search at itrial=',itrial
 
      dksqmn=huge(one)
 
-!    The ii index is dummy. This avoids an infinite loop.
+     ! The ii index is dummy. This avoids an infinite loop.
      do ii=1,l3*nkpt1
-!      do ikpt1=1,nkpt1
+       ! do ikpt1=1,nkpt1
 
-!      If the difference in length between the trial vector and the target vector is bigger
-!      than the already achieved distance, the search is finished ...
+       ! If the difference in length between the trial vector and the target vector is bigger
+       ! than the already achieved distance, the search is finished ...
        ldiff=abs(lkpg1_sorted(itrial)-lk2)
 
-!      write(std_out,*)' listkk : ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn=',ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn
+       ! write(std_out,*)' listkk : ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn=',ii,itrial,lkpg1_sorted(itrial),lk2,ldiff,dksqmn
        if(ldiff**2>dksqmn+tol8)exit
 
-!      If this k-point has already been examined in a previous batch, skip it
-!      First, compute the minimum of the difference of length of the sets of associated vectors thanks to Umklapp vectors
-!      with the target vector
+       ! If this k-point has already been examined in a previous batch, skip it
+       ! First, compute the minimum of the difference of length of the sets of associated vectors thanks to Umklapp vectors
+       ! with the target vector
        ikpt1=(isort(itrial)-1)/l3+1
        min_l=minval(abs(lkpg1((ikpt1-1)*l3+1:(ikpt1-1)*l3+l3)-lk2))
-!      Then compare with the current ldiff
-!      write(std_out,*)' listkk : ikpt1,min_l,ldiff=',ikpt1,min_l,ldiff
 
+       ! Then compare with the current ldiff
+       ! write(std_out,*)' listkk : ikpt1,min_l,ldiff=',ikpt1,min_l,ldiff
        if(min_l > ldiff-tol12)then
 
-!        Now, will examine the trial vector, and the symmetric ones
-!MG FIXME:
-! Here there's a possible problem with the order of symmetries because
-! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
-! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
+         ! Now, will examine the trial vector, and the symmetric ones
+         !MG FIXME:
+         ! Here there's a possible problem with the order of symmetries because
+         ! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
+         ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
          do itimrev=0,timrev_used
            do isym=1,nsym_used
 
-!            Select magnetic characteristic of symmetries
+             ! Select magnetic characteristic of symmetries
              if(isppol==1 .and. symafm(isym)==-1)cycle
              if(isppol==2 .and. symafm(isym)==1)cycle
 
-!            Compute symmetric point to kpt1
+             ! Compute symmetric point to kpt1
              if(usesym==1)then
-!              original code only used transpose(symrel)
-!              kpt1a(:)=symrel(1,:,isym)*kptns1(1,ikpt1)+&
-!              &             symrel(2,:,isym)*kptns1(2,ikpt1)+&
-!              &             symrel(3,:,isym)*kptns1(3,ikpt1)
+               ! original code only used transpose(symrel)
                if (present(use_symrec)) then
                  if (use_symrec) then
                    kpt1a(:) = MATMUL(symmat(:,:,isym),kptns1(:,ikpt1))
@@ -777,36 +765,36 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
                kpt1a(:)=kptns1(:,ikpt1)
              end if
 
-!            Compute difference with respect to kpt2, modulo a lattice vector
+             ! Compute difference with respect to kpt2, modulo a lattice vector
              dk(:)=kptns2(:,ikpt2)-kpt1a(:)
              if(usesym==1)then
-!              The tolerance insure similar behaviour on different platforms
-!              XG120418 : Actually, *assumes* that the closest point will have reduced
-!              coordinates differing by less than 1/2 . There might be elongated
-!              cells where this is not correct ...
+               ! The tolerance insure similar behaviour on different platforms
+               ! XG120418: Actually, *assumes* that the closest point will have reduced
+               ! coordinates differing by less than 1/2 . There might be elongated
+               ! cells where this is not correct ...
                dkint(:)=nint(dk(:)+tol12)
                dk(:)=dk(:)-dkint(:)
              else
                dkint(:)=0
              end if
 
-!            Compute norm of the difference vector, and update kpt1 if better.
+             ! Compute norm of the difference vector, and update kpt1 if better.
              dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+&
 &             gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+&
 &             gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
 
              if (dksq<dksqmn+tol8) then
 
-!              If exactly the right point (without using symmetries neither umklapp vector), will exit the search
-!              Note that in this condition, each coordinate is tested separately, without squaring. So, it is a much stronger
-!              condition than dksqmn<tol12
+                ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
+                ! Note that in this condition, each coordinate is tested separately, without squaring. So, it is a much stronger
+                ! condition than dksqmn<tol12
                if(sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12)then
                  ikpt2_done=1
                end if
 
-!              Update in three cases : either if succeeded to have exactly the vector, or the distance is better,
-!              or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
-!               in order to respect previous ordering
+               ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
+               ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
+               ! in order to respect previous ordering
                if(  ikpt2_done==1 .or. &
 &               dksq+tol12<dksqmn .or. &
 &               ( abs(dksq-dksqmn)<tol12 .and. &
@@ -820,21 +808,19 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
                  jtime=itimrev
                  jdkint(:)=dkint(:)
 
-!                DEBUG
-!                write(std_out,*)' ikpt1,ikpt2=',ikpt1,ikpt2
-!                write(std_out,*)' timrev_used=',timrev_used
-!                write(std_out,*)' Succeeded to lower dskmn,ikpt2_done=',dksqmn,ikpt2_done
-!                write(std_out,*)' ikpt1,isym,dkint(:),itimrev=',ikpt1,isym,dkint(:),itimrev
-!                ka(:)=kpt1a(:)+dkint(:)
-!                write(std_out,*)'        k1=',kpt1a(:)
-!                write(std_out,*)'     dkint=',dkint(:)
-!                write(std_out,*)' Actual k1=',ka(:)
-!                write(std_out,*)'        k2=',kptns2(:,ikpt2)
-!                kasq=gmet(1,1)*ka(1)**2+gmet(2,2)*ka(2)**2+&
-!                &                  gmet(3,3)*ka(3)**2+two*(gmet(2,1)*ka(2)*ka(1)+&
-!                &                  gmet(3,2)*ka(3)*ka(2)+gmet(3,1)*ka(3)*ka(1))
-!                write(std_out,*)' Actual k1sq=',kasq
-!                ENDDEBUG
+                 !write(std_out,*)' ikpt1,ikpt2=',ikpt1,ikpt2
+                 !write(std_out,*)' timrev_used=',timrev_used
+                 !write(std_out,*)' Succeeded to lower dskmn,ikpt2_done=',dksqmn,ikpt2_done
+                 !write(std_out,*)' ikpt1,isym,dkint(:),itimrev=',ikpt1,isym,dkint(:),itimrev
+                 !ka(:)=kpt1a(:)+dkint(:)
+                 !write(std_out,*)'        k1=',kpt1a(:)
+                 !write(std_out,*)'     dkint=',dkint(:)
+                 !write(std_out,*)' Actual k1=',ka(:)
+                 !write(std_out,*)'        k2=',kptns2(:,ikpt2)
+                 !kasq=gmet(1,1)*ka(1)**2+gmet(2,2)*ka(2)**2+&
+                 !                  gmet(3,3)*ka(3)**2+two*(gmet(2,1)*ka(2)*ka(1)+&
+                 !                  gmet(3,2)*ka(3)*ka(2)+gmet(3,1)*ka(3)*ka(1))
+                 !write(std_out,*)' Actual k1sq=',kasq
                end if
 
              end if
@@ -845,15 +831,14 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
          if(ikpt2_done==1)exit
        end if
 
-!      Update the interval that has been explored
+       ! Update the interval that has been explored
        if(itrial<ismaller)ismaller=itrial
        if(itrial>ilarger)ilarger=itrial
 
-!      Select the next index to be tried (preferably the smaller indices, but this is a bit arbitrary).
-
-!      write(std_out,*)' before choosing the next index :'
-!      write(std_out,*)' ismaller,itrial,ilarger=',ismaller,itrial,ilarger
-!      write(std_out,*)' lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)=',lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)
+       ! Select the next index to be tried (preferably the smaller indices, but this is a bit arbitrary).
+       ! write(std_out,*)' before choosing the next index :'
+       ! write(std_out,*)' ismaller,itrial,ilarger=',ismaller,itrial,ilarger
+       ! write(std_out,*)' lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)=',lkpg1_sorted(ismaller-1),lk2,lkpg1_sorted(ilarger+1)
        if(ismaller>1 .and. ilarger<l3*nkpt1)then
          if(abs(lkpg1_sorted(ismaller-1)-lk2)<abs(lkpg1_sorted(ilarger+1)-lk2)+tol12)then
            itrial=ismaller-1
@@ -863,9 +848,10 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
        end if
        if(ismaller==1 .and. ilarger<l3*nkpt1)itrial=ilarger+1
        if(ismaller>1 .and. ilarger==l3*nkpt1)itrial=ismaller-1
-!      if(ismaller==1 .and. ilarger==l3*nkpt1), we are done with the loop !
+       ! if(ismaller==1 .and. ilarger==l3*nkpt1), we are done with the loop !
      end do ! ikpt1
 
+     ! Store indices.
      indkk(ikpt2+(isppol-1)*nkpt2,1)=jkpt1
      indkk(ikpt2+(isppol-1)*nkpt2,2)=jsym
      indkk(ikpt2+(isppol-1)*nkpt2,3:5)=jdkint(:)
@@ -873,15 +859,13 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
      dksqmax=max(dksqmax,dksqmn)
 
      if(dksqmn<-tol12)then
-       write(message, '(a,es16.6)' )'  The minimum square of dk has negative norm: dksqmn=',dksqmn
-       MSG_BUG(message)
+       write(msg, '(a,es16.6)' )'The minimum square of dk has negative norm: dksqmn= ',dksqmn
+       MSG_BUG(msg)
      end if
 
-!    DEBUG
-!    write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )' listkk: ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:)=',ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:),dksqmn
-!    if(nkpt1==17)stop
-!    ENDDEBUG
-
+     !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )&
+     ! ' listkk: ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:)=',ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:),dksqmn
+     !if(nkpt1==17)stop
    end do ! ikpt2
  end do ! isppol
 
@@ -985,7 +969,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  integer :: nkpthf_computed,nkpt_fullbz,nkptlatt,nshiftk2,nsym_used,option
  integer :: test_prime,timrev
  real(dp) :: length2,ucvol,ucvol_super
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer, parameter :: prime_factor(max_number_of_prime)=(/2,3,5,7,9, 11,13,17,19,23,&
 &  29,31,37,41,43, 47,53,59,61,67,&
@@ -1251,8 +1235,8 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  length2=min(metmin(1,1),metmin(2,2),metmin(3,3))
  kptrlen=sqrt(length2)
 
- !write(message,'(a,es16.6)' )' getkgrid : length of smallest supercell vector (bohr)=',kptrlen
- !call wrtout(std_out,message,'COLL')
+ !write(msg,'(a,es16.6)' )' getkgrid : length of smallest supercell vector (bohr)=',kptrlen
+ !call wrtout(std_out,msg,'COLL')
 ! If the number of shifts has been decreased, determine the set of kptrlatt2 vectors
 ! with minimal length (without using fact_vacuum)
 ! It is worth to determine the minimal set of vectors so that the kptrlatt that is output
@@ -1336,14 +1320,14 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
 !Check that the argument nkpt is coherent with nkpt_computed, if nkpt/=0.
  if(nkpt/=nkpt_computed .and. nkpt/=0)then
-   write(message, '(a,i6,5a,i6,7a)') &
+   write(msg, '(a,i6,5a,i6,7a)') &
 &   'The argument nkpt=',nkpt,', does not match',ch10,&
 &   'the number of k points generated by kptopt, kptrlatt, shiftk,',ch10,&
 &   'and the eventual symmetries, that is, nkpt=',nkpt_computed,'.',ch10,&
 &   'However, note that it might be due to the user,',ch10,&
 &   'if nkpt is explicitely defined in the input file.',ch10,&
 &   'In this case, please check your input file.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if(kptopt==1 .or. kptopt==2 .or. kptopt==4)then
@@ -1439,7 +1423,7 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
 !scalars
  integer :: ikpt,isym,itim,timrev
  integer :: symrankkpt
- character(len=500) :: message
+ character(len=500) :: msg
  type(kptrank_type) :: kptrank_t
 
 !arrays
@@ -1479,8 +1463,8 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
    end do !  loop sym ops
 
    if (indkpt(ikpt) == 0) then
-     write (message,'(a,i0)')' indkpt(ikpt) is still 0: no irred kpoint is equiv to ikpt ',ikpt
-     MSG_BUG(message)
+     write(msg,'(a,i0)')' indkpt(ikpt) is still 0: no irred kpoint is equiv to ikpt ',ikpt
+     MSG_BUG(msg)
    end if
  end do !  loop full kpts
 
@@ -1536,7 +1520,7 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
 !scalars
  integer, parameter :: max_number_of_prime=47
  integer :: det,ii,ikshft,iprim,jj,kk,nn
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: boundmax(3),boundmin(3),common_factor(3)
  integer, parameter :: prime_factor(max_number_of_prime)=(/2,3,5,7,9, 11,13,17,19,23,&
@@ -1612,8 +1596,8 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
          call wrap2_pmhalf(k2(2),k1(2),shift(2))
          call wrap2_pmhalf(k2(3),k1(3),shift(3))
          if(nn > nkpt_fullbz) then
-           write (message,'(a,i0)')' nkpt_fullbz mis-estimated, exceed nn=',nn
-           MSG_BUG(message)
+           write (msg,'(a,i0)')' nkpt_fullbz mis-estimated, exceed nn=',nn
+           MSG_BUG(msg)
          end if
          kpt_fullbz(:,nn)=k1(:)
          nn=nn+1
@@ -1624,9 +1608,9 @@ subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
  nn = nn-1
 
  if (nn /= nkpt_fullbz) then
-   write (message,'(2(a,i0),a,a)')' nkpt_fullbz= ',nkpt_fullbz,' underestimated  nn=',nn,&
+   write (msg,'(2(a,i0),a,a)')' nkpt_fullbz= ',nkpt_fullbz,' underestimated  nn=',nn,&
 &   ch10, "Perhaps your k grid or shifts do not correspond to the symmetry?"
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
 end subroutine get_kpt_fullbz
@@ -1719,7 +1703,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
  integer,parameter :: prtvol=0
  integer :: dividedown,ii,ikshft,jj,kk,nkpout,nkptlatt,nn,proddown
  real(dp) :: shift
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: ads(3),boundmax(3),boundmin(3),cds(3),coord(3),ngkpt(3)
  integer, allocatable :: found1(:,:),found2(:,:),found3(:,:)
@@ -1742,12 +1726,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    if(kptrlatt(1,2)/=0 .or. kptrlatt(2,1)/=0 .or. &
 &   kptrlatt(1,3)/=0 .or. kptrlatt(3,1)/=0 .or. &
 &   kptrlatt(2,3)/=0 .or. kptrlatt(3,2)/=0     ) then
-     write(message, '(2a,a,3i0,a,a,3i4,a,a,3i4)' )&
+     write(msg, '(2a,a,3i0,a,a,3i4,a,a,3i4)' )&
 &     'When abs(brav)/=1, kptrlatt must be diagonal, while it is',ch10,&
 &     'kptrlatt(:,1)= ',kptrlatt(:,1),ch10,&
 &     'kptrlatt(:,2)= ',kptrlatt(:,2),ch10,&
 &     'kptrlatt(:,3)= ',kptrlatt(:,3)
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
 
    ngkpt(1)=kptrlatt(1,1)
@@ -1755,14 +1739,14 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    ngkpt(3)=kptrlatt(3,3)
 !
    if( (ngkpt(1)<=0.or.ngkpt(2)<=0.or.ngkpt(3)<=0) .and. (ngkpt(1)/=0.or.ngkpt(2)/=0.or.ngkpt(3)/=0) ) then
-     write(message, '(5a,i4,a,a,i0,a,a,i0,a,a)' )&
+     write(msg, '(5a,i4,a,a,i0,a,a,i0,a,a)' )&
 &     'All ngkpt (or ngqpt) must be strictly positive',ch10,&
 &     'or all ngk(q)pt must be zero (for Gamma sampling), but :',ch10,&
 &     'ngk(q)pt(1) = ',ngkpt(1),ch10,&
 &     'ngk(q)pt(2) = ',ngkpt(2),ch10,&
 &     'ngk(q)pt(3) = ',ngkpt(3),ch10,&
 &     'Action: correct ngkpt or ngqpt in the input file.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
  end if
 
@@ -1794,12 +1778,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    if(present(downsampling))then
      if(.not.(downsampling(1)==1 .and. downsampling(2)==1 .and. downsampling(3)==1))then
        if(nshiftk>1)then
-         write(message, '(a,3i4,2a,i4,4a)' )&
+         write(msg, '(a,3i4,2a,i4,4a)' )&
 &         'Real downsampling is activated, with downsampling(1:3)=',downsampling(1:3),ch10,&
 &         'However, nshiftk must be 1 in this case, while the input nshiftk=',nshiftk,ch10,&
 &         'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
 &         'or set nshiftk=1.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
        proddown=downsampling(1)*downsampling(2)*downsampling(3)
        if(proddown/=0)then
@@ -1812,14 +1796,14 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
        if(mod(nkptlatt,dividedown)==0)then
          nkptlatt=nkptlatt/dividedown
        else
-         write(message, '(a,3i4,2a,i4,4a)' )&
+         write(msg, '(a,3i4,2a,i4,4a)' )&
 &         'The requested downsampling, with downsampling(1:3)=',downsampling(1:3),ch10,&
 &         'is not compatible with kptrlatt=',ch10,&
 &         kptrlatt(:,:),ch10,&
 &         'that gives nkptlatt=',nkptlatt,ch10,&
 &         'Action: either choose not to downsample the k point grid (e.g. fockdownsampling=1),',ch10,&
 &         'or modify your k-point grid and/or your downsampling in order for them to be compatible.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end if
    end if
@@ -1827,12 +1811,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !  Simple Lattice
    if (prtvol > 0) call wrtout(std_out,'       Simple Lattice Grid ','COLL')
    if (mkpt<nkptlatt*nshiftk) then
-     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
 &     'at least',nkptlatt*nshiftk,',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
 
 !  Build primitive vectors of the k lattice
@@ -1969,10 +1953,10 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end if
 
    if(nkpt/=nkptlatt*nshiftk)then
-     write(message, '(a,i0,3a,i0,a)' )&
+     write(msg, '(a,i0,3a,i0,a)' )&
 &     'The number of k points ',nkpt,' is not equal to',ch10,&
 &     'nkptlatt*nshiftk which is ',nkptlatt*nshiftk,'.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
 
  else if(brav==2)then
@@ -1980,33 +1964,33 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !  Face-Centered Lattice
    if (prtvol > 0) call wrtout(std_out,'       Face-Centered Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/2) then
-     write(message, '(a,a,a,i0,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i0,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
 &     'at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2,',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
    nn=1
    if (ngkpt(1)/=ngkpt(2).or.ngkpt(1)/=ngkpt(3)) then
-     write(message, '(4a,3(a,i0,a),a)' )&
+     write(msg, '(4a,3(a,i0,a),a)' )&
 &     'For face-centered lattices, the numbers ngqpt(1:3)',ch10,&
 &     'must be equal, while they are :',ch10,&
 &     'ngqpt(1) = ',ngkpt(1),ch10,&
 &     'ngqpt(2) = ',ngkpt(2),ch10,&
 &     'ngqpt(3) = ',ngkpt(3),ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
    if ((ngkpt(1)*nshiftk)/=(((ngkpt(1)*nshiftk)/2)*2)) then
-     write(message, '(4a,3(a,i0,a),a)' )&
+     write(msg, '(4a,3(a,i0,a),a)' )&
 &     'For face-centered lattices, the numbers ngqpt(1:3)*nshiftk',ch10,&
 &     'must be even, while they are :',ch10,&
 &     'ngqpt(1)*nshiftk = ',ngkpt(1)*nshiftk,ch10,&
 &     'ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
 &     'ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
 &     'Action: modify ngqpt(1:3)*nshiftk in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
      spkpt(1,1)=0.0_dp
@@ -2044,11 +2028,11 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
      nkpt=nn-1
      if(nkpt/=ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/2)then
-       write(message, '(a,i8,a,a,a,i8,a)' )&
+       write(msg, '(a,i8,a,a,a,i8,a)' )&
 &       'The number of k points ',nkpt,'  is not equal to',ch10,&
 &       '(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2 which is',&
 &       (ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2,'.'
-       MSG_BUG(message)
+       MSG_BUG(msg)
      end if
    end if
 
@@ -2057,25 +2041,25 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !  Body-Centered Lattice (not mandatory cubic !)
    if (prtvol > 0) call wrtout(std_out,'       Body-Centered Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/4) then
-     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
 &     'at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4,',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
    nn=1
    if ((ngkpt(1)*nshiftk)/=(((ngkpt(1)*nshiftk)/2)*2) .or.&
 &   (ngkpt(2)*nshiftk)/=(((ngkpt(2)*nshiftk)/2)*2) .or.&
 &   (ngkpt(3)*nshiftk)/=(((ngkpt(3)*nshiftk)/2)*2) ) then
-     write(message, '(4a,3(a,i6,a),a)' )&
+     write(msg, '(4a,3(a,i6,a),a)' )&
 &     'For body-centered lattices, the numbers ngqpt(1:3)',ch10,&
 &     'must be even, while they are :',ch10,&
 &     'ngqpt(1)*nshiftk = ',ngkpt(1)*nshiftk,ch10,&
 &     'ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
 &     'ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
      spkpt(1,1)=0.0_dp
@@ -2117,16 +2101,16 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
      nkpt=nn-1
      if(nkpt==0)then
-       write(message, '(3a)' )&
+       write(msg, '(3a)' )&
 &       'BCC lattice, input ngqpt=0, so no kpt is generated.',ch10,&
 &       'Action: modify ngqpt(1:3) in the input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
      if(nkpt/=(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4)then
-       write(message, '(a,i0,3a,i0,a)' )&
+       write(msg, '(a,i0,3a,i0,a)' )&
 &       'The number of k points ',nkpt,' is not equal to',ch10,&
 &       '(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4 which is',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4,'.'
-       MSG_BUG(message)
+       MSG_BUG(msg)
      end if
    end if
 
@@ -2135,28 +2119,28 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !  Hexagonal Lattice  (D6h)
    if (prtvol > 0) call wrtout(std_out,'       Hexagonal Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)) then
-     write(message, '(a,a,a,i0,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i0,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
 &     'at least',ngkpt(1)*ngkpt(2)*ngkpt(3),',',ch10,&
 &     'Action: set mkpt to that value in the main routine,',ch10,&
 &     'and recompile the code.'
-     MSG_BUG(message)
+     MSG_BUG(msg)
    end if
    nn=1
    if (ngkpt(1)/=ngkpt(2)) then
-     write(message, '(4a,2(a,i0,a),a)' )&
+     write(msg, '(4a,2(a,i0,a),a)' )&
 &     'For hexagonal lattices, the numbers ngqpt(1:2)',ch10,&
 &     'must be equal, while they are:',ch10,&
 &     'ngqpt(1) = ',ngkpt(1),ch10,&
 &     'ngqpt(2) = ',ngkpt(2),ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
-     write(message, '(3a)' )&
+     write(msg, '(3a)' )&
 &     'For hexagonal lattices, ngqpt(1:3)=0 is not permitted',ch10,&
 &     'Action: modify ngqpt(1:3) in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    else
      do kk=1,ngkpt(3)
        do jj=1,ngkpt(2)
@@ -2177,19 +2161,19 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
      nkpt=nn-1
      if(nkpt/=ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)then
-       write(message, '(a,i0,3a,i0,a)' )&
+       write(msg, '(a,i0,3a,i0,a)' )&
 &       'The number of k points ',nkpt,'  is not equal to',ch10,&
 &       'ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk which is',ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk,'.'
-       MSG_BUG(message)
+       MSG_BUG(msg)
      end if
    end if
 
  else
 
-   write(message, '(a,i0,a,a,a)' )&
+   write(msg, '(a,i0,a,a,a)' )&
 &   'The calling routine asks brav= ',brav,'.',ch10,&
 &   'but only brav=1 or -1,2,3 or 4 are allowed.'
-   MSG_BUG(message)
+   MSG_BUG(msg)
  end if
 
  if (option/=0) then
@@ -2204,16 +2188,16 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
      end do
    end if
 
-   write(message,'(a,i8)')' Grid q points  : ',nkpt
-   call wrtout(iout,message,'COLL')
+   write(msg,'(a,i8)')' Grid q points  : ',nkpt
+   call wrtout(iout,msg,'COLL')
    nkpout=nkpt
    if(nkpt>80)then
      call wrtout(iout,' greater than 80, so only write 20 of them ','COLL')
      nkpout=20
    end if
    do ii=1,nkpout
-     write(message, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
-     call wrtout(iout,message,'COLL')
+     write(msg, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
+     call wrtout(iout,msg,'COLL')
    end do
  end if
 
@@ -2295,7 +2279,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
  real(dp) :: kptrlen_trial,length1,length2,length3,length_axis1,length_axis2
  real(dp) :: length_axis3,merit_factor,mult1h,mult2h,mult3h,reduceda,reducedb
  real(dp) :: sca,scb,scc,surface,ucvol
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: kptrlatt_current(3,3),kptrlatt_trial(3,3)
  integer,allocatable :: grid_list(:)
@@ -2311,11 +2295,11 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 !The vacuum array must be made of 0 or 1
  do ii=1,3
    if(vacuum(ii)/=0 .and. vacuum(ii)/=1)then
-     write(message,'(a,a,a,i1,a,i3,a,a)')&
+     write(msg,'(a,a,a,i1,a,i3,a,a)')&
 &     'The values of vacuum must be 0 or 1.',ch10,&
 &     'However, the input vacuum(',ii,') is',vacuum(ii),ch10,&
-&     'Action : correct vacuum in your input file.'
-     MSG_ERROR(message)
+&     'Action: correct vacuum in your input file.'
+     MSG_ERROR(msg)
    end if
  end do
 
@@ -2429,11 +2413,11 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
    length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
 
 !  DEBUG
-!  write(std_out,*)' testkgrid : iholohedry, center =',iholohedry,center
-!  write(std_out,*)' testkgrid : axis 1=',axes(:,1)
-!  write(std_out,*)' testkgrid : axis 2=',axes(:,2)
-!  write(std_out,*)' testkgrid : axis 3=',axes(:,3)
-!  write(std_out,*)' testkgrid : length_axis=',length_axis1,length_axis2
+!  write(std_out,*)' testkgrid: iholohedry, center =',iholohedry,center
+!  write(std_out,*)' testkgrid: axis 1=',axes(:,1)
+!  write(std_out,*)' testkgrid: axis 2=',axes(:,2)
+!  write(std_out,*)' testkgrid: axis 3=',axes(:,3)
+!  write(std_out,*)' testkgrid: length_axis=',length_axis1,length_axis2
 !  ENDDEBUG
 
 !  End special treatment of 2-D case
@@ -2456,7 +2440,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
    length_axis2=sqrt(axes(1,2)**2+axes(2,2)**2+axes(3,2)**2)
    length_axis3=sqrt(axes(1,3)**2+axes(2,3)**2+axes(3,3)**2)
 !  DEBUG
-!  write(std_out,*)' testkgrid : axes=',axes(:,:)
+!  write(std_out,*)' testkgrid: axes=',axes(:,:)
 !  write(std_out,*)' length_axis=',length_axis1,length_axis2,length_axis3
 !  ENDDEBUG
  end if
@@ -2469,12 +2453,12 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
  if(prtkpt/=0)buffer_scale=two
 
  if(prtkpt/=0)then
-   write(message,'(a,a,a,a,a,a,a,a)' )ch10,&
+   write(msg,'(a,a,a,a,a,a,a,a)' )ch10,&
 &   ' testkgrid : will perform the analysis of a series of k-grids.',ch10,&
 &   '  Note that kptopt=1 in this analysis, irrespective of its input value.',ch10,ch10,&
 &   ' Grid#    kptrlatt         shiftk         kptrlen       nkpt  iset',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg,'COLL')
    ABI_ALLOCATE(grid_list,(mkpt_list))
    ABI_ALLOCATE(kptrlen_list,(mkpt_list))
    grid_list(:)=0
@@ -2493,13 +2477,13 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
    igrid_current=1
 
    if(prtkpt/=0)then
-     write(message,&
+     write(msg,&
 &     '(a,3i4,a,es14.4,a,es14.4,i8,i6,a,a,3i4,a,es14.4,a,a,3i4,a,es14.4,a)' )&
 &     '    1  ',kptrlatt(:,1),'  ',shiftk(1,1),'  ',kptrlen,1,1,ch10,&
 &     '       ',kptrlatt(:,2),'  ',shiftk(2,1),ch10,&
 &     '       ',kptrlatt(:,3),'  ',shiftk(3,1),ch10
-     call wrtout(std_out,message,'COLL')
-     call wrtout(iout,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(iout,msg,'COLL')
 !    The unit cell volume is fake
      ucvol=kptrlen**3
    end if
@@ -2539,7 +2523,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 !      Treat hexagonal holohedries separately
        if(iholohedry==3)then
 
-!        write(std_out,*)' testkgrid : 2D, hexagonal'
+!        write(std_out,*)' testkgrid: 2D, hexagonal'
 
          mult1=mult1+1
          nset=4
@@ -2567,9 +2551,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 !        Now treat all other holohedries
          length1=length_axis1*mult1
          length2=length_axis2*mult2
-!        DEBUG
-!        write(std_out,*)' testkgrid : (2d) length=',length1,length2
-!        ENDDEBUG
+!        write(std_out,*)' testkgrid: (2d) length=',length1,length2
          if(abs(length1-length2)<tol8)then
            mult1=mult1+1
            mult2=mult2+1
@@ -2591,7 +2573,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
            rsuper(:,1)=axes(:,1)*(mult1-0.5_dp)-axes(:,2)*(mult2-0.5_dp)
            rsuper(:,2)=axes(:,1)*(mult1-0.5_dp)+axes(:,2)*(mult2-0.5_dp)
          end if
-!        This was the easiest way to code all even mult1 and mult2 pairs :
+!        This was the easiest way to code all even mult1 and mult2 pairs:
 !        make separate series for this possibility.
          if(iset==2 .or. iset==4 .or. iset==6)then
            rsuper(:,1)=2.0_dp*rsuper(:,1)
@@ -2637,9 +2619,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
        if(iholohedry==6)then
          length1=length_axis1*mult1
          length3=length_axis3*mult3
-!        DEBUG
-!        write(std_out,*)' testkgrid : (hex) lengths=',length1,length2
-!        ENDDEBUG
+!        write(std_out,*)' testkgrid: (hex) lengths=',length1,length2
          if(abs(length1-length3)<tol8)then
            mult1=mult1+1
            mult3=mult3+1
@@ -2680,9 +2660,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
          length1=length_axis1*mult1
          length2=length_axis2*mult2
          length3=length_axis3*mult3
-!        DEBUG
-!        write(std_out,*)' testkgrid : length=',length1,length2,length3
-!        ENDDEBUG
+!        write(std_out,*)' testkgrid: length=',length1,length2,length3
          if(length2>length1+tol8 .and. length3>length1+tol8)then
            mult1=mult1+1
          else if(length1>length2+tol8 .and. length3>length2+tol8)then
@@ -2741,7 +2719,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
              shiftk_trial(:,1)=0.0_dp
            end if
          end if
-!        This was the easiest way to code all even mult1, mult2, mult3 triplets :
+!        This was the easiest way to code all even mult1, mult2, mult3 triplets:
 !        make separate series for this possibility.
          if(2*(iset/2)==iset)then
            rsuper(:,1)=2.0_dp*rsuper(:,1)
@@ -2750,14 +2728,11 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
          end if
        end if
 
-!      DEBUG
-!      write(std_out,*)' testkgrid : gprimd=',gprimd(:,:)
-!      write(std_out,*)' testkgrid : rsuper=',rsuper(:,:)
-!      write(std_out,*)' testkgrid : iset  =',iset
-!      ENDDEBUG
+!      write(std_out,*)' testkgrid: gprimd=',gprimd(:,:)
+!      write(std_out,*)' testkgrid: rsuper=',rsuper(:,:)
+!      write(std_out,*)' testkgrid: iset  =',iset
 
-
-!      The supercell and the corresponding shift have been generated !
+!      The supercell and the corresponding shift have been generated!
 !      Convert cartesian coordinates into kptrlatt_trial
        do ii=1,3
          kptrlatt_trial(:,ii)=nint( gprimd(1,:)*rsuper(1,ii)+&
@@ -2768,20 +2743,16 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 !      End of 3-dimensional system
      end if
 
-!    DEBUG
-!    write(std_out,*)' testkgrid : before getkgrid'
-!    write(std_out,*)' testkgrid : rprimd=',rprimd(:,:)
-!    write(std_out,*)' testkgrid : kptrlatt_trial=',kptrlatt_trial(:,:)
-!    ENDDEBUG
+!    write(std_out,*)' testkgrid: before getkgrid'
+!    write(std_out,*)' testkgrid: rprimd=',rprimd(:,:)
+!    write(std_out,*)' testkgrid: kptrlatt_trial=',kptrlatt_trial(:,:)
 
      call getkgrid(0,0,iscf,kpt,&
 &     kptopt,kptrlatt_trial,kptrlen_trial,&
 &     msym,nkpt,nkpt_trial,nshiftk,nsym,rprimd,&
 &     shiftk_trial,symafm,symrel,vacuum,wtk)
 
-!    DEBUG
-!    write(std_out,*)' testkgrid : after getkgrid'
-!    ENDDEBUG
+!    write(std_out,*)' testkgrid: after getkgrid'
 
 !    In case one does not need the full list of grids, will take a shortcut, and go to one of the last grids of the series,
 !    that generates a kptrlen_trial that is just below kptrlen.
@@ -2791,9 +2762,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
        mult2=mult2*iscale
        mult3=mult3*iscale
        init_mult=0
-!       DEBUG
-!       write(std_out,*)' testkgrid : iscale=',iscale
-!       ENDDEBUG
+!       write(std_out,*)' testkgrid: iscale=',iscale
        kptrlatt_trial(:,:)=kptrlatt_trial(:,:)*iscale
        call getkgrid(0,0,iscf,kpt,&
 &       kptopt,kptrlatt_trial,kptrlen_trial,&
@@ -2813,13 +2782,13 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
      end if
 
      if(prtkpt/=0)then
-       write(message,'(i5,a,3i4,a,es14.4,a,es14.4,i8,i6,a,a,3i4,a,es14.4,a,a,3i4,a,es14.4,a)' )&
+       write(msg,'(i5,a,3i4,a,es14.4,a,es14.4,i8,i6,a,a,3i4,a,es14.4,a,a,3i4,a,es14.4,a)' )&
 &       igrid,'  ',kptrlatt_trial(:,1),'  ',shiftk_trial(1,1),&
 &       '  ',kptrlen_trial,nkpt_trial,iset,ch10,&
 &       '       ',kptrlatt_trial(:,2),'  ',shiftk_trial(2,1),ch10,&
 &       '       ',kptrlatt_trial(:,3),'  ',shiftk_trial(3,1),ch10
-       call wrtout(std_out,message,'COLL')
-       call wrtout(iout,message,'COLL')
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(iout,msg,'COLL')
 
 !      Keep track of this grid, if it is worth
        if(kptrlen_trial > kptrlen_list(nkpt_trial)*(1.0_dp+tol8))then
@@ -2833,7 +2802,7 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 
 !    Treat 2-D case or 3-D case
      if( sum(vacuum(:))<=1 .and. kptrlen_trial>buffer_scale*(1.0_dp+tol8)*kptrlen )then
-!      The present set of sets of k points is finished :
+!      The present set of sets of k points is finished:
 !      either it was the last, or one has to go to the next one
        if(iset==nset)exit
        iset=iset+1
@@ -2862,58 +2831,58 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 !      one multiplies by 2 because nsym is likely twice the number
 !      of symmetries that can be effectively used in 2D
        ndims=2 ; factor=sqrt(0.75_dp)/surface/dble(nsym)*2
-       write(message,'(2a)' )ch10,' Note that the system is bi-dimensional.'
+       write(msg,'(2a)' )ch10,' Note that the system is bi-dimensional.'
      else if(sum(vacuum(:))==2)then
        ndims=1 ; factor=1/ucvol
-       write(message,'(2a)' )ch10,' Note that the system is uni-dimensional.'
+       write(msg,'(2a)' )ch10,' Note that the system is uni-dimensional.'
      else if(sum(vacuum(:))==3)then
        ndims=0
-       write(message,'(2a)' )ch10,' Note that the system is zero-dimensional.'
+       write(msg,'(2a)' )ch10,' Note that the system is zero-dimensional.'
      end if
-     call wrtout(std_out,message,'COLL')
-     call wrtout(iout,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(iout,msg,'COLL')
    end if
 
 !  The asymptotic value of the merit factor is determined
-!  by the set of symmetries : in 3D, if it includes the
+!  by the set of symmetries: in 3D, if it includes the
 !  inversion symmetry, the limit will be 1, if not, it
 !  will be two. In 2D, if it includes the inversion symmetry
 !  and an operation that maps z on -z, it will tend to one,
 !  while if only one of these operations is present,
 !  it will tend to two, and if none is present, it will tend to four.
-   write(message,'(11a)' )ch10,&
+   write(msg,'(11a)' )ch10,&
 &   ' List of best grids, ordered by nkpt.',ch10,&
 &   '  (stop at a value of kptrlen 20% larger than the target value).',ch10,&
 &   '  (the merit factor will tend to one or two in 3 dimensions)',ch10,&
 &   '  (and to one, two or four in 2 dimensions)',ch10,ch10,&
 &   '    nkpt   kptrlen    grid#  merit_factor'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg,'COLL')
 
    kptrlen_max=0.0_dp
    do ii=1,mkpt_list
      if(kptrlen_list(ii)>kptrlen_max*(1.0_dp+tol8))then
        kptrlen_max=kptrlen_list(ii)
        merit_factor=kptrlen_max**ndims/dble(ii)*factor
-       write(message, '(i6,es14.4,i6,f12.4)' )ii,kptrlen_max,grid_list(ii),merit_factor
-       call wrtout(std_out,message,'COLL')
-       call wrtout(iout,message,'COLL')
+       write(msg, '(i6,es14.4,i6,f12.4)' )ii,kptrlen_max,grid_list(ii),merit_factor
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(iout,msg,'COLL')
      end if
      if(kptrlen_max>1.2_dp*(1.0_dp-tol8)*kptrlen_target)exit
    end do
 
-   write(message,'(a,a,es14.4,a,a,i6,a,a,a,es14.4,a,i6)' )ch10,&
+   write(msg,'(a,a,es14.4,a,a,i6,a,a,a,es14.4,a,i6)' )ch10,&
 &   ' For target kptrlen=',kptrlen_target,',',&
 &   ' the selected grid is number',igrid_current,',',ch10,&
 &   '     giving kptrlen=',kptrlen_current,' with nkpt=',nkpt_current
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg,'COLL')
 
-   write(message,'(a,a,a,a)' )ch10,&
+   write(msg,'(a,a,a,a)' )ch10,&
 &   ' testkgrid : stop after analysis of a series of k-grids.',ch10,&
 &   '  For usual production runs, set prtkpt back to 0 (the default).'
-   call wrtout(std_out,message,'COLL',do_flush=.True.)
-   call wrtout(iout,message,'COLL',do_flush=.True.)
+   call wrtout(std_out,msg,'COLL',do_flush=.True.)
+   call wrtout(iout,msg,'COLL',do_flush=.True.)
 
    call abi_abort('PERS',exit_status=0,print_config=.false.)
  end if
@@ -2993,17 +2962,17 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 !scalars
  integer :: idx,ii,jp
  real(dp) :: fct
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  real(dp) :: dd(3),lng(nbounds-1)
 
 ! *************************************************************************
 
  if (ndiv_small<=0) then
-   write(message,'(3a,i0)')&
+   write(msg,'(3a,i0)')&
 &   'The argument ndiv_small should be a positive number,',ch10,&
 &   'however, ndiv_small=',ndiv_small
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  do ii=1,nbounds-1
@@ -3021,10 +2990,10 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 
 !Avoid division by zero if k(:,i+1)=k(:,i)
  if (abs(fct)<tol6) then
-   write(message,'(3a)')&
+   write(msg,'(3a)')&
 &   'found two consecutive points in the path which are equal',ch10,&
 &   'This is not allowed, please modify the path in your input file'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  fct=fct/ndiv_small
@@ -3034,27 +3003,27 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 
 !allocate(path(3,npt_tot)
  if (.not.present(path)) then
-   write(message,'(2a,i8)')ch10,&
-&   ' mknormpath : total number of points on the path : ',npt_tot
-   call wrtout(std_out,message,'COLL')
-   write(message,'(2a)')ch10,' Number of divisions for each segment of the normalized path : '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(2a,i8)')ch10,&
+&   ' mknormpath : total number of points on the path: ',npt_tot
+   call wrtout(std_out,msg,'COLL')
+   write(msg,'(2a)')ch10,' Number of divisions for each segment of the normalized path: '
+   call wrtout(std_out,msg,'COLL')
    do ii=1,nbounds-1
-     write(message,'(2(3f8.5,a),i5,a)')&
-     bounds(:,ii),' ==> ',bounds(:,ii+1),' ( ndiv : ',ndiv(ii),' )'
-     call wrtout(std_out,message,'COLL')
+     write(msg,'(2(3f8.5,a),i5,a)')&
+     bounds(:,ii),' ==> ',bounds(:,ii+1),' ( ndiv: ',ndiv(ii),' )'
+     call wrtout(std_out,msg,'COLL')
    end do
-   write(message,'(a)')ch10
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a)')ch10
+   call wrtout(std_out,msg,'COLL')
  else
-   write(message,'(2a)')ch10,' Normalized Path : '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(2a)')ch10,' Normalized Path: '
+   call wrtout(std_out,msg,'COLL')
    idx=1
    do ii=1,nbounds-1
      do jp=1,ndiv(ii)
        path(:,idx)=bounds(:,ii)+(jp-1)*(path(:,ii+1)-path(:,ii))/ndiv(ii)
-       write(message,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
+       call wrtout(std_out,msg,'COLL')
        idx=idx+1
      end do
    end do

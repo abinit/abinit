@@ -1662,6 +1662,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  logical :: changed,found,isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
+ !type(edos_t) :: edos
 !arrays
  integer :: intp_kptrlatt(3,3), g0_k(3), skw_band_block(2)
  integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
@@ -1875,6 +1876,15 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
       sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,use_symrec=.False.)
 
+   if (dksqmax > tol12) then
+      write(msg, '(4a,es16.6,7a)' )&
+       "The WFK file cannot be used to compute self-energy corrections at kpoint: ",ktoa(kk),ch10,&
+       "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+       "Q-mesh: ",trim(ltoa(new%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
+       'Action: check your WFK file and (k,q) point input variables'
+      MSG_ERROR(msg)
+   end if
+
    new%kcalc2ibz(ikcalc, :) = indkk_k(1, :)
 
    ik_ibz = indkk_k(1,1); isym_k = indkk_k(1,2)
@@ -1884,15 +1894,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    if (.not. isirr_k) then
      MSG_WARNING(sjoin("For the time being the k-point must be in the IBZ but got", ktoa(kk)))
      ierr = ierr + 1
-   end if
-
-   if (dksqmax > tol12) then
-      write(msg, '(4a,es16.6,7a)' )&
-       "The WFK file cannot be used to compute self-energy corrections at kpoint: ",ktoa(kk),ch10,&
-       "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
-       "Q-mesh: ",trim(ltoa(new%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-       'Action: check your WFK file and (k,q) point input variables'
-      MSG_ERROR(msg)
    end if
 
    ! Find the little-group of the k-point and initialize the weights for BZ integration.
@@ -2205,6 +2206,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
  end if
 
+ ! Compute electron DOS with tetra.
+ !edos = ebands_get_edos(ebands, cryst, 2, omega_step, zero, comm)
+ !call edos_free(edos)
+
  ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
 #ifdef HAVE_NETCDF
@@ -2215,6 +2220,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   !NCF_CHECK(edos_ncwrite(edos, ncid))
 
    ! Add sigma_eph dimensions.
    ncerr = nctk_def_dims(ncid, [ &
@@ -2385,98 +2391,39 @@ subroutine sigmaph_free(self)
 ! *************************************************************************
 
  ! integer
- !if (allocated(self%bstart_ks)) then
- !  ABI_FREE(self%bstart_ks)
- !end if
  ABI_SFREE(self%bstart_ks)
- if (allocated(self%nbcalc_ks)) then
-   ABI_FREE(self%nbcalc_ks)
- end if
- if (allocated(self%kcalc2ibz)) then
-   ABI_FREE(self%kcalc2ibz)
- end if
+ ABI_SFREE(self%nbcalc_ks)
+ ABI_SFREE(self%kcalc2ibz)
 
  ! real
- if (allocated(self%kcalc)) then
-   ABI_FREE(self%kcalc)
- end if
- if (allocated(self%kTmesh)) then
-   ABI_FREE(self%kTmesh)
- end if
- if (allocated(self%mu_e)) then
-   ABI_FREE(self%mu_e)
- end if
- if (allocated(self%e0vals)) then
-   ABI_FREE(self%e0vals)
- end if
- if (allocated(self%cweights)) then
-   ABI_FREE(self%cweights)
- end if
- if (allocated(self%deltaw_pm)) then
-   ABI_FREE(self%deltaw_pm)
- end if
- if (allocated(self%wrmesh_b)) then
-   ABI_FREE(self%wrmesh_b)
- end if
- !if (allocated(self%frohl_gkq2)) then
- !  ABI_FREE(self%frohl_gkq2)
- !end if
- if (allocated(self%qvers_cart)) then
-   ABI_FREE(self%qvers_cart)
- end if
- if (allocated(self%angwgth)) then
-   ABI_FREE(self%angwgth)
- end if
- if (allocated(self%qbz)) then
-   ABI_FREE(self%qbz)
- end if
- if (allocated(self%qibz)) then
-   ABI_FREE(self%qibz)
- end if
- if (allocated(self%wtq)) then
-   ABI_FREE(self%wtq)
- end if
- if (allocated(self%qibz_k)) then
-   ABI_FREE(self%qibz_k)
- end if
- !if (allocated(self%indkk)) then
- !  ABI_FREE(self%indkk)
- !end if
- if (allocated(self%wtq_k)) then
-   ABI_FREE(self%wtq_k)
- end if
- if (allocated(self%gfw_mesh)) then
-   ABI_FREE(self%gfw_mesh)
- end if
- if (allocated(self%gf_nnuq)) then
-   ABI_FREE(self%gf_nnuq)
- end if
+ ABI_SFREE(self%kcalc)
+ ABI_SFREE(self%kTmesh)
+ ABI_SFREE(self%mu_e)
+ ABI_SFREE(self%e0vals)
+ ABI_SFREE(self%cweights)
+ ABI_SFREE(self%deltaw_pm)
+ ABI_SFREE(self%wrmesh_b)
+ !ABI_SFREE(self%frohl_gkq2)
+ ABI_SFREE(self%qvers_cart)
+ ABI_SFREE(self%angwgth)
+ ABI_SFREE(self%qbz)
+ ABI_SFREE(self%qibz)
+ ABI_SFREE(self%wtq)
+ ABI_SFREE(self%qibz_k)
+ !ABI_SFREE(self%indkk)
+ ABI_SFREE(self%wtq_k)
+ ABI_SFREE(self%gfw_mesh)
+ ABI_SFREE(self%gf_nnuq)
 
  ! complex
- if (allocated(self%vals_e0ks)) then
-   ABI_FREE(self%vals_e0ks)
- end if
- if (allocated(self%frohl_vals_e0ks)) then
-   ABI_FREE(self%frohl_vals_e0ks)
- end if
- if (allocated(self%dvals_de0ks)) then
-   ABI_FREE(self%dvals_de0ks)
- end if
- if (allocated(self%frohl_dvals_de0ks)) then
-   ABI_FREE(self%frohl_dvals_de0ks)
- end if
- if (allocated(self%dw_vals)) then
-   ABI_FREE(self%dw_vals)
- end if
- if (allocated(self%vals_wr)) then
-   ABI_FREE(self%vals_wr)
- end if
- if (allocated(self%frohl_vals_wr)) then
-   ABI_FREE(self%frohl_vals_wr)
- end if
- if (allocated(self%gfw_vals)) then
-   ABI_FREE(self%gfw_vals)
- end if
+ ABI_SFREE(self%vals_e0ks)
+ ABI_SFREE(self%frohl_vals_e0ks)
+ ABI_SFREE(self%dvals_de0ks)
+ ABI_SFREE(self%frohl_dvals_de0ks)
+ ABI_SFREE(self%dw_vals)
+ ABI_SFREE(self%vals_wr)
+ ABI_SFREE(self%frohl_vals_wr)
+ ABI_SFREE(self%gfw_vals)
 
  ! types.
  if (allocated(self%degtab)) then
@@ -2490,12 +2437,9 @@ subroutine sigmaph_free(self)
     end do
     ABI_DT_FREE(self%degtab)
  end if
+
  call ephwg_free(self%ephwg)
-
- if (self%use_doublegrid) then
-   call eph_double_grid_free(self%eph_doublegrid)
- end if
-
+ call eph_double_grid_free(self%eph_doublegrid)
  call skw_free(self%frohl_skw)
 
  ! Close netcdf file.

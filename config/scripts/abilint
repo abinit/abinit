@@ -130,6 +130,7 @@ abilint [options] <source> <dest>
 
 #Operating System (used for os.path)
 import os
+import io
 #filename match as Unix shell
 import fnmatch
 #stderr and stdout
@@ -1340,7 +1341,9 @@ class File(Structure):
     def read(self,fd=None):
         "Read the file."
         if fd == None:
-            fd = open("%s/%s" % (self.dir,self.name))
+            #fd = open("%s/%s" % (self.dir,self.name), "rt")
+            fd = io.open("%s/%s" % (self.dir,self.name), 'rt', encoding="utf8")
+
         #Time stamp i.e. the time of the last modification
         self.timestamp = os.path.getmtime(fd.name)
         #We ban \r !!

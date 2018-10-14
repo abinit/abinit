@@ -126,7 +126,7 @@ module m_lgroup
 
  public :: lgroup_new                 ! Creation method.
  public :: lgroup_findq_ibzk          ! Find the index of the point in the IBZ(k).
- public :: lgroup_find_ibzimage
+ public :: lgroup_find_ibzimage       ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
  public :: lgroup_print               ! Print the object
  public :: lgroup_free                ! Free memory.
 
@@ -494,25 +494,13 @@ subroutine lgroup_free(self)
 ! *************************************************************************
 
  ! integer
- if (allocated(self%symrec_lg)) then
-   ABI_FREE(self%symrec_lg)
- end if
- if (allocated(self%symafm_lg)) then
-   ABI_FREE(self%symafm_lg)
- end if
- if (allocated(self%lgsym2glob)) then
-   ABI_FREE(self%lgsym2glob)
- end if
- if (allocated(self%symtab)) then
-   ABI_FREE(self%symtab)
- end if
+ ABI_SFREE(self%symrec_lg)
+ ABI_SFREE(self%symafm_lg)
+ ABI_SFREE(self%lgsym2glob)
+ ABI_SFREE(self%symtab)
  ! real
- if (allocated(self%ibz)) then
-   ABI_FREE(self%ibz)
- end if
- if (allocated(self%weights)) then
-   ABI_FREE(self%weights)
- end if
+ ABI_SFREE(self%ibz)
+ ABI_SFREE(self%weights)
 
 end subroutine lgroup_free
 !!***

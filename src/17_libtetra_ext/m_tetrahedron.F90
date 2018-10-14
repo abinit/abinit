@@ -95,7 +95,12 @@ type, public :: t_tetrahedron
   ! flag to wrap tetrahedron summit into IBZ
 
   integer,allocatable :: ibz_tetra_count(:)
+  ! ibz_tetra_mapping(nkpt_ibz)
+  ! Number of tetrahedra associated to a point in the IBZ.
+
   integer,allocatable :: ibz_tetra_mapping(:,:)
+  ! ibz_tetra_mapping(nkpt_ibz, maxval(tetra%ibz_tetra_count)))
+  ! map ikbz to tetra index.
 
 end type t_tetrahedron
 
@@ -486,17 +491,15 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  TETRA_DEALLOCATE(tetra_mult_)
  TETRA_DEALLOCATE(tetra_wrap_)
 
- !
- ! Create a mapping between the irreducible k-points
+ ! Create mapping between the irreducible k-points
  ! and all the tetrahedron contributing with some weight
- !
  nkpt_ibz = maxval(indkpt)
 
- ! 1. First we count what is the maximum number of distinct tetrahedra
- ! that each k-point contains
+ ! 1. First we count what is the maximum number of distinct tetrahedra that each k-point contains
  TETRA_ALLOCATE(tetra%ibz_tetra_count,(nkpt_ibz))
  tetra%ibz_tetra_count(:) = 0
- ! Count max tetra contrubuting
+
+ ! Count max tetra contributing
  do ii=1,tetra%ntetra
    ! Here we need the original ordering to reference the correct irred kpoints
    ind_ibz(:) = tetra%tetra_full(:,1,ii)
@@ -506,7 +509,6 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
      if (ikibz > nkpt_ibz) cycle
      tetra%ibz_tetra_count(ikibz) = tetra%ibz_tetra_count(ikibz) + 1
    end do
-   !
  end do
 
  ! 2. Then we build mapping of ikbz to tetra

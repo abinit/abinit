@@ -787,26 +787,14 @@ subroutine ephwg_free(self)
 !----------------------------------------------------------------------
 
  ! integer
- if (allocated(self%kq2ibz)) then
-   ABI_FREE(self%kq2ibz)
- end if
+ ABI_SFREE(self%kq2ibz)
 
  ! Real
- if (allocated(self%ibz)) then
-   ABI_FREE(self%ibz)
- end if
- if (allocated(self%bz)) then
-   ABI_FREE(self%bz)
- end if
- if (allocated(self%lgk2ibz)) then
-   ABI_FREE(self%lgk2ibz)
- end if
- if (allocated(self%phfrq_ibz)) then
-   ABI_FREE(self%phfrq_ibz)
- end if
- if (allocated(self%eigkbs_ibz)) then
-   ABI_FREE(self%eigkbs_ibz)
- end if
+ ABI_SFREE(self%ibz)
+ ABI_SFREE(self%bz)
+ ABI_SFREE(self%lgk2ibz)
+ ABI_SFREE(self%phfrq_ibz)
+ ABI_SFREE(self%eigkbs_ibz)
 
  ! types
  call destroy_tetra(self%tetra_k)

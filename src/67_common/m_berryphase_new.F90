@@ -3023,8 +3023,7 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      end if
   end do
   if (idum/=nkpt)then
-     message = ' Found wrong number of k-points in IBZ'
-     MSG_ERROR(message)
+     MSG_ERROR('Found wrong number of k-points in IBZ')
   end if
 
   !set flags for fields, forces, stresses
