@@ -141,8 +141,12 @@ module m_spin_hist
 
 
      ! observables
-     real(dp), allocatable :: ms_prim(:,:)
-     real(dp), allocatable :: Cv(:)
+     logical:: calc_thermo_obs, calc_traj_obs, calc_correlation_obs
+
+     real(dp), allocatable :: ms_sub(:,:)   ! staggered M. 
+     real(dp), allocatable :: Cv(:) ! specfic heat
+     real(dp), allocatable :: binderU4(:)
+     real(dp), allocatable :: chi_sub(:, :), chi(:) ! magnetic susceptibility
      real(dp), allocatable :: rcorr(:,:)
      real(dp), allocatable :: sp_corr_func(:,:,:)
 
@@ -175,7 +179,7 @@ contains
 !! initialize spin hist
 !!
 !! INPUTS
-!! nspins = number of magnetic atoms 
+!! nspins = number of magnetic atoms
 !! mxhist = maximum number of hist steps
 !! has_latt = whether spin dynamics in with lattice dynamics
 !!
@@ -188,7 +192,7 @@ contains
 !!
 !! SOURCE
 
-  subroutine spin_hist_t_init(hist, nspins, nspins_prim, mxhist, has_latt, rcorr)
+  subroutine spin_hist_t_init(hist, nspins, nspins_prim, mxhist, has_latt, rcorr, calc_traj_obs, calc_thermo_obs, calc_correlation_obs)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -200,7 +204,7 @@ contains
     implicit none
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in) :: nspins, mxhist, nspins_prim
-    logical, intent(in) :: has_latt
+    logical, intent(in) :: has_latt, calc_traj_obs, calc_thermo_obs, calc_correlation_obs
     real(dp), optional, intent(in) :: rcorr(:, :)
     integer :: nrcorr
 
@@ -219,6 +223,7 @@ contains
        nrcorr=0
     endif
 
+
     !print *, "initialize HIST spin"
     ABI_ALLOCATE(hist%heff, (3, nspins, mxhist))
     ABI_ALLOCATE(hist%snorm, (nspins, mxhist))
@@ -233,7 +238,7 @@ contains
 
     ABI_ALLOCATE(hist%ihist_latt, (mxhist))
 
-    ABI_ALLOCATE(hist%ms_prim, (nspins_prim, mxhist))
+    ABI_ALLOCATE(hist%ms_sub, (nspins_prim, mxhist))
     ABI_ALLOCATE(hist%Cv, (mxhist))
     ABI_ALLOCATE(hist%rcorr, (3, nrcorr))
     ABI_ALLOCATE(hist%sp_corr_func, (3, nrcorr, mxhist))
@@ -252,6 +257,24 @@ contains
     hist%dSdt(:,:,1)=zero
     hist%snorm(:,1)=zero
     !print *, "Initialization spin hist finished"
+
+    if(present(calc_traj_obs)) then
+       hist%calc_traj_obs=calc_traj_obs
+    else
+       hist%calc_traj_obs=.False.
+    endif
+
+    if(present(calc_thermo_obs)) then
+       hist%calc_thermo_obs=calc_traj_obs
+    else
+       hist%calc_thermo_obs=.False.
+    endif
+
+    if(present(calc_thermo_obs)) then
+       hist%calc_thermo_obs=calc_traj_obs
+    else
+       hist%calc_thermo_obs=.False.
+    endif
 
     hist%Cv( 1)=zero
     hist%sp_corr_func(:, :, 1)=zero
@@ -463,8 +486,8 @@ contains
     if (allocated(hist%label)) then
        ABI_DEALLOCATE(hist%label)
     end if
-   if (allocated(hist%ms_prim)) then
-       ABI_DEALLOCATE(hist%ms_prim)
+   if (allocated(hist%ms_sub)) then
+       ABI_DEALLOCATE(hist%ms_sub)
     end if
    if (allocated(hist%Cv)) then
        ABI_DEALLOCATE(hist%Cv)

@@ -36,18 +36,31 @@ module m_spin_observables
   use m_errors
   use m_xmpi
 
-  use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spin_terms, only: spin_terms_t, spin_terms_t_finalize, spin_terms_t_set_external_hfield
   use m_spin_model_primitive, only: spin_model_primitive_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params
-  use m_spin_mover, only: spin_mover_t, spin_mover_t_initialize, spin_mover_t_finalize, &
-       & spin_mover_t_run_time, spin_mover_t_run_one_step
-  use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
-       & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
-       & spin_ncfile_t_write_one_step
+  use m_spin_ncfile, only: spin_ncfile_t, & spin_ncfile_t_write_one_step
   implicit none
-!!***
+  !!***
+  public :: spin_hist_t_ob_initialize
+  public :: spin_hist_t_ob_finalize
+  public :: spin_hist_t_ob_calc_thermo_obs
+  public :: spin_hist_t_ob_calc_correlation_obs
+  public :: spin_hist_t_ob_calc_traj_obs
+
+contains
+
+  subroutine hist_ob_calc_staggered_M(self)
+    class(spin_hist_t) :: self
+  end subroutine hist_ob_calc_staggered_M
+
+  subroutine hist_ob_calc_thermo_obs(self)
+    class(spin_hist_t) :: self
+  end subroutine hist_ob_calc_thermo_obs
+
+  subroutine hist_ob_calc_correlations_obs(self)
+    class(spin_hist_t) :: self
+  end subroutine hist_ob_calc_correlations_obs
 
 
 end module m_spin_observables
