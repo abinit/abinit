@@ -319,6 +319,7 @@ end function ephwg_from_ebands
 !! INPUTS
 !!  kpoint(3): k-point in reduced coordinates.
 !!  prtvol: Verbosity level
+!!  comm: MPI communicator
 !!
 !! OUTPUT
 !!
@@ -328,7 +329,7 @@ end function ephwg_from_ebands
 !!
 !! SOURCE
 
-subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
+subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -342,7 +343,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
 !Arguments ------------------------------------
 !scalars
  type(ephwg_t),target,intent(inout) :: self
- integer,intent(in) :: prtvol
+ integer,intent(in) :: prtvol, comm
 !arrays
  real(dp),intent(in) :: kpoint(3)
 
@@ -370,7 +371,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
  ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
@@ -390,7 +391,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
 
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
@@ -410,7 +411,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol)
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
@@ -942,7 +943,7 @@ subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
  do ik_ibz=1,eb_dense%nkpt
    cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
    call cwtime(cpu, wall, gflops, "start")
-   call ephwg_setup_kpoint(ephwg, eb_dense%kptns(:, ik_ibz), dtset%prtvol)
+   call ephwg_setup_kpoint(ephwg, eb_dense%kptns(:, ik_ibz), dtset%prtvol, xmpi_comm_self)
 
    ABI_MALLOC(deltaw_pm, (nene, ephwg%nq_k, 2))
    ABI_MALLOC(phq_list, (ephwg%nq_k))

@@ -322,8 +322,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    ABI_MALLOC(ep_renorms, (hsize))
    timrev = 1
    call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, Kmesh%bz, Epren%nkpt, Kmesh%nbz, Cryst%nsym, &
-&     sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
-
+      sppoldbl, Cryst%symafm, Cryst%symrel, timrev, comm, use_symrec=.False.)
  end if
 
  call timab(693,2,tsec) ! exc_haydock_driver(wo lf    - that is, without local field

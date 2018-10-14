@@ -413,7 +413,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 
 !Local variables------------------------------
 !scalars
- integer :: isppol,ikpt
+ integer :: isppol,ikpt,comm
  integer :: nband1, nband_tmp
  integer :: timrev, sppoldbl
  integer :: ik_eph
@@ -425,6 +425,8 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
 ! ************************************************************************
 
  ABI_CHECK(Bst%nsppol == Epren%nsppol, "Nsppol should be the same")
+
+ comm = xmpi_comm_self
 
  if(do_lifetime) then
    ABI_MALLOC(Bst%lifetime,(Bst%mband,Bst%nkpt,Bst%nsppol))
@@ -439,7 +441,7 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
  ABI_MALLOC(bs2eph, (BSt%nkpt*sppoldbl, 6))
  timrev = 1
  call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, BSt%kptns, Epren%nkpt, Bst%nkpt, Cryst%nsym, &
-&   sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
+&   sppoldbl, Cryst%symafm, Cryst%symrel, timrev, comm, use_symrec=.False.)
 
  do isppol=1,Bst%nsppol
    do ikpt=1,Bst%nkpt

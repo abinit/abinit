@@ -21,7 +21,6 @@
 
 #include "abi_common.h"
 
-
 module m_fstab
 
  use defs_basis
@@ -320,7 +319,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,ebands%kptns,kpt_full,ebands%nkpt,nkpt_full,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
+    sppoldbl,cryst%symafm,cryst%symrel,timrev,comm, use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(7a,es16.6,4a)' )&

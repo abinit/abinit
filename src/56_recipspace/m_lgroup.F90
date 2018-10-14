@@ -45,12 +45,13 @@ module m_lgroup
  use m_copy
  use m_symkpt
  use m_sort
+ use m_xmpi
 
- use m_fstrings,   only : ftoa, ktoa, sjoin
+ use m_fstrings,      only : ftoa, ktoa, sjoin
  use m_numeric_tools, only : wrap2_pmhalf
- use m_geometry,   only : normv
- use m_kpts,       only : listkk
- use m_symtk,      only : chkgrp, littlegroup_q
+ use m_geometry,      only : normv
+ use m_kpts,          only : listkk
+ use m_symtk,         only : chkgrp, littlegroup_q
 
  implicit none
 
@@ -388,7 +389,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 
  ! Note use_symrec
  call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
-    1, self%symafm_lg, self%symrec_lg, timrev0, use_symrec=.True.)
+    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
 
  iq_ibz = indkk(1)
  if (dksqmax > tol12) iq_ibz = -1

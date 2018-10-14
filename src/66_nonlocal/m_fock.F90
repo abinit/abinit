@@ -819,11 +819,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !* No space symmetry is used, if kptopt==2 time reversal symmetry is used.
        symm=0 ; symm(1,1)=1 ; symm(2,2)=1 ; symm(3,3)=1
        call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&          nkpt_bz,1,1,indx,symm,timrev)
+&          nkpt_bz,1,1,indx,symm,timrev,xmpi_comm_self)
      else
 !* As in getkgrid, no use of antiferromagnetic symmetries thans to the option sppoldbl=1
        call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
+&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev, xmpi_comm_self)
      end if
 !* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
 !*    indkk(:,1)   = k point of IBZ, kpt_ibz

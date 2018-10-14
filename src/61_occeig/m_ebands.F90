@@ -3755,7 +3755,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 !scalars
  integer,parameter :: istwfk_1=1,kptopt3=3
  integer :: nkfull,timrev,bantot,sppoldbl,npw_k,nsppol,istw
- integer :: ik_ibz,ikf,isym,itimrev,spin,mband,my_nkibz
+ integer :: ik_ibz,ikf,isym,itimrev,spin,mband,my_nkibz,comm
  logical :: isirred_k
  !character(len=500) :: msg
 !arrays
@@ -3768,6 +3768,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
  ABI_CHECK(inb%kptopt /= 0, "ebands_expandk does not support kptopt == 0")
 
+ comm = xmpi_comm_self
  nsppol = inb%nsppol
 
  ! Note kptopt=3
@@ -3787,7 +3788,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
  timrev = kpts_timrev_from_kptopt(inb%kptopt)
  call listkk(dksqmax,cryst%gmet,bz2ibz,inb%kptns,kfull,inb%nkpt,nkfull,cryst%nsym,&
-   sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
+   sppoldbl,cryst%symafm,cryst%symrel,timrev,comm,use_symrec=.False.)
 
  ABI_MALLOC(wtk, (nkfull))
  wtk = one / nkfull ! weights normalized to one
@@ -3919,7 +3920,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1 = 1
- integer :: new_nkbz , timrev, bantot, new_nkibz, ik_ibz, ikf, spin,mband
+ integer :: new_nkbz , timrev, bantot, new_nkibz, ik_ibz, ikf, spin,mband, comm
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
@@ -3931,6 +3932,8 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
 
 ! *********************************************************************
 
+ comm = xmpi_comm_self
+
  ! Find IBZ associated to the new mesh.
  call kpts_ibz_from_kptrlatt(cryst, in_kptrlatt, self%kptopt, in_nshiftk, in_shiftk, &
    new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
@@ -3941,7 +3944,7 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
 
  timrev = kpts_timrev_from_kptopt(self%kptopt)
  call listkk(dksqmax, cryst%gmet, ibz_c2f, self%kptns, new_kibz, self%nkpt, new_nkibz, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrel, timrev, use_symrec=.False.)
+   sppoldbl1, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,6a)' )&
@@ -4060,7 +4063,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
 !scalars
  integer,parameter :: sppoldbl1=1
  integer :: kxord,kyord,kzord,nxknot,nyknot,nzknot,ierr,nkfull,ikf
- integer :: spin,band,ik_ibz,timrev,ix,iy,iz,nkx,nky,nkz,ii
+ integer :: spin,band,ik_ibz,timrev,ix,iy,iz,nkx,nky,nkz,ii, comm
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
@@ -4092,6 +4095,8 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
  if (ierr /= 0) then
    MSG_ERROR("bspline interpolation cannot be performed. See messages above.")
  end if
+
+ comm = xmpi_comm_self
 
  ! Build BZ mesh Note that in the simplest case of unshifted mesh:
  ! 1) k-point coordinates are in [0, 1]
@@ -4140,7 +4145,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
 
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev,comm, use_symrec=.True.)
  ABI_FREE(kfull)
 
  if (dksqmax > tol12) then

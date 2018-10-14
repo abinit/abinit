@@ -4525,7 +4525,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
        !g0_kq =  g0ibz_kq + g0bz_kq
 
        call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
-          1,cryst%symafm,cryst%symrel,timrev1,use_symrec=.False.)
+          1,cryst%symafm,cryst%symrel,timrev1,xmpi_comm_self,use_symrec=.False.)
 
        if (dksqmax > tol12) then
          write(msg, '(3a,es16.6,7a)' )&

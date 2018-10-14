@@ -336,7 +336,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,kibz,kfull,nkibz,nkfull,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
+    sppoldbl,cryst%symafm,cryst%symrec,timrev,xmpi_comm_self,use_symrec=.True.)
 
  if (dksqmax > tol12) then
    write(msg, '(3a,es16.6,6a)' )&
@@ -544,7 +544,8 @@ end function symkchk
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
 !!                   value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
-!!  use_symrec: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
+!!  comm=MPI communicator
+!!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
 !!  dksqmax=maximal value of the norm**2 of the difference between
@@ -576,9 +577,8 @@ end function symkchk
 !!
 !! SOURCE
 
-subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
-& sppoldbl,symafm,symmat,timrev,use_symrec)
-
+subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
+                  use_symrec) ! optional
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -590,7 +590,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nkpt1,nkpt2,nsym,sppoldbl,timrev
+ integer,intent(in) :: nkpt1,nkpt2,nsym,sppoldbl,timrev,comm
  real(dp),intent(out) :: dksqmax
  logical,optional,intent(in) :: use_symrec
 !arrays
@@ -600,10 +600,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: usesym=1
+ integer,parameter :: usesym=1, limit=1
+ integer :: nprocs, my_rank, ierr
  integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done
  integer :: ilarger,ismaller,itrial
- integer :: isppol,isym,itimrev,jkpt1,jsym,jtime,limit
+ integer :: isppol,isym,itimrev,jkpt1,jsym,jtime
  integer :: nsym_used,timrev_used
  real(dp) :: dksq,dksqmn,lk2,llarger,ldiff,lsmaller,ltrial,min_l
  character(len=500) :: msg
@@ -620,10 +621,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  !write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
  call timab(1021,1,tsec)
 
- if(sppoldbl<1 .or. sppoldbl>2)then
-   write(msg, '(a,i0,3a)' )&
-&   'The value of sppoldbl is',sppoldbl,',',ch10,&
-&   'but it should be either 1 or 2.'
+ !comm = xmpi_comm_self
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ if (sppoldbl<1 .or. sppoldbl>2) then
+   write(msg, '(a,i0,a)' )'The value of sppoldbl is: ',sppoldbl,', but it should be either 1 or 2.'
    MSG_BUG(msg)
  end if
 
@@ -634,14 +636,15 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  if(usesym==0)timrev_used=0
 
  ! Precompute the length of the kpt1 vectors, also taking into account possible umpklapp vectors
- limit=1 ; l3 = (2*limit+1)**3
- ABI_ALLOCATE(lkpg1,(l3*nkpt1))
- ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1))
+ l3 = (2*limit+1)**3
+ ABI_CALLOC(lkpg1,(l3*nkpt1))
+ ABI_CALLOC(lkpg1_sorted,(l3*nkpt1))
  ABI_ALLOCATE(isort,(l3*nkpt1))
- !write(std_out,*)' List of kpt1 vectors'
- !write(std_out,*)' Length of the kpt1 vectors:'
+ isort = 0
 
+ !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
  do ikpt1=1,nkpt1
+   if (mod(ikpt1, nprocs) /= my_rank) cycle  ! MPI parallelism
    k1(:)=kptns1(:,ikpt1)
    !write(std_out,*)ikpt1,k1(:)
    k1int(:)=nint(k1(:)+tol12)
@@ -653,7 +656,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
        do ig3=-limit,limit
          kpg1(3)=k1(3)+ig3
 
-         ikpg1=ig1+limit+1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
+         ikpg1 = ig1+limit+1 + (2*limit+1)*(ig2+limit) + (2*limit+1)**2*(ig3+limit) + l3*(ikpt1-1)
          ! Compute the norm of the vector (also taking into account possible umklapp)
          lkpg1(ikpg1)=sqrt(gmet(1,1)*kpg1(1)**2+gmet(2,2)*kpg1(2)**2+&
 &         gmet(3,3)*kpg1(3)**2+two*(gmet(2,1)*kpg1(2)*kpg1(1)+&
@@ -666,7 +669,13 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
    end do
  end do
 
- call sort_dp( l3*nkpt1,lkpg1_sorted,isort,tol12)
+ if (nprocs > 1) then
+   call xmpi_sum(lkpg1, comm, ierr)
+   call xmpi_sum(lkpg1_sorted, comm, ierr)
+   call xmpi_sum(isort, comm, ierr)
+ end if
+
+ call sort_dp(l3*nkpt1,lkpg1_sorted,isort,tol12)
 
 !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
 !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
@@ -675,9 +684,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
 !enddo
 
- dksqmax=zero
+ dksqmax = zero
+ indkk = 0
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
+     if (mod(ikpt2 + (isppol-1)*nkpt2, nprocs) /= my_rank) cycle  ! MPI parallelism
 
      ikpt2_done=0
      ! Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
@@ -858,7 +869,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
      indkk(ikpt2+(isppol-1)*nkpt2,6)=jtime
      dksqmax=max(dksqmax,dksqmn)
 
-     if(dksqmn<-tol12)then
+     if (dksqmn<-tol12) then
        write(msg, '(a,es16.6)' )'The minimum square of dk has negative norm: dksqmn= ',dksqmn
        MSG_BUG(msg)
      end if
@@ -872,6 +883,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  ABI_DEALLOCATE(isort)
  ABI_DEALLOCATE(lkpg1)
  ABI_DEALLOCATE(lkpg1_sorted)
+
+ if (nprocs > 1) then
+   call xmpi_sum(indkk, comm, ierr)
+   dksqmn = dksqmax
+   call xmpi_max(dksqmn, dksqmax, comm, ierr)
+ end if
 
  call timab(1021,2,tsec)
 

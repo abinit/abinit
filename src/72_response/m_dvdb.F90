@@ -2270,7 +2270,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
  !   * we use symrec instead of symrel
  ABI_MALLOC(indqq, (nqbz*sppoldbl1,6))
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -2330,7 +2330,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 
  ! Redo the mapping with the new IBZ
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
  ABI_MALLOC(emiqr, (2,db%nrpt))
  ABI_STAT_MALLOC(db%v1scf_rpt,(2,db%nrpt, nfft, db%nspden, db%natom3), ierr)
@@ -2756,7 +2756,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  !   * we use symrec instead of symrel
  ABI_MALLOC(indqq, (nqbz*sppoldbl1,6))
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -2815,7 +2815,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
  ! Redo the mapping with the new IBZ
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,comm,use_symrec=.True.)
 
  if (dksqmax > tol12) then
    MSG_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
@@ -5014,7 +5014,7 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  ! Correspondence IBZ_coarse --> DVDB
  !ABI_MALLOC(indkk, (nqibz, 6))
  !call listkk(dksqmax, cryst%gmet, indkk, dvdb%qpts, qibz, dvdb%nqpt, nqibz, cryst%nsym, &
- !   1, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+ !   1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
  !ABI_FREE(indkk)
  !if (dksqmax > tol12) then
  !  MSG_ERROR("Coarse q-mesh is not a submesh of the DVDB file.")

@@ -695,7 +695,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
-   call sigmaph_setup_kcalc(sigma, cryst, ikcalc, dtset%prtvol)
+   call sigmaph_setup_kcalc(sigma, cryst, ikcalc, dtset%prtvol, comm)
    call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
    msg = sjoin("[", itoa(ikcalc), "/", itoa(sigma%nqibz_k), "]")
    call wrtout(std_out, sjoin("Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
@@ -721,7 +721,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
    ABI_MALLOC(iqk2dvdb, (sigma%nqibz_k, 6))
    call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, sigma%qibz_k, dvdb%nqpt, sigma%nqibz_k, cryst%nsym, &
-        1, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
+        1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6,2a)' )&
        "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
@@ -903,7 +903,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        !
        kq = kk + qpt
        call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
-         sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev,use_symrec=.False.)
+         sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev,xmpi_comm_self, use_symrec=.False.)
 
        if (dksqmax > tol12) then
          write(msg, '(4a,es16.6,7a)' )&
@@ -1874,7 +1874,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  do ikcalc=1,new%nkcalc
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
-      sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,use_symrec=.False.)
+      sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,xmpi_comm_self,use_symrec=.False.)
 
    if (dksqmax > tol12) then
       write(msg, '(4a,es16.6,7a)' )&
@@ -2462,7 +2462,8 @@ end subroutine sigmaph_free
 !! INPUTS
 !!  crystal<crystal_t> = Crystal structure.
 !!  ikcalc=Index of the k-point to compute.
-!!  prtbol= Verbosity level
+!!  prtvol= Verbosity level
+!!  comm= MPI communicator
 !!
 !! PARENTS
 !!      m_sigmaph
@@ -2471,7 +2472,7 @@ end subroutine sigmaph_free
 !!
 !! SOURCE
 
-subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
+subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2483,7 +2484,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: ikcalc, prtvol
+ integer,intent(in) :: ikcalc, prtvol, comm
  type(crystal_t),intent(in) :: cryst
  type(sigmaph_t),intent(inout) :: self
 
@@ -2502,7 +2503,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
  end if
 
  ! Prepare weights for BZ(k) integration
- if (self%qint_method > 0) call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol)
+ if (self%qint_method > 0) call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol, comm)
 
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
@@ -2531,7 +2532,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol)
  !end if
  !ABI_MALLOC(self%indkk, (self%nqibz_k, 6))
  !call listkk(dksqmax, cryst%gmet, self%indkk, self%qibz, self%qibz_k, self%nqibz, self%nqibz_k, cryst%nsym,&
- !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+ !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self,use_symrec=.False.)
  !if (dksqmax > tol12) MSG_ERROR("Wrong mapping")
 
 end subroutine sigmaph_setup_kcalc
