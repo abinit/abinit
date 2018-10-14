@@ -51,13 +51,13 @@ MODULE m_ebands
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
- use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one,&
+ use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
                               isdiagmat
  use m_special_funcs,  only : dirac_delta
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
  use m_pptools,        only : printbxsf
- use m_occ,            only : getnel, newocc
+ use m_occ,            only : getnel, newocc, occ_fd
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
@@ -93,6 +93,7 @@ MODULE m_ebands
  public :: ebands_set_scheme       ! Set the occupation scheme.
  public :: ebands_set_fermie       ! Change the fermi level (assume metallic scheme).
  public :: ebands_set_nelect       ! Change the number of electrons (assume metallic scheme).
+ public :: ebands_calc_nelect      ! Compute nelect from Fermi level and Temperature.
  public :: ebands_report_gap       ! Print info on the fundamental and direct gap.
  public :: ebands_ncwrite          ! Dump the object into NETCDF file (use ncid)
  public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
@@ -2658,6 +2659,60 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
    "New fermi level: ",ebands%fermie,", with nelect: ",ebands%nelect
 
 end subroutine ebands_set_nelect
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_calc_nelect
+!! NAME
+!! ebands_calc_nelect
+!!
+!! FUNCTION
+!!  Compute nelect from Fermi level and Temperature.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+real(dp) pure function ebands_calc_nelect(self, kt, fermie) result(nelect)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_calc_nelect'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ebands_t),intent(in) :: self
+ real(dp),intent(in) :: kt, fermie
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin, ik, ib
+ real(dp) :: ofact
+
+! *************************************************************************
+
+ ofact = two / (self%nsppol * self%nspinor)
+ nelect = zero
+ do spin=1,self%nsppol
+   do ik=1,self%nkpt
+     do ib=1,self%nband(ik)
+       nelect = nelect + ofact * self%wtk(ik) * occ_fd(self%eig(ib,ik,spin), kt, fermie)
+     end do
+   end do
+ end do
+
+end function ebands_calc_nelect
 !!***
 
 !----------------------------------------------------------------------

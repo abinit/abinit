@@ -1657,7 +1657,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  logical :: downsample
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
  character(len=500) :: wfk_fname_dense
- real(dp) :: dksqmax,rfact,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
+ real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
  character(len=500) :: msg
  logical :: changed,found,isirr_k
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -2029,7 +2029,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%use_doublegrid = .True.
 
  ! read bs_interpmult
- else if (any(dtset%bs_interp_kmult /= 0) then
+ else if (any(dtset%bs_interp_kmult /= 0)) then
 
    call wrtout(std_out,"EPH Interpolation: will use star functions interpolation")
    ! Interpolate band energies with star-functions
@@ -2100,15 +2100,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
      ! are different from the occ_fd that will be used in the rest of the subroutine
      !
-     rfact = two / (tmp_ebands%nsppol * tmp_ebands%nspinor)
-     nelect = zero
-     do spin=1,tmp_ebands%nsppol
-       do ik=1,tmp_ebands%nkpt
-         do ii=1,tmp_ebands%nband(ik)
-           nelect = nelect + rfact * tmp_ebands%wtk(ik) * occ_fd(tmp_ebands%eig(ii,ik,spin),new%kTmesh(it),new%mu_e(it))
-         end do
-       end do
-     end do
+     nelect = ebands_calc_nelect(tmp_ebands, new%kTmesh(it), new%mu_e(it))
 
      if (abs(nelect - ebands%nelect) > tol6) then
        write(msg,'(3(a,f10.6))')&
