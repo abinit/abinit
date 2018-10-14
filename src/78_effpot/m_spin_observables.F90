@@ -53,7 +53,6 @@ module m_spin_observables
   public :: ob_calc_correlation_obs
   public :: ob_calc_traj_obs
   public :: ob_calc_obs
-
 contains
 
   subroutine ob_initialize(self, supercell, params)
@@ -65,6 +64,8 @@ contains
 #define ABI_FUNC 'ob_initialize'
 !End of the abilint section
 
+=======
+>>>>>>> f62d09034e943df801bccd438c1e3af232488b05
     class(spin_observable_t) :: self
     type(spin_terms_t) :: supercell
     type(multibinit_dtset_type) :: params
@@ -103,7 +104,7 @@ contains
 #define ABI_FUNC 'ob_finalize'
 !End of the abilint section
 
-    class(spin_observable_t) :: self
+    class (spin_observable_t) :: self
     if (allocated(self%isublatt)) then
        ABI_DEALLOCATE(self%isublatt)
     endif
@@ -178,7 +179,5 @@ contains
   subroutine ob_calc_obs(self)
     class(spin_observable_t) :: self
   end subroutine ob_calc_obs
-
-
 
 end module m_spin_observables
