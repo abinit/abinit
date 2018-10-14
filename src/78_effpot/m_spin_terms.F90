@@ -269,6 +269,25 @@ contains
     call set_seed(self%rng, [111111_dp, 2_dp])
   end subroutine spin_terms_t_initialize_all
 
+
+  subroutine spin_terms_t_add_SIA(self, mode, k1, k1dir)
+    class(spin_terms_t), intent(inout) :: self
+    integer, intent(in) :: mode
+    real(dp), intent(in) :: k1, k1dir
+    real(dp) :: k1_tmp(self%nspins), k1dir_tmp(3, self%nspins)
+    integer :: i
+    ! Add
+    if(mode==1 .or. mode==2) then
+       ! Note: mode 1: add
+       ! mode 2, override. If spin_sia_add==2, then the sia is not set from xml file.
+       k1_tmp(:)=k1
+       do i=1, self%nspins
+          k1dir_tmp(:,i)=k1dir
+       end do
+       call spin_terms_t_set_uniaxial_MCA(self, k1_tmp, k1dir_tmp)
+    endif
+  end subroutine spin_terms_t_add_SIA
+
   subroutine spin_terms_t_get_gamma_l(self)
 
 

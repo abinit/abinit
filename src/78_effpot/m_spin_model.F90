@@ -340,8 +340,18 @@ contains
 
     class(spin_model_t), intent(inout) :: self
     character(len=*), intent(in) :: xml_fname
+    logical:: use_sia, use_exchange, use_dmi, use_bi
     !call self%spin_primitive%read_xml(xml_fname)
-    call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname)
+    use_exchange=.True.
+    use_sia=.True.
+    use_dmi=.True.
+    use_bi=.True.
+
+    ! Do not use sia term in xml if spin_sia_add is set to 1.
+    if(self%params%spin_sia_add == 1) use_sia=.False.
+
+    call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname, &
+            & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
   end subroutine spin_model_t_read_xml
   !!***
 
