@@ -1259,7 +1259,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_sia_add=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_add',tread,'INT')
  if(tread==1) multibinit_dtset%spin_sia_add=intarr(1)
- if(multibinit_dtset%spin_sia_add <0 or multibinit_dtset%spin_sia_add>2 )then
+ if(multibinit_dtset%spin_sia_add <0 .or. multibinit_dtset%spin_sia_add>2 )then
     write(message, '(a,i0,a,a,a)' )&
          &   'spin_sia_add is',multibinit_dtset%spin_sia_add,', which is not 0, 1, or 2.',ch10,&
          &   'Action: correct spin_sia_add in your input file.'

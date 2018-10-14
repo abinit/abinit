@@ -141,7 +141,7 @@ module m_spin_hist
 
 
      ! observables
-     logical:: calc_thermo_obs, calc_traj_obs, calc_correlation_obs
+     integer:: calc_thermo_obs, calc_traj_obs, calc_correlation_obs
 
      real(dp), allocatable :: ms_sub(:,:)   ! staggered M. 
      real(dp), allocatable :: Cv(:) ! specfic heat
@@ -204,7 +204,8 @@ contains
     implicit none
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in) :: nspins, mxhist, nspins_prim
-    logical, intent(in) :: has_latt, calc_traj_obs, calc_thermo_obs, calc_correlation_obs
+    logical, intent(in) :: has_latt
+    integer, optional,  intent(in) :: calc_traj_obs, calc_thermo_obs, calc_correlation_obs
     real(dp), optional, intent(in) :: rcorr(:, :)
     integer :: nrcorr
 
@@ -261,19 +262,19 @@ contains
     if(present(calc_traj_obs)) then
        hist%calc_traj_obs=calc_traj_obs
     else
-       hist%calc_traj_obs=.False.
+       hist%calc_traj_obs=0
     endif
 
     if(present(calc_thermo_obs)) then
        hist%calc_thermo_obs=calc_traj_obs
     else
-       hist%calc_thermo_obs=.False.
+       hist%calc_thermo_obs=0
     endif
 
     if(present(calc_thermo_obs)) then
        hist%calc_thermo_obs=calc_traj_obs
     else
-       hist%calc_thermo_obs=.False.
+       hist%calc_thermo_obs=0
     endif
 
     hist%Cv( 1)=zero

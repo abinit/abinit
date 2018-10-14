@@ -42,25 +42,28 @@ module m_spin_observables
   use m_spin_ncfile, only: spin_ncfile_t, & spin_ncfile_t_write_one_step
   implicit none
   !!***
-  public :: spin_hist_t_ob_initialize
-  public :: spin_hist_t_ob_finalize
+  public :: spin_hist_t_ob_calc_staggered_M
   public :: spin_hist_t_ob_calc_thermo_obs
   public :: spin_hist_t_ob_calc_correlation_obs
   public :: spin_hist_t_ob_calc_traj_obs
 
 contains
 
-  subroutine hist_ob_calc_staggered_M(self)
+  subroutine spin_hist_t_ob_calc_staggered_M(self)
     class(spin_hist_t) :: self
-  end subroutine hist_ob_calc_staggered_M
+  end subroutine spin_hist_t_ob_calc_staggered_M
 
-  subroutine hist_ob_calc_thermo_obs(self)
-    class(spin_hist_t) :: self
-  end subroutine hist_ob_calc_thermo_obs
+  subroutine spin_hist_t_ob_calc_traj_obs(self)
+      class(spin_hist_t) :: self
+  end subroutine spin_hist_t_ob_calc_traj_obs
 
-  subroutine hist_ob_calc_correlations_obs(self)
+  subroutine spin_hist_t_ob_calc_thermo_obs(self)
     class(spin_hist_t) :: self
-  end subroutine hist_ob_calc_correlations_obs
+  end subroutine spin_hist_t_ob_calc_thermo_obs
+
+  subroutine spin_hist_t_ob_calc_correlations_obs(self)
+    class(spin_hist_t) :: self
+  end subroutine spin_hist_t_ob_calc_correlations_obs
 
 
 end module m_spin_observables
