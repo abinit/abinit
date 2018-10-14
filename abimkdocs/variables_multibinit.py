@@ -705,6 +705,70 @@ See [[abinit:restartxf]]
 ),
 
 Variable(
+    abivarname="spin_calc_correlation_obs@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN CALCulate CORRELATION OBServables",
+    text="""
+Flag to calculate spin correlation function based observables.
+* 0 --> do not calculate.
+* 1 --> calculate.
+""",
+),
+
+
+Variable(
+    abivarname="spin_calc_traj_obs@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN CALCulate TRAJectory based OBServables",
+    text="""
+Flag to calculate spin trajectory based observables. (Nothing included yet.)
+* 0 --> do not calculate.
+* 1 --> calculate.
+""",
+),
+
+
+Variable(
+    abivarname="spin_calc_thermo_obs@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN CALCulate THERMO dynamics OBServables",
+    text="""
+Flag to calculate spin thermo dynamics observables,
+including the specific heat, magnetic susceptibility, Binder U4 value.
+* 0 --> do not calculate.
+* 1 --> calculate.
+""",
+),
+
+
+Variable(
+    abivarname="spin_damping@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=-1.0,
+    mnemonics="SPIN gilbert DAMPING factor",
+    text="""
+Gilbert damping factor in LLG equation for spin dynamics.
+* negative value --> use damping factor from spin xml file.
+* positive value --> use as damping factor. The value should be between 0.0 and 1.0 (both included).
+""",
+),
+
+Variable(
     abivarname="spin_dipdip@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -823,6 +887,56 @@ Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp
 """,
 ),
 
+
+Variable(
+    abivarname="spin_sia_add@multibinit",
+    varset="multibinit",
+    vartype="int",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN Single Ion Anistropy ADD",
+    text="""
+Add single ion anistropy term to the spin model hamiltonian.
+with user defined values (see [[multibinit:spin_sia_k1]] and [[multibinit:spin_sia_k1_dir]].
+* 0 --> Do not add, use the term defined in the spin model xml file.
+* 1 --> Override the term in spin model xml file.
+* 2 --> Add to the value defined in spin model xml file.
+Default value: 0.
+""",
+),
+
+
+Variable(
+    abivarname="spin_sia_k1@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="SPIN Single Ion Anistropy K1",
+    text="""
+User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_override]] is not 0.
+The direction is defined with [[multibinit:spin_sia_k1dir]].
+Default value: 0.0.
+""",
+),
+
+
+Variable(
+    abivarname="spin_sia_k1dir@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="[3]",
+    defaultval=[0.0,0.0,1.0],
+    mnemonics="SPIN Single Ion Anistropy K1DIR",
+    text="""
+User defined direction of single ion anistropy. Only used when [[multibinit:spin_sia_override]] is not 0.
+It will be automatically normalized to 1.0.  The amplitude is defined with [[multibinit:spin_sia_k1]].
+Default value: [0.0, 0.0,1.0].
+""",
+),
 
 
 Variable(
