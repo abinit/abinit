@@ -52,6 +52,7 @@ module m_spin_observables
   public :: ob_calc_thermo_obs
   public :: ob_calc_correlation_obs
   public :: ob_calc_traj_obs
+  public :: ob_calc_obs
 
 contains
 
@@ -173,6 +174,11 @@ contains
 
     class(spin_observable_t) :: self
   end subroutine ob_calc_correlation_obs
+
+  subroutine ob_calc_obs(self)
+    class(spin_observable_t) :: self
+  end subroutine ob_calc_obs
+
 
 
 end module m_spin_observables

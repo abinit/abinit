@@ -63,6 +63,7 @@ module m_spin_model
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
        & spin_ncfile_t_write_one_step
+   use m_spin_observables, only: spin_observable_t, ob_initialize, ob_finalized, ob_calc_observables
   implicit none
 !!***
 
