@@ -135,7 +135,7 @@ contains
 !!      ebands_print,ebands_prtbltztrp,ebands_set_fermie,ebands_set_scheme
 !!      ebands_update_occ,ebands_write,edos_free,edos_print,edos_write,eph_gkk
 !!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs
-!!      ifc_outphbtrap,ifc_print,ifc_printbxsf,ifc_test_phinterp
+!!      ifc_outphbtrap,ifc_print,ifc_printbxsf
 !!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
 !!      phdos_free,phdos_ncwrite,phdos_print,phdos_print_thermo,print_ngfft
 !!      pspini,sigmaph,wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_end
@@ -505,13 +505,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
  ABI_FREE(ddb_qshifts)
  call ifc_print(ifc, unit=std_out)
-
- ! Test B-spline interpolation of phonons
- if (.False.) then
-   ! TODO: Remove
-   call ifc_test_phinterp(ifc, cryst, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm)
-   call xmpi_end()
- end if
 
  ! Output phonon band structure (requires qpath)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)

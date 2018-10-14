@@ -1668,7 +1668,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
  integer,allocatable :: gtmp(:,:),degblock(:,:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
- !real(dp),pointer :: energies_dense(:,:,:)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),th(:),wth(:)
 
 ! *************************************************************************
@@ -2022,10 +2021,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
 
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
-   !call wfk_read_eigenvalues(wfk_fname_dense, energies_dense, hdr_wfk_dense, comm)
-   !ebands_dense = ebands_from_hdr(hdr_wfk_dense,maxval(hdr_wfk_dense%nband),energies_dense)
-   !ABI_FREE(energies_dense)
-   !call hdr_free(hdr_wfk_dense)
 
    !TODO add a check for consistency
    ! number of bands and kpoints (comensurability)
@@ -2033,10 +2028,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    new%use_doublegrid = .True.
 
- !read bs_interpmult
- else if (dtset%bs_interp_kmult(1) /= 0 .or.&
-          dtset%bs_interp_kmult(2) /= 0 .or.&
-          dtset%bs_interp_kmult(3) /= 0 ) then
+ ! read bs_interpmult
+ else if (any(dtset%bs_interp_kmult /= 0) then
 
    call wrtout(std_out,"EPH Interpolation: will use star functions interpolation")
    ! Interpolate band energies with star-functions
@@ -2190,13 +2183,17 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    !if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine == 0) .or.&
    !    (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /= 0) )  then
-   !wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
-   !if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
-   !  MSG_ERROR(msg)
+   !  wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
+   !  if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
+   !    MSG_ERROR(msg)
+   !  end if
+   !  call wrtout(std_out,"Will read energies from: "//trim(wfk_fname_dense))
+   !  ebands_dense = wfk_read_ebands(path, comm) result(ebands)
+   !  ebands_ptr => ebands_dense
+   !  call ebands_free(ebands_dense)
+   !else
+   !  ebands_ptr => ebands
    !end if
-   !call wrtout(std_out,"Will read energies from: "//trim(wfk_fname_dense))
-   !ebands_dense = wfk_read_ebands(path, comm) result(ebands)
-   !call ebands_free(ebands_dense)
 
    ! Build SKW object for all bands where QP corrections are wanted.
    ! TODO: check band_block because I got weird results (don't remember if with AbiPy or Abinit)
@@ -2396,9 +2393,10 @@ subroutine sigmaph_free(self)
 ! *************************************************************************
 
  ! integer
- if (allocated(self%bstart_ks)) then
-   ABI_FREE(self%bstart_ks)
- end if
+ !if (allocated(self%bstart_ks)) then
+ !  ABI_FREE(self%bstart_ks)
+ !end if
+ ABI_SFREE(self%bstart_ks)
  if (allocated(self%nbcalc_ks)) then
    ABI_FREE(self%nbcalc_ks)
  end if
