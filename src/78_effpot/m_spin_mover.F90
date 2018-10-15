@@ -166,12 +166,9 @@ contains
     !call calculator%get_dSdt(S_out, H_lang, dSdt2)
     call spin_terms_t_get_dSdt(calculator, S_out, H_lang, dSdt2)
     etot=calculator%etot
-    !$OMP PARALLEL DO
+    !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
        S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
-    end do
-    !$OMP END PARALLEL DO
-    do i=1, self%nspins
        S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
     end do
   end subroutine spin_mover_t_run_one_step_HeunP

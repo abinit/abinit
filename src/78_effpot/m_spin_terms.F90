@@ -437,7 +437,7 @@ contains
     !Heff(:,:) = reshape (self%Htmp, [3, self%nspins])
     call CSR_mat_mv(self%bilinear_csr_mat, S ,Heff)
     !print *, "ms", self%ms
-    !$OMP PARALLEL DO
+    !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
        Heff(:, i)=Heff(:,i)/self%ms(i)
     end do
