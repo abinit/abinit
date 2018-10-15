@@ -9,7 +9,7 @@ This page gives hints on how to perform a geometry optimization with the ABINIT 
 ## Introduction
 
 Different algorithms (Broyden; modified Broyden; Verlet with sudden stop of
-atoms) allows to find the equilibrium configuration of the nuclei, for which
+atoms, FIRE) allows to find the equilibrium configuration of the nuclei, for which
 the forces vanish, see [[ionmov]]. The cell parameters can also be optimized
 concurently with the atomic positions [[optcell]], possibly with a state of
 given stress as a target, [[strtarget]].

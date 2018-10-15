@@ -22,8 +22,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <config.h>
+#include <sys/stat.h>
 
-#if defined HAVE_LIBXML
+#if defined HAVE_XML
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -59,9 +60,10 @@ void freeArray(Array *a) {
 }
 
 void copyArraytoCArray(Array *l, double **a, size_t* size){
+    size_t i;
   *size=0;
   *a=(double *) malloc(sizeof(double)*l->used);
-  for(size_t i=0;i<l->used;i++){
+  for(i=0;i<l->used;i++){
     (*a)[i]=l->array[i];
     (*size)++;
   }
@@ -95,9 +97,10 @@ void freeIntArray(IntArray *a) {
 }
 
 void copyIntArrayToCIntArray(IntArray *l, int **a, size_t *size){
+    size_t i;
   *size=0;
   *a=(int *) malloc(sizeof(int)*l->used);
-  for(size_t i=0;i<l->used;i++){
+  for(i=0;i<l->used;i++){
     (*a)[i]=l->array[i];
     (*size)++;
   }
@@ -128,6 +131,16 @@ void string2IntArray(char *input, int **farray, size_t *size) {
   }
   copyIntArrayToCIntArray(&tmp, farray, size);
   freeIntArray(&tmp);
+}
+
+// check if file exist
+int file_exists(const char* filename){
+    struct stat buffer;
+    int exist = stat(filename,&buffer);
+    if(exist == 0)
+        return 1;
+    else 
+        return 0;
 }
 
 
@@ -314,8 +327,9 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       uri = xmlGetProp(cur, (const  xmlChar *) "mass");
       present = 0;
       //1) fill the atomic mass unit
-      for(i=0;i<=*ntypat;i++){
-        if(amu[i]==strtod(uri,NULL)){
+      for(i=0;i<*ntypat;i++){
+        if(abs(amu[i]-strtod(uri,NULL))<1e-5){
+        //if(amu[i]==strtod(uri,NULL)){
           present = 1;
           break;
         }
@@ -325,9 +339,14 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         iamu++;
       }
       // fill the typat table
-      for(i=0;i<=*ntypat;i++){
-        if(amu[i]==strtod(uri,NULL)){
+      //printf("=====typat====\n");
+      //printf("ntypat: %d\n", *ntypat);
+      for(i=0;i<*ntypat;i++){
+        if(abs(amu[i]-strtod(uri,NULL))<1e-5){
           typat[iatom]=i+1;
+      // Debug typat
+      //   printf("i= %d\n", i);
+      //   printf("%d: %f, %f, %d\n", iatom, amu[i], strtod(uri,NULL), typat[iatom]);
         }
       }
       xmlFree(uri);
@@ -1059,7 +1078,7 @@ void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,c
 /****************************************************/
 
 int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
-                         int *natoms, double *masses[], int *nmatoms,
+                         int *natoms, double *masses[], int *nspins,
                          int *index_spin[], double *gyroratios[],
                          double *damping_factors[],
                          double *positions[], double *spinat[]) {
@@ -1077,16 +1096,20 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   initArray(&spinat_array, 3);
 
   *natoms = 0;
-  *nmatoms = 0;
+  *nspins = 0;
 
-  size_t size;
+  size_t size, i;
+  if (file_exists(fname)==0){
+  fprintf(stderr, "xml file %s does not exist. Exit!\n", fname);
+  return 1;
+  }
 
   xmlDocPtr doc;
   xmlNodePtr cur, cur2;
   xmlChar *key;
   doc = xmlParseFile(fname);
   if (doc == NULL) {
-    fprintf(stderr, "Document parse failed. \n");
+    fprintf(stderr, "Document %s parse failed. \n", fname);
     return 1;
   }
 
@@ -1164,7 +1187,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
       }
       xmlFree(key);
 
-        (*nmatoms)++;
+        (*nspins)++;
       }
       insertIntArray(&index_spin_array, ind_spin);
 
@@ -1176,7 +1199,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
           key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
           double *pos;
           string2Array((char *)key, &pos, &size);
-          for (size_t i = 0; i < size; ++i) {
+          for (i = 0; i < size; ++i) {
             insertArray(&position_array, pos[i]);
           }
           xmlFree(key);
@@ -1193,7 +1216,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
             fprintf(stderr,
                     "Error reading xml file, spinat should be a 3-vector, size is %zu", size);
           }
-          for (size_t i = 0; i < size; ++i) {
+          for (i = 0; i < size; ++i) {
             insertArray(&spinat_array, spinat_tmp[i]);
           }
           xmlFree(key);
@@ -1218,17 +1241,17 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     fprintf(stderr, "Number of positions not equal to number of atoms.\n");
   }
   copyArraytoCArray(&spinat_array, spinat, &size);
-  if ((int)size / 3 != *nmatoms) {
+  if ((int)size / 3 != *nspins) {
     fprintf(stderr, "Number of spinat not equal to number of magnetic atoms.\n");
   }
   copyArraytoCArray(&gyroratio_array, gyroratios, &size);
-  if ((int)size != *nmatoms) {
+  if ((int)size != *nspins) {
     fprintf(stderr,
             "Number of gyroratios not equal to number of magnetic atoms");
   }
 
   copyArraytoCArray(&damping_factor_array, damping_factors, &size);
-  if ((int)size != *nmatoms) {
+  if ((int)size != *nspins) {
     fprintf(stderr,
             "Number of damping_factors not equal to number of magnetic atoms");
   }
@@ -1247,6 +1270,7 @@ int xml_read_spin_exchange( char * fname, int *exc_nnz, int *exc_ilist[],
                             int *exc_jlist[], int *exc_Rlist[],
                              double *exc_vallist[]){
   *exc_nnz=0;
+  size_t i;
   IntArray i_array, j_array, R_array;
   Array val_array;
   initIntArray(&i_array, 3);
@@ -1305,7 +1329,7 @@ int xml_read_spin_exchange( char * fname, int *exc_nnz, int *exc_ilist[],
               size_t size;
               string2Array((char *)key, &dtmp, &size);
               xmlFree(key);
-              for(size_t i=0; i< size; i++)
+              for(i=0; i< size; i++)
                 {
                   (*exc_vallist)[counter*3+i]=dtmp[i]*eV;
                 }
@@ -1335,6 +1359,7 @@ int xml_read_spin_dmi( char * fname, int *dmi_nnz, int *dmi_ilist[],
   initIntArray(&R_array, 9);
   initArray(&val_array, 9);
   int counter =0;
+  size_t i;
 
   xmlDocPtr doc;
   xmlNodePtr cur, cur2, cur3;
@@ -1386,7 +1411,7 @@ int xml_read_spin_dmi( char * fname, int *dmi_nnz, int *dmi_ilist[],
               size_t size;
               string2Array((char *)key, &dtmp, &size);
               xmlFree(key);
-              for(size_t i=0; i< size; i++)
+              for(i=0; i< size; i++)
                 {
                   (*dmi_vallist)[counter*3+i]=dtmp[i]*eV;
                 }
@@ -1416,6 +1441,7 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
   initArray(&amp_array, 3);
   initArray(&direction_array, 3);
   int counter =0;
+  size_t i;
 
   xmlDocPtr doc;
   xmlNodePtr cur, cur2, cur3;
@@ -1462,7 +1488,7 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
               size_t size;
               string2Array((char *)key, &dtmp, &size);
               xmlFree(key);
-              for(size_t i=0; i< size; i++)
+              for(i=0; i< size; i++)
                 {
                   (*uni_amplitude_list)[i]=dtmp[i]*eV;
                 }
@@ -1473,7 +1499,7 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
               size_t size;
               string2Array((char *)key, &dtmp, &size);
               xmlFree(key);
-              for(size_t i=0; i< size; i++)
+              for(i=0; i< size; i++)
                 {
                   (*uni_direction_list)[counter*3+i]=dtmp[i];
                 }
@@ -1504,6 +1530,7 @@ int xml_read_spin_bilinear( char * fname, int *bi_nnz, int *bi_ilist[],
   initIntArray(&R_array, 9);
   initArray(&val_array, 27);
   int counter =0;
+  size_t i;
 
   xmlDocPtr doc;
   xmlNodePtr cur, cur2, cur3;
@@ -1555,7 +1582,7 @@ int xml_read_spin_bilinear( char * fname, int *bi_nnz, int *bi_ilist[],
               size_t size;
               string2Array((char *)key, &dtmp, &size);
               xmlFree(key);
-              for(size_t i=0; i< size; i++)
+              for(i=0; i< size; i++)
                 {
                   (*bi_vallist)[counter*9+i]=dtmp[i]*eV;
                 }
@@ -1576,7 +1603,7 @@ int xml_read_spin_bilinear( char * fname, int *bi_nnz, int *bi_ilist[],
 
 
 void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
-                   int *natoms, double *masses[], int *nmatoms,
+                   int *natoms, double *masses[], int *nspins,
                    int *index_spin[], double *gyroratios[], double *damping_factors[],
                    double *positions[], double *spinat[],
                    // exchange
@@ -1596,7 +1623,7 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
                    int *bi_jlist[], int *bi_Rlist[],
                    double *bi_vallist[]){
   printf("reading xml: system.\n");
-  xml_read_spin_system(fname, ref_energy, unitcell, natoms, masses, nmatoms, index_spin, gyroratios, damping_factors, positions, spinat);
+  xml_read_spin_system(fname, ref_energy, unitcell, natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat);
 
   printf("reading xml: exchange.\n");
   xml_read_spin_exchange(fname, exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist);
@@ -1617,88 +1644,8 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
   printf("Reading xml finished!");
 }
 
-
-// This function is for testing.
-// TODO hexu: to be removed
-int test_read_xml() {
-
-  char * fname="test_f.xml";
-  double ref_energy;
-  double *unitcell, *masses, *gyroratios, *damping_factors, *positions, *spinat;
-  int natoms, nmatoms, *index_spin;
-  xml_read_spin_system("test_f.xml", &ref_energy, &unitcell, &natoms, &masses,
-   &nmatoms, &index_spin, &gyroratios, &damping_factors, &positions, &spinat);
-
-  // exchange
-  printf("======Exchange Terms========\n");
-  int exc_nnz, *exc_ilist, *exc_jlist, *exc_Rlist;
-  double *exc_vallist;
-  xml_read_spin_exchange(fname, &exc_nnz, &exc_ilist, &exc_jlist, &exc_Rlist, &exc_vallist);
-  for(int i=0;i<exc_nnz;i++){
-    printf("%d\t%d\t%d\t%d\t%d\t : %E\t%E\t%E\n", exc_ilist[i], exc_jlist[i], exc_Rlist[3*i], exc_Rlist[3*i+1], exc_Rlist[3*i+2], exc_vallist[3*i], exc_vallist[3*i+1], exc_vallist[3*i+2]);
-  }
-
-  //dmi
-  printf("======DMI Terms========\n");
-  int dmi_nnz, *dmi_ilist, *dmi_jlist, *dmi_Rlist;
-  double *dmi_vallist;
-  xml_read_spin_dmi(fname, &dmi_nnz, &dmi_ilist, &dmi_jlist, &dmi_Rlist, &dmi_vallist);
-  for(int i=0;i<dmi_nnz;i++){
-    printf("%d\t%d\t%d\t%d\t%d\t :", dmi_ilist[i], dmi_jlist[i], dmi_Rlist[3*i], dmi_Rlist[3*i+1], dmi_Rlist[3*i+2]);
-    for (int j=0; j < 3; ++j) {
-      printf("%E\t", dmi_vallist[i*3+j]);
-    }
-    printf("\n");
-  }
-
-  //uniaxial SIA
-  printf("======uniaxial SIA Terms========\n");
-  int uni_nnz, *uni_ilist;
-  double *uni_amplitude_list, *uni_direction_list;
-  xml_read_spin_uni(fname, &uni_nnz, &uni_ilist, &uni_amplitude_list, &uni_direction_list);
-  for(int i=0;i<uni_nnz;i++){
-    printf("%d\t :", uni_ilist[i]);
-    printf("%E\t:", uni_amplitude_list[i]);
-    for (int j=0; j < 3; ++j) {
-      printf("%E\t", uni_direction_list[i*3+j]);
-    }
-    printf("\n");
-  }
-
-
-  //bilinear
-  printf("======Bilinear Terms========\n");
-  int bi_nnz, *bi_ilist, *bi_jlist, *bi_Rlist;
-  double *bi_vallist;
-  xml_read_spin_bilinear("test_f.xml", &bi_nnz, &bi_ilist, &bi_jlist, &bi_Rlist, &bi_vallist);
-  for(int i=0;i<bi_nnz;i++){
-    printf("%d\t%d\t%d\t%d\t%d\t :", bi_ilist[i], bi_jlist[i], bi_Rlist[3*i], bi_Rlist[3*i+1], bi_Rlist[3*i+2]);
-    for (int j=0; j < 9; ++j) {
-      printf("%E\t", bi_vallist[i*9+j]);
-    }
-    printf("\n");
-  }
-
-
-  return 0;
-}
-
-#else
-int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
-                         int *natoms, double *masses[], int *nmatoms,
-                         int *index_spin[], double *gyroratios[],
-                         double *damping_factors[],
-                         double *positions[], double *spinat[]) 
-{
-	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml support.\n");
-	exit(1);
-	return 1;
-}
-
-
-
-void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
-                   int *natoms, double *masses[], int *nmatoms,
+void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
+                   int *natoms, double *masses[], int *nspins,
                    int *index_spin[], double *gyroratios[], double *damping_factors[],
                    double *positions[], double *spinat[],
                    // exchange
@@ -1718,7 +1665,194 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
                    int *bi_jlist[], int *bi_Rlist[],
                    double *bi_vallist[])
 {
-	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml support.\n");
+  free(*unitcell);
+  free(*masses);
+  free(*index_spin);
+  free(*gyroratios);
+  free(*damping_factors);
+  free(*positions);
+  free(*spinat);
+
+  unitcell=NULL;
+  masses=NULL;
+  index_spin=NULL;
+  gyroratios=NULL;
+  damping_factors=NULL;
+  positions=NULL;
+  spinat=NULL;
+
+  if (*exc_nnz !=0){
+    free(*exc_ilist);
+    free(*exc_jlist);
+    free(*exc_Rlist);
+    free(*exc_vallist);
+    exc_ilist=NULL;
+    exc_jlist=NULL;
+    exc_Rlist=NULL;
+    exc_vallist=NULL;
+  }
+
+  if (*dmi_nnz !=0){
+    free(*dmi_ilist);
+    free(*dmi_jlist);
+    free(*dmi_Rlist);
+    free(*dmi_vallist);
+    dmi_ilist=NULL;
+    dmi_jlist=NULL;
+    dmi_Rlist=NULL;
+    dmi_vallist=NULL;
+
+  }
+
+  if (*uni_nnz!=0){
+    free(*uni_ilist);
+    free(*uni_amplitude_list);
+    free(*uni_direction_list);
+    uni_ilist=NULL;
+    uni_amplitude_list=NULL;
+    uni_direction_list=NULL;
+  }
+
+  if (*bi_nnz !=0){
+    free(*bi_ilist);
+    free(*bi_jlist);
+    free(*bi_Rlist);
+    free(*bi_vallist);
+    bi_ilist=NULL;
+    bi_jlist=NULL;
+    bi_Rlist=NULL;
+    bi_vallist=NULL;
+  }
+}
+
+// This function is for testing.
+// TODO hexu: to be removed
+int test_read_xml() {
+
+  char * fname="test_f.xml";
+  double ref_energy;
+  double *unitcell, *masses, *gyroratios, *damping_factors, *positions, *spinat;
+  int natoms, nspins, *index_spin;
+  int i, j;
+  xml_read_spin_system("test_f.xml", &ref_energy, &unitcell, &natoms, &masses,
+   &nspins, &index_spin, &gyroratios, &damping_factors, &positions, &spinat);
+
+  // exchange
+  printf("======Exchange Terms========\n");
+  int exc_nnz, *exc_ilist, *exc_jlist, *exc_Rlist;
+  double *exc_vallist;
+  xml_read_spin_exchange(fname, &exc_nnz, &exc_ilist, &exc_jlist, &exc_Rlist, &exc_vallist);
+  for(i=0;i<exc_nnz;i++){
+    printf("%d\t%d\t%d\t%d\t%d\t : %E\t%E\t%E\n", exc_ilist[i], exc_jlist[i], exc_Rlist[3*i], exc_Rlist[3*i+1], exc_Rlist[3*i+2], exc_vallist[3*i], exc_vallist[3*i+1], exc_vallist[3*i+2]);
+  }
+
+  //dmi
+  printf("======DMI Terms========\n");
+  int dmi_nnz, *dmi_ilist, *dmi_jlist, *dmi_Rlist;
+  double *dmi_vallist;
+  xml_read_spin_dmi(fname, &dmi_nnz, &dmi_ilist, &dmi_jlist, &dmi_Rlist, &dmi_vallist);
+  for(i=0;i<dmi_nnz;i++){
+    printf("%d\t%d\t%d\t%d\t%d\t :", dmi_ilist[i], dmi_jlist[i], dmi_Rlist[3*i], dmi_Rlist[3*i+1], dmi_Rlist[3*i+2]);
+    for (j=0; j < 3; ++j) {
+      printf("%E\t", dmi_vallist[i*3+j]);
+    }
+    printf("\n");
+  }
+
+  //uniaxial SIA
+  printf("======uniaxial SIA Terms========\n");
+  int uni_nnz, *uni_ilist;
+  double *uni_amplitude_list, *uni_direction_list;
+  xml_read_spin_uni(fname, &uni_nnz, &uni_ilist, &uni_amplitude_list, &uni_direction_list);
+  for(i=0;i<uni_nnz;i++){
+    printf("%d\t :", uni_ilist[i]);
+    printf("%E\t:", uni_amplitude_list[i]);
+    for (j=0; j < 3; ++j) {
+      printf("%E\t", uni_direction_list[i*3+j]);
+    }
+    printf("\n");
+  }
+
+
+  //bilinear
+  printf("======Bilinear Terms========\n");
+  int bi_nnz, *bi_ilist, *bi_jlist, *bi_Rlist;
+  double *bi_vallist;
+  xml_read_spin_bilinear("test_f.xml", &bi_nnz, &bi_ilist, &bi_jlist, &bi_Rlist, &bi_vallist);
+  for(i=0;i<bi_nnz;i++){
+    printf("%d\t%d\t%d\t%d\t%d\t :", bi_ilist[i], bi_jlist[i], bi_Rlist[3*i], bi_Rlist[3*i+1], bi_Rlist[3*i+2]);
+    for (j=0; j < 9; ++j) {
+      printf("%E\t", bi_vallist[i*9+j]);
+    }
+    printf("\n");
+  }
+
+
+  return 0;
+}
+
+#else
+int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
+                         int *natoms, double *masses[], int *nspins,
+                         int *index_spin[], double *gyroratios[],
+                         double *damping_factors[],
+                         double *positions[], double *spinat[]) 
+{
+	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml enabled.\n");
+	exit(1);
+	return 1;
+}
+
+
+
+void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
+                   int *natoms, double *masses[], int *nspins,
+                   int *index_spin[], double *gyroratios[], double *damping_factors[],
+                   double *positions[], double *spinat[],
+                   // exchange
+                   int *exc_nnz, int *exc_ilist[],
+                   int *exc_jlist[], int *exc_Rlist[],
+                   double *exc_vallist[],
+                   //dmi
+                   int *dmi_nnz, int *dmi_ilist[],
+                   int *dmi_jlist[], int *dmi_Rlist[],
+                   double *dmi_vallist[],
+                   //uniaxial SIA
+                   int *uni_nnz, int *uni_ilist[],
+                   double *uni_amplitude_list[],
+                   double *uni_direction_list[],
+                   //bilinear
+                   int *bi_nnz, int *bi_ilist[],
+                   int *bi_jlist[], int *bi_Rlist[],
+                   double *bi_vallist[])
+{
+	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml enabled.\n");
+	exit(1);
+}
+
+
+void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
+                   int *natoms, double *masses[], int *nspins,
+                   int *index_spin[], double *gyroratios[], double *damping_factors[],
+                   double *positions[], double *spinat[],
+                   // exchange
+                   int *exc_nnz, int *exc_ilist[],
+                   int *exc_jlist[], int *exc_Rlist[],
+                   double *exc_vallist[],
+                   //dmi
+                   int *dmi_nnz, int *dmi_ilist[],
+                   int *dmi_jlist[], int *dmi_Rlist[],
+                   double *dmi_vallist[],
+                   //uniaxial SIA
+                   int *uni_nnz, int *uni_ilist[],
+                   double *uni_amplitude_list[],
+                   double *uni_direction_list[],
+                   //bilinear
+                   int *bi_nnz, int *bi_ilist[],
+                   int *bi_jlist[], int *bi_Rlist[],
+                   double *bi_vallist[])
+{
+	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml enabled.\n");
 	exit(1);
 }
 #endif

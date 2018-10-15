@@ -1415,7 +1415,9 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
  logical :: ex,oldformat,usexml
  character(len=8) :: dum,dum1,dum2,dum3,dum4
  character(len=80) :: fline
- character(len=500) :: filename_,msg
+ character(len=500) :: msg
+ character(len=fnlen) :: filename_
+
 !arrays
  integer,allocatable :: meshtp(:),meshsz(:)
  real(dp),allocatable :: rad(:),radstp(:),work(:)
@@ -1482,7 +1484,7 @@ subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,r
 
 !Core WF file is in new XML format
  if ((.not.oldformat).and.(usexml)) then
-   call rdpawpsxml_core(energy_cor,trim(filename_),lcor,ncor,nphicor,radmesh,phi_cor)
+   call rdpawpsxml_core(energy_cor,filename_,lcor,ncor,nphicor,radmesh,phi_cor)
  endif
 
 !Core WF file is in new (proprietary) format
@@ -3283,7 +3285,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 & ' mmax= ',mmax
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,  msg,'COLL')
-
+ pawtab%mesh_size=pawrad%mesh_size
 !---------------------------------
 !Read pseudo wave-functions (tphi)
 
@@ -3494,12 +3496,12 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
      end if
    end do
    ivlocmesh=iread1
-   vloc_mesh%mesh_type=radmesh(ivlocmesh)%mesh_type
-   vloc_mesh%rstep=radmesh(ivlocmesh)%rstep
-   vloc_mesh%lstep=radmesh(ivlocmesh)%lstep
-   vloc_mesh%mesh_size=pawrad_ifromr(radmesh(ivlocmesh),rmax_vloc)
-   call pawrad_init(vloc_mesh)
-!   call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
+!   vloc_mesh%mesh_type=radmesh(ivlocmesh)%mesh_type
+!   vloc_mesh%rstep=radmesh(ivlocmesh)%rstep
+!   vloc_mesh%lstep=radmesh(ivlocmesh)%lstep
+!   vloc_mesh%mesh_size=radmesh(ivlocmesh)%mesh_size
+!   vloc_mesh%mesh_size=pawrad_ifromr(radmesh(ivlocmesh),rmax_vloc)
+   call pawrad_copy(radmesh(ivlocmesh),vloc_mesh)
    LIBPAW_ALLOCATE(vlocr,(vloc_mesh%mesh_size))
    vlocr=zero
    shft=mesh_shift(ivlocmesh)

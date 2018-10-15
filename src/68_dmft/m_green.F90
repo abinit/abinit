@@ -1748,17 +1748,14 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      do ikpt = 1, nkpt
    do is = 1 , nsppol
            paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&           paw_dmft%include_bands(ib1),ikpt,is)=real(green%occup%ks(is,ikpt,ib,ib1))
-           if(nspinor==1) then
+&           paw_dmft%include_bands(ib1),ikpt,is)=dreal(green%occup%ks(is,ikpt,ib,ib1))
+           paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
+&           paw_dmft%include_bands(ib1),ikpt,is)=dimag(green%occup%ks(is,ikpt,ib,ib1))
+           if(nspinor==1 .and. nsppol==1) then
+             paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dreal(green%occup%ks(is,ikpt,ib,ib1))
              paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=zero
-             if(nsppol==1) then
-               paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&               paw_dmft%include_bands(ib1),ikpt,is)=two*real(green%occup%ks(is,ikpt,ib,ib1))
-             endif
-           else if (nspinor==2) then  ! and SOC
-             paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=aimag(green%occup%ks(is,ikpt,ib,ib1))
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dimag(green%occup%ks(is,ikpt,ib,ib1))
            endif
          enddo
        enddo
@@ -3364,7 +3361,7 @@ subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 !=========================================
  fermi_old=paw_dmft%fermie
  ierr_hh=0
- f_precision=paw_dmft%dmft_chpr
+ f_precision=paw_dmft%dmft_charge_prec
  !f_precision=0.01
  x_precision=tol5
 !if(option==1) then
@@ -3417,10 +3414,10 @@ subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
 !Check convergence of fermi level during DMFT iterations
 !========================================================
  if(paw_dmft%idmftloop>=2) then
-   if(abs(paw_dmft%fermie-fermi_old).le.paw_dmft%dmft_fepr) then
-!    write(message,'(a,8x,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=<",paw_dmft%dmft_fepr,ch10,&
+   if(abs(paw_dmft%fermie-fermi_old).le.paw_dmft%dmft_fermi_prec) then
+!    write(message,'(a,8x,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=<",paw_dmft%dmft_fermi_prec,ch10,&
      write(message,'(a,8x,a,e9.2,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=",&
-&     abs(paw_dmft%fermie-fermi_old),"<",paw_dmft%dmft_fepr,ch10,&
+&     abs(paw_dmft%fermie-fermi_old),"<",paw_dmft%dmft_fermi_prec,ch10,&
 &     "=> DMFT Loop: Fermi level is converged to:",paw_dmft%fermie
      call wrtout(std_out,message,'COLL')
      green%ifermie_cv=1

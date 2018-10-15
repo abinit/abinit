@@ -45,7 +45,8 @@ dep_levels = {
   "netcdf":1,
   "timer":1,
   "triqs":0, 
-  "wannier90":3
+  "wannier90":3,
+  "xml":0  # Comment hexu: Please check. 
 }
 
 # ---------------------------------------------------------------------------- #
