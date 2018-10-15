@@ -2147,7 +2147,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%nqr = 10
    write(std_out,"(a)")"Activating computation of Frohlich self-energy:"
    write(std_out,"(2(a,i0,1x))")"ntheta:", new%ntheta, "nphi:", new%nphi
-   write(std_out,"((a,i0,1x,a,f5.3,1x,a))")"nqr points:", new%nqr, "qrad:", new%qrad, "[Bohr^-1]"
+   write(std_out,"((a,i0,1x,a,f6.3,1x,a))")"nqr points:", new%nqr, "qrad:", new%qrad, "[Bohr^-1]"
 
    ! Initialize angular mesh qvers_cart and angwgth (inspired to initang in m_pawang)
    ABI_MALLOC(th, (new%ntheta))

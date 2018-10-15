@@ -669,38 +669,18 @@ subroutine dvdb_free(db)
 !************************************************************************
 
  ! integer arrays
- if (allocated(db%pos_dpq)) then
-   ABI_FREE(db%pos_dpq)
- end if
- if (allocated(db%cplex_v1)) then
-   ABI_FREE(db%cplex_v1)
- end if
- if (allocated(db%symq_table)) then
-   ABI_FREE(db%symq_table)
- end if
- if (allocated(db%iv_pinfoq)) then
-   ABI_FREE(db%iv_pinfoq)
- end if
- if (allocated(db%ngfft3_v1)) then
-   ABI_FREE(db%ngfft3_v1)
- end if
+ ABI_SFREE(db%pos_dpq)
+ ABI_SFREE(db%cplex_v1)
+ ABI_SFREE(db%symq_table)
+ ABI_SFREE(db%iv_pinfoq)
+ ABI_SFREE(db%ngfft3_v1)
 
  ! real arrays
- if (allocated(db%qpts)) then
-   ABI_FREE(db%qpts)
- end if
- if (allocated(db%rpt)) then
-   ABI_FREE(db%rpt)
- end if
- if (allocated(db%v1scf_rpt)) then
-   ABI_FREE(db%v1scf_rpt)
- end if
- if (allocated(db%rhog1_g0)) then
-   ABI_FREE(db%rhog1_g0)
- end if
- if (allocated(db%zeff)) then
-   ABI_FREE(db%zeff)
- end if
+ ABI_SFREE(db%qpts)
+ ABI_SFREE(db%rpt)
+ ABI_SFREE(db%v1scf_rpt)
+ ABI_SFREE(db%rhog1_g0)
+ ABI_SFREE(db%zeff)
 
  ! types
  call hdr_free(db%hdr_ref)

@@ -923,86 +923,35 @@ subroutine hdr_free(hdr)
  !@hdr_type
 
  !integer
- if (allocated(hdr%istwfk)) then
-   ABI_FREE(hdr%istwfk)
- end if
- if (allocated(hdr%lmn_size)) then
-   ABI_FREE(hdr%lmn_size)
- end if
- if (allocated(hdr%nband)) then
-   ABI_FREE(hdr%nband)
- end if
- if (allocated(hdr%npwarr)) then
-   ABI_FREE(hdr%npwarr)
- end if
-
- if (allocated(hdr%pspcod)) then
-   ABI_FREE(hdr%pspcod)
- end if
- if (allocated(hdr%pspdat)) then
-   ABI_FREE(hdr%pspdat)
- end if
- if (allocated(hdr%pspso)) then
-   ABI_FREE(hdr%pspso)
- end if
- if (allocated(hdr%pspxc)) then
-   ABI_FREE(hdr%pspxc)
- end if
- if (allocated(hdr%so_psp)) then
-   ABI_FREE(hdr%so_psp)
- end if
- if (allocated(hdr%symafm)) then
-   ABI_FREE(hdr%symafm)
- end if
- if (allocated(hdr%symrel)) then
-   ABI_FREE(hdr%symrel)
- end if
- if (allocated(hdr%typat)) then
-   ABI_FREE(hdr%typat)
- end if
+ ABI_SFREE(hdr%istwfk)
+ ABI_SFREE(hdr%lmn_size)
+ ABI_SFREE(hdr%nband)
+ ABI_SFREE(hdr%npwarr)
+ ABI_SFREE(hdr%pspcod)
+ ABI_SFREE(hdr%pspdat)
+ ABI_SFREE(hdr%pspso)
+ ABI_SFREE(hdr%pspxc)
+ ABI_SFREE(hdr%so_psp)
+ ABI_SFREE(hdr%symafm)
+ ABI_SFREE(hdr%symrel)
+ ABI_SFREE(hdr%typat)
 
  !real
- if (allocated(hdr%amu)) then
-   ABI_FREE(hdr%amu)
- end if
- if (allocated(hdr%kptns)) then
-   ABI_FREE(hdr%kptns)
- end if
- if (allocated(hdr%occ)) then
-   ABI_FREE(hdr%occ)
- end if
- if (allocated(hdr%tnons)) then
-   ABI_FREE(hdr%tnons)
- end if
- if (allocated(hdr%wtk)) then
-   ABI_FREE(hdr%wtk)
- end if
- if (allocated(hdr%shiftk)) then
-   ABI_FREE(hdr%shiftk)
- end if
- if (allocated(hdr%shiftk_orig)) then
-   ABI_FREE(hdr%shiftk_orig)
- end if
- if (allocated(hdr%xred)) then
-   ABI_FREE(hdr%xred)
- end if
- if (allocated(hdr%zionpsp)) then
-   ABI_FREE(hdr%zionpsp)
- end if
- if (allocated(hdr%znuclpsp)) then
-   ABI_FREE(hdr%znuclpsp)
- end if
- if (allocated(hdr%znucltypat)) then
-   ABI_FREE(hdr%znucltypat)
- end if
+ ABI_SFREE(hdr%amu)
+ ABI_SFREE(hdr%kptns)
+ ABI_SFREE(hdr%occ)
+ ABI_SFREE(hdr%tnons)
+ ABI_SFREE(hdr%wtk)
+ ABI_SFREE(hdr%shiftk)
+ ABI_SFREE(hdr%shiftk_orig)
+ ABI_SFREE(hdr%xred)
+ ABI_SFREE(hdr%zionpsp)
+ ABI_SFREE(hdr%znuclpsp)
+ ABI_SFREE(hdr%znucltypat)
 
  !string arrays
- if (allocated(hdr%md5_pseudos)) then
-   ABI_FREE(hdr%md5_pseudos)
- end if
- if(allocated(hdr%title)) then
-   ABI_FREE(hdr%title)
- end if
+ ABI_SFREE(hdr%md5_pseudos)
+ ABI_SFREE(hdr%title)
 
  if (hdr%usepaw==1 .and. allocated(hdr%pawrhoij) ) then
    call pawrhoij_free(hdr%pawrhoij)

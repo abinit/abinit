@@ -255,26 +255,14 @@ subroutine ddb_free(ddb)
 ! ************************************************************************
 
  !integer
- if (allocated(ddb%flg))  then
-   ABI_FREE(ddb%flg)
- end if
- if (allocated(ddb%typ))  then
-   ABI_FREE(ddb%typ)
- end if
+ ABI_SFREE(ddb%flg)
+ ABI_SFREE(ddb%typ)
 
  ! real
- if (allocated(ddb%amu))  then
-   ABI_FREE(ddb%amu)
- end if
- if (allocated(ddb%nrm))  then
-   ABI_FREE(ddb%nrm)
- end if
- if (allocated(ddb%qpt))  then
-   ABI_FREE(ddb%qpt)
- end if
- if (allocated(ddb%val))  then
-   ABI_FREE(ddb%val)
- end if
+ ABI_SFREE(ddb%amu)
+ ABI_SFREE(ddb%nrm)
+ ABI_SFREE(ddb%qpt)
+ ABI_SFREE(ddb%val)
 
 end subroutine ddb_free
 !!***

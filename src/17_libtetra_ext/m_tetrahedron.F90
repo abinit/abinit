@@ -1391,7 +1391,7 @@ subroutine sort_tetra(n,list,iperm,tol)
   ! Should not call with n<1
   write(msg,1000) n
   1000  format(/,' sort_tetra has been called with array length n=',i12,/, &
-&  ' having a value less than 1.  This is not allowed.')
+&  ' having a value less than 1. This is not allowed.')
   TETRA_ERROR(msg)
 
  else ! n>1

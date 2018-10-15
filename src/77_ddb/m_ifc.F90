@@ -249,54 +249,22 @@ subroutine ifc_free(ifc)
 
 ! ************************************************************************
  ! real
- if (allocated(ifc%amu)) then
-   ABI_FREE(ifc%amu)
- end if
- if (allocated(ifc%atmfrc)) then
-   ABI_FREE(ifc%atmfrc)
- end if
- if (allocated(ifc%cell)) then
-   ABI_FREE(ifc%cell)
- end if
- if (allocated(ifc%ewald_atmfrc)) then
-   ABI_FREE(ifc%ewald_atmfrc)
- end if
- if (allocated(ifc%short_atmfrc)) then
-   ABI_FREE(ifc%short_atmfrc)
- end if
- if (allocated(ifc%qshft)) then
-   ABI_FREE(ifc%qshft)
- end if
- if (allocated(ifc%rpt)) then
-   ABI_FREE(ifc%rpt)
- end if
- if (allocated(ifc%wghatm)) then
-   ABI_FREE(ifc%wghatm)
- end if
- if (allocated(ifc%rcan)) then
-   ABI_FREE(ifc%rcan)
- end if
- if (allocated(ifc%trans)) then
-   ABI_FREE(ifc%trans)
- end if
- if (allocated(ifc%dyewq0)) then
-   ABI_FREE(ifc%dyewq0)
- end if
- if (allocated(ifc%qibz)) then
-   ABI_FREE(ifc%qibz)
- end if
- if (allocated(ifc%wtq)) then
-   ABI_FREE(ifc%wtq)
- end if
- if (allocated(ifc%qbz)) then
-   ABI_FREE(ifc%qbz)
- end if
- if (allocated(ifc%zeff))then
-   ABI_FREE(ifc%zeff)
- end if
- if (allocated(ifc%dynmat)) then
-   ABI_FREE(ifc%dynmat)
- end if
+ ABI_SFREE(ifc%amu)
+ ABI_SFREE(ifc%atmfrc)
+ ABI_SFREE(ifc%cell)
+ ABI_SFREE(ifc%ewald_atmfrc)
+ ABI_SFREE(ifc%short_atmfrc)
+ ABI_SFREE(ifc%qshft)
+ ABI_SFREE(ifc%rpt)
+ ABI_SFREE(ifc%wghatm)
+ ABI_SFREE(ifc%rcan)
+ ABI_SFREE(ifc%trans)
+ ABI_SFREE(ifc%dyewq0)
+ ABI_SFREE(ifc%qibz)
+ ABI_SFREE(ifc%wtq)
+ ABI_SFREE(ifc%qbz)
+ ABI_SFREE(ifc%zeff)
+ ABI_SFREE(ifc%dynmat)
 
  !if (allocated(ifc%dynmat_lr)) then
  !  ABI_FREE(ifc%dynmat_lr)

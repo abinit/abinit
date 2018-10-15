@@ -598,36 +598,16 @@ subroutine phdos_free(PHdos)
 ! *************************************************************************
 
  !@phonon_dos_type
- if (allocated(PHdos%atom_mass)) then
-   ABI_FREE(PHdos%atom_mass)
- end if
- if (allocated(PHdos%omega)) then
-   ABI_FREE(PHdos%omega)
- end if
- if (allocated(PHdos%phdos)) then
-   ABI_FREE(PHdos%phdos)
- end if
- if (allocated(PHdos%phdos_int)) then
-   ABI_FREE(PHdos%phdos_int)
- end if
- if (allocated(PHdos%pjdos)) then
-   ABI_FREE(PHdos%pjdos)
- end if
- if (allocated(PHdos%pjdos_int)) then
-   ABI_FREE(PHdos%pjdos_int)
- end if
- if (allocated(PHdos%pjdos_type)) then
-   ABI_FREE(PHdos%pjdos_type)
- end if
- if (allocated(PHdos%pjdos_type_int)) then
-   ABI_FREE(PHdos%pjdos_type_int)
- end if
- if (allocated(PHdos%pjdos_rc_type)) then
-   ABI_FREE(PHdos%pjdos_rc_type)
- end if
- if (allocated(PHdos%msqd_dos_atom)) then
-   ABI_FREE(PHdos%msqd_dos_atom)
- end if
+ ABI_SFREE(PHdos%atom_mass)
+ ABI_SFREE(PHdos%omega)
+ ABI_SFREE(PHdos%phdos)
+ ABI_SFREE(PHdos%phdos_int)
+ ABI_SFREE(PHdos%pjdos)
+ ABI_SFREE(PHdos%pjdos_int)
+ ABI_SFREE(PHdos%pjdos_type)
+ ABI_SFREE(PHdos%pjdos_type_int)
+ ABI_SFREE(PHdos%pjdos_rc_type)
+ ABI_SFREE(PHdos%msqd_dos_atom)
 
 end subroutine phdos_free
 !!***
@@ -1191,8 +1171,7 @@ end subroutine mkphdos
 !!
 !! SOURCE
 
-subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
-&    rlatt, tempermin, temperinc, thm_scells)
+subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1892,7 +1871,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  real(dp) :: cfact
  character(500) :: msg
  character(len=8) :: unitname
-
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer :: nomega, imode, iomega

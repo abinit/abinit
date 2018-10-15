@@ -68,7 +68,7 @@ module m_eph_driver
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
- use m_ephwg,           only : ephwg_test
+ !use m_ephwg,           only : ephwg_test
  use m_pspini,          only : pspini
 
  implicit none
