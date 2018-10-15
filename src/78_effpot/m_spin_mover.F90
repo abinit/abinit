@@ -35,8 +35,8 @@ module m_spin_mover
   use defs_basis
   use m_errors
   use m_abicore
+  use m_spin_observables , only : spin_observable_t, ob_calc_observables
   use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, spin_terms_t_get_gamma_l, spin_terms_t
-  !use m_mathfuncs
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   implicit none
@@ -213,7 +213,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_run_time(self, calculator, hist, ncfile)
+  subroutine spin_mover_t_run_time(self, calculator, hist, ncfile, ob)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -226,6 +226,7 @@ contains
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t), intent(inout) :: hist
     type(spin_ncfile_t), intent(inout) :: ncfile
+    type(spin_observable_t), intent(inout) :: ob
     !real(dp) ::  S(3, self%nspins)
     real(dp):: t
     integer :: counter
@@ -239,7 +240,7 @@ contains
     write(std_out,*) msg
     write(ab_out, *) msg
 
-    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "average M", "Energy"
+    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "average Mst (1)", "Energy (Ha)"
     write(std_out,*) msg
     write(ab_out, *) msg
     msg=repeat("-", 65)
@@ -251,11 +252,11 @@ contains
        call spin_mover_t_run_one_step(self, calculator, hist)
        call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
        if(mod(counter, hist%spin_nctime)==0) then
-          ! TODO: call calc observables
+          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), hist%Snorm(:,hist%ihist_prev))
           call spin_ncfile_t_write_one_step(ncfile, hist)
           write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
-               & sqrt(sum((sum(hist%S(:,:, hist%ihist_prev), dim=2)/self%nspins)**2)), &
-               & hist%etot(hist%ihist_prev)
+               & ob%Mst_norm_total/ob%Snorm_total, &
+               & hist%etot(hist%ihist_prev)/Ha_J
           write(std_out,*) msg
           write(ab_out, *) msg
        endif

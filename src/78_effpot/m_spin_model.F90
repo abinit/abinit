@@ -63,7 +63,7 @@ module m_spin_model
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
        & spin_ncfile_t_write_one_step
-   use m_spin_observables, only: spin_observable_t, ob_initialize, ob_finalized, ob_calc_observables
+   use m_spin_observables, only: spin_observable_t, ob_initialize, ob_finalize, ob_calc_observables
   implicit none
 !!***
 
@@ -91,6 +91,7 @@ module m_spin_model
      type(spin_mover_t):: spin_mover
      type(multibinit_dtset_type) :: params
      type(spin_ncfile_t) :: spin_ncfile
+     type(spin_observable_t) :: spin_ob
      integer :: nspins
      character(len=fnlen) :: in_fname, out_fname, xml_fname
      !  CONTAINS
@@ -222,6 +223,8 @@ contains
     call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
          &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature)
 
+    call ob_initialize(self%spin_ob, self%spin_calculator, self%params)
+
     call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
 
     call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
@@ -264,6 +267,7 @@ contains
     call spin_terms_t_finalize(self%spin_calculator)
     call spin_hist_t_free(self%spin_hist)
     call spin_mover_t_finalize(self%spin_mover)
+    call ob_finalize(self%spin_ob)
     call spin_ncfile_t_close(self%spin_ncfile)
     ! TODO: finalize others
   end subroutine spin_model_t_finalize
@@ -556,7 +560,7 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    call spin_mover_t_run_time(self%spin_mover,self%spin_calculator,self%spin_hist, self%spin_ncfile)
+    call spin_mover_t_run_time(self%spin_mover,self%spin_calculator,self%spin_hist, self%spin_ncfile, self%spin_ob)
   end subroutine spin_model_t_run_time
   !!***
 
@@ -581,7 +585,7 @@ contains
 
     T_step=(T_end-T_start)/(T_nstep-1)
 
-    write(msg, "(A52, ES13.5, A11, ES13.5, A1)") "Starting temperature dependent calculations. T from ", T_start, "to ", T_end, "."
+    write(msg, "(A52, ES13.5, A11, ES13.5, A1)") "Starting temperature dependent calculations. T from ", T_start, "K to ", T_end, " K."
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out, msg, "COLL")
 
@@ -592,7 +596,7 @@ contains
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
 
-       write(msg, "(A13, 5X, ES13.5)") "Temperature: ", T
+       write(msg, "(A13, 5X, ES13.5, A3)") "Temperature: ", T, " K."
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out,  msg, "COLL")
 
@@ -611,7 +615,7 @@ contains
        write(post_fname, "(I4.4)") i+1
        call spin_model_t_prepare_ncfile(self, spin_ncfile, trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
        call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
-       call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, self%spin_hist, ncfile=spin_ncfile)
+       call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
        call spin_ncfile_t_close(spin_ncfile)
 
  end do

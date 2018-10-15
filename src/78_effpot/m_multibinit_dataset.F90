@@ -1269,10 +1269,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_sia_k1=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_sia_k1=dprarr(1)
- if(multibinit_dtset%spin_sia_k1<=0)then
+ if(multibinit_dtset%spin_sia_k1<0)then
     write(message, '(a,f10.1,a,a,a,a,a)' )&
          &   'spin_sia_k1 is ',multibinit_dtset%spin_sia_k1,'. The only allowed values',ch10,&
-         &   'are positives values.',ch10,&
+         &   'are non-negative values.',ch10,&
          &   'Action: correct spin_sia_k1 in your input file.'
     MSG_ERROR(message)
  end if
@@ -2222,25 +2222,26 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(3x,a25,I12.1)')'spin_calc_correlation_obs',multibinit_dtset%spin_calc_correlation_obs
     write(nunit,'(3x,a25,I12.1)')'spin_calc_thermo_obs',multibinit_dtset%spin_calc_thermo_obs
     write(nunit,'(3x,a25,I12.1)')'spin_calc_traj_obs',multibinit_dtset%spin_calc_traj_obs
-    write(nunit,'(2x,a16,I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
-    write(nunit,'(a18,es15.5)')'spin_temperature',multibinit_dtset%spin_temperature
-    write(nunit,'(3x,a15,I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
-    write(nunit,'(3x,a15,3I10)')  'ncell',multibinit_dtset%ncell !TODO hexu: duplicate but dynamics can be 0.
-    write(nunit,'(3x,a15,ES15.5, a8)')  'spin_dt',multibinit_dtset%spin_dt*Time_Sec , ' second' !TODO: use a.u.
+    write(nunit,'(12x,a16,I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
+    write(nunit,'(10x, a18, 5x, F10.5)')'spin_temperature',multibinit_dtset%spin_temperature
+    write(nunit,'(10x, a18, 5x, F10.5)')'spin_damping',multibinit_dtset%spin_damping
+    write(nunit,'(13x,a15,I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
+    write(nunit,'(13x,a15,3I10)')  'ncell',multibinit_dtset%ncell !TODO hexu: duplicate but dynamics can be 0.
+    write(nunit,'(13x,a15,ES15.5, a8)')  'spin_dt',multibinit_dtset%spin_dt*Time_Sec , ' second' !TODO: use a.u.
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
-    write(nunit,'(3x,a15)')   'spin_mag_field'
-    write(nunit,'(19x,3es12.5)')   (multibinit_dtset%spin_mag_field(ii),ii=1,3)
-    write(nunit, '(3x, a15, I12.1)') 'spin_sia_add', multibinit_dtset%spin_sia_add
-    write(nunit, '(3x, a15, ES15.5)') 'spin_sia_k1', multibinit_dtset%spin_sia_k1
-    write(nunit, '(3x, a15, 3ES15.5)') 'spin_sia_k1dir', (multibinit_dtset%spin_sia_k1dir(ii), ii=1,3)
-    write(nunit,'(3x,a15)')   'spin_qpoint'
-    write(nunit,'(19x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
-
-    write(nunit, '(3x, a15, I12.1)') 'spin_var_temperature', multibinit_dtset%spin_var_temperature
-    write(nunit, '(3x, a15, ES15.5)') 'spin_temperature_start', multibinit_dtset%spin_temperature_start
-    write(nunit, '(3x, a15, ES15.5)') 'spin_temperature_end', multibinit_dtset%spin_temperature_end
-    write(nunit, '(3x, a15, I12.1)') 'spin_temperature_nstep', multibinit_dtset%spin_temperature_nstep
+    write(nunit,'(13x,a15)')   'spin_mag_field'
+    write(nunit,'(31x,3es12.5)')   (multibinit_dtset%spin_mag_field(ii),ii=1,3)
+    write(nunit, '(13x, a15, I12.1)') 'spin_sia_add', multibinit_dtset%spin_sia_add
+    write(nunit, '(13x, a15, ES15.5)') 'spin_sia_k1', multibinit_dtset%spin_sia_k1
+    write(nunit, '(13x, a15, 3ES15.5)') 'spin_sia_k1dir', (multibinit_dtset%spin_sia_k1dir(ii), ii=1,3)
+    write(nunit,'(13x,a15)')   'spin_qpoint'
+    write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
+    write(nunit, '(13x, a15, I12.1)') 'spin_init_state', multibinit_dtset%spin_init_state
+    write(nunit, '(6x, a22, I12.1)') 'spin_var_temperature', multibinit_dtset%spin_var_temperature
+    write(nunit, '(6x, a22, 5x, F10.5)') 'spin_temperature_start', multibinit_dtset%spin_temperature_start
+    write(nunit, '(6x, a22, 5x, F10.5)') 'spin_temperature_end', multibinit_dtset%spin_temperature_end
+    write(nunit, '(6x, a22, 5x, I12.1)') 'spin_temperature_nstep', multibinit_dtset%spin_temperature_nstep
 
  end if
 
