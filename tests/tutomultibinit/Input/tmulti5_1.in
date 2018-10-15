@@ -7,6 +7,7 @@ ncell =   15 15 15
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
+spin_init_state = 2
 spin_mag_field= 0.0 0.0 0.0
 spin_dynamics=1
 spin_temperature = 600
@@ -20,8 +21,9 @@ spin_qpoint = 0.0 0.0 0.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_LIBXML
+#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
 #%% system_xml = tmulti5_1.xml
+#%% exclude_hosts = nag@abiref
 #%% coeff_xml = no
 #%% [files]
 #%% files_to_test = 
