@@ -263,6 +263,13 @@ module m_xgTransposer
 
   subroutine xgTransposer_computeDistribution(xgTransposer)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgTransposer_computeDistribution'
+!End of the abilint section
+
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer :: nRealPairs
     integer :: ierr
@@ -289,6 +296,14 @@ module m_xgTransposer
   end subroutine xgTransposer_computeDistribution
 
   subroutine xgTransposer_makeXgBlock(xgTransposer)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgTransposer_makeXgBlock'
+!End of the abilint section
+
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer :: cols, rows
 
@@ -629,6 +644,14 @@ module m_xgTransposer
 !!***
 
   subroutine xgTransposer_reorganizeData(xgTransposer,bufferMess)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgTransposer_reorganizeData'
+!End of the abilint section
+
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision    , intent(inout) :: bufferMess(:,:)
     double precision, pointer :: bufferOrdered(:,:) => null()

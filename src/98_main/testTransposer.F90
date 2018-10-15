@@ -5,6 +5,12 @@ program testTransposer
   use m_time
   use defs_basis
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'testTransposer'
+!End of the abilint section
+
   implicit none
 
   integer :: npw
@@ -71,6 +77,14 @@ program testTransposer
   contains
 
     subroutine tester()
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'tester'
+!End of the abilint section
+
       maxt = 0
       do i=1,ncycle
         walltime = abi_wtime()
