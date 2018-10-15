@@ -61,7 +61,6 @@ module m_phonons
 
  private
 
-! TODO Write object to store the bands
  public :: mkphbs                        ! Compute phonon band structure
  public :: phonons_write_xmgrace         ! Write phonons bands in Xmgrace format.
  public :: phonons_write_gnuplot         ! Write phonons bands in gnuplot format.
@@ -235,9 +234,7 @@ subroutine phdos_print(PHdos,fname)
    MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
  end select
 
-! === Open external file and write results ===
-! TODO Here I have to rationalize how to write all this stuff!!
-!
+ ! Open external file and write results
  if (open_file(fname,msg,newunit=unt,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -656,6 +653,7 @@ end subroutine phdos_free
 !! dos_ngqpt(3)=Divisions of the q-mesh used for computing the DOS
 !! nqshift=Number of shifts in Q-mesh
 !! dos_qshift(3, nqshift)=Shift of the q-mesh.
+!! prefix=Prefix for output files.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -680,7 +678,7 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, &
+subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
                    wminmax, count_wminmax, comm)
 
 
@@ -696,6 +694,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 !scalars
  integer,intent(in) :: prtdos,nqshft,comm
  real(dp),intent(in) :: dosdeltae,dossmear
+ character(len=*),intent(in) ::  prefix
  type(crystal_t),intent(in) :: crystal
  type(ifc_type),intent(in) :: ifc
  type(phonon_dos_type),intent(out) :: phdos
@@ -715,7 +714,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=80) :: errstr
- character(len=80) ::  prefix = "freq_displ" ! FIXME
  type(t_tetrahedron) :: tetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
@@ -1078,7 +1076,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
    if (my_rank == master) then
 #ifdef HAVE_NETCDF
-     ! TODO: should pass prefix as arg and make it optional
+     ! TODO: make it optional?
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
      NCF_CHECK(crystal_ncwrite(crystal, ncid))
      call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
@@ -1231,7 +1229,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
 ! *************************************************************************
 
  ! check inputs
-! TODO: add check that all rlatt are the same on input
+ ! TODO: add check that all rlatt are the same on input
 
  if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
@@ -1341,6 +1339,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
 
 end subroutine zacharias_supercell_make
 !!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_phonons/thermal_supercell_make

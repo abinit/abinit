@@ -118,7 +118,7 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   wminmax = zero
   do
     call mkphdos(PHdos,Crystal,Ifc,prtdos,InVar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
-      wminmax, count_wminmax, XMPI_WORLD)
+      "freq_displ", wminmax, count_wminmax, XMPI_WORLD)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
@@ -193,9 +193,9 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
 ! ===========================================================================
   mass_amu=zero
   do iatom=1,InVar%natom_unitcell
-    itypat=InVar%typat_unitcell(iatom) 
+    itypat=InVar%typat_unitcell(iatom)
     mass_amu=mass_amu+InVar%amu(itypat)
-  end do  
+  end do
   mass_amu=mass_amu*amu_emass/real(InVar%natom_unitcell)
 
   open(unit=20,file=trim(InVar%output_prefix)//'thermo.dat')
@@ -282,7 +282,7 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
     Ftot=U0*Ha_eV+freeE+DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature*100)**2
     write(20,'(1x,i5,8(1x,f15.5))') itemp*100,freeE,U0*Ha_eV+freeE,heatcapa,entropy,internalE,&
 &                          DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature)**2,Ftot,(MSD)**0.5
-  end do  
+  end do
   close(20)
 
 end subroutine tdep_calc_thermo
