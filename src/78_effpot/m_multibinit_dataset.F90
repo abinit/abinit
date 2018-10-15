@@ -124,6 +124,9 @@ module m_multibinit_dataset
 
 
   ! TODO hexu: add parameters for spin.
+  integer :: spin_calc_traj_obs
+  integer :: spin_calc_thermo_obs
+  integer :: spin_calc_correlation_obs
   integer :: spin_dipdip
   integer :: spin_dynamics
   integer :: spin_init_state
@@ -132,6 +135,7 @@ module m_multibinit_dataset
   integer :: spin_nmatom !TODO hexu: is it needed?
   integer :: spin_n1l
   integer :: spin_n2l
+  integer :: spin_sia_add
   integer :: spin_temperature_nstep    ! var temperature number of steps
   integer :: spin_var_temperature
 
@@ -159,6 +163,8 @@ module m_multibinit_dataset
 
   ! TODO hexu:add parameters for spin
   real(dp) :: spin_dt
+  real(dp) :: spin_damping
+  real(dp) :: spin_sia_k1
   real(dp) :: spin_temperature
   ! TODO hexu: add spin convergence tol. (or remove it)
   real(dp) :: spin_temperature_start   ! var temperature start
@@ -168,6 +174,7 @@ module m_multibinit_dataset
 
   real(dp) :: spin_mag_field(3)  ! external magnetic field
   real(dp) :: spin_qpoint(3)
+  real(dp) :: spin_sia_k1dir(3)
 ! Integer arrays
   integer, allocatable :: atifc(:)
   ! atifc(natom)
@@ -331,7 +338,10 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%rifcsph=zero
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
- 
+
+ multibinit_dtset%spin_calc_traj_obs=0
+ multibinit_dtset%spin_calc_thermo_obs=0
+ multibinit_dtset%spin_calc_correlation_obs=0
  multibinit_dtset%spin_dipdip=0
  multibinit_dtset%spin_dynamics=1
  multibinit_dtset%spin_init_state=1
@@ -342,11 +352,14 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%spin_n2l=0
 
  multibinit_dtset%spin_dt=100
- !TODO hexu: what is the unit. s. here.  the atomic unit is 2.418884e-17, should we use it ?
-multibinit_dtset%spin_temperature=325 ! or 0 ?
-multibinit_dtset%spin_temperature_start=0.0 ! or 0 ?
-multibinit_dtset%spin_temperature_end= 0.0 ! or 0 ?
-multibinit_dtset%spin_temperature_nstep= 0 ! or 0 ?
+
+ multibinit_dtset%spin_damping=-1.0
+ multibinit_dtset%spin_sia_add=0
+ multibinit_dtset%spin_sia_k1=zero
+multibinit_dtset%spin_temperature=325
+multibinit_dtset%spin_temperature_start=0.0
+multibinit_dtset%spin_temperature_end= 0.0
+multibinit_dtset%spin_temperature_nstep= 0
 multibinit_dtset%spin_tolavg=1d-2 ! TODO hexu: to be decided. should it be a function of temperature?
 multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above. 
 
@@ -373,13 +386,16 @@ multibinit_dtset%spin_var_temperature=0 ! or 0 ?
  multibinit_dtset%spin_mag_field(:)=zero
  multibinit_dtset%spin_qpoint(:)=zero
 
+ multibinit_dtset%spin_sia_k1dir(:)=(/0.0,0.0,1.0/)
+
+
  ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
  multibinit_dtset%atifc(:)=0
  ABI_ALLOCATE(multibinit_dtset%conf_cutoff_disp,(multibinit_dtset%natom))
  multibinit_dtset%conf_cutoff_disp(:)=zero
  ABI_ALLOCATE(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
  multibinit_dtset%q1shft(:,:) = zero
- 
+
 end subroutine multibinit_dtset_init
 !!***
 
@@ -1084,6 +1100,44 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !S
+ multibinit_dtset%spin_damping=-1.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_damping',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_damping=dprarr(1)
+
+ multibinit_dtset%spin_calc_correlation_obs=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_correlation_obs',tread,'INT')
+ if(tread==1) multibinit_dtset%spin_calc_correlation_obs=intarr(1)
+ if(multibinit_dtset%spin_calc_correlation_obs>1.or.multibinit_dtset%spin_calc_correlation_obs<0)then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'spin_calc_correlation_obs is',multibinit_dtset%spin_calc_correlation_obs,', but the only allowed values',ch10,&
+         &   'is 0 or 1.',ch10,&
+         &   'Action: correct spin_calc_correlation_obs in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%spin_calc_thermo_obs=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_thermo_obs',tread,'INT')
+ if(tread==1) multibinit_dtset%spin_calc_thermo_obs=intarr(1)
+ if(multibinit_dtset%spin_calc_thermo_obs>1.or.multibinit_dtset%spin_calc_thermo_obs<0)then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'spin_calc_thermo_obs is',multibinit_dtset%spin_calc_thermo_obs,', but the only allowed values',ch10,&
+         &   'is 0 or 1.',ch10,&
+         &   'Action: correct spin_calc_thermo_obs in your input file.'
+    MSG_ERROR(message)
+ end if
+
+
+ multibinit_dtset%spin_calc_traj_obs=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_traj_obs',tread,'INT')
+ if(tread==1) multibinit_dtset%spin_calc_traj_obs=intarr(1)
+ if(multibinit_dtset%spin_calc_traj_obs>1.or.multibinit_dtset%spin_calc_traj_obs<0)then
+    write(message, '(a,i8,a,a,a,a,a)' )&
+         &   'spin_calc_traj_obs is',multibinit_dtset%spin_calc_traj_obs,', but the only allowed values',ch10,&
+         &   'is 0 or 1.',ch10,&
+         &   'Action: correct spin_calc_traj_obs in your input file.'
+    MSG_ERROR(message)
+ end if
+
 
  multibinit_dtset%spin_dipdip=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dipdip',tread,'INT')
@@ -1134,6 +1188,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
  
+
 
  multibinit_dtset%spin_mag_field= zero
  if(3>marr)then
@@ -1201,6 +1256,42 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%spin_mag_field(1:3)= dprarr(1:3)
 
 
+ multibinit_dtset%spin_sia_add=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_add',tread,'INT')
+ if(tread==1) multibinit_dtset%spin_sia_add=intarr(1)
+ if(multibinit_dtset%spin_sia_add <0 .or. multibinit_dtset%spin_sia_add>2 )then
+    write(message, '(a,i0,a,a,a)' )&
+         &   'spin_sia_add is',multibinit_dtset%spin_sia_add,', which is not 0, 1, or 2.',ch10,&
+         &   'Action: correct spin_sia_add in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%spin_sia_k1=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_sia_k1=dprarr(1)
+ if(multibinit_dtset%spin_sia_k1<=0)then
+    write(message, '(a,f10.1,a,a,a,a,a)' )&
+         &   'spin_sia_k1 is ',multibinit_dtset%spin_sia_k1,'. The only allowed values',ch10,&
+         &   'are positives values.',ch10,&
+         &   'Action: correct spin_sia_k1 in your input file.'
+    MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%spin_sia_k1dir(:)= [0.0,0.0,1.0]
+ if(3>marr)then
+    marr=3
+    ABI_DEALLOCATE(intarr)
+    ABI_DEALLOCATE(dprarr)
+    ABI_ALLOCATE(intarr,(marr))
+    ABI_ALLOCATE(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_sia_k1dir',tread,'DPR')
+ if(tread==1) then
+    dprarr(:)=dprarr/norm2(dprarr)
+    multibinit_dtset%spin_sia_k1dir(1:3)= dprarr(1:3)
+ endif
+
+
  multibinit_dtset%spin_temperature=325
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_temperature=dprarr(1)
@@ -1208,7 +1299,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,f10.1,a,a,a,a,a)' )&
 &   'spin_temperature is ',multibinit_dtset%spin_temperature,'. The only allowed values',ch10,&
 &   'are positives values.',ch10,&
-&   'Action: correct spin_semperature in your input file.'
+&   'Action: correct spin_temperature in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -2127,17 +2218,29 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
  if(multibinit_dtset%spin_dynamics/=0) then
     write(nunit,'(a)')' Spin Dynamics :'
-    write(nunit,'(2x,a16,3I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
-    write(nunit,'(a18,3es15.5)')'spin_temperature',multibinit_dtset%spin_temperature
-    write(nunit,'(3x,a15,3I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
+
+    write(nunit,'(3x,a25,I12.1)')'spin_calc_correlation_obs',multibinit_dtset%spin_calc_correlation_obs
+    write(nunit,'(3x,a25,I12.1)')'spin_calc_thermo_obs',multibinit_dtset%spin_calc_thermo_obs
+    write(nunit,'(3x,a25,I12.1)')'spin_calc_traj_obs',multibinit_dtset%spin_calc_traj_obs
+    write(nunit,'(2x,a16,I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
+    write(nunit,'(a18,es15.5)')'spin_temperature',multibinit_dtset%spin_temperature
+    write(nunit,'(3x,a15,I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
     write(nunit,'(3x,a15,3I10)')  'ncell',multibinit_dtset%ncell !TODO hexu: duplicate but dynamics can be 0.
     write(nunit,'(3x,a15,ES15.5, a8)')  'spin_dt',multibinit_dtset%spin_dt*Time_Sec , ' second' !TODO: use a.u.
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
     write(nunit,'(3x,a15)')   'spin_mag_field'
     write(nunit,'(19x,3es12.5)')   (multibinit_dtset%spin_mag_field(ii),ii=1,3)
+    write(nunit, '(3x, a15, I12.1)') 'spin_sia_add', multibinit_dtset%spin_sia_add
+    write(nunit, '(3x, a15, ES15.5)') 'spin_sia_k1', multibinit_dtset%spin_sia_k1
+    write(nunit, '(3x, a15, 3ES15.5)') 'spin_sia_k1dir', (multibinit_dtset%spin_sia_k1dir(ii), ii=1,3)
     write(nunit,'(3x,a15)')   'spin_qpoint'
     write(nunit,'(19x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)
+
+    write(nunit, '(3x, a15, I12.1)') 'spin_var_temperature', multibinit_dtset%spin_var_temperature
+    write(nunit, '(3x, a15, ES15.5)') 'spin_temperature_start', multibinit_dtset%spin_temperature_start
+    write(nunit, '(3x, a15, ES15.5)') 'spin_temperature_end', multibinit_dtset%spin_temperature_end
+    write(nunit, '(3x, a15, I12.1)') 'spin_temperature_nstep', multibinit_dtset%spin_temperature_nstep
 
  end if
 

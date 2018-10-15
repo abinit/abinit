@@ -124,25 +124,23 @@ module m_spin_hist
      ! TODO hexu: is it useful?
      real(dp), allocatable :: dSdt(:, :, :)
 
-     ! label of spins, sublattice
-     integer(dp), allocatable :: label(:)
-     ! sc_label(3, nspins) label of cell. (R)
-     integer(dp), allocatable :: sc_label(:,:)
      ! etot(mxhist)
      real(dp), allocatable :: etot(:)
      real(dp), allocatable :: entropy(:)
      real(dp), allocatable :: time(:)
      integer, allocatable :: itime(:)
-     ! id of netcdf spin hist file
-     integer :: ncid
+
      ! spin_nctime: interval of step for writing to netcdf hist file.
      integer :: spin_nctime
      real(dp) :: spin_temperature
 
-
      ! observables
-     real(dp), allocatable :: ms_prim(:,:)
-     real(dp), allocatable :: Cv(:)
+     integer:: calc_thermo_obs, calc_traj_obs, calc_correlation_obs
+
+     real(dp), allocatable :: ms_sub(:,:)   ! staggered M. 
+     real(dp), allocatable :: Cv(:) ! specfic heat
+     real(dp), allocatable :: binderU4_sub(:,:), binderU4(:)
+     real(dp), allocatable :: chi_sub(:, :), chi(:) ! magnetic susceptibility
      real(dp), allocatable :: rcorr(:,:)
      real(dp), allocatable :: sp_corr_func(:,:,:)
 
@@ -175,7 +173,7 @@ contains
 !! initialize spin hist
 !!
 !! INPUTS
-!! nspins = number of magnetic atoms 
+!! nspins = number of magnetic atoms
 !! mxhist = maximum number of hist steps
 !! has_latt = whether spin dynamics in with lattice dynamics
 !!
@@ -188,7 +186,7 @@ contains
 !!
 !! SOURCE
 
-  subroutine spin_hist_t_init(hist, nspins, nspins_prim, mxhist, has_latt, rcorr)
+  subroutine spin_hist_t_init(hist, nspins, mxhist, has_latt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -199,13 +197,11 @@ contains
 
     implicit none
     class(spin_hist_t), intent(inout) :: hist
-    integer, intent(in) :: nspins, mxhist, nspins_prim
+    integer, intent(in) :: nspins, mxhist
     logical, intent(in) :: has_latt
-    real(dp), optional, intent(in) :: rcorr(:, :)
-    integer :: nrcorr
+    !integer, optional,  intent(in) :: calc_traj_obs, calc_thermo_obs, calc_correlation_obs
 
     hist%nspins=nspins
-    hist%nspins_prim=nspins_prim
     hist%ntypat=0
     hist%ihist=1
     hist%ihist_prev=0
@@ -213,18 +209,11 @@ contains
     hist%natoms=0
     hist%has_latt=has_latt
 
-    if(present(rcorr)) then
-       nrcorr=size(rcorr, dim=2)
-    else
-       nrcorr=0
-    endif
-
     !print *, "initialize HIST spin"
     ABI_ALLOCATE(hist%heff, (3, nspins, mxhist))
     ABI_ALLOCATE(hist%snorm, (nspins, mxhist))
     ABI_ALLOCATE(hist%S, (3, nspins, mxhist))
     ABI_ALLOCATE(hist%dSdt, (3, nspins, mxhist))
-    ABI_ALLOCATE(hist%label, (nspins))
 
     ABI_ALLOCATE(hist%etot, (mxhist))
     ABI_ALLOCATE(hist%entropy, (mxhist))
@@ -233,10 +222,7 @@ contains
 
     ABI_ALLOCATE(hist%ihist_latt, (mxhist))
 
-    ABI_ALLOCATE(hist%ms_prim, (nspins_prim, mxhist))
-    ABI_ALLOCATE(hist%Cv, (mxhist))
-    ABI_ALLOCATE(hist%rcorr, (3, nrcorr))
-    ABI_ALLOCATE(hist%sp_corr_func, (3, nrcorr, mxhist))
+
 
     ! TODO: add observable allocation here.
 
@@ -252,10 +238,6 @@ contains
     hist%dSdt(:,:,1)=zero
     hist%snorm(:,1)=zero
     !print *, "Initialization spin hist finished"
-
-    hist%Cv( 1)=zero
-    hist%sp_corr_func(:, :, 1)=zero
-
   end subroutine spin_hist_t_init
 !!***
 
@@ -426,9 +408,6 @@ contains
     if (allocated(hist%znucl)) then
        ABI_DEALLOCATE(hist%znucl)
     end if
-    if (allocated(hist%label)) then
-       ABI_DEALLOCATE(hist%label)
-    end if
     if (allocated(hist%spin_index)) then
        ABI_DEALLOCATE(hist%spin_index)
     end if
@@ -460,22 +439,6 @@ contains
        ABI_DEALLOCATE(hist%ihist_latt)
     end if
 
-    if (allocated(hist%label)) then
-       ABI_DEALLOCATE(hist%label)
-    end if
-   if (allocated(hist%ms_prim)) then
-       ABI_DEALLOCATE(hist%ms_prim)
-    end if
-   if (allocated(hist%Cv)) then
-       ABI_DEALLOCATE(hist%Cv)
-    end if
-   if (allocated(hist%rcorr)) then
-       ABI_DEALLOCATE(hist%rcorr)
-    end if
-    if (allocated(hist%sp_corr_func)) then
-       ABI_DEALLOCATE(hist%sp_corr_func)
-    end if
-   
   end subroutine spin_hist_t_free
 !!***
 
@@ -683,35 +646,5 @@ contains
     endif
   end subroutine spin_hist_t_set_vars
   !!***
-
-
-  !!***f* m_spin_hist/spin_hist_t_update_Cv
-  !!
-  !! NAME
-  !! spin_hist_tupdate_Cv_
-  !!
-  !! FUNCTION
-  !! update volumetric heat capacity
-  !! INPUTS
-  !!   hist 
-  !! OUTPUT
-  !!   
-  !! PARENTS
-  !!      m_spin_hist
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine spin_hist_t_update_Cv(hist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_update_Cv'
-!End of the abilint section
-
-    class(spin_hist_t), intent(inout) :: hist
-  end subroutine spin_hist_t_update_Cv
 
 end module m_spin_hist
