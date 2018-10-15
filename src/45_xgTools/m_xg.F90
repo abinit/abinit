@@ -132,6 +132,9 @@ module m_xg
 
   public :: space
   public :: cols
+  public :: rows
+  public :: comm
+  public :: xgBlock_setComm
   private :: getClocR
   private :: getClocC
   private :: checkResize
@@ -570,6 +573,8 @@ module m_xg
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
+          write(*,*) xgBlock%cols,xgBlock%Ldim,cols,rows 
+          write(*,*) xgBlock%cols*xgBlock%Ldim,cols*rows 
           MSG_ERROR("Bad reverseMapping")
       end if
       cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
@@ -845,6 +850,46 @@ module m_xg
   end function space
 !!***
 
+!!****f* m_xg/comm
+!!
+!! NAME
+!! comm
+
+  function comm(xgBlock)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'comm'
+!End of the abilint section
+
+    type(xgBlock_t), intent(in) :: xgBlock
+    integer :: comm
+    comm = xgBlock%spacedim_comm
+  end function comm
+!!***
+
+!!****f* m_xg/comm
+!!
+!! NAME
+!! comm
+
+  subroutine xgBlock_setComm(xgBlock,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_setComm'
+!End of the abilint section
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+    integer :: comm
+    xgBlock%spacedim_comm = comm
+  end subroutine xgBlock_setComm
+!!***
+
 !!****f* m_xg/cols
 !!
 !! NAME
@@ -863,6 +908,29 @@ module m_xg
     integer :: cols
     cols = xgBlock%cols
   end function cols
+!!***
+
+!!****f* m_xg/rows
+!!
+!! NAME
+!! rows
+
+  function rows(xgBlock)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rows'
+!End of the abilint section
+
+    type(xgBlock_t), intent(in) :: xgBlock
+    integer :: rows
+    rows = xgBlock%rows
+    if ( rows /= xgBlock%ldim ) then
+      MSG_WARNING("rows/ldim ! Be very carrefull at what you are doing")
+    end if
+  end function rows
 !!***
 
 !!****f* m_xg/xgBlock_copy
