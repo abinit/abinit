@@ -11,6 +11,7 @@ temperature = 600
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
+spin_init_state = 2
 spin_mag_field= 0.0 0.0 0.0
 spin_dynamics=1
 spin_temperature = 600

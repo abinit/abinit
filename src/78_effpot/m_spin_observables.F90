@@ -41,7 +41,7 @@ module m_spin_observables
   type, public :: spin_observable_t
      logical :: calc_thermo_obs, calc_correlation_obs, calc_traj_obs
      integer :: nspins, nsublatt, ntime
-     integer, allocatable :: isublatt(:)
+     integer, allocatable :: isublatt(:), nspins_sub(:)
 
      ! Ms_coeff: coefficient to calcualte staggered Mst
      ! Mst_sub: M staggered for sublattice
@@ -87,10 +87,17 @@ contains
 
     self%nspins=supercell%nspins
     self%nsublatt=maxval(supercell%ispin_prim)
+
     self%ntime=0
 
     ABI_ALLOCATE(self%isublatt,(self%nspins) )
     self%isublatt(:)=supercell%ispin_prim(:)
+
+    ABI_ALLOCATE(self%nspins_sub, (self%nsublatt))
+    self%nspins_sub(:)=0
+    do i =1, self%nspins
+       self%nspins_sub(self%isublatt(i)) = self%nspins_sub(self%isublatt(i)) + 1
+    end do
 
     ABI_ALLOCATE(self%Ms_coeff,(self%nspins) )
 

@@ -467,7 +467,7 @@ contains
     real(dp) :: S(3, self%nspins)
     character(len=500) :: msg
     mode=self%params%spin_init_state
-    if(mode==0) then
+    if(mode==2) then
        ! set all spin to z direction.
        S(1,:)=0.0d0
        S(2,:)=0.0d0
@@ -484,7 +484,7 @@ contains
           S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
        end do
     else
-      write(msg,*) "Error: Set initial spin: mode should be 0 (FM) or 1 (random)"
+      write(msg,*) "Error: Set initial spin: mode should be 2(FM) or 1 (random). Others are not yet implemented."
       call wrtout(ab_out,msg,'COLL')
       call wrtout(std_out,msg,'COLL')
 

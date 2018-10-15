@@ -229,8 +229,8 @@ contains
     type(spin_observable_t), intent(inout) :: ob
     !real(dp) ::  S(3, self%nspins)
     real(dp):: t
-    integer :: counter
-    character(len=66) :: msg
+    integer :: counter, i, ii
+    character(len=80) :: msg
     t=0.0
     counter=0
     write(msg, *) " Begining spin dynamic steps :"
@@ -240,7 +240,7 @@ contains
     write(std_out,*) msg
     write(ab_out, *) msg
 
-    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "average Mst (1)", "Energy (Ha)"
+    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "Energy (Ha)"
     write(std_out,*) msg
     write(ab_out, *) msg
     msg=repeat("-", 65)
@@ -262,6 +262,31 @@ contains
        endif
        t=t+self%dt
     enddo
+
+    msg=repeat("-", 65)
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
+    write(msg, "(A30)") "Summary of spin dynamics:"
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
+    write(msg, "(A65)") "At the end of the run, the average spin at each sublattice is"
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
+    write(msg, "(8X, 10X, A5, A2, 4X, 4A10)")  'ID', ": ", '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
+
+    do i =1, ob%nsublatt
+       write(msg, "(8X, A10, I5.4, A2, 4X, 4F10.5)") "Sublattice", i, ": ", (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
+            sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B_SI)**2))
+       write(std_out,*) msg
+       write(ab_out, *) msg
+    end do
+
     msg=repeat("=", 65)
     write(std_out,*) msg
     write(ab_out, *) msg

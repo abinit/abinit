@@ -221,6 +221,8 @@ module defs_basis
  real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
+ real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
+ real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
 
 !Complex constants
  complex(dpc), parameter :: czero=(0._dp,0._dp)
