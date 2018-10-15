@@ -411,7 +411,7 @@ Variable(
     abivarname="bound_model@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_basic'],
+    topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="BOUND COEFFicient",
@@ -432,7 +432,7 @@ Variable(
     abivarname="bound_maxCoeff@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_basic'],
+    topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="BOUND MAX COEFFicient",
@@ -445,7 +445,7 @@ Variable(
     abivarname="bound_rangePower@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_basic'],
+    topics=['BoundingProcess_basic'],
     dimensions=[2],
     defaultval="6,6",
     mnemonics="BOUND RANGE POWER",
@@ -458,7 +458,7 @@ Variable(
     abivarname="bound_cutoff@multibinit",
     varset="multibinit",
     vartype="real",
-    topics=['BoundProcess_basic'],
+    topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval="1 unit cell",
     mnemonics="BOUND CUT OFF",
@@ -472,7 +472,7 @@ Variable(
     abivarname="bound_anhaStrain@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_basic'],
+    topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="BOUND ANHArmonic STRAIN coefficients",
@@ -485,7 +485,7 @@ Variable(
     abivarname="bound_SPCoupling@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_basic'],
+    topics=['BoundingProcess_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="BOUND Strain Phonon COUPLING coefficients",
@@ -498,7 +498,7 @@ Variable(
     abivarname="bound_cell@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_expert'],
+    topics=['BoundingProcess_expert'],
     dimensions=[3],
     defaultval="6,6,6",
     mnemonics="BOUND superCELL size for the molecular dynamics",
@@ -511,7 +511,7 @@ Variable(
     abivarname="bound_temp@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_expert'],
+    topics=['BoundingProcess_expert'],
     dimensions="scalar",
     defaultval=500,
     mnemonics="BOUND TEMPerature for the molecular dynamics (in Kelvin)",
@@ -524,7 +524,7 @@ Variable(
     abivarname="bound_step@multibinit",
     varset="multibinit",
     vartype="integer",
-    topics=['BoundProcess_expert'],
+    topics=['BoundingProcess_expert'],
     dimensions="scalar",
     defaultval=1000,
     mnemonics="BOUND number of STEP for the molecular dynamics",
@@ -704,4 +704,124 @@ See [[abinit:restartxf]]
 """,
 ),
 
+Variable(
+    abivarname="spin_dipdip@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN DIPole DIPole interaction",
+    text="""
+* 0 --> Switch off spin dipole-dipole interaction.
+* 1 --> Switch on spin dipole-dipole interaction.
+    (Not yet implemented.)
+""",
+),
+
+Variable(
+    abivarname="spin_dt@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=100,
+    mnemonics="SPIN Delta Time",
+    text="""
+Time step for spin dynamics. Default value is 100. 
+Default unit is atomic unit (2.419e-17 s).
+S, Sec or Second can be appended as unit. (e.g. 1e-16 Sec). 
+""",
+),
+
+
+
+Variable(
+    abivarname="spin_dynamics@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN DYNAMICS",
+    text="""
+Flag to run spin dynamics.
+* 0 --> Do not run spin dynamics.
+* 1 --> Run spin dynamics.
+""",
+),
+
+Variable(
+    abivarname="spin_mag_field@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,0],
+    mnemonics="SPIN Magnetic Field",
+    text="""
+External magnetic field. Unit: Tesla.
+""",
+),
+
+
+Variable(
+    abivarname="spin_nctime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN NetCdf write per number of TIME steps",
+    text="""
+Write spin into netcdf file in every spin_nctime of spin dynamics time steps.
+""",
+),
+
+Variable(
+    abivarname="spin_ntime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN dynamics total Number of TIME steps",
+    text="""
+Total number of spin dynamics time  steps.
+""",
+),
+
+
+Variable(
+    abivarname="spin_qpoint@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions=[3],
+    defaultval=[0,0,0],
+    mnemonics="SPIN QPOINT",
+    text="""
+Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp(i q \cdot R_i)$. The unit is the reciprocal lattice vectors of the unitcell.
+""",
+),
+
+
+
+Variable(
+    abivarname="spin_temperature@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=325,
+    mnemonics="SPIN TEMPERATURE",
+    text="""
+Temperature of spin for spin dynamics. Unit: Kelvin.
+Default value: 325.
+""",
+),
+
 ]
+
+
+

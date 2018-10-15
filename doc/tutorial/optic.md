@@ -270,6 +270,8 @@ Copy the files *toptic_4.files* and *toptic_4.in* in *Work_optic*:
     cp ../toptic_4.files .
     cp ../toptic_4.in .
 
+{% dialog tests/tutorespfn/Input/toptic_4.files tests/tutorespfn/Input/toptic_4.in %}
+
 Examine the *toptic_4.in* file: only the linear optic spectra will be built.
 
 When you have read the input file, you can run the code, as usual using the following command

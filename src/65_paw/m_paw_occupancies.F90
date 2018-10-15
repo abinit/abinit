@@ -281,11 +281,7 @@ CONTAINS  !=====================================================================
 ! only proc using correlated band have to do this
          do ibc1=1,nbandc1
            proc_sender = paw_dmft%bandc_proc(ibc1)
-           if(proc_sender /= mpi_enreg%me_band) then
-             ! recv from proc_sender
-             ierr = 0
-             call xmpi_irecv(buffer_cprj_correl(:,:,ibc1,ikpt,isppol),proc_sender,10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,req_correl(ibc1,ikpt,isppol),ierr)
-           else
+           if(proc_sender == mpi_enreg%me_band) then
 
 !            get the index of band local to this proc
              ib1 = paw_dmft%include_bands(ibc1)
@@ -305,12 +301,42 @@ CONTAINS  !=====================================================================
              call pawcprj_pack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1,ikpt,isppol))
              do proc_recver=0,mpi_enreg%nproc_band-1
                if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
-                 ! send to proc_recver
-                 ierr = 0
-                 call xmpi_isend(buffer_cprj_correl(:,:,ibc1,ikpt,isppol),proc_recver,10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,req_correl(ibc1,ikpt,isppol),ierr)
+!                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd 
+                 locc_test = .false.
+                 do ib_loop=1,nbandc1
+                   if(proc_recver == paw_dmft%bandc_proc(ib_loop)) then
+                     ib = paw_dmft%include_bands(ib_loop)
+                     locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
+&                                                abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8)
+                   end if
+                 end do
+                 if(locc_test) then
+                   ! send to proc_recver
+                   ierr = 0
+                   call xmpi_isend(buffer_cprj_correl(:,:,ibc1,ikpt,isppol),proc_recver,&
+&                                  10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,&
+&                                  req_correl(ibc1,ikpt,isppol),ierr)
+                 end if
                end if
              end do
-
+           else
+!            locc_test = At least one of the bands used by this proc have a non neglectable occnd 
+             locc_test = .false.
+             do ib_loop=1,nbandc1
+               if(mpi_enreg%me_band == paw_dmft%bandc_proc(ib_loop)) then
+                 ib = paw_dmft%include_bands(ib_loop)
+                 ib1 = paw_dmft%include_bands(ibc1)
+                 locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
+&                                            abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8)
+               end if
+             end do
+             if(locc_test) then
+               ! recv from proc_sender
+               ierr = 0
+               call xmpi_irecv(buffer_cprj_correl(:,:,ibc1,ikpt,isppol),proc_sender,&
+&                              10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,&
+&                              req_correl(ibc1,ikpt,isppol),ierr)
+             end if
            end if
          end do
        end if
