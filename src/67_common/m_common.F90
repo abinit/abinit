@@ -192,7 +192,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,parameter :: master=0
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs
  integer,save :: ttolwfr
- integer :: iatom,iband,iexit,ikpt,ishift,isppol,my_rank,
+ integer :: iatom,iband,iexit,ikpt,ishift,isppol,my_rank 
  integer :: nband_index,nband_k,nnsclohf
  integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
