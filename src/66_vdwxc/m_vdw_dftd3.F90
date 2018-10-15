@@ -409,7 +409,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
          do ia=1,size(index_c6)
            do ja=1,size(index_c6)
              if (index_c6(ia)==indi.and.index_c6(ja)==indj) then
-               nline = ia*(ia-1)/2 + ja
+               if (ia>=ja)then
+                 nline = ia*(ia-1)/2 + ja
+               else
+                 nline = ja*(ja-1)/2 + ia
+               endif
                vdw_c6ref(itypat,jtypat,refi,refj) = vdw_dftd3_c6(nline)
                vdw_c6ref(jtypat,itypat,refj,refi) = vdw_dftd3_c6(nline)
                found = .false.
