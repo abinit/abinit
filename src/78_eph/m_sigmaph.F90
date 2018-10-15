@@ -157,6 +157,9 @@ module m_sigmaph
   integer :: mpw
   ! Maximum number of PWs for all possible k+q
 
+  integer :: bcorr = 0
+  ! 1 to include Blochl correction in tetrahedron method else 0.
+
   integer :: ntheta, nphi
   !integer :: ndvis(3)=3
 
@@ -1467,7 +1470,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        !  do iq_ibz=1,sigma%nqibz_k
        !    do ib_k=1,nbcalc_ks
        !        vals_ibz_k = sigma%gf_nnuq(ib_k, nu, :, ii)
-       !        call tetra_get_onewk(sigma%ephwg%tetra_k, iq_ibz, bcorr0, sigma%gfw_nomega, sigma%nqibz_k, vals_ibz_k, &
+       !        call tetra_get_onewk(sigma%ephwg%tetra_k, iq_ibz, sigma%bcorr, sigma%gfw_nomega, sigma%nqibz_k, vals_ibz_k, &
        !          sigma%gfw_mesh(1), sigma%gfw_mesh(sigma%gfw_nomega), max_occ1, dt_weights)
        !        sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
        !          sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dt_weights(:, 1)  ! sigma%wtq_k(iq_ibz) *
@@ -1650,19 +1653,21 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop !,band_ks
  integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz
  integer :: isym_k, trev_k
- integer :: ip,npoints,skw_cplex
+ integer :: ip,npoints,skw_cplex, edos_intmeth
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
  logical :: downsample
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
+ real(dp) :: edos_step, edos_broad
  character(len=500) :: wfk_fname_dense
  real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
  character(len=500) :: msg
  logical :: changed,found,isirr_k
+ character(len=fnlen) :: path
  type(ebands_t) :: tmp_ebands, ebands_dense
  type(gaps_t) :: gaps
- !type(edos_t) :: edos
+ type(edos_t) :: edos
 !arrays
  integer :: intp_kptrlatt(3,3), g0_k(3), skw_band_block(2)
  integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
@@ -2207,8 +2212,18 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  ! Compute electron DOS with tetra.
- !edos = ebands_get_edos(ebands, cryst, 2, omega_step, zero, comm)
- !call edos_free(edos)
+ edos_intmeth = 2; if (new%bcorr == 1) edos_intmeth = 3
+ if (dtset%prtdos == 1) edos_intmeth = 1
+ edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ !edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+ edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
+ if (my_rank == master) then
+   path = strcat(dtfil%filnam_ds(4), "_EDOS")
+   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+   call edos_write(edos, path)
+   call edos_print(edos, unit=std_out)
+   !call edos_print(edos, unit=ab_out)
+ end if
 
  ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
@@ -2220,7 +2235,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   !NCF_CHECK(edos_ncwrite(edos, ncid))
+   NCF_CHECK(edos_ncwrite(edos, ncid))
 
    ! Add sigma_eph dimensions.
    ncerr = nctk_def_dims(ncid, [ &
@@ -2346,11 +2361,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
- ! Now reopen the file (not xmpi_comm_self --> only master writes)
+ ! Now reopen the file (note xmpi_comm_self --> only master writes)
  call xmpi_barrier(comm)
  NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
+
+ call edos_free(edos)
 
 end function sigmaph_new
 !!***
@@ -3050,7 +3067,6 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: bcorr0=0
  integer :: nu, band_ks, ibsum_kq, ik_ibz, ib_k, bstart_ks, nbcalc_ks, my_rank, natom3, ierr
  integer :: nprocs,this_calc
  real(dp) :: eig0nk, eminmax(2)
@@ -3082,7 +3098,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
       eminmax(1) = eig0nk - 0.01
       eminmax(2) = eig0nk + 0.01
-      call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, bcorr0, tmp_deltaw_pm, xmpi_comm_self)
+      call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, xmpi_comm_self)
       ! we pay the efficiency here
       sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) )
       sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) )

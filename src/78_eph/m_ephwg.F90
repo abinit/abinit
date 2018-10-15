@@ -417,9 +417,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call destroy_tetra(self%tetra_k)
  call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
- if (ierr /= 0) then
-   MSG_ERROR(errorstring)
- end if
+ ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
 
 end subroutine ephwg_setup_kpoint
@@ -611,8 +609,7 @@ end subroutine ephwg_get_dweights
 !! ephwg_zinv_weights
 !!
 !! FUNCTION
-!! Compute weights
-!! for a given (kpoint, qpoint, spin) for all phonon modes.
+!! Compute weights for a given (kpoint, qpoint, spin) for all phonon modes.
 !!
 !! INPUTS
 !! qpt(3)

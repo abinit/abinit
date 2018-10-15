@@ -180,23 +180,13 @@ subroutine fstab_free(fstab)
  !@fstab_t
 
  ! integer
- if (allocated(fstab%istg0)) then
-   ABI_FREE(fstab%istg0)
- end if
- if (allocated(fstab%bstcnt_ibz)) then
-   ABI_FREE(fstab%bstcnt_ibz)
- end if
+ ABI_SFREE(fstab%istg0)
+ ABI_SFREE(fstab%bstcnt_ibz)
 
  ! real
- if (allocated(fstab%kpts)) then
-   ABI_FREE(fstab%kpts)
- end if
- if (allocated(fstab%tetra_wtk)) then
-   ABI_FREE(fstab%tetra_wtk)
- end if
- if (allocated(fstab%tetra_wtk_ene)) then
-   ABI_FREE(fstab%tetra_wtk_ene)
- end if
+ ABI_SFREE(fstab%kpts)
+ ABI_SFREE(fstab%tetra_wtk)
+ ABI_SFREE(fstab%tetra_wtk_ene)
 
  ! types
  call destroy_kptrank(fstab%krank)
@@ -775,8 +765,6 @@ end subroutine fstab_print
 !! SOURCE
 
 subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
-
- use m_kptrank
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

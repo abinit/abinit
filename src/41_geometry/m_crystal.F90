@@ -497,58 +497,26 @@ subroutine crystal_free(Cryst)
  !@crystal_t
 
 !integer
- if (allocated(Cryst%indsym))  then
-   ABI_FREE(Cryst%indsym)
- end if
- if (allocated(Cryst%symafm))  then
-   ABI_FREE(Cryst%symafm)
- end if
- if (allocated(Cryst%symrec))  then
-   ABI_FREE(Cryst%symrec)
- end if
- if (allocated(Cryst%symrel))  then
-   ABI_FREE(Cryst%symrel)
- end if
- if (allocated(Cryst%atindx))  then
-   ABI_FREE(Cryst%atindx)
- end if
- if (allocated(Cryst%atindx1))  then
-   ABI_FREE(Cryst%atindx1)
- end if
- if (allocated(Cryst%typat  ))  then
-   ABI_FREE(Cryst%typat)
- end if
- if (allocated(Cryst%nattyp))  then
-   ABI_FREE(Cryst%nattyp)
- end if
+ ABI_SFREE(Cryst%indsym)
+ ABI_SFREE(Cryst%symafm)
+ ABI_SFREE(Cryst%symrec)
+ ABI_SFREE(Cryst%symrel)
+ ABI_SFREE(Cryst%atindx)
+ ABI_SFREE(Cryst%atindx1)
+ ABI_SFREE(Cryst%typat)
+ ABI_SFREE(Cryst%nattyp)
 
 !real
- if (allocated(Cryst%tnons))  then
-   ABI_FREE(Cryst%tnons)
- end if
- if (allocated(Cryst%xcart))  then
-   ABI_FREE(Cryst%xcart)
- end if
- if (allocated(Cryst%xred))  then
-   ABI_FREE(Cryst%xred)
- end if
- if (allocated(Cryst%zion))  then
-   ABI_FREE(Cryst%zion)
- end if
- if (allocated(Cryst%znucl))  then
-   ABI_FREE(Cryst%znucl)
- end if
- if (allocated(Cryst%amu))  then
-   ABI_FREE(Cryst%amu)
- end if
- if (allocated(Cryst%spinrot)) then
-    ABI_FREE(Cryst%spinrot)
- end if
+ ABI_SFREE(Cryst%tnons)
+ ABI_SFREE(Cryst%xcart)
+ ABI_SFREE(Cryst%xred)
+ ABI_SFREE(Cryst%zion)
+ ABI_SFREE(Cryst%znucl)
+ ABI_SFREE(Cryst%amu)
+ ABI_SFREE(Cryst%spinrot)
 
 !character
- if (allocated(Cryst%title))  then
-   ABI_FREE(Cryst%title)
- end if
+ ABI_SFREE(Cryst%title)
 
  DBG_EXIT("COLL")
 

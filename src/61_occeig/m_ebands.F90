@@ -420,22 +420,14 @@ subroutine gaps_free(gaps)
  !@gaps_t
 
 !integer
- if (allocated(gaps%fo_kpos)) then
-   ABI_FREE(gaps%fo_kpos)
- end if
- if (allocated(gaps%ierr)) then
-   ABI_FREE(gaps%ierr)
- end if
+ ABI_SFREE(gaps%fo_kpos)
+ ABI_SFREE(gaps%ierr)
 
 !real
- if (allocated(gaps%fo_values)) then
-   ABI_FREE(gaps%fo_values)
- end if
+ ABI_SFREE(gaps%fo_values)
 
 !chars
- if (allocated(gaps%errmsg_spin)) then
-   ABI_FREE(gaps%errmsg_spin)
- end if
+ ABI_SFREE(gaps%errmsg_spin)
 
 ! nullify pointers
  nullify(gaps%kpoints)
@@ -598,12 +590,6 @@ subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
 !End of the abilint section
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -836,7 +822,6 @@ end function ebands_from_dtset
 !!
 !! OUTPUT
 !!  Deallocate the dynamic arrays in the ebands_t type.
-!!  (only deallocate)
 !!
 !! PARENTS
 !!      bethe_salpeter,dfpt_looppert,eig2tot,elphon,eph,fold2Bloch,gstate
@@ -865,44 +850,18 @@ subroutine ebands_free(ebands)
  type(ebands_t),intent(inout) :: ebands
 ! *************************************************************************
 
- DBG_ENTER("COLL")
+ ABI_SFREE(ebands%istwfk)
+ ABI_SFREE(ebands%nband)
+ ABI_SFREE(ebands%npwarr)
+ ABI_SFREE(ebands%kptns)
+ ABI_SFREE(ebands%eig)
+ ABI_SFREE(ebands%lifetime)
+ ABI_SFREE(ebands%occ)
+ ABI_SFREE(ebands%doccde)
+ ABI_SFREE(ebands%wtk)
 
- if (allocated(ebands%istwfk)) then
-   ABI_FREE(ebands%istwfk)
- end if
- if (allocated(ebands%nband)) then
-   ABI_FREE(ebands%nband)
- end if
- if (allocated(ebands%npwarr)) then
-   ABI_FREE(ebands%npwarr)
- end if
- if (allocated(ebands%kptns)) then
-   ABI_FREE(ebands%kptns)
- end if
- if (allocated(ebands%eig)) then
-   ABI_FREE(ebands%eig)
- end if
- if (allocated(ebands%lifetime)) then
-   ABI_FREE(ebands%lifetime)
- end if
- if (allocated(ebands%occ)) then
-   ABI_FREE(ebands%occ)
- end if
- if (allocated(ebands%doccde)) then
-   ABI_FREE(ebands%doccde)
- end if
- if (allocated(ebands%wtk)) then
-   ABI_FREE(ebands%wtk)
- end if
-
- if (allocated(ebands%shiftk_orig)) then
-   ABI_FREE(ebands%shiftk_orig)
- end if
- if (allocated(ebands%shiftk)) then
-   ABI_FREE(ebands%shiftk)
- end if
-
- DBG_EXIT("COLL")
+ ABI_SFREE(ebands%shiftk_orig)
+ ABI_SFREE(ebands%shiftk)
 
 end subroutine ebands_free
 !!***
@@ -3125,6 +3084,7 @@ end function ebands_ncwrite_path
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
 !!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
+!!    If nkpt == 1 (Gamma only), the routine fallbacks to gaussian method.
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
@@ -3177,7 +3137,12 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  ierr = 0
 
- edos%nkibz = ebands%nkpt; edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
+ edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol
+ edos%intmeth = intmeth
+ if (ebands%nkpt == 1) then
+   MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
+   edos%intmeth = 1
+ end if
 
  edos%broad = broad; edos%step = step
  if (broad <= tol16 .or. step <= tol16) then
@@ -3201,7 +3166,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
  ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
 
- select case (intmeth)
+ select case (edos%intmeth)
  case (1)
    ! Gaussian
    ABI_MALLOC(wme0, (nw))
@@ -3343,18 +3308,10 @@ subroutine edos_free(edos)
 
  !@edos_t
 !real
- if (allocated(edos%mesh)) then
-   ABI_FREE(edos%mesh)
- end if
- if (allocated(edos%dos)) then
-   ABI_FREE(edos%dos)
- end if
- if (allocated(edos%idos)) then
-   ABI_FREE(edos%idos)
- end if
- if (allocated(edos%gef)) then
-   ABI_FREE(edos%gef)
- end if
+ ABI_SFREE(edos%mesh)
+ ABI_SFREE(edos%dos)
+ ABI_SFREE(edos%idos)
+ ABI_SFREE(edos%gef)
 
 end subroutine edos_free
 !!***
@@ -3463,6 +3420,8 @@ end subroutine edos_write
 !! INPUTS
 !!  edos<edos_t>=DOS container
 !!  ncid=NC file handle.
+!!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
+!!   Empty string if not specified.
 !!
 !! OUTPUT
 !!  ncerr= netcdf exit status.
@@ -3473,7 +3432,7 @@ end subroutine edos_write
 !!
 !! SOURCE
 
-integer function edos_ncwrite(edos, ncid) result(ncerr)
+integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3487,39 +3446,54 @@ integer function edos_ncwrite(edos, ncid) result(ncerr)
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
  type(edos_t),intent(in) :: edos
+ character(len=*),optional,intent(in) :: prefix
+
+!Local variables-------------------------------
+ character(len=500) :: prefix_
+
+! *************************************************************************
+
+ prefix_ = ""; if (present(prefix)) prefix_ = trim(prefix)
 
 #ifdef HAVE_NETCDF
  ! Define dimensions.
  ncerr = nctk_def_dims(ncid, [ &
-   nctkdim_t("nsppol_plus1", edos%nsppol + 1), nctkdim_t("edos_nw", edos%nw)], defmode=.True.)
+   nctkdim_t("nsppol_plus1", edos%nsppol + 1), nctkdim_t("edos_nw", edos%nw)], defmode=.True., prefix=prefix_)
  NCF_CHECK(ncerr)
 
  ! Define variables
- NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "edos_intmeth", "edos_nkibz", "edos_ief"]))
- NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "edos_broad"]))
+ NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "edos_intmeth", "edos_nkibz", "edos_ief"], prefix=prefix_))
+ NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "edos_broad"], prefix=prefix_))
 
  ncerr = nctk_def_arrays(ncid, [ &
    nctkarr_t("edos_mesh", "dp", "edos_nw"), &
    nctkarr_t("edos_dos", "dp", "edos_nw, nsppol_plus1"), &
    nctkarr_t("edos_idos", "dp", "edos_nw, nsppol_plus1"), &
    nctkarr_t("edos_gef", "dp", "nsppol_plus1") &
- ])
+ ],  prefix=prefix_)
  NCF_CHECK(ncerr)
 
  ! Write data.
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_intmeth"), edos%intmeth))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_nkibz"), edos%nkibz))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_ief"), edos%ief))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_broad"), edos%broad))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_mesh"), edos%mesh))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_dos"), edos%dos))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_idos"), edos%idos))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "edos_gef"), edos%gef))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_intmeth")), edos%intmeth))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_nkibz")), edos%nkibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_ief")), edos%ief))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_broad")), edos%broad))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_mesh")), edos%mesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_dos")), edos%dos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_idos")), edos%idos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_gef")), edos%gef))
 
 #else
  MSG_ERROR("netcdf library not available")
 #endif
+
+contains
+  pure function pre(istr) result(ostr)
+    character(len=*),intent(in) :: istr
+    character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
+    ostr = trim(prefix_) // trim(istr)
+  end function pre
 
 end function edos_ncwrite
 !!***
@@ -3569,7 +3543,7 @@ subroutine edos_print(edos, unit)
  unt = std_out; if (present(unit)) unt = unit
 
  write(unt,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief)*Ha_eV," [eV]"
- write(unt,"(a,es16.8)")" Total electron DOS in states/eV : ",edos%gef(0) / Ha_eV
+ write(unt,"(a,es16.8)")" Total electron DOS at Fermi level in states/eV : ",edos%gef(0) / Ha_eV
  if (edos%nsppol == 2) then
    write(unt,"(a,es16.8)")"   Spin up:  ",edos%gef(1) / Ha_eV
    write(unt,"(a,es16.8)")"   Spin down:",edos%gef(2) / Ha_eV
@@ -5124,9 +5098,7 @@ end subroutine ebands_prtbltztrp
 !! SOURCE
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
-&       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, &
-&       rprimd, symrel, tau_k)
-
+       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
