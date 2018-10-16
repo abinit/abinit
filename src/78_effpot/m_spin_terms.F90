@@ -281,7 +281,7 @@ contains
 
     class(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: mode
-    real(dp), intent(in) :: k1, k1dir
+    real(dp), intent(in) :: k1, k1dir(3)
     real(dp) :: k1_tmp(self%nspins), k1dir_tmp(3, self%nspins)
     integer :: i
     ! Add
@@ -290,7 +290,7 @@ contains
        ! mode 2, override. If spin_sia_add==2, then the sia is not set from xml file.
        k1_tmp(:)=k1
        do i=1, self%nspins
-          k1dir_tmp(:,i)=k1dir
+          k1dir_tmp(:,i)=k1dir(:)
        end do
        call spin_terms_t_set_uniaxial_MCA(self, k1_tmp, k1dir_tmp)
     endif

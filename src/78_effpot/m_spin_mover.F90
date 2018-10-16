@@ -60,7 +60,7 @@ module m_spin_mover
   
   type spin_mover_t
      integer :: nspins
-     real(dp) :: dt, total_time, temperature
+     real(dp) :: dt, total_time, temperature, pre_time
      !CONTAINS
      !   procedure :: initialize => spin_mover_t_initialize
      !   procedure :: run_one_step => spin_mover_t_run_one_step
@@ -89,7 +89,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature)
+  subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature, pre_time)
     !class (spin_mover_t):: self
 
 !This section has been created automatically by the script Abilint (TD).
@@ -99,10 +99,11 @@ contains
 !End of the abilint section
 
     type(spin_mover_t), intent(inout) :: self
-    real(dp), intent(in) :: dt, total_time, temperature
+    real(dp), intent(in) :: dt, total_time, pre_time,temperature
     integer, intent(in) :: nspins
     self%nspins=nspins
     self%dt=dt
+    self%pre_time=pre_time
     self%total_time=total_time
     self%temperature=temperature
   end subroutine spin_mover_t_initialize
@@ -247,6 +248,30 @@ contains
     write(std_out,*) msg
     write(ab_out, *) msg
 
+    msg="Prerun:"
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
+    do while(t<self%pre_time)
+       counter=counter+1
+       call spin_mover_t_run_one_step(self, calculator, hist)
+       call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
+       if(mod(counter, hist%spin_nctime)==0) then
+          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), hist%Snorm(:,hist%ihist_prev))
+          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
+               & ob%Mst_norm_total/ob%Snorm_total, &
+               & hist%etot(hist%ihist_prev)/Ha_J
+          write(std_out,*) msg
+          write(ab_out, *) msg
+       endif
+       t=t+self%dt
+    end do
+
+    msg="Prerun:"
+    write(std_out,*) msg
+    write(ab_out, *) msg
+
+    counter=0
     do while(t<self%total_time)
        counter=counter+1
        call spin_mover_t_run_one_step(self, calculator, hist)

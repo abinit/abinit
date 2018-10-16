@@ -875,6 +875,21 @@ Total number of spin dynamics time  steps.
 
 
 Variable(
+    abivarname="spin_ntime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN dynamics total Number of TIME steps for PREparing",
+    text="""
+Total number of spin dynamics time  steps for preparing the system.
+The results of these time step are not written to trajectory spinhist.nc file,
+0nd they are not used for calculating the observables.
+""",
+),
+
+Variable(
     abivarname="spin_qpoint@multibinit",
     varset="multibinit",
     vartype="real",
@@ -898,7 +913,7 @@ Variable(
     mnemonics="SPIN Single Ion Anistropy ADD",
     text="""
 Add single ion anistropy term to the spin model hamiltonian.
-with user defined values (see [[multibinit:spin_sia_k1]] and [[multibinit:spin_sia_k1_dir]].
+with user defined values (see [[multibinit:spin_sia_k1amp]] and [[multibinit:spin_sia_k1dir]].
 * 0 --> Do not add, use the term defined in the spin model xml file.
 * 1 --> Override the term in spin model xml file.
 * 2 --> Add to the value defined in spin model xml file.
@@ -908,15 +923,15 @@ Default value: 0.
 
 
 Variable(
-    abivarname="spin_sia_k1@multibinit",
+    abivarname="spin_sia_k1amp@multibinit",
     varset="multibinit",
     vartype="real",
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=0.0,
-    mnemonics="SPIN Single Ion Anistropy K1",
+    mnemonics="SPIN Single Ion Anistropy K1 AMPtitude",
     text="""
-User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_override]] is not 0.
+User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
 The direction is defined with [[multibinit:spin_sia_k1dir]].
 Default value: 0.0.
 """,
@@ -930,10 +945,10 @@ Variable(
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions="[3]",
     defaultval=[0.0,0.0,1.0],
-    mnemonics="SPIN Single Ion Anistropy K1DIR",
+    mnemonics="SPIN Single Ion Anistropy K1 DIRection",
     text="""
-User defined direction of single ion anistropy. Only used when [[multibinit:spin_sia_override]] is not 0.
-It will be automatically normalized to 1.0.  The amplitude is defined with [[multibinit:spin_sia_k1]].
+User defined direction of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
+It will be automatically normalized to 1.0.  The amplitude is defined with [[multibinit:spin_sia_k1amp]].
 Default value: [0.0, 0.0,1.0].
 """,
 ),

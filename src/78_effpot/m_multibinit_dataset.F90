@@ -131,6 +131,7 @@ module m_multibinit_dataset
   integer :: spin_dynamics
   integer :: spin_init_state
   integer :: spin_nctime
+  integer :: spin_ntime_pre
   integer :: spin_ntime
   integer :: spin_nmatom !TODO hexu: is it needed?
   integer :: spin_n1l
@@ -164,7 +165,7 @@ module m_multibinit_dataset
   ! TODO hexu:add parameters for spin
   real(dp) :: spin_dt
   real(dp) :: spin_damping
-  real(dp) :: spin_sia_k1
+  real(dp) :: spin_sia_k1amp
   real(dp) :: spin_temperature
   ! TODO hexu: add spin convergence tol. (or remove it)
   real(dp) :: spin_temperature_start   ! var temperature start
@@ -345,6 +346,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%spin_dipdip=0
  multibinit_dtset%spin_dynamics=1
  multibinit_dtset%spin_init_state=1
+ multibinit_dtset%spin_ntime_pre=0
  multibinit_dtset%spin_ntime=10000
  multibinit_dtset%spin_nctime=100
  multibinit_dtset%spin_nmatom=0
@@ -355,7 +357,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
  multibinit_dtset%spin_damping=-1.0
  multibinit_dtset%spin_sia_add=0
- multibinit_dtset%spin_sia_k1=zero
+ multibinit_dtset%spin_sia_k1amp=zero
 multibinit_dtset%spin_temperature=325
 multibinit_dtset%spin_temperature_start=0.0
 multibinit_dtset%spin_temperature_end= 0.0
@@ -1210,6 +1212,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
          &   'Action: correct spin_nctime in your input file.'
     MSG_ERROR(message)
  end if
+ 
+ multibinit_dtset%spin_ntime_pre=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_ntime_pre',tread,'INT')
+ if(tread==1) multibinit_dtset%spin_ntime_pre=intarr(1)
+ if(multibinit_dtset%spin_ntime_pre<0)then
+    write(message, '(a,i0,a,a,a)' )&
+         &   'spin_ntime_pre is',multibinit_dtset%spin_ntime_pre,', which is lower than 0 .',ch10,&
+         &   'Action: correct spin_ntime_pre in your input file.'
+    MSG_ERROR(message)
+ end if
+
 
 
  multibinit_dtset%spin_ntime=10000
@@ -1266,16 +1279,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- multibinit_dtset%spin_sia_k1=0.0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1',tread,'DPR')
- if(tread==1) multibinit_dtset%spin_sia_k1=dprarr(1)
- if(multibinit_dtset%spin_sia_k1<0)then
-    write(message, '(a,f10.1,a,a,a,a,a)' )&
-         &   'spin_sia_k1 is ',multibinit_dtset%spin_sia_k1,'. The only allowed values',ch10,&
-         &   'are non-negative values.',ch10,&
-         &   'Action: correct spin_sia_k1 in your input file.'
-    MSG_ERROR(message)
- end if
+ multibinit_dtset%spin_sia_k1amp=0.0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1amp',tread,'DPR')
+ if(tread==1) multibinit_dtset%spin_sia_k1amp=dprarr(1)
 
  multibinit_dtset%spin_sia_k1dir(:)= [0.0,0.0,1.0]
  if(3>marr)then
@@ -2225,6 +2231,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(12x,a16,I12.1)')'spin_dynamics',multibinit_dtset%spin_dynamics
     write(nunit,'(10x, a18, 5x, F10.5)')'spin_temperature',multibinit_dtset%spin_temperature
     write(nunit,'(10x, a18, 5x, F10.5)')'spin_damping',multibinit_dtset%spin_damping
+    write(nunit,'(9x,a19,I10.1)')'spin_ntime_pre',multibinit_dtset%spin_ntime_pre
     write(nunit,'(13x,a15,I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
     write(nunit,'(13x,a15,3I10)')  'ncell',multibinit_dtset%ncell !TODO hexu: duplicate but dynamics can be 0.
     write(nunit,'(13x,a15,ES15.5, a8)')  'spin_dt',multibinit_dtset%spin_dt*Time_Sec , ' second' !TODO: use a.u.
@@ -2233,7 +2240,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(13x,a15)')   'spin_mag_field'
     write(nunit,'(31x,3es12.5)')   (multibinit_dtset%spin_mag_field(ii),ii=1,3)
     write(nunit, '(13x, a15, I12.1)') 'spin_sia_add', multibinit_dtset%spin_sia_add
-    write(nunit, '(13x, a15, ES15.5)') 'spin_sia_k1', multibinit_dtset%spin_sia_k1
+    write(nunit, '(13x, a15, ES15.5)') 'spin_sia_k1amp', multibinit_dtset%spin_sia_k1amp
     write(nunit, '(13x, a15, 3ES15.5)') 'spin_sia_k1dir', (multibinit_dtset%spin_sia_k1dir(ii), ii=1,3)
     write(nunit,'(13x,a15)')   'spin_qpoint'
     write(nunit,'(28x,3es12.5)')   (multibinit_dtset%spin_qpoint(ii),ii=1,3)

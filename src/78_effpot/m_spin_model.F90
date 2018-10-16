@@ -49,7 +49,8 @@ module m_spin_model
   use m_xmpi
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spin_terms, only: spin_terms_t, spin_terms_t_finalize, spin_terms_t_set_external_hfield
+  use m_spin_terms, only: spin_terms_t, spin_terms_t_finalize, &
+       & spin_terms_t_set_external_hfield, spin_terms_t_add_SIA
   use m_spin_model_primitive, only: spin_model_primitive_t, &
        & spin_model_primitive_t_initialize, &
        & spin_model_primitive_t_print_terms, &
@@ -221,7 +222,8 @@ contains
 
     !call self%spin_mover%initialize(self%nspins, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
-         &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature)
+         &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature, &
+         & pre_time=self%params%spin_dt*self%params%spin_ntime_pre)
 
     call ob_initialize(self%spin_ob, self%spin_calculator, self%params)
 
@@ -310,6 +312,11 @@ contains
       mfield(:, i)=self%params%spin_mag_field(:)
     end do
     call spin_terms_t_set_external_hfield(self%spin_calculator, mfield)
+
+    if (self%params%spin_sia_add /= 0 ) then
+       call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
+          &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
+    end if
     ! params -> hist
 
   end subroutine spin_model_t_set_params
