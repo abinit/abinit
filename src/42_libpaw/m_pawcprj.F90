@@ -1148,19 +1148,19 @@ end subroutine pawcprj_output
 !! pawcprj_get
 !!
 !! FUNCTION
-!! Read the cprj for a given k-point from memory or from a temporary file
+!! Read the cprj_k for a given k-point from memory in cprj or from a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=input cprj (used if mkmem/=0)
 !!  dimcp=first dimension of cprj_k,cprj arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
 !!  [icpgr]= (optional argument) if present, only component icpgr of
 !!           input cprj gradient is copied into output cprj
 !!           Not used if cprj(:,:)%ncpgr<icpgr (mkmem>0)
 !!                    or ncpgr(optional)<icpgr (mkmem=0)
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during reading, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted=>unsorted)
@@ -1388,15 +1388,15 @@ end subroutine pawcprj_get
 !! pawcprj_put
 !!
 !! FUNCTION
-!! Write the cprj for a given set of (n,k) into memory or into a temporary file
+!! Write cprj_k for a given set of (n,k) into memory in cprj, or into a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= input cprj datastructure
 !!  dimcp=first dimension of cprj_k,cprjnk arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during writing, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted->unsorted)
