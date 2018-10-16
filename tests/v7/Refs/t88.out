@@ -473,7 +473,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Fermi level:   7.16066825E+00 [eV]
- Total electron DOS in states/eV :   3.22193685E-01
+ Total electron DOS at Fermi level in states/eV :   3.22193685E-01
 - Writing electron DOS to file: t88o_DS1_EDOS
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
@@ -692,7 +692,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Fermi level:   7.16066825E+00 [eV]
- Total electron DOS in states/eV :   3.22193685E-01
+ Total electron DOS at Fermi level in states/eV :   3.22193685E-01
 - Writing electron DOS to file: t88o_DS2_EDOS
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
@@ -1158,7 +1158,7 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
  Fermi level:   7.16066825E+00 [eV]
- Total electron DOS in states/eV :   3.22193685E-01
+ Total electron DOS at Fermi level in states/eV :   3.22193685E-01
 - Writing electron DOS to file: t88o_DS4_EDOS
 
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00

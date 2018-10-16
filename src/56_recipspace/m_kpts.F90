@@ -580,6 +580,7 @@ end function symkchk
 subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
                   use_symrec) ! optional
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
