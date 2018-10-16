@@ -32,6 +32,7 @@ module m_mlwfovlp_qp
  use defs_wannier90
  use m_errors
  use m_abicore
+ use m_xmpi
 
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
@@ -206,7 +207,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  ! Compute k points from gw irreducible set equivalent to full-zone wannier set
  sppoldbl=1 ; timrev=1 ; my_nspinor=max(1,Dtset%nspinor/MPI_enreg%nproc_spinor)
  call listkk(dksqmax,gmet,indkk,dtset%kptgw,dtset%kpt,dtset%nkptgw,nkpt,&
-&  dtset%nsym,sppoldbl,dtset%symafm,dtset%symrel,timrev)
+&  dtset%nsym,sppoldbl,dtset%symafm,dtset%symrel,timrev,xmpi_comm_self)
 
  if (dksqmax>tol8) then
    write(msg,'(5a)')&
@@ -238,7 +239,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  ABI_MALLOC(ibz2bz,(nkibz,6))
  call listkk(dksqmax,gmet,ibz2bz,dtset%kpt,dtset%kptgw,nkpt,dtset%nkptgw,&
-&  dtset%nsym,sppoldbl,dtset%symafm,dtset%symrel,timrev)
+&  dtset%nsym,sppoldbl,dtset%symafm,dtset%symrel,timrev,xmpi_comm_self)
 
  ltest=ALL(ibz2bz(:,2)==1)
  ABI_CHECK(ltest,'Not able to found irreducible points in the BZ set!')

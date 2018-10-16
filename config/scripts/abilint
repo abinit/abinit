@@ -130,6 +130,7 @@ abilint [options] <source> <dest>
 
 #Operating System (used for os.path)
 import os
+import io
 #filename match as Unix shell
 import fnmatch
 #stderr and stdout
@@ -544,6 +545,7 @@ class Project:
                     break
         self.files[fullname] = File_Class(file,dir=dir,read_only=read_only,message=self.message)
         if not create:
+            print("fullname", fullname)
             self.files[fullname].read()
         #Return the File instance
         return self.files[fullname]
@@ -1339,7 +1341,9 @@ class File(Structure):
     def read(self,fd=None):
         "Read the file."
         if fd == None:
-            fd = open("%s/%s" % (self.dir,self.name))
+            #fd = open("%s/%s" % (self.dir,self.name), "rt")
+            fd = io.open("%s/%s" % (self.dir,self.name), 'rt', encoding="utf8")
+
         #Time stamp i.e. the time of the last modification
         self.timestamp = os.path.getmtime(fd.name)
         #We ban \r !!

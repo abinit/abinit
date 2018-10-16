@@ -409,14 +409,13 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    close(hreso_unt)
 
-
    if (do_ep_renorm) then
      write(std_out,'(a)') "Mapping kpts from bse to eph"
      sppoldbl = 1 !; if (any(Cryst%symafm == -1) .and. Epren%nsppol == 1) nsppoldbl=2
      ABI_MALLOC(bs2eph, (Kmesh%nbz*sppoldbl, 6))
      timrev = 1
      call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, Kmesh%bz, Epren%nkpt, Kmesh%nbz, Cryst%nsym, &
-&       sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
+        sppoldbl, Cryst%symafm, Cryst%symrel, timrev, xmpi_comm_self, use_symrec=.False.)
    end if
 
    do itemp = 1, ntemp

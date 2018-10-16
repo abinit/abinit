@@ -390,18 +390,18 @@ subroutine eph_double_grid_free(self)
 
  type(eph_double_grid_t) :: self
 
- ABI_FREE(self%weights_dense)
- ABI_FREE(self%bz2ibz_dense)
- ABI_FREE(self%kpts_coarse)
- ABI_FREE(self%kpts_dense)
- ABI_FREE(self%kpts_dense_ibz)
- ABI_FREE(self%coarse_to_dense)
- ABI_FREE(self%dense_to_indexes)
- ABI_FREE(self%indexes_to_dense)
- ABI_FREE(self%coarse_to_indexes)
- ABI_FREE(self%indexes_to_coarse)
- ABI_FREE(self%bz2lgkibz)
- ABI_FREE(self%mapping)
+ ABI_SFREE(self%weights_dense)
+ ABI_SFREE(self%bz2ibz_dense)
+ ABI_SFREE(self%kpts_coarse)
+ ABI_SFREE(self%kpts_dense)
+ ABI_SFREE(self%kpts_dense_ibz)
+ ABI_SFREE(self%coarse_to_dense)
+ ABI_SFREE(self%dense_to_indexes)
+ ABI_SFREE(self%indexes_to_dense)
+ ABI_SFREE(self%coarse_to_indexes)
+ ABI_SFREE(self%indexes_to_coarse)
+ ABI_SFREE(self%bz2lgkibz)
+ ABI_SFREE(self%mapping)
 
 end subroutine eph_double_grid_free
 

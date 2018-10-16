@@ -430,59 +430,23 @@ subroutine phgamma_free(gams)
 
 ! *************************************************************************
 
- !@phgamma_t
-
- !integer
-
  !real
- if (allocated(gams%n0)) then
-   ABI_FREE(gams%n0)
- end if
- if (allocated(gams%qibz)) then
-   ABI_FREE(gams%qibz)
- end if
- if (allocated(gams%wtq)) then
-   ABI_FREE(gams%wtq)
- end if
- if (allocated(gams%qbz)) then
-   ABI_FREE(gams%qbz)
- end if
- if (allocated(gams%rpt)) then
-   ABI_FREE(gams%rpt)
- end if
- if (allocated(gams%wghatm)) then
-   ABI_FREE(gams%wghatm)
- end if
- if (allocated(gams%vals_qibz)) then
-   ABI_FREE(gams%vals_qibz)
- end if
- if (allocated(gams%vals_bz)) then
-   ABI_FREE(gams%vals_bz)
- end if
- if (allocated(gams%vals_rpt)) then
-   ABI_FREE(gams%vals_rpt)
- end if
- if (allocated(gams%vals_in_qibz)) then
-   ABI_FREE(gams%vals_in_qibz)
- end if
- if (allocated(gams%vals_in_bz)) then
-   ABI_FREE(gams%vals_in_bz)
- end if
- if (allocated(gams%vals_in_rpt)) then
-   ABI_FREE(gams%vals_in_rpt)
- end if
- if (allocated(gams%vals_out_qibz)) then
-   ABI_FREE(gams%vals_out_qibz)
- end if
- if (allocated(gams%vals_out_bz)) then
-   ABI_FREE(gams%vals_out_bz)
- end if
- if (allocated(gams%vals_out_rpt)) then
-   ABI_FREE(gams%vals_out_rpt)
- end if
- if (allocated(gams%vals_ee)) then
-   ABI_FREE(gams%vals_ee)
- end if
+ ABI_SFREE(gams%n0)
+ ABI_SFREE(gams%qibz)
+ ABI_SFREE(gams%wtq)
+ ABI_SFREE(gams%qbz)
+ ABI_SFREE(gams%rpt)
+ ABI_SFREE(gams%wghatm)
+ ABI_SFREE(gams%vals_qibz)
+ ABI_SFREE(gams%vals_bz)
+ ABI_SFREE(gams%vals_rpt)
+ ABI_SFREE(gams%vals_in_qibz)
+ ABI_SFREE(gams%vals_in_bz)
+ ABI_SFREE(gams%vals_in_rpt)
+ ABI_SFREE(gams%vals_out_qibz)
+ ABI_SFREE(gams%vals_out_bz)
+ ABI_SFREE(gams%vals_out_rpt)
+ ABI_SFREE(gams%vals_ee)
 
 end subroutine phgamma_free
 !!***
@@ -4525,7 +4489,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
        !g0_kq =  g0ibz_kq + g0bz_kq
 
        call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
-          1,cryst%symafm,cryst%symrel,timrev1,use_symrec=.False.)
+          1,cryst%symafm,cryst%symrel,timrev1,xmpi_comm_self,use_symrec=.False.)
 
        if (dksqmax > tol12) then
          write(msg, '(3a,es16.6,7a)' )&

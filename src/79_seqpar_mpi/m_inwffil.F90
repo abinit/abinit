@@ -393,7 +393,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 !  the pointer is ready to read the first wavefunction block.
 
 !  Compute k points from input file closest to the output file
-   call listkk(dksqmax,gmet0,indkk,kptns0,kptns,nkpt0,nkpt,nsym,sppoldbl,symafm,symrel,1)
+   call listkk(dksqmax,gmet0,indkk,kptns0,kptns,nkpt0,nkpt,nsym,sppoldbl,symafm,symrel,1,spaceComm)
 
  else if (restart==1) then ! direct restart
 

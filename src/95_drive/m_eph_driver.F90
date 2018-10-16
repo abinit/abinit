@@ -68,7 +68,7 @@ module m_eph_driver
  use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
- use m_ephwg,           only : ephwg_test
+ !use m_ephwg,           only : ephwg_test
  use m_pspini,          only : pspini
 
  implicit none
@@ -135,7 +135,7 @@ contains
 !!      ebands_print,ebands_prtbltztrp,ebands_set_fermie,ebands_set_scheme
 !!      ebands_update_occ,ebands_write,edos_free,edos_print,edos_write,eph_gkk
 !!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_mkphbs
-!!      ifc_outphbtrap,ifc_print,ifc_printbxsf,ifc_test_phinterp
+!!      ifc_outphbtrap,ifc_print,ifc_printbxsf
 !!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
 !!      phdos_free,phdos_ncwrite,phdos_print,phdos_print_thermo,print_ngfft
 !!      pspini,sigmaph,wfk_read_eigenvalues,wrtout,xmpi_bcast,xmpi_end
@@ -182,7 +182,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk,use_wfq,use_dvdb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,efmas_path,path,wfk_fname_dense
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
@@ -199,10 +199,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,allocatable :: dummy_atifc(:)
  integer :: count_wminmax(2)
  real(dp) :: wminmax(2)
- integer,allocatable :: indqq(:,:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dksqmax, dksqmin, dksqmean, maxfreq, error
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  real(dp),allocatable :: kpt_efmas(:,:)
@@ -245,7 +243,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  wfk0_path = dtfil%fnamewffk
  wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
- efmas_path = dtfil%fnameabi_efmas
  ! Use the ddb file as prefix if getdvdb or irddvb are not given in the input.
  dvdb_path = dtfil%fildvdbin
  if (dvdb_path == ABI_NOFILE) then
@@ -254,8 +251,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use_wfk = (dtset%eph_task /= 5)
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1)
-
- if (dtset%eph_frohlichm /= 1) efmas_path = dtfil%fnameabi_efmas
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -308,10 +303,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !call hdr_vs_dtset(ddk_hdr(ii), dtset)
  end if
 
- if (dtset%eph_frohlichm /= 1) then
-   call xmpi_bcast(efmas_path,master,comm,ierr)
-   call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", efmas_path) )
- end if
+ if (dtset%eph_frohlichm /= 1) call wrtout(ab_out, sjoin("- Reading EFMAS information from file:", dtfil%fnameabi_efmas))
 
  ! autoparal section
  ! TODO: This just to activate autoparal in abipy. Lot of things should be improved.
@@ -512,13 +504,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ABI_FREE(ddb_qshifts)
  call ifc_print(ifc, unit=std_out)
 
- ! Test B-spline interpolation of phonons
- if (.False.) then
-   ! TODO: Remove
-   call ifc_test_phinterp(ifc, cryst, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm)
-   call xmpi_end()
- end if
-
  ! Output phonon band structure (requires qpath)
  if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
 
@@ -527,7 +512,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    wminmax = zero
    do
      call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
-       dtset%ph_nqshift, dtset%ph_qshift, wminmax, count_wminmax, comm)
+       dtset%ph_nqshift, dtset%ph_qshift, dtfil%filnam_ds(4), wminmax, count_wminmax, comm)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
@@ -623,7 +608,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !I am not sure yet the EFMAS file will be needed as soon as eph_frohlichm/=0. To be decided later.
  if (dtset%eph_frohlichm /= 0) then
 #ifdef HAVE_NETCDF
-   NCF_CHECK(nctk_open_read(ncid, efmas_path, xmpi_comm_self))
+   NCF_CHECK(nctk_open_read(ncid, dtfil%fnameabi_efmas, xmpi_comm_self))
    call efmas_ncread(efmasdeg,efmasval,kpt_efmas,ncid)
    NCF_CHECK(nf90_close(ncid))
 #else

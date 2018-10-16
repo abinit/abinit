@@ -61,7 +61,6 @@ module m_phonons
 
  private
 
-! TODO Write object to store the bands
  public :: mkphbs                        ! Compute phonon band structure
  public :: phonons_write_xmgrace         ! Write phonons bands in Xmgrace format.
  public :: phonons_write_gnuplot         ! Write phonons bands in gnuplot format.
@@ -235,9 +234,7 @@ subroutine phdos_print(PHdos,fname)
    MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
  end select
 
-! === Open external file and write results ===
-! TODO Here I have to rationalize how to write all this stuff!!
-!
+ ! Open external file and write results
  if (open_file(fname,msg,newunit=unt,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -435,12 +432,12 @@ end subroutine phdos_print_debye
 !----------------------------------------------------------------------
 
 !****f* m_phonons/phdos_print_thermo
-!!
 !! NAME
 !! phdos_print_thermo
 !!
 !! FUNCTION
 !! Print out global thermodynamic quantities based on DOS
+!! Only master node should call this routine.
 !!
 !! INPUTS
 !! phonon_dos= container object for phonon DOS
@@ -476,7 +473,7 @@ implicit none
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
- integer :: iomega, itemper, thermal_unit
+ integer :: iomega, itemper, tunt
  character(len=500) :: msg
  real(dp) :: wover2t, ln2shx, cothx, invsinh2
  real(dp) :: tmp, domega
@@ -485,37 +482,28 @@ implicit none
 
 ! *********************************************************************
 
- ABI_ALLOCATE(free,    (ntemper))
- ABI_ALLOCATE(energy,  (ntemper))
- ABI_ALLOCATE(entropy, (ntemper))
- ABI_ALLOCATE(spheat,  (ntemper))
- ABI_ALLOCATE(wme,     (ntemper))
+ ! Allocate and put zeroes for F, E, S, Cv
+ ABI_CALLOC(free,    (ntemper))
+ ABI_CALLOC(energy,  (ntemper))
+ ABI_CALLOC(entropy, (ntemper))
+ ABI_CALLOC(spheat,  (ntemper))
+ ABI_CALLOC(wme,     (ntemper))
 
-!Put zeroes for F, E, S, Cv
- free(:)=zero
- energy(:)=zero
- entropy(:)=zero
- spheat(:)=zero
- wme(:)=zero
-
-!open THERMO file
- if (open_file(fname,msg,newunit=thermal_unit,form="formatted",action="write") /= 0) then
+ ! open THERMO file
+ if (open_file(fname, msg, newunit=tunt, form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
-! print header
- write(msg,'(a,a)') ch10,&
-&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
- call wrtout(thermal_unit,msg,'COLL')
- msg = ' # (A mol-c is the abbreviation of a mole-cell, that is, the'
- call wrtout(thermal_unit,msg,'COLL')
- msg = ' #  number of Avogadro times the atoms in a unit cell)'
- call wrtout(thermal_unit,msg,'COLL')
-
  write(msg, '(a,a,a)' )&
-&  ' phdos_print_thermo : thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
+&  ' phdos_print_thermo: thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
 &  '     see THERMO output file ...'
  call wrtout(std_out,msg,'COLL')
+
+ ! print header
+ write(tunt,'(a,a)') ch10,&
+&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
+ write(tunt, "(a)")' # (A mol-c is the abbreviation of a mole-cell, that is, the'
+ write(tunt, "(a)")' #  number of Avogadro times the atoms in a unit cell)'
 
  domega = phdos%omega_step
 
@@ -551,22 +539,21 @@ implicit none
    if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
 
    ! do the printing to file
-   write(msg,'(es11.3,5es15.7)') tmp/kb_HaK,&
+   write(tunt,'(es11.3,5es15.7)') tmp/kb_HaK,&
 &    Ha_J*Avogadro*free(itemper),&
 &    Ha_J*Avogadro*energy(itemper),&
 &    Ha_J*Avogadro*kb_HaK*entropy(itemper),&
 &    Ha_J*Avogadro*kb_HaK*spheat(itemper),&
 &    wme(itemper)*Ha_cmm1
-   call wrtout(thermal_unit,msg,'COLL')
  end do ! itemper
 
- ABI_DEALLOCATE(free)
- ABI_DEALLOCATE(energy)
- ABI_DEALLOCATE(entropy)
- ABI_DEALLOCATE(spheat)
- ABI_DEALLOCATE(wme)
+ close(tunt)
 
- close(thermal_unit)
+ ABI_FREE(free)
+ ABI_FREE(energy)
+ ABI_FREE(entropy)
+ ABI_FREE(spheat)
+ ABI_FREE(wme)
 
 end subroutine phdos_print_thermo
 !!***
@@ -611,36 +598,16 @@ subroutine phdos_free(PHdos)
 ! *************************************************************************
 
  !@phonon_dos_type
- if (allocated(PHdos%atom_mass)) then
-   ABI_FREE(PHdos%atom_mass)
- end if
- if (allocated(PHdos%omega)) then
-   ABI_FREE(PHdos%omega)
- end if
- if (allocated(PHdos%phdos)) then
-   ABI_FREE(PHdos%phdos)
- end if
- if (allocated(PHdos%phdos_int)) then
-   ABI_FREE(PHdos%phdos_int)
- end if
- if (allocated(PHdos%pjdos)) then
-   ABI_FREE(PHdos%pjdos)
- end if
- if (allocated(PHdos%pjdos_int)) then
-   ABI_FREE(PHdos%pjdos_int)
- end if
- if (allocated(PHdos%pjdos_type)) then
-   ABI_FREE(PHdos%pjdos_type)
- end if
- if (allocated(PHdos%pjdos_type_int)) then
-   ABI_FREE(PHdos%pjdos_type_int)
- end if
- if (allocated(PHdos%pjdos_rc_type)) then
-   ABI_FREE(PHdos%pjdos_rc_type)
- end if
- if (allocated(PHdos%msqd_dos_atom)) then
-   ABI_FREE(PHdos%msqd_dos_atom)
- end if
+ ABI_SFREE(PHdos%atom_mass)
+ ABI_SFREE(PHdos%omega)
+ ABI_SFREE(PHdos%phdos)
+ ABI_SFREE(PHdos%phdos_int)
+ ABI_SFREE(PHdos%pjdos)
+ ABI_SFREE(PHdos%pjdos_int)
+ ABI_SFREE(PHdos%pjdos_type)
+ ABI_SFREE(PHdos%pjdos_type_int)
+ ABI_SFREE(PHdos%pjdos_rc_type)
+ ABI_SFREE(PHdos%msqd_dos_atom)
 
 end subroutine phdos_free
 !!***
@@ -666,6 +633,7 @@ end subroutine phdos_free
 !! dos_ngqpt(3)=Divisions of the q-mesh used for computing the DOS
 !! nqshift=Number of shifts in Q-mesh
 !! dos_qshift(3, nqshift)=Shift of the q-mesh.
+!! prefix=Prefix for output files.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -690,7 +658,7 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, &
+subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
                    wminmax, count_wminmax, comm)
 
 
@@ -706,6 +674,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 !scalars
  integer,intent(in) :: prtdos,nqshft,comm
  real(dp),intent(in) :: dosdeltae,dossmear
+ character(len=*),intent(in) ::  prefix
  type(crystal_t),intent(in) :: crystal
  type(ifc_type),intent(in) :: ifc
  type(phonon_dos_type),intent(out) :: phdos
@@ -725,7 +694,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=80) :: errstr
- character(len=80) ::  prefix = "freq_displ" ! FIXME
  type(t_tetrahedron) :: tetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
@@ -1088,7 +1056,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
    if (my_rank == master) then
 #ifdef HAVE_NETCDF
-     ! TODO: should pass prefix as arg and make it optional
+     ! TODO: make it optional?
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
      NCF_CHECK(crystal_ncwrite(crystal, ncid))
      call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
@@ -1203,8 +1171,7 @@ end subroutine mkphdos
 !!
 !! SOURCE
 
-subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
-&    rlatt, tempermin, temperinc, thm_scells)
+subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1241,7 +1208,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
 ! *************************************************************************
 
  ! check inputs
-! TODO: add check that all rlatt are the same on input
+ ! TODO: add check that all rlatt are the same on input
 
  if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
@@ -1351,6 +1318,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
 
 end subroutine zacharias_supercell_make
 !!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_phonons/thermal_supercell_make
@@ -1903,7 +1871,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  real(dp) :: cfact
  character(500) :: msg
  character(len=8) :: unitname
-
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer :: nomega, imode, iomega
@@ -2330,6 +2297,7 @@ end subroutine phdos_print_vsound
 !! FUNCTION
 !!  Print out mean square displacement and velocity for each atom (trace and full matrix) as a function of T
 !!  see for example https://atztogo.github.io/phonopy/thermal-displacement.html#thermal-displacement
+!!  Only master node should call this routine.
 !!
 !! INPUTS
 !!   PHdos structure
@@ -2385,31 +2353,21 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    MSG_ERROR(msg)
  end if
 
-! write a header
-   write (msg, '(2a)') '# mean square displacement for each atom as a function of T (bohr^2)'
+ ! write the header
+ write (iunit, '(a)') '# mean square displacement for each atom as a function of T (bohr^2)'
+ write (junit, '(a)') "# mean square velocity for each atom as a function of T (bohr^2/atomic time unit^2)"
 
-! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master.
-!  Do not change this to wrtout without checking extensively.
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
+ write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
+ write (iunit, '(a)') trim(msg)
+ write (junit, '(a)') trim(msg)
 
-   write (msg, '(2a)') '# mean square velocity for each atom as a function of T (bohr^2/atomic time unit^2)'
-   write (junit, '(a)') trim(msg)
-
-   write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
-   write (junit, '(a)') trim(msg)
-
-   write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
-&                                              '                u_yz                u_xz                u_xy in bohr^2'
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
-   write (msg, '(3a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
-&                                              '                v_yz                v_xz                v_xy',&
-&                                              ' in bohr^2/atomic time unit^2'
-   !call wrtout(iunit, msg, 'COLL')
-   write (junit, '(a)') trim(msg)
+ write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
+&                                            '                u_yz                u_xz                u_xy in bohr^2'
+ write (iunit, '(a)') trim(msg)
+ write (msg, '(3a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
+&                                            '                v_yz                v_xz                v_xy',&
+&                                            ' in bohr^2/atomic time unit^2'
+ write (junit, '(a)') trim(msg)
 
  ABI_ALLOCATE (tmp_msqd, (PHdos%nomega,9))
  ABI_ALLOCATE (tmp_msqv, (PHdos%nomega,9))
@@ -2419,7 +2377,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_ALLOCATE (bose_msqv, (PHdos%nomega, ntemper))
 
  do io=1, PHdos%nomega
-     if ( PHdos%omega(io) >= 2._dp * 4.56d-6 ) exit ! 2 cm-1 TODO: make this an input parameter
+   if ( PHdos%omega(io) >= 2._dp * 4.56d-6 ) exit ! 2 cm-1 TODO: make this an input parameter
  end do
  iomin = io
 
@@ -2430,9 +2388,9 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    temper = tempermin + (itemp-1) * temperinc
    if (temper < 1.e-3) cycle ! millikelvin at least to avoid exploding Bose factor(TM)
    do io = iomin, PHdos%nomega
-! NB: factors follow convention in phonopy documentation
-!   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
-!   bose() is dimensionless
+     ! NB: factors follow convention in phonopy documentation
+     ! the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
+     ! bose() is dimensionless
      !bose_msqd(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) / PHdos%omega(io)
      !bose_msqv(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) * PHdos%omega(io)
      bose_msqd(io, itemp) =  (half + bose_einstein(PHdos%omega(io),kb_HaK*temper)) / PHdos%omega(io)
@@ -2442,35 +2400,32 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 
  do iatom=1,PHdos%natom
    write (msg, '(a,I8)') '# atom number ', iatom
-   !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
    write (junit, '(a)') trim(msg)
 
-! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
+   ! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
    integ_msqd = zero
    tmp_msqd = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
-! perform all integrations as matrix multiplication: integ_msqd (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose_msqd(io,itemp)
-   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega,&
-&      bose_msqd, PHdos%nomega, zero, integ_msqd, 9)
-! NB: this presumes an equidistant omega grid
+
+   ! perform all integrations as matrix multiplication: integ_msqd (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose_msqd(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega, bose_msqd, PHdos%nomega, zero, integ_msqd, 9)
+   ! NB: this presumes an equidistant omega grid
    integ_msqd = integ_msqd * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
    integ_msqv = zero
    tmp_msqv = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
-! perform all integrations as matrix multiplication: integ_msqv (idir, itemp) = [tmp_msqv(io,idir)]^T  * bose_msqv(io,itemp)
-   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqv,PHdos%nomega,&
-&      bose_msqv, PHdos%nomega, zero, integ_msqv, 9)
-! NB: this presumes an equidistant omega grid
+
+   ! perform all integrations as matrix multiplication: integ_msqv (idir, itemp) = [tmp_msqv(io,idir)]^T  * bose_msqv(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqv,PHdos%nomega, bose_msqv, PHdos%nomega, zero, integ_msqv, 9)
+   ! NB: this presumes an equidistant omega grid
    integ_msqv = integ_msqv * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
-
-! print out stuff
+   ! print out stuff
    do itemp = 1, ntemper
      temper = tempermin + (itemp-1) * temperinc
      write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqd(1,itemp)+integ_msqd(5,itemp)+integ_msqd(9,itemp)), &
 &                      integ_msqd(1,itemp),integ_msqd(5,itemp),integ_msqd(9,itemp), &
 &                      integ_msqd(6,itemp),integ_msqd(3,itemp),integ_msqd(2,itemp)
-     !call wrtout(iunit, msg, 'COLL')
      write (iunit, '(a)') trim(msg)
      write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqv(1,itemp)+integ_msqv(5,itemp)+integ_msqv(9,itemp)), &
 &                      integ_msqv(1,itemp),integ_msqv(5,itemp),integ_msqv(9,itemp), &
@@ -2478,7 +2433,6 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
      write (junit, '(a)') trim(msg)
    end do ! itemp
 
-   !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') ''
    write (junit, '(a)') ''
  enddo ! iatom
@@ -2489,6 +2443,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_DEALLOCATE (bose_msqv)
  ABI_DEALLOCATE (integ_msqd)
  ABI_DEALLOCATE (integ_msqv)
+
  close(iunit)
  close(junit)
 

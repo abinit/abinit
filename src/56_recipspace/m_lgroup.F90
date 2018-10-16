@@ -45,12 +45,13 @@ module m_lgroup
  use m_copy
  use m_symkpt
  use m_sort
+ use m_xmpi
 
- use m_fstrings,   only : ftoa, ktoa, sjoin
+ use m_fstrings,      only : ftoa, ktoa, sjoin
  use m_numeric_tools, only : wrap2_pmhalf
- use m_geometry,   only : normv
- use m_kpts,       only : listkk
- use m_symtk,      only : chkgrp, littlegroup_q
+ use m_geometry,      only : normv
+ use m_kpts,          only : listkk
+ use m_symtk,         only : chkgrp, littlegroup_q
 
  implicit none
 
@@ -126,7 +127,7 @@ module m_lgroup
 
  public :: lgroup_new                 ! Creation method.
  public :: lgroup_findq_ibzk          ! Find the index of the point in the IBZ(k).
- public :: lgroup_find_ibzimage
+ public :: lgroup_find_ibzimage       ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
  public :: lgroup_print               ! Print the object
  public :: lgroup_free                ! Free memory.
 
@@ -388,7 +389,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 
  ! Note use_symrec
  call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
-    1, self%symafm_lg, self%symrec_lg, timrev0, use_symrec=.True.)
+    1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
 
  iq_ibz = indkk(1)
  if (dksqmax > tol12) iq_ibz = -1
@@ -494,25 +495,13 @@ subroutine lgroup_free(self)
 ! *************************************************************************
 
  ! integer
- if (allocated(self%symrec_lg)) then
-   ABI_FREE(self%symrec_lg)
- end if
- if (allocated(self%symafm_lg)) then
-   ABI_FREE(self%symafm_lg)
- end if
- if (allocated(self%lgsym2glob)) then
-   ABI_FREE(self%lgsym2glob)
- end if
- if (allocated(self%symtab)) then
-   ABI_FREE(self%symtab)
- end if
+ ABI_SFREE(self%symrec_lg)
+ ABI_SFREE(self%symafm_lg)
+ ABI_SFREE(self%lgsym2glob)
+ ABI_SFREE(self%symtab)
  ! real
- if (allocated(self%ibz)) then
-   ABI_FREE(self%ibz)
- end if
- if (allocated(self%weights)) then
-   ABI_FREE(self%weights)
- end if
+ ABI_SFREE(self%ibz)
+ ABI_SFREE(self%weights)
 
 end subroutine lgroup_free
 !!***

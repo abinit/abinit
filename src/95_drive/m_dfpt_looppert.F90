@@ -38,7 +38,6 @@ module m_dfpt_loopert
  use m_wffile
  use m_io_redirect
  use m_paral_pert
- use m_abi_etsf
  use m_nctk
  use m_ddb
 #ifdef HAVE_NETCDF

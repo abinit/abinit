@@ -4,6 +4,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
+import io
 import re
 import time
 import shutil
@@ -830,7 +831,7 @@ class AbinitProject(object):
         # Read header with comments to be added to the new conf file.
         # NB: use [DEFAULT] as sentinel.
         header = []
-        with open(binconf_path, "rt") as fh:
+        with io.open(binconf_path, "rt", encodig="utf8") as fh:
             for line in fh:
                 line = line.strip()
                 if line == "[DEFAULT]":

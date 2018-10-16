@@ -328,7 +328,6 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    rcut = params(2) * sqrt(r2vals(new%nr))
    rsigma = params(3); if (rsigma <= zero) rsigma = five
    call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)") ! [[cite:Uehara2000]]
-   !call wrtout(std_out," cut sigma
    do ir=2,nr
      new%coefs(ir,:,:) = new%coefs(ir,:,:) * half * abi_derfc((sqrt(r2vals(ir)) - rcut) / rsigma)
    end do
