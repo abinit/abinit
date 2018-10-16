@@ -395,7 +395,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
  !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym(:,:,:)=zero
+ ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym = 0
  tolsym8=tol8
  call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
 
@@ -679,9 +679,9 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
    do ia=1,natom
      symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
    end do
-   itypat = zero
+   itypat = 0
    do itypat =1,ntypat
-     ii = zero
+     ii = 0
      do ia=1,natom
        if(typat(ia)==itypat) then
          ii = ii + 1
@@ -701,7 +701,6 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
 
 end subroutine symbols_crystal
 !!***
-
 
 !----------------------------------------------------------------------
 

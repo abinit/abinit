@@ -156,8 +156,10 @@
 #  define ABI_DATATYPE_DEALLOCATE(ARR)   deallocate(ARR)
 #endif
 
-/* Macros defined in terms of previous macros */
-#define ABI_CALLOC(ARR,SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
+/* Macros to allocate zero-initializes arrays.
+ * defined in terms of previous macros */
+#define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
+#define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)

@@ -199,10 +199,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,allocatable :: dummy_atifc(:)
  integer :: count_wminmax(2)
  real(dp) :: wminmax(2)
- integer,allocatable :: indqq(:,:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dksqmax, dksqmin, dksqmean, maxfreq, error
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom), qpt(3)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  real(dp),allocatable :: kpt_efmas(:,:)

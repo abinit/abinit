@@ -170,7 +170,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
- use m_abi_etsf
  use m_nctk
  use m_hdr
  use m_plowannier

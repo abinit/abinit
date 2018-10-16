@@ -11,6 +11,9 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
+!! TODO
+!!  Remove this module. At present it's used only in m_iowf.F90
+!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
