@@ -33,7 +33,7 @@ program testTransposer
 
   npw = 2000+xmpi_comm_rank(xmpi_world)
   nband = 200
-  ncycle = 100
+  ncycle = 10
 
   std_out = 6+xmpi_comm_rank(xmpi_world)
 
