@@ -1151,7 +1151,7 @@ end subroutine extrapwf
 !! INPUTS
 !!  atindx1(dtset%natom)=index table for atoms, inverse of atindx
 !!  dtset <type(dataset_type)>=all input variables in this dataset
-!!  istep=number of call the routine (usually the outer loop in the SCF double loop)
+!!  istep=number of call the routine 
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mcprj=size of cprj array
 !!  mpi_enreg=information about MPI parallelization
@@ -1211,7 +1211,7 @@ end subroutine extrapwf
  integer :: ibdmix,ibg,ibg_hist,icg,icg_hist,iband
  integer :: ierr,ikpt,indh,ind1,ind2,ind1new,inplace
  integer :: isppol,istwf_k,kk,me_distrb,mband,my_nspinor,mcprj_k
- integer :: nband_k,nbdmix,nbdmax,nmaxk,npw_k,ntypat
+ integer :: nband_k,nbdmix,nbdmax,npw_k,ntypat
  integer :: spaceComm_band,usepaw
  real(dp) :: alpha,beta,dotr,doti
  
@@ -1225,7 +1225,6 @@ end subroutine extrapwf
 
  if (istep==0) return
 
- nmaxk=maxval(npwarr)
  ntypat=dtset%ntypat
  usepaw=dtset%usepaw
  mband=dtset%mband
@@ -1375,26 +1374,26 @@ end subroutine extrapwf
 &         cgout=psi_ortho,cprjout=cprj_kh,icgout=0)
 
 !!!TEST
-
-!  do iband=1,nband_k
-!     call dotprod_g(dotr,doti,istwf_k,npw_k,2,scf_history_wf%cg(:,icg+1+my_nspinor*npw_k:icg+2*my_nspinor*npw_k,indh),&
+!      if (usepaw==0) then
+!        do iband=1,nband_k
+!          call dotprod_g(dotr,doti,istwf_k,npw_k,2,scf_history_wf%cg(:,icg+1+my_nspinor*npw_k:icg+2*my_nspinor*npw_k,indh),&
 !&            psi_ortho(:,1+(iband-1)*my_nspinor*npw_k:iband*my_nspinor*npw_k),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-! write(80+mpi_enreg%me,*) dotr,doti
-!flush(80+mpi_enreg%me)
- 
-!  end do
-!    if (usepaw==1) then
-!       hermitian=0
-!       call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),psi_ortho,scf_history_wf%cprj(:,:,indh)&
-!&         ,cprj_kh,dimcprj,hermitian,0,0,icg_hist,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj_k,mcprj_k,dtset%mkmem,&
+!          write(80+mpi_enreg%me,*) dotr,doti
+!          flush(80+mpi_enreg%me)
+!        end do
+!      else
+!        hermitian=0
+!        call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),psi_ortho,scf_history_wf%cprj(:,:,indh)&
+!&         ,cprj_kh,dimcprj,hermitian,0,0,icg_hist,icg_hist,ikpt,isppol,istwf_k,nbdmax,mcg,mcg,mcprj_k,mcprj_k,dtset%mkmem,&
 !&         mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn(:,1:nbdmix,1:nbdmix),usepaw)
-!   write(90+mpi_enreg%me,*) smn
-!   flush(90+mpi_enreg%me)
-!     end if
+!        write(90+mpi_enreg%me,*) smn
+!        flush(90+mpi_enreg%me)
+!      end if
 !!!TEST
 !      The biorthogonalised set of wavefunctions is now stored at the proper place
 
 !       cg(:,icg+1:icg+my_nspinor*npw_k*nband_k)=zero
+
 !      psi(t+dt) <- psi(t) + alpha.psi(t)
        cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)=(one+alpha)*psi_ortho(:,1:my_nspinor*npw_k*nbdmix)
        if(usepaw==1) then
