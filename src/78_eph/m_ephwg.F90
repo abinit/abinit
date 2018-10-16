@@ -52,7 +52,7 @@ module m_ephwg
  use defs_abitypes,     only : dataset_type
  use m_time,            only : cwtime, sec2str
  use m_symtk,           only : matr3inv
- use m_numeric_tools,   only : arth, inrange
+ use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  use m_special_funcs,   only : dirac_delta
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
@@ -460,7 +460,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 !Arguments ------------------------------------
 !scalars
  type(ephwg_t),target,intent(inout) :: self
- type(eph_double_grid_t),intent(in) :: eph_doublegrid
+ type(eph_double_grid_t),intent(inout) :: eph_doublegrid
  integer,intent(in) :: prtvol
 !arrays
  real(dp),intent(in) :: kpoint(3)
@@ -468,14 +468,15 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1=1
- integer :: ierr,ii
+ integer :: ierr,ii,ik_idx,ik_bz,isym
  real(dp) :: dksqmax
  character(len=80) :: errorstring
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
 !arrays
- integer,allocatable :: indkk(:,:)
-
+ integer,allocatable :: indkk(:,:), lgkibz2bz(:), lgkibz2ibz(:), lgkibz2ibzkq(:)
+ integer,allocatable :: bz2lgkibz(:), bz2lgkibzkq(:), bz2bz(:), mapping(:,:)
+ real(dp) :: kpt_sym(3), kpt(3), wrap_kpt(3), shift
 !----------------------------------------------------------------------
 
  cryst => self%cryst
@@ -486,63 +487,204 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  if (prtvol > 0) call lgroup_print(self%lgk)
  self%nq_k = self%lgk%nibz
 
- ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
- ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
-
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6)' ) &
-    "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
-   MSG_ERROR(msg)
+ ! get dg%bz --> self%lgrp%ibz
+ if (allocated(eph_doublegrid%bz2lgkibz)) then
+   ABI_FREE(eph_doublegrid%bz2lgkibz)
  end if
+ ABI_MALLOC(eph_doublegrid%bz2lgkibz,(eph_doublegrid%dense_nbz))
+ ABI_MALLOC(mapping,(eph_doublegrid%dense_nbz,3))
+
+ call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
+                             cryst%symrel, cryst%nsym, &
+                             eph_doublegrid%bz2lgkibz, has_timrev=1, mapping=mapping)
+
+#if 0
+   ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, eph_doublegrid%kpts_dense,& 
+               self%lgk%nibz, eph_doublegrid%dense_nbz, cryst%nsym,&
+               sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+
+   !check if same results as listkk
+   !eph_doublegrid%bz2lgkibz(:)=indkk(:,1)
+   do ii=1,self%nbz
+      if (indkk(ii,1).ne.eph_doublegrid%bz2lgkibz(ii)) then
+        write(*,*) ii
+        write(*,*) eph_doublegrid%kpts_dense(:,ii)
+        write(*,*) ii, '-->', indkk(ii,1)
+        write(*,*) self%lgk%ibz(:,indkk(ii,1)), indkk(ii,2), indkk(ii,6)
+        !check listkk stuff
+        kpt = (1-2*indkk(ii,6))*matmul(transpose(cryst%symrel(:,:,indkk(ii,2))),self%lgk%ibz(:,indkk(ii,1)))
+        call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
+        call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
+        call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
+        write(*,*) wrap_kpt
+
+        write(*,*) ii, '-->', eph_doublegrid%bz2lgkibz(ii)
+        write(*,*) self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)), mapping(ii,1), mapping(ii,2)
+        !check double grid stuff
+        kpt = (1-2*mapping(ii,2))*matmul(transpose(cryst%symrel(:,:,mapping(ii,1))),self%lgk%ibz(:,eph_doublegrid%bz2lgkibz(ii)))
+        call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
+        call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
+        call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
+        write(*,*) wrap_kpt
+        write(*,*)
+      end if
+      ABI_CHECK(indkk(ii,1)==eph_doublegrid%bz2lgkibz(ii),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+#endif
+ 
+ ! self%lgrp%ibz --> dg%bz
+ ABI_CALLOC(lgkibz2bz,(self%lgk%nibz))
+ do ii=1,self%nbz
+   ik_idx = eph_doublegrid%bz2lgkibz(ii)
+   lgkibz2bz(ik_idx) = ii
+ enddo
+
+ ! get self%lgrp%ibz --> dg%bz --> self%ibz
  if (allocated(self%lgk2ibz)) then
    ABI_FREE(self%lgk2ibz)
  end if
- call alloc_copy(indkk(:, 1), self%lgk2ibz)
- ABI_FREE(indkk)
+ ABI_MALLOC(self%lgk2ibz, (self%nq_k))
+ do ii=1,self%nq_k
+   ik_idx = lgkibz2bz(ii)
+   self%lgk2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
+ enddo
 
- ! Get mapping (k + q) --> initial IBZ.
+#if 0
+   ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
+   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+
+   !check if same results as listkk
+   do ii=1,self%nq_k
+      ABI_CHECK(self%lgk2ibz(ii)==indkk(ii,1),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+#endif
+
+ ! calculate k+q
  do ii=1,self%nq_k
    self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) + kpoint
  end do
- ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
 
- call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+ ! get dg%bz --> lgk%ibz (k+q)
+ ABI_MALLOC(bz2lgkibzkq, (eph_doublegrid%dense_nbz))
+ call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
+                             cryst%symrel, cryst%nsym, &
+                             bz2lgkibzkq, has_timrev=1)
 
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6)' ) &
-    "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-   MSG_ERROR(msg)
- end if
+ ! self%lgrp%ibz (k+q) --> dg%bz
+ do ii=1,self%nbz
+   ik_idx = bz2lgkibzkq(ii)
+   lgkibz2bz(ik_idx) = ii
+ enddo
 
+ ! get self%lgrp%ibz (k+q) --> dg%bz --> self%ibz
  if (allocated(self%kq2ibz)) then
    ABI_FREE(self%kq2ibz)
  end if
- call alloc_copy(indkk(:, 1), self%kq2ibz)
- ABI_FREE(indkk)
+ ABI_MALLOC(self%kq2ibz, (self%nq_k))
+ do ii=1,self%nq_k
+   ik_idx = lgkibz2bz(ii)
+   self%kq2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
+ enddo
+
+#if 0
+   ! Get mapping (k + q) --> initial IBZ.
+   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+
+   !check if same results as listkk
+   do ii=1,self%nq_k
+      ABI_CHECK(self%kq2ibz(ii)==indkk(ii,1),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+#endif
+
+ ! revert change
  do ii=1,self%nq_k
    self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
  end do
 
- ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
- ABI_MALLOC(indkk, (self%nbz * sppoldbl1,1))
- call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
-                             self%lgk%symrec_lg, self%lgk%nsym_lg, &
-                             indkk(:, 1))
+ ! get self%bz --> dg%bz --> self%lgrp%ibz
+ ABI_MALLOC(bz2lgkibz,(self%nbz))
 
- !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
- !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+#if 0
+   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
+   ABI_MALLOC(bz2bz, (self%nbz * sppoldbl1))
+   call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,& 
+      eph_doublegrid%dense_nbz, self%nbz, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+   do ii=1,self%nbz
+      ! get self%bz --> self%bz
+      bz2bz(ii) = eph_double_grid_get_index(eph_doublegrid,self%bz(:,ii),2)
+   end do
+
+   !check if same results as listkk
+   do ii=1,self%nbz
+      ABI_CHECK(indkk(ii,1)==bz2bz(ii),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+   ABI_FREE(bz2bz)
+#endif
+
+ do ii=1,self%nbz
+    ! get self%bz --> dg%bz
+    ik_idx = eph_double_grid_get_index(eph_doublegrid,self%bz(:,ii),2)
+    ! dg%bz --> self%lgrp%ibz
+    bz2lgkibz(ii) = eph_doublegrid%bz2lgkibz(ik_idx)
+ end do
+
+#if 0
+   ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
+   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
+   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6)' ) &
+      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
+     MSG_ERROR(msg)
+   end if
+
+   !check if same results as listkk
+   do ii=1,self%nbz
+      ABI_CHECK(indkk(ii,1)==bz2lgkibz(ii),'Unmatching indexes')
+   enddo
+   ABI_FREE(indkk)
+#endif
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call destroy_tetra(self%tetra_k)
- call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ call init_tetra(bz2lgkibz, cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
  if (ierr /= 0) then
    MSG_ERROR(errorstring)
  end if
- ABI_FREE(indkk)
+ ABI_FREE(bz2lgkibz)
+ !ABI_FREE(lgkibz2bz)
 
 end subroutine ephwg_double_grid_setup_kpoint
 !!***

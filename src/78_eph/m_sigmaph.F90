@@ -845,11 +845,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
 
        ! Map sigma%eph_doublegrid%dense -> ephwg%lgk%ibz
-       if (sigma%use_doublegrid) then
-         call eph_double_grid_bz2ibz(sigma%eph_doublegrid, sigma%ephwg%lgk%ibz, sigma%ephwg%lgk%nibz,&
-                                     sigma%ephwg%lgk%symrec_lg, sigma%ephwg%lgk%nsym_lg, &
-                                     sigma%eph_doublegrid%bz2lgkibz)
-       endif
+       !if (sigma%use_doublegrid) then
+       !  call eph_double_grid_bz2ibz(sigma%eph_doublegrid, sigma%ephwg%lgk%ibz, sigma%ephwg%lgk%nibz,&
+       !                              sigma%ephwg%lgk%symrec_lg, sigma%ephwg%lgk%nsym_lg, &
+       !                              sigma%eph_doublegrid%bz2lgkibz)
+       !endif
 
        ! Precompute the weights for tetrahedron
        call sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
