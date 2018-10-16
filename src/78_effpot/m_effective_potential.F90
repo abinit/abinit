@@ -2872,7 +2872,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 !array
   integer,parameter :: alpha(9)=(/1,2,3,3,3,2,2,1,1/),beta(9)=(/1,2,3,2,1,1,3,3,2/)
   integer,allocatable :: my_atoms(:)
-  logical(dp) :: shift(3,natom)
   type(strain_type) :: strain
   real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
   real(dp) :: xred_ref_tmp(3,natom)
@@ -2932,22 +2931,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist)
   end if
   
-  shift=.FALSE.
-! Marcus treat atoms at unit cell boundary
-!  do ib=1,natom
-!    if((xcart_hist_tmp(1,ib)/rprimd_hist(1,1))>0.975)then         !Shift atoms back to first unit cell 
-!       xcart_hist_tmp(1,ib)=rprimd_hist(1,1)-xcart_hist_tmp(1,ib)
-!       shift(1,ib)=.TRUE.
-!    end if 
-!    if((xcart_hist_tmp(2,ib)/rprimd_hist(2,2))>0.975)then
-!       xcart_hist_tmp(2,ib)=rprimd_hist(2,2)-xcart_hist_tmp(2,ib)
-!       shift(2,ib)=.TRUE.
-!    end if 
-!    if((xcart_hist_tmp(3,ib)/rprimd_hist(3,3))>0.975)then
-!       xcart_hist_tmp(3,ib)=rprimd_hist(3,3)-xcart_hist_tmp(3,ib)
-!       shift(3,ib)=.TRUE.
-!    end if
-!  end do 
 ! Fill the reference position and change the cartesian coordinates
 ! if the rprimd is different
   if(has_strain) then
@@ -2965,42 +2948,10 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     end if
   end if
 
-!open(13,file='origin-change.out',status='unknown',access='append') ! MARCUS PRINT FOR DEBUG
-! Compute displacement
-!  if(need_displacement)then
-!    write(*,*) 'I was here'
-!    displacement(:,:) = zero
-!    do ii = 1, natom
-!      if(shift(1,ii) .eqv. .TRUE.)then
-!        write(13,'(I5)',advance='no') ii
-!        displacement(1,ii) = - xcart_hist_tmp(1,ii) + xcart_ref_tmp(1,ii)          
-!      else
-!        displacement(1,ii) =  xcart_hist_tmp(1,ii) - xcart_ref_tmp(1,ii)   
-!      end if   
-!      if(shift(2,ii) .eqv. .TRUE.)then
-!        write(13,'(I5)',advance='no')  ii
-!        displacement(2,ii) = - xcart_hist_tmp(2,ii) + xcart_ref_tmp(2,ii)          
-!      else
-!        displacement(2,ii) =  xcart_hist_tmp(2,ii) - xcart_ref_tmp(2,ii)   
-!      end if  
-!      if(shift(3,ii) .eqv. .TRUE.)then 
-!        write(13,'(I5)',advance='no')  ii
-!        displacement(3,ii) = - xcart_hist_tmp(3,ii) + xcart_ref_tmp(3,ii)          
-!      else
-!        displacement(3,ii) =  xcart_hist_tmp(3,ii) - xcart_ref_tmp(3,ii)   
-!      end if   
-!    end do
-!  end if
-!write(13,*) '   '
-!close(13)
-
-!! ORIGINAL !!!
 ! Compute displacement
   if(need_displacement)then
     displacement(:,:) = zero
     do ii = 1, natom
-     ! write(*,*)'xcart_hist_tmp(:,ii)', xcart_hist_tmp(:,ii) ! Marcus Print for Debug
-     ! write(*,*)'xcart_ref_tmp(:,ii)', xcart_ref_tmp(:,ii)
       displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)  !        
     end do
   end if

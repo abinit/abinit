@@ -237,7 +237,7 @@ type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: nloop,nshell,ntime,option,comm, mxhist 
-integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
+integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
 character(len=500) :: dilatmx_errmsg
@@ -339,7 +339,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
- mxhist = hist_prev%mxhist ! Wirte number of MD-steps into mxhist  
+   mxhist = hist_prev%mxhist ! Wirte number of MD-steps into mxhist  
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
@@ -618,9 +618,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
 
-           INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened)
+           INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
              if(file_opened .eqv. .TRUE.)then
-               write(12,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
+               write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
              endif
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
@@ -853,7 +853,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
-     if (ab_mover%ionmov==13 .and. hist%mxhist > 3) then  
+     if (ab_mover%ionmov==13 .and. mxhist > 3 ) then !.and. mxhist > 3  
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)
@@ -1707,7 +1707,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use netcdf
 #endif
 
- use m_io_tools,   only : open_file
+ use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
 
 !This section has been created automatically by the script Abilint (TD).

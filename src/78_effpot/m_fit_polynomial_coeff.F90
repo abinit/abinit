@@ -149,7 +149,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
  integer :: ncycle_tot,ncycle_max,need_prt_names,nproc,ntime,nsweep,size_mpi
- integer :: rank_to_send
+ integer :: rank_to_send,unit_names
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge
@@ -360,8 +360,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
  !wait everybody
  call xmpi_barrier(comm)
- 
+  
  if(need_prt_names == 1 .and. nproc == 1)then
+   unit_names = get_unit()
    write (powerstr,'(I0,A1,I0)') power_disps(1),'-',power_disps(2)
    write (rangestr,'(F4.2)') cutoff 
    namefile='name-of-terms_range-'//trim(rangestr)//'_power-'//trim(powerstr)//'.out'
@@ -370,11 +371,11 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    call wrtout(std_out,message,'COLL')
    write(message,'(a,a)') " Write list of generated terms to file: ",namefile
    call wrtout(std_out,message,'COLL')
-   open(11,file=namefile,status='replace')
+   open(unit_names,file=namefile,status='replace')
    do icoeff=1,ncoeff_tot
-       write(11,*) icoeff, trim(my_coeffs(icoeff)%name ) ! Marcus Write name of coefficient to file
+       write(unit_names,*) icoeff, trim(my_coeffs(icoeff)%name ) ! Marcus Write name of coefficient to file
    enddo
-   close(11)
+   close(unit_names)
  else if(need_prt_names == 1 .and. nproc /= 1)then
    write(message, '(15a)' )ch10,&
 &        ' --- !WARNING',ch10,&
@@ -389,7 +390,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Write the XML with the coefficient before the fit process
  if(iam_master)then
    filename = "terms_set.xml"
-!   call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.) ! MARCUS UNCOMMENTED
+!   call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.) 
  end if
 
 !Reset the output (we free the memory)

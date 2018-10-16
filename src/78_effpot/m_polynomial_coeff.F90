@@ -1055,7 +1055,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
 ! scalar
   integer :: i1,i2,i3,ia1,ib1,ia2,ib2,idir1,idir2,ierr,ii
   integer :: icoeff,iterm,idisp1,idisp2,idisp1_strain,idisp2_strain,icell,ndisp
-  integer :: nstrain,ndisp_tot,power_disp,power_strain
+  integer :: nstrain,ndisp_tot,power_disp,power_strain,unit_out
   real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3,weight,energy_term
   logical :: file_opened 
 ! array
@@ -1266,16 +1266,16 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
 
 
 !Write to anharmonic_energy_terms.out ORIGINAL  
-  INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened)
+  INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
   if(file_opened .eqv. .TRUE.)then
     do icoeff=1,ncoeff
       call xmpi_sum(energy_coeff(icoeff), comm, ierr)
      !write(*,*) 'term ',icoeff,' :', energy_coeff(icoeff)
      ! Marcus write energy contributions of anharmonic terms to file 
       if(icoeff <ncoeff)then      
-        write(12,'(A,1ES24.16)',advance='no')  '    ',energy_coeff(icoeff)
+        write(unit_out,'(A,1ES24.16)',advance='no')  '    ',energy_coeff(icoeff)
       else if(icoeff==ncoeff)then  
-        write(12,'(A,1ES24.16)',advance='yes') '    ',energy_coeff(icoeff)
+        write(unit_out,'(A,1ES24.16)',advance='yes') '    ',energy_coeff(icoeff)
       end if     
     enddo 
   end if
@@ -2348,7 +2348,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  icoeff3 = 0! icoeff3 is the current index in total new list of coefficients
  rank_to_send_save = 0
 
-!open(11,file='name_of_terms.out',status='replace')
  do icoeff=1,ncoeff_max
 !  Need to send the rank with the chosen coefficient
    rank_to_send = 0
@@ -2443,13 +2442,6 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    call wrtout(std_out,message,'COLL')
  end if
  
- !if(my_rank==0)then 
- !  open(11,file='name_of_terms.out',status='replace')
- !  do icoeff=1,ncoeff_tot
- !    write(11,*) icoeff, trim(coefficients(icoeff)%name ) ! Marcus Write name of coefficient to file
- !  enddo 
- !  close(11)
- !end if
 
 !Final deallocation
  ABI_DEALLOCATE(symbols)

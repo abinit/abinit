@@ -126,7 +126,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
  use m_mover,            only : mover
-
+ use m_io_tools,         only : get_unit, open_file
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -145,7 +145,7 @@ implicit none
  type(abihist),optional,intent(inout):: hist
 !Local variables-------------------------------
 !scalar
- integer :: filetype,icoeff_bound,ii
+ integer :: filetype,icoeff_bound,ii, unit_out
 !integer :: iexit,initialized
  integer :: jj,kk,nproc,icoeff,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
@@ -192,6 +192,7 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
+ character(len=50) :: name_file 
  character(len=200):: term_name
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
@@ -559,26 +560,31 @@ implicit none
 
      ! Marcus: if wanted analyze anharmonic terms of effective potential && 
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
+     ! Open File and write header 
+     ncoeff = effective_potential%anharmonics_terms%ncoeff
+     name_file='anharmonic_energy_terms.out' 
+     unit_out = get_unit()
+     write(*,*) 'unit_out', unit_out 
      if(inp%analyze_anh_pot == 1)then 
-       open(12,file='anharmonic_energy_terms.out',status='replace')
-       write(12,*) '#---------------------------------------------#'
-       write(12,*) '#    Anharmonic Terms Energy Contribution     #'
-       write(12,*) '#---------------------------------------------#'
-       write(12,*) ''
-       write(12,'(A,I5)') 'Number of Terms: ', ncoeff
-       write(12,*) '' 
-       write(12,'(A)') 'Terms     Names' 
+       open(unit=unit_out,file=name_file,status='replace',form='formatted')
+       write(unit_out,*) '#---------------------------------------------#'
+       write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
+       write(unit_out,*) '#---------------------------------------------#'
+       write(unit_out,*) ''
+       write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
+       write(unit_out,*) '' 
+       write(unit_out,'(A)') 'Terms     Names' 
        do icoeff=1,ncoeff
          term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
-         write(12,'(I5,A,A)') icoeff,'     ',trim(term_name)
+         write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
        enddo  
-       write(12,*) ''  
-       write(12,'(A)',advance='no')  'Cycle/Terms'
+       write(unit_out,*) ''  
+       write(unit_out,'(A)',advance='no')  'Cycle/Terms'
        do icoeff=1,ncoeff
          if(icoeff<ncoeff)then
-         write(12,'(I5)',advance='no') icoeff
+         write(unit_out,'(I5)',advance='no') icoeff
          else 
-         write(12,'(I5)',advance='yes') icoeff
+         write(unit_out,'(I5)',advance='yes') icoeff
          endif
        enddo  
      end if 
@@ -589,7 +595,7 @@ implicit none
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
 &     verbose=verbose,writeHIST=writeHIST)
-     close(12)
+     close(unit_out)
    else if(option== -1.or.option==-2)then
      !*************************************************************
      !   Try to bound the model

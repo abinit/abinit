@@ -40,7 +40,7 @@ module m_effective_potential_file
 #endif
 
  use m_io_tools,   only : open_file
- use m_geometry,   only : xcart2xred, metric
+ use m_geometry,   only : xcart2xred, xred2xcart, metric
  use m_symfind,    only : symfind, symlatt
  use m_crystal,    only : crystal_t, crystal_init, crystal_free
  use m_dynmat,     only : dfpt_prtph
@@ -3562,10 +3562,10 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  real(dp):: factor
  logical :: revelant_factor,need_map,need_verbose
 !arrays
- real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3),scale_cell(3)
- integer :: ncell(3)
+ real(dp) :: rprimd_hist(3,3),rprimd_ref(3,3)
+ integer :: ncell(3),scale_cell(3)
  integer,allocatable  :: blkval(:),list(:)
- real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:)
+ real(dp),allocatable :: xred_hist(:,:),xred_ref(:,:),xcart_ref(:,:),xcart_hist(:,:)
  character(len=500) :: msg
  type(abihist) :: hist_tmp
 ! *************************************************************************
@@ -3575,9 +3575,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  if (present(verbose)) need_verbose = verbose
 
  natom_hist = size(hist%xred,2)
- nstep_hist = size(hist%xred,3) ! MARCUS -> Original size(hist%xred,3)
+ nstep_hist = size(hist%xred,3) 
 
-!Try to set the supercell according to the hist file
+! Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
@@ -3585,7 +3585,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    scale_cell(:) = zero
    do ii=1,3
      if(abs(rprimd_ref(ii,ia)) > tol10)then
-       scale_cell(ii) = rprimd_hist(ii,ia) / rprimd_ref(ii,ia)
+       scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
      end if
    end do
 !  Check if the factor for the supercell is revelant
@@ -3604,7 +3604,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     ncell(ia) = nint(factor)
+     ncell(ia) = factor
    end if
  end do
 
@@ -3638,12 +3638,38 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  ABI_ALLOCATE(list,(natom_hist))
  ABI_ALLOCATE(xred_hist,(3,natom_hist))
  ABI_ALLOCATE(xred_ref,(3,natom_hist))
+ ABI_ALLOCATE(xcart_hist,(3,natom_hist))
+ ABI_ALLOCATE(xcart_ref,(3,natom_hist))
  blkval = 1
  list   = 0
- call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
-&                eff_pot%supercell%xcart,xred_ref)
 
- xred_hist = hist%xred(:,:,1)
+ !Fill xcart_ref/hist and xred_ref/hist 
+ 
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred_ref)                   ! Get xred_ref 
+
+ xcart_ref = eff_pot%supercell%xcart                                 ! Get xcart_ref 
+ xred_hist = hist%xred(:,:,1)                                        ! Get xred_hist 
+ 
+ do ib=1,natom_hist
+   if((rprimd_hist(1,1)+rprimd_hist(2,1)+rprimd_hist(3,1)) &  !Shift positions to negative coordinates 
+&     *(1 - xred_hist(1,ib)) < 1)then                         !if close to unit cell boundary
+      xred_hist(1,ib)=xred_hist(1,ib)-1  
+      hist%xred(1,ib,1)=xred_hist(1,ib)
+   end if
+   if((rprimd_hist(1,2)+rprimd_hist(2,2)+rprimd_hist(3,2)) & 
+&     *(1 - xred_hist(2,ib)) < 1 )then 
+      xred_hist(2,ib)=xred_hist(2,ib)-1
+      hist%xred(2,ib,1)=xred_hist(2,ib)
+   end if 
+   if((rprimd_hist(1,3)+rprimd_hist(2,3)+rprimd_hist(3,3)) &
+&     *(1 - xred_hist(3,ib)) < 1 )then 
+      xred_hist(3,ib)=xred_hist(3,ib)-1
+      hist%xred(3,ib,1)=xred_hist(3,ib)
+   end if
+ enddo  
+
+ call xred2xcart(natom_hist,rprimd_hist,xcart_hist,hist%xred(:,:,1)) ! Get xcart_hist 
 
  if(need_verbose) then
    write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
@@ -3652,49 +3678,19 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
    call wrtout(ab_out,msg,'COLL')
  end if
 
-! MARCUS Try to map with reduced distance
-!try to map
-! do ia=1,natom_hist
-!   do ib=1,natom_hist
-!     if(blkval(ib)==1)then
-!       if(sqrt(abs((xred_ref(1,ia)-(1-xred_hist(1,ib))))**2 & !! Marcus increased from 0.1 to 0.3 test for CaTiO3
-!&        +  abs((xred_ref(2,ia)-(1-xred_hist(2,ib))))**2    &
-!&        +  abs((xred_ref(3,ia)-(1-xred_hist(3,ib))))**2) < 0.1 ) then
-!         blkval(ib) = 0
-!         list(ib) = ia
-!       end if
-!     end if
-!   end do
-! end do
-
-
-!!! ORIGINAL MAP 
 !try to map
  do ia=1,natom_hist
    do ib=1,natom_hist
      if(blkval(ib)==1)then
-       if(xred_hist(1,ib)>0.975)then         !Shift atoms back to first unit cell i
-          xred_hist(1,ib)=xred_hist(1,ib)-1
-          hist%xred(1,ib,1)=xred_hist(1,ib)
-       end if
-       if(xred_hist(2,ib)>0.975)then 
-          xred_hist(2,ib)=xred_hist(2,ib)-1
-          hist%xred(2,ib,1)=xred_hist(2,ib)
-       end if 
-       if(xred_hist(3,ib)>0.975)then 
-          xred_hist(3,ib)=xred_hist(3,ib)-1
-          hist%xred(3,ib,1)=xred_hist(3,ib)
-       end if
-       if(abs((xred_ref(1,ia)-xred_hist(1,ib))) < 0.05 .and.& !! MARCUS ORIGINAL 0.1
-&         abs((xred_ref(2,ia)-xred_hist(2,ib))) < 0.05 .and.&
-&         abs((xred_ref(3,ia)-xred_hist(3,ib))) < 0.05) then
+       if(sqrt(abs((xcart_ref(1,ia)-xcart_hist(1,ib)))**2 &          ! Map atoms to each other that are 
+&         +  abs((xcart_ref(2,ia)-xcart_hist(2,ib)))**2   &          ! closer than 1.5 bohr
+&         +  abs((xcart_ref(3,ia)-xcart_hist(3,ib)))**2) < 1.5)then 
          blkval(ib) = 0
          list(ib) = ia
        end if
      end if
    end do
  end do
-
 
 !Check before transfert
  if(.not.all(blkval==0))then      
