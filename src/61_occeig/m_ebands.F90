@@ -3490,6 +3490,14 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 
 contains
   pure function pre(istr) result(ostr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pre'
+!End of the abilint section
+
     character(len=*),intent(in) :: istr
     character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
     ostr = trim(prefix_) // trim(istr)
@@ -5099,6 +5107,7 @@ end subroutine ebands_prtbltztrp
 
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
        natom, nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
