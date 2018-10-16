@@ -1,12 +1,12 @@
 ## v8.10
 
-Version 8.10, released on October 7, 2018.
+Version 8.10, released on October 15, 2018.
 List of changes with respect to version 8.8.
 
 Many thanks to the contributors to the ABINIT project between
 April 2018 and October 2018. These release notes
 are relative to modifications/improvements of ABINIT v8.10 with respect to v8.8.
-The merge request #408 is the first MR not reported in these release notes.
+The merge request #408 is the first MR not reported in these release notes. Then, #410-411, #413-416 have also been included.
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote, 
@@ -51,7 +51,7 @@ B.3 The multibinit application (for second-principles calculations) has consider
     in addition to the already existing input variable documentation and test cases.
     See [[topic:LatticeModel]], [[topic:BoundingProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
     that are hub to the relevant tutorial, input variables and test cases 
-    (e.g. [[lesson:LatticeModel]],[[test:v8_15]], [[test:v8_16]]...).  
+    (e.g. [[lesson:lattice_model]],[[test:v8_15]], [[test:v8_16]]...).  
     By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
 
 B.4 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:

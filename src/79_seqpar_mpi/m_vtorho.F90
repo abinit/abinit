@@ -1142,7 +1142,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Build sum of everything
        call timab(48,1,tsec)
        call xmpi_sum(buffer1,mpi_enreg%comm_kpt,ierr)
-       if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
+!      if(mpi_enreg%paral_kgb/=1.and.paw_dmft%use_dmft==1) then
+       if(paw_dmft%use_dmft==1) then
          call xmpi_sum(buffer2,mpi_enreg%comm_kpt,ierr)
        end if
        call timab(48,2,tsec)
@@ -1207,6 +1208,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      ==  initialise occnd
        paw_dmft%occnd=zero
+      
+       bdtot_index = 1
+       do isppol=1,dtset%nsppol
+         do ikpt=1,dtset%nkpt
+           do iband=1,dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+             paw_dmft%occnd(1,iband,iband,ikpt,isppol)=occ(bdtot_index)
+             bdtot_index = bdtot_index + 1
+           end do
+         end do
+       end do
+
 
        if(dmft_ldaocc==0) then
          if(dtset%occopt/=3) then
@@ -1282,21 +1294,24 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call flush_unit(std_out)
 !        paw_dmft%occnd(:,:,:,:,:)=0.5_dp
 
+!        For compatibility with old test, do not use for calculation
+         if(dtset%dmft_occnd_imag==0) paw_dmft%occnd(2,:,:,:,:)=zero
+
 !        call print_dmft(paw_dmft,dtset%pawprtvol)
-         if(dtset%paral_kgb==1) then
-           write(message,'(5a)')ch10,&
-&           ' Parallelization over bands is not yet compatible with self-consistency in DMFT ',ch10,&
-&           ' Calculation of density does not taken into account non diagonal occupations',ch10
-           call wrtout(std_out,message,'COLL')
-           call wrtout(ab_out,message,'COLL')
-!          MSG_ERROR(message)
-           if(dtset%nstep>1) then
-             write(message,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
-             MSG_ERROR(message)
-           end if
-           residm=zero
-         end if
-         if(dtset%nspinor==2) then
+!         if(dtset%paral_kgb==1) then
+!           write(message,'(5a)')ch10,&
+!&           ' Parallelization over bands is not yet compatible with self-consistency in DMFT ',ch10,&
+!&           ' Calculation of density does not taken into account non diagonal occupations',ch10
+!           call wrtout(std_out,message,'COLL')
+!           call wrtout(ab_out,message,'COLL')
+!!          MSG_ERROR(message)
+!           if(dtset%nstep>1) then
+!             write(message,'(a,i0)')'  Action: use nstep=1 instead of nstep=',dtset%nstep
+!             MSG_ERROR(message)
+!           end if
+!           residm=zero
+!         end if
+!        if(dtset%nspinor==2) then
 !          call flush_unit(ab_out)
 !          write(message,'(3a)')&
 !          &         ' Self consistent DFT+DMFT with nspinor==2 is not possible yet ',ch10,&
@@ -1306,7 +1321,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          write(message,'(a,i0)')' Action: use nstep=1 instead of nstep=',dtset%nstep
 !          !           MSG_ERROR(message)
 !          endif
-         end if
+!        end if
 
          if(me_distrb==0) then
            call saveocc_dmft(paw_dmft)
@@ -1403,10 +1418,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !                write(std_out,*) "II+", isppol,ikpt,iband,iband1
                  ekindmft2=ekindmft2  +  dtset%wtk(ikpt)*paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*&
 &                 eknk_nd(isppol,ikpt,1,iband,iband1)
-                 if(dtset%nspinor==2) then
-                   ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
-&                   eknk_nd(isppol,ikpt,2,iband,iband1)
-                 end if
+                 ekindmft2=ekindmft2  -  dtset%wtk(ikpt)*paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*&
+&                 eknk_nd(isppol,ikpt,2,iband,iband1)
 !                write(std_out,*) "II", occnd(1,iband,iband1,ikpt,isppol),eknk_nd(isppol,ikpt,iband,iband1)
                end if
              end do
@@ -1431,7 +1444,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         "-----------------------------------------------"
          call wrtout(std_out,message,'COLL')
        end if
-       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
+!       if(paw_dmft%use_dmft==1.and.mpi_enreg%paral_kgb==1) paw_dmft%use_dmft=0
      end if
 
      if (psps%usepaw==0) then

@@ -16,6 +16,7 @@ getwfk2 -1
 # -- Parallelization
 paral_kgb 1
 npband 2
+bandpp2 17
 npkpt 2
 npfft 1
 #iomode 1
@@ -69,6 +70,8 @@ dmft_nwlo 32
 dmftcheck 0
 dmft_rslf 0
 dmft_mxsf 0.3
+# for historical reasons, do not use this elsewhere
+dmft_occnd_imag2 0
 
 ##### LDA+U
 usepawu1    1   # LDA+U is not used.
