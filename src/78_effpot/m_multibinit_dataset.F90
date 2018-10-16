@@ -1293,7 +1293,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_sia_k1dir',tread,'DPR')
  if(tread==1) then
-    dprarr(:)=dprarr/norm2(dprarr)
+    dprarr(1:3)=dprarr(1:3)/sqrt(sum(dprarr(1:3)**2))
     multibinit_dtset%spin_sia_k1dir(1:3)= dprarr(1:3)
  endif
 

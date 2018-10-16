@@ -37,7 +37,7 @@ module m_spin_mover
   use m_abicore
   use m_spin_observables , only : spin_observable_t, ob_calc_observables
   use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, spin_terms_t_get_gamma_l, spin_terms_t
-  use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s
+  use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   implicit none
   !!***
@@ -248,30 +248,33 @@ contains
     write(std_out,*) msg
     write(ab_out, *) msg
 
-    msg="Prerun:"
-    write(std_out,*) msg
-    write(ab_out, *) msg
+    if (abs(self%pre_time) > 1e-30) then
+       msg="Pre-run:"
+       write(std_out,*) msg
+       write(ab_out, *) msg
 
-    do while(t<self%pre_time)
-       counter=counter+1
-       call spin_mover_t_run_one_step(self, calculator, hist)
-       call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
-       if(mod(counter, hist%spin_nctime)==0) then
-          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), hist%Snorm(:,hist%ihist_prev))
-          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
-               & ob%Mst_norm_total/ob%Snorm_total, &
-               & hist%etot(hist%ihist_prev)/Ha_J
-          write(std_out,*) msg
-          write(ab_out, *) msg
-       endif
-       t=t+self%dt
-    end do
+       do while(t<self%pre_time)
+          counter=counter+1
+          call spin_mover_t_run_one_step(self, calculator, hist)
+          call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
+          if(mod(counter, hist%spin_nctime)==0) then
+             call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), hist%Snorm(:,hist%ihist_prev))
+             write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
+                  & ob%Mst_norm_total/ob%Snorm_total, &
+                  & hist%etot(hist%ihist_prev)/Ha_J
+             write(std_out,*) msg
+             write(ab_out, *) msg
+          endif
+          t=t+self%dt
+       end do
+       t=0.0
+       counter=0
+       call spin_hist_t_reset(hist,array_to_zero=.False.)
+       msg="Formal run:"
+       write(std_out,*) msg
+       write(ab_out, *) msg
+    endif
 
-    msg="Prerun:"
-    write(std_out,*) msg
-    write(ab_out, *) msg
-
-    counter=0
     do while(t<self%total_time)
        counter=counter+1
        call spin_mover_t_run_one_step(self, calculator, hist)
