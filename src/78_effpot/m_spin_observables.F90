@@ -211,7 +211,7 @@ contains
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ob_calc_obs'
+#define ABI_FUNC 'ob_calc_observables'
 !End of the abilint section
 
     class(spin_observable_t) :: self

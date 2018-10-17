@@ -174,6 +174,49 @@ contains
     end do
   end subroutine spin_mover_t_run_one_step_HeunP
   !!***
+ 
+  subroutine spin_mover_t_run_one_step_DM(self, calculator, S_in, S_out, etot)
+
+    ! TODO: implement Depondt & Mertens (2009) method. 
+    !class (spin_mover_t), intent(inout):: self
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'spin_mover_t_run_one_step_HeunP'
+!End of the abilint section
+
+    type(spin_mover_t), intent(inout):: self
+    type(spin_terms_t), intent(inout) :: calculator
+    real(dp), intent(in) :: S_in(3,self%nspins)
+    real(dp), intent(out) :: S_out(3,self%nspins), etot
+    integer :: i
+    real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
+         & H_lang(3, self%nspins)
+    ! predict
+    !call calculator%get_Langevin_Heff(self%dt, self%temperature, H_lang)
+    call spin_terms_t_get_Langevin_Heff(calculator, self%dt, self%temperature, H_lang)
+
+    !call calculator%get_dSdt(S_in, H_lang, dSdt)
+    call spin_terms_t_get_dSdt(calculator, S_in, H_lang, dSdt)
+    !$OMP PARALLEL DO
+    do i =1, self%nspins
+       S_out(:,i)=  S_in(:,i) +dSdt(:,i) * self%dt
+    end do
+    !$OMP END PARALLEL DO
+
+    ! correction
+    !call calculator%get_dSdt(S_out, H_lang, dSdt2)
+    call spin_terms_t_get_dSdt(calculator, S_out, H_lang, dSdt2)
+    etot=calculator%etot
+    !$OMP PARALLEL DO private(i)
+    do i =1, self%nspins
+       S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
+       S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
+    end do
+  end subroutine spin_mover_t_run_one_step_DM
+  !!***
+
 
 
   subroutine spin_mover_t_run_one_step(self, calculator, hist)

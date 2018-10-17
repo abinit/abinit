@@ -57,15 +57,15 @@ $$E^{ext}=- \sum_i   m_{i}   \vec{S_i}\cdot \vec{H},$$
 
 where $m_i$ denotes the magnetic moment of site $i$, and $\vec{H}$ is the magnetic field.
 
-## 2. Format of xml file for spin model (TODO: remove?)
 
-## 3. Build spin model file
+
+## 2. Build spin model file
 
 One way to calculate the Heisenberg model parameters is to use the spin force theorem (see [[cite:Liechtenstein1983]], [[cite:Katsnelson2000]]), which take rotations of localized spins as perturbations. In Abinit, the Hamiltonian uses plane waves as a basis set, thus the localized spin is not directly accessible. We can construct localized Wannier functions rewrite the Hamiltonian in the Wannier basis. Then, the exchange parameters can be calculated from this Hamiltonian ( [[cite:Korotin2015]] ). 
 
 For building the Wannier function Hamiltonian from Abinit, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) can also be used. Then, the  [TB2J](https://gitlab.abinit.org/xuhe/TB2J) package can be used to get the Heisenberg model parameters and generate the input model for Multibinit. 
 
-## 4. Run spin dynamics
+## 3. Run spin dynamics
 
 ### Basic
 
@@ -99,7 +99,7 @@ spin_mag_field= 0.0 0.0 0.0    ! external magnetic field (Tesla)
 spin_dynamics=1	               ! switch on spin dynamics
 spin_temperature = 600         ! temperature of spin. (Kelvin)
 spin_ntime =10000              ! Total number of time steps.
-spin_nctime=100                ! Number of time steps between two writes into netcdf file
+spin_nctime=100                ! Number of time steps between two writes into netcdf 
 spin_dt=1e-16 s                ! Time step, unit s.  
 spin_qpoint = 0.0 0.0 0.0      ! Wave vector for summation of spin in each sublattice.
 ```
@@ -138,27 +138,41 @@ It is essential to choose the parameters so that the calculation result is meani
 
 * time step ([[multibinit: spin_dt]]):
 
-    Typical time step is about $10^{-15}  $ to $10^{-17}$ s. A optimal time step can be got by tring several values and comparing the results (equilibrium magnetic order, moments, etc) with a calculation with small time step. At this stage, a small box and temperature close to zero can be used.   (<TODO: there must be a better way.>)
+    Typical time step is about $10^{-15}  $ to $10^{-17}$ s. A optimal time step can be got by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with small time step (e.g. $10^{-17}$ s). At this stage, a small box and temperature close to zero can be used.   ( <!--TODO: there must be a better way.-->)
 
 * supercell size ([[multibinit:ncell]])
 
-  Due to the periodic boundary condition, the spins between periods could be correlated with each other, which could lead to artificially higher phase transition temperature, etc. A small box is also not enough for sampling of some quantities and the To avoid this, it is required to 
+  Due to the periodic boundary condition, the spins between periods could be correlated with each other, which could lead to artificially higher phase transition temperature, etc. A small box is also not enough for sampling of some quantities and the To avoid this, it is required to test if the quantities of interest is converged with the supercell size.
 
-  For antiferromagnetic structure, or more generally, structure with non-zero wave vector, the box size should allow the spins to align with the q-vector, i.e. ($\vec{q}\cdot \vec{n}$) should be integers. For some structure, it is not easy or sometimes impossible to find such $\vec{n}$. In these cases, a large box is usually required.  
+  For anti-ferromagnetic structure, or more generally, structure with non-zero wave vector, the box size should allow the spins to align with the q-vector, i.e. ($\vec{q}\cdot \vec{n}$) should be integers. For some structure, it is not easy or sometimes impossible to find such $\vec{n}$. In these cases, a large box is usually required.  
 
-* Total time ([[multibinit: spin_nstep]])
+* Total time ([[multibinit: spin_ntime]])
 
-  The total should allow the spins to relax to the equilibrium state, and in order to calculate some observables, longer time are required so enough ensembles can be generated.  To see how much time is needed for the system to get to the equilibrium state, we can plot the magnetic moment. 
+  The total should allow the spins to relax to the equilibrium state, and in order to calculate some observables, longer time (e.g. 10x relaxation time) are required so enough samples can be generated.  To see how much time is needed for the system to get to the equilibrium state, we can plot the magnetic moment as function of time. It should be noted that it usually take much longer near the phase transition temperature so it is important to test the relaxation time there.
 
-### Temperature dependent calculation
+### An real world examle: $LaFeO_3$ 
 
 A most common usage of spin dynamics is to calculate the quantities (e.g. magnetic moments, susceptibility, specific heat ) as functions of temperature and find the phase transition temperature. By setting [[multibinit:spin_var_temperature]] to 1 and the starting, ending temperature, and number of steps as follows, a series of calculation will be carried out. (See ~abinit/tests/tutomultibinit/Input/tmulti5_2.* )
 
+Note that some of the parameters in the input file are set to "bad" values. Let's try to tune them to make a meaningful calculation.
+
 ```
-spin_var_temperature = 1       ! switch on variable temperature calculation
-spin_temperature_start = 0.0   ! starting temperature
-spin_temperature_end = 1500.0  ! ending temperature  
-spin_temperature_nstep = 31    ! number of steps, both starting and ending T included.
+dynamics =  0    ! disable molecular dynamics
+ncell =   6 6 6  ! size of supercell. Is it too small
+spin_dynamics=1  ! run spin dynamics
+spin_ntime =20000 ! number of steps. Is is enough?
+spin_nctime=100   
+spin_dt=1e-16 s   ! time step. Is it too large?
+spin_init_state = 2  ! initial: ferromagnetic magnetic state
+
+spin_var_temperature=1   ! variable temperature calculation
+spin_temperature_start=0 ! starting point of T
+spin_temperature_end=500 ! end point of T. Small ?
+spin_temperature_nstep=6 ! number of temperature step.
+
+spin_sia_add = 1         ! Add an single ion anistropy (SIA) to all ions.
+spin_sia_k1amp = 1e-22   ! amplitude of SIA. Is it large or small?
+spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA.
 ```
 
 After the run, the trajectories for each temperature will be written into the T0001_spin_hist.nc to T0031_spin_hist.nc files. 

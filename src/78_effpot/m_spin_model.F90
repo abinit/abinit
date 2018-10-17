@@ -49,7 +49,7 @@ module m_spin_model
   use m_xmpi
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spin_terms, only: spin_terms_t, spin_terms_t_finalize, &
+  use m_spin_terms, only: spin_terms_t, spin_terms_t_set_params,  spin_terms_t_finalize, &
        & spin_terms_t_set_external_hfield, spin_terms_t_add_SIA
   use m_spin_model_primitive, only: spin_model_primitive_t, &
        & spin_model_primitive_t_initialize, &
@@ -304,10 +304,21 @@ contains
 !End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
-    real(dp):: mfield(3, self%nspins)
-    integer ::  i 
+    real(dp):: mfield(3, self%nspins), damping(self%nspins)
+    integer ::  i
     ! params -> mover
     ! params -> calculator
+
+
+    if (self%params%spin_damping >=0) then
+       damping(:)= self%params%spin_damping
+       call spin_terms_t_set_params(self%spin_calculator, dt=self%params%spin_dt, &
+            & temperature=self%params%spin_temperature, gilbert_damping=damping)
+    else
+       call spin_terms_t_set_params(self%spin_calculator, dt=self%params%spin_dt, &
+            & temperature=self%params%spin_temperature)
+    end if
+
     do i=1, self%nspins
       mfield(:, i)=self%params%spin_mag_field(:)
     end do
@@ -317,6 +328,7 @@ contains
        call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
           &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
     end if
+
     ! params -> hist
 
   end subroutine spin_model_t_set_params
