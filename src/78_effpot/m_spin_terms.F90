@@ -202,11 +202,11 @@ contains
     call set_seed(self%rng, [111111_dp, 2_dp])
   end subroutine spin_terms_t_initialize
 
-  subroutine spin_terms_t_initialize_all(self,nspins, ms, &
+  subroutine spin_terms_t_set_terms(self, &
        &     external_hfield, &
        &     exchange_i, exchange_j, exchange_val, &
        &     DMI_i, DMI_j, DMI_val, &
-       &    gyro_ratio,k1,k1dir,gilbert_damping, &
+       &   k1,k1dir, &
        & bilinear_i, bilinear_j, bilinear_val)
 
 
@@ -219,28 +219,21 @@ contains
     implicit none
     !Arguments ------------------------------------
     !scalars
-    integer, intent(in) :: nspins
     !arrays
-    type(spin_terms_t), intent(out) :: self
+    type(spin_terms_t), intent(inout) :: self
 
     ! Terms. 
     real(dp), optional, intent(in) :: external_hfield(:,:)
-    !integer, optional,intent(in) :: exchange_nint, DMI_nint
     integer, optional,intent(in) :: exchange_i(:), exchange_j(:), &
          & dmi_i(:), dmi_j(:), bilinear_i(:), bilinear_j(:)
-    real(dp), intent(in) :: ms(:)
     real(dp), optional,intent(in) :: exchange_val(:), dmi_val(:,:), bilinear_val(:,:,:)
-    real(dp),optional,intent(in) :: k1(nspins)
-    real(dp),optional,intent(in) :: k1dir(3,nspins)
+    real(dp),optional,intent(in) :: k1(self%nspins)
+    real(dp),optional,intent(in) :: k1dir(3,self%nspins)
 
-    ! parameters.
-    real(dp),intent(in) :: gyro_ratio(nspins), gilbert_damping(nspins)
     !Local variables-------------------------------
 
     ! *************************************************************************
 
-    ABI_ALLOCATE( self%ms, (nspins))
-    self%ms = ms
 
     if(present(external_hfield)) then
        call spin_terms_t_set_external_hfield(self, external_hfield)
@@ -264,10 +257,9 @@ contains
        call spin_terms_t_set_uniaxial_MCA(self, k1, k1dir)
     endif
 
-    call set_seed(self%rng, [111111_dp, 2_dp])
-  end subroutine spin_terms_t_initialize_all
+  end subroutine spin_terms_t_set_terms
 
-  subroutine spin_terms_t_set_params(self, dt, temperature, gilbert_damping)
+  subroutine spin_terms_t_set_params(self, dt, temperature, gilbert_damping, gyro_ratio)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -277,10 +269,14 @@ contains
 !End of the abilint section
 
     class(spin_terms_t) , intent(inout) :: self
-    real(dp), optional, intent(in) :: gilbert_damping(self%nspins), dt, temperature
+    real(dp), optional, intent(in) :: gilbert_damping(self%nspins), dt, temperature, gyro_ratio(self%nspins)
 
     if(present(gilbert_damping)) then
        self%gilbert_damping(:)=gilbert_damping(:)
+    endif
+
+    if(present(gyro_ratio)) then
+       self%gyro_ratio(:)=gyro_ratio(:)
     endif
 
     if(present(dt)) then

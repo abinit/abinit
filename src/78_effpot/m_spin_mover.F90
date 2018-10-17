@@ -183,7 +183,7 @@ contains
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_run_one_step_HeunP'
+#define ABI_FUNC 'spin_mover_t_run_one_step_DM'
 !End of the abilint section
 
     type(spin_mover_t), intent(inout):: self
