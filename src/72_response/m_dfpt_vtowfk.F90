@@ -243,7 +243,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,save :: nskip=0
  integer :: counter,iband,idir0,ierr,iexit,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
- integer :: option,opt_gvnl1,quit,test_ddk
+ integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
  character(len=500) :: message
@@ -252,7 +252,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:)
- real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnl1(:,:),gvnlxc(:,:)
+ real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnlx1(:,:),gvnlxc(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
 
@@ -281,7 +281,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  kinpw1 => gs_hamkq%kinpw_kp
  ABI_ALLOCATE(gh0c1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(gvnlxc,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
+ ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
  ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
  ABI_ALLOCATE(cwave1,(2,npw1_k*nspinor))
@@ -398,7 +398,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    if(test_ddk==1) then
      ii = wfk_findk(ddk_f(1), gs_hamkq%kpt_k)
      ABI_CHECK(ii == ikpt, "ii != ikpt")
-     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=gvnl1)
+     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=gvnlx1)
 
 !    Multiplication by -i
 !    MVeithen 021212 : use + i instead,
@@ -409,12 +409,12 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !    This change will affect the computation of the 2dtes from non
 !    stationary expressions, see dfpt_nstdy.f and dfpt_nstwf.f
      do ipw=1,npw1_k*nspinor
-!      aa=gvnl1(1,ipw)
-!      gvnl1(1,ipw)=gvnl1(2,ipw)
-!      gvnl1(2,ipw)=-aa
-       aa=gvnl1(1,ipw)
-       gvnl1(1,ipw)=-gvnl1(2,ipw)
-       gvnl1(2,ipw)=aa
+!      aa=gvnlx1(1,ipw)
+!      gvnlx1(1,ipw)=gvnlx1(2,ipw)
+!      gvnlx1(2,ipw)=-aa
+       aa=gvnlx1(1,ipw)
+       gvnlx1(1,ipw)=-gvnlx1(2,ipw)
+       gvnlx1(2,ipw)=aa
      end do
    end if
 
@@ -430,14 +430,14 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
      eig0nk=eig0_k(iband)
      usedcwavef=gs_hamkq%usepaw;if (dim_dcwf==0) usedcwavef=0
      if (inonsc==1) usedcwavef=2*usedcwavef
-     opt_gvnl1=0;if (ipert==natom+2) opt_gvnl1=1
-     if (ipert==natom+2.and.gs_hamkq%usepaw==1.and.inonsc==1) opt_gvnl1=2
+     opt_gvnlx1=0;if (ipert==natom+2) opt_gvnlx1=1
+     if (ipert==natom+2.and.gs_hamkq%usepaw==1.and.inonsc==1) opt_gvnlx1=2
 
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        call dfpt_cgwf(iband,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwavef,&
-&       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnl1,icgq,&
+&       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
 &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,dtset%nbdbuf,dtset%nline,&
-&       npw_k,npw1_k,nspinor,opt_gvnl1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+&       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
 &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
        resid_k(iband)=resid
      else
@@ -508,8 +508,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        enl0_k(iband)=energy_factor*scprod
 
        if(ipert/=natom+10.and.ipert/=natom+11) then
-!        <G|Vnl1|Cnk> is contained in gvnl1 (with cwave1)
-         call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnl1,mpi_enreg%me_g0,&
+!        <G|Vnl1|Cnk> is contained in gvnlx1 (with cwave1)
+         call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnlx1,mpi_enreg%me_g0,&
 &         mpi_enreg%comm_spinorfft)
          enl1_k(iband)=two*energy_factor*scprod
        end if
@@ -589,7 +589,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  ABI_DEALLOCATE(cwave1)
  ABI_DEALLOCATE(gh0c1)
  ABI_DEALLOCATE(gvnlxc)
- ABI_DEALLOCATE(gvnl1)
+ ABI_DEALLOCATE(gvnlx1)
  ABI_DEALLOCATE(gh1c_n)
 
  if (gs_hamkq%usepaw==1) then

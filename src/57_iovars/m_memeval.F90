@@ -2198,7 +2198,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  cmpw(51)=2                    ; dttyp(51)=8
 !ffnlk,ffnl1,ffnlkq
  cmpw(52)=2*(ntypat+2)*lmnmax  ; dttyp(52)=8
-!ghc,gvnlxc,gvnl1
+!ghc,gvnlxc,gvnlx1
  cmpw(53)=6*nspinor            ; dttyp(53)=8
 !ph3d
  matblk=NLO_MINCAT
