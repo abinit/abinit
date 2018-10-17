@@ -1,5 +1,5 @@
 
-.Version 8.11.0 of MULTIBINIT 
+.Version 8.11.1 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu8.2 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 15 Oct 2018.
-- ( at 18h11 )
+.Starting date : Wed 17 Oct 2018.
+- ( at 22h44 )
   
 -  nproc =    1
 
@@ -39,13 +39,14 @@
                spin_dynamics           1
             spin_temperature      600.00000
                 spin_damping       -1.00000
+              spin_ntime_pre         0
                   spin_ntime      1000
                        ncell         6         6         6
                      spin_dt    1.00000E-16  second
               spin_mag_field
                                 0.00000E+00 0.00000E+00 0.00000E+00
                 spin_sia_add           0
-                 spin_sia_k1    0.00000E+00
+              spin_sia_k1amp    0.00000E+00
               spin_sia_k1dir    0.00000E+00    0.00000E+00    1.00000E+00
                  spin_qpoint
                              0.00000E+00 0.00000E+00 0.00000E+00
@@ -100,10 +101,10 @@ dipdip_range         6         6         6
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.059  and wall time      0.059 sec
++Total cpu time      0.049  and wall time      0.051 sec
 
  multibinit : the run completed succesfully.
