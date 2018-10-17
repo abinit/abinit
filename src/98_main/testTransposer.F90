@@ -85,8 +85,14 @@ program testTransposer
   npw = 4000+xmpi_comm_rank(xmpi_world)
   nband = 2000
   ncycle = 20
-  nCpuRows = 2
-  nCpuCols = xmpi_comm_size(xmpi_world)/nCpuRows
+  if ( xmpi_comm_size(xmpi_world) > 1 ) then
+    nCpuRows = 2
+    nCpuCols = xmpi_comm_size(xmpi_world)/nCpuRows
+  else 
+    nCpuRows = 1
+    nCpuCols = 1
+  end if
+
 
   std_out = 6+xmpi_comm_rank(xmpi_world)
 
@@ -147,7 +153,9 @@ program testTransposer
       do i=1,ncycle
         walltime = abi_wtime()
         call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
-        call random_number(cg)
+        if ( ncpucols > 1 ) then ! for 1 both states are aliased !!
+          call random_number(cg)
+        end if
         !call xgBlock_scale(xcgLinalg,0.d0,1)
         !call xgBlock_print(xgeigen,6)
         call xgTransposer_transpose(xgTransposer,STATE_LINALG)
@@ -158,10 +166,10 @@ program testTransposer
         call xmpi_max(walltime,maxt,xmpi_world,ierr)
       end do
       call xmpi_max(cputime,maxt,xmpi_world,ierr)
-      write(std_out,*) "-Mean time: ", maxt/ncycle
+      write(std_out,"(a,f20.4)") ".Mean time: ", maxt/ncycle
       errmax = (sum(cg0-cg))/nband
       call xmpi_sum(errmax,xmpi_world,ierr)
-      write(std_out,*) " Difference: ",errmax
+      write(std_out,"(a,f20.4)") " Difference: ",errmax
       call xmpi_barrier(xmpi_world)
     end subroutine tester
 

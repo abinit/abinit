@@ -326,7 +326,7 @@ module m_xgTransposer
       if ( allocated(xgTransposer%buffer) ) then
         ABI_FREE(xgTransposer%buffer)
       end if
-      if ( xgTransposer%mpiData(MPI_LINALG)%size == 1 ) then
+      if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
         xgTransposer%xgBlock_colsrows = xgTransposer%xgBlock_linalg
       else
         ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
@@ -372,15 +372,19 @@ module m_xgTransposer
       if ( xgTransposer%state == STATE_LINALG ) then
         MSG_WARNING("Array linalg has already been transposed")
       end if
-      if ( xgTransposer%mpiData(MPI_LINALG)%size /= 1 ) then
+      if ( xgTransposer%mpiData(MPI_COLS)%size > 1 ) then
         call xgTransposer_toLinalg(xgTransposer)
+      else
+        xgTransposer%state = STATE_LINALG
       end if
     case (STATE_COLSROWS)
       if ( xgTransposer%state == STATE_COLSROWS ) then
         MSG_WARNING("Array colsrows has already been transposed")
       end if
-      if ( xgTransposer%mpiData(MPI_LINALG)%size /= 1 ) then
+      if ( xgTransposer%mpiData(MPI_COLS)%size > 1 ) then
         call xgTransposer_toColsRows(xgTransposer)
+      else
+        xgTransposer%state = STATE_COLSROWS
       end if
     end select
 
