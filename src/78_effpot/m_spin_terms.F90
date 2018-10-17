@@ -200,6 +200,11 @@ contains
     call LIL_mat_initialize(self%bilinear_lil_mat,self%nspins*3,self%nspins*3)
     ABI_ALLOCATE( self%Htmp, (nspins*3))
     call set_seed(self%rng, [111111_dp, 2_dp])
+
+    ! set dt default value so x/dt would not crash
+    self%dt=1e-16
+    self%temperature=0.0
+    
   end subroutine spin_terms_t_initialize
 
   subroutine spin_terms_t_set_terms(self, &
