@@ -25,7 +25,7 @@ module m_fit_polynomial_coeff
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_polynomial_coeff
  use m_atomdata
  use m_xmpi
