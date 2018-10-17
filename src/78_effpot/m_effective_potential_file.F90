@@ -29,7 +29,7 @@ module m_effective_potential_file
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore 
  use m_xmpi
  use m_harmonics_terms
  use m_anharmonics_terms
