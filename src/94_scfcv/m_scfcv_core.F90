@@ -162,6 +162,7 @@ contains
 !!  fatvshift=factor to multiply dtset%atvshift
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*my_nspinor*mband*mkmem*nsppol
+!!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)= # atoms of each type.
@@ -190,6 +191,7 @@ contains
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions; if mkmem>=nkpt, these are kept in a disk file.
+!!  cprj(natom,mcprj*usecprj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each NL proj |p_lmn>
 !!  dtefield <type(efield_type)> = variables related to Berry phase
 !!  dtorbmag <type(orbmag_type)> = variables related to orbital magnetization
 !!  dtpawuj(ndtpawuj)= data used for the automatic determination of U
@@ -1100,8 +1102,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
          ABI_DEALLOCATE(workr)
        else if (abs(dtset%densfor_pred)==5.or.abs(dtset%densfor_pred)==6) then
          scf_history%icall=scf_history%icall+1
-         call extraprho(atindx,atindx1,cg,dtset,gmet,gprimd,gsqcut,&
-&         scf_history%icall,kg,mcg,mgfftf,mpi_enreg,psps%mqgrid_vl,&
+         call extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,&
+&         scf_history%icall,kg,mcg,mcprj,mgfftf,mpi_enreg,psps%mqgrid_vl,&
 &         my_natom,nattyp,nfftf,ngfftf,npwarr,psps%ntypat,pawrhoij,pawtab,&
 &         ph1df,psps,psps%qgrid_vl,rhor,rprimd,scf_history,ucvol,&
 &         psps%usepaw,xred,xred_old,ylm,psps%ziontypat,psps%znuclpsp)
@@ -1158,7 +1160,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0 .and. .not. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) )then
          call wf_mixing(atindx1,cg,cprj,dtset,istep_fock_outer,mcg,mcprj,mpi_enreg,&
-&         nattyp,npwarr,pawtab,scf_history_wf,0)
+&         nattyp,npwarr,pawtab,scf_history_wf)
          istep_fock_outer=istep_fock_outer+1
 
 !DEBUG
@@ -2723,7 +2725,6 @@ end subroutine etotfor
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(dtset%ntypat)=number of atoms of each type in cell.
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
-!!  option= 1 for wf prediction for molecular dynamics; 0 otherwise.
 !!  pawtab(dtset%ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!
 !! SIDE EFFECTS
@@ -2746,7 +2747,7 @@ end subroutine etotfor
 !! SOURCE
 
 subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
-& nattyp,npwarr,pawtab,scf_history_wf,option)
+& nattyp,npwarr,pawtab,scf_history_wf)
 
  !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj, dotprodm_sumdiag_cgcprj, lincom_cgcprj, cgcprj_cholesky
@@ -2761,7 +2762,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istep,mcg,mcprj,option
+ integer,intent(in) :: istep,mcg,mcprj
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(scf_history_type),intent(inout) :: scf_history_wf
@@ -2777,7 +2778,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  integer :: hermitian
  integer :: ibdmix,ibdsp,ibg,ibg_hist,icg,icg_hist
  integer :: ierr,ikpt,indh,ind_biorthog,ind_biorthog_eff,ind_newwf,ind_residual,inplace
- integer :: iset2,isppol,istep_cycle,istep_new,istwf_k,kk,me_distrb,my_nspinor
+ integer :: iorder,iset2,isppol,istep_cycle,istep_new,istwf_k,kk,me_distrb,my_nspinor
  integer :: nband_k,nbdmix,npw_k,nset1,nset2,ntypat
  integer :: shift_set1,shift_set2,spaceComm_band,spare_mem,usepaw,wfmixalg
  real(dp) :: alpha,beta
@@ -2824,11 +2825,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !scf_history_wf%alpha contains dtset%wfmix
  alpha=scf_history_wf%alpha
  beta=one-scf_history_wf%alpha
- if(option==1) then
-   wfmixalg=3
-   beta=scf_history_wf%beta
-   nbdmix=dtset%mband
- end if
  icg=0
  icg_hist=0
  ibg=0
@@ -2837,6 +2833,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !Useful array
  ABI_ALLOCATE(dimcprj,(dtset%natom))
  if (usepaw==1) then
+   iorder=0 ! There is no change of ordering in the mixing of wavefunctions
    call pawcprj_getdim(dimcprj,dtset%natom,nattyp,ntypat,dtset%typat,pawtab,'O')
  end if
 
@@ -2858,14 +2855,12 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  if(wfmixalg>2)then
    nset1=1
    nset2=min(istep-1,wfmixalg-1)
-   if(option==0) then
-     ABI_ALLOCATE(dotprod_res_k,(2,1,nset2))
-     ABI_ALLOCATE(dotprod_res,(2,1,nset2))
-     ABI_ALLOCATE(res_mn,(2,wfmixalg-1,wfmixalg-1))
-     dotprod_res=zero
-     if(istep==1)then
-       scf_history_wf%dotprod_sumdiag_cgcprj_ij=zero
-     end if
+   ABI_ALLOCATE(dotprod_res_k,(2,1,nset2))
+   ABI_ALLOCATE(dotprod_res,(2,1,nset2))
+   ABI_ALLOCATE(res_mn,(2,wfmixalg-1,wfmixalg-1))
+   dotprod_res=zero
+   if(istep==1)then
+     scf_history_wf%dotprod_sumdiag_cgcprj_ij=zero
    end if
  end if
 
@@ -2902,10 +2897,10 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
        scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
        if(usepaw==1) then
 !        scf_history_wf%cprj(:,ibg_hist+1:ibg_hist+my_nspinor*nbdmix,1)=cprj(:,ibg+1:ibg+my_nspinor*nbdmix)
-         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
+         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,iorder,isppol,dtset%mband,&
 &         dtset%mkmem,dtset%natom,nbdmix,nband_k,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,iorder,isppol,&
 &         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
        end if
@@ -2954,10 +2949,10 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      Biorthogonalization
 
        if(usepaw==1) then
-         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,1,isppol,dtset%mband,&
+         call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,iorder,isppol,dtset%mband,&
 &         dtset%mkmem,dtset%natom,nbdmix,nband_k,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         call pawcprj_get(atindx1,cprj_kh,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+         call pawcprj_get(atindx1,cprj_kh,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,iorder,isppol,&
 &         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
        end if  !end usepaw=1
@@ -2969,7 +2964,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 &         mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        else
          call dotprod_set_cgcprj(atindx1,scf_history_wf%cg(:,:,indh),cg,cprj_kh,cprj_k,dimcprj,hermitian,&
-&         0,0,icg,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
+&         0,0,icg_hist,icg,ikpt,isppol,istwf_k,nbdmix,mcg,mcg,mcprj,mcprj,dtset%mkmem,&
 &         mpi_enreg,dtset%natom,nattyp,nbdmix,nbdmix,npw_k,my_nspinor,dtset%nsppol,ntypat,pawtab,smn,usepaw)
        end if
 
@@ -3027,7 +3022,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,indh)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
          if(usepaw==1) then
            do ibdmix=1,nbdmix
-             call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+             call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,indh),dtset%natom,1,ibg_hist,ikpt,iorder,isppol,&
 &             nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
 &             mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
            end do ! end loop on ibdmix
@@ -3041,7 +3036,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
            scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,1)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
            if(usepaw==1) then
              do ibdmix=1,nbdmix
-               call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,1),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+               call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,1),dtset%natom,1,ibg_hist,ikpt,iorder,isppol,&
 &               nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
 &               mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
              end do ! end loop on ibdmix
@@ -3050,27 +3045,26 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
          ind_biorthog_eff=ind_biorthog
          if(istep==2)ind_biorthog_eff=1 ! The argument wf has not been stored in ind_biorthog
-         if(option==0) then
-!          Compute the residual of the wavefunctions for this istep,
-!          that replaces the previously stored set of (biorthogonalized) input wavefunctions
-           scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)=&
-&           scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)&
-&           -scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
-           if(usepaw==1) then
-             do ibdmix=1,nbdmix
-               call pawcprj_axpby(one,-one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff),&
-&               scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual))
-             end do ! end loop on ibdmix
-           end if
-
-!          Compute the new scalar products to fill the res_mn matrix
-           call dotprodm_sumdiag_cgcprj(atindx1,scf_history_wf%cg,scf_history_wf%cprj,dimcprj,&
-&           ibg,icg,ikpt,isppol,istwf_k,nbdmix,mcg,mcprj,dtset%mkmem,&
-&           mpi_enreg,scf_history_wf%history_size,dtset%natom,nattyp,nbdmix,npw_k,nset1,nset2,my_nspinor,dtset%nsppol,ntypat,&
-&           shift_set1,shift_set2,pawtab,dotprod_res_k,usepaw)
-
-           dotprod_res=dotprod_res+dotprod_res_k
+!        Compute the residual of the wavefunctions for this istep,
+!        that replaces the previously stored set of (biorthogonalized) input wavefunctions
+         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)=&
+&         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)&
+&         -scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_residual)
+         if(usepaw==1) then
+           do ibdmix=1,nbdmix
+             call pawcprj_axpby(one,-one,scf_history_wf%cprj(:,ibdmix:ibdmix,ind_biorthog_eff),&
+&             scf_history_wf%cprj(:,ibdmix:ibdmix,ind_residual))
+           end do ! end loop on ibdmix
          end if
+
+!        Compute the new scalar products to fill the res_mn matrix
+         call dotprodm_sumdiag_cgcprj(atindx1,scf_history_wf%cg,scf_history_wf%cprj,dimcprj,&
+&         ibg_hist,icg_hist,ikpt,isppol,istwf_k,nbdmix,mcg,mcprj,dtset%mkmem,&
+&         mpi_enreg,scf_history_wf%history_size,dtset%natom,nattyp,nbdmix,npw_k,nset1,nset2,my_nspinor,dtset%nsppol,ntypat,&
+&         shift_set1,shift_set2,pawtab,dotprod_res_k,usepaw)
+
+         dotprod_res=dotprod_res+dotprod_res_k
+
 !        scf_history_wf for index ind_biorthog will contain the extrapolated wavefunctions (and no more the output of the SCF loop).
          scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog)=&
 &         scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_biorthog_eff)+&
@@ -3211,7 +3205,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 !      Store the newly extrapolated wavefunctions for this k point, still bi-orthonormalized, in scf_history_wf
        scf_history_wf%cg(:,icg_hist+1:icg_hist+my_nspinor*npw_k*nbdmix,ind_newwf)=cg(:,icg+1:icg+my_nspinor*npw_k*nbdmix)
        if(usepaw==1) then
-         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,ind_newwf),dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+         call pawcprj_put(atindx1,cprj_k,scf_history_wf%cprj(:,:,ind_newwf),dtset%natom,1,ibg_hist,ikpt,iorder,isppol,&
 &         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
        end if
@@ -3222,7 +3216,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
 !      Need to transfer cprj_k to cprj
        if(usepaw==1) then
-         call pawcprj_put(atindx1,cprj_k,cprj,dtset%natom,1,ibg_hist,ikpt,1,isppol,&
+         call pawcprj_put(atindx1,cprj_k,cprj,dtset%natom,1,ibg,ikpt,iorder,isppol,&
 &         nbdmix,dtset%mkmem,dtset%natom,nbdmix,nbdmix,dimcprj,my_nspinor,dtset%nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,proc_distrb=mpi_enreg%proc_distrb)
        end if
@@ -3261,7 +3255,7 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
  ABI_DEALLOCATE(dimcprj)
  ABI_DEALLOCATE(mmn)
  ABI_DEALLOCATE(smn)
- if(wfmixalg>2.and.option==0)then
+ if(wfmixalg>2)then
    ABI_DEALLOCATE(dotprod_res_k)
    ABI_DEALLOCATE(dotprod_res)
    ABI_DEALLOCATE(res_mn)

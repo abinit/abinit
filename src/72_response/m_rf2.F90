@@ -603,6 +603,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > tol_test) then
        write(msg,'(a,es17.8E3)') 'RF2 TEST GETGHC : NOT PASSED dotr = ',dotr
+       call wrtout(ab_out,msg)
        call wrtout(std_out,msg)
      end if
    end if ! end tests
@@ -639,7 +640,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (dotr > tol_test) then
          write(msg,'(4(a,i2),a,es17.8E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
                                             ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg)
+         call wrtout(std_out,msg)
        end if
      end do ! end iband
      ABI_DEALLOCATE(iddk)
@@ -779,7 +781,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > 10*tol_test) then
        write(msg,'(a,es17.8E3)') 'RF2 TEST GETGH2C : NOT PASSED dotr = ',dotr
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg)
+       call wrtout(std_out,msg)
      end if
 
 !    Change the pointer ffnl_k back to ffnl1 (idir_ffnl=4, for nonlop with signs=2)

@@ -49,6 +49,7 @@ module m_mkrho
  use m_sort,         only : sort_dp
  use m_prep_kgb,     only : prep_fourwf
  use m_wvl_rho,      only : wvl_mkrho
+ use m_rot_cg,       only : rot_cg
 
  implicit none
 
@@ -130,7 +131,7 @@ contains
 !!
 !! CHILDREN
 !!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn
-!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum
+!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum,diag_occ_rot_cg
 !!
 !! SOURCE
 
@@ -191,6 +192,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp),allocatable :: occ_k(:),rhoaug(:,:,:),rhoaug_down(:,:,:)
  real(dp),allocatable :: rhoaug_mx(:,:,:),rhoaug_my(:,:,:),rhoaug_up(:,:,:)
  real(dp),allocatable :: taur_alphabeta(:,:,:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: occ_diag(:)
+! real(dp),allocatable :: occ_nd(2, :, :)
+ real(dp),allocatable :: cwavef_rot(:,:,:,:)
 
 ! *************************************************************************
 
@@ -391,8 +395,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
                    if (my_nspinor==2) cwavefb(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
                    weight  =paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
-                   if(dtset%nspinor==1) weight_i=zero
-                   if(dtset%nspinor==2) weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                   weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
 
                  else
                    weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
@@ -495,6 +498,20 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            ABI_ALLOCATE(occ_k,(nband_k))
            occ_k(:)=occ(bdtot_index+1:bdtot_index+nband_k)
 
+! ---------- DMFT
+           if(allocated(cwavef_rot))  then
+             ABI_DEALLOCATE(cwavef_rot)
+             ABI_DEALLOCATE(occ_diag)
+             ! ABI_DEALLOCATE(occ_nd)
+           end if
+           if(paw_dmft%use_sc_dmft==1) then
+             ! Allocation of DMFT temporaries arrays
+             ABI_ALLOCATE(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
+             ABI_ALLOCATE(occ_diag,(blocksize))
+             ! ABI_ALLOCATE(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
+           end if
+! ---------- END DMFT
+
            do iblock=1,nbdblock
              if (dtset%nspinor==1) then
                cwavef(:,1:npw_k*blocksize,1)=cg(:,1+(iblock-1)*npw_k*blocksize+icg:iblock*npw_k*blocksize+icg)
@@ -515,6 +532,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  call xmpi_sum(cwavef,mpi_enreg%comm_spinor,ierr)
                end if
              end if
+
              if(ioption==1)then
 !              Multiplication by 2pi i (k+G)_alpha
                gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
@@ -535,6 +553,27 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              else if(ioption==2)then
                MSG_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
+
+! ---------- DMFT
+             if(paw_dmft%use_sc_dmft==1) then
+               ! initialisation of DMFT arrays
+               cwavef_rot(:,:,:,:) = zero
+               occ_diag(:) = zero
+               ! occ_nd(:,:,:,:) = paw_dmft%occnd(:,:,:,ikpt,:)
+
+               do ib=1,blocksize
+                 cwavef_rot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
+               end do
+
+               call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
+&                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag) 
+               do ib=1,blocksize
+                 cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
+               end do
+               
+               occ_k(:) = occ_diag(:)
+             end if
+! ---------- END DMFT
 
              call timab(538,1,tsec)
              if (nspinor1TreatedByThisProc) then
@@ -642,6 +681,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      ABI_DEALLOCATE(cwavefb)
      ABI_DEALLOCATE(rhoaug)
      ABI_DEALLOCATE(wfraug)
+
+     if(allocated(cwavef_rot))  then
+       ABI_DEALLOCATE(cwavef_rot)
+       ABI_DEALLOCATE(occ_diag)
+       ! ABI_DEALLOCATE(occ_nd)
+     end if
 
 !    Recreate full rhor on all proc.
      call timab(48,1,tsec)

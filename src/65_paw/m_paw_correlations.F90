@@ -1658,6 +1658,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_ALLOCATE(noccmmp2,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
        end if
        if(ndij==4)  then
+         if(allocated(nocctot2)) then
+           ABI_DEALLOCATE(nocctot2)
+         end if
          ABI_ALLOCATE(nocctot2,(ndij))
        end if
        do ispden=1,ndij

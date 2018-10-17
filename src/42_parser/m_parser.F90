@@ -238,7 +238,8 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      errcod=1
    end if
 
- else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI') then
+ else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' & 
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
 !  real(dp) input section
 
@@ -327,7 +328,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
  else
    write(msg,'(4a)' ) &
-&   'Argument typevarphys must be INT,DPR,LEN,ENE,BFI or LOG ',ch10,&
+&   'Argument typevarphys must be INT,DPR,LEN,ENE,BFI,TIM or LOG ',ch10,&
 &   'but input value was: ',trim(typevarphys)
    MSG_ERROR(msg)
  end if
@@ -1402,7 +1403,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  tread = 0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  if(typevarphys=='KEY')then
    if(opttoken>=2)then
      write(message, '(9a)' )&
@@ -1540,6 +1542,7 @@ end subroutine intagm
 !!       and return in au -atomic units=bohr- )
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
 !!   'BFI'=>real(dp) (expect a "magnetic field", identify T, Tesla)
+!!   'TIM'=>real(dp) (expect a "time", identify S, Second)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in token cs
 !!
@@ -1604,7 +1607,8 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  ii=0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  & 
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  strln=len_trim(string)
 
  do while (ii<narr)
@@ -1688,8 +1692,9 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    MSG_ERROR(message)
  end if
 
-!In case of 'LEN', 'ENE', or 'BFI', try to identify the unit
- if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')then
+!In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
+if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
+&    .or. typevarphys=='TIM')then
    do
 
 !    Relative location of next blank after data
@@ -1699,8 +1704,10 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      if(b2==0) b2=strln-b1+1
 
 !    DEBUG
-!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+!    write(std_out,*)' inarray : strln=',strln
+!    write(std_out,*)' inarray : b1=',b1
 !    write(std_out,*)' inarray : b2=',b2
+!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
 !    write(std_out,*)' typevarphys==',typevarphys
 !    ENDDEBUG
 
@@ -1726,7 +1733,11 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
          if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE')then
            factor=BField_Tesla
          end if
-       end if
+       else if (typevarphys=='TIM' .and. b2>=2) then
+         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
+           factor=one/Time_Sec
+         end if
+       endif
        dprarr(1:narr)=dprarr(1:narr)*factor
        exit
      else
@@ -2876,7 +2887,7 @@ end subroutine chkint_prt
 !! prttagm
 !!
 !! FUNCTION
-!! Eventually print the content of dprarr (if typevarphys='DPR','LEN', 'ENE' and 'BFI'),
+!! Eventually print the content of dprarr (if typevarphys='DPR','LEN', 'ENE', 'TIM' and 'BFI'),
 !! or intarr (if typevarphys='INT'), arrays of effective dimensions narr and 0:ndtset_alloc
 !! For the second dimension, the 0 index relates to a default.
 !! Print the array only if the content for at least one value of the second
@@ -2923,6 +2934,7 @@ end subroutine chkint_prt
 !!   'LEN'=>real(dp) (output in bohr and angstrom)
 !!   'ENE'=>real(dp) (output in hartree and eV)
 !!   'BFI'=>real(dp) (output in Tesla)
+!!   'TIM'=>real(dp) (output in second)
 !!  use_narrm= if 0, use of scalar 'narr' instead of array 'narrm'
 !!  [firstchar]= (optional) first character of the line (default=' ')
 !!  [forceprint]= (optional) control if output is forced even if a variable is equal to its default value:
@@ -3119,9 +3131,9 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
      end if !(print==1)
 
 !    ###########################################################
-!    ### 03. Treatment of real 'DPR', 'LEN', 'ENE', 'BFI'
+!    ### 03. Treatment of real 'DPR', 'LEN', 'ENE', 'BFI', 'TIM'
 
-   else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI') then
+   else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
      if((ndtset_alloc>1).and.(use_narrm==0))then
        do idtset=1,ndtset_alloc
@@ -3195,7 +3207,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(abs(length)==1)format_dp=digit//short_dpr
            if(abs(length)==2)format_dp=digit//long_dpr
            if(abs(length)==6)format_dp=digit//veryshort_dpr
-         else if(typevarphys=='ENE' .or. typevarphys=='LEN' .or. typevarphys=='BFI')then
+   else if(typevarphys=='ENE' .or. typevarphys=='LEN' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
            if (narr<10) write(digit,'(i1)')narr_eff
            if (narr> 9) write(digit,'(i2)')narr_eff
            if(abs(length)==1)format_dp=digit//short_dim
@@ -3228,6 +3240,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='ENE')out_unit=' Hartree'
            if(typevarphys=='LEN')out_unit=' Bohr   '
            if(typevarphys=='BFI')out_unit='   ' !EB remove Tesla unit
+           if(typevarphys=='TIM')out_unit=' Second' !EB remove Tesla unit
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
              appen=' '
@@ -3260,7 +3273,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
      end if
 
 !    ###########################################################
-!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI'
+!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI','TIM'
    else
      MSG_BUG('Disallowed typevarphys = '//TRIM(typevarphys))
    end if

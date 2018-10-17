@@ -94,6 +94,7 @@ Summary of important options:
   * MPI    enabled  : ${enable_mpi}
   * MPI-IO enabled  : ${enable_mpi_io}
   * GPU    enabled  : ${enable_gpu} (flavor: ${lib_gpu_flavor})
+  * XML    enabled  : ${enable_xml}
 
   * TRIO   flavor = ${lib_trio_flavor}
   * TIMER  flavor = ${lib_timer_flavor} (libs: ${tmp_rep_timer_libs})
