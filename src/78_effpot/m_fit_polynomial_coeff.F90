@@ -498,7 +498,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
-!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
+!each atoms and each step  (see equations 11 & 12 of  
+!PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]]+ allocation
 !If the user does not turn off this initialization, we store all the informations for the fit,
 !it will reduce the computation time but increase a lot the memory...
  if(need_initialize_data)then
@@ -700,10 +701,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
 
 !      call the fit process routine
-!      This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!      This routine solves the linear system proposed 
+!      by C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
        call fit_polynomial_coeff_solve(coeff_values(1:icycle),fcart_coeffs_tmp,fit_data%fcart_diff,&
-&                                      info,list_coeffs_tmp(1:icycle),natom_sc,icycle,&
-&                                      ncycle_max,ntime,strten_coeffs_tmp,fit_data%strten_diff,&
+&                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
+&                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncycle_max,ntime,&
+&                                      strten_coeffs_tmp,fit_data%strten_diff,&
 &                                      fit_data%training_set%sqomega)
        if(info==0)then
          if (need_positive.and.any(coeff_values(nfixcoeff+1:icycle) < zero)) then
@@ -931,10 +934,12 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !TEST_AM
 
 !      call the fit process routine
-!      This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!      This routine solves the linear system proposed by 
+!      C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
        call fit_polynomial_coeff_solve(coeff_values(1:icycle_tmp),fcart_coeffs_tmp,fit_data%fcart_diff,&
-&                                      info,list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp,&
-&                                      ncycle_max,ntime,strten_coeffs_tmp,fit_data%strten_diff,&
+&                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
+&                                      list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp,ncycle_max,&
+&                                      ntime,strten_coeffs_tmp,fit_data%strten_diff,&
 &                                      fit_data%training_set%sqomega)
        if(info==0)then
          call fit_polynomial_coeff_computeGF(coeff_values(1:icycle_tmp),energy_coeffs_tmp,&
@@ -1021,12 +1026,14 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    end do
  end select
 
-!This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!This routine solves the linear system proposed by 
+! C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
  if(ncycle_tot > 0)then
 
    call fit_polynomial_coeff_solve(coeff_values(1:ncycle_tot),fcart_coeffs_tmp,fit_data%fcart_diff,&
-&                                  info,list_coeffs_tmp(1:ncycle_tot),natom_sc,ncycle_tot,&
-&                                  ncycle_max,ntime,strten_coeffs_tmp,&
+&                                  energy_coeffs_tmp,fit_data%energy_diff,info,&
+&                                  list_coeffs_tmp(1:ncycle_tot),natom_sc,&
+&                                  ncycle_tot,ncycle_max,ntime,strten_coeffs_tmp,&
 &                                  fit_data%strten_diff,fit_data%training_set%sqomega)
 
    if(need_verbose) then
@@ -1260,7 +1267,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  end do
 
 !Get the decomposition for each coefficients of the forces and stresses for
-!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017)
+!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
  if(need_verbose)then
    write(message, '(a)' ) ' Initialisation of the fit process...'
    call wrtout(std_out,message,'COLL')
