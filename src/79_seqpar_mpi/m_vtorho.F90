@@ -231,7 +231,7 @@ contains
 !!  energies <type(energies_type)>=storage for energies computed here :
 !!   | e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
 !!   | e_kinetic=kinetic energy part of total energy
-!!   | e_nonlocalpsp=nonlocal pseudopotential part of total energy
+!!   | e_nlpsp_vfock=nonlocal pseudopotential part of total energy
 !!   | e_fermie=fermi energy (Hartree)
 !!  occ(mband*nkpt*nsppol)=occupation number for each band for each k.
 !!      (input if insulator - occopt<3 - ; output if metallic)
@@ -450,7 +450,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(.not. wvlbigdft) then
    energies%e_eigenvalues = zero
    energies%e_kinetic     = zero
-   energies%e_nonlocalpsp = zero
+   energies%e_nlpsp_vfock = zero
    if (usefock) then
      energies%e_fock=zero
      energies%e_fockdc=zero
@@ -622,7 +622,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nsppol,occ,dtset%wtk)
    else
      energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
-&     + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
+&     + energies%e_xcdc  + two*energies%e_hartree +energies%e_nlpsp_vfock
    end if
 
    if (optforces == 1) then ! not compatible with iscf=0 and wvlbigdftcomp=1 + PAW
@@ -995,7 +995,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            if (abs(occ_k(iband))>tol8) then
              energies%e_kinetic     = energies%e_kinetic     + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
-             energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enlx_k(iband)
+             energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + dtset%wtk(ikpt)*occ_k(iband)*enlx_k(iband)
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
              if (usefock) energies%e_fock=energies%e_fock + half*fock%fock_common%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
            end if
@@ -1351,7 +1351,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Compute eeig, ek,enl and grnl from the new occ, and the shared eknk,enlxnk,grnlnk
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
-     energies%e_nonlocalpsp = zero
+     energies%e_nlpsp_vfock = zero
      if (usefock) then
        energies%e_fock     = zero
        if (optforces>0) fock%fock_common%forces=zero
@@ -1402,7 +1402,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &             dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
              energies%e_kinetic = energies%e_kinetic + &
 &             dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
-             energies%e_nonlocalpsp = energies%e_nonlocalpsp + &
+             energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + &
 &             dtset%wtk(ikpt)*occ(bdtot_index)*enlxnk(bdtot_index)
              if (usefock) then
                energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
@@ -1484,7 +1484,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          buffer1(index1+1) = energies%e_kinetic
          buffer1(index1+2) = energies%e_eigenvalues
-         buffer1(index1+3) = energies%e_nonlocalpsp
+         buffer1(index1+3) = energies%e_nlpsp_vfock
          index1=index1+3
 !        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
@@ -1528,7 +1528,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          energies%e_kinetic = buffer1(index1+1)
          energies%e_eigenvalues = buffer1(index1+2)
-         energies%e_nonlocalpsp = buffer1(index1+3)
+         energies%e_nlpsp_vfock = buffer1(index1+3)
          index1=index1+3
 !        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
@@ -1912,7 +1912,7 @@ subroutine wvl_nscf_loop()
 
 !  Update energies depending on new WF
    energies%e_kinetic=ekin
-   energies%e_nonlocalpsp=enl
+   energies%e_nlpsp_vfock=enl
    energies%e_exactX=eexctx
    energies%e_sicdc=esicdc
 
@@ -2005,7 +2005,7 @@ subroutine wvl_nscf_loop_bigdft()
      do inonsc = 2, nnsclo_now-1
        call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
 &       energies%e_hartree, energies%e_kinetic, energies%e_localpsp, &
-&       energies%e_nonlocalpsp, energies%e_sicdc, istep, inonsc, iscf_, &
+&       energies%e_nlpsp_vfock, energies%e_sicdc, istep, inonsc, iscf_, &
 &       mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
 &       dtset%nspden, nres2, do_scf,energies%e_xcdc, &
 &       wvl, wvlbigdft, xcart, strsxc)
@@ -2025,7 +2025,7 @@ subroutine wvl_nscf_loop_bigdft()
 !    !Update energies and potential (nscf cycles are not finished)
      call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
 &     energies%e_hartree,energies%e_kinetic, energies%e_localpsp, &
-&     energies%e_nonlocalpsp, energies%e_sicdc, istep, nnsclo_now, iscf_, &
+&     energies%e_nlpsp_vfock, energies%e_sicdc, istep, nnsclo_now, iscf_, &
 &     mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
 &     dtset%nspden, nres2, do_scf,energies%e_xcdc, &
 &     wvl, wvlbigdft, xcart, strsxc)
