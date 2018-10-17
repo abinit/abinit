@@ -32,6 +32,7 @@ module m_common
  use m_errors
  use m_abicore
  use m_exit
+ use m_fftcore
  use m_fock
  use m_io_tools
 #if defined DEV_YP_VDWXC
@@ -40,7 +41,7 @@ module m_common
 
  use m_fstrings,         only : indent
  use m_electronpositron, only : electronpositron_type
-use m_energies,          only : energies_type, energies_eval_eint
+ use m_energies,          only : energies_type, energies_eval_eint
 
  implicit none
 
@@ -135,7 +136,7 @@ contains
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  quit= 0 if the SCF cycle is not finished ; 1 otherwise.
+!!  quit= 0 if the SCF cycle is not finished; 1 otherwise.
 !!  conv_retcode=Only if choice==3, != 0 if convergence is not achieved.
 !!
 !! PARENTS
@@ -188,13 +189,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  integer,parameter :: master=0
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  integer :: iatom,iband,iexit,ikpt,isppol,nband_index,nband_k,openexit,option, ishift
- integer :: tmagnet, my_rank
+ integer :: tmagnet, my_rank, ii
 #if defined DEV_YP_VDWXC
  integer :: ivdw
 #endif
  real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
  real(dp) :: diff_e,diff_f,magnet,rhodn,rhoup
- logical :: noquit
+ logical :: noquit,use_dpfft
  character(len=500) :: message, message2, message3
  character(len=2) :: format_istep
  character(len=5) :: format_magnet
@@ -211,6 +212,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  my_rank = mpi_enreg%me_cell
 
  quit=0; conv_retcode=0
+ use_dpfft = .False.
 
  tmagnet=0
  if(response==0.and.(iscf>0.or.iscf==-3).and.dtset%nsppol==2.and.dtset%occopt>2)tmagnet=1
@@ -530,24 +532,29 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #endif
      ! Here treat the tolwfr criterion: if maximum residual is less than
      ! input tolwfr, stop steps (exit loop here)
-     if( ttolwfr==1 .and. residm<tolwfr .and. (.not.noquit)) then
-       if (dtset%usewvl == 0) then
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
-&         ' At SCF step',istep,'   max residual=',residm,' < tolwfr=',tolwfr,' =>converged.'
+     if (ttolwfr == 1 .and. .not. noquit) then
+       if (residm < tolwfr) then
+         if (dtset%usewvl == 0) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
+           ' At SCF step',istep,'   max residual=',residm,' < tolwfr=',tolwfr,' =>converged.'
+         else
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
+           ' At SCF step',istep,'   max grdnorm=',residm,' < tolwfr=',tolwfr,' =>converged.'
+         end if
+         call wrtout(ab_out,message,'COLL')
+         call wrtout(std_out,message,'COLL')
+         quit=1
        else
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
-&         ' At SCF step',istep,'   max grdnorm=',residm,' < tolwfr=',tolwfr,' =>converged.'
+         use_dpfft = residm < tol7
        end if
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-       quit=1
      end if
+
      ! Here treat the toldff criterion: if maximum change of fcart is less than
      ! input toldff twice consecutively, stop steps (exit loop here)
-     if( ttoldff==1 ) then
-       if( istep==1 )then
+     if (ttoldff==1) then
+       if (istep==1) then
          toldff_ok=0
-       else if (diffor<toldff) then
+       else if (diffor < toldff) then
          toldff_ok=toldff_ok+1
          ! add warning for forces which are 0 by symmetry. Also added Matteo check below that the wave
          ! functions are relatively converged as well
@@ -559,8 +566,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          end if
        else
          toldff_ok=0
+         use_dpfft = diffor < tol6
        end if
-       if(toldff_ok==2 .and. (.not.noquit))then
+
+       if(toldff_ok==2 .and. .not.noquit)then
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
 &         ' At SCF step',istep,', forces are converged : ',ch10,&
 &         '  for the second time, max diff in force=',diffor,' < toldff=',toldff
@@ -569,19 +578,21 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          quit=1
        end if
      end if
+
      ! Here treat the tolrff criterion: if maximum change of fcart is less than
      ! input tolrff times fcart itself twice consecutively, stop steps (exit loop here)
-     if( ttolrff==1 ) then
-       if( istep==1 )then
+     if (ttolrff==1) then
+       if (istep==1) then
          tolrff_ok=0
          ! 27/7/2009: added test for absolute value of maxfor, otherwise if it is 0 this never exits the scf loop.
-       else if (diffor<tolrff*maxfor .or. (maxfor < tol16 .and. diffor < tol16)) then
+       else if (diffor < tolrff*maxfor .or. (maxfor < tol16 .and. diffor < tol16)) then
          tolrff_ok=tolrff_ok+1
            ! Thu Mar 12 19:01:40 MG: added additional check on res2 to make sure the SCF cycle is close to convergence.
            ! Needed for structural relaxations otherwise the stress tensor is wrong and the relax algo makes wrong moves.
          if (maxfor < tol16 .and. res2 > tol9) tolrff_ok=0
        else
          tolrff_ok=0
+         use_dpfft = diffor < tolrff * maxfor * five
        end if
        if(tolrff_ok==2 .and. (.not.noquit))then
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
@@ -593,17 +604,19 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          quit=1
        end if
      end if
+
      ! Here treat the toldfe criterion: if the change of energy is less than
      ! input toldfe twice consecutively, stop steps (exit loop here)
-     if( ttoldfe==1 ) then
-       if( istep==1 )then
+     if (ttoldfe==1) then
+       if (istep==1) then
          toldfe_ok=0
        else if (abs(deltae)<toldfe) then
          toldfe_ok=toldfe_ok+1
        else
          toldfe_ok=0
+         use_dpfft = abs(deltae) < tol8
        end if
-       if(toldfe_ok==2 .and. (.not.noquit))then
+       if(toldfe_ok==2 .and. .not.noquit)then
          write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
 &         ' At SCF step',istep,', etot is converged : ',ch10,&
 &         '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
@@ -611,6 +624,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          call wrtout(std_out,message,'COLL')
          quit=1
        end if
+
        ! Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
        ! calculations: If input vdw_df_threshold is lesss than toldfe
        ! then the vdW-DF is triggered once selfconsistency criteria is
@@ -630,19 +644,24 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
 #endif
      end if
+
      ! Here treat the tolvrs criterion: if density/potential residual (squared)
      ! is less than input tolvrs, stop steps (exit loop here)
-     if( ttolvrs==1 .and. res2<tolvrs .and. (.not.noquit)) then
-       if (optres==0) then
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-&         ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+     if (ttolvrs==1 .and. .not. noquit) then
+       if (res2 < tolvrs) then
+         if (optres==0) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+            ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+         else
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+            ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+         end if
+         call wrtout(ab_out,message,'COLL')
+         call wrtout(std_out,message,'COLL')
+         quit=1
        else
-         write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-&         ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+         use_dpfft = res2 < tol5
        end if
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-       quit=1
      end if
 
      if (quit==1.and.noquit) then
@@ -652,6 +671,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        call wrtout(std_out,message,'COLL')
      end if
 
+   end if
+
+   ! Activate FFT in double-precision.
+   if (use_dpfft) then
+     if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching convergence. Activating FFT in double-precision")
+     ii = fftcore_set_mixprec(0)
    end if
 
  case (3)

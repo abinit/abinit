@@ -170,11 +170,11 @@ integer function fftcore_set_mixprec(wp) result(old_wp)
  old_wp = fftcore_mixprec
  fftcore_mixprec = abs(wp)
 
- select case (abs(fftcore_mixprec))
+ select case (fftcore_mixprec)
  case (0)
-   call wrtout(std_out, " Using FFT in double-precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in double-precision.")
  case (1)
-   call wrtout(std_out, " Using FFT in mixed precision.")
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in mixed precision.")
  case default
    MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
  end select

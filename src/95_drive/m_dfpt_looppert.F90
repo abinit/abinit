@@ -61,6 +61,7 @@ module m_dfpt_loopert
  use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
  use m_fft,        only : fourdp
+ use m_fftcore,    only : fftcore_set_mixprec
  use m_kg,         only : getcut, getmpw, kpgio, getph
  use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
@@ -694,8 +695,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (mpi_enreg%distrb_pert(icase)/=mpi_enreg%me_pert) cycle
    end if
 
-!  *Redefine output/log files
+   ! Redefine output/log files
    call localwrfile(mpi_enreg%comm_cell,icase,npert_io,mpi_enreg%paral_pert,0)
+
+   ! Set precision for FFT libs.
+   ii = fftcore_set_mixprec(dtset%mixprec)
 
 !!  Retrieve type and direction of the perturbation
 !   if (pert_calc(icase) <= dtset%natom*3) then

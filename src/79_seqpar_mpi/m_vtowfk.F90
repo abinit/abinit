@@ -41,6 +41,7 @@ module m_vtowfk
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
  use m_paw_dmft,    only : paw_dmft_type
  use m_gwls_hamiltonian, only : build_H
+ use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
@@ -489,8 +490,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
-   if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
- end do !  End loop over inonsc (NON SELF-CONSISTENT LOOP)
+   if (iscf <= 0 .and. residk > dtset%tolwfr .and. residk < tol7) then
+     if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
+     ii = fftcore_set_mixprec(0)
+   end if
+
+   ! Exit loop over inonsc if converged
+   if (residk < dtset%tolwfr) exit
+ end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
@@ -614,7 +621,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end do
 #endif
 
-   if(iscf>0)then ! In case of fixed occupation numbers, accumulates the partial density
+   if(iscf>0)then
+     ! In case of fixed occupation numbers, accumulates the partial density
      if (fixed_occ .and. mpi_enreg%paral_kgb/=1) then
        if (abs(occ_k(iblock))>=tol8) then
          weight=occ_k(iblock)*wtk/gs_hamk%ucvol
@@ -818,7 +826,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers
  if(iscf>0 .and. fixed_occ .and. (prtvol>2 .or. ikpt<=nkpt_max) )then
-   write(message,'(a,i0)')' vtowfk : number of one-way 3D ffts skipped in vtowfk until now =',nskip
+   write(message,'(a,i0)')' vtowfk: number of one-way 3D ffts skipped in vtowfk until now =',nskip
    call wrtout(std_out,message,'PERS')
  end if
 
@@ -882,12 +890,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !###################################################################
 
- if (iscf<=0 .and. residk>dtset%tolwfr) then
-   write(message,'(a,2i5,a,es13.5)')&
-&   'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
+ if (iscf<=0 .and. residk > dtset%tolwfr) then
+   write(message,'(a,2(i0,1x),a,es13.5)')&
+&   'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid= ',residk
    MSG_WARNING(message)
  end if
-
 
 !Print out eigenvalues (hartree)
  if (prtvol>2 .or. ikpt<=nkpt_max) then
