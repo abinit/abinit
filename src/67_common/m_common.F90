@@ -1537,10 +1537,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (usepaw==0) then
        if(abs(energies%e_fock0)<tol8)then
          write(msg, '(a,es21.14)' ) &
-&         '    NL   psp  energy= ',energies%e_nonlocalpsp-energies%e_fock0
+&         '    NL   psp  energy= ',energies%e_nlpsp_vfock-energies%e_fock0
        else
          write(msg, '(a,es21.14)' ) &
-&         '    NL(psp+X) energy= ',energies%e_nonlocalpsp-energies%e_fock0
+&         '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
        endif
      else
        write(msg, '(a,es21.14)' ) &

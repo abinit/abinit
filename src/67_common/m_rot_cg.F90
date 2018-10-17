@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/diag_occ
+!!****f* ABINIT/m_rot_cg
 !! NAME
 !! m_rot_cg
 !!
@@ -48,8 +48,8 @@ module m_rot_cg
   public :: rot_cg
 
   contains
+!!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/diag_occ
 !! NAME
 !! diag_occ
@@ -176,8 +176,8 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
   DBG_EXIT("COLL")
 
 end subroutine diag_occ
+!!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/rot_cg
 !! NAME
 !! rot_cg
@@ -313,7 +313,7 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
   
   DBG_EXIT("COLL")
 
-end subroutine rot_cg
-!!***
+ end subroutine rot_cg
 
 end module m_rot_cg
+!!***

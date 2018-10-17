@@ -220,7 +220,7 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' kinetic="', trim(value) ,'"'
    write(value, "(es20.8)") results_gs%energies%e_localpsp
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' local="', trim(value) ,'"'
-   write(value, "(es20.8)") results_gs%energies%e_nonlocalpsp
+   write(value, "(es20.8)") results_gs%energies%e_nlpsp_vfock
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' non-local="', trim(value) ,'"'
    if (usepaw == 1) then
      write(value, "(es20.8)") results_gs%energies%e_paw

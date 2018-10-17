@@ -286,6 +286,6 @@ conflict marker checker (util/source/check-conflict-markers.py).
 Other news
 ----------
 
-More news can be found in the ~abinit/doc/release_notes/ directory,
+More news can be found in the [release-notes directory](https://docs.abinit.org/about/release-notes),
 more specifically in the latest of the release_notes_v*.*. files.
 
