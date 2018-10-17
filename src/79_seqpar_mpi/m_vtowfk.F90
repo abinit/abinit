@@ -212,7 +212,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
- real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnl(:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! **********************************************************************
@@ -283,14 +283,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
 
    ABI_ALLOCATE(subvnlx,(0))
-   ABI_ALLOCATE(totvnl,(0,0))
+   ABI_ALLOCATE(totvnlx,(0,0))
    if (gs_hamk%usepaw==0) then
      if (wfopta10==4) then
-       ABI_DEALLOCATE(totvnl)
+       ABI_DEALLOCATE(totvnlx)
        if (istwf_k==1) then
-         ABI_ALLOCATE(totvnl,(2*nband_k,nband_k))
+         ABI_ALLOCATE(totvnlx,(2*nband_k,nband_k))
        else if (istwf_k==2) then
-         ABI_ALLOCATE(totvnl,(nband_k,nband_k))
+         ABI_ALLOCATE(totvnlx,(nband_k,nband_k))
        end if
      else
        ABI_DEALLOCATE(subvnlx)
@@ -330,7 +330,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
        if (wfopta10==4) then
-         totvnl(:,:)=zero
+         totvnlx(:,:)=zero
        else
          subvnlx(:)=zero
        end if
@@ -373,13 +373,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        if (wfopta10==4) then
          if ( .not. newlobpcg ) then
            call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnl)
+&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx)
 !          In case of FFT parallelism, exchange subspace arrays
            spaceComm=mpi_enreg%comm_bandspinorfft
            call xmpi_sum(subham,spaceComm,ierr)
            if (gs_hamk%usepaw==0) then
              if (wfopta10==4) then
-               call xmpi_sum(totvnl,spaceComm,ierr)
+               call xmpi_sum(totvnlx,spaceComm,ierr)
              else
                call xmpi_sum(subvnlx,spaceComm,ierr)
              end if
@@ -833,7 +833,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      enl_k(1:nband_k)=zero
 
      if (istwf_k==1) then
-       call zhemm('l','l',nband_k,nband_k,cone,totvnl,nband_k,evec,nband_k,czero,mat1,nband_k)
+       call zhemm('l','l',nband_k,nband_k,cone,totvnlx,nband_k,evec,nband_k,czero,mat1,nband_k)
        do iband=1,nband_k
          res = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
          enl_k(iband)= res
@@ -846,7 +846,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            evec_loc(iband,jj)=evec(2*iband-1,jj)
          end do
        end do
-       call dsymm('l','l',nband_k,nband_k,one,totvnl,nband_k,evec_loc,nband_k,zero,mat_loc,nband_k)
+       call dsymm('l','l',nband_k,nband_k,one,totvnlx,nband_k,evec_loc,nband_k,zero,mat_loc,nband_k)
        do iband=1,nband_k
          enl_k(iband)=ddot(nband_k,evec_loc(:,iband),1,mat_loc(:,iband),1)
        end do
@@ -938,7 +938,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(subham)
    !if (gs_hamk%usepaw==0) then
    !if (wfopta10==4) then
-   ABI_DEALLOCATE(totvnl)
+   ABI_DEALLOCATE(totvnlx)
    !else
    ABI_DEALLOCATE(subvnlx)
    !end if

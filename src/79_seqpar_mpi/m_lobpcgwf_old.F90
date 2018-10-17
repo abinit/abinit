@@ -74,7 +74,7 @@ contains
 !!  subham(nband_k*(nband_k+1))=the matrix elements of h
 !!  If gs_hamk%usepaw==0:
 !!    gsc(2,mgsc)=<g|s|c> matrix elements (s=overlap)
-!!    totvnl(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl
+!!    totvnlx(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions
@@ -91,7 +91,7 @@ contains
 !! SOURCE
 
 subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnl)
+&                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnlx)
 
 
  use defs_abitypes
@@ -127,7 +127,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  real(dp),intent(in) :: kinpw(npw_k)
  real(dp),intent(out) :: resid_k(nband_k)
  real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
- real(dp),intent(inout) :: totvnl((3-gs_hamk%istwf_k)*nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))
+ real(dp),intent(inout) :: totvnlx((3-gs_hamk%istwf_k)*nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))
 
 !Local variables-------------------------------
  integer, parameter :: tim_getghc=5
@@ -1170,7 +1170,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end if
 
 !  The Vnl part of the Hamiltonian is no more stored in the packed form such as it was the case for subvnlx(:).
-!  Now, the full matrix is stored in totvnl(:,:). This trick permits:
+!  Now, the full matrix is stored in totvnlx(:,:). This trick permits:
 !  1) to avoid the reconstruction of the total matrix in vtowfk.F90 (double loop over bands)
 !  2) to use two optimized matrix-matrix blas routine for general (in lobpcgccwf.F90) or hermitian (in vtowfk.F90)
 !  operators, zgemm.f and zhemm.f respectively, rather than a triple loop in both cases.
@@ -1191,7 +1191,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    if (gs_hamk%usepaw==0) then
      ! MG FIXME: Here gfortran4.9 allocates temporary array for C in abi_d2zgemm.
      call abi_xgemm(cparam(cplx),'n',blocksize,iwavef,vectsize,cone,blockvectorvx,vectsize,&
-&     blockvectorz,vectsize,czero,totvnl(cplx*bblocksize+1:cplx*iwavef,1:iwavef),blocksize,x_cplx=x_cplx)
+&     blockvectorz,vectsize,czero,totvnlx(cplx*bblocksize+1:cplx*iwavef,1:iwavef),blocksize,x_cplx=x_cplx)
    end if
 
    do iblocksize=1,blocksize
