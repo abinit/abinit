@@ -217,29 +217,29 @@ module m_xgTransposer
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer             , intent(in   ) :: ncpuRows
     integer             , intent(in   ) :: ncpuCols
+    integer :: commColsRows
 #if defined HAVE_MPI
     integer :: coordInGrid(2),sizeGrid(2)
     logical :: periodic(2), selectDim(2), reorder
     integer :: ierr
-    integer :: commColsRows
 
     sizeGrid(1) = ncpuRows
     sizeGrid(2) = ncpuCols
     periodic = (/ .false., .false. /)
     reorder  = .false.
     call mpi_cart_create(xgTransposer%mpiData(MPI_LINALG)%comm,2,sizeGrid,periodic,reorder,commColsRows,ierr)
-    if ( ierr /= MPI_SUCCESS ) then
+    if ( ierr /= xmpi_success ) then
       MSG_ERROR("xgTransposer failed to creat cartesian grid")
     end if
 
     selectDim = (/ .true., .false. /)
     call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_ROWS)%comm,ierr)
-    if ( ierr /= MPI_SUCCESS ) then
+    if ( ierr /= xmpi_success ) then
       MSG_ERROR("xgTransposer failed to creat rows communicator")
     end if
     selectDim = (/ .false., .true. /)
     call mpi_cart_sub(commColsRows, selectDim, xgTransposer%mpiData(MPI_COLS)%comm,ierr)
-    if ( ierr /= MPI_SUCCESS ) then
+    if ( ierr /= xmpi_success ) then
       MSG_ERROR("xgTransposer failed to creat columns communicator")
     end if
 #else 
@@ -280,7 +280,7 @@ module m_xgTransposer
     nRealPairs = rows(xgTransposer%xgBlock_linalg)/xgTransposer%perPair !number of pair of reals
 
     call xmpi_allgather(nRealPairs,xgTransposer%nrowsLinalg,xgTransposer%mpiData(MPI_LINALG)%comm,ierr)
-    if ( ierr /= MPI_SUCCESS ) then
+    if ( ierr /= xmpi_success ) then
       MSG_ERROR("Error while gathering number of rows in linalg")
     end if 
 
@@ -350,8 +350,8 @@ module m_xgTransposer
       MSG_ERROR("Bad value for toState")
     end if
 
-    write(std_out,*) "linalg", rows(xgTransposer%xgBlock_linalg)*cols(xgTransposer%xgBlock_linalg)
-    write(std_out,*) "colsrows", rows(xgTransposer%xgBlock_colsrows)*cols(xgTransposer%xgBlock_colsrows)
+    !write(std_out,*) "linalg", rows(xgTransposer%xgBlock_linalg)*cols(xgTransposer%xgBlock_linalg)
+    !write(std_out,*) "colsrows", rows(xgTransposer%xgBlock_colsrows)*cols(xgTransposer%xgBlock_colsrows)
     select case (toState)
     case (STATE_LINALG)
       if ( xgTransposer%state == STATE_LINALG ) then
@@ -467,9 +467,9 @@ module m_xgTransposer
 
    !ABI_MALLOC(status,(MPI_STATUS_SIZE))
    !call mpi_wait(request(myrequest),status,ierr)
-   !if ( ierr /= MPI_SUCCESS ) then
-   !  MSG_ERROR("Error while waiting for mpi")
-   !end if 
+   if ( ierr /= MPI_SUCCESS ) then
+     MSG_ERROR("Error while waiting for mpi")
+   end if 
 
    if ( allocated(sendcounts) ) then
      ABI_FREE(sendcounts)
@@ -568,7 +568,8 @@ module m_xgTransposer
        sdispls(icpu) = sdispls(icpu-1)+sendcounts(icpu-1)
      end do
 
-     call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf,xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
+     call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf, &
+&      xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
      !write(*,*) "Before ialltoall"
      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
                          recvbuf, recvcounts, rdispls, & 
@@ -605,7 +606,7 @@ module m_xgTransposer
    !ABI_MALLOC(status,(MPI_STATUS_SIZE))
    !call mpi_wait(request(myrequest),status,ierr)
    !write(*,*) "Request ended"
-   if ( ierr /= MPI_SUCCESS ) then
+   if ( ierr /= xmpi_success ) then
      MSG_ERROR("Error while waiting for mpi")
    end if 
    !write(*,*) "with success"

@@ -1,3 +1,38 @@
+!{\src2tex{textfont=tt}}
+!!****p* ABINIT/testTransposer
+!! NAME
+!! testTransposer
+!!
+!! FUNCTION
+!! test the xgTransposer module with 8 MPI. No more no less.
+!! It includes testing of complex and real numbers, and all2all and gatherv
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (JB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! NOTES
+!!
+!! INPUTS
+!!  (main routine)
+!!
+!! OUTPUT
+!!  (main routine)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
 program testTransposer
   use m_xg
   use m_xgTransposer
@@ -104,7 +139,6 @@ program testTransposer
       errmax = (sum(cg0-cg))/nband
       call xmpi_sum(errmax,xmpi_world,ierr)
       write(std_out,*) "Difference: ",errmax
-      call flush(std_out)
       call xmpi_barrier(xmpi_world)
     end subroutine tester
 
