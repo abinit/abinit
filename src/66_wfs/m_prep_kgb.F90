@@ -578,7 +578,7 @@ end subroutine prep_getghc
 !!    if paw_opt==3:         contribution of this block of states to <c|S|c>  (where S=overlap when PAW)
 !!  ==== if (signs==2) ====
 !!    if paw_opt==0, 1, 2 or 4:
-!!       gvnlxc(2,my_nspinor*npw)=result of the aplication of the nl operator
+!!       gvnlc(2,my_nspinor*npw)=result of the application of the nl operator
 !!                        or one of its derivative to the input vect.
 !!    if paw_opt==3 or 4:
 !!       gsc(2,my_nspinor*npw*(paw_opt/3))=result of the aplication of (I+S)
@@ -614,7 +614,7 @@ end subroutine prep_getghc
 
 subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,&
 &                      blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc,&
-&                      tim_nonlop,cwavef,gvnlxc,already_transposed)
+&                      tim_nonlop,cwavef,gvnlc,already_transposed)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -629,7 +629,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer,intent(in) :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
  logical,optional,intent(in) :: already_transposed
  real(dp),intent(in) :: lambdablock(blocksize)
- real(dp),intent(out) :: enlout_block(nnlout*blocksize),gvnlxc(:,:),gsc(:,:)
+ real(dp),intent(out) :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
  real(dp),intent(inout) :: cwavef(:,:)
  type(gs_hamiltonian_type),intent(in) :: hamk
  type(mpi_type),intent(inout) :: mpi_enreg
@@ -646,8 +646,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer,  allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
  integer,ABI_CONTIGUOUS  pointer :: rdispls(:),recvcounts(:),sdispls(:),sendcounts(:)
  real(dp) :: lambda_nonlop(mpi_enreg%bandpp),tsec(2)
- real(dp), allocatable :: cwavef_alltoall2(:,:),gvnlxc_alltoall2(:,:),gsc_alltoall2(:,:)
- real(dp), allocatable :: cwavef_alltoall1(:,:),gvnlxc_alltoall1(:,:),gsc_alltoall1(:,:)
+ real(dp), allocatable :: cwavef_alltoall2(:,:),gvnlc_alltoall2(:,:),gsc_alltoall2(:,:)
+ real(dp), allocatable :: cwavef_alltoall1(:,:),gvnlc_alltoall1(:,:),gsc_alltoall1(:,:)
  real(dp),allocatable :: enlout(:)
 
 ! *************************************************************************
@@ -676,8 +676,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
  if(choice/=0.and.signs==2) then
    if (paw_opt/=3) then
-     if (size(gvnlxc)/=2*npw*my_nspinor*blocksize) then
-       msg = 'Incorrect size for gvnlxc!'
+     if (size(gvnlc)/=2*npw*my_nspinor*blocksize) then
+       msg = 'Incorrect size for gvnlc!'
        MSG_BUG(msg)
      end if
    end if
@@ -710,13 +710,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
  ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(gsc_alltoall2,(2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
- ABI_ALLOCATE(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_ALLOCATE(gvnlc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
 
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_ALLOCATE(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    if(signs==2)then
      if (paw_opt/=3) then
-       ABI_ALLOCATE(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+       ABI_ALLOCATE(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
      end if
      if (paw_opt==3.or.paw_opt==4) then
        ABI_ALLOCATE(gsc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
@@ -768,10 +768,10 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
    if (paw_opt==2) lambda_nonlop(1)=lambdablock(mpi_enreg%me_band+1)
    call nonlop(choice,cpopt,cwaveprj,enlout,hamk,idir,lambda_nonlop,mpi_enreg,1,nnlout,paw_opt,&
-&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlxc_alltoall2)
+&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2)
 
    if (do_transpose .and. mpi_enreg%paral_spinor == 0 .and. nspinortot==2.and.signs==2) then
-     if (paw_opt/=3) gvnlxc_alltoall1(:,index_wavef_band)=gvnlxc_alltoall2(:,:)
+     if (paw_opt/=3) gvnlc_alltoall1(:,index_wavef_band)=gvnlc_alltoall2(:,:)
      if (paw_opt==3.or.paw_opt==4) gsc_alltoall1(:,index_wavef_band)=gsc_alltoall2(:,:)
    end if
 
@@ -795,13 +795,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !  -------------------------------------------------------
    if(paw_opt == 2) lambda_nonlop(1:bandpp) = lambdablock((mpi_enreg%me_band*bandpp)+1:((mpi_enreg%me_band+1)*bandpp))
    call nonlop(choice,cpopt,cwaveprj,enlout,hamk,idir,lambda_nonlop,mpi_enreg,bandpp,nnlout,paw_opt,&
-&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlxc_alltoall2)
+&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2)
 
 !  -----------------------------------------------------
 !  Sorting of waves functions below the processors
 !  -----------------------------------------------------
    if(do_transpose.and.signs==2) then
-     if (paw_opt/=3) gvnlxc_alltoall1(:,index_wavef_band)=gvnlxc_alltoall2(:,:)
+     if (paw_opt/=3) gvnlc_alltoall1(:,index_wavef_band)=gvnlc_alltoall2(:,:)
      if (paw_opt==3.or.paw_opt==4) gsc_alltoall1(:,index_wavef_band)=gsc_alltoall2(:,:)
    end if
 
@@ -822,7 +822,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      call timab(581,1,tsec)
      if(bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2))then
        if (paw_opt/=3) then
-         call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
+         call xmpi_alltoallv(gvnlc_alltoall1,recvcountsloc,rdisplsloc,gvnlc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
        end if
        if (paw_opt==3.or.paw_opt==4) then
@@ -831,7 +831,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
        end if
      else
        if (paw_opt/=3) then
-         call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
+         call xmpi_alltoallv(gvnlc_alltoall2,recvcountsloc,rdisplsloc,gvnlc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
        end if
        if (paw_opt==3.or.paw_opt==4) then
@@ -856,13 +856,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  ABI_DEALLOCATE(recvcountsloc)
  ABI_DEALLOCATE(rdisplsloc)
  ABI_DEALLOCATE(cwavef_alltoall2)
- ABI_DEALLOCATE(gvnlxc_alltoall2)
+ ABI_DEALLOCATE(gvnlc_alltoall2)
  ABI_DEALLOCATE(gsc_alltoall2)
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_DEALLOCATE(cwavef_alltoall1)
    if(signs==2)then
      if (paw_opt/=3) then
-       ABI_DEALLOCATE(gvnlxc_alltoall1)
+       ABI_DEALLOCATE(gvnlc_alltoall1)
      end if
      if (paw_opt==3.or.paw_opt==4) then
        ABI_DEALLOCATE(gsc_alltoall1)
@@ -888,7 +888,6 @@ end subroutine prep_nonlop
 !!  blocksize= size of block for FFT
 !!  cwavef(2,npw*ndat)=planewave coefficients of wavefunction (one spinorial component?).
 !!  dtfil <type(datafiles_type)>=variables related to files
-!!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!        =if useylm=0, max number of (l,n)   comp. over all type of psps
