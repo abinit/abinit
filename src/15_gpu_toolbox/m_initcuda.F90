@@ -35,7 +35,7 @@
 module m_initcuda
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi, only: xmpi_world,xmpi_comm_rank,xmpi_comm_size,xmpi_abort
 
  implicit none
@@ -102,7 +102,6 @@ CONTAINS !===========================================================
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prt_device_info'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -359,7 +358,6 @@ end subroutine Get_Mem_Dev
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setdevice_cuda'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -498,7 +496,6 @@ end subroutine Get_Mem_Dev
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_fastest_devices'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

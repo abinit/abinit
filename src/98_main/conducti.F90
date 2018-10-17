@@ -21,10 +21,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!!
-!! CHILDREN
-!!      conducti_nc, conducti_paw
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -46,7 +42,7 @@ program conducti
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -56,13 +52,12 @@ program conducti
  use m_time,      only : timein
  use m_fstrings,  only : sjoin, itoa
  use m_mpinfo,    only : destroy_mpi_enreg
+ use m_paw_optics,only : linear_optics_paw
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'conducti'
- use interfaces_65_paw
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -682,8 +682,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     211.750     211.714
        -0.000   0.000  -0.998   0.000  -0.123   0.000  -0.123  -0.000  -0.123
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  28.5776
-  dielectric constant without local fields =  31.4722
+  dielectric constant =  28.5774
+  dielectric constant without local fields =  31.4720
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     90.34  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -691,10 +691,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     211.750     211.714
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.035   0.003  -0.003  -0.010   0.010   0.010  -0.010  -0.003   0.003
-      0.000   0.003   0.003  -0.010  -0.010   0.010   0.010  -0.003  -0.003
+     -0.000   0.003   0.003  -0.010  -0.010   0.010   0.010  -0.003  -0.003
        1       2       3       4       5       6       7       8       9
       0.035   0.003  -0.003  -0.010   0.010   0.010  -0.010  -0.003   0.003
-      0.000  -0.003  -0.003   0.010   0.010  -0.010  -0.010   0.003   0.003
+     -0.000  -0.003  -0.003   0.010   0.010  -0.010  -0.010   0.003   0.003
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
@@ -1190,7 +1190,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).

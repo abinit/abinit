@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -666,8 +666,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
        -0.000   0.000  -0.000  -0.000  -0.000  -0.787  -0.044  -0.044  -0.044
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  13.3990
-  dielectric constant without local fields =  14.3022
+  dielectric constant =  13.3995
+  dielectric constant without local fields =  14.3029
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     16.29  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -1122,8 +1122,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
        -0.000  -0.000   0.000  -0.000   0.000  -0.784  -0.044  -0.044  -0.044
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  11.7711
-  dielectric constant without local fields =  12.4855
+  dielectric constant =  11.7715
+  dielectric constant without local fields =  12.4862
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     17.17  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -1140,10 +1140,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
    Upper and lower wings at the    2 th omega   0.0000  13.6058 [eV]
        1       2       3       4       5       6       7       8       9
       0.274   0.010  -0.031   0.031  -0.010  -0.010   0.031  -0.031   0.010
-     -0.000   0.002  -0.006   0.006  -0.002   0.002  -0.006   0.006  -0.002
+      0.000   0.002  -0.006   0.006  -0.002   0.002  -0.006   0.006  -0.002
        1       2       3       4       5       6       7       8       9
       0.274   0.010  -0.031   0.031  -0.010  -0.010   0.031  -0.031   0.010
-     -0.000  -0.002   0.006  -0.006   0.002  -0.002   0.006  -0.006   0.002
+      0.000  -0.002   0.006  -0.006   0.002  -0.002   0.006  -0.006   0.002
 
 
 
@@ -1755,7 +1755,7 @@ P           mkmem           2
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] ABINIT : First-principles approach of materials and nanosystem properties.
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,

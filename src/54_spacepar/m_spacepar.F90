@@ -28,7 +28,7 @@
 module m_spacepar
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_sort
@@ -38,7 +38,7 @@ module m_spacepar
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
  use m_geometry,        only : metric, symredcart
  use m_mpinfo,          only : ptabs_fourdp
- use m_fft,             only : zerosym
+ use m_fft,             only : zerosym, fourdp
 
  implicit none
 
@@ -111,7 +111,6 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartre'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -406,16 +405,18 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end do
      end if
-     if(use_ndo==1 .and. nspinor==2)then
+     if(use_ndo==1)then
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
        end do
+       if(nspinor == 2) then
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
-       do ipw=1+npw,2*npw
-         jpw=ipw-npw
-         ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-       end do
+         do ipw=1+npw,2*npw
+           jpw=ipw-npw
+           ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
+         end do
+       end if
      end if
 
 !    !$OMP PARALLEL DO REDUCTION(+:ar,ar_im)
@@ -447,20 +448,25 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          end if
        end do
      end if
-     if(use_ndo==1 .and. nspinor==2)then
+     if(use_ndo==1)then
+       if(.not.present(ar_im)) then
+         MSG_BUG("use_ndo true and ar_im not present")
+       end if
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          if(diag(ipw)<huge(0.0d0)*1.d-11)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
+       if(nspinor == 2) then
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
-       do ipw=1+npw,2*npw
-         jpw=ipw-npw
-         if(diag(jpw)<huge(0.0d0)*1.d-11)then
-           ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-         end if
-       end do
+         do ipw=1+npw,2*npw
+           jpw=ipw-npw
+           if(diag(jpw)<huge(0.0d0)*1.d-11)then
+             ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
+           end if
+         end do
+       end if
      end if
 
 
@@ -571,7 +577,6 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'laplacian'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -758,7 +763,6 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'redgr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -919,7 +923,6 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hartrestr'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1125,7 +1128,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'symrhg'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1584,7 +1586,6 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'irrzg'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1990,7 +1991,6 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rotate_rho'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

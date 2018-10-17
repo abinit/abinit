@@ -9,7 +9,7 @@ module m_lobpcg2
   use m_xg
   use m_xgScalapack
   use defs_basis, only : std_err, std_out
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   use m_xomp
 #ifdef HAVE_OPENMP
@@ -1068,7 +1068,7 @@ module m_lobpcg2
 
     call timab(tim_maxres,1,tsec)
       !lobpcg%XWP(1:spacedim,shiftW+iblock) = lobpcg%AXWP(:,shiftX+iblock) - lobpcg%BXWP(:,shiftX+iblock)*eigenvalues(iblock)
-    call xgBlock_colwiseCaxmy(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
+    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
 

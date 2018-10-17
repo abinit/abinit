@@ -53,7 +53,7 @@ private
 ! Don't use dp because stupid abilint generates wrong interfaces
 integer, parameter :: dp_ = kind(1.0d0)
 
-real(dp_),parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
+real(dp_),parameter  :: tol6 = 1.d-14, tol14 = 1.d-14, zero = 0.d0
 
 real(dp_), parameter :: sqrtpi = 1.7724538509055159d0
 
@@ -587,7 +587,7 @@ end subroutine tetra_write
 !! get_tetra_weight
 !!
 !! FUNCTION
-!! calculate integration weights and their derivatives from Blochl et al PRB 49 16223
+!! calculate integration weights and their derivatives from Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
 !!
 !! INPUTS
 !! eigen_in(nkpt)=eigenenergies for each k point
@@ -668,7 +668,7 @@ end subroutine get_tetra_weight
 !! tetra_blochl_weights
 !!
 !! FUNCTION
-!! calculate integration weights and their derivatives from Blochl et al PRB 49 16223
+!! calculate integration weights and their derivatives from Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
 !! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
 !!
 !! PARENTS
@@ -792,7 +792,7 @@ end subroutine tetra_blochl_weights
 !!
 !! FUNCTION
 !! calculate integration weights and their derivatives
-!! for double tetrahedron method from Allen Phys Stat Sol B 120 529 (1983)
+!! for double tetrahedron method from Allen Phys Stat Sol B 120 529 (1983) [[cite:Allen1983b]]
 !! the k-points and tetrahedra must be the same for both grids, of course,
 !! but the range of energies is arbitrary
 !!
@@ -1601,7 +1601,7 @@ pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,ne
 
  volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
 
- ! all notations are from Blochl PRB 49 16223 Appendix B
+ ! all notations are from Blochl PRB 49 16223 [[cite:Bloechl1994a]] Appendix B
  epsilon21 = eigen_1tetra(2)-eigen_1tetra(1)
  epsilon31 = eigen_1tetra(3)-eigen_1tetra(1)
  epsilon41 = eigen_1tetra(4)-eigen_1tetra(1)

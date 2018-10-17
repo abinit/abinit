@@ -48,5 +48,6 @@ bound_step = 100
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read ddb and HIST, fit and try to bound the anharmonic part
+#%%   read ddb and HIST, fit and enforce that the anharmonic part is bounded from below.
+#%% topics = FitProcess,BoundingProcess,LatticeModel
 #%%<END TEST_INFO>

@@ -29,7 +29,7 @@ module m_outvars
  use defs_basis
  use defs_abitypes
  use m_results_out
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xomp
  use m_xmpi
@@ -120,7 +120,6 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'outvars'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -285,8 +284,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  end if
 
 !DEBUG
- write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
- write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
+! write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
+! write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
 !ENDDEBUG
 
  nshiftk=1

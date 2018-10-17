@@ -10,49 +10,50 @@ These tutorials are aimed at teaching the use of ABINIT, in the
 UNIX/Linux OS and its variants (MacOSX, AIX ...). 
 They might be used for other operating systems, but the commands have to be adapted.
 
-At present, more than thirty tutorials are available. Each of them is at most
+At present, nearly forty tutorials are available. Each of them is at most
 two hours of student work. Tutorials 1-4 cover the basics, other lectures are
 more specialized. There are dependencies between tutorials.
 The following schema should help you to understand these dependencies. 
 
 <center>
 <map id="map1" name="map1"> 
-<area shape="rect" coords="120  , 5 ,260 , 80 " href="base1/index.html" /> <!--2,3,4-->
-<area shape="rect" coords="30  ,135 ,170 ,160 " href="spin/index.html" />
-<area shape="rect" coords="30  ,165 , 99 ,189 " href="paw1/index.html" />
-<area shape="rect" coords="100 ,165 ,129 ,189 " href="paw2/index.html" />
-<area shape="rect" coords="130 ,165 ,170 ,189 " href="paw3/index.html" />
-<area shape="rect" coords="30  ,190 ,170 ,240 " href="nuc/index.html" /> 
-<area shape="rect" coords="30  ,245 , 99 ,272 " href="dftu/index.html" />
-<area shape="rect" coords="100 ,245 ,170 ,272 " href="dmft/index.html" />
-<area shape="rect" coords="30  ,273 ,100 ,300 " href="ucalc_crpa/index.html" />
-<area shape="rect" coords="100 ,273 ,170 ,300 " href="udet/index.html" />
-<area shape="rect" coords="30  ,305 ,170 ,330 " href="ffield/index.html" />
-<area shape="rect" coords="30  ,335 ,170 ,360 " href="positron/index.html" />
-<area shape="rect" coords="30  ,370 ,170 ,395 " href="tddft/index.html" />
-<area shape="rect" coords="30  ,400 ,170 ,425 " href="analysis_tools/index.html" />
-<area shape="rect" coords="30  ,430 ,170 ,455 " href="fold2bloch/index.html" />
-<area shape="rect" coords="30  ,460 ,170 ,485 " href="wannier90/index.html" />
-<area shape="rect" coords="30  ,490 ,170 ,515" href="source_code/index.html" />
-<area shape="rect" coords="230  ,135 ,376 ,199 " href="rf1/index.html" />
-<area shape="rect" coords="230  ,215 ,376 ,245 " href="optic/index.html" />
-<area shape="rect" coords="230  ,265 ,376 ,289 " href="rf2/index.html" />
-<area shape="rect" coords="230  ,290 ,376 ,309 " href="eph/index.html" /> 
-<area shape="rect" coords="230  ,310 ,376 ,334 " href="tdepes/index.html" /> 
-<area shape="rect" coords="230  ,335 ,376 ,365 " href="elastic/index.html" /> 
-<area shape="rect" coords="230  ,366 ,376 ,395 " href="nlo/index.html" /> 
-<area shape="rect" coords="360  ,420 ,456 ,465 " href="gw1/index.html" />
-<area shape="rect" coords="360  ,480 ,456 ,502 " href="gw2/index.html" /> 
-<area shape="rect" coords="360  ,503 ,456 ,525 " href="bse/index.html" /> 
-<area shape="rect" coords="530  , 5 ,670 , 80 " href="basepar/index.html" />
-<area shape="rect" coords="520  ,125 ,695 ,175 " href="paral_gspw/index.html" />
-<area shape="rect" coords="520  ,180 ,695 ,235 " href="paral_moldyn/index.html" />
-<area shape="rect" coords="520  ,240 ,695 ,300 " href="paral_images/index.html" />
-<area shape="rect" coords="520  ,305 ,695 ,365 " href="paral_gswvl/index.html" />
-<area shape="rect" coords="520  ,380 ,695 ,435 " href="paral_dfpt/index.html" />
-<area shape="rect" coords="520  ,445 ,695 ,500 " href="paral_mbt/index.html" />
+<area shape="rect" coords="145  ,15 ,250 , 90 " href="base1/index.html" /> <!--2,3,4-->
+<area shape="rect" coords="70  ,135 ,180 ,160 " href="spin/index.html" />
+<area shape="rect" coords="70  ,165 ,129 ,184 " href="paw1/index.html" />
+<area shape="rect" coords="130 ,165 ,144 ,184 " href="paw2/index.html" />
+<area shape="rect" coords="145 ,165 ,180 ,184 " href="paw3/index.html" />
+<area shape="rect" coords="70  ,185 ,180 ,230 " href="nuc/index.html" /> 
+<area shape="rect" coords="70  ,235 ,124 ,257 " href="dftu/index.html" />
+<area shape="rect" coords="125 ,235 ,180 ,257 " href="dmft/index.html" />
+<area shape="rect" coords="70  ,258 ,125 ,280 " href="ucalc_crpa/index.html" />
+<area shape="rect" coords="125 ,258 ,180 ,280 " href="udet/index.html" />
+<area shape="rect" coords="70  ,285 ,180 ,310 " href="tddft/index.html" />
+<area shape="rect" coords="70  ,315 ,180 ,335 " href="positron/index.html" />
+<area shape="rect" coords="70  ,345 ,180 ,369 " href="ffield/index.html" />
+<area shape="rect" coords="70  ,370 ,180 ,390 " href="analysis_tools/index.html" />
+<area shape="rect" coords="70  ,395 ,180 ,420 " href="fold2bloch/index.html" />
+<area shape="rect" coords="70  ,425 ,180 ,445 " href="wannier90/index.html" />
+<area shape="rect" coords="70  ,450 ,180 ,475" href="source_code/index.html" />
+<area shape="rect" coords="225  ,135 ,335 ,199 " href="rf1/index.html" />
+<area shape="rect" coords="225  ,210 ,335 ,240 " href="optic/index.html" />
+<area shape="rect" coords="225  ,250 ,335 ,280 " href="rf2/index.html" />
+<area shape="rect" coords="225  ,290 ,335 ,330 " href="elastic/index.html" /> 
+<area shape="rect" coords="225  ,340 ,335 ,369 " href="nlo/index.html" /> 
+<area shape="rect" coords="225  ,370 ,335 ,400 " href="lattice_model/index.html" /> 
+<area shape="rect" coords="225  ,425 ,335 ,449 " href="eph/index.html" />
+<area shape="rect" coords="225  ,450 ,335 ,485 " href="tdepes/index.html" />
+<area shape="rect" coords="355  ,400 ,440 ,440 " href="gw1/index.html" />
+<area shape="rect" coords="355  ,460 ,440 ,479 " href="gw2/index.html" /> 
+<area shape="rect" coords="355  ,480 ,440 ,500 " href="bse/index.html" /> 
+<area shape="rect" coords="485  ,15 ,590 , 90 " href="basepar/index.html" />
+<area shape="rect" coords="475  ,125 ,615 ,175 " href="paral_gspw/index.html" />
+<area shape="rect" coords="475  ,180 ,615 ,235 " href="paral_moldyn/index.html" />
+<area shape="rect" coords="475  ,240 ,615 ,295 " href="paral_images/index.html" />
+<area shape="rect" coords="475  ,300 ,615 ,355 " href="paral_gswvl/index.html" />
+<area shape="rect" coords="475  ,360 ,615 ,410 " href="paral_dfpt/index.html" />
+<area shape="rect" coords="415  ,420 ,615 ,470 " href="paral_mbt/index.html" />
 </map>
-<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v7.png" usemap="#map1"/>
+<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v8.png" usemap="#map1"/>
 </center>
 
 The "base" tutorials are presented at the top, in orange. The blocks in red represents additional tutorials related 
@@ -61,12 +62,17 @@ in the tutorials in the light brown blocks. Finally, the Many-Body Perturbation 
 capabilities are demonstrated in the tutorials belonging to the dark brown blocks.
 The right-hand side blocks gather the tutorials related to the parallelism inside ABINIT.
 
+Visualisation tools are NOT covered in the ABINIT tutorials. 
+Powerful visualisation procedures have been developed in the Abipy context, 
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
 Before following the tutorials, you should have read the 
 [new user's guide](..),
 as well as the pages
 1045-1058 of [[cite:Payne1992|Rev. Mod. Phys. 64, 1045 (1992)]].
 If you have more time, you should browse through the Chaps. 1 to 13, and appendices L and M of the book 
-[[cite:Martin2008|this book]] by R. M. Martin.
+[[cite:Martin2004|this book]] by R. M. Martin.
 The latter reference is a must if you have not yet used another electronic structure code or a Quantum Chemistry package.
 
 After the tutorial, you might find it useful to learn about the test cases
@@ -142,7 +148,7 @@ prerequisite than the tutorials 1 to 4, and that you can do in any order (there 
     shows how to determine the U value with the constrained Random Phase Approximation 
     using projected Wannier orbitals. Prerequisite: DFT+U.
 
-  * [The tutorialon the determination of U for DFT+U](udet) shows how to determine the U value 
+  * [The tutorial on the determination of U for DFT+U](udet) shows how to determine the U value 
     with the linear response method, to be used in the DFT+U approach. Prerequisite: DFT+U.
 
   * [The tutorial on TDDFT](tddft) deals with the computation of the excitation spectrum of finite systems, 
@@ -162,17 +168,17 @@ piezoelectricity ...), for which some common additional information are needed:*
     phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. 
     The creation of the "Derivative Data Base" (DDB) is presented.
 
+**The additional information given by tutorial DFPT1 opens the door to:**
+
   * [The tutorial DFPT 2 (RF2 - response function 2)](rf2) presents the analysis of the DDBs that have been 
     introduced in the preceeding tutorial RF1. The computation of the interatomic forces and the computation 
     of thermodynamical properties is an outcome of this tutorial.
-
-**The additional information given by tutorial DFPT1 opens the door to:**
 
   * [The tutorial on Optic](optic), the utility that allows to obtain
     the frequency dependent linear optical dielectric function and the frequency
     dependent second order nonlinear optical susceptibility, in the simple "Sum-Over-State" approximation.
 
-**The additional information given by tutorials DFPT1 and DFPT2 opens the door to a group of tutorials 
+**The additional information given by tutorials DFPT1 and DFPT2 (Optic not needed) opens the door to a group of tutorials 
 that can be followed independently of each other:**
 
   * [The tutorial on the electron-phonon interaction](eph) presents the use of the utility MRGKK and ANADDB 
@@ -189,6 +195,12 @@ that can be followed independently of each other:**
     the linear order, within Density-Functional Perturbation Theory (beyond the simple Sum-Over-State approximation): 
     Raman scattering efficiencies (non-resonant case), non-linear electronic susceptibility, electro-optic effect. 
     Comparison with the finite field technique (combining DFPT calculatons with finite difference calculations), is also provided.
+
+**After following tutorials DFPT1, DFPT2, Elastic and NLO, the tutorials on MULTIBINIT might be followed:**
+
+  * [The first tutorial on MULTIBINIT](lattice_model) presents the basic use of the MULTIBINIT application,
+    how to build a harmonic model by using a second-principles approach for lattice dynamics 
+    simulations based on atomic potentials fitted on first-principles calculations.
 
 ### MBPT-related tutorials
 **There is another additional group of tutorials on many-body perturbation

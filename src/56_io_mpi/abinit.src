@@ -21,7 +21,6 @@ sources = [
  "m_abi_etsf.F90",
  "m_exit.F90",
  "m_hdr.F90",
- "outxfhist.F90",
  "m_rwwf.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

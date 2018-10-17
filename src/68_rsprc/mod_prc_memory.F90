@@ -30,7 +30,7 @@
 module mod_prc_memory
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 

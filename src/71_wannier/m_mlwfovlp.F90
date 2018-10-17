@@ -30,7 +30,7 @@ module m_mlwfovlp
  use defs_datatypes
  use defs_abitypes
  use defs_wannier90
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_xmpi
@@ -38,19 +38,30 @@ module m_mlwfovlp
 #ifdef FC_NAG
  use f90_unix_dir
 #endif
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
+ use m_hdr
 
  use m_io_tools, only : delete_file, get_unit, open_file
- use m_numeric_tools, only : uniformrandom, simpson_int
  use m_hide_lapack,     only : matrginv
+ use m_fstrings,      only : strcat, sjoin
+ use m_numeric_tools, only : uniformrandom, simpson_int, c2r, l2int
  use m_special_funcs,   only : besjm
- use m_geometry,  only : xred2xcart, rotmat
+ use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_fftcore,  only : sphereboundary
+ use m_crystal,  only : crystal_t
+ use m_crystal_io, only : crystal_ncwrite
+ use m_ebands,   only : ebands_ncwrite
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type, simp_gen
  use m_pawtab,   only : pawtab_type
  use m_pawcprj,  only : pawcprj_type
  use m_paw_sphharm, only : ylm_cmplx, initylmr
+ use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
+ use m_fft,            only : fourwf
 
  implicit none
 
@@ -74,6 +85,9 @@ contains
 !! separate wannier calculation with the wannier90 code.
 !!
 !! INPUTS
+!!  crystal<crystal_t>=Info on the crystalline structure.
+!!  ebands<ebands_t>=The object describing the band structure.
+!!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
 !!  cg(2,mcg)=planewave coefficients of wavefunctions.
 !!  cprj(natom,mcprj)= <p_lmn|Cnk> coefficients for each WF |Cnk> and each |p_lmn> non-local projector
@@ -121,7 +135,7 @@ contains
 !!
 !! SOURCE
 
- subroutine mlwfovlp(atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
+ subroutine mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
 & mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
@@ -131,9 +145,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -143,6 +154,9 @@ contains
  integer,intent(in) :: mband,mcg,mcprj,mgfftc,mkmem,mpw,natom,nfft,nkpt
  integer,intent(in) :: nsppol,ntypat,prtvol
  real(dp),intent(in) :: ucvol
+ type(crystal_t),intent(in) :: crystal
+ type(ebands_t),intent(in) :: ebands
+ type(hdr_type),intent(in) :: hdr
  type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
@@ -169,6 +183,12 @@ contains
 #if defined HAVE_WANNIER90
  integer :: kk
 #endif
+#ifdef HAVE_NETCDF
+ integer :: ncid, ncerr, nrpts
+ character(len=fnlen) :: abiwan_fname
+ integer :: have_disentangled_spin(nsppol)
+ integer,allocatable :: irvec(:,:),ndegen(:)
+#endif
  integer :: n1tmp,n2,n2tmp,n3,n3tmp,n4,n5,n6,nband_k
  integer :: nntot,npw_k,num_nnmax,spacing
  integer :: tim_fourwf
@@ -181,8 +201,8 @@ contains
  complex(dpc) :: caux,caux2,caux3
 #endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
- character(len=20) :: wfnname
- character(len=500) :: message
+ character(len=fnlen) :: wfnname
+ character(len=1000) :: message
  character(len=fnlen) :: seed_name(nsppol)
  character(len=fnlen) :: fname,filew90_win(nsppol),filew90_wout(nsppol),filew90_amn(nsppol),filew90_ramn(nsppol)
  character(len=fnlen) :: filew90_mmn(nsppol),filew90_eig(nsppol)
@@ -208,7 +228,7 @@ contains
  character(len=3),allocatable :: atom_symbols(:)
  logical,allocatable::just_augmentation(:,:)
 #if defined HAVE_WANNIER90
- real(dp) :: spreadw(3)
+ real(dp) :: spreadw(3,nsppol)
  real(dp),allocatable :: csix(:,:,:,:)
  real(dpc),allocatable :: occ_arr(:,:,:),occ_wan(:,:,:)
  real(dp),allocatable :: tdocc_wan(:,:)
@@ -1141,7 +1161,7 @@ contains
 &    U_matrix_opt(1:num_bands(isppol),1:nwan(isppol),:,isppol),& !output
 &    lwindow_loc=lwindow(1:num_bands(isppol),:,isppol),& !output
 &    wann_centres_loc=wann_centres(:,1:nwan(isppol),isppol),&     !output
-&    wann_spreads_loc=wann_spreads(1:nwan(isppol),isppol),spread_loc=spreadw)                            !output
+&    wann_spreads_loc=wann_spreads(1:nwan(isppol),isppol),spread_loc=spreadw(:,isppol))                            !output
 
 !    ----------------------------------------------------------------------------------------------
 
@@ -1162,6 +1182,85 @@ contains
    call xmpi_sum(wann_centres,spaceComm,ierr)
    call xmpi_sum(wann_spreads,spaceComm,ierr)
 
+   ! Output ABIWAN.nc file
+#ifdef HAVE_NETCDF
+   if (dtset%kptopt == 0) then
+     MSG_WARNING("Output of ABIWAN.nc requires kptopt /= 0. ABIWAN.nc file won't be produced!")
+     ! Need kptrlatt in wigner_seitz and client code need to know the k-grid.
+   end if
+   if (rank == master .and. dtset%kptopt /= 0) then
+     abiwan_fname = strcat(dtfil%filnam_ds(4), "_ABIWAN.nc")
+     call wrtout(std_out, sjoin("Saving wannier90 ouput results in:", abiwan_fname))
+     call wigner_seitz([zero, zero, zero], [2, 2, 2], dtset%kptrlatt, crystal%rmet, nrpts, irvec, ndegen)
+     ! We know if disentanglement has been done by looking at the output values of lwindow
+     ! Not elegant but it is the only way to avoid the parsing of the wannier input.
+     ! In wannier_run lwindow is set to True if not disentanglement
+     have_disentangled_spin = 0
+     do isppol=1,nsppol
+       !if nwan(isppol) < num_bands(isppol)
+       if (.not. all(lwindow(:,:,isppol))) have_disentangled_spin(isppol) = 1
+     end do
+
+     NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
+     NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
+     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(ebands_ncwrite(ebands, ncid))
+
+     ncerr = nctk_def_dims(ncid, [ &
+       nctkdim_t("mwan", mwan), &
+       nctkdim_t("max_num_bands", max_num_bands), &
+       nctkdim_t("nrpts", nrpts) &
+     ], defmode=.True.)
+     NCF_CHECK(ncerr)
+
+     ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "nntot"])
+     NCF_CHECK(ncerr)
+     !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
+     !NCF_CHECK(ncerr)
+
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("nwan", "int", "number_of_spins"), &
+       nctkarr_t("num_bands", "int", "number_of_spins"), &
+       nctkarr_t("band_in_int", "int", "max_number_of_states, number_of_spins"), &
+       nctkarr_t("lwindow_int", "int", "max_num_bands, number_of_kpoints, number_of_spins"), &
+       !nctkarr_t("exclude_bands", "int", "max_number_of_states, number_of_spins"), &
+       !nctkarr_t("eigenvalues_w", "int", "max_num_bands, number_of_kpoints, number_of_spins"), &
+       nctkarr_t("spread", "dp", "three, number_of_spins"), &
+       !nctkarr_t("A_matrix", "dp", "two, max_num_bands, mwan, number_of_kpoints, number_of_spins"), &
+       nctkarr_t("irvec", "int", "three, nrpts"), &
+       nctkarr_t("ndegen", "int", "nrpts"), &
+       nctkarr_t("have_disentangled_spin", "int", "number_of_spins"), &
+       nctkarr_t("U_matrix", "dp", "two, mwan, mwan, number_of_kpoints, number_of_spins"), &
+       nctkarr_t("U_matrix_opt", "dp", "two, max_num_bands, mwan, number_of_kpoints, number_of_spins"), &
+       nctkarr_t("wann_centres", "dp", "three, mwan, number_of_spins"), &
+       nctkarr_t("wann_spreads", "dp", "mwan, number_of_spins") &
+       ])
+     NCF_CHECK(ncerr)
+
+     ! Write data.
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nntot"), nntot))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nwan"), nwan))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "num_bands"), num_bands))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "band_in_int"), l2int(band_in)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "lwindow_int"), l2int(lwindow)))
+     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "exclude_bands"), exclude_bands))
+     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eigenvalues_w"), eigenvalues_w))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "spread"), spreadw))
+     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "A_matrix"), c2r(A_matrix)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "irvec"), irvec))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ndegen"), ndegen))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "have_disentangled_spin"), have_disentangled_spin))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "U_matrix"), c2r(U_matrix)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "U_matrix_opt"), c2r(U_matrix_opt)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wann_centres"), wann_centres))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wann_spreads"), wann_spreads))
+     NCF_CHECK(nf90_close(ncid))
+
+     ABI_FREE(irvec)
+     ABI_FREE(ndegen)
+   end if
+#endif
 
 !  CALL SILVESTRELLI'S APPROACH TO EVALUATE vdW INTERACTION ENERGY USING MLWF!!
 !  ----------------------------------------------------------------------------------------------
@@ -1390,7 +1489,6 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_seedname'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1405,7 +1503,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
  integer::isppol
  character(len=fnlen) :: test_win1,test_win2,test_win3
  logical :: lfile
- character(len=500) :: message                   ! to be uncommented, if needed
+ character(len=2000) :: message   
  character(len=10)::postfix
 ! *************************************************************************
 
@@ -1590,7 +1688,6 @@ end subroutine mlwfovlp_seedname
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_setup'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1892,7 +1989,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_pw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2263,7 +2359,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_proj'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2790,7 +2885,6 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_projpaw'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

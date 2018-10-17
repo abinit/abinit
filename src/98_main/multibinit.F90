@@ -48,7 +48,7 @@ program multibinit
  use m_build_info
  use m_xmpi
  use m_xomp
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_argparse
  use m_effective_potential
@@ -64,16 +64,17 @@ program multibinit
  use m_fstrings,   only : replace, inupper
  use m_time,       only : asctime, timein
  use m_parser,     only : instrng
+ use m_dtset,      only : chkvars
  use m_dtfil,      only : isfile
+ use m_mover_effpot, only : mover_effpot
+ !use m_generate_training_set, only : generate_training_set
+ use m_compute_anharmonics, only : compute_anharmonics
+ use m_init10,              only : init10
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'multibinit'
- use interfaces_14_hidewrite
- use interfaces_57_iovars
- use interfaces_78_effpot
- use interfaces_95_drive
 !End of the abilint section
 
  implicit none
@@ -225,43 +226,41 @@ program multibinit
 
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     'reading spin terms.'
-     call spin_model_t_initialize(spin_model, filnam(3), inp )
+     call spin_model_t_initialize(spin_model, filnam, inp )
    end if
-    endif
+ else
+   !  Read the model (from DDB or XML)  
+   call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
-!Read the model (from DDB or XML)
-    if (inp%dynamics/=0 .or. inp%fit_coeff/=0) then
-     call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-     
  !Read the coefficient from fit
-     if(filnam(4)/=''.and.filnam(4)/='no')then
-       call effective_potential_file_getType(filnam(4),filetype)
-   ! TODO hexu: filetype==(33?) 
-       if(filetype==3.or.filetype==23) then
-         call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
-       else
-         write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&         ' There is no specific file for the coefficients from polynomial fitting'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
-       end if
+   if(filnam(4)/=''.and.filnam(4)/='no')then
+     call effective_potential_file_getType(filnam(4),filetype)
+   ! TODO hexu: filetype==(33?)
+     if(filetype==3.or.filetype==23) then
+       call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
      else
-       if(inp%ncoeff/=0) then
-         write(message, '(5a)' )&
+       write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&         ' There is no specific file for the coefficients from polynomial fitting'
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+     end if
+   else
+     if(inp%ncoeff/=0) then
+       write(message, '(5a)' )&
 &         'ncoeff is specified in the input but,',ch10,&
 &         'there is no file for the coefficients ',ch10,&
 &         'Action: add coefficients.xml file'
-         MSG_ERROR(message)
+       MSG_ERROR(message)
 
-       else
-         write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+     else
+       write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &         ' There is no file for the coefficients from polynomial fitting'
-         call wrtout(ab_out,message,'COLL')
-         call wrtout(std_out,message,'COLL')
-       end if
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
      end if
-
    end if
+ end if
+ 
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences
@@ -302,7 +301,7 @@ program multibinit
              write(message, '(3a)' )&
 &             'There is no MD file to bound the model ',ch10,&
 &             'Action: add MD file'
-             MSG_ERROR(message)           
+             MSG_ERROR(message)
            else if(inp%confinement==2) then
              write(message, '(3a)' )&
 &             'There is no MD file to compute the confinement',ch10,&
@@ -454,18 +453,18 @@ program multibinit
      call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)
    end if
 
-!****************************************************************************************    
+!****************************************************************************************
 
 
 ! Run spin dynamics
-!****************************************************************************************    
+!****************************************************************************************
    if(inp%spin_dynamics>0) then
   ! TODO hexu: no mpi yet.
      if(iam_master) then
        call spin_model_t_run(spin_model)
      end if
    end if
-!****************************************************************************************    
+!****************************************************************************************
 
 
 !Free the effective_potential and dataset

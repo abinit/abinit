@@ -31,7 +31,7 @@ module m_prcref
  use defs_abitypes
  use defs_wvltypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_xcdata
 
@@ -47,7 +47,7 @@ module m_prcref
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_fftcore,  only : kgindex
- use m_fft,      only : zerosym, indirect_parallel_fourier
+ use m_fft,      only : zerosym, indirect_parallel_fourier, fourdp
  use m_kg,       only : getph
  use m_dtset,    only : testsusmat
  use m_spacepar, only : hartre, laplacian
@@ -56,6 +56,8 @@ module m_prcref
  use m_atm2fft,    only : atm2fft
  use m_rhotoxc,    only : rhotoxc
  use m_mklocl,     only : mklocl
+ use m_mkcore,     only : mkcore
+
 
  implicit none
 
@@ -203,8 +205,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref'
- use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -293,7 +293,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !Compute the residuals corresponding to the solution
 !of an approximate realspace dielectric function according
-!to X. Gonze PRB vol54 nb7 p4383 (1996)
+!to X. Gonze PRB vol54 nb7 p4383 (1996) [[cite:Gonze1996]]
  if(dtset%iprcel>=71.and.dtset%iprcel<=79) then
    if (nfft==nfftprc) then
      if (dtset%iprcel<=78) then
@@ -855,8 +855,6 @@ end subroutine prcref
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prcref_PMA'
- use interfaces_53_ffts
- use interfaces_56_xc
 !End of the abilint section
 
  implicit none
@@ -952,7 +950,7 @@ end subroutine prcref
 
 !Compute the residuals corresponding to the solution
 !of an approximate realspace dielectric function according
-!to X. Gonze PRB vol54 nb7 p4383 (1996)
+!to X. Gonze PRB vol54 nb7 p4383 (1996) [[cite:Gonze1996]]
  if(dtset%iprcel>=71.and.dtset%iprcel<=79) then
    if (nfft==nfftprc) then
      if (dtset%iprcel<=78) then
@@ -1385,7 +1383,6 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'moddiel'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1633,7 +1630,6 @@ subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dielmt'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2006,8 +2002,6 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dieltcel'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

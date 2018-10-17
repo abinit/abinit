@@ -28,7 +28,7 @@ MODULE m_numeric_tools
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_linalg_interfaces
 
  use m_fstrings,   only : itoa, sjoin
@@ -44,6 +44,7 @@ MODULE m_numeric_tools
  public :: get_trace             ! Calculate the trace of a square matrix
  public :: get_diag              ! Return the diagonal of a matrix as a vector
  public :: isdiagmat             ! True if matrix is diagonal
+ public :: l2int                 ! convert logical data to int array
  public :: r2c,c2r               ! Transfer complex data stored in a real array to a complex array and vice versa
  public :: iseven                ! True if int is even
  public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
@@ -132,6 +133,12 @@ MODULE m_numeric_tools
    module procedure isdiagmat_rdp
    !module procedure isdiagmat_cdp
  end interface isdiagmat
+
+ interface l2int
+   module procedure l2int_1D
+   module procedure l2int_2D
+   module procedure l2int_3D
+ end interface l2int
 
  interface r2c
    module procedure rdp2cdp_1D
@@ -1012,7 +1019,130 @@ end function isdiagmat_rdp
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/rdp2cdp_1D
+!!****f* m_numeric_tools/l2int_1D
+!! NAME
+!!  l2int_1D
+!!
+!! FUNCTION
+!!  Convert a logical array into an int array (True --> 1, False --> 0)
+!!
+!! INPUTS
+!!  larr(:)=the input logical array
+!!
+!! SOURCE
+
+pure function l2int_1D(larr) result(int_arr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'l2int_1D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: larr(:)
+ integer :: int_arr(size(larr))
+
+! *********************************************************************
+
+ where (larr)
+   int_arr = 1
+ elsewhere
+   int_arr = 0
+ end where
+
+end function l2int_1D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/l2int_2D
+!! NAME
+!!  l2int_2D
+!!
+!! FUNCTION
+!!  Convert a logical array into an int array (True --> 1, False --> 0)
+!!
+!! INPUTS
+!!  larr(:)=the input logical array
+!!
+!! SOURCE
+
+pure function l2int_2D(larr) result(int_arr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'l2int_2D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: larr(:,:)
+ integer :: int_arr(size(larr,1), size(larr,2))
+
+! *********************************************************************
+
+ where (larr)
+   int_arr = 1
+ elsewhere
+   int_arr = 0
+ end where
+
+end function l2int_2D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/l2int_3D
+!! NAME
+!!  l2int_3D
+!!
+!! FUNCTION
+!!  Convert a logical array into an int array (True --> 1, False --> 0)
+!!
+!! INPUTS
+!!  larr(:)=the input logical array
+!!
+!! SOURCE
+
+pure function l2int_3D(larr) result(int_arr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'l2int_3D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: larr(:,:,:)
+ integer :: int_arr(size(larr,1), size(larr,2), size(larr,3))
+
+! *********************************************************************
+
+ where (larr)
+   int_arr = 1
+ elsewhere
+   int_arr = 0
+ end where
+
+end function l2int_3D
+!!***
+
+!----------------------------------------------------------------------
+
+!!***!!****f* m_numeric_tools/rdp2cdp_1D
 !! NAME
 !!  rdp2cdp_1D
 !!
@@ -3574,8 +3704,6 @@ end function simpson_cplx
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized at output
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -3672,8 +3800,6 @@ end subroutine hermitianize_spc
 !!
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, hermitianized in output
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!
@@ -3852,7 +3978,6 @@ subroutine hermit(chmin,chmout,ierr,ndim)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hermit'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3957,8 +4082,6 @@ end subroutine hermit
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized at output
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -4047,8 +4170,6 @@ end subroutine symmetrize_spc
 !!
 !! SIDE EFFECTS
 !!  mat(:,:)=complex input matrix, symmetrized in output
-!!
-!! CHILDREN
 !!
 !! PARENTS
 !!
@@ -4214,7 +4335,6 @@ subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr1d_spc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4284,7 +4404,6 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr1d_dpc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4354,7 +4473,6 @@ subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr2d_spc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4429,7 +4547,6 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_arr2d_dpc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -6537,7 +6654,7 @@ end function uniformrandom
 !! Also deduce different quantities at this predicted point, and at the two other points
 !! It uses a quartic interpolation, with the supplementary
 !! condition that the second derivative vanishes at one and
-!! only one point (See Schlegel, J. Comp. Chem. 3, 214 (1982).
+!! only one point. See Schlegel, J. Comp. Chem. 3, 214 (1982) [[cite:Schlegel1982]].
 !! For this option, lambda_1 must be 1 (new point),
 !! and lambda_2 must be 0 (old point).
 !! Also, if the derivative at the new point is more negative
@@ -6585,7 +6702,6 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'findmin'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -6778,7 +6894,6 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kramerskronig'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

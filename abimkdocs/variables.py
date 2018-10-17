@@ -126,6 +126,9 @@ ABI_UNITS = [
     'Rydbergs',
     'T',
     'Tesla',
+    'Second',
+    'S',
+    'Sec',
 ]
 
 # Operators supported by parser
@@ -170,10 +173,12 @@ ABI_TOPICS = [
     "Band2eps",
     "Berry",
     "BandOcc",
+    "BoundingProcess",
     "BSE",
     "ConstrainedPol",
     "Control",
     "Coulomb",
+    "CrossingBarriers",
     "CRPA",
     "crystal",
     "DFT+U",
@@ -182,6 +187,7 @@ ABI_TOPICS = [
     "Dev",
     "DFPT",
     "DMFT",
+    "DynamicsMultibinit",
     "EffectiveMass",
     "EFG",
     "Elastic",
@@ -190,6 +196,7 @@ ABI_TOPICS = [
     "ElecDOS",
     "ElecBandStructure",
     "FileFormats",
+    "FitProcess",
     "ForcesStresses",
     "FrequencyMeshMBPT",
     "GeoConstraints",
@@ -200,11 +207,13 @@ ABI_TOPICS = [
     "GWls",
     "Hybrids",
     "k-points",
+    "LatticeModel",
     "LDAminushalf",
     "LOTF",
     "MagField",
     "MagMom",
     "MolecularDynamics",
+    "Macroave",
     "multidtset",
     "nonlinear",
     "Optic",
@@ -229,6 +238,7 @@ ABI_TOPICS = [
     "SelfEnergy",
     "SmartSymm",
     "spinpolarisation",
+    "SpinDynamicsMultibinit",
     "STM",
     "Susceptibility",
     "TDDFT",
@@ -299,7 +309,7 @@ class Variable(object):
                 Either constant number, formula or another variable
             mnemonics (str): Mnemonic string (required).
             characteristics (list): List of characteristics or None
-            excludes (str): String with variables that are exluded if this variable is given.
+            excludes (str): String with variables that are excluded if this variable is given.
             requires (str): String with variables that are required.
             commentdefault=None,
             commentdims=None,

@@ -40,8 +40,9 @@ module m_lgroup
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_crystal
+ use m_symkpt
 
  use m_fstrings,   only : ftoa, ktoa, sjoin
  use m_symtk,      only : chkgrp, littlegroup_q
@@ -125,7 +126,6 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lgroup_new'
- use interfaces_29_kpoints
 !End of the abilint section
 
  implicit none
@@ -240,7 +240,6 @@ subroutine lgroup_print(self, title, unit, prtvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lgroup_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

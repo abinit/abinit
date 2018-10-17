@@ -29,7 +29,7 @@ module m_spin_current
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_splines
 
  use m_io_tools,   only : open_file
@@ -37,6 +37,7 @@ module m_spin_current
  use m_geometry,   only : xred2xcart
  use m_fftcore,    only : sphereboundary
  use m_special_funcs,   only : gamma_function
+ use m_fft,            only : fourwf
 
  implicit none
 
@@ -100,7 +101,6 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'spin_current'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -683,7 +683,7 @@ subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
 !
 !v_SO^l (r,r)  = sum_ij  p_i^l (r) k_{ij}^l p_j^l(r) sum_m Y_{lm} (\hat{r}) Y^{*}_lm (\hat{r})
 != (2l+1)/4\pi sum_ij  p_i^l (r) k_{ij}^l p_j^l(r) (eq B.17 Patrick Rinke thesis)
-!p are gaussian projectors (from HGH paper prb 58 3641)
+!p are gaussian projectors (from HGH paper prb 58 3641) [[cite:Hartwigsen1998]]
 !sum_l v_SO^l (r,r) is a purely radial quantity (function of |r|), so spline it
 
 !maximum distance needed in unit cell

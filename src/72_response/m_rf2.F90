@@ -29,7 +29,7 @@ MODULE m_rf2
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_hamiltonian
  use m_cgtools
@@ -38,6 +38,7 @@ MODULE m_rf2
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free, pawcprj_output
  use m_getghc,      only : getghc
  use m_nonlop,      only : nonlop
+ use m_getgh2c,     only : getgh2c
 
  implicit none
 
@@ -299,7 +300,6 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_accumulate_bands'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -474,8 +474,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_apply_hamiltonian'
- use interfaces_14_hidewrite
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -491,7 +489,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !arrays
  real(dp),intent(in),target :: cg_jband(2,size_wf*debug_mode*nband_k,2)
- real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2)
+ real(dp),intent(in),optional,target :: enl(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq)
  real(dp),intent(in),optional :: ffnl1(:,:,:,:),ffnl1_test(:,:,:,:)
  real(dp),intent(in) :: eig0(nband_k),eig1_k_jband(2*nband_k)
  real(dp),intent(inout) :: gvnl1(2,size_wf)
@@ -506,8 +504,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
  integer :: opt_gvnl1,opt_gvnl2,optlocal,optnl,usevnl
  logical :: compute_conjugate,has_cprj_jband,has_cwaveprj,pert_phon_elfd
  real(dp) :: dotr,doti,dotr2,doti2,enlout(18*gs_hamkq%natom),tol_test
- real(dp), pointer :: enl_ptr(:,:,:)
- real(dp),allocatable,target :: enl_temp(:,:,:)
+ real(dp), pointer :: enl_ptr(:,:,:,:)
+ real(dp),allocatable,target :: enl_temp(:,:,:,:)
  character(len=500) :: msg
 
 !arrays
@@ -605,6 +603,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > tol_test) then
        write(msg,'(a,es17.8E3)') 'RF2 TEST GETGHC : NOT PASSED dotr = ',dotr
+       call wrtout(ab_out,msg)
        call wrtout(std_out,msg)
      end if
    end if ! end tests
@@ -641,7 +640,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (dotr > tol_test) then
          write(msg,'(4(a,i2),a,es17.8E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
                                             ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg)
+         call wrtout(std_out,msg)
        end if
      end do ! end iband
      ABI_DEALLOCATE(iddk)
@@ -704,8 +704,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (present(enl)) then
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
-         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
+         enl_temp(:,:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,:) + rf_hamk_idir%e1kbsc(:,:,:,:)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
          enl_ptr => rf_hamk_idir%e1kbfr
@@ -743,8 +743,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
        if (present(enl)) then
          enl_ptr => enl
        else if (associated(rf_hamk_idir%e1kbfr).and.associated(rf_hamk_idir%e1kbsc).and.optnl==2) then
-         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2))
-         enl_temp = rf_hamk_idir%e1kbfr + rf_hamk_idir%e1kbsc
+         ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,rf_hamk_idir%cplex))
+         enl_temp(:,:,:,:) = rf_hamk_idir%e1kbfr(:,:,:,:) + rf_hamk_idir%e1kbsc(:,:,:,:)
          enl_ptr => enl_temp
        else if (associated(rf_hamk_idir%e1kbfr)) then
          enl_ptr => rf_hamk_idir%e1kbfr
@@ -781,7 +781,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > 10*tol_test) then
        write(msg,'(a,es17.8E3)') 'RF2 TEST GETGH2C : NOT PASSED dotr = ',dotr
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg)
+       call wrtout(std_out,msg)
      end if
 
 !    Change the pointer ffnl_k back to ffnl1 (idir_ffnl=4, for nonlop with signs=2)

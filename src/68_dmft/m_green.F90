@@ -25,23 +25,23 @@
 #include "abi_common.h"
 
  MODULE m_green
- 
+
  use defs_basis
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_lib_four
- 
+
  use m_io_tools, only : flush_unit, open_file
  use m_time,     only : timab
  use m_oper, only : oper_type
  use m_matlu, only : matlu_type
- 
+
  implicit none
- 
+
  private
- 
+
  public :: init_green
  public :: destroy_green
  public :: init_green_tau
@@ -63,6 +63,9 @@
  private :: occupfd
  private :: distrib_paral
  public :: greenldacompute_green
+ public :: fermi_green
+ public :: newton
+ public :: local_ks_green
 !!***
 
 !!****t* m_green/green_type
@@ -174,7 +177,6 @@
 
 
 CONTAINS
-!========================================================================================
 !!***
 
 !!****f* m_green/init_green
@@ -195,7 +197,7 @@ CONTAINS
 !! green  = variable of type green_type
 !!
 !! PARENTS
-!!      dmft_solve,dyson,hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
 !!
 !! CHILDREN
 !!      loc_oper,print_matlu,sym_matlu,wrtout
@@ -272,7 +274,7 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 
  call distrib_paral(paw_dmft%nkpt,paw_dmft%nproc,nw,nw_perproc,green%procb,green%proct)
  green%nw=nw
- 
+
 !  need to distribute memory over frequencies
 
 !!  begin of temporary modificatios
@@ -360,7 +362,7 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
  if(present(opt_ksloc)) then
    optksloc=opt_ksloc
  else
-   optksloc=3 
+   optksloc=3
  endif
  green%use_oper_tau_ks=0
  if(green%use_oper_tau_ks==0) then
@@ -383,8 +385,6 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
 end subroutine init_green_tau
 !!***
 
-!!      m_green
-!!      loc_oper,print_matlu,sym_matlu,wrtout
 !!****f* m_green/destroy_green
 !! NAME
 !! destroy_green
@@ -398,7 +398,7 @@ end subroutine init_green_tau
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,dyson,hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
+!!      m_dmft,dyson,m_hubbard_one,m_green,qmc_prep_ctqmc,spectral_function
 !!
 !! CHILDREN
 !!      loc_oper,print_matlu,sym_matlu,wrtout
@@ -447,13 +447,13 @@ subroutine destroy_green(green)
  end if
  green%has_charge_matlu_solver=0
 
- if ( allocated(green%ecorr_qmc))   then  
+ if ( allocated(green%ecorr_qmc))   then
     ABI_DEALLOCATE(green%ecorr_qmc)
  end if
- if ( allocated(green%procb))   then  
+ if ( allocated(green%procb))   then
     ABI_DEALLOCATE(green%procb)
  end if
- if ( allocated(green%proct))   then  
+ if ( allocated(green%proct))   then
     ABI_DEALLOCATE(green%proct)
  end if
  green%omega => null()
@@ -505,7 +505,7 @@ subroutine destroy_green_tau(green)
 ! if(present(opt_ksloc)) then
 !   optksloc=opt_ksloc
 ! else
-!   optksloc=3 
+!   optksloc=3
 ! endif
 
  call destroy_oper(green%occup_tau)
@@ -612,7 +612,7 @@ end subroutine copy_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,impurity_solve,m_green,qmc_prep_ctqmc
+!!      m_dmft,impurity_solve,m_green,qmc_prep_ctqmc
 !!
 !! CHILDREN
 !!      loc_oper,print_matlu,sym_matlu,wrtout
@@ -630,7 +630,6 @@ subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'printocc_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -750,7 +749,6 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1018,8 +1016,8 @@ end subroutine print_green
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
 !!  green  <type(green_type)>= green function data
 !!  opt_nonxsum = 0 : do usual xsum after calculation of green(freq)%ks
-!!              = 1 : do not do xsum after calculation of green(freq)%ks: each proc as only a part 
-!!                    of the data: this is useful where only the total number of electron will be computed. 
+!!              = 1 : do not do xsum after calculation of green(freq)%ks: each proc as only a part
+!!                    of the data: this is useful where only the total number of electron will be computed.
 !!  opt_nonxsum2 0 : green(ifreq)%matlu will be broadcasted
 !!               1 : green(ifreq)%matlu will not be broadcasted in compute_green: calc
 !!                   if occupations will not possible.
@@ -1028,7 +1026,7 @@ end subroutine print_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve,fermi_green,m_green,newton,spectral_function
+!!      m_dmft,fermi_green,m_green,newton,spectral_function
 !!
 !! CHILDREN
 !!      loc_oper,print_matlu,sym_matlu,wrtout
@@ -1049,7 +1047,6 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compute_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1122,7 +1119,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  spacecomm=paw_dmft%spacecomm
  myproc=paw_dmft%myproc
  nproc=paw_dmft%nproc
- 
+
 ! Initialise integers
  mband   = paw_dmft%mband
  mbandc  = paw_dmft%mbandc
@@ -1178,7 +1175,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 ! ================================
 ! == Compute Green function G(k)
 ! ================================
- green%occup%ks=czero 
+ green%occup%ks=czero
  ABI_ALLOCATE(procb_ifreq,(paw_dmft%nkpt))
  do ifreq=1,green%nw
    !if(present(iii)) write(6,*) ch10,'ifreq  self', ifreq,self%oper(ifreq)%matlu(1)%mat(1,1,1,1,1)
@@ -1198,7 +1195,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
 
      call add_matlu(self%oper(ifreq)%matlu,self%hdc%matlu,&
 &                   self_minus_hdc_oper%matlu,green%oper(ifreq)%natom,-1)
-     if(paw_dmft%dmft_solv==4)  then 
+     if(paw_dmft%dmft_solv==4)  then
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
      endif
@@ -1416,7 +1413,7 @@ end subroutine compute_green
 !!   green%occup = occupations
 !!
 !! PARENTS
-!!      dmft_solve,fermi_green,impurity_solve,m_green,newton
+!!      m_dmft,fermi_green,impurity_solve,m_green,newton
 !!
 !! CHILDREN
 !!      loc_oper,print_matlu,sym_matlu,wrtout
@@ -1439,7 +1436,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'integrate_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1495,7 +1491,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  myproc=paw_dmft%myproc
  nproc=paw_dmft%nproc
 
- 
+
 ! Initialise integers
  mband   = paw_dmft%mband
  mbandc  = paw_dmft%mbandc
@@ -1506,7 +1502,7 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
 
 ! Initialize green%oper before calculation (important for xmpi_sum)
 ! allocate(charge_loc_old(paw_dmft%natom,paw_dmft%nsppol+1))
-! if(.not.present(opt_diff)) then  ! if integrate_green is called in dmft_solve after calculation of self
+! if(.not.present(opt_diff)) then  ! if integrate_green is called in m_dmft after calculation of self
 !   charge_loc_old=green%charge_matlu
 ! endif
  icomp_chloc=0
@@ -1752,17 +1748,14 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
      do ikpt = 1, nkpt
    do is = 1 , nsppol
            paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&           paw_dmft%include_bands(ib1),ikpt,is)=real(green%occup%ks(is,ikpt,ib,ib1))
-           if(nspinor==1) then
+&           paw_dmft%include_bands(ib1),ikpt,is)=dreal(green%occup%ks(is,ikpt,ib,ib1))
+           paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
+&           paw_dmft%include_bands(ib1),ikpt,is)=dimag(green%occup%ks(is,ikpt,ib,ib1))
+           if(nspinor==1 .and. nsppol==1) then
+             paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dreal(green%occup%ks(is,ikpt,ib,ib1))
              paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=zero
-             if(nsppol==1) then
-               paw_dmft%occnd(1,paw_dmft%include_bands(ib),&
-&               paw_dmft%include_bands(ib1),ikpt,is)=two*real(green%occup%ks(is,ikpt,ib,ib1))
-             endif
-           else if (nspinor==2) then  ! and SOC
-             paw_dmft%occnd(2,paw_dmft%include_bands(ib),&
-&             paw_dmft%include_bands(ib1),ikpt,is)=aimag(green%occup%ks(is,ikpt,ib,ib1))
+&             paw_dmft%include_bands(ib1),ikpt,is)=two*dimag(green%occup%ks(is,ikpt,ib,ib1))
            endif
          enddo
        enddo
@@ -1872,8 +1865,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  DBG_EXIT("COLL")
 
 end subroutine integrate_green
-
-!!      m_green
 !!***
 
 !!****f* m_green/icip_green
@@ -1897,7 +1888,7 @@ end subroutine integrate_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      loc_oper,print_matlu,sym_matlu,wrtout
@@ -1917,7 +1908,6 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'icip_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1981,7 +1971,7 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
        write(message,'(a,a,2(e15.4))') ch10,&
 &        "Warning:  a LDA calculation is carried out and self is not zero"
        call wrtout(std_out,message,'COLL')
-!       call leave_new('COLL')
+!       call abi_abort('COLL')
      endif
    endif
  else
@@ -2029,7 +2019,6 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourier_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2310,7 +2299,7 @@ end subroutine fourier_green
 !! OUTPUT
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!      loc_oper,print_matlu,sym_matlu,wrtout
@@ -2328,7 +2317,6 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'check_fourier_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2413,7 +2401,6 @@ subroutine compa_occup_ks(green,paw_dmft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'compa_occup_ks'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2442,13 +2429,13 @@ subroutine compa_occup_ks(green,paw_dmft)
          occ_a=occ1
          occ_b=occ2
          ib_=ib;isppol_=isppol;ikpt_=ikpt
-       endif        
+       endif
        if(abs(two*(occ1-occ2)/(occ1+occ2))>diffrel) then
          diffrel=abs(two*(occ1-occ2)/(occ1+occ2))
          occ_aa=occ1
          occ_bb=occ2
          ib__=ib;isppol__=isppol;ikpt__=ikpt
-       endif        
+       endif
      enddo
    enddo
  enddo
@@ -2488,13 +2475,11 @@ end subroutine compa_occup_ks
 !!  ldiag    = option according to diagonal or non-diagonal elements
 !!  option = nspinor
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!!  proct= for parallelism 
+!!  proct= for parallelism
 !!
 !! SIDE EFFECTS
-!!  integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
-!!
-!! SIDE EFFECTS
-!!  ft= function is time space
+!!  * integral = integral of ff over matsubara frequencies (there is an accumulation in the present routine, so intent(inout))
+!!  * ft= function is time space
 !!
 !! PARENTS
 !!      m_green
@@ -2537,8 +2522,8 @@ subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo
     integral=integral+2.d0*temp *                         &
 &      real( ff-one / ( j_dpc*omega ) ) *  &
 &      wgt_wlo
-    if(ifreq==dmft_nwlo) integral=integral+half 
-!    integral=integral+half 
+    if(ifreq==dmft_nwlo) integral=integral+half
+!    integral=integral+half
     ! the if is here, to count only one time this correction
   endif
 
@@ -2546,8 +2531,8 @@ subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo
     integral=integral+2.d0*temp *                         &
 &       ( ff-one / ( j_dpc*omega ) ) *  &
 &   wgt_wlo
-    if(ifreq==dmft_nwlo) integral=integral+half 
-!    integral=integral+half 
+    if(ifreq==dmft_nwlo) integral=integral+half
+!    integral=integral+half
     ! the if is here, to count only one time this correction
   endif
 
@@ -2588,7 +2573,7 @@ end subroutine add_int_fct
 !!  ldiag    = option according to diagonal or non-diagonal elements
 !!  option = nspinor
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!!  proct= for parallelism 
+!!  proct= for parallelism
 !!
 !! OUTPUT
 !!  integral = integral of ff over matsubara frequencies
@@ -2661,8 +2646,8 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
 &        paw_dmft%wgt_wlo(ifreq)
       endif
     enddo
-    if(procb2(paw_dmft%dmft_nwlo)) integral=integral+half 
-!    integral=integral+half 
+    if(procb2(paw_dmft%dmft_nwlo)) integral=integral+half
+!    integral=integral+half
     ! the if is here, to count only one time this correction
   endif
 
@@ -2674,8 +2659,8 @@ subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
 &       paw_dmft%wgt_wlo(ifreq)
       endif
     enddo
-    if(procb2(paw_dmft%dmft_nwlo)) integral=integral+half 
-!    integral=integral+half 
+    if(procb2(paw_dmft%dmft_nwlo)) integral=integral+half
+!    integral=integral+half
     ! the if is here, to count only one time this correction
   endif
 
@@ -2748,7 +2733,6 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fourier_fct'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2843,7 +2827,7 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
        fw=tospline_li
      endif
    endif
- 
+
    ABI_DEALLOCATE(tospline_li)
 
    ABI_DEALLOCATE(ftr)
@@ -2890,6 +2874,7 @@ end subroutine fourier_fct
 !!      loc_oper,print_matlu,sym_matlu,wrtout
 !!
 !! SOURCE
+
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
 
  use defs_basis
@@ -2960,7 +2945,7 @@ end subroutine spline_fct
 !!  Compute occup_tau from green%oper_tau
 !!
 !! INPUTS
-!!  green  <type(green_type)>= green function data  
+!!  green  <type(green_type)>= green function data
 !!
 !! OUTPUT
 !!
@@ -3021,7 +3006,7 @@ end subroutine occup_green_tau
 !! OUTPUT
 !!
 !! PARENTS
-!!     
+!!
 !!
 !! CHILDREN
 !!      wrtout
@@ -3198,11 +3183,8 @@ end subroutine occup_green_tau
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  
-!! 
-!! OUTPUT
 !!
-!! NOTES
+!! OUTPUT
 !!
 !! PARENTS
 !!
@@ -3217,7 +3199,7 @@ end subroutine occup_green_tau
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
@@ -3229,7 +3211,6 @@ end subroutine occup_green_tau
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'greenldacompute_green'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3259,7 +3240,7 @@ end subroutine occup_green_tau
  if(green%oper(1)%has_operks==0) then
   MSG_ERROR("greenlda%oper(1)%ks not allocated")
  endif
- 
+
 !======================================
 !Get Green's function G=1/(iw_n+mu-e_nk)
 !======================================
@@ -3283,21 +3264,776 @@ end subroutine occup_green_tau
 ! Compute local Green's function
 !======================================================================
    call loc_oper(green%oper(ifreq),paw_dmft,1)
-  
+
 !======================================================================
 ! Symetrize
 !======================================================================
    call sym_matlu(cryst_struc,green%oper(ifreq)%matlu,pawang)
-   
+
  enddo
  write(message,'(a,2x,a,f13.5)') ch10," == Print LDA Green's function for last frequency"
  call wrtout(std_out,message,'COLL')
  call print_matlu(green%oper(paw_dmft%dmft_nwlo)%matlu,natom,1)
 
-
-
  end subroutine greenldacompute_green
 !!***
+
+
+!!****f* m_green/fermi_green
+!! NAME
+!! fermi_green
+!!
+!! FUNCTION
+!!  Compute Fermi level for DMFT or LDA.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! fermie: current value
+!! f_precision: precision of f required
+!! ITRLST: =1 if last iteration of DMFT
+!! opt_noninter   : if one wants the LDA fermi level
+!! max_iter : max number of iterations.
+!!
+!! OUTPUT
+!! fermie: output value
+!!
+!! PARENTS
+!!      m_dmft
+!!
+!! CHILDREN
+!!      compute_green,integrate_green,newton,wrtout
+!!
+!! SOURCE
+
+subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
+
+ use m_abicore
+
+ use defs_basis
+ use defs_abitypes
+ use m_pawang, only : pawang_type
+ use m_crystal, only : crystal_t
+ use m_paw_dmft, only: paw_dmft_type
+ use m_self, only : self_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fermi_green'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst_struc
+ type(green_type),intent(inout) :: green
+ type(paw_dmft_type), intent(inout) :: paw_dmft
+ !type(MPI_type), intent(in) :: mpi_enreg
+ type(pawang_type),intent(in) :: pawang
+ type(self_type), intent(inout) :: self
+
+!Local variables-------------------------------
+ integer :: ierr_hh,opt_noninter,max_iter
+ real(dp):: x_precision,f_precision,fermi_old
+! real(dp) :: hx
+ character(len=500) :: message
+!************************************************************************
+!
+ write(message,'(a,8x,a)') ch10,"  == Compute Fermi level"
+ call wrtout(std_out,message,'COLL')
+
+!=============
+!headers
+!=============
+ write(message,'(2a)') ch10, "  |---Newton method to search Fermi level ------------|"
+ call wrtout(std_out,message,'COLL')
+ write(message,'(2a,f13.6)') ch10, "  |--- Initial value for Fermi level",paw_dmft%fermie
+ call wrtout(std_out,message,'COLL')
+
+!========================================
+!Define precision and nb of iterations
+!=========================================
+ fermi_old=paw_dmft%fermie
+ ierr_hh=0
+ f_precision=paw_dmft%dmft_charge_prec
+ !f_precision=0.01
+ x_precision=tol5
+!if(option==1) then
+!f_precision=(erreursurlacharge)/100d0
+!else
+!f_precision=tol11
+!endif
+ max_iter=1 ! for tests only
+ !write(6,*) "for tests max_iter=1"
+ max_iter=50
+ opt_noninter=4
+
+!=====================
+!Call newton method
+!=====================
+ write(message,'(a,4x,a,e13.6)') ch10," Precision required :",f_precision
+ call wrtout(std_out,message,'COLL')
+ if (f_precision<10_dp)  then
+   call newton(cryst_struc,green,paw_dmft,pawang,self,&
+&   paw_dmft%fermie,x_precision,max_iter,f_precision,ierr_hh,opt_noninter)
+ end if
+
+!===========================
+!Deals with errors signals
+!===========================
+ if(ierr_hh==-314) then
+   write(message,'(a)') "Warning, check Fermi level"
+   call wrtout(std_out,message,'COLL')
+!  call abi_abort('COLL')
+   write(message,'(2a,f13.6)') ch10, "  |---  Final  value for Fermi level (check)",paw_dmft%fermie
+   call wrtout(std_out,message,'COLL')
+ else if (ierr_hh==-123) then
+   write(message,'(a,f13.6)') " Fermi level is put to",fermi_old
+   paw_dmft%fermie=fermi_old
+   call wrtout(std_out,message,'COLL')
+
+!  =====================================
+!  If fermi level search was successful
+!  =====================================
+ else
+   write(message,'(a,4x,a,e13.6)') ch10," Precision achieved on Fermi Level :",x_precision
+   call wrtout(std_out,message,'COLL')
+   write(message,'(4x,a,e13.6)') " Precision achieved on number of electrons :",f_precision
+   call wrtout(std_out,message,'COLL')
+   write(message,'(2a,f13.6)') ch10, "  |---  Final  value for Fermi level",paw_dmft%fermie
+   call wrtout(std_out,message,'COLL')
+ end if
+
+!========================================================
+!Check convergence of fermi level during DMFT iterations
+!========================================================
+ if(paw_dmft%idmftloop>=2) then
+   if(abs(paw_dmft%fermie-fermi_old).le.paw_dmft%dmft_fermi_prec) then
+!    write(message,'(a,8x,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=<",paw_dmft%dmft_fermi_prec,ch10,&
+     write(message,'(a,8x,a,e9.2,a,e9.2,a,8x,a,e12.5)') ch10,"|fermie(n)-fermie(n-1)|=",&
+&     abs(paw_dmft%fermie-fermi_old),"<",paw_dmft%dmft_fermi_prec,ch10,&
+&     "=> DMFT Loop: Fermi level is converged to:",paw_dmft%fermie
+     call wrtout(std_out,message,'COLL')
+     green%ifermie_cv=1
+   else
+     write(message,'(a,8x,a,2f12.5)') ch10,"DMFT Loop: Fermi level is not converged:",&
+&     paw_dmft%fermie
+     call wrtout(std_out,message,'COLL')
+     green%ifermie_cv=0
+   end if
+ end if
+ write(message,'(2a)') ch10, "  |---------------------------------------------------|"
+ call wrtout(std_out,message,'COLL')
+!
+
+!==========================================================
+!Recompute full green function including non diag elements
+!==========================================================
+ call compute_green(cryst_struc,green,paw_dmft,pawang,0,self,opt_self=1,opt_nonxsum=1)
+ call integrate_green(cryst_struc,green,paw_dmft,pawang,prtopt=0,opt_ksloc=3) !,opt_nonxsum=1)
+
+ return
+end subroutine fermi_green
+!!***
+
+!!****f* m_green/newton
+!! NAME
+!! newton
+!!
+!! FUNCTION
+!!  Compute root of a function with newton methods (newton/halley)
+!!
+!! COPYRIGHT
+!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  x_input      : input of x
+!!  x_precision  : required precision on x
+!!  max_iter     : maximum number of iterations
+!!  opt_noninter
+!!
+!! OUTPUT
+!!  f_precision  : output precision on function F
+!!  ierr_hh      : different from zero if an error occurs
+!!
+!! PARENTS
+!!      fermi_green
+!!
+!! CHILDREN
+!!      compute_green,integrate_green
+!!
+!! SOURCE
+
+subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
+& x_input,x_precision,max_iter,f_precision,ierr_hh,opt_noninter,opt_algo)
+
+ use defs_basis
+ use defs_abitypes
+ use m_abicore
+ use m_errors
+
+ use m_pawang,    only : pawang_type
+ use m_crystal,   only : crystal_t
+ use m_paw_dmft,  only: paw_dmft_type
+ use m_self,      only : self_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'newton'
+!End of the abilint section
+
+ implicit none
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst_struc
+ type(green_type),intent(inout) :: green
+ !type(MPI_type), intent(in) :: mpi_enreg
+ type(paw_dmft_type), intent(inout) :: paw_dmft
+ type(pawang_type),intent(in) :: pawang
+ type(self_type), intent(inout) :: self
+ integer,intent(in) :: opt_noninter,max_iter
+ integer,intent(out) :: ierr_hh
+ real(dp),intent(inout) :: x_input,x_precision
+ real(dp),intent(inout) :: f_precision
+ real(dp),intent(in), optional :: opt_algo
+!Local variables-------------------------------
+ integer iter
+ real(dp) Fx,Fxprime,Fxdouble,xold,x_before,Fxoptimum
+ real(dp) :: nb_elec_x
+ integer option,optalgo
+ logical l_minus,l_plus
+ real(dp) :: x_minus,x_plus,x_optimum
+ character(len=500) :: message
+! *********************************************************************
+ x_minus=-10_dp
+ x_plus=-11_dp
+ xold=-12_dp
+
+ if(present(opt_algo)) then
+   optalgo=opt_algo
+ else
+   optalgo=1 ! newton
+ end if
+
+ x_input=paw_dmft%fermie
+ ierr_hh=0
+ option =2  ! Halley method
+ option =1  ! Newton method
+
+!write(std_out,*) "ldaprint",opt_noninter
+
+!--- Start of iterations
+ write(message,'(a,3a)') "     Fermi level   Charge    Difference"
+ call wrtout(std_out,message,'COLL')
+!do iter=1, 40
+!x_input=float(iter)/100_dp
+!call function_and_deriv(cryst_struc,f_precision,green,iter,mpi_enreg,paw_dmft,pawang,self,&
+!&  x_input,x_before,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
+!write(std_out,*) x_input,Fx
+!enddo
+!call abi_abort('COLL')
+
+ l_minus=.false.
+ l_plus=.false.
+ Fxoptimum=1_dp
+!========================================
+!start iteration to find fermi level
+!========================================
+ do iter=1, max_iter
+
+!  ========================================
+!  If zero is located between two values: apply newton method or dichotomy
+!  ========================================
+   if(l_minus.and.l_plus) then
+
+!    ==============================================
+!    Compute the function and derivatives for newton
+!    ==============================================
+     call function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self,&
+&     x_input,x_before,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
+
+!    Apply stop criterion on Fx
+     if(abs(Fx) < f_precision) then
+!      write(message,'(a,2f12.6)') "Fx,f_precision",Fx,f_precision
+!      call wrtout(std_out,message,'COLL')
+       x_precision=x_input-xold
+       return
+     end if
+     if(iter==max_iter) then
+       write(message,'(a,2f12.6)') "   Fermi level could not be found"
+       call wrtout(std_out,message,'COLL')
+       x_input=x_optimum
+       ierr_hh=-123
+       return
+     end if
+
+!    Cannot divide by Fxprime if too small
+     if(abs(Fxprime) .le. 1.e-15)then
+       ierr_hh=-314
+       write(message,'(a,f12.7)') "Fxprime=",Fxprime
+       call wrtout(std_out,message,'COLL')
+       return
+     end if
+
+     x_precision=x_input-xold
+
+!    ==============================================
+!    Newton/Halley's  formula for next iteration
+!    ==============================================
+     xold=x_input
+     if(option==1) x_input=x_input-Fx/Fxprime
+     if(option==2) x_input=x_input-2*Fx*Fxprime/(2*Fxprime**2-Fx*Fxdouble)
+
+!    ==============================================
+!    If newton does not work well, use dichotomy.
+!    ==============================================
+     if(x_input<x_minus.or.x_input>x_plus) then
+       call compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
+&       Fx,opt_noninter,nb_elec_x,xold)
+       write(message,'(a,3f12.6)') " ---",x_input,nb_elec_x,Fx
+       call wrtout(std_out,message,'COLL')
+       if(Fx>0) then
+         x_plus=xold
+       else if(Fx<0) then
+         x_minus=xold
+       end if
+       x_input=(x_plus+x_minus)/2.d0
+
+     end if
+!    write(std_out,'(a,2f12.6)') " Q(xold) and dQ/dx=",Fx,Fxprime
+!    write(std_out,'(a,f12.6)') " =>  new Fermi level",x_input
+!    ========================================
+!    Locate zero between two values
+!    ========================================
+   else
+     call compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
+&     Fx,opt_noninter,nb_elec_x,x_input)
+     write(message,'(a,3f12.6)') "  --",x_input,nb_elec_x,Fx
+!    Possible improvement for large systems, removed temporarely for
+!    automatic tests: more study is necessary: might worsen the convergency
+!    if(iter==1) then
+!    f_precision=max(abs(Fx/50),f_precision)
+!    write(message,'(a,4x,a,e12.6)') ch10," Precision required changed to:",f_precision
+!    call wrtout(std_out,message,'COLL')
+!    endif
+     call wrtout(std_out,message,'COLL')
+     if(Fx>0) then
+       l_plus=.true.
+       x_plus=x_input
+       x_input=x_input-0.02
+     else if(Fx<0) then
+       l_minus=.true.
+       x_minus=x_input
+       x_input=x_input+0.02
+     end if
+
+   end if
+
+   if(abs(Fx)<abs(Fxoptimum)) then
+     Fxoptimum=Fx
+     x_optimum=x_input
+   end if
+
+
+
+!  if(myid==master) then
+!  write(std_out,'(a,i4,3f12.6)') "i,xnew,F,Fprime",i,x_input,Fx,Fxprime
+!  endif
+
+
+!  ! Apply stop criterion on x
+!  if(abs(x_input-xold) .le. x_input*x_precision) then
+!  !    write(std_out,'(a,4f12.6)') "x_input-xold, x_precision*x_input   "&
+!  !&    ,x_input-xold,x_precision*x_input,x_precision
+!  f_precision=Fx
+!  return
+!  endif
+
+ end do
+!--- End of iterations
+
+
+ ierr_hh=1
+ return
+
+ CONTAINS  !========================================================================================
+!-----------------------------------------------------------------------
+!!***
+
+!!****f* newton/function_and_deriv
+!! NAME
+!!  function_and_deriv
+!!
+!! FUNCTION
+!!  Compute value of a function and its numerical derivatives
+!!
+!! INPUTS
+!!  x_input      : input of x
+!!  option       : if 1 compute only first derivative
+!!                 if 2 compute the two first derivatives.
+!!  opt_noninter
+!!
+!! OUTPUTS
+!!  Fx           : Value of F(x)
+!!  Fxprime      : Value of F'(x)
+!!  Fxdouble     : Value of F''(x)
+!!
+!! PARENTS
+!!      newton
+!!
+!! CHILDREN
+!!      compute_green,integrate_green
+!!
+!! SOURCE
+
+subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
+& ,x_input,x_old,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
+
+ use m_abicore
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_crystal, only : crystal_t
+ use m_paw_dmft, only: paw_dmft_type
+ use m_self, only : self_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'function_and_deriv'
+!End of the abilint section
+
+ implicit none
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst_struc
+ type(green_type),intent(inout) :: green
+ !type(MPI_type), intent(in) :: mpi_enreg
+ type(paw_dmft_type), intent(inout) :: paw_dmft
+ type(pawang_type),intent(in) :: pawang
+ type(self_type), intent(inout) :: self
+ integer,intent(in) :: iter,opt_noninter,option
+ real(dp),intent(inout)  :: f_precision,x_input,x_precision
+ real(dp),intent(out) :: Fx,Fxprime,Fxdouble
+ real(dp),intent(inout) :: x_old
+!Local variables-------------------------------
+ real(dp) :: deltax,nb_elec_x,Fxmoins,Fxplus,xmoins,xplus,x0
+ character(len=500) :: message
+! *********************************************************************
+
+!  choose deltax: for numeric evaluation of derivative
+   if(iter==1) then
+!    deltax=0.02
+   end if
+!  deltax=max((x_input-x_old)/10.d0,min(0.00001_dp,x_precision/100_dp))
+   deltax=min(0.00001_dp,x_precision/100_dp)  ! small but efficient
+!  endif
+!  write(std_out,*) "iter,x_input,deltax",iter,x_input,deltax
+   x0=x_input
+   xmoins=x0-deltax
+   xplus=x0+deltax
+
+   call compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
+&   Fx,opt_noninter,nb_elec_x,x0)
+
+   write(message,'(a,3f12.6)') "  - ",x0,nb_elec_x,Fx
+   call wrtout(std_out,message,'COLL')
+!  write(std_out,*) "Fx", Fx
+   if(abs(Fx)<f_precision) return
+
+   call compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
+&   Fxplus,opt_noninter,nb_elec_x,xplus)
+
+   write(message,'(a,3f12.6)') "  - ",xplus,nb_elec_x,Fxplus
+   call wrtout(std_out,message,'COLL')
+
+   if(option==2) then
+     call compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
+&     Fxmoins,opt_noninter,nb_elec_x,xmoins)
+
+     write(message,'(a,3f12.6)') "  - ",xmoins,nb_elec_x,Fxmoins
+     call wrtout(std_out,message,'COLL')
+   end if
+
+   if(option==1) then
+     Fxprime=(Fxplus-Fx)/deltax
+   else if (option==2) then
+     Fxprime=(Fxplus-Fxmoins)/(2*deltax)
+     Fxdouble=(Fxplus+Fxmoins-2*Fx)/(deltax**2)
+   end if
+!  write(std_out,*) "after computation of Fxprime",myid
+   if(Fxprime<zero) then
+     write(message,'(a,f12.6)') "  Warning: slope of charge versus fermi level is negative !", Fxprime
+     call wrtout(std_out,message,'COLL')
+   end if
+   x_old=x_input
+
+   return
+ end subroutine function_and_deriv
+!!***
+
+!!****f* newton/compute_nb_elec
+!! NAME
+!! compute_nb_elec
+!!
+!! FUNCTION
+!!  Compute nb of electrons as a function of Fermi level
+!!
+!! INPUTS
+!! fermie       : input of energy
+!! opt_noninter
+!!
+!! OUTPUTS
+!! Fx           : Value of F(x).
+!! nb_elec_x    : Number of electrons for the value of x
+!!
+!! PARENTS
+!!      newton
+!!
+!! CHILDREN
+!!      compute_green,integrate_green
+!!
+!! SOURCE
+
+subroutine compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
+&  Fx,opt_noninter,nb_elec_x,fermie)
+
+ use m_abicore
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_crystal, only : crystal_t
+ use m_paw_dmft, only: paw_dmft_type
+ use m_self, only : self_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'compute_nb_elec'
+!End of the abilint section
+
+ implicit none
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst_struc
+ type(green_type),intent(inout) :: green
+ !type(MPI_type), intent(in) :: mpi_enreg
+ type(paw_dmft_type), intent(inout) :: paw_dmft
+ type(pawang_type),intent(in) :: pawang
+ type(self_type), intent(inout) :: self
+ integer,intent(in) :: opt_noninter
+ real(dp),intent(in)  :: fermie
+ real(dp),intent(out) :: Fx,nb_elec_x
+! *********************************************************************
+   paw_dmft%fermie=fermie
+   call compute_green(cryst_struc,green,paw_dmft,pawang,0,self,opt_self=1,&
+&   opt_nonxsum=1,opt_nonxsum2=1)
+   call integrate_green(cryst_struc,green,paw_dmft,pawang,prtopt=0,&
+&   opt_ksloc=-1) !,opt_nonxsum=1)
+!  opt_ksloc=-1, compute total charge
+   nb_elec_x=green%charge_ks
+   Fx=nb_elec_x-paw_dmft%nelectval
+
+   if(opt_noninter==1) then
+   end if
+ end subroutine compute_nb_elec
+!!***
+
+end subroutine newton
+!!***
+
+!!****f* m_green/local_ks_green
+!! NAME
+!! local_ks_green
+!!
+!! FUNCTION
+!! Compute the sum over k-point of ks green function.
+!! do the fourier transformation and print it
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  cryst_struc
+!!  istep    =  step of iteration for LDA.
+!!  lda_occup
+!!  mpi_enreg=informations about MPI parallelization
+!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!
+!! OUTPUT
+!!  paw_dmft =  data for self-consistent LDA+DMFT calculations.
+!!
+!! PARENTS
+!!      m_dmft
+!!
+!! CHILDREN
+!!      fourier_fct,wrtout
+!!
+!! SOURCE
+
+subroutine local_ks_green(green,paw_dmft,prtopt)
+
+ use defs_basis
+ use m_errors
+ use m_abicore
+
+ use m_crystal, only : crystal_t
+ use m_paw_dmft, only : paw_dmft_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'local_ks_green'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(green_type), intent(in) :: green
+ type(paw_dmft_type), intent(in)  :: paw_dmft
+ integer, intent(in) :: prtopt
+
+!Local variables ------------------------------
+ character(len=500) :: message
+ integer :: iband,ifreq,ikpt,isppol,itau,lsub,ltau,mbandc,nkpt,nsppol
+ character(len=1) :: tag_is
+ character(len=fnlen) :: tmpfil
+ integer,allocatable :: unitgreenlocks_arr(:)
+ real(dp) :: beta
+ real(dp), allocatable :: tau(:)
+ complex(dpc), allocatable :: loc_ks(:,:,:)
+ complex(dpc), allocatable :: loc_ks_tau(:,:,:),fw(:),ft(:)
+!scalars
+!************************************************************************
+ mbandc=paw_dmft%mbandc
+ nkpt=paw_dmft%nkpt
+ nsppol=paw_dmft%nsppol
+ ltau=128
+ ABI_ALLOCATE(tau,(ltau))
+ do itau=1,ltau
+   tau(itau)=float(itau-1)/float(ltau)/paw_dmft%temp
+ end do
+ beta=one/paw_dmft%temp
+
+!Only imaginary frequencies here
+ if(green%w_type=="real") then
+   message = ' compute_energy not implemented for real frequency'
+   MSG_BUG(message)
+ end if
+
+!=========================================
+!Compute local band ks green function
+! should be computed in compute_green: it would be less costly in memory.
+!=========================================
+ ABI_ALLOCATE(loc_ks,(nsppol,mbandc,paw_dmft%dmft_nwlo))
+ if(green%oper(1)%has_operks==1) then
+   loc_ks(:,:,:)=czero
+   do isppol=1,nsppol
+     do iband=1,mbandc
+       do ifreq=1,paw_dmft%dmft_nwlo
+         do ikpt=1,nkpt
+           loc_ks(isppol,iband,ifreq)=loc_ks(isppol,iband,ifreq)+  &
+&           green%oper(ifreq)%ks(isppol,ikpt,iband,iband)*paw_dmft%wtk(ikpt)
+         end do
+       end do
+     end do
+   end do
+ else
+   message = ' green fct is not computed in ks space'
+   MSG_BUG(message)
+ end if
+
+!=========================================
+!Compute fourier transformation
+!=========================================
+
+ ABI_ALLOCATE(loc_ks_tau,(nsppol,mbandc,ltau))
+ ABI_ALLOCATE(fw,(paw_dmft%dmft_nwlo))
+ ABI_ALLOCATE(ft,(ltau))
+ loc_ks_tau(:,:,:)=czero
+ do isppol=1,nsppol
+   do iband=1,mbandc
+     do ifreq=1,paw_dmft%dmft_nwlo
+       fw(ifreq)=loc_ks(isppol,iband,ifreq)
+     end do
+     call fourier_fct(fw,ft,.true.,ltau,-1,paw_dmft) ! inverse fourier
+     do itau=1,ltau
+       loc_ks_tau(isppol,iband,itau)=ft(itau)
+     end do
+   end do
+ end do
+ ABI_DEALLOCATE(fw)
+ ABI_DEALLOCATE(ft)
+ do isppol=1,nsppol
+   do iband=1,mbandc
+     do itau=1,ltau
+       loc_ks_tau(isppol,iband,itau)=(loc_ks_tau(isppol,iband,itau)+conjg(loc_ks_tau(isppol,iband,itau)))/two
+     end do
+   end do
+ end do
+
+!=========================================
+!Print out ksloc green function
+!=========================================
+ if(abs(prtopt)==1) then
+   ABI_ALLOCATE(unitgreenlocks_arr,(nsppol))
+   do isppol=1,nsppol
+     write(tag_is,'(i1)')isppol
+     tmpfil = trim(paw_dmft%filapp)//'Gtau_locks_isppol'//tag_is
+     write(message,'(3a)') ch10," == Print green function on file ",tmpfil
+     call wrtout(std_out,message,'COLL')
+     unitgreenlocks_arr(isppol)=500+isppol-1
+     open (unit=unitgreenlocks_arr(isppol),file=trim(tmpfil),status='unknown',form='formatted')
+     rewind(unitgreenlocks_arr(isppol))
+     write(message,'(a,a,a,i4)') 'opened file : ', trim(tmpfil), ' unit', unitgreenlocks_arr(isppol)
+     write(message,'(a,a)') ch10,"# New record : First 40 bands"
+     call wrtout(unitgreenlocks_arr(isppol),message,'COLL')
+     do lsub=1,mbandc/40+1
+       do itau=1, ltau
+         write(message,'(2x,50(e10.3,2x))') tau(itau), &
+&         (real(loc_ks_tau(isppol,iband,itau)),iband=40*(lsub-1)+1,min(40*lsub,mbandc))
+         call wrtout(unitgreenlocks_arr(isppol),message,'COLL')
+       end do
+       write(message,'(2x,50(e10.3,2x))') beta, &
+&       ((-one-real(loc_ks_tau(isppol,iband,1))),iband=40*(lsub-1)+1,min(40*lsub,mbandc))
+       call wrtout(unitgreenlocks_arr(isppol),message,'COLL')
+       if(40*lsub<mbandc) then
+         write(message,'(a,a,i5,a,i5)')    &
+&         ch10,"# Same record, Following bands : From ",    &
+&         40*(lsub),"  to ",min(40*(lsub+1),mbandc)
+         call wrtout(unitgreenlocks_arr(isppol),message,'COLL')
+       end if
+     end do
+!    call flush(unitgreenlocks_arr(isppol))
+   end do
+   ABI_DEALLOCATE(unitgreenlocks_arr)
+ end if
+
+!Deallocations
+ ABI_DEALLOCATE(loc_ks)
+ ABI_DEALLOCATE(loc_ks_tau)
+ ABI_DEALLOCATE(tau)
+
+end subroutine local_ks_green
+!!***
+
 
 END MODULE m_green
 !!***

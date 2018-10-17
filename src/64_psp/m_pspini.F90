@@ -30,7 +30,7 @@ module m_pspini
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_psxml2ab
  !use m_psps
@@ -43,7 +43,8 @@ module m_pspini
                          nctab_eval_tcorespl
  use m_pawpsp,    only : pawpsp_bcast, pawpsp_read_pawheader, pawpsp_read_header_xml,&
                          pawpsp_header_type, pawpsp_wvl, pawpsp_7in, pawpsp_17in
- use m_pawxmlps,  only : paw_setup, ipsp2xml
+ use m_pawxmlps,  only : paw_setup_free,paw_setuploc
+ use m_pspheads,  only : pawpsxml2ab
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : dictionary, atomic_info, dict_init, dict_free, UNINITIALIZED
 #endif
@@ -55,6 +56,7 @@ module m_pspini
  use m_psp9,       only : psp9in
  use m_upf2abinit, only : upf2abinit
  use m_psp_hgh,    only : psp2in, psp3in, psp10in
+ use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
  implicit none
 
@@ -137,7 +139,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspini'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -270,6 +271,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 &   (psps%pspso(ipsp)==1.and.pspso_old(ipsp)==pspso_zero(ipsp))) then
      new_pspso(ipsp)=0
    end if
+!  No new characteristics if PAW
+   if (psps%usepaw==1) new_pspso(ipsp)=0
 !  Prepare the saving of the intrinsic pseudopotential characteristics
    if(psps%pspso(ipsp)==1) pspso_zero(ipsp)=0
  end do
@@ -832,8 +835,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pspatm'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -867,9 +868,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  character(len=fnlen) :: title
  character(len=fnlen) :: filnam
  type(pawpsp_header_type):: pawpsp_header
+ type(pspheader_type) :: pspheads_tmp
 !arrays
  integer,allocatable :: nproj(:)
- real(dp) :: tsec(2)
+ real(dp) :: tsec(2),ecut_tmp(3,2)
  real(dp),allocatable :: e990(:),e999(:),ekb1(:),ekb2(:),epspsp(:),rcpsp(:)
  real(dp),allocatable :: rms(:)
 #if defined HAVE_PSML
@@ -1002,16 +1004,20 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
 
-!PENDING: These routines will be added to libpaw:
 !    Return header informations
-     call pawpsp_read_header_xml(lloc,lmax,pspcod,&
-&     pspxc,paw_setup(ipsp2xml(ipsp)),r2well,zion,znucl)
-!    Fill in pawpsp_header object:
-     call pawpsp_read_pawheader(pawpsp_header%basis_size,&
-&     lmax,pawpsp_header%lmn_size,&
-&     pawpsp_header%l_size,pawpsp_header%mesh_size,&
-&     pawpsp_header%pawver,paw_setup(ipsp2xml(ipsp)),&
-&     pawpsp_header%rpaw,pawpsp_header%rshp,pawpsp_header%shape_type)
+     call pawpsxml2ab(psps%filpsp(ipsp),ecut_tmp, pspheads_tmp,0)
+     lmax=pspheads_tmp%lmax
+     pspxc=pspheads_tmp%pspxc
+     znucl=pspheads_tmp%znuclpsp
+     pawpsp_header%basis_size=pspheads_tmp%pawheader%basis_size
+     pawpsp_header%l_size=pspheads_tmp%pawheader%l_size
+     pawpsp_header%lmn_size=pspheads_tmp%pawheader%lmn_size
+     pawpsp_header%mesh_size=pspheads_tmp%pawheader%mesh_size
+     pawpsp_header%pawver=pspheads_tmp%pawheader%pawver
+     pawpsp_header%shape_type=pspheads_tmp%pawheader%shape_type
+     pawpsp_header%rpaw=pspheads_tmp%pawheader%rpaw
+     pawpsp_header%rshp=pspheads_tmp%pawheader%rshp
+     lloc=0; pspcod=17
 
    else if (useupf == 1) then
      if (psps%usepaw /= 0) then
@@ -1036,8 +1042,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !  TODO: in case of pspcod 5 (phoney) and 8 (oncvpsp) this is not specific enough.
 !  they can be non-SOC as well.
 !  HGH is ok - can always turn SOC on or off.
+!  PAW is ok - can be used with or without SOC
 !  write(std_out,*) pspso
-   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10))then
+   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10).and. &
+&     (pspcod/=7).and.(pspcod/=17))then
 !    If pspso requires internal characteristics, set it to 1 for non-HGH psps
      if(psps%pspso(ipsp)==1) psps%pspso(ipsp)=0
      if(psps%pspso(ipsp)/=0)then
@@ -1229,7 +1237,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &     psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 &     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
 &     dtset%usexcnhat_orig,vlspl,xcccrc,&
-&     dtset%xclevel,dtset%xc_denpos,zion,psps%znuclpsp(ipsp))
+&     dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp))
+     call paw_setup_free(paw_setuploc)
    end if
 
    close (unit=tmp_unit)
@@ -1240,7 +1249,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &     ' pspatm : COMMENT -',ch10,&
 &     '  the projectors are not normalized,',ch10,&
 &     '  so that the KB energies are not consistent with ',ch10,&
-&     '  definition in PRB44, 8503 (1991). ',ch10,&
+&     '  definition in PRB44, 8503 (1991). ',ch10,& ! [[cite:Gonze1991]]
 &     '  However, this does not influence the results obtained hereafter.'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')

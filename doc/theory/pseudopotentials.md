@@ -2,7 +2,7 @@
 authors: MG
 ---
 
-$
+$$
 \newcommand{\aa}{\alpha}
 \newcommand{\PS}{{\text{PS}}}
 \newcommand{\Ylm}{{Y_m^l}}
@@ -18,22 +18,31 @@ $
 \newcommand{\jl}{j_l}
 \newcommand{\rrhat}{{\widehat\rr}}
 \newcommand{\dd}{{\,\text{d}}}
-$
+$$
 
 ## Pseudopotentials in the Kleynman Bylander form
 
 This page reports the basic definitions and equations needed to evaluate the nonlocal part of the Hamiltonian. 
 We mainly focus on norm-conserving pseudopotentials.
-Providing a consistent introduction to the theory of pseudopotentials is beyond the purpose of this section, a more complete discussion of the topic can be found in specialized articles available in the literature  [[cite:Hamann1979]], [[cite:Bachelet1982]], [[cite:Kleinman1982]], [[cite:Hamann1989]], [[cite:Troullier1991]]
+Providing a consistent introduction to the theory of pseudopotentials is beyond the purpose of this section,
+a more complete discussion of the topic can be found in specialized articles available in the literature
+[[cite:Hamann1979]], [[cite:Bachelet1982]], [[cite:Kleinman1982]], [[cite:Hamann1989]], [[cite:Troullier1991]]
 [[cite:Gonze1991]], [[cite:Fuchs1999]].
-For the generalization of norm conservation to multiple projectors (Optimized norm-conserving Vanderbilt pseudopotentials) we refer the reader to [[cite:Hamann2013]]. 
-The generation and validation of ONCVPSP pseudopotentials is described in the [PseudoDojo](http://www.pseudo-dojo.org/) paper [[cite:Setten2018]].
+For the generalization of norm conservation to multiple projectors (Optimized norm-conserving Vanderbilt pseudopotentials)
+we refer the reader to [[cite:Hamann2013]]. 
+The generation and validation of ONCVPSP pseudopotentials is described in
+the [PseudoDojo](http://www.pseudo-dojo.org/) paper [[cite:Setten2018]].
 
-For our purpose, we can summarize by saying that a pseudopotential is constructed in order to replace the atomic all-electron potential such that core states are eliminated and valence electrons are described by pseudo wavefunctions whose representation in the Fourier space decays rapidly.
+For our purpose, we can summarize by saying that a pseudopotential is constructed in order to replace
+the atomic all-electron potential such that core states are eliminated and valence electrons are 
+described by pseudo wavefunctions whose representation in the Fourier space decays rapidly.
 
-Modern norm-conserving pseudopotentials are constructed such that the scattering properties of the all-electron atom are reproduced around the reference energy configuration up to first order in energy, following the procedure described in [[cite:Hamann1979]], [[cite:Hamann1989]], and [[cite:Troullier1991]].
-In modern ab initio codes, the fully separable KB form, proposed by Kleynman and Bylander, is usually employed as it drastically reduces the number of operations 
-required for the application of the nonlocal part of the Hamiltonian as well as the memory required to store the operator [[cite:Kleinman1982]].
+Modern norm-conserving pseudopotentials are constructed such that the scattering properties 
+of the all-electron atom are reproduced around the reference energy configuration up to first order in energy,
+following the procedure described in [[cite:Hamann1979]], [[cite:Hamann1989]], and [[cite:Troullier1991]].
+In modern ab initio codes, the fully separable KB form, proposed by Kleynman and Bylander, is usually employed
+as it drastically reduces the number of operations required for the application of the nonlocal part of the Hamiltonian
+as well as the memory required to store the operator [[cite:Kleinman1982]].
 In the KB form, the interaction between a valence electron and an ion of type $\aa$ is described by means of the operator:
 
 \begin{equation}\label{eq:KBsingleatom}

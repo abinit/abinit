@@ -30,13 +30,14 @@ module m_psp_hgh
  use defs_datatypes
  use defs_abitypes
  use m_splines
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_special_funcs,  only : abi_derfc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atomic_info
 #endif
+ use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
  implicit none
 
@@ -121,8 +122,6 @@ subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlsp
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp2in'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -467,7 +466,6 @@ subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp2lo'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -575,7 +573,7 @@ end subroutine psp2lo
 !! psp3in
 !!
 !! FUNCTION
-!! Initialize pspcod=3 pseudopotentials (HGH psps PRB58,3641(1998)):
+!! Initialize pspcod=3 pseudopotentials (HGH psps PRB58,3641(1998) [[cite:Hartwigsen1998]]):
 !! continue to read the file, then compute the corresponding
 !! local and non-local potentials.
 !!
@@ -637,8 +635,6 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp3in'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none
@@ -1397,8 +1393,8 @@ end subroutine psp3nl
 !!
 !! FUNCTION
 !! Initialize pspcod=10 pseudopotentials (formalism is the same as in HGH psps
-!! PRB58,3641(1998), but the full h and k matrices are read, allowing for using
-!! also subsequent developments such as Theor. Chem. Acc. 114, 145 (2005)):
+!! PRB58,3641(1998) [[cite:Hartwigsen1998]], but the full h and k matrices are read, allowing for using
+!! also subsequent developments such as Theor. Chem. Acc. 114, 145 (2005) [[cite:Dolg2005]]:
 !! continue to read the file, then compute the corresponding
 !! local and non-local potentials.
 !!
@@ -1460,8 +1456,6 @@ subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, p
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp10in'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
 !End of the abilint section
 
  implicit none

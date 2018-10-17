@@ -27,7 +27,7 @@
 module m_multibinit_dataset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_parser, only : intagm
@@ -336,7 +336,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%spin_n1l=1
  multibinit_dtset%spin_n2l=0
 
- multibinit_dtset%spin_dt=1d-16
+ multibinit_dtset%spin_dt=100
  !TODO hexu: what is the unit. s. here.  the atomic unit is 2.418884e-17, should we use it ?
 multibinit_dtset%spin_temperature=325 ! or 0 ?
 multibinit_dtset%spin_tolavg=1d-2 ! TODO hexu: to be decided. should it be a function of temperature?
@@ -500,7 +500,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars10'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1090,7 +1089,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 
  multibinit_dtset%spin_dt= 1d-16
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dt',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dt',tread,'TIM')
  if(tread==1) multibinit_dtset%spin_dt=dprarr(1)
  if(multibinit_dtset%spin_dt<0)then
     write(message, '(a,es10.2,a,a,a,a,a)' )&
@@ -2061,7 +2060,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit,'(a18,3es15.5)')'spin_temperature',multibinit_dtset%spin_temperature
     write(nunit,'(3x,a15,3I10.1)')'spin_ntime',multibinit_dtset%spin_ntime
     write(nunit,'(3x,a15,3I10)')  'ncell',multibinit_dtset%ncell !TODO hexu: duplicate but dynamics can be 0.
-    write(nunit,'(3x,a15,3es15.5)')  'spin_dt',multibinit_dtset%spin_dt
+    write(nunit,'(3x,a15,ES15.5, a8)')  'spin_dt',multibinit_dtset%spin_dt*Time_Sec , ' second' !TODO: use a.u.
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolavg',multibinit_dtset%spin_tolavg
     !write(nunit,'(3x,a14,3es10.5)')  '   spin_tolvar',multibinit_dtset%spin_tolvar
     write(nunit,'(3x,a15)')   'spin_mag_field'

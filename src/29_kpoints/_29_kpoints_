@@ -14,6 +14,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! symkpt.F90
+!! interfaces_29_kpoints.F90
+!! m_symkpt.F90
 !!
 !!***

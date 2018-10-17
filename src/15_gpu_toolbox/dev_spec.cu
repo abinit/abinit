@@ -262,7 +262,7 @@ extern "C" void alloc_on_gpu_(void **gpu_ptr,int* size){
   if(cudaMalloc(gpu_ptr,*size)!=cudaSuccess){
     printf("ERROR: alloc_on_gpu failed:%s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 }
 
@@ -279,7 +279,7 @@ extern "C" void dealloc_on_gpu_(void **gpu_ptr){
   if(cudaFree(*gpu_ptr)!=cudaSuccess){
     printf("ERROR: dealloc_on_gpu failed :%s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
   *gpu_ptr=NULL;
 }
@@ -299,7 +299,7 @@ extern "C" void copy_on_gpu_(void *ptr, void **gpu_ptr,int* size){
   if(cudaMemcpy(*gpu_ptr,ptr,*size,cudaMemcpyHostToDevice)!=cudaSuccess){
     printf("ERROR: copy_on_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 }
 
@@ -316,6 +316,6 @@ extern "C" void copy_from_gpu_(void *ptr,void **gpu_ptr,int* size){
   if(cudaMemcpy(ptr,*gpu_ptr,*size,cudaMemcpyDeviceToHost)!=cudaSuccess){
     printf("ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
-    leave_new_("COLL");
+    abi_cabort();
   }
 }

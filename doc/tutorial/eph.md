@@ -19,37 +19,44 @@ utility. This implies a preliminary calculation of the electron-phonon matrix
 elements and phonon frequencies and eigenvectors, from a standard ABINIT
 phonon calculation, which will be reviewed succinctly.
 
+[TUTORIAL_README]
+
 This tutorial should take about 1 hour.
+
+Visualisation tools are NOT covered in this tutorial.
+Powerful visualisation procedures have been developed in the Abipy context,
+relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
+and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 ## 1 Calculation of the ground state and phonon structure of fcc Al
 
-  
 *Before beginning, you might consider making a different subdirectory to work
-in. Why not create "Work_eph" in ~abinit/tests/tutorespfn/Input?*
+in. Why not create Work_eph in \$ABI_TUTORESPFN/Input?*
 
 It is presumed that the user has already followed the Tutorials [RF1](rf1) and [RF2](rf2), 
 and understands the calculation of ground state and response (phonon using density-functional
 perturbation theory (DFPT)) properties with ABINIT.
 
-The file ~abinit/tests/tutorespfn/Input/teph_1.files lists the file names and
-root names for the first run (GS+perturbations). You can copy it to the
-working directory. You can also copy the file
-~abinit/tests/tutorespfn/Input/teph_1.in to your working directory. 
+The file *teph_1.files* lists the file names and root names for the first run (GS+perturbations).
+You can copy it to the working directory. You can also copy the file *teph_1.in* to your working directory. 
+
+```sh
+cd $ABI_TUTORESPFN/Input
+mkdir Work_eph
+cd Work_eph
+cp ../teph_1.file . 
+cp ../teph_1.in .
+```
 
 {% dialog tests/tutorespfn/Input/teph_1.in %}
 
-This is your input file.
-
-    cp ../teph_1.files .
-    cp ../teph_1.in .
-
 You can immediately start this run - the input files will be examined later...
     
-    ../../abinit < teph_1.files > tmp-log &
+    abinit < teph_1.files > log 2> err &
 
 ### Dataset Structure and Flow
 
-The teph_1.in file contains a number of datasets (DS). These will perform the
+The *teph_1.in* file contains a number of datasets (DS). These will perform the
 ground state (DS 1), then the phonon perturbations (DS 2-4), for a cell of FCC
 aluminium. The DDK perturbation (DS 5) is also calculated, and will be used to
 obtain the Fermi velocities for the transport calculations in Section 6.
@@ -83,7 +90,7 @@ will be completely unconverged, but by the end of the tutorial you should know
 how to run a full electron phonon calculation, and be able to improve the
 convergence on your own.
 
-Edit the file teph_1.in. We now examine several variables. The kinetic energy
+Edit the file *teph_1.in*. We now examine several variables. The kinetic energy
 cutoff [[ecut]] is a bit low, and the number of k-points (determined by
 [[ngkpt]]) is much too low. Electron-phonon calculations require a very
 precise determination of the Fermi surface of the metal. This implies a very
@@ -144,7 +151,7 @@ contain the 2DTE for the different phonons wavevectors q.
 
 ## 2 Merging of the 2DTE DDB files using MRGDDB
   
-You can copy the following content to a file teph_2.in within your working directory:
+You can copy the following content to a file *teph_2.in* within your working directory:
     
     teph_2.ddb.out
     Total ddb for Al FCC system
@@ -159,10 +166,10 @@ or use
 
 This is your input file for the [[help:mrgddb|MRGDDB]] utility, which will
 take the different _DDB files and merge them into a single one which ANADDB
-will use to determine the phonon frequencies and eigenvectors. teph_2.in
-contains the name of the final file, a comment line, then the number of _DDB
+will use to determine the phonon frequencies and eigenvectors. *teph_2.in*
+contains the name of the final file, a comment line, then the number of *_DDB*
 files to be merged and their names.
-mrgddb is run with the command
+*mrgddb* is run with the command
     
      mrgddb < teph_2.in 
 
@@ -172,7 +179,7 @@ It runs in a few seconds.
   
 A merge similar to that in the last section must be carried out for the
 electron-phonon matrix elements. This is done using the MRGGKK utility, and
-its input file is ~abinit/tests/tutorespfn/Input/teph_3.in, shown below
+its input file is *\$ABI_TUTORESPFN/Input/teph_3.in*, shown below
     
     teph_3o_GKK.bin   # Name of output file
     0                    # binary (0) or ascii (1) output
@@ -187,8 +194,8 @@ or use
 {% dialog tests/tutorespfn/Input/teph_3.in %}
 
 The matrix element sections of all the _GKK files will be extracted and
-concatenated into one (binary) file, here named teph_3o_GKK.bin. The following
-lines in teph_3.in give the output format (0 for binary or 1 for ascii), then
+concatenated into one (binary) file, here named *teph_3o_GKK.bin*. The following
+lines in *teph_3.in* give the output format (0 for binary or 1 for ascii), then
 the name of the ground state wavefunction file. The fourth line contains 3
 integers, which give the number of _1WF files (which can also be used to
 salvage the GKK), the number of _GKK files, and the number of perturbations in
@@ -207,15 +214,14 @@ superconductivity is reviewed in [[cite:Allen1983a|Theory of Superconducting Tc]
 by P.B. Allen and B. Mitrovic.
 The first implementations similar to that in ABINIT are those in [[cite:Savrasov1996]] and [[cite:Liu1996]].
 
-File ~abinit/tests/tutorespfn/Input/teph_4.in contains the input needed by
+File *\$ABI_TUTORESPFN/Input/teph_4.in* contains the input needed by
 ANADDB to carry out the calculation of the electron-phonon quantities.
 
 {% dialog tests/tutorespfn/Input/teph_4.in %}
 
-ANADDB
-takes a files file, just like ABINIT, which tells it where to find the input,
+ANADDB takes a files file, just like ABINIT, which tells it where to find the input,
 ddb, and gkk files, and what to name the output, thermodynamical output, and
-electron phonon output files. ~abinit/tests/tutorespfn/Input/teph_4.files is
+electron phonon output files. *\$ABI_TUTORESPFN/Input/teph_4.files* is
 your files file for ANADDB. You can edit it now.
 
 The new variables are at the head of the file:
@@ -303,9 +309,8 @@ does not affect results. Normally, the limit for a very small
 [[anaddb:elphsmear]] and a very dense k-point grid is the same as the value
 obtained with the tetrahedron method (which usually converges with a sparser k-point grid).
 
-Edit input file ~abinit/tests/tutorespfn/Input/teph_5.in and you will see the
-main difference with teph_4.in is the choice of the tetrahedron integration
-method.
+Edit input file *\$ABI_TUTORESPFN/Input/teph_5.in* and you will see the
+main difference with teph_4.in is the choice of the tetrahedron integration method.
 
 {% dialog tests/tutorespfn/Input/teph_5.in %}
 
@@ -367,7 +372,7 @@ additional dataset, DS5, with the following lines of teph_1.in:
     
 
 Copy the additional .ddk file from the tests/tutorespfn/Inputs directory, and
-run anaddb with the new "files" file. The input for teph_6 has added to teph_5.in the following 2 lines:
+run anaddb with the new "files" file. The input for teph_6 has added to *teph_5.in* the following 2 lines:
     
     ifltransport 1
     ep_keepbands 1

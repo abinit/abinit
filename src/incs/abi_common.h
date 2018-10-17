@@ -239,7 +239,7 @@
 
 /* Macro for clean exit */
 /*
-#define ABI_EXIT(exit_status) call leave_new("COLL",exit_status=exit_status,print_config=.False.)
+#define ABI_EXIT(exit_status) call abi_abort("COLL",exit_status=exit_status,print_config=.False.)
 */
 
 /* Macros used for stopping the code if external libraries have not been enabled */

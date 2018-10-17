@@ -57,6 +57,8 @@ dmft_rslf 0
 dmft_mxsf 0.7
 dmft_dc 1
 dmft_t2g 1   # special value for t2g only calculation.
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
 
 # == CTQMC
 dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo code.
@@ -79,7 +81,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_TRIQS
+#%% need_cpp_vars = HAVE_TRIQS_v1_4
 #%% [files]
 #%% files_to_test = 
 #%%    t01.out,  tolnlines =0, tolabs =1.1e-11, tolrel = 2.0e-12, fld_options=-medium ;

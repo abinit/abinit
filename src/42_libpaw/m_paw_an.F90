@@ -383,7 +383,6 @@ end subroutine paw_an_init
 !! SIDE EFFECTS
 !!  Paw_an(:)<type(Paw_an_type)>=various arrays given on ANgular mesh or ANgular moments
 !!
-!! SIDE EFFECTS
 !!  All associated pointers in Paw_an(:) are deallocated
 !!
 !! PARENTS
@@ -772,7 +771,6 @@ subroutine paw_an_print(Paw_an,unit,mode_paral, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'paw_an_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

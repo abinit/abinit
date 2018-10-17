@@ -25,7 +25,7 @@
 module defs_rectypes
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use defs_abitypes,  only : MPI_type
  use m_pawfgr, only : pawfgr_type
 

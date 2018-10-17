@@ -30,7 +30,7 @@ MODULE m_sigma
  use defs_datatypes
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use iso_c_binding
  use m_nctk
@@ -262,7 +262,6 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'write_sigma_header'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -460,7 +459,6 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'write_sigma_results'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -675,7 +673,6 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_Sigma_perturbative'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -829,7 +826,6 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'print_Sigma_QPSC'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

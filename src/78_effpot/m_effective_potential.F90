@@ -30,7 +30,7 @@ module m_effective_potential
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_strain
  use m_ifc
  use m_supercell
@@ -400,12 +400,6 @@ end subroutine effective_potential_init
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine effective_potential_initmpi(eff_pot,comm)
 
 
@@ -658,7 +652,6 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_generateDipDip'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1075,7 +1068,6 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_setCoeffs'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1521,7 +1513,6 @@ subroutine effective_potential_print(eff_pot,option,filename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -1650,7 +1641,6 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_printSupercell'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1818,7 +1808,6 @@ subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_writeXML'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2159,7 +2148,6 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_writeAbiInput'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2351,7 +2339,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_evaluate'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none
@@ -2545,7 +2532,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !   ii = ii + 1
 !   if(ii > eff_pot%crystal%natom) ii = 1
 ! end do
- 
+
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
@@ -3128,14 +3115,6 @@ end function effective_potential_compare
 ! subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,ncell,nph1l,option,qph1l)
 
 
-! !This section has been created automatically by the script Abilint (TD).
-! !Do not modify the following lines by hand.
-! #undef ABI_FUNC
-! #define ABI_FUNC 'effective_potential_effpot2ddb'
-!  use interfaces_32_util
-!  use interfaces_41_geometry
-! !End of the abilint section
-
 !   implicit none
 
 ! !Arguments ------------------------------------
@@ -3594,7 +3573,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  istep = 4
  xred = hist%xred(:,:,istep)
  rprimd =  hist%rprimd(:,:,istep)
- 
+
  rprimd_ref =  eff_pot%supercell%rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -3602,20 +3581,20 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  delta = 0.001
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
  strain = zero
- 
+
    do ia=1,natom
      do mu=1,3
        write(std_out,*) "atm: ",ia," dir: ",mu
        do ii=1,npt
          delt = deltalist(ii)
 
-!        Get the initial displacement        
+!        Get the initial displacement
          call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
 &                                         eff_pot%supercell%rprimd,1,xred_hist=xred,&
 &                                         xcart_ref=eff_pot%supercell%xcart,&
 &                                         compute_displacement = .true.,compute_duDelta = .true.)
 
-!        Add the delta         
+!        Add the delta
          call xcart2xred(natom, rprimd, disp, disp_red)
          disp_red(mu,ia) = disp_red(mu,ia) + delt
          call xred2xcart(natom, rprimd, disp, disp_red)
@@ -3687,7 +3666,7 @@ forall(ii=1:3)identity(ii,ii)=1
 
      diff(ii) = energy
 
-   end do 
+   end do
 
 !  The two options should give the same result
 !  Option 1 => compute the disps and provide them to evaluate
@@ -3704,7 +3683,7 @@ forall(ii=1:3)identity(ii,ii)=1
 !  Option 2 => compute the disps within evaluate
    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.true.,verbose=.false.)
-   
+
  write(std_out,*) "Analyti:",strten(jj)
  write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol
  write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
@@ -3753,7 +3732,6 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_writeNETCDF'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

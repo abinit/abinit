@@ -305,7 +305,7 @@ end subroutine data4entropyDMFT_setDocc
 !! NOTES
 !!
 !! PARENTS
-!!      dmft_solve
+!!      m_dmft
 !!
 !! CHILDREN
 !!

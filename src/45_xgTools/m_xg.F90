@@ -39,7 +39,7 @@
 module m_xg
 
   use m_errors
-  use m_profiling_abi
+  use m_abicore
 
   use defs_basis, only : std_err, std_out
   use m_time,     only: timab
@@ -109,10 +109,10 @@ module m_xg
     module procedure xgBlock_gemmC
   end interface
 
-  interface xgBlock_colwiseMul
-    module procedure xgBlock_colwiseMulR
-    module procedure xgBlock_colwiseMulC
-  end interface
+ interface xgBlock_colwiseMul
+   module procedure xgBlock_colwiseMulR
+   module procedure xgBlock_colwiseMulC
+ end interface
 
   interface xgBlock_trsm
     module procedure xgBlock_trsmR
@@ -172,7 +172,7 @@ module m_xg
   public :: xgBlock_add
   public :: xgBlock_cshift
   public :: xgBlock_colwiseNorm2
-  public :: xgBlock_colwiseCaxmy
+  public :: xgBlock_colwiseCymax
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
 
@@ -756,7 +756,7 @@ module m_xg
 !! NAME
 !! xgBlock_setBlock
 
-  subroutine xgBlock_setBlock(xgBlock1,xgBlock2, fcol, rows, cols)
+  subroutine xgBlock_setBlock(xgBlockA,xgBlockB, fcol, rows, cols)
     use iso_c_binding
 
 !This section has been created automatically by the script Abilint (TD).
@@ -765,35 +765,35 @@ module m_xg
 #define ABI_FUNC 'xgBlock_setBlock'
 !End of the abilint section
 
-    type(xgBlock_t), intent(inout) :: xgBlock1
-    type(xgBlock_t), intent(inout) :: xgBlock2
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
     integer, intent(in) :: fcol
     integer, intent(in) :: rows
     integer, intent(in) :: cols
     type(c_ptr) :: cptr
 
-    if ( (fcol+cols-1 ) > xgblock1%cols ) then
+    if ( (fcol+cols-1 ) > xgblockA%cols ) then
       MSG_ERROR("Too many columns")
     endif
-    if ( rows > xgblock1%rows ) then
+    if ( rows > xgblockA%rows ) then
       MSG_ERROR("Too many rows")
     end if
 
-    xgBlock2%space = xgBlock1%space
-    xgBlock2%rows = rows
-    xgBlock2%LDim = xgBlock1%LDim
-    xgBlock2%cols = cols
-    xgBlock2%trans = xgBlock1%trans
-    xgBlock2%normal = xgBlock1%normal
-    xgBlock2%spacedim_comm= xgBlock1%spacedim_comm
+    xgBlockB%space = xgBlockA%space
+    xgBlockB%rows = rows
+    xgBlockB%LDim = xgBlockA%LDim
+    xgBlockB%cols = cols
+    xgBlockB%trans = xgBlockA%trans
+    xgBlockB%normal = xgBlockA%normal
+    xgBlockB%spacedim_comm= xgBlockA%spacedim_comm
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      cptr = getClocR(xgBlock1%LDim,xgBlock1%cols,xgBlock1%vecR(:,fcol:fcol+cols-1))
-      call c_f_pointer(cptr,xgBlock2%vecR,(/ xgBlock2%LDim,cols /))
+      cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(:,fcol:fcol+cols-1))
+      call c_f_pointer(cptr,xgBlockB%vecR,(/ xgBlockB%LDim,cols /))
     case(SPACE_C)
-      cptr = getClocC(xgBlock1%LDim,xgBlock1%cols,xgBlock1%vecC(:,fcol:fcol+cols-1))
-      call c_f_pointer(cptr,xgBlock2%vecC,(/ xgBlock2%LDim,cols /))
+      cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(:,fcol:fcol+cols-1))
+      call c_f_pointer(cptr,xgBlockB%vecC,(/ xgBlockB%LDim,cols /))
     end select
 
   end subroutine xgBlock_setBlock
@@ -870,7 +870,7 @@ module m_xg
 !! NAME
 !! xgBlock_copy
 
-  subroutine xgBlock_copy(xgBlock1, xgBlock2, inc1, inc2)
+  subroutine xgBlock_copy(xgBlockA, xgBlockB, inc1, inc2)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -879,8 +879,8 @@ module m_xg
 #define ABI_FUNC 'xgBlock_copy'
 !End of the abilint section
 
-    type(xgBlock_t), intent(inout) :: xgBlock1
-    type(xgBlock_t), intent(inout) :: xgBlock2
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
     integer, optional :: inc1
     integer, optional :: inc2
     integer :: incx
@@ -893,22 +893,22 @@ module m_xg
     call timab(tim_copy,1,tsec)
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space ) then
       MSG_ERROR("Not same space")
     end if
-    !if ( xgBlock1%LDim*xgBlock1%cols/incx /= xgBlock2%LDim*xgBlock2%cols/incy ) then
+    !if ( xgBlockA%LDim*xgBlockA%cols/incx /= xgBlockB%LDim*xgBlockB%cols/incy ) then
     !  MSG_ERROR("Number of element different")
     !end if
 
-    size1 = xgBlock1%LDim*xgBlock1%cols/incx ; if ( size1 * incx < xgBlock1%LDim*xgBlock1%cols ) size1 = size1+1
-    size2 = xgBlock2%LDim*xgBlock2%cols/incy ; if ( size2 * incy < xgBlock2%LDim*xgBlock2%cols ) size2 = size2+1
+    size1 = xgBlockA%LDim*xgBlockA%cols/incx ; if ( size1 * incx < xgBlockA%LDim*xgBlockA%cols ) size1 = size1+1
+    size2 = xgBlockB%LDim*xgBlockB%cols/incy ; if ( size2 * incy < xgBlockB%LDim*xgBlockB%cols ) size2 = size2+1
     size = min(size1,size2)
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      call dcopy(size,xgBlock1%vecR,incx,xgBlock2%vecR,incy)
+      call dcopy(size,xgBlockA%vecR,incx,xgBlockB%vecR,incy)
     case(SPACE_C)
-      call zcopy(size,xgBlock1%vecC,incx,xgBlock2%vecC,incy)
+      call zcopy(size,xgBlockA%vecC,incx,xgBlockB%vecC,incy)
     end select
     call timab(tim_copy,2,tsec)
 
@@ -920,7 +920,7 @@ module m_xg
 !! NAME
 !! xgBlock_pack
 
-  subroutine xgBlock_pack(xgBlock1,xgBlock2,uplo)
+  subroutine xgBlock_pack(xgBlockA,xgBlockB,uplo)
     use iso_c_binding
 
 !This section has been created automatically by the script Abilint (TD).
@@ -929,8 +929,8 @@ module m_xg
 #define ABI_FUNC 'xgBlock_pack'
 !End of the abilint section
 
-    type(xgBlock_t), intent(inout) :: xgBlock1
-    type(xgBlock_t), intent(inout) :: xgBlock2
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
     character, intent(in) :: uplo
     integer :: j
     integer :: i
@@ -941,66 +941,66 @@ module m_xg
     double precision :: tsec(2)
 
     call timab(tim_pack,1,tsec)
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space ) then
       MSG_ERROR("Both blocks must be the same space")
     end if
 
-    if ( xgBlock1%Ldim /= xgBlock1%rows ) then
+    if ( xgBlockA%Ldim /= xgBlockA%rows ) then
       MSG_ERROR("Cannot pack when ldim /= rows")
     end if
 
-    if ( xgBlock1%Ldim /= xgBlock1%cols ) then
+    if ( xgBlockA%Ldim /= xgBlockA%cols ) then
       MSG_ERROR("Cannot pack when cols /= rows")
     end if
 
-    if ( xgBlock1%rows*(xgBlock1%rows+1)/2 > xgBlock2%Ldim*xgBlock2%cols ) then
+    if ( xgBlockA%rows*(xgBlockA%rows+1)/2 > xgBlockB%Ldim*xgBlockB%cols ) then
       MSG_ERROR("Not enought memory in destination")
     end if
 
     ! make a fake pointer to pack in a 1-D array instead of 2
     ! This allows to directly use the lapack conventions of transformation
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      cptr = getClocR(xgBlock2%Ldim,xgBlock2%cols,xgBlock2%vecR(:,:))
-      call c_f_pointer(cptr,subR,(/ (xgBlock2%cols*(xgBlock2%cols+1))/2 /))
+      cptr = getClocR(xgBlockB%Ldim,xgBlockB%cols,xgBlockB%vecR(:,:))
+      call c_f_pointer(cptr,subR,(/ (xgBlockB%cols*(xgBlockB%cols+1))/2 /))
     case (SPACE_C)
-      cptr = getClocC(xgBlock2%Ldim,xgBlock2%cols,xgBlock2%vecC(:,:))
-      call c_f_pointer(cptr,subC,(/ (xgBlock2%cols*(xgBlock2%cols+1))/2 /))
+      cptr = getClocC(xgBlockB%Ldim,xgBlockB%cols,xgBlockB%vecC(:,:))
+      call c_f_pointer(cptr,subC,(/ (xgBlockB%cols*(xgBlockB%cols+1))/2 /))
     end select
 
     select case(uplo)
     case ('u','U')
-      select case(xgBlock1%space)
+      select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
-        do j = 1, xgBlock1%cols
+        do j = 1, xgBlockA%cols
           col = (j*(j-1))/2
           do i = 1, j
-            subR(i+col) = xgBlock1%vecR(i,j)
+            subR(i+col) = xgBlockA%vecR(i,j)
           end do
         end do
       case (SPACE_C)
-        do j = 1, xgBlock1%cols
+        do j = 1, xgBlockA%cols
           col = (j*(j-1))/2
           do i = 1, j
-            subC(i+col) = xgBlock1%vecC(i,j)
+            subC(i+col) = xgBlockA%vecC(i,j)
           end do
         end do
       end select
 
     case ('l','L')
-      select case(xgBlock1%space)
+      select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
-        do j = 1, xgBlock1%cols
-          col = ((2*xgBlock1%cols-j)*(j-1))/2
-          do i = j, xgBlock1%cols
-            subR(i+col) = xgBlock1%vecR(i,j)
+        do j = 1, xgBlockA%cols
+          col = ((2*xgBlockA%cols-j)*(j-1))/2
+          do i = j, xgBlockA%cols
+            subR(i+col) = xgBlockA%vecR(i,j)
           end do
         end do
       case (SPACE_C)
-        do j = 1, xgBlock1%cols
-          col = ((2*xgBlock1%cols-j)*(j-1))/2
-          do i = j, xgBlock1%cols
-            subC(i+col) = xgBlock1%vecC(i,j)
+        do j = 1, xgBlockA%cols
+          col = ((2*xgBlockA%cols-j)*(j-1))/2
+          do i = j, xgBlockA%cols
+            subC(i+col) = xgBlockA%vecC(i,j)
           end do
         end do
       end select
@@ -1017,7 +1017,7 @@ module m_xg
 !! NAME
 !! xgBlock_gemmR
 
-  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlock1, xgBlock2, beta, xgBlock3)
+  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1029,42 +1029,42 @@ module m_xg
     character, intent(in) :: transa
     character, intent(in) :: transb
     double precision, intent(in) :: alpha
-    type(xgBlock_t), intent(in) :: xgBlock1
-    type(xgBlock_t), intent(in) :: xgBlock2
+    type(xgBlock_t), intent(in) :: xgBlockA
+    type(xgBlock_t), intent(in) :: xgBlockB
     double precision, intent(in) :: beta
-    type(xgBlock_t), intent(inout) :: xgBlock3
+    type(xgBlock_t), intent(inout) :: xgBlockW
     complex(kind=8) :: calpha
     complex(kind=8) :: cbeta
     integer :: K
     double precision :: tsec(2)
 
     call timab(tim_gemm,1,tsec)
-    if ( xgBlock1%space /= xgBlock2%space .or. xgBlock2%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       MSG_ERROR("Not same space")
     end if
 
     if ( transa == 'n' ) then
-      K = xgBlock1%cols
+      K = xgBlockA%cols
     else
-      K = xgBlock1%rows
+      K = xgBlockA%rows
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      call dgemm(transa,transb,xgBlock3%rows, xgBlock3%cols, K, &
-        alpha,xgBlock1%vecR, xgBlock1%LDim, &
-        xgBlock2%vecR, xgBlock2%LDim, beta,xgBlock3%vecR,xgBlock3%LDim)
-      if ( transa == xgBlock1%trans .and. (beta) < 1d-10) then
-        call xmpi_sum(xgBlock3%vecR,xgBlock3%spacedim_comm,K)
+      call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
+        alpha,xgBlockA%vecR, xgBlockA%LDim, &
+        xgBlockB%vecR, xgBlockB%LDim, beta,xgBlockW%vecR,xgBlockW%LDim)
+      if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
+        call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
       end if
     case(SPACE_C)
       calpha = dcmplx(alpha,0.d0)
       cbeta = dcmplx(beta,0.d0)
-      call zgemm(transa,transb,xgBlock3%rows, xgBlock3%cols, K, &
-        calpha,xgBlock1%vecC, xgBlock1%LDim, &
-        xgBlock2%vecC, xgBlock2%LDim, cbeta,xgBlock3%vecC,xgBlock3%LDim)
-      if ( xgBlock3%spacedim_comm/= -1 .and. transa == xgBlock3%trans .and. abs(beta) < 1d-10 ) then
-        call xmpi_sum(xgBlock3%vecC,xgBlock3%spacedim_comm,K)
+      call zgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
+        calpha,xgBlockA%vecC, xgBlockA%LDim, &
+        xgBlockB%vecC, xgBlockB%LDim, cbeta,xgBlockW%vecC,xgBlockW%LDim)
+      if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
+        call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
       end if
     end select
 
@@ -1078,7 +1078,7 @@ module m_xg
 !! NAME
 !! xgBlock_gemmC
 
-  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlock1, xgBlock2, beta, xgBlock3)
+  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1090,33 +1090,33 @@ module m_xg
     character, intent(in) :: transa
     character, intent(in) :: transb
     complex(kind=8), intent(in) :: alpha
-    type(xgBlock_t), intent(in) :: xgBlock1
-    type(xgBlock_t), intent(in) :: xgBlock2
+    type(xgBlock_t), intent(in) :: xgBlockA
+    type(xgBlock_t), intent(in) :: xgBlockB
     complex(kind=8), intent(in) :: beta
-    type(xgBlock_t), intent(inout) :: xgBlock3
+    type(xgBlock_t), intent(inout) :: xgBlockW
     integer :: K
     double precision :: tsec(2)
 
     call timab(tim_gemm,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space .or. xgBlock2%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       MSG_ERROR("Not same space")
     end if
-    if ( xgBlock1%space /= SPACE_C ) then
+    if ( xgBlockA%space /= SPACE_C ) then
       MSG_ERROR("Not correct space")
     end if
 
     if ( transa == 'n' ) then
-      K = xgBlock1%cols
+      K = xgBlockA%cols
     else
-      K = xgBlock1%rows
+      K = xgBlockA%rows
     end if
 
-    call zgemm(transa,transb,xgBlock3%rows, xgBlock3%cols, K, &
-      alpha,xgBlock1%vecC, xgBlock1%LDim, &
-      xgBlock2%vecC, xgBlock2%LDim, beta,xgBlock3%vecC,xgBlock3%LDim)
-    if ( xgBlock3%spacedim_comm/= -1 .and. transa == xgBlock1%trans .and. abs(beta) < 1.d-10 ) then
-      call xmpi_sum(xgBlock3%vecC,xgBlock3%spacedim_comm,K)
+    call zgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, K, &
+      alpha,xgBlockA%vecC, xgBlockA%LDim, &
+      xgBlockB%vecC, xgBlockB%LDim, beta,xgBlockW%vecC,xgBlockW%LDim)
+    if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
+      call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
     end if
 
     call timab(tim_gemm,2,tsec)
@@ -1170,7 +1170,7 @@ module m_xg
 !===================================================
 != Hermitian Full Matrix diago
 !===================================================
-  subroutine xgBlock_heev(jobz,uplo,xgBlock1,xgBlock3,info)
+  subroutine xgBlock_heev(jobz,uplo,xgBlockA,xgBlockW,info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1181,35 +1181,35 @@ module m_xg
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock3
+    type(xgBlock_t) , intent(inout) :: xgBlockA
+    type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_heev,1,tsec)
 
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,8*xgBlock1%rows)
+      call checkResize(rwork,lrwork,8*xgBlockA%rows)
 
-      call dsyev(jobz,uplo,xgBlock1%cols, &
-        xgBlock1%vecR,xgBlock1%LDim, &
-      xgBlock3%vecR, &
+      call dsyev(jobz,uplo,xgBlockA%cols, &
+        xgBlockA%vecR,xgBlockA%LDim, &
+      xgBlockW%vecR, &
       rwork, lrwork,info)
 
 
     case (SPACE_C)
-      call checkResize(rwork,lrwork,3*xgBlock1%cols-2)
+      call checkResize(rwork,lrwork,3*xgBlockA%cols-2)
       call checkResize(cwork,lcwork,lrwork)
 
-      call zheev(jobz,uplo,xgBlock1%cols, &
-        xgBlock1%vecC,xgBlock1%LDim, &
-      xgBlock3%vecR, &
+      call zheev(jobz,uplo,xgBlockA%cols, &
+        xgBlockA%vecC,xgBlockA%LDim, &
+      xgBlockW%vecR, &
       cwork, lrwork, rwork, info)
 
     end select
@@ -1229,7 +1229,7 @@ module m_xg
 !! NAME
 !! xgBlock_heevd
 
-  subroutine xgBlock_heevd(jobz,uplo,xgBlock1,xgBlock3, info)
+  subroutine xgBlock_heevd(jobz,uplo,xgBlockA,xgBlockW, info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1240,36 +1240,36 @@ module m_xg
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock3
+    type(xgBlock_t) , intent(inout) :: xgBlockA
+    type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_heevd,1,tsec)
 
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlock1%rows+3)
+    call checkResize(iwork,liwork,5*xgBlockA%rows+3)
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,2*xgBlock1%rows*xgBlock1%rows+6*xgBlock1%rows+1)
+      call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
 
-      call dsyevd(jobz,uplo,xgBlock1%cols, &
-        xgBlock1%vecR,xgBlock1%LDim, &
-      xgBlock3%vecR, rwork, lrwork, &
+      call dsyevd(jobz,uplo,xgBlockA%cols, &
+        xgBlockA%vecR,xgBlockA%LDim, &
+      xgBlockW%vecR, rwork, lrwork, &
       iwork, liwork,info)
 
     case (SPACE_C)
-      call checkResize(cwork,lcwork,xgBlock1%rows*xgBlock1%rows+2*xgBlock1%rows)
-      call checkResize(rwork,lrwork,2*xgBlock1%rows*xgBlock1%rows+5*xgBlock1%rows+1)
+      call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
+      call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+5*xgBlockA%rows+1)
 
-      call zheevd(jobz,uplo,xgBlock1%cols, &
-        xgBlock1%vecC,xgBlock1%LDim, &
-      xgBlock3%vecR, &
+      call zheevd(jobz,uplo,xgBlockA%cols, &
+        xgBlockA%vecC,xgBlockA%LDim, &
+      xgBlockW%vecR, &
       cwork, lcwork, rwork, lrwork, iwork, liwork, info)
 
       if ( int(cwork(1)) > lcwork ) then
@@ -1302,7 +1302,7 @@ module m_xg
 !===================================================
 != Hermitian Packed Matrix diago
 !===================================================
-  subroutine xgBlock_hpev(jobz,uplo,xgBlock1,xgBlock3,xgBlock4,info)
+  subroutine xgBlock_hpev(jobz,uplo,xgBlockAP,xgBlockW,xgBlockZ,info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1313,38 +1313,38 @@ module m_xg
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock3
-    type(xgBlock_t) , intent(inout) :: xgBlock4
+    type(xgBlock_t) , intent(inout) :: xgBlockAP
+    type(xgBlock_t) , intent(inout) :: xgBlockW
+    type(xgBlock_t) , intent(inout) :: xgBlockZ
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_hpev,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock4%space ) then
+    if ( xgBlockAP%space /= xgBlockZ%space ) then
       MSG_ERROR("Not same space")
     end if
 
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockAP%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,3*xgBlock4%cols)
+      call checkResize(rwork,lrwork,3*xgBlockZ%cols)
 
-      call dspev(jobz,uplo,xgBlock4%cols, &
-        xgBlock1%vecR, xgBlock3%vecR, xgBlock4%vecR, xgBlock4%Ldim, &
+      call dspev(jobz,uplo,xgBlockZ%cols, &
+        xgBlockAP%vecR, xgBlockW%vecR, xgBlockZ%vecR, xgBlockZ%Ldim, &
       rwork, info)
 
 
     case (SPACE_C)
-      call checkResize(cwork,lcwork,2*xgBlock4%cols-1)
-      call checkResize(rwork,lrwork,3*xgBlock4%cols-2)
+      call checkResize(cwork,lcwork,2*xgBlockZ%cols-1)
+      call checkResize(rwork,lrwork,3*xgBlockZ%cols-2)
 
-      call zhpev(jobz,uplo,xgBlock4%cols, &
-        xgBlock1%vecC, xgBlock3%vecR, xgBlock4%vecC, xgBlock4%Ldim, &
+      call zhpev(jobz,uplo,xgBlockZ%cols, &
+        xgBlockAP%vecC, xgBlockW%vecR, xgBlockZ%vecC, xgBlockZ%Ldim, &
       cwork, rwork, info)
 
       if ( int(cwork(1)) > lcwork ) then
@@ -1369,7 +1369,7 @@ module m_xg
 !! NAME
 !! xgBlock_hpevd
 
-  subroutine xgBlock_hpevd(jobz,uplo,xgBlock1,xgBlock3,xgBlock4,info)
+  subroutine xgBlock_hpevd(jobz,uplo,xgBlockAP,xgBlockW,xgBlockZ,info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1380,39 +1380,39 @@ module m_xg
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock3
-    type(xgBlock_t) , intent(inout) :: xgBlock4
+    type(xgBlock_t) , intent(inout) :: xgBlockAP
+    type(xgBlock_t) , intent(inout) :: xgBlockW
+    type(xgBlock_t) , intent(inout) :: xgBlockZ
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_hpevd,1,tsec)
 
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    if ( xgBlock1%space /= xgBlock4%space ) then
+    if ( xgBlockAP%space /= xgBlockZ%space ) then
       MSG_ERROR("Block 1 and 3 must have the same space")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlock4%rows+3)
-    select case(xgBlock1%space)
+    call checkResize(iwork,liwork,5*xgBlockZ%rows+3)
+    select case(xgBlockAP%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,xgBlock4%rows*xgBlock4%rows+6*xgBlock4%rows+1)
+      call checkResize(rwork,lrwork,xgBlockZ%rows*xgBlockZ%rows+6*xgBlockZ%rows+1)
 
-      call dspevd(jobz,uplo,xgBlock4%cols, &
-        xgBlock1%vecR, xgBlock3%vecR, xgBlock4%vecR, xgBlock4%Ldim, &
+      call dspevd(jobz,uplo,xgBlockZ%cols, &
+        xgBlockAP%vecR, xgBlockW%vecR, xgBlockZ%vecR, xgBlockZ%Ldim, &
         rwork, lrwork, iwork, liwork,info)
 
 
     case (SPACE_C)
-      call checkResize(cwork,lcwork,2*xgBlock4%rows)
-      call checkResize(rwork,lrwork,2*xgBlock4%rows*xgBlock4%rows+5*xgBlock4%rows+1)
+      call checkResize(cwork,lcwork,2*xgBlockZ%rows)
+      call checkResize(rwork,lrwork,2*xgBlockZ%rows*xgBlockZ%rows+5*xgBlockZ%rows+1)
 
-      call zhpevd(jobz,uplo,xgBlock4%cols, &
-        xgBlock1%vecC, xgBlock3%vecR, xgBlock4%vecC, xgBlock4%Ldim, &
+      call zhpevd(jobz,uplo,xgBlockZ%cols, &
+        xgBlockAP%vecC, xgBlockW%vecR, xgBlockZ%vecC, xgBlockZ%Ldim, &
       cwork, lcwork, rwork, lrwork, iwork, liwork, info)
 
       if ( int(cwork(1)) > lcwork ) then
@@ -1446,7 +1446,7 @@ module m_xg
 != Hermitian Full Generalized Matrix diago
 !===================================================
 
-  subroutine xgBlock_hegv(itype, jobz, uplo, xgBlock1, xgBlock2, xgBlock3, info)
+  subroutine xgBlock_hegv(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1458,36 +1458,36 @@ module m_xg
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock2
-    type(xgBlock_t) , intent(inout) :: xgBlock3
+    type(xgBlock_t) , intent(inout) :: xgBlockA
+    type(xgBlock_t) , intent(inout) :: xgBlockB
+    type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_hegv,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space ) then
       MSG_ERROR("Not same space")
     end if
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,2*xgBlock1%rows*xgBlock1%rows+6*xgBlock1%rows+1)
+      call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
 
-      call dsygv(itype, jobz, uplo, xgBlock1%rows, xgBlock1%vecR, xgBlock1%ldim, &
-        xgBlock2%vecR, xgBlock2%ldim, xgBlock3%vecR, rwork, lrwork, info)
+      call dsygv(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
+        xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, info)
 
     case (SPACE_C)
 
-      call checkResize(cwork,lcwork,2*xgBlock1%rows-1)
-      call checkResize(rwork,lrwork,3*xgBlock1%rows-2)
+      call checkResize(cwork,lcwork,2*xgBlockA%rows-1)
+      call checkResize(rwork,lrwork,3*xgBlockA%rows-2)
 
-      call zhegv(itype, jobz, uplo, xgBlock1%rows, xgBlock1%vecC, xgBlock1%ldim,&
-        xgBlock2%vecC, xgBlock2%ldim, xgBlock3%vecR, cwork, lcwork, &
+      call zhegv(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecC, xgBlockA%ldim,&
+        xgBlockB%vecC, xgBlockB%ldim, xgBlockW%vecR, cwork, lcwork, &
         rwork, info)
 
       if ( int(cwork(1)) > lcwork ) then
@@ -1512,7 +1512,7 @@ module m_xg
 !! NAME
 !! xgBlock_hegvx
 
-  subroutine xgBlock_hegvx(itype,jobz,range,uplo,xgBlock1,xgBlock2,vl,vu,il,iu,abstol,xgBlock3,xgBlock4,info)
+  subroutine xgBlock_hegvx(itype,jobz,range,uplo,xgBlockA,xgBlockB,vl,vu,il,iu,abstol,xgBlockW,xgBlockZ,info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1525,15 +1525,15 @@ module m_xg
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: range
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock2
+    type(xgBlock_t) , intent(inout) :: xgBlockA
+    type(xgBlock_t) , intent(inout) :: xgBlockB
     double precision, intent(in   ) :: vl
     double precision, intent(in   ) :: vu
     integer         , intent(in   ) :: il
     integer         , intent(in   ) :: iu
     double precision, intent(in   ) :: abstol
-    type(xgBlock_t) , intent(inout) :: xgBlock3
-    type(xgBlock_t) , intent(inout) :: xgBlock4
+    type(xgBlock_t) , intent(inout) :: xgBlockW
+    type(xgBlock_t) , intent(inout) :: xgBlockZ
     integer         , intent(  out) :: info
     integer :: neigen
     integer, allocatable :: ifail(:)
@@ -1541,37 +1541,37 @@ module m_xg
 
     call timab(tim_hegvx,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space .or. xgBlock1%space /= xgBlock4%space ) then
+    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockZ%space ) then
       MSG_ERROR("Not same space")
     end if
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlock1%rows)
+    call checkResize(iwork,liwork,5*xgBlockA%rows)
 
-    ABI_MALLOC(ifail,(xgBlock1%rows))
+    ABI_MALLOC(ifail,(xgBlockA%rows))
     ifail = 0
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,8*xgBlock1%rows)
+      call checkResize(rwork,lrwork,8*xgBlockA%rows)
 
-      call dsygvx(itype,jobz,range,uplo,xgBlock1%rows, &
-        xgBlock1%vecR,xgBlock1%LDim,xgBlock2%vecR,xgBlock2%LDim, &
+      call dsygvx(itype,jobz,range,uplo,xgBlockA%rows, &
+        xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,xgBlockB%LDim, &
       vl,vu,il,iu,abstol,&
-      neigen,xgBlock3%vecR, xgBlock4%vecR, xgBlock4%LDim, &
+      neigen,xgBlockW%vecR, xgBlockZ%vecR, xgBlockZ%LDim, &
       rwork, lrwork,iwork,ifail,info)
 
     case (SPACE_C)
-      call checkResize(rwork,lrwork,7*xgBlock1%rows)
+      call checkResize(rwork,lrwork,7*xgBlockA%rows)
       call checkResize(cwork,lcwork,lrwork)
 
-      call zhegvx(itype,jobz,range,uplo,xgBlock1%rows, &
-        xgBlock1%vecC,xgBlock1%LDim,xgBlock2%vecC,xgBlock2%LDim, &
+      call zhegvx(itype,jobz,range,uplo,xgBlockA%rows, &
+        xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim, &
       vl,vu,il,iu,abstol,&
-      neigen,xgBlock3%vecR, xgBlock4%vecC, xgBlock4%LDim, &
+      neigen,xgBlockW%vecR, xgBlockZ%vecC, xgBlockZ%LDim, &
       cwork, lcwork, rwork, iwork,ifail,info)
 
     end select
@@ -1593,7 +1593,7 @@ module m_xg
 !! NAME
 !! xgBlock_hegvd
 
-  subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlock1, xgBlock2, xgBlock3, info)
+  subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1605,38 +1605,38 @@ module m_xg
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock2
-    type(xgBlock_t) , intent(inout) :: xgBlock3
+    type(xgBlock_t) , intent(inout) :: xgBlockA
+    type(xgBlock_t) , intent(inout) :: xgBlockB
+    type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_hegvd,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space ) then
       MSG_ERROR("Not same space")
     end if
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlock1%rows+3)
+    call checkResize(iwork,liwork,5*xgBlockA%rows+3)
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,2*xgBlock1%rows*xgBlock1%rows+6*xgBlock1%rows+1)
+      call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
 
-      call dsygvd(itype, jobz, uplo, xgBlock1%rows, xgBlock1%vecR, xgBlock1%ldim, &
-        xgBlock2%vecR, xgBlock2%ldim, xgBlock3%vecR, rwork, lrwork, iwork, liwork, info)
+      call dsygvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
+        xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, iwork, liwork, info)
 
     case (SPACE_C)
 
-      call checkResize(cwork,lcwork,xgBlock1%rows*xgBlock1%rows+2*xgBlock1%rows)
-      call checkResize(rwork,lrwork,2*(xgBlock1%rows*xgBlock1%rows)+5*xgBlock1%rows+1)
+      call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
+      call checkResize(rwork,lrwork,2*(xgBlockA%rows*xgBlockA%rows)+5*xgBlockA%rows+1)
 
-      call zhegvd(itype, jobz, uplo, xgBlock1%rows, xgBlock1%vecC, xgBlock1%ldim,&
-        xgBlock2%vecC, xgBlock2%ldim, xgBlock3%vecR, cwork, lcwork, &
+      call zhegvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecC, xgBlockA%ldim,&
+        xgBlockB%vecC, xgBlockB%ldim, xgBlockW%vecR, cwork, lcwork, &
         rwork, lrwork, iwork, liwork, info)
 
       if ( int(cwork(1)) > lcwork ) then
@@ -1672,7 +1672,7 @@ module m_xg
 != Hermitian Full Generalized Matrix diago
 !===================================================
 
-  subroutine xgBlock_hpgv(itype, jobz, uplo, xgBlock1, xgBlock2, xgBlock3, xgBlock4,info)
+  subroutine xgBlock_hpgv(itype, jobz, uplo, xgBlockAP, xgBlockBP, xgBlockW, xgBlockZ,info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1684,38 +1684,38 @@ module m_xg
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock2
-    type(xgBlock_t) , intent(inout) :: xgBlock3
-    type(xgBlock_t) , intent(inout) :: xgBlock4
+    type(xgBlock_t) , intent(inout) :: xgBlockAP
+    type(xgBlock_t) , intent(inout) :: xgBlockBP
+    type(xgBlock_t) , intent(inout) :: xgBlockW
+    type(xgBlock_t) , intent(inout) :: xgBlockZ
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_hpgv,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockAP%space /= xgBlockBP%space ) then
       MSG_ERROR("Not same space")
     end if
 
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockAP%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,3*xgBlock4%rows)
+      call checkResize(rwork,lrwork,3*xgBlockZ%rows)
 
-      call dspgv(itype, jobz, uplo, xgBlock4%rows, xgBlock1%vecR, xgBlock2%vecR, &
-        xgBlock3%vecR, xgBlock4%vecR, xgBlock4%Ldim, rwork, info)
+      call dspgv(itype, jobz, uplo, xgBlockZ%rows, xgBlockAP%vecR, xgBlockBP%vecR, &
+        xgBlockW%vecR, xgBlockZ%vecR, xgBlockZ%Ldim, rwork, info)
 
     case (SPACE_C)
 
-      call checkResize(cwork,lcwork,2*xgBlock4%rows-1)
-      call checkResize(rwork,lrwork,3*xgBlock4%rows-2)
+      call checkResize(cwork,lcwork,2*xgBlockZ%rows-1)
+      call checkResize(rwork,lrwork,3*xgBlockZ%rows-2)
 
-      call zhpgv(itype, jobz, uplo, xgBlock1%rows, xgBlock1%vecC, xgBlock2%vecC, &
-        xgBlock3%vecR, xgBlock4%vecC, xgBlock4%Ldim, cwork, rwork, info)
+      call zhpgv(itype, jobz, uplo, xgBlockAP%rows, xgBlockAP%vecC, xgBlockBP%vecC, &
+        xgBlockW%vecR, xgBlockZ%vecC, xgBlockZ%Ldim, cwork, rwork, info)
 
       if ( int(cwork(1)) > lcwork ) then
         !write(std_out,*) "Allocate work from", lcwork, "to", int(cwork(1))
@@ -1739,7 +1739,7 @@ module m_xg
 !! NAME
 !! xgBlock_hpgvx
 
-  subroutine xgBlock_hpgvx(itype,jobz,range,uplo,xgBlock1,xgBlock2,vl,vu,il,iu,abstol,xgBlock3,xgBlock4,info)
+  subroutine xgBlock_hpgvx(itype,jobz,range,uplo,xgBlockAP,xgBlockBP,vl,vu,il,iu,abstol,xgBlockW,xgBlockZ,info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1752,15 +1752,15 @@ module m_xg
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: range
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock2
+    type(xgBlock_t) , intent(inout) :: xgBlockAP
+    type(xgBlock_t) , intent(inout) :: xgBlockBP
     double precision, intent(in   ) :: vl
     double precision, intent(in   ) :: vu
     integer         , intent(in   ) :: il
     integer         , intent(in   ) :: iu
     double precision, intent(in   ) :: abstol
-    type(xgBlock_t) , intent(inout) :: xgBlock3
-    type(xgBlock_t) , intent(inout) :: xgBlock4
+    type(xgBlock_t) , intent(inout) :: xgBlockW
+    type(xgBlock_t) , intent(inout) :: xgBlockZ
     integer         , intent(  out) :: info
     integer :: neigen
     integer, allocatable :: ifail(:)
@@ -1768,37 +1768,37 @@ module m_xg
 
     call timab(tim_hpgvx,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space .or. xgBlock1%space /= xgBlock4%space ) then
+    if ( xgBlockAP%space /= xgBlockBP%space .or. xgBlockAP%space /= xgBlockZ%space ) then
       MSG_ERROR("Not same space")
     end if
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlock4%rows)
+    call checkResize(iwork,liwork,5*xgBlockZ%rows)
 
-    ABI_MALLOC(ifail,(xgBlock4%rows))
+    ABI_MALLOC(ifail,(xgBlockZ%rows))
     ifail = 0
 
-    select case(xgBlock1%space)
+    select case(xgBlockAP%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,8*xgBlock4%rows)
+      call checkResize(rwork,lrwork,8*xgBlockZ%rows)
 
-      call dspgvx(itype,jobz,range,uplo,xgBlock4%rows, &
-        xgBlock1%vecR,xgBlock2%vecR, &
+      call dspgvx(itype,jobz,range,uplo,xgBlockZ%rows, &
+        xgBlockAP%vecR,xgBlockBP%vecR, &
       vl,vu,il,iu,abstol,&
-      neigen,xgBlock3%vecR, xgBlock4%vecR, xgBlock4%LDim, &
+      neigen,xgBlockW%vecR, xgBlockZ%vecR, xgBlockZ%LDim, &
       rwork, iwork, ifail, info)
 
     case (SPACE_C)
-      call checkResize(rwork,lrwork,7*xgBlock1%rows)
-      call checkResize(cwork,lcwork,2*xgBlock4%rows)
+      call checkResize(rwork,lrwork,7*xgBlockAP%rows)
+      call checkResize(cwork,lcwork,2*xgBlockZ%rows)
 
-      call zhpgvx(itype,jobz,range,uplo,xgBlock4%rows, &
-        xgBlock1%vecC,xgBlock2%vecC, &
+      call zhpgvx(itype,jobz,range,uplo,xgBlockZ%rows, &
+        xgBlockAP%vecC,xgBlockBP%vecC, &
       vl,vu,il,iu,abstol,&
-      neigen,xgBlock3%vecR, xgBlock4%vecC, xgBlock4%LDim, &
+      neigen,xgBlockW%vecR, xgBlockZ%vecC, xgBlockZ%LDim, &
       cwork, rwork, iwork, ifail, info)
 
     end select
@@ -1820,7 +1820,7 @@ module m_xg
 !! NAME
 !! xgBlock_hpgvd
 
-  subroutine xgBlock_hpgvd(itype, jobz, uplo, xgBlock1, xgBlock2, xgBlock3, xgBlock4, info)
+  subroutine xgBlock_hpgvd(itype, jobz, uplo, xgBlockAP, xgBlockBP, xgBlockW, xgBlockZ, info)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1832,40 +1832,40 @@ module m_xg
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock2
-    type(xgBlock_t) , intent(inout) :: xgBlock3
-    type(xgBlock_t) , intent(inout) :: xgBlock4
+    type(xgBlock_t) , intent(inout) :: xgBlockAP
+    type(xgBlock_t) , intent(inout) :: xgBlockBP
+    type(xgBlock_t) , intent(inout) :: xgBlockW
+    type(xgBlock_t) , intent(inout) :: xgBlockZ
     integer         , intent(  out) :: info
     double precision :: tsec(2)
 
     call timab(tim_hpgvd,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockAP%space /= xgBlockBP%space ) then
       MSG_ERROR("Not same space")
     end if
-    if ( xgBlock3%space /= SPACE_R ) then
+    if ( xgBlockW%space /= SPACE_R ) then
       MSG_ERROR("Block3 must be real")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlock4%rows+3)
+    call checkResize(iwork,liwork,5*xgBlockZ%rows+3)
 
-    select case(xgBlock1%space)
+    select case(xgBlockAP%space)
 
     case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,2*xgBlock4%rows*xgBlock4%rows+6*xgBlock4%rows+1)
+      call checkResize(rwork,lrwork,2*xgBlockZ%rows*xgBlockZ%rows+6*xgBlockZ%rows+1)
 
-      call dspgvd(itype, jobz, uplo, xgBlock4%rows, xgBlock1%vecR, xgBlock2%vecR, &
-        xgBlock3%vecR, xgBlock4%vecR, xgBlock4%Ldim, &
+      call dspgvd(itype, jobz, uplo, xgBlockZ%rows, xgBlockAP%vecR, xgBlockBP%vecR, &
+        xgBlockW%vecR, xgBlockZ%vecR, xgBlockZ%Ldim, &
         rwork, lrwork, iwork, liwork, info)
 
     case (SPACE_C)
 
-      call checkResize(cwork,lcwork,2*xgBlock4%rows)
-      call checkResize(rwork,lrwork,2*(xgBlock4%rows*xgBlock4%rows)+5*xgBlock4%rows+1)
+      call checkResize(cwork,lcwork,2*xgBlockZ%rows)
+      call checkResize(rwork,lrwork,2*(xgBlockZ%rows*xgBlockZ%rows)+5*xgBlockZ%rows+1)
 
-      call zhpgvd(itype, jobz, uplo, xgBlock4%rows, xgBlock1%vecC, xgBlock2%vecC, &
-        xgBlock3%vecR, xgBlock4%vecC, xgBlock4%Ldim, &
+      call zhpgvd(itype, jobz, uplo, xgBlockZ%rows, xgBlockAP%vecC, xgBlockBP%vecC, &
+        xgBlockW%vecR, xgBlockZ%vecC, xgBlockZ%Ldim, &
         cwork, lcwork, rwork, lrwork, iwork, liwork, info)
 
       if ( int(cwork(1)) > lcwork ) then
@@ -1895,7 +1895,7 @@ module m_xg
 !! NAME
 !! xgBlock_trsmR
 
-  subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha, xgBlock1,xgBlock2)
+  subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1909,24 +1909,24 @@ module m_xg
     character       , intent(in   ) :: transa
     character       , intent(in   ) :: diag
     double precision, intent(in   ) :: alpha
-    type(xgBlock_t) , intent(inout) :: xgBlock1
-    type(xgBlock_t) , intent(inout) :: xgBlock2
+    type(xgBlock_t) , intent(inout) :: xgBlockA
+    type(xgBlock_t) , intent(inout) :: xgBlockB
     complex(kind=8) :: calpha
     double precision :: tsec(2)
 
     call timab(tim_trsm,1,tsec)
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space ) then
       MSG_ERROR("Not same space")
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      call dtrsm(side,uplo,transa,diag,xgBlock2%rows,xgBlock2%cols, &
-        alpha,xgBlock1%vecR,xgBlock1%LDim,xgBlock2%vecR,xgBlock2%LDim)
+      call dtrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+        alpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,xgBlockB%LDim)
     case (SPACE_C)
       calpha = dcmplx(alpha,0.d0)
-      call ztrsm(side,uplo,transa,diag,xgBlock2%rows,xgBlock2%cols, &
-        calpha,xgBlock1%vecC,xgBlock1%LDim,xgBlock2%vecC,xgBlock2%LDim)
+      call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+        calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
     end select
 
     call timab(tim_trsm,2,tsec)
@@ -1939,7 +1939,7 @@ module m_xg
 !! NAME
 !! xgBlock_trsmC
 
-  subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlock1,xgBlock2)
+  subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1953,75 +1953,75 @@ module m_xg
     character      , intent(in   ) :: transa
     character      , intent(in   ) :: diag
     complex(kind=8), intent(in   ) :: alpha
-    type(xgBlock_t), intent(inout) :: xgBlock1
-    type(xgBlock_t), intent(inout) :: xgBlock2
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
     double precision :: tsec(2)
 
     call timab(tim_trsm,1,tsec)
 
-    if ( xgBlock1%space /= xgBlock2%space .or. xgBlock1%space /= SPACE_C) then
+    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= SPACE_C) then
       MSG_ERROR("Not same space")
     end if
 
-    call ztrsm(side,uplo,transa,diag,xgBlock2%rows,xgBlock2%cols, &
-      alpha,xgBlock1%vecC,xgBlock1%LDim,xgBlock2%vecC,xgBlock2%LDim)
+    call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+      alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
 
     call timab(tim_trsm,2,tsec)
 
   end subroutine xgBlock_trsmC
 !!***
 
-!!****f* m_xg/xgBlock_colwiseCaxmy
+!!****f* m_xg/xgBlock_colwiseCymax
 !!
 !! NAME
-!! xgBlock_colwiseCaxmy
+!! xgBlock_colwiseCymax
 
-  subroutine xgBlock_colwiseCaxmy(xgBlock1, da, xgBlock2,xgBlock3)
+  subroutine xgBlock_colwiseCymax(xgBlockA, da, xgBlockB,xgBlockW)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_colwiseCaxmy'
+#define ABI_FUNC 'xgBlock_colwiseCymax'
 !End of the abilint section
 
-    type(xgBlock_t), intent(inout) :: xgBlock1
+    type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(in   ) :: da
-    type(xgBlock_t), intent(in   ) :: xgBlock2
-    type(xgBlock_t), intent(in   ) :: xgBlock3
+    type(xgBlock_t), intent(in   ) :: xgBlockB
+    type(xgBlock_t), intent(in   ) :: xgBlockW
     integer :: iblock
 
-    if ( xgBlock1%space /= xgBlock2%space .or. xgBlock1%space /= xgBlock3%space ) then
+    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockW%space ) then
       MSG_ERROR("Must be same space for caxmy")
     end if
-    if ( xgBlock1%LDim /= xgBlock2%LDim .or. xgBlock1%LDim /= xgBlock3%LDim) then
+    if ( xgBlockA%LDim /= xgBlockB%LDim .or. xgBlockA%LDim /= xgBlockW%LDim) then
       MSG_ERROR("Must have same LDim for caxmy")
     end if
-    if ( xgBlock1%cols /= xgBlock2%cols .or. xgBlock1%cols /= xgBlock3%cols ) then
+    if ( xgBlockA%cols /= xgBlockB%cols .or. xgBlockA%cols /= xgBlockW%cols ) then
       MSG_ERROR("Must have same cols for caxmy")
     end if
-    if ( da%rows /= xgBlock1%cols ) then
+    if ( da%rows /= xgBlockA%cols ) then
       MSG_ERROR("Must have same cols for caxmy")
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      !$omp parallel do shared(da,xgBlock2,xgBlock3,xgBlock1), &
+      !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
       !$omp& schedule(static)
-      do iblock = 1, xgBlock1%cols
-        xgBlock1%vecR(:,iblock) = - da%vecR(iblock,1) * xgBlock2%vecR(:,iblock) + xgBlock3%vecR(:,iblock)
+      do iblock = 1, xgBlockA%cols
+        xgBlockA%vecR(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecR(:,iblock) + xgBlockW%vecR(:,iblock)
       end do
       !$omp end parallel do
     case (SPACE_C)
-      !$omp parallel do shared(da,xgBlock2,xgBlock3,xgBlock1), &
+      !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
       !$omp& schedule(static)
-      do iblock = 1, xgBlock1%cols
-        xgBlock1%vecC(:,iblock) = - da%vecR(iblock,1) * xgBlock2%vecC(:,iblock) + xgBlock3%vecC(:,iblock)
+      do iblock = 1, xgBlockA%cols
+        xgBlockA%vecC(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(:,iblock) + xgBlockW%vecC(:,iblock)
       end do
       !$omp end parallel do
     end select
 
-  end subroutine xgBlock_colwiseCaxmy
+  end subroutine xgBlock_colwiseCymax
 !!***
 
 !!****f* m_xg/xgBlock_colwiseMulR
@@ -2108,7 +2108,7 @@ module m_xg
 !! NAME
 !! xgBlock_add
 
-  subroutine xgBlock_add(xgBlock1, xgBlock2)
+  subroutine xgBlock_add(xgBlockA, xgBlockB)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2117,38 +2117,38 @@ module m_xg
 #define ABI_FUNC 'xgBlock_add'
 !End of the abilint section
 
-    type(xgBlock_t), intent(inout) :: xgBlock1
-    type(xgBlock_t), intent(inout) :: xgBlock2
+    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(inout) :: xgBlockB
     integer :: col
     integer :: row
 
-    if ( xgBlock1%space /= xgBlock2%space ) then
+    if ( xgBlockA%space /= xgBlockB%space ) then
       MSG_ERROR("Must be same space for add")
     end if
-    if ( xgBlock1%rows /= xgBlock2%rows ) then
+    if ( xgBlockA%rows /= xgBlockB%rows ) then
       MSG_ERROR("Must have same LDim for add")
     end if
-    if ( xgBlock1%cols /= xgBlock2%cols ) then
+    if ( xgBlockA%cols /= xgBlockB%cols ) then
       MSG_ERROR("Must have same cols for add")
     end if
 
-    select case(xgBlock1%space)
+    select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
       !$omp parallel do schedule(static)
-      do col = 1, xgBlock2%cols
-        do row = 1, xgBlock2%rows
-          xgBlock1%vecR(row,col) = xgBlock1%vecR(row,col) + xgBlock2%vecR(row,col)
+      do col = 1, xgBlockB%cols
+        do row = 1, xgBlockB%rows
+          xgBlockA%vecR(row,col) = xgBlockA%vecR(row,col) + xgBlockB%vecR(row,col)
         end do
       end do
-      !call daxpy(xgBlock1%cols*xgBlock1%LDim,1.d0,xgBlock2%vecR,1,xgBlock1%vecR1)
+      !call daxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
     case (SPACE_C)
       !$omp parallel do schedule(static)
-      do col = 1, xgBlock2%cols
-        do row = 1, xgBlock2%rows
-          xgBlock1%vecC(row,col) = xgBlock1%vecC(row,col) + xgBlock2%vecC(row,col)
+      do col = 1, xgBlockB%cols
+        do row = 1, xgBlockB%rows
+          xgBlockA%vecC(row,col) = xgBlockA%vecC(row,col) + xgBlockB%vecC(row,col)
         end do
       end do
-      !call zaxpy(xgBlock1%cols*xgBlock1%LDim,1.d0,xgBlock2%vecR,1,xgBlock1%vecR1)
+      !call zaxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
     end select
 
   end subroutine xgBlock_add

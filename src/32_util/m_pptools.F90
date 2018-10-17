@@ -29,7 +29,7 @@ MODULE m_pptools
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_kptrank
 
  use m_io_tools,        only : open_file
@@ -83,7 +83,6 @@ subroutine prmat (mat, ni, nj, mi, unitm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prmat'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

@@ -371,7 +371,7 @@ Namespace      | Markdown                         | Result
  `ac`          | `[[ac:abiref_gnu_5.3_debug.ac]]` | [[ac:abiref_gnu_5.3_debug.ac]]
  `pdf`         | `[[pdf:howto_chebfi.pdf]]`       | [[pdf:howto_chebfi.pdf]]
  `pdf`         | `[[pdf:howto_chebfi]]`           | [[pdf:howto_chebfi]]
- `src`         | `[[src:94_scfcv/scfcv.F90]]`     | [[src:94_scfcv/scfcv.F90]]
+ `src`         | `[[src:94_scfcv/m_scfcv.F90]]`   | [[src:94_scfcv/m_scfcv.F90]]
 
 
 `#files-file` is an HTML id defined in *~abinit/doc/guide/abinit.md with*:
@@ -381,7 +381,7 @@ Namespace      | Markdown                         | Result
 ## 4 More detailed presentation of the files file
 ```
 
-Also in this case, it's possible to specify the name of the link with the
+Also in this case, it's possible to specify the name of the link 
 with the `|` separator so `[[topic:PIMD#1|Introduction]]` becomes [[topic:PIMD#1|Introduction]].
 
 
@@ -438,6 +438,7 @@ The aliases are defined in the `mkdocs.yml` configuration file (`abimkdocs_alias
 | `|AbipyStructureNb|` | |AbipyStructureNb| |
 | `|xmgrace|` | |xmgrace| |
 | `|gnuplot|` | |gnuplot| |
+| `|today|` | |today| |
 
 
 ### Permalinks

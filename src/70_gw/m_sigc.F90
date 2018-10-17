@@ -24,7 +24,7 @@ module m_sigc
  use defs_datatypes
  use defs_abitypes
  use m_gwdefs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_xomp
  use m_defs_ptgroups
@@ -32,8 +32,8 @@ module m_sigc
  use m_time
  use m_splines
 
- use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
-                      Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
+ !use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
+ !                     Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
  use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
@@ -55,6 +55,7 @@ module m_sigc
  use m_pawfgrtab,     only : pawfgrtab_type
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_paw_sym,       only : paw_symcprj
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
 
  implicit none
@@ -142,7 +143,7 @@ contains
 !! OUTPUT
 !!
 !! NOTES
-!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) is included.
+!!  1) The treatment of the divergence of Gygi+Baldereschi (PRB 1986) [[cite:Gigy1986]] is included.
 !!  2) The calculation of energy derivative is based on finite elements.
 !!  3) On the symmetrization of Sigma matrix elements ***/
 !!        If  Sk = k+G0 then  M_G(k, Sq)= e^{-i( Sq+G).t} M_{ S^-1(G}   (k,q)
@@ -184,8 +185,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_sigc_me'
- use interfaces_14_hidewrite
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1396,7 +1395,6 @@ subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'calc_coh_comp'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

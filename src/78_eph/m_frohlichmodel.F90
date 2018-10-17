@@ -29,7 +29,7 @@ module m_frohlichmodel
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -69,7 +69,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
 !use m_xmpi
 !use m_xomp
  use m_errors
@@ -208,21 +208,21 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
  zpr_q0_fact=zpr_q0_avg*two*pi*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
 
 !DEBUG
- do iqdir=1,nqdir,513
-   write(std_out,'(a,3f8.4,3es12.4)')' unit_qdir,dielt_qdir,zpr_q0_phononfactor_qdir,frohlich_phononfactor=',&
-&    unit_qdir(:,iqdir),dielt_qdir(iqdir),zpr_q0_phononfactor_qdir(iqdir),frohlich_phononfactor_qdir(iqdir)
-   do imode=1,3*cryst%natom
-     write(std_out,'(a,i5,6es12.4)')'   imode,phfrq_qdir,phfrq(cmm1),polarity_qdir=',&
-&     imode,phfrq_qdir(imode,iqdir),phfrq_qdir(imode,iqdir)*Ha_cmm1,polarity_qdir(:,imode,iqdir),proj_polarity_qdir(imode,iqdir)
-   enddo
- enddo
- write(std_out,'(2a,3es12.4)')ch10,&
-& ' zpr_q0_avg, zpr_q0_fact, zpr_q0_fact (eV) =',zpr_q0_avg, zpr_q0_fact, zpr_q0_fact*Ha_eV
+! do iqdir=1,nqdir,513
+!   write(std_out,'(a,3f8.4,3es12.4)')' unit_qdir,dielt_qdir,zpr_q0_phononfactor_qdir,frohlich_phononfactor=',&
+!&    unit_qdir(:,iqdir),dielt_qdir(iqdir),zpr_q0_phononfactor_qdir(iqdir),frohlich_phononfactor_qdir(iqdir)
+!   do imode=1,3*cryst%natom
+!     write(std_out,'(a,i5,6es12.4)')'   imode,phfrq_qdir,phfrq(cmm1),polarity_qdir=',&
+!&     imode,phfrq_qdir(imode,iqdir),phfrq_qdir(imode,iqdir)*Ha_cmm1,polarity_qdir(:,imode,iqdir),proj_polarity_qdir(imode,iqdir)
+!   enddo
+! enddo
+! write(std_out,'(2a,3es12.4)')ch10,&
+!& ' zpr_q0_avg, zpr_q0_fact, zpr_q0_fact (eV) =',zpr_q0_avg, zpr_q0_fact, zpr_q0_fact*Ha_eV
 !ENDDEBUG
 
  write(ab_out,'(6a,f14.6,a,f14.6,a)') ch10,&
 &  ' Rough correction to the ZPR, to take into account the missing q=0 piece using Frohlich model:',ch10,&
-&  ' (+ for electrons, - for holes) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) ',ch10,&
+&  ' (+ for occupied states, - for unoccupied states) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) ',ch10,&
 &  ' where Nqpt_full_bz=number of q wavevectors in full BZ, and zpr_q0_fact=',zpr_q0_fact,' Ha=',zpr_q0_fact*Ha_eV,' eV'
 
  !Compute effective masses, and integrate the Frohlich model
@@ -334,7 +334,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
          sign_warn=.true.
        else
          m_avg_frohlich(iband) = DSIGN(m_avg_frohlich(iband),m_avg(iband))
-         zpr_frohlich_avg(iband) = DSIGN(zpr_frohlich_avg(iband),m_avg(iband))
+         zpr_frohlich_avg(iband) = -DSIGN(zpr_frohlich_avg(iband),m_avg(iband))
          write(ab_out,'(a,i5,a,f14.10)') &
 &          ' Band ',efmasdeg(ikpt)%degs_bounds(1,ideg)+iband-1,&
 &          ' Angular average effective mass for Frohlich model (<m**0.5>)**2= ',m_avg_frohlich(iband)

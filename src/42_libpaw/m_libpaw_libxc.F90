@@ -487,7 +487,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'libpaw_libxc_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1826,7 +1825,6 @@ end function libpaw_libxc_gga_from_hybrid
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'libpaw_libxc_set_tb09'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

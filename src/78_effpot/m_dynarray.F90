@@ -8,7 +8,7 @@
 !! Module for int and real(dp) array which allocate memory dynamically
 !! real_array_type for real(dp) and int_array_type for integer.
 !! they have push (but no pop) and finalize methods.
-!! TODO hexu: Is this already implemented somewhere in abinit. 
+!! TODO hexu: Is this already implemented somewhere in abinit.
 !! If not, should this file  be moved to the place to make it more general usable?
 !!
 !!
@@ -26,9 +26,10 @@
 #include "config.h"
 #endif
 #include "abi_common.h"
+
 module m_dynmaic_array
   use defs_basis
-  use m_profiling_abi
+  use m_abicore
   use m_errors
   implicit none
 !!***
@@ -100,18 +101,22 @@ subroutine real_array_type_push(self, val)
     class(real_array_type), intent(inout):: self
     real(dp) :: val
     real(dp), allocatable :: temp(:)
+    integer :: err
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
+      !ABI_ALLOCATE(self%data, (self%capacity))
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ABI_ALLOCATE(temp,(self%capacity))
+      !ABI_ALLOCATE(temp,(self%capacity))
+      ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
     self%data(self%size)=val
-end subroutine
+
+end subroutine real_array_type_push
 !!***
 
 !****f* m_dynarray/real_array_type_finalize
@@ -142,12 +147,15 @@ subroutine real_array_type_finalize(self)
 !End of the abilint section
 
   class(real_array_type), intent(inout):: self
+  integer :: err
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      !ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data, stat=err)
   end if
   self%size=0
   self%capacity=0
-end subroutine
+
+end subroutine real_array_type_finalize
 !!***
 
 !****f* m_dynarray/int_array_type_push
@@ -179,25 +187,24 @@ subroutine int_array_type_push(self, val)
 !End of the abilint section
 
     class(int_array_type), intent(inout):: self
-    integer :: val
+    integer :: val, err
     integer, allocatable :: temp(:)
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
-      ABI_ALLOCATE(self%data, (self%capacity))
+      !ABI_ALLOCATE(self%data, (self%capacity))
+      ALLOCATE(self%data(self%capacity), stat=err)
     else if ( self%size>self%capacity ) then
       self%capacity = self%size + self%size / 4 + 8
-      ABI_ALLOCATE(temp,(self%capacity))
+      !ABI_ALLOCATE(temp,(self%capacity))
+      ALLOCATE(temp(self%capacity), stat=err)
       temp(:self%size-1) = self%data
       call move_alloc(temp, self%data) !temp gets deallocated
     end if
     self%data(self%size)=val
+
 end subroutine int_array_type_push
 !!***
-
-
-
-
 
 !****f* m_dynarray/int_array_type_finalize
 !!
@@ -227,12 +234,15 @@ subroutine int_array_type_finalize(self)
 !End of the abilint section
 
   class(int_array_type), intent(inout):: self
+  integer:: err
   if ( allocated(self%data) ) then
-      ABI_DEALLOCATE(self%data)
+      !ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data, stat=err)
   end if
   self%size=0
   self%capacity=0
-end subroutine
+
+end subroutine int_array_type_finalize
 
 end module m_dynmaic_array
 !!***

@@ -29,7 +29,7 @@ module m_odamix
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_xcdata
@@ -44,9 +44,12 @@ module m_odamix
  use m_paw_ij,     only : paw_ij_type
  use m_pawfgrtab,  only : pawfgrtab_type
  use m_pawrhoij,   only : pawrhoij_type
+ use m_paw_nhat,   only : pawmknhat
+ use m_paw_denpot, only : pawdenpot
  use m_energies,   only : energies_type
  use m_spacepar,   only : hartre
  use m_rhotoxc,    only : rhotoxc
+ use m_fft,        only : fourdp
 
  implicit none
 
@@ -192,8 +195,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'odamix'
- use interfaces_53_ffts
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -285,7 +286,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
      message = ' dijhat variable must be allocated in odamix ! '
      MSG_ERROR(message)
    end if
-   if(paw_ij(1)%cplex==2)then
+   if(paw_ij(1)%cplex_dij==2.or.paw_ij(1)%cplex_rf==2)then
      message = ' complex dij not allowed in odamix! '
      MSG_ERROR(message)
    end if
@@ -424,7 +425,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  else
    energies%e_entropy = zero
  end if
-!Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009), the missing volumce is added here
+!Turn it into an electric enthalpy,refer to Eq.(33) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]]
+! the missing volume is added here
  energies%e_elecfield = zero
  if (dtset%berryopt == 4 .or. dtset%berryopt == 14 ) then             !!HONG
 
@@ -448,7 +450,8 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !energies%e_magfield = emag
 !end if
 
-!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009), but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
+!HONG  Turn it into an internal enthalpy, refer to Eq.(36) of Suppl. of Nat. Phys. paper (5,304,2009) [[cite:Stengel2009]], 
+!but a little different: U=E_ks + (vol/8*pi) *  g^{-1})_ij ebar_i ebar_j
  if (dtset%berryopt == 6 .or. dtset%berryopt == 16 )  then
    energies%e_elecfield=zero
    call metric(gmet,gprimdlc,-1,rmet,rprimd,ucvol_local)

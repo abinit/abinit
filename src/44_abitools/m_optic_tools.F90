@@ -17,10 +17,10 @@
 !!
 !!  Right now the routine sums over the k-points. In future linear tetrahedron method might be useful.
 !!  Reference articles:
-!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003
-!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996
-!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004
-!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993
+!!  1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003 [[cite:Sharma2003]]
+!!  2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996 [[cite:Hughes1996]]
+!!  3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004 [[cite:Sharma2004]]
+!!  4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993 [[cite:Sipe1993]]
 !!
 !! SOURCE
 
@@ -34,7 +34,7 @@ MODULE m_optic_tools
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_linalg_interfaces
  use m_xmpi
  use m_nctk
@@ -354,7 +354,6 @@ subroutine pmat_renorm(efermi, evalv, mband, nkpt, nsppol, pmat, sc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pmat_renorm'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1138,7 +1137,7 @@ complex(dpc), allocatable :: intra1wS(:),chi2tot(:)
                    *delta(istm,istn,lz)
 !                  NOTE:: lx to ly m to n in pmat matrices respectively
 !                  Changes are made so that this (b3) term is according to paper
-!                  PRB48(Ref. 4) rather than PRB53(Ref 2) in which this term is incorrect
+!                  [[cite:Sipe1993]] (Ref. 4) rather than [[cite:Hughes1996]] (Ref 2) in which this term is incorrect
                  end do
                end do
              end do

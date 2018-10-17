@@ -13,8 +13,8 @@ The cut3d program can produce output that can be read by several other programs.
 At present, at least XCrySDen ([www.xcrysden.org](http://www.xcrysden.org/), freely available)
 is known to support this output.
 
-The cut3d program can be used to treat data in a density file (\_DEN), a
-potential file (\_POT) or a wavefunction file (\_WFK). In this tutorial will we
+The cut3d program can be used to treat data in a density file (*_DEN*), a
+potential file (*_POT*) or a wavefunction file (*_WFK*). In this tutorial will we
 see how to use this program to obtain the value of the density on a line.
 
 This tutorial should take about 15 minutes.
@@ -25,7 +25,7 @@ We will first start by a simple example: viewing Silicon density information.
 Before using the cut3d program, we first have to generate the density and
 the wavefunctions files by running the Abinit program. For this simple case,
 we will use the last input file used in [tutorial 3](base3)
-(tbase3_5.in). That input file contains two datasets, one to obtain a
+(*tbase3_5.in*). That input file contains two datasets, one to obtain a
 self-consistent density and the other to obtain a selected number of k-point wavefunctions.
 If you do not have the output of this case, you will need to
 rerun it, at this stage, this should be fairly easy for you!
@@ -42,31 +42,31 @@ The output files that are of interest for us now are:
     parameter [[prtden]] to 1 in the input file as it was done in the first dataset in this example.
 
 **NOTE:** In DS1, the self-consistent dataset, we have a good density (file:
-tbase3_5o_DS1_DEN) which is physically relevant. Careful, if you run a non-
-self-consistent job, you may obtain a density but it will not be physical!
+*tbase3_5o_DS1_DEN*) which is physically relevant.
+Careful, if you run a non-self-consistent job, you may obtain a density but it will not be physical!
 
-**NOTE:** The wavefunctions in DS1 (file: tbase3_5o_DS1_WFK) are those of the
+**NOTE:** The wavefunctions in DS1 (file: *tbase3_5o_DS1_WFK*) are those of the
 Monkhorst and Pack grid which are good for self-consistent calculations but
 often not really inspiring physically. For this reason, we often have to do a
 non-self-consistent run to get relevant wavefunctions as it is done in this
-case. The DS2 (file: tbase3_5o_DS2_WFK) contains the interesting wavefunctions
+case. The DS2 (file: *tbase3_5o_DS2_WFK*) contains the interesting wavefunctions
 that we want to analyse.
 
 ## 2 Getting the density on a given line
 
 Now we are ready to use the cut3d program. First we must make sure that we
-have compiled the program. If you have run the command  "make" in the Abinit
+have compiled the program. If you have run the command  *make* in the Abinit
 main directory, and everything went well, then you have obtained the abinit
-program and all the accompanying program, in particular cut3d. You can
-obtain only the cut3d program by issuing the command  "make cut3d" in the Abinit main directory.
+program and all the accompanying program, in particular *cut3d*. You can
+obtain only the cut3d program by issuing the command *make cut3d* in the Abinit main directory.
 
-Assuming that we are in the directory Tutorial/Work_tools, and the cut3d
+Assuming that we are in the directory *Tutorial/Work_tools*, and the *cut3d*
 program can be accessed by simply typing its name, now write the command:
 
     cut3d
 
-The cut3d program will ask you several questions in order to determine what
-you want him to do. In this tutorial, the text coming from the cut3d program are
+The *cut3d* program will ask you several questions in order to determine what
+you want him to do. In this tutorial, the text coming from the *cut3d* program are
 in black and the input that you have to type in are in  red.
 
 After some text about the version and the licence, you will see the question:
@@ -142,7 +142,7 @@ Enter something meaningful, si_den_111.dat.
     More analysis of the 3D file ? (1=default=yes,2=no)
 
 Enter 2 to finish with cut3d. If you do a list of the files in your working
-directory, you should see the  "si_den_111.dat" file. You can look at this
+directory, you should see the *si_den_111.dat* file. You can look at this
 file, you will see that this is a simple two columns file. You can visualize
 it with your favorite plotting software (ex: xmgrace, gnuplot, ...). If you
 open this file with xmgrace, you will obtain the following graph:
@@ -155,7 +155,7 @@ We note also that there is almost no density at the origin. By doing the line
 in the [111] direction, we have crossed the first silicon-silicon bond which
 we can see as a large density peak indicated by the red arrows.
 
-By the way, cut3d works with the so-called "trilinear" interpolation of the
+By the way, cut3d works with the so-called trilinear interpolation of the
 density. That is, the FFT grid, on which the density is defined, in real
 space, leads to a partitioning of the space in small rectangular
 parallelepipeds, and in each such parallelepiped, the eight values of the

@@ -29,7 +29,7 @@ module m_rhotov
  use defs_abitypes
  use defs_wvltypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_ab7_mixing
  use m_abi2big
  use m_xmpi
@@ -45,6 +45,8 @@ module m_rhotov
  use m_dens,             only : mag_constr
  use m_rhotoxc,          only : rhotoxc
  use m_xchybrid,         only : xchybrid_ncpp_cc
+ use m_psolver,          only : psolver_rhohxc
+ use m_wvl_psi,          only : wvl_psitohpsi
 
  implicit none
 
@@ -169,8 +171,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rhotov'
- use interfaces_62_poisson
- use interfaces_62_wvl_wfs
 !End of the abilint section
 
  implicit none

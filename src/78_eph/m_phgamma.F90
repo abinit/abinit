@@ -25,7 +25,7 @@ module m_phgamma
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_kptrank
@@ -59,7 +59,8 @@ module m_phgamma
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
  use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
- use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_getgh1c,          only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_fourier_interpol, only : transgrid
 
  implicit none
 
@@ -359,7 +360,7 @@ module m_phgamma
 
   real(dp),allocatable :: vals_tr_gen(:,:,:,:,:,:,:)
   ! vals(nene,nene,nomega,3,3,nsppol)
-  ! generalized transport spectral function from PB Allen Phys. Rev. Lett. 59, 1460 (1987)
+  ! generalized transport spectral function from PB Allen Phys. Rev. Lett. 59, 1460 (1987) [[cite:Allen1987]]
 
   real(dp),allocatable :: lambdaw_tr(:,:,:,:,:)
   ! lambda(nomega,3,3,0:natom3,nsppol)
@@ -620,7 +621,6 @@ subroutine phgamma_print(gams,cryst,ifc,ncid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2266,7 +2266,6 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2630,7 +2629,7 @@ end if
  end do
 
 #ifdef DEV_MJV
- ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013))
+ ! calculate the temperature dependence of the a2f(e,e',w) integrals (G_0(T_e) in PRL 110 016405 (2013) [[cite:Arnaud2013]]) 
  if (my_rank == master) then
    ntemp = 100
    min_temp = zero
@@ -2692,7 +2691,7 @@ end subroutine a2fw_init
 !!
 !! FUNCTION
 !!  Compute \int dw [a2F(w)/w] w^n
-!!  From Allen PRL 59 1460 (See also Grimvall, Eq 6.72 page 175)
+!!  From Allen PRL 59 1460 [[cite:Allen1987]] (See also [[cite:Grimvall1981]], Eq 6.72 page 175)
 !!
 !! INPUTS
 !!  a2f<a2fw_t>=Structure storing the Eliashberg function.
@@ -2770,7 +2769,7 @@ end function a2fw_moment
 !!
 !! FUNCTION
 !!  Compute \int dw [a2F_tr(w)/w] w^n
-!!  From Allen PRL 59 1460 and later PRB papers (See also Grimvall book)
+!!  From Allen PRL 59 1460 [[cite:Allen1987]] and later PRB papers (See also [[cite:Grimvall1981]] book)
 !!
 !! INPUTS
 !!  a2f_tr<a2fw_tr_t>=Structure storing the Eliashberg function.
@@ -3633,7 +3632,6 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'a2fw_tr_init'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4204,7 +4202,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -4239,7 +4237,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'eph_phgamma'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

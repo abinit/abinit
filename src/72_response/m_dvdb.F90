@@ -30,7 +30,7 @@
 MODULE m_dvdb
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_distribfft
@@ -51,10 +51,12 @@ MODULE m_dvdb
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
+ use m_fft,           only : fourdp
  use m_crystal,       only : crystal_t, crystal_free, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 
@@ -720,7 +722,6 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_print'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -899,7 +900,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_read_onev1'
- use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -1166,7 +1166,6 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_complete'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1505,7 +1504,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'v1phq_rotate'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1687,7 +1685,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  !if (psps%usepaw==1) then
  !  ! Allocate/initialize only zarot in pawang1 datastructure
  !  call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
- !  call setsymrhoij(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
+ !  call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  !end if
 
  ! FIXME Be careful here because symrhg was written for densities!
@@ -1858,7 +1856,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_setup'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2735,7 +2732,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
- real(dp),intent(out) :: v1scf_rpt(2,nrpt,nfft,db%nspden)
+ real(dp),intent(in) :: v1scf_rpt(2,nrpt,nfft,db%nspden)
  real(dp),intent(out) :: v1scf_qpt(2,nfft,db%nspden)
 
 !Local variables-------------------------------
@@ -3198,7 +3195,6 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_list_perts'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -4104,7 +4100,7 @@ end subroutine dvdb_test_ftinterp
 !!
 !! FUNCTION
 !!  Compute the long-range part of the phonon potential
-!!  due to the Born effective charges [PRL 115, 176401 (2015)].
+!!  due to the Born effective charges, PRL 115, 176401 (2015) [[cite:Verdi2015]].
 !!
 !!    V^L_{iatom,idir}(r) = i (4pi/vol) sum_G (q+G) . Zeff_{iatom,idir}
 !!                           e^{i (q + G) . (r - tau_{iatom})} / ((q + G) . dielt . (q + G))
@@ -4141,7 +4137,6 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_v1r_long_range'
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -4277,13 +4272,6 @@ end subroutine dvdb_v1r_long_range
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, &
 &          ngqpt, qptopt, mpi_enreg, comm)
@@ -4294,7 +4282,6 @@ subroutine dvdb_interpolate_and_write(dtfil, ngfft, ngfftf, cryst, dvdb, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_interpolate_and_write'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

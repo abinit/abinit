@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -84,6 +84,8 @@ _ WF disk file :      1.436 Mbytes ; DEN or POT disk file :      0.956 Mbytes.
         dmft_nwli2      10000
         dmft_nwlo1          0
         dmft_nwlo2        100
+  dmft_occnd_imag1          1
+  dmft_occnd_imag2          0
         dmft_rslf1          0
         dmft_rslf2          1
              ecut      1.20000000E+01 Hartree
@@ -1000,6 +1002,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     458.625     458.600
         dmft_nwli2      10000
         dmft_nwlo1          0
         dmft_nwlo2        100
+  dmft_occnd_imag1          1
+  dmft_occnd_imag2          0
         dmft_rslf1          0
         dmft_rslf2          1
              ecut      1.20000000E+01 Hartree
@@ -1193,7 +1197,7 @@ P           mkmem          10
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method: 
 - applications to cerium, Ce2O3 and Pu2O3 with the Hubbard I solver and comparison to DFT + U,

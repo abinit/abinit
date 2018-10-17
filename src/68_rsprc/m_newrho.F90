@@ -28,7 +28,10 @@ module m_newrho
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
+
+ use m_wvl_rho, only : wvl_prcref
+ use m_fft,     only : fourdp
 
  implicit none
 
@@ -170,7 +173,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  use defs_abitypes
  use defs_wvltypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_ab7_mixing
  use m_abi2big
 
@@ -184,8 +187,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'newrho'
- use interfaces_53_ffts
- use interfaces_68_rsprc
 !End of the abilint section
 
  implicit none

@@ -120,7 +120,7 @@ CONTAINS
 !! PARENTS
 !!      berryphase_new,calc_optical_mels,calc_sigc_me,calc_sigx_me,calc_vhxc_me
 !!      calc_wf_qp,cchi0,cchi0q0,cchi0q0_intraband,cgwf,chebfi,chern_number
-!!      classify_bands,cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools
+!!      classify_bands,cohsex_me,ctocprj,d2frnl,m_datafordmft,debug_tools
 !!      dfpt_accrho,dfpt_cgwf,dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk
 !!      dfpt_wfkfermi,dotprod_set_cgcprj,dotprodm_sumdiag_cgcprj,energy
 !!      exc_build_block,exc_build_ham,exc_plot,extrapwf,fock2ACE,forstr
@@ -756,7 +756,7 @@ end subroutine pawcprj_zaxpby
 !!  ntypat :: number of types of atoms
 !!  typat(natom) :: type of each atom
 !!  zarot(2*lmax+1,2*lmax+1,lmax+1,nsym) :: elements of rotation matrix for angular momentum states
-!!                                          and symmetry operations. See setsymrhoij.F90
+!!                                          and symmetry operations. See m_paw_sphharm/setsym_ylm.
 !!
 !! OUTPUT
 !!  cprj_fkn (pawcprj_type) :: cprj for a single band and k point where the k point is related to
@@ -1148,19 +1148,19 @@ end subroutine pawcprj_output
 !! pawcprj_get
 !!
 !! FUNCTION
-!! Read the cprj for a given k-point from memory or from a temporary file
+!! Read the cprj_k for a given k-point from memory in cprj or from a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=input cprj (used if mkmem/=0)
 !!  dimcp=first dimension of cprj_k,cprj arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
 !!  [icpgr]= (optional argument) if present, only component icpgr of
 !!           input cprj gradient is copied into output cprj
 !!           Not used if cprj(:,:)%ncpgr<icpgr (mkmem>0)
 !!                    or ncpgr(optional)<icpgr (mkmem=0)
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during reading, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted=>unsorted)
@@ -1388,15 +1388,15 @@ end subroutine pawcprj_get
 !! pawcprj_put
 !!
 !! FUNCTION
-!! Write the cprj for a given set of (n,k) into memory or into a temporary file
+!! Write cprj_k for a given set of (n,k) into memory in cprj, or into a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= input cprj datastructure
 !!  dimcp=first dimension of cprj_k,cprjnk arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during writing, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted->unsorted)

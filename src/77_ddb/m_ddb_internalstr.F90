@@ -27,7 +27,7 @@
 module m_ddb_internalstr
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_crystal
  use m_ddb
@@ -55,17 +55,20 @@ contains
 !! Get the insternal strain tensors,both force response and displacement response ones.
 !!
 !! INPUTS
+!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! blkval(2,3,mpert,3,mpert,nblok)=
 !!   second derivatives of total energy with respect to electric fields
 !!   atom displacements,strain,...... all in cartesian coordinates
 !! crystal<crystal_t>=Crystalline structure info.
-!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
-!! iblok= bolk number in DDB file
+!! iblok= blok number in DDB file
 !! iout=out file number
 !! mpert=maximum number of ipert
 !! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
+!! prt_internalstr=if 2 or higher, print force and displacement internal strain, 
+!!                 if 1, print only force internal strain, 
+!!                 if 0, do not print internal strain. 
 !!
 !! OUTPUT
 !! instrain=force response internal strain tensor
@@ -89,21 +92,20 @@ subroutine ddb_internalstr(asr,&
 !&asrq0,&
 & d2asr,iblok,instrain,iout,mpert,&
 !&msize,&
-natom,nblok)
+natom,nblok,prt_internalstr)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_internalstr'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
 
 !Arguments----------------------------------------------
 !scalars
- integer,intent(in) :: asr,iblok,iout,mpert,natom,nblok
+ integer,intent(in) :: asr,iblok,iout,mpert,natom,nblok,prt_internalstr
 !integer,intent(in) :: msize
 !type(crystal_t),intent(in) :: crystal
 !type(asrq0_t),intent(inout) :: asrq0
@@ -183,28 +185,29 @@ natom,nblok)
 !ending the sum rule
 
 !print the force response internal strain constants into the output file
-
- write(message,'(a,a,a,a)')ch10,&
-& ' Force-response internal strain tensor','(Unit:Hartree/bohr)',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
-
- write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
-& 'strainyy','strainzz','strainyz','strainxz','strainxy'
- call wrtout(std_out,message,'COLL')
- do ii1=1,3*natom
-   if(mod(ii1,3)==1)then
-     direction='x'
-   elseif(mod(ii1,3)==2)then
-     direction='y'
-   elseif(mod(ii1,3)==0)then
-     direction='z'
-   end if
-   write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
-&   instrain(ii1,1),instrain(ii1,2),instrain(ii1,3),&
-&   instrain(ii1,4),instrain(ii1,5),instrain(ii1,6)
+ if(prt_internalstr>0)then
+   write(message,'(a,a,a,a)')ch10,&
+&   ' Force-response internal strain tensor','(Unit:Hartree/bohr)',ch10
    call wrtout(std_out,message,'COLL')
- end do
+   call wrtout(iout,message,'COLL')
+
+   write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+&   'strainyy','strainzz','strainyz','strainxz','strainxy'
+   call wrtout(std_out,message,'COLL')
+   do ii1=1,3*natom
+     if(mod(ii1,3)==1)then
+       direction='x'
+     elseif(mod(ii1,3)==2)then
+       direction='y'
+     elseif(mod(ii1,3)==0)then
+       direction='z'
+     end if
+     write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ii1-1)/3)+1,'  ',direction,&
+&     instrain(ii1,1),instrain(ii1,2),instrain(ii1,3),&
+&     instrain(ii1,4),instrain(ii1,5),instrain(ii1,6)
+     call wrtout(std_out,message,'COLL')
+   end do
+ endif
 
 !now write into the ddb output file
  write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
@@ -225,7 +228,9 @@ natom,nblok)
    call wrtout(iout,message,'COLL')
  end do
 
-!try to get the displacement response internal strain tensor
+! ----------------------------------------------------------------------------------------
+
+!Try to get the displacement response internal strain tensor
 !first need the inverse of force constant matrix
  d2cart = zero
  do ipertA=1,natom
@@ -281,7 +286,7 @@ natom,nblok)
 !end do
 !ENDDEBUG
 
-!starting the pseudoinervering processes
+!starting the pseudoinverting processes
 !then get the eigenvectors of the big matrix,give values to matrixBp
  Bpmatr=0.0_dp
  ii1=1
@@ -395,7 +400,7 @@ natom,nblok)
    call wrtout(std_out,message,'COLL')
  end if
 
-!Do the matrix muplication to get pseudoinverse inverse matrix
+!Do the matrix mutiplication to get pseudoinverse inverse matrix
  Cmatr(:,:)=0.0_dp
  Amatr(:,:)=0.0_dp
  do ivarA=1,3*natom-3
@@ -411,7 +416,7 @@ natom,nblok)
  end do
 
 
-!The second mulplication
+!The second multiplication
  Cmatr(:,:)=0.0_dp
  do ivarA=1,3*natom-3
    do ivarB=1,3*natom-3
@@ -432,7 +437,7 @@ natom,nblok)
 !ENDDEBUG
 
 !So now the inverse of the reduced matrix is in the matrixC
-!now do another mulplication to get the pseudoinverse of the original
+!now do another mutilplication to get the pseudoinverse of the original
  Cpmatr(:,:)=0.0_dp
  Apmatr(:,:)=0.0_dp
  do ivarA=1,3*natom-3
@@ -479,29 +484,31 @@ natom,nblok)
  end do
 
 !Print out the results
- write(message,'(a,a,a,a)')ch10,&
-& ' Displacement-response internal strain ', 'tensor (Unit:Bohr)',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
- write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
-& 'strainyy','strainzz','strainyz','strainxz','strainxy'
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
- do ivarA=1,3*natom
-   if(mod(ivarA,3)==1)then
-     direction='x'
-   elseif(mod(ivarA,3)==2)then
-     direction='y'
-   elseif(mod(ivarA,3)==0)then
-     direction='z'
-   end if
-   write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ivarA-1)/3)+1,'  ',direction,&
-&   instrain_dis(1,ivarA),instrain_dis(2,ivarA),&
-&   instrain_dis(3,ivarA),instrain_dis(4,ivarA),instrain_dis(5,ivarA),&
-&   instrain_dis(6,ivarA)
+ if(prt_internalstr>1)then
+   write(message,'(a,a,a,a)')ch10,&
+&   ' Displacement-response internal strain ', 'tensor (Unit:Bohr)',ch10
    call wrtout(std_out,message,'COLL')
    call wrtout(iout,message,'COLL')
- end do
+   write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+&   'strainyy','strainzz','strainyz','strainxz','strainxy'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,message,'COLL')
+   do ivarA=1,3*natom
+     if(mod(ivarA,3)==1)then
+       direction='x'
+     elseif(mod(ivarA,3)==2)then
+       direction='y'
+     elseif(mod(ivarA,3)==0)then
+       direction='z'
+     end if
+     write(message,'(a1,i2,a2,a3,6f12.7)')' ',int((ivarA-1)/3)+1,'  ',direction,&
+&     instrain_dis(1,ivarA),instrain_dis(2,ivarA),&
+&     instrain_dis(3,ivarA),instrain_dis(4,ivarA),instrain_dis(5,ivarA),&
+&     instrain_dis(6,ivarA)
+     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,message,'COLL')
+   end do
+ endif
 
 end subroutine ddb_internalstr
 !!***

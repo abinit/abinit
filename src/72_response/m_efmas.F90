@@ -764,12 +764,12 @@ end subroutine print_efmas
      if(mdim>1) then
        write(io_unit,'(a)') '   are DEGENERATE (effective mass tensor is therefore not defined).'
        if(mdim==3) then
-         write(io_unit,'(a)') '   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).'
+         write(io_unit,'(a)') '   See Section IIIB Eqs. (67)-(70) and Appendix E of PRB 93 205147 (2016).' ! [[cite:Laflamme2016]]
          write(io_unit,'(a,i7,a)') &
 &          ' - Angular average effective mass for Frohlich model is to be averaged over degenerate bands. See later.'
        elseif(mdim==2) then
          write(io_unit,'(a)') ' - Also, 2D requested (perpendicular to Z axis).'
-         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).'
+         write(io_unit,'(a)') '   See Section IIIB and Appendix F, Eqs. (F12)-(F14) of PRB 93 205147 (2016).' ! [[cite:Laflamme2016]]
        end if
        write(io_unit,'(a,i7,a)') ' - Associated theta integrals calculated with ntheta=',ntheta,' points.'
      else
@@ -937,7 +937,6 @@ end subroutine print_efmas
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'efmas_main'
- use interfaces_14_hidewrite
 !End of the abilint section
 
   implicit none

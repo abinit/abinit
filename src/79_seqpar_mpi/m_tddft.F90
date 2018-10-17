@@ -31,7 +31,7 @@ module m_tddft
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wffile
@@ -46,6 +46,7 @@ module m_tddft
  use m_fftcore,  only : sphereboundary
  use m_spacepar, only : hartre
  use m_mpinfo,   only : proc_distrb_cycle
+ use m_fft,      only : fourwf, fourdp
 
  implicit none
 
@@ -137,8 +138,6 @@ contains
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'tddft'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none

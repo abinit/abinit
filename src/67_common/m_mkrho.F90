@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_mkrho
+!!****m* m_mkrho/m_mkrho
 !! NAME
 !!  m_mkrho
 !!
@@ -29,13 +29,13 @@ module m_mkrho
  use defs_basis
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
 
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
- use m_fft,          only : fftpac, zerosym
+ use m_fft,          only : fftpac, zerosym, fourwf, fourdp
  use m_hamiltonian,  only : gs_hamiltonian_type
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type
@@ -44,6 +44,12 @@ module m_mkrho
  use m_atomdata,     only : atom_length
  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
  use m_pawtab,       only : pawtab_type
+ use m_io_tools,     only : open_file
+ use m_splines,      only : spline,splint
+ use m_sort,         only : sort_dp
+ use m_prep_kgb,     only : prep_fourwf
+ use m_wvl_rho,      only : wvl_mkrho
+ use m_rot_cg,       only : rot_cg
 
  implicit none
 
@@ -53,6 +59,7 @@ module m_mkrho
  public :: mkrho
  public :: initro
  public :: prtrhomxmn
+ public :: read_atomden
 !!***
 
 contains
@@ -124,7 +131,7 @@ contains
 !!
 !! CHILDREN
 !!      bandfft_kpt_set_ikpt,fftpac,fourwf,prep_fourwf,prtrhomxmn
-!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum
+!!      sphereboundary,symrhg,timab,wrtout,wvl_mkrho,xmpi_sum,diag_occ_rot_cg
 !!
 !! SOURCE
 
@@ -137,10 +144,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkrho'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_66_wfs
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -189,6 +192,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp),allocatable :: occ_k(:),rhoaug(:,:,:),rhoaug_down(:,:,:)
  real(dp),allocatable :: rhoaug_mx(:,:,:),rhoaug_my(:,:,:),rhoaug_up(:,:,:)
  real(dp),allocatable :: taur_alphabeta(:,:,:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: occ_diag(:)
+! real(dp),allocatable :: occ_nd(2, :, :)
+ real(dp),allocatable :: cwavef_rot(:,:,:,:)
 
 ! *************************************************************************
 
@@ -389,8 +395,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                    cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
                    if (my_nspinor==2) cwavefb(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
                    weight  =paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
-                   if(dtset%nspinor==1) weight_i=zero
-                   if(dtset%nspinor==2) weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                   weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
 
                  else
                    weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
@@ -493,6 +498,20 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            ABI_ALLOCATE(occ_k,(nband_k))
            occ_k(:)=occ(bdtot_index+1:bdtot_index+nband_k)
 
+! ---------- DMFT
+           if(allocated(cwavef_rot))  then
+             ABI_DEALLOCATE(cwavef_rot)
+             ABI_DEALLOCATE(occ_diag)
+             ! ABI_DEALLOCATE(occ_nd)
+           end if
+           if(paw_dmft%use_sc_dmft==1) then
+             ! Allocation of DMFT temporaries arrays
+             ABI_ALLOCATE(cwavef_rot,(2,npw_k,blocksize,dtset%nspinor))
+             ABI_ALLOCATE(occ_diag,(blocksize))
+             ! ABI_ALLOCATE(occ_nd,(2, blocksize, blocksize, dtset%nspinor))
+           end if
+! ---------- END DMFT
+
            do iblock=1,nbdblock
              if (dtset%nspinor==1) then
                cwavef(:,1:npw_k*blocksize,1)=cg(:,1+(iblock-1)*npw_k*blocksize+icg:iblock*npw_k*blocksize+icg)
@@ -513,6 +532,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  call xmpi_sum(cwavef,mpi_enreg%comm_spinor,ierr)
                end if
              end if
+
              if(ioption==1)then
 !              Multiplication by 2pi i (k+G)_alpha
                gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
@@ -533,6 +553,27 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              else if(ioption==2)then
                MSG_ERROR("kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.")
              end if
+
+! ---------- DMFT
+             if(paw_dmft%use_sc_dmft==1) then
+               ! initialisation of DMFT arrays
+               cwavef_rot(:,:,:,:) = zero
+               occ_diag(:) = zero
+               ! occ_nd(:,:,:,:) = paw_dmft%occnd(:,:,:,ikpt,:)
+
+               do ib=1,blocksize
+                 cwavef_rot(:, :, ib, :) = cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :)
+               end do
+
+               call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
+&                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag) 
+               do ib=1,blocksize
+                 cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
+               end do
+               
+               occ_k(:) = occ_diag(:)
+             end if
+! ---------- END DMFT
 
              call timab(538,1,tsec)
              if (nspinor1TreatedByThisProc) then
@@ -640,6 +681,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      ABI_DEALLOCATE(cwavefb)
      ABI_DEALLOCATE(rhoaug)
      ABI_DEALLOCATE(wfraug)
+
+     if(allocated(cwavef_rot))  then
+       ABI_DEALLOCATE(cwavef_rot)
+       ABI_DEALLOCATE(occ_diag)
+       ! ABI_DEALLOCATE(occ_nd)
+     end if
 
 !    Recreate full rhor on all proc.
      call timab(48,1,tsec)
@@ -787,8 +834,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'initro'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
 !End of the abilint section
 
  implicit none
@@ -1241,7 +1286,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 end subroutine initro
 !!***
 
-!!****f* ABINIT/prtrhomxmn
+!!****f* m_mkrho/prtrhomxmn
 !! NAME
 !! prtrhomxmn
 !!
@@ -1287,7 +1332,6 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prtrhomxmn'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1895,6 +1939,643 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  ABI_DEALLOCATE(integrated)
 
 end subroutine prtrhomxmn
+!!***
+
+!!****f* m_mkrho/read_atomden
+!! NAME
+!! read_atomden
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2018 ABINIT group (SM,VR,FJ,MT)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~ABINIT/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! natom : number of atoms in cell
+!! nfft=(effective) number of FFT grid points (for this processor) - fine grid
+!! ngfft(18)=contain all needed information about 3D FFT,
+!! nspden : number of spin densities
+!! ntypat : number of types of atoms in the cell
+!! typat(natom) : list of atom types
+!!
+!! OUTPUT
+!! rhor_atm(nfft,nspden) : full electron density on the (fine) grid
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      outscfcv
+!!
+!! CHILDREN
+!!      atomden
+!!
+!! SOURCE
+
+subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
+&                       rhor_atm,typat,rprimd,xred,prtvol,file_prefix)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'read_atomden'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nfft,nspden,ntypat,prtvol
+!arrays
+ type(MPI_type),intent(in) :: MPI_enreg
+ integer,intent(in) :: ngfft(18),typat(natom)
+ real(dp), intent(in) :: rprimd(3,3),xred(3,natom)
+ real(dp),intent(inout) :: rhor_atm(nfft,nspden)
+ character(len=7), intent(in) :: file_prefix
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: message
+ character(len=120) :: filename
+ character(len=7) :: calctype='replace'
+ integer :: igrid,i,i1,i2,i3,io_err,itypat,unt
+ integer :: natomgrmax,nlines,ngrid,n1,n2,n3
+ real(dp) :: difx,dify,difz,ucvol!,norm
+!arrays
+ integer :: natomgr(ntypat)
+ real(dp) :: a(3),b(3),c(3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable :: atomrgrid(:,:),r_vec_grid(:,:),density(:,:)
+ real(dp),allocatable :: rho(:)
+
+! ************************************************************************
+
+!Initialise various variables
+ ngrid = nfft
+ a(:) = rprimd(:,1)
+ b(:) = rprimd(:,2)
+ c(:) = rprimd(:,3)
+ ABI_ALLOCATE(rho,(ngrid))
+ if (nspden/=1) then
+   MSG_ERROR('read_atomden: Only nspden=1 allowed.')
+ end if
+ rho = rhor_atm(:,1)
+ gmet=zero;gprimd=zero;rmet=zero;ucvol=zero
+
+
+!Calculate the r vector (reduced coord.) of the fine gridpoints
+ ABI_ALLOCATE(r_vec_grid,(3,ngrid))
+ igrid = 0
+ n1 = ngfft(1)
+ n2 = ngfft(2)
+ n3 = ngfft(3)
+ do i3=0,n3-1
+   difz=dble(i3)/dble(n3)
+   do i2=0,n2-1
+     dify=dble(i2)/dble(n2)
+     do i1=0,n1-1
+       difx=dble(i1)/dble(n1)
+       igrid = igrid + 1
+       r_vec_grid(1,igrid)=difx*rprimd(1,1)+dify*rprimd(1,2)+difz*rprimd(1,3)
+       r_vec_grid(2,igrid)=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)
+       r_vec_grid(3,igrid)=difx*rprimd(3,1)+dify*rprimd(3,2)+difz*rprimd(3,3)
+     end do
+   end do
+ end do
+ if (igrid/=ngrid) then
+   MSG_ERROR('read_atomden: igrid not equal to ngrid')
+ end if
+
+!Read in atomic density data for each atom type
+!first check how many datapoints are in each file
+ do itypat=1,ntypat
+   filename='';io_err=0;
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
+&   '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
+&   '_density_atom_type',itypat,'.dat'
+   if (open_file(filename, message, newunit=unt, status='old',action='read') /= 0) then
+     write(std_out,*) 'ERROR in read_atomden: Could not open file: ',filename
+     write(std_out,*) ' Current implementation requires this file to be present'
+     write(std_out,*) ' for each type of atom.'
+     write(std_out,*)trim(message)
+     MSG_ERROR("Cannot continue")
+   end if
+!  Check number of lines in file
+   nlines = 1;io_err=0;
+   do
+     read(unt,*,iostat=io_err)
+     if (io_err<0) exit
+     nlines = nlines + 1
+   end do
+   close(unt)
+   natomgr(itypat) = nlines - 2
+ end do ! Atom type
+!Allocate arrays and read in data
+ natomgrmax = maxval(natomgr)
+ ABI_ALLOCATE(atomrgrid,(natomgrmax,ntypat))
+ ABI_ALLOCATE(density,(natomgrmax,ntypat))
+ atomrgrid = zero ; density = zero
+ do itypat=1,ntypat
+   filename='';io_err=0;
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
+&   '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
+&   '_density_atom_type',itypat,'.dat'
+   if (open_file(filename,message,newunit=unt,status='old',action='read') /= 0) then
+     MSG_ERROR(message)
+   end if
+   read(unt,*) ! Skip comment line
+   do i=1,natomgr(itypat)
+     read(unt,*) atomrgrid(i,itypat),density(i,itypat)
+   end do
+   close(unt)
+   if (atomrgrid(1,itypat)/=zero) then
+     write(std_out,*) 'ERROR in read_atomden, in file: ',filename
+     write(std_out,*) ' First gridpoint has to be the origin.'
+     MSG_ERROR("Cannot continue")
+   end if
+ end do ! Atom type
+
+!write(std_out,*) '*** --- In read_atomden before call--- ***'
+!write(std_out,*) '  calctype:',calctype,' natom:',natom
+!write(std_out,*) '    ntypat:',ntypat,' typat:',typat
+!write(std_out,*) '     ngrid:',ngrid
+!write(std_out,*) '         a:',a
+!write(std_out,*) '         b:',b
+!write(std_out,*) '         c:',c
+!write(std_out,*) '      xred:',xred
+!write(std_out,*) '   natomgr:',natomgr
+!write(std_out,*) 'natomgrmax:',natomgrmax
+!write(std_out,*) ' atomrgrid:',atomrgrid
+!write(std_out,*) '   density:',density
+!write(std_out,*) 'r_vec_grid:'
+!write(std_out,*) r_vec_grid
+
+!Call atomden
+ call atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,xred, &
+& natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
+
+!if (prtvol>9) then ! calculate norm
+!call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+!norm = SUM(rho(:))*ucvol/dble(n1*n2*n3)
+!write(message,'(a,F8.4)') '  In read_atomden - NORM OF DENSITY: ',norm
+!call wrtout(std_out,message,'COLL')
+!end if
+
+ rhor_atm(:,1) = rho
+
+ if (allocated(atomrgrid))  then
+   ABI_DEALLOCATE(atomrgrid)
+ end if
+ if (allocated(density))  then
+   ABI_DEALLOCATE(density)
+ end if
+ if (allocated(r_vec_grid))  then
+   ABI_DEALLOCATE(r_vec_grid)
+ end if
+ if (allocated(rho))  then
+   ABI_DEALLOCATE(rho)
+ end if
+
+ return
+
+end subroutine read_atomden
+!!***
+
+!!****f* m_mkrho/atomden
+!! NAME
+!! atomden
+!!
+!! FUNCTION
+!! Construct atomic proto-bulk density (i.e. the superposed density
+!! from neutral, isolated atoms at the bulk atomic positions).
+!! This is useful if one wants to construct the bonding density:
+!!
+!! rho^{bnd} = rho^{bulk}(r)
+!!                 - \sum_{\alpha}\rho^{atm}_{\alpha}(r-R_{\alpha})
+!!
+!! Where rho^{bulk} is the bulk density, rho^{atm} the atomic density
+!! and the index \alpha sums over all atoms. the R_{\alpha} are the
+!! atomic positions in the bulk. This routine calculates the sum over
+!! rho^{atm}_{\alpha}(r-R_{\alpha}) on a grid.
+!!
+!! Units are atomic.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2018 ABINIT group (SM,VR,FJ,MT)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~ABINIT/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! calctype : type of calculation
+!!          'replace' zero the input/output density array
+!!          'add'     add to the input/output density array
+!! natom : number of atoms in cell
+!! ntypat : number of different types of atoms in cell
+!! typat(natom) : type of each atom
+!! ngrid : number of gridpoints
+!! r_vec_grid(3,ngrid) : real (non-reduced) coordinates for grid points
+!! rho(ngrid) : input/output density array
+!! a(3),b(3),c(3) : real-space basis vectors
+!! atom_pos(3,natom) : reduced coordinates for atomic positions
+!! natomgr(ntypat) : number of gridpoints for each atomic density grid
+!! natomgrmax : max(natomgr(ntypat))
+!! atomrgrid(natomgrmax,ntypat)
+!! density(natomgrmax,ntypat)
+!!
+!! OUTPUT
+!! rho(ngrid) : input/output density array
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!! There are two ways to compile the proto density in real space
+!! for a solid. One alternative is that the density is calculated
+!! for an extended grid encompassing the sphere of points around
+!! one atom, and the results are folded back into the unit cell.
+!! On the other hand one can, around each grid point, identify the
+!! number of atoms in a sphere equivalent to the length of the radial
+!! grid for each type of atom.
+!! The second approach, with some modification, is taken here. The
+!! numer of atoms in a supercell cell are listed such that the supercell
+!! encompasses the atoms which could contribute to any point in the grid.
+!! That list is kept and cycled through, to avoid recalculating it at
+!! each point.
+!! Note that the density calculated from the atom is the spherical
+!! average, since there is no preferred direction without any
+!! external field (and it's simpler)
+!!
+!!
+!! PARENTS
+!!      read_atomden
+!!
+!! CHILDREN
+!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_pos, &
+&                  natomgr,natomgrmax,atomrgrid,density,prtvol,calctype)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'atomden'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat,ngrid,natomgrmax,prtvol
+ character(len=7),intent(in) :: calctype
+!arrays
+ type(MPI_type),intent(in) :: MPI_enreg
+ integer,intent(in) :: typat(natom),natomgr(ntypat)
+ real(dp),intent(in) :: r_vec_grid(3,ngrid),a(3),b(3),c(3)
+ real(dp),intent(in) :: atom_pos(3,natom),atomrgrid(natomgrmax,ntypat)
+ real(dp),intent(in) :: density(natomgrmax,ntypat)
+ real(dp),intent(inout) :: rho(ngrid)
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: message
+ integer :: cnt,delta,i,l,m,n,iatom,itypat,igrid,ncells,n_grid_p
+ integer :: ierr,spaceComm,nprocs,master,rank,remainder
+ real(dp) :: a_norm,b_norm,c_norm
+ real(dp) :: r_max,R_sphere_max,dp_dummy,ybcbeg,ybcend
+!arrays
+ integer :: n_equiv_atoms(ntypat),grid_index(ngrid)
+ integer :: my_start_equiv_atoms(ntypat)
+ integer :: my_end_equiv_atoms(ntypat)
+ integer :: l_min(ntypat),m_min(ntypat),n_min(ntypat)
+ integer :: l_max(ntypat),m_max(ntypat),n_max(ntypat)
+ real(dp) :: center(3),dp_vec_dummy(3),delta_a(3),delta_b(3),delta_c(3)
+ real(dp) :: r_atom(3),grid_distances(ngrid)
+ integer, allocatable :: new_index(:),i_1d_dummy(:)
+ real(dp),allocatable :: equiv_atom_dist(:,:),equiv_atom_pos(:,:,:),rho_temp(:,:)
+ real(dp),allocatable :: dp_1d_dummy(:),dp_2d_dummy(:,:),ypp(:)
+ real(dp),allocatable :: x_fit(:),y_fit(:)
+
+
+! ************************************************************************
+
+!initialise and check parallel execution
+ spaceComm=MPI_enreg%comm_cell
+ nprocs=xmpi_comm_size(spaceComm)
+ rank=MPI_enreg%me_kpt
+
+ master=0
+
+!initialise variables and vectors
+ a_norm = sqrt(dot_product(a,a))
+ b_norm = sqrt(dot_product(b,b))
+ c_norm = sqrt(dot_product(c,c))
+ center = (a+b+c)*half
+ dp_dummy = dot_product(a,b)/(b_norm*b_norm)
+ dp_vec_dummy = dp_dummy*b
+ delta_a = a - dp_vec_dummy
+ dp_dummy = dot_product(b,a)/(a_norm*a_norm)
+ dp_vec_dummy = dp_dummy*a
+ delta_b = b - dp_vec_dummy
+ dp_dummy = dot_product(c,(a+b))/(dot_product((a+b),(a+b)))
+ dp_vec_dummy = dp_dummy*(a+b)
+ delta_c = c - dp_vec_dummy
+ ABI_ALLOCATE(rho_temp,(ngrid,ntypat))
+ rho_temp = zero
+
+!write(std_out,*) '*** --- In atomden --- ***'
+!write(std_out,*) ' a_norm:',a_norm,' b_norm:',b_norm,' c_norm:',c_norm
+!write(std_out,*) 'delta_a:',delta_a,'delta_b:',delta_b,'delta_c:',delta_c
+!write(std_out,*) ' center:',center
+
+!Find supercell which will contain all possible contributions
+!for all atoms, and enumerate positions for all atoms
+!TODO list of atoms can be "pruned", i.e identify all atoms
+!that can't possibly contribute and remove from list.
+!Should be most important for very oblique cells
+ do itypat=1,ntypat
+   R_sphere_max = atomrgrid(natomgr(itypat),itypat)
+   l_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_a,delta_a)))
+   l_max(itypat) = -l_min(itypat)
+   m_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_b,delta_b)))
+   m_max(itypat) = -m_min(itypat)
+   n_min(itypat) = -ceiling(R_sphere_max/sqrt(dot_product(delta_c,delta_c)))
+   n_max(itypat) = -n_min(itypat)
+   ncells = (l_max(itypat)-l_min(itypat)+1) &
+&   *(m_max(itypat)-m_min(itypat)+1) &
+&   *(n_max(itypat)-n_min(itypat)+1)
+   n_equiv_atoms(itypat) = 0
+   do iatom=1,natom
+     if (typat(iatom)==itypat) then
+       n_equiv_atoms(itypat) = n_equiv_atoms(itypat) + ncells
+     end if ! if type=itypat
+   end do ! number of atoms per cell
+   if ((rank==master).and.(prtvol>9)) then
+     write(message,'(a)') '*** --- In atomden --- find box ***'
+     call wrtout(std_out,message,'COLL')
+     write(message,'(a,I4)') ' itypat:',itypat
+     call wrtout(std_out,message,'COLL')
+     write(message,'(2(a,I4))') ' l_min:',l_min(itypat),' l_max:',l_max(itypat)
+     call wrtout(std_out,message,'COLL')
+     write(message,'(2(a,I4))') ' m_min:',m_min(itypat),' m_max:',m_max(itypat)
+     call wrtout(std_out,message,'COLL')
+     write(message,'(2(a,I4))') ' n_min:',n_min(itypat),' n_max:',n_max(itypat)
+     call wrtout(std_out,message,'COLL')
+     write(message,'(2(a,I4))') ' n_equiv_atoms:',n_equiv_atoms(itypat)
+     call wrtout(std_out,message,'COLL')
+   end if
+ end do !atom type
+
+!allocate arrays
+ n = maxval(n_equiv_atoms)
+ ABI_ALLOCATE(equiv_atom_pos,(3,n,ntypat))
+ ABI_ALLOCATE(equiv_atom_dist,(n,ntypat))
+ equiv_atom_pos = zero
+ equiv_atom_dist = zero
+
+!Find positions and distance of atoms from center of cell
+ do itypat=1,ntypat
+   i = 1
+   do l=l_min(itypat),l_max(itypat)
+     do m=m_min(itypat),m_max(itypat)
+       do n=n_min(itypat),n_max(itypat)
+         do iatom=1,natom
+           if (typat(iatom)==itypat) then
+             if (i>n_equiv_atoms(itypat)) then
+               MSG_ERROR('atomden: i>n_equiv_atoms')
+             end if
+             equiv_atom_pos(:,i,itypat) = (atom_pos(1,iatom)+dble(l))*a &
+&             + (atom_pos(2,iatom)+dble(m))*b &
+&             + (atom_pos(3,iatom)+dble(n))*c
+             dp_vec_dummy = equiv_atom_pos(:,i,itypat)-center
+             equiv_atom_dist(i,itypat) = &
+&             sqrt(dot_product(dp_vec_dummy,dp_vec_dummy))
+             i = i + 1
+           end if
+         end do
+       end do !n
+     end do !m
+   end do !l
+!  write(std_out,*) '*** --- In atomden --- find equiv ***'
+!  write(std_out,*) ' itypat:',itypat
+!  write(std_out,*) ' equiv_atom_pos:'
+!  write(std_out,*) equiv_atom_pos(:,:,itypat)
+!  write(std_out,*) ' equiv_atom_dist:',equiv_atom_dist(:,itypat)
+ end do !atom type
+
+!Sort the atoms after distance so that the density from the ones
+!furthest away can be added first. This is to prevent truncation error.
+ do itypat=1,ntypat
+   n = n_equiv_atoms(itypat)
+   ABI_ALLOCATE(dp_1d_dummy,(n))
+   ABI_ALLOCATE(new_index,(n))
+   ABI_ALLOCATE(dp_2d_dummy,(3,n))
+   dp_1d_dummy = equiv_atom_dist(1:n,itypat)
+   dp_2d_dummy = equiv_atom_pos(1:3,1:n,itypat)
+   do i=1,n
+     new_index(i) = i
+   end do
+   call sort_dp(n,dp_1d_dummy,new_index,tol14)
+   do i=1,n
+!    write(std_out,*) i,' -> ',new_index(i)
+     equiv_atom_pos(1:3,n+1-i,itypat) = dp_2d_dummy(1:3,new_index(i))
+     equiv_atom_dist(1:n,itypat) = dp_1d_dummy
+   end do
+   ABI_DEALLOCATE(dp_1d_dummy)
+   ABI_DEALLOCATE(new_index)
+   ABI_DEALLOCATE(dp_2d_dummy)
+!  write(std_out,*) '*** --- In atomden ---  sorting atoms ***'
+!  write(std_out,*) ' itypat:',itypat
+!  write(std_out,*) ' equiv_atom_pos:'
+!  write(std_out,*) equiv_atom_pos(:,:,itypat)
+!  write(std_out,*) ' equiv_atom_dist:',equiv_atom_dist(:,itypat)
+ end do ! atom type
+
+!Divide the work in case of parallel execution
+ if (nprocs==1) then ! Make sure everything runs with one proc
+   if (prtvol>9) then
+     write(message,'(a)') '  In atomden - number of processors:     1'
+     call wrtout(std_out,message,'COLL')
+     write(message,'(a)') '  Calculation of proto-atomic density done in serial'
+     call wrtout(std_out,message,'COLL')
+   end if
+   do itypat=1,ntypat
+     if (prtvol>9) then
+       write(message,'(a,I6)') '  Number of equivalent atoms:',n_equiv_atoms(itypat)
+       call wrtout(std_out,message,'COLL')
+     end if
+     my_start_equiv_atoms(itypat) = 1
+     my_end_equiv_atoms(itypat) = n_equiv_atoms(itypat)
+   end do
+ else
+   if (rank==master.and.prtvol>9) then
+     write(message,'(a,I5)') '  In atomden - number of processors:',nprocs
+     call wrtout(std_out,message,'COLL')
+     write(message,'(a)') '  Calculation of proto-atomic density done in parallel'
+     call wrtout(std_out,message,'COLL')
+   end if
+   do itypat=1,ntypat
+     if (rank==master.and.prtvol>9) then
+       write(message,'(a,I6)') '  Number of equivalent atoms:',n_equiv_atoms(itypat)
+       call wrtout(std_out,message,'COLL')
+     end if
+!    Divide the atoms among the processors by shuffling indices
+     delta = int(floor(real(n_equiv_atoms(itypat))/real(nprocs)))
+     remainder = n_equiv_atoms(itypat)-nprocs*delta
+     my_start_equiv_atoms(itypat) = 1+rank*delta
+     my_end_equiv_atoms(itypat) = (rank+1)*delta
+!    Divide the remainder points among the processors
+!    by shuffling indices
+     if ((rank+1)>remainder) then
+       my_start_equiv_atoms(itypat) = my_start_equiv_atoms(itypat) + remainder
+       my_end_equiv_atoms(itypat) = my_end_equiv_atoms(itypat) + remainder
+     else
+       my_start_equiv_atoms(itypat) = my_start_equiv_atoms(itypat) + rank
+       my_end_equiv_atoms(itypat) = my_end_equiv_atoms(itypat) + rank + 1
+     end if
+     if (prtvol>9) then
+       write(message,'(a,I3)') '          For atom type: ',itypat
+       call wrtout(std_out,message,'PERS')
+!      write(message,'(a,I6)') '  I''ll take atoms from: ',my_start_equiv_atoms(itypat)
+!      call wrtout(std_out,message,'PERS')
+!      write(message,'(a,I6)') '           total for me: ',my_end_equiv_atoms(itypat)
+!      call wrtout(std_out,message,'PERS')
+       write(message,'(a,I6)') '            total for me: ', &
+&       my_end_equiv_atoms(itypat)+1-my_start_equiv_atoms(itypat)
+       call wrtout(std_out,message,'PERS')
+     end if
+   end do
+ end if
+
+!Loop over types of atoms and equivalent atoms and
+!interpolate density onto grid
+ do itypat=1,ntypat
+!  do iatom=my_start_equiv_atoms(itypat),my_end_equiv_atoms(itypat)
+
+   cnt = 0
+   iatom = rank+1 - nprocs
+!  Parallel execution of loop
+   do
+     cnt = cnt + 1
+     iatom = iatom + nprocs
+     if (iatom>n_equiv_atoms(itypat)) exit ! Exit if index is too large
+
+     if (mod(cnt,100)==0.and.prtvol>0) then
+       write(message,'(2(a,I6))') ' atoms so far',cnt,' of: ',n_equiv_atoms(itypat)/nprocs
+       call wrtout(std_out,message,'PERS')
+     end if
+
+     r_max = atomrgrid(natomgr(itypat),itypat)
+     r_atom = equiv_atom_pos(:,iatom,itypat)
+
+!    Set up an array with the gridpoint distances
+     i = 1
+     grid_distances = zero
+     grid_index = 0
+     do igrid=1,ngrid
+       dp_vec_dummy(:) = r_vec_grid(:,igrid) - r_atom(:)
+       dp_dummy = sqrt(dot_product(dp_vec_dummy,dp_vec_dummy))
+       if (dp_dummy <= r_max) then
+         grid_distances(i) = dp_dummy
+         grid_index(i) = igrid
+         i = i + 1
+       else
+         cycle ! cycle if point is too far away
+       end if
+     end do
+     n_grid_p = i - 1
+
+     if (n_grid_p==0) cycle ! Cycle if no point needs
+!    to be interpolated
+
+!    Sort points to be interpolated in ascending order
+     ABI_ALLOCATE(dp_1d_dummy,(n_grid_p))
+     ABI_ALLOCATE(new_index,(n_grid_p))
+     ABI_ALLOCATE(i_1d_dummy,(n_grid_p))
+     dp_1d_dummy = grid_distances(1:n_grid_p)
+     do i=1,n_grid_p
+       new_index(i) = i
+     end do
+     call sort_dp(n_grid_p,dp_1d_dummy,new_index,tol16)
+     grid_distances(1:n_grid_p) = dp_1d_dummy
+     i_1d_dummy = grid_index(1:n_grid_p)
+     do i=1,n_grid_p
+!      write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
+       grid_index(i) = i_1d_dummy(new_index(i))
+     end do
+     ABI_DEALLOCATE(dp_1d_dummy)
+     ABI_DEALLOCATE(new_index)
+     ABI_DEALLOCATE(i_1d_dummy)
+
+!    Interpolate density onto all grid points
+     ABI_ALLOCATE(ypp,(natomgr(itypat)))
+     ABI_ALLOCATE(x_fit,(n_grid_p))
+     ABI_ALLOCATE(y_fit,(n_grid_p))
+     ypp = zero; y_fit = zero
+     ybcbeg = zero; ybcend = zero
+     x_fit = grid_distances(1:n_grid_p)
+     call spline(atomrgrid(1:natomgr(itypat),itypat), &
+&     density(1:natomgr(itypat),itypat), &
+&     natomgr(itypat),ybcbeg,ybcend,ypp)
+     call splint(natomgr(itypat),atomrgrid(1:natomgr(itypat),itypat), &
+&     density(1:natomgr(itypat),itypat),ypp,n_grid_p, &
+&     x_fit,y_fit)
+
+!    Save the interpolated points to grid
+     do i=1,n_grid_p
+       rho_temp(grid_index(i),itypat) = rho_temp(grid_index(i),itypat) + y_fit(i)
+     end do
+     ABI_DEALLOCATE(ypp)
+     ABI_DEALLOCATE(x_fit)
+     ABI_DEALLOCATE(y_fit)
+
+   end do ! n equiv atoms
+ end do ! type of atom
+
+!Collect all contributions to rho_temp if
+!we are running in parallel
+ if (nprocs>1) then
+   call xmpi_barrier(spaceComm)
+   call xmpi_sum_master(rho_temp,master,spaceComm,ierr)
+   call xmpi_barrier(spaceComm)
+   if (prtvol>9) then
+     write(message,'(a)') '  In atomden - contributions to rho_temp collected'
+     call wrtout(std_out,message,'PERS')
+   end if
+ end if
+
+!Now rho_temp contains the atomic protodensity for each atom.
+!Check whether this is to replace or be added to the input/output array
+!and sum up contributions
+ if (trim(calctype)=='replace') rho = zero
+ do itypat=1,ntypat
+   rho(:) = rho(:) + rho_temp(:,itypat)
+ end do
+
+!deallocations
+ if (allocated(rho_temp))  then
+   ABI_DEALLOCATE(rho_temp)
+ end if
+ if (allocated(equiv_atom_pos))  then
+   ABI_DEALLOCATE(equiv_atom_pos)
+ end if
+ if (allocated(equiv_atom_dist))  then
+   ABI_DEALLOCATE(equiv_atom_dist)
+ end if
+!if (allocated()) deallocate()
+
+ return
+
+ end subroutine atomden
 !!***
 
 end module m_mkrho

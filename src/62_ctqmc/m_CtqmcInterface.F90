@@ -137,8 +137,9 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   DOUBLE PRECISION, INTENT(IN) :: u
   !DOUBLE PRECISION, INTENT(IN) :: mu
 !Local arguements -----------------------------
-  INTEGER          :: ifstream
+  INTEGER          :: ifstream!,opt_nondiag
   DOUBLE PRECISION, DIMENSION(1:9) :: buffer
+ ! opt_nondiag=0
 
   ifstream = 42
 
@@ -151,6 +152,7 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   buffer(7)=beta
   buffer(8)=U
   buffer(9)=GREENHYB_TAU
+ ! buffer(10)=DBLE(opt_nondiag)
   !buffer(9)=0.d0!mu
   !buffer(9)=DBLE(Wmax)
 

@@ -46,7 +46,7 @@ contains
 
  subroutine ptg_D4 (nsym,nclass,sym,class_ids,class_names,Irr)
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_defs_ptgroups,  only : irrep_t
 
 !This section has been created automatically by the script Abilint (TD).

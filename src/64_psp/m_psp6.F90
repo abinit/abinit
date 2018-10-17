@@ -29,7 +29,7 @@ module m_psp6
  use defs_basis
  use m_splines
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_numeric_tools,  only : smooth, ctrap
  use m_psptk,          only : psp5lo, psp5nl, cc_derivatives
@@ -111,7 +111,6 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp6in'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none

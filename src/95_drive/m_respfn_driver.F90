@@ -31,7 +31,7 @@ module m_respfn_driver
  use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_exit
  use m_wffile
@@ -46,10 +46,11 @@ module m_respfn_driver
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
+ use m_fft,         only : zerosym, fourdp
  use m_kpts,        only : symkchk
  use m_geometry,    only : irreducible_set_pert
  use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq, sytens, dfpt_prtph, &
-                           asria_calc, asria_corr, cart29, cart39, chneu9
+                           asria_calc, asria_corr, cart29, cart39, chneu9, dfpt_sydy
  use m_ddb,         only : DDB_VERSION
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_ddb_interpolate, only : outddbnc
@@ -59,7 +60,7 @@ module m_respfn_driver
  use m_ioarr,       only : read_rhor
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
- use m_pawtab,      only : pawtab_type,pawtab_get_lsize
+ use m_pawtab,      only : pawtab_type, pawtab_get_lsize
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
@@ -68,7 +69,13 @@ module m_respfn_driver
  use m_pawdij,      only : pawdij, symdij
  use m_pawfgr,      only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_finegrid,only : pawexpiqr
+ use m_pawxc,       only : pawxc_get_nkxc
  use m_paw_dmft,    only : paw_dmft_type
+ use m_paw_sphharm, only : setsym_ylm
+ use m_paw_nhat,    only : nhatgrid,pawmknhat
+ use m_paw_tools,   only : chkpawovlp
+ use m_paw_denpot,  only : pawdenpot
+ use m_paw_init,    only : pawinit,paw_gencond
  use m_kg,          only : getcut, getph, kpgio
  use m_eig2d,       only : eig2tot, elph2_fanddw
  use m_inwffil,     only : inwffil
@@ -79,11 +86,18 @@ module m_respfn_driver
  use m_initylmg,    only : initylmg
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
- use m_dfpt_loopert,only : dfpt_looppert
+ use m_dfpt_loopert,only : dfpt_looppert, eigen_meandege
  use m_rhotoxc,     only : rhotoxc
  use m_drivexc,     only : check_kxc
- use m_mklocl,      only : mklocl
+ use m_mklocl,      only : mklocl, mklocl_recipspace
  use m_common,      only : setup1, prteigrs
+ use m_fourier_interpol, only : transgrid
+ use m_paral_atom,     only : get_my_atmtab, free_my_atmtab
+ use m_paw_occupancies, only : initrhoij
+ use m_paw_correlations,only : pawpuxinit
+ use m_mkcore,     only : mkcore, dfpt_mkcore
+ use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
+ use m_d2frnl,     only : d2frnl
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -190,7 +204,7 @@ contains
 !!      pawfgrtab_free,pawfgrtab_init,pawinit,pawmknhat,pawpuxinit
 !!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
 !!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,pspini,q0dy3_apply
-!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsymrhoij,setup1,status,symdij
+!!      q0dy3_calc,read_rhor,rhotoxc,setsym,setsym_ylm,setup1,status,symdij
 !!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
 !!      wings3,wrtloctens,wrtout,xcdata_init,xmpi_bcast
 !!
@@ -204,11 +218,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'respfn'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
- use interfaces_56_xc
- use interfaces_65_paw
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -237,7 +246,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: nk3xc
  integer :: analyt,ask_accurate,band_index,bantot,bdeigrf,coredens_method,cplex
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
+ integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,ikpt,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isppol
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
@@ -246,9 +255,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
- integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
- integer :: usexcnhat,use_sym,vloc_method
+ integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit,non_magnetic_xc
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -276,7 +285,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp),allocatable :: amass(:),becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
+ real(dp),allocatable :: becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
  real(dp),allocatable :: d2cart_bbb(:,:,:,:,:,:),d2eig0(:,:,:,:,:)
  real(dp),allocatable :: d2k0(:,:,:,:,:),d2lo(:,:,:,:,:),d2loc0(:,:,:,:,:)
  real(dp),allocatable :: d2matr(:,:,:,:,:),d2nfr(:,:,:,:,:),d2nl(:,:,:,:,:),d2ovl(:,:,:,:,:)
@@ -361,8 +370,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  eii=zero ; eew=zero ; ecore=zero
 
 !Set up for iterations
- ABI_ALLOCATE(amass,(natom))
- call setup1(dtset%acell_orig(1:3,1),amass,dtset%amu_orig(:,1),bantot,dtset,&
+ call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
@@ -645,7 +653,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
-     call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
+     call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
      ! Update internal values
@@ -657,7 +665,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      if (pawtab(1)%has_nabla==1) pawtab(1:psps%ntypat)%has_nabla=2
    end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
-   call setsymrhoij(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
+   call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    pawtab(:)%usepawu=0
    pawtab(:)%useexexch=0
    pawtab(:)%exchmix=zero
@@ -717,22 +725,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
-   has_dijnd=0; req_cplex_dij=1
-   if(any(abs(dtset%nucdipmom)>tol8)) then
-     has_dijnd=1; req_cplex_dij=2
-   end if
+   has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
+   has_diju=0; if(dtset%usepawu==5.or.dtset%usepaw==6) has_diju=1
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
-     has_kxc=1;nkxc1=2*min(dtset%nspden,2)-1            ! LDA
-     if(dtset%xclevel==2.and.dtset%nspden==1) nkxc1=7   ! GGA non-polarized
-     if(dtset%xclevel==2.and.dtset%nspden==2) nkxc1=19  ! GGA polarized
-     if (dtset%nspden==4) nkxc1=nkxc1+3  ! Non-coll.: need to store 3 additional arrays in kxc
+     has_kxc=1
+     call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
 &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&
+&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
@@ -1420,6 +1424,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
    if (psps%usepaw==1) d2nfr(:,:,:,:,:)=d2nfr(:,:,:,:,:)+d2ovl(:,:,:,:,:)
 
+   zero_by_symm=1
+   if(dtset%rfmeth<0)zero_by_symm=0
+
 !  In case of bbb decomposition
    if(prtbbb==1)then
      ABI_ALLOCATE(blkflg1,(3,mpert,3,mpert))
@@ -1438,7 +1445,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        blkflg1(:,:,:,:) = blkflg2(:,:,:,:)
        d2tmp(:,:,natom+2,:,:) = d2bbb(:,:,:,:,iband,iband)
        call d2sym3(blkflg1,d2tmp,indsym,mpert,natom,dtset%nsym,qphon,symq,&
-&       symrec,dtset%symrel,timrev)
+&       symrec,dtset%symrel,timrev,zero_by_symm)
        d2bbb(:,:,:,:,iband,iband) = d2tmp(:,:,natom+2,:,:)
      end do
      ABI_DEALLOCATE(blkflg1)
@@ -1447,20 +1454,19 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
-   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev)
+   !write(std_out,*)"blkflg before d2sym3: ", blkflg
+   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm)
+   !write(std_out,*)"blkflg after d2sym3: ", blkflg
 
    if(rfphon==1.and.psps%n1xccc/=0)then
 !    Complete the dyfrx1 matrix by symmetrization of the existing elements
-     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev)
+     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm)
    end if
 
-!  Note that there is a bug in d2sym3 which will set some elements of
-!  blkflg to 1 even when no corresponding symmetry-related element
-!  has been computed.  This has the effect of producing spurious extra
-!  output lines in the 2nd-order matrix listing in the .out file
-!  and in the DDB file. The suprious matrix elements are all zero,
-!  so this is primarily an annoyance.(DRH)
-
+!  Note that d2sym3 usually complete the 2nd-order matrix
+!  with elements that are zero by symmetry, automatically,
+!  unless it has been explicitly asked not to do so.
+!  blkflg is then set to 1 for these matrix elements, even if there has be no calculation.
 
 !  Add the frozen-wf (dyfrwf) part to the ewald part (dyew),
 !  the part 1 of the frozen wf part of the xc core correction
@@ -1774,7 +1780,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
  ABI_DEALLOCATE(clflg)
- ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(blkflg)
@@ -1902,7 +1907,6 @@ subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'wrtloctens'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3910,6 +3914,477 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 !ENDDEBUG
 
 end subroutine dfpt_gatherdy
+!!***
+
+!!****f* ABINIT/dfpt_dyfro
+!! NAME
+!! dfpt_dyfro
+!!
+!! FUNCTION
+!! Compute the different parts of the frozen-wavefunction part of
+!! the dynamical matrix, except the non-local one, computed previously.
+!! Also (when installed) symmetrize the different part and their sum.
+!!
+!! INPUTS
+!!  atindx1(natom)=index table for atoms, inverse of atindx
+!!  dyfr_cplex=1 if dyfrnl is real, 2 if it is complex
+!!  dyfr_nondiag=1 if dyfrnl and dyfrwf are non diagonal with respect to atoms; 0 otherwise
+!!  gmet(3,3)=reciprocal space metric (bohr^-2)
+!!  gprimd(3,3)=dimensional primitive translations for reciprocal space (bohr**-1)
+!!  gsqcut=cutoff on G^2 based on ecut
+!!  indsym(4,nsym,natom)=index showing transformation of atom labels
+!!   under symmetry operations (computed in symatm)
+!!  mgfft=maximum size of 1D FFTs
+!!  mpi_enreg=information about MPI parallelization
+!!  mqgrid=dimensioned number of q grid points for local psp spline
+!!  natom=number of atoms in unit cell
+!!  nattyp(ntypat)=number of atoms of each type
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT,
+!!     see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nspden=number of spin-density components
+!!  nsym=number of symmetries in space group
+!!  ntypat=number of types of atoms
+!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!  n3xccc=dimension of the xccc3d array (0 or nfft).
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
+!!  qgrid(mqgrid)=q point array for local psp spline fits
+!!  qphon(3)=wavevector of the phonon
+!!  rhog(2,nfft)=electron density in G space
+!!  rprimd(3,3)=dimensional primitive translation vectors (bohr)
+!!  symq(4,2,nsym)=1 if symmetry preserves present qpoint. From littlegroup_q
+!!  symrec(3,3,nsym)=symmetries in reciprocal space
+!!  typat(natom)=integer type for each atom in cell
+!!  ucvol=unit cell volume (bohr**3).
+!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  vlspl(mqgrid,2,ntypat)=q^2 v(q) spline for each type of atom.
+!!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real
+!!   space--only used when n1xccc/=0
+!!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
+!!  xccc1d(n1xccc,6,ntypat)=1D core charge function and five derivatives,
+!!   for each type of atom, from psp
+!!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xred(3,natom)=reduced coordinates for atoms in unit cell
+!!
+!! OUTPUT
+!!  dyfrlo(3,3,natom)=frozen wavefunctions part of the dynamical matrix
+!!                    (local only)
+!!  dyfrwf(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)=
+!!                    frozen wavefunctions part of the dynamical matrix
+!!                    (local + non-local)
+!!                    If NCPP, it depends on one atom
+!!                    If PAW,  it depends on two atoms
+!!  dyfrxc(3,3,natom)=frozen wavefunctions part of the dynamical matrix
+!!                    (non-linear xc core correction)
+!!
+!! SIDE EFFECTS
+!! Input/Output
+!!  dyfrnl(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)=
+!!                    frozen wavefunctions part of the dynamical matrix
+!!                    (non-local only)
+!!                    If NCPP, it depends on one atom
+!!                    If PAW,  it depends on two atoms
+!!
+!!
+!! PARENTS
+!!      respfn
+!!
+!! CHILDREN
+!!      atm2fft,dfpt_sydy,fourdp,mkcore,mklocl_recipspace,timab,zerosym
+!!
+!! SOURCE
+
+subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondiag,&
+&  gmet,gprimd,gsqcut,indsym,mgfft,mpi_enreg,mqgrid,natom,nattyp,&
+&  nfft,ngfft,nspden,nsym,ntypat,n1xccc,n3xccc,paral_kgb,psps,pawtab,ph1d,qgrid,&
+&  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
+&  xcccrc,xccc1d,xccc3d,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_dyfro'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
+ integer,intent(in) :: nsym,ntypat,paral_kgb,usepaw
+ real(dp),intent(in) :: gsqcut,ucvol
+ type(pseudopotential_type),intent(in) :: psps
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: atindx1(natom),indsym(4,nsym,natom),nattyp(ntypat)
+ integer,intent(in) :: ngfft(18),symq(4,2,nsym),symrec(3,3,nsym),typat(natom)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3),ph1d(2,3*(2*mgfft+1)*natom)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rhog(2,nfft),rprimd(3,3)
+ real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden)
+ real(dp),intent(in) :: xccc1d(n1xccc,6,ntypat),xcccrc(ntypat),xred(3,natom)
+ real(dp),intent(inout) :: dyfrnl(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag),xccc3d(n3xccc)
+ real(dp),intent(out) :: dyfrlo(3,3,natom),dyfrwf(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)
+ real(dp),intent(inout) :: dyfrxc(3,3,natom) !vz_i
+ type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
+
+!Local variables-------------------------------
+!scalars
+ logical, parameter :: do_final_sym=.true.
+ integer :: iatom,jatom,n1,n2,n3,optatm,optdyfr,opteltfr,optgr,option
+ integer :: optn,optn2,optstr,optv
+ real(dp) :: eei
+!arrays
+ integer  :: qprtrb(3)
+ real(dp) :: dummy6(6),dum_strn(6),dum_strv(6)
+ real(dp) :: tsec(2),vprtrb(2)
+ real(dp) :: dum_atmrho(0),dum_atmvloc(0),dum_gauss(0),dum_grn(0),dum_grv(0),dum_eltfrxc(0)
+ real(dp),allocatable :: dyfrlo_tmp1(:,:,:),dyfrlo_tmp2(:,:,:,:,:),dyfrsym_tmp(:,:,:,:,:)
+ real(dp),allocatable :: gr_dum(:,:),v_dum(:),vxctotg(:,:)
+
+! *************************************************************************
+
+ if(nspden==4)then
+   MSG_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for insulators and norm-conserving psp!')
+ end if
+
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
+
+ if (usepaw==1 .or. psps%nc_xccc_gspace==1) then
+
+!  PAW or NC with nc_xccc_gspace: compute local psp and core charge contribs together
+!  in reciprocal space
+!  -----------------------------------------------------------------------
+   call timab(563,1,tsec)
+   if (n3xccc>0) then
+     ABI_ALLOCATE(v_dum,(nfft))
+     ABI_ALLOCATE(vxctotg,(2,nfft))
+     v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
+&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+     ABI_DEALLOCATE(v_dum)
+   else
+     ABI_ALLOCATE(vxctotg,(0,0))
+   end if
+   optatm=0;optdyfr=1;optgr=0;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1;opteltfr=0
+   call atm2fft(atindx1,dum_atmrho,dum_atmvloc,dyfrxc,dyfrlo,dum_eltfrxc,&
+&   dum_gauss,gmet,gprimd,dum_grn,dum_grv,gsqcut,mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,&
+&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,qgrid,qprtrb,rhog,&
+&   dum_strn,dum_strv,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb,vlspl)
+   ABI_DEALLOCATE(vxctotg)
+   if (n3xccc==0) dyfrxc=zero
+ else
+
+!  Norm-conserving: compute local psp contribution in reciprocal space
+!  and core charge contribution in real space
+!  -----------------------------------------------------------------------
+   option=4
+   ABI_ALLOCATE(dyfrlo_tmp1,(3,3,natom))
+   ABI_ALLOCATE(gr_dum,(3,natom))
+   ABI_ALLOCATE(v_dum,(nfft))
+   call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
+&   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
+&   ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,rhog,ucvol,vlspl,vprtrb,v_dum)
+   do iatom=1,natom
+!    Reestablish correct order of atoms
+     dyfrlo(1:3,1:3,atindx1(iatom))=dyfrlo_tmp1(1:3,1:3,iatom)
+   end do
+   ABI_DEALLOCATE(dyfrlo_tmp1)
+   ABI_DEALLOCATE(v_dum)
+   if(n1xccc/=0)then
+     call mkcore(dummy6,dyfrxc,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,&
+&     n1,n1xccc,n2,n3,option,rprimd,typat,ucvol,vxc,xcccrc,xccc1d,xccc3d,xred)
+   end if
+   ABI_DEALLOCATE(gr_dum)
+ end if
+
+!Symmetrize dynamical matrix explicitly for given space group:
+
+!Symmetrize local part of the dynamical matrix dyfrlo:
+ ABI_ALLOCATE(dyfrsym_tmp,(1,3,3,natom,1))
+ ABI_ALLOCATE(dyfrlo_tmp2,(1,3,3,natom,1))
+ dyfrsym_tmp(1,:,:,:,1)=dyfrlo(:,:,:)
+ call dfpt_sydy(1,dyfrsym_tmp,indsym,natom,0,nsym,qphon,dyfrlo_tmp2,symq,symrec)
+ dyfrlo(:,:,:)=dyfrlo_tmp2(1,:,:,:,1)
+ if (do_final_sym) then
+   dyfrsym_tmp(1,:,:,:,1)=dyfrxc(:,:,:)
+   call dfpt_sydy(1,dyfrsym_tmp,indsym,natom,0,nsym,qphon,dyfrlo_tmp2,symq,symrec)
+   dyfrxc(:,:,:)=dyfrlo_tmp2(1,:,:,:,1)
+ end if
+ ABI_DEALLOCATE(dyfrsym_tmp)
+ ABI_DEALLOCATE(dyfrlo_tmp2)
+
+!Symmetrize nonlocal part of the dynamical matrix dyfrnl:
+!atindx1 is used to reestablish the correct order of atoms
+ if (dyfr_nondiag==0) then
+   ABI_ALLOCATE(dyfrsym_tmp,(dyfr_cplex,3,3,natom,1))
+   do iatom=1,natom
+     dyfrsym_tmp(:,:,:,atindx1(iatom),1)=dyfrnl(:,:,:,iatom,1)
+   end do
+ else
+   ABI_ALLOCATE(dyfrsym_tmp,(dyfr_cplex,3,3,natom,natom))
+   do jatom=1,natom
+     do iatom=1,natom
+       dyfrsym_tmp(:,:,:,atindx1(iatom),atindx1(jatom))=dyfrnl(:,:,:,iatom,jatom)
+     end do
+   end do
+ end if
+ call dfpt_sydy(dyfr_cplex,dyfrsym_tmp,indsym,natom,dyfr_nondiag,nsym,qphon,dyfrnl,symq,symrec)
+ ABI_DEALLOCATE(dyfrsym_tmp)
+
+!Collect local, nl xc core, and non-local part
+!of the frozen wf dynamical matrix.
+ dyfrwf(:,:,:,:,:)=dyfrnl(:,:,:,:,:)
+ if (dyfr_nondiag==0) then
+   dyfrwf(1,:,:,:,1)=dyfrwf(1,:,:,:,1)+dyfrlo(:,:,:)+dyfrxc(:,:,:)
+ else
+   do iatom=1,natom
+     dyfrwf(1,:,:,iatom,iatom)=dyfrwf(1,:,:,iatom,iatom)+dyfrlo(:,:,iatom)+dyfrxc(:,:,iatom)
+   end do
+ end if
+
+end subroutine dfpt_dyfro
+!!***
+
+!!****f* ABINIT/dfpt_dyxc1
+!! NAME
+!! dfpt_dyxc1
+!!
+!! FUNCTION
+!! Compute 2nd-order non-linear xc core-correction (part1) to the dynamical matrix.
+!! In case of derivative with respect to k or electric field perturbation,
+!! the 1st-order local potential vanishes.
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms
+!!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
+!!  gsqcut=cutoff value on G**2 for sphere inside fft box.
+!!  ixc= choice of exchange-correlation scheme
+!!  kxc(nfft,nkxc)=first-order derivative of the xc potential
+!!    if (nkxc=1) LDA kxc(:,1)= d2Exc/drho2
+!!    if (nkxc=2) LDA kxc(:,1)= d2Exc/drho_up drho_up
+!!                    kxc(:,2)= d2Exc/drho_up drho_dn
+!!                    kxc(:,3)= d2Exc/drho_dn drho_dn
+!!    if (nkxc=7) GGA kxc(:,1)= d2Exc/drho2
+!!                    kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
+!!                    kxc(:,3)= 1/|grad(rho)| d2Exc/d|grad(rho)| drho
+!!                    kxc(:,4)= 1/|grad(rho)| * d/d|grad(rho)| ( 1/|grad(rho)| dExc/d|grad(rho)| )
+!!                    kxc(:,5)= gradx(rho)
+!!                    kxc(:,6)= grady(rho)
+!!                    kxc(:,7)= gradz(rho)
+!!    if (nkxc=19) spin-polarized GGA case (same as nkxc=7 with up and down components)
+!!  mgfft=maximum size of 1D FFTs
+!!  mpert=maximum number of ipert
+!!  mpi_enreg=information about MPI parallelization
+!!  mqgrid=number of grid pts in q array for f(q) spline.
+!!  natom=number of atoms in cell.
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(3)=fft grid dimensions.
+!!  nkxc=second dimension of the kxc array
+!!   (=1 for non-spin-polarized case, =3 for spin-polarized case)
+!!  nspden=number of spin-density components
+!!  ntypat=number of types of atoms in cell.
+!!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information
+!!  qgrid(mqgrid)=q grid for spline from 0 to qmax.
+!!  qphon(3)=wavevector of the phonon
+!!  rfdir(3)=array that define the directions of perturbations
+!!  rfpert(mpert)=array defining the type of perturbations that have to be computed
+!!  rprimd(3,3)=dimensional primitive translation vectors (bohr)
+!!  timrev=1 if time-reversal preserves the q wavevector; 0 otherwise.
+!!  typat(natom)=integer type for each atom in cell
+!!  ucvol=unit cell volume (bohr**3).
+!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
+!!  xccc1d(n1xccc,6,ntypat)=1D core charge function and five derivatives,
+!!   for each type of atom, from psp
+!!  xred(3,natom)=fractional coordinates for atoms in unit cell
+!!
+!! OUTPUT
+!!  blkflgfrx1(3,natom,3,natom)=flag to indicate whether an element has been computed or not
+!!  dyfrx1(2,3,natom,3,natom)=2nd-order non-linear xc
+!!    core-correction (part1) part of the dynamical matrix
+!!
+!! PARENTS
+!!      respfn
+!!
+!! CHILDREN
+!!      dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll,dotprod_vn,timab
+!!      xmpi_sum
+!!
+!! SOURCE
+
+subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,mpi_enreg,mqgrid,&
+&          natom,nfft,ngfft,nkxc,nspden,ntypat,n1xccc,paral_kgb,psps,pawtab,&
+&          ph1d,qgrid,qphon,rfdir,rfpert,rprimd,timrev,typat,ucvol,usepaw,xcccrc,xccc1d,xred,rhor,vxc)
+
+ use m_cgtools,       only : dotprod_vn
+ use m_atm2fft,       only : dfpt_atm2fft
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_dyxc1'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ixc,mgfft,mpert,mqgrid,n1xccc,natom,nfft,nkxc,nspden,ntypat
+ integer,intent(in) :: paral_kgb,timrev,usepaw
+ real(dp),intent(in) :: gsqcut,ucvol
+ type(pseudopotential_type),intent(in) :: psps
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: atindx(natom),ngfft(18),rfdir(3),rfpert(mpert),typat(natom)
+ real(dp),intent(in) :: gmet(3,3),kxc(nfft,nkxc)
+ real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid),qphon(3)
+ real(dp),intent(in) :: rprimd(3,3),xccc1d(n1xccc,6,ntypat),xcccrc(ntypat)
+ real(dp),intent(in) :: xred(3,natom)
+ integer,intent(out) :: blkflgfrx1(3,natom,3,natom)
+ real(dp),intent(out) :: dyfrx1(2,3,natom,3,natom)
+ type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
+!optional
+ real(dp),optional,intent(in) :: rhor(nfft,nspden)
+ real(dp),optional,intent(in) :: vxc(nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: cplex,iat1,iatom1,iatom2,idir1,idir2,ierr,ifft,my_natom,comm_atom
+ integer :: n1,n2,n3,n3xccc,nfftot,option,upperdir,optnc
+ logical :: paral_atom
+ real(dp) :: valuei,valuer
+!arrays
+ integer,pointer :: my_atmtab(:)
+ real(dp) :: tsec(2),gprimd_dummy(3,3)
+ real(dp) :: dum_nhat(0)
+ real(dp),allocatable :: rhor1(:,:),vxc10(:,:),xcccwk1(:),xcccwk2(:)
+! *********************************************************************
+
+ call timab(182,1,tsec)
+
+ n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
+ nfftot=n1*n2*n3
+
+!Set up parallelism over atoms
+ my_natom=mpi_enreg%my_natom
+ my_atmtab=>mpi_enreg%my_atmtab
+ comm_atom=mpi_enreg%comm_atom
+ paral_atom=(my_natom/=natom)
+
+!Zero out the output arrays :
+ blkflgfrx1(:,:,:,:)=0
+ dyfrx1(:,:,:,:,:)=zero
+
+ cplex=2-timrev ; n3xccc=nfft
+ ABI_ALLOCATE(vxc10,(cplex*nfft,nspden))
+
+
+!Loop on the perturbation j1
+ do iat1=1,my_natom
+   iatom1=iat1; if(paral_atom)iatom1=my_atmtab(iat1)
+   do idir1=1,3
+
+!    Compute the derivative of the core charge with respect to j1
+     ABI_ALLOCATE(xcccwk1,(cplex*n3xccc))
+
+!    PAW or NC with nc_xccc_gspace: 1st-order core charge in reciprocal space
+     if (usepaw==1 .or. psps%nc_xccc_gspace==1) then
+       call dfpt_atm2fft(atindx,cplex,gmet,gprimd_dummy,gsqcut,idir1,iatom1,&
+&       mgfft,mqgrid,natom,1,nfft,ngfft,ntypat,ph1d,qgrid,&
+&       qphon,typat,ucvol,usepaw,xred,psps,pawtab,atmrhor1=xcccwk1,optn2_in=1)
+
+!      Norm-conserving psp: 1st-order core charge in real space
+     else
+       call dfpt_mkcore(cplex,idir1,iatom1,natom,ntypat,n1,n1xccc,&
+&       n2,n3,qphon,rprimd,typat,ucvol,xcccrc,xccc1d,xcccwk1,xred)
+     end if
+
+!    Compute the corresponding potential
+     option=0
+     ABI_ALLOCATE(rhor1,(cplex*nfft,nspden))
+     rhor1=zero
+!FR SPr EB Non-collinear magnetism
+     if (nspden==4.and.present(rhor).and.present(vxc)) then
+       optnc=1
+       call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,dum_nhat,0,nkxc,&
+&       nspden,n3xccc,optnc,option,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc,vxc10,xcccwk1)
+     else
+       call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
+&       nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
+     end if
+     ABI_DEALLOCATE(rhor1)
+     ABI_DEALLOCATE(xcccwk1)
+
+!    vxc10 will couple with xcccwk2, that behaves like
+!    a total density (ispden=1). Only the spin-up + spin-down
+!    average of vxc10 is needed.
+     if (nspden/=1)then
+       do ifft=1,cplex*nfft
+         vxc10(ifft,1)=(vxc10(ifft,1)+vxc10(ifft,2))*half
+       end do
+     end if
+
+!    Loop on the perturbation j2
+     do iatom2=1,iatom1
+       upperdir=3
+       if(iatom1==iatom2)upperdir=idir1
+       do idir2=1,upperdir
+         if( (rfpert(iatom1)==1 .and. rfdir(idir1) == 1) .or. &
+&         (rfpert(iatom2)==1 .and. rfdir(idir2) == 1)    )then
+
+!          Compute the derivative of the core charge with respect to j2
+           ABI_ALLOCATE(xcccwk2,(cplex*n3xccc))
+
+!          PAW or NC with nc_xccc_gspace: 1st-order core charge in reciprocal space
+           if (usepaw==1 .or. psps%nc_xccc_gspace==1) then
+             call dfpt_atm2fft(atindx,cplex,gmet,gprimd_dummy,gsqcut,idir2,iatom2,&
+&             mgfft,mqgrid,natom,1,nfft,ngfft,ntypat,ph1d,qgrid,&
+&             qphon,typat,ucvol,usepaw,xred,psps,pawtab,atmrhor1=xcccwk2,optn2_in=1)
+
+!            Norm-conserving psp: 1st-order core charge in real space
+           else
+             call dfpt_mkcore(cplex,idir2,iatom2,natom,ntypat,n1,n1xccc,&
+&             n2,n3,qphon,rprimd,typat,ucvol,xcccrc,xccc1d,xcccwk2,xred)
+           end if
+
+!          Get the matrix element j1,j2
+
+           call dotprod_vn(cplex,xcccwk2,valuer,valuei,nfft,nfftot,1,2,vxc10,ucvol)
+
+           ABI_DEALLOCATE(xcccwk2)
+
+           dyfrx1(1,idir1,iatom1,idir2,iatom2)= valuer
+           dyfrx1(2,idir1,iatom1,idir2,iatom2)= valuei
+           dyfrx1(1,idir2,iatom2,idir1,iatom1)= valuer
+           dyfrx1(2,idir2,iatom2,idir1,iatom1)=-valuei
+           blkflgfrx1(idir1,iatom1,idir2,iatom2)=1
+           blkflgfrx1(idir2,iatom2,idir1,iatom1)=1
+         end if
+       end do
+     end do
+   end do
+ end do
+
+ if (paral_atom) then
+   call timab(48,1,tsec)
+   call xmpi_sum(dyfrx1,comm_atom,ierr)
+   call xmpi_sum(blkflgfrx1,comm_atom,ierr)
+   call timab(48,2,tsec)
+ end if
+
+ ABI_DEALLOCATE(vxc10)
+
+ call timab(182,2,tsec)
+
+end subroutine dfpt_dyxc1
 !!***
 
 end module m_respfn_driver
