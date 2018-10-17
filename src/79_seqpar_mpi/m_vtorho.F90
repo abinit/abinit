@@ -231,7 +231,7 @@ contains
 !!  energies <type(energies_type)>=storage for energies computed here :
 !!   | e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
 !!   | e_kinetic=kinetic energy part of total energy
-!!   | e_nlpsp_vfock=nonlocal pseudopotential part of total energy
+!!   | e_nlpsp_vfock=nonlocal psp + potential Fock ACE part of total energy
 !!   | e_fermie=fermi energy (Hartree)
 !!  occ(mband*nkpt*nsppol)=occupation number for each band for each k.
 !!      (input if insulator - occopt<3 - ; output if metallic)

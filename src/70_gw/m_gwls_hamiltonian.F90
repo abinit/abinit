@@ -1245,7 +1245,7 @@ real(dp), intent(in), optional :: cte
 !Hpsik,            O
 !gsc,              D              (output for PAW : <G|S|C>)
 !gs_hamk,          T
-!gvnlxc,            D              (<G|Vnonlocal|C>)
+!gvnlxc,            D              (<G|Vnonlocal+VFockACE|C>)
 !eshift,           I              (<G|H-eshift.S|C>)
 !mpi_enreg,        T
 !ndat,             Fixed to 1     (# of FFTs to do in //)

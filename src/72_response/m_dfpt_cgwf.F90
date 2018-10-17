@@ -117,7 +117,7 @@ contains
 !!                     eig1(:,ii,jj)=<C0 ii|H1|C0 jj> for norm-conserving psps
 !!                     eig1(:,ii,jj)=<C0 ii|H1-(eig0_k+eig0_k+q)/2.S(1)|C0 jj> for PAW
 !!  ghc(2,npw1*nspinor)=<G|H0-eig0_k.I|C1 band,k> (NCPP) or <G|H0-eig0_k.S0|C1 band,k> (PAW)
-!!  gvnlxc(2,npw1*nspinor)=<G|Vnl|C1 band,k>
+!!  gvnlxc(2,npw1*nspinor)=<G|Vnl+VFockACE|C1 band,k>
 !!  gvnlx1(2,npw1*nspinor)=  part of <G|K1+Vnl1|C0 band,k> not depending on VHxc1           (NCPP)
 !!                       or part of <G|K1+Vnl1-eig0k.S1|C0 band,k> not depending on VHxc1 (PAW)
 !!  resid=wf residual for current band

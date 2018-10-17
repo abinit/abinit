@@ -62,7 +62,7 @@ contains
 !! FUNCTION
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !! Result is put in array ghc.
-!! <G|Vnonlocal|C> is also returned in gvnlxc.
+!! <G|Vnonlocal + VfockACE|C> is also returned in gvnlxc if either NLoc NCPP or FockACE.
 !! if required, <G|S|C> is returned in gsc (S=overlap - PAW only)
 !! Note that left and right k points can be different, i.e. ghc=<k^prime+G|H|C_k>.
 !!
@@ -107,8 +107,8 @@ contains
 !! OUTPUT
 !!  ghc(2,npw*my_nspinor*ndat)=matrix elements <G|H|C> (if sij_opt>=0)
 !!                                          or <G|H-lambda.S|C> (if sij_opt=-1)
-!!  gvnlxc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal|C> (if sij_opt>=0)
-!!                                            or <G|Vnonlocal-lambda.S|C> (if sij_opt=-1)
+!!  gvnlxc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal+VFockACE|C> (if sij_opt>=0)
+!!                                            or <G|Vnonlocal+VFockACE-lambda.S|C> (if sij_opt=-1)
 !!  if (sij_opt=1)
 !!    gsc(2,npw*my_nspinor*ndat)=matrix elements <G|S|C> (S=overlap).
 !!

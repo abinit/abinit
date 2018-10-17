@@ -502,7 +502,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        eeig0_k(iband)=-energy_factor*(eig0_k(iband)- (dtset%dfpt_sciss) )*scprod
 
 !      Compute nonlocal psp contributions to nonlocal energy:
-!      <G|Vnl|C1nk(perp)> is contained in gvnlxc (with cwavef)
+!      <G|Vnl+VFockACE|C1nk(perp)> is contained in gvnlxc (with cwavef)
        call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gvnlxc,mpi_enreg%me_g0,&
 &       mpi_enreg%comm_spinorfft)
        enl0_k(iband)=energy_factor*scprod

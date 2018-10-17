@@ -125,7 +125,7 @@ contains
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
 !!  ==== if (gs_hamk%usepaw==0) ====
-!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential part of total energy, at this k-point
+!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential + potential Fock ACE part of total energy, at this k-point
 !!  ==== if (gs_hamk%usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
@@ -822,7 +822,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,message,'PERS')
  end if
 
-!Norm-conserving only: Compute nonlocal part of total energy : rotate subvnlx
+!Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy : rotate subvnlx
  if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))

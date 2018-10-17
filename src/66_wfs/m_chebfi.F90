@@ -79,7 +79,7 @@ contains
 !!  If gs_hamk%usepaw==1:
 !!    gsc(2,*)=<g|s|c> matrix elements (s=overlap)
 !!  If gs_hamk%usepaw==0
-!!    enl(nband)=contribution from each band to nonlocal pseudopotential part of total energy, at this k-point
+!!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part of total energy, at this k-point
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
@@ -112,7 +112,7 @@ contains
 !!
 !! SOURCE
 
-subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
+subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -131,7 +131,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  real(dp),intent(inout), target :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband)
  real(dp),intent(in) :: kinpw(npw)
  real(dp),intent(out) :: resid(nband)
- real(dp),intent(out) :: enl(nband*(1-gs_hamk%usepaw))
+ real(dp),intent(out) :: enlx(nband*(1-gs_hamk%usepaw))
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
@@ -580,7 +580,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 &   resid_vec,mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 
    if(.not. paw) then
-     call dotprod_g(enl(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
+     call dotprod_g(enlx(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
 &     gvnlxc(:, shift+1:shift+npw_filter*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
  end do

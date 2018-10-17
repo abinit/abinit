@@ -73,7 +73,7 @@ contains
 !!  energies <type(energies_type)>=storage for energies computed here :
 !!   | e_kinetic(OUT)=kinetic energy part of total energy
 !!   | e_localpsp(OUT)=local pseudopotential part of total energy
-!!   | e_nlpsp_vfock(OUT)=nonlocal pseudopotential part of total energy
+!!   | e_nlpsp_vfock(OUT)=nonlocal psp + potential Fock ACE part of total energy
 !!  residm=max value for gradient in the minimisation process.
 !!  rhor(dtset%nfft)=electron density in r space
 !!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.

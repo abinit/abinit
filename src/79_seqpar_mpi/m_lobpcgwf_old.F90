@@ -74,7 +74,7 @@ contains
 !!  subham(nband_k*(nband_k+1))=the matrix elements of h
 !!  If gs_hamk%usepaw==0:
 !!    gsc(2,mgsc)=<g|s|c> matrix elements (s=overlap)
-!!    totvnlx(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl
+!!    totvnlx(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl+vfockACE
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions
@@ -1169,7 +1169,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
    end if
 
-!  The Vnl part of the Hamiltonian is no more stored in the packed form such as it was the case for subvnlx(:).
+!  The Vnl+VFockACE part of the Hamiltonian is no more stored in the packed form such as it was the case for subvnlx(:).
 !  Now, the full matrix is stored in totvnlx(:,:). This trick permits:
 !  1) to avoid the reconstruction of the total matrix in vtowfk.F90 (double loop over bands)
 !  2) to use two optimized matrix-matrix blas routine for general (in lobpcgccwf.F90) or hermitian (in vtowfk.F90)

@@ -119,7 +119,8 @@ contains
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in sthe WFs subspace
 !!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
-!!  subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian expressed in sthe WFs subspace
+!!  subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
+!!   expressed in the WFs subspace
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)
@@ -1853,7 +1854,8 @@ end subroutine etheta
 !!  isubo=index of current state in array subovl
 !!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
-!!  subvnlx(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian expressed in the WFs subspace
+!!  subvnlx(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
+!!   expressed in the WFs subspace
 !!
 !! PARENTS
 !!      cgwf

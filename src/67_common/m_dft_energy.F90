@@ -176,7 +176,7 @@ contains
 !!   | e_eigenvalues(OUT)=Sum of the eigenvalues - Band energy (Hartree)
 !!   | e_hartree(OUT)=Hartree part of total energy (hartree units)
 !!   | e_kinetic(OUT)=kinetic energy part of total energy.
-!!   | e_nlpsp_vfock(OUT)=nonlocal pseudopotential part of total energy.
+!!   | e_nlpsp_vfock(OUT)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(OUT)=exchange-correlation energy (hartree)
 !!  ==== if optene==0, 2 or 3
 !!   | e_localpsp(OUT)=local psp energy (hartree)

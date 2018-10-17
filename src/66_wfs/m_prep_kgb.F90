@@ -69,7 +69,7 @@ contains
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  cwavef(2,npw*my_nspinor*blocksize)=planewave coefficients of wavefunction.
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
-!!  gvnlxc=matrix elements <G|Vnonlocal|C>
+!!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!         Typically lambda is the eigenvalue (or its guess)
 !!  mpi_enreg=informations about mpi parallelization
@@ -557,7 +557,7 @@ end subroutine prep_getghc
 !!  blocksize= size of block for FFT
 !!  cpopt=flag defining the status of cwaveprj=<Proj_i|Cnk> scalars (see below, side effects)
 !!  cwavef(2,npw*my_nspinor*blocksize)=planewave coefficients of wavefunction.
-!!  gvnlxc=matrix elements <G|Vnonlocal|C>
+!!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  hamk <type(gs_hamiltonian_type)>=data defining the Hamiltonian at a given k (NL part involved here)
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
 !!                        - k point direction in the case (choice=5,signs=2)
@@ -888,7 +888,7 @@ end subroutine prep_nonlop
 !!  blocksize= size of block for FFT
 !!  cwavef(2,npw*ndat)=planewave coefficients of wavefunction (one spinorial component?).
 !!  dtfil <type(datafiles_type)>=variables related to files
-!!  gvnlxc=matrix elements <G|Vnonlocal|C>
+!!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!        =if useylm=0, max number of (l,n)   comp. over all type of psps
