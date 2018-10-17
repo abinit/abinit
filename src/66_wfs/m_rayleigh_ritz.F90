@@ -340,7 +340,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nba
  ! Locals
  integer :: blocksize,nbproc,iproc,ierr,cplx,vectsize
  integer :: buffsize_iproc(2), coords_iproc(2), grid_dims(2)
- real(dp) :: cg_new(2,npw*nspinor*nband),gsc_or_vnlc_new(2,npw*nspinor*nband),ghc_new(2,npw*nspinor*nband)
+ real(dp) :: cg_new(2,npw*nspinor*nband),gsc_or_vnlxc_new(2,npw*nspinor*nband),ghc_new(2,npw*nspinor*nband)
  real(dp), allocatable :: ham_iproc(:,:), ovl_iproc(:,:), evec_iproc(:,:), left_temp(:,:), right_temp(:,:)
  real(dp) :: tsec(2)
  type(matrix_scalapack) :: sca_ham, sca_ovl, sca_evec
@@ -493,7 +493,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nba
  !======================================================================================================
  call timab(timer_rotation, 1, tsec)
  cg_new = zero
- gsc_or_vnlc_new = zero
+ gsc_or_vnlxc_new = zero
  ghc_new = zero
  do iproc=0,nbproc-1
    ! Compute the contribution to the rotated matrices from this block
@@ -549,7 +549,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nba
    end if
    call abi_xgemm('n','n',vectsize,buffsize_iproc(2),buffsize_iproc(1),cone,left_temp,vectsize,&
 &   evec_iproc, buffsize_iproc(1), czero, right_temp, vectsize, x_cplx=cplx)
-   call from_block_cyclic_to_mat(gsc_or_vnlc_new, npw*nspinor, nband, right_temp, &
+   call from_block_cyclic_to_mat(gsc_or_vnlxc_new, npw*nspinor, nband, right_temp, &
 &   buffsize_iproc(2), blocksize, coords_iproc(2), grid_dims(2))
 
    ABI_DEALLOCATE(evec_iproc)
@@ -561,9 +561,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nba
  cg = cg_new
  ghc = ghc_new
  if(usepaw == 1) then
-   gsc = gsc_or_vnlc_new
+   gsc = gsc_or_vnlxc_new
  else
-   gvnlxc = gsc_or_vnlc_new
+   gvnlxc = gsc_or_vnlxc_new
  end if
  call timab(timer_rotation, 2, tsec)
 
