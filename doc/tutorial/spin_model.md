@@ -1,5 +1,5 @@
 ---
-authors: xuhe
+authors: xuhe, NH
 ---
 
 # Spin model in Multibinit
@@ -63,11 +63,11 @@ where $m_i$ denotes the magnetic moment of site $i$, and $\vec{H}$ is the magnet
 
 One way to calculate the Heisenberg model parameters is to use the spin force theorem (see [[cite:Liechtenstein1983]], [[cite:Katsnelson2000]]), which take rotations of localized spins as perturbations. In Abinit, the Hamiltonian uses plane waves as a basis set, thus the localized spin is not directly accessible. We can construct localized Wannier functions rewrite the Hamiltonian in the Wannier basis. Then, the exchange parameters can be calculated from this Hamiltonian ( [[cite:Korotin2015]] ). 
 
-For building the Wannier function Hamiltonian from Abinit, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) can also be used. Then, the  [TB2J](https://gitlab.abinit.org/xuhe/TB2J) package can be used to get the Heisenberg model parameters and generate the input model for Multibinit. 
+For building the Wannier function Hamiltonian from Abinit, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) can also be used. Then, the  [TB2J](https://gitlab.abinit.org/xuhe/TB2J) package can be used to get the Heisenberg model parameters and generate the input model for Multibinit. Please read [TB2J tutorial](https://gitlab.abinit.org/xuhe/TB2J/blob/master/README.md) to see how to use it.
 
 ## 3. Run spin dynamics
 
-### Basic
+### Basic: how to use Multibinit to run spin dynamics
 
 Now that we have the spin model xml file, we can run a spin dynamics calculation with multibinit.  Example input files can be found at ~abinit/tests/tutomultibinit/Input/tmulti5_1.* .  There are three files: 
 
@@ -128,11 +128,25 @@ In the .out file, lines below can be found, which gives a overview of the evolut
 ......
 ```
 
-Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturate magnetic moment . If all the spins align to the wavevector of ($\vec{q}$) [[multibinit:spin_qpoint]], this value would be 1.0. And it would deviate from 1.0 with thermo fluctuation.
+Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturate magnetic moment . If all the spins align to the wave-vector of ($\vec{q}$) [[multibinit:spin_qpoint]], this value would be 1.0. And it would deviate from 1.0 with thermo fluctuation.
 
-At the end of the run, there is a summary of the 
+At the end of the run, there is a summary of the calculation:
 
-In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using postprocessing tools. 
+<!--TODO: add more to the summary. What is useful? -->
+
+```
+      Summary of spin dynamics:
+     At the end of the run, the average spin at each sublattice is
+                      ID:       <M_i>(x)  <M_i>(y)  <M_i>(z) ||<M_i>||
+         Sublattice 0001:       -0.26146   0.09858   0.33257   0.43437
+
+```
+
+
+
+ For structures with more than one magnetic sites (sublattices) in the unitcell, several lines will be printed. Then we can see if how the spins of them are aligned. 
+
+In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using post-processing tools.  <!-- TODO: add postprocessing.-->
 
 It is essential to choose the parameters so that the calculation result is meaningful. 
 
@@ -144,52 +158,77 @@ It is essential to choose the parameters so that the calculation result is meani
 
   Due to the periodic boundary condition, the spins between periods could be correlated with each other, which could lead to artificially higher phase transition temperature, etc. A small box is also not enough for sampling of some quantities and the To avoid this, it is required to test if the quantities of interest is converged with the supercell size.
 
-  For anti-ferromagnetic structure, or more generally, structure with non-zero wave vector, the box size should allow the spins to align with the q-vector, i.e. ($\vec{q}\cdot \vec{n}$) should be integers. For some structure, it is not easy or sometimes impossible to find such $\vec{n}$. In these cases, a large box is usually required.  
+  For anti-ferromagnetic structure, or more generally, structure with non-zero wave vector, the box size should allow the spins to fit to the q-vector, i.e. ($\vec{q}\cdot \vec{n}$) should be integers. For some structure, it is not easy or sometimes impossible to find such $\vec{n}$. In these cases, a large box is usually required.  
 
 * Total time ([[multibinit: spin_ntime]])
 
-  The total should allow the spins to relax to the equilibrium state, and in order to calculate some observables, longer time (e.g. 10x relaxation time) are required so enough samples can be generated.  To see how much time is needed for the system to get to the equilibrium state, we can plot the magnetic moment as function of time. It should be noted that it usually take much longer near the phase transition temperature so it is important to test the relaxation time there.
+  The total time should at least allow the spins to relax to the equilibrium state, and in order to calculate some observables, longer time (e.g. 10x relaxation time) are required so enough samples can be generated.  To see how much time is needed for the system to get to the equilibrium state, we can plot the magnetic moment as function of time. It should be noted that it usually take much longer near the phase transition temperature so it is important to test the relaxation time there.
 
 ### An real world examle: $LaFeO_3$ 
 
-A most common usage of spin dynamics is to calculate the quantities (e.g. magnetic moments, susceptibility, specific heat ) as functions of temperature and find the phase transition temperature. By setting [[multibinit:spin_var_temperature]] to 1 and the starting, ending temperature, and number of steps as follows, a series of calculation will be carried out. (See ~abinit/tests/tutomultibinit/Input/tmulti5_2.* )
+A most common usage of spin dynamics is to calculate the quantities (e.g. magnetic moments, susceptibility, specific heat ) as functions of temperature and find the phase transition temperature. By setting [[multibinit:spin_var_temperature]] to 1 and the starting, ending temperature, and number of steps as follows, a series of calculation will be carried out. (See e.g. ~abinit/tests/tutomultibinit/Input/tmulti5_2.* )
 
-Note that some of the parameters in the input file are set to "bad" values. Let's try to tune them to make a meaningful calculation.
+(*Note that some of the parameters in the input file are set to "bad" values. Let's try to tune them to make a meaningful calculation.* )
 
 ```
 dynamics =  0    ! disable molecular dynamics
-ncell =   6 6 6  ! size of supercell. Is it too small
+ncell =   6 6 6  ! size of supercell. Is it too small?
 spin_dynamics=1  ! run spin dynamics
 spin_ntime =20000 ! number of steps. Is is enough?
-spin_nctime=100   
+spin_nctime=100   ! 
 spin_dt=1e-16 s   ! time step. Is it too large?
-spin_init_state = 2  ! initial: ferromagnetic magnetic state
+spin_init_state = 2  ! initial: ferromagnetic magnetic state, problematic? 
 
 spin_var_temperature=1   ! variable temperature calculation
 spin_temperature_start=0 ! starting point of T
 spin_temperature_end=500 ! end point of T. Small ?
-spin_temperature_nstep=6 ! number of temperature step.
+spin_temperature_nstep=6 ! number of temperature step, is it enough?
 
 spin_sia_add = 1         ! Add an single ion anistropy (SIA) to all ions.
 spin_sia_k1amp = 1e-22   ! amplitude of SIA. Is it large or small?
 spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA.
+
+spin_qpoint = 0.0 0.0 0.0  ! wave vector of spin order. 
 ```
 
-After the run, the trajectories for each temperature will be written into the T0001_spin_hist.nc to T0031_spin_hist.nc files. 
+After the run, the trajectories for each temperature will be written into the \*\_T0001_spin_hist.nc to \*\_T0006_spin_hist.nc files if spin_temperature_step=6. 
 
-There are several ways to find the critical temperature. The most natural way is to use the M-T curve. However, there are some difficulties due to that the change of mangetic moment is not abrupt, and it's sensitive to box size. There is divegences of  specific heat and magnetic susceptibility, which could be better for finding $T_c$. Another quantity is Binder cumulant, defined as $U_4= 1.0- \frac{<m^4>}{3 <m^2> }$. It is less sensitive to the box size and the change is abrupt. 
+There are several ways to find the critical temperature. The most natural way is to use the M-T curve. However, there are some difficulties due to that the change of magnetic moment is not abrupt, and it's sensitive to box size. There are divergences of  specific heat and magnetic susceptibility, which could be better for finding $T_c$. The specific heat has the advantage taht we do not need to know the magnetic order to calculate it. Another quantity is Binder cumulant, defined as $U_4= 1.0- \frac{<m^4>}{3 <m^2> }$, which is less sensitive to the box size and the change is abrupt. 
 
+If the input parameters are well tuned.
+
+
+
+<!-- TODO: tune the parameter so the lines are smooth! -->
+
+
+
+![tmulti5_2](spin_model_assets/tmulti5_2.png)
+
+<!-- TODO: add something about SIA -->
+
+## 5. Postprocessing
+
+<!-- TODO: agate --> 
+
+### Tips:
+
+* Antiferromanetic/ spin spiral structure.
+
+  In the example above, the magnetic structure is anti-ferromagnetic,  where the unitcell is a multiple of the spin period. Sometimes the unitcell used does not contains the full period of spin, e.g. in a simple cubic AFM lattice with only one atom in the primitive cell.  We can use the magnetic wave vector so that the staggered magnetic moment can be calculated. This is also useful for spin spiral structures, etc. 
+
+  ```
+  spin_qpoint = 0.5 0.5 0.5
+  ```
 
 
 ##### To add
 
-- observables: magnetization versus temperature, determine Curie temperature
 - spectral function
-- magnetic susceptibility
 - comparison with experiments?
-- alternating spins for antiferromagnets
 
-## 5. Postprocessing
+
+## 
 
 
 
