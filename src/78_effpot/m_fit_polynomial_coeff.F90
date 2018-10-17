@@ -1904,11 +1904,11 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
  etmp     = zero
  ftmp     = zero
  stmp     = zero
- efact = one/(ntime)
 
 !Compute factors
  ffact = one/(3*natom*ntime)
  sfact = one/(6*ntime)
+ efact = one/(ntime)
 
 ! loop over the configuration
  do itime=1,ntime
