@@ -399,12 +399,6 @@ end subroutine effective_potential_init
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine effective_potential_initmpi(eff_pot,comm)
 
 
@@ -3119,14 +3113,6 @@ end function effective_potential_compare
 
 ! subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,ncell,nph1l,option,qph1l)
 
-
-! !This section has been created automatically by the script Abilint (TD).
-! !Do not modify the following lines by hand.
-! #undef ABI_FUNC
-! #define ABI_FUNC 'effective_potential_effpot2ddb'
-!  use interfaces_32_util
-!  use interfaces_41_geometry
-! !End of the abilint section
 
 !   implicit none
 
