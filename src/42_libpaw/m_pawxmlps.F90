@@ -3006,7 +3006,7 @@ end subroutine paw_setup_copy
  endfile=.false.
  LIBPAW_DATATYPE_ALLOCATE(gridwf,(nphicor))
  LIBPAW_DATATYPE_ALLOCATE(statewf,(nphicor))
- maxmeshz=maxval(radmesh(:)%mesh_size)
+ maxmeshz=pawrad%mesh_size
  LIBPAW_ALLOCATE(phitmp,(nphicor,maxmeshz))
 
  do while (.not.endfile)
@@ -3068,11 +3068,14 @@ end subroutine paw_setup_copy
        LIBPAW_DEALLOCATE(work)
        call pawrad_free(tmpmesh)
      else
+       call pawrad_init(tmpmesh,mesh_size=maxmeshz,mesh_type=radmesh(imeshae)%mesh_type,&
+&                 rstep=radmesh(imeshae)%rstep,lstep=radmesh(imeshae)%lstep)
        shft=mesh_shift(imeshae)
        phi_cor(1+shft:radmesh(imeshae)%mesh_size,ii)=phitmp(ii,1:radmesh(imeshae)%mesh_size-shft)
-       phi_cor(1+shft:maxmeshz,ii)=phi_cor(1+shft:maxmeshz,ii)*radmesh(imeshae)%rad(1+shft:maxmeshz)
+       phi_cor(1+shft:maxmeshz,ii)=phi_cor(1+shft:maxmeshz,ii)*tmpmesh%rad(1+shft:maxmeshz)
        if (radmesh(imeshae)%mesh_size<maxmeshz) phi_cor(radmesh(imeshae)%mesh_size+1:maxmeshz,ii)=zero
        if (shft==1) phi_cor(1,ii)=zero
+       call pawrad_free(tmpmesh)
      end if
    end do
  end if
