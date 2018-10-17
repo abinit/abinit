@@ -487,15 +487,11 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  self%nq_k = self%lgk%nibz
 
  ! get dg%bz --> self%lgrp%ibz
- if (allocated(eph_doublegrid%bz2lgkibz)) then
-   ABI_FREE(eph_doublegrid%bz2lgkibz)
- end if
+ ABI_SFREE(eph_doublegrid%bz2lgkibz)
  ABI_MALLOC(eph_doublegrid%bz2lgkibz,(eph_doublegrid%dense_nbz))
- ABI_MALLOC(mapping,(eph_doublegrid%dense_nbz,3))
-
  call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
                              cryst%symrel, cryst%nsym, &
-                             eph_doublegrid%bz2lgkibz, has_timrev=1, mapping=mapping)
+                             eph_doublegrid%bz2lgkibz, has_timrev=1)
 
 #if 0
    ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
@@ -547,9 +543,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  enddo
 
  ! get self%lgrp%ibz --> dg%bz --> self%ibz
- if (allocated(self%lgk2ibz)) then
-   ABI_FREE(self%lgk2ibz)
- end if
+ ABI_SFREE(self%lgk2ibz)
  ABI_MALLOC(self%lgk2ibz, (self%nq_k))
  do ii=1,self%nq_k
    ik_idx = lgkibz2bz(ii)
@@ -591,16 +585,16 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ik_idx = bz2lgkibzkq(ii)
    lgkibz2bz(ik_idx) = ii
  enddo
+ ABI_FREE(bz2lgkibzkq)
 
  ! get self%lgrp%ibz (k+q) --> dg%bz --> self%ibz
- if (allocated(self%kq2ibz)) then
-   ABI_FREE(self%kq2ibz)
- end if
+ ABI_SFREE(self%kq2ibz)
  ABI_MALLOC(self%kq2ibz, (self%nq_k))
  do ii=1,self%nq_k
    ik_idx = lgkibz2bz(ii)
    self%kq2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
  enddo
+ ABI_FREE(lgkibz2bz)
 
 #if 0
    ! Get mapping (k + q) --> initial IBZ.
@@ -683,7 +677,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    MSG_ERROR(errorstring)
  end if
  ABI_FREE(bz2lgkibz)
- !ABI_FREE(lgkibz2bz)
 
 end subroutine ephwg_double_grid_setup_kpoint
 !!***
