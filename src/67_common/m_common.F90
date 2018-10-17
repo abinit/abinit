@@ -186,8 +186,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs
- integer,save :: ttolwfr
+ integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  integer :: iatom,iband,iexit,ikpt,isppol,nband_index,nband_k,openexit,option, ishift
  integer :: tmagnet, my_rank
 #if defined DEV_YP_VDWXC
@@ -195,7 +194,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #endif
  real(dp),save :: toldfe,toldff,tolrff,tolvrs,tolwfr,vdw_df_threshold
  real(dp) :: diff_e,diff_f,magnet,rhodn,rhoup
- real(dp) :: residm_band(dtset%mband,dtset%nsppol)
  logical :: noquit
  character(len=500) :: message, message2, message3
  character(len=2) :: format_istep
@@ -203,6 +201,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  character(len=8) :: colname
  character(len=1) :: firstchar
 !arrays
+ real(dp) :: residm_band(dtset%mband,dtset%nsppol)
  real(dp) :: f_tmp(3)
 
 ! *********************************************************************
@@ -230,9 +229,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  select case (choice)
 
  case (1)
-!  Examine tolerance criteria
-! NB: The tests on tolwfr and the presence of tolerances in the SCF case are
-! also done at the level of the parser in chkinp.
+   ! Examine tolerance criteria
+   ! NB: The tests on tolwfr and the presence of tolerances in the SCF case are
+   ! also done at the level of the parser in chkinp.
    tolwfr=tollist(2)
    toldff=tollist(3)
    toldfe=tollist(4)
@@ -245,7 +244,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if(abs(tolrff)>tiny(zero))ttolrff=1
    if(abs(toldfe)>tiny(zero))ttoldfe=1
    if(abs(tolvrs)>tiny(zero))ttolvrs=1
-!  If non-scf calculations, tolwfr must be defined
+   !  If non-scf calculations, tolwfr must be defined
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
 &     'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
@@ -253,12 +252,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &     'Action: change tolwfr in your input file and resubmit the job.'
      MSG_ERROR(message)
    end if
-!  toldff only allowed when prtfor==1
-!  FIXME: this test should be done on input, not during calculation
+   ! toldff only allowed when prtfor==1
+   ! FIXME: this test should be done on input, not during calculation
    if((ttoldff == 1 .or. ttolrff == 1) .and. prtfor==0 )then
      MSG_ERROR('toldff only allowed when prtfor=1!')
    end if
-!  If SCF calculations, one and only one of these can differ from zero
+   ! If SCF calculations, one and only one of these can differ from zero
    if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
@@ -327,8 +326,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
  case (2)
 
-
-!  Examine tolerance criteria
+   ! Examine tolerance criteria
    tolwfr=tollist(2)
    toldff=tollist(3)
    toldfe=tollist(4)
@@ -341,14 +339,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
    if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
-!  Conduct printing. If extra output follows, then put a blank line into the output here
+   ! Conduct printing. If extra output follows, then put a blank line into the output here
    if (dtset%prtvol>=10) then
      message = ' '
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
    end if
 
-!  Calculate up and down charge and magnetization
+   ! Calculate up and down charge and magnetization
    if(tmagnet==1) then
      rhoup = zero
      rhodn = zero
@@ -393,7 +391,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      write(ab_xml_out, "(A)") " />"
    end if
 
-!  Print total (free) energy (hartree) and other convergence measures
+   ! Print total (free) energy (hartree) and other convergence measures
    if(dtset%prtstm==0)then
      format_istep='i3'
      if(istep>99)format_istep='i5'
@@ -439,11 +437,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    end if ! dtset%prtstm==0
 
-!  Print positions/forces every step if dtset%prtvol>=10 and iscf>0 or -3 and GS case
+   ! Print positions/forces every step if dtset%prtvol>=10 and iscf>0 or -3 and GS case
    if (dtset%prtvol>=10.and.(iscf>=0.or.iscf==-3).and.response==0.and.dtset%prtstm==0) then
      call wrtout(ab_out," ",'COLL')
 
-!    Print up and down charge and magnetization
+     ! Print up and down charge and magnetization
      if(tmagnet==1) then
        write(message,'(a,f11.6,a,f11.6,a,f10.6)')&
 &       ' #electrons spin up=',rhoup,', spin down=',rhodn,', magnetization=',magnet
@@ -451,7 +449,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        call wrtout(std_out,  message,'COLL')
      end if
 
-!    Moreover, print atomic positions if dtset%ionmov==4, and moved_atm_inside==1
+     ! Moreover, print atomic positions if dtset%ionmov==4, and moved_atm_inside==1
      if (dtset%ionmov==4 .and. moved_atm_inside==1)then
        message = ' reduced coordinates :'
        call wrtout(ab_out,message,'COLL')
@@ -463,7 +461,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end do
      end if
 
-!    Slightly change favg for printing reasons
+     ! Slightly change favg for printing reasons
      if (prtfor>0) then
        f_tmp(:)=favg(:)
        if(abs(favg(1))<1.0d-13)f_tmp(1)=zero
@@ -485,7 +483,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    end if
 
-!  Print eigenvalues every step if dtset%prtvol>=10 and GS case
+   ! Print eigenvalues every step if dtset%prtvol>=10 and GS case
    if (my_rank == master .and. (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0)) then
      option=1
      call prteigrs(eigen,dtset%enunit,fermie,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
@@ -500,17 +498,17 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      call wrtout(std_out,message,'COLL')
    end if
 
-!  Check whether exiting was required by the user.
+   ! Check whether exiting was required by the user.
    openexit=1 ; if(dtset%chkexit==0) openexit=0
    call exit_check(cpus,filnam1,iexit,ab_out,mpi_enreg%comm_cell,openexit)
    if (iexit/=0) quit=1
 
-!  In special cases, do not quit even if convergence is reached
+   ! In special cases, do not quit even if convergence is reached
    noquit=((istep<nstep).and.(usepaw==1).and.(dtset%usepawu>0).and.&
 &   (dtset%usedmatpu/=0).and.(istep<=abs(dtset%usedmatpu)).and.&
 &   (dtset%usedmatpu<0.or.initGS==0))
 
-!  Additional stuff for electron/positron
+   ! Additional stuff for electron/positron
    if (present(electronpositron)) then
      if (associated(electronpositron)) then
        if (electronpositron%istep_scf==1) then
@@ -519,19 +517,19 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
    end if
 
-!  Stopping criteria in the SCF case
+   ! Stopping criteria in the SCF case
    if(iscf>1 .or. iscf==-3 .or. iscf == 0) then
-!    Here treat the vdw_df_threshold criterion : if the change of energy is less than
-!    input vdw_df_threshold, trigger the calculation of vdW interactions
-!    write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
-!    &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
-!    &      (abs(deltae)<vdw_df_threshold),ch10
-!    call wrtout(std_out,message,'COLL')
+     ! Here treat the vdw_df_threshold criterion : if the change of energy is less than
+     ! input vdw_df_threshold, trigger the calculation of vdW interactions
+     ! write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
+     ! &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
+     ! &      (abs(deltae)<vdw_df_threshold),ch10
+     ! call wrtout(std_out,message,'COLL')
 #if defined DEV_YP_VDWXC
      call xc_vdw_trigger( (abs(deltae)<vdw_df_threshold) )
 #endif
-!    Here treat the tolwfr criterion : if maximum residual is less than
-!    input tolwfr, stop steps (exit loop here)
+     ! Here treat the tolwfr criterion: if maximum residual is less than
+     ! input tolwfr, stop steps (exit loop here)
      if( ttolwfr==1 .and. residm<tolwfr .and. (.not.noquit)) then
        if (dtset%usewvl == 0) then
          write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
@@ -544,15 +542,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        call wrtout(std_out,message,'COLL')
        quit=1
      end if
-!    Here treat the toldff criterion : if maximum change of fcart is less than
-!    input toldff twice consecutively, stop steps (exit loop here)
+     ! Here treat the toldff criterion: if maximum change of fcart is less than
+     ! input toldff twice consecutively, stop steps (exit loop here)
      if( ttoldff==1 ) then
        if( istep==1 )then
          toldff_ok=0
        else if (diffor<toldff) then
          toldff_ok=toldff_ok+1
-! add warning for forces which are 0 by symmetry. Also added Matteo check below that the wave
-!  functions are relatively converged as well
+         ! add warning for forces which are 0 by symmetry. Also added Matteo check below that the wave
+         ! functions are relatively converged as well
          if (diffor < tol12) then
            write (message,'(3a)') ' toldff criterion is satisfied, but your forces are suspiciously low.', ch10,&
 &           ' Check if the forces are 0 by symmetry: in that case you can not use the toldff convergence criterion!'
@@ -571,12 +569,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          quit=1
        end if
      end if
-!    Here treat the tolrff criterion : if maximum change of fcart is less than
-!    input tolrff times fcart itself twice consecutively, stop steps (exit loop here)
+     ! Here treat the tolrff criterion: if maximum change of fcart is less than
+     ! input tolrff times fcart itself twice consecutively, stop steps (exit loop here)
      if( ttolrff==1 ) then
        if( istep==1 )then
          tolrff_ok=0
-!        27/7/2009: added test for absolute value of maxfor, otherwise if it is 0 this never exits the scf loop.
+         ! 27/7/2009: added test for absolute value of maxfor, otherwise if it is 0 this never exits the scf loop.
        else if (diffor<tolrff*maxfor .or. (maxfor < tol16 .and. diffor < tol16)) then
          tolrff_ok=tolrff_ok+1
            ! Thu Mar 12 19:01:40 MG: added additional check on res2 to make sure the SCF cycle is close to convergence.
@@ -595,8 +593,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          quit=1
        end if
      end if
-!    Here treat the toldfe criterion : if the change of energy is less than
-!    input toldfe twice consecutively, stop steps (exit loop here)
+     ! Here treat the toldfe criterion: if the change of energy is less than
+     ! input toldfe twice consecutively, stop steps (exit loop here)
      if( ttoldfe==1 ) then
        if( istep==1 )then
          toldfe_ok=0
@@ -613,14 +611,14 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          call wrtout(std_out,message,'COLL')
          quit=1
        end if
-!    Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
-!    calculations: If input vdw_df_threshold is lesss than toldfe
-!    then the vdW-DF is triggered once selfconsistency criteria is
-!    reached for the first time.
-!    write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
-!    &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
-!    &      (abs(deltae)<toldfe),ch10
-!    call wrtout(std_out,message,'COLL')
+       ! Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
+       ! calculations: If input vdw_df_threshold is lesss than toldfe
+       ! then the vdW-DF is triggered once selfconsistency criteria is
+       ! reached for the first time.
+       ! write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
+       ! &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
+       ! &      (abs(deltae)<toldfe),ch10
+       ! call wrtout(std_out,message,'COLL')
 #if defined DEV_YP_VDWXC
        ivdw = 0
        if ( toldfe > vdw_df_threshold ) then
@@ -632,8 +630,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
 #endif
      end if
-!    Here treat the tolvrs criterion : if density/potential residual (squared)
-!    is less than input tolvrs, stop steps (exit loop here)
+     ! Here treat the tolvrs criterion: if density/potential residual (squared)
+     ! is less than input tolvrs, stop steps (exit loop here)
      if( ttolvrs==1 .and. res2<tolvrs .and. (.not.noquit)) then
        if (optres==0) then
          write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
@@ -657,8 +655,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
 
  case (3)
-
-!  If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
+   ! If wavefunction convergence was not reached (for nstep>0) print a warning and return conv_retcode
    conv_retcode = 0
    if(nstep>0) then
      if (.not. converged()) then
@@ -740,7 +737,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          write(ab_xml_out, "(A)", advance = "NO") '      <status cvState="Failed"'
        end if
 
-     else    ! Convergence is OK
+     else
+       ! Convergence is OK
        if (prtxml == 1) then
          write(ab_xml_out, "(A)", advance = "NO") '      <status cvState="Ok"'
        end if
@@ -769,7 +767,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    MSG_BUG(message)
  end select
 
-!Additional stuff for the Fock+SCF cycle
+ ! Additional stuff for the Fock+SCF cycle
  if (present(fock)) then
    if (associated(fock)) then
      fock%fock_common%scf_converged=(quit==1)
@@ -778,7 +776,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    end if
  end if
 
-!Additional stuff for the two-component DFT SCF cycle (electrons+positron)
+ ! Additional stuff for the two-component DFT SCF cycle (electrons+positron)
  if (present(electronpositron)) then
    if (associated(electronpositron)) then
      electronpositron%scf_converged=(quit==1)
@@ -791,8 +789,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        if(abs(dtset%postoldff)>tiny(0.0_dp))ttoldff=1
        if(abs(dtset%postoldfe)>tiny(0.0_dp))ttoldfe=1
        if (dtset%positron<0.and.ttoldff+ttoldfe/=1.and.iscf>0) then
-         message = 'one and only one of toldff or toldfe must differ from zero !'
-         MSG_ERROR(message)
+         MSG_ERROR('one and only one of toldff or toldfe must differ from zero !')
        end if
      end if
      if (choice==2) then
@@ -989,23 +986,23 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  if(dtset%nqpt>1.or.dtset%nqpt<0) then
    write(message,'(a,i0,5a)')&
-&   '  nqpt =',dtset%nqpt,' is not allowed',ch10,&
-&   '  (only 0 or 1 are allowed).',ch10,&
-&   '  Action: correct your input file.'
+&   'nqpt =',dtset%nqpt,' is not allowed',ch10,&
+&   '(only 0 or 1 are allowed).',ch10,&
+&   'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
-!Compute dimensional primitive translations rprimd
+ ! Compute dimensional primitive translations rprimd
  call mkrdim(acell,rprim,rprimd)
 
-!Obtain dimensional translations in reciprocal space gprimd,
-!metrics and unit cell volume, from rprimd.
-!Also output rprimd, gprimd and ucvol
+ ! Obtain dimensional translations in reciprocal space gprimd,
+ ! metrics and unit cell volume, from rprimd.
+ ! Also output rprimd, gprimd and ucvol
  call metric(gmet,gprimd,ab_out,rmet,rprimd,ucvol)
 
-!Get boxcut for given acell, gmet, ngfft, and ecut_eff
-!(center at 000 for groundstate, center at q for respfn):
-!boxcut=ratio of basis sphere diameter to fft box side
+ ! Get boxcut for given acell, gmet, ngfft, and ecut_eff
+ ! (center at 000 for groundstate, center at q for respfn):
+ ! boxcut=ratio of basis sphere diameter to fft box side
  k0(:)=0.0_dp
  if(response==1 .and. dtset%nqpt==1)then
    k0(:)=dtset%qptn(:)
@@ -1027,7 +1024,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
    gsqcutc_eff=gsqcut_eff
  end if
 
-!Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
+ ! Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
  if (boxcut<2.0_dp.and.dtset%intxc==1) then
    write(message, '(a,es12.4,a,a,a,a,a)' )&
 &   'boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
@@ -1141,7 +1138,7 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
  end if
 
  if (prteig > 0) then
-   write(msg, '(a,a)' ) ' prteigrs : about to open file ',TRIM(fname_eig)
+   write(msg, '(2a)' ) ' prteigrs : about to open file ',TRIM(fname_eig)
    call wrtout(iout,msg,'COLL')
    if (open_file(fname_eig, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
      MSG_ERROR(msg)
@@ -1169,8 +1166,8 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 
      if (enunit==1 .and. ienunit==0)cycle
      if (enunit==0 .and. ienunit==1)cycle
-!  Print eigenvalues in hartree for enunit=0 or 2
-!  The definition of two different strings is quite ridiculous. Historical reasons ...
+     ! Print eigenvalues in hartree for enunit=0 or 2
+     ! The definition of two different strings is quite ridiculous. Historical reasons ...
 
      if (ienunit==0)then
        convrt=one
@@ -1215,8 +1212,7 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
        if (prteig > 0) call wrtout(temp_unit,msg,'COLL')
      end if
 
-
-!    if( (iscf>=0 .or. iscf==-3) .and. ienunit==0)then     ! This is the most correct
+     ! if( (iscf>=0 .or. iscf==-3) .and. ienunit==0)then     ! This is the most correct
      if(iscf>=0 .and. ienunit==0)then ! For historical reasons
        if(tmagnet==1)then
          write(msg, '(a,es16.8,a,a,es16.8,a,es16.8)' )&
@@ -1227,7 +1223,7 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
        end if
      end if
 
-!    Loop over spins (suppress spin data if nsppol not 2)
+     ! Loop over spins (suppress spin data if nsppol not 2)
      do isppol=1,nsppol
 
        ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
@@ -1422,11 +1418,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
  type(energies_type),intent(in) :: energies
 
 !Local variables-------------------------------
-! Do not modify the length of this string
 !scalars
  integer :: ipositron,mu,optdc
  logical :: directE_avail,testdmft
  real(dp) :: eent,enevalue,etotal,etotaldc
+ ! Do not modify the length of these strings
  character(len=22) :: eneName
  character(len=500) :: msg
 !arrays
