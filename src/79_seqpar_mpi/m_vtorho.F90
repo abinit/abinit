@@ -374,7 +374,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
- real(dp),allocatable :: enl_k(:),enlnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
+ real(dp),allocatable :: enlx_k(:),enlnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
@@ -799,7 +799,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ABI_ALLOCATE(eig_k,(nband_k))
        ABI_ALLOCATE(ek_k,(nband_k))
-       ABI_ALLOCATE(enl_k,(nband_k))
+       ABI_ALLOCATE(enlx_k,(nband_k))
        ABI_ALLOCATE(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_ALLOCATE(occ_k,(nband_k))
        ABI_ALLOCATE(resid_k,(nband_k))
@@ -808,7 +808,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        eig_k(:)=zero
        ek_k(:)=zero
-       enl_k(:)=zero
+       enlx_k(:)=zero
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
@@ -936,7 +936,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      contributions to kinetic energy, nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,enl_k,fixed_occ,grnl_k,gs_hamk,&
+&       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
@@ -986,7 +986,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(paw_dmft%use_dmft==1) eknk_nd(isppol,ikpt,:,:,:) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
-       enlnk(1+bdtot_index : nband_k+bdtot_index) = enl_k(:)
+       enlnk(1+bdtot_index : nband_k+bdtot_index) = enlx_k(:)
 
        if(iscf>0 .or. iscf==-3)then
 !        Accumulate sum over k points for band, nonlocal and kinetic energies,
@@ -995,7 +995,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            if (abs(occ_k(iband))>tol8) then
              energies%e_kinetic     = energies%e_kinetic     + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
-             energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enl_k(iband)
+             energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enlx_k(iband)
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
              if (usefock) energies%e_fock=energies%e_fock + half*fock%fock_common%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
            end if
@@ -1019,7 +1019,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(occ_k)
        ABI_DEALLOCATE(resid_k)
        ABI_DEALLOCATE(zshift)
-       ABI_DEALLOCATE(enl_k)
+       ABI_DEALLOCATE(enlx_k)
 
 !      Keep track of total number of bands (all k points so far, even for k points not treated by me)
        bdtot_index=bdtot_index+nband_k

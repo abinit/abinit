@@ -1004,7 +1004,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !  cg_disk
    cmpw(54)=2*nspinor*mband      ; dttyp(54)=8
  end if
-!eig_k, ek_k, enl_k, grnl_k, occ_k, resid_k
+!eig_k, ek_k, enlx_k, grnl_k, occ_k, resid_k
  cadd(56)=(14+3*natom)*mband   ; dttyp(56)=8
 !ylm_k
  cmpw(57)=mpsang*mpsang*useylm ; dttyp(57)=8
