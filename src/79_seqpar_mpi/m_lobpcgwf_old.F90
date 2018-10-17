@@ -1169,7 +1169,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
    end if
 
-!  The Vnl part of the Hamiltonian is no more stored in the packed form such as it was the case for subvnl(:).
+!  The Vnl part of the Hamiltonian is no more stored in the packed form such as it was the case for subvnlx(:).
 !  Now, the full matrix is stored in totvnl(:,:). This trick permits:
 !  1) to avoid the reconstruction of the total matrix in vtowfk.F90 (double loop over bands)
 !  2) to use two optimized matrix-matrix blas routine for general (in lobpcgccwf.F90) or hermitian (in vtowfk.F90)
@@ -1208,7 +1208,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    end do
    ABI_DEALLOCATE(tsubham)
    ABI_DEALLOCATE(blockvectorz)
-!  comm for subham and subvnl are made in vtowfk
+!  comm for subham and subvnlx are made in vtowfk
 
    ABI_DEALLOCATE(pcon)
    ABI_DEALLOCATE(blockvectory)

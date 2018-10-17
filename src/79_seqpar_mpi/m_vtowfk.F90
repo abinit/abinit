@@ -212,7 +212,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
- real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! **********************************************************************
@@ -282,7 +282,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
 
-   ABI_ALLOCATE(subvnl,(0))
+   ABI_ALLOCATE(subvnlx,(0))
    ABI_ALLOCATE(totvnl,(0,0))
    if (gs_hamk%usepaw==0) then
      if (wfopta10==4) then
@@ -293,8 +293,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ABI_ALLOCATE(totvnl,(nband_k,nband_k))
        end if
      else
-       ABI_DEALLOCATE(subvnl)
-       ABI_ALLOCATE(subvnl,(nband_k*(nband_k+1)))
+       ABI_DEALLOCATE(subvnlx)
+       ABI_ALLOCATE(subvnlx,(nband_k*(nband_k+1)))
      end if
    end if
 
@@ -332,7 +332,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        if (wfopta10==4) then
          totvnl(:,:)=zero
        else
-         subvnl(:)=zero
+         subvnlx(:)=zero
        end if
      end if
      if (use_subovl==1)subovl(:)=zero
@@ -381,7 +381,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              if (wfopta10==4) then
                call xmpi_sum(totvnl,spaceComm,ierr)
              else
-               call xmpi_sum(subvnl,spaceComm,ierr)
+               call xmpi_sum(subvnlx,spaceComm,ierr)
              end if
            end if
            if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
@@ -407,7 +407,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &       gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
 &       mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
 &       dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&       subham,subovl,subvnl,dtset%tolrde,dtset%tolwfr,use_subovl,wfoptalg,zshift)
+&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,wfoptalg,zshift)
      end if
    end if
 
@@ -822,7 +822,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,message,'PERS')
  end if
 
-!Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
+!Norm-conserving only: Compute nonlocal part of total energy : rotate subvnlx
  if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
@@ -856,13 +856,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    else
 !    MG: This version is much faster with good OMP scalability.
-!    Construct upper triangle of matvnl from subvnl using full storage mode.
+!    Construct upper triangle of matvnl from subvnlx using full storage mode.
      pidx=0
      do jj=1,nband_k
        do ii=1,jj
          pidx=pidx+1
-         matvnl(1,ii,jj)=subvnl(2*pidx-1)
-         matvnl(2,ii,jj)=subvnl(2*pidx  )
+         matvnl(1,ii,jj)=subvnlx(2*pidx-1)
+         matvnl(2,ii,jj)=subvnlx(2*pidx  )
        end do
      end do
 
@@ -940,7 +940,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    !if (wfopta10==4) then
    ABI_DEALLOCATE(totvnl)
    !else
-   ABI_DEALLOCATE(subvnl)
+   ABI_DEALLOCATE(subvnlx)
    !end if
    !end if
    ABI_DEALLOCATE(subovl)

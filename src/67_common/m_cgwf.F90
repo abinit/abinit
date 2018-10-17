@@ -119,7 +119,7 @@ contains
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in sthe WFs subspace
 !!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
-!!  subvnl(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian expressed in sthe WFs subspace
+!!  subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian expressed in sthe WFs subspace
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)
@@ -156,7 +156,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                mpw,nband,nbdblock,nkpt,nline,npw,npwarr,&
 &                nspinor,nsppol,ortalg,prtvol,pwind,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
-&                subvnl,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
+&                subvnlx,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -185,7 +185,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
  real(dp),intent(inout) :: dphase_k(3)
  real(dp),intent(out) :: subham(nband*(nband+1)),subovl(nband*(nband+1)*use_subovl)
- real(dp),intent(out) :: subvnl(nband*(nband+1)*(1-gs_hamk%usepaw))
+ real(dp),intent(out) :: subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
@@ -1221,7 +1221,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    !  ======================================================================
    call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
-&   nspinor,subham,subovl,subvnl,use_subovl,use_vnl,me_g0)
+&   nspinor,subham,subovl,subvnlx,use_subovl,use_vnl,me_g0)
 
  end do ! iblock End loop over block of bands
 
@@ -1251,12 +1251,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! Debugging ouputs
  if(prtvol==-level)then
    isubh=1
-   if (use_vnl==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnl(isubh:isubh+1)'
+   if (use_vnl==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
    if (use_vnl==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
    do iband=1,nband
      do ii=1,iband
        if (use_vnl==1) then
-         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnl(isubh:isubh+1)
+         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
        else
          write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
        end if
@@ -1853,7 +1853,7 @@ end subroutine etheta
 !!  isubo=index of current state in array subovl
 !!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
-!!  subvnl(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian expressed in the WFs subspace
+!!  subvnlx(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian expressed in the WFs subspace
 !!
 !! PARENTS
 !!      cgwf
@@ -1864,7 +1864,7 @@ end subroutine etheta
 
 subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
-&                    nspinor,subham,subovl,subvnl,use_subovl,use_vnl,me_g0)
+&                    nspinor,subham,subovl,subvnlx,use_subovl,use_vnl,me_g0)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1886,7 +1886,7 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
  real(dp),intent(inout) :: ghc(2,npw_k*nspinor),gvnlxc(2,npw_k*nspinor)
  real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
  real(dp),intent(inout) :: subovl(nband_k*(nband_k+1)*use_subovl)
- real(dp),intent(inout) :: subvnl(nband_k*(nband_k+1)*use_vnl)
+ real(dp),intent(inout) :: subvnlx(nband_k*(nband_k+1)*use_vnl)
 
 !Local variables-------------------------------
 !scalars
@@ -1929,13 +1929,13 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
            cvcre=cvcre+cgreipw*gvnlxc(1,ipw)+cgimipw*gvnlxc(2,ipw)
            cvcim=cvcim+cgreipw*gvnlxc(2,ipw)-cgimipw*gvnlxc(1,ipw)
          end do
-         subvnl(isubh  )=cvcre
-         subvnl(isubh+1)=cvcim
+         subvnlx(isubh  )=cvcre
+         subvnlx(isubh+1)=cvcim
 #else
 !        New version with BLAS1, will require some update of the refs.
          cvc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),gvnlxc)
-         subvnl(isubh  )=cvc(1)
-         subvnl(isubh+1)=cvc(2)
+         subvnlx(isubh  )=cvc(1)
+         subvnlx(isubh+1)=cvc(2)
          chc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),ghc)
          chcre = chc(1)
          chcim = chc(2)
@@ -1982,8 +1982,8 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
          chcre=two*chcre
          cvcre=two*cvcre
 !        Store real and imag parts in Hermitian storage mode:
-         subvnl(isubh  )=cvcre
-         subvnl(isubh+1)=zero
+         subvnlx(isubh  )=cvcre
+         subvnlx(isubh+1)=zero
        end if
        subham(isubh  )=chcre
        subham(isubh+1)=zero

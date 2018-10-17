@@ -1083,7 +1083,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !evec
  cadd(71)=2*mband*mband        ; dttyp(71)=8
-!subham, subvnl(if not PAW)
+!subham, subvnlx(if not PAW)
  cadd(72)=(1+usepaw)*mband*(mband+1)    ; dttyp(72)=8
 !gkpsq
  cmpw(73)=1                    ; dttyp(73)=8
