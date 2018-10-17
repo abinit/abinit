@@ -903,6 +903,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1661) = 'lobpcg_RayleighRitz@hegv       '
 
  ! xg_t
+ names(1662) = 'xgTransposer_transpose@ColsRows'
+ names(1663) = 'xgTransposer_transpose@Linalg  '
+ names(1664) = 'xgTransposer_*@all2all         '
+ names(1665) = 'xgTransposer_*@gatherv         '
+ names(1666) = 'xgTransposer_@reorganize       '
+ names(1667) = 'xgTransposer_init              '
+ names(1668) = 'xgTransposer_free              '
+ names(1669) = 'xgTransposer_transpose         '
  names(1670) = 'xgBlock_potrf                  '
  names(1671) = 'xgBlock_trsm                   '
  names(1672) = 'xgBlock_gemm                   '
@@ -1602,6 +1610,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/)
          message='low-level xgScalapack type '
+       case(78)
+         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
+         message='low-level xgTransposer type '
        case default
          cycle ! This allows to disable temporarily some partitionings
 

@@ -34,6 +34,7 @@ module m_xgTransposer
   use m_xmpi
   use m_errors
   use m_xg
+  use m_time
 
 #ifdef HAVE_MPI2
  use mpi
@@ -57,8 +58,14 @@ module m_xgTransposer
   integer, parameter, public :: TRANS_ALL2ALL = 1
   integer, parameter, public :: TRANS_GATHER = 2
 
-  integer, parameter :: tim_toColsRows = 1670
-  integer, parameter :: tim_toLinalg = 1671
+  integer, parameter :: tim_toColsRows  = 1662
+  integer, parameter :: tim_toLinalg    = 1663
+  integer, parameter :: tim_all2allv    = 1664
+  integer, parameter :: tim_gatherv     = 1665
+  integer, parameter :: tim_reorganize  = 1666
+  integer, parameter :: tim_init        = 1667
+  integer, parameter :: tim_free        = 1668
+  integer, parameter :: tim_transpose   = 1669
 
   type, private :: mpiData_t
     integer :: comm
@@ -120,6 +127,9 @@ module m_xgTransposer
     integer :: icol
     integer :: icplx
     character(len=500) :: message
+    double precision :: tsec(2)
+
+    call timab(tim_init,1,tsec)
 
     xgTransposer%xgBlock_linalg => xgBlock_linalg
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
@@ -196,6 +206,8 @@ module m_xgTransposer
     case default
       MSG_ERROR("State is undefined")
     end select
+
+    call timab(tim_init,2,tsec)
 
   end subroutine xgTransposer_init
 !!***
@@ -345,6 +357,9 @@ module m_xgTransposer
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer             , intent(in   ) :: toState
+    double precision :: tsec(2)
+
+    call timab(tim_transpose,1,tsec)
 
     if ( toState /= STATE_LINALG .and. toState /= STATE_COLSROWS ) then
       MSG_ERROR("Bad value for toState")
@@ -368,6 +383,8 @@ module m_xgTransposer
         call xgTransposer_toColsRows(xgTransposer)
       end if
     end select
+
+    call timab(tim_transpose,2,tsec)
 
   end subroutine xgTransposer_transpose
 !!***
@@ -402,6 +419,9 @@ module m_xgTransposer
    type(xgBlock_t) :: xgBlock_toTransposed
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)
+   double precision :: tsec(2)
+
+    call timab(tim_toLinalg,1,tsec)
 
    ncpu = xgTransposer%mpiData(MPI_COLS)%size
    comm = xgTransposer%mpiData(MPI_COLS)%comm
@@ -439,9 +459,11 @@ module m_xgTransposer
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
+     call timab(tim_all2allv,1,tsec)
      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
                          recvbuf, recvcounts, rdispls, & 
                          comm, ierr)
+     call timab(tim_all2allv,2,tsec)
      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
      !                    recvbuf, recvcounts, rdispls, & 
      !                    comm, request(myrequest))
@@ -453,7 +475,9 @@ module m_xgTransposer
      ABI_MALLOC(sendptrbuf,(1:ncpu))
      do icpu = 1, ncpu
        sendptrbuf(me+1)%ptr => sendbuf(:,sdispls(icpu)/2+1:sdispls(icpu)/2+sendcounts(icpu))
+       call timab(tim_gatherv,1,tsec)
        call xmpi_gatherv(sendptrbuf(me+1)%ptr,sendcounts(icpu),recvbuf,recvcounts,rdispls,icpu-1,comm,ierr)
+       call timab(tim_gatherv,2,tsec)
        !call mpi_igatherv(sendptrbuf(me+1)%ptr,sendcounts(icpu),MPI_DOUBLE_PRECISION,&
        !  recvbuf,recvcounts,rdispls,MPI_DOUBLE_PRECISION,icpu-1,comm,request(icpu),ierr)
      end do
@@ -498,6 +522,8 @@ module m_xgTransposer
    !ABI_FREE(status)
    !ABI_FREE(request)
 
+    call timab(tim_toLinalg,2,tsec)
+
   end subroutine xgTransposer_toLinalg
 !!***
 
@@ -531,6 +557,9 @@ module m_xgTransposer
    type(xgBlock_t) :: xgBlock_toTransposed
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)
+   double precision :: tsec(2)
+
+    call timab(tim_toColsRows,1,tsec)
 
    ncpu = xgTransposer%mpiData(MPI_COLS)%size
    comm = xgTransposer%mpiData(MPI_COLS)%comm
@@ -571,9 +600,11 @@ module m_xgTransposer
      call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf, &
 &      xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
      !write(*,*) "Before ialltoall"
+     call timab(tim_all2allv,1,tsec)
      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
                          recvbuf, recvcounts, rdispls, & 
                          comm, ierr)
+     call timab(tim_all2allv,2,tsec)
      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
      !                    recvbuf, recvcounts, rdispls, & 
      !                    comm, request(myrequest))
@@ -591,7 +622,9 @@ module m_xgTransposer
        !write(*,*) me, "->", icpu, "from col ",icpu*ncolsColsRows+1, " number of rows:", nrowsLinalgMe
        call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsColsRows+1,nrowsLinalgMe,ncolsColsRows)
        call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(me+1)%ptr,xgTransposer%perPair,ncolsColsRows*nrowsLinalgMe)
+       call timab(tim_gatherv,1,tsec)
        call xmpi_gatherv(sendptrbuf(me+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,recvbuf,recvcounts,rdispls,icpu,comm,ierr)
+       call timab(tim_gatherv,2,tsec)
        !call mpi_igatherv(sendptrbuf(me+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,MPI_DOUBLE_PRECISION,&
        !  recvbuf,recvcounts,rdispls,MPI_DOUBLE_PRECISION,icpu,comm,request(icpu+1),ierr)
      end do
@@ -642,6 +675,8 @@ module m_xgTransposer
    !ABI_FREE(status)
    !ABI_FREE(request)
 
+    call timab(tim_toColsRows,2,tsec)
+
   end subroutine xgTransposer_toColsRows
 !!***
 
@@ -665,6 +700,9 @@ module m_xgTransposer
     integer :: me
     integer :: nPair
     integer, pointer :: nrowsLinalg(:)
+    double precision :: tsec(2)
+
+    call timab(tim_reorganize,1,tsec)
 
     me = xgTransposer%mpiData(MPI_ROWS)%rank*xgTransposer%mpiData(MPI_COLS)%size
     nrowsColsRows = xgTransposer%nrowsColsRows
@@ -703,6 +741,8 @@ module m_xgTransposer
       end do
     end select
 
+    call timab(tim_reorganize,2,tsec)
+
   end subroutine xgTransposer_reorganizeData
 
 
@@ -721,11 +761,16 @@ module m_xgTransposer
 !End of the abilint section
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
-#ifdef HAVE_MPI
+    double precision :: tsec(2)
     integer :: i
+
+    call timab(tim_free,1,tsec)
+#ifdef HAVE_MPI
     call mpi_comm_free(xgTransposer%mpiData(MPI_ROWS)%comm,i)
     call mpi_comm_free(xgTransposer%mpiData(MPI_COLS)%comm,i)
     call mpi_comm_free(xgTransposer%mpiData(MPI_2DCART)%comm,i)
+#else
+    ABI_UNUSED(i)
 #endif
 
     if ( allocated(xgTransposer%lookup) ) then
@@ -739,6 +784,7 @@ module m_xgTransposer
     if ( allocated(xgTransposer%buffer) ) then
       ABI_FREE(xgTransposer%buffer)
     end if
+    call timab(tim_free,2,tsec)
 
 
   end subroutine xgTransposer_free

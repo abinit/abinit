@@ -57,18 +57,36 @@ program testTransposer
   double precision :: walltime
   double precision :: cputime
   double precision :: maxt
+  integer :: nCpuCols, nCpuRows
   double precision, allocatable :: cg(:,:)
   double precision, allocatable :: cg0(:,:)
+  character(len=40) :: names(8)
+
+  double precision :: nflops, ftimes(2)
+  integer :: ncount
+  double precision :: times(2)
 
   type(xgBlock_t) :: xcgLinalg
   type(xgBlock_t) :: xcgColsRows
   type(xgTransposer_t) :: xgTransposer
 
+
+  names(1662-1661) = 'xgTransposer_transpose@ColsRows'
+  names(1663-1661) = 'xgTransposer_transpose@Linalg  '
+  names(1664-1661) = 'xgTransposer_*@all2all         '
+  names(1665-1661) = 'xgTransposer_*@gatherv         '
+  names(1666-1661) = 'xgTransposer_@reorganize       '
+  names(1667-1661) = 'xgTransposer_init              '
+  names(1668-1661) = 'xgTransposer_free              '
+  names(1669-1661) = 'xgTransposer_transpose         '
+
   call xmpi_init()
 
-  npw = 2000+xmpi_comm_rank(xmpi_world)
-  nband = 200
-  ncycle = 10
+  npw = 4000+xmpi_comm_rank(xmpi_world)
+  nband = 2000
+  ncycle = 20
+  nCpuRows = 2
+  nCpuCols = xmpi_comm_size(xmpi_world)/nCpuRows
 
   std_out = 6+xmpi_comm_rank(xmpi_world)
 
@@ -80,27 +98,31 @@ program testTransposer
 
   call xgBlock_map(xcgLinalg,cg,SPACE_C,npw,nband,xmpi_world)
 
-  write(std_out,*) "Complex iall2all"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,2,4,STATE_LINALG,1)
+  write(std_out,*) " Complex all2all"
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
   call tester()
   call xgTransposer_free(xgTransposer)
+  call printTimes()
 
-  write(std_out,*) "Complex igatherv"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,2,4,STATE_LINALG,2)
+  write(std_out,*) " Complex gatherv"
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2)
   call tester()
   call xgTransposer_free(xgTransposer)
+  call printTimes()
 
   call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
 
-  write(std_out,*) "Real iall2all"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,2,4,STATE_LINALG,1)
+  write(std_out,*) " Real all2all"
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,1)
   call tester()
   call xgTransposer_free(xgTransposer)
+  call printTimes()
 
-  write(std_out,*) "Real igatherv"
-  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,2,4,STATE_LINALG,2)
+  write(std_out,*) " Real gatherv"
+  call xgTransposer_init(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,2)
   call tester()
   call xgTransposer_free(xgTransposer)
+  call printTimes()
 
   deallocate(cg)
   deallocate(cg0)
@@ -121,6 +143,7 @@ program testTransposer
 !End of the abilint section
 
       maxt = 0
+      cputime = 0
       do i=1,ncycle
         walltime = abi_wtime()
         call xgTransposer_transpose(xgTransposer,STATE_COLSROWS)
@@ -135,13 +158,39 @@ program testTransposer
         call xmpi_max(walltime,maxt,xmpi_world,ierr)
       end do
       call xmpi_max(cputime,maxt,xmpi_world,ierr)
-      write(std_out,*) "Mean time: ", maxt/ncycle
+      write(std_out,*) "-Mean time: ", maxt/ncycle
       errmax = (sum(cg0-cg))/nband
       call xmpi_sum(errmax,xmpi_world,ierr)
-      write(std_out,*) "Difference: ",errmax
+      write(std_out,*) " Difference: ",errmax
       call xmpi_barrier(xmpi_world)
     end subroutine tester
 
+    subroutine printTimes()
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'printTimes'
+!End of the abilint section
+
+      double precision :: total(2)
+      integer :: ntot
+      write(std_out,'(1x,a30,a8,a17,a17)') "counter", "calls", "cpu_time", "wall_time"
+      ntot = 0
+      total(:) = 0.d0
+      do i=1662,1669
+        call time_accu(i,ncount,times,nflops,ftimes)
+        total(1) = total(1) + times(1)
+        total(2) = total(2) + times(2)
+        ntot = ntot + ncount
+        write(std_out,'(a,a30,i8,2F17.3)') "-",trim(names(i-1661)), ncount, times(1), times(2) 
+      end do
+      write(std_out,'(a,a30,i8,2F17.3)') "-","total", ntot, total(1), total(2) 
+      call timab(1,0,times)
+
+    end subroutine printTimes
 
 
   end program testTransposer
+  !!***

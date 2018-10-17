@@ -870,10 +870,10 @@ module m_xg
   end function comm
 !!***
 
-!!****f* m_xg/comm
+!!****f* m_xg/setComm
 !!
 !! NAME
-!! comm
+!! setComm
 
   subroutine xgBlock_setComm(xgBlock,comm)
 
