@@ -2834,7 +2834,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  real(dp) :: enlout(6),dum_svectout(1,1),dum(1),kpg_dum(0,0)
  real(dp),allocatable :: cwave0(:,:),cwavef(:,:),dkinpw(:),eig2_k(:)
  real(dp),allocatable :: ffnl(:,:,:,:),ffnl_ylm(:,:,:,:),ghc(:,:)
- real(dp),allocatable :: gvnl1(:,:),gvnlc(:,:),kinpw1(:),ph3d(:,:,:)
+ real(dp),allocatable :: gvnl1(:,:),gvnlxc(:,:),kinpw1(:),ph3d(:,:,:)
  type(pawcprj_type) :: cprj_dum(0,0)
 
 ! *********************************************************************
@@ -2846,7 +2846,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 
 !Init me
  ABI_ALLOCATE(ghc,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlc,(2,npw1_k*nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw1_k*nspinor))
  ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(eig2_k,(2*nsppol*mband**2))
  ABI_ALLOCATE(kinpw1,(npw1_k))
@@ -2965,7 +2965,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 
  ABI_DEALLOCATE(eig2_k)
  ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlc)
+ ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gvnl1)
  ABI_DEALLOCATE(kinpw1)
  ABI_DEALLOCATE(dkinpw)

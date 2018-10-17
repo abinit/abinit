@@ -1429,7 +1429,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp) :: dkb(3),dkg(3),dkbg(3),dtm_k(2),gmet(3,3),gprimd(3,3)
  real(dp) :: kpoint(3),kpointb(3),kpointg(3)
  real(dp) :: orbmagvec(2,3),rhodum(1),rmet(3,3)
- real(dp),allocatable :: bra(:,:),cg1_k(:,:),cgrvtrial(:,:),cwavef(:,:),ffnl(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: bra(:,:),cg1_k(:,:),cgrvtrial(:,:),cwavef(:,:),ffnl(:,:,:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
  real(dp),allocatable :: hmat(:,:,:,:,:,:),kinpw(:),kk_paw(:,:,:),kpg_k_dummy(:,:)
  real(dp),allocatable :: my_nucdipmom(:,:),ph3d(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:,:),smat_inv(:,:,:)
  real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:),ylm_k(:,:)
@@ -1670,7 +1670,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
              ABI_ALLOCATE(cwavef,(2,npw_k))
              ABI_ALLOCATE(ghc,(2,npw_k))
              ABI_ALLOCATE(gsc,(2,npw_k))
-             ABI_ALLOCATE(gvnlc,(2,npw_k))
+             ABI_ALLOCATE(gvnlxc,(2,npw_k))
              hmat(:,:,:,ikpt,0,0) = zero
              do nn = 1, nband_k
                 cwavef(1,1:npw_k) = cg(1,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
@@ -1678,7 +1678,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                 call pawcprj_get(atindx1,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
                      &           dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
                 my_cpopt=2
-                call getghc(my_cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+                call getghc(my_cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,mpi_enreg,ndat,&
                      &           prtvol,sij_opt,tim_getghc,type_calc)
                 hmat(1,nn,nn,ikpt,0,0)= DOT_PRODUCT(cwavef(1,1:npw_k),ghc(1,1:npw_k)) &
                      &           + DOT_PRODUCT(cwavef(2,1:npw_k),ghc(2,1:npw_k))
@@ -1688,7 +1688,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
              ABI_DEALLOCATE(cwavef)
              ABI_DEALLOCATE(ghc)
              ABI_DEALLOCATE(gsc)
-             ABI_DEALLOCATE(gvnlc)
+             ABI_DEALLOCATE(gvnlxc)
 
              ABI_DEALLOCATE(ylm_k)
              ABI_DEALLOCATE(kpg_k_dummy)
@@ -1879,7 +1879,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                    ABI_ALLOCATE(cwavef,(2,npw_kb))
                    ABI_ALLOCATE(ghc,(2,npw_kb))
                    ABI_ALLOCATE(gsc,(2,npw_kb))
-                   ABI_ALLOCATE(gvnlc,(2,npw_kb))
+                   ABI_ALLOCATE(gvnlxc,(2,npw_kb))
 
                    ABI_ALLOCATE(bra,(2,npw_kg))
 
@@ -1891,7 +1891,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                       cwavef(1,1:npw_kb) = cg(1,icgb+(nn-1)*npw_kb+1:icgb+nn*npw_kb)
                       cwavef(2,1:npw_kb) = cg(2,icgb+(nn-1)*npw_kb+1:icgb+nn*npw_kb)
                       ! apply only vlocal
-                      call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk123,gvnlc,lambda,mpi_enreg,ndat,&
+                      call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk123,gvnlxc,lambda,mpi_enreg,ndat,&
                            &               prtvol,sij_opt,tim_getghc,type_calc_123)
                       do n1 = 1, nband_k
                          bra(1,1:npw_kg) = cg(1,icgg+(n1-1)*npw_kg+1:icgg+n1*npw_kg)
@@ -1974,7 +1974,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                    ABI_DEALLOCATE(bra)
                    ABI_DEALLOCATE(ghc)
                    ABI_DEALLOCATE(gsc)
-                   ABI_DEALLOCATE(gvnlc)
+                   ABI_DEALLOCATE(gvnlxc)
 
                    ABI_DEALLOCATE(kpg_k_dummy)
 

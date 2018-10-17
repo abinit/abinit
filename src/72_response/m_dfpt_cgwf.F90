@@ -117,7 +117,7 @@ contains
 !!                     eig1(:,ii,jj)=<C0 ii|H1|C0 jj> for norm-conserving psps
 !!                     eig1(:,ii,jj)=<C0 ii|H1-(eig0_k+eig0_k+q)/2.S(1)|C0 jj> for PAW
 !!  ghc(2,npw1*nspinor)=<G|H0-eig0_k.I|C1 band,k> (NCPP) or <G|H0-eig0_k.S0|C1 band,k> (PAW)
-!!  gvnlc(2,npw1*nspinor)=<G|Vnl|C1 band,k>
+!!  gvnlxc(2,npw1*nspinor)=<G|Vnl|C1 band,k>
 !!  gvnl1(2,npw1*nspinor)=  part of <G|K1+Vnl1|C0 band,k> not depending on VHxc1           (NCPP)
 !!                       or part of <G|K1+Vnl1-eig0k.S1|C0 band,k> not depending on VHxc1 (PAW)
 !!  resid=wf residual for current band
@@ -149,7 +149,7 @@ contains
 
 subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwavef,&
 & eig0nk,eig0_kq,eig1_k,ghc,gh1c_n,grad_berry,gsc,gscq,&
-& gs_hamkq,gvnlc,gvnl1,icgq,idir,ipert,igscq,&
+& gs_hamkq,gvnlxc,gvnl1,icgq,idir,ipert,igscq,&
 & mcgq,mgscq,mpi_enreg,mpw1,natom,nband,nbdbuf,nline_in,npw,npw1,nspinor,&
 & opt_gvnl1,prtvol,quit,resid,rf_hamkq,dfpt_sciss,tolrde,tolwfr,&
 & usedcwavef,wfoptalg,nlines_done)
@@ -185,7 +185,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  real(dp),intent(out) :: gh1c_n(2,npw1*nspinor)
  real(dp),intent(out) :: ghc(2,npw1*nspinor)
  real(dp),intent(out) :: gsc(2,npw1*nspinor*gs_hamkq%usepaw)
- real(dp),intent(inout) :: gvnl1(2,npw1*nspinor),gvnlc(2,npw1*nspinor)
+ real(dp),intent(inout) :: gvnl1(2,npw1*nspinor),gvnlxc(2,npw1*nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj(natom,nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj0(natom,nspinor*gs_hamkq%usecprj)
 
@@ -518,7 +518,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  if(band>max(1,nband-nbdbuf))then
    cwavef=zero
    ghc   =zero
-   gvnlc =zero
+   gvnlxc =zero
    if (gen_eigenpb) gsc=zero
    if (usedcwavef==2) dcwavef=zero
    if (usepaw==1) then
@@ -550,7 +550,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !  Here apply H(0) at k+q to input orthogonalized 1st-order wfs
    sij_opt=0;if (gen_eigenpb) sij_opt=1
    cpopt=-1+usepaw
-   call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamkq,gvnlc,eshift,mpi_enreg,1,&
+   call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamkq,gvnlxc,eshift,mpi_enreg,1,&
 &   prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
 !  ghc also includes the eigenvalue shift
@@ -653,7 +653,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        end if
        cwavef =zero
        ghc    =zero
-       gvnlc  =zero
+       gvnlxc  =zero
        if (gen_eigenpb) gsc(:,:)=zero
        if (usepaw==1) then
          call pawcprj_set_zero(cwaveprj)
@@ -848,7 +848,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
        cwavef=zero
        ghc   =zero
-       gvnlc =zero
+       gvnlxc =zero
        if (gen_eigenpb) gsc=zero
        if (usepaw==1) then
          call pawcprj_set_zero(cwaveprj)
@@ -878,7 +878,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
      call cg_zaxpy(npw1*nspinor,(/theta,zero/),conjgr,cwavef)
      call cg_zaxpy(npw1*nspinor,(/theta,zero/),gh_direc,ghc)
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnl_direc,gvnlc)
+     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnl_direc,gvnlxc)
 
      if (gen_eigenpb) then
        call cg_zaxpy(npw1*nspinor,(/theta,zero/),sconjgr,gsc)

@@ -1112,7 +1112,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !conjgr, cwavef, direc, gh_direc, gvnl_direc
  cmpw(81)=2*5*nspinor          ; dttyp(81)=8
-!ghc,gvnlc
+!ghc,gvnlxc
  cmpw(82)=2*2*nspinor          ; dttyp(82)=8
 !PAW: scwavef,direc_tmp,ghc_all
  cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
@@ -2198,7 +2198,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  cmpw(51)=2                    ; dttyp(51)=8
 !ffnlk,ffnl1,ffnlkq
  cmpw(52)=2*(ntypat+2)*lmnmax  ; dttyp(52)=8
-!ghc,gvnlc,gvnl1
+!ghc,gvnlxc,gvnl1
  cmpw(53)=6*nspinor            ; dttyp(53)=8
 !ph3d
  matblk=NLO_MINCAT

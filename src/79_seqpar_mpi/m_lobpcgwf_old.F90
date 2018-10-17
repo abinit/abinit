@@ -146,7 +146,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  real(dp) :: zvar(2)
  logical :: havetoprecon
  real(dp) :: tsec(2)
- real(dp), allocatable :: gwavef(:,:),cwavef(:,:),gvnlc(:,:)
+ real(dp), allocatable :: gwavef(:,:),cwavef(:,:),gvnlxc(:,:)
  real(dp), allocatable :: swavef(:,:)
  real(dp), allocatable :: residualnorms(:),eigen(:)
  real(dp), allocatable :: tmpeigen(:)
@@ -352,7 +352,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
    ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
    ABI_ALLOCATE(gwavef,(2,npw_k*my_nspinor*blocksize))
-   ABI_ALLOCATE(gvnlc,(2,npw_k*my_nspinor*blocksize))
+   ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor*blocksize))
    ABI_ALLOCATE(swavef,(2,npw_k*my_nspinor*blocksize))
 
    call wfcopy('I',vectsize*blocksize,blockvectorx,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
@@ -368,10 +368,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    cpopt=-1;sij_opt=0;if (gen_eigenpb) sij_opt=1
 
    if (mpi_enreg%paral_kgb==0) then
-     call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlc,dum,&
+     call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlxc,dum,&
 &     mpi_enreg,blocksize,prtvol,sij_opt,tim_getghc,0)
    else
-     call prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,dum,blocksize,mpi_enreg,&
+     call prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,dum,blocksize,mpi_enreg,&
 &     prtvol,sij_opt,cpopt,cprj_dum,already_transposed=.false.)
    end if
    if(abs(dtset%timopt)==4) then
@@ -385,7 +385,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      call wfcopy('D',vectsize*blocksize,swavef,1,blockvectorbx,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
    else
-     call wfcopy('D',vectsize*blocksize,gvnlc,1,blockvectorvx,1,blocksize,iblock,'W',withbbloc=.false.,&
+     call wfcopy('D',vectsize*blocksize,gvnlxc,1,blockvectorvx,1,blocksize,iblock,'W',withbbloc=.false.,&
 &     timopt=timopt,tim_wfcopy=tim_wfcopy)
      call abi_xcopy(vectsize*blocksize,blockvectorx,1,blockvectorbx,1,x_cplx=x_cplx)
    end if
@@ -395,7 +395,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
    ABI_DEALLOCATE(cwavef)
    ABI_DEALLOCATE(gwavef)
-   ABI_DEALLOCATE(gvnlc)
+   ABI_DEALLOCATE(gvnlxc)
    ABI_DEALLOCATE(swavef)
 
    call abi_xorthonormalize(blockvectorx,blockvectorbx,blocksize,mpi_enreg%comm_bandspinorfft,gramxbx,vectsize,&
@@ -568,7 +568,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
      ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor*blocksize))
      ABI_ALLOCATE(gwavef,(2,npw_k*my_nspinor*blocksize))
-     ABI_ALLOCATE(gvnlc,(2,npw_k*my_nspinor*blocksize))
+     ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor*blocksize))
      ABI_ALLOCATE(swavef,(2,npw_k*my_nspinor*blocksize))
 
      call wfcopy('I',vectsize*blocksize,blockvectorr,1,cwavef,1,blocksize,iblock,'W',withbbloc=.false.,&
@@ -584,10 +584,10 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      end if
 
      if (mpi_enreg%paral_kgb==0) then
-       call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlc,dum,&
+       call getghc(cpopt,cwavef,cprj_dum,gwavef,swavef,gs_hamk,gvnlxc,dum,&
 &       mpi_enreg,blocksize,prtvol,sij_opt,tim_getghc,0)
      else
-       call prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,dum,blocksize,mpi_enreg,&
+       call prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,dum,blocksize,mpi_enreg,&
 &       prtvol,sij_opt,cpopt,cprj_dum,already_transposed=.false.)
      end if
 
@@ -603,7 +603,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &       timopt=timopt,tim_wfcopy=tim_wfcopy)
      else
        call abi_xcopy(vectsize*blocksize,blockvectorr,1,blockvectorbr,1,x_cplx=x_cplx)
-       call wfcopy('D',vectsize*blocksize,gvnlc,1,blockvectorvr,1,blocksize,iblock,'W',withbbloc=.false.,&
+       call wfcopy('D',vectsize*blocksize,gvnlxc,1,blockvectorvr,1,blocksize,iblock,'W',withbbloc=.false.,&
 &       timopt=timopt,tim_wfcopy=tim_wfcopy)
      end if
 
@@ -612,7 +612,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
      ABI_DEALLOCATE(cwavef)
      ABI_DEALLOCATE(gwavef)
-     ABI_DEALLOCATE(gvnlc)
+     ABI_DEALLOCATE(gvnlxc)
      ABI_DEALLOCATE(swavef)
 
      if(use_linalg_gpu==1) then

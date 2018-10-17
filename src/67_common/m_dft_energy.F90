@@ -980,7 +980,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  real(dp) :: doti,dotr
 !arrays
  real(dp) :: tsec(2)
- real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: cwavef_ptr(:,:),ghc_ptr(:,:),gsc_ptr(:,:)
  type(pawcprj_type) :: cwaveprj(0,0)
 
@@ -1002,7 +1002,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  npw_k=gs_hamk%npw_k
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
  ABI_ALLOCATE(ghc,(2,npw_k*my_nspinor))
- ABI_ALLOCATE(gvnlc,(2,npw_k*my_nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor))
  if (gs_hamk%usepaw==1)  then
    ABI_ALLOCATE(gsc,(2,npw_k*my_nspinor))
  else
@@ -1025,10 +1025,10 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !  Compute H|Cn>
    cpopt=-1
    if (mpi_enreg%paral_kgb==0) then
-     call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,zero,mpi_enreg,1,&
+     call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,zero,mpi_enreg,1,&
 &     prtvol,gs_hamk%usepaw,tim_getghc,0)
    else
-     call prep_getghc(cwavef,gs_hamk,gvnlc,ghc,gsc,zero,nband,mpi_enreg,&
+     call prep_getghc(cwavef,gs_hamk,gvnlxc,ghc,gsc,zero,nband,mpi_enreg,&
 &     prtvol,gs_hamk%usepaw,cpopt,cwaveprj,&
 &     already_transposed=.false.)
    end if
@@ -1072,7 +1072,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlc)
+ ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gsc)
 
  call timab(13,2,tsec)

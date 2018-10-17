@@ -252,7 +252,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:)
- real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnl1(:,:),gvnlc(:,:)
+ real(dp),allocatable :: gsc(:,:),gscq(:,:),gvnl1(:,:),gvnlxc(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
 
@@ -280,7 +280,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  kinpw1 => gs_hamkq%kinpw_kp
  ABI_ALLOCATE(gh0c1,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlc,(2,npw1_k*nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw1_k*nspinor))
  ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
  ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
@@ -435,7 +435,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        call dfpt_cgwf(iband,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwavef,&
-&       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlc,gvnl1,icgq,&
+&       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnl1,icgq,&
 &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,dtset%nbdbuf,dtset%nline,&
 &       npw_k,npw1_k,nspinor,opt_gvnl1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
 &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
@@ -502,8 +502,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        eeig0_k(iband)=-energy_factor*(eig0_k(iband)- (dtset%dfpt_sciss) )*scprod
 
 !      Compute nonlocal psp contributions to nonlocal energy:
-!      <G|Vnl|C1nk(perp)> is contained in gvnlc (with cwavef)
-       call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gvnlc,mpi_enreg%me_g0,&
+!      <G|Vnl|C1nk(perp)> is contained in gvnlxc (with cwavef)
+       call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gvnlxc,mpi_enreg%me_g0,&
 &       mpi_enreg%comm_spinorfft)
        enl0_k(iband)=energy_factor*scprod
 
@@ -588,7 +588,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(cwave1)
  ABI_DEALLOCATE(gh0c1)
- ABI_DEALLOCATE(gvnlc)
+ ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gvnl1)
  ABI_DEALLOCATE(gh1c_n)
 

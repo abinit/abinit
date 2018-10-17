@@ -1073,7 +1073,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  real(dp),allocatable :: eig_ene(:),eig_vec(:,:,:),ph3d(:,:,:),pwave(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),vlocal_tmp(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlc(:,:),gsc(:,:),ghg_mat(:,:,:),gtg_mat(:,:,:),cgrvtrial(:,:)
+ real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:),ghg_mat(:,:,:),gtg_mat(:,:,:),cgrvtrial(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
@@ -1291,7 +1291,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      pwave=zero ! Initialize plane-wave array:
 
      ABI_MALLOC(ghc  ,(2,npw_k*nspinor*ndat))
-     ABI_MALLOC(gvnlc,(2,npw_k*nspinor*ndat))
+     ABI_MALLOC(gvnlxc,(2,npw_k*nspinor*ndat))
      ABI_MALLOC(gsc  ,(2,npw_k*nspinor*ndat*(sij_opt+1)/2))
 
      if (dtset%prtvol > 0) call wrtout(std_out,' Calculating <G|H|G''> elements','PERS')
@@ -1303,7 +1303,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
        pwave = zero
        pwave(1,igsp2)=one
 
-       call getghc(cpopt,pwave,cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,mpi_enreg,ndat,&
+       call getghc(cpopt,pwave,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,mpi_enreg,ndat,&
 &                  dtset%prtvol,sij_opt,tim_getghc,type_calc)
 
        ! Fill the upper triangle.
@@ -1318,7 +1318,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
      ABI_FREE(ph3d)
      ABI_FREE(pwave)
      ABI_FREE(ghc)
-     ABI_FREE(gvnlc)
+     ABI_FREE(gvnlxc)
      ABI_FREE(gsc)
 
      if (psps%usepaw==1.and.cpopt==0) call pawcprj_free(cwaveprj)

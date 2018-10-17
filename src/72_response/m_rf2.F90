@@ -510,7 +510,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !arrays
  real(dp),target :: cwave_empty(0,0),svectout_dum(0,0)
- real(dp),allocatable :: gvnlc(:,:),iddk(:,:)
+ real(dp),allocatable :: gvnlxc(:,:),iddk(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: cwave_i(:,:),cwave_j(:,:)
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),pointer :: cprj_j(:,:)
@@ -587,15 +587,15 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 ! *******************************************************************************************
  if (ipert == 0) then
 
-   ABI_ALLOCATE(gvnlc,(2,size_wf))
-   gvnlc(:,:) = zero
+   ABI_ALLOCATE(gvnlxc,(2,size_wf))
+   gvnlxc(:,:) = zero
 
 !  Test if < u^(0) | H^(0) | u^(0) > = eig0(jband)
    if(debug_mode/=0) then
      cwave_j => cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
      if (has_cprj_jband) cprj_j => cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj)
      cpopt = -1+3*gs_hamkq%usecprj*gs_hamkq%usepaw
-     call getghc(cpopt,cwave_j,cprj_j,h_cwave,s_cwave,gs_hamkq,gvnlc,zero,mpi_enreg,1,prtvol,&
+     call getghc(cpopt,cwave_j,cprj_j,h_cwave,s_cwave,gs_hamkq,gvnlxc,zero,mpi_enreg,1,prtvol,&
                  sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
      call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_j,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -609,9 +609,9 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
    end if ! end tests
 
    cpopt=-1;if (has_cwaveprj) cpopt=2
-   call getghc(cpopt,cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnlc,zero,mpi_enreg,1,prtvol,&
+   call getghc(cpopt,cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnlxc,zero,mpi_enreg,1,prtvol,&
                sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
-   ABI_DEALLOCATE(gvnlc)
+   ABI_DEALLOCATE(gvnlxc)
 
 ! *******************************************************************************************
 ! apply H^(1)
