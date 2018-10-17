@@ -2,14 +2,13 @@
 #Test for multibinit, just read xml and run spin dynamics
 ##############################################################################
 prt_model = 0
-ncell =   15 15 15
+ncell =   16 16 16
 
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
+spin_dynamics=1    
 spin_init_state = 2
-spin_mag_field= 0.0 0.0 0.0
-spin_dynamics=1
 spin_temperature = 600
 spin_ntime =10000
 spin_nctime=100
