@@ -467,7 +467,7 @@ module m_xgTransposer
 
    !ABI_MALLOC(status,(MPI_STATUS_SIZE))
    !call mpi_wait(request(myrequest),status,ierr)
-   if ( ierr /= MPI_SUCCESS ) then
+   if ( ierr /= xmpi_success ) then
      MSG_ERROR("Error while waiting for mpi")
    end if 
 
