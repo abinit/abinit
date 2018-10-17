@@ -2626,7 +2626,7 @@ subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,nty
  isize=isize+16*mpw*natom                   !ph3d
  memsize=max(memsize,isize)
  isize=isize+48*mpw*nspinor&
-& +8*mpw*nspinor*(mpw*nspinor+1)        !pwave,subghg,gvnlg
+& +8*mpw*nspinor*(mpw*nspinor+1)            !pwave,subghg,gvnlg
  if (nspinor==2)&
 & isize=isize+40*mpw*nspinor                !pwave_so,subghg_so
  memsize=max(memsize,isize)

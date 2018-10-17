@@ -213,7 +213,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),allocatable :: gh_direc(:,:),gh_direcws(:,:),ghc(:,:),ghc_all(:,:),ghcws(:,:)
  real(dp),allocatable :: grad_berry(:,:),grad_total(:,:),gs_direc(:,:)
  real(dp) :: gsc_dummy(0,0)
- real(dp),allocatable :: gvnlxc(:,:),gvnl_direc(:,:),gvnl_dummy(:,:)
+ real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:),gvnlx_dummy(:,:)
  real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef(:,:)
  real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),swork(:,:),vresid(:,:),work(:,:)
  real(dp),pointer :: kinpw(:)
@@ -278,7 +278,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_ALLOCATE(scprod,(2,nband))
 
  ABI_ALLOCATE(gh_direc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnl_direc,(2,npw*nspinor))
+ ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
  ABI_ALLOCATE(vresid,(2,npw*nspinor))
 
  if (gen_eigenpb)  then
@@ -310,9 +310,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  if (wfopta10==2 .or. wfopta10==3) then
    ABI_ALLOCATE(ghcws,(2,npw*nspinor))
    ABI_ALLOCATE(gh_direcws,(2,npw*nspinor))
-   ABI_ALLOCATE(gvnl_dummy,(2,npw*nspinor))
+   ABI_ALLOCATE(gvnlx_dummy,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(gvnl_dummy,(0,0))
+   ABI_ALLOCATE(gvnlx_dummy,(0,0))
  end if
 
 !if "generalized eigenproblem", not sure of wfoptalg=2,3 algorithms
@@ -542,7 +542,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          sij_opt=0
          work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
        end if
-       call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnl_dummy,&
+       call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
 &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
        if (gen_eigenpb) then
          ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
@@ -859,7 +859,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
-         call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnl_direc,&
+         call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
 
          if(wfopta10==2 .or. wfopta10==3)then
@@ -873,7 +873,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              work(:,:)=gh_direc(:,:)-zshift(iband)*direc(:,:)
            end if
 
-           call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnl_dummy,&
+           call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnlx_dummy,&
 &           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
 
            if (gen_eigenpb) then
@@ -1084,10 +1084,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (use_vnl==1) then
 !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
-             gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnl_direc(1,ipw)*sintn
-             gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnl_direc(2,ipw)*sintn
+             gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
+             gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnlx_direc(2,ipw)*sintn
            end do
-!          call cg_zaxpby(npw*nspinor,(/sintn,zero/),gvnl_direc,(/costh,zero/),gvnlxc)
+!          call cg_zaxpby(npw*nspinor,(/sintn,zero/),gvnlx_direc,(/costh,zero/),gvnlxc)
          end if
 
          if (gen_eigenpb) then
@@ -1277,7 +1277,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_DEALLOCATE(ghc)
  ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gh_direc)
- ABI_DEALLOCATE(gvnl_direc)
+ ABI_DEALLOCATE(gvnlx_direc)
  ABI_DEALLOCATE(vresid)
  ABI_DEALLOCATE(gs_direc)
 
@@ -1294,7 +1294,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ABI_DEALLOCATE(ghcws)
    ABI_DEALLOCATE(gh_direcws)
  end if
- ABI_DEALLOCATE(gvnl_dummy)
+ ABI_DEALLOCATE(gvnlx_dummy)
 
  if(wfopta10==2.or.wfopta10==3)  then
    ABI_DEALLOCATE(work)

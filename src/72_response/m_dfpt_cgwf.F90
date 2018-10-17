@@ -205,7 +205,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  real(dp) :: dummy(0,0),tsec(2)
  real(dp),allocatable :: conjgr(:,:),cwaveq(:,:),cwwork(:,:),direc(:,:)
  real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:),gvnlx1_saved(:,:)
- real(dp),allocatable :: gs1c(:,:),gvnl_direc(:,:),pcon(:),sconjgr(:,:)
+ real(dp),allocatable :: gs1c(:,:),gvnlx_direc(:,:),pcon(:),sconjgr(:,:)
  real(dp),allocatable :: scprod(:,:),work(:,:),work1(:,:),work2(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: conjgrprj(:,:)
@@ -797,7 +797,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
        write(msg,'(a)') '  CGWF3_WARNING : dedt>0'
        call wrtout(std_out,msg,'PERS')
      end if
-     ABI_ALLOCATE(gvnl_direc,(2,npw1*nspinor))
+     ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
      ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
      if (gen_eigenpb)  then
        ABI_ALLOCATE(sconjgr,(2,npw1*nspinor))
@@ -806,7 +806,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end if
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1+usepaw
-     call getghc(cpopt,conjgr,conjgrprj,gh_direc,sconjgr,gs_hamkq,gvnl_direc,&
+     call getghc(cpopt,conjgr,conjgrprj,gh_direc,sconjgr,gs_hamkq,gvnlx_direc,&
 &     eshift,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
 !    ghc also includes the eigenvalue shift
@@ -878,7 +878,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
      call cg_zaxpy(npw1*nspinor,(/theta,zero/),conjgr,cwavef)
      call cg_zaxpy(npw1*nspinor,(/theta,zero/),gh_direc,ghc)
-     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnl_direc,gvnlxc)
+     call cg_zaxpy(npw1*nspinor,(/theta,zero/),gvnlx_direc,gvnlxc)
 
      if (gen_eigenpb) then
        call cg_zaxpy(npw1*nspinor,(/theta,zero/),sconjgr,gsc)
@@ -888,7 +888,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end if
 
      ABI_DEALLOCATE(gh_direc)
-     ABI_DEALLOCATE(gvnl_direc)
+     ABI_DEALLOCATE(gvnlx_direc)
      ABI_DEALLOCATE(sconjgr)
 
 !    ======================================================================
@@ -1095,8 +1095,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    if (allocated(gh_direc))  then
      ABI_DEALLOCATE(gh_direc)
    end if
-   if (allocated(gvnl_direc))  then
-     ABI_DEALLOCATE(gvnl_direc)
+   if (allocated(gvnlx_direc))  then
+     ABI_DEALLOCATE(gvnlx_direc)
    end if
    ABI_DEALLOCATE(conjgr)
    ABI_DEALLOCATE(cwaveq)

@@ -1110,7 +1110,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !(8)                     in cgwf------------------------------------------
 
-!conjgr, cwavef, direc, gh_direc, gvnl_direc
+!conjgr, cwavef, direc, gh_direc, gvnlx_direc
  cmpw(81)=2*5*nspinor          ; dttyp(81)=8
 !ghc,gvnlxc
  cmpw(82)=2*2*nspinor          ; dttyp(82)=8
@@ -2212,7 +2212,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
 !(6)                     in dfpt_cgwf ----------------------------------------
 
-!gh1, gh_direc, gvnl_direc, conjgr, direc, vresid, cwaveq
+!gh1, gh_direc, gvnlx_direc, conjgr, direc, vresid, cwaveq
  cmpw(61)=14*nspinor            ; dttyp(61)=8
 
 !(9a)                    in getghc and fourwf----------------------------
