@@ -484,7 +484,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  end if
 
 !Get the decomposition for each coefficients of the forces and stresses for
-!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017)
+!each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
  if(need_verbose)then
    write(message, '(a)' ) ' Initialisation of the fit process...'
    call wrtout(std_out,message,'COLL')
@@ -494,7 +494,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !Compute the displacmeent of each configuration.
 !Compute the variation of the displacement due to strain of each configuration.
 !Compute fixed forces and stresse and get the standard deviation.
-!Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
+!Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
@@ -1270,11 +1270,12 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !Compute the displacmeent of each configuration.
 !Compute the variation of the displacement due to strain of each configuration.
 !Compute fixed forces and stresse and get the standard deviation.
-!Compute Shepard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012).
+!Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
 !Get the decomposition for each coefficients of the forces,stresses and energy for
-!each atoms and each step  (see equations 11 & 12 of  PRB95,094115(2017)) + allocation
+!each atoms and each step  (see equations 11 & 12 of  
+! PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]] + allocation
  ABI_ALLOCATE(energy_coeffs,(ncoeff_tot,ntime))
  ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,ncoeff_tot,ntime))
  ABI_ALLOCATE(strten_coeffs,(6,ntime,ncoeff_tot))
@@ -1317,7 +1318,8 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  do ii=1,my_nmodel
    imodel = my_modelindexes(ii)
    call fit_polynomial_coeff_solve(coeff_values(imodel,1:ncoeff),fcart_coeffs,fit_data%fcart_diff,&
-&                                  info,list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
+&                                  energy_coeffs,fit_data%energy_diff,info,&
+&                                  list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
 &                                  ncoeff_tot,ntime,strten_coeffs,fit_data%strten_diff,&
 &                                  fit_data%training_set%sqomega)
 
@@ -1610,7 +1612,8 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!
 !! FUNCTION
 !! Build and the solve the system to get the values of the coefficients
-!! This routine solves the linear system proposed by C.Escorihuela-Sayalero see PRB95,094115(2017)
+!! This routine solves the linear system proposed by 
+!! C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
 !!
 !! INPUTS
 !! fcart_coeffs(3,natom_sc,ncoeff_max,ntime) = List of the values of the contribution to the
@@ -1618,6 +1621,9 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!                                             for each direction and each time
 !! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and
 !!                             fixed part of the model (more often harmonic part)
+!! energy_coeffs(ncoeff,ntime)   = value of the energy for each  coefficient (Ha)
+!! energy_diff(ntime) = Difference of energ ybetween DFT calculation and fixed part
+!!                             of the model (more often harmonic part)
 !! list_coeffs(ncoeff_fit) = List with the index of the coefficients used for this model
 !! natom = Number of atoms
 !! ncoeff_fit = Number of coeff for the fit (dimension of the system)
@@ -1627,7 +1633,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!                                      of  the coefficients for each direction,time
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
 !!                        fixed part of the model (more often harmonic part)
-!! sqomega(ntime) =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega(ntime) =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !!
 !! OUTPUT
 !! coefficients(ncoeff_fit) = Values of the coefficients
@@ -1647,7 +1653,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
+subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energy_coeffs,energy_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
 &                                     strten_coeffs,strten_diff,sqomega)
 
@@ -1665,6 +1671,8 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
  integer,intent(in)  :: natom,ncoeff_fit,ncoeff_max,ntime
  integer,intent(out) :: info_out
 !arrays
+ real(dp),intent(in) :: energy_coeffs(ncoeff_max,ntime)
+ real(dp),intent(in) :: energy_diff(ntime)
  integer,intent(in)  :: list_coeffs(ncoeff_fit)
  real(dp),intent(in) :: fcart_coeffs(3,natom,ncoeff_max,ntime)
  real(dp),intent(in) :: fcart_diff(3,natom,ntime)
@@ -1674,7 +1682,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 !Local variables-------------------------------
 !scalar
  integer :: ia,itime,icoeff,jcoeff,icoeff_tmp,jcoeff_tmp,mu,LDA,LDB,LDX,LDAF,N,NRHS
- real(dp):: ffact,sfact,ftmpA,stmpA,ftmpB,stmpB,fmu,fnu,smu,snu
+ real(dp):: efact,ffact,sfact,ftmpA,stmpA,ftmpB,stmpB,etmpA,etmpB,fmu,fnu,smu,snu,emu,enu
  integer :: INFO,ITER
  real(dp):: RCOND
  real(dp):: fcart_coeffs_tmp(3,natom,ntime)
@@ -1693,6 +1701,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 !Set the factors
  ffact = one/(3*natom*ntime)
  sfact = one/(6*ntime)
+ efact = one/(ntime)
 
 !0-Allocation
  ABI_ALLOCATE(A,(LDA,N))
@@ -1715,14 +1724,26 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
 !1-Get forces and stresses from the model and fill A
 !  Fill alsor B with the forces and stresses from
 !  the DFT snapshot and the model
-!  See equation 17 of PRB95 094115 (2017)
+!  See equation 17 of PRB95 094115 (2017) [[cite:Escorihuela-Sayalero2017]]
  do icoeff=1,ncoeff_fit
    icoeff_tmp = list_coeffs(icoeff)
    fcart_coeffs_tmp(:,:,:) = fcart_coeffs(:,:,icoeff_tmp,:)
    ftmpA= zero; ftmpB = zero
    stmpA= zero; stmpB = zero
+   etmpA= zero; etmpB = zero
 !  loop over the configuration
    do itime=1,ntime
+!    Fill energy
+     emu = energy_coeffs(icoeff_tmp,itime)
+     do jcoeff=1,ncoeff_fit
+       jcoeff_tmp = list_coeffs(jcoeff)
+       enu = energy_coeffs(jcoeff_tmp,itime)
+!       etmpA =  emu*enu
+!       A(icoeff,jcoeff) = A(icoeff,jcoeff) + efact*etmpA
+     end do
+     etmpB = etmpB + energy_diff(itime)*emu / (sqomega(itime)**3)
+     etmpB = zero ! REMOVE THIS LINE TO TAKE INTO ACOUNT THE ENERGY     
+
 !    Fill forces
      do ia=1,natom
        do mu=1,3
@@ -1748,7 +1769,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,&
        stmpB = stmpB + sqomega(itime)*strten_diff(mu,itime)*smu
      end do !End loop stress dir
    end do ! End loop time
-   B(icoeff,1) = B(icoeff,1) + ffact*ftmpB + sfact*stmpB
+   B(icoeff,1) = B(icoeff,1) + ffact*ftmpB + sfact*stmpB + efact*etmpB
  end do ! End loop icoeff
 
 !2-Solve Ax=B
@@ -1806,6 +1827,9 @@ end subroutine fit_polynomial_coeff_solve
 !! INPUTS
 !! coefficients(ncoeff)          = type(polynomial_coeff_type)
 !! energy_coeffs(ncoeff,ntime)   = value of the energy for each  coefficient (Ha)
+!! energy_diff(ntime) = Difference of energ ybetween DFT calculation and fixed part
+!!                             of the model (more often harmonic part)
+!!                             fixed part of the model (more often harmonic part)
 !! fcart_coeffs(ncoeff,3,natom,ntime) = value of the forces for each coefficient
 !!                                      (-1 factor is taking into acount) (Ha/Bohr)
 !! fcart_diff(3,natom,ntime) = Difference of cartesian forces between DFT calculation and
@@ -1819,7 +1843,7 @@ end subroutine fit_polynomial_coeff_solve
 !!                                      (1/ucvol factor is taking into acount) (Ha/Bohr^3)
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
 !!                        fixed part of the model (more often harmonic part)
-!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !!
 !! OUTPUT
 !! gf_value(4) = Goal function
@@ -1863,16 +1887,17 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
 !scalar
  integer :: ia,icoeff,icoeff_tmp,itime,mu
  real(dp):: etmp,emu,fmu,ftmp,smu,stmp
- real(dp) :: ffact,sfact
+ real(dp) :: ffact,sfact,efact
 !arrays
 ! *************************************************************************
 
 !1-Compute the value of the goal function
-! see equation 9 of PRB 95 094115(2017)
+! see equation 9 of PRB 95 094115(2017) [[cite:Escorihuela-Sayalero2017]]
  gf_value = zero
  etmp     = zero
  ftmp     = zero
  stmp     = zero
+ efact = one/(ntime)
 
 !Compute factors
  ffact = one/(3*natom*ntime)
@@ -1886,6 +1911,8 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
      icoeff_tmp = list_coeffs(icoeff)
      emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime)
    end do
+!   uncomment the next line to be consistent with the definition of the goal function   
+!   etmp = etmp + (energy_diff(itime)-emu)**2
    etmp = etmp + abs(energy_diff(itime)-emu)
 !  Fill forces
    do ia=1,natom
@@ -1908,10 +1935,10 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
    end do !End loop stress dir
  end do ! End loop time
 
- gf_value(1)   =  ffact*ftmp + sfact*stmp !Stresses + Forces
+ gf_value(1)   =  ffact*ftmp + sfact*stmp !+ efact*etmp !Stresses + Forces
  gf_value(2)   =  ffact*ftmp ! only Forces
  gf_value(3)   =  sfact*stmp ! only Stresses
- gf_value(4)   =  etmp / ntime ! abs(Energy)
+ gf_value(4)   =  efact*etmp !abs(Energy)
 
 end subroutine fit_polynomial_coeff_computeGF
 !!***
@@ -1923,7 +1950,7 @@ end subroutine fit_polynomial_coeff_computeGF
 !! fit_polynomial_coeff_getFS
 !!
 !! FUNCTION
-!! Compute all the matrix elements of eq.11 and 12 in PRB95,094115 (2017)
+!! Compute all the matrix elements of eq.11 and 12 in PRB95,094115 (2017) [[cite:Escorihuela-Sayalero2017]]
 !!
 !! INPUTS
 !! coefficients(ncoeff)          = type(polynomial_coeff_type)
@@ -2227,7 +2254,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! hist<type(abihist)> = The history of the MD
 !! natom = number of atom
 !! ntime = number of time in the hist
-!! sqomega =  Shepard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012)
+!! sqomega =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
 !! compute_anharmonic = TRUE if the anharmonic part of the effective potential
 !!                           has to be taking into acount
 !! print_file = if True, a ASCII file with the difference in energy will be print

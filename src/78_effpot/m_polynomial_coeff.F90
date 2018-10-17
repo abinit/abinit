@@ -27,7 +27,7 @@ module m_polynomial_coeff
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_polynomial_term
  use m_xmpi
 #ifdef HAVE_MPI2

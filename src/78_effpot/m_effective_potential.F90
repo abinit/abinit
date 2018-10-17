@@ -30,7 +30,7 @@ module m_effective_potential
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_strain
  use m_ifc
  use m_supercell
