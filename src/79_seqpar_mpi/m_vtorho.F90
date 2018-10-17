@@ -374,7 +374,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
- real(dp),allocatable :: enlx_k(:),enlnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
+ real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
@@ -466,7 +466,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  if(dtset%usewvl==0) then
    ABI_ALLOCATE(eknk,(mbdkpsp))
-   ABI_ALLOCATE(enlnk,(mbdkpsp))
+   ABI_ALLOCATE(enlxnk,(mbdkpsp))
    ABI_ALLOCATE(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
    ABI_ALLOCATE(EigMin,(2,dtset%mband))
    ABI_ALLOCATE(grnlnk,(3*natom,mbdkpsp*optforces))
@@ -478,7 +478,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        fockfornk=zero
      end if
    end if
-   eknk(:)=zero;enlnk(:)=zero
+   eknk(:)=zero;enlxnk(:)=zero
    if (optforces>0) grnlnk(:,:)=zero
    if(paw_dmft%use_dmft==1) eknk_nd=zero
  end if !usewvl==0
@@ -986,7 +986,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(paw_dmft%use_dmft==1) eknk_nd(isppol,ikpt,:,:,:) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
-       enlnk(1+bdtot_index : nband_k+bdtot_index) = enlx_k(:)
+       enlxnk(1+bdtot_index : nband_k+bdtot_index) = enlx_k(:)
 
        if(iscf>0 .or. iscf==-3)then
 !        Accumulate sum over k points for band, nonlocal and kinetic energies,
@@ -1098,16 +1098,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(989,1,tsec)
 
-!      If needed, exchange the values of eigen,resid,eknk,enlnk,grnlnk
+!      If needed, exchange the values of eigen,resid,eknk,enlxnk,grnlnk
        ABI_ALLOCATE(buffer1,((4+3*natom*optforces+dtset%usefock+3*natom*dtset%usefock*optforces)*mbdkpsp))
        if(paw_dmft%use_dmft==1) then
          ABI_ALLOCATE(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
        end if
-!      Pack eigen,resid,eknk,enlnk,grnlnk in buffer1
+!      Pack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        buffer1(1          :  mbdkpsp)=eigen(:)
        buffer1(1+  mbdkpsp:2*mbdkpsp)=resid(:)
        buffer1(1+2*mbdkpsp:3*mbdkpsp)=eknk(:)
-       buffer1(1+3*mbdkpsp:4*mbdkpsp)=enlnk(:)
+       buffer1(1+3*mbdkpsp:4*mbdkpsp)=enlxnk(:)
        index1=4*mbdkpsp
        if (optforces>0) then
          buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(grnlnk,(/(3*natom)*mbdkpsp/) )
@@ -1148,11 +1148,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
        call timab(48,2,tsec)
 
-!      Unpack eigen,resid,eknk,enlnk,grnlnk in buffer1
+!      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        eigen(:) =buffer1(1          :  mbdkpsp)
        resid(:) =buffer1(1+  mbdkpsp:2*mbdkpsp)
        eknk(:)  =buffer1(1+2*mbdkpsp:3*mbdkpsp)
-       enlnk(:) =buffer1(1+3*mbdkpsp:4*mbdkpsp)
+       enlxnk(:) =buffer1(1+3*mbdkpsp:4*mbdkpsp)
        index1=4*mbdkpsp
        if (optforces>0) then
          grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3*natom,mbdkpsp/) )
@@ -1348,7 +1348,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(992,1,tsec)
 
-!    Compute eeig, ek,enl and grnl from the new occ, and the shared eknk,enlnk,grnlnk
+!    Compute eeig, ek,enl and grnl from the new occ, and the shared eknk,enlxnk,grnlnk
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
      energies%e_nonlocalpsp = zero
@@ -1403,7 +1403,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              energies%e_kinetic = energies%e_kinetic + &
 &             dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
              energies%e_nonlocalpsp = energies%e_nonlocalpsp + &
-&             dtset%wtk(ikpt)*occ(bdtot_index)*enlnk(bdtot_index)
+&             dtset%wtk(ikpt)*occ(bdtot_index)*enlxnk(bdtot_index)
              if (usefock) then
                energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
                if (optforces>0) fock%fock_common%forces(:,:)=fock%fock_common%forces(:,:)+&
@@ -1605,7 +1605,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
    ABI_DEALLOCATE(eknk_nd)
    ABI_DEALLOCATE(grnlnk)
-   ABI_DEALLOCATE(enlnk)
+   ABI_DEALLOCATE(enlxnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
    if(iscf<=0 .and. me_distrb==0)then

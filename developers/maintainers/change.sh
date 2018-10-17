@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!enl_k!enlx_k!' $file > tmp.file
+ sed -e 's!enlnk!enlxnk!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

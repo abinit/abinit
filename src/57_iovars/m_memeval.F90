@@ -990,7 +990,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !(6e) is for the arrays in dielmt, for the dielmt chain, see (11)
 !(6f) is for the arrays in pawmkrhoij
 
-!eknlk, enlnk, grnlnk
+!eknlk, enlxnk, grnlnk
  cadd(51)=(11+3*natom)*mband*nkpt*nsppol &
 & ; dttyp(51)=8
 !kg_k
