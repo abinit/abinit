@@ -1,4 +1,4 @@
-# C in diamond structure.  Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
+# C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
  ndtset 6
 
  istwfk *1

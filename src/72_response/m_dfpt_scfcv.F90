@@ -696,13 +696,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     call wrtout(std_out,sjoin("dfpt_scfcv: previous iteration took ",sec2str(wtime_step)))
+     call wrtout(std_out,sjoin(" dfpt_scfcv: previous iteration took ",sec2str(wtime_step)))
 
      if (have_timelimit_in(ABI_FUNC)) then
        if (istep > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
-           write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in dfpt_scfcv."
+           write(msg,"(3a)")" Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in dfpt_scfcv."
            MSG_COMMENT(msg)
            call wrtout(ab_out, msg, "COLL")
            timelimit_exit = 1

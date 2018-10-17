@@ -3635,8 +3635,7 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
  end if
 
  if (nsym1<1) then
-   write(msg,'(a,i0,a)')&
-&   ' The number of selected symmetries should be > 0, while it is nsym=',nsym1,'.'
+   write(msg,'(a,i0,a)')' The number of selected symmetries should be > 0, while it is nsym= ',nsym1,'.'
    MSG_BUG(msg)
  end if
 
@@ -3645,14 +3644,14 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
      write(msg,'(a,i5,a)')' Found ',nsym1,' symmetries that leave the perturbation invariant.'
      call wrtout(iout,msg,'COLL')
    end if
-   write(msg,'(a,i5,a)')' littlegroup_pert : found ',nsym1,' symmetries that leave the perturbation invariant :'
+   write(msg,'(a,i5,a)')' littlegroup_pert: found ',nsym1,' symmetries that leave the perturbation invariant: '
    call wrtout(ount,msg,'COLL')
  else
    if (iout /= ount .and. iout > 0) then
      write(msg,'(a,a)')' The set of symmetries contains',' only one element for this perturbation.'
      call wrtout(iout,msg,'COLL')
    end if
-   write(msg,'(a)')' littlegroup_pert : only one element in the set of symmetries for this perturbation :'
+   write(msg,'(a)')' littlegroup_pert: only one element in the set of symmetries for this perturbation:'
    call wrtout(ount,msg,'COLL')
  end if
 

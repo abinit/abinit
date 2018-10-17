@@ -141,7 +141,9 @@ program mrgddb
 
    else
      ! Save filenames passed via command-line.
-     ABI_MALLOC(filnam, (mddb+1))
+     if (.not. allocated(filnam)) then
+       ABI_MALLOC(filnam, (mddb+1))
+     end if
      nfiles_cli = nfiles_cli + 1
      if (nfiles_cli > mddb+1) then
        ! Extend filnam

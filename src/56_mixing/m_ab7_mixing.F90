@@ -2146,7 +2146,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 
 !  Compute mixing factor
    lambda=(resid_new(1)-prod_resid(1))/(resid_new(1)+resid_old-2*prod_resid(1))
-   write(message,*)' mixing of old trial potential    :',lambda
+   write(message,*)' mixing of old trial potential: ',lambda
    call wrtout(std_out,message,'COLL')
 
 !  Evaluate best residual square on the line
@@ -2222,7 +2222,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
    det=aa1*aa2-bb*bb
    lambda =(aa2*cc1-bb*cc2)/det
    lambda2=(aa1*cc2-bb*cc1)/det
-   write(message,*)' mixing of old trial potentials   :',lambda,lambda2
+   write(message,*)' mixing of old trial potentials: ',lambda,lambda2
    call wrtout(std_out,message,'COLL')
 
 !  Store information for later use
@@ -2319,7 +2319,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
    end do
    alpha(:)=alpha(:)/det
    ABI_DEALLOCATE(amatinv)
-   write(message,'(a,5(1x,g10.3))')' mixing of old trial potential : alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
+   write(message,'(a,5(1x,g10.3))')' mixing of old trial potential: alpha(m:m-4)=',(alpha(ii),ii=niter,max(1,niter-4),-1)
    call wrtout(std_out,message,'COLL')
 
 !  Save latest trial potential and compute new trial potential

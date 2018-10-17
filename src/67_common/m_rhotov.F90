@@ -266,12 +266,12 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
 !    Use the periodic solver to compute Hxc.
      nk3xc=1
-!write(80,*) "rhotov"
-!xccc3d=zero
-!DEBUG
-     write(std_out,*)' rhotov : is_hybrid_ncpp=',is_hybrid_ncpp
-     write(std_out,*)' rhotov : n3xccc=',n3xccc
-!ENDDEBUG
+     !write(80,*) "rhotov"
+     !xccc3d=zero
+     !DEBUG
+     !write(std_out,*)' rhotov : is_hybrid_ncpp=',is_hybrid_ncpp
+     !write(std_out,*)' rhotov : n3xccc=',n3xccc
+     !ENDDEBUG
 
      call timab(941,1,tsec)
      if (ipositron==0) then

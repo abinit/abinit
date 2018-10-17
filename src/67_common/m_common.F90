@@ -991,8 +991,7 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
    write(message,'(a,i0,5a)')&
 &   '  nqpt =',dtset%nqpt,' is not allowed',ch10,&
 &   '  (only 0 or 1 are allowed).',ch10,&
-&   '  Action : correct your input file.'
-   call wrtout(ab_out,message,'COLL')
+&   '  Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1031,9 +1030,9 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 !Check that boxcut>=2 if dtset%intxc=1; otherwise dtset%intxc must be set=0
  if (boxcut<2.0_dp.and.dtset%intxc==1) then
    write(message, '(a,es12.4,a,a,a,a,a)' )&
-&   '  boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
-&   '  Need larger ngfft to use intxc=1.',ch10,&
-&   '  Action : you could increase ngfft, or decrease ecut, or put intxcn=0.'
+&   'boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
+&   'Need larger ngfft to use intxc=1.',ch10,&
+&   'Action: you could increase ngfft, or decrease ecut, or put intxcn=0.'
    MSG_ERROR(message)
  end if
 

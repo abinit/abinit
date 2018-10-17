@@ -414,9 +414,8 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
-
+subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc,&
+                   pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

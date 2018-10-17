@@ -935,6 +935,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Local variables-------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
+ integer,save :: enough=0
  integer :: iv1,ispden,nfftot_file,nfftot_out,ifft
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -975,7 +976,8 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
  else
    ! The FFT mesh used in the caller differ from the one found in the DBDB --> Fourier interpolation
    ! TODO: Add linear interpolation as well.
-   MSG_WARNING("FFT interpolation of DFPT potentials must be tested.")
+   if (enough == 0) MSG_WARNING("FFT interpolation of DFPT potentials must be tested.")
+   enough = enough + 1
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
    do ispden=1,db%nspden
      read(db%fh, err=10, iomsg=msg) (v1r_file(ifft, ispden), ifft=1,cplex*nfftot_file)
@@ -1416,7 +1418,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    ! Print progress.
    if (db_iqpt < 20) then
      call cwtime(cpu, wall, gflops, "stop")
-     write(msg,'(2(a,i0),2(a,f8.2))') "Reding q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
+     write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
    else if (db_iqpt == 20) then
      call wrtout(std_out, "...")
