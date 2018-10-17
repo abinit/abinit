@@ -714,7 +714,9 @@ Variable(
     mnemonics="SPIN CALCulate CORRELATION OBServables",
     text="""
 Flag to calculate spin correlation function based observables.
+
 * 0 --> do not calculate.
+
 * 1 --> calculate.
 """,
 ),
@@ -730,7 +732,9 @@ Variable(
     mnemonics="SPIN CALCulate TRAJectory based OBServables",
     text="""
 Flag to calculate spin trajectory based observables. (Nothing included yet.)
+
 * 0 --> do not calculate.
+
 * 1 --> calculate.
 """,
 ),
@@ -747,7 +751,9 @@ Variable(
     text="""
 Flag to calculate spin thermo dynamics observables,
 including the specific heat, magnetic susceptibility, Binder U4 value.
+
 * 0 --> do not calculate.
+
 * 1 --> calculate.
 """,
 ),
@@ -763,7 +769,9 @@ Variable(
     mnemonics="SPIN gilbert DAMPING factor",
     text="""
 Gilbert damping factor in LLG equation for spin dynamics.
+
 * negative value --> use damping factor from spin xml file.
+
 * positive value --> use as damping factor. The value should be between 0.0 and 1.0 (both included).
 """,
 ),
@@ -778,6 +786,7 @@ Variable(
     mnemonics="SPIN DIPole DIPole interaction",
     text="""
 * 0 --> Switch off spin dipole-dipole interaction.
+
 * 1 --> Switch on spin dipole-dipole interaction.
     (Not yet implemented.)
 """,
@@ -809,7 +818,9 @@ Variable(
     mnemonics="SPIN DYNAMICS",
     text="""
 Flag to run spin dynamics.
+
 * 0 --> Do not run spin dynamics.
+
 * 1 --> Run spin dynamics.
 """,
 ),
@@ -824,10 +835,15 @@ Variable(
     mnemonics="SPIN INITial STATE",
     text="""
 Flag to initialize spin state. (only option 1 and 2 are implemented.)
+
 * 0 --> Read from spinhist netcdf file. 
+
 * 1 --> Random spin state using uniform random numbers.
+
 * 2 --> Ferromagnetic state.
+
 * 3 --> State with q-vector using [[multibinit:spin_qpoint]]
+
 * 4 --> Random spin state with temperature of [[multibinit:spin_temperature]] 
 """,
 ),
@@ -885,7 +901,7 @@ Variable(
     text="""
 Total number of spin dynamics time  steps for preparing the system.
 The results of these time step are not written to trajectory spinhist.nc file,
-0nd they are not used for calculating the observables.
+And they are not used for calculating the observables.
 """,
 ),
 
@@ -914,9 +930,13 @@ Variable(
     text="""
 Add single ion anistropy term to the spin model hamiltonian.
 with user defined values (see [[multibinit:spin_sia_k1amp]] and [[multibinit:spin_sia_k1dir]].
+
 * 0 --> Do not add, use the term defined in the spin model xml file.
+
 * 1 --> Override the term in spin model xml file.
+
 * 2 --> Add to the value defined in spin model xml file.
+
 Default value: 0.
 """,
 ),
