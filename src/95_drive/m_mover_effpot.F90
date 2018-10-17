@@ -127,6 +127,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
  use m_mover,            only : mover
  use m_io_tools,         only : get_unit, open_file
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

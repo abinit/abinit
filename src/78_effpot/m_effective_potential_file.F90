@@ -663,35 +663,36 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
    MSG_ERROR(message)
  end if
 
+! TODO hexu: temporarily disabled. Discuss with alex how to do this properly.
 ! Do some checks
- if (natom < 1) then
-   write(message, '(a,a,a,a,a)' )&
-&   ' Unable to read the number of atom from ',trim(filename),ch10,&
-&   'This file  is not compatible with multibinit',ch10
-   MSG_ERROR(message)
- end if
-
- if (filetype==2 .or. filetype==23) then
-
-   if (natom < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of atom from ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
-   if (nrpt < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of rpt points ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
-   if (ntypat < 1) then
-     write(message, '(a,a,a)' )&
-&     ' Unable to read the number of type of atoms ',trim(filename),ch10
-     MSG_ERROR(message)
-   end if
-
- end if
+! if (natom < 1) then
+!   write(message, '(a,a,a,a,a)' )&
+!&   ' Unable to read the number of atom from ',trim(filename),ch10,&
+!&   'This file  is not compatible with multibinit',ch10
+!   MSG_ERROR(message)
+! end if
+!
+! if (filetype==2 .or. filetype==23) then
+!
+!   if (natom < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of atom from ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+!   if (nrpt < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of rpt points ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+!   if (ntypat < 1) then
+!     write(message, '(a,a,a)' )&
+!&     ' Unable to read the number of type of atoms ',trim(filename),ch10
+!     MSG_ERROR(message)
+!   end if
+!
+! end if
 
 end subroutine effective_potential_file_getDimSystem
 !!***
@@ -2281,17 +2282,11 @@ end subroutine system_xml2effpot
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore  
  use m_dynmat
  use m_xmpi
 
@@ -3704,7 +3699,6 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 
  do ia=1,natom_hist
    if(.not.any(list(:)==ia))then
-     write(*,*) 'I broke at', ia
      write(msg, '(5a)' )&
 &         'Unable to map the molecular dynamic file  ',ch10,&
 &         'on the reference supercell structure',ch10,&
