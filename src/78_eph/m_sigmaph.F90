@@ -89,6 +89,11 @@ module m_sigmaph
    type(bids_t), allocatable :: bids(:)
  end type degtab_t
 
+ ! Store the weights in single or double precision
+
+ integer,private,parameter :: DELTAW_KIND = dp
+ !integer,private,parameter :: DELTAW_KIND = sp
+
 !----------------------------------------------------------------------
 
 !!****t* m_sigmaph/sigmaph_t
@@ -265,7 +270,7 @@ module m_sigmaph
   ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  real(dp),allocatable :: deltaw_pm(:,:,:,:,:)
+  real(DELTAW_KIND),allocatable :: deltaw_pm(:,:,:,:,:)
   ! (2, nbcalc_ks, natom3, nbsum, nq_k))
   ! Weights for the q-integration of the two delta (abs/emission) if imag_only
   ! This array is initialized inside the (ikcalc, spin) loop

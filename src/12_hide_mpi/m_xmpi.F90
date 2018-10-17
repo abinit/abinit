@@ -519,6 +519,12 @@ interface xmpi_sum
   module procedure xmpi_sum_dpvt
   module procedure xmpi_sum_dpv
   module procedure xmpi_sum_dpn    !?
+  module procedure xmpi_sum_sp2d
+  module procedure xmpi_sum_sp3d
+  module procedure xmpi_sum_sp4d
+  module procedure xmpi_sum_sp5d
+  module procedure xmpi_sum_sp6d
+  module procedure xmpi_sum_sp7d
   module procedure xmpi_sum_dp2d
   module procedure xmpi_sum_dp3d
   module procedure xmpi_sum_dp4d
