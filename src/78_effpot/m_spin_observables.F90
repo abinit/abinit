@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_spin_model
+!!****m* ABINIT/m_spin_observables
 !! NAME
 !! m_spin_observables
 !!
@@ -8,9 +8,8 @@
 !!
 !!
 !! Datatypes:
-!!
+!! spin_observable_t: store data to calculate observables
 !! Subroutines:
-!!
 !!
 !!
 !! COPYRIGHT

@@ -604,7 +604,9 @@ contains
 
     T_step=(T_end-T_start)/(T_nstep-1)
 
-    write(msg, "(A52, ES13.5, A11, ES13.5, A1)") "Starting temperature dependent calculations. T from ", T_start, "K to ", T_end, " K."
+    write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+            & "Starting temperature dependent calculations. T from ", &
+            & T_start, "K to ", T_end, " K."
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out, msg, "COLL")
 
@@ -632,9 +634,11 @@ contains
 
        self%spin_mover%temperature=T
        write(post_fname, "(I4.4)") i+1
-       call spin_model_t_prepare_ncfile(self, spin_ncfile, trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
+       call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
+               & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
        call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
-       call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
+       call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, & 
+               & self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
        call spin_ncfile_t_close(spin_ncfile)
 
  end do
