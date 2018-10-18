@@ -55,7 +55,7 @@ module m_libpaw_mpi
 #endif
 
 !----------------------------------------------------------------------
-!MPI public procedures.
+!MPI public procedures
 
  public :: xpaw_mpi_abort                 ! Wrapper for MPI_ABORT
  public :: xpaw_mpi_comm_rank             ! Wrapper for MPI_COMM_RANK
@@ -66,7 +66,11 @@ module m_libpaw_mpi
  public :: xpaw_mpi_iprobe                ! Wrapper for MPI_IPROBE
 
 !----------------------------------------------------------------------
-!MPI generic interfaces.
+!MPI private procedures
+ private :: xpaw_mpi_get_tag_ub           ! Get MPI_TAG_UB attribute
+
+!----------------------------------------------------------------------
+!MPI generic interfaces
 
  public :: xpaw_mpi_allgather             ! Wrapper for MPI_ALLGATHER
  interface xpaw_mpi_allgather
@@ -2297,7 +2301,7 @@ subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_RECV(xval,n1,MPI_INTEGER,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
@@ -2358,7 +2362,7 @@ subroutine xpaw_mpi_recv_dp1d(xval,source,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_RECV(xval,n1,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
@@ -2419,7 +2423,7 @@ subroutine xpaw_mpi_recv_dp2d(xval,source,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1) ; n2=size(xval,dim=2)
-   my_tag=MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_RECV(xval,n1*n2,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
@@ -2480,7 +2484,7 @@ subroutine xpaw_mpi_recv_dp3d(xval,source,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1) ; n2=size(xval,dim=2) ; n3=size(xval,dim=3)
-   my_tag=MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_RECV(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,MPI_STATUS_IGNORE,ier)
  end if
 #endif
@@ -2541,8 +2545,8 @@ subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
  ierr=0
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
-   my_tag=MOD(tag,MPI_TAG_UB)
    n1=size(xval)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_IRECV(xval,n1,MPI_INTEGER,source,my_tag,spaceComm,request,ier)
    ierr=ier
  end if
@@ -2604,7 +2608,7 @@ subroutine xpaw_mpi_irecv_dp1d(xval,source,tag,spaceComm,request,ierr)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1)
-   my_tag=MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_IRECV(xval,n1,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,request,ier)
    ierr=ier
  end if
@@ -2666,7 +2670,7 @@ subroutine xpaw_mpi_irecv_dp2d(xval,source,tag,spaceComm,request,ierr)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1);n2=size(xval,dim=2)
-   my_tag=MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_IRECV(xval,n1*n2,MPI_DOUBLE_PRECISION,source,my_tag,spaceComm,request,ier)
    ierr=ier
  end if
@@ -2727,7 +2731,7 @@ subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_SEND(xval,n1,MPI_INTEGER,dest,my_tag,spaceComm,ier)
  end if
 #endif
@@ -2785,7 +2789,7 @@ subroutine xpaw_mpi_send_dp1d(xval,dest,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_SEND(xval,n1,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,ier)
  end if
 #endif
@@ -2843,7 +2847,7 @@ subroutine xpaw_mpi_send_dp2d(xval,dest,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1) ; n2=size(xval,dim=2)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_SEND(xval,n1*n2,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,ier)
  end if
 #endif
@@ -2901,7 +2905,7 @@ subroutine xpaw_mpi_send_dp3d(xval,dest,tag,spaceComm,ier)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1) ; n2=size(xval,dim=2) ; n3=size(xval,dim=3)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_SEND(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,ier)
  end if
 #endif
@@ -2961,7 +2965,7 @@ subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_ISEND(xval,n1,MPI_INTEGER,dest,my_tag,spaceComm,request,ier)
    ierr=ier
  end if
@@ -3020,7 +3024,7 @@ subroutine xpaw_mpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_ISEND(xval,n1,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
    ierr=ier
  end if
@@ -3145,7 +3149,7 @@ subroutine xpaw_mpi_exch_int1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(n1==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag = MOD(n1,MPI_TAG_UB)
+ tag = MOD(n1,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,n1,MPI_INTEGER,sender,tag,spaceComm,status,ier)
  end if
@@ -3212,7 +3216,7 @@ subroutine xpaw_mpi_exch_dp1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(n1==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag = MOD(n1,MPI_TAG_UB)
+ tag = MOD(n1,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,n1,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,status,ier)
  end if
@@ -3279,7 +3283,7 @@ subroutine xpaw_mpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(nt==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag=MOD(nt,MPI_TAG_UB)
+ tag = MOD(nt,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,status,ier)
  end if
@@ -3346,7 +3350,7 @@ subroutine xpaw_mpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 #if defined HAVE_MPI
  if (sender==recever.or.spaceComm==xpaw_mpi_comm_null.or.(nt==0)) return
  call MPI_COMM_RANK(spaceComm,me,ier)
- tag=MOD(nt,MPI_TAG_UB)
+ tag = MOD(nt,xpaw_mpi_get_tag_ub(spaceComm))
  if (recever==me) then
    call MPI_RECV(vrecv,nt,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,status,ier)
  end if
@@ -3686,6 +3690,65 @@ subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
  end if
 #endif
 end subroutine xpaw_mpi_sum_dp3d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xpaw_mpi_get_tag_ub
+!! NAME
+!!  xpaw_mpi_get_tag_ub
+!!
+!! FUNCTION
+!!  Get MPI_TAG_UB attribute
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  xpaw_mpi_get_tag_ub=value for the MPI_TAG_UB attribute attached to comm
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      mpi_attr_get
+!!
+!! SOURCE
+
+function xpaw_mpi_get_tag_ub(comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xpaw_mpi_get_tag_ub'
+!End of the abilint section
+
+ implicit none
+
+!Arguments-------------------------
+ integer, intent(in) :: comm
+ integer :: xpaw_mpi_get_tag_ub
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: attribute_val,ier
+ logical :: lflag
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_MPI
+ !Deprecated in MPI2 but not all MPI2 implementations provide MPI_Comm_get_attr !
+ call MPI_ATTR_GET(comm,MPI_TAG_UB,attribute_val,lflag,ier)
+!call MPI_Comm_get_attr(comm MPI_TAG_UB,attribute_val,lflag,ier)
+
+ if (lflag) xpaw_mpi_get_tag_ub = attribute_val
+
+#else
+ xpaw_mpi_get_tag_ub=32767
+#endif
+
+end function xpaw_mpi_get_tag_ub
 !!***
 
 !----------------------------------------------------------------------
