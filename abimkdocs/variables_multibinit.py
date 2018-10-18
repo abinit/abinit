@@ -891,7 +891,7 @@ Total number of spin dynamics time  steps.
 
 
 Variable(
-    abivarname="spin_ntime@multibinit",
+    abivarname="spin_ntime_pre@multibinit",
     varset="multibinit",
     vartype="integer",
     topics=['SpinDynamicsMultibinit_basic'],
