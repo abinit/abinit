@@ -340,9 +340,6 @@ contains
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
 
-
-          write(std_out,*) msg
-          write(ab_out, *) msg
        endif
        t=t+self%dt
     enddo
