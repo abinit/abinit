@@ -654,7 +654,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    !call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
 
- case (5)
+ case (5, -5)
    ! Interpolate the phonon potential
    call dvdb_interpolate_and_write(dvdb, dtset, dtfil%fnameabo_dvdb, ngfftc,ngfftf, cryst, &
      ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)

@@ -1,6 +1,6 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 4
+ndtset 5
 
 getwfk   20    # Read GS wavefunctions from DS20_WFK
 getddb   20    # Read DDB files from DS20_DDB
@@ -60,6 +60,20 @@ eph_ngqpt_fine3 4 4 4
 eph_task4 -4
 getdvdb4   2
 eph_ngqpt_fine4 4 4 4
+
+############
+# DATASET 5
+############
+eph_task5 -5
+getdvdb5   2
+
+ph_nqpath5 5
+ph_qpath5
+  0 0 0 
+  0.15 0 0
+  0.25 0 0
+  0.35 0 0
+  0.5 0.0 0
 
 ############################################################################################
 #                                         STRUCTURE

@@ -96,7 +96,7 @@
 #%% test_chain = t157.in, t158.in, t159.in, t160.in
 #%% [files]
 #%% files_to_test = 
-#%%   t157.out, tolnlines = 10, tolabs = 1.1e-3, tolrel = 2.0e-2
+#%%   t157.out, tolnlines = 180, tolabs = 1.1e-3, tolrel = 2.0e-2
 #%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10

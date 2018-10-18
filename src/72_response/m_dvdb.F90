@@ -4589,6 +4589,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
  type(hdr_type) :: hdr_ref
+ !type(kpath_t) :: qpath
 !arrays
  integer :: qptrlatt(3,3), rfdir(3)
  integer :: symq(4,2,cryst%nsym)
@@ -4601,22 +4602,42 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- write(msg, '(2a)') "Interpolation of the electron-phonon coupling potential", ch10
+ write(msg, '(2a)') " Interpolation of the electron-phonon coupling potential", ch10
  call wrtout(ab_out, msg, do_flush=.True.); call wrtout(std_out, msg, do_flush=.True.)
- msg = sjoin(" From coarse q-mesh:", ltoa(ngqpt_coarse), "to:", ltoa(dtset%eph_ngqpt_fine))
- call wrtout(ab_out, msg); call wrtout(std_out, msg)
+
+ if (dtset%eph_task == 5) then
+   msg = sjoin(" From coarse q-mesh:", ltoa(ngqpt_coarse), "to:", ltoa(dtset%eph_ngqpt_fine))
+   call wrtout(ab_out, msg); call wrtout(std_out, msg)
+   ! Setup fine q-point grid
+   ! Generate the list of irreducible q-points in the grid
+   qptrlatt = 0
+   qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+
+ else if (dtset%eph_task == -5) then
+   msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
+   call wrtout(ab_out, msg); call wrtout(std_out, msg)
+   ABI_CHECK(dtset%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
+   !qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+   !nqpts = qpath%npts
+   !call kpath_free(qpath)
+   nqibz = dtset%ph_nqpath
+   ABI_MALLOC(qibz, (3, nqibz))
+   qibz = dtset%ph_qpath(:, 1:nqibz)
+   ABI_CALLOC(wtq, (nqibz))
+   nqbz = nqibz
+   ABI_MALLOC(qbz, (3, nqbz))
+   qbz = qibz
+
+ else
+   MSG_ERROR(sjoin("Invalid eph_task", itoa(dtset%eph_task)))
+ end if
 
  ! =======================
  ! Setup fine q-point grid
  ! =======================
  nfftf = product(ngfftf(1:3))
  nfft = product(ngfft(1:3))
-
- ! Generate the list of irreducible q-points in the grid
- qptrlatt = 0
- !qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 
  ! check that ngqpt_coarse is in DVDB.
  nqbz_coarse = product(ngqpt_coarse) * nqshift_coarse
@@ -4742,9 +4763,9 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    end if
  end do
 
- msg = sjoin("Number of q-points found in initial DVDB", itoa(nqpt_read))
+ msg = sjoin(" Number of q-points found in input DVDB", itoa(nqpt_read))
  call wrtout(ab_out, msg); call wrtout(std_out, msg)
- msg = sjoin("Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate))
+ msg = sjoin(" Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate))
  call wrtout(ab_out, msg); call wrtout(std_out, msg)
 
  ! =================================================

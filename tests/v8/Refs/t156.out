@@ -425,6 +425,7 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+- Writing electron DOS to file: t156o_DS1_EDOS
 Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
@@ -549,6 +550,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+- Writing electron DOS to file: t156o_DS2_EDOS
 Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
@@ -677,6 +679,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+- Writing electron DOS to file: t156o_DS3_EDOS
 Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
@@ -807,6 +810,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+- Writing electron DOS to file: t156o_DS4_EDOS
 Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
@@ -936,6 +940,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+- Writing electron DOS to file: t156o_DS5_EDOS
 Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
@@ -1058,6 +1063,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+- Writing electron DOS to file: t156o_DS6_EDOS
 Number of bands in e-ph self-energy: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]

@@ -3680,7 +3680,9 @@ The choice is among:
 * 3 --> Compute phonon self-energy.
 * 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy).
-* 5 --> Interpolate DFPT potentials to produce a new DVDB file that can be read with [[getdvdb]]
+* 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
+* -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]] (Note that, in this case,
+         the user has to provide the full list of q-points in the input, [[ph_ndivsm]] is not used to generate the q-path.
 """,
 ),
 
