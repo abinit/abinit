@@ -220,7 +220,8 @@ contains
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self)
 
-    !call self%spin_mover%initialize(self%nspins, dt=params%dtspin, total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
+    !call self%spin_mover%initialize(self%nspins, dt=params%dtspin, & 
+    !    & total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
          &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature, &
          & pre_time=self%params%spin_dt*self%params%spin_ntime_pre)
@@ -509,8 +510,8 @@ contains
 
     end if
 
-    call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%ms,  time=0.0_dp, ihist_latt=0, inc=.True.)
-    !print *, "initial spin", self%spin_hist%current_S
+    call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%ms, &
+          &  time=0.0_dp, ihist_latt=0, inc=.True.)
   end subroutine spin_model_t_set_initial_spin
   !!***
 

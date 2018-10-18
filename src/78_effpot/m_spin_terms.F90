@@ -804,6 +804,9 @@ contains
        ABI_DEALLOCATE(self%gamma_l)
     endif
 
+    if (allocated(self%H_lang_coeff))  then
+       ABI_DEALLOCATE(self%H_lang_coeff)
+    endif
 
 
     self%has_exchange=.False.

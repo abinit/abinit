@@ -129,6 +129,11 @@ contains
        ABI_DEALLOCATE(self%isublatt)
     endif
 
+    if (allocated(self%nspins_sub)) then
+       ABI_DEALLOCATE(self%nspins_sub)
+    endif
+
+
     if (allocated(self%Ms_coeff)) then
        ABI_DEALLOCATE(self%Ms_coeff)
     endif
