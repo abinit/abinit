@@ -1256,7 +1256,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    !if (sum(dtset%qptn(1:3)**2)>=1.d-14) then ! non-zero q
    if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
-     call wrtout(std_out, "qpt is Gamma, psi_k+q initialized from psi_k in memory")
+     call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
    else

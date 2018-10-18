@@ -4954,7 +4954,7 @@ subroutine subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
      end if
    end do
 
-!  If paw, musb also rotate S.C(G,n):
+!  If paw, must also rotate S.C(G,n):
    if (usepaw==1) then
 
      do iband=1,nband_k

@@ -35,7 +35,8 @@ module m_vtowfk
  use m_linalg_interfaces
  use m_cgtools
 
- use m_time,        only : timab
+ use m_time,        only : timab, cwtime, sec2str
+ use m_fstrings,    only : sjoin, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_paw_dmft,    only : paw_dmft_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
@@ -207,7 +208,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock
- real(dp) :: res,residk,weight
+ real(dp) :: res,residk,weight,cpu,wall,gflops
  character(len=500) :: message
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
@@ -306,9 +307,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
-!Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
-
- if(prtvol>2 .or. ikpt<=nkpt_max)then
+ ! Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
+ if (prtvol>2 .or. ikpt<=nkpt_max) then
    write(message,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
    call wrtout(std_out,message,'PERS')
  end if
@@ -326,7 +326,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  do inonsc=1,nnsclo_now
 
-!  This initialisation is needed for the MPI-parallelisation (gathering using sum)
+   if (iscf < 0) call cwtime(cpu, wall, gflops, "start")
+
+   ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
    if(wfopta10 /= 1 .and. .not. newlobpcg) then
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
@@ -417,7 +419,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =========================================================================
 
 !  Find largest resid over bands at this k point
-!  Note that this operation is done BEFORE rotation of bands :
+!  Note that this operation is done BEFORE rotation of bands:
 !  it would be time-consuming to recompute the residuals after.
    residk=maxval(resid_k(1:max(1,nband_k-dtset%nbdbuf)))
 
@@ -490,9 +492,15 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
-   if (iscf <= 0 .and. residk > dtset%tolwfr .and. residk < tol7) then
-     if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
-     ii = fftcore_set_mixprec(0)
+   if (iscf < 0) then
+     ! Print residual and wall-time after NSCF iteration.
+     call cwtime(cpu, wall, gflops, "stop")
+     call wrtout(std_out, sjoin("max resid =", ftoa(residk, fmt="es13.5"), &
+       " (without nbdbuf). one NSCF iteration took cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+     if (residk > dtset%tolwfr .and. residk < tol7) then
+       if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
+       ii = fftcore_set_mixprec(0)
+     end if
    end if
 
    ! Exit loop over inonsc if converged

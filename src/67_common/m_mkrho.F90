@@ -566,11 +566,11 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                end do
 
                call rot_cg(paw_dmft%occnd(:,:,:,ikpt,isppol), cwavef_rot, npw_k, nband_k, blocksize,&
-&                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag) 
+&                          dtset%nspinor, paw_dmft%include_bands(1), paw_dmft%mbandc, occ_diag)
                do ib=1,blocksize
                  cwavef(:, 1+(ib-1)*npw_k:ib*npw_k, :) = cwavef_rot(:, :, ib, :)
                end do
-               
+
                occ_k(:) = occ_diag(:)
              end if
 ! ---------- END DMFT
@@ -767,7 +767,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
 !Find and print minimum and maximum total electron density
 !(or total kinetic energy density, or total element of kinetic energy density tensor) and locations
- call wrtout(std_out,'mkrho: echo density (plane-wave part only)','COLL')
+ call wrtout(std_out,' mkrho: echo density (plane-wave part only)','COLL')
  call prtrhomxmn(std_out,mpi_enreg,dtset%nfft,dtset%ngfft,dtset%nspden,1,rhor,optrhor=ioption,ucvol=ucvol)
 
  call timab(799,2,tsec)

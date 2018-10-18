@@ -1856,7 +1856,7 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
 
  if(nspden==4)then
    errid = AB7_ERROR_MIXING_ARG
-   write(errmess, *) ' scfeig : does not work yet for nspden=4'
+   write(errmess, *) ' scfeig: does not work yet for nspden=4'
    return
  end if
 
@@ -1867,7 +1867,7 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
  if(istep==1)then
 
    write(message, '(a,es12.4,a,a,a,a,a,a,a)' )&
-&   ' scfeig : fixed PC_residual square =',fix_resid,ch10,&
+&   ' scfeig: fixed PC_residual square =',fix_resid,ch10,&
 &   '    Note that fixed resid should always be much larger',ch10,&
 &   '    than initial PC resid square, still sufficiently',ch10,&
 &   '    small to reduce anharmonic effects ',ch10
@@ -1880,8 +1880,7 @@ subroutine scfeig(istep,nfft,nspden,vrespc,vtrial,vtrial0,work,errid,errmess)
        resid_old=resid_old+vrespc(ifft,isp)**2
      end do
    end do
-   write(message, '(a,es12.4)' )&
-&   ' scfeig : initial PC_residual square =',resid_old
+   write(message, '(a,es12.4)' )' scfeig: initial PC_residual square =',resid_old
    call wrtout(std_out,message,'COLL')
    if(resid_old>1.0d-8)then
      errid = AB7_ERROR_MIXING_ARG
@@ -2101,22 +2100,21 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 !_______________________________________________________________
 !Here use only the preconditioning, or initialize the other algorithms
 
- if(istep==1 .or. iscf==2)then
-
-   write(message,'(2a)') ch10,'Simple mixing update:'
+ if (istep==1 .or. iscf==2) then
+   write(message,'(2a)') ch10,' Simple mixing update:'
    call wrtout(std_out,message,'COLL')
 
-   write(message,*)' residual square of the potential :',resid_new(1)
+   write(message,*)' residual square of the potential: ',resid_new(1)
    call wrtout(std_out,message,'COLL')
 
-!  Store information for later use
+   ! Store information for later use
    if (iscf==3.or.iscf==4) resid_old=resid_new(1)
    if (iscf==7) then
      amat(:,:)=zero
      amat(1,1)=resid_new(1)
    end if
 
-!  Compute new vtrial (and new rhoij if PAW)
+   ! Compute new vtrial (and new rhoij if PAW)
    if (iscf/=2) f_fftgr(:,:,i_vstore)=vtrial(:,:)
    vtrial(:,:)=vtrial(:,:)+f_fftgr(:,:,i_vrespc(1))
    if (usepaw==1) then
@@ -2128,7 +2126,7 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 !  Here Anderson algorithm using one previous iteration
  else if((istep==2 .or. iscf==3).and.iscf/=7)then
 
-   write(message,'(2a)') ch10,'Anderson update:'
+   write(message,'(2a)') ch10,' Anderson update:'
    call wrtout(std_out,message,'COLL')
 
    write(message,*)' residual square of the potential: ',resid_new(1)
@@ -2185,10 +2183,10 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
 !  Here Anderson algorithm using two previous iterations
  else if(iscf==4.and.iscf/=7)then
 
-   write(message,'(2a)') ch10,'Anderson (order 2) update:'
+   write(message,'(2a)') ch10,' Anderson (order 2) update:'
    call wrtout(std_out,message,'COLL')
 
-   write(message,*)' residual square of the potential :',resid_new(1)
+   write(message,*)' residual square of the potential: ',resid_new(1)
    call wrtout(std_out,message,'COLL')
 
 !  Compute prod_resid from f_fftgr/f_paw(:,:,i_vrespc(1)) and f_fftgr/f_paw(:,:,i_vrespc(2))
@@ -2264,8 +2262,8 @@ subroutine scfopt(cplex,f_fftgr,f_paw,iscf,istep,i_vrespc,i_vtrial,&
    if (npulay>npulaymax) then
      errid = AB7_ERROR_MIXING_CONVERGENCE
      write(errmess, '(4a)' ) ch10,&
-&     ' scfopt : ERROR - ',ch10,&
-&     '  Too much iterations required for Pulay algorithm (<50) !'
+&     ' scfopt: ERROR - ',ch10,&
+&     '  Too many iterations required for Pulay algorithm (<50) !'
      return
    end if
 
