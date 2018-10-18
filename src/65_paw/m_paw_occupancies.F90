@@ -152,7 +152,7 @@ CONTAINS  !=====================================================================
  integer :: idum(0), n2buff
  integer, allocatable :: req_correl(:,:,:)
  real(dp) :: occup(2)
- real(dp) ABI_ASYNC, allocatable :: buffer_cprj_correl(:,:,:,:,:)
+ real(dp) ABI_ASYNC, allocatable :: buffer_cprj_correl(:,:,:)
  character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:),cwaveprj(:,:),cwaveprjb(:,:)
  type(pawcprj_type),pointer :: cprj_ptr(:,:)
@@ -224,7 +224,7 @@ CONTAINS  !=====================================================================
  if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
    if(paw_dmft%use_bandc(mpi_enreg%me_band+1)) then
      n2buff = nspinor*sum(dimcprj)
-     ABI_ALLOCATE(buffer_cprj_correl,(2,n2buff,nbandc1,nkpt,nsppol))
+     ABI_ALLOCATE(buffer_cprj_correl,(2,n2buff,nbandc1))
      ABI_ALLOCATE(req_correl,(nbandc1, nkpt, nsppol))
      req_correl(:,:,:) = 0
    end if
@@ -298,7 +298,7 @@ CONTAINS  !=====================================================================
 &                             iorder_cprj,isppol,mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,&
 &                             unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
 
-             call pawcprj_pack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1,ikpt,isppol))
+             call pawcprj_pack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
              do proc_recver=0,mpi_enreg%nproc_band-1
                if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
 !                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd 
@@ -313,9 +313,11 @@ CONTAINS  !=====================================================================
                  if(locc_test) then
                    ! send to proc_recver
                    ierr = 0
-                   call xmpi_isend(buffer_cprj_correl(:,:,ibc1,ikpt,isppol),proc_recver,&
+                   call xmpi_isend(buffer_cprj_correl(:,:,ibc1),proc_recver,&
 &                                  10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,&
 &                                  req_correl(ibc1,ikpt,isppol),ierr)
+!                  force sending or buffering
+                   call xmpi_wait(req_correl(ibc1,ikpt,isppol), ierr)
                  end if
                end if
              end do
@@ -333,7 +335,7 @@ CONTAINS  !=====================================================================
              if(locc_test) then
                ! recv from proc_sender
                ierr = 0
-               call xmpi_irecv(buffer_cprj_correl(:,:,ibc1,ikpt,isppol),proc_sender,&
+               call xmpi_irecv(buffer_cprj_correl(:,:,ibc1),proc_sender,&
 &                              10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,&
 &                              req_correl(ibc1,ikpt,isppol),ierr)
              end if
@@ -413,7 +415,7 @@ CONTAINS  !=====================================================================
                    ierr = 0
                    call xmpi_wait(req_correl(ibc1,ikpt,isppol), ierr)
                  end if
-                 call pawcprj_unpack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1,ikpt,isppol))
+                 call pawcprj_unpack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
                else ! paral_kgb /= 0
                  call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1,ibg,ikpt,iorder_cprj,isppol,&
 &                                 mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
