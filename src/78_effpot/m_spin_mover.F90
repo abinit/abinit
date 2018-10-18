@@ -278,24 +278,28 @@ contains
     t=0.0
     counter=0
     write(msg, *) " Begining spin dynamic steps :"
-    write(std_out,*) msg
-    write(ab_out, *) msg
+
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
     msg=repeat("=", 65)
-    write(std_out,*) msg
-    write(ab_out, *) msg
+
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
 
     write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "Energy (Ha)"
-    write(std_out,*) msg
-    write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
+
     msg=repeat("-", 65)
-    write(std_out,*) msg
-    write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
 
     if (abs(self%pre_time) > 1e-30) then
        msg="Pre-run:"
-       write(std_out,*) msg
-       write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
 
+ 
        do while(t<self%pre_time)
           counter=counter+1
           call spin_mover_t_run_one_step(self, calculator, hist)
@@ -305,8 +309,11 @@ contains
              write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/Ha_J
-             write(std_out,*) msg
-             write(ab_out, *) msg
+          ! total : 13+4+...= 64 
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
+
+ 
           endif
           t=t+self%dt
        end do
@@ -314,8 +321,10 @@ contains
        counter=0
        call spin_hist_t_reset(hist,array_to_zero=.False.)
        msg="Formal run:"
-       write(std_out,*) msg
-       write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
+
+
     endif
 
     do while(t<self%total_time)
@@ -328,6 +337,10 @@ contains
           write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                & ob%Mst_norm_total/ob%Snorm_total, &
                & hist%etot(hist%ihist_prev)/Ha_J
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
+
+
           write(std_out,*) msg
           write(ab_out, *) msg
        endif
@@ -335,32 +348,37 @@ contains
     enddo
 
     msg=repeat("-", 65)
-    write(std_out,*) msg
-    write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
+
+
 
     write(msg, "(A30)") "Summary of spin dynamics:"
-    write(std_out,*) msg
-    write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
 
     write(msg, "(A65)") "At the end of the run, the average spin at each sublattice is"
-    write(std_out,*) msg
-    write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
+
 
     write(msg, "(8X, 10X, A5, A2, 4X, 4A10)")  'ID', ": ", '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
-    write(std_out,*) msg
-    write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
 
 
     do i =1, ob%nsublatt
        write(msg, "(8X, A10, I5.4, A2, 4X, 4F10.5)") "Sublattice", i, ": ", (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
             sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B_SI)**2))
-       write(std_out,*) msg
-       write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
     end do
 
     msg=repeat("=", 65)
-    write(std_out,*) msg
-    write(ab_out, *) msg
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out, msg, 'COLL')
+
+
 
   end subroutine spin_mover_t_run_time
 !!***
