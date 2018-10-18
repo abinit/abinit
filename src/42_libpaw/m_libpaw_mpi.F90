@@ -3083,7 +3083,7 @@ subroutine xpaw_mpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
    n1=size(xval,dim=1) ; n1=size(xval,dim=2)
-   my_tag = MOD(tag,MPI_TAG_UB)
+   my_tag = MOD(tag,xpaw_mpi_get_tag_ub(spaceComm))
    call MPI_ISEND(xval,n1*n2,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
    ierr=ier
  end if
