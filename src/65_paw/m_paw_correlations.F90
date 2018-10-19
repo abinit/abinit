@@ -1684,7 +1684,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            lmax=pawtab(itypat)%indklmn(4,klmn)
 
            ro(1:2)=zero
-           ro(1:cplex_rhoij)=half*pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,1)
+           ro(1:cplex_rhoij)=pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+cplex_rhoij-1,ispden)
            if (ndij==1) ro(1:2)=half*ro(1:2)
 !          Non-collinear magnetism: keep n, m storage because
 !            it is easier for the computation of noccmmp from rhoij)
@@ -1692,17 +1692,18 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
            if(lmin==0.and.lmax==2*lcur) then
              icount=in1+(in2*(in2-1))/2
              if(pawtab(itypat)%ij_proj<icount)  then
-               message='PAW+U: Problem in the loop for calculating noccmmp !'
+               message='PAW+U: Problem in the loop calculating noccmmp!'
                MSG_BUG(message)
              end if
              if(in1/=in2) then
                if(im2<=im1) then
-                 noccmmptemp(:,im1,im2,ispden)=noccmmptemp(:,im1,im2,ispden)+ro(:)*pawtab(itypat)%phiphjint(icount)
+                 noccmmptemp(1:cplex_dij,im1,im2,ispden)=noccmmptemp(1:cplex_dij,im1,im2,ispden) &
+&                           +ro(1:cplex_dij)*pawtab(itypat)%phiphjint(icount)
                end if
              end if
              if(im2>=im1) then
-               paw_ij(iatom)%noccmmp(:,im1,im2,ispden)=paw_ij(iatom)%noccmmp(:,im1,im2,ispden) &
-&               +ro(:)*pawtab(itypat)%phiphjint(icount)
+               paw_ij(iatom)%noccmmp(1:cplex_dij,im1,im2,ispden)=paw_ij(iatom)%noccmmp(1:cplex_dij,im1,im2,ispden) &
+&                           +ro(1:cplex_dij)*pawtab(itypat)%phiphjint(icount)
              end if
            end if
            jrhoij=jrhoij+cplex_rhoij

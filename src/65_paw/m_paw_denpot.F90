@@ -756,8 +756,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      ABI_ALLOCATE(rho,(mesh_size))
      ABI_ALLOCATE(vh,(mesh_size))
 
+!    Construct vh1 and tvh1
      do iq=1,cplex
-
        !Construct vh1
        !  The sqrt(4pi) factor comes from the fact we are calculating the spherical moments,
        !   and for the 00 channel the prefactor of Y_00 = 2 sqrt(pi)
@@ -767,10 +767,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &                                         *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        end if
        call poisson(rho,0,pawrad(itypat),vh)
-       if (usecore==1) then
-         vh(2:mesh_size)=vh(2:mesh_size)-sqrt(four_pi)*znucl(itypat)/pawrad(itypat)%rad(2:mesh_size)
-         call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
-       end if
+       vh(2:mesh_size)=(vh(2:mesh_size)-sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+       call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
        paw_an(iatom)%vh1(iq:cplex*mesh_size:cplex,1,1)=vh(1:mesh_size)
 !      TODO: check this is equivalent to the previous version (commented) which explicitly recalculated VH(coredens)
 !      DONE: numerically there are residual differences on abiref (7th digit).
@@ -788,10 +786,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &                                         *four_pi*pawrad(itypat)%rad(1:mesh_size)**2
        end if
        call poisson(rho,0,pawrad(itypat),vh)
-       if (usetcore==1) then
-         vh(2:mesh_size)=vh(2:mesh_size)-sqrt(four_pi)*znucl(itypat)/pawrad(itypat)%rad(2:mesh_size)
-         call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
-       end if
+       vh(2:mesh_size)=(vh(2:mesh_size)-sqrt(four_pi)*znucl(itypat))/pawrad(itypat)%rad(2:mesh_size)
+       call pawrad_deducer0(vh,mesh_size,pawrad(itypat))
        paw_an(iatom)%vht1(iq:cplex*mesh_size:cplex,1,1)=vh(1:mesh_size)
 
      end do ! cplex phase
@@ -870,6 +866,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !    Compute spin-orbit contribution to on-site energy
      if (option/=1.and.cplex_rhoij==2) then
+!TEST
        call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
      end if
 
@@ -940,7 +937,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
      !Term 2 : \sum_ij rho_ij gamma_ij
      etmp=zero
-     call pawaccenergy_nospin(etmp,pawrhoij(iatom),pawtab(itypat)%gammaij,1,qphase,pawtab(itypat))
+     call pawaccenergy_nospin(etmp,pawrhoij(iatom),pawtab(itypat)%gammaij,1,1,pawtab(itypat))
      vpotzero(2)=vpotzero(2)-etmp/ucvol
 
    end if
@@ -950,13 +947,13 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
    if (option/=1.and.ipert<=0) then
 
-     call pawaccenergy_nospin(e1t10,pawrhoij(iatom),pawtab(itypat)%dij0,1,qphase,pawtab(itypat))
+     call pawaccenergy_nospin(e1t10,pawrhoij(iatom),pawtab(itypat)%dij0,1,1,pawtab(itypat))
 
 !    Positron special case (dij0 is opposite, except for kinetic term)
      if (ipositron==1) then
-       ABI_ALLOCATE(dij_ep,(qphase*lmn2_size))
+       ABI_ALLOCATE(dij_ep,(lmn2_size))
        dij_ep(:)=two*(pawtab(itypat)%kij(:)-pawtab(itypat)%dij0(:))
-       call pawaccenergy_nospin(e1t10,pawrhoij(iatom),dij_ep,1,qphase,pawtab(itypat))
+       call pawaccenergy_nospin(e1t10,pawrhoij(iatom),dij_ep,1,1,pawtab(itypat))
        ABI_DEALLOCATE(dij_ep)
      end if
 
@@ -1547,7 +1544,8 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
  character(len=500) :: msg
 !arrays
  real(dp),pointer :: rhoij(:,:)
-
+!TEST
+real(dp) :: etest
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1589,28 +1587,28 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
 !  Non-collinear case
    if (nspden_rhoij==4.and.nspden_dij==4) then
      rhoij(:,:)=zero
-     jrhoij=(iq-1)*lmn2_size*cplex_rhoij+1 ; krhoij=1
+     jrhoij=(iq-1)*lmn2_size*pawrhoij%cplex_rhoij+1 ; krhoij=1
      do irhoij=1,pawrhoij%nrhoijsel
        klmn=pawrhoij%rhoijselect(irhoij)
-       rhoij(krhoij  ,1)= half*(pawrhoij%rhoijp(jrhoij,1)+pawrhoij%rhoijp(jrhoij,1))
-       rhoij(krhoij  ,2)= half*(pawrhoij%rhoijp(jrhoij,1)-pawrhoij%rhoijp(jrhoij,1))
-       !Be careful we store rhoij21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
+       rhoij(krhoij  ,1)= half*(pawrhoij%rhoijp(jrhoij,1)+pawrhoij%rhoijp(jrhoij,4))
+       rhoij(krhoij  ,2)= half*(pawrhoij%rhoijp(jrhoij,1)-pawrhoij%rhoijp(jrhoij,4))
+       !Be careful we store rhoij^21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
        !because of the inversion of spins in rhoij definition
        rhoij(krhoij  ,3)= half*pawrhoij%rhoijp(jrhoij,2)
        rhoij(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij,3)
        rhoij(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij,2)
        rhoij(krhoij+1,4)=-half*pawrhoij%rhoijp(jrhoij,3)
-       if (cplex_rhoij==2) then
-         rhoij(krhoij+1,1)= half*(pawrhoij%rhoijp(jrhoij+1,1)+pawrhoij%rhoijp(jrhoij+1,1))
-         rhoij(krhoij+1,2)= half*(pawrhoij%rhoijp(jrhoij+1,1)-pawrhoij%rhoijp(jrhoij+1,1))
-         !Be careful we store rhoij21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
+       if (pawrhoij%cplex_rhoij==2) then
+         rhoij(krhoij+1,1)= half*(pawrhoij%rhoijp(jrhoij+1,1)+pawrhoij%rhoijp(jrhoij+1,4))
+         rhoij(krhoij+1,2)= half*(pawrhoij%rhoijp(jrhoij+1,1)-pawrhoij%rhoijp(jrhoij+1,4))
+         !Be careful we store rhoij^21 in rhoij(:,3) and rhoij^12 in rhoij(:,4)
          !because of the inversion of spins in rhoij definition
-         rhoij(krhoij  ,3)=-half*pawrhoij%rhoijp(jrhoij+1,3)
-         rhoij(krhoij+1,3)= half*pawrhoij%rhoijp(jrhoij+1,2)
-         rhoij(krhoij  ,4)= half*pawrhoij%rhoijp(jrhoij+1,3)
-         rhoij(krhoij+1,4)= half*pawrhoij%rhoijp(jrhoij+1,2)
+         rhoij(krhoij  ,3)= rhoij(krhoij  ,3)-half*pawrhoij%rhoijp(jrhoij+1,3)
+         rhoij(krhoij+1,3)= rhoij(krhoij+1,3)+half*pawrhoij%rhoijp(jrhoij+1,2)
+         rhoij(krhoij  ,4)= rhoij(krhoij  ,4)+half*pawrhoij%rhoijp(jrhoij+1,3)
+         rhoij(krhoij+1,4)= rhoij(krhoij+1,4)+half*pawrhoij%rhoijp(jrhoij+1,2)
        end if
-       jrhoij=krhoij+pawrhoij%cplex_rhoij ; krhoij=krhoij+2
+       jrhoij=jrhoij+pawrhoij%cplex_rhoij ; krhoij=krhoij+2
      end do
      iq0_rhoij=0
    end if
@@ -1621,7 +1619,7 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
      jrhoij=iq0_rhoij+1
      do irhoij=1,pawrhoij%nrhoijsel
        klmn=pawrhoij%rhoijselect(irhoij)
-       kklmn=iq0_dij+klmn
+       kklmn=iq0_dij+cplex_dij*(klmn-1)+1
        etmp=rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
        if (add_imaginary) etmp=etmp-rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
        epaw=epaw+etmp*pawtab%dltij(klmn)
@@ -1637,12 +1635,12 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
        do irhoij=1,pawrhoij%nrhoijsel
          klmn=pawrhoij%rhoijselect(irhoij)
          if (iq==1) then
-           kklmn=lmn2_size*cplex_dij+klmn
+           kklmn=lmn2_size*cplex_dij+cplex_dij*(klmn-1)+1
            etmp=-rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
            if (add_imaginary) etmp=etmp+rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
          end if
          if (iq==2) then
-           kklmn=klmn
+           kklmn=cplex_dij*(klmn-1)+1
            etmp=rhoij(jrhoij,isp_rhoij)*dij(kklmn,isp_dij)
            if (add_imaginary) etmp=etmp-rhoij(jrhoij+1,isp_rhoij)*dij(kklmn+1,isp_dij)
          end if
@@ -1654,7 +1652,7 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
 
  end do ! qphase
  
- if (nspden_rhoij==4) then
+ if (nspden_rhoij==4.and.nspden_dij==4) then
    ABI_DEALLOCATE(rhoij)
  end if
  
@@ -1733,7 +1731,7 @@ real(dp), ABI_CONTIGUOUS pointer :: dij_2D(:,:)
 ! *************************************************************************
 
  size_dij=size(dij)
- 
+
 #ifdef HAVE_FC_ISO_C_BINDING
  cptr=c_loc(dij(1))
  call c_f_pointer(cptr,dij_2D,shape=[size_dij,1])

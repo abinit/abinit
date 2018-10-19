@@ -2664,45 +2664,47 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      my_natinc=1; if(natom>1) my_natinc=natom-1
      if (PRESENT(natinc)) my_natinc = natinc ! user-defined increment.
      LIBPAW_ALLOCATE(ibuffer,(0))
+     if (my_qphase==2) then
+       LIBPAW_ALLOCATE(rhoij_tmp,(2*nselect))
+     end if
      do iatom=1,my_natom,my_natinc
        iatom_tot=iatom;if(paral_atom)iatom_tot=my_atmtab(iatom)
        my_cplex =pawrhoij(iatom)%cplex_rhoij
        my_nspden=pawrhoij(iatom)%nspden
        my_qphase=pawrhoij(iatom)%qphase
        nselect=pawrhoij(iatom)%nrhoijsel
-       if (my_qphase==1) then
-         rhoij_tmp => pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)
-       else
-         LIBPAW_ALLOCATE(rhoij_tmp,(2*nselect))
-         rhoij_tmp=zero
-         jj=my_cplex*pawrhoij(iatom)%lmn2_size
-         if (my_cplex==1) then
-           do ii=1,nselect  
-             rhoij_tmp(2*ii-1)=pawrhoij(iatom)%rhoijp(ii,ispden)
-             rhoij_tmp(2*ii  )=pawrhoij(iatom)%rhoijp(jj+ii,ispden)
-           end do
-         else
-           do ii=1,nselect  
-             rhoij_tmp(2*ii-1)=pawrhoij(iatom)%rhoijp(2*ii-1,ispden) &
-&                             -pawrhoij(iatom)%rhoijp(jj+2*ii  ,ispden)
-             rhoij_tmp(2*ii  )=pawrhoij(iatom)%rhoijp(2*ii  ,ispden) &
-&                             +pawrhoij(iatom)%rhoijp(jj+2*ii-1,ispden)
-           end do       
-         end if
-         my_cplex=2
-       end if
        do ispden=1,pawrhoij(iatom)%nspden
+         if (my_qphase==1) then
+           rhoij_tmp => pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)
+         else
+           rhoij_tmp=zero
+           jj=my_cplex*pawrhoij(iatom)%lmn2_size
+           if (my_cplex==1) then
+             do ii=1,nselect
+               rhoij_tmp(2*ii-1)=pawrhoij(iatom)%rhoijp(ii,ispden)
+               rhoij_tmp(2*ii  )=pawrhoij(iatom)%rhoijp(jj+ii,ispden)
+             end do
+           else
+             do ii=1,nselect
+               rhoij_tmp(2*ii-1)=pawrhoij(iatom)%rhoijp(2*ii-1,ispden) &
+  &                             -pawrhoij(iatom)%rhoijp(jj+2*ii  ,ispden)
+               rhoij_tmp(2*ii  )=pawrhoij(iatom)%rhoijp(2*ii  ,ispden) &
+  &                             +pawrhoij(iatom)%rhoijp(jj+2*ii-1,ispden)
+             end do
+           end if
+           my_cplex=2
+         end if
          write(unitfi, '(a,i4,a,i1,a)' ) ' rhoij(',iatom_tot,',',ispden,')=  (max 12 non-zero components will be written)'
          call pawio_print_ij(unitfi,rhoij_tmp,nselect,my_cplex,&
 &         pawrhoij(iatom)%lmn_size,-1,ibuffer,1,0,&
 &         pawrhoij(iatom)%rhoijselect,-1.d0,1,&
 &         opt_sym=2,mode_paral='PERS')
        end do
-       if (my_qphase==2) then
-         LIBPAW_DEALLOCATE(rhoij_tmp)
-       end if
      end do
      LIBPAW_DEALLOCATE(ibuffer)
+     if (my_qphase==2) then
+       LIBPAW_DEALLOCATE(rhoij_tmp)
+     end if
 
   case ("D","d") ! Debug
 
@@ -4265,13 +4267,13 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  pawrhoij(iatm)%rhoijp(klmn1q,mu)=rotmag(1,mu-1,iq)/nsym_used(1)
                  if (cplex_rhoij==2) then
                    if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q,mu)
-                   if (cplex_eff==2) ro=rotrho(2,mu-1,iq)/nsym_used(1)
+                   if (cplex_eff==2) ro=rotmag(2,mu-1,iq)/nsym_used(1)
                    pawrhoij(iatm)%rhoijp(klmn1q+1,mu)=ro
                  end if
                end do
              end do
            end if
-            
+
 !          Rhoij^down when antiferro
            if (antiferro.and.optrhoij==1) then
              if (nsym_used(2)>0) then
