@@ -2016,8 +2016,8 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
      MSG_ERROR('pawoptmix=1 is not compatible with nspden=4 !')
    end if
    if (my_natom>0) then
-     if (pawrhoij(1)%cplex_rhoij<cplex) then
-       MSG_ERROR('pawrhoij()%cplex_rhoij must be >=cplex !')
+     if (pawrhoij(1)%qphase<cplex) then
+       MSG_ERROR('pawrhoij()%qphase must be >=cplex !')
      end if
    end if
  end if
@@ -2129,8 +2129,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 !PAW: either use the array f_paw or the array f_paw_disk
  ABI_ALLOCATE(vpaw,(npawmix*usepaw))
  if (usepaw==1.and.my_natom>0) then
-   dplex=cplex_rhoij-1
-   indx=-dplex
+   dplex=cplex_rhoij-1 ; indx=-dplex
    do iatom=1,my_natom
      ABI_ALLOCATE(rhoijtmp,(cplex_rhoij*pawrhoij(iatom)%lmn2_size,1))
      do iq=1,qphase
@@ -2149,8 +2148,8 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
            mix%f_paw(indx:indx+dplex,i_vrespc1)=rhoijrespc(indx:indx+dplex)
          end do
        end do
-       ABI_DEALLOCATE(rhoijtmp)
      end do
+     ABI_DEALLOCATE(rhoijtmp)
    end do
  end if
 
@@ -2177,13 +2176,12 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
  if(iscf==2 .or. iscf==3 .or. iscf==7)then
 !  PAW: restore rhoij from compact storage
    if (usepaw==1.and.my_natom>0) then
-     dplex=cplex_rhoij-1
-     indx=-dplex
+     dplex=cplex_rhoij-1 ; indx=-dplex
      do iatom=1,my_natom
        ABI_ALLOCATE(rhoijtmp,(cplex_rhoij*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
-         rhoijtmp=zero
-        do iq=1,qphase
-         iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+       rhoijtmp=zero
+       do iq=1,qphase
+         iq0=merge(0,cplex_rhoij*pawrhoij(iatom)%lmn2_size,iq==1)
          if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
            do ispden=1,pawrhoij(iatom)%nspden
              jrhoij=iq0+1
@@ -2219,7 +2217,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
        ABI_ALLOCATE(rhoijtmp,(cplex_rhoij*qphase*pawrhoij(iatom)%lmn2_size,pawrhoij(iatom)%nspden))
        rhoijtmp=zero
        do iq=1,qphase
-         iq0=merge(0,cplex*pawrhoij(iatom)%lmn2_size,iq==1)
+         iq0=merge(0,cplex_rhoij*pawrhoij(iatom)%lmn2_size,iq==1)
          if (pawrhoij(iatom)%lmnmix_sz<pawrhoij(iatom)%lmn2_size) then
            do ispden=1,pawrhoij(iatom)%nspden
              do kmix=1,pawrhoij(iatom)%lmnmix_sz

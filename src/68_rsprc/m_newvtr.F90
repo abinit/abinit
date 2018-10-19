@@ -470,8 +470,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
            mix%f_paw(indx:indx+dplex,i_vrespc1)=rhoijrespc(indx:indx+dplex)
          end do
        end do
-       ABI_DEALLOCATE(rhoijtmp)
      end do
+     ABI_DEALLOCATE(rhoijtmp)
    end do
  end if
 

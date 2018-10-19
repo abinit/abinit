@@ -836,7 +836,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
    if (any(abs(nucdipmom(:,iatom))>tol8).and.ipert==0.and.ipositron/=1) then
 
-     ABI_CHECK(cplex_rhoij==1,'BUG in pawdenpot: rhoij must be complex for ND moments!')
+     ABI_CHECK(cplex_rhoij==2,'BUG in pawdenpot: rhoij must be complex for ND moments!')
      ABI_CHECK(qphase==1,'BUG in pawdenpot: qphase should be 1 for ND moments!')
 
 !    Compute nuclear dipole contribution to Dij if necessary
@@ -911,12 +911,13 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !      Fock contribution to energy
        if (option/=1) then
-         dijfock_cv(:,:)=half*dijfock_vv(:,:)+dijfock_cv(:,:)
+         dijfock_vv(:,:)=half*dijfock_vv(:,:) ; dijfock_cv(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
          call pawaccenergy(efock  ,pawrhoij(iatom),dijfock_cv,cplex_dij,qphase,ndij,pawtab(itypat))
          call pawaccenergy(efockdc,pawrhoij(iatom),dijfock_vv,cplex_dij,qphase,ndij,pawtab(itypat))
-         ABI_DEALLOCATE(dijfock_vv)
-         ABI_DEALLOCATE(dijfock_cv)
        end if
+
+       ABI_DEALLOCATE(dijfock_vv)
+       ABI_DEALLOCATE(dijfock_cv)
      end if
 
 !    Special case for positron
@@ -1158,7 +1159,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
    msg='nspden must be <= pawrhoij%nspden!'
    MSG_BUG(msg)
  end if
- if (cplex>pawrhoij%cplex_rhoij) then
+ if (cplex>pawrhoij%qphase) then
    msg='cplex must be <= pawrhoij%qphase!'
    MSG_BUG(msg)
  end if

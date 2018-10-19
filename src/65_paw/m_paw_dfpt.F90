@@ -233,8 +233,8 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
        msg='paw_ij1()%qphase and paw_an1()%cplex must be equal!'
        MSG_BUG(msg)
      end if
-     if (pawrhoij_a(1)%cplex_rhoij<paw_an1(1)%cplex.or.pawrhoij_b(1)%cplex_rhoij<paw_an1(1)%cplex) then
-       msg='pawrhoij()%cplex_rhoij must be >=paw_an1()%cplex!'
+     if (pawrhoij_a(1)%qphase<paw_an1(1)%cplex.or.pawrhoij_b(1)%qphase<paw_an1(1)%cplex) then
+       msg='pawrhoij()%qphase must be >=paw_an1()%cplex!'
        MSG_BUG(msg)
      end if
      if (paw_ij1(1)%nspden/=paw_an1(1)%nspden) then
@@ -277,8 +277,8 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
    itypat=pawrhoij_a(iatom)%itypat
    mesh_size=pawtab(itypat)%mesh_size
    nspden=paw_an1(iatom)%nspden
-   cplex_a=pawrhoij_a(iatom)%cplex_rhoij
-   cplex_b=pawrhoij_b(iatom)%cplex_rhoij
+   cplex_a=pawrhoij_a(iatom)%qphase
+   cplex_b=pawrhoij_b(iatom)%qphase
    cplex_vxc1=paw_an1(iatom)%cplex
    qphase_dijh1=paw_ij1(iatom)%qphase
    qphase_diju1=paw_ij1(iatom)%qphase

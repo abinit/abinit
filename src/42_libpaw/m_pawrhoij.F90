@@ -3590,6 +3590,9 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
        if (my_nspden==4) write(msg,'(a,i3,a,i1,3a)')  ' Atom #',iatom,' - L=',my_l_only,' ONLY - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
      end if
      call wrtout(my_unt,msg,my_mode)
+   else if (my_l_only>=0) then
+     write(msg,'(a,i1,a)') ' L=',my_l_only,' ONLY'
+     call wrtout(my_unt,msg,my_mode)
    end if
 
    !Printing

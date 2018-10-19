@@ -1251,6 +1251,10 @@ subroutine pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing,hyb_mixi
 
 ! *************************************************************************
 
+!Useful data
+ lmn2_size=pawtab%lmn2_size
+ cplex_rhoij=pawrhoij%cplex_rhoij
+
 !Check data consistency
  if (size(dijfock_vv,1)/=qphase*cplex_dij*lmn2_size.or.size(dijfock_vv,2)/=ndij) then
    msg='invalid sizes for Dijfock_vv!'
@@ -1279,10 +1283,6 @@ subroutine pawdijfock(dijfock_vv,dijfock_cv,cplex_dij,qphase,hyb_mixing,hyb_mixi
      eijkl => pawtab%eijkl_sr
    end if
  end if
-
-!Useful data
- lmn2_size=pawtab%lmn2_size
- cplex_rhoij=pawrhoij%cplex_rhoij
 
 !Init memory
  dijfock_vv=zero ; dijfock_cv=zero
