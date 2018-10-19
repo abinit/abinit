@@ -36,7 +36,7 @@ module m_vtowfk
  use m_cgtools
 
  use m_time,        only : timab, cwtime, sec2str
- use m_fstrings,    only : sjoin, ftoa
+ use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_paw_dmft,    only : paw_dmft_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
@@ -195,7 +195,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: newlobpcg
- integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11
+ integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=5
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
 !     subovl should be Identity (in that case we should use use_subovl=0)
@@ -225,10 +225,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Structured debugging if prtvol==-level
  if(prtvol==-level)then
-   write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk : enter'
+   write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk: enter'
    call wrtout(std_out,message,'PERS')
  end if
-
 
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
@@ -280,7 +279,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    gsc=zero
  end if
 
- if(wfopta10 /= 1 .and. .not. newlobpcg ) then !chebfi already does this stuff inside
+ if(wfopta10 /= 1 .and. .not. newlobpcg ) then
+   !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
 
@@ -325,8 +325,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  do inonsc=1,nnsclo_now
-
-   if (iscf < 0) call cwtime(cpu, wall, gflops, "start")
+   if (iscf < 0 .and. inonsc <= enough) call cwtime(cpu, wall, gflops, "start")
 
    ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
    if(wfopta10 /= 1 .and. .not. newlobpcg) then
@@ -357,7 +356,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end do
 
-   ! JLJ 17/10/2014 : If it is a GWLS calculation, construct the hamiltonian
+   ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
    ! This would be equivalent to nstep=0, if the latter did work.
    if(dtset%optdriver/=RUNL_GWLS) then
@@ -493,18 +492,25 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
 
    if (iscf < 0) then
-     ! Print residual and wall-time after NSCF iteration.
-     call cwtime(cpu, wall, gflops, "stop")
-     call wrtout(std_out, sjoin("max resid =", ftoa(residk, fmt="es13.5"), &
-       " (without nbdbuf). one NSCF iteration took cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
      if (residk > dtset%tolwfr .and. residk < tol7) then
        if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
        ii = fftcore_set_mixprec(0)
      end if
+
+     ! Print residual and wall-time required by NSCF iteration.
+     if (inonsc <= enough) then
+       call cwtime(cpu, wall, gflops, "stop")
+       call wrtout(std_out, sjoin("max resid =", ftoa(residk, fmt="es13.5"), &
+         " (without nbdbuf). one NSCF iteration took cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+       if (inonsc == enough) call wrtout(std_out, "Stop printing residuals ...")
+     end if
    end if
 
    ! Exit loop over inonsc if converged
-   if (residk < dtset%tolwfr) exit
+   if (residk < dtset%tolwfr) then
+     call wrtout(std_out, sjoin("NSCF loop completed after", itoa(inonsc), "iterations", ch10))
+     exit
+   end if
  end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
  call timab(39,2,tsec)

@@ -2458,7 +2458,8 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
  iq=0
 
- if (ALL(ABS(kmkp(:))<EPSILON(one))) then ! Find q close to 0 ===
+ if (ALL(ABS(kmkp(:))<EPSILON(one))) then
+   ! Find q close to 0
    do iqbz=1,nqbz
      if (ALL(ABS(qbz(:,iqbz))<tolq0)) then
        iq=iqbz
@@ -2470,7 +2471,8 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    end if
    g0(:)=0; RETURN
 
- else ! q is not zero, find q such as k-kp=q+G0.
+ else
+   ! q is not zero, find q such as k-kp=q+G0.
 
    ! Try with G0=0 first.
    !do iqbz=1,nqbz

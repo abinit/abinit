@@ -1438,7 +1438,7 @@ Variable(
 If 0, the code will not stop execution if the threshold of [[dilatmx]] is exceeded,
 it will simply issue a warning. There will be no rescaling. If 1, after tentative
 rescaling as described in [[dilatmx]], the code will stop execution.
-Also, the use of [[chkdilatmx]] = 0 allows one to set [[dilatmx]] to a larger value than 1.15 ,
+Also, the use of [[chkdilatmx]] = 0 allows one to set [[dilatmx]] to a larger value than 1.15,
 otherwise forbidden as being a waste of CPU and memory.
 """,
 ),
@@ -1457,9 +1457,9 @@ interrupt the run (using the keyword "exit" on the top of the input file or
 creating a file named "abinit.exit": see the end of section 3.2
 of the [[help:abinit#parameters]]).
 
-  * If [[chkexit]] = 0, the check is not performed at all
-  * If [[chkexit]] = 1, the check is not performed frequently (after each SCF step)
-  * If [[chkexit]] = 2, the check is performed frequently (after a few bands, at each k point)
+  * 0 --> the check is not performed at all
+  * 1 --> the check is not performed frequently (after each SCF step)
+  * 2 --> the check is performed frequently (after a few bands, at each k point)
 
 In all cases, the check is performed at most every 2 seconds of CPU time.
 """,
@@ -3676,7 +3676,9 @@ The choice is among:
 
 * 0 --> No computation (mainly used to access the post-processing tools)
 * 1 --> Compute phonon linewidths in metals.
-* 2 --> Compute electron-phonon matrix elements.
+* 2 --> Compute electron-phonon matrix elements. Save results in GKK.nc file format.
+* -2 --> Compute electron-phonon matrix elements. Save results in GKQ.nc file format
+         that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
 * 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy).
@@ -8506,7 +8508,7 @@ variable is derived from [[kpt]] and [[kptnrm]]: [[kptns]](1:3,:)=
 [[kpt]](1:3,:)/ [[kptnrm]], so that it is [[kpt]] renormalized by [[kptnrm]].
 
 If [[nqpt]] = 1 and one is not doing a ground-state calculation, this internal
-variable is derived from [[kpt]], [[kptnrm]] and [[qptn]] : [[kptns]](1:3,:)=
+variable is derived from [[kpt]], [[kptnrm]] and [[qptn]]: [[kptns]](1:3,:)=
 [[kpt]](1:3,:)/ [[kptnrm]]+ [[qptn]](1:3), so that it is [[kpt]] renormalized
 by [[kptnrm]], then shifted by [[qptn]](1:3).
 """,
