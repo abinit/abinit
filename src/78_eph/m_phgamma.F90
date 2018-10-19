@@ -1230,15 +1230,9 @@ subroutine phgamma_interp_setup(gams,cryst,action)
    end if ! allocation and filling of rpt as well
 
  case ("FREE")
-   if (allocated(gams%vals_bz)) then
-     ABI_FREE(gams%vals_bz)
-   end if
-   if (allocated(gams%vals_rpt)) then
-     ABI_FREE(gams%vals_rpt)
-   end if
-   if (allocated(gams%vals_ee)) then
-     ABI_FREE(gams%vals_ee)
-   end if
+   ABI_SFREE(gams%vals_bz)
+   ABI_SFREE(gams%vals_rpt)
+   ABI_SFREE(gams%vals_ee)
 
  case default
    MSG_BUG(sjoin("Wrong action:",action))
@@ -1719,18 +1713,10 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
    end if
 
  case ("FREE")
-   if (allocated(gams%vals_in_bz)) then
-     ABI_FREE(gams%vals_in_bz)
-   end if
-   if (allocated(gams%vals_out_bz)) then
-     ABI_FREE(gams%vals_out_bz)
-   end if
-   if (allocated(gams%vals_in_rpt)) then
-     ABI_FREE(gams%vals_in_rpt)
-   end if
-   if (allocated(gams%vals_out_rpt)) then
-     ABI_FREE(gams%vals_out_rpt)
-   end if
+   ABI_SFREE(gams%vals_in_bz)
+   ABI_SFREE(gams%vals_out_bz)
+   ABI_SFREE(gams%vals_in_rpt)
+   ABI_SFREE(gams%vals_out_rpt)
 
  case default
    MSG_BUG(sjoin("Wrong action:",action))
@@ -1985,26 +1971,14 @@ subroutine a2fw_free(a2f)
  ! @a2fw_t
 
  ! integer
- if (allocated(a2f%qshift)) then
-   ABI_FREE(a2f%qshift)
- end if
+ ABI_SFREE(a2f%qshift)
 
  ! real
- if (allocated(a2f%n0)) then
-   ABI_FREE(a2f%n0)
- end if
- if (allocated(a2f%omega)) then
-   ABI_FREE(a2f%omega)
- end if
- if (allocated(a2f%vals)) then
-   ABI_FREE(a2f%vals)
- end if
- if (allocated(a2f%vals_ee)) then
-   ABI_FREE(a2f%vals_ee)
- end if
- if (allocated(a2f%lambdaw)) then
-   ABI_FREE(a2f%lambdaw)
- end if
+ ABI_SFREE(a2f%n0)
+ ABI_SFREE(a2f%omega)
+ ABI_SFREE(a2f%vals)
+ ABI_SFREE(a2f%vals_ee)
+ ABI_SFREE(a2f%lambdaw)
 
 end subroutine a2fw_free
 !!***
@@ -3326,32 +3300,16 @@ subroutine a2fw_tr_free(a2f_tr)
  ! @a2fw_tr_t
 
  ! integer
- if (allocated(a2f_tr%qshift)) then
-   ABI_FREE(a2f_tr%qshift)
- end if
+ ABI_SFREE(a2f_tr%qshift)
 
  ! real
- if (allocated(a2f_tr%n0)) then
-   ABI_FREE(a2f_tr%n0)
- end if
- if (allocated(a2f_tr%omega)) then
-   ABI_FREE(a2f_tr%omega)
- end if
- if (allocated(a2f_tr%vals_in)) then
-   ABI_FREE(a2f_tr%vals_in)
- end if
- if (allocated(a2f_tr%vals_out)) then
-   ABI_FREE(a2f_tr%vals_out)
- end if
- if (allocated(a2f_tr%vals_tr)) then
-   ABI_FREE(a2f_tr%vals_tr)
- end if
- if (allocated(a2f_tr%vals_tr_gen)) then
-   ABI_FREE(a2f_tr%vals_tr_gen)
- end if
- if (allocated(a2f_tr%lambdaw_tr)) then
-   ABI_FREE(a2f_tr%lambdaw_tr)
- end if
+ ABI_SFREE(a2f_tr%n0)
+ ABI_SFREE(a2f_tr%omega)
+ ABI_SFREE(a2f_tr%vals_in)
+ ABI_SFREE(a2f_tr%vals_out)
+ ABI_SFREE(a2f_tr%vals_tr)
+ ABI_SFREE(a2f_tr%vals_tr_gen)
+ ABI_SFREE(a2f_tr%lambdaw_tr)
 
 end subroutine a2fw_tr_free
 !!***
@@ -3817,15 +3775,15 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
    do iw=1,a2f_tr%nomega
      write(unt,'(e16.6, 2x, 3(3e16.6,1x), 2x,  3(3e16.6,1x), 2x,  3(3e16.6,1x))') a2f_tr%omega(iw), &
 &                 ((sum(a2f_tr%vals_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &
-&                 a2f_tr%vals_tr(iw,:,:,0,1)      ,      &  ! UP
-&                 a2f_tr%vals_tr(iw,:,:,0,2)                ! DOWN
+&                 a2f_tr%vals_tr(iw,:,:,0,1), &  ! UP
+&                 a2f_tr%vals_tr(iw,:,:,0,2)     ! DOWN
    end do
    write(unt,'(3a)') ch10, ch10, "# Frequency, lambda_tr_tot(w,i,j)dw, lambda_tr_spin1(w,i,j) ..."
    do iw=1,a2f_tr%nomega
      write(unt,'(e16.6, 2x, 3(3e16.6,1x), 2x, 3(3e16.6,1x), 2x,      3(3e16.6,1x), 2x,  3(3e16.6,1x))') a2f_tr%omega(iw), &
 &                 ((sum(a2f_tr%lambdaw_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &  ! TOT
-&                 a2f_tr%lambdaw_tr(iw,:,:,0,1),      &  ! UP
-&                 a2f_tr%lambdaw_tr(iw,:,:,0,2)          ! DOWN
+&                 a2f_tr%lambdaw_tr(iw,:,:,0,1), &  ! UP
+&                 a2f_tr%lambdaw_tr(iw,:,:,0,2)     ! DOWN
    end do
  end if
 

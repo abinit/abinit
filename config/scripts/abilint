@@ -1340,7 +1340,7 @@ class File(Structure):
     #
     def read(self,fd=None):
         "Read the file."
-        if fd == None:
+        if fd is None:
             #fd = open("%s/%s" % (self.dir,self.name), "rt")
             fd = io.open("%s/%s" % (self.dir,self.name), 'rt', encoding="utf8")
 
@@ -1361,8 +1361,9 @@ class File(Structure):
                 #Do nothing
                 return
         self.message.write("[%s/%s]" % (dir,file))
-        if fd == None:
-            fd = open("%s/%s" % (dir,file),"w")
+        if fd is None:
+            #fd = open("%s/%s" % (dir,file),"w")
+            fd = io.open("%s/%s" % (dir,file), "wt", encoding="utf8")
         #The code is inserted before the child codes
         fd.write(self.code)
         for child in self.children:

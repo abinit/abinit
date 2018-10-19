@@ -760,6 +760,7 @@ end subroutine ncwrite_v1qnu
 
 subroutine find_mpw(mpw, kpts, nsppol, nkpt, gmet, ecut, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
