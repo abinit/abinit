@@ -428,11 +428,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')" eph%init: cpu: ",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
- call cwtime(cpu,wall,gflops,"start")
 
  ! =======================================
  ! Output useful info on electronic bands
  ! =======================================
+ call cwtime(cpu,wall,gflops,"start")
  if (my_rank == master) then
    ! Fermi Surface
    if (dtset%prtfsurf /= 0) then
@@ -460,7 +460,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')" eph%edos: cpu:",cpu,", wall: ",wall
+ write(msg,'(2(a,f8.2))')" eph%ebands_postprocess: cpu:",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
@@ -526,12 +526,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
      !call phdos_print_debye(phdos, crystal%ucvol)
 
-!TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
-! Otherwise just leave these defaults.
-!MG: 1) Disabled for the time being because of SIGFPE in v8[41]
-!    2) I've added a new abinit variable (tmesh) to specifiy the list of temperatures.
+     !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
+     ! Otherwise just leave these defaults.
+     !MG: 1) Disabled for the time being because of SIGFPE in v8[41]
+     !    2) I've added a new abinit variable (tmesh) to specifiy the list of temperatures.
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
-!MG: Disabled for the time being because of SIGFPE in v8[41]
+     !MG: Disabled for the time being because of SIGFPE in v8[41]
      !call phdos_print_msqd(phdos, path, 1000, one, one)
      path = strcat(dtfil%filnam_ds(4), "_THERMO")
      call phdos_print_thermo(PHdos, path, 1000, zero, one)
@@ -670,7 +670,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !=====================
  !==== Free memory ====
  !=====================
-
  call crystal_free(cryst)
  call dvdb_free(dvdb)
  call ddb_free(ddb)
@@ -680,15 +679,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
- if(allocated(efmasdeg))then
+ if (allocated(efmasdeg)) then
    call efmasdeg_free_array(efmasdeg)
  endif
- if( allocated (efmasval))then
+ if (allocated(efmasval)) then
    call efmasval_free_array(efmasval)
  endif
- if(allocated(kpt_efmas))then
-   ABI_DEALLOCATE(kpt_efmas)
- endif
+ ABI_SFREE(kpt_efmas)
 
 !XG20180810: please do not remove. Otherwise, I get an error on my Mac.
  write(std_out,*)' eph : after free efmasval and kpt_efmas'

@@ -43,10 +43,10 @@ module m_eph_double_grid
  public :: eph_double_grid_get_index ! Get the index of the the kpoint in the double grid
  public :: eph_double_grid_bz2ibz ! Map BZ to IBZ using the double grid structure
  public :: eph_double_grid_get_mapping ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
-!!***
+
 !----------------------------------------------------------------------
 
-!!****t* eph_double_grid_t
+!!****t* m_eph_double_grid/eph_double_grid_t
 !! NAME
 !! eph_double_grid_t
 !!
@@ -108,6 +108,7 @@ module m_eph_double_grid
    ! map k, k+q and q in the IBZ and FBZ of the double grid structure
 
  end type eph_double_grid_t
+!!***
 
 contains  !=====================================================
 !!***
@@ -376,6 +377,7 @@ subroutine eph_double_grid_free(self)
  ABI_SFREE(self%mapping)
 
 end subroutine eph_double_grid_free
+!!***
 
 !------------------------------------------------------------------------
 
@@ -426,7 +428,7 @@ integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
  endif
 
 end function eph_double_grid_get_index
-
+!!***
 
 !----------------------------------------------------------------------
 
@@ -495,6 +497,7 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symrec,nsym,bz2ibz)
  !call wrtout(std_out, msg, do_flush=.True.)
 
 end subroutine eph_double_grid_bz2ibz
+!!***
 
 !----------------------------------------------------------------------
 
@@ -560,6 +563,7 @@ subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
  enddo
 
 end subroutine eph_double_grid_get_mapping
+!!***
 
 end module m_eph_double_grid
 !!***

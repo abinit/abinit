@@ -350,6 +350,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    if (i_am_master) then
      call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
      fname = strcat(dtfil%filnam_ds(4), "_GKQ.nc")
+#ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKQ file")
      NCF_CHECK(crystal_ncwrite(cryst, ncid))
      ! Write bands on k+q mesh.
@@ -375,6 +376,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart'), displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_red'), displ_red))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gkq_representation"), "atom"))
+#endif
    end if
  else
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))

@@ -185,22 +185,22 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  filnam_ds(1:5)=filnam(1:5)
  jdtset=dtset%jdtset
 
-!If multi dataset mode, special treatment of filenames 3 and 4 (density and
-!wavefunctions input and output, as well as other output files)
+ ! If multi dataset mode, special treatment of filenames 3 and 4 (density and
+ ! wavefunctions input and output, as well as other output files)
  if(ndtset>0)then
    call appdig(jdtset,'',appen)
    filnam_ds(3)=trim(filnam(3))//'_DS'//trim(appen)
    filnam_ds(4)=trim(filnam(4))//'_DS'//trim(appen)
  end if
 
-!If multi image mode (nimage>1), special treatment of filenames 4 and 5
+ ! If multi image mode (nimage>1), special treatment of filenames 4 and 5
  if(iimage>0)then
    call appdig(iimage,'',appen)
    filnam_ds(4)=trim(filnam_ds(4))//'_IMG'//trim(appen)
    filnam_ds(5)=trim(filnam_ds(5))//'_IMG'//trim(appen)
  end if
 
-!According to getwfk and irdwfk, build _WFK file name, referred as fnamewffk
+ ! According to getwfk and irdwfk, build _WFK file name, referred as fnamewffk
  if (iimage>0.and.dtfil%getwfk_from_image/=0) then
    if (dtfil%getwfk_from_image==-1) then
      call appdig(iimage,'',appen)
@@ -220,7 +220,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    write(message, '(5a,i3,3a,i3,a,i3,3a)' )&
 &   'At least one of the input variables irdwfk and getwfk ',ch10,&
 &   'must refer to a valid _WFK file, in the response function',ch10,&
-&   'case, while for idtset=',idtset,',',ch10,&
+&   'case, while for idtset = ',idtset,',',ch10,&
 &   'they are irdwfk=',dtset%irdwfk,', and getwfk=',dtset%getwfk,'.',ch10,&
 &   'Action: correct irdwfk or getwfk in your input file.'
    MSG_ERROR(message)
@@ -261,7 +261,6 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_1WF' ; stringvar='dkde'
    call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,0,jdtset_,&
 &   ndtset,stringfile,stringvar,will_read)
-
  end if
 
 !-------------------------------------------------------------------------------------------
@@ -1156,14 +1155,13 @@ subroutine isfile(filnam, status)
    ii = 0
    inquire(file=trim(trialnam),iostat=ios,exist=ex)
    if ( ios /= 0 ) then
-     write(message,'(4a)') 'Something is wrong with permissions for ', &
-&     'reading/writing on this filesystem.',ch10,&
-&     'Action : Check permissions.'
+     write(message,'(3a)') 'Something is wrong with permissions for reading/writing on this filesystem.',ch10,&
+&     'Action: Check permissions.'
      MSG_ERROR(message)
    end if
 
    if ( ex .eqv. .true. ) then
-     write(message,'(4a)')'Output file ',trim(trialnam),ch10,' already exists.'
+     write(message,'(3a)')'Output file: ',trim(trialnam),' already exists.'
      MSG_COMMENT(message)
      found=.false.
 
@@ -1191,7 +1189,7 @@ subroutine isfile(filnam, status)
        MSG_COMMENT(message)
        call clib_rename(filnam,trialnam,ioserr)
        if ( ioserr /= 0 ) then
-         write(message,'(4a)') 'Failed to rename file ', trim(filnam),' to ',trim(trialnam)
+         write(message,'(4a)') 'Failed to rename file: ', trim(filnam),' to: ',trim(trialnam)
          MSG_ERROR(message)
        end if
      else
@@ -1202,10 +1200,9 @@ subroutine isfile(filnam, status)
      end if
    end if
 
-   ! if ii > 0 we iterated so rename abi_out to abi_outXXXX
-   ! and just write to abi_out
+   ! if ii > 0 we iterated so rename abi_out to abi_outXXXX and just write to abi_out
  else ! status not recognized
-   write(message,'(3a)')'  Input status= ',status,' not recognized.'
+   write(message,'(3a)')' Input status= ',status,' not recognized.'
    MSG_BUG(message)
  end if
 
@@ -1326,12 +1323,10 @@ subroutine iofn1(filnam,filstat,comm)
  end if
 
  if (me==master) then
-
-!  Eventually redefine standard input and standard output
-
+   !  Eventually redefine standard input and standard output
    if (do_write_log) then
 #if defined READ_FROM_FILE
-!    Take care of the output file
+     ! Take care of the output file
      tmpfil(1:fnlen)=blank
      tmpfil(1:3)='log'
      call isfile(tmpfil,'new')
@@ -1341,7 +1336,7 @@ subroutine iofn1(filnam,filstat,comm)
      end if
 #endif
    else
-!    Redirect standard output to null
+     ! Redirect standard output to null
      close(std_out, err=10, iomsg=errmsg)
      if (open_file(NULL_FILE,message,unit=std_out,action="write") /= 0) then
        MSG_ERROR(message)
@@ -1353,7 +1348,7 @@ subroutine iofn1(filnam,filstat,comm)
    tmpfil(1:fnlen)=blank
    tmpfil(1:9)='ab.files'
    write(message, '(4a)' )&
-&   'Because of cpp option READ_FROM_FILE,',ch10,&
+&   'Because of CPP option READ_FROM_FILE,',ch10,&
 &   'read file "ab.files" instead of standard input ' ,ch10
    MSG_COMMENT(message)
    call isfile(tmpfil,'old')
@@ -1404,7 +1399,7 @@ subroutine iofn1(filnam,filstat,comm)
 &     'Root name for generic input files is too long. ',ch10,&
 &     'It must be 20 characters less than the maximal allowed ',ch10,&
 &     'length of names, that is ',fnlen,', while it is ',len_trim(filnam(3)),ch10,&
-&     'Action : correct your "file" file.'
+&     'Action: correct your "file" file.'
      MSG_ERROR(message)
    end if
    if ( len_trim(filnam(4)) >= (fnlen-20) ) then
