@@ -135,6 +135,9 @@ import io
 import fnmatch
 #stderr and stdout
 import sys
+# Handle py2, py3k differences.
+py2 = sys.version_info[0] <= 2
+
 #Options
 import getopt
 #Regular expressions
@@ -152,6 +155,12 @@ if  version_info < [2,3,0]:
     sys.stderr.write("Detected version %d.%d.%d\n" % tuple(version_info))
     sys.stderr.write("Minimal required version is python 2.3.0")
     sys.exit(1)
+
+def my_unicode(s):
+    if py2:
+        return unicode(s)
+    else:
+        return s
 
 #If the class 'set' does not exist use instead Set
 if 'set' not in dir(__builtins__):
@@ -1311,7 +1320,7 @@ class Structure:
                 #Do nothing
                 return
         #The code is inserted before the child codes
-        fd.write(self.code)
+        fd.write(my_unicode(self.code))
         for child in self.children:
             child.write(fd,only_if_changed)
 
@@ -1365,7 +1374,7 @@ class File(Structure):
             #fd = open("%s/%s" % (dir,file),"w")
             fd = io.open("%s/%s" % (dir,file), "wt", encoding="utf8")
         #The code is inserted before the child codes
-        fd.write(self.code)
+        fd.write(my_unicode(self.code))
         for child in self.children:
             child.write(fd,only_if_changed=False)
         fd.close()
