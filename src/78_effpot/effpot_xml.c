@@ -1732,7 +1732,7 @@ int test_read_xml() {
   char * fname="test_f.xml";
   double ref_energy;
   double *unitcell, *masses, *gyroratios, *damping_factors, *positions, *spinat;
-  int natoms, nmatoms, *index_spin;
+  int natoms, nspins, *index_spin;
   int i, j;
   xml_read_spin_system("test_f.xml", &ref_energy, &unitcell, &natoms, &masses,
    &nspins, &index_spin, &gyroratios, &damping_factors, &positions, &spinat);
