@@ -77,10 +77,10 @@ subroutine init10(filnam,comm)
  use defs_basis
  use m_xmpi
  use m_errors
- use m_ab7_invars
 
  use m_fstrings,     only : int2char4
  use m_io_tools,     only : open_file
+
  implicit none
 
 !Arguments -------------------------------

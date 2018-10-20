@@ -999,12 +999,6 @@ end subroutine melements_zero
 
 !pure function mels_get_exene_core(mels,kmesh,bands) result(ex_energy)
 !
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'mels_get_exene_core'
-!!End of the abilint section
-!
 ! implicit none
 !
 !!Arguments ------------------------------------

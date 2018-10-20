@@ -42,7 +42,6 @@ module m_respfn_driver
  use m_crystal
  use m_xcdata
 
- use m_dtfil,       only : status
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
@@ -312,8 +311,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(132,1,tsec)
  call timab(133,1,tsec)
 
- call status(0,dtfil%filstat,iexit,level,'init          ')
-
 ! Initialise non_magnetic_xc for rhohxc
  non_magnetic_xc=(dtset%usepawu==4).or.(dtset%usepawu==14)
 
@@ -354,8 +351,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  natom=dtset%natom
  nfftot=product(ngfft(1:3))
  nfftotf=product(ngfftf(1:3))
-
- call status(0,dtfil%filstat,iexit,level,'call setup1   ')
 
 !LIKELY TO BE TAKEN AWAY
  initialized=0
@@ -410,7 +405,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Set up the basis sphere of planewaves
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
- call status(0,dtfil%filstat,iexit,level,'call kpgio(1) ')
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
@@ -423,7 +417,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_ALLOCATE(ylmgr,(0,0,psps%useylm))
  end if
  if (psps%useylm==1) then
-   call status(0,dtfil%filstat,iexit,level,'call initylmg ')
    option=0
    if (rfstrs/=0.or.pawbec==1.or.pawpiezo==1.or.dtset%efmas>0) option=2
    call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
@@ -434,7 +427,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call timab(134,1,tsec)
 
 !Open and read pseudopotential files
- call status(0,dtfil%filstat,iexit,level,'call pspini(1)')
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
@@ -471,8 +463,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
-
- call status(0,dtfil%filstat,iexit,level,'call inwffil(1')
 
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
@@ -695,7 +685,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (rfelfd==1.or.rfelfd==3.or.rf2_dkde==1) then
      if (optgr1==0) optgr1=dtset%pawstgylm
    end if
-   call status(0,dtfil%filstat,iexit,level,'call nhatgrid ')
    call nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfftf,psps%ntypat,&
 &   optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,dtset%typat,ucvol,xred,&
 &   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab )
@@ -1027,7 +1016,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Compute Ewald (q=0) contribution
    sumg0=0;qphon(:)=zero
-   call status(0,dtfil%filstat,iexit,level,'call dfpt_ewald(1)')
    call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    option=1
@@ -1057,7 +1045,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfstrs/=0) then
 
 !  Verify that k-point set has full space-group symmetry; otherwise exit
-   call status(0,dtfil%filstat,iexit,level,'call symkchk ')
    timrev=1
    if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,message) /= 0) then
      MSG_ERROR(message)
@@ -1250,7 +1237,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Contribution to the dynamical matrix from ion-ion energy
  if(rfphon==1)then
-   call status(0,dtfil%filstat,iexit,level,'call dfpt_ewald(2)')
    call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call q0dy3_apply(natom,dyewq0,dyew)
@@ -1470,7 +1456,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_ALLOCATE(carflg,(3,mpert,3,mpert))
    ABI_ALLOCATE(d2matr,(2,3,mpert,3,mpert))
    outd2=1
-   call status(0,dtfil%filstat,iexit,level,'call dfpt_gatherdy    ')
    call dfpt_gatherdy(becfrnl,dtset%berryopt,blkflg,carflg,&
 &   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
@@ -1484,13 +1469,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Open the formatted derivative database file, and write the header
-   call status(0,dtfil%filstat,iexit,level,'call ddb_hdr_open_write')
    call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
 
    call ddb_hdr_free(ddb_hdr)
 
 !  Output of the dynamical matrix (master only)
-   call status(0,dtfil%filstat,iexit,level,'call dfpt_dyout   ')
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
 &   dyfrnl,dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,d2eig0,&
 &   d2k0,d2lo,d2loc0,d2matr,d2nl,d2nl0,d2nl1,d2ovl,d2vn,&
@@ -1850,8 +1833,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call dealloc_hamilt_gpu(0,dtset%use_gpu_cuda)
  end if
 #endif
-
- call status(0,dtfil%filstat,iexit,level,'exit')
 
  call timab(138,2,tsec)
  call timab(132,2,tsec)

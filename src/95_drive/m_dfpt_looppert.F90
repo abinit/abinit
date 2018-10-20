@@ -46,7 +46,6 @@ module m_dfpt_loopert
  use m_hdr
  use m_ebands
 
- use m_dtfil,      only : status
  use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
@@ -367,8 +366,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  _IBM6("In dfpt_looppert")
 
  call timab(141,1,tsec)
-
- call status(0,dtfil%filstat,iexit,level,'init          ')
 
 !Structured debugging if prtvol==-level
  if(dtset%prtvol==-level)then
@@ -1087,7 +1084,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
-   call status(0,dtfil%filstat,iexit,level,'call inwffil-k')
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
 &   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 &   kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
@@ -1254,7 +1250,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      eigenq = eigen0
    else
      call timab(144,1,tsec)
-     call status(0,dtfil%filstat,iexit,level,'call inwffilkq')
      call inwffil(ask_accurate,cgq,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
 &     formeig,hdr,&
 &     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcgq,&
@@ -1270,7 +1265,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
-       call status(0,dtfil%filstat,iexit,level,'call inwffilkq')
        call inwffil(ask_accurate,cg_mq,dtset,dtset%ecut,ecut_eff,eigen_mq,dtset%exchn2n3d,&
 &       formeig,hdr,&
 &       ireadwf0,istwfk_rbz,kg1_mq,kmq_rbz,dtset%localrdwf,dtset%mband,mcgmq,&
@@ -1295,7 +1289,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DATATYPE_ALLOCATE(cprjq,(0,0))
    if (psps%usepaw==1) then
      if (usecprj==1) then
-       call status(0,dtfil%filstat,iexit,level,'call ctocprjq')
        mcprjq=dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
        ABI_DATATYPE_DEALLOCATE(cprjq)
        ABI_DATATYPE_ALLOCATE(cprjq,(dtset%natom,mcprjq))
@@ -1467,7 +1460,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(eigen1,(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(resid,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
-   call status(pertcase,dtfil%filstat,iexit,level,'call inwffil  ')
    call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
 &   formeig,hdr,&
 &   dtfil%ireadwf,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,&
@@ -1485,7 +1477,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_ALLOCATE(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
      !initialize cg1_mq:
      call timab(144,1,tsec)
-     call status(pertcase,dtfil%filstat,iexit,level,'call inwffil  ')
      call inwffil(ask_accurate,cg1_mq,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
 &     formeig,hdr,&
 &     dtfil%ireadwf,istwfk_rbz,kg1_mq,kmq_rbz,dtset%localrdwf,&
@@ -2051,7 +2042,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    if (write_1wfk) then
      ! Output 1st-order wavefunctions in file
-     call status(pertcase,dtfil%filstat,iexit,level,'call outwf    ')
      call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
 &     dtset%mband,mcg1,mk1mem_rbz,mpi_enreg,mpw1,dtset%natom,nband_rbz,&
 &     nkpt_rbz,npwar1,dtset%nsppol,&
@@ -2491,7 +2481,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    nullify(old_atmtab)
  end if
 
- call status(0,dtfil%filstat,iexit,level,'exit')
  call timab(141,2,tsec)
 
  DBG_EXIT("COLL")

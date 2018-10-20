@@ -1112,12 +1112,6 @@ end module m_mkcore_wvl
 !%%  use m_pawtab,   only : pawtab_type
 !%%  use m_mpinfo,   only : ptabs_fourdp
 !%%
-!%% !This section has been created automatically by the script Abilint (TD).
-!%% !Do not modify the following lines by hand.
-!%% #undef ABI_FUNC
-!%% #define ABI_FUNC 'mkcore_paw'
-!%% !End of the abilint section
-!%%
 !%%  implicit none
 !%%
 !%% !Arguments ------------------------------------

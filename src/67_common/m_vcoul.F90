@@ -969,10 +969,6 @@ contains !===============================================================
 
  implicit none
 
-!Arguments ------------------------------------
- !MG here there is a bug in abilint since integratefaux is chaged to integrate, dont know why!
- !real(dp) :: integrate
-
 !Local variables-------------------------------
   integer,parameter :: nref=3
   integer,parameter :: nq=50

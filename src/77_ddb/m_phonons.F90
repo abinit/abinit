@@ -3627,10 +3627,6 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 &         qphon, rprimd, typat, xcart, znucl)
 
 
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'freeze_displ_allmodes'
-!End of the abilint section
  implicit none
 
 ! arguments

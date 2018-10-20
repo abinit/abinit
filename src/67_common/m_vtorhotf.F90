@@ -33,7 +33,6 @@ module m_vtorhotf
  use m_xmpi
 
  use m_time,     only : timab
- use m_dtfil,    only : status
  use m_spacepar,  only : symrhg
 
  implicit none
@@ -132,9 +131,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !Keep track of total time spent in vtorho
  call timab(21,1,tsec)
 
-
- call status(0,dtfil%filstat,iexit,level,'enter         ')
-
 !Structured debugging if prtvol==-level
  prtvol=dtset%prtvol
  if(prtvol==-level)then
@@ -175,8 +171,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  call tf
 !Compute energy terms
  call tfek
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
  call timab(21,2,tsec)
 !End thomas fermi
@@ -256,7 +250,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !  Compute rhog
    call timab(70,1,tsec)
 
-   call status(0,dtfil%filstat,iexit,level,'compute rhog  ')
    nfftot=dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3)
    call symrhg(1,gprimd,irrzon,mpi_enreg,nfft,nfftot,dtset%ngfft,nspden,nsppol,nsym,dtset%paral_kgb,phnons,&
 &   rhog,rhor,rprimd,dtset%symafm,dtset%symrel)

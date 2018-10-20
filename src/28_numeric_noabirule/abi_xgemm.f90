@@ -41,13 +41,6 @@
 
  subroutine abi_zgemm_2d(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zgemm_2d'
-
-!End of the abilint section
-
  implicit none
 
  !Arguments------------------------------------
@@ -114,12 +107,6 @@ end subroutine abi_zgemm_2d
 !!
 subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 &       x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2zgemm'
-!End of the abilint section
 
  implicit none
 

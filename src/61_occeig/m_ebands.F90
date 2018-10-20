@@ -392,12 +392,6 @@ subroutine gaps_free(gaps)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaps_free'
-!End of the abilint section
-
 !Arguments ------------------------------------
  type(gaps_t),intent(inout) :: gaps
 
@@ -2773,14 +2767,6 @@ integer function ebands_ncwrite(ebands,ncid) result(ncerr)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -3322,12 +3308,6 @@ integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermi
   qpath_vertices,errmsg) result(skipnest)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_write_nesting'
-!End of the abilint section
 
 !Arguments ------------------------------------
  type(ebands_t),intent(in) :: ebands

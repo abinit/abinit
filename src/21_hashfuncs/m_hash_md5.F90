@@ -240,12 +240,6 @@ implicit none
 
 !Arguments ------------------------------------
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hash_final'
-!End of the abilint section
-
   character(len=32), intent(out) :: retval
   type(md5_context_t), intent(inout) :: ctx
 
@@ -326,12 +320,6 @@ end subroutine hash_init
 subroutine hash_update(ctx, buffer, bufsize)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hash_update'
-!End of the abilint section
 
 !Arguments ------------------------------------
   type(md5_context_t), intent(inout) :: ctx

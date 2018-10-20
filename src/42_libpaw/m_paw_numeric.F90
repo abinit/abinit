@@ -958,12 +958,6 @@ subroutine paw_jbessel_4spline(bes,besp,ll,order,xx,tol)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_jbessel_4spline'
-!End of the abilint section
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ll,order

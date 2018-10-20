@@ -36,12 +36,6 @@
 
 subroutine abi_dpotrf(uplo,n,a,lda,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dpotrf'
-!End of the abilint section
-
  implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
@@ -78,13 +72,6 @@ end subroutine abi_dpotrf
 
 subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zpotrf_2d'
-
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -113,12 +100,6 @@ end subroutine abi_zpotrf_2d
 !! SOURCE
 
 subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2zpotrf'
-!End of the abilint section
 
  implicit none
 
@@ -169,12 +150,6 @@ end subroutine abi_d2zpotrf
 !! SOURCE
 
 subroutine abi_zpotrf(uplo,n,a,lda,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zpotrf'
-!End of the abilint section
 
  implicit none
  !Arguments ------------------------------------

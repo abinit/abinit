@@ -82,7 +82,7 @@ module m_gstate
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
- use m_dtfil,            only : dtfil_init_time, status
+ use m_dtfil,            only : dtfil_init_time
  use m_jellium,          only : jellium
  use m_iowf,             only : outwf
  use m_outqmc,           only : outqmc
@@ -324,8 +324,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  call timab(32,1,tsec)
  call timab(33,3,tsec)
-
- call status(0,dtfil%filstat,iexit,level,'enter')
 
 !###########################################################
 !### 01. Initializations XML, MPI, WVL, etc
@@ -1182,7 +1180,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    else if ((dtset%iscf==-1.or.dtset%iscf==-2.or.dtset%iscf==-3).and.dtset%positron<=0) then
 
-     call status(0,dtfil%filstat,iexit,level,'call ioarr    ')
 !    Read rho(r) from a disk file
      rdwrpaw=psps%usepaw
 !    Note : results_gs%etotal is read here,
@@ -1318,13 +1315,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 
      if (dtset%macro_uj==0) then
-
-       call status(0,dtfil%filstat,iexit,level,'call scfcv_run')
        call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-
      else
 !      Conduct determination of U
-
        call pawuj_drive(scfcv_args,dtset,electronpositron,rhog,rhor,rprimd,xred,xred_old)
      end if
 
@@ -1754,8 +1747,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call dealloc_hamilt_gpu(2,dtset%use_gpu_cuda)
  end if
 #endif
-
- call status(0,dtfil%filstat,iexit,level,'exit')
 
  call timab(36,2,tsec)
  call timab(32,2,tsec)

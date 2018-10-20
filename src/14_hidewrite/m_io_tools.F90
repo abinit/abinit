@@ -43,12 +43,12 @@ MODULE m_io_tools
  public :: pick_aname         ! Returns the name of a non-existent file to be used for temporary storage.
  public :: isncfile           ! .TRUE. if we have a NETCDF file.
  public :: iomode_from_fname  ! Automatic selection of the IO mode based on the file extension.
- public :: iomode2str         ! Convert iomode to string 
+ public :: iomode2str         ! Convert iomode to string
  public :: mvrecord           ! Moves forward or backward in a Fortran binary file by nn records.
  public :: open_file          ! Helper function to open a file in sequential mode with improved error handling.
  public :: close_unit         ! Helper function to close a Fortran unit with improved error handling.
- public :: write_lines        ! split a string in lines and output the text to the specified unit 
- public :: lock_and_write     ! Write a string to a file with locking mechanism. 
+ public :: write_lines        ! split a string in lines and output the text to the specified unit
+ public :: lock_and_write     ! Write a string to a file with locking mechanism.
  public :: num_opened_units   ! Return the number of opened units.
  public :: show_units         ! Print info on the logical units.
 
@@ -106,7 +106,7 @@ CONTAINS  !===========================================================
 !!  A free unit is reported if no argument is specified.
 !!  If the file name is supplied, the function reports the unit number
 !!  associated to the file
-!!  Note that GET_UNIT assumes that units 0, 5, 6 (stderr, stdin, std_out) 
+!!  Note that GET_UNIT assumes that units 0, 5, 6 (stderr, stdin, std_out)
 !!  are special, and will never return those values.
 !!
 !! TODO
@@ -125,12 +125,6 @@ CONTAINS  !===========================================================
 integer function get_free_unit()
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_free_unit'
-!End of the abilint section
 
 !Local variables-------------------------------
  integer :: iunt
@@ -170,12 +164,6 @@ end function get_free_unit
 integer function get_unit_from_fname(fname)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_unit_from_fname'
-!End of the abilint section
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
@@ -958,7 +946,7 @@ pure function iomode_from_fname(fname) result(iomode)
    iomode = IO_MODE_ETSF
  else
 #ifdef HAVE_MPI_IO
-   iomode = IO_MODE_MPI  
+   iomode = IO_MODE_MPI
 #else
    iomode = IO_MODE_FORTRAN
 #endif
@@ -975,13 +963,13 @@ end function iomode_from_fname
 !! iomode2str
 !!
 !! FUNCTION
-!!  Convert iomode to string 
+!!  Convert iomode to string
 !!
 !! PARENTS
 !!
 !! SOURCE
 
-pure function iomode2str(iomode) 
+pure function iomode2str(iomode)
 
  implicit none
 
@@ -1080,7 +1068,7 @@ end subroutine mvrecord
 !!    * Function statement that returns the value of iostat
 !!    * Emulate iomsg (F2003)
 !!    * Accepts either unit (user-specified unit number, input) or
-!!      newunit (free unit not associated to any file, output). 
+!!      newunit (free unit not associated to any file, output).
 !!      The two options are mutually exclusive.
 !!
 !!  See Fortran intrinsic for a more detailed description of the variables
@@ -1137,7 +1125,7 @@ function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) resul
    end if
    if (present(unit)) iostat = -666  ! wrong call
 
- else 
+ else
    iomsg = "Either unit or newunit must be specified"
    iostat = -1
  end if
@@ -1157,7 +1145,7 @@ end function open_file
 !! close_unit
 !!
 !! FUNCTION
-!!  close a Fortran unit 
+!!  close a Fortran unit
 !!  The main differences wrt the intrinsic close:
 !!
 !!    * Function statement that returns the value of iostat
@@ -1221,8 +1209,8 @@ end function close_unit
 !!  write_lines
 !!
 !! FUNCTION
-!!  This routine receives a string, split the message in lines according to the 
-!!  ch10 character and output the text to the specified unit 
+!!  This routine receives a string, split the message in lines according to the
+!!  ch10 character and output the text to the specified unit
 !!
 !! INPUTS
 !!  unit=unit number for writing
@@ -1257,20 +1245,20 @@ subroutine write_lines(unit,message)
 
  if (msg_size == 0) then
    write(unit,*)
-   return 
+   return
  end if
 
- ! Here, split the message, according to the char(10) characters (carriage return). 
+ ! Here, split the message, according to the char(10) characters (carriage return).
  ! This technique is portable accross different OS.
  rtnpos = index(message,ch10)
 
  if (rtnpos == 0) then
    write(unit,"(a)")message(1:msg_size)
    return
- end if 
+ end if
 
  ii = 1; jj = rtnpos
- do 
+ do
    if (ii == jj) then
      write(unit,*)
    else
@@ -1278,8 +1266,8 @@ subroutine write_lines(unit,message)
    end if
    ii = jj + 1
    if (ii > msg_size) exit
-   jj = index(message(ii:msg_size),ch10) 
-   if (jj == 0) then 
+   jj = index(message(ii:msg_size),ch10)
+   if (jj == 0) then
      ! Will write the last line at the next iteration and exit .
      jj = msg_size + 1
    else
@@ -1288,7 +1276,7 @@ subroutine write_lines(unit,message)
    !write(*,*)"ii, jj, msg_size",ii, jj, msg_size
  end do
 
- ! This is needed to preserve the od behaviour: a ch10 at the 
+ ! This is needed to preserve the od behaviour: a ch10 at the
  ! end of the string was causing an extra newline!
  if (message(msg_size:msg_size) == ch10) write(unit,*)
 
@@ -1338,7 +1326,7 @@ subroutine lock_and_write(filename, string, ierr)
  call write_lines(file_unit, string)
  close(lock_unit, status="delete")
  close(file_unit)
- return 
+ return
 
 99 ierr = 1
 
@@ -1352,7 +1340,7 @@ end subroutine lock_and_write
 !!  num_opened_units
 !!
 !! FUNCTION
-!!  Return the number of opened units. 
+!!  Return the number of opened units.
 !!  Unit numbers listed in the optional argument `ignore` are not considered.
 !!
 !! PARENTS
@@ -1364,12 +1352,6 @@ end subroutine lock_and_write
 integer function num_opened_units(ignore) result(nn)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_units'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -1413,12 +1395,6 @@ subroutine show_units(ount)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_units'
-!End of the abilint section
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ount
@@ -1441,7 +1417,7 @@ subroutine show_units(ount)
          else
             write(ount,*)"unit: ", ii, "form: ",form, ', No name available'
          endif
-      else 
+      else
         !write(ount,*)"unit: ", ii, " is not opened"
       endif
    else

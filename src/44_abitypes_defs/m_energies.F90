@@ -478,12 +478,6 @@ end subroutine energies_to_array
 
   implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energies_eval_eint'
-!End of the abilint section
-
 !Arguments ------------------------------------
 !scalars
  type(energies_type),intent(in) :: energies

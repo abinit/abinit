@@ -1676,7 +1676,7 @@ end subroutine prtene
 !!
 !! SOURCE
 
-subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, comm)
+subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, comm)
 
  use m_xmpi
 
@@ -1685,12 +1685,11 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  use m_invars2
  use m_time,         only : timab, time_set_papiopt
  use defs_abitypes,  only : dataset_type, ab_dimensions
- use m_dtfil,        only : status
  use defs_datatypes, only : pspheader_type
- !use m_ab7_invars,   only : iofn2
  use m_pspheads,     only : inpspheads, pspheads_comm
  use m_dtset
  use m_xpapi
+
  implicit none
 
 !Arguments ------------------------------------
@@ -1704,7 +1703,6 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  integer,intent(in) :: comm
  integer,intent(out) :: timopt
  integer,intent(out) :: dmatpuflag
- character(len=fnlen), intent(in) :: status_file
 
 !Local variables-------------------------------
 !scalars
@@ -1720,33 +1718,23 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  character(len=fnlen), allocatable :: pspfilnam_(:)
  character(len=fnlen) :: filpsp
  character(len=500) :: msg
- integer, parameter :: level=3
  real(dp) :: tsec(2)
 
 !************************************************************************
 
- ! 6~11) Call the parser from the parser module.
- !call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
- !call ab7_invars_load(dtsetsId, string, lenstr, ndtset, .true., .true.)
- !!call timab(44,1,tsec)
- !call ab7_invars_get_abinit_vars(dtsetsId, dtsets, pspheads,mxvals, papiopt, timopt, dmatpuflag)
- !ndtset_alloc = size(dtsets) - 1
- !npsp = size(pspheads)
-
+ ! Call the parser from the parser module.
  me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! Read the file, stringify it and return the number of datasets.
  call parsefile(path, lenstr, ndtset, string, comm)
 
  !subroutine ab7_invars_load(dtsetsId, string, lenstr, ndtset, with_psp, with_mem, pspfilnam)
-
  ndtset_alloc = ndtset; if (ndtset == 0) ndtset_alloc=1
  ABI_DATATYPE_ALLOCATE(dtsets, (0:ndtset_alloc))
 
  timopt = 1; if (xmpi_paral==1) timopt = 0
 
- !7) Continue to analyze the input string, get upper dimensions,
- !and allocate the remaining arrays.
+ ! Continue to analyze the input string, get upper dimensions, and allocate the remaining arrays.
  call invars0(dtsets, istatr, istatshft, lenstr, &
       & msym, mxvals%natom, mxvals%nimage, mxvals%ntypat, ndtset, ndtset_alloc, npsp, &
       & papiopt, timopt, string)
@@ -1758,11 +1746,6 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  dtsets(0)%timopt = 1
  if (xmpi_paral == 1) dtsets(0)%timopt = 0
 
- !Be careful : at these fourth and fifth calls of status, istatr and istatshft taken
- !from the input variables will be saved definitively.
- call status(0,status_file,istatr,level,'init istatr   ')
- call status(0,status_file,istatshft,level,'init istatshft')
-
  call timab(41,2,tsec)
  call timab(timopt,5,tsec)
 
@@ -1771,7 +1754,6 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  !from the pseudopotential headers, as well as the psp filename
 
  call timab(42,1,tsec)
- call status(0,status_file,99,level,'call iofn2    ')
 
  usepaw = 0
  ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
@@ -1864,25 +1846,19 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  call timab(42,2,tsec)
  call timab(43,3,tsec)
 
- !9) Provide defaults for the variables that have not yet been initialized.
- call status(0,status_file,99,level,'call indefo   ')
-
+ ! Provide defaults for the variables that have not yet been initialized.
  call indefo(dtsets, ndtset_alloc, nprocs)
-
- call status(0,status_file,99,level,'call macroin  ')
-
  call macroin(dtsets, ecut_tmp, lenstr, ndtset_alloc, string)
 
- !10) Perform some global initialization, depending on the value of
+ ! Perform some global initialization, depending on the value of
  ! pseudopotentials, parallelism variables, or macro input variables
 
- !If all the pseudopotentials have the same pspxc, override the default value for dtsets 1 to ndtset
+ ! If all the pseudopotentials have the same pspxc, override the default value for dtsets 1 to ndtset
  if (minval(abs((pspheads(1:npsp)%pspxc - pspheads(1)%pspxc)))==0) then
     dtsets(1:ndtset_alloc)%ixc = pspheads(1)%pspxc
  end if
 
- !11) Call the main input routine.
- call status(0,status_file,99,level,'call invars2m ')
+ ! Call the main input routine.
 
  !if (with_mem) then
    !write(std_out,*)' ab7_invars_f90 : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
@@ -1896,8 +1872,6 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  !  end do
  !end if
 
- call status(0,status_file,99,level,'call macroin2  ')
-
  call macroin2(dtsets, ndtset_alloc)
 
  !mxmband=maxval(dtsets(1:ndtset_alloc)%mband) ! This might not work with the HP compiler
@@ -1907,7 +1881,6 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  end do
 
  call timab(43,2,tsec)
- call status(0,status_file,99,level,'exit')
 
  ABI_DEALLOCATE(mband_upper_)
 

@@ -84,7 +84,7 @@ integer  :: natom
 integer  :: nconeq
 ! Option to add strain when FREEZe DISPlacement
 integer :: ph_freez_disp_addStrain
-! Option for the PHonon FREEZe DISPlacement AMPLitude 
+! Option for the PHonon FREEZe DISPlacement AMPLitude
 integer :: ph_freez_disp_option
 ! Number of PHonon FREEZe DISPlacement AMPLitude
 integer :: ph_freez_disp_nampl
@@ -138,10 +138,10 @@ integer,pointer  :: ph_ngqpt(:)         ! ph_ngqpt(3)
 ! List of PHonon FREEZe DISPlacement AMPLitude
 real(dp),pointer :: ph_freez_disp_ampl(:,:)
 ! shift of the Qpoint Grid (used for ionmov 26 and 27)
-real(dp),pointer :: ph_qshift(:,:)       ! 
+real(dp),pointer :: ph_qshift(:,:)       !
 ! amu input var for the current image
 real(dp), pointer :: amu_curr(:)     ! amu_curr(ntypat)
-! Mass of each atom 
+! Mass of each atom
 real(dp),pointer :: amass(:)            ! amass(natom)
 ! Geometry Optimization Preconditioner PaRaMeters
 real(dp),pointer :: goprecprm(:)
@@ -429,7 +429,7 @@ contains  !=============================================================
 subroutine abimover_ini(ab_mover,amu_curr,dtfil,dtset,specs)
 
 !Arguments ------------------------------------
-real(dp),target, intent(in) :: amu_curr(:)            ! amu_curr(ntype)  
+real(dp),target, intent(in) :: amu_curr(:)            ! amu_curr(ntype)
 type(abimover),intent(out) :: ab_mover
 type(datafiles_type),target,intent(in) :: dtfil
 type(dataset_type),target,intent(in) :: dtset
@@ -958,12 +958,6 @@ subroutine mttk_ini(mttk_vars,nnos)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mttk_ini'
-!End of the abilint section
-
  integer,intent(in)  :: nnos
  type(mttk_type), intent(out) :: mttk_vars
 
@@ -1110,7 +1104,7 @@ end subroutine abiforstr_fin
 !! SIDE EFFECTS
 !!   deloc <type(delocint)>=Important variables for
 !!   |                           pred_delocint
-!!   ! icenter  = Index of the center of the number of shifts 
+!!   ! icenter  = Index of the center of the number of shifts
 !!   | nang     = Number of angles
 !!   | nbond    = Number of bonds
 !!   | ncart    = Number of cartesian directions

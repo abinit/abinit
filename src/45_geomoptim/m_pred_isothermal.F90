@@ -470,7 +470,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !  !      If metric has changed since the initialization, update the Ylm's
 !  if (ab_mover%optcell/=0.and.psps%useylm==1.and.itime>1)then
-!  call status(0,dtfil%filstat,iexit,level,'call initylmg ')
 !  option=0;if (ab_mover%iscf>0) option=1
 !  call initylmg(gprimd,kg,ab_mover%kptns,ab_mover%mkmem,mpi_enreg,psps%mpsang,ab_mover%mpw,ab_mover%nband,ab_mover%nkpt,&
 !  &         npwarr,ab_mover%nsppol,option,rprimd_next,ylm,ylmgr)
@@ -534,7 +533,6 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !  !      If metric has changed since the initialization, update the Ylm's
 !  if (ab_mover%optcell/=0.and.psps%useylm==1.and.itime>1)then
-!  call status(0,dtfil%filstat,iexit,level,'call initylmg ')
 !  option=0;if (ab_mover%iscf>0) option=1
 !  call initylmg(gprimd,kg,ab_mover%kptns,ab_mover%mkmem,mpi_enreg,psps%mpsang,ab_mover%mpw,ab_mover%nband,ab_mover%nkpt,&
 !  &         npwarr,ab_mover%nsppol,option,rprimd_next,ylm,ylmgr)

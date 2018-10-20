@@ -777,13 +777,6 @@ end subroutine ephwg_free
 
 !! subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
 !!
-!!
-!! !This section has been created automatically by the script Abilint (TD).
-!! !Do not modify the following lines by hand.
-!! #undef ABI_FUNC
-!! #define ABI_FUNC 'ephwg_test'
-!! !End of the abilint section
-!!
 !!  implicit none
 !!
 !! !Arguments ------------------------------------

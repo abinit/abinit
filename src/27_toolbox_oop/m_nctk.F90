@@ -279,7 +279,6 @@ integer function nctk_idname(ncid, varname) result(varid)
 ! *********************************************************************
 
 #ifdef HAVE_NETCDF
- ! nctk_idname must be available outside CPP blocks due to a bug in abilint.
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
  if (ncerr /= nf90_noerr) then
@@ -577,12 +576,6 @@ integer function str2xtype(string) result(xtype)
 
   implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2xtype'
-!End of the abilint section
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
 
@@ -628,12 +621,6 @@ end function str2xtype
 logical function bail_if_ncerr(ncerr, file, line) result(bail)
 
   implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2xtype'
-!End of the abilint section
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncerr

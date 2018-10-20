@@ -121,12 +121,6 @@ contains
 
   implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_init'
-!End of the abilint section
-
 !Arguments ------------------------------------
  integer, intent(in) :: level
  real(dp),optional,intent(in) :: deltat
@@ -250,12 +244,6 @@ subroutine abimem_set_opts(level, limit, deltat, filename, funcname)
 
   implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_setlogopts'
-!End of the abilint section
-
 !Arguments ------------------------------------
  integer, intent(in) :: level
  real(dp),optional,intent(in) :: limit
@@ -292,12 +280,6 @@ end subroutine abimem_set_opts
 subroutine abimem_report(unit)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_report'
-!End of the abilint section
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: unit
@@ -362,12 +344,6 @@ end subroutine abimem_report
 subroutine abimem_get_info(nalloc, ndealloc, allocmemory)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_get_info'
-!End of the abilint section
 
 !Arguments ------------------------------------
  integer(kind=8), intent(out) :: allocmemory

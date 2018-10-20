@@ -1070,12 +1070,6 @@ character(len=3) pure function yesno(bool)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'yesno'
-!End of the abilint section
-
 !Arguments ------------------------------------
  logical,intent(in) :: bool
 

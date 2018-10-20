@@ -1004,12 +1004,6 @@ elemental function ig2gfft(ig,ng) result (gc)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ig2gfft'
-!End of the abilint section
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ig,ng
@@ -1058,15 +1052,7 @@ pure integer function g2ifft(gg,ngfft) result (gidx)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g2ifft'
-!End of the abilint section
-
 !Arguments ------------------------------------
-!scalars
-!arrays
  integer,intent(in) :: gg(3),ngfft(3)
 
 !Local variables-------------------------------

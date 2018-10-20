@@ -1268,13 +1268,6 @@ end subroutine Hpsikc
 !
 !subroutine pc_k(psi_inout,n,eig_e,above)
 !
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'pc_k'
-!!End of the abilint section
-!
 !implicit none
 !real(dp), intent(inout) :: psi_inout(2,npw_kb)
 !integer , intent(in), optional :: n

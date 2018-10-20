@@ -38,7 +38,6 @@ module m_dfpt_mkrho
  use m_fftcore,         only : sphereboundary
  use m_fft,             only : fftpac, fourwf
  use m_spacepar,        only : symrhg
- use m_dtfil,           only : status
  use m_hamiltonian,     only : gs_hamiltonian_type
  use m_pawrhoij,        only : pawrhoij_type
  use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free
@@ -601,7 +600,6 @@ end subroutine dfpt_mkrho
 !!
 !! CHILDREN
 !!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
-!!      status
 !!
 !! SOURCE
 
@@ -670,10 +668,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    ABI_ALLOCATE(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
    do ispinor=1,nspinor
-
-     if (prtvol>=10) then
-       call status(counter,filstat,iexit,level,'density update')
-     end if
 
 !  Part devoted to the accumulation of the 0-order potential part of the 2nd-order total energy
 !  --------------------------------------------------------------------------------------------
@@ -779,9 +773,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  else ! nvloc = 4
 ! The same lines of code are in 72_response/dfpt_mkrho.F90
 ! TODO merge these lines in a single routine??!!
-   if (prtvol>=10) then
-     call status(counter,filstat,iexit,level,'density update')
-   end if
    ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
    ABI_ALLOCATE(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 

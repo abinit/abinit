@@ -30,10 +30,10 @@
 module m_xieee
 
 #ifdef HAVE_FC_IEEE_EXCEPTIONS
- !use, intrinsic :: ieee_exceptions  ! abilint does not like intrinsic
- use ieee_exceptions 
+ !use, intrinsic :: ieee_exceptions
+ use ieee_exceptions
 #endif
-    
+
  implicit none
 
  private
@@ -43,7 +43,7 @@ module m_xieee
 
  integer,private,parameter :: std_out = 6
 
-contains 
+contains
 !!***
 
 !!****f* m_xieee/xieee_halt_ifexc
@@ -70,7 +70,7 @@ subroutine xieee_halt_ifexc(halt)
 !scalars
  logical,intent(in) :: halt
 ! *************************************************************************
-    
+
 #ifdef HAVE_FC_IEEE_EXCEPTIONS
  ! Possible Flags: ieee_invalid, ieee_overflow, ieee_divide_by_zero, ieee_inexact, and ieee_underflow
  if (ieee_support_halting(ieee_invalid)) then
@@ -121,7 +121,7 @@ subroutine xieee_signal_ifexc(flag)
 !scalars
  logical,intent(in) :: flag
 ! *************************************************************************
-    
+
 #ifdef HAVE_FC_IEEE_EXCEPTIONS
  ! Possible Flags: ieee_invalid, ieee_overflow, ieee_divide_by_zero, ieee_inexact, and ieee_underflow
  call ieee_set_flag(ieee_invalid, flag)

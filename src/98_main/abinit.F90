@@ -94,7 +94,6 @@ program abinit
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_ab7_invars
  use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
@@ -131,13 +130,14 @@ program abinit
  use m_outvars,       only : outvars
  use m_driver,       only : driver
 #ifdef HAVE_GPU_CUDA
- use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
+ use m_initcuda,     only: setdevice_cuda, unsetdevice_cuda
 #endif
 #if defined HAVE_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
 
  use m_common, only : get_dtsets_pspheads
+
  implicit none
 
 #if defined HAVE_MPI1
@@ -274,7 +274,7 @@ program abinit
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
- call get_dtsets_pspheads(filnam(1), ndtset, filstat, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, xmpi_world)
+ call get_dtsets_pspheads(filnam(1), ndtset, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, xmpi_world)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -293,8 +293,6 @@ program abinit
 !------------------------------------------------------------------------------
 
 !12) Echo input data to output file and log file
-
- call status(0,filstat,iexit,level,'call outvars(1)')
 
  ! For evolving variables, and results
  ABI_DATATYPE_ALLOCATE(results_out,(0:ndtset_alloc))
@@ -358,7 +356,6 @@ program abinit
 !13) Perform additional checks on input data
 
  call timab(45,3,tsec)
- call status(0,filstat,iexit,level,'call chkinp   ')
 
  call chkinp(dtsets,ab_out,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
@@ -396,7 +393,6 @@ program abinit
 !The timing is done in gstate
 
  call timab(45,2,tsec)
- call status(0,filstat,iexit,level,'call driver   ')
 
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
@@ -412,8 +408,6 @@ program abinit
    call driver(abinit_version,tcpui,dtsets,filnam,filstat,&
 &   mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
  end if
-
- call status(0,filstat,iexit,level,'after driver  ')
 
 !------------------------------------------------------------------------------
 
@@ -483,7 +477,6 @@ program abinit
 
  ! 17) Timing analysis
  if(timopt/=0)then
-   call status(0,filstat,iexit,level,'call timana   ')
    call timana (mpi_enregs(1), natom, nband, ndtset, nfft, nkpt, npwtot, nsppol, timopt)
  else
 #if defined HAVE_MPI
@@ -514,11 +507,8 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 19) Delete the status file, and, for build-in tests, analyse the correctness of results.
- call status(0,filstat,iexit,level,'end echo status')
  if (ndtset == 0) then
    call testfi(dtsets(1)%builtintest,etotal,filstat,fred,natom,strten,xred)
- else
-   call delete_file(filstat, ierr)
  end if
 
  ! One should have here the explicit deallocation of all arrays

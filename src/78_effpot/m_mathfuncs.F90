@@ -71,12 +71,6 @@ contains
   !  subroutine rand_normal_ziggurat(a)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'rand_normal_ziggurat'
-!End of the abilint section
-
 !    real(dp), intent(out)::a(:,:)
 !    integer :: i, j
 !    do i=1, size(a, dim=2)

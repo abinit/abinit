@@ -879,12 +879,6 @@ pure logical function isdiagmat_rdp(mat, atol) result(ans)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isdiagmat_rdp'
-!End of the abilint section
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: mat(:,:)
@@ -2075,12 +2069,6 @@ end subroutine mask2blocks
 function linfit_rdp(nn,xx,yy,aa,bb) result(res)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linfit_rdp'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -3852,12 +3840,6 @@ end subroutine symmetrize_dpc
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pack_matrix'
-!End of the abilint section
 
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)

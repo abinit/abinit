@@ -3136,13 +3136,6 @@ end function effective_potential_compare
 
 ! subroutine effective_potential_printPDOS(eff_pot,filename,ncell,nph1l,option,qph1l)
 
-
-! !This section has been created automatically by the script Abilint (TD).
-! !Do not modify the following lines by hand.
-! #undef ABI_FUNC
-! #define ABI_FUNC 'effective_potential_printPDOS'
-! !End of the abilint section
-
 !   implicit none
 
 ! !Arguments ------------------------------------

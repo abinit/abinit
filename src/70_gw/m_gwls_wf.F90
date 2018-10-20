@@ -106,10 +106,10 @@ end subroutine set_wf
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
@@ -121,7 +121,7 @@ real(dp), intent(in) :: v(2,nk)
 norm_k = 0.0_dp
 
 do i=1,nk
-norm_k = norm_k + v(1,i)**2 + v(2,i)**2 
+norm_k = norm_k + v(1,i)**2 + v(2,i)**2
 end do
 call xmpi_sum(norm_k,cbf,i) ! sum on all processors
 
@@ -142,10 +142,10 @@ end function norm_k
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
@@ -177,17 +177,17 @@ end function norm_kc
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
 complex(dpc) function scprod_kc(v1,v2)
 
 implicit none
-complex(dpc), intent(in) :: v1(nk), v2(nk) 
+complex(dpc), intent(in) :: v1(nk), v2(nk)
 ! *************************************************************************
 scprod_kc = zero
 do i=1,nk
@@ -195,7 +195,7 @@ scprod_kc = scprod_kc + conjg(v1(i))*v2(i)
 end do
 call xmpi_sum(scprod_kc,cbf,i) ! sum on all processors
 
-!scprod_kc = sum(conjg(v1)*v2)  !Eliminated to avoid functions that return vectors embeded in another function/subroutine call. 
+!scprod_kc = sum(conjg(v1)*v2)  !Eliminated to avoid functions that return vectors embeded in another function/subroutine call.
 
 end function scprod_kc
 !!***
@@ -212,21 +212,14 @@ end function scprod_kc
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
 ! real(dp) function contribution(alpha,beta,k,norm_svne)
-!
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'contribution'
-!!End of the abilint section
 !
 !  implicit none
 !  real(dp), intent(in) :: alpha(k), beta(k-1), norm_svne
@@ -245,8 +238,8 @@ end function scprod_kc
 !  eq_lin(4,1) = 1.0        !the RHS vector to the linear equation (here, |1,0,0,...>)
 !
 !  !DGTSV( N, NRHS, DL, D, DU, B, LDB, INFO )
-!  !dgtsv(matrix size, # of column of RHS, sub-diagonal elements, diagonal elements, super-diagonal elements, 
-!  !      RHS of equation (solution of equation at end of routine), size of RHS vector, 
+!  !dgtsv(matrix size, # of column of RHS, sub-diagonal elements, diagonal elements, super-diagonal elements,
+!  !      RHS of equation (solution of equation at end of routine), size of RHS vector,
 !  !      error message integer (0: success, -i: illegal ith argument, i: ith factorization failed))
 !  call dgtsv(k,1,eq_lin(1,1:k-1),eq_lin(2,:),eq_lin(3,1:k-1),eq_lin(4,:),k,i)
 !  !Do the scalar product between the <qr_k|sv|ne>=(1,0,0,...) vector and the solution x to T*x=(1,0,0,...) to obtain contribution
@@ -269,21 +262,14 @@ end function scprod_kc
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
 ! function contribution_bloc(alpha,beta,kmax,norm_svne,nseeds)
-!
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'contribution_bloc'
-!!End of the abilint section
 !
 !  implicit none
 !  real(dp) :: contribution_bloc(2)
@@ -322,17 +308,17 @@ end function scprod_kc
 !   do j=1,nseeds
 !    do i=1,j
 !      a(k*nseeds+i,(k-1)*nseeds+j) = cmplx(beta(1,i,j,k),beta(2,i,j,k),dpc)
-!      a((k-1)*nseeds+i,k*nseeds+j) = cmplx(beta(1,j,i,k),-beta(2,j,i,k),dpc) 
+!      a((k-1)*nseeds+i,k*nseeds+j) = cmplx(beta(1,j,i,k),-beta(2,j,i,k),dpc)
 !    end do
 !   end do
-!  end do 
+!  end do
 !  !write(std_out,*)  "Setting RHS..."
 !  b(1,1) = (1.0,0.0)
 !
 !  !write(std_out,*)  "Solving..."
 !  call zgesv(kmax*nseeds,1,a,kmax*nseeds,ipiv,b,kmax*nseeds,i)
 !  !Do the scalar product between the <qr_k|sv|ne>=(1,0,0,...) vector and the solution x to T*x=(1,0,0,...) to obtain contribution
-!  !to SEX, at order k, from orbital n 
+!  !to SEX, at order k, from orbital n
 !  !write(std_out,*)  "Obtaining contribution..."
 !  contribution_bloc(1) = real(b(1,1))*norm_svne**2
 !  contribution_bloc(2) = aimag(b(1,1))*norm_svne**2
@@ -355,21 +341,21 @@ end function scprod_kc
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
 function scprod_k(v1,v2)
 !--------------------------------------------------------------------------------
-! This function computes the inner product of two "vectors" (typically 
+! This function computes the inner product of two "vectors" (typically
 ! wavefunctions), < v1 | v2 >.
 !--------------------------------------------------------------------------------
 implicit none
 real(dp) :: scprod_k(2)
-real(dp), intent(in) :: v1(2,nk), v2(2,nk) 
+real(dp), intent(in) :: v1(2,nk), v2(2,nk)
 ! *************************************************************************
 scprod_k = zero
 
@@ -383,7 +369,7 @@ scprod_k = zero
 scprod_k = cg_zdotc(nk,v1,v2)
 
 ! Collect from every processor
-call xmpi_sum(scprod_k,cbf,i) ! sum on all processors 
+call xmpi_sum(scprod_k,cbf,i) ! sum on all processors
 
 end function scprod_k
 !!***

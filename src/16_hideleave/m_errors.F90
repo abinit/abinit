@@ -1421,12 +1421,6 @@ subroutine xlf_set_sighandler()
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xlf_set_sighandler'
-!End of the abilint section
-
 ! *************************************************************************
 
 #ifdef FC_IBM

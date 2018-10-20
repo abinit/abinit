@@ -199,12 +199,6 @@ subroutine eigr2d_init(eig2nkq,eigr2d,mband,nsppol,nkpt,natom)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_init'
-!End of the abilint section
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::mband,nsppol,nkpt,natom
@@ -301,14 +295,6 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -391,12 +377,6 @@ subroutine fan_init(fan,fan2d,mband,nsppol,nkpt,natom)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_init'
-!End of the abilint section
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::mband,nsppol,nkpt,natom
@@ -446,12 +426,6 @@ end subroutine fan_init
 subroutine gkk_init(gkk,gkk2d,mband,nsppol,nkpt,natom,ncart)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -551,13 +525,6 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -646,14 +613,6 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

@@ -557,21 +557,8 @@ subroutine check_fform(fform)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
-
 !Local variables-------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
-
  integer,intent(in) :: fform
 #ifdef DEBUG_MODE
  type(abifile_t) :: abifile
@@ -2980,12 +2967,6 @@ subroutine hdr_ncread(Hdr,ncid,fform)
 contains
  integer function vid(vname)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -3476,13 +3457,6 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
 
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)

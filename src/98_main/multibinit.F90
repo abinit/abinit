@@ -22,7 +22,7 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      ab7_invars_set_flags,abi_io_redirect,abihist_bcast,abihist_free
+!!      abi_io_redirect,abihist_bcast,abihist_free
 !!      abimem_init,abinit_doctor,compute_anharmonics
 !!      effective_potential_file_getdimsystem,effective_potential_file_gettype
 !!      effective_potential_file_maphisttoref,effective_potential_file_read
@@ -57,7 +57,6 @@ program multibinit
  use m_effective_potential_file
  use m_spin_model
  use m_abihist
- use m_ab7_invars, only : ab7_invars_set_flags
 
  use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit, open_file
@@ -86,7 +85,6 @@ program multibinit
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(17),tmpfilename,name
- character(len=fnlen) :: filstat
  character(len=500) :: message
  type(multibinit_dtset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
@@ -139,10 +137,6 @@ program multibinit
 
 !Initialise the code : write heading, and read names of files.
  call init10(filnam,comm)
-
-! Call the parser from the parser module.
- filstat = trim("_STATUS")
- call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
 
 !******************************************************************
 

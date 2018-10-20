@@ -2757,12 +2757,6 @@ subroutine write_a2fw_header()
 
  ! Output the header.
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_a2fw_header'
-!End of the abilint section
-
  write(unt,'(a)')              '#'
  write(unt,'(a)')              '# ABINIT package: a2F(w) file'
  write(unt,'(a)')              '#'

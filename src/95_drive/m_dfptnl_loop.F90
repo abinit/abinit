@@ -161,7 +161,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_wffile
  use m_wfk
 
- use m_dtfil,       only : status
  use m_time,        only : timab
  use m_io_tools,    only : file_exists
  use m_kg,          only : getph
@@ -274,7 +273,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  DBG_ENTER("COLL")
 
  call timab(503,1,tsec)
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  comm_cell = mpi_enreg%comm_cell
 
@@ -400,8 +398,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
        counter = pert1case
        call appdig(pert1case,dtfil%fnamewff1,fiwf1i)
 
-       call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
-
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
 &       formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &       dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
@@ -418,7 +414,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
        rho1r1(:,:) = zero
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
          call appdig(pert1case,dtfil%fildens1in,fiden1i)
-         call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, pawrhoij1_i1pert, comm_cell, check_hdr=hdr)
@@ -450,7 +445,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
              counter = 100*pert3case + pert1case
              call appdig(pert3case,dtfil%fnamewff1,fiwf3i)
 
-             call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
              call inwffil(ask_accurate,cg3,dtset,dtset%ecut,ecut_eff,eigen3,dtset%exchn2n3d,&
 &             formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &             dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
@@ -468,7 +462,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
              if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
 
                call appdig(pert3case,dtfil%fildens1in,fiden1i)
-               call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, pawrhoij1_i3pert, comm_cell, check_hdr=hdr)
@@ -510,7 +503,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    counter = 100*pert2case + pert2case
                    call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
-                   call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
                    call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
 &                   formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &                   dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
@@ -529,7 +521,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                    if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
 
                      call appdig(pert2case,dtfil%fildens1in,fiden1i)
-                     call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, pawrhoij1_i2pert , comm_cell, check_hdr=hdr)
@@ -538,7 +529,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfftf))
                      work(:)=rho2r1(:,1)
-                     call status(counter,dtfil%filstat,iexit,level,'call fourdp   ')
                      call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
                      ABI_DEALLOCATE(work)
 
@@ -625,7 +615,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
                    end if ! usepaw
 
-                   call status(counter,dtfil%filstat,iexit,level,'get vtrial1   ')
                    option=1;optene=0
                    call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,dummy_real,&
 &                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
@@ -738,7 +727,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 
 !                  Perform DFPT part of the 3dte calculation
                    call timab(513,1,tsec)
-                   call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
 !                  NOTE : eigen2 equals zero here
 
                    call dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
@@ -751,7 +739,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                   d3etot_1,d3etot_2,d3etot_3,d3etot_4,d3etot_5,d3etot_6,d3etot_7,d3etot_8,d3etot_9)
                    call timab(513,2,tsec)
 
-                   call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
 
 !                  Eventually close the dot file
                    do ii=1,nwffile
@@ -775,8 +762,6 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
      end if   ! rfpert
    end do    ! i1dir
  end do     ! i1pert
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
 !More memory cleaning
  call destroy_hamiltonian(gs_hamkq)

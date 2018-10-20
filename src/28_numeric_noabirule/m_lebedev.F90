@@ -135,12 +135,6 @@ type(lebedev_t) function lebedev_new(seq_idx) result(new)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lebedev_new'
-!End of the abilint section
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: seq_idx
@@ -184,12 +178,6 @@ end function lebedev_new
 subroutine lebedev_free(lgrid)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lebedev_free'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -237,12 +225,6 @@ end subroutine lebedev_free
 subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_lebedev_grid'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars

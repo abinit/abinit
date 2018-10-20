@@ -2427,17 +2427,11 @@ end subroutine compute_oper_ks2wan
 
 subroutine normalization_plowannier(wan)
 
-
   use m_matrix, only : invsqrt_matrix
+
   implicit none
+
 !Arguments------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normalization_plowannier'
-!End of the abilint section
-
   type(plowannier_type), intent(inout) :: wan
 
 !Local----------------------

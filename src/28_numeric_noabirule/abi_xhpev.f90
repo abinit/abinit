@@ -32,12 +32,6 @@
 
   subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,work,info,rwork,istwf_k)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -88,13 +82,6 @@ end subroutine abi_dhpev
 !! SOURCE
 
   subroutine abi_dhpev_alloc_1d(jobz,uplo,n,a,w,z,istwf_k,use_slk)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev_alloc_1d'
-
-!End of the abilint section
 
  implicit none
  !Arguments ------------------------------------
@@ -183,13 +170,6 @@ end subroutine abi_dhpev_alloc_1d
 
  subroutine abi_dhpev_alloc_2d(jobz,uplo,n,a,w,z,istwf_k)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev_alloc_2d'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -231,12 +211,6 @@ end subroutine abi_dhpev_alloc_2d
 
   subroutine abi_chpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpev'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -274,13 +248,6 @@ end subroutine abi_chpev
 
  subroutine abi_chpev_alloc(jobz,uplo,n,a,w,z)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpev_alloc'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -314,12 +281,6 @@ end subroutine abi_chpev_alloc
 !! SOURCE
 
   subroutine abi_zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpev'
-!End of the abilint section
 
  implicit none
 
@@ -359,13 +320,6 @@ end subroutine abi_zhpev
 !! SOURCE
 
  subroutine abi_zhpev_alloc(jobz,uplo,n,a,w,z)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpev_alloc'
-
-!End of the abilint section
 
  implicit none
 

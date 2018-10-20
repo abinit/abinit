@@ -155,12 +155,6 @@ end subroutine disable_timelimit
 
 logical pure function have_timelimit_in(abifunc) result(ans)
 
-
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'have_timelimit_in'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------

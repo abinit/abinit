@@ -356,11 +356,6 @@ end subroutine herald
 !! OUTPUT
 !!  (only writing)
 !!
-!! NOTES
-!!   The routine uses optional arguments, therefore the interface must be explicit.
-!!   Be careful when writing CPP macros that use wrtout since abilint won't see the call
-!!   and no interface will be added to the source file.
-!!
 !! PARENTS
 !!      abinit,afterscfloop,anaddb,append_xyz,atm2fft,atomden,berryphase
 !!      berryphase_new,bethe_salpeter,bonds_lgth_angles,bsepostproc,calc_efg

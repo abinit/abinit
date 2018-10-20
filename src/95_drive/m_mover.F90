@@ -51,7 +51,7 @@ module m_mover
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time, status
+ use m_dtfil,              only : dtfil_init_time
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
@@ -257,8 +257,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  need_writeHIST=.TRUE.
  if(present(writeHIST)) need_writeHIST = writeHIST
-
- call status(0,dtfil%filstat,iexit,level,'init          ')
 
  ! enable time limit handler if not done in callers.
  if (enable_timelimit_in(MY_NAME) == MY_NAME) then
@@ -951,8 +949,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
 contains
 !!***

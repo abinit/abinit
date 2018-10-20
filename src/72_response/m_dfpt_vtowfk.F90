@@ -37,7 +37,6 @@ module m_dfpt_vtowfk
  use m_rf2
  use m_rf2_init,         only : rf2_init
 
- use m_dtfil,        only : status
  use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby
@@ -286,7 +285,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  end if
 
 !Read the npw and kg records of wf files
- call status(0,dtfil%filstat,iexit,level,'before WffRead')
  test_ddk=0
  if ((ipert==natom+2.and.sum((dtset%qptn(1:3))**2)<1.0d-7.and.&
 & (dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
