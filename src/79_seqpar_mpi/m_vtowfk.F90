@@ -125,7 +125,7 @@ contains
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
 !!  ==== if (gs_hamk%usepaw==0) ====
-!!    enl_k(nband_k)=contribution from each band to nonlocal pseudopotential part of total energy, at this k-point
+!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential + potential Fock ACE part of total energy, at this k-point
 !!  ==== if (gs_hamk%usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
@@ -153,7 +153,7 @@ contains
 !! SOURCE
 
 subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
-& eig_k,ek_k,ek_k_nd,enl_k,fixed_occ,grnl_k,gs_hamk,&
+& eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 & ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj,mkgq,mpi_enreg,&
 & mpw,natom,nband_k,nkpt,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
 & pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift)
@@ -185,7 +185,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp), intent(in) :: zshift(nband_k)
  real(dp), intent(out) :: eig_k(nband_k),ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
- real(dp), intent(out) :: enl_k(nband_k*(1-gs_hamk%usepaw))
+ real(dp), intent(out) :: enlx_k(nband_k*(1-gs_hamk%usepaw))
  real(dp), intent(out) :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(out) :: resid_k(nband_k)
  real(dp), intent(inout) :: cg(2,mcg),rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
@@ -212,7 +212,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
- real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
+ real(dp),allocatable :: subham(:),subovl(:),subvnlx(:),totvnlx(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! **********************************************************************
@@ -282,19 +282,19 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
 
-   ABI_ALLOCATE(subvnl,(0))
-   ABI_ALLOCATE(totvnl,(0,0))
+   ABI_ALLOCATE(subvnlx,(0))
+   ABI_ALLOCATE(totvnlx,(0,0))
    if (gs_hamk%usepaw==0) then
      if (wfopta10==4) then
-       ABI_DEALLOCATE(totvnl)
+       ABI_DEALLOCATE(totvnlx)
        if (istwf_k==1) then
-         ABI_ALLOCATE(totvnl,(2*nband_k,nband_k))
+         ABI_ALLOCATE(totvnlx,(2*nband_k,nband_k))
        else if (istwf_k==2) then
-         ABI_ALLOCATE(totvnl,(nband_k,nband_k))
+         ABI_ALLOCATE(totvnlx,(nband_k,nband_k))
        end if
      else
-       ABI_DEALLOCATE(subvnl)
-       ABI_ALLOCATE(subvnl,(nband_k*(nband_k+1)))
+       ABI_DEALLOCATE(subvnlx)
+       ABI_ALLOCATE(subvnlx,(nband_k*(nband_k+1)))
      end if
    end if
 
@@ -330,9 +330,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
        if (wfopta10==4) then
-         totvnl(:,:)=zero
+         totvnlx(:,:)=zero
        else
-         subvnl(:)=zero
+         subvnlx(:)=zero
        end if
      end if
      if (use_subovl==1)subovl(:)=zero
@@ -373,20 +373,20 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        if (wfopta10==4) then
          if ( .not. newlobpcg ) then
            call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnl)
+&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx)
 !          In case of FFT parallelism, exchange subspace arrays
            spaceComm=mpi_enreg%comm_bandspinorfft
            call xmpi_sum(subham,spaceComm,ierr)
            if (gs_hamk%usepaw==0) then
              if (wfopta10==4) then
-               call xmpi_sum(totvnl,spaceComm,ierr)
+               call xmpi_sum(totvnlx,spaceComm,ierr)
              else
-               call xmpi_sum(subvnl,spaceComm,ierr)
+               call xmpi_sum(subvnlx,spaceComm,ierr)
              end if
            end if
            if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
          else
-           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,mpi_enreg,&
+           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
 &           nband_k,npw_k,my_nspinor,prtvol,resid_k)
          end if
 !        In case of FFT parallelism, exchange subspace arrays
@@ -395,7 +395,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
        else if (wfopta10 == 1) then
-         call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
+         call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &         mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
        end if
 
@@ -407,7 +407,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &       gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
 &       mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
 &       dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&       subham,subovl,subvnl,dtset%tolrde,dtset%tolwfr,use_subovl,wfoptalg,zshift)
+&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,wfoptalg,zshift)
      end if
    end if
 
@@ -822,7 +822,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,message,'PERS')
  end if
 
-!Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
+!Norm-conserving or FockACE: Compute nonlocal+FockACE part of total energy : rotate subvnlx
  if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
@@ -830,13 +830,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    mat1=zero
 
    if (wfopta10==4) then
-     enl_k(1:nband_k)=zero
+     enlx_k(1:nband_k)=zero
 
      if (istwf_k==1) then
-       call zhemm('l','l',nband_k,nband_k,cone,totvnl,nband_k,evec,nband_k,czero,mat1,nband_k)
+       call zhemm('l','l',nband_k,nband_k,cone,totvnlx,nband_k,evec,nband_k,czero,mat1,nband_k)
        do iband=1,nband_k
          res = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
-         enl_k(iband)= res
+         enlx_k(iband)= res
        end do
      else if (istwf_k==2) then
        ABI_ALLOCATE(evec_loc,(nband_k,nband_k))
@@ -846,9 +846,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            evec_loc(iband,jj)=evec(2*iband-1,jj)
          end do
        end do
-       call dsymm('l','l',nband_k,nband_k,one,totvnl,nband_k,evec_loc,nband_k,zero,mat_loc,nband_k)
+       call dsymm('l','l',nband_k,nband_k,one,totvnlx,nband_k,evec_loc,nband_k,zero,mat_loc,nband_k)
        do iband=1,nband_k
-         enl_k(iband)=ddot(nband_k,evec_loc(:,iband),1,mat_loc(:,iband),1)
+         enlx_k(iband)=ddot(nband_k,evec_loc(:,iband),1,mat_loc(:,iband),1)
        end do
        ABI_DEALLOCATE(evec_loc)
        ABI_DEALLOCATE(mat_loc)
@@ -856,13 +856,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    else
 !    MG: This version is much faster with good OMP scalability.
-!    Construct upper triangle of matvnl from subvnl using full storage mode.
+!    Construct upper triangle of matvnl from subvnlx using full storage mode.
      pidx=0
      do jj=1,nband_k
        do ii=1,jj
          pidx=pidx+1
-         matvnl(1,ii,jj)=subvnl(2*pidx-1)
-         matvnl(2,ii,jj)=subvnl(2*pidx  )
+         matvnl(1,ii,jj)=subvnlx(2*pidx-1)
+         matvnl(2,ii,jj)=subvnlx(2*pidx  )
        end do
      end do
 
@@ -871,7 +871,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !$OMP PARALLEL DO PRIVATE(res)
      do iband=1,nband_k
        res = cg_real_zdotc(nband_k,evec(:,iband),mat1(:,:,iband))
-       enl_k(iband) = res
+       enlx_k(iband) = res
      end do
    end if
 
@@ -922,7 +922,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      call wrtout(std_out,message,'PERS')
 
      do ii=0,(nband_k-1)/6
-       write(message,'(1p,6e12.4)') (enl_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
+       write(message,'(1p,6e12.4)') (enlx_k(iband),iband=1+6*ii,min(6+6*ii,nband_k))
        call wrtout(std_out,message,'PERS')
      end do
    end if
@@ -938,9 +938,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(subham)
    !if (gs_hamk%usepaw==0) then
    !if (wfopta10==4) then
-   ABI_DEALLOCATE(totvnl)
+   ABI_DEALLOCATE(totvnlx)
    !else
-   ABI_DEALLOCATE(subvnl)
+   ABI_DEALLOCATE(subvnlx)
    !end if
    !end if
    ABI_DEALLOCATE(subovl)

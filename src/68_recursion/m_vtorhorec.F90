@@ -86,7 +86,7 @@ contains
 !!
 !! OUTPUT
 !!  ek=kinetic energy part of total energy.
-!!  enl=nonlocal pseudopotential part of total energy.
+!!  enlx=nonlocal psp + potential Fock ACE part of total energy.
 !!  entropy=entropy due to the occupation number smearing (if metal)
 !!  e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
 !!  fermie=fermi energy (Hartree)
@@ -118,7 +118,7 @@ contains
 !! SOURCE
 
 subroutine vtorhorec(dtset,&
-&  ek,enl,entropy,e_eigenvalues,fermie,&
+&  ek,enlx,entropy,e_eigenvalues,fermie,&
 &  grnl,initialized,irrzon,nfftf,phnons,&
 &  rhog, rhor, vtrial,rset,deltastep,rprimd,gprimd)
 
@@ -135,7 +135,7 @@ subroutine vtorhorec(dtset,&
 !scalars
  integer,intent(in) :: initialized
  integer,intent(in) :: nfftf,deltastep
- real(dp),intent(out) :: e_eigenvalues,ek,enl,entropy,fermie
+ real(dp),intent(out) :: e_eigenvalues,ek,enlx,entropy,fermie
  type(dataset_type),intent(in) :: dtset
  type(recursion_type),intent(inout) :: rset
 !arrays
@@ -246,7 +246,7 @@ subroutine vtorhorec(dtset,&
  n_pt_integ_entropy = max(25,dtset%recnpath)
 
 !-- energies non-local: at day not implemented
- enl = zero
+ enlx = zero
  grnl = zero
 !jmb
  ek = zero
@@ -822,7 +822,7 @@ subroutine vtorhorec(dtset,&
 
 
    if(rset%nl%nlpsp) then
-     call nlenergyrec(rset,enl,exppot,dtset%ngfft,dtset%natom,&
+     call nlenergyrec(rset,enlx,exppot,dtset%ngfft,dtset%natom,&
 &     dtset%typat,tsmear,trotter,tolrec)
    end if
  end if noentropie
@@ -868,7 +868,7 @@ subroutine vtorhorec(dtset,&
    intrhov = (inf_ucvol)*sum(rholocal*vtrial(min_pt:max_pt,1))
    call xmpi_sum(intrhov,rset%mpi%comm_bandfft ,ierr)
 
-   ek = e_eigenvalues-intrhov-enl
+   ek = e_eigenvalues-intrhov-enlx
 
 
    if(rset%debug) then
@@ -909,7 +909,7 @@ subroutine vtorhorec(dtset,&
 &   ' -omega/T    =',gran_pot,ch10,&
 &   ' eigenvalues =',e_eigenvalues,ch10,&
 &   ' kinetic     =',ek,ch10,&
-&   ' non-loc ene =',enl
+&   ' non-loc ene =',enlx
    call wrtout(std_out,msg,'COLL')
  end if
  write(msg,'(a,50a)')' ',('-',ii=1,50)
@@ -2029,7 +2029,7 @@ end subroutine gran_potrec
 !!  natom=number of atoms
 !!
 !! OUTPUT
-!!  enl=non-local energy
+!!  enlx=non-local energy
 !!
 !! SIDE EFFECTS
 !!
@@ -2043,7 +2043,7 @@ end subroutine gran_potrec
 !!
 !! SOURCE
 
-subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
+subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2059,7 +2059,7 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  integer , intent(in)  :: natom,trotter
  real(dp), intent(in)  :: tsmear,tol
  type(recursion_type),intent(in) :: rset
- real(dp), intent(out) :: enl
+ real(dp), intent(out) :: enlx
 !Arrays
  integer , intent(in)  :: typat(natom),ngfft(18)
  real(dp), intent(in)  :: exppot(0:ngfft(1)*ngfft(2)*ngfft(3)-1)
@@ -2095,7 +2095,7 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
  call wrtout(std_out,msg,'COLL')
 
 !--Initialisation variables
- enl = zero
+ enlx = zero
  mult = two !--is twice for non-spinned systems
  ngfftrec = rset%ngfftrec(:3)
  gcart_loc = rset%inf%gcart
@@ -2189,14 +2189,14 @@ subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
 &         natom,projec)
        end if
 
-       enl = enl+mult*rho_nl*rset%nl%eival(in,il,ipsp)*normali
+       enlx = enlx+mult*rho_nl*rset%nl%eival(in,il,ipsp)*normali
      end if
 
    end do projloop
  end do atomloop
 
 !--Sum the contribution to the non-local energy computed by any procs
- call xmpi_sum(enl,mpi_loc%comm_bandfft,ierr)
+ call xmpi_sum(enlx,mpi_loc%comm_bandfft,ierr)
 
  if(associated(projec))  then
    ABI_DEALLOCATE(projec)

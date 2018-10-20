@@ -2834,7 +2834,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  real(dp) :: enlout(6),dum_svectout(1,1),dum(1),kpg_dum(0,0)
  real(dp),allocatable :: cwave0(:,:),cwavef(:,:),dkinpw(:),eig2_k(:)
  real(dp),allocatable :: ffnl(:,:,:,:),ffnl_ylm(:,:,:,:),ghc(:,:)
- real(dp),allocatable :: gvnl1(:,:),gvnlc(:,:),kinpw1(:),ph3d(:,:,:)
+ real(dp),allocatable :: gvnlx1(:,:),gvnlxc(:,:),kinpw1(:),ph3d(:,:,:)
  type(pawcprj_type) :: cprj_dum(0,0)
 
 ! *********************************************************************
@@ -2846,8 +2846,8 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 
 !Init me
  ABI_ALLOCATE(ghc,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnlc,(2,npw1_k*nspinor))
- ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw1_k*nspinor))
+ ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(eig2_k,(2*nsppol*mband**2))
  ABI_ALLOCATE(kinpw1,(npw1_k))
  ABI_ALLOCATE(dkinpw,(npw_k))
@@ -2923,19 +2923,19 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 
        signs=2 ; choice=3 ; nnlout=6 ; paw_opt=0 ; cpopt=-1 ; tim_nonlop=5
        call nonlop(choice,cpopt,cprj_dum,enlout,gs_hamk,istr1,dum,mpi_enreg,1,nnlout,paw_opt,&
-&       signs,dum_svectout,tim_nonlop,cwave0,gvnl1)
-!      <G|Vnl1|Cnk> is contained in gvnl1
+&       signs,dum_svectout,tim_nonlop,cwave0,gvnlx1)
+!      <G|Vnl1|Cnk> is contained in gvnlx1
 
 !      Kinetic contribution
        do ispinor=1,nspinor
          do ipw=1,npw1_k
            ipws=ipw+npw1_k*(ispinor-1)
            if(kinpw1(ipw)<huge(0.0_dp)*1.d-11)then
-             gvnl1(1,ipws)=gvnl1(1,ipws)+dkinpw(ipw)*cwave0(1,ipws)
-             gvnl1(2,ipws)=gvnl1(2,ipws)+dkinpw(ipw)*cwave0(2,ipws)
+             gvnlx1(1,ipws)=gvnlx1(1,ipws)+dkinpw(ipw)*cwave0(1,ipws)
+             gvnlx1(2,ipws)=gvnlx1(2,ipws)+dkinpw(ipw)*cwave0(2,ipws)
            else
-             gvnl1(1,ipws)=0.0_dp
-             gvnl1(2,ipws)=0.0_dp
+             gvnlx1(1,ipws)=0.0_dp
+             gvnlx1(2,ipws)=0.0_dp
            end if
          end do
        end do
@@ -2944,7 +2944,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 !      and add it to the 2nd-order matrix
 !      imaginary term should be zero for strain-strain 2nd derivatives,
 !      but keep it as a test for now
-       call dotprod_g(dotr,doti,gs_hamk%istwf_k,npw1_k*nspinor,2,cwavef,gvnl1,&
+       call dotprod_g(dotr,doti,gs_hamk%istwf_k,npw1_k*nspinor,2,cwavef,gvnlx1,&
 &       mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
        d2nl_k(1,idir1,ipert1)= d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*2.0_dp*dotr
@@ -2965,8 +2965,8 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 
  ABI_DEALLOCATE(eig2_k)
  ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlc)
- ABI_DEALLOCATE(gvnl1)
+ ABI_DEALLOCATE(gvnlxc)
+ ABI_DEALLOCATE(gvnlx1)
  ABI_DEALLOCATE(kinpw1)
  ABI_DEALLOCATE(dkinpw)
  ABI_DEALLOCATE(ffnl)
@@ -4411,11 +4411,11 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  integer,parameter :: level=18
  integer :: berryopt,counter,iband,iexit,ii,indx,iorder_cprj
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
- integer :: opt_gvnl1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
+ integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
  real(dp) :: dotr,lambda,wtband
  character(len=500) :: msg
 !arrays
- real(dp) :: dum_grad_berry(1,1),dum_gvnl1(1,1),dum_gs1(1,1),tsec(2)
+ real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwaveq(:,:),gh1(:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:),cwaveprjq(:,:),cwaveprj_tmp(:,:)
 
@@ -4465,7 +4465,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  end if
 !Arguments of getgh1c routine (want only (NL+kin) frozen H(1))
  berryopt=0;usevnl=0;sij_opt=-gs_hamkq%usepaw;tim_getgh1c=3
- optlocal=0;optnl=1;opt_gvnl1=0
+ optlocal=0;optnl=1;opt_gvnlx1=0
  if(ipert==gs_hamkq%natom+5) optnl=0;    ! no 1st order NL in H(1), also no kin, but this will be taken into account later
 !if(ipert==gs_hamkq%natom+5) optlocal=0; ! 1st order LOCAL potential present
 
@@ -4526,8 +4526,8 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !    Apply H^(1)-Esp.S^(1) to Psi^(0) (H(^1)=only (NL+kin) frozen part)
      lambda=eig0_k(iband)
-     call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnl1,&
-&     idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,&
+     call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnlx1,&
+&     idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,&
 &     tim_getgh1c,usevnl)
 !    Compute Eig1=<Psi^(0)|H^(1)-Eps.S^(1)|Psi(0)>
      call dotprod_g(dotr,lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
