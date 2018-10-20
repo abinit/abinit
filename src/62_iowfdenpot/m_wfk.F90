@@ -5101,7 +5101,7 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 
 ! *************************************************************************
 
- call wrtout(std_out,ABI_FUNC//": comparing "//TRIM(fname1)//" "//TRIM(fname2),"COLL")
+ call wrtout(std_out, "wfk_diff: comparing "//TRIM(fname1)//" "//TRIM(fname2))
 
  my_rank = xmpi_comm_rank(comm); nproc   = xmpi_comm_size(comm)
  sc_mode = xmpio_collective

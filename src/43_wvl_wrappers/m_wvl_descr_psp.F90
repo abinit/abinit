@@ -444,7 +444,7 @@ subroutine wvl_descr_atoms_set(acell, icoulomb, natom, ntypat, typat, wvl)
 
 #if defined HAVE_BIGDFT
 
- call f_routine(ABI_FUNC)
+ call f_routine('wvl_descr_atoms_set')
 
  wvl%atoms=atoms_data_null()
 

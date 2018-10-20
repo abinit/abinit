@@ -522,7 +522,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call psolver_kernel( wvl%den%denspot%dpbox%hgrids, 1, icoulomb, mpi_enreg%me_wvl, wvl%den%denspot%pkernel , &
 &   mpi_enreg%comm_wvl, wvl%den%denspot%dpbox%ndims, mpi_enreg%nproc_wvl, dtset%nscforder)
    nullify(wvl%den%denspot%pkernelseq%kernel)
-   !call copy_coulomb_operator(wvl%den%denspot%pkernel,wvl%den%denspot%pkernelseq,ABI_FUNC)
+   !call copy_coulomb_operator(wvl%den%denspot%pkernel,wvl%den%denspot%pkernelseq, "gstate")
 !  Associate the denspot distribution into mpi_enreg.
    mpi_enreg%nscatterarr  => wvl%den%denspot%dpbox%nscatterarr
    mpi_enreg%ngatherarr   => wvl%den%denspot%dpbox%ngatherarr

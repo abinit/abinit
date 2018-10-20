@@ -3354,7 +3354,7 @@ subroutine test_xginv(msize,skinds,do_check,Tres,comm)
  call xginv(cmat_dpc,msize,comm)
 
  call cwtime(Tres%ctime,Tres%wtime,Tres%gflops,"stop")
- Tres%testname  = ABI_FUNC
+ Tres%testname  = 'test_xginv'
  Tres%msize     = msize
 
  max_abserr = -one

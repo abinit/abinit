@@ -368,6 +368,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp) :: val_min,vxcavg,vxcavg_dum
  real(dp) :: zion,wtime_step,now,prev
  character(len=10) :: tag
+ character(len=500) :: MY_NAME = "scfcv_core"
  character(len=1500) :: message
  !character(len=500) :: dilatmx_errmsg
  character(len=fnlen) :: fildata
@@ -438,8 +439,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  call status(0,dtfil%filstat,iexit,level,'enter')
 
  ! enable time limit handler if not done in callers.
- if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-   write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+ if (enable_timelimit_in(MY_NAME) == MY_NAME) then
+   write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
  end if
 
 ! Initialise non_magnetic_xc for rhohxc
@@ -723,7 +724,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      if (usefock==1) then
        ctocprj_choice = 1
        if (dtset%optforces == 1) then
-        ctocprj_choice = 2; ! ncpgr = 3 
+        ctocprj_choice = 2; ! ncpgr = 3
        end if
 !       if (dtset%optstress /= 0) then
 !         ncpgr = 6 ; ctocprj_choice = 3
@@ -1010,7 +1011,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      prev = now
      call wrtout(std_out, sjoin(" scfcv_core: previous iteration took ",sec2str(wtime_step)))
 
-     if (have_timelimit_in(ABI_FUNC)) then
+     if (have_timelimit_in(MY_NAME)) then
        if (istep > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then

@@ -419,7 +419,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
  if (use_fftrisc) then
-   !call wrtout(std_out,strcat(ABI_FUNC," calls dfti_fftrisc"),"COLL")
+   !call wrtout(std_out, " calls dfti_fftrisc")
    if (ndat == 1) then
      if (fftcore_mixprec == 0) then
        call dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&

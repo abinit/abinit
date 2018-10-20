@@ -1598,7 +1598,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #endif
 
        else if(formeig==1)then
-         call wrtout(std_out,ABI_FUNC//': transfer of first-order eigs not yet coded!',"COLL")
+         call wrtout(std_out,'wfsinp: transfer of first-order eigs not yet coded!',"COLL")
        end if
 
 !      DEBUG

@@ -244,6 +244,7 @@ character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb
+character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
@@ -267,9 +268,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  call status(0,dtfil%filstat,iexit,level,'init          ')
 
  ! enable time limit handler if not done in callers.
- if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
+ if (enable_timelimit_in(MY_NAME) == MY_NAME) then
    if (need_verbose) then
-     write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+     write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
    end if
  end if
 
@@ -488,7 +489,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      prev = now
      write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
      if(need_verbose)call wrtout(std_out, message, "COLL")
-     if (have_timelimit_in(ABI_FUNC)) then
+     if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then

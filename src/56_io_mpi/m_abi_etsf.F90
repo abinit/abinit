@@ -350,7 +350,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 #ifdef HAVE_ETSF_IO
 !Initialize the filename
  filetsf = nctk_ncify(filapp)
- call wrtout(std_out,ABI_FUNC//': about to create file '//TRIM(filetsf),'COLL')
+ call wrtout(std_out,"about to create file "//TRIM(filetsf),'COLL')
 
  usewvl = dtset%usewvl
 

@@ -318,7 +318,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Init
   ngpts = my_vdw_params%ngpts
@@ -620,7 +620,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   ABI_DEALLOCATE(utmp)
   ABI_DEALLOCATE(wtmp)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_aggregate
 !!***
@@ -886,7 +886,7 @@ subroutine xc_vdw_done(vdw_params)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   call libxc_functionals_end(xc_functionals=vdw_funcs)
 
@@ -902,7 +902,7 @@ subroutine xc_vdw_done(vdw_params)
   ABI_DEALLOCATE(phig)
   ABI_DEALLOCATE(d2phidg2)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_done
 !!***
@@ -1015,7 +1015,7 @@ subroutine xc_vdw_init(vdw_params)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Global init
   call xc_vdw_set_params(vdw_params)
@@ -1352,7 +1352,7 @@ subroutine xc_vdw_init(vdw_params)
 
   vdw_switch = .true.
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_init
 !!***
@@ -1407,7 +1407,7 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Select LibXC functionals
   select case (ixc_vdw)
@@ -1435,7 +1435,7 @@ subroutine xc_vdw_libxc_init(ixc_vdw)
   ! XC functional init
   call libxc_functionals_init(ixc,1,xc_functionals=vdw_funcs)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_libxc_init
 !!***
@@ -1599,7 +1599,7 @@ subroutine xc_vdw_read(filename)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
 #if defined HAVE_NETCDF
   write(msg,'("Reading vdW-DF data from",1x,a)') trim(filename)
@@ -1726,7 +1726,7 @@ subroutine xc_vdw_read(filename)
   MSG_ERROR('reading vdW-DF variables requires NetCDF')
 #endif
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_read
 !!***
@@ -2062,7 +2062,7 @@ subroutine xc_vdw_write(filename)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
 #if defined HAVE_NETCDF
   write(msg,'(a,1x,"Writing vdW-DF data to",1x,a)') ch10,trim(filename)
@@ -2196,7 +2196,7 @@ subroutine xc_vdw_write(filename)
   MSG_WARNING('writing vdW-DF variables requires NetCDF - skipping')
 #endif
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine xc_vdw_write
 !!***
@@ -2258,7 +2258,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Init
 
@@ -2364,7 +2364,7 @@ subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
   ABI_DEALLOCATE(utmp)
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine vdw_df_filter
 !!***
@@ -2422,7 +2422,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
 ! *************************************************************************
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 #endif
 
   ! Init
@@ -2470,7 +2470,7 @@ function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
   end if ! dtmp < dsoft
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 #endif
 
 end function vdw_df_kernel
@@ -2524,7 +2524,7 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
 ! *************************************************************************
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 #endif
 
   ! Create angular mesh
@@ -2662,7 +2662,7 @@ function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
   ABI_DEALLOCATE(eint)
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 #endif
 
 end function vdw_df_kernel_value
@@ -2721,7 +2721,7 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   is_gga=libxc_functionals_isgga(vdw_funcs)
 
@@ -2782,7 +2782,7 @@ subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
     ABI_DEALLOCATE(grho2)
   end if
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine vdw_df_ldaxc
 !!***
@@ -2852,7 +2852,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
 ! *************************************************************************
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 #endif
 
   if ( present(avoid_zero) ) then
@@ -3012,7 +3012,7 @@ subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
   end select
 
 #if ( defined DEBUG_VERBOSE ) && ( DEBUG_VERBOSE > 1 )
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 #endif
 
 end subroutine vdw_df_create_mesh
@@ -3212,7 +3212,7 @@ subroutine vdw_df_internal_checks(test_mode)
 
 ! *************************************************************************
 
-  VDWXC_DBG_ENTER("COLL",ABI_FUNC)
+  DBG_ENTER("COLL")
 
   ! Here starts a test which will evaluate the integral over D for
   ! delta=0 (see Fig. 1 of DRSLL04).
@@ -3279,7 +3279,7 @@ subroutine vdw_df_internal_checks(test_mode)
 
   end if
 
-  VDWXC_DBG_EXIT("COLL",ABI_FUNC)
+  DBG_EXIT("COLL")
 
 end subroutine vdw_df_internal_checks
 !!***

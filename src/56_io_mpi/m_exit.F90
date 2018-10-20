@@ -137,12 +137,6 @@ subroutine disable_timelimit()
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'disable_timelimit'
-!End of the abilint section
-
 !Local variables-------------------------------
 !scalars
  character(len=500) :: msg
@@ -176,7 +170,6 @@ end subroutine disable_timelimit
 logical pure function have_timelimit_in(abifunc) result(ans)
 
 
-!This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'have_timelimit_in'
@@ -184,14 +177,7 @@ logical pure function have_timelimit_in(abifunc) result(ans)
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'have_timelimit_in'
-!End of the abilint section
-
 !Arguments -----------------------------------
-
  character(len=*),intent(in) :: abifunc
 
 ! *************************************************************************
@@ -213,8 +199,8 @@ end function have_timelimit_in
 !!  Example:
 !!
 !!    ! enable time limit handler if not done in callers.
-!!    if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-!!      write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+!!    if (enable_timelimit_in(FUNC_NAME) == FUNC_NAME) then
+!!      write(std_out,*)"Enabling timelimit check in function: ",trim(FUNC_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
 !!    end if
 !!
 !! PARENTS
@@ -231,12 +217,6 @@ function enable_timelimit_in(abifunc) result(prev_func)
 !End of the abilint section
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'enable_timelimit_in'
-!End of the abilint section
 
 !Arguments -----------------------------------
  character(len=*),intent(in) :: abifunc
@@ -274,12 +254,6 @@ real(dp) pure function get_timelimit()
 
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit'
-!End of the abilint section
-
  get_timelimit = WTIME_LIMIT
 
 end function get_timelimit
@@ -308,12 +282,6 @@ pure function get_timelimit_string() result(string)
 !End of the abilint section
 
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit'
-!End of the abilint section
 
 !Local variables-------------------------------
 !scalars

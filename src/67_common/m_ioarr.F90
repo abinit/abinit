@@ -221,7 +221,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  end if
  call wrtout(std_out,message,'COLL')
 
- call wrtout(std_out,ABI_FUNC//': file name is '//TRIM(fildata),'COLL')
+ call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata),'COLL')
 
 #ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.

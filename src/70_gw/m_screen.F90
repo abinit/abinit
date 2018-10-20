@@ -1168,7 +1168,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      !
      ! Read data from file (use MPI-IO if possible)
      if (W%iomode /= IO_MODE_ETSF .and. xmpi_mpiio==1) then
-       call wrtout(std_out,ABI_FUNC//"read_screening with MPI_IO","COLL")
+       call wrtout(std_out, "read_screening with MPI_IO")
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,IO_MODE_MPI,comm,iqiA=iq_ibz)
      else
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,W%iomode,comm,iqiA=iq_ibz)

@@ -995,7 +995,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ABI_CHECK(ierr==0, "Out-of-memory in Er%epsm1 (in-core)")
 
      if (iomode == IO_MODE_MPI) then
-       !call wrtout(std_out,sjoin(ABI_FUNC, " read_screening with MPI_IO"))
+       !call wrtout(std_out, "read_screening with MPI_IO")
        MSG_WARNING("SUSC files is buggy. Using Fortran IO")
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      else
@@ -1127,7 +1127,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
-     !  !call wrtout(std_out,sjoin(ABI_FUNC, "read_screening with MPI_IO"))
+     !  !call wrtout(std_out, "read_screening with MPI_IO")
      !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
      !  call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      !else
@@ -1695,7 +1695,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
  CASE (4)
-   !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]] 
+   !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]]
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
    ABI_STAT_MALLOC(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
@@ -1846,7 +1846,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
 CASE(6)
    !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) [[cite:Rigamonti2015]]
-   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]] 
+   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]]
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
    ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)

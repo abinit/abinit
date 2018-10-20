@@ -1123,7 +1123,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
          db%nspden,db%nsppol,db%mpi_enreg,v1scf(:,:,:,mu))
      end do
    end if
-   if (db%debug) write(std_out,*)ABI_FUNC,": All perts available. Returning"
+   if (db%debug) write(std_out,*)"All perts available. Returning"
    return
  end if
 
