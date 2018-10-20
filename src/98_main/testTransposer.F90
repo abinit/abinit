@@ -144,6 +144,30 @@ program testTransposer
 !!
 !! NAME
 !! tester
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (JB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! NOTES
+!!
+!! INPUTS
+!!  (main routine)
+!!
+!! OUTPUT
+!!  (main routine)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
     subroutine tester()
 
 
@@ -183,6 +207,29 @@ program testTransposer
 !!
 !! NAME
 !! printTimes
+!!
+!! FUNCTION
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (JB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! NOTES
+!!
+!! INPUTS
+!!  (main routine)
+!!
+!! OUTPUT
+!!  (main routine)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
     subroutine printTimes()
 
