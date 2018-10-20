@@ -57,7 +57,7 @@ program multibinit
  use m_effective_potential_file
  use m_spin_model
  use m_abihist
- use m_ab7_invars
+ use m_ab7_invars, only : ab7_invars_set_flags
 
  use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit, open_file
@@ -229,7 +229,7 @@ program multibinit
      call spin_model_t_initialize(spin_model, filnam, inp )
    end if
  else
-   !  Read the model (from DDB or XML)  
+   !  Read the model (from DDB or XML)
    call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
  !Read the coefficient from fit
@@ -260,7 +260,7 @@ program multibinit
      end if
    end if
  end if
- 
+
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences

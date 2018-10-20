@@ -86,29 +86,27 @@ module m_ab7_invars
 
   logical, private, parameter :: AB_DBG = .false.
 
-#include "ab7_invars_f90.inc"
+!!#include "ab7_invars_f90.inc"
 
   ! The following group is used for Fortran bindings only,
   ! and specifically its usage inside ABINIT. They have no C or Python equivalent.
   public :: ab7_invars_set_flags
-!  public :: ab7_invars_set_mpi
-  public :: ab7_invars_get_abinit_vars
-  public :: ab7_invars_load
+  !public :: ab7_invars_get_abinit_vars
+  !public :: ab7_invars_load
 
   ! The following routines are the main creation routines, having also an equivalent in C or Python.
-  public :: ab7_invars_new_from_file
-  public :: ab7_invars_new_from_string
-  public :: ab7_invars_free
+  !public :: ab7_invars_new_from_file
+  !public :: ab7_invars_new_from_string
+  !public :: ab7_invars_free
 
   ! The following routines are the main getter functions, also available in C or Python.
-  public :: ab7_invars_get_ndtset
-  public :: ab7_invars_get_integer
-  public :: ab7_invars_get_real
-  public :: ab7_invars_get_shape
-  public :: ab7_invars_get_integer_array
-  public :: ab7_invars_get_real_array
-
-  public :: iofn2
+  !public :: ab7_invars_get_ndtset
+  !public :: ab7_invars_get_integer
+  !public :: ab7_invars_get_real
+  !public :: ab7_invars_get_shape
+  !public :: ab7_invars_get_integer_array
+  !public :: ab7_invars_get_real_array
+  !public :: iofn2
 
 contains
 !!***
@@ -972,7 +970,7 @@ subroutine iofn2(npsp,filnam)
 end subroutine iofn2
 !!***
 
-#include "ab7_invars_f90_get.f90"
+!!#include "ab7_invars_f90_get.f90"
 
 end module m_ab7_invars
 !!***

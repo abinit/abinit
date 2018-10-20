@@ -455,37 +455,37 @@ if ( opts.run_source ):
   run_script(my_name, "Generating CPP option dumper",
     "./config/scripts/make-cppopts-dumper")
 
-  if ( opts.run_abilint ):
-    abilint_cmdline = "./config/scripts/abilint %s" % \
-      (re.sub("\n", " ", mcnf.get("abilint", "arguments")))
-    print_message(my_name, "  Updating Fortran interfaces")
-    print_message(my_name, "  ---> running %s" % (abilint_cmdline))
-    abilint_exitcode = os.system(abilint_cmdline)
-
-    if ( abilint_exitcode != 0 ):
-      sys.stderr.write("""
-     ****************************************************************
-     ***                     FATAL ERROR!                         ***
-     ****************************************************************
-     ***                                                          ***
-     *** The abilint script returned an non-zero exit code. As a  ***
-     *** consequence, the Fortran interfaces will likely produce  ***
-     *** build-time errors. The 'abilint.log' file has been left  ***
-     *** for your investigations. Its standard output has been    *** 
-     *** also redirected to 'abilint.out'.                        ***
-     *** It might be that the cache file (.abilint) has to be     ***
-     *** regenerated. Remove that file and issue abilint again.   ***
-     ***                                                          ***
-     *** Please have a careful look at abilint's outputs before   ***
-     *** sending a bug report.                                    ***
-     ***                                                          ***
-     ****************************************************************
-
-""")
-      sys.stderr.write("[%s] Aborting now\n" % (my_name))
-      sys.exit(1)
-  else:
-    print_message(my_name, "  *** Skipping update of Fortran interfaces ***")
+#  if ( opts.run_abilint ):
+#    abilint_cmdline = "./config/scripts/abilint %s" % \
+#      (re.sub("\n", " ", mcnf.get("abilint", "arguments")))
+#    print_message(my_name, "  Updating Fortran interfaces")
+#    print_message(my_name, "  ---> running %s" % (abilint_cmdline))
+#    abilint_exitcode = os.system(abilint_cmdline)
+#
+#    if ( abilint_exitcode != 0 ):
+#      sys.stderr.write("""
+#     ****************************************************************
+#     ***                     FATAL ERROR!                         ***
+#     ****************************************************************
+#     ***                                                          ***
+#     *** The abilint script returned an non-zero exit code. As a  ***
+#     *** consequence, the Fortran interfaces will likely produce  ***
+#     *** build-time errors. The 'abilint.log' file has been left  ***
+#     *** for your investigations. Its standard output has been    *** 
+#     *** also redirected to 'abilint.out'.                        ***
+#     *** It might be that the cache file (.abilint) has to be     ***
+#     *** regenerated. Remove that file and issue abilint again.   ***
+#     ***                                                          ***
+#     *** Please have a careful look at abilint's outputs before   ***
+#     *** sending a bug report.                                    ***
+#     ***                                                          ***
+#     ****************************************************************
+#
+#""")
+#      sys.stderr.write("[%s] Aborting now\n" % (my_name))
+#      sys.exit(1)
+#  else:
+#    print_message(my_name, "  *** Skipping update of Fortran interfaces ***")
 
   if ( os.path.exists(os.path.join("src", "57_iovars", "dtset.pickle")) ):
     run_script(my_name, "Generating dtset source files",

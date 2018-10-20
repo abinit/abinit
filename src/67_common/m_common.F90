@@ -1722,7 +1722,7 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  use defs_abitypes,  only : dataset_type, ab_dimensions
  use m_dtfil,        only : status
  use defs_datatypes, only : pspheader_type
- use m_ab7_invars,   only : iofn2
+ !use m_ab7_invars,   only : iofn2
  use m_pspheads,     only : inpspheads, pspheads_comm
  use m_dtset
  use m_xpapi
@@ -1739,8 +1739,8 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
 !scalars
  integer, intent(out) :: lenstr, ndtset
  character(len=strlen), intent(out) :: string
- type(dataset_type),pointer  :: dtsets(:)
- type(pspheader_type),pointer :: pspheads(:)
+ type(dataset_type),allocatable,intent(out)  :: dtsets(:)
+ type(pspheader_type),allocatable,intent(out):: pspheads(:)
  type(ab_dimensions),intent(out) :: mxvals
  character(len=*),intent(in) :: path
  integer,intent(in) :: comm
@@ -1752,7 +1752,7 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
 !scalars
  !integer :: ndtset !lenstr,
  !character(len = fnlen), intent(in), optional :: pspfilnam(:)
- integer :: jdtset,ipsp
+ integer :: jdtset,ipsp,ios
  integer :: me, ndtset_alloc, nprocs
  integer :: istatr,istatshft, papiopt
  integer :: npsp, ii, idtset, msym, usepaw
@@ -1760,6 +1760,8 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  real(dp),allocatable :: zionpsp(:)
  real(dp) :: ecut_tmp(3,2,10)
  character(len=fnlen), allocatable :: pspfilnam_(:)
+ character(len=fnlen) :: filpsp
+ character(len=500) :: msg
  integer, parameter :: level=3
  real(dp) :: tsec(2)
 
@@ -1824,7 +1826,27 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  if (me == 0) then
     !if (.not. present(pspfilnam)) then
        ABI_ALLOCATE(pspfilnam_,(npsp))
-       call iofn2(npsp, pspfilnam_)
+       !call iofn2(npsp, pspfilnam_)
+
+       do ipsp=1,npsp
+         ! Read the name of the psp file
+         write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
+         read (std_in, '(a)' , iostat=ios ) filpsp
+         pspfilnam_(ipsp) = trim(filpsp)
+
+         ! It might be that a file name is missing
+         if (ios/=0) then
+           write(msg, '(7a)' )&
+           'There are not enough names of pseudopotentials',ch10,&
+           'provided in the files file.',ch10,&
+           'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
+           'if they are correct, complete your files file.'
+           MSG_ERROR(msg)
+         end if
+
+         write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
+       end do ! ipsp=1,npsp
+
        call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
        ABI_DEALLOCATE(pspfilnam_)
     !else
@@ -1877,6 +1899,8 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
    & mxvals%nspinor, mxvals%nsppol, mxvals%nsym, mxvals%ntypat, mxvals%nimfrqs, &
    & mxvals%nfreqsp, mxvals%nzchempot, mxvals%n_projection_frequencies, ndtset, &
    & ndtset_alloc, string, npsp, zionpsp)
+
+ mxvals%nberry = 20   ! This is presently a fixed value. Should be changed.
 
  ABI_DEALLOCATE(zionpsp)
  call timab(42,2,tsec)

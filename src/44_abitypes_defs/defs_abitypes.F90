@@ -1789,7 +1789,7 @@ type dataset_type
     integer :: natsph
     integer :: natsph_extra
     integer :: natvshift
-    integer :: nberry
+    integer :: nberry = 20 ! This is presently a fixed value. Should be changed.
     integer :: nbandhf
     integer :: nconeq
     integer :: n_efmas_dirs

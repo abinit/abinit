@@ -168,11 +168,11 @@ program abinit
 ! Declarations
 ! Define "level of the routine", for debugging purposes
  integer,parameter :: level=1
- integer :: choice,dmatpuflag,ierr,iexit,ii,iounit,dtsetsId,ios
+ integer :: choice,dmatpuflag,ierr,iexit,ii,iounit,ios
  integer :: lenstr,me,print_mem_report
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
- integer :: nsppol,nwarning,nwarning_paw,papiopt,prtvol,timopt,use_gpu_cuda
+ integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal
  real(dp) :: tcpui,twalli
@@ -185,9 +185,9 @@ program abinit
  character(len=fnlen) :: filstat
  character(len=fnlen) :: filnam(5)
  type(args_t) :: args
- type(dataset_type),pointer  :: dtsets(:)
- type(MPI_type),pointer :: mpi_enregs(:)
- type(pspheader_type),pointer :: pspheads(:)
+ type(dataset_type),allocatable  :: dtsets(:)
+ type(MPI_type),allocatable :: mpi_enregs(:)
+ type(pspheader_type),allocatable :: pspheads(:)
  type(results_out_type),allocatable,target :: results_out(:)
  type(results_out_type),pointer :: results_out_all(:)
  type(ab_dimensions) :: mxvals
@@ -281,24 +281,7 @@ program abinit
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
-#define NEW_PARSER
-
-#ifdef NEW_PARSER
  call get_dtsets_pspheads(filnam(1), ndtset, filstat, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, xmpi_world)
-#else
-
- ! Read the file, stringify it and return the number of datasets.
- call parsefile(filnam(1), lenstr, ndtset, string, xmpi_world)
-
- ! Call the parser from the parser module.
- call ab7_invars_set_flags(.true., .true., status_file=filstat, timab_tsec=tsec)
- call ab7_invars_load(dtsetsId, string, lenstr, ndtset, .true., .true.)
-
- call ab7_invars_get_abinit_vars(dtsetsId, dtsets, pspheads, mxvals, papiopt, timopt, dmatpuflag)
-
- ! Enable PAPI timers
- call time_set_papiopt(papiopt)
-#endif
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -651,15 +634,11 @@ program abinit
  end do
 
  ! Here we deallocate dtsets. Do not access dtsets after this line!
-#ifdef NEW_PARSER
  do ii=0,size(dtsets)-1,1
    call dtset_free(dtsets(ii))
  end do
  ABI_FREE(dtsets)
  ABI_FREE(pspheads)
-#else
- call ab7_invars_free(dtsetsId)
-#endif
 
 #if defined HAVE_BIGDFT
  call f_lib_finalize()
