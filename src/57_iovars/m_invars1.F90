@@ -971,7 +971,7 @@ subroutine indefo1(dtset)
  dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0
- dtset%typat(:)=0
+ dtset%typat(:)=0  ! This init is important because dimension of typat is mxnatom (and not natom).
 !U
  dtset%usedmatpu=0
  dtset%usedmft=0

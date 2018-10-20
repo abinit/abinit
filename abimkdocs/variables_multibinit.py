@@ -705,6 +705,78 @@ See [[abinit:restartxf]]
 ),
 
 Variable(
+    abivarname="spin_calc_correlation_obs@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN CALCulate CORRELATION OBServables",
+    text="""
+Flag to calculate spin correlation function based observables.
+
+* 0 --> do not calculate.
+
+* 1 --> calculate.
+""",
+),
+
+
+Variable(
+    abivarname="spin_calc_traj_obs@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN CALCulate TRAJectory based OBServables",
+    text="""
+Flag to calculate spin trajectory based observables. (Nothing included yet.)
+
+* 0 --> do not calculate.
+
+* 1 --> calculate.
+""",
+),
+
+
+Variable(
+    abivarname="spin_calc_thermo_obs@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN CALCulate THERMO dynamics OBServables",
+    text="""
+Flag to calculate spin thermo dynamics observables,
+including the specific heat, magnetic susceptibility, Binder U4 value.
+
+* 0 --> do not calculate.
+
+* 1 --> calculate.
+""",
+),
+
+
+Variable(
+    abivarname="spin_damping@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=-1.0,
+    mnemonics="SPIN gilbert DAMPING factor",
+    text="""
+Gilbert damping factor in LLG equation for spin dynamics.
+
+* negative value --> use damping factor from spin xml file.
+
+* positive value --> use as damping factor. The value should be between 0.0 and 1.0 (both included).
+""",
+),
+
+Variable(
     abivarname="spin_dipdip@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -714,6 +786,7 @@ Variable(
     mnemonics="SPIN DIPole DIPole interaction",
     text="""
 * 0 --> Switch off spin dipole-dipole interaction.
+
 * 1 --> Switch on spin dipole-dipole interaction.
     (Not yet implemented.)
 """,
@@ -735,7 +808,6 @@ S, Sec or Second can be appended as unit. (e.g. 1e-16 Sec).
 ),
 
 
-
 Variable(
     abivarname="spin_dynamics@multibinit",
     varset="multibinit",
@@ -746,10 +818,36 @@ Variable(
     mnemonics="SPIN DYNAMICS",
     text="""
 Flag to run spin dynamics.
+
 * 0 --> Do not run spin dynamics.
+
 * 1 --> Run spin dynamics.
 """,
 ),
+
+Variable(
+    abivarname="spin_init_state@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="SPIN INITial STATE",
+    text="""
+Flag to initialize spin state. (only option 1 and 2 are implemented.)
+
+* 0 --> Read from spinhist netcdf file. 
+
+* 1 --> Random spin state using uniform random numbers.
+
+* 2 --> Ferromagnetic state.
+
+* 3 --> State with q-vector using [[multibinit:spin_qpoint]]
+
+* 4 --> Random spin state with temperature of [[multibinit:spin_temperature]] 
+""",
+),
+
 
 Variable(
     abivarname="spin_mag_field@multibinit",
@@ -793,6 +891,21 @@ Total number of spin dynamics time  steps.
 
 
 Variable(
+    abivarname="spin_ntime_pre@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN dynamics total Number of TIME steps for PREparing",
+    text="""
+Total number of spin dynamics time  steps for preparing the system.
+The results of these time step are not written to trajectory spinhist.nc file,
+And they are not used for calculating the observables.
+""",
+),
+
+Variable(
     abivarname="spin_qpoint@multibinit",
     varset="multibinit",
     vartype="real",
@@ -805,6 +918,60 @@ Spin wave vector. It is used for getting the total spin. $M_{tot}=\sum_i M_i exp
 """,
 ),
 
+
+Variable(
+    abivarname="spin_sia_add@multibinit",
+    varset="multibinit",
+    vartype="int",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN Single Ion Anistropy ADD",
+    text="""
+Add single ion anistropy term to the spin model hamiltonian.
+with user defined values (see [[multibinit:spin_sia_k1amp]] and [[multibinit:spin_sia_k1dir]].
+
+* 0 --> Do not add, use the term defined in the spin model xml file.
+
+* 1 --> Override the term in spin model xml file.
+
+* 2 --> Add to the value defined in spin model xml file.
+
+Default value: 0.
+""",
+),
+
+
+Variable(
+    abivarname="spin_sia_k1amp@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="SPIN Single Ion Anistropy K1 AMPtitude",
+    text="""
+User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
+The direction is defined with [[multibinit:spin_sia_k1dir]].
+Default value: 0.0.
+""",
+),
+
+
+Variable(
+    abivarname="spin_sia_k1dir@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="[3]",
+    defaultval=[0.0,0.0,1.0],
+    mnemonics="SPIN Single Ion Anistropy K1 DIRection",
+    text="""
+User defined direction of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
+It will be automatically normalized to 1.0.  The amplitude is defined with [[multibinit:spin_sia_k1amp]].
+Default value: [0.0, 0.0,1.0].
+""",
+),
 
 
 Variable(
@@ -821,7 +988,67 @@ Default value: 325.
 """,
 ),
 
-]
 
+Variable(
+    abivarname="spin_var_temperature@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN  VARiable TEMPERATURE",
+    text="""
+Switch for variable temperature calculation. 0: off. 1: on.
+If switched on, a series of spin dynamics calculation with temperatures from
+[[multibinit:spin_temperature_start]] to [[multibinit:spin_temperature_end]],
+with number of steps [[multibinit:spin_temperature_nstep]] will be done.
+The corresponding _spinhist.nc  file has the corresponding temperature in the filename.
+""",
+),
+
+
+Variable(
+    abivarname="spin_temperature_start@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="SPIN TEMPERATURE START",
+    text="""
+Start point of variable temperature spin dynamcis calculation (see [[multibinit:spin_var_temperature]]) in spin dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="spin_temperature_end@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="SPIN TEMPERATURE END",
+    text="""
+End point of variable temperature spin dynamics calculation (see [[multibinit:spin_var_temperature]]) in spin dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="spin_temperature_nstep@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="SPIN TEMPERATURE Number of STEPs",
+    text="""
+Number of steps in the variable temperature spin dynamics calculation (see [[multibinit:spin_var_temperature]]) in spin dynamics calculation.
+""",
+),
+
+
+
+
+]
 
 

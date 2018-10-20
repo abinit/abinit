@@ -802,7 +802,6 @@ endif
     integer::irow, i1, i2, i
     !external ddot
     y(:)=0.0d0
-    !!$OMP PARALLEL
     !$OMP PARALLEL DO private(i, i1, i2)
     do irow=1, A%nrow
 
@@ -835,7 +834,6 @@ endif
 
     enddo
     !$OMP END PARALLEL DO
-    !!$OMP END PARALLEL
   end subroutine CSR_mat_mv
 
 !#ifdef DMKL

@@ -1369,7 +1369,7 @@ subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 
  !@pawtab_type
 
- natom_typat=size(typat)
+ natom_typat=count(typat>0)
  if (size(pawtab)<maxval(typat)) then
    msg='error on pawtab size!'
    MSG_BUG(msg)

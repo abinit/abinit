@@ -1131,7 +1131,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
 
     // read unit cell
     if (!xmlStrcmp(cur->name, (const xmlChar *)("unit_cell"))) {
-      printf("%s\n", cur->name);
+      //printf("%s\n", cur->name);
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       printf("unit_cell: %s\n", key);
       string2Array((char *)key, unitcell, &size);
@@ -1143,7 +1143,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     // read atoms
     if (!xmlStrcmp(cur->name, BAD_CAST "atom")) {
       (*natoms)++;
-      printf("%s\n", cur->name);
+      //printf("%s\n", cur->name);
       int ind_spin = -1;
       // mass
       key = xmlGetProp(cur, BAD_CAST "mass");
@@ -1855,4 +1855,6 @@ void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
 	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml enabled.\n");
 	exit(1);
 }
+
+
 #endif

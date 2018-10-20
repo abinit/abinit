@@ -311,7 +311,7 @@ contains
     call  spin_model_primitive_t_set_bilinear(self,n,ilist,ilist,Rlist,bivallist)
   end subroutine spin_model_primitive_t_set_uni
 
-  subroutine spin_model_primitive_t_read_xml(self, xml_fname)
+  subroutine spin_model_primitive_t_read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -323,6 +323,8 @@ contains
     class(spin_model_primitive_t), intent(inout) :: self
     character(kind=C_CHAR) :: xml_fname(*)
     integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+    logical, optional, intent(in) :: use_exchange, use_dmi, use_sia, use_bi
+    logical :: uexc, udmi, usia, ubi
     real(dp) :: ref_energy
     type(c_ptr) ::  p_unitcell,         &
          p_masses,  p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
@@ -375,48 +377,82 @@ contains
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
     print *, "Spin model: setting structure."
-    !print *, "natoms", natoms
-    !print *, "nspins", nspins
-    !print *, "positions", positions
-    !print *, "unitcell: ", unitcell
-    !print *, "spinat", spinat
-    !print *, "index_spin", index_spin
-    call spin_model_primitive_t_set_atoms(self,natoms,reshape(unitcell, [3,3]), & 
+    call spin_model_primitive_t_set_atoms(self,natoms,transpose(reshape(unitcell, [3,3])), & 
             & reshape(positions, [3, natoms]), &
             & nspins, &
             & index_spin, &
             & reshape(spinat, [3, natoms]), &
             & gyroratios,damping_factors)
 
-    print *, "Spin model: setting exchange terms."
     ! call self%set_exchange(exc_nnz,exc_ilist,exc_jlist,&
     !      reshape(exc_Rlist, (/3, exc_nnz /)), &
     !      reshape(exc_vallist, (/3, exc_nnz/)) )
-    call spin_model_primitive_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
-         reshape(exc_Rlist, (/3, exc_nnz /)), &
-         reshape(exc_vallist, (/3, exc_nnz/)))
 
-    print *, "Spin model: setting dmi terms."
-    ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
-    !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
-    !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
-    call spin_model_primitive_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
-         Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
-         vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
-    print *, "Spin model: setting uniaxial SIA terms."
+    if(.not. present(use_exchange))  then
+       uexc=.True.
+    else
+       uexc=use_exchange
+    end if
 
+    if(uexc) then
+       print *, "Spin model: setting exchange terms."
+       call spin_model_primitive_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
+            reshape(exc_Rlist, (/3, exc_nnz /)), &
+            reshape(exc_vallist, (/3, exc_nnz/)))
+    else
+       print *, "Spin model: exchange term from xml file not used."
+    endif
+
+    if(.not. present(use_dmi))  then
+       udmi=.True.
+    else
+       udmi=use_dmi
+    end if
+    if (udmi) then
+       print *, "Spin model: setting dmi terms."
+       ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
+       !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
+       !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
+       call spin_model_primitive_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
+            Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
+            vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
+       print *, "Spin model: setting uniaxial SIA terms."
+    else
+       print *, "Spin model: DMI term from xml file not used."
+    end if
     !call self%set_uni(uni_nnz, uni_ilist, uni_amplitude_list, &
     !     reshape(uni_direction_list, [3, uni_nnz]) )
-    call spin_model_primitive_t_set_uni(self, uni_nnz, uni_ilist, uni_amplitude_list, &
-         reshape(uni_direction_list, [3, uni_nnz]) )
 
-    print *, "Spin model: setting bilinear terms."
+    if(.not. present(use_sia)) then
+       usia=.True.
+    else
+       usia=use_sia
+    end if
+    if (usia) then
+       print *, "Spin model: setting SIA terms."
+       call spin_model_primitive_t_set_uni(self, uni_nnz, uni_ilist, uni_amplitude_list, &
+            reshape(uni_direction_list, [3, uni_nnz]) )
     !call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
     !     Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
     !     vallist = reshape(bi_vallist, (/3,3, bi_nnz/)) )
-    call spin_model_primitive_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
-         Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
-         vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
+    else
+       print *, "Spin model: SIA term in xml file not used."
+    end if
+
+    if(.not. present(use_bi)) then
+       ubi=.True.
+    else
+       ubi=use_bi
+    endif
+
+    if (ubi) then
+       print *, "Spin model: setting bilinear terms."
+       call spin_model_primitive_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
+            Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
+            vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
+    else
+       print *, "Spin model: Bilinear term in xml file not used."
+    endif
 
     call xml_free_spin(xml_fname, ref_energy, p_unitcell,                 &
          natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
@@ -425,125 +461,6 @@ contains
          uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
          bi_nnz, p_bi_ilist, p_bi_jlist, p_bi_Rlist, p_bi_vallist)
 
-
-    ! TODO hexu: should use free in C code, not here.
-  !   if(associated(unitcell))  then
-  !      ABI_DEALLOCATE(unitcell)
-  !   end if
-  !   nullify(unitcell)
-
-  !   if(associated(masses))  then
-  !      ABI_DEALLOCATE(masses)
-  !   end if
-  !   nullify(masses)
-
-  !   if(associated(index_spin))  then
-  !      ABI_DEALLOCATE(index_spin)
-  !   end if
-  !   nullify(index_spin)
-
-  !   if(associated(gyroratios))  then
-  !      ABI_DEALLOCATE(gyroratios)
-  !   end if
-  !   nullify(gyroratios)
-
-  !   if(associated(damping_factors))  then
-  !      ABI_DEALLOCATE(damping_factors)
-  !   end if
-  !   nullify(damping_factors)
-  !   if(associated(positions))  then
-  !      ABI_DEALLOCATE(positions)
-  !   end if
-  !   nullify(positions)
-
-  !   if(associated(spinat))  then
-  !      ABI_DEALLOCATE(spinat)
-  !   end if
-  !   nullify(spinat)
-
-  !   if(exc_nnz /=0) then
-  !      if(associated(exc_ilist))  then
-  !         ABI_DEALLOCATE(exc_ilist)
-  !      end if
-  !      nullify(exc_ilist)
-
-
-  !      if(associated(exc_jlist))  then
-  !         ABI_DEALLOCATE(exc_jlist)
-  !      end if
-  !      nullify(exc_jlist)
-
-  !      if(associated(exc_Rlist))  then
-  !         ABI_DEALLOCATE(exc_Rlist)
-  !      end if
-  !      nullify(exc_Rlist)
-
-  !      if(associated(exc_vallist))  then
-  !         ABI_DEALLOCATE(exc_vallist)
-  !      end if
-  !      nullify(exc_vallist)
-  !   endif
-
-  !   if(dmi_nnz/=0) then
-  !      if(associated(dmi_ilist))  then
-  !         ABI_DEALLOCATE(dmi_ilist)
-  !      end if
-  !      nullify(dmi_ilist)
-
-  !      if(associated(dmi_jlist))  then
-  !         ABI_DEALLOCATE(dmi_jlist)
-  !      end if
-  !      nullify(dmi_jlist)
-
-  !      if(associated(dmi_Rlist))  then
-  !         ABI_DEALLOCATE(dmi_Rlist)
-  !      end if
-  !      nullify(dmi_Rlist)
-
-  !      if(associated(dmi_vallist))  then
-  !         ABI_DEALLOCATE(dmi_vallist)
-  !      end if
-  !      nullify(dmi_vallist)
-  !   end if
-
-  !   if(uni_nnz/=0) then
-  !      if(associated(uni_ilist))  then
-  !         ABI_DEALLOCATE(uni_ilist)
-  !      end if
-  !      nullify(uni_ilist)
-
-  !      if(associated(uni_amplitude_list))  then
-  !         ABI_DEALLOCATE(uni_amplitude_list)
-  !      end if
-  !      nullify(uni_amplitude_list)
-
-  !      if(associated(uni_direction_list))  then
-  !         ABI_DEALLOCATE(uni_direction_list)
-  !      end if
-  !      nullify(uni_direction_list)
-  !   end if
-
-  !   if(bi_nnz/=0) then
-  !      if(associated(bi_ilist))  then
-  !         ABI_DEALLOCATE(bi_ilist)
-  !      end if
-  !      nullify(bi_ilist)
-
-  !      if(associated(bi_jlist))  then
-  !         ABI_DEALLOCATE(bi_jlist)
-  !      end if
-  !      nullify(bi_jlist)
-
-  !      if(associated(bi_Rlist))  then
-  !         ABI_DEALLOCATE(bi_Rlist)
-  !      end if
-  !      nullify(bi_Rlist)
-
-  !      if(associated(bi_vallist))  then
-  !         ABI_DEALLOCATE(bi_vallist)
-  !      end if
-  !      nullify(bi_vallist)
-  !   endif
   end subroutine spin_model_primitive_t_read_xml
 
   subroutine spin_model_primitive_t_finalize(self)
@@ -825,15 +742,20 @@ contains
        !if(scell%atom_indexing(i)>0) then
        if(self%index_spin(iatom)>0) then
           counter=counter+1
+          !map from spin to atom and atom to spin.
           sc_index_spin(i)=counter
-          sc_spinpos(:, counter)=scell%xcart(:,counter)
-          !sc_spinat(:, counter)=self%spinat(:,self%index_spin(iatom))
-          ! in primitive cell, everyone has spinat
-          sc_spinat(:, counter)=self%spinat(:,iatom) 
-          sc_iatoms(counter)=i
+          ! variables which every atom have in primitive cell
+          sc_iatoms(counter)=iatom
+          sc_spinpos(:, counter)=scell%xcart(:,i)
+          sc_spinat(:, counter)=self%spinat(:,iatom)
+
+          sc_ispin_prim(counter) = self%index_spin(iatom)
+
+          ! variables only atoms with spin have.
           sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
           sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
-          sc_ispin_prim(counter) = self%index_spin(iatom)
+
+          ! Rvec
           sc_rvec(:,counter)=scell%uc_indexing(:,i)
        else
           sc_index_spin(i)=-1
@@ -846,8 +768,10 @@ contains
 
     call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
          spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
-    sc_ham%gyro_ratio(:)=sc_gyroratios(:)
-    sc_ham%gilbert_damping(:)=sc_damping_factors(:)
+    
+    !sc_ham%gyro_ratio(:)=sc_gyroratios(:)
+    !sc_ham%gilbert_damping(:)=sc_damping_factors(:)
+    call spin_terms_t_set_params(sc_ham, gyro_ratio=sc_gyroratios, gilbert_damping=sc_damping_factors)
 
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
