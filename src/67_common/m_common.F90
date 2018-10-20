@@ -52,6 +52,7 @@ module m_common
  public :: setup1
  public :: prteigrs
  public :: prtene
+ public :: get_dtsets_pspheads
 !!***
 
 contains
@@ -1689,9 +1690,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
 end subroutine prtene
 !!***
 
-!!****f* ABINIT/dtsets_from_file
+!!****f* ABINIT/get_dtsets_pspheads
 !! NAME
-!! dtsets_from_file
+!! get_dtsets_pspheads
 !!
 !! FUNCTION
 !!
@@ -1710,40 +1711,46 @@ end subroutine prtene
 !!
 !! SOURCE
 
-subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
+subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, comm)
 
  use m_xmpi
 
- use m_invars1,      only : invars0
+ use m_parser,       only : parsefile
+ use m_invars1,      only : invars0, invars1m, indefo
+ use m_invars2
  use m_time,         only : timab, time_set_papiopt
  use defs_abitypes,  only : dataset_type, ab_dimensions
  use m_dtfil,        only : status
  use defs_datatypes, only : pspheader_type
  use m_ab7_invars,   only : iofn2
  use m_pspheads,     only : inpspheads, pspheads_comm
+ use m_dtset
  use m_xpapi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dtsets_from_file'
+#define ABI_FUNC 'get_dtsets_pspheads'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
+ integer, intent(out) :: lenstr, ndtset
+ character(len=strlen), intent(out) :: string
  type(dataset_type),pointer  :: dtsets(:)
+ type(pspheader_type),pointer :: pspheads(:)
  type(ab_dimensions),intent(out) :: mxvals
  character(len=*),intent(in) :: path
  integer,intent(in) :: comm
  integer,intent(out) :: timopt
+ integer,intent(out) :: dmatpuflag
+ character(len=fnlen), intent(in) :: status_file
 
 !Local variables-------------------------------
 !scalars
- integer :: lenstr, ndtset
- character(len=strlen) :: string
- !integer, intent(in) :: lenstr, ndtset
+ !integer :: ndtset !lenstr,
  !character(len = fnlen), intent(in), optional :: pspfilnam(:)
  integer :: jdtset,ipsp
  integer :: me, ndtset_alloc, nprocs
@@ -1753,12 +1760,8 @@ subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
  real(dp),allocatable :: zionpsp(:)
  real(dp) :: ecut_tmp(3,2,10)
  character(len=fnlen), allocatable :: pspfilnam_(:)
- character(len=fnlen), parameter :: opt_status_file = "status"
  integer, parameter :: level=3
  real(dp) :: tsec(2)
-
- type(pspheader_type),pointer :: pspheads(:)
- integer :: dmatpuflag
 
 !************************************************************************
 
@@ -1797,8 +1800,8 @@ subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
 
  !Be careful : at these fourth and fifth calls of status, istatr and istatshft taken
  !from the input variables will be saved definitively.
- call status(0,opt_status_file,istatr,level,'init istatr   ')
- call status(0,opt_status_file,istatshft,level,'init istatshft')
+ call status(0,status_file,istatr,level,'init istatr   ')
+ call status(0,status_file,istatshft,level,'init istatshft')
 
  call timab(41,2,tsec)
  call timab(timopt,5,tsec)
@@ -1808,7 +1811,7 @@ subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
  !from the pseudopotential headers, as well as the psp filename
 
  call timab(42,1,tsec)
- call status(0,opt_status_file,99,level,'call iofn2    ')
+ call status(0,status_file,99,level,'call iofn2    ')
 
  usepaw = 0
  ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
@@ -1880,11 +1883,11 @@ subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
  call timab(43,3,tsec)
 
  !9) Provide defaults for the variables that have not yet been initialized.
- call status(0,opt_status_file,99,level,'call indefo   ')
+ call status(0,status_file,99,level,'call indefo   ')
 
  call indefo(dtsets, ndtset_alloc, nprocs)
 
- call status(0,opt_status_file,99,level,'call macroin  ')
+ call status(0,status_file,99,level,'call macroin  ')
 
  call macroin(dtsets, ecut_tmp, lenstr, ndtset_alloc, string)
 
@@ -1897,7 +1900,7 @@ subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
  end if
 
  !11) Call the main input routine.
- call status(0,opt_status_file,99,level,'call invars2m ')
+ call status(0,status_file,99,level,'call invars2m ')
 
  !if (with_mem) then
    !write(std_out,*)' ab7_invars_f90 : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
@@ -1911,7 +1914,7 @@ subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
  !  end do
  !end if
 
- call status(0,opt_status_file,99,level,'call macroin2  ')
+ call status(0,status_file,99,level,'call macroin2  ')
 
  call macroin2(dtsets, ndtset_alloc)
 
@@ -1922,11 +1925,11 @@ subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
  end do
 
  call timab(43,2,tsec)
- call status(0,opt_status_file,99,level,'exit')
+ call status(0,status_file,99,level,'exit')
 
  ABI_DEALLOCATE(mband_upper_)
 
-end subroutine dtsets_from_file
+end subroutine get_dtsets_pspheads
 !!***
 
 end module m_common
