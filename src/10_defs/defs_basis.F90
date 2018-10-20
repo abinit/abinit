@@ -388,13 +388,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_log_status_state'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -438,13 +431,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_io_redirect'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -486,13 +472,6 @@ CONTAINS  !=====================================================================
 
 !Arguments-------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_kinds'
-!End of the abilint section
-
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
@@ -545,13 +524,6 @@ end subroutine print_kinds
 !! SOURCE
 
  integer pure function str2wfktask(str) result(wfk_task)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2wfktask'
-!End of the abilint section
 
  implicit none
 

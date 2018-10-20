@@ -463,13 +463,6 @@ CONTAINS  !=====================================================================
 
 subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kdata_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -626,13 +619,6 @@ end subroutine kdata_init
 
 subroutine kdata_free_0D(Kdata)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kdata_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -689,13 +675,6 @@ end subroutine kdata_free_0D
 
 subroutine kdata_free_1D(Kdata)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kdata_free_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -736,13 +715,6 @@ end subroutine kdata_free_1D
 !! SOURCE
 
 subroutine copy_kdata_0D(Kdata_in,Kdata_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_kdata_0D'
-!End of the abilint section
 
  implicit none
 
@@ -793,13 +765,6 @@ end subroutine copy_kdata_0D
 !! SOURCE
 
 subroutine copy_kdata_1D(Kdata_in,Kdata_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_kdata_1D'
-!End of the abilint section
 
  implicit none
 
@@ -876,13 +841,6 @@ end subroutine copy_kdata_1D
 
 subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,nkibz,nsppol,bks_mask,&
 &  nspden,nspinor,ecutsm,dilatmx,istwfk,kibz,ngfft,gvec,nloalg,prtvol,pawprtvol,comm,opt_ecut)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_init'
-!End of the abilint section
 
  implicit none
 
@@ -1157,13 +1115,6 @@ end subroutine wfd_init
 
 subroutine wfd_free(Wfd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1264,13 +1215,6 @@ end subroutine wfd_free
 !! SOURCE
 
 subroutine wfd_copy(Wfd_in,Wfd_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1387,13 +1331,6 @@ end subroutine wfd_copy
 
 function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_norm2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1482,13 +1419,6 @@ end function wfd_norm2
 !! SOURCE
 
 function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_xdotc'
-!End of the abilint section
 
  implicit none
 
@@ -1582,13 +1512,6 @@ end function wfd_xdotc
 
 subroutine wfd_reset_ur_cprj(Wfd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_reset_ur_cprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1642,13 +1565,6 @@ end subroutine wfd_reset_ur_cprj
 !! SOURCE
 
 subroutine wfd_get_many_ur(Wfd,bands,ik_ibz,spin,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_get_many_ur'
-!End of the abilint section
 
  implicit none
 
@@ -1706,13 +1622,6 @@ end subroutine wfd_get_many_ur
 !! SOURCE
 
 subroutine wfd_copy_cg(wfd,band,ik_ibz,spin,cg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_copy_cg'
-!End of the abilint section
 
  implicit none
 
@@ -1780,13 +1689,6 @@ end subroutine wfd_copy_cg
 !! SOURCE
 
 subroutine wfd_get_ur(Wfd,band,ik_ibz,spin,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_get_ur'
-!End of the abilint section
 
  implicit none
 
@@ -1868,13 +1770,6 @@ end subroutine wfd_get_ur
 
 subroutine wfd_nullify(Wfd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1921,13 +1816,6 @@ end subroutine wfd_nullify
 !! SOURCE
 
 subroutine wfd_print(Wfd,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_print'
-!End of the abilint section
 
  implicit none
 
@@ -2023,13 +1911,6 @@ end subroutine wfd_print
 !! SOURCE
 
 subroutine wfd_mkall_ur(Wfd,ncalc,force)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_mkall_ur'
-!End of the abilint section
 
  implicit none
 
@@ -2128,13 +2009,6 @@ end subroutine wfd_mkall_ur
 !! SOURCE
 
 subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sorted)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_ug2cprj'
-!End of the abilint section
 
  implicit none
 
@@ -2275,13 +2149,6 @@ end subroutine wfd_ug2cprj
 
 subroutine wave_init_0D(Wave,usepaw,npw,nfft,nspinor,natom,nlmn_size,cprj_order)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wave_init_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2357,13 +2224,6 @@ end subroutine wave_init_0D
 !! SOURCE
 
 subroutine wave_free_0D(Wave,what)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wave_free_0D'
-!End of the abilint section
 
  implicit none
 
@@ -2446,13 +2306,6 @@ end subroutine wave_free_0D
 
 subroutine wave_free_3D(Wave,what,mask)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wave_free_3D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2523,13 +2376,6 @@ end subroutine wave_free_3D
 !! SOURCE
 
 subroutine wave_copy_0D(Wave_in,Wave_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wave_copy_0D'
-!End of the abilint section
 
  implicit none
 
@@ -2606,13 +2452,6 @@ end subroutine wave_copy_0D
 
 subroutine copy_wave_3D(Wave_in,Wave_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_wave_3D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2675,13 +2514,6 @@ end subroutine copy_wave_3D
 !! SOURCE
 
 subroutine wfd_push_ug(Wfd,band,ik_ibz,spin,Cryst,ug,update_ur,update_cprj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_push_ug'
-!End of the abilint section
 
  implicit none
 
@@ -2781,13 +2613,6 @@ end subroutine wfd_push_ug
 
 subroutine wfd_extract_cgblock(Wfd,band_list,ik_ibz,spin,cgblock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_extract_cgblock'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2855,13 +2680,6 @@ end subroutine wfd_extract_cgblock
 !! SOURCE
 
 function wfd_rank_has_ug(Wfd,rank,band,ik_ibz,spin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_rank_has_ug'
-!End of the abilint section
 
  implicit none
 
@@ -2936,13 +2754,6 @@ end function wfd_rank_has_ug
 
 function wfd_ihave_ug(Wfd,band,ik_ibz,spin,how)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_ihave_ug'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2992,13 +2803,6 @@ end function wfd_ihave_ug
 !! SOURCE
 
 function wfd_ihave_ur(Wfd,band,ik_ibz,spin,how)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_ihave_ur'
-!End of the abilint section
 
  implicit none
 
@@ -3050,13 +2854,6 @@ end function wfd_ihave_ur
 
 function wfd_ihave_cprj(Wfd,band,ik_ibz,spin,how)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_ihave_cprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3103,13 +2900,6 @@ end function wfd_ihave_cprj
 !! SOURCE
 
 function wfd_itreat_spin(Wfd,spin,comm_spin,rank_spin,nproc_spin) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_itreat_spin'
-!End of the abilint section
 
  implicit none
 
@@ -3166,13 +2956,6 @@ end function wfd_itreat_spin
 !! SOURCE
 
 function wfd_ihave(Wfd,what,band,ik_ibz,spin,how)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_ihave'
-!End of the abilint section
 
  implicit none
 
@@ -3286,13 +3069,6 @@ end function wfd_ihave
 
 subroutine wfd_mybands(Wfd,ik_ibz,spin,how_manyb,my_band_list,how)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_mybands'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3348,13 +3124,6 @@ end subroutine wfd_mybands
 !! SOURCE
 
 subroutine wfd_show_bkstab(Wfd,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_show_bkstab'
-!End of the abilint section
 
  implicit none
 
@@ -3430,13 +3199,6 @@ end subroutine wfd_show_bkstab
 
 subroutine wfd_bands_of_rank(Wfd,rank,ik_ibz,spin,how_manyb,rank_band_list)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_bands_of_rank'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3495,13 +3257,6 @@ end subroutine wfd_bands_of_rank
 !! SOURCE
 
 subroutine wfd_get_ug(Wfd,band,ik_ibz,spin,ug)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_get_ug'
-!End of the abilint section
 
  implicit none
 
@@ -3563,13 +3318,6 @@ end subroutine wfd_get_ug
 
 subroutine wfd_ptr_ug(Wfd,band,ik_ibz,spin,ptr_ug,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_ptr_ug'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3628,13 +3376,6 @@ end subroutine wfd_ptr_ug
 !! SOURCE
 
 subroutine wfd_ptr_ur(Wfd,band,ik_ibz,spin,ptr_ur,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_ptr_ur'
-!End of the abilint section
 
  implicit none
 
@@ -3699,13 +3440,6 @@ end subroutine wfd_ptr_ur
 !! SOURCE
 
 subroutine wfd_wave_free(Wfd,what,bks_mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_wave_free'
-!End of the abilint section
 
  implicit none
 
@@ -3776,13 +3510,6 @@ end subroutine wfd_wave_free
 !! SOURCE
 
 subroutine wfd_who_has_ug(Wfd,band,ik_ibz,spin,how_many,proc_ranks)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_who_has_ug'
-!End of the abilint section
 
  implicit none
 
@@ -3863,13 +3590,6 @@ end subroutine wfd_who_has_ug
 !! SOURCE
 
 function wfd_everybody_has_ug(Wfd,band,ik_ibz,spin) result(answer)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_everybody_has_ug'
-!End of the abilint section
 
  implicit none
 
@@ -3969,13 +3689,6 @@ end function wfd_everybody_has_ug
 
 subroutine wfd_update_bkstab(Wfd,show)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_update_bkstab'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4033,13 +3746,6 @@ end subroutine wfd_update_bkstab
 !! SOURCE
 
 subroutine wfd_set_mpicomm(Wfd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_set_mpicomm'
-!End of the abilint section
 
  implicit none
 
@@ -4121,13 +3827,6 @@ end subroutine wfd_set_mpicomm
 !! SOURCE
 
 subroutine wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_distribute_bands'
-!End of the abilint section
 
  implicit none
 
@@ -4221,13 +3920,6 @@ end subroutine wfd_distribute_bands
 !!
 
 subroutine wfd_rotate(Wfd,Cryst,m_lda_to_qp,bmask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_rotate'
-!End of the abilint section
 
  implicit none
 
@@ -4357,13 +4049,6 @@ end subroutine wfd_rotate
 
 function wfd_iterator_bks(Wfd, bks_mask) result(iter_bks)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_iterator_bks'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4427,13 +4112,6 @@ end function wfd_iterator_bks
 !! SOURCE
 
 subroutine wfd_bks_distrb(Wfd,bks_distrb,got,bks_mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_bks_distrb'
-!End of the abilint section
 
  implicit none
 
@@ -4521,13 +4199,6 @@ end subroutine wfd_bks_distrb
 
 subroutine wfd_sanity_check(Wfd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_sanity_check'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4613,13 +4284,6 @@ end subroutine wfd_sanity_check
 
 subroutine wfd_dump_errinfo(Wfd,onfile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_dump_errinfo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4702,13 +4366,6 @@ end subroutine wfd_dump_errinfo
 
 subroutine wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_distribute_bbp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4779,13 +4436,6 @@ end subroutine wfd_distribute_bbp
 !! SOURCE
 
 subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_distribute_kb_kpbp'
-!End of the abilint section
 
  implicit none
 
@@ -4924,13 +4574,6 @@ end subroutine wfd_distribute_kb_kpbp
 
 subroutine wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cprj_out,sorted)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_get_cprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5049,13 +4692,6 @@ end subroutine wfd_get_cprj
 
 subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_change_ngfft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5160,13 +4796,6 @@ end subroutine wfd_change_ngfft
 
 function wfd_iam_master(Wfd) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_iam_master'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5211,13 +4840,6 @@ end function wfd_iam_master
 !! SOURCE
 
 subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_test_ortho'
-!End of the abilint section
 
  implicit none
 
@@ -5390,13 +5012,6 @@ end subroutine wfd_test_ortho
 
 subroutine wfd_barrier(Wfd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_barrier'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5447,13 +5062,6 @@ end subroutine wfd_barrier
 !! SOURCE
 
 subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur_kibz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_sym_ur'
-!End of the abilint section
 
  implicit none
 
@@ -5638,13 +5246,6 @@ end subroutine wfd_sym_ur
 
 subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_write_wfk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5827,13 +5428,6 @@ end subroutine wfd_write_wfk
 !! SOURCE
 
 subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_read_wfk'
-!End of the abilint section
 
  implicit none
 
@@ -6155,13 +5749,6 @@ end subroutine wfd_read_wfk
 
 subroutine wfd_from_wfk(Wfd,wfk_fname,iomode,Psps,Pawtab,ngfft,nloalg,keep_ur,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_from_wfk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6294,13 +5881,6 @@ end subroutine wfd_from_wfk
 !! SOURCE
 
 subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae,ur_ae_onsite,ur_ps_onsite)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_paw_get_aeur'
-!End of the abilint section
 
  implicit none
 
@@ -6440,13 +6020,6 @@ end subroutine wfd_paw_get_aeur
 !! SOURCE
 
 subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_plot_ur'
-!End of the abilint section
 
  implicit none
 
@@ -6850,13 +6423,6 @@ end subroutine wfd_plot_ur
 subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 &                    optcalc) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_mkrho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -7089,13 +6655,6 @@ end subroutine wfd_mkrho
 subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 & usepaw,usexcnhat,usefinegrid,compch_sph,compch_fft,omegaplasma)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_charge'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -7218,13 +6777,6 @@ end subroutine test_charge
 !! SOURCE
 
 subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_pawrhoij'
-!End of the abilint section
 
  implicit none
 

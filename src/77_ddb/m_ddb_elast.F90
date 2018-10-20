@@ -101,13 +101,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
 &            instrain,iout,mpert,natom,nblok,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_elast'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------------------

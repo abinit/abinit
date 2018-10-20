@@ -271,13 +271,6 @@ CONTAINS  !=====================================================================
 
 character(len=nctk_slen) function ncname_from_id(id) result(varname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ncname_from_id'
-!End of the abilint section
-
   integer,intent(in) :: id
 
   varname = "None"
@@ -313,13 +306,6 @@ end function ncname_from_id
 !! SOURCE
 
 subroutine hscr_from_file(hscr,path,fform,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_from_file'
-!End of the abilint section
 
  implicit none
 
@@ -425,13 +411,6 @@ end subroutine hscr_from_file
 !! SOURCE
 
 subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_io'
-!End of the abilint section
 
  implicit none
 
@@ -758,13 +737,6 @@ end subroutine hscr_io
 
 subroutine hscr_print(Hscr,header,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -892,13 +864,6 @@ end subroutine hscr_print
 
 type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1015,13 +980,6 @@ end function hscr_new
 
 subroutine hscr_bcast(hscr,master,my_rank,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1110,13 +1068,6 @@ end subroutine hscr_bcast
 
 subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_malloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1159,13 +1110,6 @@ end subroutine hscr_malloc
 !! SOURCE
 
 subroutine hscr_free(hscr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_free'
-!End of the abilint section
 
  implicit none
 
@@ -1218,13 +1162,6 @@ end subroutine hscr_free
 !! SOURCE
 
 subroutine hscr_copy(Hscr_in,Hscr_cp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1311,13 +1248,6 @@ end subroutine hscr_copy
 !! SOURCE
 
 subroutine hscr_merge(Hscr_in,Hscr_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_merge'
-!End of the abilint section
 
  implicit none
 
@@ -1479,13 +1409,6 @@ end subroutine hscr_merge
 
 subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_screening'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1596,13 +1519,6 @@ end subroutine write_screening
 
 subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 & iqiA) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_screening'
-!End of the abilint section
 
  implicit none
 
@@ -1933,13 +1849,6 @@ end subroutine read_screening
 
 subroutine hscr_mpio_skip(mpio_fh,fform,offset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hscr_mpio_skip'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2026,13 +1935,6 @@ end subroutine hscr_mpio_skip
 !! SOURCE
 
 subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_qmerge'
-!End of the abilint section
 
  implicit none
 
@@ -2175,13 +2077,6 @@ end subroutine ioscr_qmerge
 
 subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_qrecover'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2310,13 +2205,6 @@ end subroutine ioscr_qrecover
 !! SOURCE
 
 subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohscr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_wmerge'
-!End of the abilint section
 
  implicit none
 
@@ -2614,13 +2502,6 @@ end subroutine ioscr_wmerge
 !! SOURCE
 
 subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioscr_wremove'
-!End of the abilint section
 
  implicit none
 

@@ -118,13 +118,6 @@ CONTAINS  !=====================================================================
 
 subroutine spectra_init(Spectra,nomega,omega,nqpts,qpts)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_init'
-!End of the abilint section
-
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -179,13 +172,6 @@ end subroutine spectra_init
 !! SOURCE
 
 subroutine spectra_free(Spectra)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_free'
-!End of the abilint section
 
  implicit none
 
@@ -243,13 +229,6 @@ end subroutine spectra_free
 !! SOURCE
 
 subroutine spectra_write(Spectra,write_bits,fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_write'
-!End of the abilint section
 
  implicit none
 
@@ -340,13 +319,6 @@ CONTAINS
 
  subroutine dump_Qlist()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dump_Qlist'
-!End of the abilint section
-
   integer :: iqpt
   write(unt,'(a,i3)')'# Q-point list, No. ',Spectra%nqpts
   do iqpt=1,Spectra%nqpts
@@ -379,13 +351,6 @@ end subroutine spectra_write
 !! SOURCE
 
 subroutine spectra_repr(Spectra,str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_repr'
-!End of the abilint section
 
  implicit none
 

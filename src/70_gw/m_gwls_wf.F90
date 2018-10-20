@@ -77,13 +77,6 @@ contains
 
 subroutine set_wf(dv2,nx2,ny2,nz2,nk2,nb2,ng2,cbf2,cf2,cb2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_wf'
-!End of the abilint section
-
 implicit none
 real(dp), intent(in) :: dv2
 integer, intent(in) :: nx2, ny2, nz2, nk2, nb2, ng2, cbf2, cf2, cb2
@@ -122,13 +115,6 @@ end subroutine set_wf
 
 real(dp) function norm_k(v)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'norm_k'
-!End of the abilint section
-
 implicit none
 real(dp), intent(in) :: v(2,nk)
 ! *************************************************************************
@@ -165,13 +151,6 @@ end function norm_k
 
 real(dp) function norm_kc(v)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'norm_kc'
-!End of the abilint section
-
 implicit none
 complex(dpc), intent(in) :: v(nk)
 ! *************************************************************************
@@ -206,13 +185,6 @@ end function norm_kc
 !! SOURCE
 
 complex(dpc) function scprod_kc(v1,v2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scprod_kc'
-!End of the abilint section
 
 implicit none
 complex(dpc), intent(in) :: v1(nk), v2(nk) 
@@ -395,13 +367,6 @@ function scprod_k(v1,v2)
 ! This function computes the inner product of two "vectors" (typically 
 ! wavefunctions), < v1 | v2 >.
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scprod_k'
-!End of the abilint section
-
 implicit none
 real(dp) :: scprod_k(2)
 real(dp), intent(in) :: v1(2,nk), v2(2,nk) 

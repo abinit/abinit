@@ -122,13 +122,6 @@ subroutine vtorhorec(dtset,&
 &  grnl,initialized,irrzon,nfftf,phnons,&
 &  rhog, rhor, vtrial,rset,deltastep,rprimd,gprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vtorhorec'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -976,13 +969,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 &                     n_pt_integ,xmax,&
 &                     ent_out1,ent_out2,ent_out3,ent_out4)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyrec'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1250,13 +1236,6 @@ subroutine entropyrec(an,bn2,nrec,trotter,ent_out,multce,debug_rec, &
 
    function func1_rec(z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'func1_rec'
-!End of the abilint section
-
    implicit none
 
    complex(dpc) :: func1_rec
@@ -1315,13 +1294,6 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
   &                      acc, max_it, &
   &                      long_tranche,mpi_enreg,&
   &                      inf_ucvol,gputopo)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fermisolverec'
-!End of the abilint section
 
  implicit none
 
@@ -1612,13 +1584,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 &                     fermie,tsmear,rtrotter, &
 &                     dim_trott,tol,inf_ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'density_rec'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1740,13 +1705,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 &                     debug_rec,n_pt_integ,xmax,&
 &                     ene_out1,ene_out2,ene_out3,ene_out4)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gran_potrec'
-!End of the abilint section
 
  implicit none
 
@@ -1989,13 +1947,6 @@ subroutine gran_potrec(an,bn2,nrec,trotter,ene_out, mult, &
 
    function func_rec(z,x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'func_rec'
-!End of the abilint section
-
    implicit none
 
    complex(dpc) :: func_rec
@@ -2044,13 +1995,6 @@ end subroutine gran_potrec
 !! SOURCE
 
 subroutine nlenergyrec(rset,enl,exppot,ngfft,natom,typat,tsmear,trotter,tol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nlenergyrec'
-!End of the abilint section
 
  implicit none
 
@@ -2264,13 +2208,6 @@ end subroutine nlenergyrec
 !! SOURCE
 
 subroutine first_rec(dtset,psps,rset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'first_rec'
-!End of the abilint section
 
  implicit none
 
@@ -2508,13 +2445,6 @@ end subroutine first_rec
 
 subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'green_kernel'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2609,13 +2539,6 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
    function dsq_green(ii,jj,kk,inf_rmet)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dsq_green'
-!End of the abilint section
-
    real(dp) :: dsq_green
    integer,intent(in) :: ii,jj,kk
    real(dp),intent(in) :: inf_rmet(3,3)
@@ -2693,13 +2616,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'recursion'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2923,13 +2839,6 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'recursion_nl'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3131,13 +3040,6 @@ subroutine vn_nl_rec(vn,natom,typat,ngfftrec,inf_ucvol,nlrec,projec)
 
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vn_nl_rec'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------

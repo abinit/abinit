@@ -247,13 +247,6 @@ CONTAINS  !=====================================================================
 
 subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BSt, QP_BSt, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -460,13 +453,6 @@ end subroutine hexc_init
 subroutine hexc_interp_init(hexc_i, hexc, m3_width, method, Kmesh_dense, Vcp_dense, &
 &    double_grid, Wfd_dense, KS_BSt_dense, QP_BSt_dense, Psps, Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -622,13 +608,6 @@ end subroutine hexc_interp_init
 
 subroutine hexc_build_hinterp(hexc,hexc_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_build_hinterp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -711,13 +690,6 @@ end subroutine hexc_build_hinterp
 
 subroutine hexc_compute_subhinterp(BSp,grid,nbnd_coarse,&
 &  interpolator,kdense2div,work_coeffs,Cmat,ikp_dense,overlaps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_compute_subhinterp'
-!End of the abilint section
 
  implicit none
 
@@ -849,13 +821,6 @@ end subroutine hexc_compute_subhinterp
 subroutine hexc_compute_hinterp(BSp,hsize_coarse,hsize_dense,hmat,grid,nbnd_coarse,&
 &  interpolator,kdense2div,acoeffs,bcoeffs,ccoeffs,Kmesh_dense,Vcp_dense,gmet,hinterp,&
 &  m3_width)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_compute_hinterp'
-!End of the abilint section
 
  implicit none
 
@@ -1251,13 +1216,6 @@ end subroutine hexc_compute_hinterp
 
 subroutine hexc_free(hexc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -1312,13 +1270,6 @@ end subroutine hexc_free
 !! SOURCE
 
 subroutine hexc_interp_free(hexc_i)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_free'
-!End of the abilint section
 
  implicit none
 
@@ -1408,13 +1359,6 @@ end subroutine hexc_interp_free
 
 subroutine hexc_interp_matmul(BSp,hsize_coarse,hsize_dense,hmat,phi,hphi,grid,&
 &   nbnd_coarse,interpolator,div2kdense,kdense2div)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_interp_matmul'
-!End of the abilint section
 
  implicit none
 
@@ -1729,13 +1673,6 @@ end subroutine hexc_interp_matmul
 
 subroutine hexc_matmul_tda(hexc, hexc_i, phi, hphi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_tda'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -1805,13 +1742,6 @@ end subroutine hexc_matmul_tda
 
 subroutine hexc_matmul_elphon(hexc, phi, hphi, op, ep_renorm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_elphon'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -1876,13 +1806,6 @@ end subroutine hexc_matmul_elphon
 !! SOURCE
 
 subroutine hexc_matmul_full(hexc, hexc_i, phi, hphi, parity)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hexc_matmul_full'
-!End of the abilint section
 
  implicit none
 

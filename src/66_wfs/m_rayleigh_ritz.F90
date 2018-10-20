@@ -90,13 +90,6 @@ contains
 
 subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rayleigh_ritz_subdiago'
-!End of the abilint section
-
  implicit none
 
  ! Arguments
@@ -319,13 +312,6 @@ end subroutine rayleigh_ritz_subdiago
 !! SOURCE
 
 subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rayleigh_ritz_distributed'
-!End of the abilint section
 
  implicit none
 
@@ -599,13 +585,6 @@ end subroutine rayleigh_ritz_distributed
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'from_mat_to_block_cyclic'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: vectsize, nband, buffsize, blocksize, iproc, nprocs
@@ -662,13 +641,6 @@ end subroutine from_mat_to_block_cyclic
 !! SOURCE
 
 subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'from_block_cyclic_to_mat'
-!End of the abilint section
 
  implicit none
 

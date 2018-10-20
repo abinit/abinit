@@ -276,13 +276,6 @@ CONTAINS  !===========================================================
 
 integer function fform_from_ext(abiext) result(fform)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fform_from_ext'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -347,13 +340,6 @@ end function fform_from_ext
 !! SOURCE
 
 character(len=nctk_slen) function varname_from_fname(filename) result(varname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'varname_from_fname'
-!End of the abilint section
 
  implicit none
 
@@ -496,13 +482,6 @@ end function varname_from_fname
 
 type(abifile_t) function abifile_from_varname(varname) result(afile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abifile_from_varname'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -541,13 +520,6 @@ end function abifile_from_varname
 
 type(abifile_t) function abifile_from_fform(fform) result(afile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abifile_from_fform'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -582,13 +554,6 @@ end function abifile_from_fform
 !! SOURCE
 
 subroutine check_fform(fform)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
 
  implicit none
 
@@ -651,13 +616,6 @@ end subroutine check_fform
 
 subroutine test_abifiles()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_abifiles'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -709,13 +667,6 @@ end subroutine test_abifiles
 !! SOURCE
 
 subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshiftk_orig, nshiftk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_malloc'
-!End of the abilint section
 
  implicit none
 
@@ -792,13 +743,6 @@ end subroutine hdr_malloc
 
 subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
 &                   mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_init'
-!End of the abilint section
 
  implicit none
 
@@ -903,13 +847,6 @@ end subroutine hdr_init
 
 subroutine hdr_free(hdr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -989,13 +926,6 @@ end subroutine hdr_free
 !! SOURCE
 
 subroutine hdr_copy(Hdr_in,Hdr_cp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1134,13 +1064,6 @@ end subroutine hdr_copy
 
 real(dp) pure function hdr_nelect_fromocc(Hdr) result(nelect)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_nelect_fromocc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1206,13 +1129,6 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 &  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
 &  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
 &  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_init_lowlvl'
-!End of the abilint section
 
  implicit none
 
@@ -1419,13 +1335,6 @@ end subroutine hdr_init_lowlvl
 
 subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_read_from_fname'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1509,13 +1418,6 @@ end subroutine hdr_read_from_fname
 
 subroutine hdr_write_to_fname(Hdr,fname,fform)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_write_to_fname'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1586,13 +1488,6 @@ end subroutine hdr_write_to_fname
 !! SOURCE
 
 subroutine hdr_mpio_skip(mpio_fh,fform,offset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_mpio_skip'
-!End of the abilint section
 
  implicit none
 
@@ -1703,13 +1598,6 @@ end subroutine hdr_mpio_skip
 !! SOURCE
 
 subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_bsize_frecords'
-!End of the abilint section
 
  implicit none
 
@@ -1842,13 +1730,6 @@ end subroutine hdr_bsize_frecords
 
 subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_io_wfftype'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1961,13 +1842,6 @@ end subroutine hdr_io_wfftype
 
 subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_io_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2032,13 +1906,6 @@ end subroutine hdr_io_int
 !! SOURCE
 
 subroutine hdr_echo(Hdr,fform,rdwr,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_echo'
-!End of the abilint section
 
  implicit none
 
@@ -2210,13 +2077,6 @@ end subroutine hdr_echo
 
 subroutine hdr_skip_int(unitfi,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_skip_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2268,13 +2128,6 @@ end subroutine hdr_skip_int
 !! SOURCE
 
 subroutine hdr_skip_wfftype(wff,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_skip_wfftype'
-!End of the abilint section
 
  implicit none
 
@@ -2439,13 +2292,6 @@ end subroutine hdr_skip_wfftype
 subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu, &
 &                     comm_atom,mpi_atmtab) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_update'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2522,13 +2368,6 @@ end subroutine hdr_update
 !! SOURCE
 
 subroutine hdr_bcast(hdr,master,me,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_bcast'
-!End of the abilint section
 
  implicit none
 
@@ -2852,13 +2691,6 @@ end subroutine hdr_bcast
 
 subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_fort_read'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2982,13 +2814,6 @@ end subroutine hdr_fort_read
 !! SOURCE
 
 subroutine hdr_ncread(Hdr,ncid,fform)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_ncread'
-!End of the abilint section
 
  implicit none
 
@@ -3198,13 +3023,6 @@ end subroutine hdr_ncread
 
 subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_fort_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3295,13 +3113,6 @@ end subroutine hdr_fort_write
 
 integer function hdr_backspace(hdr, unit, msg) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_backspace'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3359,13 +3170,6 @@ end function hdr_backspace
 !! SOURCE
 
 integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -3703,13 +3507,6 @@ end function hdr_ncwrite
 
 subroutine hdr_set_occ(hdr, occ3d)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_set_occ'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3750,13 +3547,6 @@ end subroutine hdr_set_occ
 !! SOURCE
 
 subroutine hdr_get_occ3d(hdr, occ3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_get_occ3d'
-!End of the abilint section
 
  implicit none
 
@@ -3869,13 +3659,6 @@ end subroutine hdr_get_occ3d
 !! SOURCE
 
 subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_check'
-!End of the abilint section
 
  implicit none
 
@@ -4686,13 +4469,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 subroutine mk_hdr_check_fmt(nelm,typfmt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mk_hdr_check_fmt'
-!End of the abilint section
-
    implicit none
 
 !  Arguments ------------------------------------
@@ -4752,13 +4528,6 @@ end subroutine hdr_check
 !! SOURCE
 
 subroutine hdr_vs_dtset(Hdr,Dtset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_vs_dtset'
-!End of the abilint section
 
  implicit none
 
@@ -4970,13 +4739,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !! SOURCE
 
  subroutine compare_int(name,iexp,ifound,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compare_int'
-!End of the abilint section
 
  implicit none
 

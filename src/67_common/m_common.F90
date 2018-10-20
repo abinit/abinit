@@ -156,13 +156,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  vxcavg,wtk,xred,conv_retcode,&
 &  electronpositron, fock) ! optional arguments)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scprqt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -887,13 +880,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    ! LB-02/01/2017 :
    ! This code avoids evaluation of undefined variables (which could happen in respfn, apparently)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'converged'
-!End of the abilint section
-
    logical :: loc_conv
    loc_conv = .true.
    if (ttolwfr==1) then
@@ -969,13 +955,6 @@ subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
 
  use m_geometry,   only : mkrdim, metric
  use m_kg,         only : getcut
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1125,13 +1104,6 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 &  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
  use m_io_tools,  only : open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prteigrs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1428,13 +1400,6 @@ end subroutine prteigrs
 
 subroutine prtene(dtset,energies,iout,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtene'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1726,13 +1691,6 @@ subroutine get_dtsets_pspheads(path, ndtset, status_file, lenstr, string, timopt
  use m_pspheads,     only : inpspheads, pspheads_comm
  use m_dtset
  use m_xpapi
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dtsets_pspheads'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

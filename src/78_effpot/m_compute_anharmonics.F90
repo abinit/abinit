@@ -81,13 +81,6 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_strain
  use m_fstrings, only : itoa,int2char4,ftoa
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_anharmonics'
-!End of the abilint section
-
   implicit none
 
  !Arguments ------------------------------------

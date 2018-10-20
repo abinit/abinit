@@ -158,13 +158,6 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 & npwarr,occ,psps,pwind,&
 & rfpert,rprimd,ucvol,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pead_nl_loop'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -773,13 +766,6 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 & mpert,mpi_enreg,mpsang,mpw,natom,nfft,nkpt,nspden,nspinor,nsppol,&
 & npwarr,occ,ph1d,psps,rprimd,vtrial1,xred,ylm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pead_nl_resp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1108,13 +1094,6 @@ subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 &                   nsppol,pwind)
 
  use m_hide_lapack, only : dzgedi, dzgefa
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pead_nl_mv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

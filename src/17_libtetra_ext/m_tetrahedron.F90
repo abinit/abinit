@@ -139,13 +139,6 @@ contains
 
 subroutine destroy_tetra (tetra)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_tetra'
-!End of the abilint section
-
  implicit none
 
  type(t_tetrahedron), intent(inout) :: tetra
@@ -202,13 +195,6 @@ end subroutine destroy_tetra
 !! SOURCE
 
 subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,errorstring)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_tetra'
-!End of the abilint section
 
  implicit none
 
@@ -560,13 +546,6 @@ end subroutine init_tetra
 
 subroutine tetra_write(tetra, nkibz, kibz, path)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetra_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -673,13 +652,6 @@ end subroutine tetra_write
 subroutine get_tetra_weight(eigen_in,enemin,enemax,max_occ,nene,nkpt,tetra,&
   bcorr,tweight,dtweightde,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_tetra_weight'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -730,13 +702,6 @@ end subroutine get_tetra_weight
 
 subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
   bcorr,tweight_t,dtweightde_t,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetra_blochl_weights'
-!End of the abilint section
 
  implicit none
 
@@ -863,13 +828,6 @@ end subroutine tetra_blochl_weights
 
 subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enemax2,&
 &    max_occ,nene1,nene2,nkpt,tetra,tweight,dtweightde, ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dbl_tetra_weight'
-!End of the abilint section
 
  implicit none
 
@@ -1366,13 +1324,6 @@ end subroutine get_dbl_tetra_weight
 
 subroutine sort_tetra(n,list,iperm,tol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sort_tetra'
-!End of the abilint section
-
  implicit none
 
  integer, intent(in) :: n
@@ -1465,13 +1416,6 @@ end subroutine sort_tetra
 
 logical function tetralib_has_mpi() result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetralib_has_mpi'
-!End of the abilint section
-
   ans = .False.
 #ifdef HAVE_MPI
   ans = .True.
@@ -1519,13 +1463,6 @@ end function tetralib_has_mpi
 !! SOURCE
 
 subroutine split_work(ntasks,comm,nprocs,my_start,my_stop,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'split_work'
-!End of the abilint section
 
  implicit none
 
@@ -1578,13 +1515,6 @@ end subroutine split_work
 
 pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr, &
 &  tweight_tmp,dtweightde_tmp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_onetetra_'
-!End of the abilint section
 
  implicit none
 
@@ -1927,13 +1857,6 @@ end subroutine get_onetetra_
 
 subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,max_occ,weights)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetra_get_onewk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2015,13 +1938,6 @@ end subroutine tetra_get_onewk
 !! SOURCE
 
 subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz, weights, wtol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetra_get_onewk_wvals'
-!End of the abilint section
 
  implicit none
 

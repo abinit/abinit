@@ -183,13 +183,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
 &           wffnow,unwff1,wffnm,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inwffil'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1133,13 +1126,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                  nspinor0,nsppol,nsppol0,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,squeeze,symrel,tnons,wff1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfsinp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1863,13 +1849,6 @@ end subroutine wfsinp
 subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 &  spin,mcg,mpi_enreg,nband_k,nkpt,npw,nspinor,occ_k,wff1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2108,13 +2087,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &                  ngfft1,ngfft2,nkpt1,nkpt2,npwarr1,npwarr2,nspinor1,nspinor2,&
 &                  nsppol1,nsppol2,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newkpt'
-!End of the abilint section
 
  implicit none
 
@@ -2711,13 +2683,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 & kg1,kg2,kptns1,kptns2,mband1,mband2,mcg1,mcg2,mpi_enreg1,mpi_enreg2,&
 & mpw1,mpw2,nbd1,nbd2,ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,&
 & nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfconv'
-!End of the abilint section
 
  implicit none
 

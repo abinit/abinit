@@ -167,13 +167,6 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 &  susmat,symafm,symrel,tnons,typat,ucvol,unpaw,usecprj,usepaw,usetimerev,&
 &  wtk,ylmdiel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'suscep_stat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -911,13 +904,6 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'susk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1511,13 +1497,6 @@ subroutine suskmm(atindx,bdtot_index,cg,cprj_k,doccde,drhode,eigen,extrap,gbound
 &  npwdiel,npw_k,nspden,nspden_eff,nspinor,nsppol,ntypat,occ,occopt,occ_deavg,paral_kgb,&
 &  pawang,pawtab,ph3d_diel,rhoextrap,sumdocc,&
 &  susmat,typat,ucvol,usepaw,wtk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'suskmm'
-!End of the abilint section
 
  implicit none
 

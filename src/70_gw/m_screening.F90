@@ -282,13 +282,6 @@ CONTAINS  !=====================================================================
 
 subroutine em1results_free(Er)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1results_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -351,13 +344,6 @@ end subroutine em1results_free
 !! SOURCE
 
 subroutine em1results_print(Er,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1results_print'
-!End of the abilint section
 
  implicit none
 
@@ -543,13 +529,6 @@ end subroutine em1results_print
 
 subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,epsm1_qbz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Epsm1_symmetrizer'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -677,13 +656,6 @@ end subroutine Epsm1_symmetrizer
 
 subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Epsm1_symmetrizer_inplace'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -781,13 +753,6 @@ end subroutine Epsm1_symmetrizer_inplace
 !! SOURCE
 
 subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_Er_from_file'
-!End of the abilint section
 
  implicit none
 
@@ -925,13 +890,6 @@ end subroutine init_Er_from_file
 subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 &                    ikxc_required,option_test,fname_dump,iomode,&
 &                    nfftot,ngfft,comm,fxc_ADA)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkdump_Er'
-!End of the abilint section
 
  implicit none
 
@@ -1216,13 +1174,6 @@ end subroutine mkdump_Er
 
 subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_epsm1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1301,13 +1252,6 @@ end subroutine get_epsm1
 !! SOURCE
 
 subroutine decompose_epsm1(Er,iqibz,eigs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'decompose_epsm1'
-!End of the abilint section
 
  implicit none
 
@@ -1479,13 +1423,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,chi0_head,&
   chi0_lwing,chi0_uwing,chi0,spectra,comm,&
   fxc_ADA) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_epsm1_driver'
-!End of the abilint section
 
  implicit none
 
@@ -2004,13 +1941,6 @@ end subroutine make_epsm1_driver
 
 subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rpa_symepsm1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2167,13 +2097,6 @@ end subroutine rpa_symepsm1
 
 subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nqlwl,dim_wing,omega,&
 & chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atddft_symepsm1'
-!End of the abilint section
 
  implicit none
 
@@ -2395,13 +2318,6 @@ end subroutine atddft_symepsm1
 
 subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_uwing,chi0,eps_head,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkem1_q0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2525,13 +2441,6 @@ end subroutine mkem1_q0
 
 subroutine lebedev_laikov_int()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lebedev_laikov_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2652,13 +2561,6 @@ end subroutine lebedev_laikov_int
 
 function ylmstar_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmstar_over_qTq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2720,13 +2622,6 @@ end function ylmstar_over_qTq
 
 function ylmstar_wtq_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmstar_wtq_over_qTq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2784,13 +2679,6 @@ end function ylmstar_wtq_over_qTq
 !! SOURCE
 
 elemental function mdielf_bechstedt(eps_inf,qnrm,rhor) result(mdielf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mdielf_bechstedt'
-!End of the abilint section
 
  implicit none
 
@@ -2850,13 +2738,6 @@ end function mdielf_bechstedt
 !! SOURCE
 
 subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,nspden,nfft,ngfft,rhor,which,w_qbz,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_mdielf'
-!End of the abilint section
 
  implicit none
 
@@ -3034,13 +2915,6 @@ end subroutine screen_mdielf
 
 type(chi_t) function chi_new(npwe, nomega) result(chi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3079,13 +2953,6 @@ end function chi_new
 !! SOURCE
 
 subroutine chi_free(chi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi_free'
-!End of the abilint section
 
  implicit none
 
@@ -3131,13 +2998,6 @@ end subroutine chi_free
 !! SOURCE
 
 subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0_lwing, chi0_uwing, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_write'
-!End of the abilint section
 
  implicit none
 
@@ -3305,13 +3165,6 @@ end subroutine lwl_write
 
 subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3385,13 +3238,6 @@ end subroutine lwl_init
 !! SOURCE
 
 subroutine lwl_free(lwl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_free'
-!End of the abilint section
 
  implicit none
 

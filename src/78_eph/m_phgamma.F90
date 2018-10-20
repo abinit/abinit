@@ -416,13 +416,6 @@ contains  !=====================================================
 
 subroutine phgamma_free(gams)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -480,13 +473,6 @@ end subroutine phgamma_free
 !! SOURCE
 
 subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transport,ngqpt,nsppol,nspinor,n0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_init'
-!End of the abilint section
 
  implicit none
 
@@ -592,13 +578,6 @@ end subroutine phgamma_init
 
 subroutine phgamma_print(gams,cryst,ifc,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -697,13 +676,6 @@ end subroutine phgamma_print
 
 subroutine tgamma_symm(cryst,qpt,tgamma)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tgamma_symm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -784,13 +756,6 @@ end subroutine tgamma_symm
 !! SOURCE
 
 subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_eval_qibz'
-!End of the abilint section
 
  implicit none
 
@@ -921,13 +886,6 @@ end subroutine phgamma_eval_qibz
 !! SOURCE
 
 subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_interp'
-!End of the abilint section
 
  implicit none
 
@@ -1074,13 +1032,6 @@ end subroutine phgamma_interp
 !! SOURCE
 
 subroutine phgamma_interp_setup(gams,cryst,action)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_interp_setup'
-!End of the abilint section
 
  implicit none
 
@@ -1273,13 +1224,6 @@ end subroutine phgamma_interp_setup
 
 subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gamma_out_ph,lambda_in_ph,lambda_out_ph)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_vv_eval_qibz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1403,13 +1347,6 @@ end subroutine phgamma_vv_eval_qibz
 !! SOURCE
 
 subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out_ph,lambda_in_ph,lambda_out_ph)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_vv_interp'
-!End of the abilint section
 
  implicit none
 
@@ -1556,13 +1493,6 @@ end subroutine phgamma_vv_interp
 !! SOURCE
 
 subroutine phgamma_vv_interp_setup(gams,cryst,action)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_vv_interp_setup'
-!End of the abilint section
 
  implicit none
 
@@ -1754,13 +1684,6 @@ end subroutine phgamma_vv_interp_setup
 !! SOURCE
 
 subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminmax,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_linwid'
-!End of the abilint section
 
  implicit none
 
@@ -1954,13 +1877,6 @@ end subroutine phgamma_linwid
 
 subroutine a2fw_free(a2f)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2022,13 +1938,6 @@ end subroutine a2fw_free
 
 subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshift,qshift,comm,&
   qintp,qptopt) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_init'
-!End of the abilint section
 
  implicit none
 
@@ -2470,13 +2379,6 @@ end subroutine a2fw_init
 
 real(dp) function a2fw_moment(a2f,nn,spin,out_int)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_moment'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2547,13 +2449,6 @@ end function a2fw_moment
 !! SOURCE
 
 function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_moment'
-!End of the abilint section
 
  implicit none
 
@@ -2630,13 +2525,6 @@ end function a2fw_tr_moment
 
 real(dp) function a2fw_logmoment(a2f,spin) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_logmoment'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2692,13 +2580,6 @@ end function a2fw_logmoment
 !! SOURCE
 
 real(dp) function a2fw_lambda_wij(a2f,wi,wj,spin) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_lambda_wij'
-!End of the abilint section
 
  implicit none
 
@@ -2767,13 +2648,6 @@ end function a2fw_lambda_wij
 !! SOURCE
 
 subroutine a2fw_write(a2f, basename, post, ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_write'
-!End of the abilint section
 
  implicit none
 
@@ -2932,13 +2806,6 @@ end subroutine a2fw_write
 
 subroutine a2fw_ee_write(a2f,basename)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_ee_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2999,13 +2866,6 @@ contains
 subroutine write_a2fw_header()
 
  ! Output the header.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_a2fw_header'
-!End of the abilint section
-
  write(unt,'(a)')              '#'
  write(unt,'(a)')              '# ABINIT package: a2F(e,eprime,w) file'
  write(unt,'(a)')              '#'
@@ -3059,13 +2919,6 @@ end subroutine a2fw_ee_write
 !! SOURCE
 
 subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,prefix,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_solve_gap'
-!End of the abilint section
 
  implicit none
 
@@ -3283,13 +3136,6 @@ end subroutine a2fw_solve_gap
 
 subroutine a2fw_tr_free(a2f_tr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3353,13 +3199,6 @@ end subroutine a2fw_tr_free
 
 subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshift,qshift,comm,&
   qintp,qptopt) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_init'
-!End of the abilint section
 
  implicit none
 
@@ -3724,13 +3563,6 @@ end subroutine a2fw_tr_init
 
 subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3862,13 +3694,6 @@ contains
 subroutine write_a2fw_tr_header()
 
  ! Output the header.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_a2fw_tr_header'
-!End of the abilint section
-
  write(unt,'(a)')              '#'
  write(unt,'(a)')              '# ABINIT package: a2F_tr(w) file'
  write(unt,'(a)')              '#'
@@ -3922,13 +3747,6 @@ end subroutine a2fw_tr_write
 
 subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_phgamma'
-!End of the abilint section
 
  implicit none
 

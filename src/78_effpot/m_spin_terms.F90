@@ -140,13 +140,6 @@ module  m_spin_terms
 contains
   subroutine spin_terms_t_initialize(self, cell, pos, spinat,  iatoms, ispin_prim, rvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_initialize'
-!End of the abilint section
-
     implicit none
     !Arguments ------------------------------------
     !scalars
@@ -214,13 +207,6 @@ contains
        &   k1,k1dir, &
        & bilinear_i, bilinear_j, bilinear_val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_terms'
-!End of the abilint section
-
     implicit none
     !Arguments ------------------------------------
     !scalars
@@ -266,13 +252,6 @@ contains
 
   subroutine spin_terms_t_set_params(self, dt, temperature, gilbert_damping, gyro_ratio)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_params'
-!End of the abilint section
-
     class(spin_terms_t) , intent(inout) :: self
     real(dp), optional, intent(in) :: gilbert_damping(self%nspins), dt, temperature, gyro_ratio(self%nspins)
 
@@ -300,13 +279,6 @@ contains
 
   subroutine spin_terms_t_add_SIA(self, mode, k1, k1dir)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_add_SIA'
-!End of the abilint section
-
     class(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: mode
     real(dp), intent(in) :: k1, k1dir(3)
@@ -326,26 +298,12 @@ contains
 
   subroutine spin_terms_t_get_gamma_l(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_get_gamma_l'
-!End of the abilint section
-
     type(spin_terms_t), intent(inout) :: self
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%gilbert_damping(:)**2)
     self%gamma_l_calculated=.True.
   end subroutine spin_terms_t_get_gamma_l
 
   subroutine spin_terms_t_set_external_hfield(self, external_hfield)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_external_hfield'
-!End of the abilint section
 
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: external_hfield(:,:)
@@ -356,26 +314,12 @@ contains
 
   subroutine spin_terms_t_calc_external_Heff(self, Heff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_calc_external_Heff'
-!End of the abilint section
-
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(out) :: Heff(:,:)
     Heff(:,:)=self%external_hfield(:,:)
   end subroutine spin_terms_t_calc_external_Heff
 
   subroutine spin_terms_t_set_uniaxial_MCA(self, k1, k1dir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_uniaxial_MCA'
-!End of the abilint section
 
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: k1(:), k1dir(:,:)
@@ -394,13 +338,6 @@ contains
 
   subroutine spin_terms_t_calc_uniaxial_MCA_Heff(self, S, Heff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_calc_uniaxial_MCA_Heff'
-!End of the abilint section
-
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(:,:)
@@ -408,13 +345,6 @@ contains
   end subroutine spin_terms_t_calc_uniaxial_MCA_Heff
 
   subroutine spin_terms_t_set_bilinear_term_single(self, i, j, val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_bilinear_term_single'
-!End of the abilint section
 
     type(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: i, j
@@ -430,13 +360,6 @@ contains
   end subroutine spin_terms_t_set_bilinear_term_single
 
   subroutine spin_terms_t_set_bilinear_term(self, idx_i, idx_j, val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_bilinear_term'
-!End of the abilint section
 
     type(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: idx_i(:), idx_j(:)
@@ -459,13 +382,6 @@ contains
   end subroutine spin_terms_t_set_bilinear_term
 
   subroutine spin_terms_t_calc_bilinear_term_Heff(self, S, Heff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_calc_bilinear_term_Heff'
-!End of the abilint section
 
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
@@ -502,13 +418,6 @@ contains
 
   subroutine spin_terms_t_set_exchange(self, exchange_i, exchange_j, exchange_val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_exchange'
-!End of the abilint section
-
     type(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: exchange_i(:), exchange_j(:)
     real(dp), intent(in) :: exchange_val(:)
@@ -527,13 +436,6 @@ contains
 
   subroutine spin_terms_t_calc_exchange_Heff(self, S, Heff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_calc_exchange_Heff'
-!End of the abilint section
-
     type(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(:,:)
@@ -542,13 +444,6 @@ contains
   end subroutine spin_terms_t_calc_exchange_Heff
 
   subroutine spin_terms_t_set_DMI(self, DMI_i, DMI_j, DMI_val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_set_DMI'
-!End of the abilint section
 
     type(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: DMI_i(:), DMI_j(:)
@@ -566,13 +461,6 @@ contains
 
   subroutine spin_terms_t_calc_DMI_Heff(self, S, Heff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_calc_DMI_Heff'
-!End of the abilint section
-
     type(spin_terms_t), intent(in) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(:,:)
@@ -583,13 +471,6 @@ contains
 
 
   subroutine spin_terms_t_total_Heff(self,S, Heff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_total_Heff'
-!End of the abilint section
 
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in):: S(3,self%nspins)
@@ -638,13 +519,6 @@ contains
   ! A effective torque from Langevin heat bath
   subroutine spin_terms_t_get_Langevin_Heff(self, dt, temperature, Heff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_get_Langevin_Heff'
-!End of the abilint section
-
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: dt, temperature
     real(dp), intent(out):: Heff(3,self%nspins)
@@ -667,13 +541,6 @@ contains
   ! ds/dt = f(Heff, S)
   subroutine spin_terms_t_Heff_to_dsdt(self, Heff, S, dSdt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_Heff_to_dsdt'
-!End of the abilint section
-
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: Heff(3,self%nspins), S(3,self%nspins)
     real(dp), intent(out) :: dSdt(3, self%nspins)
@@ -689,13 +556,6 @@ contains
 
   subroutine spin_terms_t_get_etot(self, S, Heff, etot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_get_etot'
-!End of the abilint section
-
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(3, self%nspins), Heff(3, self%nspins)
     real(dp), intent(out) :: etot
@@ -709,13 +569,6 @@ contains
   end subroutine spin_terms_t_get_etot
 
   subroutine spin_terms_t_get_dSdt(self,  S, H_lang, dSdt )
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_get_dSdt'
-!End of the abilint section
 
     class(spin_terms_t) ,intent(inout) :: self
     real(dp), intent(in):: S(3, self%nspins), H_lang(3, self%nspins)
@@ -731,13 +584,6 @@ contains
   end subroutine spin_terms_t_get_dSdt
 
   subroutine spin_terms_t_finalize(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_terms_t_finalize'
-!End of the abilint section
 
     class(spin_terms_t), intent(inout):: self
 

@@ -101,13 +101,6 @@ contains
 subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset,&
 &                      image_index) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtfil_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -648,13 +641,6 @@ end subroutine dtfil_init
 
 subroutine dtfil_init_time(dtfil,iapp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtfil_init_time'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -760,13 +746,6 @@ end subroutine dtfil_init_time
 subroutine fappnd(filapp,filnam,iapp,&
 &                 suff) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fappnd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -853,13 +832,6 @@ end subroutine fappnd
 !! SOURCE
 
 subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtfil_init_img'
-!End of the abilint section
 
  implicit none
 
@@ -972,13 +944,6 @@ end subroutine dtfil_init_img
 !! SOURCE
 
 subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkfilename'
-!End of the abilint section
 
  implicit none
 
@@ -1103,13 +1068,6 @@ end subroutine mkfilename
 !! SOURCE
 
 subroutine isfile(filnam, status)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isfile'
-!End of the abilint section
 
  implicit none
 
@@ -1248,13 +1206,6 @@ end subroutine isfile
 !! SOURCE
 
 subroutine iofn1(filnam,filstat,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iofn1'
-!End of the abilint section
 
  implicit none
 
@@ -1500,13 +1451,6 @@ end subroutine iofn1
 subroutine status(counter,filstat,istat,level,routine)
 
  use m_time,       only : timab
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'status'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

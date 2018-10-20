@@ -190,13 +190,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,xccc3d,xred,&
 &          taug,taur,vxctau,add_tfw) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'odamix'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

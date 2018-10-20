@@ -103,13 +103,6 @@ CONTAINS  !=====================================================================
 
 subroutine dtset_chkneu(charge,dtset,occopt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtset_chkneu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -373,13 +366,6 @@ end subroutine dtset_chkneu
 !! SOURCE
 
 subroutine dtset_copy(dtout, dtin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtset_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1264,13 +1250,6 @@ end subroutine dtset_copy
 
 subroutine dtset_free(dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtset_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1535,13 +1514,6 @@ end subroutine dtset_free
 
 subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,ndtset_alloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_getdtset'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1631,13 +1603,6 @@ end subroutine find_getdtset
 subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 
  use m_symkpt,     only : symkpt
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_npert_rbz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1951,13 +1916,6 @@ end subroutine get_npert_rbz
 
 subroutine testsusmat(compute,dielop,dielstrt,dtset,istep)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testsusmat'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -2042,13 +2000,6 @@ end subroutine testsusmat
 !! SOURCE
 
 subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'macroin'
-!End of the abilint section
 
  implicit none
 
@@ -2291,13 +2242,6 @@ end subroutine macroin
 
 subroutine macroin2(dtsets,ndtset_alloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'macroin2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2355,13 +2299,6 @@ end subroutine macroin2
 !! SOURCE
 
 subroutine chkvars (string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkvars'
-!End of the abilint section
 
  implicit none
 

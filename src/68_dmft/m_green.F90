@@ -209,13 +209,6 @@ subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
  use m_crystal, only : crystal_t
  use m_oper, only : init_oper
  use m_paw_dmft, only: paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -340,13 +333,6 @@ subroutine init_green_tau(green,paw_dmft,opt_ksloc)
 
  use m_oper, only : init_oper
  use m_paw_dmft, only: paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_green_tau'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -408,13 +394,6 @@ end subroutine init_green_tau
 subroutine destroy_green(green)
 
  use m_oper, only : destroy_oper
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -485,13 +464,6 @@ subroutine destroy_green_tau(green)
 
  use m_crystal, only : crystal_t
  use m_oper, only : destroy_oper
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_green_tau'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -550,13 +522,6 @@ subroutine copy_green(green1,green2,opt_tw)
 
  use m_crystal, only : crystal_t
  use m_oper, only : copy_oper
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -625,13 +590,6 @@ subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
  use m_oper, only : print_oper
  use m_matlu, only : diff_matlu,print_matlu,trace_matlu
  use m_paw_dmft, only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printocc_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -744,13 +702,6 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
  use m_paw_dmft, only : paw_dmft_type
 
  use m_fstrings, only : int2char4
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1042,13 +993,6 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
  use m_oper, only : inverse_oper,loc_oper,print_oper,upfold_oper,init_oper,destroy_oper
  use m_paw_dmft, only : paw_dmft_type
  use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1431,13 +1375,6 @@ subroutine integrate_green(cryst_struc,green,paw_dmft&
  use m_oper,      only : loc_oper,trace_oper,init_oper,destroy_oper
 ! use m_oper, only : loc_oper,trace_oper,upfold_oper,print_oper,identity_oper,init_oper,destroy_oper
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrate_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1903,13 +1840,6 @@ subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt
  use m_paw_dmft, only : paw_dmft_type
  use m_oper, only : loc_oper
  use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'icip_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2014,13 +1944,6 @@ subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
  use m_matlu, only : sym_matlu,init_matlu,destroy_matlu,print_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_oper, only : loc_oper
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourier_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2312,13 +2235,6 @@ subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : print_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fourier_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2396,13 +2312,6 @@ end subroutine check_fourier_green
 subroutine compa_occup_ks(green,paw_dmft)
 
  use m_paw_dmft, only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compa_occup_ks'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2492,13 +2401,6 @@ subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo
 
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'add_int_fct'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2591,13 +2493,6 @@ end subroutine add_int_fct
 subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
 
  use m_paw_dmft, only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_fct'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2728,13 +2623,6 @@ subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
 
  use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
  use m_splines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourier_fct'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2880,13 +2768,6 @@ subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
  use m_splines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spline_fct'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2960,13 +2841,6 @@ end subroutine spline_fct
 subroutine occup_green_tau(green)
 
  use m_matlu, only : shift_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occup_green_tau'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3014,13 +2888,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
  function occupfd(eig,fermie,temp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occupfd'
-!End of the abilint section
 
  implicit none
 
@@ -3070,13 +2937,6 @@ end subroutine occup_green_tau
  use defs_basis
  use defs_datatypes
  use defs_abitypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'distrib_paral'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3206,13 +3066,6 @@ end subroutine occup_green_tau
  use m_paw_dmft, only : paw_dmft_type
  use m_oper, only : oper_type,loc_oper
  use m_matlu, only : sym_matlu, print_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'greenldacompute_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3320,13 +3173,6 @@ subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only: paw_dmft_type
  use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fermi_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3485,13 +3331,6 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
  use m_crystal,   only : crystal_t
  use m_paw_dmft,  only: paw_dmft_type
  use m_self,      only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newton'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -3707,13 +3546,6 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
  use m_crystal, only : crystal_t
  use m_paw_dmft, only: paw_dmft_type
  use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'function_and_deriv'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -3817,13 +3649,6 @@ subroutine compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
  use m_crystal, only : crystal_t
  use m_paw_dmft, only: paw_dmft_type
  use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_nb_elec'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -3895,13 +3720,6 @@ subroutine local_ks_green(green,paw_dmft,prtopt)
 
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'local_ks_green'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

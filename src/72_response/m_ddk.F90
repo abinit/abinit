@@ -173,13 +173,6 @@ CONTAINS
 
 subroutine ddk_init(ddk, paths, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -250,13 +243,6 @@ end subroutine ddk_init
 !! SOURCE
 
 subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_ddk'
-!End of the abilint section
 
  implicit none
 
@@ -545,13 +531,6 @@ end subroutine eph_ddk
 
 subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_read_fsvelocities'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -687,13 +666,6 @@ end subroutine ddk_read_fsvelocities
 
 subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_fs_average_veloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -773,13 +745,6 @@ end subroutine ddk_fs_average_veloc
 
 subroutine ddk_free(ddk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -829,13 +794,6 @@ end subroutine ddk_free
 !! SOURCE
 
 subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_print'
-!End of the abilint section
 
  implicit none
 

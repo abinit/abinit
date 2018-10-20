@@ -91,13 +91,6 @@ contains
   !! SOURCE
   subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature, pre_time)
     !class (spin_mover_t):: self
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_initialize'
-!End of the abilint section
-
     type(spin_mover_t), intent(inout) :: self
     real(dp), intent(in) :: dt, total_time, pre_time,temperature
     integer, intent(in) :: nspins
@@ -137,13 +130,6 @@ contains
   subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
 
     !class (spin_mover_t), intent(inout):: self
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_run_one_step_HeunP'
-!End of the abilint section
-
     type(spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
@@ -179,13 +165,6 @@ contains
 
     ! TODO: implement Depondt & Mertens (2009) method. 
     !class (spin_mover_t), intent(inout):: self
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_run_one_step_DM'
-!End of the abilint section
-
     type(spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
@@ -221,13 +200,6 @@ contains
 
   subroutine spin_mover_t_run_one_step(self, calculator, hist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_run_one_step'
-!End of the abilint section
-
     type(spin_mover_t), intent(inout) :: self
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t),intent(inout) :: hist
@@ -258,13 +230,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_mover_t_run_time(self, calculator, hist, ncfile, ob)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_run_time'
-!End of the abilint section
 
     class(spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
@@ -402,13 +367,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_mover_t_finalize(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_mover_t_finalize'
-!End of the abilint section
 
     class(spin_mover_t), intent(inout):: self
   end subroutine spin_mover_t_finalize

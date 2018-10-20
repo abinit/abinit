@@ -106,13 +106,6 @@ contains
 
 subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_spectra'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -350,13 +343,6 @@ end subroutine build_spectra
 
 subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_data'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -531,13 +517,6 @@ end subroutine exc_write_data
 
 subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,opt_cvk,ucvol,broad,nomega,omega,eps_rpa,dos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_rpa'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -670,13 +649,6 @@ end subroutine exc_eps_rpa
 
 subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
 &    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_resonant'
-!End of the abilint section
 
  implicit none
 
@@ -930,13 +902,6 @@ end subroutine exc_eps_resonant
 
 subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_coupling'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1128,13 +1093,6 @@ end subroutine exc_eps_coupling
 
 subroutine exc_write_tensor(BSp,BS_files,what,tensor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_tensor'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1283,13 +1241,6 @@ end subroutine exc_write_tensor
 
 subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mdfs_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1408,13 +1359,6 @@ end subroutine mdfs_ncwrite
 !! SOURCE
 
 subroutine check_kramerskronig(n,o,eps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_kramerskronig'
-!End of the abilint section
 
  implicit none
 
@@ -1549,13 +1493,6 @@ end subroutine check_kramerskronig
 !! SOURCE
 
 subroutine check_fsumrule(n,o,e2,omegaplasma)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fsumrule'
-!End of the abilint section
 
  implicit none
 

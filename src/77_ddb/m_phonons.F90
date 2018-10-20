@@ -197,13 +197,6 @@ CONTAINS  !=====================================================================
 
 subroutine phdos_print(PHdos,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -335,13 +328,6 @@ end subroutine phdos_print
 
 subroutine phdos_print_debye(PHdos, ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_debye'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -456,13 +442,6 @@ end subroutine phdos_print_debye
 !! SOURCE
 
 subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_thermo'
-!End of the abilint section
 
 implicit none
 
@@ -583,13 +562,6 @@ end subroutine phdos_print_thermo
 
 subroutine phdos_free(PHdos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -660,13 +632,6 @@ end subroutine phdos_free
 
 subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
                    wminmax, count_wminmax, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphdos'
-!End of the abilint section
 
  implicit none
 
@@ -1173,13 +1138,6 @@ end subroutine mkphdos
 
 subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zacharias_supercell_make'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1363,13 +1321,6 @@ end subroutine zacharias_supercell_make
 
 subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
 &                                 rlatt, temperature_K, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_make'
-!End of the abilint section
 
  implicit none
 
@@ -1573,13 +1524,6 @@ end subroutine thermal_supercell_make
 
 subroutine thermal_supercell_free(nscells, thm_scells)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1623,13 +1567,6 @@ end subroutine thermal_supercell_free
 !! SOURCE
 
 subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zacharias_supercell_print'
-!End of the abilint section
 
  implicit none
 
@@ -1683,13 +1620,6 @@ end subroutine zacharias_supercell_print
 !! SOURCE
 
 subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_print'
-!End of the abilint section
 
  implicit none
 
@@ -1746,13 +1676,6 @@ end subroutine thermal_supercell_print
 !! SOURCE
 
 subroutine phdos_ncwrite(phdos,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -1841,13 +1764,6 @@ end subroutine phdos_ncwrite
 !! SOURCE
 
 subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphbs'
-!End of the abilint section
 
  implicit none
 
@@ -2161,13 +2077,6 @@ end subroutine mkphbs
 
 subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_calc_vsound'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2240,13 +2149,6 @@ end subroutine phdos_calc_vsound
 
 subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_vsound'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2315,13 +2217,6 @@ end subroutine phdos_print_vsound
 !! SOURCE
 
 subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_msqd'
-!End of the abilint section
 
  implicit none
 
@@ -2486,13 +2381,6 @@ end subroutine phdos_print_msqd
 
 subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2536,13 +2424,6 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 contains
  integer function vid(vname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -2583,13 +2464,6 @@ end subroutine phonons_ncwrite
 !! SOURCE
 
  subroutine phonons_write_phfrq(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_phfrq'
-!End of the abilint section
 
  implicit none
 
@@ -2686,13 +2560,6 @@ end subroutine phonons_write_phfrq
 !! SOURCE
 
 subroutine phonons_writeEPS(natom,nqpts,ntypat,typat,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_writeEPS'
-!End of the abilint section
 
  implicit none
 
@@ -3111,13 +2978,6 @@ end subroutine phonons_writeEPS
 
 subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbounds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_xmgrace'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3248,13 +3108,6 @@ end subroutine phonons_write_xmgrace
 !! SOURCE
 
 subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_gnuplot'
-!End of the abilint section
 
  implicit none
 
@@ -3387,13 +3240,6 @@ end subroutine phonons_write_gnuplot
 !! SOURCE
 
 subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_mkphbs'
-!End of the abilint section
 
  implicit none
 
@@ -3545,13 +3391,6 @@ end subroutine ifc_mkphbs
 !! SOURCE
 
 subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_symph'
-!End of the abilint section
 
  implicit none
 
@@ -3792,13 +3631,6 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 #undef ABI_FUNC
 #define ABI_FUNC 'freeze_displ_allmodes'
 !End of the abilint section
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'freeze_displ_allmodes'
-!End of the abilint section
-
  implicit none
 
 ! arguments

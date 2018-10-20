@@ -115,13 +115,6 @@ contains
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
 & results_out,strimg,timopt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvar_o_z'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1568,13 +1561,6 @@ contains
 !! SOURCE
 
 subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,results_out,strimg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtocc'
-!End of the abilint section
 
  implicit none
 

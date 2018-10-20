@@ -68,13 +68,6 @@ subroutine xieee_halt_ifexc(halt)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xieee_halt_ifexc'
-!End of the abilint section
-
  logical,intent(in) :: halt
 ! *************************************************************************
     
@@ -126,13 +119,6 @@ subroutine xieee_signal_ifexc(flag)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xieee_signal_ifexc'
-!End of the abilint section
-
  logical,intent(in) :: flag
 ! *************************************************************************
     

@@ -192,13 +192,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gstateimg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -822,13 +815,6 @@ end subroutine gstateimg
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
 &                 prt_all_images,prtvolimg,resimg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtimg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1035,13 +1021,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
  use m_predict_steepest, only : predict_steepest
  use m_predict_pimd,    only : predict_pimd
  use m_predict_string, only : predict_string
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predictimg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1192,13 +1171,6 @@ end subroutine predictimg
 subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
 &                       ntimimage_stored,results_img)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_copy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1280,13 +1252,6 @@ end subroutine predict_copy
 !! SOURCE
 
 subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,ntimimage_stored,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'move_1geo'
-!End of the abilint section
 
  implicit none
 

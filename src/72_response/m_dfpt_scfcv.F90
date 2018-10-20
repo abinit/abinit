@@ -288,13 +288,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  cg_mq,cg1_mq,cg1_active_mq,docckde_mq,eigen_mq,eigen1_mq,gh0c1_set_mq,gh1c_set_mq,&
 &  kg1_mq,npwar1_mq,occk_mq,resid_mq,residm_mq,rhog1_pq,rhog1_mq,rhor1_pq,rhor1_mq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_scfcv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1597,13 +1590,6 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 &                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &                enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_etot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1749,13 +1735,6 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
 &                     pawrhoij1,pawrhoijfermi,pawtab,pawxcdev,prtvol,rhorfermi,&
 &                     ucvol,usepaw,usexcnhat,vtrial1,vxc1,xclevel,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newfermie1'
-!End of the abilint section
 
  implicit none
 
@@ -1954,13 +1933,6 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 &          initialized,iscf,ispmix,istep,mix,mixtofft,&
 &          mpi_enreg,my_natom,nfft,nfftmix,ngfft,ngfftmix,npawmix,pawrhoij,&
 &          qphon,rhor,rprimd,usepaw,vresid,vtrial)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_newvtr'
-!End of the abilint section
 
  implicit none
 
@@ -2386,13 +2358,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
  use m_spacepar,   only : hartrestr
  use m_mkcore,      only : dfpt_mkcore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nselt'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2797,13 +2762,6 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  use m_hamiltonian, only : gs_hamiltonian_type,load_k_hamiltonian
  use m_mkffnl,      only : mkffnl
  use m_nonlop,      only : nonlop
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nsteltwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3075,13 +3033,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use m_dynmat,    only : dfpt_sygra
  use m_dfpt_mkvxc,     only : dfpt_mkvxc
  use m_mkcore,         only : dfpt_mkcore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nstdy'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3673,13 +3624,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
  use m_spacepar,    only : symrhg
  use m_mkffnl,      only : mkffnl
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_rhofermi'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -4376,13 +4320,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
  use m_getgh1c,     only : getgh1c
  use m_dfpt_mkrho,  only : dfpt_accrho
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_wfkfermi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

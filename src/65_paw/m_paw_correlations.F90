@@ -121,13 +121,6 @@ CONTAINS  !=====================================================================
 &           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
 &           ucrpa) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpuxinit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -886,13 +879,6 @@ CONTAINS  !=====================================================================
  subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
  &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuenergy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1246,13 +1232,6 @@ CONTAINS  !=====================================================================
 
  subroutine pawxenergy(eexex,pawprtvol,pawrhoij,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxenergy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1411,13 +1390,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawprtvol,pawrhoij,pawtab,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setnoccmmp'
-!End of the abilint section
 
  implicit none
 
@@ -2298,13 +2270,6 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &                       mpi_comm_read,my_natom,natom,ntypat,pawrhoij,pawtab,typat,&
 &                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setrhoijpbe0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2638,13 +2603,6 @@ end subroutine setrhoijpbe0
 !! SOURCE
 
  subroutine calc_ubare(itypatcor,lpawu,pawang,pawrad,pawtab,rmax)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ubare'
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------

@@ -2549,7 +2549,9 @@ class Use(Code):
               #Add text_use inside use statements
               #self.code += text_use
           text_use += use_after + "\n"
-          self.code += text_use
+
+          # Comment this line to insert empty abilint section
+          #self.code += text_use
 
         #Remove multiple \n
         self.code = self.re_multi_n.sub('\n\n',self.code)

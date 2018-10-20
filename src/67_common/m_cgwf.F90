@@ -158,13 +158,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
 &                subvnl,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1404,13 +1397,6 @@ end subroutine cgwf
 subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &  efield_dot,iline,nkpt,nstr,hel,phase_end,phase_init,sdeg,sinth,thetam)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linemin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1727,13 +1713,6 @@ end subroutine linemin
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
 &    hel,nkpt,nstr,sdeg,theta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'etheta'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1862,13 +1841,6 @@ end subroutine etheta
 subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
 &                    nspinor,subham,subovl,subvnl,use_subovl,use_vnl,me_g0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mksubham'
-!End of the abilint section
 
  implicit none
 
@@ -2107,13 +2079,6 @@ end subroutine mksubham
 subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield,grad_berry,&
 &                          gs_hamk,iband,icg,ikpt,isppol,mband,mcg,mcgq,mkgq,mpi_enreg,mpw,natom,nkpt,&
 &                          npw,npwarr,nspinor,nsppol,pwind,pwind_alloc,pwnsfac,pwnsfacq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_grad_berry'
-!End of the abilint section
 
   implicit none
 

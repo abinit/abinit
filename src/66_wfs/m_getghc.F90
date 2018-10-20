@@ -128,13 +128,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 &                 prtvol,sij_opt,tim_getghc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -794,13 +787,6 @@ end subroutine getghc
 subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
 &                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vxctaulocal,use_gpu_cuda)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghc_mGGA'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1097,13 +1083,6 @@ end subroutine getghc_mGGA
 subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 &                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgsc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1299,13 +1278,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambd
 #ifdef HAVE_OPENMP
    use omp_lib
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multithreaded_getghc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1442,13 +1414,6 @@ end subroutine multithreaded_getghc
 !! SOURCE
 
 subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghcnd'
-!End of the abilint section
 
  implicit none
 

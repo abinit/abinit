@@ -126,13 +126,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
  use m_mover,            only : mover
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mover_effpot'
-!End of the abilint section
-
 implicit none
 
 !Arguments --------------------------------

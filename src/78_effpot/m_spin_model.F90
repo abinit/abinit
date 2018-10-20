@@ -131,13 +131,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_run(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_run'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     if(self%params%spin_var_temperature==1) then
        call spin_model_t_run_various_T(self, self%params%spin_temperature_start, &
@@ -169,13 +162,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_model_t_initialize(self, filenames,  params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_initialize'
-!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     character(len=fnlen), intent(in) :: filenames(:)
@@ -257,13 +243,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_finalize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_finalize'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     !call self%spin_primitive%finalize()
     call spin_model_primitive_t_finalize(self%spin_primitive)
@@ -296,13 +275,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_model_t_set_params(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_set_params'
-!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     real(dp):: mfield(3, self%nspins), damping(self%nspins)
@@ -356,13 +328,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_read_xml(self, xml_fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_read_xml'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     character(len=*), intent(in) :: xml_fname
     logical:: use_sia, use_exchange, use_dmi, use_bi
@@ -402,13 +367,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_make_supercell(self, sc_mat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_make_supercell'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     integer , intent(in):: sc_mat(3, 3)
     !call self%spin_primitive%make_supercell(sc_mat, self%spin_calculator)
@@ -433,13 +391,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_model_t_prepare_ncfile(self, spin_ncfile, fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_prepare_ncfile'
-!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     type(spin_ncfile_t), intent(out) :: spin_ncfile
@@ -473,13 +424,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_model_t_set_initial_spin(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_set_initial_spin'
-!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     integer :: mode
@@ -538,13 +482,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_run_one_step(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_run_one_step'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     call spin_mover_t_run_one_step(self%spin_mover, self%spin_calculator, &
          self%spin_hist)
@@ -572,13 +509,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_run_time(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_run_time'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     call spin_mover_t_run_time(self%spin_mover,self%spin_calculator,self%spin_hist, self%spin_ncfile, self%spin_ob)
   end subroutine spin_model_t_run_time
@@ -586,13 +516,6 @@ contains
 
 
   subroutine spin_model_t_run_various_T(self, T_start, T_end, T_nstep)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_run_various_T'
-!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     real(dp), intent(in) :: T_start, T_end
@@ -667,13 +590,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_run_MvT(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_run_MvT'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     !TODO
     write(std_err, *) "MvH is not yet implemented. "
@@ -701,13 +617,6 @@ contains
   !! SOURCE
   subroutine spin_model_t_run_MvH(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_run_MvH'
-!End of the abilint section
-
     class(spin_model_t), intent(inout) :: self
     write(std_err, *) "MvH is not yet implemented. "
   end subroutine spin_model_t_run_MvH
@@ -717,13 +626,6 @@ contains
   !! TODO This is temporary and should be removed
   !!         a.u. should be used internally. 
   subroutine spin_model_t_unit_conversion(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_t_unit_conversion'
-!End of the abilint section
 
     class(spin_model_t), intent(inout) :: self
     self%params%spin_dt = self%params%spin_dt*Time_Sec

@@ -134,13 +134,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 & pel,pel_cg,pelev,pion,psps,pwind,pwind_alloc,&
 & pwnsfac,rprimd,ucvol,usecprj,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elpolariz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -493,13 +486,6 @@ end subroutine elpolariz
 subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 & mband,mcg,mkmem,mpi_enreg,mpw,natom,nband,nberry,npwarr,nspinor,nsppol,nkpt_,&
 & unddk,fnameabo_1wf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'uderiv'
-!End of the abilint section
 
  implicit none
 
@@ -991,13 +977,6 @@ end subroutine uderiv
 subroutine waveformat(cg,cg_disk,cg_index,cg_new,dk,ii,ikpt,&
 & ikpt_,isgn,isppol,jj,jkpt,jkpt_,kg_kpt,kpt,kg_jl,maxband,mband,mcg,mcg_disk,&
 & minband,mkmem,mpw,nkpt,nkpt_,npwarr,nsppol,nspinor,shift_g_2,tr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'waveformat'
-!End of the abilint section
 
  implicit none
 

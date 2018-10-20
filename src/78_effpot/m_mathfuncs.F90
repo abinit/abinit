@@ -17,13 +17,6 @@ contains
   ! vector cross production
   function cross(a, b) result(c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross'
-!End of the abilint section
-
     real(dp), intent(in) :: a(3), b(3)
     real(dp)  :: c(3)
     c(1) = a(2)*b(3) - a(3)*b(2)
@@ -35,13 +28,6 @@ contains
 
   ! defines outer product of two vectors.
   function outer_product(a,b) ! result (c)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outer_product'
-!End of the abilint section
 
     real(dp), intent(in) :: a(:), b(:)
     real(dp)  :: outer_product(size(b, dim=1), size(a, dim=1))
@@ -56,13 +42,6 @@ contains
 
   subroutine set_random_seed(seed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_random_seed'
-!End of the abilint section
-
       integer , intent(in) :: seed(:)
       print*, "Warning! Currently I'm not sure about how this function  &
       &(set_random_seed,which calls RANDOM_SEED) works. Do test it!"
@@ -72,13 +51,6 @@ contains
   ! Random number generator; Normal (Gaussian) dist.
   ! a is a array.
   subroutine rand_normal_builtin(a)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_normal_builtin'
-!End of the abilint section
 
     real(dp), intent(out)::a(:,:)
     real(dp), allocatable :: b(:,:)

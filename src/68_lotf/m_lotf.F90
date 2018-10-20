@@ -86,13 +86,6 @@ contains
 &                  bond_atom_init,     &
 &                  bond_matrix_alloc,  &
 &                  bond_matrix_set
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_lotf'
-!End of the abilint section
-
   integer,intent(in) :: itime
   integer,intent(in) :: natom
   real(dp),intent(in) :: acell(3),rprimd(3,3)
@@ -224,13 +217,6 @@ contains
 
   !--init_lotf
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'end_LOTF'
-!End of the abilint section
-
    ABI_DEALLOCATE(alpha)
    ABI_DEALLOCATE(alpha_in)
    ABI_DEALLOCATE(alpha_end)
@@ -287,13 +273,6 @@ contains
 
   !--Evaluates "real" forces from external source, and computes
   ! the istantaneous best fit of the current model.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fitclus'
-!End of the abilint section
-
   implicit none
   !Arguments ------------------------------------
   logical,intent(in) :: tfor
@@ -857,13 +836,6 @@ contains
 &                  nfitmax,imat,bond_matrix_set,bond_compute,&
 &                  bond_fit_set,nbondex
   use eval_lotf,only : upd_lis0
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upd_lis'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -978,13 +950,6 @@ contains
   use tools_lotf,only : dlvsum
   use bond_lotf,only : ibn_tot,nbondex,tafit
   use eval_lotf, only : phi_n_calc,calc_coord2,eval_forces_u_n
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'force0'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -1108,13 +1073,6 @@ contains
  subroutine intparms(itime)
   use bond_lotf,only : ibn_tot
   use tools_lotf,only : pinterp,pinterp_nolinear
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intparms'
-!End of the abilint section
-
   implicit none
   !Arguments ------------------------------------
   integer,intent(in) :: itime!,nitex
@@ -1159,13 +1117,6 @@ contains
  !! SOURCE
  subroutine alpha_update(dphi,jbo,alpha_dum)
   use bond_lotf,only : ibn_tot
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alpha_update'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
@@ -1206,13 +1157,6 @@ contains
 !! SOURCE
 
  function lotf_extrapolation(itime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lotf_extrapolation'
-!End of the abilint section
 
   implicit none
 
@@ -1260,13 +1204,6 @@ contains
 !! SOURCE
 
  subroutine force_to_vel(v2gauss,dtion,amass,vel_in,fcart,vel_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'force_to_vel'
-!End of the abilint section
 
   implicit none
 
@@ -1331,13 +1268,6 @@ contains
 
  subroutine vel_to_gauss(vel_in,amass,v2gauss,vtest)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vel_to_gauss'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -1401,13 +1331,6 @@ contains
 !! SOURCE
 
  subroutine vel_rescale(mditemp,vel,amass,v2gauss)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vel_rescale'
-!End of the abilint section
 
   real(dp),intent(in) :: mditemp
   real(dp),intent(out) :: v2gauss
@@ -1488,13 +1411,6 @@ contains
 
  subroutine extrapolation_loop(itime,mditemp,dtion,amass,&
 &                           xcart,vel,xcart_next,vel_nexthalf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extrapolation_loop'
-!End of the abilint section
 
   implicit none
 
@@ -1593,13 +1509,6 @@ contains
 
  subroutine lotf_interpolation(itime,dtion,v2gauss,amass,xcart,vel,&
 &                           fcart_m,xcart_next,vel_nexthalf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lotf_interpolation'
-!End of the abilint section
 
   implicit none
 

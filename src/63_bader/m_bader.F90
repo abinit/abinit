@@ -165,13 +165,6 @@ module m_bader
 
  subroutine aim_shutdown()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'aim_shutdown'
-!End of the abilint section
-
   implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -233,13 +226,6 @@ end subroutine aim_shutdown
 !! SOURCE
 
 subroutine adini(aim_dtset,inpstr,lenstr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'adini'
-!End of the abilint section
 
  implicit none
 
@@ -740,13 +726,6 @@ end subroutine adini
 
 subroutine addout(aim_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'addout'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -913,13 +892,6 @@ end subroutine addout
 !! SOURCE
 
 subroutine aim_follow(aim_dtset,vv,npmax,srch,iatinit,iposinit,iat,ipos,nstep)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'aim_follow'
-!End of the abilint section
 
  implicit none
 
@@ -1269,13 +1241,6 @@ end subroutine aim_follow
 
 subroutine consist(aim_dtset,tstngr,tstvpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'consist'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1360,13 +1325,6 @@ end subroutine consist
 !! SOURCE
 
 subroutine cpdrv(aim_dtset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cpdrv'
-!End of the abilint section
 
  implicit none
 
@@ -2150,13 +2108,6 @@ end subroutine cpdrv
 
 subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'critic'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2478,13 +2429,6 @@ end subroutine critic
 
 subroutine ordr(aa,dd,nn,cff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ordr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ----------------------------
@@ -2563,13 +2507,6 @@ end subroutine ordr
 !! SOURCE
 
 subroutine  critics(aim_dtset,inxat,stwo,sthree,sfour,dstmax)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'critics'
-!End of the abilint section
 
  implicit none
 
@@ -2915,13 +2852,6 @@ end subroutine critics
 
 subroutine defad(aim_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'defad'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3014,13 +2944,6 @@ end subroutine defad
 !! SOURCE
 
 subroutine drvaim(aim_dtset,tcpui,twalli)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'drvaim'
-!End of the abilint section
 
  implicit none
 
@@ -3245,13 +3168,6 @@ end subroutine drvaim
 
 subroutine graph(unts,untg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'graph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3344,13 +3260,6 @@ end subroutine graph
 !! SOURCE
 
 subroutine initaim(aim_dtset,znucl_batom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initaim'
-!End of the abilint section
 
  implicit none
 
@@ -3746,13 +3655,6 @@ end subroutine initaim
 
 subroutine inpar(instr,lenstr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inpar'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3867,13 +3769,6 @@ end subroutine inpar
 
 subroutine inspln(idir,snn,tnn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inspln'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3977,13 +3872,6 @@ end subroutine inspln
 !! SOURCE
 
 subroutine integrho(aim_dtset,znucl_batom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integrho'
-!End of the abilint section
 
  implicit none
 
@@ -4303,13 +4191,6 @@ end subroutine integrho
 
 subroutine integvol()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'integvol'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4427,13 +4308,6 @@ end subroutine integvol
 
 subroutine onestep(vv,chg,grho,hh,np,npmax,deltar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'onestep'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4524,13 +4398,6 @@ end subroutine onestep
 !! SOURCE
 
 subroutine plint()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plint'
-!End of the abilint section
 
  implicit none
 
@@ -4639,13 +4506,6 @@ end subroutine plint
 !! SOURCE
 
 subroutine rsurf(aim_dtset,rr,grho,theta,phi,rr0,iatinit,npmax,srch)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rsurf'
-!End of the abilint section
 
  implicit none
 
@@ -4824,13 +4684,6 @@ end subroutine rsurf
 !! SOURCE
 
 subroutine surf(aim_dtset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'surf'
-!End of the abilint section
 
  implicit none
 
@@ -5426,13 +5279,6 @@ end subroutine surf
 
 subroutine vgh_rho(vv,rho,grho,hrho,rdmin,iat,ipos,chs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vgh_rho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5973,13 +5819,6 @@ end subroutine vgh_rho
 
 function vnorm(vv,dir)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vnorm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6031,13 +5870,6 @@ end function vnorm
 
 function vec_prod(uu,vv)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vec_prod'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6072,13 +5904,6 @@ end function vec_prod
 !! SOURCE
 
 subroutine mprod(aa,bb,cc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mprod'
-!End of the abilint section
 
  implicit none
 
@@ -6121,13 +5946,6 @@ end subroutine mprod
 !! SOURCE
 
 subroutine bschg1(vv,dir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bschg1'
-!End of the abilint section
 
  implicit none
 
@@ -6181,13 +5999,6 @@ end subroutine bschg1
 !! SOURCE
 
 subroutine bschg2(aa,dir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bschg2'
-!End of the abilint section
 
  implicit none
 

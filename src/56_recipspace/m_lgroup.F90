@@ -161,13 +161,6 @@ contains  !=====================================================
 
 type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, sord) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lgroup_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -310,13 +303,6 @@ end function lgroup_new
 
 integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lgroup_findq_ibzk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -366,13 +352,6 @@ end function lgroup_findq_ibzk
 
 integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lgroup_find_ibzimage'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -421,13 +400,6 @@ end function lgroup_find_ibzimage
 !! SOURCE
 
 subroutine lgroup_print(self, title, unit, prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lgroup_print'
-!End of the abilint section
 
  implicit none
 
@@ -479,13 +451,6 @@ end subroutine lgroup_print
 !! SOURCE
 
 subroutine lgroup_free(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lgroup_free'
-!End of the abilint section
 
  implicit none
 

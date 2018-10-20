@@ -93,13 +93,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 & diag_matlu,init_matlu,destroy_matlu,rotate_matlu,copy_matlu,slm2ylm_matlu
  use m_hu, only : hu_type,rotatevee_hu
  use m_datafordmft, only : compute_levels
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hubbard_one'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -419,13 +412,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  use m_green, only : green_type,init_green,destroy_green
  use m_hu, only : hu_type
  use m_paw_dmft, only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'green_atomic_hubbard'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -820,13 +806,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
  recursive subroutine combin(ielec,nconfig,nconfig_nelec,nelec,nlevels,occ_level,occup)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'combin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

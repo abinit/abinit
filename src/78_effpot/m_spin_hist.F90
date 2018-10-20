@@ -188,13 +188,6 @@ contains
 
   subroutine spin_hist_t_init(hist, nspins, mxhist, has_latt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_init'
-!End of the abilint section
-
     implicit none
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in) :: nspins, mxhist
@@ -242,13 +235,6 @@ contains
 !!***
 
   subroutine spin_hist_t_reset(hist, array_to_zero)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_reset'
-!End of the abilint section
 
     implicit none
     class(spin_hist_t), intent(inout) :: hist
@@ -302,13 +288,6 @@ contains
   !! SOURCE
   subroutine spin_hist_t_set_atomic_structure(hist, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_set_atomic_structure'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
     real(dp), intent(in) :: acell(3), rprimd(3,3), xred(:,:), znucl(:)
     integer, intent(in):: spin_index(:), ntypat, typat(:)
@@ -354,13 +333,6 @@ contains
   
   subroutine spin_hist_t_set_params(hist, spin_nctime, spin_temperature)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_set_params'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in) :: spin_nctime
     real(dp), intent(in) :: spin_temperature
@@ -389,13 +361,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_hist_t_free(hist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_free'
-!End of the abilint section
 
     class(spin_hist_t) , intent(inout) :: hist
 
@@ -466,13 +431,6 @@ contains
   !! SOURCE
   function spin_hist_t_get_S(hist, step) result(S)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_get_S'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in), optional:: step
     real(dp) :: S(3, hist%nspins)
@@ -508,13 +466,6 @@ contains
   !! SOURCE
   subroutine spin_hist_t_inc(hist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_inc'
-!End of the abilint section
-
     class(spin_hist_t), intent(inout) :: hist
     if(hist%ihist_prev ==0 ) then
         hist%itime(hist%ihist)=1
@@ -545,13 +496,6 @@ contains
   !!
   !! SOURCE
   function spin_hist_t_findIndex(hist, step) result(index)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_findIndex'
-!End of the abilint section
 
     type(spin_hist_t), intent(inout) :: hist
     integer , intent(in) :: step
@@ -601,13 +545,6 @@ contains
   !!
   !! SOURCE
   subroutine spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_hist_t_set_vars'
-!End of the abilint section
 
     class(spin_hist_t), intent(inout) :: hist
     real(dp), optional, intent(in) :: S(3, hist%nspins), Snorm(hist%nspins), dSdt(3, hist%nspins), &

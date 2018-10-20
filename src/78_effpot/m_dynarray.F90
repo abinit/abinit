@@ -91,13 +91,6 @@ CONTAINS
 !! SOURCE
 subroutine real_array_type_push(self, val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'real_array_type_push'
-!End of the abilint section
-
     class(real_array_type), intent(inout):: self
     real(dp) :: val
     real(dp), allocatable :: temp(:)
@@ -139,13 +132,6 @@ end subroutine real_array_type_push
 !! SOURCE
 subroutine real_array_type_finalize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'real_array_type_finalize'
-!End of the abilint section
-
   class(real_array_type), intent(inout):: self
   integer :: err
   if ( allocated(self%data) ) then
@@ -178,13 +164,6 @@ end subroutine real_array_type_finalize
 !!
 !! SOURCE
 subroutine int_array_type_push(self, val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_array_type_push'
-!End of the abilint section
 
     class(int_array_type), intent(inout):: self
     integer :: val, err
@@ -225,13 +204,6 @@ end subroutine int_array_type_push
 !!
 !! SOURCE
 subroutine int_array_type_finalize(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_array_type_finalize'
-!End of the abilint section
 
   class(int_array_type), intent(inout):: self
   integer:: err

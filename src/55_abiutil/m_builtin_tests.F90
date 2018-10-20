@@ -75,13 +75,6 @@ contains
 
 subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testfi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

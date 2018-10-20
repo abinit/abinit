@@ -417,13 +417,6 @@ contains  !=====================================================
 subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc,&
                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1553,13 +1546,6 @@ end subroutine sigmaph
 
 subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkknu_from_atm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1627,13 +1613,6 @@ end subroutine gkknu_from_atm
 !! SOURCE
 
 type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_new'
-!End of the abilint section
 
  implicit none
 
@@ -2390,13 +2369,6 @@ end function sigmaph_new
 
 subroutine sigmaph_free(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2491,13 +2463,6 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_setup_kcalc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2580,13 +2545,6 @@ end subroutine sigmaph_setup_kcalc
 !! SOURCE
 
 subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_gather_and_write'
-!End of the abilint section
 
  implicit none
 
@@ -2960,13 +2918,6 @@ end subroutine sigmaph_gather_and_write
 
 subroutine sigmaph_print(self, dtset, unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3049,13 +3000,6 @@ end subroutine sigmaph_print
 
 subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_get_all_qweights'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3137,13 +3081,6 @@ end subroutine sigmaph_get_all_qweights
 !! SOURCE
 
 subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_sigfrohl'
-!End of the abilint section
 
  implicit none
 

@@ -75,13 +75,6 @@ contains
 
 subroutine symlist_prim(additional_info,nsym,n_axes,spgroup)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_prim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -521,13 +514,6 @@ end subroutine symlist_prim
 
 subroutine symlist_bcc(additional_info,nsym,n_axes,spgroup)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_bcc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -715,13 +701,6 @@ end subroutine symlist_bcc
 
 subroutine symlist_fcc(nsym,n_axes,spgroup)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_fcc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -836,13 +815,6 @@ end subroutine symlist_fcc
 !! SOURCE
 
 subroutine symlist_others(brvltt,nsym,n_axes,spgroup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlist_others'
-!End of the abilint section
 
  implicit none
 

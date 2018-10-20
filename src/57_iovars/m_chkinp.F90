@@ -89,13 +89,6 @@ contains
 
 subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkinp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

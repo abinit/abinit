@@ -141,13 +141,6 @@ CONTAINS  !===========================================================
 
 pure function is_letter(ch) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_letter'
-!End of the abilint section
-
  character(len=1),intent(in) :: ch
  logical :: ans
 ! *********************************************************************
@@ -174,13 +167,6 @@ end function is_letter
 pure function is_digit_0D(ch) result(ans)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_digit_0D'
-!End of the abilint section
-
  character(len=1),intent(in) :: ch
  logical :: ans
 ! *********************************************************************
@@ -205,13 +191,6 @@ end function is_digit_0D
 !! SOURCE
 
 pure subroutine upper(str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upper'
-!End of the abilint section
 
  character(len=*),intent(inout) :: str
 
@@ -239,13 +218,6 @@ end subroutine upper
 !! SOURCE
 
 pure function toupper(str_in) result(str_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'toupper'
-!End of the abilint section
 
  character(len=*),intent(in) :: str_in
  character(len=LEN_TRIM(str_in)) :: str_out
@@ -284,13 +256,6 @@ end function toupper
 
 pure subroutine lower(str)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lower'
-!End of the abilint section
-
  character(len=*),intent(inout) :: str
 
 !Local variables-------------------------------
@@ -317,13 +282,6 @@ end subroutine lower
 !! SOURCE
 
 pure function tolower(str_in) result(str_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tolower'
-!End of the abilint section
 
  character(len=*),intent(in) :: str_in
  character(len=LEN_TRIM(str_in)) :: str_out
@@ -365,13 +323,6 @@ end function tolower
 !! SOURCE
 
 subroutine removesp(str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'removesp'
-!End of the abilint section
 
  character(len=*),intent(inout) :: str
 
@@ -415,13 +366,6 @@ end subroutine removesp
 
 elemental subroutine replace_ch0(string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'replace_ch0'
-!End of the abilint section
-
   character(len=*), intent(inout) :: string
 
   integer :: i, l
@@ -449,13 +393,6 @@ end subroutine replace_ch0
 !! SOURCE
 
 function replace(s, text, rep)  result(outs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'replace'
-!End of the abilint section
 
  character(len=*),intent(in) :: s,text,rep
  character(len(s)+500) :: outs     ! provide outs with extra 500 char len
@@ -491,13 +428,6 @@ end function replace
 
 pure function lstrip(istr) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lstrip'
-!End of the abilint section
-
  character(len=*),intent(in) :: istr
  character(len=len(istr)) :: ostr
 
@@ -532,13 +462,6 @@ end function lstrip
 !! SOURCE
 
 pure function ljust(istr, width, fillchar) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ljust'
-!End of the abilint section
 
  character(len=*),intent(in) :: istr
  integer,intent(in) :: width
@@ -582,13 +505,6 @@ end function ljust
 
 pure function lpad(istr, repeat, fillchar) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lpad'
-!End of the abilint section
-
  character(len=*),intent(in) :: istr
  integer,intent(in) :: repeat
  character(len=LEN_TRIM(istr) + repeat) :: ostr
@@ -621,13 +537,6 @@ end function lpad
 !! SOURCE
 
 pure function round_brackets(istr) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'round_brackets'
-!End of the abilint section
 
  character(len=*),intent(in) :: istr
  character(len=LEN_TRIM(istr)+2) :: ostr
@@ -677,13 +586,6 @@ end function round_brackets
 
 pure function quote(istr) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'quote'
-!End of the abilint section
-
  character(len=*),intent(in) :: istr
  character(len=LEN_TRIM(istr)+2) :: ostr
 
@@ -732,13 +634,6 @@ end function quote
 
 pure function rmquotes(istr) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rmquotes'
-!End of the abilint section
-
  character(len=*),intent(in) :: istr
  character(len=len(istr)) :: ostr
 
@@ -774,13 +669,6 @@ end function rmquotes
 !! SOURCE
 
 subroutine write_rdp_0d(rnum,str,fmt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_rdp_0d'
-!End of the abilint section
 
  implicit none
 
@@ -819,13 +707,6 @@ end subroutine write_rdp_0D
 subroutine write_int_0D(inum,str,fmt)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_int_0D'
-!End of the abilint section
-
  integer,intent(in) :: inum
  character(len=*),intent(in) :: fmt
  character(len=*),intent(out) :: str
@@ -865,13 +746,6 @@ end subroutine write_int_0D
 ! NOT sure it will work
 
 subroutine trimzero(str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trimzero'
-!End of the abilint section
 
  character(len=*),intent(inout) :: str
 
@@ -925,13 +799,6 @@ end subroutine trimzero
 !! SOURCE
 subroutine writeq_rdp_0D(unit,namestr,value,fmt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'writeq_rdp_0D'
-!End of the abilint section
-
  real(dp),intent(in) :: value
  integer,intent(in) :: unit
  character(len=*),intent(in) :: fmt
@@ -970,13 +837,6 @@ end subroutine writeq_rdp_0D
 
 subroutine writeq_int_0D(unit,namestr,ivalue,fmt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'writeq_int_0D'
-!End of the abilint section
-
  integer,intent(in) :: ivalue
  integer,intent(in) :: unit
  character(len=*),intent(in) :: namestr
@@ -1005,13 +865,6 @@ end subroutine writeq_int_0D
 
 pure function sjoin_2(str1,str2) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sjoin_2'
-!End of the abilint section
-
  character(len=*),intent(in) :: str1,str2
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+1) :: ostr
 
@@ -1038,13 +891,6 @@ end function sjoin_2
 
 pure function sjoin_3(str1,str2,str3) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sjoin_3'
-!End of the abilint section
-
  character(len=*),intent(in) :: str1,str2,str3
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+2) :: ostr
 
@@ -1066,13 +912,6 @@ end function sjoin_3
 !!
 
 pure function sjoin_4(str1,str2,str3,str4) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sjoin_4'
-!End of the abilint section
 
  character(len=*),intent(in) :: str1,str2,str3,str4
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+3) :: ostr
@@ -1096,13 +935,6 @@ end function sjoin_4
 
 pure function sjoin_5(str1,str2,str3,str4,str5) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sjoin_5'
-!End of the abilint section
-
  character(len=*),intent(in) :: str1,str2,str3,str4,str5
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+4) :: ostr
 
@@ -1125,13 +957,6 @@ end function sjoin_5
 
 pure function sjoin_6(str1,str2,str3,str4,str5,str6) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sjoin_6'
-!End of the abilint section
-
  character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+5) :: ostr
 
@@ -1153,13 +978,6 @@ end function sjoin_6
 !!
 
 pure function sjoin_7(str1,str2,str3,str4,str5,str6,str7) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sjoin_7'
-!End of the abilint section
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6,str7
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+len(str7)+6) &
@@ -1184,13 +1002,6 @@ end function sjoin_7
 
 pure function strcat_2(str1,str2) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strcat_2'
-!End of the abilint section
-
  character(len=*),intent(in) :: str1,str2
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)) :: ostr
 
@@ -1212,13 +1023,6 @@ end function strcat_2
 !!
 
 pure function strcat_3(str1, str2, str3) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strcat_3'
-!End of the abilint section
 
  character(len=*),intent(in) :: str1,str2,str3
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)) :: ostr
@@ -1242,13 +1046,6 @@ end function strcat_3
 
 pure function strcat_4(str1, str2, str3, str4) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strcat_4'
-!End of the abilint section
-
  character(len=*),intent(in) :: str1,str2,str3,str4
  character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+LEN_TRIM(str4)) :: ostr
 
@@ -1270,13 +1067,6 @@ end function strcat_4
 !!
 
 character(len=3) pure function yesno(bool)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'yesno'
-!End of the abilint section
 
  implicit none
 
@@ -1313,13 +1103,6 @@ end function yesno
 function atoi(string)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atoi'
-!End of the abilint section
-
  integer :: atoi
  character(len=*),intent(in) :: string
 
@@ -1351,13 +1134,6 @@ end function atoi
 
 pure function itoa(value)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'itoa'
-!End of the abilint section
-
  integer,intent(in) :: value
  character(len=22) :: itoa
 
@@ -1385,13 +1161,6 @@ end function itoa
 !!
 
 pure function ftoa(value,fmt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftoa'
-!End of the abilint section
 
  implicit none
 
@@ -1427,13 +1196,6 @@ end function ftoa
 
 pure function ktoa(kpt,fmt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ktoa'
-!End of the abilint section
-
  real(dp),intent(in) :: kpt(3)
  character(len=*),optional,intent(in) :: fmt
  character(len=MAX_SLEN) :: ktoa
@@ -1464,13 +1226,6 @@ end function ktoa
 !! CHILDREN
 
 pure function ltoa_int(list) result(str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ltoa_int'
-!End of the abilint section
 
  implicit none
 
@@ -1530,13 +1285,6 @@ end function ltoa_int
 !! CHILDREN
 
 pure function ltoa_dp(list, fmt) result(str)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ltoa_dp'
-!End of the abilint section
 
  implicit none
 
@@ -1604,13 +1352,6 @@ end function ltoa_dp
 
 pure function basename(string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'basename'
-!End of the abilint section
-
  character(len=*),intent(in) :: string
  character(len=LEN_TRIM(string)) :: basename
 
@@ -1661,13 +1402,6 @@ end function basename
 
 pure function firstchar_0d(string,ch,csens) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'firstchar_0d'
-!End of the abilint section
-
  logical :: ans
  logical,optional,intent(in) :: csens
  character(len=*),intent(in) :: string
@@ -1710,13 +1444,6 @@ end function firstchar_0d
 !! SOURCE
 
 pure function firstchar_1d(string,char_list,csens) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'firstchar_1d'
-!End of the abilint section
 
  logical :: ans
  logical,optional,intent(in) :: csens
@@ -1761,13 +1488,6 @@ end function firstchar_1d
 
 pure function startswith(string, prefix) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'startswith'
-!End of the abilint section
-
  logical :: ans
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: prefix
@@ -1800,13 +1520,6 @@ end function startswith
 !! SOURCE
 
 pure function endswith(string, suffix) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'endswith'
-!End of the abilint section
 
  logical :: ans
  character(len=*),intent(in) :: string
@@ -1846,13 +1559,6 @@ end function endswith
 !! SOURCE
 
 pure function indent(istr) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indent'
-!End of the abilint section
 
  character(len=*),intent(in) :: istr
  character(len=len(istr)*4+4) :: ostr
@@ -1903,13 +1609,6 @@ end function indent
 !! SOURCE
 
 pure function prep_dash(istr) result(ostr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_dash'
-!End of the abilint section
 
  character(len=*),intent(in) :: istr
  character(len=2*len(istr)) :: ostr
@@ -1968,13 +1667,6 @@ end function prep_dash
 !! SOURCE
 
 pure subroutine int2char4(iint,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int2char4'
-!End of the abilint section
 
  implicit none
 
@@ -2049,13 +1741,6 @@ end subroutine int2char4
 
 pure subroutine int2char10(iint,string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int2char10'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2110,13 +1795,6 @@ end subroutine int2char10
 
 integer pure function char_count(string, char)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'char_count'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2151,13 +1829,6 @@ end function char_count
 !! SOURCE
 
 integer function next_token(string, start, ostr) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'next_token'
-!End of the abilint section
 
  implicit none
 
@@ -2230,13 +1901,6 @@ end function next_token
 !! SOURCE
 
 subroutine inupper(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inupper'
-!End of the abilint section
 
  implicit none
 

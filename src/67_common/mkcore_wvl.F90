@@ -120,13 +120,6 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_wvl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -567,13 +560,6 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: ext_buffers,ind_positions
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_wvl_old'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -942,13 +928,6 @@ end subroutine mkcore_wvl_old
 subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,natom,ncmax,nfft,&
 &          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rr,strdia,vxc,xccc3d,&
 &          rred) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_inner'
-!End of the abilint section
 
  implicit none
 

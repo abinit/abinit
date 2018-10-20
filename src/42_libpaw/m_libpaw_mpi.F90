@@ -206,13 +206,6 @@ CONTAINS  !===========================================================
 
 subroutine xpaw_mpi_abort(comm,mpierr,msg,exit_status)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_abort'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -282,13 +275,6 @@ end subroutine xpaw_mpi_abort
 
 function xpaw_mpi_comm_rank(comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_comm_rank'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -332,13 +318,6 @@ end function xpaw_mpi_comm_rank
 
 function xpaw_mpi_comm_size(comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_comm_size'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -381,13 +360,6 @@ end function xpaw_mpi_comm_size
 !! SOURCE
 
 subroutine xpaw_mpi_barrier(comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_barrier'
-!End of the abilint section
 
  implicit none
 
@@ -439,13 +411,6 @@ end subroutine xpaw_mpi_barrier
 
 subroutine xpaw_mpi_wait(request,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_wait'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -491,13 +456,6 @@ end subroutine xpaw_mpi_wait
 !! SOURCE
 
 subroutine xpaw_mpi_waitall(array_of_requests,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_waitall'
-!End of the abilint section
 
  implicit none
 
@@ -547,13 +505,6 @@ end subroutine xpaw_mpi_waitall
 !! SOURCE
 
 subroutine xpaw_mpi_iprobe(source,tag,mpicomm,flag,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_iprobe'
-!End of the abilint section
 
  implicit none
 
@@ -607,13 +558,6 @@ end subroutine xpaw_mpi_iprobe
 
 subroutine xpaw_mpi_allgather_int1d(xval,nelem,recvbuf,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_allgather_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -662,13 +606,6 @@ end subroutine xpaw_mpi_allgather_int1d
 !! SOURCE
 
 subroutine xpaw_mpi_allgather_dp1d(xval,nelem,recvbuf,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_allgather_dp1d'
-!End of the abilint section
 
  implicit none
 
@@ -719,13 +656,6 @@ end subroutine xpaw_mpi_allgather_dp1d
 
 subroutine xpaw_mpi_allgather_dp2d(xval,nelem,recvbuf,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_allgather_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -774,13 +704,6 @@ end subroutine xpaw_mpi_allgather_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_allgather_dp3d(xval,nelem,recvbuf,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_allgather_dp3d'
-!End of the abilint section
 
  implicit none
 
@@ -834,13 +757,6 @@ end subroutine xpaw_mpi_allgather_dp3d
 !! SOURCE
 
 subroutine xpaw_mpi_allgatherv_int1d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_allgatherv_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -900,13 +816,6 @@ end subroutine xpaw_mpi_allgatherv_int1d
 
 subroutine xpaw_mpi_allgatherv_dp1d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_allgatherv_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -964,13 +873,6 @@ end subroutine xpaw_mpi_allgatherv_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_allgatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_allgatherv_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -1034,13 +936,6 @@ end subroutine xpaw_mpi_allgatherv_dp2d
 
 subroutine xpaw_mpi_scatterv_int1d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_scatterv_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1099,13 +994,6 @@ end subroutine xpaw_mpi_scatterv_int1d
 
 subroutine xpaw_mpi_scatterv_dp1d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_scatterv_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1163,13 +1051,6 @@ end subroutine xpaw_mpi_scatterv_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_scatterv_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -1230,13 +1111,6 @@ end subroutine xpaw_mpi_scatterv_dp2d
 
 subroutine xpaw_mpi_alltoall_int1d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_alltoall_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1291,13 +1165,6 @@ end subroutine xpaw_mpi_alltoall_int1d
 
 subroutine xpaw_mpi_alltoall_dp1d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_alltoall_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1349,13 +1216,6 @@ end subroutine xpaw_mpi_alltoall_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_alltoall_dp2d(xval,sendsize,recvbuf,recvsize,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_alltoall_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -1412,13 +1272,6 @@ end subroutine xpaw_mpi_alltoall_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_alltoallv_int1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_alltoallv_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -1483,13 +1336,6 @@ end subroutine xpaw_mpi_alltoallv_int1d
 
 subroutine xpaw_mpi_alltoallv_dp1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_alltoallv_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1550,13 +1396,6 @@ end subroutine xpaw_mpi_alltoallv_dp1d
 
 subroutine xpaw_mpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_alltoallv_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1616,13 +1455,6 @@ end subroutine xpaw_mpi_alltoallv_dp2d
 
 subroutine xpaw_mpi_bcast_int(xval,master,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_bcast_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1667,13 +1499,6 @@ end subroutine xpaw_mpi_bcast_int
 !! SOURCE
 
 subroutine xpaw_mpi_bcast_int1d(xval,master,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_bcast_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -1720,13 +1545,6 @@ end subroutine xpaw_mpi_bcast_int1d
 !!
 !! SOURCE
 subroutine xpaw_mpi_bcast_dp1d(xval,master,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_bcast_dp1d'
-!End of the abilint section
 
  implicit none
 
@@ -1777,13 +1595,6 @@ end subroutine xpaw_mpi_bcast_dp1d
 
 subroutine xpaw_mpi_bcast_dp2d(xval,master,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_bcast_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1832,13 +1643,6 @@ end subroutine xpaw_mpi_bcast_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_bcast_dp3d(xval,master,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_bcast_dp3d'
-!End of the abilint section
 
  implicit none
 
@@ -1894,13 +1698,6 @@ end subroutine xpaw_mpi_bcast_dp3d
 
 subroutine xpaw_mpi_gather_int1d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_gather_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1952,13 +1749,6 @@ end subroutine xpaw_mpi_gather_int1d
 !! SOURCE
 
 subroutine xpaw_mpi_gather_dp1d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_gather_dp1d'
-!End of the abilint section
 
  implicit none
 
@@ -2012,13 +1802,6 @@ end subroutine xpaw_mpi_gather_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_gather_dp2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_gather_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -2075,13 +1858,6 @@ end subroutine xpaw_mpi_gather_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_gatherv_int1d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_gatherv_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -2142,13 +1918,6 @@ end subroutine xpaw_mpi_gatherv_int1d
 
 subroutine xpaw_mpi_gatherv_dp1d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_gatherv_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2207,13 +1976,6 @@ end subroutine xpaw_mpi_gatherv_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_gatherv_dp2d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_gatherv_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -2277,13 +2039,6 @@ end subroutine xpaw_mpi_gatherv_dp2d
 
 subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_recv_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2337,13 +2092,6 @@ subroutine xpaw_mpi_recv_int1d(xval,source,tag,spaceComm,ier)
 !! SOURCE
 
 subroutine xpaw_mpi_recv_dp1d(xval,source,tag,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_recv_dp1d'
-!End of the abilint section
 
  implicit none
 
@@ -2399,13 +2147,6 @@ end subroutine xpaw_mpi_recv_dp1d
 
 subroutine xpaw_mpi_recv_dp2d(xval,source,tag,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_recv_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2459,13 +2200,6 @@ end subroutine xpaw_mpi_recv_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_recv_dp3d(xval,source,tag,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_recv_dp3d'
-!End of the abilint section
 
  implicit none
 
@@ -2523,13 +2257,6 @@ end subroutine xpaw_mpi_recv_dp3d
 
 subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_irecv_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2583,13 +2310,6 @@ subroutine xpaw_mpi_irecv_int1d(xval,source,tag,spaceComm,request,ierr)
 !! SOURCE
 
 subroutine xpaw_mpi_irecv_dp1d(xval,source,tag,spaceComm,request,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_irecv_dp1d'
-!End of the abilint section
 
  implicit none
 
@@ -2646,13 +2366,6 @@ end subroutine xpaw_mpi_irecv_dp1d
 
 subroutine xpaw_mpi_irecv_dp2d(xval,source,tag,spaceComm,request,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_irecv_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2707,13 +2420,6 @@ end subroutine xpaw_mpi_irecv_dp2d
 
 subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_send_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2764,13 +2470,6 @@ subroutine xpaw_mpi_send_int1d(xval,dest,tag,spaceComm,ier)
 !! SOURCE
 
 subroutine xpaw_mpi_send_dp1d(xval,dest,tag,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_send_dp1d'
-!End of the abilint section
 
  implicit none
 
@@ -2823,13 +2522,6 @@ end subroutine xpaw_mpi_send_dp1d
 
 subroutine xpaw_mpi_send_dp2d(xval,dest,tag,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_send_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2880,13 +2572,6 @@ end subroutine xpaw_mpi_send_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_send_dp3d(xval,dest,tag,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_send_dp3d'
-!End of the abilint section
 
  implicit none
 
@@ -2941,13 +2626,6 @@ end subroutine xpaw_mpi_send_dp3d
 
 subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_isend_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -3000,13 +2678,6 @@ subroutine xpaw_mpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
 subroutine xpaw_mpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_isend_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -3058,13 +2729,6 @@ end subroutine xpaw_mpi_isend_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_isend_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -3121,13 +2785,6 @@ end subroutine xpaw_mpi_isend_dp2d
 !! SOURCE
 
 subroutine xpaw_mpi_exch_int1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_exch_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -3189,13 +2846,6 @@ end subroutine xpaw_mpi_exch_int1d
 
 subroutine xpaw_mpi_exch_dp1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_exch_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------
@@ -3255,13 +2905,6 @@ end subroutine xpaw_mpi_exch_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_exch_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -3323,13 +2966,6 @@ end subroutine xpaw_mpi_exch_dp2d
 
 subroutine xpaw_mpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_exch_dp3d'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------
@@ -3388,13 +3024,6 @@ end subroutine xpaw_mpi_exch_dp3d
 
 subroutine xpaw_mpi_sum_int(xval,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_sum_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -3452,13 +3081,6 @@ end subroutine xpaw_mpi_sum_int
 !! SOURCE
 
 subroutine xpaw_mpi_sum_int1d(xval,comm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_sum_int1d'
-!End of the abilint section
 
  implicit none
 
@@ -3519,13 +3141,6 @@ end subroutine xpaw_mpi_sum_int1d
 
 subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_sum_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -3584,13 +3199,6 @@ end subroutine xpaw_mpi_sum_dp1d
 !! SOURCE
 
 subroutine xpaw_mpi_sum_dp2d(xval,comm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_sum_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -3651,13 +3259,6 @@ end subroutine xpaw_mpi_sum_dp2d
 
 subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_sum_dp3d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -3715,13 +3316,6 @@ end subroutine xpaw_mpi_sum_dp3d
 !! SOURCE
 
 function xpaw_mpi_get_tag_ub(comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpaw_mpi_get_tag_ub'
-!End of the abilint section
 
  implicit none
 

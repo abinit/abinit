@@ -87,13 +87,6 @@ CONTAINS
 
 subroutine exit_init(time_limit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exit_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -127,13 +120,6 @@ end subroutine exit_init
 !! SOURCE
 
 subroutine disable_timelimit()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'disable_timelimit'
-!End of the abilint section
 
  implicit none
 
@@ -209,13 +195,6 @@ end function have_timelimit_in
 
 function enable_timelimit_in(abifunc) result(prev_func)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'enable_timelimit_in'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -245,13 +224,6 @@ end function enable_timelimit_in
 
 real(dp) pure function get_timelimit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit'
-!End of the abilint section
-
  implicit none
 
  get_timelimit = WTIME_LIMIT
@@ -273,13 +245,6 @@ end function get_timelimit
 !! SOURCE
 
 pure function get_timelimit_string() result(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_timelimit_string'
-!End of the abilint section
 
  implicit none
 
@@ -313,13 +278,6 @@ end function get_timelimit_string
 !! SOURCE
 
 real(dp) pure function get_start_time()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_start_time'
-!End of the abilint section
 
  get_start_time = WALL0
 
@@ -361,13 +319,6 @@ end function get_start_time
 !! SOURCE
 
 subroutine exit_check(cpus,filename,iexit,iout,comm,openexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exit_check'
-!End of the abilint section
 
  implicit none
 

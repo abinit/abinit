@@ -132,13 +132,6 @@ contains
 
 subroutine ab7_invars_set_flags(status, timab, status_file, timab_tsec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_invars_set_flags'
-!End of the abilint section
-
  logical, intent(in) :: status, timab
  character(len = fnlen), intent(in), optional :: status_file
  real(dp), intent(in), target, optional :: timab_tsec(:)
@@ -185,13 +178,6 @@ end subroutine ab7_invars_set_flags
 !End of the abilint section
 
  subroutine ab7_invars_get_abinit_vars(dtsetsId, dtsets, pspheads, mxvals, papiopt, timopt, dmatpuflag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_invars_get_abinit_vars'
-!End of the abilint section
 
  integer, intent(in) :: dtsetsId
  type(dataset_type), pointer :: dtsets(:)
@@ -269,13 +255,6 @@ end subroutine ab7_invars_get_abinit_vars
 
   subroutine new_token(token)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'new_token'
-!End of the abilint section
-
 type(dtsets_list), pointer :: token
 
  ! We allocate a new list token and prepend it.
@@ -315,13 +294,6 @@ end subroutine new_token
 !! SOURCE
 
   subroutine free_token(token)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'free_token'
-!End of the abilint section
 
 type(dtsets_list), pointer :: token
 
@@ -386,13 +358,6 @@ end subroutine free_token
 
  subroutine get_token(token, id)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_token'
-!End of the abilint section
-
  type(dtsets_list), pointer :: token
  integer, intent(in) :: id
 
@@ -438,13 +403,6 @@ end subroutine get_token
 !! SOURCE
 
   subroutine ab7_invars_new_from_string(dtsetsId, instr, len)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_invars_new_from_string'
-!End of the abilint section
 
  integer, intent(out) :: dtsetsId
  integer, intent(in) :: len
@@ -522,13 +480,6 @@ end subroutine ab7_invars_new_from_string
 
 subroutine ab7_invars_new_from_file(dtsetsId, filename, n, pspfiles, npsp, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_invars_new_from_file'
-!End of the abilint section
-
  integer, intent(out) :: dtsetsId
  integer, intent(in) :: n, npsp
  integer,optional,intent(in) :: comm
@@ -581,13 +532,6 @@ end subroutine ab7_invars_new_from_file
 !! SOURCE
 
  subroutine ab7_invars_load(dtsetsId, string, lenstr, ndtset, with_psp, with_mem, pspfilnam)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_invars_load'
-!End of the abilint section
 
  integer, intent(out) :: dtsetsId
  character(len = strlen), intent(inout) :: string
@@ -835,13 +779,6 @@ end subroutine ab7_invars_load
 
   subroutine ab7_invars_free(dtsetsId)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_invars_free'
-!End of the abilint section
-
  integer, intent(in) :: dtsetsId
 
  type(dtsets_list), pointer :: token
@@ -876,13 +813,6 @@ end subroutine ab7_invars_free
 !! SOURCE
 
 subroutine ab7_invars_get_ndtset(dtsetsId, value, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab7_invars_get_ndtset'
-!End of the abilint section
 
  integer, intent(in) :: dtsetsId
  integer, intent(out) :: value
@@ -924,13 +854,6 @@ end subroutine ab7_invars_get_ndtset
 !! SOURCE
 
 subroutine iofn2(npsp,filnam)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iofn2'
-!End of the abilint section
 
  implicit none
 

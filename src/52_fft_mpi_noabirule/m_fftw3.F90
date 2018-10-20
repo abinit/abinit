@@ -298,13 +298,6 @@ CONTAINS  !===========================================================
 
 subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_seqfourdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -460,13 +453,6 @@ end subroutine fftw3_seqfourdp
 
 subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_seqfourwf'
-!End of the abilint section
 
  implicit none
 
@@ -807,13 +793,6 @@ end subroutine fftw3_seqfourwf
 subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftrisc_sp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -938,13 +917,6 @@ end subroutine fftw3_fftrisc_sp
 subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftrisc_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1004,13 +976,6 @@ end subroutine fftw3_fftrisc_dp
 
 subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftrisc_mixprec'
-!End of the abilint section
 
  implicit none
 
@@ -1090,13 +1055,6 @@ end subroutine fftw3_fftrisc_mixprec
 
 subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftug_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1167,13 +1125,6 @@ end subroutine fftw3_fftug_dp
 !! SOURCE
 
 subroutine fftw3_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftug_spc'
-!End of the abilint section
 
  implicit none
 
@@ -1246,13 +1197,6 @@ end subroutine fftw3_fftug_spc
 !! SOURCE
 
 subroutine fftw3_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftug_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1327,13 +1271,6 @@ end subroutine fftw3_fftug_dpc
 !! SOURCE
 
 subroutine fftw3_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftur_dp'
-!End of the abilint section
 
  implicit none
 
@@ -1410,13 +1347,6 @@ end subroutine fftw3_fftur_dp
 
 subroutine fftw3_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftur_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1492,13 +1422,6 @@ end subroutine fftw3_fftur_spc
 
 subroutine fftw3_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftur_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1567,13 +1490,6 @@ end subroutine fftw3_fftur_dpc
 !! SOURCE
 
 subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_c2c_ip_spc'
-!End of the abilint section
 
  implicit none
 
@@ -1660,13 +1576,6 @@ end subroutine fftw3_c2c_ip_spc
 
 subroutine fftw3_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftpad_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1725,13 +1634,6 @@ end subroutine fftw3_fftpad_spc
 !! SOURCE
 
 subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_c2c_ip_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1813,13 +1715,6 @@ end subroutine fftw3_c2c_ip_dpc
 !! SOURCE
 
 subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_c2c_op_spc'
-!End of the abilint section
 
  implicit none
 
@@ -1903,13 +1798,6 @@ end subroutine fftw3_c2c_op_spc
 !! SOURCE
 
 subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_c2c_op_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1996,13 +1884,6 @@ end subroutine fftw3_c2c_op_dpc
 !! SOURCE
 
 subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_r2c_op'
-!End of the abilint section
 
  implicit none
 
@@ -2163,13 +2044,6 @@ end subroutine fftw3_r2c_op
 
 subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_c2r_op'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2289,13 +2163,6 @@ end subroutine fftw3_c2r_op
 
 subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_many_dft_op'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2383,13 +2250,6 @@ end subroutine fftw3_many_dft_op
 
 subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_many_dft_ip'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2471,13 +2331,6 @@ end subroutine fftw3_many_dft_ip
 
 subroutine fftw3_cleanup()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_cleanup'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -2519,13 +2372,6 @@ end subroutine fftw3_cleanup
 !! SOURCE
 
 subroutine fftw3_destroy_plan(plan)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_destroy_plan'
-!End of the abilint section
 
  implicit none
 
@@ -2572,13 +2418,6 @@ end subroutine fftw3_destroy_plan
 !! SOURCE
 
 subroutine fftw3_init_threads()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_init_threads'
-!End of the abilint section
 
  implicit none
 
@@ -2641,13 +2480,6 @@ end subroutine fftw3_init_threads
 !! SOURCE
 
 subroutine fftw3_set_nthreads(nthreads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_set_nthreads'
-!End of the abilint section
 
  implicit none
 
@@ -2734,13 +2566,6 @@ end subroutine fftw3_set_nthreads
 
 subroutine fftw3_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftpad_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2805,13 +2630,6 @@ end subroutine fftw3_fftpad_dp
 
 subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_fftpad_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2859,13 +2677,6 @@ end subroutine fftw3_fftpad_dpc
 !! SOURCE
 
 function dplan_many_dft_1D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dplan_many_dft_1D'
-!End of the abilint section
 
  implicit none
 
@@ -2919,13 +2730,6 @@ end function dplan_many_dft_1D
 !! SOURCE
 
 function dplan_many_dft_2D(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dplan_many_dft_2D'
-!End of the abilint section
 
  implicit none
 
@@ -2981,13 +2785,6 @@ end function dplan_many_dft_2D
 
 function cplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplan_many_dft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3041,13 +2838,6 @@ end function cplan_many_dft
 !! FIXME  technically it should be intent(inout) since FFTW3 can destroy the input for particular flags.
 
 function zplan_many_dft(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,sign,flags,nthreads) result(plan)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zplan_many_dft'
-!End of the abilint section
 
  implicit none
 
@@ -3104,13 +2894,6 @@ end function zplan_many_dft
 
 function dplan_many_dft_r2c(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,flags,nthreads) result(plan)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dplan_many_dft_r2c'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3163,13 +2946,6 @@ end function dplan_many_dft_r2c
 !! SOURCE
 
 function dplan_many_dft_c2r(rank,n,howmany,fin,inembed,istride,idist,fout,onembed,ostride,odist,flags, nthreads) result(plan)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dplan_many_dft_c2r'
-!End of the abilint section
 
  implicit none
 
@@ -3237,13 +3013,6 @@ end function dplan_many_dft_c2r
 
 subroutine fftw3_execute_dft_dp(plan, in, out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_execute_dft_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3278,13 +3047,6 @@ end subroutine fftw3_execute_dft_dp
 
 subroutine fftw3_execute_dft_spc(plan, in, out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_execute_dft_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3318,13 +3080,6 @@ end subroutine fftw3_execute_dft_spc
 #ifdef HAVE_FFT_FFTW3
 
 subroutine fftw3_execute_dft_dpc(plan, in, out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_execute_dft_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -3361,13 +3116,6 @@ end subroutine fftw3_execute_dft_dpc
 #ifdef HAVE_FFT_FFTW3
 
 subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_alloc_real1d_dp'
-!End of the abilint section
 
  implicit none
 
@@ -3408,13 +3156,6 @@ end subroutine fftw3_alloc_real1d_dp
 
 subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_alloc_real2d_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3454,13 +3195,6 @@ end subroutine fftw3_alloc_real2d_dp
 
 subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_alloc_complex1d_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3499,13 +3233,6 @@ end subroutine fftw3_alloc_complex1d_spc
 #ifdef HAVE_FFT_FFTW3
 
 subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_alloc_complex1d_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -3549,13 +3276,6 @@ end subroutine fftw3_alloc_complex1d_dpc
 
 function fftw3_spawn_threads_here(ndat,nthreads) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_spawn_threads_here'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3594,13 +3314,6 @@ end function fftw3_spawn_threads_here
 !! SOURCE
 
 subroutine fftw3_use_lib_threads(logvar)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_use_lib_threads'
-!End of the abilint section
 
  implicit none
 
@@ -3642,13 +3355,6 @@ end subroutine fftw3_use_lib_threads
 !! SOURCE
 
 subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0,offset,n0_tr,offset_tr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftwmpi_get_work_array'
-!End of the abilint section
 
  implicit none
 
@@ -3714,13 +3420,6 @@ end subroutine fftwmpi_get_work_array
 
 subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftwmpi_free_work_array'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3777,13 +3476,6 @@ end subroutine fftwmpi_free_work_array
 !! SOURCE
 
 subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_fft,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3mpi_many_dft_ip'
-!End of the abilint section
 
   implicit none
 
@@ -3903,13 +3595,6 @@ end subroutine fftw3mpi_many_dft_ip
 
 subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3mpi_many_dft_tr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3994,13 +3679,6 @@ end subroutine fftw3mpi_many_dft_tr
 
 subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpifourdp_c2r'
-!End of the abilint section
 
  implicit none
 
@@ -4153,13 +3831,6 @@ end subroutine fftw3_mpifourdp_c2r
 subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpifourdp_r2c'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4311,13 +3982,6 @@ end subroutine fftw3_mpifourdp_r2c
 subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
   fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'old_fftw3_mpifourdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4435,13 +4099,6 @@ end subroutine old_fftw3_mpifourdp
 
 subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft,fftw_flags)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpifourdp_c2c'
-!End of the abilint section
 
  implicit none
 
@@ -4625,13 +4282,6 @@ end subroutine fftw3_mpifourdp_c2c
 
 subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpiback_wf'
-!End of the abilint section
 
  implicit none
 
@@ -4990,13 +4640,6 @@ end subroutine fftw3_mpiback_wf
 subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &        max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zr,zf,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpiforw_wf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5349,13 +4992,6 @@ end subroutine fftw3_mpiforw_wf
 
 subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zf,zr,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpiback'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5657,13 +5293,6 @@ end subroutine fftw3_mpiback
 
 subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zr,zf,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpiforw'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5932,13 +5561,6 @@ end subroutine fftw3_mpiforw
 subroutine fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpifourdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6059,13 +5681,6 @@ end subroutine fftw3_mpifourdp
 subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_applypot'
-!End of the abilint section
 
  implicit none
 
@@ -6539,13 +6154,6 @@ end subroutine fftw3_applypot
 subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,comm_fft,nproc_fft,me_fft,zf,rho,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_accrho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6876,13 +6484,6 @@ end subroutine fftw3_accrho
 
 subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &  max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zf,zr,comm_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpiback_manywf'
-!End of the abilint section
 
  implicit none
 
@@ -7238,13 +6839,6 @@ end subroutine fftw3_mpiback_manywf
 subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 &        max1,max2,max3,m1,m2,m3,md1,md2proc,md3,zr,zf,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_mpiforw_manywf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -7589,13 +7183,6 @@ end subroutine fftw3_mpiforw_manywf
 subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 &  max1i,max2i,max3i,m1i,m2i,m3i,md1,md2proc,md3,&
 &  max1o,max2o,max3o,m1o,m2o,m3o,comm_fft,nproc_fft,me_fft,pot,zf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_applypot_many'
-!End of the abilint section
 
  implicit none
 
@@ -8054,13 +7641,6 @@ end subroutine fftw3_applypot_many
 !! SOURCE
 
 subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftw3_poisson'
-!End of the abilint section
 
  implicit none
 

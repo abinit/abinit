@@ -200,13 +200,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mover'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -1017,13 +1010,6 @@ contains
 
 subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,tolmxf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fconv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1146,13 +1132,6 @@ end subroutine fconv
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'erlxconv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1252,13 +1231,6 @@ end subroutine mover
 !! SOURCE
 
 subroutine prtxfase(ab_mover,hist,itime,iout,pos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtxfase'
-!End of the abilint section
 
 implicit none
 
@@ -1526,13 +1498,6 @@ implicit none
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gettag'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -1593,13 +1558,6 @@ implicit none
 
 
 subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtnatom'
-!End of the abilint section
 
 implicit none
 
@@ -1697,13 +1655,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
  use m_io_tools,   only : open_file
  use m_geometry,   only : xcart2xred, xred2xcart, metric
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrt_moldyn_netcdf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

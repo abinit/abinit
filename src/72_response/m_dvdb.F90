@@ -316,13 +316,6 @@ CONTAINS
 
 subroutine dvdb_init(db, path, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -526,13 +519,6 @@ end subroutine dvdb_init
 
 subroutine dvdb_open_read(db, ngfft, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_open_read'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -604,13 +590,6 @@ end subroutine dvdb_open_read
 
 subroutine dvdb_close(db)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_close'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -648,13 +627,6 @@ end subroutine dvdb_close
 !! SOURCE
 
 subroutine dvdb_free(db)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_free'
-!End of the abilint section
 
  implicit none
 
@@ -729,13 +701,6 @@ end subroutine dvdb_free
 !! SOURCE
 
 subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_print'
-!End of the abilint section
 
  implicit none
 
@@ -842,13 +807,6 @@ end subroutine dvdb_print
 
 integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_get_pinfo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -913,13 +871,6 @@ end function dvdb_get_pinfo
 !! SOURCE
 
 integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1scf, msg) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_read_onev1'
-!End of the abilint section
 
  implicit none
 
@@ -1065,13 +1016,6 @@ end function dvdb_read_onev1
 
 subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_readsym_allv1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1175,13 +1119,6 @@ end subroutine dvdb_readsym_allv1
 !! SOURCE
 
 subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_readsym_qbz'
-!End of the abilint section
 
  implicit none
 
@@ -1315,13 +1252,6 @@ end subroutine dvdb_readsym_qbz
 
 subroutine dvdb_set_qcache_mb(db, mbsize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_set_qcache_mb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1376,13 +1306,6 @@ end subroutine dvdb_set_qcache_mb
 !! SOURCE
 
 subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_qcache_read'
-!End of the abilint section
 
  implicit none
 
@@ -1470,13 +1393,6 @@ end subroutine dvdb_qcache_read
 !! SOURCE
 
 subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,symv1,pflag,v1scf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'v1phq_complete'
-!End of the abilint section
 
  implicit none
 
@@ -1710,13 +1626,6 @@ end subroutine v1phq_complete
 
 subroutine find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_symeq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1802,13 +1711,6 @@ end subroutine find_symeq
 !! SOURCE
 
 subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r_qibz,v1r_qbz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'v1phq_rotate'
-!End of the abilint section
 
  implicit none
 
@@ -1935,13 +1837,6 @@ end subroutine v1phq_rotate
 
 subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'v1phq_symmetrize'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2021,13 +1916,6 @@ end subroutine v1phq_symmetrize
 !! SOURCE
 
 subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_fqg'
-!End of the abilint section
 
  implicit none
 
@@ -2144,13 +2032,6 @@ end subroutine rotate_fqg
 !! SOURCE
 
 subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_ftinterp_setup'
-!End of the abilint section
 
  implicit none
 
@@ -2510,13 +2391,6 @@ end subroutine dvdb_ftinterp_setup
 
 subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_ftinterp_qpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2637,13 +2511,6 @@ end subroutine dvdb_ftinterp_qpt
 
 subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 &                             nrpt, nspden, ipert, v1scf_rpt, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_get_v1scf_rpt'
-!End of the abilint section
 
  implicit none
 
@@ -2995,13 +2862,6 @@ end subroutine dvdb_get_v1scf_rpt
 subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 &                             ipert, v1scf_rpt, v1scf_qpt, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_get_v1scf_qpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3118,13 +2978,6 @@ end subroutine dvdb_get_v1scf_qpt
 subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
 &                                 nfft, ngfft, nfftf, ngfftf, v1scf, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_interpolate_v1scf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3203,13 +3056,6 @@ end subroutine dvdb_interpolate_v1scf
 
 integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_findq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3262,13 +3108,6 @@ end function dvdb_findq
 !! SOURCE
 
 subroutine dvdb_seek(db, idir, ipert, iqpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_seek'
-!End of the abilint section
 
  implicit none
 
@@ -3365,13 +3204,6 @@ end subroutine dvdb_seek
 
 integer function dvdb_rewind(db, msg) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_rewind'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3421,13 +3253,6 @@ end function dvdb_rewind
 !! SOURCE
 
 integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_hdr_skip'
-!End of the abilint section
 
  implicit none
 
@@ -3487,13 +3312,6 @@ end function my_hdr_skip
 !! SOURCE
 
 subroutine dvdb_list_perts(db, ngqpt, unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_list_perts'
-!End of the abilint section
 
  implicit none
 
@@ -3668,13 +3486,6 @@ end subroutine dvdb_list_perts
 !! SOURCE
 
 subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_merge_files'
-!End of the abilint section
 
  implicit none
 
@@ -3857,13 +3668,6 @@ end subroutine dvdb_merge_files
 
 pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_eiqr'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3912,13 +3716,6 @@ end subroutine calc_eiqr
 !! SOURCE
 
 integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_check_fform'
-!End of the abilint section
 
  implicit none
 
@@ -3986,13 +3783,6 @@ end function dvdb_check_fform
 !! SOURCE
 
 subroutine dvdb_test_v1rsym(db_path, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_v1rsym'
-!End of the abilint section
 
  implicit none
 
@@ -4130,13 +3920,6 @@ end subroutine dvdb_test_v1rsym
 !! SOURCE
 
 subroutine dvdb_test_v1complete(db_path, dump_path, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_v1complete'
-!End of the abilint section
 
  implicit none
 
@@ -4303,13 +4086,6 @@ end subroutine dvdb_test_v1complete
 
 subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_ftinterp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4416,13 +4192,6 @@ end subroutine dvdb_test_ftinterp
 !! SOURCE
 
 subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_v1r_long_range'
-!End of the abilint section
 
  implicit none
 
@@ -4553,13 +4322,6 @@ end subroutine dvdb_v1r_long_range
 
 subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf, cryst, &
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_interpolate_and_write'
-!End of the abilint section
 
  implicit none
 
@@ -4952,13 +4714,6 @@ end subroutine dvdb_interpolate_and_write
 !! SOURCE
 
 subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_qdownsample'
-!End of the abilint section
 
  implicit none
 

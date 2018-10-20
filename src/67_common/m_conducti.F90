@@ -127,13 +127,6 @@ contains
 
  subroutine conducti_paw(filnam,filnam_out,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conducti_paw'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -571,13 +564,6 @@ end subroutine conducti_paw
 
  subroutine conducti_paw_core(filnam,filnam_out,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conducti_paw_core'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -899,13 +885,6 @@ end subroutine conducti_paw_core
 
 
 subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'conducti_nc'
-!End of the abilint section
 
  implicit none
 
@@ -1533,13 +1512,6 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 
 subroutine msig(fcti,npti,xi,filnam_out_sig)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'msig'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -1769,13 +1741,6 @@ end subroutine msig
 !! SOURCE
 
  subroutine emispec_paw(filnam,filnam_out,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'emispec_paw'
-!End of the abilint section
 
  implicit none
 

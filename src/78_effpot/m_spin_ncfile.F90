@@ -72,13 +72,6 @@ contains
 
   subroutine spin_ncfile_t_init(self, filename)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ncfile_t_init'
-!End of the abilint section
-
     class(spin_ncfile_t), intent(inout):: self
     character(len=*),intent(in) :: filename
     integer :: ncerr
@@ -93,13 +86,6 @@ contains
   end subroutine spin_ncfile_t_init
 
   subroutine spin_ncfile_t_def_sd(self, hist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ncfile_t_def_sd'
-!End of the abilint section
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_hist_t),intent(in) :: hist
@@ -135,13 +121,6 @@ contains
 
   subroutine spin_ncfile_t_write_one_step(self, hist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ncfile_t_write_one_step'
-!End of the abilint section
-
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_hist_t), intent(in) :: hist
     integer :: ncerr, itime
@@ -175,13 +154,6 @@ contains
 
 
   subroutine spin_ncfile_t_write_primitive_cell(self, prim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ncfile_t_write_primitive_cell'
-!End of the abilint section
 
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_model_primitive_t) :: prim
@@ -217,13 +189,6 @@ contains
 
   subroutine spin_ncfile_t_write_supercell(self, scell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ncfile_t_write_supercell'
-!End of the abilint section
-
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_terms_t), intent(in) :: scell
     integer :: rprimd_id, pos_id, ispin_prim_id, rvec_id, iatoms_id, ncerr
@@ -258,13 +223,6 @@ contains
   end subroutine spin_ncfile_t_write_supercell
 
   subroutine spin_ncfile_t_write_parameters(self, params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ncfile_t_write_parameters'
-!End of the abilint section
 
     class(spin_ncfile_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
@@ -305,13 +263,6 @@ contains
   end subroutine spin_ncfile_t_write_parameters
 
   subroutine spin_ncfile_t_close(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ncfile_t_close'
-!End of the abilint section
 
     class(spin_ncfile_t), intent(inout) :: self
     integer :: ncerr

@@ -235,13 +235,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                 mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
 &                 psps,results_gs,rprim,scf_history,vel,vel_cell,wvl,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gstate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1802,13 +1795,6 @@ end subroutine gstate
 
 subroutine setup2(dtset,npwtot,start,wfs,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1947,13 +1933,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
   & fnameabo_dos,fnameabo_eig,fred,&
   & mpi_enreg,nfft,ngfft,occ,prtfor,&
   & resid,rhor,rprimd,vxcavg,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnup1'
-!End of the abilint section
 
  implicit none
 
@@ -2146,13 +2125,6 @@ end subroutine clnup1
 
 subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtxf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2321,13 +2293,6 @@ end subroutine prtxf
 
 subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
 &                 prtfor,prtstr,prtvol,start,strten,synlgr,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnup2'
-!End of the abilint section
 
  implicit none
 
@@ -2589,13 +2554,6 @@ end subroutine clnup2
 
 subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuj_drive'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2737,13 +2695,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 #if defined HAVE_NETCDF
  use netcdf
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxfhist'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

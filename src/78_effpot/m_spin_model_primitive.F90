@@ -149,26 +149,12 @@ contains
 
   subroutine spin_model_primitive_t_initialize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_initialize'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
    !TODO should something  be done here?
   end subroutine spin_model_primitive_t_initialize
 
   subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &
        nspins, index_spin, spinat, gyroratios, damping_factors )
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_atoms'
-!End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in):: natoms, nspins, index_spin(:)
@@ -201,13 +187,6 @@ contains
 
   subroutine  spin_model_primitive_t_set_bilinear(self, n, ilist, jlist, Rlist, vallist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_bilinear'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:, :,:)
@@ -233,13 +212,6 @@ contains
 
   subroutine spin_model_primitive_t_set_exchange(self, n, ilist, jlist, Rlist, vallist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_exchange'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
@@ -257,13 +229,6 @@ contains
 
 
   subroutine spin_model_primitive_t_set_dmi(self, n, ilist, jlist, Rlist, vallist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_dmi'
-!End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
@@ -287,13 +252,6 @@ contains
 
   subroutine spin_model_primitive_t_set_uni(self, n, ilist, k1list, k1dirlist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_set_uni'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:)
     real(dp), intent(in) :: k1list(:), k1dirlist(:, :)
@@ -312,13 +270,6 @@ contains
   end subroutine spin_model_primitive_t_set_uni
 
   subroutine spin_model_primitive_t_read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_read_xml'
-!End of the abilint section
 
     class(spin_model_primitive_t), intent(inout) :: self
     character(kind=C_CHAR) :: xml_fname(*)
@@ -465,13 +416,6 @@ contains
 
   subroutine spin_model_primitive_t_finalize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_finalize'
-!End of the abilint section
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer :: i, j
 
@@ -577,13 +521,6 @@ contains
 
   subroutine spin_ham_set_exchange(self, nnz,  ilist, jlist, Rlist, vallist)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_ham_set_exchange'
-!End of the abilint section
-
     type(spin_model_primitive_t) , intent(inout) :: self
     integer, intent(in) :: nnz,  ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
@@ -601,13 +538,6 @@ contains
 
   ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
   subroutine find_R_PBC(scell, R, R_sc, R_prim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_R_PBC'
-!End of the abilint section
 
     type(supercell_type) , intent(in):: scell
     integer, intent(in):: R(3)
@@ -643,13 +573,6 @@ contains
   ! find the spercelll atom index from index of atom in primitive cell and R vector
   function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_supercell_index'
-!End of the abilint section
-
     type(supercell_type) , intent(in):: scell
     integer, intent(in) :: iatom_prim, rvec(3)
     integer  :: iatom_supercell
@@ -668,13 +591,6 @@ contains
   !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
   subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_supercell_ijR'
-!End of the abilint section
-
     type(supercell_type) , intent(in):: scell
     integer, intent(in) :: i0, j0, R0(3), R(3)
     integer, intent(out) :: i1, j1, R1(3), R_sc(3)
@@ -684,13 +600,6 @@ contains
   end subroutine find_supercell_ijR
 
   subroutine spin_model_primitive_t_make_supercell(self, sc_matrix, sc_ham)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_make_supercell'
-!End of the abilint section
 
     class(spin_model_primitive_t) , intent(in) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
@@ -821,13 +730,6 @@ contains
   end subroutine spin_model_primitive_t_make_supercell
 
   subroutine spin_model_primitive_t_print_terms(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_model_primitive_t_print_terms'
-!End of the abilint section
 
     class(spin_model_primitive_t) :: self
     integer :: i, ii, jj,  R(3)

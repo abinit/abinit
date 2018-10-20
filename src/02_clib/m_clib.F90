@@ -228,13 +228,6 @@ CONTAINS  !===========================================================
 subroutine fmallinfo(Minfo)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fmallinfo'
-!End of the abilint section
-
  type(Mallinfo_t),intent(out) :: Minfo
 
 !Local variables-------------------------------
@@ -276,13 +269,6 @@ end subroutine fmallinfo
 subroutine clib_print_mallinfo(Minfo,unt)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clib_print_mallinfo'
-!End of the abilint section
-
  integer,intent(in) :: unt
  type(Mallinfo_t),intent(in) :: Minfo
 ! *********************************************************************
@@ -322,13 +308,6 @@ end subroutine clib_print_mallinfo
 !! SOURCE
 
 subroutine clib_show_fc_alignment(unt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clib_show_fc_alignment'
-!End of the abilint section
 
  implicit none
 
@@ -375,13 +354,6 @@ end subroutine clib_show_fc_alignment
 subroutine clib_rename(old_fname, new_fname, ierr)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clib_rename'
-!End of the abilint section
-
  character(len=*),intent(in) :: old_fname, new_fname
  integer, optional, intent(out) :: ierr
  integer :: ier

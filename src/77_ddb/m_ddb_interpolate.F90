@@ -84,13 +84,6 @@ contains
 
 subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_interpolate'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -376,13 +369,6 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 
  !use defs_datatypes
  !use defs_abitypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outddbnc'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------

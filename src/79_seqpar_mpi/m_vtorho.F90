@@ -283,13 +283,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vtorho'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1854,13 +1847,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 subroutine wvl_nscf_loop()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nscf_loop'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1965,13 +1951,6 @@ subroutine wvl_nscf_loop()
 
 subroutine wvl_nscf_loop_bigdft()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nscf_loop_bigdft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2065,13 +2044,6 @@ subroutine wvl_nscf_loop_bigdft()
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'e_eigen'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2132,13 +2104,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
 subroutine wvl_occ()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_occ'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -2193,13 +2158,6 @@ subroutine wvl_occ()
 
 subroutine wvl_occ_bigdft()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_occ_bigdft'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -2253,13 +2211,6 @@ subroutine wvl_occ_bigdft()
 !! SOURCE
 
 subroutine wvl_comm_eigen()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_comm_eigen'
-!End of the abilint section
 
  implicit none
 
@@ -2359,13 +2310,6 @@ end subroutine vtorho
 subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
 &                      me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
 &                      npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgq_builder'
-!End of the abilint section
 
  implicit none
 

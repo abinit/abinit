@@ -205,13 +205,6 @@ CONTAINS !===========================================================
 
 subroutine energies_init(energies)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energies_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -282,13 +275,6 @@ end subroutine energies_init
 !! SOURCE
 
  subroutine energies_copy(energies_in,energies_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energies_copy'
-!End of the abilint section
 
  implicit none
 
@@ -366,13 +352,6 @@ end subroutine energies_copy
 !! SOURCE
 
  subroutine energies_to_array(energies,energies_array,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energies_to_array'
-!End of the abilint section
 
  implicit none
 
@@ -497,13 +476,6 @@ end subroutine energies_to_array
 
  subroutine energies_eval_eint(energies,dtset,usepaw,optdc,eint,eintdc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energies_eval_eint'
-!End of the abilint section
-
   implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -598,13 +570,6 @@ end subroutine energies_eval_eint
 !! SOURCE
 
 subroutine energies_ncwrite(enes,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energies_ncwrite'
-!End of the abilint section
 
  implicit none
 

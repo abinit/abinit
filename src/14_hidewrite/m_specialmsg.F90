@@ -81,13 +81,6 @@ CONTAINS  !===========================================================
 
 subroutine specialmsg_setcount(n_add_comment,n_add_warning,n_add_exit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'specialmsg_setcount'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -133,13 +126,6 @@ end subroutine specialmsg_setcount
 
 subroutine specialmsg_getcount(ncomment,nwarning,nexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'specialmsg_getcount'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -180,13 +166,6 @@ end subroutine specialmsg_getcount
 !! SOURCE
 
 subroutine specialmsg_mpisum(mpicomm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'specialmsg_mpisum'
-!End of the abilint section
 
  implicit none
 
@@ -239,13 +218,6 @@ end subroutine specialmsg_mpisum
 !! SOURCE
 
 subroutine herald(code_name,code_version,iout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'herald'
-!End of the abilint section
 
  implicit none
 
@@ -477,13 +449,6 @@ subroutine wrtout(unit,msg,mode_paral,do_flush)
 
  use m_xmpi,      only : xmpi_world, xmpi_comm_rank, xmpi_comm_size
  use m_io_tools,  only : flush_unit, write_lines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrtout'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -580,13 +545,6 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
  use m_xmpi,       only : xmpi_sum
  !use m_specialmsg, only : specialmsg_setcount
  use m_io_tools,   only : flush_unit, write_lines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrtout_myproc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

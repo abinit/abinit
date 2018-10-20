@@ -251,13 +251,6 @@ contains
 
 subroutine multibinit_dtset_init(multibinit_dtset,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multibinit_dtset_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -424,13 +417,6 @@ end subroutine multibinit_dtset_init
 
 subroutine multibinit_dtset_free(multibinit_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multibinit_dtset_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -521,13 +507,6 @@ end subroutine multibinit_dtset_free
 !! SOURCE
 
 subroutine invars10(multibinit_dtset,lenstr,natom,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars10'
-!End of the abilint section
 
  implicit none
 
@@ -2163,13 +2142,6 @@ end subroutine invars10
 !! SOURCE
 
 subroutine outvars_multibinit (multibinit_dtset,nunit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvars_multibinit'
-!End of the abilint section
 
  implicit none
 

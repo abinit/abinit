@@ -199,13 +199,6 @@ module m_xg
 
   subroutine checkResizeI(array,current_dim,asked_dim)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checkResizeI'
-!End of the abilint section
-
     integer, allocatable, intent(inout) :: array(:)
     integer, intent(inout) :: current_dim
     integer, intent(in   )  :: asked_dim
@@ -226,13 +219,6 @@ module m_xg
 !! checkResizeR
 
   subroutine checkResizeR(array,current_dim,asked_dim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checkResizeR'
-!End of the abilint section
 
     double precision, allocatable, intent(inout) :: array(:)
     integer, intent(inout) :: current_dim
@@ -255,13 +241,6 @@ module m_xg
 
   subroutine checkResizeC(array,current_dim,asked_dim)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checkResizeC'
-!End of the abilint section
-
     complex(kind=8), allocatable, intent(inout) :: array(:)
     integer, intent(inout) :: current_dim
     integer, intent(in   )  :: asked_dim
@@ -283,13 +262,6 @@ module m_xg
 
   function getClocR(rows,cols,array) result(cptr)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getClocR'
-!End of the abilint section
-
     integer, intent(in) :: rows
     integer, intent(in) :: cols
     double precision, target, intent(inout) :: array(rows,cols)
@@ -305,13 +277,6 @@ module m_xg
 
   function getClocC(rows,cols,array) result(cptr)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getClocC'
-!End of the abilint section
-
     integer, intent(in) :: rows
     integer, intent(in) :: cols
     complex(kind=8), target, intent(inout) :: array(rows,cols)
@@ -326,13 +291,6 @@ module m_xg
 !! xg_init
 
   subroutine xg_init(xg, space, rows, cols, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xg_init'
-!End of the abilint section
 
     type(xg_t), intent(inout) :: xg
     integer   , intent(in   ) :: space
@@ -384,13 +342,6 @@ module m_xg
 !! xg_set
 
   subroutine xg_set(xg,array,shift_col,rows)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xg_set'
-!End of the abilint section
 
     type(xg_t), intent(inout) :: xg
     double precision, intent(in) :: array(:,:)
@@ -444,13 +395,6 @@ module m_xg
 
   subroutine xgBlock_set(xgBlock,array,shift_col,rows)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_set'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     double precision, intent(in) :: array(:,:)
     integer, intent(in) :: shift_col
@@ -503,13 +447,6 @@ module m_xg
 
   subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_map'
-!End of the abilint section
-
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, intent(inout) :: array(:,:)
     integer   , intent(in   ) :: space
@@ -554,13 +491,6 @@ module m_xg
 
   subroutine xgBlock_reverseMap(xgBlock,array,rows,cols)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_reverseMap'
-!End of the abilint section
-
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, pointer, intent(inout) :: array(:,:)
     integer   , intent(in   ) :: rows
@@ -591,13 +521,6 @@ module m_xg
 !! xg_get
 
   subroutine xg_get(xg,array,shift_col,rows)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xg_get'
-!End of the abilint section
 
     type(xg_t), intent(inout) :: xg
     double precision, intent(out) :: array(:,:)
@@ -651,13 +574,6 @@ module m_xg
 
   subroutine xgBlock_get(xgBlock,array,shift_col,rows)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_get'
-!End of the abilint section
-
     type(xgBlock_t), intent(in   ) :: xgBlock
     double precision, intent(out) :: array(:,:)
     integer, intent(in) :: shift_col
@@ -710,13 +626,6 @@ module m_xg
 
   subroutine xg_setBlock(xg,Xgblock, fcol, rows, cols)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xg_setBlock'
-!End of the abilint section
-
     type(xg_t), intent(inout) :: xg
     type(xgBlock_t), intent(inout) :: xgBlock
     integer, intent(in) :: fcol
@@ -758,13 +667,6 @@ module m_xg
 
   subroutine xgBlock_setBlock(xgBlockA,xgBlockB, fcol, rows, cols)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_setBlock'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
     integer, intent(in) :: fcol
@@ -806,13 +708,6 @@ module m_xg
 
   subroutine xg_free(xg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xg_free'
-!End of the abilint section
-
     type(xg_t), intent(inout) :: xg
 
     if ( allocated(xg%vecR) ) then
@@ -832,13 +727,6 @@ module m_xg
 
   function space(xgBlock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'space'
-!End of the abilint section
-
     type(xgBlock_t), intent(in) :: xgBlock
     integer :: space
     space = xgBlock%space
@@ -852,13 +740,6 @@ module m_xg
 
   function cols(xgBlock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cols'
-!End of the abilint section
-
     type(xgBlock_t), intent(in) :: xgBlock
     integer :: cols
     cols = xgBlock%cols
@@ -871,13 +752,6 @@ module m_xg
 !! xgBlock_copy
 
   subroutine xgBlock_copy(xgBlockA, xgBlockB, inc1, inc2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_copy'
-!End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
@@ -922,13 +796,6 @@ module m_xg
 
   subroutine xgBlock_pack(xgBlockA,xgBlockB,uplo)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_pack'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
     character, intent(in) :: uplo
@@ -1019,13 +886,6 @@ module m_xg
 
   subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_gemmR'
-!End of the abilint section
-
     character, intent(in) :: transa
     character, intent(in) :: transb
     double precision, intent(in) :: alpha
@@ -1080,13 +940,6 @@ module m_xg
 
   subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_gemmC'
-!End of the abilint section
-
     character, intent(in) :: transa
     character, intent(in) :: transb
     complex(kind=8), intent(in) :: alpha
@@ -1131,13 +984,6 @@ module m_xg
 
   subroutine xgBlock_potrf(xgBlock,uplo,info)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_potrf'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     character      , intent(in   ) :: uplo
     integer        , intent(  out) :: info
@@ -1171,13 +1017,6 @@ module m_xg
 != Hermitian Full Matrix diago
 !===================================================
   subroutine xgBlock_heev(jobz,uplo,xgBlockA,xgBlockW,info)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_heev'
-!End of the abilint section
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1230,13 +1069,6 @@ module m_xg
 !! xgBlock_heevd
 
   subroutine xgBlock_heevd(jobz,uplo,xgBlockA,xgBlockW, info)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_heevd'
-!End of the abilint section
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1304,13 +1136,6 @@ module m_xg
 !===================================================
   subroutine xgBlock_hpev(jobz,uplo,xgBlockAP,xgBlockW,xgBlockZ,info)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hpev'
-!End of the abilint section
-
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
     type(xgBlock_t) , intent(inout) :: xgBlockAP
@@ -1370,13 +1195,6 @@ module m_xg
 !! xgBlock_hpevd
 
   subroutine xgBlock_hpevd(jobz,uplo,xgBlockAP,xgBlockW,xgBlockZ,info)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hpevd'
-!End of the abilint section
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1448,13 +1266,6 @@ module m_xg
 
   subroutine xgBlock_hegv(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hegv'
-!End of the abilint section
-
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1513,13 +1324,6 @@ module m_xg
 !! xgBlock_hegvx
 
   subroutine xgBlock_hegvx(itype,jobz,range,uplo,xgBlockA,xgBlockB,vl,vu,il,iu,abstol,xgBlockW,xgBlockZ,info)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hegvx'
-!End of the abilint section
 
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
@@ -1595,13 +1399,6 @@ module m_xg
 
   subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hegvd'
-!End of the abilint section
-
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1674,13 +1471,6 @@ module m_xg
 
   subroutine xgBlock_hpgv(itype, jobz, uplo, xgBlockAP, xgBlockBP, xgBlockW, xgBlockZ,info)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hpgv'
-!End of the abilint section
-
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1740,13 +1530,6 @@ module m_xg
 !! xgBlock_hpgvx
 
   subroutine xgBlock_hpgvx(itype,jobz,range,uplo,xgBlockAP,xgBlockBP,vl,vu,il,iu,abstol,xgBlockW,xgBlockZ,info)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hpgvx'
-!End of the abilint section
 
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
@@ -1822,13 +1605,6 @@ module m_xg
 
   subroutine xgBlock_hpgvd(itype, jobz, uplo, xgBlockAP, xgBlockBP, xgBlockW, xgBlockZ, info)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_hpgvd'
-!End of the abilint section
-
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1897,13 +1673,6 @@ module m_xg
 
   subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_trsmR'
-!End of the abilint section
-
     character       , intent(in   ) :: side
     character       , intent(in   ) :: uplo
     character       , intent(in   ) :: transa
@@ -1941,13 +1710,6 @@ module m_xg
 
   subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_trsmC'
-!End of the abilint section
-
     character      , intent(in   ) :: side
     character      , intent(in   ) :: uplo
     character      , intent(in   ) :: transa
@@ -1977,13 +1739,6 @@ module m_xg
 !! xgBlock_colwiseCymax
 
   subroutine xgBlock_colwiseCymax(xgBlockA, da, xgBlockB,xgBlockW)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_colwiseCymax'
-!End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(in   ) :: da
@@ -2031,13 +1786,6 @@ module m_xg
 
   subroutine xgBlock_colwiseMulR(xgBlock, vec, shift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_colwiseMulR'
-!End of the abilint section
-
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, intent(in   ) :: vec(:)
     integer, intent(in   )          :: shift
@@ -2073,13 +1821,6 @@ module m_xg
 
   subroutine xgBlock_colwiseMulC(xgBlock, vec, shift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_colwiseMulC'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     complex(kind=8), intent(in   ) :: vec(:)
     integer, intent(in   )         :: shift
@@ -2109,13 +1850,6 @@ module m_xg
 !! xgBlock_add
 
   subroutine xgBlock_add(xgBlockA, xgBlockB)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_add'
-!End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
@@ -2161,13 +1895,6 @@ module m_xg
 
   subroutine xgBlock_cshift(xgBlock,nshift,shiftdim)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_cshift'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     integer        , intent(in   ) :: nshift
     integer        , intent(in   ) :: shiftdim
@@ -2191,13 +1918,6 @@ module m_xg
 !! xgBlock_colwiseNorm2
 
   subroutine xgBlock_colwiseNorm2(xgBlock,dot,max_val,max_elt,min_val,min_elt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_colwiseNorm2'
-!End of the abilint section
 
     type(xgBlock_t) , intent(in   ) :: xgBlock
     type(xgBlock_t) , intent(inout) :: dot
@@ -2257,13 +1977,6 @@ module m_xg
 
   subroutine xgBlock_scaleR(xgBlock, val, inc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_scaleR'
-!End of the abilint section
-
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, intent(in   ) :: val
     integer         , intent(in   ) :: inc
@@ -2301,13 +2014,6 @@ module m_xg
 
   subroutine xgBlock_scaleC(xgBlock, val, inc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_scaleC'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     complex(kind=8), intent(in   ) :: val
     integer         , intent(in   ) :: inc
@@ -2342,13 +2048,6 @@ module m_xg
 
   subroutine xgBlock_getSize(xgBlock, rows, cols)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_getSize'
-!End of the abilint section
-
     type(xgBlock_t), intent(in   ) :: xgBlock
     integer        , intent(  out) :: rows
     integer        , intent(  out) :: cols
@@ -2365,13 +2064,6 @@ module m_xg
 
   subroutine xgBlock_reshape(xgBlock,newShape)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_reshape'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     integer        , intent(in   ) :: newShape(2)
     type(c_ptr) :: cptr
@@ -2401,13 +2093,6 @@ module m_xg
 
   subroutine xgBlock_zero(xgBlock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_zero'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     integer :: i
 
@@ -2434,13 +2119,6 @@ module m_xg
 
   subroutine xgBlock_one(xgBlock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_one'
-!End of the abilint section
-
     type(xgBlock_t), intent(inout) :: xgBlock
     integer :: i
 
@@ -2466,13 +2144,6 @@ module m_xg
 !! xgBlock_diagonal
 
   subroutine xgBlock_diagonal(xgBlock,diag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_diagonal'
-!End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock
     type(xgBlock_t), intent(in   ) :: diag
@@ -2521,13 +2192,6 @@ module m_xg
 
   subroutine xgBlock_diagonalOnly(xgBlock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_diagonalOnly'
-!End of the abilint section
-
     type(xgBlock_t) , intent(inout) :: xgBlock
     type(xg_t) :: diag
     integer :: i
@@ -2562,13 +2226,6 @@ module m_xg
 
   subroutine xgBlock_average(xgBlock,average)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_average'
-!End of the abilint section
-
     type(XgBlock_t) , intent(in)  :: xgBlock
     double precision, intent(out) :: average
     complex(kind=8) :: averageC
@@ -2599,13 +2256,6 @@ module m_xg
 !! xgBlock_deviation
 
   subroutine xgBlock_deviation(xgBlock,deviation)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_deviation'
-!End of the abilint section
 
     type(XgBlock_t) , intent(in)  :: xgBlock
     double precision, intent(out) :: deviation
@@ -2639,13 +2289,6 @@ module m_xg
 
   subroutine xgBlock_print(xgBlock,outunit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_print'
-!End of the abilint section
-
     type(xgBlock_t), intent(in) :: xgBlock
     integer, intent(in) :: outunit
     integer :: i, j
@@ -2676,13 +2319,6 @@ module m_xg
 !! xg_finalize
 
   subroutine xg_finalize()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xg_finalize'
-!End of the abilint section
 
     if ( allocated(iwork) ) then
       ABI_FREE(iwork)

@@ -216,13 +216,6 @@ subroutine DistributeValenceWavefunctions()
 ! susceptibility operator.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'DistributeValenceWavefunctions'
-!End of the abilint section
-
 implicit none
 
 integer  :: iblk, mb, v
@@ -324,13 +317,6 @@ subroutine DistributeValenceKernel()
 ! A better (forthcoming) algorithm would only distribute the actual kernel,
 ! not all valence bands.
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'DistributeValenceKernel'
-!End of the abilint section
-
 implicit none
 
 integer  :: mb, n
@@ -416,13 +402,6 @@ subroutine pc_k_valence_kernel(psi_inout,n)
 ! array containing the kernel (defined in this module) is already prepared
 ! and ready to be used.
 !================================================================================
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pc_k_valence_kernel'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(inout) :: psi_inout(2,npw_g)
@@ -513,13 +492,6 @@ end subroutine pc_k_valence_kernel
 !! SOURCE
 
 subroutine wf_block_distribute(psik, psik_alltoall, direction)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wf_block_distribute'
-!End of the abilint section
 
 implicit none
 
@@ -654,13 +626,6 @@ use m_cgtools
 ! This subroutine computes the exchange energy in band+FFT parallel
 !
 !================================================================================
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exchange'
-!End of the abilint section
-
 implicit none
 real(dp) :: exchange
 
@@ -797,13 +762,6 @@ end function exchange
 
 function dft_xc_energy(e)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dft_xc_energy'
-!End of the abilint section
-
 implicit none
 real(dp) :: dft_xc_energy
 integer, intent(in) :: e
@@ -924,13 +882,6 @@ subroutine set_precondition(lambda,omega)
 ! TODO :
 ! - eliminate the 2 "if(kinpw(i) < huge(0.0_dp)*1.0d-11)"
 !   since ecutsm = 0.0 always (check if that's true in this gw_sternheimer subroutine).
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_precondition'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(in), optional :: lambda, omega
@@ -1033,13 +984,6 @@ end subroutine set_precondition
 
 subroutine unset_precondition()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unset_precondition'
-!End of the abilint section
-
 implicit none
 ! *************************************************************************
 
@@ -1071,13 +1015,6 @@ end subroutine unset_precondition
 !! SOURCE
 
 subroutine precondition(psi_out,psi_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precondition'
-!End of the abilint section
 
 implicit none
 
@@ -1118,13 +1055,6 @@ end subroutine precondition
 
 subroutine precondition_cplx(psi_out,psi_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precondition_cplx'
-!End of the abilint section
-
 implicit none
 
 complex(dpc), intent(out) :: psi_out(npw_g)
@@ -1163,13 +1093,6 @@ end subroutine precondition_cplx
 !! SOURCE
 
 subroutine sqrt_vc_k(psi_inout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqrt_vc_k'
-!End of the abilint section
 
 implicit none
 
@@ -1214,13 +1137,6 @@ end subroutine sqrt_vc_k
 !! SOURCE
 
 subroutine Hpsik(psi_out,psi_in,cte)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Hpsik'
-!End of the abilint section
 
 implicit none
 
@@ -1304,13 +1220,6 @@ end subroutine Hpsik
 !! SOURCE
 
 subroutine Hpsikc(psi_out,psi_in,cte)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Hpsikc'
-!End of the abilint section
 
 implicit none
 
@@ -1449,13 +1358,6 @@ end subroutine Hpsikc
 
 subroutine g_to_r(psi_out,psi_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g_to_r'
-!End of the abilint section
-
 implicit none
 real(dp), intent(out) :: psi_out(2,n4,n5,n6)
 real(dp), intent(in)  :: psi_in(2,npw_g)
@@ -1529,13 +1431,6 @@ end subroutine g_to_r
 
 subroutine gr_to_g(psig_out,psir_in,psig_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gr_to_g'
-!End of the abilint section
-
 implicit none
 real(dp), intent(in)  :: psir_in(2,n4,n5,n6)
 real(dp), intent(in), optional :: psig_in(2,npw_g)
@@ -1607,13 +1502,6 @@ subroutine kbkb_to_kb(psik_out,psik_in_1,psik_in_2)
 !
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kbkb_to_kb'
-!End of the abilint section
-
 implicit none
 real(dp), intent(out) :: psik_out(2,npw_kb)
 real(dp), intent(inout)  :: psik_in_1(2,npw_kb), psik_in_2(2,npw_kb)
@@ -1665,13 +1553,6 @@ end subroutine kbkb_to_kb
 subroutine build_vxc(vxc2,nfft2,nspden2)
 !Only transcribe the argument vxc2 in the module; the change from dg to sg is done in build_H (and stored in vxc), since the
 !arguments of fftpac are built in build_H.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_vxc'
-!End of the abilint section
-
 implicit none
 
 !We need the dimensions of vxc since they don't exist yet in the module; build_vxc being called before build_H.
@@ -1710,13 +1591,6 @@ end subroutine build_vxc
 !! SOURCE
 
 subroutine destroy_H
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_H'
-!End of the abilint section
 
 implicit none
 
@@ -1877,13 +1751,6 @@ subroutine build_H(dtset2,mpi_enreg2,cpopt2,cg2,gs_hamk2,kg_k2,kinpw2)
 !use m_bandfft_kpt
 use m_cgtools
 use m_wfutils
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_H'
-!End of the abilint section
-
 implicit none
 
 !Arguments of gw_sternheimer, reveived as argument by build_H-------------------------

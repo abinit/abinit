@@ -94,13 +94,6 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
   use m_errors
 
 ! use m_paw_dmft,     only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diag_occ'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -225,13 +218,6 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
   use m_errors
 
 ! use m_paw_dmft,     only : paw_dmft_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rot_cg'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------

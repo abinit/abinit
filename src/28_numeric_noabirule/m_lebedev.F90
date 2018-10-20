@@ -133,13 +133,6 @@ contains  !===========================================================
 
 type(lebedev_t) function lebedev_new(seq_idx) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lebedev_new'
-!End of the abilint section
-
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -189,13 +182,6 @@ end function lebedev_new
 !! SOURCE
 
 subroutine lebedev_free(lgrid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lebedev_free'
-!End of the abilint section
 
  implicit none
 
@@ -249,13 +235,6 @@ end subroutine lebedev_free
 !! SOURCE
 
 subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_lebedev_grid'
-!End of the abilint section
 
  implicit none
 
@@ -376,13 +355,6 @@ end subroutine build_lebedev_grid
 !! SOURCE
 
 subroutine gen_oh(code, num, x, y, z, w, a, b, v)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gen_oh'
-!End of the abilint section
 
        implicit logical(a-z)
        double precision x(*),y(*),z(*),w(*)
@@ -969,13 +941,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 
  SUBROUTINE LD0006(X,Y,Z,W,N)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0006'
-!End of the abilint section
-
        implicit none
 
        DOUBLE PRECISION X(   6)
@@ -1037,13 +1002,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0014(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0014'
-!End of the abilint section
 
        implicit none
 
@@ -1108,13 +1066,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0026(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0026'
-!End of the abilint section
 
        implicit none
 
@@ -1182,13 +1133,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 
  SUBROUTINE LD0038(X,Y,Z,W,N)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0038'
-!End of the abilint section
-
        implicit none
 
        DOUBLE PRECISION X(  38)
@@ -1255,13 +1199,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0050(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0050'
-!End of the abilint section
 
        implicit none
 
@@ -1331,13 +1268,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0074(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0074'
-!End of the abilint section
 
        implicit none
 
@@ -1411,13 +1341,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 
  SUBROUTINE LD0086(X,Y,Z,W,N)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0086'
-!End of the abilint section
-
        implicit none
 
        DOUBLE PRECISION X(  86)
@@ -1490,13 +1413,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0110(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0110'
-!End of the abilint section
 
        implicit none
 
@@ -1573,13 +1489,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0146(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0146'
-!End of the abilint section
 
        implicit none
 
@@ -1659,13 +1568,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0170(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0170'
-!End of the abilint section
 
        implicit none
 
@@ -1748,13 +1650,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0194(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0194'
-!End of the abilint section
 
        implicit none
 
@@ -1840,13 +1735,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0230(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0230'
-!End of the abilint section
 
        implicit none
 
@@ -1936,13 +1824,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0266(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0266'
-!End of the abilint section
 
        implicit none
 
@@ -2035,13 +1916,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0302(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0302'
-!End of the abilint section
 
        implicit none
 
@@ -2138,13 +2012,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0350(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0350'
-!End of the abilint section
 
        implicit none
 
@@ -2245,13 +2112,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0434(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0434'
-!End of the abilint section
 
        implicit none
 
@@ -2361,13 +2221,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0590(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0590'
-!End of the abilint section
 
        implicit none
 
@@ -2492,13 +2345,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0770(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0770'
-!End of the abilint section
 
        implicit none
 
@@ -2640,13 +2486,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0974(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD0974'
-!End of the abilint section
 
        implicit none
 
@@ -2807,13 +2646,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD1202(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD1202'
-!End of the abilint section
 
        implicit none
 
@@ -2995,13 +2827,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD1454(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD1454'
-!End of the abilint section
 
        implicit none
 
@@ -3206,13 +3031,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD1730(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD1730'
-!End of the abilint section
 
        implicit none
 
@@ -3442,13 +3260,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD2030(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD2030'
-!End of the abilint section
 
        implicit none
 
@@ -3705,13 +3516,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD2354(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD2354'
-!End of the abilint section
 
        implicit none
 
@@ -3997,13 +3801,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD2702(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD2702'
-!End of the abilint section
 
        implicit none
 
@@ -4320,13 +4117,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD3074(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD3074'
-!End of the abilint section
 
        implicit none
 
@@ -4676,13 +4466,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD3470(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD3470'
-!End of the abilint section
 
        implicit none
 
@@ -5067,13 +4850,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD3890(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD3890'
-!End of the abilint section
 
        implicit none
 
@@ -5495,13 +5271,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD4334(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD4334'
-!End of the abilint section
 
        implicit none
 
@@ -5962,13 +5731,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD4802(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD4802'
-!End of the abilint section
 
        implicit none
 
@@ -6470,13 +6232,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD5294(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD5294'
-!End of the abilint section
 
        implicit none
 
@@ -7021,13 +6776,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD5810(X,Y,Z,W,N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'LD5810'
-!End of the abilint section
 
        implicit none
 

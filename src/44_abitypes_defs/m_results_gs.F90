@@ -223,13 +223,6 @@ CONTAINS
 
 subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_gs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -317,13 +310,6 @@ end subroutine init_results_gs
 !! SOURCE
 
 subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_gs_array'
-!End of the abilint section
 
  implicit none
 
@@ -421,13 +407,6 @@ end subroutine init_results_gs_array
 
 subroutine destroy_results_gs(results_gs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_gs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -497,13 +476,6 @@ end subroutine destroy_results_gs
 !! SOURCE
 
 subroutine destroy_results_gs_array(results_gs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_gs_array'
-!End of the abilint section
 
  implicit none
 
@@ -585,13 +557,6 @@ end subroutine destroy_results_gs_array
 !! SOURCE
 
 subroutine copy_results_gs(results_gs_in,results_gs_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_results_gs'
-!End of the abilint section
 
  implicit none
 
@@ -732,13 +697,6 @@ end subroutine copy_results_gs
 !! SOURCE
 
 integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'results_gs_ncwrite'
-!End of the abilint section
 
  implicit none
 

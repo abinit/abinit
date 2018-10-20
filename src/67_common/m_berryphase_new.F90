@@ -175,13 +175,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'berryphase_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1804,13 +1797,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &  scfcv_level,scfcv_quit,scfcv_step,ucvol,unit_out,&
 &  usepaw,xred,ylm,ylmgr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'update_e_field_vars'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -2314,13 +2300,6 @@ end subroutine update_e_field_vars
 
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtefield'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -2726,13 +2705,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
      &              mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_e_field_vars'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -2880,13 +2852,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      &              nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,&
      &              rprimd,symrec,typat,usepaw,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initberry'
-!End of the abilint section
 
   implicit none
 

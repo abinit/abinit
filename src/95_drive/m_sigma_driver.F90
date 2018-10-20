@@ -200,13 +200,6 @@ contains
 
 subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,converged)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2508,13 +2501,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
  !use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_sigma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3486,13 +3472,6 @@ end subroutine setup_sigma
 
 subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_tables'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3678,13 +3657,6 @@ end subroutine sigma_tables
 
 subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_ur,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_bksmask'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3839,13 +3811,6 @@ end subroutine sigma_bksmask
 subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &  Pawang,Pawrad,Pawtab,Pawfgrtab,prev_Pawrhoij,&
 &  QP_pawrhoij,QP_paw_ij,QP_paw_an,QP_energies,qp_nhat,nhatgrdim,qp_nhatgr,qp_compch_sph,qp_compch_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_qpscgw'
-!End of the abilint section
 
  implicit none
 

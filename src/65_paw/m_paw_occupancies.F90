@@ -112,13 +112,6 @@ CONTAINS  !=====================================================================
 &                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,&
 &                      pawprtvol,pawrhoij,unpaw,usewvl,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmkrhoij'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -567,13 +560,6 @@ end subroutine pawmkrhoij
  subroutine pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj1,ipert,isppol,my_natom,natom,&
 &                       nspinor,occ_k,option,pawrhoij,usetimerev,wtk_k,occ_k_2, &
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawaccrhoij'
-!End of the abilint section
 
  implicit none
 
@@ -1163,13 +1149,6 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 &                    nspden,nspinor,nsppol,ntypat,pawrhoij,pawspnorb,pawtab,spinat,typat,&
 &                    ngrhoij,nlmnmix,use_rhoij_,use_rhoijres,& ! optional arguments
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initrhoij'
-!End of the abilint section
 
  implicit none
 

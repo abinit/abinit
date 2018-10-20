@@ -162,13 +162,6 @@ CONTAINS  !=====================================================================
 
 type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, comm) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -424,13 +417,6 @@ end function skw_new
 
 subroutine skw_print(skw, unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -481,13 +467,6 @@ end subroutine skw_print
 !! SOURCE
 
 subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_eval_bks'
-!End of the abilint section
 
  implicit none
 
@@ -580,13 +559,6 @@ end subroutine skw_eval_bks
 !! SOURCE
 
 subroutine skw_eval_fft(skw, ngfft, nfft, band, spin, oeig_mesh, oder1_mesh, oder2_mesh)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_eval_fft'
-!End of the abilint section
 
  implicit none
 
@@ -704,13 +676,6 @@ end subroutine skw_eval_fft
 
 subroutine skw_free(skw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -776,13 +741,6 @@ end subroutine skw_free
 
 subroutine mkstar(skw, kpt, srk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -836,13 +794,6 @@ end subroutine mkstar
 !! SOURCE
 
 subroutine mkstar_dk1(skw, kpt, srk_dk1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar_dk1'
-!End of the abilint section
 
  implicit none
 
@@ -900,13 +851,6 @@ end subroutine mkstar_dk1
 !! SOURCE
 
 subroutine mkstar_dk2(skw, kpt, srk_dk2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar_dk2'
-!End of the abilint section
 
  implicit none
 
@@ -983,13 +927,6 @@ end subroutine mkstar_dk2
 subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 
  use m_gsphere,  only : get_irredg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_rstar_gen'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

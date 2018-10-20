@@ -70,13 +70,6 @@ program multibinit
  !use m_generate_training_set, only : generate_training_set
  use m_compute_anharmonics, only : compute_anharmonics
  use m_init10,              only : init10
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multibinit'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------

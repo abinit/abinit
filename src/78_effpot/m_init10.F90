@@ -81,13 +81,6 @@ subroutine init10(filnam,comm)
 
  use m_fstrings,     only : int2char4
  use m_io_tools,     only : open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init10'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------

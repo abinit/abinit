@@ -280,13 +280,6 @@ contains
 subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 & rho_grho,deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,stress_vdw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_aggregate'
-!End of the abilint section
-
   implicit none
 
 #if defined HAVE_FFT_FFTW3
@@ -663,13 +656,6 @@ end subroutine xc_vdw_aggregate
 subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
 & theta,eps,dexc,dexcg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_energy'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -868,13 +854,6 @@ end subroutine xc_vdw_energy
 
 subroutine xc_vdw_done(vdw_params)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_done'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -926,13 +905,6 @@ end subroutine xc_vdw_done
 !! SOURCE
 
 subroutine xc_vdw_get_params(vdw_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_get_params'
-!End of the abilint section
 
   implicit none
 
@@ -989,13 +961,6 @@ end subroutine xc_vdw_get_params
 !! SOURCE
 
 subroutine xc_vdw_init(vdw_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_init'
-!End of the abilint section
 
   implicit none
 
@@ -1385,13 +1350,6 @@ end subroutine xc_vdw_init
 
 subroutine xc_vdw_libxc_init(ixc_vdw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_libxc_init'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1460,13 +1418,6 @@ end subroutine xc_vdw_libxc_init
 !! SOURCE
 
 subroutine xc_vdw_memcheck(unt,vp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_memcheck'
-!End of the abilint section
 
   implicit none
 
@@ -1577,13 +1528,6 @@ end subroutine xc_vdw_memcheck
 !! SOURCE
 
 subroutine xc_vdw_read(filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_read'
-!End of the abilint section
 
   implicit none
 
@@ -1751,13 +1695,6 @@ end subroutine xc_vdw_read
 
 subroutine xc_vdw_set_functional(vdw_func,vdw_zab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_set_functional'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1796,13 +1733,6 @@ end subroutine xc_vdw_set_functional
 !! SOURCE
 
 subroutine xc_vdw_set_params(vdw_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_set_params'
-!End of the abilint section
 
   implicit none
 
@@ -1860,13 +1790,6 @@ end subroutine xc_vdw_set_params
 !! SOURCE
 
 subroutine xc_vdw_show(unt,vp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_show'
-!End of the abilint section
 
   implicit none
 
@@ -1940,13 +1863,6 @@ end subroutine xc_vdw_show
 
 function xc_vdw_status()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_status'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1980,13 +1896,6 @@ end function xc_vdw_status
 !! SOURCE
 
 subroutine xc_vdw_trigger(condition)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_trigger'
-!End of the abilint section
 
   implicit none
 
@@ -2042,13 +1951,6 @@ end subroutine xc_vdw_trigger
 !! SOURCE
 
 subroutine xc_vdw_write(filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_vdw_write'
-!End of the abilint section
 
   implicit none
 
@@ -2237,13 +2139,6 @@ end subroutine xc_vdw_write
 
 subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_filter'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2401,13 +2296,6 @@ end subroutine vdw_df_filter
 
 function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_kernel'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2500,13 +2388,6 @@ end function vdw_df_kernel
 !! SOURCE
 
 function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_kernel_value'
-!End of the abilint section
 
   implicit none
 
@@ -2699,13 +2580,6 @@ end function vdw_df_kernel_value
 subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 &                       exc_lda,vxc_lda,vxcg_lda)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_ldaxc'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2825,13 +2699,6 @@ end subroutine vdw_df_ldaxc
 
 subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
 & mesh_inc,mesh_ratio,mesh_tolerance,mesh_file,avoid_zero,exact_max)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_create_mesh'
-!End of the abilint section
 
   implicit none
 
@@ -3043,13 +2910,6 @@ end subroutine vdw_df_create_mesh
 
 function vdw_df_indexof(list_1d,npts,value)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_indexof'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -3103,13 +2963,6 @@ end function vdw_df_indexof
 function vdw_df_interpolate(d1,d2,sofswt)
 
   use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_interpolate'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -3189,13 +3042,6 @@ end function vdw_df_interpolate
 !! SOURCE
 
 subroutine vdw_df_internal_checks(test_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_internal_checks'
-!End of the abilint section
 
   implicit none
 
@@ -3311,13 +3157,6 @@ end subroutine vdw_df_internal_checks
 subroutine vdw_df_netcdf_ioerr(ncerr,file_name,file_line)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_netcdf_ioerr'
-!End of the abilint section
-
  integer,intent(in) :: ncerr
  character(len=*),optional,intent(in) :: file_name
  integer,optional,intent(in) :: file_line
@@ -3370,13 +3209,6 @@ end subroutine vdw_df_netcdf_ioerr
 
 subroutine vdw_df_set_tweaks(input_tweaks,output_tweaks)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_set_tweaks'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -3416,13 +3248,6 @@ end subroutine vdw_df_set_tweaks
 !! SOURCE
 
 subroutine vdw_df_write_func(func_name,mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_df_write_func'
-!End of the abilint section
 
   implicit none
 

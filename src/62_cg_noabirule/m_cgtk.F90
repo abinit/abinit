@@ -86,13 +86,6 @@ contains
 subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
   npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgtk_rotate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -246,13 +239,6 @@ end subroutine cgtk_rotate
 !! SOURCE
 
 subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, cg2, work_ngfft, work)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgtk_change_gsphere'
-!End of the abilint section
 
  implicit none
 

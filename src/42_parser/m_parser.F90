@@ -87,13 +87,6 @@ CONTAINS  !===========================================================
 
 subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'parsefile'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -193,13 +186,6 @@ end subroutine parsefile
 !! SOURCE
 
 subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inread'
-!End of the abilint section
 
  implicit none
 
@@ -381,13 +367,6 @@ end subroutine inread
 !! SOURCE
 
 recursive subroutine instrng(filnam,lenstr,option,strln,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'instrng'
-!End of the abilint section
 
  implicit none
 
@@ -669,13 +648,6 @@ end subroutine instrng
 
 subroutine inreplsp(string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inreplsp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -750,13 +722,6 @@ end subroutine inreplsp
 !! SOURCE
 
 subroutine incomprs(string,length)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'incomprs'
-!End of the abilint section
 
  implicit none
 
@@ -956,13 +921,6 @@ end subroutine incomprs
 !! SOURCE
 
 subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,ds_input,key_value)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intagm'
-!End of the abilint section
 
  implicit none
 
@@ -1568,13 +1526,6 @@ end subroutine intagm
 
 subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inarray'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1790,13 +1741,6 @@ end subroutine inarray
 
 subroutine importxyz(lenstr,string_raw,string_upper,strln)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'importxyz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1921,13 +1865,6 @@ end subroutine importxyz
 !! SOURCE
 
 subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'append_xyz'
-!End of the abilint section
 
  implicit none
 
@@ -2110,13 +2047,6 @@ end subroutine append_xyz
 subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minimal_flag,reference_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkdpr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2275,13 +2205,6 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2370,13 +2293,6 @@ end subroutine chkint
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,list_number,list_values,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_eq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2463,13 +2379,6 @@ end subroutine chkint_eq
 
 subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minmax_value,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_ge'
-!End of the abilint section
 
  implicit none
 
@@ -2559,13 +2468,6 @@ end subroutine chkint_ge
 subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  minmax_value,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_le'
-!End of the abilint section
 
  implicit none
 
@@ -2658,13 +2560,6 @@ end subroutine chkint_le
 subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_ne'
-!End of the abilint section
 
  implicit none
 
@@ -2779,13 +2674,6 @@ end subroutine chkint_ne
 subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_prt'
-!End of the abilint section
 
  implicit none
 
@@ -2957,13 +2845,6 @@ end subroutine chkint_prt
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 & marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
   firstchar,forceprint)  ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prttagm'
-!End of the abilint section
 
  implicit none
 
@@ -3314,13 +3195,6 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 & marr,narrm,ncid,ndtset_alloc,token,typevarphys,&
 & mxnimage,nimagem,ndtset,prtimg,strimg,firstchar,forceprint)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prttagm_images'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3508,13 +3382,6 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 
  use defs_basis
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkvars_in_string'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

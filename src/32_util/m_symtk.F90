@@ -96,13 +96,6 @@ contains
 
 subroutine mati3inv(mm, mit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mati3inv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -171,13 +164,6 @@ end subroutine mati3inv
 
 subroutine mati3det(mm, det)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mati3det'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -225,13 +211,6 @@ end subroutine mati3det
 !! SOURCE
 
 subroutine matr3inv(aa, ait)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matr3inv'
-!End of the abilint section
 
  implicit none
 
@@ -299,13 +278,6 @@ end subroutine matr3inv
 
 subroutine symdet(determinant, nsym, sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdet'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -363,13 +335,6 @@ end subroutine symdet
 !! SOURCE
 
 subroutine chkgrp(nsym,symafm,symrel,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkgrp'
-!End of the abilint section
 
  implicit none
 
@@ -499,13 +464,6 @@ end subroutine chkgrp
 !! SOURCE
 
 subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_multable'
-!End of the abilint section
 
  implicit none
 
@@ -639,13 +597,6 @@ end subroutine sg_multable
 
 subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkorthsy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -774,13 +725,6 @@ end subroutine chkorthsy
 
 subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkprimit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -866,13 +810,6 @@ end subroutine chkprimit
 !! SOURCE
 
 subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrelrot'
-!End of the abilint section
 
  implicit none
 
@@ -985,13 +922,6 @@ end subroutine symrelrot
 !! SOURCE
 
 subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_q'
-!End of the abilint section
 
  implicit none
 
@@ -1130,13 +1060,6 @@ end subroutine littlegroup_q
 subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matpointsym'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1263,13 +1186,6 @@ end subroutine matpointsym
 !! SOURCE
 
 subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'holocell'
-!End of the abilint section
 
  implicit none
 
@@ -1468,13 +1384,6 @@ end subroutine holocell
 
 subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetrize_rprimd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1586,13 +1495,6 @@ end subroutine symmetrize_rprimd
 !! SOURCE
 
 subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetrize_xred'
-!End of the abilint section
 
  implicit none
 
@@ -1730,13 +1632,6 @@ end subroutine symmetrize_xred
 !! SOURCE
 
 subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symchk'
-!End of the abilint section
 
  implicit none
 
@@ -1886,13 +1781,6 @@ end subroutine symchk
 
 subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symatm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2037,13 +1925,6 @@ end subroutine symatm
 !! SOURCE
 
 subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons, type_axis)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symcharac'
-!End of the abilint section
 
  implicit none
 
@@ -2309,13 +2190,6 @@ end subroutine symcharac
 
 subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order,trialt,type_axis)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symaxes'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2579,13 +2453,6 @@ end subroutine symaxes
 !! SOURCE
 
 subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_axis)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symplanes'
-!End of the abilint section
 
  implicit none
 
@@ -2904,13 +2771,6 @@ end subroutine symplanes
 
 subroutine smallprim(metmin,minim,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smallprim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3134,13 +2994,6 @@ end subroutine smallprim
 !! SOURCE
 
 subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_symmetries'
-!End of the abilint section
 
  implicit none
 

@@ -202,13 +202,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
 &  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optionals arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setvtr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -816,13 +809,6 @@ end subroutine setvtr
 
 subroutine spatialchempot(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spatialchempot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -956,13 +942,6 @@ end subroutine spatialchempot
 
 subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ionion_realSpace'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1066,13 +1045,6 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: IonicEnergyandForces
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ionion_surface'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

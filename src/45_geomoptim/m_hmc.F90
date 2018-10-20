@@ -73,13 +73,6 @@ contains
 subroutine compute_kinetic_energy(ab_mover,vel,ekin)
     
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_kinetic_energy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -132,13 +125,6 @@ end subroutine compute_kinetic_energy
 subroutine generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)
     
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'generate_random_velocities'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -219,13 +205,6 @@ end subroutine generate_random_velocities
 subroutine metropolis_check(seed,de,kbtemp,iacc)
     
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metropolis_check'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

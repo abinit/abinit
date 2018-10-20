@@ -157,13 +157,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'driver'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------

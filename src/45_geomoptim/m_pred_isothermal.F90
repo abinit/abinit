@@ -95,13 +95,6 @@ contains
 
 subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_isothermal'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -652,13 +645,6 @@ end subroutine pred_isothermal
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isotemp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -798,13 +784,6 @@ end subroutine isotemp
 
  subroutine isopress(amass,bmass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,&
    & strten,strtarget,ucvol,vel,vlogv)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isopress'
-!End of the abilint section
 
  implicit none
 
@@ -981,13 +960,6 @@ end subroutine isopress
    & qmass,strten,strtarget,ucvol,vel)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isostress'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

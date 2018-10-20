@@ -113,13 +113,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_mkffnl,         only : mkffnl
  use m_mpinfo,         only : proc_distrb_cycle
  use m_nonlop,         only : nonlop
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop_test'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

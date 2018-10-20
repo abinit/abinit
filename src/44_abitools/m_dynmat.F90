@@ -135,13 +135,6 @@ contains
 
 subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asria_calc'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -310,13 +303,6 @@ end subroutine asria_calc
 
 subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asria_corr'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -389,13 +375,6 @@ end subroutine asria_corr
 !! SOURCE
 
 subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,natom,xcart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrprs'
-!End of the abilint section
 
  implicit none
 
@@ -753,13 +732,6 @@ end subroutine asrprs
 subroutine cart29(blkflg,blkval,carflg,d2cart,&
 & gprimd,iblok,mpert,natom,nblok,ntypat,rprimd,typat,ucvol,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cart29'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -908,13 +880,6 @@ end subroutine cart29
 
 subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cart39'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1016,13 +981,6 @@ end subroutine cart39
 
 subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
 &                        ntypat,typat,ucvol,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2cart_to_red'
-!End of the abilint section
 
  implicit none
 
@@ -1172,13 +1130,6 @@ end subroutine d2cart_to_red
 
 subroutine chkph3(carflg,idir,mpert,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkph3'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1274,13 +1225,6 @@ end subroutine chkph3
 !! SOURCE
 
 subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chneu9'
-!End of the abilint section
 
  implicit none
 
@@ -1545,13 +1489,6 @@ end subroutine chneu9
 !! SOURCE
 
 subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2sym3'
-!End of the abilint section
 
  implicit none
 
@@ -2017,13 +1954,6 @@ end subroutine d2sym3
 
 subroutine q0dy3_apply(natom,dyewq0,dyew)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'q0dy3_apply'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2100,13 +2030,6 @@ end subroutine q0dy3_apply
 !! SOURCE
 
 subroutine q0dy3_calc(natom,dyewq0,dyew,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'q0dy3_calc'
-!End of the abilint section
 
  implicit none
 
@@ -2198,13 +2121,6 @@ end subroutine q0dy3_calc
 !! SOURCE
 
 subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdyma'
-!End of the abilint section
 
  implicit none
 
@@ -2413,13 +2329,6 @@ end subroutine symdyma
 
 subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_sygra'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2553,13 +2462,6 @@ end subroutine dfpt_sygra
 !! SOURCE
 
 subroutine dfpt_sydy(cplex,dyfrow,indsym,natom,nondiag,nsym,qphon,sdyfro,symq,symrec)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_sydy'
-!End of the abilint section
 
  implicit none
 
@@ -2715,13 +2617,6 @@ end subroutine dfpt_sydy
 
 subroutine wings3(carflg,d2cart,mpert)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wings3'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2793,13 +2688,6 @@ end subroutine wings3
 !! SOURCE
 
 subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrif9'
-!End of the abilint section
 
  implicit none
 
@@ -2911,13 +2799,6 @@ end subroutine asrif9
 
 subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_bigbox'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2992,13 +2873,6 @@ end subroutine make_bigbox
 !! SOURCE
 
 subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bigbx9'
-!End of the abilint section
 
  implicit none
 
@@ -3180,13 +3054,6 @@ end subroutine bigbx9
 
 
 subroutine canat9(brav,natom,rcan,rprim,trans,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'canat9'
-!End of the abilint section
 
  implicit none
 
@@ -3418,13 +3285,6 @@ end subroutine canat9
 
 subroutine canct9(acell,gprim,ib,index,irpt,natom,nrpt,rcan,rcart,rprim,rpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'canct9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3491,13 +3351,6 @@ end subroutine canct9
 !! SOURCE
 
 subroutine chkrp9(brav,rprim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkrp9'
-!End of the abilint section
 
  implicit none
 
@@ -3618,13 +3471,6 @@ end subroutine chkrp9
 
 subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dist9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3723,13 +3569,6 @@ end subroutine dist9
 !! SOURCE
 
 subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftifc_q2r'
-!End of the abilint section
 
  implicit none
 
@@ -3840,13 +3679,6 @@ end subroutine ftifc_q2r
 
 subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftifc_r2q'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3947,13 +3779,6 @@ end subroutine ftifc_r2q
 
 subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dynmat_dq'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -4042,13 +3867,6 @@ end subroutine dynmat_dq
 
 subroutine ifclo9(ifccar,ifcloc,vect1,vect2,vect3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifclo9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -4131,13 +3949,6 @@ end subroutine ifclo9
 !! SOURCE
 
 subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,wghatm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wght9'
-!End of the abilint section
 
  implicit none
 
@@ -4574,13 +4385,6 @@ end subroutine wght9
 
 subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd3sym'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -4793,13 +4597,6 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
  use defs_basis
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sytens'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -5065,13 +4862,6 @@ end subroutine sytens
 subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 & dynmat,gprim,indsym,mpert,natom,nblok,nqpt,nsym,rfmeth,&
 & rprim,spqpt,symrec,symrel,comm,qmissing)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdm9'
-!End of the abilint section
 
  implicit none
 
@@ -5369,13 +5159,6 @@ end subroutine symdm9
 
 subroutine axial9(ifccar,vect1,vect2,vect3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'axial9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -5476,13 +5259,6 @@ end subroutine axial9
 
 subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dymfz9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -5569,13 +5345,6 @@ end subroutine dymfz9
 !! SOURCE
 
 subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nanal9'
-!End of the abilint section
 
  implicit none
 
@@ -5679,13 +5448,6 @@ end subroutine nanal9
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
 & nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gtdyn9'
-!End of the abilint section
 
  implicit none
 
@@ -5832,13 +5594,6 @@ end subroutine gtdyn9
 subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 & mpert,msym,natom,nsym,ntypat,phfrq,qphnrm,qphon,rprimd,&
 & symdynmat,symrel,symafm,typat,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_phfrq'
-!End of the abilint section
 
  implicit none
 
@@ -6110,13 +5865,6 @@ end subroutine dfpt_phfrq
 
 subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_prtph'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -6327,13 +6075,6 @@ end subroutine dfpt_prtph
 
 subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'massmult_and_breaksym'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -6441,13 +6182,6 @@ end subroutine massmult_and_breaksym
 !! SOURCE
 
 subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftgam'
-!End of the abilint section
 
  implicit none
 
@@ -6565,13 +6299,6 @@ end subroutine ftgam
 !! SOURCE
 
 subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ftgam_init'
-!End of the abilint section
 
  implicit none
 

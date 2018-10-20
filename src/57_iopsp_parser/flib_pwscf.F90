@@ -49,13 +49,6 @@ module flib_pwscf
 !-----------------------------------------------------------------------
 FUNCTION matches( string1, string2 )
 !-----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matches'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   CHARACTER (LEN=*), INTENT(IN) :: string1, string2
@@ -106,13 +99,6 @@ END FUNCTION matches
 !-----------------------------------------------------------------------
 FUNCTION capital( in_char )
 !-----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'capital'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   CHARACTER(LEN=1), INTENT(IN) :: in_char
@@ -163,13 +149,6 @@ END FUNCTION capital
 !-----------------------------------------------------------------------
 FUNCTION lowercase( in_char )
 !-----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lowercase'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   CHARACTER(LEN=1), INTENT(IN) :: in_char
@@ -218,13 +197,6 @@ END FUNCTION lowercase
 subroutine errore (routine, error, code)
 
   use defs_basis, only: std_out,std_out_default
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'errore'
-!End of the abilint section
-
   implicit none
 
   !args

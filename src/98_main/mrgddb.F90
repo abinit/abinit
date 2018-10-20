@@ -60,13 +60,6 @@ program mrgddb
  use m_io_tools,     only : file_exists
  use m_fstrings,     only : sjoin
  use m_ddb,          only : DDB_VERSION, mblktyp1, mblktyp5
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrgddb'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

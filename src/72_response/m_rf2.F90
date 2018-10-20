@@ -157,13 +157,6 @@ CONTAINS  !=====================================================================
 
 subroutine rf2_getidir(idir1,idir2,idir)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rf2_getidir'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -205,13 +198,6 @@ end subroutine rf2_getidir
 !! SOURCE
 
 subroutine rf2_getidirs(idir,idir1,idir2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rf2_getidirs'
-!End of the abilint section
 
  implicit none
 
@@ -294,13 +280,6 @@ end subroutine rf2_getidirs
 
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
                                  jband,debug_mode,vi,v1j,v2j)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rf2_accumulate_bands'
-!End of the abilint section
 
  implicit none
 
@@ -468,13 +447,6 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 &                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
 &                                debug_mode,prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &                                conj,enl,ffnl1,ffnl1_test) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rf2_apply_hamiltonian'
-!End of the abilint section
 
  implicit none
 
@@ -838,13 +810,6 @@ end subroutine rf2_apply_hamiltonian
 !! SOURCE
 
 subroutine rf2_destroy(rf2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rf2_destroy'
-!End of the abilint section
 
  implicit none
 

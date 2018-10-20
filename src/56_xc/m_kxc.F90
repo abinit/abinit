@@ -113,13 +113,6 @@ CONTAINS  !=====================================================================
 
 subroutine kxc_rpa(gsq,krpa,npw,option,rcut_coulomb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_rpa'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------------------------------------
@@ -211,13 +204,6 @@ end subroutine kxc_rpa
 !! SOURCE
 
 subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_local'
-!End of the abilint section
 
  implicit none
 
@@ -415,13 +401,6 @@ end subroutine kxc_local
 !! SOURCE
 
 subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocut,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_alda'
-!End of the abilint section
 
  implicit none
 
@@ -676,13 +655,6 @@ end subroutine kxc_alda
 
 subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_pgg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -905,13 +877,6 @@ end subroutine kxc_pgg
 
 subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_eok'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------------------------------------
@@ -1070,13 +1035,6 @@ end subroutine kxc_eok
 !! SOURCE
 
 subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kxcg,gvec,comm,dbg_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_driver'
-!End of the abilint section
 
  implicit none
 
@@ -1330,13 +1288,6 @@ end subroutine kxc_driver
 
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 &                  npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_ADA'
-!End of the abilint section
 
  implicit none
 

@@ -129,13 +129,6 @@ CONTAINS
 SUBROUTINE MatrixHyb_init(this, iTech, size, Wmax)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_init'
-!End of the abilint section
-
   TYPE(MatrixHyb)     , INTENT(INOUT) :: this
   INTEGER             , INTENT(IN   ) :: iTech
   INTEGER, OPTIONAL, INTENT(IN   ) :: size
@@ -203,13 +196,6 @@ END SUBROUTINE MatrixHyb_init
 SUBROUTINE MatrixHyb_setSize(this,new_tail)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_setSize'
-!End of the abilint section
-
   TYPE(MatrixHyb), INTENT(INOUT) :: this
   INTEGER        , INTENT(IN   ) :: new_tail
 !Local variables ------------------------------
@@ -259,13 +245,6 @@ END SUBROUTINE MatrixHyb_setSize
 SUBROUTINE MatrixHyb_enlarge(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_enlarge'
-!End of the abilint section
-
   TYPE(MatrixHyb)     , INTENT(INOUT)          :: this
   INTEGER, OPTIONAL, INTENT(IN   )          :: size
 !Local variables ------------------------------
@@ -351,13 +330,6 @@ END SUBROUTINE MatrixHyb_enlarge
 SUBROUTINE MatrixHyb_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_clear'
-!End of the abilint section
-
   TYPE(MatrixHyb), INTENT(INOUT) :: this
   this%tail = 0 
 END SUBROUTINE MatrixHyb_clear
@@ -397,13 +369,6 @@ END SUBROUTINE MatrixHyb_clear
 SUBROUTINE MatrixHyb_assign(this, matrix)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_assign'
-!End of the abilint section
-
   TYPE(MatrixHyb), INTENT(INOUT) :: this
   TYPE(MatrixHyb), INTENT(IN   ) :: matrix
 !Local variables ------------------------------
@@ -461,13 +426,6 @@ END SUBROUTINE MatrixHyb_assign
 SUBROUTINE MatrixHyb_inverse(this,determinant)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_inverse'
-!End of the abilint section
-
   TYPE(MatrixHyb), INTENT(INOUT) :: this
   DOUBLE PRECISION, OPTIONAL, INTENT(OUT) :: determinant
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: invMatrix
@@ -586,13 +544,6 @@ END SUBROUTINE MatrixHyb_inverse
 SUBROUTINE MatrixHyb_LU(this,pivot,determinant)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_LU'
-!End of the abilint section
-
   TYPE(MatrixHyb), INTENT(INOUT) :: this
   INTEGER, DIMENSION(:), ALLOCATABLE, OPTIONAL, INTENT(INOUT) :: pivot
   DOUBLE PRECISION, OPTIONAL, INTENT(OUT) :: determinant
@@ -701,13 +652,6 @@ END SUBROUTINE MatrixHyb_LU
 SUBROUTINE MatrixHyb_getDet(this,det)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_getDet'
-!End of the abilint section
-
   TYPE(MatrixHyb) , INTENT(INOUT) :: this
   DOUBLE PRECISION, INTENT(  OUT) :: det
 
@@ -756,13 +700,6 @@ END SUBROUTINE MatrixHyb_getDet
 SUBROUTINE MatrixHyb_print(this,ostream,opt_print)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_print'
-!End of the abilint section
-
   TYPE(MatrixHyb), INTENT(IN) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: ostream
   INTEGER, OPTIONAL, INTENT(IN) :: opt_print
@@ -831,13 +768,6 @@ END SUBROUTINE MatrixHyb_print
 SUBROUTINE MatrixHyb_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MatrixHyb_destroy'
-!End of the abilint section
-
   TYPE(MatrixHyb), INTENT(INOUT) :: this
 
   FREEIF(this%mat)

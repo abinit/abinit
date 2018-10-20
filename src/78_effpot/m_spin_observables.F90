@@ -67,13 +67,6 @@ contains
 
   use m_spin_terms, only: spin_terms_t
   use m_multibinit_dataset, only: multibinit_dtset_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ob_initialize'
-!End of the abilint section
-
     class(spin_observable_t) :: self
     type(spin_terms_t) :: supercell
     type(multibinit_dtset_type) :: params
@@ -117,13 +110,6 @@ contains
 
   subroutine ob_finalize(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ob_finalize'
-!End of the abilint section
-
     class(spin_observable_t) :: self
     if (allocated(self%isublatt)) then
        ABI_DEALLOCATE(self%isublatt)
@@ -148,13 +134,6 @@ contains
 
   subroutine ob_calc_staggered_M(self, S, Snorm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ob_calc_staggered_M'
-!End of the abilint section
-
     class(spin_observable_t), intent(inout) :: self
     real(dp), intent(in):: S(3,self%nspins), Snorm(self%nspins)
     integer :: i, isub
@@ -175,48 +154,20 @@ contains
 
   subroutine ob_calc_traj_obs(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ob_calc_traj_obs'
-!End of the abilint section
-
       class(spin_observable_t) :: self
   end subroutine ob_calc_traj_obs
 
   subroutine ob_calc_thermo_obs(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ob_calc_thermo_obs'
-!End of the abilint section
 
     class(spin_observable_t) :: self
   end subroutine ob_calc_thermo_obs
 
   subroutine ob_calc_correlation_obs(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ob_calc_correlation_obs'
-!End of the abilint section
-
     class(spin_observable_t) :: self
   end subroutine ob_calc_correlation_obs
 
   subroutine ob_calc_observables(self, S, Snorm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ob_calc_observables'
-!End of the abilint section
 
     class(spin_observable_t) :: self
     real(dp), intent(in) :: S(3,self%nspins), Snorm(self%nspins)

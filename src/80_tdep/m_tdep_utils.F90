@@ -42,13 +42,6 @@ contains
 !=====================================================================================================
  subroutine tdep_calc_MoorePenrose(Forces_MD,CoeffMoore,InVar,IFC_coeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_MoorePenrose'
-!End of the abilint section
-
   implicit none 
 
   type(Input_Variables_type),intent(in) :: InVar
@@ -117,13 +110,6 @@ contains
 !====================================================================================================
  subroutine tdep_MatchIdeal2Average(distance,Forces_MD,InVar,Lattice,&
 &                              Rlatt_cart,Rlatt4dos,Sym,ucart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_MatchIdeal2Average'
-!End of the abilint section
 
   implicit none 
 
@@ -581,13 +567,6 @@ contains
  subroutine tdep_calc_model(Free_Anh,Forces_MD,Forces_TDEP,InVar,Phij_NN,Pij_N,ucart,U0,&
 &                 ftot3) !optional 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_model'
-!End of the abilint section
-
   implicit none 
 
   type(Input_Variables_type),intent(in) :: InVar
@@ -814,13 +793,6 @@ contains
 
 !====================================================================================================
 subroutine tdep_calc_nbcoeff(distance,iatcell,InVar,ishell,jatom,katom,ncoeff,norder,nshell,order,proj,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_nbcoeff'
-!End of the abilint section
 
   implicit none
 

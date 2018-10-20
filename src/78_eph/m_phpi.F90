@@ -105,13 +105,6 @@ contains  !=====================================================================
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_phpi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -652,13 +645,6 @@ subroutine out_phpi(iout, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_phpi'
-!End of the abilint section
-
  integer,intent(in) :: iout
  integer,intent(in) :: natom3
 !arrays
@@ -717,13 +703,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_phpi_nc'
-!End of the abilint section
-
  integer,intent(in) :: natom3
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst

@@ -133,13 +133,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 & occopt,qptn,response,rprimd,shiftk,string,symafm,symrel,vacuum,wtk,&
 & impose_istwf_1) ! Optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inkpts'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -595,13 +588,6 @@ end subroutine inkpts
 !! SOURCE
 
 subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spinat,string,typat,vacuum,xred,qptrlatt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inqpt'
-!End of the abilint section
 
  implicit none
 

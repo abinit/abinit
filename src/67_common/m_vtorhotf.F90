@@ -93,13 +93,6 @@ contains
 subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 &  irrzon,mpi_enreg,natom,nfft,nspden,nsppol,nsym,phnons,rhog,rhor,rprimd,ucvol,vtrial)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vtorhotf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -209,13 +202,6 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !! SOURCE
   subroutine tf()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tf'
-!End of the abilint section
-
   implicit none
 
 ! *************************************************************************
@@ -304,13 +290,6 @@ end subroutine tf
 
   subroutine tfek()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tfek'
-!End of the abilint section
-
   implicit none
 
 ! *************************************************************************
@@ -383,13 +362,6 @@ end subroutine tf
 !! SOURCE
 
  function zfermim12(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermim12'
-!End of the abilint section
 
  implicit none
 
@@ -476,13 +448,6 @@ end function zfermim12
 !..reference: antia apjs 84,101 1993
 !..
 !..declare
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi12'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -569,13 +534,6 @@ end function zfermi12
 !..reference: antia  priv comm. 11sep94
 !..
 !..declare
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi1'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -653,13 +611,6 @@ end function zfermi1
 !! SOURCE
 
  function zfermi32(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi32'
-!End of the abilint section
 
  implicit none
 
@@ -745,13 +696,6 @@ end function zfermi32
 
  function zfermi2(xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi2'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -829,13 +773,6 @@ end function zfermi2
 !! SOURCE
 
  function zfermi52(xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi52'
-!End of the abilint section
 
  implicit none
 
@@ -920,13 +857,6 @@ end function zfermi52
 
  function zfermi3(xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zfermi3'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1006,13 +936,6 @@ end function zfermi3
 
  function ifermim12(ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermim12'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1090,13 +1013,6 @@ end function ifermim12
 
  function ifermi12(ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermi12'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1170,13 +1086,6 @@ end function ifermi12
 !! SOURCE
 
  function ifermi32(ff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermi32'
-!End of the abilint section
 
  implicit none
 
@@ -1252,13 +1161,6 @@ end function ifermi32
 
  function ifermi52(ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifermi52'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1331,13 +1233,6 @@ end function ifermi52
 
  function fp12a1 (x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fp12a1'
-!End of the abilint section
-
  implicit none
 
 ! Arguments -------------------------------
@@ -1388,13 +1283,6 @@ end function ifermi52
 !! SOURCE
 
  function fp32a1 (x)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fp32a1'
-!End of the abilint section
 
  implicit none
 
@@ -1447,13 +1335,6 @@ end function ifermi52
 !! SOURCE
 
  function xp12a1 (y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xp12a1'
-!End of the abilint section
 
  implicit none
 
@@ -1508,13 +1389,6 @@ end function ifermi52
 
  function fm12a1 (x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fm12a1'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1566,13 +1440,6 @@ end function ifermi52
 !! SOURCE
 
  subroutine fm12a1t (cktf,rtnewt,tphysel,vtrial,rhor_middx,rhor_mid,nfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fm12a1t'
-!End of the abilint section
 
  implicit none
 

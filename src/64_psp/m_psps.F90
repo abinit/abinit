@@ -97,13 +97,6 @@ contains
 
 subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_xml_xmlpaw_upf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -182,13 +175,6 @@ end subroutine test_xml_xmlpaw_upf
 !! SOURCE
 
 subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_global'
-!End of the abilint section
 
  implicit none
 
@@ -278,13 +264,6 @@ end subroutine psps_init_global
 !! SOURCE
 
 subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_from_dtset'
-!End of the abilint section
 
  implicit none
 
@@ -553,13 +532,6 @@ end subroutine psps_init_from_dtset
 
 subroutine psps_free(psps)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -675,13 +647,6 @@ end subroutine psps_free
 !! SOURCE
 
 subroutine psps_copy(pspsin, pspsout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_copy'
-!End of the abilint section
 
  implicit none
 
@@ -834,13 +799,6 @@ end subroutine psps_copy
 !! SOURCE
 
 subroutine psps_print(psps,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_print'
-!End of the abilint section
 
  implicit none
 
@@ -1051,13 +1009,6 @@ end subroutine psps_print
 
 subroutine psps_ncwrite(psps, path)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1216,13 +1167,6 @@ end subroutine psps_ncwrite
 
 subroutine psp2params_init(gth_params, npsp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1276,13 +1220,6 @@ end subroutine psp2params_init
 
 subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_copy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1334,13 +1271,6 @@ end subroutine psp2params_copy
 !! SOURCE
 
 subroutine psp2params_free(gth_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_free'
-!End of the abilint section
 
  implicit none
 
@@ -1398,13 +1328,6 @@ end subroutine psp2params_free
 
 subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1451,13 +1374,6 @@ end subroutine nctab_init
 
 subroutine nctab_free(nctab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1496,13 +1412,6 @@ end subroutine nctab_free
 !! SOURCE
 
 subroutine nctab_copy(nctabin, nctabout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1557,13 +1466,6 @@ end subroutine nctab_copy
 !! SOURCE
 
 subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tvalespl'
-!End of the abilint section
 
  implicit none
 
@@ -1637,13 +1539,6 @@ end subroutine nctab_eval_tvalespl
 !! SOURCE
 
 subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_vl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tcorespl'
-!End of the abilint section
 
  implicit none
 
@@ -1719,13 +1614,6 @@ end subroutine nctab_eval_tcorespl
 !! SOURCE
 
 subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_mixalch'
-!End of the abilint section
 
  implicit none
 

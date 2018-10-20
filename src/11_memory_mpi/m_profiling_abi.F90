@@ -119,13 +119,6 @@ contains
 
  subroutine abimem_init(level, deltat, filename, funcname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_init'
-!End of the abilint section
-
   implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -219,13 +212,6 @@ end subroutine abimem_init
 
 subroutine abimem_shutdown()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_shutdown'
-!End of the abilint section
-
   implicit none
 
 !Local variables-------------------------------
@@ -261,13 +247,6 @@ end subroutine abimem_shutdown
 
 
 subroutine abimem_set_opts(level, limit, deltat, filename, funcname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_set_opts'
-!End of the abilint section
 
   implicit none
 
@@ -311,13 +290,6 @@ end subroutine abimem_set_opts
 !!***
 
 subroutine abimem_report(unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_report'
-!End of the abilint section
 
  implicit none
 
@@ -389,13 +361,6 @@ end subroutine abimem_report
 
 subroutine abimem_get_info(nalloc, ndealloc, allocmemory)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_get_info'
-!End of the abilint section
-
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -442,13 +407,6 @@ end subroutine abimem_get_info
 !! SOURCE
 
 subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_record'
-!End of the abilint section
 
  implicit none
 
@@ -593,13 +551,6 @@ end subroutine abimem_record
 
 subroutine abimem_check(nalloc, ndealloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_check'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -639,13 +590,6 @@ end subroutine abimem_check
 !! SOURCE
 
 subroutine abimem_abort(msg, file, func, line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_abort'
-!End of the abilint section
 
  implicit none
 
@@ -696,13 +640,6 @@ end subroutine abimem_abort
 !! SOURCE
 
 pure function abimem_basename(string) result(basename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_basename'
-!End of the abilint section
 
  character(len=*),intent(in) :: string
  character(len=LEN_TRIM(string)) :: basename
@@ -756,13 +693,6 @@ end function abimem_basename
 !! SOURCE
 
 function abimem_wtime() result(wall)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abimem_wtime'
-!End of the abilint section
 
  implicit none
 

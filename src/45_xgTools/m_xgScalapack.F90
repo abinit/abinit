@@ -100,13 +100,6 @@ module m_xgScalapack
 !! SOURCE
   subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,usable)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgScalapack_init'
-!End of the abilint section
-
     type(xgScalapack_t), intent(inout) :: xgScalapack
     integer            , intent(in   ) :: comm
     integer            , intent(in   ) :: maxDim
@@ -237,13 +230,6 @@ module m_xgScalapack
 
   subroutine xgScalapack_config(myconfig,maxDim)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgScalapack_config'
-!End of the abilint section
-
     integer, intent(in) :: myconfig
     integer, intent(in) :: maxDim
     if ( myconfig == SLK_AUTO) then
@@ -267,13 +253,6 @@ module m_xgScalapack
 
   function toProcessorScalapack(xgScalapack) result(processor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'toProcessorScalapack'
-!End of the abilint section
-
     type(xgScalapack_t), intent(in) :: xgScalapack
     type(processor_scalapack) :: processor
 
@@ -287,13 +266,6 @@ module m_xgScalapack
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgScalapack_heev'
-!End of the abilint section
-
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: eigenvalues
@@ -368,13 +340,6 @@ module m_xgScalapack
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues)
     use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgScalapack_hegv'
-!End of the abilint section
-
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: matrixB
@@ -454,13 +419,6 @@ module m_xgScalapack
 
   subroutine xgScalapack_scatter(xgScalapack,matrix,req)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgScalapack_scatter'
-!End of the abilint section
-
     type(xgScalapack_t), intent(in   ) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrix
     integer            , intent(  out) :: req
@@ -512,13 +470,6 @@ module m_xgScalapack
 
 
   subroutine  xgScalapack_free(xgScalapack)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgScalapack_free'
-!End of the abilint section
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
     double precision :: tsec(2)

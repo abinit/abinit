@@ -108,13 +108,6 @@ CONTAINS  !=====================================================================
 subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,Epren,&
 & Kmesh_dense, KS_BSt_dense, QP_BSt_dense, Wfd_dense, Vcp_dense, grid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_haydock_driver'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -638,13 +631,6 @@ end subroutine exc_haydock_driver
 subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
 & nkets,kets,green,hexc,hexc_i,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_herm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -929,13 +915,6 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
 & green,inn,is_converged,&
 & hexc, hexc_i, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_herm_algo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1112,13 +1091,6 @@ end subroutine haydock_herm_algo
 
 subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_restart'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1237,13 +1209,6 @@ end subroutine haydock_restart
 !! SOURCE
 
 subroutine haydock_mdf_to_tensor(BSp,Cryst,eps,tensor_cart,tensor_red,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_mdf_to_tensor'
-!End of the abilint section
 
  implicit none
 
@@ -1371,13 +1336,6 @@ end subroutine haydock_mdf_to_tensor
 !! SOURCE
 
 subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,green,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_psherm'
-!End of the abilint section
 
  implicit none
 
@@ -1635,13 +1593,6 @@ end subroutine haydock_psherm
 
 subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
 &  factor,term_type,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,green,inn,is_converged,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_psherm_optalgo'
-!End of the abilint section
 
  implicit none
 
@@ -1938,13 +1889,6 @@ end subroutine haydock_psherm_optalgo
 !! SOURCE
 
 subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,ep_renorms,green,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_bilanczos'
-!End of the abilint section
 
  implicit none
 
@@ -2256,13 +2200,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 &  factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
 &  green,inn,is_converged,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'haydock_bilanczos_optalgo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2555,13 +2492,6 @@ end subroutine haydock_bilanczos_optalgo
 !! SOURCE
 
 subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'continued_fract_general'
-!End of the abilint section
 
  implicit none
 
