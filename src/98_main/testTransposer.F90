@@ -138,7 +138,12 @@ program testTransposer
   call xmpi_end()
 
   contains
+!!***
 
+!!****f* testTransposer/tester
+!!
+!! NAME
+!! tester
     subroutine tester()
 
 
@@ -172,6 +177,12 @@ program testTransposer
       write(std_out,"(a,f20.4)") " Difference: ",errmax
       call xmpi_barrier(xmpi_world)
     end subroutine tester
+!!***
+
+!!****f* testTransposer/printTimes
+!!
+!! NAME
+!! printTimes
 
     subroutine printTimes()
 
@@ -201,4 +212,4 @@ program testTransposer
 
 
   end program testTransposer
-  !!***
+!!***
