@@ -195,7 +195,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: newlobpcg
- integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=5
+ integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
 !     subovl should be Identity (in that case we should use use_subovl=0)

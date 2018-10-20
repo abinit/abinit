@@ -235,7 +235,6 @@ end subroutine ab7_invars_set_flags
     mxvals%nsym        = token%mxnsym
     mxvals%ntypat      = token%mxntypat
     mxvals%nzchempot   = token%mxnzchempot
-
     mxvals%nberry      = 20   ! This is presently a fixed value. Should be changed.
 
     papiopt       = token%papiopt
@@ -543,9 +542,7 @@ subroutine ab7_invars_new_from_file(dtsetsId, filename, n, pspfiles, npsp, comm)
 
  dtsetsId = 0
 
- if (AB_DBG) write(std_err,*) "AB module: read '", trim(filename), "' to string."
  call parsefile(filename, lenstr, ndtset, string, my_comm)
- if (AB_DBG) write(std_err,*) "AB module: read OK, string length ", lenstr
 
  if (npsp == 0) then
     call ab7_invars_load(dtsetsId, string, lenstr, ndtset, .false., .false.)
@@ -673,7 +670,7 @@ end subroutine ab7_invars_new_from_file
           ABI_ALLOCATE(pspfilnam_,(npsp))
           call iofn2(npsp, pspfilnam_)
           call inpspheads(pspfilnam_,npsp,token%pspheads,ecut_tmp)
-!      write(std_out,*)' ab7_invars_f90 : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
+          !write(std_out,*)' ab7_invars_f90 : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
           ABI_DEALLOCATE(pspfilnam_)
        else
           call inpspheads(pspfilnam,npsp,token%pspheads,ecut_tmp)
@@ -681,7 +678,7 @@ end subroutine ab7_invars_new_from_file
        if(minval(abs(token%pspheads(1:npsp)%pspcod-7))==0) usepaw=1
        if(minval(abs(token%pspheads(1:npsp)%pspcod-17))==0) usepaw=1
     end if
-    !Communicate pspheads to all processors
+    ! Communicate pspheads to all processors
     call pspheads_comm(npsp,token%pspheads,usepaw)
  else
     ! No psp files are given, we put default values into pspheads.
@@ -697,7 +694,7 @@ end subroutine ab7_invars_new_from_file
     if(usepaw==0)then
       token%dtsets(idtset)%ratsph(:)=two
     else
-!     Note that the following coding assumes that npsp=ntypati for PAW, which is true as of now (XG20101024).
+      ! Note that the following coding assumes that npsp=ntypati for PAW, which is true as of now (XG20101024).
       !token%dtsets(idtset)%ratsph(1:npsp)=token%pspheads(1:npsp)%pawheader%rpaw
       do ipsp=1,npsp
         token%dtsets(idtset)%ratsph(ipsp)=token%pspheads(ipsp)%pawheader%rpaw
@@ -705,8 +702,7 @@ end subroutine ab7_invars_new_from_file
     endif
  end do
 
- !Take care of other dimensions, and part of the content of dtsets
- !that is or might be needed early.
+ !Take care of other dimensions, and part of the content of dtsets that is or might be needed early.
  !zion_max=maxval(pspheads(1:npsp)%zionpsp) ! This might not work properly with HP compiler
 
 ! zion_max=token%pspheads(1)%zionpsp
@@ -767,8 +763,7 @@ end subroutine ab7_invars_new_from_file
  !10) Perform some global initialization, depending on the value of
  ! pseudopotentials, parallelism variables, or macro input variables
 
- !If all the pseudopotentials have the same pspxc, override the default
- !value for dtsets 1 to ndtset
+ !If all the pseudopotentials have the same pspxc, override the default value for dtsets 1 to ndtset
  if(with_psp .and. minval(abs((token%pspheads(1:npsp)%pspxc-token%pspheads(1)%pspxc)))==0)then
     token%dtsets(1:ndtset_alloc)%ixc=token%pspheads(1)%pspxc
  end if
@@ -930,8 +925,6 @@ end subroutine ab7_invars_get_ndtset
 
 subroutine iofn2(npsp,filnam)
 
- use defs_basis
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -960,9 +953,9 @@ subroutine iofn2(npsp,filnam)
    read (std_in, '(a)' , iostat=ios ) filpsp
    filnam(ipsp)=trim(filpsp)
 
-   !  It might be that a file name is missing
+   ! It might be that a file name is missing
    if (ios/=0) then
-     write(message, '(a,a,a,a,a,a,a)' )&
+     write(message, '(7a)' )&
 &     'There are not enough names of pseudopotentials',ch10,&
 &     'provided in the files file.',ch10,&
 &     'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
@@ -970,7 +963,7 @@ subroutine iofn2(npsp,filnam)
      MSG_ERROR(message)
    end if
 
-   write(std_out,'(a,i0,2a)' )' iofn2 : for atom type ',ipsp,', psp file is ',trim(filpsp)
+   write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
  end do ! ipsp=1,npsp
 
 end subroutine iofn2

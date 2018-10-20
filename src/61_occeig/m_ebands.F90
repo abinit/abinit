@@ -2605,8 +2605,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  if (.not. ebands_has_metal_scheme(ebands)) then
-   msg = "set_nelect assumes a metallic occupation scheme. Use ebands_set_scheme!"
-   MSG_ERROR(msg)
+   MSG_ERROR("set_nelect assumes a metallic occupation scheme. Use ebands_set_scheme!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
@@ -2616,6 +2615,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
  write(msg,"(2(a,es16.6),a,2(a,es16.6))")&
    "Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10,&
    "New fermi level: ",ebands%fermie,", with nelect: ",ebands%nelect
+ call wrtout(std_out, msg)
 
 end subroutine ebands_set_nelect
 !!***

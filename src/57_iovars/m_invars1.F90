@@ -195,7 +195,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
        write(message, '(3a,i0,a,i0,a,a)' )&
 &       'The components of jdtset must be between 1 and 9999.',ch10,&
 &       'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
-&       'Action : correct jdtset in your input file.'
+&       'Action: correct jdtset in your input file.'
        MSG_ERROR(message)
      end if
    end do
@@ -290,7 +290,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      write(message, '(5a)' )&
 &     'supercell_latt must have positive parameters and diagonal part',ch10,&
 &     'This is not allowed.  ',ch10,&
-&     'Action : modify supercell_latt in the input file.'
+&     'Action: modify supercell_latt in the input file.'
      MSG_ERROR(message)
    end if
 !  Compute the multiplicity of the supercell
@@ -571,8 +571,7 @@ end subroutine invars0
 !!  mxnatom=maximal value of input natom for all the datasets
 !!  mxnimage=maximal value of input nimage for all the datasets
 !!  ndtset= number of datasets to be read; if 0, no multi-dataset mode
-!!  ndtset_alloc=number of datasets, corrected for allocation of at least
-!!               one data set.
+!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !!  npsp= number of pseudopotential files
 !!  string*(*)=string of characters containing all input variables and data
 !!  zionpsp(npsp)= valence charge over all psps

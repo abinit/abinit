@@ -400,10 +400,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
 
    else if (abs(dtset%eph_extrael) > tol12) then
-     !NOT_IMPLEMENTED_ERROR()
-     ! TODO: Be careful with the trick used in elphon for passing the concentration
      call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-     call ebands_set_nelect(ebands, ebands%nelect+dtset%eph_extrael, dtset%spinmagntarget, msg)
+     call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
      call wrtout(ab_out,msg)
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
@@ -619,7 +617,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
-
  call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
  ! ====================================================
