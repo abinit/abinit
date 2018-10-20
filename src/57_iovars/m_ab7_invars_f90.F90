@@ -108,6 +108,8 @@ module m_ab7_invars
   public :: ab7_invars_get_integer_array
   public :: ab7_invars_get_real_array
 
+  public :: iofn2
+
 contains
 !!***
 

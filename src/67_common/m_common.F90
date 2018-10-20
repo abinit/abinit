@@ -1669,5 +1669,245 @@ subroutine prtene(dtset,energies,iout,usepaw)
 end subroutine prtene
 !!***
 
+!!****f* ABINIT/dtsets_from_file
+!! NAME
+!! dtsets_from_file
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  path: Input Filename
+!!  comm: MPI communicator
+!!
+!! OUTPUT
+!!  dtsets
+!!  dims
+!!
+!! PARENTS
+!!      abinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dtsets_from_file(path, timopt, dtsets, mxvals, comm)
+
+ use m_xmpi
+
+ use m_invars1,      only : invars0
+ use m_time,         only : timab, time_set_papiopt
+ use defs_abitypes,  only : dataset_type, ab_dimensions
+ use m_dtfil,        only : status
+ use defs_datatypes, only : pspheader_type
+ use m_ab7_invars,   only : iofn2
+ use m_pspheads,     only : inpspheads, pspheads_comm
+ use m_xpapi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dtsets_from_file'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),pointer  :: dtsets(:)
+ type(ab_dimensions),intent(out) :: mxvals
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+ integer,intent(out) :: timopt
+
+!Local variables-------------------------------
+!scalars
+ integer :: lenstr, ndtset
+ character(len=strlen) :: string
+ !integer, intent(in) :: lenstr, ndtset
+ !character(len = fnlen), intent(in), optional :: pspfilnam(:)
+ integer :: jdtset,ipsp
+ integer :: me, ndtset_alloc, nprocs
+ integer :: istatr,istatshft, papiopt
+ integer :: npsp, ii, idtset, msym, usepaw
+ integer,allocatable :: mband_upper_(:)
+ real(dp),allocatable :: zionpsp(:)
+ real(dp) :: ecut_tmp(3,2,10)
+ character(len=fnlen), allocatable :: pspfilnam_(:)
+ character(len=fnlen), parameter :: opt_status_file = "status"
+ integer, parameter :: level=3
+ real(dp) :: tsec(2)
+
+ type(pspheader_type),pointer :: pspheads(:)
+ integer :: dmatpuflag
+
+!************************************************************************
+
+ ! 6~11) Call the parser from the parser module.
+ !call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
+ !call ab7_invars_load(dtsetsId, string, lenstr, ndtset, .true., .true.)
+ !!call timab(44,1,tsec)
+ !call ab7_invars_get_abinit_vars(dtsetsId, dtsets, pspheads,mxvals, papiopt, timopt, dmatpuflag)
+ !ndtset_alloc = size(dtsets) - 1
+ !npsp = size(pspheads)
+
+ me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ ! Read the file, stringify it and return the number of datasets.
+ call parsefile(path, lenstr, ndtset, string, comm)
+
+ !subroutine ab7_invars_load(dtsetsId, string, lenstr, ndtset, with_psp, with_mem, pspfilnam)
+
+ ndtset_alloc = ndtset; if (ndtset == 0) ndtset_alloc=1
+ ABI_DATATYPE_ALLOCATE(dtsets, (0:ndtset_alloc))
+
+ timopt = 1; if (xmpi_paral==1) timopt = 0
+
+ !7) Continue to analyze the input string, get upper dimensions,
+ !and allocate the remaining arrays.
+ call invars0(dtsets, istatr, istatshft, lenstr, &
+      & msym, mxvals%natom, mxvals%nimage, mxvals%ntypat, ndtset, ndtset_alloc, npsp, &
+      & papiopt, timopt, string)
+
+ ! Enable PAPI timers
+ call time_set_papiopt(papiopt)
+
+ dtsets(:)%timopt = timopt
+ dtsets(0)%timopt = 1
+ if (xmpi_paral == 1) dtsets(0)%timopt = 0
+
+ !Be careful : at these fourth and fifth calls of status, istatr and istatshft taken
+ !from the input variables will be saved definitively.
+ call status(0,opt_status_file,istatr,level,'init istatr   ')
+ call status(0,opt_status_file,istatshft,level,'init istatshft')
+
+ call timab(41,2,tsec)
+ call timab(timopt,5,tsec)
+
+ !8) Finish to read the "file" file completely, as npsp is known,
+ !and also initialize pspheads, that contains the important information
+ !from the pseudopotential headers, as well as the psp filename
+
+ call timab(42,1,tsec)
+ call status(0,opt_status_file,99,level,'call iofn2    ')
+
+ usepaw = 0
+ ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
+ if (npsp > 10) then
+   MSG_BUG('ecut_tmp is not well defined.')
+ end if
+ ecut_tmp = -one
+
+ pspheads(:)%usewvl = dtsets(1)%usewvl
+ if (me == 0) then
+    !if (.not. present(pspfilnam)) then
+       ABI_ALLOCATE(pspfilnam_,(npsp))
+       call iofn2(npsp, pspfilnam_)
+       call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
+       ABI_DEALLOCATE(pspfilnam_)
+    !else
+    !   call inpspheads(pspfilnam, npsp, pspheads, ecut_tmp)
+    !end if
+    if(minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
+    if(minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
+ end if
+
+ ! Communicate pspheads to all processors
+ call pspheads_comm(npsp, pspheads, usepaw)
+
+ !If (all) pspcod are 7 then this is a PAW calculation. Initialize (default) the value of ratsph
+ do idtset=0,ndtset_alloc
+    dtsets(idtset)%usepaw = usepaw
+    if (usepaw == 0) then
+      dtsets(idtset)%ratsph(:)=two
+    else
+      ! Note that the following coding assumes that npsp=ntypati for PAW, which is true as of now (XG20101024).
+      !dtsets(idtset)%ratsph(1:npsp)=token%pspheads(1:npsp)%pawheader%rpaw
+      do ipsp=1,npsp
+        dtsets(idtset)%ratsph(ipsp) = pspheads(ipsp)%pawheader%rpaw
+      end do
+    endif
+ end do
+
+ !Take care of other dimensions, and part of the content of dtsets
+ !that is or might be needed early.
+ !zion_max=maxval(pspheads(1:npsp)%zionpsp) ! This might not work properly with HP compiler
+
+! zion_max=token%pspheads(1)%zionpsp
+! do ii=1,npsp
+!    zion_max=max(token%pspheads(ii)%zionpsp,zion_max)
+! end do
+ ABI_ALLOCATE(zionpsp,(npsp))
+ do ii=1,npsp
+  zionpsp(ii) = pspheads(ii)%zionpsp
+ end do
+
+ ABI_ALLOCATE(mband_upper_, (0:ndtset_alloc))
+! write(std_out,*)' ab7_invars_f90 , before invars1m : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
+
+ call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, &
+   & msym, mxvals%ga_n_rules, mxvals%gw_nqlwl, mxvals%lpawu, &
+   & mxvals%mband_upper, &
+   & mxvals%natom, mxvals%natpawu, mxvals%natsph, mxvals%natsph_extra, &
+   & mxvals%natvshift, &
+   & mxvals%nconeq, mxvals%nimage, mxvals%n_efmas_dirs, mxvals%nkpt, mxvals%nkptgw, mxvals%nkpthf, mxvals%nnos, &
+   & mxvals%nqptdm, &
+   & mxvals%nspinor, mxvals%nsppol, mxvals%nsym, mxvals%ntypat, mxvals%nimfrqs, &
+   & mxvals%nfreqsp, mxvals%nzchempot, mxvals%n_projection_frequencies, ndtset, &
+   & ndtset_alloc, string, npsp, zionpsp)
+
+ ABI_DEALLOCATE(zionpsp)
+ call timab(42,2,tsec)
+ call timab(43,3,tsec)
+
+ !9) Provide defaults for the variables that have not yet been initialized.
+ call status(0,opt_status_file,99,level,'call indefo   ')
+
+ call indefo(dtsets, ndtset_alloc, nprocs)
+
+ call status(0,opt_status_file,99,level,'call macroin  ')
+
+ call macroin(dtsets, ecut_tmp, lenstr, ndtset_alloc, string)
+
+ !10) Perform some global initialization, depending on the value of
+ ! pseudopotentials, parallelism variables, or macro input variables
+
+ !If all the pseudopotentials have the same pspxc, override the default value for dtsets 1 to ndtset
+ if (minval(abs((pspheads(1:npsp)%pspxc - pspheads(1)%pspxc)))==0) then
+    dtsets(1:ndtset_alloc)%ixc = pspheads(1)%pspxc
+ end if
+
+ !11) Call the main input routine.
+ call status(0,opt_status_file,99,level,'call invars2m ')
+
+ !if (with_mem) then
+   !write(std_out,*)' ab7_invars_f90 : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
+   call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
+ !else
+ !  do idtset = 1, ndtset_alloc, 1
+ !     jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+ !     call invars2(dtsets(idtset)%bravais, dtsets(idtset),ab_out,jdtset,lenstr,&
+ !        & mband_upper_(idtset),msym,npsp,string,usepaw,&
+ !        & token%pspheads(1:npsp)%zionpsp)
+ !  end do
+ !end if
+
+ call status(0,opt_status_file,99,level,'call macroin2  ')
+
+ call macroin2(dtsets, ndtset_alloc)
+
+ !mxmband=maxval(dtsets(1:ndtset_alloc)%mband) ! This might not work with the HP compiler
+ mxvals%mband = dtsets(1)%mband
+ do ii=1,ndtset_alloc
+    mxvals%mband = max(dtsets(ii)%mband, mxvals%mband)
+ end do
+
+ call timab(43,2,tsec)
+ call status(0,opt_status_file,99,level,'exit')
+
+ ABI_DEALLOCATE(mband_upper_)
+
+end subroutine dtsets_from_file
+!!***
+
 end module m_common
 !!***
