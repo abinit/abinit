@@ -109,11 +109,6 @@
  *   ABI_DT_ALLOCATE
  *   ABI_DT_DEALLOCATE
  *
- * Note for programmers using OpenMP:
- *   Do not use stat=ABI_ALLOC_STAT_ABI inside an OpenMP parallel region
- *   ABI_ALLOC_STAT_ABI is a global variable defined in m_profiling_abi.F90
- *   and this can have a detrimental effect if the allocation is done inside an OpenMP parallel region.
- *
  #define HAVE_MEM_PROFILING
 */
 
@@ -161,8 +156,10 @@
 #  define ABI_DATATYPE_DEALLOCATE(ARR)   deallocate(ARR)
 #endif
 
-/* Macros defined in terms of previous macros */
-#define ABI_CALLOC(ARR,SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
+/* Macros to allocate zero-initializes arrays.
+ * defined in terms of previous macros */
+#define ABI_CALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = zero
+#define ABI_ICALLOC(ARR, SIZE) ABI_ALLOCATE(ARR, SIZE) NEWLINE ARR = 0
 
 /* Shorthand versions */
 #define ABI_MALLOC(ARR,SIZE) ABI_ALLOCATE(ARR,SIZE)
@@ -172,22 +169,19 @@
 #define ABI_DT_MALLOC(ARR,SIZE)  ABI_DATATYPE_ALLOCATE(ARR,SIZE)
 #define ABI_DT_FREE(ARR)         ABI_DATATYPE_DEALLOCATE(ARR)
 
-/* Macro for checking whether allocation was successful 
-#define ABI_CHECK_ALLOC(msg) if (ABI_ALLOC_STAT_ABI/=0) MSG_ERROR(msg)
-*/
-
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
    In this case, indeed, we should not count the deallocation */
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
 
 /*
- * Macros to allocate/deallocate depending on the status of the entity
+ * Macros to allocate/deallocate depending on the allocation (association) status of the variable (pointer).
+ * SFREE stands for SAFE FREE
  * Caveat: pointers must use ABI_PTR_FREE_IF
  *
-#define ABI_MALLOC_IFNOT(ARR) if (.not.allocated(ARR)) ABI_MALLOC(ARR)
-#define ABI_SFREE(ARR) if (allocated(ARR)) ABI_FREE(ARR)
-#define ABI_SFREE_PTR(PTR) if (associated(PTR)) ABI_FREE(PTR)
 */
+#define ABI_MALLOC_IFNOT(ARR) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR) NEWLINE endif
+#define ABI_SFREE(ARR) if (allocated(ARR)) then NEWLINE ABI_FREE(ARR) NEWLINE endif
+#define ABI_SFREE_PTR(PTR) if (associated(PTR)) then NEWLINE ABI_FREE(PTR) NEWLINE endif
 
 /* Macros used in debug mode */
 #ifdef DEBUG_MODE
@@ -351,10 +345,6 @@
 #else
 #define _IBM6(message)
 #endif
-
-
-/*
-*/
 
 #endif
 /* _ABINIT_COMMON_H */

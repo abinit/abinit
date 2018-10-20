@@ -394,6 +394,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%irdden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdden','INT',0)
 
+ intarr(1,:)=dtsets(:)%irddvdb
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irddvdb','INT',0)
+
  intarr(1,:)=dtsets(:)%irdefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdefmas','INT',0)
 
@@ -784,6 +787,9 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'mixalch','DPR',&
 & mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
+ intarr(1,:)=dtsets(:)%mixprec
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mixprec','INT',0)
+
 !mixesimgf
  dprarr(1:marr,0)=zero              ! default value
  narr=mxvals%nimage                 ! default size for all datasets
@@ -796,7 +802,7 @@ subroutine outvar_i_n (dtsets,iout,&
  else
    multival=0
    narrm(1:ndtset_alloc)=narr
-   dprarr(1:marr,1:ndtset_alloc)=zero  
+   dprarr(1:marr,1:ndtset_alloc)=zero
  endif
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
 & narrm,ncid,ndtset_alloc,'mixesimgf','DPR',multival)

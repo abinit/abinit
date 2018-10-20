@@ -6,7 +6,7 @@
 !! FUNCTION
 !!  Rotate the cg coefficient with the rotation matrix obtained from the
 !!  diagonalisation of the non-diagonal occupation matrix produced by DMFT.
-!! 
+!!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (TCavignac)
 !! This file is distributed under the terms of the
@@ -55,10 +55,10 @@ module m_rot_cg
 !! diag_occ
 !!
 !! FUNCTION
-!! Use for DMFT in KGB parallelisation. Diagonalise the occupation matrix 
+!! Use for DMFT in KGB parallelisation. Diagonalise the occupation matrix
 !! and return diagonalised occupations and associated eigen vectors sorted
 !! with descending occupation
-!! 
+!!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (TCavignac)
 !! This file is distributed under the terms of the
@@ -69,10 +69,10 @@ module m_rot_cg
 !! INPUTS
 !!   occ_nd_cpx(nband, nband) = matrix of non diagonal occupations for DMFT
 !!   nband = number of band to be processed
-!!   
+!!
 !!
 !! OUTPUT
-!!   occ_diag(2, nband) = diagonal occupation in the new band space 
+!!   occ_diag(2, nband) = diagonal occupation in the new band space
 !!   cwavef_rot(2, npw, nband) = fourier coefficient of wave functions for all bands rotated in the band space
 !!
 !! PARENTS
@@ -85,13 +85,7 @@ module m_rot_cg
 !! TODO /!\ No parallel computing yet !
 !! TODO add the possibility of using ScaLAPACK to do computation in parallel
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-subroutine diag_occ(occ_nd_cpx, nband, occ_diag) 
+subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 
   use defs_basis
   use defs_abitypes
@@ -172,7 +166,7 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
 &the occupation matrix (bad input argument), info=",info
     MSG_ERROR(message)
   end if
-  
+
   DBG_EXIT("COLL")
 
 end subroutine diag_occ
@@ -183,9 +177,9 @@ end subroutine diag_occ
 !! rot_cg
 !!
 !! FUNCTION
-!! Use for DMFT in KGB parallelisation. Diagonalise the occupation matrix 
+!! Use for DMFT in KGB parallelisation. Diagonalise the occupation matrix
 !! and use the resulting base to represent the wave functions.
-!! 
+!!
 !! COPYRIGHT
 !! Copyright (C) 1998-2018 ABINIT group (TCavignac)
 !! This file is distributed under the terms of the
@@ -203,16 +197,16 @@ end subroutine diag_occ
 !!   nspinor = number of spinor components
 !!   first_bandc = index of the first correlated band
 !!   nbandc = number of bands correlated
-!!   
+!!
 !!
 !! OUTPUT
-!!   occ_diag(2, nband) = diagonal occupation in the new band space 
+!!   occ_diag(2, nband) = diagonal occupation in the new band space
 !!
 !! SIDE EFFECT
 !!   cwavef is rotated with the unitary matrix obtained from the diagonalisation
 !!   of occupations (occ_nd)
 !! PARENTS
-!!      mkrho 
+!!      mkrho
 !!
 !! CHILDREN
 !!
@@ -221,12 +215,6 @@ end subroutine diag_occ
 !! TODO /!\ No parallel computing yet !
 !! TODO add the possibility of using ScaLAPACK to do computation in parallel
 !! TODO Make the computation of the new wf parallel
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
 subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, nbandc, occ_diag)
 
@@ -288,7 +276,7 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
 !! Get diagonal occupations and associeted base
 
   call diag_occ(occ_nd_cpx, nbandc, occ_diag_red)
-  
+
   do n=1,nband
     if (n < first_bandc .or. n >= first_bandc+nbandc) then
       occ_diag(n) = occ_nd(1, n, n)
@@ -310,7 +298,7 @@ subroutine rot_cg(occ_nd, cwavef, npw, nband, blocksize, nspinor, first_bandc, n
     cwavef(1,ig,first_bandc:first_bandc+nbandc-1,:) = dreal(cwavef_rot_g)
     cwavef(2,ig,first_bandc:first_bandc+nbandc-1,:) = dimag(cwavef_rot_g)
   end do
-  
+
   DBG_EXIT("COLL")
 
  end subroutine rot_cg

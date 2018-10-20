@@ -529,8 +529,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  call timab(1500,1,tsec)
 
  if (dtset%nspinor/=1) then
-   msg='Hartree-Fock option can be used only with option nspinor=1.'
-   MSG_ERROR(msg)
+   MSG_ERROR('Hartree-Fock option can be used only with option nspinor=1.')
  end if
 
 
@@ -741,8 +740,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !* Number of iterations with fixed occupied states when calculating the exact exchange contribution.
    if (dtset%nnsclohf<0) then
-     msg='The parameter nnsclohf must be a non-negative integer.'
-     MSG_ERROR(msg)
+     MSG_ERROR('The parameter nnsclohf must be a non-negative integer.')
    end if
    if (dtset%nnsclohf==0) then
      fockcommon%nnsclo_hf=1
@@ -821,11 +819,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !* No space symmetry is used, if kptopt==2 time reversal symmetry is used.
        symm=0 ; symm(1,1)=1 ; symm(2,2)=1 ; symm(3,3)=1
        call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&          nkpt_bz,1,1,indx,symm,timrev)
+&          nkpt_bz,1,1,indx,symm,timrev,xmpi_comm_self)
      else
 !* As in getkgrid, no use of antiferromagnetic symmetries thans to the option sppoldbl=1
        call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
+&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev, xmpi_comm_self)
      end if
 !* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
 !*    indkk(:,1)   = k point of IBZ, kpt_ibz
@@ -839,13 +837,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      if (dtset%kptopt==0) then
 !* kptopt =0 : read directly nkpt, kpt, kptnrm and wtk in the input file
 !*              => this case is not allowed for the moment
-       msg='Hartree-Fock option can not be used with option kptopt=0.'
-       MSG_ERROR(msg)
+       MSG_ERROR('Hartree-Fock option can not be used with option kptopt=0.')
      else
 !* kptopt <0 : rely on kptbounds, and ndivk to set up a band structure calculation
 !*              => a band structure calculation is not yet allowed.
-       msg='Hartree-Fock option can not be used with option kptopt<0.'
-       MSG_ERROR(msg)
+       MSG_ERROR('Hartree-Fock option can not be used with option kptopt<0.')
      end if
    end if
 
@@ -957,8 +953,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        end do
      end if
      if(invsym(isym)==0) then
-       msg='No inverse has been found for isym'
-       MSG_ERROR(msg)
+       MSG_ERROR('No inverse has been found for isym')
      end if
    end do
 
@@ -1142,7 +1137,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
  call timab(1500,2,tsec)
 
-DBG_EXIT("COLL")
+ DBG_EXIT("COLL")
 
 end subroutine fock_init
 !!***

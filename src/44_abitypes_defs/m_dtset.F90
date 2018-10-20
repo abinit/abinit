@@ -139,8 +139,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
    dtset%nelect=one
  end if
 
-! write(std_out,*)ch10
-! write(std_out,*)' chkneu : enter, dtset%nelect=',dtset%nelect
+! write(std_out,*)ch10,' chkneu : enter, dtset%nelect=',dtset%nelect
 ! write(std_out,*)' occopt,dtset%nsppol,dtset%nspden=',occopt,dtset%nsppol,dtset%nspden
 
 !(2) Optionally initialize occ with semiconductor occupancies
@@ -155,9 +154,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
    nocc=(dtset%nelect-1.0d-8)/maxocc + 1
 !  Occupation number of the highest level
    occlast=dtset%nelect-maxocc*(nocc-1)
-
    !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
-
 
 !  The number of allowed bands must be sufficiently large
    if( nocc<=dtset%nband(1)*dtset%nsppol .or. dtset%iscf==-2) then
@@ -215,11 +212,11 @@ subroutine dtset_chkneu(charge,dtset,occopt)
          end if
          !write(std_out,*)' dtset%nband(1),maxocc,occlast=',dtset%nband(1),maxocc,occlast
          if(dtset%nband(1)*nint(maxocc)<nocc)then
-           write(message, '(a,i4,a, a,2i6,a, a,es16.6,a, a,es16.6,6a)' )&
-&           'Initialization of occ, with nspden=',dtset%nspden,ch10,&
-&           'number of bands=',dtset%nband(1:2),ch10,&
-&           'number of electrons=',dtset%nelect,ch10,&
-&           'and spinmagntarget=',dtset%spinmagntarget,ch10,&
+           write(message, '(a,i0,a, a,2i0,a, a,es16.6,a, a,es16.6,6a)' )&
+&           'Initialization of occ, with nspden = ',dtset%nspden,ch10,&
+&           'number of bands = ',dtset%nband(1:2),ch10,&
+&           'number of electrons = ',dtset%nelect,ch10,&
+&           'and spinmagntarget = ',dtset%spinmagntarget,ch10,&
 &           'This combination is not possible, because of a lack of bands.',ch10,&
 &           'Action: modify input file ... ',ch10,&
 &           '(you should likely increase nband, but also check nspden, nspinor, nsppol, and spinmagntarget)'
@@ -238,9 +235,9 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        end do
 
      else
-       write(message, '(a,i4,a,a,es16.6,6a)' )&
-&       'Initialization of occ, with nspden=',dtset%nspden,ch10,&
-&       'and spinmagntarget=',dtset%spinmagntarget,ch10,&
+       write(message, '(a,i0,a,a,es16.6,6a)' )&
+&       'Initialization of occ, with nspden = ',dtset%nspden,ch10,&
+&       'and spinmagntarget = ',dtset%spinmagntarget,ch10,&
 &       'This combination is not possible.',ch10,&
 &       'Action: modify input file ... ',ch10,&
 &       '(check nspden, nspinor, nsppol and spinmagntarget)'
@@ -249,39 +246,38 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 
 !    Now print the values (only the first image, since they are all the same)
      if(dtset%nsppol==1)then
-
-       write(message, '(a,i4,a,a)' ) &
-&       ' chkneu : initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case : '
+       write(message, '(a,i0,a,a)' ) &
+&       ' chkneu: initialized the occupation numbers for occopt= ',occopt,', spin-unpolarized or antiferromagnetic case:'
        call wrtout(std_out,message,'COLL')
-       do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
-         call wrtout(std_out,message,'COLL')
-       end do
-
+       if (dtset%prtvol > 0) then
+         do ii=0,(dtset%nband(1)-1)/12
+           write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
+           call wrtout(std_out,message,'COLL')
+         end do
+       end if
      else
-
-       write(message, '(a,i4,a,a)' ) &
-&       ' chkneu : initialized the occupation numbers for occopt= ',occopt,&
-&       ch10,'    spin up   values : '
+       write(message, '(a,i0,2a)' ) &
+        ' dtset_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
        call wrtout(std_out,message,'COLL')
-       do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
-         call wrtout(std_out,message,'COLL')
-       end do
-       write(message, '(a)' ) '    spin down values : '
-       call wrtout(std_out,message,'COLL')
-       do ii=0,(dtset%nband(1)-1)/12
-         write(message,'(12f6.2)') &
-&         dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
-         call wrtout(std_out,message,'COLL')
-       end do
+       if (dtset%prtvol > 0) then
+         do ii=0,(dtset%nband(1)-1)/12
+           write(message,'(12f6.2)') dtset%occ_orig( 1+ii*12 : min(12+ii*12,dtset%nband(1)),1 )
+           call wrtout(std_out,message,'COLL')
+         end do
+         call wrtout(std_out,'    spin down values:','COLL')
+         do ii=0,(dtset%nband(1)-1)/12
+           write(message,'(12f6.2)') &
+             dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
+           call wrtout(std_out,message,'COLL')
+         end do
+       end if
 
      end if
 
 !    Here, treat the case when the number of allowed bands is not large enough
    else
-     write(message, '(a,i4,a,a,a,a,a,a,a,a)' )&
-&     'Initialization of occ, with occopt=',occopt,ch10,&
+     write(message, '(a,i0,8a)' )&
+&     'Initialization of occ, with occopt: ',occopt,ch10,&
 &     'There are not enough bands to get charge balance right',ch10,&
 &     'Action: modify input file ... ',ch10,&
 &     '(check the pseudopotential charges, the variable charge,',ch10,&
@@ -330,7 +326,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
 &         ' This is not the case. '
        else
 !        The discrepancy is not so severe
-         write(message, '(a,a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
+         write(message, '(2a,e9.2)' )ch10,'These should obey zval-nelect_occ=charge to better than ',tol11
        end if
        MSG_WARNING(message)
 
@@ -346,10 +342,9 @@ subroutine dtset_chkneu(charge,dtset,occopt)
        end if
 
      end if
-
    end do
 
- end if !  End the condition dtset%iscf>0 or -1 or -3 .
+ end if ! condition dtset%iscf>0 or -1 or -3 .
 
 end subroutine dtset_chkneu
 !!***
@@ -519,6 +514,11 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
+ dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
+
+ dtout%sigma_ngkpt = dtin%sigma_ngkpt
+ dtout%sigma_nshiftk = dtin%sigma_nshiftk
+ if (allocated(dtin%sigma_shiftk)) call alloc_copy(dtin%sigma_shiftk, dtout%sigma_shiftk)
 
  dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
  dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
@@ -551,6 +551,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%getbscoup          = dtin%getbscoup
  dtout%getcell            = dtin%getcell
  dtout%getddb             = dtin%getddb
+ dtout%getdvdb            = dtin%getdvdb
  dtout%getddk             = dtin%getddk
  dtout%getdelfd           = dtin%getdelfd
  dtout%getdkdk            = dtin%getdkdk
@@ -630,6 +631,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%irdbsreso          = dtin%irdbsreso
  dtout%irdbscoup          = dtin%irdbscoup
  dtout%irdddb             = dtin%irdddb
+ dtout%irddvdb            = dtin%irddvdb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
  dtout%irdefmas           = dtin%irdefmas
@@ -671,6 +673,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%mdf_epsinf         = dtin%mdf_epsinf
  dtout%mep_solver         = dtin%mep_solver
  dtout%mem_test           = dtin%mem_test
+ dtout%mixprec            = dtin%mixprec
  dtout%mffmem             = dtin%mffmem
  dtout%mgfft              = dtin%mgfft
  dtout%mgfftdg            = dtin%mgfftdg
@@ -1460,13 +1463,16 @@ subroutine dtset_free(dtset)
  if (allocated(dtset%shiftk))      then
    ABI_DEALLOCATE(dtset%shiftk)
  end if
- if (allocated(dtset%spinat))      then
+ if (allocated(dtset%spinat)) then
    ABI_DEALLOCATE(dtset%spinat)
  end if
- if (allocated(dtset%tnons))       then
+ if (allocated(dtset%tnons)) then
    ABI_DEALLOCATE(dtset%tnons)
  end if
- if (allocated(dtset%upawu))       then
+ if (allocated(dtset%sigma_shiftk)) then
+   ABI_DEALLOCATE(dtset%sigma_shiftk)
+ end if
+ if (allocated(dtset%upawu)) then
    ABI_DEALLOCATE(dtset%upawu)
  end if
  if (allocated(dtset%vel_orig))    then
@@ -2396,9 +2402,9 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_qcache_mb delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
- list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip  dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
@@ -2434,7 +2440,7 @@ subroutine chkvars (string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getefmas getgam_eig2nkq'
+ list_vars=trim(list_vars)//' getddb getddk getdelfd getdkdk getdkde getden getdvdb getefmas getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getqps getscr'
  list_vars=trim(list_vars)//' getwfkfine'
  list_vars=trim(list_vars)//' getsuscep '
@@ -2458,7 +2464,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
@@ -2476,7 +2482,7 @@ subroutine chkvars (string)
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
- list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixesimgf'
+ list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
  list_vars=trim(list_vars)//' mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
@@ -2536,6 +2542,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
+ list_vars=trim(list_vars)//' sigma_ngkpt sigma_nshiftk sigma_shiftk'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'

@@ -35,12 +35,14 @@ module m_vtowfk
  use m_linalg_interfaces
  use m_cgtools
 
- use m_time,        only : timab
+ use m_time,        only : timab, cwtime, sec2str
+ use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_paw_dmft,    only : paw_dmft_type
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
  use m_paw_dmft,    only : paw_dmft_type
  use m_gwls_hamiltonian, only : build_H
+ use m_fftcore,     only : fftcore_set_mixprec, fftcore_mixprec
  use m_cgwf,        only : cgwf
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
@@ -193,7 +195,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: newlobpcg
- integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11
+ integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
 !     subovl should be Identity (in that case we should use use_subovl=0)
@@ -206,7 +208,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: ar,ar_im,eshift,occblock
- real(dp) :: res,residk,weight
+ real(dp) :: res,residk,weight,cpu,wall,gflops
  character(len=500) :: message
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
@@ -223,10 +225,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Structured debugging if prtvol==-level
  if(prtvol==-level)then
-   write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk : enter'
+   write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk: enter'
    call wrtout(std_out,message,'PERS')
  end if
-
 
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
@@ -278,7 +279,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    gsc=zero
  end if
 
- if(wfopta10 /= 1 .and. .not. newlobpcg ) then !chebfi already does this stuff inside
+ if(wfopta10 /= 1 .and. .not. newlobpcg ) then
+   !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
 
@@ -305,9 +307,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
-!Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
-
- if(prtvol>2 .or. ikpt<=nkpt_max)then
+ ! Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
+ if (prtvol>2 .or. ikpt<=nkpt_max) then
    write(message,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
    call wrtout(std_out,message,'PERS')
  end if
@@ -324,8 +325,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  do inonsc=1,nnsclo_now
+   if (iscf < 0 .and. inonsc <= enough) call cwtime(cpu, wall, gflops, "start")
 
-!  This initialisation is needed for the MPI-parallelisation (gathering using sum)
+   ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
    if(wfopta10 /= 1 .and. .not. newlobpcg) then
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
@@ -354,7 +356,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end do
 
-   ! JLJ 17/10/2014 : If it is a GWLS calculation, construct the hamiltonian
+   ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
    ! This would be equivalent to nstep=0, if the latter did work.
    if(dtset%optdriver/=RUNL_GWLS) then
@@ -416,7 +418,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =========================================================================
 
 !  Find largest resid over bands at this k point
-!  Note that this operation is done BEFORE rotation of bands :
+!  Note that this operation is done BEFORE rotation of bands:
 !  it would be time-consuming to recompute the residuals after.
    residk=maxval(resid_k(1:max(1,nband_k-dtset%nbdbuf)))
 
@@ -489,8 +491,27 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
    end if
 
-   if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
- end do !  End loop over inonsc (NON SELF-CONSISTENT LOOP)
+   if (iscf < 0) then
+     if (residk > dtset%tolwfr .and. residk < tol7) then
+       if (fftcore_mixprec == 1) call wrtout(std_out, " Approaching NSCF convergence. Activating FFT in double-precision")
+       ii = fftcore_set_mixprec(0)
+     end if
+
+     ! Print residual and wall-time required by NSCF iteration.
+     if (inonsc <= enough) then
+       call cwtime(cpu, wall, gflops, "stop")
+       call wrtout(std_out, sjoin("max resid =", ftoa(residk, fmt="es13.5"), &
+         " (without nbdbuf). one NSCF iteration took cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+       if (inonsc == enough) call wrtout(std_out, "Stop printing residuals ...")
+     end if
+   end if
+
+   ! Exit loop over inonsc if converged
+   if (residk < dtset%tolwfr) then
+     call wrtout(std_out, sjoin("NSCF loop completed after", itoa(inonsc), "iterations", ch10))
+     exit
+   end if
+ end do ! End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
@@ -614,7 +635,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end do
 #endif
 
-   if(iscf>0)then ! In case of fixed occupation numbers, accumulates the partial density
+   if(iscf>0)then
+     ! In case of fixed occupation numbers, accumulates the partial density
      if (fixed_occ .and. mpi_enreg%paral_kgb/=1) then
        if (abs(occ_k(iblock))>=tol8) then
          weight=occ_k(iblock)*wtk/gs_hamk%ucvol
@@ -818,7 +840,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers
  if(iscf>0 .and. fixed_occ .and. (prtvol>2 .or. ikpt<=nkpt_max) )then
-   write(message,'(a,i0)')' vtowfk : number of one-way 3D ffts skipped in vtowfk until now =',nskip
+   write(message,'(a,i0)')' vtowfk: number of one-way 3D ffts skipped in vtowfk until now =',nskip
    call wrtout(std_out,message,'PERS')
  end if
 
@@ -882,12 +904,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !###################################################################
 
- if (iscf<=0 .and. residk>dtset%tolwfr) then
-   write(message,'(a,2i5,a,es13.5)')&
-&   'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid=',residk
+ if (iscf<=0 .and. residk > dtset%tolwfr) then
+   write(message,'(a,2(i0,1x),a,es13.5)')&
+&   'Wavefunctions not converged for nnsclo,ikpt=',nnsclo_now,ikpt,' max resid= ',residk
    MSG_WARNING(message)
  end if
-
 
 !Print out eigenvalues (hartree)
  if (prtvol>2 .or. ikpt<=nkpt_max) then

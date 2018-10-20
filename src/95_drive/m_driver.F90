@@ -123,6 +123,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_abi_linalg
  use m_abicore
  use m_exit
+ use m_fftcore
  use libxc_functionals
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
@@ -290,10 +291,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      write(message,'(2a,i2,67a)') trim(message),' ',jdtset,' ',('=',mu=1,66)
    end if
    write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
-   if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,&
-&   dtset%mkmem,dtset%nsppol)) then
-     write(message,'(2a)') trim(message),&
-&     '   -> not optimal: autoparal keyword recommended in input file'
+   if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
+     write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
    end if
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
@@ -670,16 +669,17 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
        write(message,'(3a)')&
 &       'vdW-DF functionals are not fully operational yet.',ch10,&
-&       'Action : modify vdw_xc'
+&       'Action: modify vdw_xc'
        MSG_ERROR(message)
      end if
 #endif
    end if
 
-!  FFTW3 threads initialization
-   if (dtset%ngfft(7)/100==FFT_FFTW3)then
-     call fftw3_init_threads()
-   end if
+   ! FFTW3 threads initialization
+   if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_init_threads()
+
+   ! Set precision for FFT libs.
+   ii = fftcore_set_mixprec(dtset%mixprec)
 
 !  linalg initialisation:
    call abi_linalg_init(mpi_enregs(idtset)%comm_bandspinorfft,dtset%np_slk,3*maxval(dtset%nband(:)), mpi_enregs(idtset)%me)
@@ -730,7 +730,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      write(message,'(3a)')&
 &     'The optdriver value 6 has been disabled since ABINITv6.0.',ch10,&
-&     'Action : modify optdriver in the input file.'
+&     'Action: modify optdriver in the input file.'
      MSG_ERROR(message)
 
    case (RUNL_BSE)
@@ -738,8 +738,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call status(jdtset_status,filstat,iexit,level,'call bethe_salpeter')
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case(RUNL_GWLS) ! For running G0W0 calculations with Lanczos basis for dielectric operator and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
-
+   case(RUNL_GWLS)
+     ! For running G0W0 calculations with Lanczos basis for dielectric operator
+     ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(etotal_img,(nimage))
@@ -764,7 +765,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call status(jdtset_status,filstat,iexit,level,'call eph      ')
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case default ! Bad value for optdriver
+   case default
+     ! Bad value for optdriver
      write(message,'(a,i0,4a)')&
 &     'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
 &     'This is not allowed. ',ch10,&
@@ -775,9 +777,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call timab(643,1,tsec)
 !  ****************************************************************************
 
-!  Transfer of multi dataset outputs from temporaries :
-!  acell, xred, occ rprim, and vel might be modified from their
-!  input values
+!  Transfer of multi dataset outputs from temporaries:
+!  acell, xred, occ rprim, and vel might be modified from their input values
 !  etotal, fcart, fred, and strten have been computed
 !  npwtot was already computed before, but is stored only now
 
@@ -821,9 +822,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ABI_DEALLOCATE(vel_cell_img)
    ABI_DEALLOCATE(xred_img)
 
-   if (dtset%ngfft(7)/100==FFT_FFTW3) then
-     call fftw3_cleanup()
-   end if
+   if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_cleanup()
 
    if (dtset%ixc<0) then
      call libxc_functionals_end()

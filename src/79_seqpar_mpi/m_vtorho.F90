@@ -533,7 +533,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  end if
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
- write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho : nnsclo_now=',nnsclo_now,&
+ write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now=',nnsclo_now,&
 & ', note that nnsclo,dbl_nnsclo,istep=',dtset%nnsclo,dbl_nnsclo,istep
  call wrtout(std_out,message,'COLL')
 
@@ -1208,7 +1208,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      ==  initialise occnd
        paw_dmft%occnd=zero
-      
+
        bdtot_index = 1
        do isppol=1,dtset%nsppol
          do ikpt=1,dtset%nkpt

@@ -1120,7 +1120,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
      write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
-&     ' symspgr : problem with isym=',isym,ch10,&
+&     ' symspgr: problem with isym=',isym,ch10,&
 &     '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
 &     '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
 &     '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
@@ -1128,8 +1128,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 &     '  trialt(:)=',trialt(:)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i4,2a)' )&
-&     'The space symmetry operation number',isym,ch10,&
-&     'is not a (translated) root of unity'
+&     'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
      MSG_BUG(message)
    else if (t_axes(isym) == -2) then
      write(message, '(a,i0,a)' )'The symmetry operation number ',isym,' is not a root of unity'
@@ -1296,15 +1295,15 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  call spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
 
  if(spgroup/=0)then
-   write(message, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr : spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
+   write(message, '(a,i4,2x,a,a,a,a,a)' ) ' symspgr: spgroup=',spgroup,trim(brvsb),trim(intsb),'   (=',trim(schsb),')'
    call wrtout(std_out,message,'COLL')
  end if
 
  if(bravais(1)==7)then
-   write(message, '(a)' ) ' symspgr : optical characteristics = isotropic '
+   write(message, '(a)' ) ' symspgr: optical characteristics = isotropic '
    call wrtout(std_out,message,'COLL')
  else if(bravais(1)==4 .or. bravais(1)==5 .or. bravais(1)==6)then
-   write(message, '(a)' ) ' symspgr : optical characteristics = uniaxial '
+   write(message, '(a)' ) ' symspgr: optical characteristics = uniaxial '
    call wrtout(std_out,message,'COLL')
 !  Identify the first symmetry operation that is order 3, 4 or 6
    found=0
@@ -2130,11 +2129,11 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      if(center==0 .or. center==-1 .or. center==-3)then
        iholohedry=7 ; found=1
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cP (primitive cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cP (primitive cubic)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cI (body-centered cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cI (body-centered cubic)'
        else if(center==-3)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is cF (face-centered cubic)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is cF (face-centered cubic)'
        end if
      end if
    end if
@@ -2153,9 +2152,9 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
          axes(:,:)=cell_base(:,:)
        end if
        if(center==0)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is tP (primitive tetragonal)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tP (primitive tetragonal)'
        else if(center==-1)then
-         write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is tI (body-centered tetragonal)'
+         write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is tI (body-centered tetragonal)'
        end if
      end if
    end if
@@ -2165,13 +2164,13 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
      iholohedry=3 ; found=1
      axes(:,:)=cell_base(:,:)
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oP (primitive orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oP (primitive orthorhombic)'
      else if(center==-1)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oI (body-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oI (body-centered orthorhombic)'
      else if(center==1 .or. center==2 .or. center==3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oC (one-face-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oC (one-face-centered orthorhombic)'
      else if(center==-3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is oF (face-centered orthorhombic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is oF (face-centered orthorhombic)'
      end if
    end if
 
@@ -2180,7 +2179,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !  Hexagonal system
    if(found==0 .and. ang90(1)==1 .and. ang90(2)==1 .and. equal(3)==1 .and. (2*metmin(2,1)+metmin(1,1))<tolsym*metmin(1,1))then
      iholohedry=6 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is hP (primitive hexagonal)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hP (primitive hexagonal)'
    end if
 
 !  Rhombohedral system
@@ -2188,23 +2187,23 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 &   abs(metmin(2,1)-metmin(3,2))<tolsym*metmin(2,2)             .and.       &
 &   abs(metmin(2,1)-metmin(3,1))<tolsym*metmin(1,1) )then
      iholohedry=5 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is hR (rhombohedral)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is hR (rhombohedral)'
    end if
 
 !  Monoclinic system
    if(found==0 .and. ang90(1)+ang90(2)+ang90(3)==2 )then
      iholohedry=2 ; found=1
      if(center==0)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is mP (primitive monoclinic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mP (primitive monoclinic)'
      else if(center==3)then
-       write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is mC (one-face-centered monoclinic)'
+       write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is mC (one-face-centered monoclinic)'
      end if
    end if
 
 !  Triclinic system
    if(found==0)then
      iholohedry=1 ; found=1
-     write(message,'(a,a)')ch10,' symlatt : the Bravais lattice is aP (primitive triclinic)'
+     write(message,'(a,a)')ch10,' symlatt: the Bravais lattice is aP (primitive triclinic)'
    end if
 
  end if

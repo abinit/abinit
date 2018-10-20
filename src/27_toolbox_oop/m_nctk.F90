@@ -1156,6 +1156,7 @@ end function nctk_set_collective
 !!  dimnames(:)=List of strings with the name of the dimensions
 !!  values(:)=List of integer scalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
+!!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
 !! PARENTS
 !!
@@ -1163,7 +1164,7 @@ end function nctk_set_collective
 !!
 !! SOURCE
 
-integer function nctk_def_one_dim(ncid, nctkdim, defmode) result(ncerr)
+integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1178,11 +1179,13 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode) result(ncerr)
 !scalars
  integer,intent(in) :: ncid
  logical,optional,intent(in) :: defmode
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  type(nctkdim_t),intent(in) :: nctkdim
 
 !Local variables-------------------------------
  integer :: dimid,dimlen
+ character(len=nctk_slen) :: dname
  character(len=500) :: msg
 ! *********************************************************************
 
@@ -1194,8 +1197,14 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode) result(ncerr)
    end if
  end if
 
+ if (present(prefix)) then
+   dname = strcat(prefix, nctkdim%name)
+ else
+   dname = nctkdim%name
+ end if
+
  ! if dimension already exists, test whether it has the same value else define new dim.
- ncerr = nf90_inq_dimid(ncid,  nctkdim%name, dimid)
+ ncerr = nf90_inq_dimid(ncid, dname, dimid)
 
  if (ncerr == nf90_noerr) then
    NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=dimlen))
@@ -1206,7 +1215,7 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode) result(ncerr)
      MSG_ERROR(msg)
    end if
  else
-   ncerr = nf90_def_dim(ncid, nctkdim%name, nctkdim%value, dimid)
+   ncerr = nf90_def_dim(ncid, dname, nctkdim%value, dimid)
    NCF_CHECK(ncerr)
  end if
 
@@ -1228,6 +1237,7 @@ end function nctk_def_one_dim
 !!  dimnames(:)=List of strings with the name of the dimensions
 !!  values(:)=List of integer scalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
+!!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
 !! PARENTS
 !!
@@ -1235,7 +1245,7 @@ end function nctk_def_one_dim
 !!
 !! SOURCE
 
-integer function nctk_def_dim_list(ncid, nctkdims, defmode) result(ncerr)
+integer function nctk_def_dim_list(ncid, nctkdims, defmode, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1250,6 +1260,7 @@ integer function nctk_def_dim_list(ncid, nctkdims, defmode) result(ncerr)
 !scalars
  integer,intent(in) :: ncid
  logical,optional,intent(in) :: defmode
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  type(nctkdim_t),intent(in) :: nctkdims(:)
 
@@ -1267,7 +1278,11 @@ integer function nctk_def_dim_list(ncid, nctkdims, defmode) result(ncerr)
  end if
 
  do ii=1,size(nctkdims)
-   ncerr = nctk_def_one_dim(ncid, nctkdims(ii))
+   if (present(prefix)) then
+     ncerr = nctk_def_one_dim(ncid, nctkdims(ii), prefix=prefix)
+   else
+     ncerr = nctk_def_one_dim(ncid, nctkdims(ii))
+   end if
    if (ncerr /= nf90_noerr) return
  end do
 
@@ -1464,6 +1479,7 @@ end subroutine ab_define_var
 !!  varnames(:)=List of strings with the name of the variables
 !!  xtype=Type of the variables
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
+!!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
 !! PARENTS
 !!
@@ -1471,7 +1487,7 @@ end subroutine ab_define_var
 !!
 !! SOURCE
 
-integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode) result(ncerr)
+integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1486,12 +1502,14 @@ integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode) result(nc
 !scalars
  integer,intent(in) :: ncid,xtype
  logical,optional,intent(in) :: defmode
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  character(len=*),intent(in) :: varnames(:)
 
 !Local variables-------------------------------
 !scalars
  integer :: ii,varid
+ character(len=nctk_slen) :: vname
  type(nctkvar_t) :: var
 
 ! *********************************************************************
@@ -1504,10 +1522,11 @@ integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode) result(nc
  end if
 
  ! Special case where dimension is null
-
  do ii=1,size(varnames)
+   vname = varnames(ii)
+   if (present(prefix)) vname = strcat(prefix, vname)
 
-   if (nf90_inq_varid(ncid, varnames(ii), varid) == nf90_noerr)  then
+   if (nf90_inq_varid(ncid, vname, varid) == nf90_noerr)  then
        ! Variable already exists. Check if type and dimensions agree
        call var_from_id(ncid, varid, var)
 
@@ -1519,7 +1538,7 @@ integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode) result(nc
 
    else
      ! Define variable since it doesn't exist.
-     ncerr = nf90_def_var(ncid, varnames(ii), xtype, varid)
+     ncerr = nf90_def_var(ncid, vname, xtype, varid)
      NCF_CHECK(ncerr)
    end if
  end do
@@ -1538,6 +1557,7 @@ end function nctk_def_scalars_type
 !!  ncid=Netcdf identifier.
 !!  varnames(:)=List of strings with the name of the variables
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
+!!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
 !! PARENTS
 !!
@@ -1545,7 +1565,7 @@ end function nctk_def_scalars_type
 !!
 !! SOURCE
 
-integer function nctk_def_iscalars(ncid, varnames, defmode) result(ncerr)
+integer function nctk_def_iscalars(ncid, varnames, defmode, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1560,6 +1580,7 @@ integer function nctk_def_iscalars(ncid, varnames, defmode) result(ncerr)
 !scalars
  integer,intent(in) :: ncid
  logical,optional,intent(in) :: defmode
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  character(len=*),intent(in) :: varnames(:)
 
@@ -1568,7 +1589,11 @@ integer function nctk_def_iscalars(ncid, varnames, defmode) result(ncerr)
  if (present(defmode)) then
    ncerr = nctk_def_scalars_type(ncid, varnames, nf90_int, defmode=defmode)
  else
-   ncerr = nctk_def_scalars_type(ncid, varnames, nf90_int)
+   if (present(prefix)) then
+     ncerr = nctk_def_scalars_type(ncid, varnames, nf90_int, prefix=prefix)
+   else
+     ncerr = nctk_def_scalars_type(ncid, varnames, nf90_int)
+   end if
  end if
 
 end function nctk_def_iscalars
@@ -1585,6 +1610,7 @@ end function nctk_def_iscalars
 !!  ncid=Netcdf identifier.
 !!  varnames(:)=List of strings with the name of the variables
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
+!!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
 !! PARENTS
 !!
@@ -1592,7 +1618,7 @@ end function nctk_def_iscalars
 !!
 !! SOURCE
 
-integer function nctk_def_dpscalars(ncid, varnames, defmode) result(ncerr)
+integer function nctk_def_dpscalars(ncid, varnames, defmode, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1607,15 +1633,20 @@ integer function nctk_def_dpscalars(ncid, varnames, defmode) result(ncerr)
 !scalars
  integer,intent(in) :: ncid
  logical,optional,intent(in) :: defmode
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  character(len=*),intent(in) :: varnames(:)
 
+!Local variables-------------------------------
+ character(len=nctk_slen) :: prefix_
+
 ! *********************************************************************
+ prefix_ = ""; if (present(prefix)) prefix_ = prefix
 
  if (present(defmode)) then
-   ncerr = nctk_def_scalars_type(ncid, varnames, nf90_double, defmode=defmode)
+   ncerr = nctk_def_scalars_type(ncid, varnames, nf90_double, defmode=defmode, prefix=prefix_)
  else
-   ncerr = nctk_def_scalars_type(ncid, varnames, nf90_double)
+   ncerr = nctk_def_scalars_type(ncid, varnames, nf90_double, prefix=prefix_)
  end if
 
 end function nctk_def_dpscalars
@@ -1632,6 +1663,7 @@ end function nctk_def_dpscalars
 !!  ncid=Netcdf identifier.
 !!  nctk_array=Array descriptor.
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
+!!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
 !! PARENTS
 !!
@@ -1640,7 +1672,7 @@ end function nctk_def_dpscalars
 !! SOURCE
 
 
-integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(ncerr)
+integer function nctk_def_one_array(ncid, nctk_array, defmode, varid, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1657,6 +1689,7 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
  logical,optional,intent(in) :: defmode
  integer,optional,intent(out) :: varid
  type(nctkarr_t),intent(in) :: nctk_array
+ character(len=*),optional,intent(in) :: prefix
 
 !Local variables-------------------------------
 !scalars
@@ -1664,10 +1697,12 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
  character(len=500) :: msg
 !arrays
  integer :: dimids(NF90_MAX_DIMS),dimvals(NF90_MAX_DIMS)
- character(len=nctk_slen) :: sarr(NF90_MAX_DIMS), string
+ character(len=nctk_slen) :: sarr(NF90_MAX_DIMS), string, pre, vname
  type(nctkvar_t) :: var
 
 ! *********************************************************************
+
+ pre = ""; if (present(prefix)) pre = prefix
 
  ncerr = nf90_noerr
  if (present(defmode)) then
@@ -1677,49 +1712,50 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
  end if
 
  xtype = str2xtype(nctk_array%dtype)
+ vname = strcat(pre, nctk_array%name)
 
  ! Build array of strings with the dimensions.
  string = nctk_array%shape_str
  nn = char_count(string, ",")
  ABI_CHECK(nn <= NF90_MAX_DIMS, "Too many dimensions!")
 
+ ! Parse dimension names and add prefix (if any).
  if (nn == 0) then
    cnt = 1
-   sarr(1) = lstrip(string)
+   sarr(1) = strcat(pre, lstrip(string))
  else
    prev = 0; cnt = 0
    do ii=1,len_trim(string)
      if (string(ii:ii) == ",") then
        cnt = cnt + 1
-       sarr(cnt) = lstrip(string(prev+1:ii-1))
+       sarr(cnt) = strcat(pre, lstrip(string(prev+1:ii-1)))
        prev = ii
      end if
    end do
    cnt = cnt + 1
-   sarr(cnt) = lstrip(string(prev+1:ii-1))
+   sarr(cnt) = strcat(pre, lstrip(string(prev+1:ii-1)))
  end if
 
  ! Get dimids
  do ii=1,cnt
-   !write(std_out,*)trim(sarr(ii))
    NCF_CHECK_MSG(nf90_inq_dimid(ncid, sarr(ii), dimids(ii)), sarr(ii))
    NCF_CHECK(nf90_inquire_dimension(ncid, dimids(ii), len=dimvals(ii)))
  end do
 
  ! Check if dimension already exists.
  ! Variable already exists. Check if type and dimensions agree
- if (nf90_inq_varid(ncid, nctk_array%name, vid) == nf90_noerr)  then
+ if (nf90_inq_varid(ncid, vname, vid) == nf90_noerr)  then
    call var_from_id(ncid, vid, var)
    if (.not. (var%xtype == xtype .and. var%ndims == cnt)) then
       write(msg,"(4a,2(2(a,i0),a))")&
-        "variable ",trim(nctk_array%name)," already exists with a different definition:",ch10,&
+        "variable ",trim(vname)," already exists with a different definition:",ch10,&
         "In file:     xtype = ",var%xtype,", ndims = ",var%ndims,ch10,&
         "From caller: xtype = ",xtype,", ndims = ",cnt,ch10
       MSG_ERROR(msg)
    end if
    if (any(dimvals(1:cnt) /= var%dimlens(1:var%ndims))) then
       write(msg,"(4a,2(3a))")&
-        "variable ",trim(nctk_array%name)," already exists but with different shape.",ch10,&
+        "variable ",trim(vname)," already exists but with different shape.",ch10,&
         "In file:     dims = ",trim(ltoa(var%dimlens(:var%ndims))),ch10,&
         "From caller  dims = ",trim(ltoa(dimvals(:cnt))),ch10
       MSG_ERROR(msg)
@@ -1729,7 +1765,7 @@ integer function nctk_def_one_array(ncid, nctk_array, defmode, varid) result(nce
  end if
 
  ! Define variable since it doesn't exist.
- ncerr = nf90_def_var(ncid, nctk_array%name, xtype, dimids(1:cnt), vid)
+ ncerr = nf90_def_var(ncid, vname, xtype, dimids(1:cnt), vid)
  NCF_CHECK(ncerr)
 
  if (present(varid)) varid = vid
@@ -1748,6 +1784,7 @@ end function nctk_def_one_array
 !!  ncid=Netcdf identifier.
 !!  nctk_arrays(:)=List of array descriptors.
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
+!!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
 !! PARENTS
 !!
@@ -1756,7 +1793,7 @@ end function nctk_def_one_array
 !! SOURCE
 
 
-integer function nctk_def_array_list(ncid, nctk_arrays, defmode) result(ncerr)
+integer function nctk_def_array_list(ncid, nctk_arrays, defmode, prefix) result(ncerr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1771,6 +1808,7 @@ integer function nctk_def_array_list(ncid, nctk_arrays, defmode) result(ncerr)
 !scalars
  integer,intent(in) :: ncid
  logical,optional,intent(in) :: defmode
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  type(nctkarr_t),intent(in) :: nctk_arrays(:)
 
@@ -1788,7 +1826,11 @@ integer function nctk_def_array_list(ncid, nctk_arrays, defmode) result(ncerr)
  end if
 
  do ia=1,size(nctk_arrays)
-   NCF_CHECK(nctk_def_one_array(ncid, nctk_arrays(ia)))
+   if (present(prefix)) then
+     NCF_CHECK(nctk_def_one_array(ncid, nctk_arrays(ia), prefix=prefix))
+   else
+     NCF_CHECK(nctk_def_one_array(ncid, nctk_arrays(ia)))
+   end if
  end do
 
 end function nctk_def_array_list
@@ -1851,7 +1893,7 @@ integer function nctk_write_iscalars(ncid, varnames, values, datamode) result(nc
  end if
 
  do ii=1,size(varnames)
-   NCF_CHECK(nf90_inq_varid(ncid, varnames(ii), varid))
+   NCF_CHECK_MSG(nf90_inq_varid(ncid, varnames(ii), varid), sjoin("Inquiring: ", varnames(ii)))
    NCF_CHECK(nf90_put_var(ncid, varid, values(ii)))
  end do
 

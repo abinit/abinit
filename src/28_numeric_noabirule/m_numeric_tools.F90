@@ -49,7 +49,7 @@ MODULE m_numeric_tools
  public :: iseven                ! True if int is even
  public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
  public :: is_zero               ! True if all elements of rr differ from zero by less than tol
- public :: isinside              ! True if float is inside an interval.
+ public :: inrange               ! True if (int/float) is inside an interval.
  public :: bisect                ! Given a monotonic array A and x find j such that A(j)>x>A(j+1) using bisection
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
  public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
@@ -106,8 +106,8 @@ MODULE m_numeric_tools
  end interface arth
 
  interface reverse
-   module procedure arth_int
-   module procedure arth_rdp
+   module procedure reverse_int
+   module procedure reverse_rdp
  end interface reverse
 
  interface set2unit
@@ -133,6 +133,11 @@ MODULE m_numeric_tools
    module procedure isdiagmat_rdp
    !module procedure isdiagmat_cdp
  end interface isdiagmat
+
+ interface inrange
+   module procedure inrange_int
+   module procedure inrange_dp
+ end interface inrange
 
  interface l2int
    module procedure l2int_1D
@@ -1757,34 +1762,66 @@ end function is_zero_rdp_1d
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/isinside
+!!****f* m_numeric_tools/inrange_int
 !! NAME
-!!  isinside
+!!  inrange_int
 !!
 !! FUNCTION
-!!  True if float `xval` is inside the interval [win(1), win(2)]
+!!  True if int `xval` is inside the interval [win(1), win(2)]
 !!
 !! SOURCE
 
-pure logical function isinside(xval, win)
+pure logical function inrange_int(xval, win)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'isinside'
+#define ABI_FUNC 'inrange_int'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in) :: xval,win(2)
+ integer,intent(in) :: xval,win(2)
 ! *************************************************************************
 
- isinside = (xval >= win(1) .and. xval <= win(2))
+ inrange_int = (xval >= win(1) .and. xval <= win(2))
 
-end function isinside
+end function inrange_int
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/inrange_dp
+!! NAME
+!!  inrange_dp
+!!
+!! FUNCTION
+!!  True if float `xval` is inside the interval [win(1), win(2)]
+!!
+!! SOURCE
+
+pure logical function inrange_dp(xval, win)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'inrange_dp'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: xval, win(2)
+! *************************************************************************
+
+ inrange_dp = (xval >= win(1) .and. xval <= win(2))
+
+end function inrange_dp
 !!***
 
 !!****f* m_numeric_tools/bisect_rdp
@@ -7086,6 +7123,7 @@ function dotproduct(nv1,nv2,v1,v2)
    dotproduct=dotproduct+v1(i,j)*v2(i,j)
   end do
  end do
+
 end function dotproduct
 !!***
 

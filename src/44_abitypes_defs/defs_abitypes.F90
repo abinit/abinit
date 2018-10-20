@@ -7,11 +7,10 @@
 !! This module contains definitions of high-level structured datatypes for the ABINIT package.
 !!
 !! If you are sure a new high-level structured datatype is needed,
-!! write it here, and DOCUMENT it properly (not all datastructure here are
-!! well documented, it is a shame ...).
-!! Do not forget : you will likely be the major winner if you document
-!! properly.
-!! Proper documentation of a structured datatype means :
+!! write it here, and DOCUMENT it properly (not all datastructure here are well documented, it is a shame ...).
+!! Do not forget: you will likely be the major winner if you document properly.
+!!
+!! Proper documentation of a structured datatype means:
 !!  (1) Mention it in the list just below
 !!  (2) Describe it in the NOTES section
 !!  (3) Put it in alphabetical order in the the main section of this module
@@ -20,14 +19,14 @@
 !!      input variables, for which there is a help file)
 !!  (5) Declare variables on separated lines in order to reduce the occurence of git conflicts.
 !!
-!! List of datatypes :
-!! * aim_dataset_type : the "dataset" for aim
-!! * bandfft_kpt_type : the "dataset" for triple band-fft-kpt parallelization
+!! List of datatypes:
+!! * aim_dataset_type: the "dataset" for aim
+!! * bandfft_kpt_type: the "dataset" for triple band-fft-kpt parallelization
 !! * datafiles_type: gather all the variables related to files
-!! * dataset_type : the "dataset" for the main abinit code
-!! * MPI_type : the data related to MPI parallelization
-!! * hdr_type : the header of wf, den and pot files
-!! * macro_uj_type : TO BE COMPLETED
+!! * dataset_type: the "dataset" for the main abinit code
+!! * MPI_type: the data related to MPI parallelization
+!! * hdr_type: the header of wf, den and pot files
+!! * macro_uj_type: TO BE COMPLETED
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2018 ABINIT group (XG)
@@ -244,6 +243,7 @@ type dataset_type
  integer :: ga_n_rules
  integer :: getcell
  integer :: getddb
+ integer :: getdvdb = 0
  integer :: getddk
  integer :: getdelfd
  integer :: getdkdk
@@ -281,9 +281,9 @@ type dataset_type
  integer :: gw_sigxcore
 
  ! GWLS
- integer :: gwls_stern_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
+ integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
- integer :: gwls_diel_model       ! switch to determine which dielectic model should be used in integration
+ integer :: gwls_diel_model             ! switch to determine which dielectic model should be used in integration
  integer :: gwls_print_debug            ! switch to determine what to print out for debugging
  integer :: gwls_nseeds                 ! number of seeds in the Lanczos description of the dielectric matrix
  integer :: gwls_n_proj_freq            ! Number of projection frequencies to be used for the construction of the sternheimer basis
@@ -294,9 +294,12 @@ type dataset_type
  integer :: gwls_band_index             ! band index of the state to be corrected
  integer :: gwls_exchange               ! Flag to determine if Exchange energy will be computed
  integer :: gwls_correlation            ! Flag to determine if Correlation energy will be computed
- integer :: gwls_first_seed             ! index of the first seed used in the Lanczos algorithm; seeds will go from first_seed to first_seed+nseeds
- !integer :: gwls_n_ext_freq             ! The number of frequencies to be read in gwls_ext_freq
- integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matric and add them to the other solutions requested. 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
+ integer :: gwls_first_seed             ! index of the first seed used in the Lanczos algorithm;
+                                        ! seeds will go from first_seed to first_seed+nseeds
+ !integer :: gwls_n_ext_freq            ! The number of frequencies to be read in gwls_ext_freq
+ integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matrix
+                                        ! and add them to the other solutions requested.
+                                        ! 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
  integer :: gw_frqim_inzgrid
  integer :: gw_frqre_inzgrid
  integer :: gw_frqre_tangrid
@@ -318,6 +321,7 @@ type dataset_type
  integer :: iprcfc
  integer :: irandom
  integer :: irdddb
+ integer :: irddvdb = 0
  integer :: irdddk
  integer :: irdden
  integer :: irdefmas
@@ -691,6 +695,7 @@ type dataset_type
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
+ real(dp) :: dvdb_qcache_mb = 1024.0_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
  real(dp) :: ecutsigx
@@ -864,7 +869,7 @@ type dataset_type
  real(dp), allocatable :: rprim_orig(:,:,:)   !SET2NULL  ! rprim_orig(3,3,nimage)
  real(dp), allocatable :: rprimd_orig(:,:,:)  !SET2NULL  ! rprimd_orig(3,3,nimage)
  real(dp), allocatable :: shiftk(:,:)         !SET2NULL  ! shiftk(3,nshiftk)
- real(dp) :: shiftk_orig(3,210)             ! original shifts given in input (changed in inkpts).
+ real(dp) :: shiftk_orig(3,MAX_NSHIFTK)       ! original shifts given in input (changed in inkpts).
 
  real(dp), allocatable :: spinat(:,:)         !SET2NULL  ! spinat(3,natom)
  real(dp), allocatable :: tnons(:,:)          !SET2NULL  ! tnons(3,nsym)
@@ -921,7 +926,7 @@ type dataset_type
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
- integer :: ph_
+ !integer :: ph_
  real(dp),allocatable :: ph_freez_disp_ampl(:,:)
   ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
  real(dp),allocatable :: ph_qshift(:,:)
@@ -945,6 +950,18 @@ type dataset_type
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
+
+ integer :: mixprec = 0
+
+ integer :: sigma_ngkpt(3) = 0
+ ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
+
+ integer :: sigma_nshiftk = 1
+ ! Number of shifts in k-mesh for Sigma_{nk}.
+
+ real(dp),allocatable :: sigma_shiftk(:,:)
+ ! sigma_shiftk(3, sigma_nshiftk)
+ ! shifts in k-mesh for Sigma_{nk}.
 !END EPH
 
  integer :: ndivsm=0
@@ -1342,6 +1359,11 @@ type dataset_type
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'DEN'
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DEN'
 
+  character(len=fnlen) :: fildvdbin
+   ! if no dataset mode             : abi//'DVDB'
+   ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
+   ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
+
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'KDEN'
@@ -1478,10 +1500,10 @@ type dataset_type
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
-
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
   character(len=fnlen) :: fnameabo_dos
+  character(len=fnlen) :: fnameabo_dvdb
   character(len=fnlen) :: fnameabo_eelf
   character(len=fnlen) :: fnameabo_eig
   character(len=fnlen) :: fnameabo_eigi2d

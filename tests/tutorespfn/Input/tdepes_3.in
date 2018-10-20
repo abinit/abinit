@@ -71,6 +71,6 @@
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = S. Ponc\'e
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = Temperature dependence calculation of diamond.
 #%%<END TEST_INFO>

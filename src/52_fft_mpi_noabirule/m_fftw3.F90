@@ -32,6 +32,9 @@
 #define FFTLIB "FFTW3"
 #define FFT_PREF(name) CONCAT(fftw3_,name)
 #define SPAWN_THREADS_HERE(ndat, nthreads) fftw3_spawn_threads_here(ndat, nthreads)
+#define FFT_DOUBLE 1
+#define FFT_SINGLE 2
+#define FFT_MIXPREC 3
 
 MODULE m_fftw3
 
@@ -53,7 +56,6 @@ MODULE m_fftw3
  use m_mpinfo,         only : ptabs_fourwf
  use m_fstrings,       only : strcat
  use m_fft_mesh,       only : zpad_t, zpad_init, zpad_free
- use m_fftcore
 
  implicit none
 
@@ -106,22 +108,22 @@ MODULE m_fftw3
 
 #ifdef HAVE_FFT_FFTW3_MPI
 ! flags copied from fftw3.f
- integer,public,parameter :: ABI_FFTW_FORWARD=FFTW_FORWARD
- integer,public,parameter :: ABI_FFTW_BACKWARD=FFTW_BACKWARD
- integer,public,parameter :: ABI_FFTW_ESTIMATE=FFTW_ESTIMATE
- integer,public,parameter :: ABI_FFTW_MEASURE=FFTW_MEASURE
+ integer,public,parameter :: ABI_FFTW_FORWARD = FFTW_FORWARD
+ integer,public,parameter :: ABI_FFTW_BACKWARD = FFTW_BACKWARD
+ integer,public,parameter :: ABI_FFTW_ESTIMATE = FFTW_ESTIMATE
+ integer,public,parameter :: ABI_FFTW_MEASURE = FFTW_MEASURE
  ! end flags copied from fftw3.f
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN=FFTW_MPI_TRANSPOSED_IN
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT=FFTW_MPI_TRANSPOSED_OUT
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN = FFTW_MPI_TRANSPOSED_IN
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT = FFTW_MPI_TRANSPOSED_OUT
  ! end flags copies from fftw3-mpi.f03
 #else
- integer,public,parameter :: ABI_FFTW_FORWARD=-1
- integer,public,parameter :: ABI_FFTW_BACKWARD=+1
- integer,public,parameter :: ABI_FFTW_ESTIMATE=64
- integer,public,parameter :: ABI_FFTW_MEASURE=0
+ integer,public,parameter :: ABI_FFTW_FORWARD = -1
+ integer,public,parameter :: ABI_FFTW_BACKWARD = +1
+ integer,public,parameter :: ABI_FFTW_ESTIMATE = 64
+ integer,public,parameter :: ABI_FFTW_MEASURE = 0
 ! end flags copied from fftw3.f
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN=536870912
- integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT=1073741824
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_IN = 536870912
+ integer,public,parameter :: ABI_FFTW_MPI_TRANSPOSED_OUT = 1073741824
 ! end flags copies from fftw3-mpi.f03
 #endif
 
@@ -315,35 +317,65 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
 
 !Local variables-------------------------------
 !scalars
- integer :: my_flags
+ integer :: my_flags,ii,jj
+ complex(spc), allocatable :: work_sp(:)
 
 ! *************************************************************************
 
- my_flags=ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
+ my_flags = ABI_FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
 
  select case (cplex)
- case (2) ! Complex to Complex.
+ case (2)
+   ! Complex to Complex.
+   if (fftcore_mixprec == 1) then
+     ! Mixed precision: copyin + in-place + copyout
+     ABI_MALLOC(work_sp, (ldx*ldy*ldz*ndat))
+     if (isign == ABI_FFTW_BACKWARD) then ! +1
+       work_sp(:) = cmplx(fofg(1::2), fofg(2::2), kind=spc)
+     else if (isign == ABI_FFTW_FORWARD) then ! -1
+       work_sp(:) = cmplx(fofr(1::2), fofr(2::2), kind=spc)
+     else
+       MSG_BUG("Wrong isign")
+     end if
 
-   select case (isign)
-   case (ABI_FFTW_BACKWARD) ! +1
-     call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags=my_flags)
+     call fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp,fftw_flags=my_flags)
 
-   case (ABI_FFTW_FORWARD)  ! -1
-     call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg,fftw_flags=my_flags)
+     if (isign == ABI_FFTW_BACKWARD) then ! +1
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofr(jj) = real(work_sp(ii), kind=dp)
+         fofr(jj+1) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     else if (isign == ABI_FFTW_FORWARD) then  ! -1
+       jj = 1
+       do ii=1,ldx*ldy*ldz*ndat
+         fofg(jj) = real(work_sp(ii), kind=dp)
+         fofg(jj+1) = aimag(work_sp(ii))
+         jj = jj + 2
+       end do
+     end if
+     ABI_FREE(work_sp)
 
-   case default
-     MSG_BUG("Wrong isign")
-   end select
+   else
+     ! double precision version.
+     select case (isign)
+     case (ABI_FFTW_BACKWARD) ! +1
+       call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_flags=my_flags)
+     case (ABI_FFTW_FORWARD)  ! -1
+       call fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofr,fofg,fftw_flags=my_flags)
+     case default
+       MSG_BUG("Wrong isign")
+     end select
+   end if
 
- case (1) ! Real case.
-
+ case (1)
+   ! Real case.
    select case (isign)
    case (ABI_FFTW_FORWARD) ! -1; R --> G
      call fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg,fftw_flags=my_flags)
-
    case (ABI_FFTW_BACKWARD) ! +1; G --> R
      call fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr,fftw_flags=my_flags)
-
    case default
      MSG_BUG("Wrong isign")
    end select
@@ -491,11 +523,16 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
  if (use_fftrisc) then
-   !call wrtout(std_out,strcat(ABI_FUNC,": calls fftw3_fftrisc","COLL")
+   !call wrtout(std_out, calling fftw3_fftrisc","COLL")
 
-   if (ndat==1) then
-     call fftw3_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&      mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+   if (ndat == 1) then
+     if (fftcore_mixprec == 0) then
+       call fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+         mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+     else
+       call fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+         mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+     end if
 
    else
      ! All this boilerplate code is needed because the caller might pass zero-sized arrays
@@ -535,7 +572,7 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 &          mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
        end do
 
-       ! This version seems not to be efficient
+       ! This version doesn't seem efficient
        !!!  !$OMP PARALLEL PRIVATE(ptg,ptr,saveden)
        !!!         ABI_MALLOC(saveden, (ldx,ldy,ldz))
        !!!         saveden = zero
@@ -559,8 +596,13 @@ subroutine fftw3_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
          do dat=1,ndat
            ptgin  = 1 + (dat-1)*npwin
            ptgout = 1 + (dat-1)*npwout
-           call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-&            mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           if (fftcore_mixprec == 0) then
+             call fftw3_fftrisc_dp(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
+                 istwf_k,kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           else
+             call fftw3_fftrisc_mixprec(cplex,denpot,fofgin(1,ptgin),fofgout(1,ptgout),fofr,gboundin,gboundout,&
+                 istwf_k,kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+           end if
          end do
        else
 !$OMP PARALLEL DO PRIVATE(ptgin,ptgout)
@@ -753,65 +795,7 @@ end subroutine fftw3_seqfourwf
 !! Carry out Fourier transforms between real and reciprocal (G) space,
 !! for wavefunctions, contained in a sphere in reciprocal space,
 !! in both directions. Also accomplish some post-processing.
-!!
-!! NOTES
-!! Specifically uses rather sophisticated algorithms, based on S Goedecker
-!! routines, specialized for superscalar RISC architecture.
-!! Zero padding : saves 7/12 execution time
-!! Bi-dimensional data locality in most of the routine : cache reuse
-!! For k-point (0 0 0) : takes advantage of symmetry of data.
-!! Note however that no blocking is used, in both 1D z-transform
-!! or subsequent 2D transform. This should be improved.
-!!
-!! INPUTS
-!!  cplex= if 1 , denpot is real, if 2 , denpot is complex
-!!     (cplex=2 only allowed for option=2 when istwf_k=1)
-!!     one can also use cplex=0 if option=0 or option=3
-!!  fofgin(2,npwin)=holds input wavefunction in G vector basis sphere.
-!!  gboundin(2*mgfft+8,2)=sphere boundary info for reciprocal to real space
-!!  gboundout(2*mgfft+8,2)=sphere boundary info for real to reciprocal space
-!!  istwf_k=option parameter that describes the storage of wfs
-!!  kg_kin(3,npwin)=reduced planewave coordinates, input
-!!  kg_kout(3,npwout)=reduced planewave coordinates, output
-!!  mgfft=maximum size of 1D FFTs
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  npwin=number of elements in fofgin array (for option 0, 1 and 2)
-!!  npwout=number of elements in fofgout array (for option 2 and 3)
-!!  ldx,ldy,ldz=ngfft(4),ngfft(5),ngfft(6), dimensions of fofr.
-!!  option= if 0: do direct FFT
-!!          if 1: do direct FFT, then sum the density
-!!          if 2: do direct FFT, multiply by the potential, then do reverse FFT
-!!          if 3: do reverse FFT only
-!!  weight=weight to be used for the accumulation of the density in real space
-!!          (needed only when option=1)
-!!
-!! OUTPUT
-!!  (see side effects)
-!!
-!! OPTIONS
-!!  The different options are:
-!!  - reciprocal to real space and output the result (when option=0),
-!!  - reciprocal to real space and accumulate the density (when option=1) or
-!!  - reciprocal to real space, apply the local potential to the wavefunction
-!!    in real space and produce the result in reciprocal space (when option=2)
-!!  - real space to reciprocal space (when option=3).
-!!  option=0 IS NOT ALLOWED when istwf_k>2
-!!  option=3 IS NOT ALLOWED when istwf_k>=2
-!!
-!! SIDE EFFECTS
-!!  for option==0, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 fofr(2,ldx,ldy,ldz) contains the Fourier Transform of fofgin;
-!!                 no use of denpot, fofgout and npwout.
-!!  for option==1, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 denpot(cplex*ldx,ldy,ldz) contains the input density at input,
-!!                 and the updated density at output;
-!!                 no use of fofgout and npwout.
-!!  for option==2, fofgin(2,npwin)=holds input wavefunction in G sphere;
-!!                 denpot(cplex*ldx,ldy,ldz) contains the input local potential;
-!!                 fofgout(2,npwout) contains the output function;
-!!  for option==3, fofr(2,ldx,ldy,ldz) contains the real space wavefunction;
-!!                 fofgout(2,npwout) contains its Fourier transform;
-!!                 no use of fofgin and npwin.
+!! See fftw3_fftrisc_dp for API doc.
 !!
 !! PARENTS
 !!
@@ -854,7 +838,7 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #undef  MYCMPLX
 #undef  MYCONJG
 
-#define FFT_PRECISION FFTW3_SINGLE
+#define FFT_PRECISION FFT_SINGLE
 #define MYKIND SPC
 #define MYCZERO (0._sp,0._sp)
 #define MYCMPLX  CMPLX
@@ -984,7 +968,7 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #undef  MYCMPLX
 #undef  MYCONJG
 
-#define FFT_PRECISION FFTW3_DOUBLE
+#define FFT_PRECISION FFT_DOUBLE
 #define MYKIND DPC
 #define MYCZERO (0._dp,0._dp)
 #define MYCMPLX  DCMPLX
@@ -1000,6 +984,73 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 #endif
 
 end subroutine fftw3_fftrisc_dp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fftw3/fftw3_fftrisc_mixprec
+!! NAME
+!! fftw3_fftrisc_mixprec
+!!
+!! FUNCTION
+!!  Mixed precision version of fftrisc: input/output in dp, computation done in sp.
+!!  See fftw3_fftrisc_dp for API docs.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
+& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fftw3_fftrisc_mixprec'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
+ real(dp),intent(in) :: weight_r,weight_i
+!arrays
+ integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
+ integer,intent(in) :: kg_kin(3,npwin),kg_kout(3,npwout),ngfft(18)
+ real(dp),intent(in) :: fofgin(2,npwin)
+ real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz),fofr(2,ldx*ldy*ldz)
+ real(dp),intent(inout) :: fofgout(2,npwout)
+
+! *************************************************************************
+
+#ifdef HAVE_FFT_FFTW3
+
+#undef  FFT_PRECISION
+#undef  MYKIND
+#undef  MYCZERO
+#undef  MYCMPLX
+#undef  MYCONJG
+
+#define FFT_PRECISION FFT_MIXPREC
+#define MYKIND SPC
+#define MYCZERO (0._sp,0._sp)
+#define MYCMPLX  CMPLX
+#define MYCONJG  CONJG
+
+#include "fftw3_fftrisc.finc"
+
+#else
+ MSG_ERROR("FFTW3 support not activated")
+ ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
+ ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
+ ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
+#endif
+
+end subroutine fftw3_fftrisc_mixprec
 !!***
 
 !----------------------------------------------------------------------
@@ -1023,7 +1074,7 @@ end subroutine fftw3_fftrisc_dp
 !! istwf_k=Option describing the storage of the wavefunction.
 !! mgfft=Max number of FFT divisions (used to dimension gbound)
 !! kg_k(3,npw_k)=G-vectors in reduced coordinates
-!! gbound(2*mgfft+8,2)=Table for padded-FFT. See sphereboundary.
+!! gbound(2*mgfft+8,2)=Table for zero-padded FFT. See sphereboundary.
 !!  ug(npw_k*ndat)=wavefunctions in reciprocal space.
 !!
 !! OUTPUT

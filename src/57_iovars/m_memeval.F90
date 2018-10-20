@@ -297,7 +297,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
        ! Don't perform memory tests if MBPT.
        mem_test = dtsets(idtset)%mem_test
-       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE])) mem_test = 0
+       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE, RUNL_EPH])) mem_test = 0
 
        call memory(n1xccc,extrapwf,getcell,idtset,dtsets(idtset)%icoulomb,&
 &       intxc,dtsets(idtset)%ionmov,iout,densfor_pred,&
@@ -452,7 +452,7 @@ end subroutine memory_eval
 !! arrays allocated in move.f, brdmin.f, gstate.f (xf array) or pspini.f
 !! In the case 3<=occopt<=8 this amount is increased by 760 Kbytes
 !! to take into account the arrays smdfun, occfun, entfun, workfun and xgrid,
-!! declared in getnel
+!! declared in getnel.
 !!
 !! The current version takes into account
 !! 1) and 2) the "main chain" in its two slightly different versions :
@@ -477,16 +477,14 @@ end subroutine memory_eval
 !! driver - gstate - (move or brdmin) - scfcv - vtorho - tddft
 !!
 !! It is valid for all values of iscf, but not for nstep=0 (when the chain
-!!     goes through energy instead of vtorho).
+!! goes through energy instead of vtorho).
 !!
 !! Also, it is assumed that the potentials are non-local, even if there
-!!     are local ! It would be necessary to update this routine
-!!     now that the beginning of psp files is read before
-!!     the present call (XG 980502)
+!! are local ! It would be necessary to update this routine
+!! now that the beginning of psp files is read before the present call (XG 980502)
 !!
-!! One might also estimate if there must be a chain arriving at :
-!!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro,
-!!  clnup1.
+!! One might also estimate if there must be a chain arriving at:
+!!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro, clnup1.
 !! This is because there are allocated arrays in these routines.
 !!
 !! PARENTS
@@ -580,7 +578,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
 
- call wrtout(std_out,'memory : analysis of memory needs ','COLL')
+ call wrtout(std_out,'memory: analysis of memory needs ','COLL')
 
  if(jdtset>=100)then
    write(message,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&

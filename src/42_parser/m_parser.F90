@@ -139,9 +139,9 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    if (tread==1) ndtset=intarr(1)
    ! Check that ndtset is not negative
    if (ndtset<0 .or. ndtset>9999) then
-     write(message, '(a,i0,a,a,a,a)' )&
+     write(message, '(a,i0,4a)' )&
 &     'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
-&     'This is not allowed.  ',ch10,&
+&     'This is not allowed.',ch10,&
 &     'Action: modify ndtset in the input file.'
      MSG_ERROR(message)
    end if
@@ -231,14 +231,14 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    if(errcod/=0)then
 !    integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     ' inread : ERROR -',&
+&     ' inread: ERROR -',&
 &     '  Attempted to read ndig=',ndig,' integer digits,'
      write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),&
 &     ', to initialize an integer variable'
      errcod=1
    end if
 
- else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' & 
+ else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
 &     .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
 !  real(dp) input section
@@ -318,7 +318,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    if(errcod/=0)then
 !    integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     'inread : ERROR -',&
+&     'inread: ERROR -',&
 &     'Attempted to read ndig=',ndig,' integer digits,'
      write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize a logical variable.'
      errcod=3
@@ -337,7 +337,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    do idig=1,ndig
      if( string(idig:idig) == 'O' )then
        write(std_out,'(/,a,/,a,a,a)' ) &
-&       'inread : WARNING -',&
+&       'inread: WARNING -',&
 &       'Note that this string contains the letter O. ',ch10,&
 &       'It is likely that this letter should be replaced by the number 0.'
        exit
@@ -1607,7 +1607,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  ii=0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  & 
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  &
 &     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  strln=len_trim(string)
 

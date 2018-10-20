@@ -1133,9 +1133,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.4383 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.5674 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.4383 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.5674 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  CONTOUR DEFORMATION
  number of plane-waves for SigmaX                  283
@@ -1278,9 +1278,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.0346 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.8622 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   3.0346 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.8622 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
 == END DATASET(S) ==============================================================
 ================================================================================

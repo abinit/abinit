@@ -340,7 +340,7 @@ subroutine strain_apply(rprim,rprim_def,strain)
  type(strain_type),intent(in) :: strain
 !Local variables-------------------------------
 !scalar
- integer :: i
+ !integer :: i
 !arrays
 ! *************************************************************************
 

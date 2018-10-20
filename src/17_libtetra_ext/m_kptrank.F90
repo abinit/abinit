@@ -196,7 +196,6 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
 ! could add a check that all k in full grid are in the invrank...
 
-
 end subroutine mkkptrank
 !!***
 

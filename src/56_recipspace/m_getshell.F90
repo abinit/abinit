@@ -153,7 +153,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  integer :: neigh(0:6,nkpt2),symafm_dummy(1),vacuum(3)
  integer,allocatable :: symrel1(:,:,:)
  real(dp) :: dist(6),dk(3),dk_(3),mat(6,6),rvec(6),sgval(6)
- real(dp) :: shiftk_(3,210),work(30)
+ real(dp) :: shiftk_(3,MAX_NSHIFTK),work(30)
  real(dp),allocatable :: tnons1(:,:),wtk3(:)
 
 !************************************************************************

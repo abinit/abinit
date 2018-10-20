@@ -27,7 +27,6 @@
 module m_invars1
 
  use defs_basis
- !use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -196,7 +195,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
        write(message, '(3a,i0,a,i0,a,a)' )&
 &       'The components of jdtset must be between 1 and 9999.',ch10,&
 &       'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
-&       'Action : correct jdtset in your input file.'
+&       'Action: correct jdtset in your input file.'
        MSG_ERROR(message)
      end if
    end do
@@ -291,7 +290,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      write(message, '(5a)' )&
 &     'supercell_latt must have positive parameters and diagonal part',ch10,&
 &     'This is not allowed.  ',ch10,&
-&     'Action : modify supercell_latt in the input file.'
+&     'Action: modify supercell_latt in the input file.'
      MSG_ERROR(message)
    end if
 !  Compute the multiplicity of the supercell
@@ -529,7 +528,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%rprimd_orig,(3,3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%so_psp,(npsp))
    ABI_ALLOCATE(dtsets(idtset)%spinat,(3,mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,210))
+   ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_ALLOCATE(dtsets(idtset)%typat,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%upawu,(mxntypat,mxnimage))
 !   if (dtsets(idtset)%plowan_compute>0) then
@@ -572,8 +571,7 @@ end subroutine invars0
 !!  mxnatom=maximal value of input natom for all the datasets
 !!  mxnimage=maximal value of input nimage for all the datasets
 !!  ndtset= number of datasets to be read; if 0, no multi-dataset mode
-!!  ndtset_alloc=number of datasets, corrected for allocation of at least
-!!               one data set.
+!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !!  npsp= number of pseudopotential files
 !!  string*(*)=string of characters containing all input variables and data
 !!  zionpsp(npsp)= valence charge over all psps
@@ -1111,6 +1109,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !************************************************************************
 
+ ! This counter is incremented when we find a non-critical error.
+ ! The code outputs a warning and stops at end.
+ leave = 0
+
 !Some initialisations
  ierr=0
  cond_string(1:4)=' '
@@ -1223,10 +1225,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        call inupper(symbol)
        call inupper(string2)
 
-!      DEBUG
 !      write(std_out,'(a)')' invars1 : before test, trim(adjustl(symbol)),trim(adjustl(string2))'
 !      write(std_out,'(5a)' )'"',trim(adjustl(symbol)),'","',trim(adjustl(string2)),'"'
-!      ENDDEBUG
 
        if(trim(adjustl(symbol))==trim(adjustl(string2)))then
          found=1
@@ -1237,10 +1237,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
            MSG_ERROR(message)
          end if
 
-!        DEBUG
 !        write(std_out,*)' invars1 : found ipsp=',ipsp
-!        ENDDEBUG
-
          write(string1,'(i1)')ipsp
          string(index_lower:index_lower+1)=blank//string1
          index_lower=index_lower+2
@@ -1309,12 +1306,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'SpinPolarized',tread_alt,'LOG')
  if(tread_alt==1)then
    if(tread==1)then
-     write(message, '(5a)' )&
-&     'nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
-&     'for the same dataset.',ch10,&
-&     'Action: check the input file.'
-     call wrtout(std_out,  message,'COLL')
-     leave=1
+     write(message, '(3a)' )&
+     'nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
+     'for the same dataset.'
+     MSG_ERROR_NOSTOP(message, leave)
    else
 !    Note that SpinPolarized is a logical input variable
      nsppol=1
@@ -1418,8 +1413,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(dtset%nimage> 2 .and. ii==intimage)cycle ! Will do the intermediate reference image at the last reading
    if(dtset%nimage>=2 .and. ii==dtset%nimage+1)iimage=intimage
 
-   write(message,'(a,i0)')' invars1 : treat image number: ',iimage
-   call wrtout(std_out,message,'COLL')
+   if (dtset%nimage /= 1) then
+     write(message,'(a,i0)')' invars1 : treat image number: ',iimage
+     call wrtout(std_out,message,'COLL')
+   end if
 
 !  Need to reset nsym to default value for each image
    dtset%nsym=0
@@ -1520,8 +1517,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%nkptgw<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input nkptgw must be >= 0, but was ',dtset%nkptgw,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1532,8 +1528,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gw_nqlwl<0) then
    write(message, '(a,i12,a,a,a,a)' )&
 &   'Input gw_nqlwl must be > 0, but was ',dtset%gw_nqlwl,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1610,8 +1605,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%nqptdm<-1) then
    write(message, '(a,i12,a,a,a,a)' )&
 &   'Input nqptdm must be >= 0, but was ',dtset%nqptdm,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1624,8 +1618,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%cd_customnimfrqs<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input cd_customnimfrqs must be >= 0, but was ',dtset%cd_customnimfrqs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1635,8 +1628,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gw_customnfreqsp<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gw_customnfreqsp must be >= 0, but was ',dtset%gw_customnfreqsp,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1646,8 +1638,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gwls_n_proj_freq<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1657,8 +1648,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (ABS(dtset%efmas_calc_dirs)>3) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input efmas_calc_dirs must be between -3 and 3, but was ',dtset%efmas_calc_dirs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1668,8 +1658,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%efmas_n_dirs<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input efmas_n_dirs must be >= 0, but was ',dtset%efmas_n_dirs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 !---------------------------------------------------------------------------
@@ -1681,62 +1670,35 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%ga_n_rules=intarr(1)
 
 !Perform the first checks
-
- leave=0
-
 !Check that nkpt is greater than 0
  if (nkpt<=0) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  After inkpts, nkpt must be > 0, but was ',nkpt,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,  message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'After inkpts, nkpt must be > 0, but was ',nkpt
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nsppol is 1 or 2
  if (nsppol/=1 .and. nsppol/=2) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  Input nsppol must be 1 or 2, but was ',nsppol,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'Input nsppol must be 1 or 2, but was ',nsppol
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nspinor is 1 or 2
  if (nspinor/=1 .and. nspinor/=2) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  Input nspinor must be 1 or 2, but was ',nspinor,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'Input nspinor must be 1 or 2, but was ',nspinor
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nspinor and nsppol are not 2 together
  if (nsppol==2 .and. nspinor==2) then
-   write(message, '(8a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  nspinor and nsappol cannot be 2 together !',ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   MSG_ERROR_NOSTOP('nspinor and nsappol cannot be 2 together!', leave)
  end if
 
 !Here, leave if an error has been detected earlier
- if(leave==1) then
-   message = ' Other errors might be present in the input file. '
-   MSG_ERROR(message)
+ if (leave /= 0) then
+   MSG_ERROR('Errors are present in the input file. See above messages')
  end if
 
-
 !Now, take care of mband_upper
-
  mband_upper=1
  occopt=1
  fband=0.5_dp
@@ -1835,8 +1797,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_DEALLOCATE(reaalloc)
  else
    write(message, '(a,i0,3a)' )&
-&   'occopt=',occopt,' is not an allowed value.',ch10,&
-&   'Action: correct your input file.'
+&   'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1844,8 +1805,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (mband_upper<=0) then
    write(message, '(a,i0,4a)' )&
 &   'Maximal nband must be > 0, but was ',mband_upper,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 

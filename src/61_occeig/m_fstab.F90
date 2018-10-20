@@ -21,7 +21,6 @@
 
 #include "abi_common.h"
 
-
 module m_fstab
 
  use defs_basis
@@ -181,23 +180,13 @@ subroutine fstab_free(fstab)
  !@fstab_t
 
  ! integer
- if (allocated(fstab%istg0)) then
-   ABI_FREE(fstab%istg0)
- end if
- if (allocated(fstab%bstcnt_ibz)) then
-   ABI_FREE(fstab%bstcnt_ibz)
- end if
+ ABI_SFREE(fstab%istg0)
+ ABI_SFREE(fstab%bstcnt_ibz)
 
  ! real
- if (allocated(fstab%kpts)) then
-   ABI_FREE(fstab%kpts)
- end if
- if (allocated(fstab%tetra_wtk)) then
-   ABI_FREE(fstab%tetra_wtk)
- end if
- if (allocated(fstab%tetra_wtk_ene)) then
-   ABI_FREE(fstab%tetra_wtk_ene)
- end if
+ ABI_SFREE(fstab%kpts)
+ ABI_SFREE(fstab%tetra_wtk)
+ ABI_SFREE(fstab%tetra_wtk_ene)
 
  ! types
  call destroy_kptrank(fstab%krank)
@@ -320,7 +309,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,ebands%kptns,kpt_full,ebands%nkpt,nkpt_full,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
+    sppoldbl,cryst%symafm,cryst%symrel,timrev,comm, use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(7a,es16.6,4a)' )&
@@ -484,7 +473,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
        ! Get the contribution of this band
        tmp_eigen = ebands%eig(band, :nkibz, spin)
 
-       ! Calculate general integration weights at each irred kpoint 
+       ! Calculate general integration weights at each irred kpoint
        ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
          bcorr0,btheta,bdelta,xmpi_comm_self)
@@ -777,7 +766,6 @@ end subroutine fstab_print
 
 subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
 
- use m_kptrank
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

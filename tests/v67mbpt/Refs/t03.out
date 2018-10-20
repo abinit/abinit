@@ -1072,9 +1072,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.1367 [eV], located at k-point      :   0.0000  0.0000  0.5000
-   Fundamental gap     =   2.1367 [eV], Top of valence bands at :   0.0000  0.0000  0.5000
-                                        Bottom of conduction at :   0.0000  0.0000  0.5000
+   Minimum direct gap =   2.1367 [eV], located at k-point      :   0.0000  0.0000  0.5000
+   Fundamental gap    =   2.1367 [eV], Top of valence bands at :   0.0000  0.0000  0.5000
+                                       Bottom of conduction at :   0.0000  0.0000  0.5000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  119
@@ -1198,9 +1198,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.1367 [eV], located at k-point      :   0.0000  0.0000  0.5000
-   Fundamental gap     =   2.1367 [eV], Top of valence bands at :   0.0000  0.0000  0.5000
-                                        Bottom of conduction at :   0.0000  0.0000  0.5000
+   Minimum direct gap =   2.1367 [eV], located at k-point      :   0.0000  0.0000  0.5000
+   Fundamental gap    =   2.1367 [eV], Top of valence bands at :   0.0000  0.0000  0.5000
+                                       Bottom of conduction at :   0.0000  0.0000  0.5000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  119
@@ -1324,9 +1324,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.1367 [eV], located at k-point      :   0.0000  0.0000  0.5000
-   Fundamental gap     =   2.1367 [eV], Top of valence bands at :   0.0000  0.0000  0.5000
-                                        Bottom of conduction at :   0.0000  0.0000  0.5000
+   Minimum direct gap =   2.1367 [eV], located at k-point      :   0.0000  0.0000  0.5000
+   Fundamental gap    =   2.1367 [eV], Top of valence bands at :   0.0000  0.0000  0.5000
+                                       Bottom of conduction at :   0.0000  0.0000  0.5000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  119

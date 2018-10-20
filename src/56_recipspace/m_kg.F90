@@ -157,9 +157,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
    write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,a,a)' ) ch10,&
 &   ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
 &   '         ecut(hartree)=',ecut_pw+tol8,ch10,'=> whole FFT box selected'
-   if(iout/=std_out) then
-     call wrtout(iout,message,'COLL')
-   end if
+   if(iout/=std_out) call wrtout(iout,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
  else
@@ -178,9 +176,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,3x,a,f10.5)' ) ch10,&
 &     ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
 &     '         ecut(hartree)=',ecut+tol8,'=> boxcut(ratio)=',boxcut+tol8
-     if(iout/=std_out) then
-       call wrtout(iout,message,'COLL')
-     end if
+     if(iout/=std_out) call wrtout(iout,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
@@ -190,9 +186,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
 &       '  Actio: try larger ngfft or smaller ecut.',ch10,&
 &       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        MSG_ERROR(message)
      end if
 
@@ -203,9 +197,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  is sufficient for exact treatment of convolution.',ch10,&
 &       '  Such a large boxcut is a waste : you could raise ecut',ch10,&
 &       '  e.g. ecut=',effcut*0.25_dp+tol8,' Hartrees makes boxcut=2',ch10
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
 
@@ -215,9 +207,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
 &       '  Be sure to test with larger ngfft(1:3) values.',ch10
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
 
@@ -566,10 +556,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)' kpgio : enter '
-!ENDDEBUG
-
 !Define me
  me=mpi_enreg%me_kpt
 
@@ -640,9 +626,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if
 
- if (mpi_enreg%nproc>1) then
-   call wrtout(std_out,' kpgio: loop on k-points done in parallel','COLL')
- end if
+ !if (mpi_enreg%nproc>1) call wrtout(std_out,' kpgio: loop on k-points done in parallel','COLL')
 
 !XG030513 MPIWF : now, one should sum npwarr over all processors
 !of the WF group, to get npwtot (to be spread on all procs of the WF group
@@ -658,10 +642,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
      end if
    end if
  end do
-
-!DEBUG
-!write(std_out,*)' kpgio : exit '
-!ENDDEBUG
 
 end subroutine kpgio
 !!***

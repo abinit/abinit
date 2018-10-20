@@ -41,6 +41,7 @@ module m_fftcore
  use m_sort
 
  use m_time,         only : timab
+ use m_fstrings,     only : itoa, sjoin
  use defs_abitypes,  only : MPI_type
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
@@ -98,9 +99,12 @@ module m_fftcore
  public :: mpifft_collect_datar           ! Collect a real-space MPI-FFT distributed array on each proc.
 
  public :: indfftrisc
-
  public :: addrho
  public :: multpot
+
+ ! 0 for double precision version (default), 1 for mixed precision FFTs
+ integer, public, protected :: fftcore_mixprec = 0
+ public :: fftcore_set_mixprec
 
 ! *************************************************************************
 
@@ -127,6 +131,55 @@ module m_fftcore
 &   "zero-pad+cache "/)
 
 contains
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fftcore/fftcore_set_mixprec
+!! NAME
+!! fftalg_set_precision
+!!
+!! FUNCTION
+!!  Set the precision to be used in the FFT routines: 0 for standard double precision,
+!!  1 for mixed precision (dp input, sp for intermediate arrays passed to FFT libs)
+!!  Return old value.
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+integer function fftcore_set_mixprec(wp) result(old_wp)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fftcore_set_mixprec'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: wp
+
+! *************************************************************************
+
+ old_wp = fftcore_mixprec
+ fftcore_mixprec = abs(wp)
+
+ select case (fftcore_mixprec)
+ case (0)
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in double-precision.")
+ case (1)
+   if (old_wp /= fftcore_mixprec) call wrtout(std_out, " Activating FFT in mixed precision.")
+ case default
+   MSG_ERROR(sjoin("Wrong value for input wp:", itoa(fftcore_mixprec)))
+ end select
+
+end function fftcore_set_mixprec
 !!***
 
 !----------------------------------------------------------------------
@@ -1525,7 +1578,7 @@ end subroutine sphereboundary
 !!
 !! TODO
 !! 1) Order arguments
-!! 2) Split the two cases: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
+!! 2) Split the two cases to avoid breaking intent: from and to sphere (merge with cg_box2gpsh and cg_gsph2box?)
 !! 3) If symmetries are used with or without shiftg, it might happen that the FFT mesh
 !!    is not large enough to accomodate the rotated G, in this case one should return ierr /= 0
 !!
