@@ -133,7 +133,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
  real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
- real(dp), allocatable :: gvnlc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
+ real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
  real(dp), allocatable :: vfock(:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
  real(dp), allocatable,target ::cwavef_r(:,:,:,:)
@@ -228,7 +228,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      forikpt=zero
    end if
    ABI_ALLOCATE(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3)))
-   ABI_ALLOCATE(gvnlc,(2,npw*nspinor))
+   ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
    ABI_ALLOCATE(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim))
  end if
 
@@ -451,9 +451,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        if(need_ghc) then
          choice=1
          call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
-&         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlc,enl=dijhat,&
+&         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlxc,enl=dijhat,&
 &         select_k=K_H_KPRIME)
-         ghc2=ghc2-gvnlc*occ*wtk
+         ghc2=ghc2-gvnlxc*occ*wtk
        end if
 
 ! Forces calculation
@@ -607,7 +607,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    ABI_DEALLOCATE(vfock)
    ABI_DEALLOCATE(vqg)
    if (fockcommon%usepaw==1) then
-     ABI_DEALLOCATE(gvnlc)
+     ABI_DEALLOCATE(gvnlxc)
      ABI_DEALLOCATE(grnhat12)
      if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
        ABI_DEALLOCATE(forikpt)
@@ -669,7 +669,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ===============================
 
  if (fockcommon%usepaw==1) then
-   ABI_DEALLOCATE(gvnlc)
+   ABI_DEALLOCATE(gvnlxc)
    ABI_DEALLOCATE(grnhat12)
    if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
      ABI_DEALLOCATE(forikpt)

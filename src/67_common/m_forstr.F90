@@ -344,7 +344,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  ABI_ALLOCATE(grnl,(3*dtset%natom*optfor))
  grnl(:)=zero
 
-!Compute nonlocal pseudopotential parts of forces and stress tensor
+!Compute nonlocal psp + potential Fock ACE parts of forces and stress tensor
 !-involves summations over wavefunctions at all k points
  if (dtset%tfkinfunc>0.and.stress_needed==1) then
    kinstr(1:3)=-two/three*energies%e_kinetic/ucvol ; kinstr(4:6)=zero

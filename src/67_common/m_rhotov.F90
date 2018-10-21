@@ -510,7 +510,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      ABI_ALLOCATE(xcart,(3, dtset%natom))
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
-&     energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
+&     energies%e_kinetic, energies%e_localpsp, energies%e_nlpsp_vfock, energies%e_sicdc, &
 &     istep + 1, 1, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft,&
 &     mpi_enreg%nproc_wvl, dtset%nspden, &
 &     vres2, .true., energies%e_xcdc, wvl,&
@@ -584,7 +584,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      ABI_ALLOCATE(xcart,(3, dtset%natom))
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
-&     energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
+&     energies%e_kinetic, energies%e_localpsp, energies%e_nlpsp_vfock, energies%e_sicdc, &
 &     istep + 1, 1, dtset%iscf, mpi_enreg%me_wvl, &
 &     dtset%natom, dtset%nfft, mpi_enreg%nproc_wvl,&
 &     dtset%nspden,vres2, .true.,energies%e_xcdc,  wvl,&

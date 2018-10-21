@@ -246,7 +246,7 @@ contains
 !!   | e_hybcomp_v0=potential compensation term for hybrid exchange-correlation energy (hartree) at fixed density
 !!   | e_hybcomp_v=potential compensation term for hybrid exchange-correlation energy (hartree) at self-consistent den
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
-!!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
+!!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
 !!   | e_paw(IN)=PAW spherical part energy
@@ -441,10 +441,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        if (dtset%iscf==0) then
          energies%e_kinetic=ekin    ; energies%e_hartree=eh
          energies%e_xc=exc          ; energies%e_localpsp=eloc
-         energies%e_nonlocalpsp=enl ; energies%e_exactX=eexctx
+         energies%e_nlpsp_vfock=enl ; energies%e_exactX=eexctx
          energies%e_sicdc=esicdc    ; energies%e_xcdc=evxc
          energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
-&         + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
+&         + energies%e_xcdc  + two*energies%e_hartree +energies%e_nlpsp_vfock
        end if
      end if
      call last_orthon(mpi_enreg%me_wvl,mpi_enreg%nproc_wvl,istep,wvl%wfs%ks,wvl%e%energs%evsum,.true.)

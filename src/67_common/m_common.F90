@@ -1486,7 +1486,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
      call wrtout(iout,msg,'COLL')
      if (usepaw==0) then
-       write(msg, '(a,es21.14)' ) '    NL   psp  energy= ',energies%e_nonlocalpsp
+       write(msg, '(a,es21.14)' ) '    NL   psp  energy= ',energies%e_nlpsp_vfock
      else
        write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_paw
      end if

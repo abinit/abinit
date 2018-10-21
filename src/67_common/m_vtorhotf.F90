@@ -72,7 +72,7 @@ contains
 !!
 !! OUTPUT
 !!  ek=kinetic energy part of total energy.
-!!  enl=nonlocal pseudopotential part of total energy.
+!!  enlx=nonlocal psp + potential Fock ACE part of total energy.
 !!  entropy=entropy due to the occupation number smearing (if metal)
 !!  fermie=fermi energy (Hartree)
 !!  grnl(3*natom)=stores grads of nonlocal energy wrt length scales
@@ -89,7 +89,7 @@ contains
 !!
 !! SOURCE
 
-subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
+subroutine vtorhotf(dtfil,dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 &  irrzon,mpi_enreg,natom,nfft,nspden,nsppol,nsym,phnons,rhog,rhor,rprimd,ucvol,vtrial)
 
  implicit none
@@ -98,7 +98,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
 !scalars
  integer,intent(in) :: natom,nfft,nspden,nsppol,nsym
  real(dp),intent(in) :: ucvol
- real(dp),intent(out) :: ek,enl,entropy,fermie
+ real(dp),intent(out) :: ek,enlx,entropy,fermie
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -161,7 +161,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  end if
 
  ek=zero
- enl=zero
+ enlx=zero
  grnl(:)=zero
 
 !Initialize rhor if needed

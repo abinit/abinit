@@ -465,7 +465,7 @@ end subroutine make_invovl
  integer :: ikpt_this_proc
  integer, parameter :: tim_nonlop = 13
  ! dummies
- real(dp) :: enlout(ndat), lambda_block(1), gvnlc(1,1)
+ real(dp) :: enlout(ndat), lambda_block(1), gvnlxc(1,1)
  integer, parameter :: nnlout = 0, idir = 0, signs = 2
 
  type(invovl_kpt_type), pointer :: invovl
@@ -502,10 +502,10 @@ end subroutine make_invovl
  paw_opt = 3 ! S nonlocal operator
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc,already_transposed=.true.)
+&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
  else
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
-&              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
+&              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
 
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
@@ -544,10 +544,10 @@ end subroutine make_invovl
  paw_opt = 3
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
-&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc,already_transposed=.true.)
+&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
  else
    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
-&              signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
+&              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
 
  call timab(timer_apply_inv_ovl_opernlb, 2, tsec)

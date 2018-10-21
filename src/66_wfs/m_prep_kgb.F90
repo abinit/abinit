@@ -69,7 +69,7 @@ contains
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  cwavef(2,npw*my_nspinor*blocksize)=planewave coefficients of wavefunction.
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
-!!  gvnlc=matrix elements <G|Vnonlocal|C>
+!!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!         Typically lambda is the eigenvalue (or its guess)
 !!  mpi_enreg=informations about mpi parallelization
@@ -96,7 +96,7 @@ contains
 !!
 !! SOURCE
 
-subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
+subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 &                      mpi_enreg,prtvol,sij_opt,cpopt,cwaveprj,&
 &                      already_transposed) ! optional argument
 
@@ -110,7 +110,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(mpi_type),intent(inout) :: mpi_enreg
 !arrays
- real(dp),intent(inout) :: cwavef(:,:),gvnlc (:,:),gwavef(:,:),swavef(:,:)
+ real(dp),intent(inout) :: cwavef(:,:),gvnlxc (:,:),gwavef(:,:),swavef(:,:)
  type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
 
 !Local variables-------------------------------
@@ -131,11 +131,11 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
  integer,ABI_CONTIGUOUS pointer :: sendcounts(:),sendcounts_sym(:),sendcounts_sym_all(:)
  integer,ABI_CONTIGUOUS pointer :: tab_proc(:)
  real(dp) :: tsec(2)
- real(dp),allocatable,target :: cwavef_alltoall1(:,:),gvnlc_alltoall1(:,:)
+ real(dp),allocatable,target :: cwavef_alltoall1(:,:),gvnlxc_alltoall1(:,:)
  real(dp),allocatable,target :: gwavef_alltoall1(:,:),swavef_alltoall1(:,:)
- real(dp),allocatable,target :: cwavef_alltoall2(:,:),gvnlc_alltoall2(:,:)
+ real(dp),allocatable,target :: cwavef_alltoall2(:,:),gvnlxc_alltoall2(:,:)
  real(dp),allocatable,target :: gwavef_alltoall2(:,:),swavef_alltoall2(:,:)
- real(dp),pointer :: ewavef_alltoall_sym(:,:),gvnlc_alltoall_sym(:,:)
+ real(dp),pointer :: ewavef_alltoall_sym(:,:),gvnlxc_alltoall_sym(:,:)
  real(dp),pointer :: gwavef_alltoall_sym(:,:)
  real(dp),pointer :: swavef_alltoall_sym(:,:)
 
@@ -173,8 +173,8 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    msg='wrong size for gwavef!'
    MSG_BUG(msg)
  end if
- if (size(gvnlc)<mcg) then
-   msg='wrong size for gvnlc!'
+ if (size(gvnlxc)<mcg) then
+   msg='wrong size for gvnlxc!'
    MSG_BUG(msg)
  end if
  if (sij_opt==1) then
@@ -229,18 +229,18 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    ABI_ALLOCATE(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_ALLOCATE(gwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    ABI_ALLOCATE(swavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
-   ABI_ALLOCATE(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_ALLOCATE(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    swavef_alltoall1(:,:)=zero
-   gvnlc_alltoall1(:,:)=zero
+   gvnlxc_alltoall1(:,:)=zero
    cwavef_alltoall1(:,:)=zero
    gwavef_alltoall1(:,:)=zero
  end if
  ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_ALLOCATE(gvnlc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_ALLOCATE(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  swavef_alltoall2(:,:)=zero
- gvnlc_alltoall2(:,:)=zero
+ gvnlxc_alltoall2(:,:)=zero
  cwavef_alltoall2(:,:)=zero
  gwavef_alltoall2(:,:)=zero
 
@@ -288,14 +288,14 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 
    call timab(635,3,tsec)
    call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2(:,1:nbval),&
-&   gs_hamk,gvnlc_alltoall2,lambda,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+&   gs_hamk,gvnlxc_alltoall2,lambda,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
    call timab(635,2,tsec)
 
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.my_nspinor==2)then
      call timab(634,3,tsec)
      gwavef_alltoall1(:,index_wavef_spband)=gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_spband)=swavef_alltoall2(:,:)
-     gvnlc_alltoall1(:,index_wavef_spband)=gvnlc_alltoall2(:,:)
+     gvnlxc_alltoall1(:,index_wavef_spband)=gvnlxc_alltoall2(:,:)
      ABI_DEALLOCATE(index_wavef_spband)
      call timab(634,2,tsec)
    end if
@@ -321,7 +321,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  ----------------------
    call timab(636,3,tsec)
    call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
-&   gvnlc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,0)
+&   gvnlxc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,0)
    call timab(636,2,tsec)
 
 !  -----------------------------------------------------
@@ -331,7 +331,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
      call timab(634,3,tsec)
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
-     gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
+     gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
      ABI_DEALLOCATE(index_wavef_band)
      call timab(634,2,tsec)
    end if
@@ -372,11 +372,11 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  ------------------------------------------------------------
    ABI_ALLOCATE(gwavef_alltoall_sym,(2,ndatarecv_tot*bandpp_sym))
    ABI_ALLOCATE(swavef_alltoall_sym,(2,(ndatarecv_tot*bandpp_sym)*iscalc))
-   ABI_ALLOCATE(gvnlc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
+   ABI_ALLOCATE(gvnlxc_alltoall_sym ,(2,ndatarecv_tot*bandpp_sym))
 
    gwavef_alltoall_sym(:,:)=zero
    swavef_alltoall_sym(:,:)=zero
-   gvnlc_alltoall_sym(:,:)=zero
+   gvnlxc_alltoall_sym(:,:)=zero
 
    call timab(632,2,tsec)
 
@@ -385,7 +385,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  ------------------------------------------------------------
    call timab(637,3,tsec)
    call multithreaded_getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
-&   gvnlc_alltoall_sym,lambda,mpi_enreg,bandpp_sym,prtvol,sij_opt,tim_getghc,1,&
+&   gvnlxc_alltoall_sym,lambda,mpi_enreg,bandpp_sym,prtvol,sij_opt,tim_getghc,1,&
 &   kg_fft_k=kg_k_gather_sym)
    call timab(637,2,tsec)
 
@@ -416,17 +416,17 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    call prep_wavef_sym_undo(mpi_enreg,bandpp,my_nspinor,&
 &   ndatarecv,&
 &   ndatarecv_tot,ndatasend_sym,idatarecv0,&
-&   gvnlc_alltoall2,&
+&   gvnlxc_alltoall2,&
 &   sendcounts_sym,sdispls_sym,&
 &   recvcounts_sym,rdispls_sym,&
-&   gvnlc_alltoall_sym,&
+&   gvnlxc_alltoall_sym,&
 &   index_wavef_send)
 
    ABI_DEALLOCATE(ewavef_alltoall_sym)
    ABI_DEALLOCATE(index_wavef_send)
    ABI_DEALLOCATE(gwavef_alltoall_sym)
    ABI_DEALLOCATE(swavef_alltoall_sym)
-   ABI_DEALLOCATE(gvnlc_alltoall_sym)
+   ABI_DEALLOCATE(gvnlxc_alltoall_sym)
 
 !  -------------------------------------------
 !  We call getghc to calculate the nl matrix elements.
@@ -444,7 +444,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 
    call timab(638,3,tsec)
    call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
-&   gvnlc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,2)
+&   gvnlxc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,2)
    call timab(638,2,tsec)
 
    call timab(634,3,tsec)
@@ -459,7 +459,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !    cwavef_alltoall(:,index_wavef_band) = cwavef_alltoall(:,:)   ! NOT NEEDED
      gwavef_alltoall1(:,index_wavef_band) = gwavef_alltoall2(:,:)
      if (sij_opt==1) swavef_alltoall1(:,index_wavef_band) = swavef_alltoall2(:,:)
-     gvnlc_alltoall1(:,index_wavef_band)  = gvnlc_alltoall2(:,:)
+     gvnlxc_alltoall1(:,index_wavef_band)  = gvnlxc_alltoall2(:,:)
      ABI_DEALLOCATE(index_wavef_band)
      call timab(634,2,tsec)
    end if
@@ -478,7 +478,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
        call xmpi_alltoallv(swavef_alltoall1,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
      end if
-     call xmpi_alltoallv(gvnlc_alltoall1,recvcountsloc,rdisplsloc,gvnlc,&
+     call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
      call xmpi_alltoallv(gwavef_alltoall1,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
@@ -487,7 +487,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
        call xmpi_alltoallv(swavef_alltoall2,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
      end if
-     call xmpi_alltoallv(gvnlc_alltoall2,recvcountsloc,rdisplsloc,gvnlc,&
+     call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
      call xmpi_alltoallv(gwavef_alltoall2,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
@@ -498,7 +498,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    if(sij_opt == 1) then
      call DCOPY(2*ndatarecv*my_nspinor*bandpp, swavef_alltoall2, 1, swavef, 1)
    end if
-   call DCOPY(2*ndatarecv*my_nspinor*bandpp, gvnlc_alltoall2, 1, gvnlc, 1)
+   call DCOPY(2*ndatarecv*my_nspinor*bandpp, gvnlxc_alltoall2, 1, gvnlxc, 1)
    call DCOPY(2*ndatarecv*my_nspinor*bandpp, gwavef_alltoall2, 1, gwavef, 1)
  end if
 
@@ -513,14 +513,14 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
  ABI_DEALLOCATE(rdisplsloc)
  ABI_DEALLOCATE(cwavef_alltoall2)
  ABI_DEALLOCATE(gwavef_alltoall2)
- ABI_DEALLOCATE(gvnlc_alltoall2)
+ ABI_DEALLOCATE(gvnlxc_alltoall2)
  ABI_DEALLOCATE(swavef_alltoall2)
 
  if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
 & ((.not.flag_inv_sym) .and. bandpp>1) .or.  flag_inv_sym  ) then
    ABI_DEALLOCATE(cwavef_alltoall1)
    ABI_DEALLOCATE(gwavef_alltoall1)
-   ABI_DEALLOCATE(gvnlc_alltoall1)
+   ABI_DEALLOCATE(gvnlxc_alltoall1)
    ABI_DEALLOCATE(swavef_alltoall1)
  end if
 
@@ -550,7 +550,7 @@ end subroutine prep_getghc
 !!  blocksize= size of block for FFT
 !!  cpopt=flag defining the status of cwaveprj=<Proj_i|Cnk> scalars (see below, side effects)
 !!  cwavef(2,npw*my_nspinor*blocksize)=planewave coefficients of wavefunction.
-!!  gvnlc=matrix elements <G|Vnonlocal|C>
+!!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  hamk <type(gs_hamiltonian_type)>=data defining the Hamiltonian at a given k (NL part involved here)
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
 !!                        - k point direction in the case (choice=5,signs=2)
@@ -571,7 +571,7 @@ end subroutine prep_getghc
 !!    if paw_opt==3:         contribution of this block of states to <c|S|c>  (where S=overlap when PAW)
 !!  ==== if (signs==2) ====
 !!    if paw_opt==0, 1, 2 or 4:
-!!       gvnlc(2,my_nspinor*npw)=result of the aplication of the nl operator
+!!       gvnlxc(2,my_nspinor*npw)=result of the aplication of the nl operator
 !!                        or one of its derivative to the input vect.
 !!    if paw_opt==3 or 4:
 !!       gsc(2,my_nspinor*npw*(paw_opt/3))=result of the aplication of (I+S)
@@ -607,7 +607,7 @@ end subroutine prep_getghc
 
 subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,&
 &                      blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc,&
-&                      tim_nonlop,cwavef,gvnlc,already_transposed)
+&                      tim_nonlop,cwavef,gvnlxc,already_transposed)
 
  implicit none
 
@@ -615,7 +615,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer,intent(in) :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
  logical,optional,intent(in) :: already_transposed
  real(dp),intent(in) :: lambdablock(blocksize)
- real(dp),intent(out) :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
+ real(dp),intent(out) :: enlout_block(nnlout*blocksize),gvnlxc(:,:),gsc(:,:)
  real(dp),intent(inout) :: cwavef(:,:)
  type(gs_hamiltonian_type),intent(in) :: hamk
  type(mpi_type),intent(inout) :: mpi_enreg
@@ -632,8 +632,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer,  allocatable :: rdisplsloc(:),recvcountsloc(:),sdisplsloc(:),sendcountsloc(:)
  integer,ABI_CONTIGUOUS  pointer :: rdispls(:),recvcounts(:),sdispls(:),sendcounts(:)
  real(dp) :: lambda_nonlop(mpi_enreg%bandpp),tsec(2)
- real(dp), allocatable :: cwavef_alltoall2(:,:),gvnlc_alltoall2(:,:),gsc_alltoall2(:,:)
- real(dp), allocatable :: cwavef_alltoall1(:,:),gvnlc_alltoall1(:,:),gsc_alltoall1(:,:)
+ real(dp), allocatable :: cwavef_alltoall2(:,:),gvnlxc_alltoall2(:,:),gsc_alltoall2(:,:)
+ real(dp), allocatable :: cwavef_alltoall1(:,:),gvnlxc_alltoall1(:,:),gsc_alltoall1(:,:)
  real(dp),allocatable :: enlout(:)
 
 ! *************************************************************************
@@ -662,8 +662,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  end if
  if(choice/=0.and.signs==2) then
    if (paw_opt/=3) then
-     if (size(gvnlc)/=2*npw*my_nspinor*blocksize) then
-       msg = 'Incorrect size for gvnlc!'
+     if (size(gvnlxc)/=2*npw*my_nspinor*blocksize) then
+       msg = 'Incorrect size for gvnlxc!'
        MSG_BUG(msg)
      end if
    end if
@@ -696,13 +696,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
  ABI_ALLOCATE(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
  ABI_ALLOCATE(gsc_alltoall2,(2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
- ABI_ALLOCATE(gvnlc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+ ABI_ALLOCATE(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
 
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_ALLOCATE(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
    if(signs==2)then
      if (paw_opt/=3) then
-       ABI_ALLOCATE(gvnlc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
+       ABI_ALLOCATE(gvnlxc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
      end if
      if (paw_opt==3.or.paw_opt==4) then
        ABI_ALLOCATE(gsc_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
@@ -754,10 +754,10 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
    if (paw_opt==2) lambda_nonlop(1)=lambdablock(mpi_enreg%me_band+1)
    call nonlop(choice,cpopt,cwaveprj,enlout,hamk,idir,lambda_nonlop,mpi_enreg,1,nnlout,paw_opt,&
-&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2)
+&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlxc_alltoall2)
 
    if (do_transpose .and. mpi_enreg%paral_spinor == 0 .and. nspinortot==2.and.signs==2) then
-     if (paw_opt/=3) gvnlc_alltoall1(:,index_wavef_band)=gvnlc_alltoall2(:,:)
+     if (paw_opt/=3) gvnlxc_alltoall1(:,index_wavef_band)=gvnlxc_alltoall2(:,:)
      if (paw_opt==3.or.paw_opt==4) gsc_alltoall1(:,index_wavef_band)=gsc_alltoall2(:,:)
    end if
 
@@ -781,13 +781,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 !  -------------------------------------------------------
    if(paw_opt == 2) lambda_nonlop(1:bandpp) = lambdablock((mpi_enreg%me_band*bandpp)+1:((mpi_enreg%me_band+1)*bandpp))
    call nonlop(choice,cpopt,cwaveprj,enlout,hamk,idir,lambda_nonlop,mpi_enreg,bandpp,nnlout,paw_opt,&
-&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2)
+&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlxc_alltoall2)
 
 !  -----------------------------------------------------
 !  Sorting of waves functions below the processors
 !  -----------------------------------------------------
    if(do_transpose.and.signs==2) then
-     if (paw_opt/=3) gvnlc_alltoall1(:,index_wavef_band)=gvnlc_alltoall2(:,:)
+     if (paw_opt/=3) gvnlxc_alltoall1(:,index_wavef_band)=gvnlxc_alltoall2(:,:)
      if (paw_opt==3.or.paw_opt==4) gsc_alltoall1(:,index_wavef_band)=gsc_alltoall2(:,:)
    end if
 
@@ -808,7 +808,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      call timab(581,1,tsec)
      if(bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2))then
        if (paw_opt/=3) then
-         call xmpi_alltoallv(gvnlc_alltoall1,recvcountsloc,rdisplsloc,gvnlc,&
+         call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
        end if
        if (paw_opt==3.or.paw_opt==4) then
@@ -817,7 +817,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
        end if
      else
        if (paw_opt/=3) then
-         call xmpi_alltoallv(gvnlc_alltoall2,recvcountsloc,rdisplsloc,gvnlc,&
+         call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
        end if
        if (paw_opt==3.or.paw_opt==4) then
@@ -842,13 +842,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  ABI_DEALLOCATE(recvcountsloc)
  ABI_DEALLOCATE(rdisplsloc)
  ABI_DEALLOCATE(cwavef_alltoall2)
- ABI_DEALLOCATE(gvnlc_alltoall2)
+ ABI_DEALLOCATE(gvnlxc_alltoall2)
  ABI_DEALLOCATE(gsc_alltoall2)
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_DEALLOCATE(cwavef_alltoall1)
    if(signs==2)then
      if (paw_opt/=3) then
-       ABI_DEALLOCATE(gvnlc_alltoall1)
+       ABI_DEALLOCATE(gvnlxc_alltoall1)
      end if
      if (paw_opt==3.or.paw_opt==4) then
        ABI_DEALLOCATE(gsc_alltoall1)
@@ -874,7 +874,7 @@ end subroutine prep_nonlop
 !!  blocksize= size of block for FFT
 !!  cwavef(2,npw*ndat)=planewave coefficients of wavefunction (one spinorial component?).
 !!  dtfil <type(datafiles_type)>=variables related to files
-!!  gvnlc=matrix elements <G|Vnonlocal|C>
+!!  gvnlxc=matrix elements <G|Vnonlocal+VFockACE|C>
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!        =if useylm=0, max number of (l,n)   comp. over all type of psps

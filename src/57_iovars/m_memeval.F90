@@ -974,7 +974,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !(6e) is for the arrays in dielmt, for the dielmt chain, see (11)
 !(6f) is for the arrays in pawmkrhoij
 
-!eknlk, enlnk, grnlnk
+!eknlk, enlxnk, grnlnk
  cadd(51)=(11+3*natom)*mband*nkpt*nsppol &
 & ; dttyp(51)=8
 !kg_k
@@ -988,7 +988,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !  cg_disk
    cmpw(54)=2*nspinor*mband      ; dttyp(54)=8
  end if
-!eig_k, ek_k, enl_k, grnl_k, occ_k, resid_k
+!eig_k, ek_k, enlx_k, grnl_k, occ_k, resid_k
  cadd(56)=(14+3*natom)*mband   ; dttyp(56)=8
 !ylm_k
  cmpw(57)=mpsang*mpsang*useylm ; dttyp(57)=8
@@ -1067,7 +1067,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !evec
  cadd(71)=2*mband*mband        ; dttyp(71)=8
-!subham, subvnl(if not PAW)
+!subham, subvnlx(if not PAW or if usefock_ACE)
  cadd(72)=(1+usepaw)*mband*(mband+1)    ; dttyp(72)=8
 !gkpsq
  cmpw(73)=1                    ; dttyp(73)=8
@@ -1094,9 +1094,9 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !(8)                     in cgwf------------------------------------------
 
-!conjgr, cwavef, direc, gh_direc, gvnl_direc
+!conjgr, cwavef, direc, gh_direc, gvnlx_direc
  cmpw(81)=2*5*nspinor          ; dttyp(81)=8
-!ghc,gvnlc
+!ghc,gvnlxc
  cmpw(82)=2*2*nspinor          ; dttyp(82)=8
 !PAW: scwavef,direc_tmp,ghc_all
  cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
@@ -2168,7 +2168,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  cmpw(51)=2                    ; dttyp(51)=8
 !ffnlk,ffnl1,ffnlkq
  cmpw(52)=2*(ntypat+2)*lmnmax  ; dttyp(52)=8
-!ghc,gvnlc,gvnl1
+!ghc,gvnlxc,gvnlx1
  cmpw(53)=6*nspinor            ; dttyp(53)=8
 !ph3d
  matblk=NLO_MINCAT
@@ -2182,7 +2182,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
 !(6)                     in dfpt_cgwf ----------------------------------------
 
-!gh1, gh_direc, gvnl_direc, conjgr, direc, vresid, cwaveq
+!gh1, gh_direc, gvnlx_direc, conjgr, direc, vresid, cwaveq
  cmpw(61)=14*nspinor            ; dttyp(61)=8
 
 !(9a)                    in getghc and fourwf----------------------------

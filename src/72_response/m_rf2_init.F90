@@ -161,7 +161,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  integer :: file_index(2)
  real(dp) :: lambda_ij(2),tsec(2)
  real(dp),allocatable :: cg_jband(:,:,:),ddk_read(:,:),dudkdk(:,:),dudk_dir2(:,:)
- real(dp),allocatable :: eig1_read(:),gvnl1(:,:),h_cwave(:,:),s_cwave(:,:),dsusdu_loc(:,:),dsusdu_gather(:,:)
+ real(dp),allocatable :: eig1_read(:),gvnlx1(:,:),h_cwave(:,:),s_cwave(:,:),dsusdu_loc(:,:),dsusdu_gather(:,:)
  real(dp),allocatable,target :: dsusdu(:,:),dudk(:,:),eig1_k_stored(:)
  real(dp), ABI_CONTIGUOUS pointer :: cwave_dudk(:,:),cwave_i(:,:),cwave_j(:,:),eig1_k_jband(:)
  real(dp),pointer :: rhs_j(:,:)
@@ -339,10 +339,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 !Allocate work spaces for one band
  ABI_ALLOCATE(h_cwave,(2,size_wf))
  ABI_ALLOCATE(s_cwave,(2,size_wf))
- ABI_ALLOCATE(gvnl1,(2,size_wf))
+ ABI_ALLOCATE(gvnlx1,(2,size_wf))
  h_cwave(:,:) = zero
  s_cwave(:,:) = zero
- gvnl1(:,:) = zero
+ gvnlx1(:,:) = zero
 
 ! "dsusdu" contains dS/dpert_dir |u_band> + S|du_band/dpert1> for every bands and ndir (=1 or 2) directions
  ABI_STAT_ALLOCATE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
@@ -439,7 +439,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 !      Compute H^(0) | du/dpert1 > (in h_cwave) and S^(0) | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,mkmem,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,0,0,ikpt,isppol,mkmem,&
 &       mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 
        if (gs_hamkq%usepaw==0) s_cwave(:,:)=cwave_dudk(:,:) ! Store | du/dpert1 > in s_cwave
@@ -472,17 +472,17 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        if (ipert1==natom+2) then
 !        Extract ddk and multiply by i :
          if(idir<=3) then ! in this case : idir1=idir2
-           gvnl1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
          else
-           gvnl1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
          end if
        end if
 
 !      Compute dH/dpert1 | u^(0) > (in h_cwave) and dS/dpert1 | u^(0) > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,idir1,ipert1,ikpt,isppol,&
 &       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 
 !      Copy infos in dsusdu
@@ -610,18 +610,18 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
        if (ipert==natom+11) then
 !        Extract ddk and multiply by i :
          if(idir<=3) then ! in this case : idir1=idir2
-           gvnl1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
          else
-           gvnl1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
-           gvnl1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
+           gvnlx1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
          end if
        end if
 
 !      Compute  : d^2H/(dpert1 dpert2)|u^(0)>  (in h_cwave)
 !      and      : d^2S/(dpert1 dpert2)|u^(0)>  (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,idir,ipert,ikpt,isppol,&
 &       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf,&
 &       ffnl1=ffnl1,ffnl1_test=ffnl1_test)
 
@@ -716,13 +716,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
        if (ipert2==natom+2) then
 !        Extract dkdk and multiply by i :
-         gvnl1(1,:) = -dudkdk(2,1+shift_band1:size_wf+shift_band1)
-         gvnl1(2,:) =  dudkdk(1,1+shift_band1:size_wf+shift_band1)
+         gvnlx1(1,:) = -dudkdk(2,1+shift_band1:size_wf+shift_band1)
+         gvnlx1(2,:) =  dudkdk(1,1+shift_band1:size_wf+shift_band1)
        end if
 
 !      Compute dH/dpert2 | du/dpert1 > (in h_cwave) and dS/dpert2 | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnlx1,idir2,ipert2,ikpt,isppol,&
 &       mkmem,mpi_enreg,nband_k,nsppol,debug_mode,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
 
        if (debug_mode/=0) then
@@ -771,7 +771,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
  end do ! kdir1
 
- ABI_DEALLOCATE(gvnl1)
+ ABI_DEALLOCATE(gvnlx1)
  ABI_DEALLOCATE(h_cwave)
  ABI_DEALLOCATE(s_cwave)
  ABI_DEALLOCATE(cg_jband)

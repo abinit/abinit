@@ -294,7 +294,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  tmpr=r2s((results_gs%energies%e_localpsp+results_gs%energies%e_corepsp),'(f24.14)')
  write(io,'(1x,a)')trim(tmpr)
  write(io,"('Non-local potential energy')")
- tmpr=r2s(results_gs%energies%e_nonlocalpsp,'(f24.14)')
+ tmpr=r2s(results_gs%energies%e_nlpsp_vfock,'(f24.14)')
  write(io,'(1x,a)')trim(tmpr)
  write(io,"('Electron-electron energy (Hartree Energy + Exchange-Correlation Energy)')")
  tmpr=r2s((results_gs%energies%e_hartree+results_gs%energies%e_xc),'(f24.14)')
