@@ -158,7 +158,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),, gs1c(:,:), gkq_atm(:,:,:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:), gs1c(:,:), gkq_atm(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
 
