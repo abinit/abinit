@@ -307,12 +307,6 @@ if ( opts.run_clean ):
       "rm -f src/10_dumpinfo/m_cppopts_dumper.F90")
     run_script(my_name, "Removing optimization flags dumper routine",
       "rm -f src/10_dumpinfo/m_optim_dumper.F90")
-    run_script(my_name, "Removing input variable checking routines",
-      "rm -f src/57_iovars/ab7_invars_f90.inc src/57_iovars/ab7_invars_f90_get.f90")
-    run_script(my_name, "Removing C headers for Python bindings",
-      "rm -f bindings/parser/ab7_invars.h bindings/parser/ab7_invars_c.h bindings/parser/ab7_invars_py.h")
-    run_script(my_name, "Removing Python pickle file for Abinit datasets",
-      "rm -f src/57_iovars/dtset.pickle")
   else:
     print_message(my_name,
       "*** Skipping script-generated source file removal ***")
