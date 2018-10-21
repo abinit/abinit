@@ -98,9 +98,6 @@ tests/TestBot_MPI*/*
 /bindings/libpaw/libpaw-0.*
 /bindings/libpaw/libpaw-1.*
 /bindings/libpaw/libpaw-*.tar.gz
-/bindings/parser/ab7_invars.h
-/bindings/parser/ab7_invars_c.h
-/bindings/parser/ab7_invars_py.h
 /bindings/parser/bindings-ready
 /config/dist/*.lst
 /config/gnu/abinit-info.sh
@@ -211,8 +208,6 @@ mkdocs_plugins/dist
 /src/18_timing/.deps
 /src/52_manage_cuda/.deps
 /src/56_xc/.deps
-/src/57_iovars/ab7_invars_f90.inc
-/src/57_iovars/ab7_invars_f90_get.f90
 /src/98_main/abinit
 /src/98_main/aim
 /src/98_main/anaddb

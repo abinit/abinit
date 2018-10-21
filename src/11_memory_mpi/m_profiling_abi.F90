@@ -40,7 +40,7 @@ module m_profiling_abi
 
 #ifdef HAVE_MEM_PROFILING
 
-#define _ABORT(msg) call abimem_abort(msg, __FILE__, ABI_FUNC, __LINE__)
+#define _ABORT(msg) call abimem_abort(msg, __FILE__, "UnknownFunc", __LINE__)
 
  public :: abimem_get_info
  public :: abimem_init
