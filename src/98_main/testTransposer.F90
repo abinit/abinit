@@ -40,16 +40,10 @@ program testTransposer
   use m_time
   use defs_basis
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testTransposer'
-!End of the abilint section
-
   implicit none
 
   integer :: npw
-  integer :: nband 
+  integer :: nband
   integer :: ncycle
   integer :: i
   integer :: ierr
@@ -88,7 +82,7 @@ program testTransposer
   if ( xmpi_comm_size(xmpi_world) > 1 ) then
     nCpuRows = 2
     nCpuCols = xmpi_comm_size(xmpi_world)/nCpuRows
-  else 
+  else
     nCpuRows = 1
     nCpuCols = 1
   end if
@@ -170,13 +164,6 @@ program testTransposer
 
     subroutine tester()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tester'
-!End of the abilint section
-
       maxt = 0
       cputime = 0
       do i=1,ncycle
@@ -233,13 +220,6 @@ program testTransposer
 
     subroutine printTimes()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printTimes'
-!End of the abilint section
-
       double precision :: total(2)
       integer :: ntot
       write(std_out,'(1x,a30,a8,a17,a17)') "counter", "calls", "cpu_time", "wall_time"
@@ -250,9 +230,9 @@ program testTransposer
         total(1) = total(1) + times(1)
         total(2) = total(2) + times(2)
         ntot = ntot + ncount
-        write(std_out,'(a,a30,i8,2F17.3)') "-",trim(names(i-1661)), ncount, times(1), times(2) 
+        write(std_out,'(a,a30,i8,2F17.3)') "-",trim(names(i-1661)), ncount, times(1), times(2)
       end do
-      write(std_out,'(a,a30,i8,2F17.3)') "-","total", ntot, total(1), total(2) 
+      write(std_out,'(a,a30,i8,2F17.3)') "-","total", ntot, total(1), total(2)
       call timab(1,0,times)
 
     end subroutine printTimes

@@ -2,12 +2,12 @@
 !!****m* ABINIT/m_xgTransposer
 !! NAME
 !!  m_xgTransposer
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !! This module is to be user to go to "KGB" representation and to "linear
 !! algebra representation" It will replace most of prep_* subroutine
 !! This should really help to do the transposition operataion
-!! 
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2017 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
@@ -106,13 +106,6 @@ module m_xgTransposer
 
   subroutine xgTransposer_init(xgTransposer,xgBlock_linalg,xgBlock_colsrows,ncpuRows,ncpuCols,state,algo)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_init'
-!End of the abilint section
-
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
     type(xgBlock_t), target, intent(in   ) :: xgBlock_colsrows
@@ -162,9 +155,9 @@ module m_xgTransposer
     !  MSG_COMMENT("Using mpi_gatherv for transposition")
     !end if
 
-    select case (state) 
+    select case (state)
     case (STATE_LINALG)
-      ! We are in the linalg representation. 
+      ! We are in the linalg representation.
       ! We need to construct the colsrows parallelization
       call xgBlock_getSize(xgBlock_linalg,nrows,ncols)
       call xmpi_sum(nrows,commLinalg,ierr)
@@ -219,13 +212,6 @@ module m_xgTransposer
 
   subroutine xgTransposer_makeComm(xgTransposer,ncpuRows,ncpuCols)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_makeComm'
-!End of the abilint section
-
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer             , intent(in   ) :: ncpuRows
     integer             , intent(in   ) :: ncpuCols
@@ -254,7 +240,7 @@ module m_xgTransposer
     if ( ierr /= xmpi_success ) then
       MSG_ERROR("xgTransposer failed to creat columns communicator")
     end if
-#else 
+#else
     commColsRows = xmpi_comm_null
     xgTransposer%mpiData(MPI_ROWS)%comm = xmpi_comm_null
     xgTransposer%mpiData(MPI_COLS)%comm = xmpi_comm_null
@@ -275,13 +261,6 @@ module m_xgTransposer
 
   subroutine xgTransposer_computeDistribution(xgTransposer)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_computeDistribution'
-!End of the abilint section
-
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer :: nRealPairs
     integer :: ierr
@@ -294,7 +273,7 @@ module m_xgTransposer
     call xmpi_allgather(nRealPairs,xgTransposer%nrowsLinalg,xgTransposer%mpiData(MPI_LINALG)%comm,ierr)
     if ( ierr /= xmpi_success ) then
       MSG_ERROR("Error while gathering number of rows in linalg")
-    end if 
+    end if
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
     icpu = xgTransposer%mpiData(MPI_ROWS)%rank*ncpuCols
@@ -308,13 +287,6 @@ module m_xgTransposer
   end subroutine xgTransposer_computeDistribution
 
   subroutine xgTransposer_makeXgBlock(xgTransposer)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_makeXgBlock'
-!End of the abilint section
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer :: cols, rows
@@ -347,13 +319,6 @@ module m_xgTransposer
 !! xgTransposer_transpose
 
   subroutine xgTransposer_transpose(xgTransposer,toState)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_transpose'
-!End of the abilint section
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     integer             , intent(in   ) :: toState
@@ -400,13 +365,6 @@ module m_xgTransposer
 
   subroutine xgTransposer_toLinalg(xgTransposer)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_toLinalg'
-!End of the abilint section
-
    type(xgTransposer_t), intent(inout) :: xgTransposer
    double precision, allocatable, target :: sendbuf(:,:)
    double precision, pointer :: recvbuf(:,:)
@@ -436,7 +394,7 @@ module m_xgTransposer
 
    nrowsLinalg => xgTransposer%nrowsLinalg
    nrowsLinalgMe = nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
-   
+
    ABI_MALLOC(sendbuf,(2,nrowsColsRows*ncolsColsRows))
    call xgTransposer_reorganizeData(xgTransposer,sendbuf)
 
@@ -465,11 +423,11 @@ module m_xgTransposer
 
      call timab(tim_all2allv,1,tsec)
      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
-                         recvbuf, recvcounts, rdispls, & 
+                         recvbuf, recvcounts, rdispls, &
                          comm, ierr)
      call timab(tim_all2allv,2,tsec)
      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
-     !                    recvbuf, recvcounts, rdispls, & 
+     !                    recvbuf, recvcounts, rdispls, &
      !                    comm, request(myrequest))
    case (TRANS_GATHER)
      !ABI_MALLOC(request,(ncpu))
@@ -497,7 +455,7 @@ module m_xgTransposer
    !call mpi_wait(request(myrequest),status,ierr)
    if ( ierr /= xmpi_success ) then
      MSG_ERROR("Error while waiting for mpi")
-   end if 
+   end if
 
    if ( allocated(sendcounts) ) then
      ABI_FREE(sendcounts)
@@ -519,7 +477,7 @@ module m_xgTransposer
    !    call mpi_wait(request(icpu),status,ierr)
    !    if ( ierr /= MPI_SUCCESS ) then
    !      MSG_ERROR("Error while waiting for other mpi")
-   !    end if 
+   !    end if
    !  end if
    !end do
    ABI_FREE(sendbuf)
@@ -537,13 +495,6 @@ module m_xgTransposer
 !! xgTransposer_toColsRows
 
   subroutine xgTransposer_toColsRows(xgTransposer)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_toColsRows'
-!End of the abilint section
 
    type(xgTransposer_t), intent(inout) :: xgTransposer
    double precision, pointer :: sendbuf(:,:)
@@ -571,10 +522,10 @@ module m_xgTransposer
 
    nrowsColsRows = xgTransposer%nrowsColsRows
    ncolsColsRows = xgTransposer%ncolsColsRows
-   
+
    nrowsLinalg => xgTransposer%nrowsLinalg
    nrowsLinalgMe = nrowsLinalg(xgTransposer%mpiData(MPI_LINALG)%rank+1)
-   
+
    ABI_MALLOC(recvbuf,(2,nrowsColsRows*ncolsColsRows))
    ABI_MALLOC(recvcounts,(ncpu))
    ABI_MALLOC(rdispls,(ncpu))
@@ -606,11 +557,11 @@ module m_xgTransposer
      !write(*,*) "Before ialltoall"
      call timab(tim_all2allv,1,tsec)
      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
-                         recvbuf, recvcounts, rdispls, & 
+                         recvbuf, recvcounts, rdispls, &
                          comm, ierr)
      call timab(tim_all2allv,2,tsec)
      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
-     !                    recvbuf, recvcounts, rdispls, & 
+     !                    recvbuf, recvcounts, rdispls, &
      !                    comm, request(myrequest))
      !write(*,*) "After ialltoall"
 
@@ -645,7 +596,7 @@ module m_xgTransposer
    !write(*,*) "Request ended"
    if ( ierr /= xmpi_success ) then
      MSG_ERROR("Error while waiting for mpi")
-   end if 
+   end if
    !write(*,*) "with success"
 
    call xgTransposer_reorganizeData(xgTransposer,recvbuf)
@@ -673,7 +624,7 @@ module m_xgTransposer
    !    call mpi_wait(request(icpu),status,ierr)
    !    if ( ierr /= MPI_SUCCESS ) then
    !      MSG_ERROR("Error while waiting for other mpi")
-   !    end if 
+   !    end if
    !  end if
    !end do
    !ABI_FREE(status)
@@ -685,13 +636,6 @@ module m_xgTransposer
 !!***
 
   subroutine xgTransposer_reorganizeData(xgTransposer,bufferMess)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_reorganizeData'
-!End of the abilint section
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision    , intent(inout) :: bufferMess(:,:)
@@ -756,13 +700,6 @@ module m_xgTransposer
 !! xgTransposer_free
 
   subroutine xgTransposer_free(xgTransposer)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xgTransposer_free'
-!End of the abilint section
 
     type(xgTransposer_t), intent(inout) :: xgTransposer
     double precision :: tsec(2)
