@@ -66,6 +66,7 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
  integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
+ integer,public,parameter :: xmpi_success        = MPI_SUCCESS
 #else
  ! Fake replacements for the sequential version.
  integer,public,parameter :: xmpi_world          = 0
@@ -79,6 +80,7 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_msg_len        = 1000
  integer,public,parameter :: xmpi_paral          = 0
  integer,public,parameter :: xmpi_info_null      = 0
+ integer,public,parameter :: xmpi_success        = 0
 #endif
 
 #ifdef HAVE_MPI
