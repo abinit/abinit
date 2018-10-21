@@ -98,6 +98,9 @@ module m_phgamma
   integer :: nqibz
   ! Number of q-points in the IBZ.
 
+  integer :: my_nqibz
+  ! Number of q-points from the IBZ for current processor
+
   integer :: nqbz
   ! Number of q-points in the BZ.
 
@@ -120,6 +123,9 @@ module m_phgamma
 
   integer :: nene
   ! Number of chemical potential values used for inelastic integration
+
+  integer, allocatable :: my_iq(:)
+  ! indices of full iq in local array for vals_ee. -1 if iq does not belong to current proc
 
   real(dp) :: enemin
   ! Minimal chemical potential value used for inelastic integration Copied from fstab
@@ -503,7 +509,8 @@ end subroutine phgamma_free
 !!
 !! SOURCE
 
-subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transport,ngqpt,nsppol,nspinor,n0)
+subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transport,&
+  & ngqpt,nsppol,nspinor,n0,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -518,6 +525,7 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
 !scalars
  integer,intent(in) :: nsppol,nspinor,symdynmat,eph_scalprod
  integer,intent(in) :: eph_transport
+ integer,intent(in) :: comm
  type(crystal_t),intent(in) :: cryst
  type(ifc_type),intent(in) :: ifc
  type(phgamma_t),intent(out) :: gams
@@ -530,10 +538,13 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
 !scalars
  integer,parameter :: qptopt1=1
  integer :: ierr
+ integer :: ind, my_rank, nproc, iq
 !arrays
  integer :: qptrlatt(3,3)
 
 ! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
  !@phgamma_t
  ! Set basic dimensions.
@@ -562,6 +573,21 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
  ABI_CHECK(ierr==0, "out of memory in %vals_qibz")
  gams%vals_qibz = zero
 
+ ABI_STAT_MALLOC(gams%my_iq, (gams%nqibz), ierr)
+ ABI_CHECK(ierr==0, "out of memory in %my_iq")
+ gams%my_iq = -1
+
+ ! distribution of q across processors for memory issues with vals_ee. Could be used for other arrays too.
+ ! in particular the vals_in_qibz, vals_out_qibz and others depending on full nbz
+ ind = 0
+ do iq = 1, gams%nqibz
+    if (mod(iq, nproc) == my_rank) then
+      ind = ind + 1
+      gams%my_iq(iq) = ind
+    end if
+ end do
+ gams%my_nqibz = ind
+
  ! TODO: if we remove the nsig dependency in the gvvvals_*_qibz we can remove
  ! the intermediate array and save a lot of memory
  ABI_STAT_MALLOC(gams%vals_in_qibz, (2,gams%ndir_transp**2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
@@ -575,7 +601,7 @@ subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transpor
  end if
 
 #ifdef DEV_MJV
- ABI_STAT_MALLOC(gams%vals_ee,(2,gams%nene,gams%nene,gams%natom3,gams%natom3,gams%nqibz,gams%nsppol), ierr)
+ ABI_STAT_MALLOC(gams%vals_ee,(2,gams%nene,gams%nene,gams%natom3,gams%natom3,gams%my_nqibz,gams%nsppol), ierr)
  ABI_CHECK(ierr==0, 'out of memory in gams%vals_ee')
 #endif
 
@@ -834,6 +860,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
  integer,parameter :: qtor0=0
  integer :: natom3,nu1,nu2
  integer :: iene, jene
+ integer :: ierr
  real(dp) :: diagerr,spinfact
  character(len=500) :: msg
  !arrays
@@ -846,6 +873,10 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 
  !@phgamma_t
  natom3 = gams%natom3
+
+ if (gams%my_iq(iq_ibz) == -1) then
+   MSG_BUG("phgamma_eval_qibz called for iq this proc does not have:")
+ end if
 
  ! Get phonon frequencies and eigenvectors.
  call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
@@ -869,7 +900,7 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
    if (present (gamma_ph_ee)) then
      do iene = 1, gams%nene
        do jene = 1, gams%nene
-         tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2,natom3,natom3])
+         tmp_gam2 = reshape(gams%vals_ee(:,jene,iene,:,:,gams%my_iq(iq_ibz),spin), [2,natom3,natom3])
          call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
          do nu1=1,natom3
@@ -916,6 +947,9 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
 
  ! Compute lambda
  ! TODO : check this - looks like a factor of 2 wrt the inline documentation!
+ ! NB: one factor of 2 comes from the phonon propagator and BE factor, 
+ ! then you have to be careful with the convention for the Fermi level DOS
+ !
  !spinfact should be 1 for a normal non sppol calculation without spinorbit
  !for spinors it should also be 1 as bands are twice as numerous but n0 has been divided by 2
  !for nsppol 2 it should be 0.5 as we have 2 spin channels to sum
@@ -2325,7 +2359,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  nsppol = gams%nsppol; natom3 = gams%natom3
 
  call cwtime(cpu,wall,gflops,"start")
-
+print *, "do_qintp ", do_qintp
  if (do_qintp) then
    ! Generate the q-mesh by finding the IBZ and the corresponding weights.
    qptrlatt = 0
@@ -2425,17 +2459,17 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  open (unit=900, file="a2fvals_ee.dat")
  write (900,*) '# do_qintp ', do_qintp
 #endif
- ! Loop over spins and qpoints in the IBZ
- cnt = 0
+ ! Loop over spins and qpoints in the IBZ. For the moment parallelize over iq_ibz
+print *, "nqi nqi ", nqibz, gams%nqibz
  do spin=1,nsppol
    do iq_ibz=1,nqibz
-     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
 
      ! Interpolate or evaluate gamma directly.
 #ifdef DEV_MJV
      if (do_qintp) then
        call phgamma_interp(gams,cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
      else
+       if (gams%my_iq(iq_ibz) == -1) cycle
        call phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
      end if
 #else
@@ -2462,7 +2496,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
        end do
 
 #ifdef DEV_MJV
-       ! reset phfrq for low freq modes to
+       ! reset phfrq for low freq modes
        invphfrq = zero
        do mu=1,natom3
          if (abs(phfrq(mu)) > EPH_WTOL) then
@@ -2520,7 +2554,7 @@ end if
    do spin=1,nsppol
      do mu=1,natom3
        do iq_ibz=1,nqibz
-         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism: NB this no longer depends on the distribution of vals_ee and other arrays inside gams
 
          call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu), &
            omega_min, omega_max, one, wdt)
@@ -4325,6 +4359,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  real(dp), allocatable :: resvv_out(:,:)
  real(dp), allocatable :: tgamvv_in(:,:,:,:,:),  vv_kk(:,:,:)
  real(dp), allocatable :: tgamvv_out(:,:,:,:,:), vv_kkq(:,:,:)
+#ifdef DEV_MJV
+ real(dp), allocatable :: tmp_vals_ee(:,:,:,:,:)
+#endif
 
  ! for the Eliashberg solver
  integer :: ntemp
@@ -4391,7 +4428,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  if (all(dtset%eph_ngqpt_fine /= 0)) gamma_ngqpt = dtset%eph_ngqpt_fine
 
  ! TODO: Support nsig in phgamma_init
- call phgamma_init(gams,cryst,ifc,fstab(1),dtset%symdynmat,eph_scalprod,dtset%eph_transport,gamma_ngqpt,nsppol,nspinor,n0)
+ call phgamma_init(gams,cryst,ifc,fstab(1),dtset%symdynmat,eph_scalprod,dtset%eph_transport,&
+      & gamma_ngqpt,nsppol,nspinor,n0,comm)
  call wrtout(std_out, sjoin("Will compute",itoa(gams%nqibz),"q-points in the IBZ"))
 
  ncid = nctk_noid
@@ -4661,8 +4699,15 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  open (unit=800, file="wt_kq_en.dat")
  open (unit=801, file="wt_k_en.dat")
  open (unit=802, file="res_small.dat")
+ ABI_STAT_MALLOC(tmp_vals_ee, (2,gams%nene,gams%nene,gams%natom3,gams%natom3), ierr)
+ ABI_CHECK(ierr==0, "out of mem tmp_vals_ee")
+
+ gams%vals_ee = zero
 #endif
+
+ ! start loops over iq, spin, k, bands, modes...
  do iq_ibz=1,gams%nqibz
+
    qpt = gams%qibz(:,iq_ibz)
    tgam = zero
    if (dtset%eph_transport > 0) then
@@ -4696,11 +4741,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
    ABI_CHECK(ierr==0, "oom vlocal1")
 
-#ifdef DEV_MJV
-   gams%vals_ee = zero
-#endif
    do spin=1,nsppol
      fs => fstab(spin)
+
+#ifdef DEV_MJV
+     tmp_vals_ee = zero
+#endif
 
      ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
      do ipc=1,natom3
@@ -4970,8 +5016,10 @@ if (sum(abs(res)) < tol6) then
 end if
                do jene = 1, gams%nene
                  do iene = 1, gams%nene
-                   gams%vals_ee(:,iene,jene,ipc1,ipc2,iq_ibz,spin) = &
-&                    gams%vals_ee(:,iene,jene,ipc1,ipc2,iq_ibz,spin) + &
+! TODO: distribute this in procs over q. Make a temp array here for 1 q
+! then mpi sync it and save it only on 1 processor below after mpisum over k
+                   tmp_vals_ee(:,iene,jene,ipc1,ipc2) = &
+&                    tmp_vals_ee(:,iene,jene,ipc1,ipc2) + &
 &                    res(:) * wt_kq_en(1, ib1, iene) * wt_k_en(1, ib2, jene)
                  end do
                end do
@@ -5035,8 +5083,12 @@ end if
      ABI_FREE(wt_kq_en)
 
      call xmpi_sum(tgam, comm, ierr)
+
 #ifdef DEV_MJV
-     call xmpi_sum(gams%vals_ee, comm, ierr)
+     call xmpi_sum(tmp_vals_ee, comm, ierr) ! this sums over kfs
+     if (gams%my_iq(iq_ibz) /= -1) then ! this saves the right matrices locally
+       gams%vals_ee(:,:,:,:,:,gams%my_iq(iq_ibz),spin) = tmp_vals_ee
+     end if
 #endif
 
      if (dtset%eph_transport > 0) then
@@ -5086,6 +5138,7 @@ end if
 close(800)
 close(801)
 close(802)
+   ABI_FREE(tmp_vals_ee)
 #endif
 
  ! Collect gvals_qibz on each node and divide by the total number of k-points in the full mesh.
