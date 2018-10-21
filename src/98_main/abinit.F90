@@ -55,10 +55,6 @@
 !! 20) Write the final timing, close the output file, and write a final line to the log file
 !! 21) Eventual cleaning of MPI run
 !!
-!! TODO
-!!  1) Reduce the number of tasks in this main routine
-!!  2) Create subroutine to make the full init of input variables, including the echo ...
-!!
 !! INPUTS
 !!  (main routine)
 !!
@@ -198,14 +194,11 @@ program abinit
 
 !0) Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
-
  !call xlf_set_sighandler()
 
 !------------------------------------------------------------------------------
 
-!1) Eventually initialize MPI
-!Pay attention: it may be initialzed again in finddistrproc
-
+!1) Eventually initialize MPI. Pay attention: me and comm may be initialzed again in finddistrproc
  call xmpi_init()
  me = xmpi_comm_rank(xmpi_world)
 
@@ -259,7 +252,7 @@ program abinit
    call dump_config(std_out)
    call dump_optim(std_out)
    call dump_cpp_options(std_out)
-!  Write names of files
+   ! Write names of files
    write(message, '(a,a,a,a,a,a,a,a,a,a,a,a)' )&
 &   '- input  file    -> ',trim(filnam(1)),ch10,&
 &   '- output file    -> ',trim(filnam(2)),ch10,&
@@ -310,8 +303,7 @@ program abinit
      ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
    end if
 
-   call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all,&
-&   allgather=.false.,master=0)
+   call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all, allgather=.false.,master=0)
 
  else
    results_out_all => results_out
@@ -345,7 +337,6 @@ program abinit
 
 !This synchronization is not strictly needed, but without it,
 !there are problems with Tv1#93 in parallel, PGI compiler, on Intel/PC
-
  call abi_io_redirect(new_io_comm=xmpi_world)
 
  call timab(44,2,tsec)
@@ -353,9 +344,7 @@ program abinit
 !------------------------------------------------------------------------------
 
 !13) Perform additional checks on input data
-
  call timab(45,3,tsec)
-
  call chkinp(dtsets,ab_out,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !Check whether the string only contains valid keywords
@@ -389,15 +378,12 @@ program abinit
 !------------------------------------------------------------------------------
 
 !15) Perform main calculation
-!The timing is done in gstate
-
  call timab(45,2,tsec)
 
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
  if (prtvol==-level .or. prtvol==-2.or.args%dry_run/=0) then
-   write(message,'(a,a,i0,a)')ch10,&
-&   ' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip driver '
+   write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip driver '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
    test_exit=.true.
@@ -423,14 +409,12 @@ program abinit
      ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
    end if
 
-   call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all,&
-&   allgather=.false.,master=0)
+   call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all,allgather=.false.,master=0)
  end if
 
  if(me==0) then
    if(test_exit)then
-     write(message,'(a,a,i0,a)')ch10,&
-&     ' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip outvars '
+     write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip outvars '
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    else
@@ -489,8 +473,7 @@ program abinit
  ! 18) Bibliographical recommendations
  if(me==0) then
    if(test_exit)then
-     write(message,'(a,a,i0,a)')ch10,&
-&     ' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments '
+     write(message,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    else

@@ -46,7 +46,7 @@ istwfk 8*1
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t00.out, tolnlines=   5,   tolabs=  2.00e-05,   tolrel=  4.00e-04
+#%% files_to_test = t00.out, tolnlines=5, tolabs=2.3e-05, tolrel=4.00e-04
 #%% psp_files= 31ga.pspnc, 33as.pspnc
 #%% extra_inputs = t00o_w90.win
 #%% [paral_info]

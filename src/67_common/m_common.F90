@@ -1768,7 +1768,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  if (me == 0) then
     !if (.not. present(pspfilnam)) then
        ! Read the name of the psp file
-       ABI_ALLOCATE(pspfilnam_,(npsp))
+       ABI_MALLOC(pspfilnam_,(npsp))
        do ipsp=1,npsp
          write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
          read (std_in, '(a)' , iostat=ios ) filpsp
@@ -1786,7 +1786,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
        end do ! ipsp=1,npsp
 
        call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
-       ABI_DEALLOCATE(pspfilnam_)
+       ABI_FREE(pspfilnam_)
     !else
     !   call inpspheads(pspfilnam, npsp, pspheads, ecut_tmp)
     !end if
@@ -1818,18 +1818,18 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 ! do ii=1,npsp
 !    zion_max=max(token%pspheads(ii)%zionpsp,zion_max)
 ! end do
- ABI_ALLOCATE(zionpsp,(npsp))
+ ABI_MALLOC(zionpsp,(npsp))
  do ii=1,npsp
   zionpsp(ii) = pspheads(ii)%zionpsp
  end do
 
- ABI_ALLOCATE(mband_upper_, (0:ndtset_alloc))
+ ABI_MALLOC(mband_upper_, (0:ndtset_alloc))
 
  ! Get MAX dimension over datasets
  call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, mx,&
                msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
 
- ABI_DEALLOCATE(zionpsp)
+ ABI_FREE(zionpsp)
  call timab(42,2,tsec)
  call timab(43,3,tsec)
 
@@ -1857,7 +1857,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  call timab(43,2,tsec)
 
- ABI_DEALLOCATE(mband_upper_)
+ ABI_FREE(mband_upper_)
 
 end subroutine get_dtsets_pspheads
 !!***
