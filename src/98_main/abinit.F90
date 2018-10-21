@@ -120,7 +120,7 @@ program abinit
  use m_memeval,     only : memory_eval
  use m_chkinp,      only : chkinp
  use m_dtset,       only : chkvars, dtset_free
- use m_dtfil,       only : iofn1, status
+ use m_dtfil,       only : iofn1
  use m_outxml,      only : outxml_open, outxml_finalise
  use m_parser,      only : parsefile
  use m_out_acknowl, only : out_acknowl
@@ -183,7 +183,7 @@ program abinit
  type(pspheader_type),allocatable :: pspheads(:)
  type(results_out_type),allocatable,target :: results_out(:)
  type(results_out_type),pointer :: results_out_all(:)
- type(ab_dimensions) :: mxvals
+ type(ab_dimensions) :: mx
  logical :: test_img,test_exit,use_results_all,xml_output=.false.
  integer :: values(8)
  character(len=5) :: strzone
@@ -274,7 +274,7 @@ program abinit
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
- call get_dtsets_pspheads(filnam(1), ndtset, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, xmpi_world)
+ call get_dtsets_pspheads(filnam(1), ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -298,11 +298,11 @@ program abinit
  ABI_DATATYPE_ALLOCATE(results_out,(0:ndtset_alloc))
 
  ! Initialize results_out datastructure
- call init_results_out(dtsets,1,1,mpi_enregs, mxvals%natom,mxvals%mband_upper,mxvals%nkpt,npsp,&
-  mxvals%nsppol,mxvals%ntypat,results_out)
+ call init_results_out(dtsets,1,1,mpi_enregs, mx%natom, mx%mband_upper, mx%nkpt,npsp,&
+  mx%nsppol, mx%ntypat, results_out)
 
  ! Gather contributions to results_out from images of the cell, if needed
- test_img=(mxvals%nimage/=1.and.maxval(dtsets(:)%npimage)>1)
+ test_img = (mx%nimage/=1.and.maxval(dtsets(:)%npimage)>1)
  use_results_all=.false.
  if (test_img) then
    use_results_all=(me==0)
@@ -324,8 +324,7 @@ program abinit
      if(ii==1)iounit=ab_out
      if(ii==2)iounit=std_out
 
-     call outvars (choice,dmatpuflag,dtsets,trim(filnam(4)),&
-&     iounit, mxvals, ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+     call outvars(choice,dmatpuflag,dtsets, filnam(4), iounit, mx, ndtset,ndtset_alloc,npsp,results_out_all,timopt)
    end do
 
    if (dtsets(1)%prtxml == 1) then
@@ -441,8 +440,7 @@ program abinit
        if(ii==1)iounit=ab_out
        if(ii==2)iounit=std_out
        write(iounit,*)' '
-       call outvars (choice,dmatpuflag,dtsets,trim(filnam(4)),&
-&       iounit,mxvals,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+       call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
        if(ii==2)write(std_out,*)' '
      end do
    end if

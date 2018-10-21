@@ -1648,7 +1648,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call wrtout(iout,msg,'COLL')
  end if
 
-!=============
  write(msg,'(a,80a)')('-',mu=1,80)
  call wrtout(iout,msg,'COLL')
 
@@ -1660,14 +1659,22 @@ end subroutine prtene
 !! get_dtsets_pspheads
 !!
 !! FUNCTION
+!!  Parse input file, get list of pseudos for files file and build list of datasets
+!!  pseudopotential headers, maxval of dimensions needed in outvars
 !!
 !! INPUTS
 !!  path: Input Filename
 !!  comm: MPI communicator
 !!
 !! OUTPUT
-!!  dtsets
-!!  dims
+!!  lenstr= the length of the resulting string.
+!!  ndtset= the number of declared datasets.
+!!  string= contains on output the content of the file, ready for parsing.
+!!  dtsets(0:ndtset): List of datasets
+!!  dmatpuflag=flag controlling the use of an initial density matrix in PAW+U (max. value over datasets)
+!!  mx<ab_dimensions>=datatype storing the maximal dimensions.
+!!  pspheads(npsp)=<type pspheader_type>=all the important information from the
+!!   pseudopotential file headers, as well as the psp file names
 !!
 !! PARENTS
 !!      abinit
@@ -1676,9 +1683,11 @@ end subroutine prtene
 !!
 !! SOURCE
 
-subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mxvals, dmatpuflag, comm)
+subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
 
  use m_xmpi
+ use m_dtset
+ use m_xpapi
 
  use m_parser,       only : parsefile
  use m_invars1,      only : invars0, invars1m, indefo
@@ -1687,38 +1696,32 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  use defs_abitypes,  only : dataset_type, ab_dimensions
  use defs_datatypes, only : pspheader_type
  use m_pspheads,     only : inpspheads, pspheads_comm
- use m_dtset
- use m_xpapi
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(out) :: lenstr, ndtset
+ type(ab_dimensions),intent(out) :: mx
  character(len=strlen), intent(out) :: string
- type(dataset_type),allocatable,intent(out)  :: dtsets(:)
- type(pspheader_type),allocatable,intent(out):: pspheads(:)
- type(ab_dimensions),intent(out) :: mxvals
  character(len=*),intent(in) :: path
  integer,intent(in) :: comm
- integer,intent(out) :: timopt
- integer,intent(out) :: dmatpuflag
+ integer,intent(out) :: timopt, dmatpuflag
+!arrays
+ type(dataset_type),allocatable,intent(out)  :: dtsets(:)
+ type(pspheader_type),allocatable,intent(out):: pspheads(:)
 
 !Local variables-------------------------------
 !scalars
- !integer :: ndtset !lenstr,
- !character(len = fnlen), intent(in), optional :: pspfilnam(:)
- integer :: jdtset,ipsp,ios
- integer :: me, ndtset_alloc, nprocs
- integer :: istatr,istatshft, papiopt
- integer :: npsp, ii, idtset, msym, usepaw
- integer,allocatable :: mband_upper_(:)
- real(dp),allocatable :: zionpsp(:)
- real(dp) :: ecut_tmp(3,2,10)
- character(len=fnlen), allocatable :: pspfilnam_(:)
+ integer :: jdtset,ipsp,ios, me, ndtset_alloc, nprocs
+ integer :: istatr,istatshft, papiopt, npsp, ii, idtset, msym, usepaw
  character(len=fnlen) :: filpsp
  character(len=500) :: msg
- real(dp) :: tsec(2)
+!arrays
+ integer,allocatable :: mband_upper_(:)
+ real(dp) :: ecut_tmp(3,2,10),tsec(2)
+ real(dp),allocatable :: zionpsp(:)
+ character(len=fnlen), allocatable :: pspfilnam_(:)
 
 !************************************************************************
 
@@ -1735,9 +1738,8 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  timopt = 1; if (xmpi_paral==1) timopt = 0
 
  ! Continue to analyze the input string, get upper dimensions, and allocate the remaining arrays.
- call invars0(dtsets, istatr, istatshft, lenstr, &
-      & msym, mxvals%natom, mxvals%nimage, mxvals%ntypat, ndtset, ndtset_alloc, npsp, &
-      & papiopt, timopt, string)
+ call invars0(dtsets, istatr, istatshft, lenstr, msym, mx%natom, mx%nimage, mx%ntypat, &
+              ndtset, ndtset_alloc, npsp, papiopt, timopt, string)
 
  ! Enable PAPI timers
  call time_set_papiopt(papiopt)
@@ -1749,9 +1751,9 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  call timab(41,2,tsec)
  call timab(timopt,5,tsec)
 
- !8) Finish to read the "file" file completely, as npsp is known,
- !and also initialize pspheads, that contains the important information
- !from the pseudopotential headers, as well as the psp filename
+ ! Finish to read the "file" file completely, as npsp is known,
+ ! and also initialize pspheads, that contains the important information
+ ! from the pseudopotential headers, as well as the psp filename
 
  call timab(42,1,tsec)
 
@@ -1765,15 +1767,11 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  pspheads(:)%usewvl = dtsets(1)%usewvl
  if (me == 0) then
     !if (.not. present(pspfilnam)) then
+       ! Read the name of the psp file
        ABI_ALLOCATE(pspfilnam_,(npsp))
-       !call iofn2(npsp, pspfilnam_)
-
        do ipsp=1,npsp
-         ! Read the name of the psp file
          write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
          read (std_in, '(a)' , iostat=ios ) filpsp
-         pspfilnam_(ipsp) = trim(filpsp)
-
          ! It might be that a file name is missing
          if (ios/=0) then
            write(msg, '(7a)' )&
@@ -1783,7 +1781,7 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
            'if they are correct, complete your files file.'
            MSG_ERROR(msg)
          end if
-
+         pspfilnam_(ipsp) = trim(filpsp)
          write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
        end do ! ipsp=1,npsp
 
@@ -1792,29 +1790,28 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
     !else
     !   call inpspheads(pspfilnam, npsp, pspheads, ecut_tmp)
     !end if
-    if(minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
-    if(minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
+    if (minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
+    if (minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
  end if
 
  ! Communicate pspheads to all processors
  call pspheads_comm(npsp, pspheads, usepaw)
 
- !If (all) pspcod are 7 then this is a PAW calculation. Initialize (default) the value of ratsph
+ ! If (all) pspcod are 7 then this is a PAW calculation. Initialize (default) the value of ratsph
  do idtset=0,ndtset_alloc
     dtsets(idtset)%usepaw = usepaw
     if (usepaw == 0) then
       dtsets(idtset)%ratsph(:)=two
     else
-      ! Note that the following coding assumes that npsp=ntypati for PAW, which is true as of now (XG20101024).
-      !dtsets(idtset)%ratsph(1:npsp)=token%pspheads(1:npsp)%pawheader%rpaw
+      ! Note that the following coding assumes that npsp=ntypat for PAW, which is true as of now (XG20101024).
+      ! dtsets(idtset)%ratsph(1:npsp)=token%pspheads(1:npsp)%pawheader%rpaw
       do ipsp=1,npsp
         dtsets(idtset)%ratsph(ipsp) = pspheads(ipsp)%pawheader%rpaw
       end do
     endif
  end do
 
- !Take care of other dimensions, and part of the content of dtsets
- !that is or might be needed early.
+ !Take care of other dimensions, and part of the content of dtsets that is or might be needed early.
  !zion_max=maxval(pspheads(1:npsp)%zionpsp) ! This might not work properly with HP compiler
 
 ! zion_max=token%pspheads(1)%zionpsp
@@ -1827,20 +1824,10 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  end do
 
  ABI_ALLOCATE(mband_upper_, (0:ndtset_alloc))
-! write(std_out,*)' ab7_invars_f90 , before invars1m : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
 
- call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, &
-   & msym, mxvals%ga_n_rules, mxvals%gw_nqlwl, mxvals%lpawu, &
-   & mxvals%mband_upper, &
-   & mxvals%natom, mxvals%natpawu, mxvals%natsph, mxvals%natsph_extra, &
-   & mxvals%natvshift, &
-   & mxvals%nconeq, mxvals%nimage, mxvals%n_efmas_dirs, mxvals%nkpt, mxvals%nkptgw, mxvals%nkpthf, mxvals%nnos, &
-   & mxvals%nqptdm, &
-   & mxvals%nspinor, mxvals%nsppol, mxvals%nsym, mxvals%ntypat, mxvals%nimfrqs, &
-   & mxvals%nfreqsp, mxvals%nzchempot, mxvals%n_projection_frequencies, ndtset, &
-   & ndtset_alloc, string, npsp, zionpsp)
-
- mxvals%nberry = 20   ! This is presently a fixed value. Should be changed.
+ ! Get MAX dimension over datasets
+ call invars1m(dmatpuflag, dtsets, ab_out, lenstr, mband_upper_, mx,&
+               msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
 
  ABI_DEALLOCATE(zionpsp)
  call timab(42,2,tsec)
@@ -1855,29 +1842,17 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
 
  ! If all the pseudopotentials have the same pspxc, override the default value for dtsets 1 to ndtset
  if (minval(abs((pspheads(1:npsp)%pspxc - pspheads(1)%pspxc)))==0) then
-    dtsets(1:ndtset_alloc)%ixc = pspheads(1)%pspxc
+   dtsets(1:ndtset_alloc)%ixc = pspheads(1)%pspxc
  end if
 
  ! Call the main input routine.
-
- !if (with_mem) then
-   !write(std_out,*)' ab7_invars_f90 : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
-   call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
- !else
- !  do idtset = 1, ndtset_alloc, 1
- !     jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
- !     call invars2(dtsets(idtset)%bravais, dtsets(idtset),ab_out,jdtset,lenstr,&
- !        & mband_upper_(idtset),msym,npsp,string,usepaw,&
- !        & token%pspheads(1:npsp)%zionpsp)
- !  end do
- !end if
+ call invars2m(dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
 
  call macroin2(dtsets, ndtset_alloc)
 
- !mxmband=maxval(dtsets(1:ndtset_alloc)%mband) ! This might not work with the HP compiler
- mxvals%mband = dtsets(1)%mband
+ mx%mband = dtsets(1)%mband
  do ii=1,ndtset_alloc
-    mxvals%mband = max(dtsets(ii)%mband, mxvals%mband)
+    mx%mband = max(dtsets(ii)%mband, mx%mband)
  end do
 
  call timab(43,2,tsec)

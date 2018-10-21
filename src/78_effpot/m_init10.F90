@@ -94,7 +94,6 @@ subroutine init10(filnam,comm)
  integer,parameter :: master=0
  integer :: me,nproc,ierr
  integer :: ii,io
-!arrays
 ! *********************************************************************
 
 !Determine who I am in comm
