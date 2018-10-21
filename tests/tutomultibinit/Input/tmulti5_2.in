@@ -31,7 +31,6 @@ spin_sia_k1amp = 1e-22        ! amplitude of SIA, how large should be used?
 spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit

@@ -12,7 +12,6 @@ t85o_DS9_1WF1
 t85o_DS9_1WF2
 t85o_DS9_1WF3
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrggkk
