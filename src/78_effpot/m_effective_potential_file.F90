@@ -29,7 +29,7 @@ module m_effective_potential_file
 
  use defs_basis
  use m_errors
- use m_abicore 
+ use m_abicore
  use m_xmpi
  use m_harmonics_terms
  use m_anharmonics_terms
@@ -2286,7 +2286,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
  use defs_basis
  use m_errors
- use m_abicore  
+ use m_abicore
  use m_dynmat
  use m_xmpi
 
@@ -3571,7 +3571,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  if (present(verbose)) need_verbose = verbose
 
  natom_hist = size(hist%xred,2)
- nstep_hist = size(hist%xred,3) 
+ nstep_hist = size(hist%xred,3)
 
 ! Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
@@ -3689,7 +3689,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  end do
 
 !Check before transfert
- if(.not.all(blkval==0))then      
+ if(.not.all(blkval==0))then
    write(msg, '(5a)' )&
 &         'Unable to map the molecular dynamic file ',ch10,&
 &         'on the reference supercell structure',ch10,&

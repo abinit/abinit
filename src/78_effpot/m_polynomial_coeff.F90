@@ -1288,7 +1288,7 @@ end subroutine polynomial_coeff_evaluate
 !!
 !! NAME
 !! polynomial_coeff_getList
-
+!!
 !! FUNCTION
 !! Get the list of all  the possible coefficients for the polynome
 !!

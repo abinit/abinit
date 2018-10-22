@@ -328,9 +328,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    my_coefflist(icoeff) = icoeff
 
    if(my_rank==0) then
-     my_coeffindexes(icoeff) = icoeff     
+     my_coeffindexes(icoeff) = icoeff
    else
-     my_coeffindexes(icoeff) = sum(buffin(1:my_rank)) + icoeff     
+     my_coeffindexes(icoeff) = sum(buffin(1:my_rank)) + icoeff
    end if
 
 !  Only copy the input coefficients on the CPU0

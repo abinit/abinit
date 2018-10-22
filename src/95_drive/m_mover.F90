@@ -332,6 +332,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
+ mxhist=zero 
  if (ab_mover%restartxf<0)then
 !  Read history from file (and broadcast if MPI)
    if (me==master) then
@@ -380,9 +381,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  iexit=0; timelimit_exit=0
  ncycle=specs%ncycle
 
- if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0) then
+ if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
    ncycle=scfcv_args%dtset%hmctt
-   if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0) then
+   if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
      ncycle=ncycle+scfcv_args%dtset%hmcsst
    endif
  endif
@@ -391,9 +392,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
  if(specs%nhist/=-1 .and. mxhist >= 3)then   ! then .and. hist%mxhist > 3 
   nhisttot = specs%nhist! We don't need to store all the history
- elseif(mxhist == 1)then 
-  nhisttot = 1 ! Less than three MD-Steps
- end if   
+ elseif(mxhist > 0 .and. mxhist  < 3)then
+  nhisttot = mxhist ! Less than three MD-Steps
+ end if
+
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
@@ -402,7 +404,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !If effective potential is present,
 !  forces will be compute with it
- if (present(effective_potential)) then
+ if (present(effective_potential))then
    need_scfcv_cycle = .FALSE.
    if(need_verbose)then
      write(message,'(2a,i2,5a,80a)')&
@@ -853,7 +855,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
-     if (ab_mover%ionmov==13 .and. mxhist > 3 ) then !.and. mxhist > 3  
+     if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then 
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)

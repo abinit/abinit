@@ -2475,12 +2475,12 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   du_delta_tmp(:,:,:) = zero
   if((.not.present(displacement).or..not.present(du_delta)).and.present(xred))then
 !   Compute the displacement
-    call xred2xcart(natom, rprimd, xcart, xred) 
+    call xred2xcart(natom, rprimd, xcart, xred)
     call effective_potential_getDisp(disp_tmp,du_delta_tmp,natom,rprimd,&
 &                                    eff_pot%supercell%rprimd,comm,xcart_hist=xcart,&
 &                                    xcart_ref=eff_pot%supercell%xcart,&
 &                                    compute_displacement = .not.present(displacement),&
-&                                    compute_duDelta =  .not.present(du_delta)) 
+&                                    compute_duDelta =  .not.present(du_delta))
   end if
 
 ! or set ftrom the arguments
@@ -2920,7 +2920,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 
 ! fill the history position
   if(present(xcart_hist)) then
-    xcart_hist_tmp(:,:) = xcart_hist(:,:)    
+    xcart_hist_tmp(:,:) = xcart_hist(:,:)
   else
     call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist)
   end if
@@ -2946,7 +2946,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if(need_displacement)then
     displacement(:,:) = zero
     do ii = 1, natom
-      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)  !        
+      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii) 
     end do
   end if
 
@@ -3665,7 +3665,7 @@ forall(ii=1:3)identity(ii,ii)=1
 
      diff(ii) = energy
 
-   end do 
+   end do
 
 !  The two options should give the same result
 !  Option 1 => compute the disps and provide them to evaluate
