@@ -64,6 +64,8 @@ dmft_read_occnd 0
 dmft_tollc 0.000001
 dmft_mxsf 0.3
 dmft_dc 1
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
 
 ##### LDA+U
 usepawu1    1   # LDA+U is not used.
@@ -94,7 +96,6 @@ dmatpawu
     0.0 0.0 0.0 0.0 0.0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

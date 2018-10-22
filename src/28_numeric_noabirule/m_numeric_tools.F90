@@ -49,7 +49,7 @@ MODULE m_numeric_tools
  public :: iseven                ! True if int is even
  public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
  public :: is_zero               ! True if all elements of rr differ from zero by less than tol
- public :: isinside              ! True if float is inside an interval.
+ public :: inrange               ! True if (int/float) is inside an interval.
  public :: bisect                ! Given a monotonic array A and x find j such that A(j)>x>A(j+1) using bisection
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
  public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
@@ -106,8 +106,8 @@ MODULE m_numeric_tools
  end interface arth
 
  interface reverse
-   module procedure arth_int
-   module procedure arth_rdp
+   module procedure reverse_int
+   module procedure reverse_rdp
  end interface reverse
 
  interface set2unit
@@ -133,6 +133,11 @@ MODULE m_numeric_tools
    module procedure isdiagmat_rdp
    !module procedure isdiagmat_cdp
  end interface isdiagmat
+
+ interface inrange
+   module procedure inrange_int
+   module procedure inrange_dp
+ end interface inrange
 
  interface l2int
    module procedure l2int_1D
@@ -291,13 +296,6 @@ CONTAINS  !===========================================================
 
 pure function arth_int(start,step,nn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'arth_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -340,13 +338,6 @@ end function arth_int
 !! SOURCE
 
 pure function arth_rdp(start,step,nn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'arth_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -399,13 +390,6 @@ end function arth_rdp
 
 pure function geop(start,factor,nn) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'geop'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -442,13 +426,6 @@ end function geop
 !! SOURCE
 
 subroutine reverse_int(arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'reverse_int'
-!End of the abilint section
 
  implicit none
 
@@ -487,13 +464,6 @@ end subroutine reverse_int
 !! SOURCE
 
 subroutine reverse_rdp(arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'reverse_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -537,13 +507,6 @@ end subroutine reverse_rdp
 
 pure subroutine unit_matrix_int(matrix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unit_matrix_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -582,13 +545,6 @@ end subroutine unit_matrix_int
 !! SOURCE
 
 pure subroutine unit_matrix_rdp(matrix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unit_matrix_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -629,13 +585,6 @@ end subroutine unit_matrix_rdp
 
 pure subroutine unit_matrix_cdp(matrix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unit_matrix_cdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -673,13 +622,6 @@ end subroutine unit_matrix_cdp
 !! SOURCE
 
 pure function get_trace_int(matrix) result(trace)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_trace_int'
-!End of the abilint section
 
  implicit none
 
@@ -719,13 +661,6 @@ end function get_trace_int
 
 pure function get_trace_rdp(matrix) result(trace)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_trace_rdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -762,13 +697,6 @@ end function get_trace_rdp
 
 pure function get_trace_cdp(matrix) result(trace)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_trace_cdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -804,13 +732,6 @@ end function get_trace_cdp
 !! SOURCE
 
 function get_diag_int(mat) result(diag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_diag_int'
-!End of the abilint section
 
  implicit none
 
@@ -851,13 +772,6 @@ end function get_diag_int
 !! SOURCE
 function get_diag_rdp(mat) result(diag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_diag_rdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -897,13 +811,6 @@ function get_diag_cdp(cmat) result(cdiag)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_diag_cdp'
-!End of the abilint section
-
  complex(dpc),intent(in) :: cmat(:,:)
  complex(dpc) :: cdiag(SIZE(cmat,1))
 
@@ -933,13 +840,6 @@ end function get_diag_cdp
 !! SOURCE
 
 pure logical function isdiagmat_int(mat) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isdiagmat_int'
-!End of the abilint section
 
  implicit none
 
@@ -977,20 +877,7 @@ end function isdiagmat_int
 
 pure logical function isdiagmat_rdp(mat, atol) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isdiagmat_rdp'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isdiagmat_rdp'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -1033,13 +920,6 @@ end function isdiagmat_rdp
 
 pure function l2int_1D(larr) result(int_arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'l2int_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1074,13 +954,6 @@ end function l2int_1D
 
 pure function l2int_2D(larr) result(int_arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'l2int_2D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1114,13 +987,6 @@ end function l2int_2D
 !! SOURCE
 
 pure function l2int_3D(larr) result(int_arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'l2int_3D'
-!End of the abilint section
 
  implicit none
 
@@ -1159,13 +1025,6 @@ end function l2int_3D
 
 pure function rdp2cdp_1D(rr) result(cc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdp2cdp_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1195,13 +1054,6 @@ end function rdp2cdp_1D
 !! SOURCE
 
 pure function rdp2cdp_2D(rr) result(cc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdp2cdp_2D'
-!End of the abilint section
 
  implicit none
 
@@ -1233,13 +1085,6 @@ end function rdp2cdp_2D
 
 pure function rdp2cdp_3D(rr) result(cc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdp2cdp_3D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1269,13 +1114,6 @@ end function rdp2cdp_3D
 !! SOURCE
 
 pure function rdp2cdp_4D(rr) result(cc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdp2cdp_4D'
-!End of the abilint section
 
  implicit none
 
@@ -1307,13 +1145,6 @@ end function rdp2cdp_4D
 
 pure function rdp2cdp_5D(rr) result(cc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdp2cdp_5D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1343,13 +1174,6 @@ end function rdp2cdp_5D
 !! SOURCE
 
 pure function rdp2cdp_6D(rr) result(cc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdp2cdp_6D'
-!End of the abilint section
 
  implicit none
 
@@ -1384,13 +1208,6 @@ end function rdp2cdp_6D
 
 pure function cdp2rdp_1D(cc) result(rr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cdp2rdp_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1422,13 +1239,6 @@ end function cdp2rdp_1D
 
 pure function cdp2rdp_2D(cc) result(rr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cdp2rdp_2D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1458,13 +1268,6 @@ end function cdp2rdp_2D
 !! SOURCE
 
 pure function cdp2rdp_3D(cc) result(rr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cdp2rdp_3D'
-!End of the abilint section
 
  implicit none
 
@@ -1497,13 +1300,6 @@ end function cdp2rdp_3D
 
 pure function cdp2rdp_4D(cc) result(rr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cdp2rdp_4D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1533,13 +1329,6 @@ end function cdp2rdp_4D
 !! SOURCE
 
 pure function cdp2rdp_5D(cc) result(rr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cdp2rdp_5D'
-!End of the abilint section
 
  implicit none
 
@@ -1573,13 +1362,6 @@ end function cdp2rdp_5D
 
 elemental function iseven(nn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iseven'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1609,13 +1391,6 @@ end function iseven
 !! SOURCE
 
 pure function is_integer_0d(rr,tol) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_integer_0d'
-!End of the abilint section
 
  implicit none
 
@@ -1648,13 +1423,6 @@ end function is_integer_0d
 !! SOURCE
 
 pure function is_integer_1d(rr,tol) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_integer_1d'
-!End of the abilint section
 
  implicit none
 
@@ -1695,13 +1463,6 @@ end function is_integer_1d
 
 function is_zero_rdp_0d(rr,tol) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_zero_rdp_0d'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1733,13 +1494,6 @@ end function is_zero_rdp_0d
 
 function is_zero_rdp_1d(rr,tol) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_zero_rdp_1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1757,34 +1511,52 @@ end function is_zero_rdp_1d
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/isinside
+!!****f* m_numeric_tools/inrange_int
 !! NAME
-!!  isinside
+!!  inrange_int
+!!
+!! FUNCTION
+!!  True if int `xval` is inside the interval [win(1), win(2)]
+!!
+!! SOURCE
+
+pure logical function inrange_int(xval, win)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: xval,win(2)
+! *************************************************************************
+
+ inrange_int = (xval >= win(1) .and. xval <= win(2))
+
+end function inrange_int
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/inrange_dp
+!! NAME
+!!  inrange_dp
 !!
 !! FUNCTION
 !!  True if float `xval` is inside the interval [win(1), win(2)]
 !!
 !! SOURCE
 
-pure logical function isinside(xval, win)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isinside'
-!End of the abilint section
+pure logical function inrange_dp(xval, win)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in) :: xval,win(2)
+ real(dp),intent(in) :: xval, win(2)
 ! *************************************************************************
 
- isinside = (xval >= win(1) .and. xval <= win(2))
+ inrange_dp = (xval >= win(1) .and. xval <= win(2))
 
-end function isinside
+end function inrange_dp
 !!***
 
 !!****f* m_numeric_tools/bisect_rdp
@@ -1799,13 +1571,6 @@ end function isinside
 !! SOURCE
 
 pure function bisect_rdp(AA,xx) result(loc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bisect_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -1864,13 +1629,6 @@ end function bisect_rdp
 !! SOURCE
 pure function bisect_int(AA,xx) result(loc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bisect_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1923,13 +1681,6 @@ end function bisect_int
 
 pure function imax_loc_int(iarr,mask)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'imax_loc_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1968,13 +1719,6 @@ end function imax_loc_int
 !! SOURCE
 pure function imax_loc_rdp(arr,mask)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'imax_loc_rdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2010,13 +1754,6 @@ end function imax_loc_rdp
 !! SOURCE
 
 pure function imin_loc_int(arr,mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'imin_loc_int'
-!End of the abilint section
 
  implicit none
 
@@ -2056,13 +1793,6 @@ end function imin_loc_int
 !! SOURCE
 
 pure function imin_loc_rdp(arr,mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'imin_loc_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -2109,13 +1839,6 @@ end function imin_loc_rdp
 !! SOURCE
 
 integer pure function lfind(mask, back)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lfind'
-!End of the abilint section
 
  implicit none
 
@@ -2184,13 +1907,6 @@ end function lfind
 !! SOURCE
 
 subroutine list2blocks(list,nblocks,blocks)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'list2blocks'
-!End of the abilint section
 
  implicit none
 
@@ -2265,13 +1981,6 @@ end subroutine list2blocks
 !! SOURCE
 
 subroutine mask2blocks(mask,nblocks,blocks)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mask2blocks'
-!End of the abilint section
 
  implicit none
 
@@ -2359,20 +2068,7 @@ end subroutine mask2blocks
 
 function linfit_rdp(nn,xx,yy,aa,bb) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linfit_rdp'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linfit_rdp'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -2430,13 +2126,6 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linfit_spc'
-!End of the abilint section
-
  integer,intent(in) :: nn
  real(dp) :: res
  real(dp),intent(in) :: xx(nn)
@@ -2486,13 +2175,6 @@ end function linfit_spc
 !! SOURCE
 
 function linfit_dpc(nn,xx,zz,aa,bb) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linfit_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -2557,13 +2239,6 @@ end function linfit_dpc
 !! SOURCE
 
 subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'llsfit_svd'
-!End of the abilint section
 
  implicit none
 
@@ -2685,13 +2360,6 @@ end subroutine llsfit_svd
 
 subroutine polyn_interp(xa,ya,x,y,dy)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polyn_interp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2773,13 +2441,6 @@ end subroutine polyn_interp
 !! SOURCE
 
 recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trapezoidal_'
-!End of the abilint section
 
  implicit none
 
@@ -2887,13 +2548,6 @@ end subroutine trapezoidal_
 
  recursive subroutine midpoint_(func,nn,xmin,xmax,quad)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'midpoint_'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2994,13 +2648,6 @@ end subroutine midpoint_
 !! SOURCE
 
 recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,npts)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'quadrature'
-!End of the abilint section
 
  implicit none
 
@@ -3212,13 +2859,6 @@ end subroutine quadrature
 
 subroutine ctrap(imax,ff,hh,ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ctrap'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3377,13 +3017,6 @@ end subroutine ctrap
 !! SOURCE
 
 subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cspint'
-!End of the abilint section
 
   implicit none
 
@@ -3547,13 +3180,6 @@ end subroutine cspint
 
 subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'coeffs_gausslegint'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3633,13 +3259,6 @@ end subroutine coeffs_gausslegint
 
 function simpson_cplx(npts,step,ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'simpson_cplx'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3711,13 +3330,6 @@ end function simpson_cplx
 !! SOURCE
 
 subroutine hermitianize_spc(mat,uplo)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hermitianize_spc'
-!End of the abilint section
 
  implicit none
 
@@ -3809,13 +3421,6 @@ end subroutine hermitianize_spc
 
 subroutine hermitianize_dpc(mat,uplo)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hermitianize_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3902,13 +3507,6 @@ end subroutine hermitianize_dpc
 
 pure subroutine mkherm(array,ndim)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkherm'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3972,13 +3570,6 @@ end subroutine mkherm
 !! SOURCE
 
 subroutine hermit(chmin,chmout,ierr,ndim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hermit'
-!End of the abilint section
 
  implicit none
 
@@ -4090,13 +3681,6 @@ end subroutine hermit
 
 subroutine symmetrize_spc(mat,uplo)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetrize_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4179,13 +3763,6 @@ end subroutine symmetrize_spc
 
 subroutine symmetrize_dpc(mat,uplo)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetrize_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4262,20 +3839,7 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pack_matrix'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pack_matrix'
-!End of the abilint section
 
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
@@ -4329,13 +3893,6 @@ end subroutine pack_matrix
 !! SOURCE
 
 subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_arr1d_spc'
-!End of the abilint section
 
  implicit none
 
@@ -4399,13 +3956,6 @@ end subroutine print_arr1d_spc
 
 subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_arr1d_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4467,13 +4017,6 @@ end subroutine print_arr1d_dpc
 !! SOURCE
 
 subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_arr2d_spc'
-!End of the abilint section
 
  implicit none
 
@@ -4542,13 +4085,6 @@ end subroutine print_arr2d_spc
 
 subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_arr2d_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4609,13 +4145,6 @@ end subroutine print_arr2d_dpc
 
 function pade(n,z,f,zz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pade'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4664,13 +4193,6 @@ end function pade
 !! SOURCE
 
 function dpade(n,z,f,zz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dpade'
-!End of the abilint section
 
  implicit none
 
@@ -4738,13 +4260,6 @@ end function dpade
 
 subroutine calculate_pade_a(a,n,z,f)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calculate_pade_a'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4791,13 +4306,6 @@ end subroutine calculate_pade_a
 
 function newrap_step(z,f,df)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newrap_step'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4829,13 +4337,6 @@ end function newrap_step
 !!
 pure function cross_product_int(vec1,vec2) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_product_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4860,13 +4361,6 @@ end function cross_product_int
 !!  Return the cross product of two vectors with real double precision components.
 !!
 pure function cross_product_rdp(vec1,vec2) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_product_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -4893,13 +4387,6 @@ end function cross_product_rdp
 !!
 
 pure function l2norm_rdp(vec) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'l2norm_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -4948,13 +4435,6 @@ end function l2norm_rdp
 !! SOURCE
 
 subroutine remove_copies(n_in,set_in,n_out,is_equal)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'remove_copies'
-!End of the abilint section
 
  implicit none
 
@@ -5043,13 +4523,6 @@ end subroutine remove_copies
 
 integer function denominator(dd,ierr,tolerance)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'denominator'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5098,13 +4571,6 @@ end function denominator
 !! SOURCE
 
 integer function mincm(ii,jj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mincm'
-!End of the abilint section
 
  implicit none
 
@@ -5166,13 +4632,6 @@ end function mincm
 !! SOURCE
 
 subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'continued_fract'
-!End of the abilint section
 
  implicit none
 
@@ -5285,13 +4744,6 @@ end subroutine continued_fract
 
 subroutine cmplx_sphcart(carr, from, units)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cmplx_sphcart'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5380,13 +4832,6 @@ end subroutine cmplx_sphcart
 
 subroutine pfactorize(nn,nfactors,pfactors,powers)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pfactorize'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5447,13 +4892,6 @@ end subroutine pfactorize
 !! SOURCE
 
 function isordered_rdp(nn,arr,direction,tol) result(isord)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isordered_rdp'
-!End of the abilint section
 
  implicit none
 
@@ -5525,13 +4963,6 @@ end function isordered_rdp
 !! SOURCE
 
 pure function stats_eval(arr) result(stats)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'stats_eval'
-!End of the abilint section
 
  implicit none
 
@@ -5609,13 +5040,6 @@ end function stats_eval
 
 elemental subroutine wrap2_zero_one(num,red,shift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap2_zero_one'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5665,13 +5089,6 @@ end subroutine wrap2_zero_one
 !! SOURCE
 
 elemental subroutine wrap2_pmhalf(num,red,shift)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap2_pmhalf'
-!End of the abilint section
 
  implicit none
 
@@ -5723,13 +5140,6 @@ end subroutine wrap2_pmhalf
 !! SOURCE
 
 pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpol3d'
-!End of the abilint section
 
  implicit none
 
@@ -5796,13 +5206,6 @@ end function interpol3d
 !! SOURCE
 
 pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpol3d_indices'
-!End of the abilint section
 
  implicit none
 
@@ -5877,13 +5280,6 @@ end subroutine interpol3d_indices
 !! SOURCE
 
 subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_rhor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpolate_denpot'
-!End of the abilint section
 
  implicit none
 
@@ -5967,13 +5363,6 @@ end subroutine interpolate_denpot
 
 subroutine simpson_int(npts,step,values,int_values)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'simpson_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6046,13 +5435,6 @@ end subroutine simpson_int
 
 function simpson(step,values) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'simpson'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6097,13 +5479,6 @@ end function simpson
 !! SOURCE
 
 pure subroutine rhophi(cx,phi,rho)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rhophi'
-!End of the abilint section
 
  implicit none
 
@@ -6169,13 +5544,6 @@ end subroutine rhophi
 !! SOURCE
 
 pure function vdiff_eval(cplex,nr,f1,f2,volume) result(vd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdiff_eval'
-!End of the abilint section
 
  implicit none
 
@@ -6244,13 +5612,6 @@ end function vdiff_eval
 
 subroutine vdiff_print(vd, unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdiff_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -6296,13 +5657,6 @@ end subroutine vdiff_print
 !! SOURCE
 
 subroutine smooth(a,mesh,it)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smooth'
-!End of the abilint section
 
  implicit none
 
@@ -6371,13 +5725,6 @@ end subroutine smooth
 !! SOURCE
 
 subroutine nderiv(hh,yy,zz,ndim,norder)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nderiv'
-!End of the abilint section
 
  implicit none
 
@@ -6473,13 +5820,6 @@ end subroutine nderiv
 
 real(dp) function central_finite_diff(order, ipos, npts) result(fact)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'central_finite_diff'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -6574,13 +5914,6 @@ end function central_finite_diff
 !! SOURCE
 
 function uniformrandom(seed)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'uniformrandom'
-!End of the abilint section
 
  implicit none
 
@@ -6696,13 +6029,6 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 & d2edv2_1,d2edv2_2,d2edv2_predict,&
 & etotal_1,etotal_2,etotal_predict,&
 & lambda_1,lambda_2,lambda_predict,status)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findmin'
-!End of the abilint section
 
  implicit none
 
@@ -6889,13 +6215,6 @@ end subroutine findmin
 
 subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kramerskronig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -7059,13 +6378,6 @@ end subroutine kramerskronig
 
 function dotproduct(nv1,nv2,v1,v2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotproduct'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -7086,6 +6398,7 @@ function dotproduct(nv1,nv2,v1,v2)
    dotproduct=dotproduct+v1(i,j)*v2(i,j)
   end do
  end do
+
 end function dotproduct
 !!***
 
@@ -7112,13 +6425,6 @@ end function dotproduct
 !! SOURCE
 
 subroutine invcb(rhoarr,rspts,npts)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invcb'
-!End of the abilint section
 
  implicit none
 

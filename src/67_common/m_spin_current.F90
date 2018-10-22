@@ -96,13 +96,6 @@ contains
 
 subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spin_current'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -621,13 +614,6 @@ end subroutine spin_current
 !! SOURCE
 
 subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vso_realspace_local'
-!End of the abilint section
 
  implicit none
 

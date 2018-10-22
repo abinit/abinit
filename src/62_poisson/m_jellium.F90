@@ -86,13 +86,6 @@ contains
 subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 &  option,paral_kgb,slabwsrad,rhog,rhor,rprimd,vjell,slabzstart,slabzend)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jellium'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -230,13 +223,6 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  contains
 
    function gsq_jel(i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_jel'
-!End of the abilint section
 
    real(dp) :: gsq_jel
    integer,intent(in) :: i1,i2,i3

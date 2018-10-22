@@ -135,13 +135,6 @@ CONTAINS  !=====================================================================
 subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
 &    Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab, method)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpolator_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -241,13 +234,6 @@ end subroutine interpolator_init
 
 subroutine int_alloc_work(interpolator, work_size)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_alloc_work'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -284,13 +270,6 @@ end subroutine int_alloc_work
 !! SOURCE
 
 subroutine int_free_work(interpolator)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_free_work'
-!End of the abilint section
 
  implicit none
 
@@ -332,13 +311,6 @@ end subroutine int_free_work
 
 subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
 &   Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_compute_overlaps'
-!End of the abilint section
 
  implicit none
 
@@ -522,13 +494,6 @@ end subroutine int_compute_overlaps
 
 subroutine int_preprocess_tables(interpolator,double_grid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_preprocess_tables'
-!End of the abilint section
-
  implicit none
 
 !Argument ------------------------------------
@@ -622,13 +587,6 @@ end subroutine int_preprocess_tables
 
 subroutine int_compute_corresp(interpolator,BSp,double_grid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'int_compute_corresp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -719,13 +677,6 @@ end subroutine int_compute_corresp
 
 subroutine interpolator_normalize(interpolator)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpolator_normalize'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------
@@ -786,13 +737,6 @@ end subroutine interpolator_normalize
 !! SOURCE
 
 subroutine interpolator_free(interpolator)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'interpolator_free'
-!End of the abilint section
 
  implicit none
 

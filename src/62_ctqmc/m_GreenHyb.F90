@@ -138,13 +138,6 @@ CONTAINS
 SUBROUTINE GreenHyb_init(this, samples, beta,iTech,MY_COMM)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_init'
-!End of the abilint section
-
-
 #ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
@@ -262,13 +255,6 @@ END SUBROUTINE GreenHyb_init
 SUBROUTINE GreenHyb_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_clear'
-!End of the abilint section
-
   TYPE(GreenHyb)     , INTENT(INOUT) :: this
 
   !CALL Vector_clear(this%oper_old)
@@ -320,13 +306,6 @@ END SUBROUTINE GreenHyb_clear
 SUBROUTINE GreenHyb_reset(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_reset'
-!End of the abilint section
-
   TYPE(GreenHyb)     , INTENT(INOUT) :: this
 
   CALL GreenHyb_clear(this)
@@ -371,13 +350,6 @@ END SUBROUTINE GreenHyb_reset
 SUBROUTINE GreenHyb_setOperW(this, Gomega)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_setOperW'
-!End of the abilint section
-
   TYPE(GreenHyb)          , INTENT(INOUT) :: this
   COMPLEX(KIND=8), DIMENSION(:), INTENT(IN   ) :: Gomega
 !Loval variables ------------------------------
@@ -436,13 +408,6 @@ END SUBROUTINE GreenHyb_setOperW
 SUBROUTINE GreenHyb_measHybrid(this, Mthis, ListCdagC_1, updated)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_measHybrid'
-!End of the abilint section
-
   TYPE(GreenHyb)    , INTENT(INOUT) :: this
   TYPE(MatrixHyb)   , INTENT(IN   ) :: Mthis
   TYPE(ListcdagC), INTENT(IN   ) :: ListCdagC_1
@@ -598,13 +563,6 @@ END SUBROUTINE GreenHyb_measHybrid
 SUBROUTINE GreenHyb_getHybrid(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_getHybrid'
-!End of the abilint section
-
   TYPE(GreenHyb), INTENT(INOUT) :: this
 
   IF ( this%set .EQV. .FALSE. ) &
@@ -657,13 +615,6 @@ END SUBROUTINE GreenHyb_getHybrid
 SUBROUTINE GreenHyb_setN(this,N)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_setN'
-!End of the abilint section
-
   TYPE(GreenHyb)     , INTENT(INOUT) :: this
   DOUBLE PRECISION, INTENT(IN   ) :: N
 
@@ -710,13 +661,6 @@ END SUBROUTINE GreenHyb_setN
 SUBROUTINE GreenHyb_setMuD1(this,mu,d1)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_setMuD1'
-!End of the abilint section
-
   TYPE(GreenHyb)  , INTENT(INOUT) :: this
   DOUBLE PRECISION, INTENT(IN   ) :: mu
   DOUBLE PRECISION, INTENT(IN   ) :: d1
@@ -762,13 +706,6 @@ END SUBROUTINE GreenHyb_setMuD1
 SUBROUTINE GreenHyb_setMoments(this,u1,u2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_setMoments'
-!End of the abilint section
-
   TYPE(GreenHyb)  , INTENT(INOUT) :: this
   DOUBLE PRECISION, INTENT(IN   ) :: u1
   DOUBLE PRECISION, INTENT(IN   ) :: u2
@@ -815,13 +752,6 @@ END SUBROUTINE GreenHyb_setMoments
 !! SOURCE
 
 SUBROUTINE GreenHyb_backFourier(this,dvgc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_backFourier'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -973,13 +903,6 @@ END SUBROUTINE GreenHyb_backFourier
 
 SUBROUTINE GreenHyb_forFourier(this, Gomega, omega, Wmax)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_forFourier'
-!End of the abilint section
-
 
 #ifdef HAVE_MPI1
 include 'mpif.h'
@@ -1268,13 +1191,6 @@ END SUBROUTINE GreenHyb_forFourier
 SUBROUTINE GreenHyb_print(this, ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_print'
-!End of the abilint section
-
   TYPE(GreenHyb), INTENT(IN) :: this
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -1337,13 +1253,6 @@ END SUBROUTINE GreenHyb_print
 SUBROUTINE GreenHyb_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GreenHyb_destroy'
-!End of the abilint section
-
   TYPE(GreenHyb), INTENT(INOUT) :: this
 
   this%set          = .FALSE.

@@ -106,13 +106,6 @@ program optic
  use m_numeric_tools,  only : c2r
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith
  use m_crystal_io,     only : crystal_ncwrite
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optic'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------

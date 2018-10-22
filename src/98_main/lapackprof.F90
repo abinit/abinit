@@ -55,13 +55,6 @@ program lapackprof
  use m_io_tools,      only : prompt
  use m_numeric_tools, only : arth
  use m_mpinfo,        only : init_mpi_enreg, destroy_mpi_enreg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lapackprof'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

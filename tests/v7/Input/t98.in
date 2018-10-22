@@ -98,7 +98,6 @@ diemac 3
 vdw_xc 7  # Activate DFT-D3(BJ)
 vdw_tol 1d-10 # Tolerance on the pair-wise term
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

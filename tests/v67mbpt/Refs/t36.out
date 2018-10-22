@@ -1333,9 +1333,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
  SIGMA fundamental parameters:
  MODEL GW without PLASMON POLE MODEL
  number of plane-waves for SigmaX                  531
@@ -1438,9 +1438,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   7.0500 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   4.9035 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   7.0500 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.9035 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
 
  writing QP data on file : t36o_DS5_QPS
 
@@ -2063,9 +2063,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
  SIGMA fundamental parameters:
  MODEL GW without PLASMON POLE MODEL
  number of plane-waves for SigmaX                  531
@@ -2168,9 +2168,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   7.1677 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   5.0787 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   7.1677 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   5.0787 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
 
  writing QP data on file : t36o_DS7_QPS
 
@@ -2793,9 +2793,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
  SIGMA fundamental parameters:
  MODEL GW without PLASMON POLE MODEL
  number of plane-waves for SigmaX                  531
@@ -2898,9 +2898,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   7.2573 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   5.1472 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   7.2573 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   5.1472 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
 
  writing QP data on file : t36o_DS12_QPS
 
@@ -3523,9 +3523,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   5.6219 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.2427 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
  SIGMA fundamental parameters:
  MODEL GW without PLASMON POLE MODEL
  number of plane-waves for SigmaX                  531
@@ -3628,9 +3628,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   7.1677 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   5.0613 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.3333  0.3333  0.0000
+   Minimum direct gap =   7.1677 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   5.0613 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.3333  0.3333  0.0000
 
  writing QP data on file : t36o_DS22_QPS
 

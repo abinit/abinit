@@ -138,13 +138,6 @@ CONTAINS  !===========================================================
 
 function assert_eq2(l1,l2,message,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert_eq2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -188,13 +181,6 @@ end function assert_eq2
 
 function assert_eq3(l1,l2,l3,message,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert_eq3'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -237,13 +223,6 @@ end function assert_eq3
 
 function assert_eq4(l1,l2,l3,l4,message,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert_eq4'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -282,13 +261,6 @@ end function assert_eq4
 !! SOURCE
 
 function assert_eqn(nn,message,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert_eqn'
-!End of the abilint section
 
  implicit none
 
@@ -340,13 +312,6 @@ end function assert_eqn
 
 subroutine assert1(l1,message,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -391,13 +356,6 @@ end subroutine assert1
 !! SOURCE
 
 subroutine assert2(l1,l2,message,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert2'
-!End of the abilint section
 
  implicit none
 
@@ -444,13 +402,6 @@ end subroutine assert2
 
 subroutine assert3(l1,l2,l3,message,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert3'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -496,13 +447,6 @@ end subroutine assert3
 
 subroutine assert4(l1,l2,l3,l4,message,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert4'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -543,13 +487,6 @@ end subroutine assert4
 !! SOURCE
 
 subroutine assert_v(n,message,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assert_v'
-!End of the abilint section
 
  implicit none
 
@@ -599,13 +536,6 @@ end subroutine assert_v
 !! SOURCE
 
 subroutine netcdf_check(ncerr,msg,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'netcdf_check'
-!End of the abilint section
 
  implicit none
 
@@ -678,13 +608,6 @@ end subroutine netcdf_check
 !! SOURCE
 
 subroutine sentinel(level,mode_paral,file,func,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sentinel'
-!End of the abilint section
 
  implicit none
 
@@ -772,13 +695,6 @@ end subroutine sentinel
 
 subroutine die(message,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'die'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -805,11 +721,10 @@ subroutine die(message,file,line)
  if (PRESENT(file)) f90name= basename(file)
  msg=TRIM(f90name)//':'//TRIM(lnum)//' P'//TRIM(strank)
 
- write(msg,'(a,2x,2a,2x,a)')ch10,&
-& TRIM(msg),ch10,&
-& TRIM(message)
+ write(msg,'(a,2x,2a,2x,a)')ch10,TRIM(msg),ch10,TRIM(message)
 
  call wrtout(std_out,msg,'PERS')
+ !if is_connected(ab_out)) call wrtout(ab_out,msg,'PERS')
  call abi_abort('PERS')
 
 end subroutine die
@@ -848,13 +763,6 @@ end subroutine die
 !! SOURCE
 
 subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'msg_hndl'
-!End of the abilint section
 
  implicit none
 
@@ -955,13 +863,6 @@ end subroutine msg_hndl
 subroutine set_backtrace_onerr(iflag)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_backtrace_onerr'
-!End of the abilint section
-
  integer,intent(in) :: iflag
 ! *********************************************************************
 
@@ -991,13 +892,6 @@ end subroutine set_backtrace_onerr
 !! SOURCE
 
 subroutine show_backtrace()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_backtrace'
-!End of the abilint section
 
 
 #if defined FC_GNU && defined HAVE_FC_BACKTRACE
@@ -1035,13 +929,6 @@ end subroutine show_backtrace
 !! SOURCE
 
 subroutine check_mpi_ierr(ierr,msg,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_mpi_ierr'
-!End of the abilint section
 
  implicit none
 
@@ -1102,13 +989,6 @@ end subroutine check_mpi_ierr
 
 elemental subroutine unused_int(var)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unused_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1148,13 +1028,6 @@ end subroutine unused_int
 
 elemental subroutine unused_real_dp(var)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unused_real_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1182,13 +1055,6 @@ end subroutine unused_real_dp
 !! SOURCE
 
 elemental subroutine unused_real_sp(var)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unused_real_sp'
-!End of the abilint section
 
  implicit none
 
@@ -1223,13 +1089,6 @@ end subroutine unused_real_sp
 !! SOURCE
 
 elemental subroutine unused_cplx_spc(var)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unused_cplx_spc'
-!End of the abilint section
 
  implicit none
 
@@ -1270,13 +1129,6 @@ end subroutine unused_cplx_spc
 
 elemental subroutine unused_cplx_dpc(var)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unused_cplx_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1316,13 +1168,6 @@ end subroutine unused_cplx_dpc
 
 elemental subroutine unused_logical(var)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unused_logical'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1361,13 +1206,6 @@ end subroutine unused_logical
 !! SOURCE
 
 elemental subroutine unused_ch(var)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unused_ch'
-!End of the abilint section
 
  implicit none
 
@@ -1413,13 +1251,6 @@ end subroutine unused_ch
 #if defined HAVE_ETSF_IO
 
 subroutine abietsf_msg_hndl(lstat,Error_data,mode_paral,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abietsf_msg_hndl'
-!End of the abilint section
 
  implicit none
 
@@ -1477,13 +1308,6 @@ end subroutine abietsf_msg_hndl
 
 subroutine abietsf_warn(lstat,Error_data,mode_paral,file,line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abietsf_warn'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1534,13 +1358,6 @@ end subroutine abietsf_warn
 !! SOURCE
 
 subroutine bigdft_lib_error(file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bigdft_lib_error'
-!End of the abilint section
 
  implicit none
 
@@ -1602,20 +1419,7 @@ end subroutine bigdft_lib_error
 
 subroutine xlf_set_sighandler()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xlf_set_sighandler'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xlf_set_sighandler'
-!End of the abilint section
 
 ! *************************************************************************
 
@@ -1652,13 +1456,6 @@ end subroutine xlf_set_sighandler
 !! SOURCE
 
 subroutine abinit_doctor(prefix, print_mem_report)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abinit_doctor'
-!End of the abilint section
 
  implicit none
 
@@ -1787,13 +1584,6 @@ end subroutine abinit_doctor
 
 subroutine abi_abort(mode_paral,exit_status,print_config)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_abort'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1838,13 +1628,6 @@ end subroutine abi_abort
 !!  C-interoperable version of abi_abort
 
 subroutine abi_cabort() bind(C, name='abi_cabort')
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_cabort'
-!End of the abilint section
 
   call abi_abort("COLL", exit_status=1, print_config=.False.)
 

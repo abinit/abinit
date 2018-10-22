@@ -240,13 +240,6 @@ CONTAINS  !===========================================================
 
 subroutine ddb_free(ddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -255,26 +248,14 @@ subroutine ddb_free(ddb)
 ! ************************************************************************
 
  !integer
- if (allocated(ddb%flg))  then
-   ABI_FREE(ddb%flg)
- end if
- if (allocated(ddb%typ))  then
-   ABI_FREE(ddb%typ)
- end if
+ ABI_SFREE(ddb%flg)
+ ABI_SFREE(ddb%typ)
 
  ! real
- if (allocated(ddb%amu))  then
-   ABI_FREE(ddb%amu)
- end if
- if (allocated(ddb%nrm))  then
-   ABI_FREE(ddb%nrm)
- end if
- if (allocated(ddb%qpt))  then
-   ABI_FREE(ddb%qpt)
- end if
- if (allocated(ddb%val))  then
-   ABI_FREE(ddb%val)
- end if
+ ABI_SFREE(ddb%amu)
+ ABI_SFREE(ddb%nrm)
+ ABI_SFREE(ddb%qpt)
+ ABI_SFREE(ddb%val)
 
 end subroutine ddb_free
 !!***
@@ -296,13 +277,6 @@ end subroutine ddb_free
 !! SOURCE
 
 subroutine ddb_copy(iddb, oddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_copy'
-!End of the abilint section
 
  implicit none
 
@@ -358,13 +332,6 @@ end subroutine ddb_copy
 !! SOURCE
 
 subroutine ddb_malloc(ddb,msize,nblok,natom,ntypat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_malloc'
-!End of the abilint section
 
  implicit none
 
@@ -423,13 +390,6 @@ end subroutine ddb_malloc
 !! SOURCE
 
 subroutine ddb_bcast(Ddb, master, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_bcast'
-!End of the abilint section
 
  implicit none
 
@@ -531,13 +491,6 @@ end subroutine ddb_bcast
 
 
 subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gtblk9'
-!End of the abilint section
 
  implicit none
 
@@ -798,13 +751,6 @@ end subroutine gtblk9
 
 subroutine gamma9(gamma,qphon,qphnrm,qtol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gamma9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -876,13 +822,6 @@ end subroutine gamma9
 
 subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_blok8'
-!End of the abilint section
 
  implicit none
 
@@ -1135,13 +1074,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 & mband,mpert,msize,msym,natifc,natom,nkpt,nsym,ntypat,&
 & rmet,rprim,symrec,symrel,symafm,tnons,typat,ucvol,xcart,xred,zion,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdddb9'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1379,13 +1311,6 @@ end subroutine rdddb9
 
 subroutine chkin9(atifc,natifc,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkin9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1471,13 +1396,6 @@ end subroutine chkin9
 !! SOURCE
 
 subroutine nlopt(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nlopt'
-!End of the abilint section
 
  implicit none
 
@@ -1631,13 +1549,6 @@ end subroutine nlopt
 !! SOURCE
 
 subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_from_file'
-!End of the abilint section
 
  implicit none
 
@@ -1859,13 +1770,6 @@ end subroutine ddb_from_file
 subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
 & mpert,msize,natom,nblok,nkpt,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'carttransf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1979,13 +1883,6 @@ end subroutine carttransf
 subroutine carteig2d(blkflg,blkval,carflg,d2cart,&
 & gprimd,iblok,mpert,natom,nblok,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'carteig2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2090,13 +1987,6 @@ end subroutine carteig2d
 
 subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtech9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2188,13 +2078,6 @@ end subroutine dtech9
 !! SOURCE
 
 subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtchi'
-!End of the abilint section
 
  implicit none
 
@@ -2373,13 +2256,6 @@ end subroutine dtchi
 
 integer function ddb_get_etotal(ddb,etotal) result(iblok)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_etotal'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2454,13 +2330,6 @@ end function ddb_get_etotal
 !! SOURCE
 
 integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff) result(iblok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dielt_zeff'
-!End of the abilint section
 
  implicit none
 
@@ -2551,13 +2420,6 @@ end function ddb_get_dielt_zeff
 
 integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dielt'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2646,13 +2508,6 @@ end function ddb_get_dielt
 
 integer function ddb_get_dchidet(ddb,ramansr,nlflag,dchide,dchidt) result(iblok)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_dchidet'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2730,13 +2585,6 @@ end function ddb_get_dchidet
 !! SOURCE
 
 type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_get_asrq0'
-!End of the abilint section
 
  implicit none
 
@@ -2856,13 +2704,6 @@ end function ddb_get_asrq0
 subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
                       out_eigvec,out_displ_red)   ! Optional [out]
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_diagoq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2956,13 +2797,6 @@ end subroutine ddb_diagoq
 
 subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrq0_apply'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3013,13 +2847,6 @@ end subroutine asrq0_apply
 !! SOURCE
 
 subroutine asrq0_free(asrq0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asrq0_free'
-!End of the abilint section
 
  implicit none
 
@@ -3103,13 +2930,6 @@ end subroutine asrq0_free
 
 subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_write_blok'
-!End of the abilint section
 
  implicit none
 
@@ -3288,13 +3108,6 @@ end subroutine ddb_write_blok
 
 subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_doutput'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3391,13 +3204,6 @@ end subroutine dfptnl_doutput
 
 
 subroutine ddb_to_dtset(comm,dtset,filename,psps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_to_dtset'
-!End of the abilint section
 
  implicit none
 
@@ -3611,13 +3417,6 @@ end subroutine ddb_to_dtset
 !! SOURCE
 
 subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mblktyp1'
-!End of the abilint section
 
  implicit none
 
@@ -3942,13 +3741,6 @@ end subroutine mblktyp1
 !! SOURCE
 
 subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mblktyp5'
-!End of the abilint section
 
  implicit none
 

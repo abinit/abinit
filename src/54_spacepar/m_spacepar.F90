@@ -106,13 +106,6 @@ contains
 subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
 &  divgq0,qpt) ! Optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hartre'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -343,13 +336,6 @@ end subroutine hartre
 
 subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'meanvalue_g'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -405,16 +391,18 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end do
      end if
-     if(use_ndo==1 .and. nspinor==2)then
+     if(use_ndo==1)then
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
        end do
+       if(nspinor == 2) then
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
-       do ipw=1+npw,2*npw
-         jpw=ipw-npw
-         ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-       end do
+         do ipw=1+npw,2*npw
+           jpw=ipw-npw
+           ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
+         end do
+       end if
      end if
 
 !    !$OMP PARALLEL DO REDUCTION(+:ar,ar_im)
@@ -446,20 +434,25 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          end if
        end do
      end if
-     if(use_ndo==1 .and. nspinor==2)then
+     if(use_ndo==1)then
+       if(.not.present(ar_im)) then
+         MSG_BUG("use_ndo true and ar_im not present")
+       end if
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          if(diag(ipw)<huge(0.0d0)*1.d-11)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
+       if(nspinor == 2) then
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
-       do ipw=1+npw,2*npw
-         jpw=ipw-npw
-         if(diag(jpw)<huge(0.0d0)*1.d-11)then
-           ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-         end if
-       end do
+         do ipw=1+npw,2*npw
+           jpw=ipw-npw
+           if(diag(jpw)<huge(0.0d0)*1.d-11)then
+             ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
+           end if
+         end do
+       end if
      end if
 
 
@@ -564,13 +557,6 @@ end subroutine meanvalue_g
 
 subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 &  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'laplacian'
-!End of the abilint section
 
  implicit none
 
@@ -751,13 +737,6 @@ end subroutine laplacian
 
 subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'redgr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -910,13 +889,6 @@ end subroutine redgr
 
 subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 &  paral_kgb,rhog,rprimd,vhartr1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hartrestr'
-!End of the abilint section
 
  implicit none
 
@@ -1115,13 +1087,6 @@ end subroutine hartrestr
 
 subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,paral_kgb,&
 &                 phnons,rhog,rhor,rprimd,symafm,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrhg'
-!End of the abilint section
 
  implicit none
 
@@ -1498,13 +1463,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
    function map_symrhg(j1,n1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'map_symrhg'
-!End of the abilint section
-
    integer :: map_symrhg
    integer,intent(in) :: j1,n1
    map_symrhg=mod(n1+mod(j1,n1),n1)
@@ -1573,13 +1531,6 @@ end subroutine symrhg
 !! SOURCE
 
 subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'irrzg'
-!End of the abilint section
 
  implicit none
 
@@ -1979,13 +1930,6 @@ end subroutine irrzg
 subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 &   rhor1, rhog1_eq, rhor1_eq, symrel1, tnon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_rho'
-!End of the abilint section
-
  implicit none
 
 !args
@@ -2167,13 +2111,6 @@ end subroutine rotate_rho
 
 subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,&
 & symafm,symrec,symrel,tnons,typat,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setsym'
-!End of the abilint section
 
  implicit none
 

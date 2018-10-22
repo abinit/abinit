@@ -51,7 +51,7 @@ module m_mover
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time, status
+ use m_dtfil,              only : dtfil_init_time
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
@@ -200,13 +200,6 @@ subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mover'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -244,6 +237,7 @@ character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb
+character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
@@ -264,12 +258,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  need_writeHIST=.TRUE.
  if(present(writeHIST)) need_writeHIST = writeHIST
 
- call status(0,dtfil%filstat,iexit,level,'init          ')
-
  ! enable time limit handler if not done in callers.
- if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
+ if (enable_timelimit_in(MY_NAME) == MY_NAME) then
    if (need_verbose) then
-     write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+     write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
    end if
  end if
 
@@ -488,7 +480,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      prev = now
      write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
      if(need_verbose)call wrtout(std_out, message, "COLL")
-     if (have_timelimit_in(ABI_FUNC)) then
+     if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
@@ -958,8 +950,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
- call status(0,dtfil%filstat,iexit,level,'exit          ')
-
 contains
 !!***
 
@@ -1015,13 +1005,6 @@ contains
 !! SOURCE
 
 subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,tolmxf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fconv'
-!End of the abilint section
 
  implicit none
 
@@ -1145,13 +1128,6 @@ end subroutine fconv
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'erlxconv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1251,13 +1227,6 @@ end subroutine mover
 !! SOURCE
 
 subroutine prtxfase(ab_mover,hist,itime,iout,pos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtxfase'
-!End of the abilint section
 
 implicit none
 
@@ -1525,13 +1494,6 @@ implicit none
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gettag'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -1592,13 +1554,6 @@ implicit none
 
 
 subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtnatom'
-!End of the abilint section
 
 implicit none
 
@@ -1696,13 +1651,6 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
  use m_io_tools,   only : open_file
  use m_geometry,   only : xcart2xred, xred2xcart, metric
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrt_moldyn_netcdf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

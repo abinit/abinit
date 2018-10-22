@@ -13,12 +13,6 @@
 subroutine xmpi_land_log0d(xval, comm)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_land_log0d'
-!End of the abilint section
-
  implicit none
 
 
@@ -63,12 +57,6 @@ end subroutine xmpi_land_log0d
 
 subroutine xmpi_lor_log1d(xval,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_lor_log1d'
-!End of the abilint section
 
  implicit none
 
@@ -121,13 +109,6 @@ end subroutine xmpi_lor_log1d
 subroutine xmpi_lor_log2d(xval,comm)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_lor_log2d'
-!End of the abilint section
-
  implicit none
 
 
@@ -178,13 +159,6 @@ end subroutine xmpi_lor_log2d
 !!
 !! SOURCE
 subroutine xmpi_lor_log3d(xval,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_lor_log3d'
-!End of the abilint section
 
  implicit none
 

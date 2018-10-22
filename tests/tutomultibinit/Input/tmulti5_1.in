@@ -1,0 +1,36 @@
+##############################################################################
+#Test for multibinit, just read xml and run spin dynamics
+##############################################################################
+prt_model = 0
+ncell =   16 16 16
+
+#-------------------------------------------------------------
+#Spin dynamics
+#------------------------------------------------------------
+spin_dynamics=1    
+spin_init_state = 2
+spin_temperature = 600
+spin_ntime =10000
+spin_nctime=100
+spin_dt=1e-16 s
+spin_qpoint = 0.0 0.0 0.0
+
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
+#%% system_xml = tmulti5_1.xml
+#%% exclude_hosts = nag@abiref
+#%% coeff_xml = no
+#%% [files]
+#%% files_to_test = 
+#%%   tmulti5_1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. He
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read xml  and run spin dynamics
+#%%<END TEST_INFO>

@@ -94,13 +94,6 @@ contains
 
 subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,thmflag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonic_thermo'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------

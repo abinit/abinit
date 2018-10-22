@@ -139,13 +139,6 @@ CONTAINS
 
  subroutine pawcprj_alloc(cprj,ncpgr,nlmn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_alloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -226,13 +219,6 @@ end subroutine pawcprj_alloc
 
  subroutine pawcprj_free(cprj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -284,13 +270,6 @@ end subroutine pawcprj_free
 !! SOURCE
 
  subroutine pawcprj_set_zero(cprj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_set_zero'
-!End of the abilint section
 
  implicit none
 
@@ -353,13 +332,6 @@ end subroutine pawcprj_set_zero
 
  subroutine pawcprj_copy(cprj_in,cprj_out,&
 &                    icpgr) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_copy'
-!End of the abilint section
 
  implicit none
 
@@ -468,13 +440,6 @@ end subroutine pawcprj_copy
 !! SOURCE
 
  subroutine pawcprj_axpby(alpha,beta,cprjx,cprjy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_axpby'
-!End of the abilint section
 
  implicit none
 
@@ -599,13 +564,6 @@ end subroutine pawcprj_axpby
 !! SOURCE
 
  subroutine pawcprj_zaxpby(alpha,beta,cprjx,cprjy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_zaxpby'
-!End of the abilint section
 
  implicit none
 
@@ -780,13 +738,6 @@ end subroutine pawcprj_zaxpby
 &                       isym,itim,kpt,lmax,lmnmax,mband,natom,nband,nspinor,nsym,ntypat,&
 &                       typat,zarot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_symkn'
-!End of the abilint section
-
  implicit none
 
 !Arguments---------------------------
@@ -917,13 +868,6 @@ end subroutine pawcprj_zaxpby
 
  subroutine pawcprj_conjg(cprj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_conjg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -994,13 +938,6 @@ end subroutine pawcprj_conjg
 !! SOURCE
 
  subroutine pawcprj_lincom(alpha,cprj_in,cprj_out,nn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_lincom'
-!End of the abilint section
 
  implicit none
 
@@ -1103,13 +1040,6 @@ end subroutine pawcprj_lincom
 
  subroutine pawcprj_output(cprj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_output'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1148,19 +1078,19 @@ end subroutine pawcprj_output
 !! pawcprj_get
 !!
 !! FUNCTION
-!! Read the cprj for a given k-point from memory or from a temporary file
+!! Read the cprj_k for a given k-point from memory in cprj or from a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=input cprj (used if mkmem/=0)
 !!  dimcp=first dimension of cprj_k,cprj arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
 !!  [icpgr]= (optional argument) if present, only component icpgr of
 !!           input cprj gradient is copied into output cprj
 !!           Not used if cprj(:,:)%ncpgr<icpgr (mkmem>0)
 !!                    or ncpgr(optional)<icpgr (mkmem=0)
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during reading, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted=>unsorted)
@@ -1201,13 +1131,6 @@ end subroutine pawcprj_output
  subroutine pawcprj_get(atind,cprj_k,cprj,dimcp,iband1,ibg,ikpt,iorder,isppol,mband,&
 &                    mkmem,natom,nband,nband_k,nspinor,nsppol,uncp,&
 &                    icpgr,ncpgr,mpicomm,proc_distrb) ! optionals arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_get'
-!End of the abilint section
 
  implicit none
 
@@ -1388,15 +1311,15 @@ end subroutine pawcprj_get
 !! pawcprj_put
 !!
 !! FUNCTION
-!! Write the cprj for a given set of (n,k) into memory or into a temporary file
+!! Write cprj_k for a given set of (n,k) into memory in cprj, or into a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= input cprj datastructure
 !!  dimcp=first dimension of cprj_k,cprjnk arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during writing, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted->unsorted)
@@ -1435,13 +1358,6 @@ end subroutine pawcprj_get
  subroutine pawcprj_put(atind,cprj_k,cprj,dimcp,iband1,ibg,ikpt,iorder,isppol,mband,&
 &           mkmem,natom,nband,nband_k,nlmn,nspinor,nsppol,uncp,&
 &           mpicomm,mpi_comm_band,proc_distrb,to_be_gathered) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_put'
-!End of the abilint section
 
  implicit none
 
@@ -1645,13 +1561,6 @@ end subroutine pawcprj_put
 
  subroutine pawcprj_reorder(cprj,atm_indx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_reorder'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1753,13 +1662,6 @@ end subroutine pawcprj_reorder
 !! SOURCE
 
 subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,receiver,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_exch'
-!End of the abilint section
 
  implicit none
 
@@ -1893,13 +1795,6 @@ end subroutine pawcprj_mpi_exch
 
 subroutine pawcprj_mpi_send(natom,n2dim,nlmn,ncpgr,cprj_out,receiver,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_send'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2014,13 +1909,6 @@ end subroutine pawcprj_mpi_send
 
 subroutine pawcprj_mpi_recv(natom,n2dim,nlmn,ncpgr,cprj_in,sender,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_recv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2126,13 +2014,6 @@ end subroutine pawcprj_mpi_recv
 
 subroutine pawcprj_mpi_sum(cprj,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_sum'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2235,13 +2116,6 @@ end subroutine pawcprj_mpi_sum
 
 subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,nlmn,ncpgr,nproc,spaceComm,ierr,&
 &                                rank_ordered)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_allgather'
-!End of the abilint section
 
  implicit none
 
@@ -2374,13 +2248,6 @@ end subroutine pawcprj_mpi_allgather
 
 subroutine pawcprj_bcast(Cprj,natom,n2dim,nlmn,ncpgr,master,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2501,13 +2368,6 @@ end subroutine pawcprj_bcast
 !! SOURCE
 
  subroutine pawcprj_transpose(cprjin,cprjout,cprj_bandpp,natom,nband,nspinor,spaceComm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_transpose'
-!End of the abilint section
 
  implicit none
 
@@ -2760,13 +2620,6 @@ end subroutine pawcprj_bcast
  subroutine pawcprj_gather_spin(cprj,cprj_gat,natom,n2size,nspinor,nspinortot,&
 &                            spaceComm_spin,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_gather_spin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2889,13 +2742,6 @@ end subroutine pawcprj_bcast
 
 subroutine pawcprj_getdim(dimcprj,natom,nattyp,ntypat,typat,Pawtab,sort_mode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_getdim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2963,13 +2809,6 @@ end subroutine pawcprj_getdim
 !! SOURCE
 
 function paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_overlap'
-!End of the abilint section
 
  implicit none
 

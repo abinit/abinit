@@ -261,13 +261,6 @@ CONTAINS
 
 subroutine nullify_wvl_data(wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nullify_wvl_data'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -343,13 +336,6 @@ subroutine nullify_wvl_data(wvl)
 !!  Nullify comms
 
 pure function comms_cubic_null() result(comms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'comms_cubic_null'
-!End of the abilint section
 
   implicit none
   type(comms_cubic) :: comms

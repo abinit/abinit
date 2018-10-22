@@ -227,13 +227,6 @@ CONTAINS  !=====================================================================
 
 subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_get_qbz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -353,13 +346,6 @@ end subroutine ppm_get_qbz
 
 subroutine ppm_nullify(PPm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -395,13 +381,6 @@ end subroutine ppm_nullify
 !! SOURCE
 
 subroutine ppm_free(PPm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_free'
-!End of the abilint section
 
  implicit none
 
@@ -512,13 +491,6 @@ end subroutine ppm_free
 
 subroutine ppm_mallocq(PPm,iq_ibz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_mallocq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -562,13 +534,6 @@ end subroutine ppm_mallocq
 !! SOURCE
 
 subroutine ppm_table_free(PPm,iq_ibz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_table_free'
-!End of the abilint section
 
  implicit none
 
@@ -621,13 +586,6 @@ end subroutine ppm_table_free
 !! SOURCE
 
 subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_init'
-!End of the abilint section
 
  implicit none
 
@@ -779,13 +737,6 @@ end subroutine ppm_init
 subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngfftf,rhor_tot,&
 & iqiA) !Optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_ppmodel'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -908,13 +859,6 @@ end subroutine setup_ppmodel
 !! SOURCE
 
 subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,only_ig2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getem1_from_ppm'
-!End of the abilint section
 
  implicit none
 
@@ -1061,13 +1005,6 @@ end subroutine getem1_from_ppm
 
 subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getem1_from_ppm_one_ggp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1184,13 +1121,6 @@ end subroutine getem1_from_ppm_one_ggp
 !! SOURCE
 
 subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_ppm_eigenvalues'
-!End of the abilint section
 
  implicit none
 
@@ -1338,13 +1268,6 @@ end subroutine get_ppm_eigenvalues
 
 subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm1par'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1477,13 +1400,6 @@ end subroutine cppm1par
 !! SOURCE
 
 subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatwsq,omegatw,invalid_freq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm2par'
-!End of the abilint section
 
  implicit none
 
@@ -1701,13 +1617,6 @@ end subroutine cppm2par
 !! SOURCE
 
 subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw,eigtot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm3par'
-!End of the abilint section
 
  implicit none
 
@@ -1975,13 +1884,6 @@ end subroutine cppm3par
 
 subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cppm4par'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2244,13 +2146,6 @@ end subroutine cppm4par
 
 subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cqratio'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2360,13 +2255,6 @@ end subroutine cqratio
 
 subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 & omegame0i,zcut,theta_mu_minus_e0i,eig,npwx,ket,sigcme)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sig_ppm'
-!End of the abilint section
 
  implicit none
 
@@ -2553,13 +2441,6 @@ end subroutine calc_sig_ppm
 
 subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_ggw,nfftf,ngfftf,rhor_tot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_symmetrizer'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2718,13 +2599,6 @@ end subroutine ppm_symmetrizer
 
 subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,gvec,ngfftf,rhor_tot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'new_setup_ppmodel'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2853,13 +2727,6 @@ end subroutine new_setup_ppmodel
 !! SOURCE
 
 subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu_minus_e0i,npwx,ket,sigcme)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ppm_times_ket'
-!End of the abilint section
 
  implicit none
 

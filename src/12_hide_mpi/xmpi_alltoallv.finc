@@ -36,12 +36,6 @@
 
 subroutine xmpi_alltoallv_dp2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoallv_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -94,12 +88,6 @@ end subroutine xmpi_alltoallv_dp2d
 subroutine xmpi_alltoallv_int2d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoallv_int2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -144,12 +132,6 @@ end subroutine xmpi_alltoallv_int2d
 !! SOURCE
 
 subroutine xmpi_alltoallv_dp1d(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoallv_dp1d'
-!End of the abilint section
 
  implicit none
 
@@ -204,12 +186,6 @@ end subroutine xmpi_alltoallv_dp1d
 !! SOURCE
 
 subroutine xmpi_alltoallv_dp1d2(xval,sendcnts,sdispls,recvbuf,recvcnts,rdispls,comm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoallv_dp1d2'
-!End of the abilint section
 
  implicit none
 

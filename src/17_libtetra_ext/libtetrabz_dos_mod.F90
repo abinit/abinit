@@ -41,13 +41,6 @@ SUBROUTINE libtetrabz_dos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_dos'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
@@ -102,13 +95,6 @@ SUBROUTINE libtetrabz_intdos(ltetra,bvec,nb,nge,eig,ngw,wght,ne,e0,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_intdos'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
@@ -164,13 +150,6 @@ SUBROUTINE libtetrabz_dos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,ne,e
   USE libtetrabz_common, ONLY : libtetrabz_sort, &
   &                             libtetrabz_triangle_a1, libtetrabz_triangle_b1, &
   &                             libtetrabz_triangle_b2, libtetrabz_triangle_c1
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_dos_main'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &
@@ -259,13 +238,6 @@ SUBROUTINE libtetrabz_intdos_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,n
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_intdos_main'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &

@@ -25,7 +25,10 @@ class Entry(namedtuple("Entry", "vname, ptr, action, size, file, func, line, tot
 
     @classmethod
     def from_line(cls, line, sidx):
-        args = line.split()
+        #args = line.split()
+        #args.append(sidx)
+        vname = line[:59].strip().replace(" ", "")
+        args = [vname] + line[59:].split()
         args.append(sidx)
         return cls(*args)
 
@@ -222,7 +225,11 @@ class AbimemParser(object):
         with open(self.path, "rt") as fh:
             for lineno, line in enumerate(fh):
                 if lineno == 0: continue # skip header line of abimem files
-                yield Entry.from_line(line, lineno)
+                try:
+                    yield Entry.from_line(line, lineno)
+                except Exception as exc:
+                    print("Error while parsing lineno %d, line:\n%s" % (lineno, line))
+                    raise exc
 
     @catchall
     def find_peaks(self, maxlen=20):

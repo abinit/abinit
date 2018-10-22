@@ -120,13 +120,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 &                nsppol,occ,resid,response,unwff2,&
 &                wfs,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -739,13 +732,6 @@ end subroutine outwf
 
 subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspinor,mcg,&
                       mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -1378,13 +1364,6 @@ end subroutine cg_ncwrite
 
 subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ncwrite_eigen1_occ'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1473,13 +1452,6 @@ end subroutine ncwrite_eigen1_occ
 !! SOURCE
 
 subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,count_pwblock,gblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kg2seqblocks'
-!End of the abilint section
 
  implicit none
 
@@ -1576,13 +1548,6 @@ end subroutine kg2seqblocks
 !! SOURCE
 
 subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,bcount,my_cgblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg2seqblocks'
-!End of the abilint section
 
  implicit none
 

@@ -205,13 +205,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  use m_pawrhoij, only : pawrhoij_type
  use m_prcref,   only : prcref_PMA
  use m_wvl_rho,  only : wvl_prcref
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newvtr'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------

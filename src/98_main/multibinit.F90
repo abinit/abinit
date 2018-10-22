@@ -22,7 +22,7 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      ab7_invars_set_flags,abi_io_redirect,abihist_bcast,abihist_free
+!!      abi_io_redirect,abihist_bcast,abihist_free
 !!      abimem_init,abinit_doctor,compute_anharmonics
 !!      effective_potential_file_getdimsystem,effective_potential_file_gettype
 !!      effective_potential_file_maphisttoref,effective_potential_file_read
@@ -57,7 +57,6 @@ program multibinit
  use m_effective_potential_file
  use m_spin_model
  use m_abihist
- use m_ab7_invars
 
  use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit, open_file
@@ -70,13 +69,6 @@ program multibinit
  !use m_generate_training_set, only : generate_training_set
  use m_compute_anharmonics, only : compute_anharmonics
  use m_init10,              only : init10
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multibinit'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -93,7 +85,6 @@ program multibinit
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(17),tmpfilename,name
- character(len=fnlen) :: filstat
  character(len=500) :: message
  type(multibinit_dtset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
@@ -146,10 +137,6 @@ program multibinit
 
 !Initialise the code : write heading, and read names of files.
  call init10(filnam,comm)
-
-! Call the parser from the parser module.
- filstat = trim("_STATUS")
- call ab7_invars_set_flags(.true., .true., status_file = filstat, timab_tsec = tsec)
 
 !******************************************************************
 
@@ -226,10 +213,10 @@ program multibinit
 
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     'reading spin terms.'
-     call spin_model_t_initialize(spin_model, filnam(3), inp )
+     call spin_model_t_initialize(spin_model, filnam, inp )
    end if
  else
-   !  Read the model (from DDB or XML)  
+   !  Read the model (from DDB or XML)
    call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 
  !Read the coefficient from fit
@@ -260,7 +247,7 @@ program multibinit
      end if
    end if
  end if
- 
+
 !****************************************************************************************
 
 ! Compute the third order derivative with finite differences

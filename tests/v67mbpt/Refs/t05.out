@@ -299,9 +299,9 @@ P           mkmem           6
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -436,9 +436,9 @@ P           mkmem           6
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   6.0325 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.1154 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   6.0325 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.1154 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -508,9 +508,9 @@ P           mkmem           6
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -645,9 +645,9 @@ P           mkmem           6
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   6.0226 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.1650 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   6.0226 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.1650 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -734,9 +734,9 @@ P           mkmem           6
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   4.8905 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.7682 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -871,9 +871,9 @@ P           mkmem           6
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   6.1415 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   2.1432 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   6.1415 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   2.1432 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t05o_DS3_QPS
 

@@ -27,13 +27,12 @@
 module m_invars1
 
  use defs_basis
- !use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_atomdata
 
- use defs_abitypes,  only : dataset_type
+ use defs_abitypes,  only : dataset_type, ab_dimensions
  use m_fstrings, only : inupper
  use m_geometry, only : mkrdim
  use m_parser,   only : intagm, chkint_ge
@@ -98,13 +97,6 @@ contains
 
 subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 & msym,mxnatom,mxnimage,mxntypat,ndtset,ndtset_alloc,npsp,papiopt,timopt,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars0'
-!End of the abilint section
 
  implicit none
 
@@ -196,7 +188,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
        write(message, '(3a,i0,a,i0,a,a)' )&
 &       'The components of jdtset must be between 1 and 9999.',ch10,&
 &       'However, the input value of the component ',idtset,' of jdtset is ',dtsets(idtset)%jdtset,ch10,&
-&       'Action : correct jdtset in your input file.'
+&       'Action: correct jdtset in your input file.'
        MSG_ERROR(message)
      end if
    end do
@@ -291,7 +283,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      write(message, '(5a)' )&
 &     'supercell_latt must have positive parameters and diagonal part',ch10,&
 &     'This is not allowed.  ',ch10,&
-&     'Action : modify supercell_latt in the input file.'
+&     'Action: modify supercell_latt in the input file.'
      MSG_ERROR(message)
    end if
 !  Compute the multiplicity of the supercell
@@ -529,7 +521,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%rprimd_orig,(3,3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%so_psp,(npsp))
    ABI_ALLOCATE(dtsets(idtset)%spinat,(3,mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,210))
+   ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_ALLOCATE(dtsets(idtset)%typat,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%upawu,(mxntypat,mxnimage))
 !   if (dtsets(idtset)%plowan_compute>0) then
@@ -555,7 +547,6 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 end subroutine invars0
 !!***
 
-
 !!****f* ABINIT/invars1m
 !! NAME
 !! invars1m
@@ -572,8 +563,7 @@ end subroutine invars0
 !!  mxnatom=maximal value of input natom for all the datasets
 !!  mxnimage=maximal value of input nimage for all the datasets
 !!  ndtset= number of datasets to be read; if 0, no multi-dataset mode
-!!  ndtset_alloc=number of datasets, corrected for allocation of at least
-!!               one data set.
+!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !!  npsp= number of pseudopotential files
 !!  string*(*)=string of characters containing all input variables and data
 !!  zionpsp(npsp)= valence charge over all psps
@@ -581,64 +571,30 @@ end subroutine invars0
 !! OUTPUT
 !!  dmatpuflag=flag controlling the use of an initial density matrix in PAW+U (max. value over datasets)
 !!  mband_upper_(0:ndtset_alloc)=list of mband_upper values
-!!  mxga_n_rules=maximal value of input ga_n_rules for all the datasets
-!!  mxgw_nqlwl=maximal value of input gw_nqlwl for all the datasets
-!!  mxlpawu=maximal value of input lpawu for all the datasets
-!!  mxmband_upper=maximal value of input nband for all the datasets
-!!  mxnatpawu=maximal value of number of atoms on which +U is applied for all the datasets
-!!  mxnatsph=maximal value of input natsph for all the datasets
-!!  mxnatsph_extra=maximal value of input natsph_extra for all the datasets
-!!  mxnatvshift=maximal value of input natvshift for all the datasets
-!!  mxnconeq=maximal value of input nconeq for all the datasets
-!!  mxnkptgw=maximal value of input nkptgw for all the datasets
-!!  mxnkpthf=maximal value of input nkpthf for all the datasets
-!!  mxnkpt=maximal value of input nkpt for all the datasets
-!!  mxnnos=maximal value of input nnos for all the datasets
-!!  mxnqptdm=maximal value of input nqptdm for all the datasets
-!!  mxnspinor=maximal value of input nspinor for all the datasets
-!!  mxnsppol=maximal value of input nsppol for all the datasets
-!!  mxnsym=maximum number of symmetries
-!!  mxntypat=maximum number of types of atoms
-!!  mxnzchempot=maximal value of input nzchempot for all the datasets
 !!
 !! SIDE EFFECTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
-!!   some of which are initialized here (see invars1.f for more details on the
-!!   initialized records)
+!!   some of which are initialized here (see invars1.f for more details on the initialized records)
+!!  mx<ab_dimensions>=datatype storing the maximal dimensions. Partly initialized in input.
 !!
 !! PARENTS
-!!      m_ab7_invars_f90
 !!
 !! CHILDREN
 !!      indefo1,invars1
 !!
 !! SOURCE
 
-subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
-& msym,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatom,&
-& mxnatpawu,mxnatsph,mxnatsph_extra,mxnatvshift,mxnconeq,&
-& mxnimage,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnkpthf,mxnnos,mxnqptdm,mxnspinor, &
-& mxnsppol,mxnsym,mxntypat,mxnimfrqs,mxnfreqsp,mxnzchempot,&
-& mxn_projection_frequencies,ndtset,ndtset_alloc,string,npsp,zionpsp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars1m'
-!End of the abilint section
+subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
+& msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout,lenstr,msym,mxnatom,mxnimage,ndtset,ndtset_alloc,npsp
- integer,intent(out) :: dmatpuflag,mxga_n_rules,mxgw_nqlwl,mxlpawu,mxmband_upper,mxnatpawu
- integer,intent(out) :: mxnatsph, mxnatsph_extra
- integer,intent(out) :: mxnatvshift,mxnconeq,mxn_efmas_dirs,mxnkpt,mxnkptgw,mxnkpthf,mxnnos
- integer,intent(out) :: mxnqptdm,mxnspinor,mxnsppol,mxnsym,mxntypat
- integer,intent(out) :: mxnimfrqs,mxnfreqsp,mxnzchempot,mxn_projection_frequencies
+ integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp
+ integer,intent(out) :: dmatpuflag
  character(len=*),intent(inout) :: string
+ type(ab_dimensions),intent(inout) :: mx
 !arrays
  integer,intent(out) :: mband_upper_(0:ndtset_alloc)
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
@@ -707,103 +663,104 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
    tnons_(:,:,idtset)=tnons(:,:)
  end do
 
- mxmband_upper =maxval(mband_upper_ (1:ndtset_alloc))
+ mx%mband_upper = maxval(mband_upper_ (1:ndtset_alloc))
 
- dmatpuflag=0;mxnatpawu=0;mxlpawu=0
- mxnatsph=dtsets(1)%natsph
- mxnatsph_extra=dtsets(1)%natsph_extra
- mxnatvshift=dtsets(1)%natvshift
- mxnconeq=dtsets(1)%nconeq
- mxn_efmas_dirs=0
- mxga_n_rules = dtsets(1)%ga_n_rules
- mxgw_nqlwl = dtsets(1)%gw_nqlwl
- mxnimfrqs = 0
- mxnfreqsp = 0
- mxn_projection_frequencies=0
- mxnkpt  =dtsets(1)%nkpt
- mxnkptgw=dtsets(1)%nkptgw
- mxnkpthf=dtsets(1)%nkpthf
- mxnnos  =dtsets(1)%nnos
- mxnqptdm=dtsets(1)%nqptdm
- mxnspinor=dtsets(1)%nspinor
- mxnsppol=dtsets(1)%nsppol
- mxntypat=dtsets(1)%ntypat
- mxnzchempot=dtsets(1)%nzchempot
+ dmatpuflag = 0; mx%natpawu = 0; mx%lpawu = 0
+ mx%natsph = dtsets(1)%natsph
+ mx%natsph_extra = dtsets(1)%natsph_extra
+ mx%natvshift = dtsets(1)%natvshift
+ mx%nconeq = dtsets(1)%nconeq
+ mx%n_efmas_dirs=0
+ mx%ga_n_rules = dtsets(1)%ga_n_rules
+ mx%gw_nqlwl = dtsets(1)%gw_nqlwl
+ mx%nimfrqs = 0
+ mx%nfreqsp = 0
+ mx%n_projection_frequencies = 0
+ mx%nkpt  = dtsets(1)%nkpt
+ mx%nkptgw = dtsets(1)%nkptgw
+ mx%nkpthf = dtsets(1)%nkpthf
+ mx%nnos  = dtsets(1)%nnos
+ mx%nqptdm = dtsets(1)%nqptdm
+ mx%nspinor = dtsets(1)%nspinor
+ mx%nsppol = dtsets(1)%nsppol
+ mx%ntypat = dtsets(1)%ntypat
+ mx%nzchempot = dtsets(1)%nzchempot
+ mx%nberry = 20   ! This is presently a fixed value. Should be changed.
 
 !Get MAX dimension over datasets
  do ii=1,ndtset_alloc
-   mxnatsph=max(dtsets(ii)%natsph,mxnatsph)
-   mxnatsph_extra=max(dtsets(ii)%natsph_extra,mxnatsph_extra)
-   mxnconeq=max(dtsets(ii)%nconeq,mxnconeq)
-   mxn_efmas_dirs=max(dtsets(ii)%efmas_n_dirs,mxn_efmas_dirs)
-   mxga_n_rules = max(dtsets(ii)%ga_n_rules,mxga_n_rules)
-   mxgw_nqlwl = max(dtsets(ii)%gw_nqlwl,mxgw_nqlwl)
-   mxnimfrqs = max(dtsets(ii)%cd_customnimfrqs,mxnimfrqs)
-   mxnfreqsp = max(dtsets(ii)%gw_customnfreqsp,mxnfreqsp)
-   mxn_projection_frequencies = max(dtsets(ii)%gwls_n_proj_freq,mxn_projection_frequencies)
-   mxnkpt  =max(dtsets(ii)%nkpt,mxnkpt)
-   mxnkptgw=max(dtsets(ii)%nkptgw,mxnkptgw)
-   mxnkpthf=max(dtsets(ii)%nkpthf,mxnkpthf)
-   mxnnos  =max(dtsets(ii)%nnos,mxnnos)
-   mxnqptdm=max(dtsets(ii)%nqptdm,mxnqptdm)
-   mxnspinor=max(dtsets(ii)%nspinor,mxnspinor)
-   mxnsppol=max(dtsets(ii)%nsppol,mxnsppol)
-   mxntypat=max(dtsets(ii)%ntypat,mxntypat)
-   mxnzchempot=max(dtsets(ii)%nzchempot,mxnzchempot)
+   mx%natsph = max(dtsets(ii)%natsph, mx%natsph)
+   mx%natsph_extra=max(dtsets(ii)%natsph_extra, mx%natsph_extra)
+   mx%nconeq=max(dtsets(ii)%nconeq, mx%nconeq)
+   mx%n_efmas_dirs = max(dtsets(ii)%efmas_n_dirs, mx%n_efmas_dirs)
+   mx%ga_n_rules = max(dtsets(ii)%ga_n_rules,mx%ga_n_rules)
+   mx%gw_nqlwl = max(dtsets(ii)%gw_nqlwl,mx%gw_nqlwl)
+   mx%nimfrqs = max(dtsets(ii)%cd_customnimfrqs, mx%nimfrqs)
+   mx%nfreqsp = max(dtsets(ii)%gw_customnfreqsp, mx%nfreqsp)
+   mx%n_projection_frequencies = max(dtsets(ii)%gwls_n_proj_freq, mx%n_projection_frequencies)
+   mx%nkpt  = max(dtsets(ii)%nkpt, mx%nkpt)
+   mx%nkptgw = max(dtsets(ii)%nkptgw, mx%nkptgw)
+   mx%nkpthf = max(dtsets(ii)%nkpthf, mx%nkpthf)
+   mx%nnos  = max(dtsets(ii)%nnos, mx%nnos)
+   mx%nqptdm = max(dtsets(ii)%nqptdm, mx%nqptdm)
+   mx%nspinor = max(dtsets(ii)%nspinor, mx%nspinor)
+   mx%nsppol = max(dtsets(ii)%nsppol, mx%nsppol)
+   mx%ntypat = max(dtsets(ii)%ntypat, mx%ntypat)
+   mx%nzchempot = max(dtsets(ii)%nzchempot, mx%nzchempot)
    if (dtsets(ii)%usepawu>0) then
      if (dtsets(ii)%usedmatpu/=0) dmatpuflag=1
      lpawu=maxval(dtsets(ii)%lpawu(:))
-     mxlpawu=max(lpawu,mxlpawu)
+     mx%lpawu=max(lpawu,mx%lpawu)
      !dtsets(ii)%natpawu=count(dtsets(ii)%lpawu(dtsets(ii)%typat((/(i1,i1=1,dtsets(ii)%natom)/)))/=-1)
      ! Old fashon way that should do fine
      dtsets(ii)%natpawu = 0
      do iatom=1, dtsets(ii)%natom
        if (dtsets(ii)%lpawu(dtsets(ii)%typat(iatom)) /= -1 ) dtsets(ii)%natpawu = dtsets(ii)%natpawu + 1
      end do
-     mxnatpawu=max(dtsets(ii)%natpawu,mxnatpawu)
+     mx%natpawu = max(dtsets(ii)%natpawu, mx%natpawu)
      if (dtsets(ii)%macro_uj/=0) dtsets(ii)%natvshift=lpawu*2+1
    end if
-   mxnatvshift=max(dtsets(ii)%natvshift,mxnatvshift)
+   mx%natvshift = max(dtsets(ii)%natvshift, mx%natvshift)
  end do
 
-!mxnsym=maxval(dtsets(1:ndtset_alloc)%nsym) ! This might not work properly with HP compiler
- mxnsym=dtsets(1)%nsym
+!mx%nsym=maxval(dtsets(1:ndtset_alloc)%nsym) ! This might not work properly with HP compiler
+ mx%nsym=dtsets(1)%nsym
  do idtset=1,ndtset_alloc
-   mxnsym=max(dtsets(idtset)%nsym,mxnsym)
+   mx%nsym = max(dtsets(idtset)%nsym, mx%nsym)
  end do
 
  do idtset=0,ndtset_alloc
-   ABI_ALLOCATE(dtsets(idtset)%atvshift,(mxnatvshift,mxnsppol,mxnatom))
-   ABI_ALLOCATE(dtsets(idtset)%bs_loband,(mxnsppol))
-   ABI_ALLOCATE(dtsets(idtset)%bdgw,(2,mxnkptgw,mxnsppol))
-   ABI_ALLOCATE(dtsets(idtset)%cd_imfrqs,(mxnimfrqs))
-   ABI_ALLOCATE(dtsets(idtset)%chempot,(3,mxnzchempot,mxntypat))
-   nsp=max(mxnsppol,mxnspinor);nat=mxnatpawu*dmatpuflag
-   ABI_ALLOCATE(dtsets(idtset)%dmatpawu,(2*mxlpawu+1,2*mxlpawu+1,nsp,nat,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%efmas_bands,(2,mxnkpt))
-   ABI_ALLOCATE(dtsets(idtset)%efmas_dirs,(3,mxn_efmas_dirs))
-   ABI_ALLOCATE(dtsets(idtset)%gw_freqsp,(mxnfreqsp))
-   ABI_ALLOCATE(dtsets(idtset)%gwls_list_proj_freq,(mxn_projection_frequencies))
-   ABI_ALLOCATE(dtsets(idtset)%gw_qlwl,(3,mxgw_nqlwl))
-   ABI_ALLOCATE(dtsets(idtset)%kpt,(3,mxnkpt))
-   ABI_ALLOCATE(dtsets(idtset)%kptgw,(3,mxnkptgw))
-   ABI_ALLOCATE(dtsets(idtset)%kptns,(3,mxnkpt))
-   ABI_ALLOCATE(dtsets(idtset)%kptns_hf,(3,mxnkpthf))
-   ABI_ALLOCATE(dtsets(idtset)%iatsph,(mxnatsph))
-   ABI_ALLOCATE(dtsets(idtset)%istwfk,(mxnkpt))
-   ABI_ALLOCATE(dtsets(idtset)%nband,(mxnkpt*mxnsppol))
-   ABI_ALLOCATE(dtsets(idtset)%occ_orig,(mxmband_upper*mxnkpt*mxnsppol,mxnimage))
-   ABI_ALLOCATE(dtsets(idtset)%qmass,(mxnnos))
-   ABI_ALLOCATE(dtsets(idtset)%qptdm,(3,mxnqptdm))
-   ABI_ALLOCATE(dtsets(idtset)%symafm,(mxnsym))
-   ABI_ALLOCATE(dtsets(idtset)%symrel,(3,3,mxnsym))
-   ABI_ALLOCATE(dtsets(idtset)%tnons,(3,mxnsym))
-   ABI_ALLOCATE(dtsets(idtset)%wtatcon,(3,mxnatom,mxnconeq))
-   ABI_ALLOCATE(dtsets(idtset)%wtk,(mxnkpt))
-   ABI_ALLOCATE(dtsets(idtset)%xredsph_extra,(3,mxnatsph_extra))
-   dtsets(idtset)%symrel(:,:,:)=symrel_(:,:,1:mxnsym,idtset)
-   dtsets(idtset)%symafm(:)    =symafm_(1:mxnsym,idtset)
-   dtsets(idtset)%tnons (:,:)  =tnons_ (:,1:mxnsym,idtset)
+   ABI_ALLOCATE(dtsets(idtset)%atvshift, (mx%natvshift, mx%nsppol, mx%natom))
+   ABI_ALLOCATE(dtsets(idtset)%bs_loband,(mx%nsppol))
+   ABI_ALLOCATE(dtsets(idtset)%bdgw,(2, mx%nkptgw, mx%nsppol))
+   ABI_ALLOCATE(dtsets(idtset)%cd_imfrqs,(mx%nimfrqs))
+   ABI_ALLOCATE(dtsets(idtset)%chempot,(3, mx%nzchempot, mx%ntypat))
+   nsp = max(mx%nsppol, mx%nspinor); nat = mx%natpawu*dmatpuflag
+   ABI_ALLOCATE(dtsets(idtset)%dmatpawu,(2*mx%lpawu+1,2*mx%lpawu+1,nsp,nat, mx%nimage))
+   ABI_ALLOCATE(dtsets(idtset)%efmas_bands,(2, mx%nkpt))
+   ABI_ALLOCATE(dtsets(idtset)%efmas_dirs,(3, mx%n_efmas_dirs))
+   ABI_ALLOCATE(dtsets(idtset)%gw_freqsp, (mx%nfreqsp))
+   ABI_ALLOCATE(dtsets(idtset)%gwls_list_proj_freq, (mx%n_projection_frequencies))
+   ABI_ALLOCATE(dtsets(idtset)%gw_qlwl,(3,mx%gw_nqlwl))
+   ABI_ALLOCATE(dtsets(idtset)%kpt,(3, mx%nkpt))
+   ABI_ALLOCATE(dtsets(idtset)%kptgw,(3, mx%nkptgw))
+   ABI_ALLOCATE(dtsets(idtset)%kptns,(3, mx%nkpt))
+   ABI_ALLOCATE(dtsets(idtset)%kptns_hf,(3, mx%nkpthf))
+   ABI_ALLOCATE(dtsets(idtset)%iatsph,(mx%natsph))
+   ABI_ALLOCATE(dtsets(idtset)%istwfk, (mx%nkpt))
+   ABI_ALLOCATE(dtsets(idtset)%nband, (mx%nkpt*mx%nsppol))
+   ABI_ALLOCATE(dtsets(idtset)%occ_orig,(mx%mband_upper*mx%nkpt*mx%nsppol, mx%nimage))
+   ABI_ALLOCATE(dtsets(idtset)%qmass, (mx%nnos))
+   ABI_ALLOCATE(dtsets(idtset)%qptdm,(3, mx%nqptdm))
+   ABI_ALLOCATE(dtsets(idtset)%symafm, (mx%nsym))
+   ABI_ALLOCATE(dtsets(idtset)%symrel,(3,3,mx%nsym))
+   ABI_ALLOCATE(dtsets(idtset)%tnons,(3,mx%nsym))
+   ABI_ALLOCATE(dtsets(idtset)%wtatcon,(3,mx%natom, mx%nconeq))
+   ABI_ALLOCATE(dtsets(idtset)%wtk, (mx%nkpt))
+   ABI_ALLOCATE(dtsets(idtset)%xredsph_extra,(3, mx%natsph_extra))
+   dtsets(idtset)%symrel(:,:,:)=symrel_(:,:,1:mx%nsym,idtset)
+   dtsets(idtset)%symafm(:)    =symafm_(1:mx%nsym,idtset)
+   dtsets(idtset)%tnons (:,:)  =tnons_ (:,1:mx%nsym,idtset)
  end do
 
  ABI_DEALLOCATE(symafm_)
@@ -839,13 +796,6 @@ end subroutine invars1m
 !! SOURCE
 
 subroutine indefo1(dtset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indefo1'
-!End of the abilint section
 
  implicit none
 
@@ -973,7 +923,7 @@ subroutine indefo1(dtset)
  dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0
- dtset%typat(:)=0
+ dtset%typat(:)=0  ! This init is important because dimension of typat is mx%natom (and not natom).
 !U
  dtset%usedmatpu=0
  dtset%usedmft=0
@@ -1065,13 +1015,6 @@ end subroutine indefo1
 subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 & string,symafm,symrel,tnons,zionpsp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1110,6 +1053,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 
 !************************************************************************
+
+ ! This counter is incremented when we find a non-critical error.
+ ! The code outputs a warning and stops at end.
+ leave = 0
 
 !Some initialisations
  ierr=0
@@ -1223,24 +1170,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        call inupper(symbol)
        call inupper(string2)
 
-!      DEBUG
 !      write(std_out,'(a)')' invars1 : before test, trim(adjustl(symbol)),trim(adjustl(string2))'
 !      write(std_out,'(5a)' )'"',trim(adjustl(symbol)),'","',trim(adjustl(string2)),'"'
-!      ENDDEBUG
 
        if(trim(adjustl(symbol))==trim(adjustl(string2)))then
          found=1
          index_upper=index_blank+1
 !        Cannot deal properly with more that 9 psps
          if(ipsp>=10)then
-           message = 'Need to use a pseudopotential with number larger than 9. Not allowed yet.'
-           MSG_ERROR(message)
+           MSG_ERROR('Need to use a pseudopotential with number larger than 9. Not allowed yet.')
          end if
 
-!        DEBUG
 !        write(std_out,*)' invars1 : found ipsp=',ipsp
-!        ENDDEBUG
-
          write(string1,'(i1)')ipsp
          string(index_lower:index_lower+1)=blank//string1
          index_lower=index_lower+2
@@ -1268,7 +1209,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !the symmetries (symrel,symafm, and tnons)
 !and the list of fixed atoms (iatfix,iatfixx,iatfixy,iatfixz).
 !Arrays have already been
-!dimensioned thanks to the knowledge of msym and mxnatom
+!dimensioned thanks to the knowledge of msym and mx%natom
 
 !ji: We need to read the electric field before calling ingeo
 !****** Temporary ******
@@ -1309,12 +1250,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'SpinPolarized',tread_alt,'LOG')
  if(tread_alt==1)then
    if(tread==1)then
-     write(message, '(5a)' )&
-&     'nsppol and SpinPolarized cannot be specified simultaneously',ch10,&
-&     'for the same dataset.',ch10,&
-&     'Action: check the input file.'
-     call wrtout(std_out,  message,'COLL')
-     leave=1
+     message = 'nsppol and SpinPolarized cannot be specified simultaneously for the same dataset.'
+     MSG_ERROR_NOSTOP(message, leave)
    else
 !    Note that SpinPolarized is a logical input variable
      nsppol=1
@@ -1418,8 +1355,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(dtset%nimage> 2 .and. ii==intimage)cycle ! Will do the intermediate reference image at the last reading
    if(dtset%nimage>=2 .and. ii==dtset%nimage+1)iimage=intimage
 
-   write(message,'(a,i0)')' invars1 : treat image number: ',iimage
-   call wrtout(std_out,message,'COLL')
+   if (dtset%nimage /= 1) then
+     write(message,'(a,i0)')' invars1: treat image number: ',iimage
+     call wrtout(std_out,message,'COLL')
+   end if
 
 !  Need to reset nsym to default value for each image
    dtset%nsym=0
@@ -1477,11 +1416,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
 & dtset%xred_orig(1:3,1:natom,intimage))
 
-!DEBUG
 !write(std_out,*)' invars1: before inkpts, dtset%mixalch_orig(1:npspalch,1:ntypalch,:)=',&
 !dtset%mixalch_orig(1:npspalch,1:ntypalch,1:dtset%nimage)
-!stop
-!ENDDEBUG
 
 !---------------------------------------------------------------------------
 
@@ -1520,8 +1456,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%nkptgw<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input nkptgw must be >= 0, but was ',dtset%nkptgw,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1532,8 +1467,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gw_nqlwl<0) then
    write(message, '(a,i12,a,a,a,a)' )&
 &   'Input gw_nqlwl must be > 0, but was ',dtset%gw_nqlwl,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1610,8 +1544,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%nqptdm<-1) then
    write(message, '(a,i12,a,a,a,a)' )&
 &   'Input nqptdm must be >= 0, but was ',dtset%nqptdm,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1624,8 +1557,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%cd_customnimfrqs<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input cd_customnimfrqs must be >= 0, but was ',dtset%cd_customnimfrqs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1635,8 +1567,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gw_customnfreqsp<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gw_customnfreqsp must be >= 0, but was ',dtset%gw_customnfreqsp,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1646,8 +1577,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%gwls_n_proj_freq<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input gwls_n_proj_freq must be >= 0, but was ',dtset%gwls_n_proj_freq,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1657,8 +1587,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (ABS(dtset%efmas_calc_dirs)>3) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input efmas_calc_dirs must be between -3 and 3, but was ',dtset%efmas_calc_dirs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -1668,8 +1597,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (dtset%efmas_n_dirs<0) then
    write(message, '(a,i0,a,a,a,a)' )&
 &   'Input efmas_n_dirs must be >= 0, but was ',dtset%efmas_n_dirs,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 !---------------------------------------------------------------------------
@@ -1681,62 +1609,35 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%ga_n_rules=intarr(1)
 
 !Perform the first checks
-
- leave=0
-
 !Check that nkpt is greater than 0
  if (nkpt<=0) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  After inkpts, nkpt must be > 0, but was ',nkpt,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,  message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'After inkpts, nkpt must be > 0, but was ',nkpt
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nsppol is 1 or 2
  if (nsppol/=1 .and. nsppol/=2) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  Input nsppol must be 1 or 2, but was ',nsppol,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'Input nsppol must be 1 or 2, but was ',nsppol
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nspinor is 1 or 2
  if (nspinor/=1 .and. nspinor/=2) then
-   write(message, '(a,a,a,a,i12,a,a,a,a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  Input nspinor must be 1 or 2, but was ',nspinor,ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   write(message, '(a,i0)' )'Input nspinor must be 1 or 2, but was ',nspinor
+   MSG_ERROR_NOSTOP(message, leave)
  end if
 
 !Check that nspinor and nsppol are not 2 together
  if (nsppol==2 .and. nspinor==2) then
-   write(message, '(8a)' ) ch10,&
-&   ' invars1: ERROR -',ch10,&
-&   '  nspinor and nsappol cannot be 2 together !',ch10,&
-&   '  This is not allowed.',ch10,&
-&   '  Action: check the input file.'
-   call wrtout(std_out,message,'COLL')
-   leave=1
+   MSG_ERROR_NOSTOP('nspinor and nsappol cannot be 2 together!', leave)
  end if
 
 !Here, leave if an error has been detected earlier
- if(leave==1) then
-   message = ' Other errors might be present in the input file. '
-   MSG_ERROR(message)
+ if (leave /= 0) then
+   MSG_ERROR('Errors are present in the input file. See above messages')
  end if
 
-
 !Now, take care of mband_upper
-
  mband_upper=1
  occopt=1
  fband=0.5_dp
@@ -1815,10 +1716,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
      nband(:)=mband_upper
 
-!    DEBUG
 !    write(std_out,*)' invars1 : zion_max,natom,fband,mband_upper '
 !    write(std_out,*)zion_max,natom,fband,mband_upper
-!    ENDDEBUG
 
    end if
 
@@ -1835,8 +1734,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ABI_DEALLOCATE(reaalloc)
  else
    write(message, '(a,i0,3a)' )&
-&   'occopt=',occopt,' is not an allowed value.',ch10,&
-&   'Action: correct your input file.'
+&   'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1844,8 +1742,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if (mband_upper<=0) then
    write(message, '(a,i0,4a)' )&
 &   'Maximal nband must be > 0, but was ',mband_upper,ch10,&
-&   'This is not allowed.',ch10,&
-&   'Action: check the input file.'
+&   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
  end if
 
@@ -2010,13 +1907,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 
  use defs_abitypes,  only : dataset_type
  use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indefo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2164,6 +2054,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_nwli=0
    dtsets(idtset)%dmft_nwlo=0
    dtsets(idtset)%dmft_mxsf=0.3_dp
+   dtsets(idtset)%dmft_occnd_imag=1
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=0
    dtsets(idtset)%dmft_solv=5
@@ -2171,6 +2062,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_t2g=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
+   dtsets(idtset)%dmft_charge_prec=tol6
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
    dtsets(idtset)%dmftcheck=0

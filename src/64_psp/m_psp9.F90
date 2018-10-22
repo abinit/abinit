@@ -121,13 +121,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp9in'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -709,13 +702,6 @@ end subroutine psp9in
 #if defined HAVE_PSML
 
 subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp9cc'
-!End of the abilint section
 
  implicit none
 
