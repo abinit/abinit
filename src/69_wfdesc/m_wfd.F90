@@ -389,8 +389,8 @@ MODULE m_wfd
    ! The MPI_type structured datatype gather different information about the MPI parallelisation :
    ! number of processors, the index of my processor, the different groups of processors, etc ...
 
- !contains
-   !procedure :: get_ur => wfd_get_ur
+ contains
+   procedure :: get_ur => wfd_get_ur
    !procedure :: wfd_get_ur
  end type wfd_t
 
@@ -1547,7 +1547,8 @@ subroutine wfd_get_many_ur(Wfd,bands,ik_ibz,spin,ur)
  do dat=1,SIZE(bands)
    band = bands(dat)
    ptr = 1 + (dat-1)*Wfd%nfft*Wfd%nspinor
-   call wfd_get_ur(Wfd,band,ik_ibz,spin,ur(ptr))
+   !call wfd_get_ur(Wfd,band,ik_ibz,spin,ur(ptr))
+   call wfd%get_ur(band,ik_ibz,spin,ur(ptr))
  end do
 
 end subroutine wfd_get_many_ur
@@ -1658,7 +1659,7 @@ subroutine wfd_get_ur(Wfd,band,ik_ibz,spin,ur)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
- type(wfd_t),target,intent(inout) :: Wfd
+ class(wfd_t),target,intent(inout) :: Wfd
 !arrays
  complex(gwpc),intent(out) :: ur(Wfd%nfft*Wfd%nspinor)
 
@@ -5084,7 +5085,8 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  ! Reconstruct ur in the BZ from the corresponding wavefunction in IBZ.
  ABI_MALLOC(ur, (Wfd%nfft*Wfd%nspinor))
 
- call wfd_get_ur(Wfd,band,ik_ibz,spin,ur)
+ !call wfd_get_ur(Wfd,band,ik_ibz,spin,ur)
+ call wfd%get_ur(band,ik_ibz,spin,ur)
  if (PRESENT(ur_kibz)) then
    call xcopy(Wfd%nfft*Wfd%nspinor,ur,1,ur_kibz,1)
  end if
