@@ -729,21 +729,17 @@ contains
          cwavef(:,1:npw_k)=cg(:,1+(iband-1)*npw_k+(isppol-1)* (npw_k*nband_k(1)) : iband*npw_k+(isppol-1)*(npw_k*nband_k(1)))
 #endif
 
-!        DEBUG
 !        write(std_out,*)' iband : ',iband, ' isppol', isppol, '  -> index ', &
 !        &            istate,index_state(iband+(isppol-1)*nband_k(1))
-!        ENDDEBUG
 
          tim_fourwf=14
 !        This call should be made by master, and then the results be sent to the other procs
 
          call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &         istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&         0,dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&         0,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
-!        DEBUG
 !        write(std_out,'(a,i5)')' After Fourier proc ',me_loc
-!        ENDDEBUG
 
 !        Fix the phase, and checks that the wavefunction is real
 !        (should be merged with routine fxphas)

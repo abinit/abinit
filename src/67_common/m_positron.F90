@@ -2508,7 +2508,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
          call fourwf(1,denpot_dum,cwaveg_pos,fofgout_dum,cwaveaug_pos,&
 &         gbound_pos,gbound_pos,istwf_k_pos,kg_k_pos,kg_k_pos,&
 &         dtset%mgfft,mpi_enreg,1,ngfft,npw_k_pos,npw_k_pos,&
-&         n4,n5,n6,option,mpi_enreg%paral_kgb,tim_fourwf,weight_pos,weight_pos,&
+&         n4,n5,n6,option,tim_fourwf,weight_pos,weight_pos,&
 &         use_gpu_cuda=dtset%use_gpu_cuda)
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
@@ -2736,7 +2736,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                        call fourwf(1,denpot_dum,cwaveg,fofgout_dum,cwaveaug,&
 &                       gbound,gbound,istwf_k,kg_k,kg_k,&
 &                       dtset%mgfft,mpi_enreg,1,ngfft,npw_k,npw_k,&
-&                       n4,n5,n6,option,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&                       n4,n5,n6,option,tim_fourwf,weight,weight,&
 &                       use_gpu_cuda=dtset%use_gpu_cuda)
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&

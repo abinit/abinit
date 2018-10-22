@@ -491,7 +491,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        ABI_MALLOC(fofgout,(2,npwout*ndat))
 
        call fourwf(cplex,denpot,fofgin(:,1:npw_k),fofgout,fofr(:,:,:,1:n6),gbound,gbound,istwf_k,kg_k,kg_k,&
-&       mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,paral_kgb,tim_fourwf0,weight1,weight1,&
+&       mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1,&
 &       use_gpu_cuda=Dtset%use_gpu_cuda)
 
 !      Here I do not know if fourwf works in the case of spinors,
@@ -506,7 +506,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 !        NOTE: fofr_down can NOT be replaced by fofr(:,:,:,n6+1:2*n6), or else
 !        the data in fofr(:,:,:,1:n6) will be the same with fofr(:,:,:,n6+1:2*n6)
          call fourwf(cplex,denpot,fofgin_down,fofgout,fofr_down,gbound,gbound,istwf_k,kg_k,kg_k,&
-&         mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,paral_kgb,tim_fourwf0,weight1,weight1)
+&         mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1)
          ABI_FREE(fofgin_down)
        end if
 

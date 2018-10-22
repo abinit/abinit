@@ -260,10 +260,8 @@ program fftprof
      end do
    end do
 
-!1  continue
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
    call wrtout(std_out,msg,"COLL")
-
    goto 100 ! Jump to xmpi_end
  end if
 

@@ -1052,7 +1052,7 @@ contains
              tim_fourwf=0
              call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
 &             gbound,gbound,dtset%istwfk(ikpt),kg_k,kg_k,mgfft,&
-&             mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,dtset%paral_kgb,&
+&             mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 !            do jj3=1,n3,spacing
 !            do jj2=1,n2,spacing
@@ -1482,7 +1482,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
  integer::isppol
  character(len=fnlen) :: test_win1,test_win2,test_win3
  logical :: lfile
- character(len=2000) :: message   
+ character(len=2000) :: message
  character(len=10)::postfix
 ! *************************************************************************
 

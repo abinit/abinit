@@ -1312,7 +1312,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  ABI_ALLOCATE(fofr,(2,n4,n5,n6))
  call fourwf(cplex,denpot,cg,fofgout,fofr,gbound,gbound, &
 & istwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft_here,npw_k,&
-& npw_k,n4,n5,n6,1,paral_kgb,tim_fourwf,weight,weight)
+& npw_k,n4,n5,n6,1,tim_fourwf,weight,weight)
  ABI_DEALLOCATE(fofgout)
  ABI_DEALLOCATE(fofr)
  ABI_DEALLOCATE(gbound)
