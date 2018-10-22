@@ -2,7 +2,7 @@
 # Makefile.src
 # Generic make file to be used when
 #  building LIBPAW library
-#                                M.T. June 13
+#                                M.T. june 13
 # ===========================================
 
 include ../../makefile.in
