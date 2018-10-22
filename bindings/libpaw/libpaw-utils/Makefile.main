@@ -85,3 +85,6 @@ libpaw-objs: libpaw-mkbuilddir
 	$(FC) $(FCFLAGS) -o $(@F) -c $<
 %.o: %.c
 	$(CC) $(CFLAGS) -o $(@F) -c $<
+
+#Force sequential compilation (this should be corrected)
+.NOTPARALLEL:
