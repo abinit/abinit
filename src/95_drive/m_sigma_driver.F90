@@ -200,13 +200,6 @@ contains
 
 subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,converged)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2290,7 +2283,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call wrtout(ab_out,msg,'COLL')
      end if
 
-     ! Report the QP gaps (Fundamental and Optical)
+     ! Report the QP gaps (Fundamental and direct)
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
 
      ! Band structure interpolation from QP energies computed on the k-mesh.
@@ -2508,13 +2501,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
  !use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_sigma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2920,7 +2906,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  if (dtset%nkptgw==0) then
    ! Use qp_range to select the interesting k-points and the corresponing bands.
    !
-   !    0 --> Compute the QP corrections only for the fundamental and the optical gap.
+   !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
    ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
    !           bands above and below the Fermi level.
    ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
@@ -2928,7 +2914,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
    if (gap_err /=0 .and. dtset%gw_qprange==0) then
-     msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
+     msg = "Problem while computing the fundamental and direct gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      MSG_WARNING(msg)
      dtset%gw_qprange = 1
    end if
@@ -2978,9 +2964,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    else
      ! gw_qprange is not specified in the input.
-     ! Include the optical and the fundamental KS gap.
+     ! Include the direct and the fundamental KS gap.
      ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
-     ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
+     ! we have compute the union of the k-points where the fundamental and the direct gaps are located.
      !
      ! Find the list of `interesting` kpoints.
      ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
@@ -3486,13 +3472,6 @@ end subroutine setup_sigma
 
 subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_tables'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3678,13 +3657,6 @@ end subroutine sigma_tables
 
 subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_ur,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_bksmask'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3839,13 +3811,6 @@ end subroutine sigma_bksmask
 subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &  Pawang,Pawrad,Pawtab,Pawfgrtab,prev_Pawrhoij,&
 &  QP_pawrhoij,QP_paw_ij,QP_paw_an,QP_energies,qp_nhat,nhatgrdim,qp_nhatgr,qp_compch_sph,qp_compch_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_qpscgw'
-!End of the abilint section
 
  implicit none
 

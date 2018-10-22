@@ -121,13 +121,6 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 & kpt3,mkmem,mkmem_max,mvwtk,&
 & nkpt2,nkpt3,nneigh,nshiftk,rmet,rprimd,shiftk,wtk2, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getshell'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -153,7 +146,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  integer :: neigh(0:6,nkpt2),symafm_dummy(1),vacuum(3)
  integer,allocatable :: symrel1(:,:,:)
  real(dp) :: dist(6),dk(3),dk_(3),mat(6,6),rvec(6),sgval(6)
- real(dp) :: shiftk_(3,210),work(30)
+ real(dp) :: shiftk_(3,MAX_NSHIFTK),work(30)
  real(dp),allocatable :: tnons1(:,:),wtk3(:)
 
 !************************************************************************

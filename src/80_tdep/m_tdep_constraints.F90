@@ -26,13 +26,6 @@ contains
 !====================================================================================================
 subroutine tdep_calc_orthonorm(dim1,dim2,nindep,vectin,vectout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_orthonorm'
-!End of the abilint section
-
   implicit none
 
   integer, intent(in) :: dim1,dim2
@@ -80,13 +73,6 @@ subroutine tdep_calc_constraints(CoeffMoore,distance,InVar,nshell1at,nshell2at,n
 &                                proj1st,Shell1at,&!optional
 &                                proj2nd,Shell2at,&!optional 
 &                                proj3rd,Shell3at) !optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_constraints'
-!End of the abilint section
 
   implicit none
 
@@ -677,13 +663,6 @@ end subroutine tdep_calc_constraints
 !====================================================================================================
  subroutine tdep_check_constraints(distance,InVar,Phij_NN,Pij_N,nshell3at,&
 &                 ftot3,Psij_ref,Shell3at,Sym,ucart) !optional 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_check_constraints'
-!End of the abilint section
 
   implicit none 
 

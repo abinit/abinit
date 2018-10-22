@@ -327,13 +327,6 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
 &                      has_exexch_pot,has_pawu_occ,nucdipmom,& ! Optional
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -577,13 +570,6 @@ end subroutine paw_ij_init
 
 subroutine paw_ij_free(Paw_ij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -694,13 +680,6 @@ end subroutine paw_ij_free
 
 subroutine paw_ij_nullify(Paw_ij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -774,13 +753,6 @@ end subroutine paw_ij_nullify
 
 subroutine paw_ij_copy(paw_ij_in,paw_ij_cpy, &
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1017,13 +989,6 @@ end subroutine paw_ij_copy
 
 subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert, &
 &                       mpi_atmtab,comm_atom,natom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_print'
-!End of the abilint section
 
  implicit none
 
@@ -1328,13 +1293,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 !Real and imaginary parts of phase.
    subroutine get_dij_parts(my_cplex_dij,my_cplex_rf,my_dij,always_img)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dij_parts'
-!End of the abilint section
-
      integer,intent(in) :: my_cplex_dij,my_cplex_rf
      logical,intent(in),optional :: always_img
      real(dp),intent(in),target :: my_dij(:,:)
@@ -1402,13 +1360,6 @@ end subroutine paw_ij_print
 !! SOURCE
 
 subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_gather'
-!End of the abilint section
 
  implicit none
 
@@ -2080,13 +2031,6 @@ subroutine paw_ij_redistribute(paw_ij,mpi_comm_in,mpi_comm_out,&
 &                 natom,mpi_atmtab_in,mpi_atmtab_out,paw_ij_out,&
 &                 SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_redistribute'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2417,13 +2361,6 @@ end subroutine paw_ij_redistribute
 
 subroutine paw_ij_reset_flags(Paw_ij,all,dijhartree,self_consistent)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_reset_flags'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2520,13 +2457,6 @@ end subroutine paw_ij_reset_flags
 !! SOURCE
 
 subroutine paw_ij_isendreceive_getbuffer(paw_ij,npaw_ij_send,atm_indx_recv,buf_int,buf_dp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_isendreceive_getbuffer'
-!End of the abilint section
 
 implicit none
 
@@ -2776,13 +2706,6 @@ end subroutine paw_ij_isendreceive_getbuffer
 
 subroutine paw_ij_isendreceive_fillbuffer(paw_ij,atmtab_send,atm_indx_send,npaw_ij_send,&
 &                                         buf_int,buf_int_size,buf_dp,buf_dp_size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_isendreceive_fillbuffer'
-!End of the abilint section
 
 implicit none
 

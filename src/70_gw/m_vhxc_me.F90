@@ -135,13 +135,6 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_kg,          only : mkkin
  use m_rhotoxc,     only : rhotoxc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_vhxc_me'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

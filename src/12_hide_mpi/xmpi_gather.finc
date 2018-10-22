@@ -43,12 +43,6 @@
 
 subroutine xmpi_gather_int(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_gather_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -98,13 +92,6 @@ end subroutine xmpi_gather_int
 subroutine xmpi_gather_int2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_gather_int2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -153,13 +140,6 @@ end subroutine xmpi_gather_int2d
 !! SOURCE
 subroutine xmpi_gather_dp(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_gather_dp'
-!End of the abilint section
 
  implicit none
 
@@ -211,12 +191,6 @@ end subroutine xmpi_gather_dp
 !! SOURCE
 subroutine xmpi_gather_dp2d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_gather_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -266,13 +240,6 @@ end subroutine xmpi_gather_dp2d
 !! SOURCE
 subroutine xmpi_gather_dp3d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_gather_dp3d'
-!End of the abilint section
 
  implicit none
 
@@ -324,12 +291,6 @@ end subroutine xmpi_gather_dp3d
 !! SOURCE
 subroutine xmpi_gather_dp4d(xval,sendcount,recvbuf,recvcount,root,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_gather_dp4d'
-!End of the abilint section
 
  implicit none
 

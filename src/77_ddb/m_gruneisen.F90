@@ -130,13 +130,6 @@ contains  !===========================================================
 
 type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -267,13 +260,6 @@ end function gruns_new
 
 subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_fourq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -368,13 +354,6 @@ end subroutine gruns_fourq
 !! SOURCE
 
 subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_qpath'
-!End of the abilint section
 
  implicit none
 
@@ -508,13 +487,6 @@ end subroutine gruns_qpath
 !! SOURCE
 
 subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_qmesh'
-!End of the abilint section
 
  implicit none
 
@@ -739,13 +711,6 @@ end subroutine gruns_qmesh
 
 subroutine gruns_free(gruns)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -809,13 +774,6 @@ end subroutine gruns_free
 !! SOURCE
 
 subroutine gruns_anaddb(inp, prefix, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_anaddb'
-!End of the abilint section
 
  implicit none
 

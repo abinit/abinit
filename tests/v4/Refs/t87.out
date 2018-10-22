@@ -921,9 +921,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  Hartree-Fock
  number of plane-waves for SigmaX                   89
@@ -1112,9 +1112,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   8.1788 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   5.8742 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   8.1788 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   5.8742 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t87o_DS3_QPS
 
@@ -1224,9 +1224,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  Hartree-Fock
  number of plane-waves for SigmaX                   89
@@ -1415,9 +1415,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   8.5794 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   6.2390 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   8.5794 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   6.2390 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t87o_DS4_QPS
 
@@ -1527,9 +1527,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  Hartree-Fock
  number of plane-waves for SigmaX                   89
@@ -1718,9 +1718,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   8.7138 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   6.3548 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   8.7138 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   6.3548 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t87o_DS5_QPS
 

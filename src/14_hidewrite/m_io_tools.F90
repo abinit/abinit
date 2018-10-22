@@ -43,12 +43,12 @@ MODULE m_io_tools
  public :: pick_aname         ! Returns the name of a non-existent file to be used for temporary storage.
  public :: isncfile           ! .TRUE. if we have a NETCDF file.
  public :: iomode_from_fname  ! Automatic selection of the IO mode based on the file extension.
- public :: iomode2str         ! Convert iomode to string 
+ public :: iomode2str         ! Convert iomode to string
  public :: mvrecord           ! Moves forward or backward in a Fortran binary file by nn records.
  public :: open_file          ! Helper function to open a file in sequential mode with improved error handling.
  public :: close_unit         ! Helper function to close a Fortran unit with improved error handling.
- public :: write_lines        ! split a string in lines and output the text to the specified unit 
- public :: lock_and_write     ! Write a string to a file with locking mechanism. 
+ public :: write_lines        ! split a string in lines and output the text to the specified unit
+ public :: lock_and_write     ! Write a string to a file with locking mechanism.
  public :: num_opened_units   ! Return the number of opened units.
  public :: show_units         ! Print info on the logical units.
 
@@ -106,7 +106,7 @@ CONTAINS  !===========================================================
 !!  A free unit is reported if no argument is specified.
 !!  If the file name is supplied, the function reports the unit number
 !!  associated to the file
-!!  Note that GET_UNIT assumes that units 0, 5, 6 (stderr, stdin, std_out) 
+!!  Note that GET_UNIT assumes that units 0, 5, 6 (stderr, stdin, std_out)
 !!  are special, and will never return those values.
 !!
 !! TODO
@@ -124,20 +124,7 @@ CONTAINS  !===========================================================
 
 integer function get_free_unit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_free_unit'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_free_unit'
-!End of the abilint section
 
 !Local variables-------------------------------
  integer :: iunt
@@ -176,20 +163,7 @@ end function get_free_unit
 
 integer function get_unit_from_fname(fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_unit_from_fname'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_unit_from_fname'
-!End of the abilint section
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
@@ -223,13 +197,6 @@ end function get_unit_from_fname
 !! SOURCE
 
 logical function file_exists(fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'file_exists'
-!End of the abilint section
 
  character(len=*),intent(in) :: fname
 
@@ -270,13 +237,6 @@ end function file_exists
 !! SOURCE
 
 subroutine delete_file(fname,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'delete_file'
-!End of the abilint section
 
  integer,intent(out) :: ierr
  character(len=*),intent(in) :: fname
@@ -334,13 +294,6 @@ end subroutine delete_file
 
 logical function is_connected(unit,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_connected'
-!End of the abilint section
-
  integer,intent(in) :: unit
  character(len=*),intent(in) :: fname
 
@@ -374,13 +327,6 @@ end function is_connected
 
 logical function is_open_unit(unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_open_unit'
-!End of the abilint section
-
  integer,intent(in) :: unit
 ! *********************************************************************
 
@@ -407,13 +353,6 @@ end function is_open_unit
 !! SOURCE
 
 logical function is_open_fname(fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'is_open_fname'
-!End of the abilint section
 
  character(len=*),intent(in) :: fname
 ! *********************************************************************
@@ -443,13 +382,6 @@ end function is_open_fname
 !! SOURCE
 
 subroutine prompt_int0D(msg,ivalue)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_int0D'
-!End of the abilint section
 
  character(len=*),intent(in) :: msg
  integer,intent(out) :: ivalue
@@ -494,13 +426,6 @@ end subroutine prompt_int0D
 !! SOURCE
 
 subroutine prompt_rdp0D(msg,rvalue)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_rdp0D'
-!End of the abilint section
 
  character(len=*),intent(in) :: msg
  real(dp),intent(out) :: rvalue
@@ -547,13 +472,6 @@ end subroutine prompt_rdp0D
 !! SOURCE
 
 subroutine prompt_string(msg,string,strip_comment)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_string'
-!End of the abilint section
 
  character(len=*),intent(in) :: msg
  logical,optional,intent(in) :: strip_comment
@@ -609,13 +527,6 @@ end subroutine prompt_string
 subroutine prompt_int1D(msg,ivect)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_int1D'
-!End of the abilint section
-
  character(len=*),intent(in) :: msg
  integer,intent(out) :: ivect(:)
 
@@ -660,13 +571,6 @@ end subroutine prompt_int1D
 !! SOURCE
 
 subroutine prompt_int2D(msg,iarr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_int2D'
-!End of the abilint section
 
  character(len=*),intent(in) :: msg
  integer,intent(out) :: iarr(:,:)
@@ -714,13 +618,6 @@ end subroutine prompt_int2D
 subroutine prompt_rdp1D(msg,rvect)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_rdp1D'
-!End of the abilint section
-
  character(len=*),intent(in) :: msg
  real(dp),intent(out) :: rvect(:)
  character(len=4) :: PS
@@ -764,13 +661,6 @@ end subroutine prompt_rdp1D
 !! SOURCE
 
 subroutine prompt_rdp2D(msg,rarr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_rdp2D'
-!End of the abilint section
 
  character(len=*),intent(in) :: msg
  real(dp),intent(out) :: rarr(:,:)
@@ -817,13 +707,6 @@ end subroutine prompt_rdp2D
 
 subroutine prompt_exit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prompt_exit'
-!End of the abilint section
-
  integer,parameter :: NASK=5
  integer :: ios,iask
  character(len=IO_MAX_LEN) :: ans
@@ -864,13 +747,6 @@ end subroutine prompt_exit
 !! SOURCE
 
 integer function read_string(string, unit) result(ios)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_string'
-!End of the abilint section
 
  character(len=*),intent(out):: string
  integer,optional,intent(in) :: unit
@@ -923,13 +799,6 @@ end function read_string
 
 subroutine flush_unit(unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'flush_unit'
-!End of the abilint section
-
  integer,intent(in) :: unit
 
 !Local variables-------------------------------
@@ -969,13 +838,6 @@ end subroutine flush_unit
 !! SOURCE
 
 function pick_aname() result(aname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pick_aname'
-!End of the abilint section
 
  character(len=fnlen) :: aname
 
@@ -1024,13 +886,6 @@ end function pick_aname
 
 pure logical function isncfile(fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isncfile'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1078,13 +933,6 @@ end function isncfile
 
 pure function iomode_from_fname(fname) result(iomode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iomode_from_fname'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1098,7 +946,7 @@ pure function iomode_from_fname(fname) result(iomode)
    iomode = IO_MODE_ETSF
  else
 #ifdef HAVE_MPI_IO
-   iomode = IO_MODE_MPI  
+   iomode = IO_MODE_MPI
 #else
    iomode = IO_MODE_FORTRAN
 #endif
@@ -1115,20 +963,13 @@ end function iomode_from_fname
 !! iomode2str
 !!
 !! FUNCTION
-!!  Convert iomode to string 
+!!  Convert iomode to string
 !!
 !! PARENTS
 !!
 !! SOURCE
 
-pure function iomode2str(iomode) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iomode2str'
-!End of the abilint section
+pure function iomode2str(iomode)
 
  implicit none
 
@@ -1185,13 +1026,6 @@ end function iomode2str
 
 subroutine mvrecord(funt,nrec,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mvrecord'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1234,7 +1068,7 @@ end subroutine mvrecord
 !!    * Function statement that returns the value of iostat
 !!    * Emulate iomsg (F2003)
 !!    * Accepts either unit (user-specified unit number, input) or
-!!      newunit (free unit not associated to any file, output). 
+!!      newunit (free unit not associated to any file, output).
 !!      The two options are mutually exclusive.
 !!
 !!  See Fortran intrinsic for a more detailed description of the variables
@@ -1248,13 +1082,6 @@ end subroutine mvrecord
 !! SOURCE
 
 function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) result(iostat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'open_file'
-!End of the abilint section
 
  implicit none
 
@@ -1298,7 +1125,7 @@ function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) resul
    end if
    if (present(unit)) iostat = -666  ! wrong call
 
- else 
+ else
    iomsg = "Either unit or newunit must be specified"
    iostat = -1
  end if
@@ -1318,7 +1145,7 @@ end function open_file
 !! close_unit
 !!
 !! FUNCTION
-!!  close a Fortran unit 
+!!  close a Fortran unit
 !!  The main differences wrt the intrinsic close:
 !!
 !!    * Function statement that returns the value of iostat
@@ -1335,13 +1162,6 @@ end function open_file
 !! SOURCE
 
 function close_unit(unit,iomsg,status) result(iostat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'close_unit'
-!End of the abilint section
 
  implicit none
 
@@ -1389,8 +1209,8 @@ end function close_unit
 !!  write_lines
 !!
 !! FUNCTION
-!!  This routine receives a string, split the message in lines according to the 
-!!  ch10 character and output the text to the specified unit 
+!!  This routine receives a string, split the message in lines according to the
+!!  ch10 character and output the text to the specified unit
 !!
 !! INPUTS
 !!  unit=unit number for writing
@@ -1407,13 +1227,6 @@ end function close_unit
 !! SOURCE
 
 subroutine write_lines(unit,message)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_lines'
-!End of the abilint section
 
  implicit none
 
@@ -1432,20 +1245,20 @@ subroutine write_lines(unit,message)
 
  if (msg_size == 0) then
    write(unit,*)
-   return 
+   return
  end if
 
- ! Here, split the message, according to the char(10) characters (carriage return). 
+ ! Here, split the message, according to the char(10) characters (carriage return).
  ! This technique is portable accross different OS.
  rtnpos = index(message,ch10)
 
  if (rtnpos == 0) then
    write(unit,"(a)")message(1:msg_size)
    return
- end if 
+ end if
 
  ii = 1; jj = rtnpos
- do 
+ do
    if (ii == jj) then
      write(unit,*)
    else
@@ -1453,8 +1266,8 @@ subroutine write_lines(unit,message)
    end if
    ii = jj + 1
    if (ii > msg_size) exit
-   jj = index(message(ii:msg_size),ch10) 
-   if (jj == 0) then 
+   jj = index(message(ii:msg_size),ch10)
+   if (jj == 0) then
      ! Will write the last line at the next iteration and exit .
      jj = msg_size + 1
    else
@@ -1463,7 +1276,7 @@ subroutine write_lines(unit,message)
    !write(*,*)"ii, jj, msg_size",ii, jj, msg_size
  end do
 
- ! This is needed to preserve the od behaviour: a ch10 at the 
+ ! This is needed to preserve the od behaviour: a ch10 at the
  ! end of the string was causing an extra newline!
  if (message(msg_size:msg_size) == ch10) write(unit,*)
 
@@ -1491,13 +1304,6 @@ end subroutine write_lines
 
 subroutine lock_and_write(filename, string, ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lock_and_write'
-!End of the abilint section
-
  integer,intent(out) :: ierr
  character(len=*),intent(in) :: filename,string
 
@@ -1520,7 +1326,7 @@ subroutine lock_and_write(filename, string, ierr)
  call write_lines(file_unit, string)
  close(lock_unit, status="delete")
  close(file_unit)
- return 
+ return
 
 99 ierr = 1
 
@@ -1534,7 +1340,7 @@ end subroutine lock_and_write
 !!  num_opened_units
 !!
 !! FUNCTION
-!!  Return the number of opened units. 
+!!  Return the number of opened units.
 !!  Unit numbers listed in the optional argument `ignore` are not considered.
 !!
 !! PARENTS
@@ -1545,20 +1351,7 @@ end subroutine lock_and_write
 
 integer function num_opened_units(ignore) result(nn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'num_opened_units'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_units'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -1600,20 +1393,7 @@ end function num_opened_units
 
 subroutine show_units(ount)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_units'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_units'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -1637,7 +1417,7 @@ subroutine show_units(ount)
          else
             write(ount,*)"unit: ", ii, "form: ",form, ', No name available'
          endif
-      else 
+      else
         !write(ount,*)"unit: ", ii, " is not opened"
       endif
    else

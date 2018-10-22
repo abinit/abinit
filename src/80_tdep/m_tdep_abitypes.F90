@@ -43,13 +43,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_crystal(Crystal,InVar,Lattice,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_crystal'
-!End of the abilint section
-
   implicit none
   type(crystal_t),intent(out) :: Crystal
   type(Input_Variables_type),intent(in) :: InVar
@@ -82,13 +75,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,Phij_NN,Rlatt_cart,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_ifc'
-!End of the abilint section
 
   implicit none
   type(crystal_t),intent(in) :: Crystal
@@ -184,13 +170,6 @@ contains
  subroutine tdep_init_ddb(DDB,InVar,Lattice)
 
   use m_copy,             only : alloc_copy
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_ddb'
-!End of the abilint section
-
   implicit none
   type(ddb_type),intent(out) :: DDB
   type(Input_Variables_type),intent(in) :: InVar
@@ -254,13 +233,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_read_ifc'
-!End of the abilint section
 
   implicit none
 
@@ -352,13 +324,6 @@ end subroutine tdep_read_ifc
 
 subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_write_ifc'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in) :: natom_unitcell,unitfile
@@ -407,13 +372,6 @@ end subroutine tdep_write_ifc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,Rlatt4abi,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_ifc2phij'
-!End of the abilint section
 
   implicit none
 

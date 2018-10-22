@@ -131,13 +131,6 @@ CONTAINS  !=====================================================================
 
 subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,check)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -255,13 +248,6 @@ end subroutine polynomial_coeff_init
 
 subroutine polynomial_coeff_free(polynomial_coeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -313,13 +299,6 @@ end subroutine polynomial_coeff_free
 
 subroutine polynomial_coeff_setCoefficient(coefficient,polynomial_coeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_setCoefficient'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -361,13 +340,6 @@ end subroutine polynomial_coeff_setCoefficient
 !! SOURCE
 
 subroutine polynomial_coeff_setName(name,polynomial_coeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_setName'
-!End of the abilint section
 
  implicit none
 
@@ -415,13 +387,6 @@ end subroutine polynomial_coeff_setName
 !! SOURCE
 
 subroutine polynomial_coeff_getName(name,polynomial_coeff,symbols,recompute,iterm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_getName'
-!End of the abilint section
 
  implicit none
 
@@ -564,13 +529,6 @@ end subroutine polynomial_coeff_getName
 
 subroutine polynomial_coeff_broadcast(coefficients, source, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_broadcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -664,13 +622,6 @@ end subroutine polynomial_coeff_broadcast
 
 subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_MPIsend'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -739,13 +690,6 @@ end subroutine polynomial_coeff_MPIsend
 !! SOURCE
 
 subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_MPIrecv'
-!End of the abilint section
 
  implicit none
 
@@ -846,13 +790,6 @@ end subroutine polynomial_coeff_MPIrecv
 !! SOURCE
 
 subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_writeXML'
-!End of the abilint section
 
   implicit none
 
@@ -1032,13 +969,6 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
 
 !Arguments ------------------------------------
 ! scalar
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_evaluate'
-!End of the abilint section
-
   real(dp),intent(out):: energy
   integer, intent(in) :: ncell,ncoeff,natom_sc,natom_uc
   integer, intent(in) :: comm
@@ -1332,13 +1262,6 @@ end subroutine polynomial_coeff_evaluate
 
 subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
 &                                   natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,sc_size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_getList'
-!End of the abilint section
 
  implicit none
 
@@ -1919,13 +1842,6 @@ end subroutine polynomial_coeff_getList
 subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_tot,power_disps,&
 &                                     max_power_strain,option,sc_size,comm,anharmstr,spcoupling,&
 &                                     distributed,only_odd_power,only_even_power,verbose)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_getNorder'
-!End of the abilint section
 
  implicit none
 
@@ -2518,13 +2434,6 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 &                                  nrpt,nsym,power_disp,power_disp_min,power_disp_max,symbols,nbody,&
 &                                  compute,anharmstr,spcoupling,distributed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'computeNorder'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2771,13 +2680,6 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 &                                  power_disp_max,symbols,nbody,only_odd_power,only_even_power,&
 &                                  compute,anharmstr,spcoupling)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'computeCombinationFromList'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2958,13 +2860,6 @@ end subroutine computeCombinationFromList
 
 function getCoeffFromList(list_coeff,ia,ib,irpt,mu,ncoeff) result(coeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getCoeffFromList'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3037,13 +2932,6 @@ end function getCoeffFromList
 
 subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndisp_max,&
 &                                nrpt,nstr,nsym,nterm,terms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'generateTermsFromList'
-!End of the abilint section
 
  implicit none
 
@@ -3151,13 +3039,6 @@ end subroutine generateTermsFromList
 subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
 &                                     natom,ncoeff_out,ncoeff,nrpt,nsym,&
 &                                     symbols)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_getOrder1'
-!End of the abilint section
 
  implicit none
 
@@ -3332,13 +3213,6 @@ end subroutine polynomial_coeff_getOrder1
 
 pure function coeffs_compare(c1,c2) result (res)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'coeffs_compare'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

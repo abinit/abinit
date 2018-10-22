@@ -46,7 +46,6 @@ getxcart3     -2
  typat    1  1
  znucl  1.00
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

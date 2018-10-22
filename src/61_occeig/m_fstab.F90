@@ -21,7 +21,6 @@
 
 #include "abi_common.h"
 
-
 module m_fstab
 
  use defs_basis
@@ -164,13 +163,6 @@ contains  !============================================================
 
 subroutine fstab_free(fstab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -181,23 +173,13 @@ subroutine fstab_free(fstab)
  !@fstab_t
 
  ! integer
- if (allocated(fstab%istg0)) then
-   ABI_FREE(fstab%istg0)
- end if
- if (allocated(fstab%bstcnt_ibz)) then
-   ABI_FREE(fstab%bstcnt_ibz)
- end if
+ ABI_SFREE(fstab%istg0)
+ ABI_SFREE(fstab%bstcnt_ibz)
 
  ! real
- if (allocated(fstab%kpts)) then
-   ABI_FREE(fstab%kpts)
- end if
- if (allocated(fstab%tetra_wtk)) then
-   ABI_FREE(fstab%tetra_wtk)
- end if
- if (allocated(fstab%tetra_wtk_ene)) then
-   ABI_FREE(fstab%tetra_wtk_ene)
- end if
+ ABI_SFREE(fstab%kpts)
+ ABI_SFREE(fstab%tetra_wtk)
+ ABI_SFREE(fstab%tetra_wtk_ene)
 
  ! types
  call destroy_kptrank(fstab%krank)
@@ -241,13 +223,6 @@ end subroutine fstab_free
 !! SOURCE
 
 subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshiftk, shiftk, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_init'
-!End of the abilint section
 
  implicit none
 
@@ -320,7 +295,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,ebands%kptns,kpt_full,ebands%nkpt,nkpt_full,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
+    sppoldbl,cryst%symafm,cryst%symrel,timrev,comm, use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(7a,es16.6,4a)' )&
@@ -484,7 +459,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
        ! Get the contribution of this band
        tmp_eigen = ebands%eig(band, :nkibz, spin)
 
-       ! Calculate general integration weights at each irred kpoint 
+       ! Calculate general integration weights at each irred kpoint
        ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
          bcorr0,btheta,bdelta,xmpi_comm_self)
@@ -544,13 +519,6 @@ end subroutine fstab_init
 
 integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_findkg0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -600,13 +568,6 @@ end function fstab_findkg0
 !! SOURCE
 
 subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_weights_ibz'
-!End of the abilint section
 
  implicit none
 
@@ -687,13 +648,6 @@ end subroutine fstab_weights_ibz
 !! SOURCE
 
 subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_print'
-!End of the abilint section
 
  implicit none
 
@@ -776,14 +730,6 @@ end subroutine fstab_print
 !! SOURCE
 
 subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
-
- use m_kptrank
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkqptequiv'
-!End of the abilint section
 
  implicit none
 

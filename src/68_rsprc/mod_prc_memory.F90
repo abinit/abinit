@@ -65,13 +65,6 @@ public :: prc_mem_free
 
 subroutine prc_mem_init(nfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prc_mem_init'
-!End of the abilint section
-
 implicit none
 
 !Arguments -------------------------------
@@ -106,13 +99,6 @@ integer, intent(in) :: nfft
 !! SOURCE
 
 subroutine prc_mem_free()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prc_mem_free'
-!End of the abilint section
 
 implicit none
 

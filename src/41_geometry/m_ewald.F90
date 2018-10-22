@@ -79,13 +79,6 @@ contains
 
 subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -144,7 +137,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  do
    ng=ng+1
    newg=0
-!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations), 
+!   Instead of this warning that most normal users do not understand (because they are doing GS calculations, and not RF calculations),
 !   one should optimize this routine. But usually this is a very small fraction of any ABINIT run.
 !   if (ng > 20 .and. mod(ng,10)==0) then
 !      write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
@@ -272,7 +265,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              drdta3=0.0_dp
 
              do ib=1,natom
-!              fraca and fracb should be precomputedi and become arrays with natom dimension. 
+!              fraca and fracb should be precomputedi and become arrays with natom dimension.
 !              Also the combination with dble(ir1), dble(ir2), dble(ir3) or fraca should be done outside of the ib loop.
                fracb1=xred(1,ib)-aint(xred(1,ib))+0.5_dp-sign(0.5_dp,xred(1,ib))
                fracb2=xred(2,ib)-aint(xred(2,ib))+0.5_dp-sign(0.5_dp,xred(2,ib))
@@ -383,13 +376,6 @@ end subroutine ewald
 !! SOURCE
 
 subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald2'
-!End of the abilint section
 
  implicit none
 
@@ -654,13 +640,6 @@ end subroutine ewald2
 !! SOURCE
 
 subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald9'
-!End of the abilint section
 
  implicit none
 

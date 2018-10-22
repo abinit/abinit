@@ -80,13 +80,6 @@ contains
 
 subroutine d2c_weights(elph_ds,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2c_weights'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -930,13 +923,6 @@ end subroutine d2c_weights
 
 subroutine d2c_wtq(elph_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2c_wtq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1391,13 +1377,6 @@ end subroutine d2c_wtq
 subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax, nene, gprimd, &
 &    irredtoGS, kptrlatt, max_occ, minFSband, nband, nFSband, nsppol, telphint, k_obj, tmp_wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_el_weights'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1640,13 +1619,6 @@ end subroutine ep_el_weights
 subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd, &
 &    irredtoGS, kptrlatt, max_occ, minFSband, nband, nFSband, nsppol, telphint, k_obj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_fs_weights'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1875,13 +1847,6 @@ end subroutine ep_fs_weights
 !! SOURCE
 
 subroutine ep_ph_weights(phfrq,elphsmear,omega_min,omega_max,nomega,gprimd,kptrlatt,nbranch,telphint,k_obj,tmp_wtq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ep_ph_weights'
-!End of the abilint section
 
  implicit none
 

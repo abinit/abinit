@@ -26,6 +26,7 @@ MODULE m_time
  use m_abicore
  use m_errors
  use iso_c_binding
+ use m_xmpi
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -47,6 +48,7 @@ MODULE m_time
  public :: abi_wtime     ! Returns wall clock time in seconds since some arbitrary start.
  public :: abi_cpu_time  ! Returns cpu time in seconds since some arbitrary start.
  public :: cwtime        ! Returns cpu, wall clock time and gflops
+
  ! FIXME: Deprecated Should be replaced by cwtime
  public :: timein
  public :: time_accu
@@ -102,13 +104,6 @@ CONTAINS
 !! SOURCE
 
 function asctime()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asctime'
-!End of the abilint section
 
  implicit none
 
@@ -178,13 +173,6 @@ end function asctime
 
 pure function sec2str(time_s) result(str)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sec2str'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -240,13 +228,6 @@ real(dp) pure function str2sec(str) result(time)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2sec'
-!End of the abilint section
-
  character(len=*),intent(in) :: str
 
 !Local variables-------------------------------
@@ -336,13 +317,6 @@ end function str2sec
 
 function abi_cpu_time() result(cpu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_cpu_time'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -418,13 +392,6 @@ end function abi_cpu_time
 !! SOURCE
 
 function abi_wtime() result(wall)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_wtime'
-!End of the abilint section
 
  implicit none
 
@@ -509,6 +476,7 @@ end function abi_wtime
 !!  start_or_stop=
 !!    "start" to start the timers
 !!    "stop" to stop the timers and return the final cpu_time and wall_time
+!!  comm: MPI communicator. If average value inside comm is wanted. Only for "stop"
 !!
 !! OUTPUT
 !!  cpu= cpu time in seconds
@@ -537,14 +505,7 @@ end function abi_wtime
 !!
 !! SOURCE
 
-subroutine cwtime(cpu,wall,gflops,start_or_stop)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cwtime'
-!End of the abilint section
+subroutine cwtime(cpu, wall, gflops, start_or_stop, comm)
 
  implicit none
 
@@ -553,6 +514,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
  real(dp),intent(inout) :: cpu,wall
  real(dp),intent(out) :: gflops
  character(len=*),intent(in) :: start_or_stop
+ integer,intent(in),optional :: comm
 
 !Local variables-------------------------------
 #ifndef HAVE_PAPI
@@ -560,9 +522,11 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
 #else
  logical,parameter :: use_papi=.TRUE.
 #endif
+ integer :: ierr
  integer(C_INT)  :: check
  integer(C_LONG_LONG) :: flops
  real(C_FLOAT) :: real_time,proc_time,mflops
+ real(dp) :: vals(3)
 
 ! *************************************************************************
 
@@ -581,6 +545,12 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
    cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
  else
    cpu = abi_cpu_time() - cpu; wall = abi_wtime() - wall; gflops = -one
+ end if
+ if (present(comm)) then
+   vals = [cpu, wall, gflops]
+   call xmpi_sum(vals, comm, ierr)
+   vals = vals / xmpi_comm_size(comm)
+   cpu = vals(1); wall = vals(2); gflops = vals(3)
  end if
 
  CASE DEFAULT
@@ -622,13 +592,6 @@ end subroutine cwtime
 
 subroutine timein(cpu,wall)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'timein'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -669,13 +632,6 @@ end subroutine timein
 !! SOURCE
 
 subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_accu'
-!End of the abilint section
 
  implicit none
 
@@ -730,13 +686,6 @@ end subroutine time_accu
 
 subroutine time_set_papiopt(opt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_set_papiopt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -766,13 +715,6 @@ end subroutine time_set_papiopt
 !! SOURCE
 
 function time_get_papiopt()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_get_papiopt'
-!End of the abilint section
 
  implicit none
 
@@ -858,13 +800,6 @@ end function time_get_papiopt
 !!
 
 subroutine timab(nn,option,tottim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'timab'
-!End of the abilint section
 
  implicit none
 

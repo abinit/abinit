@@ -244,13 +244,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
   use m_strain
   use m_crystal, only : crystal_t, crystal_free
   use m_dynmat, only : bigbx9
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_read'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -463,13 +456,6 @@ end subroutine effective_potential_file_read
 
 subroutine effective_potential_file_getType(filename,filetype)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getType'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -598,13 +584,6 @@ subroutine effective_potential_file_getDimSystem(filename,natom,ntypat,nqpt,nrpt
 
  use m_ddb
  use m_ddb_hdr
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimSystem'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -722,13 +701,6 @@ end subroutine effective_potential_file_getDimSystem
 !! SOURCE
 
 subroutine effective_potential_file_getDimCoeff(filename,ncoeff,ndisp_max,nterm_max)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimCoeff'
-!End of the abilint section
 
  implicit none
 
@@ -871,13 +843,6 @@ end subroutine effective_potential_file_getDimCoeff
 
 subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimStrainCoupling'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -979,13 +944,6 @@ end subroutine effective_potential_file_getDimStrainCoupling
 !! SOURCE
 
 subroutine effective_potential_file_getDimMD(filename,natom,nstep)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_getDimMD'
-!End of the abilint section
 
  implicit none
 
@@ -1144,13 +1102,6 @@ end subroutine effective_potential_file_getDimMD
 !! SOURCE
 
 subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'system_getDimFromXML'
-!End of the abilint section
 
  implicit none
 
@@ -1339,13 +1290,6 @@ end subroutine system_getDimFromXML
  use m_effective_potential, only : effective_potential_type
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_ab7_symmetry
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'system_xml2effpot'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -2296,13 +2240,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_crystal,         only : crystal_t,crystal_print
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'system_ddb2effpot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2983,13 +2920,6 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 #if defined HAVE_XML
  use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'coeffs_xml2effpot'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -3414,13 +3344,6 @@ end subroutine coeffs_xml2effpot
 
 subroutine effective_potential_file_readMDfile(filename,hist,option)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_readMDfile'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3535,13 +3458,6 @@ end subroutine effective_potential_file_readMDfile
 !! SOURCE
 
 subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_mapHistToRef'
-!End of the abilint section
 
  implicit none
 
@@ -3787,13 +3703,6 @@ end subroutine effective_potential_file_mapHistToRef
 
 subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_file_readDisplacement'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3858,13 +3767,6 @@ end subroutine effective_potential_file_readDisplacement
 
 subroutine elementfromline(line,nelement)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elementfromline'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -3918,13 +3820,6 @@ subroutine elementfromline(line,nelement)
 
  subroutine rdfromline(keyword,line,output)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdfromline'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -3976,13 +3871,6 @@ subroutine elementfromline(line,nelement)
 
 recursive subroutine rmtabfromline(line)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rmtabfromline'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -4026,13 +3914,6 @@ recursive subroutine rmtabfromline(line)
 !! SOURCE
 
  subroutine rdfromline_value(keyword,line,output)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdfromline_value'
-!End of the abilint section
 
  implicit none
 
@@ -4088,13 +3969,6 @@ function char_f2c(f_string) result(c_string)
 
  use iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'char_f2c'
-!End of the abilint section
-
  character(len=*),intent(in) :: f_string
  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
 !Local variables -------------------------------
@@ -4135,13 +4009,6 @@ subroutine char_c2f(c_string,f_string)
 
  use iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'char_c2f'
-!End of the abilint section
-
  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
  character(len=*),intent(out) :: f_string
 !Local variables -------------------------------

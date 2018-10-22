@@ -80,13 +80,6 @@ contains
 
 subroutine pred_simple(ab_mover,hist,iexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_simple'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -166,13 +159,6 @@ end subroutine pred_simple
 subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prec_simple'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

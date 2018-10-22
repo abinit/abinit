@@ -95,13 +95,6 @@ CONTAINS  !===========================================================
 
 subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intagm_img_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -236,13 +229,6 @@ end subroutine intagm_img_1D
 !! SOURCE
 
 subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intagm_img_2D'
-!End of the abilint section
 
  implicit none
 

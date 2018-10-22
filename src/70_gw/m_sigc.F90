@@ -180,13 +180,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 & PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
 & gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sigc_me'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1390,13 +1383,6 @@ end subroutine calc_sigc_me
 subroutine calc_coh_comp(iqibz,i_sz,same_band,nspinor,nsig_ab,ediff,npwc,gvec,&
 &  ngfft,nfftot,wfg2_jk,vc_sqrt,botsq,otq,sigcohme)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coh_comp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1517,13 +1503,6 @@ end subroutine calc_coh_comp
 
 subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotwgp,&
 & omega,epsm1q,omegame0i,theta_mu_minus_e0i,ket,plasmafreq,npoles_missing,calc_poles,method)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sigc_cd'
-!End of the abilint section
 
  implicit none
 
@@ -1947,13 +1926,6 @@ end subroutine calc_sigc_cd
 !! SOURCE
 
 subroutine calc_sig_ppm_comp(npwc,nomega,rhotwgp,botsq,otq,omegame0i_io,zcut,theta_mu_minus_e0i,ket,ppmodel,npwx,npwc1,npwc2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_sig_ppm_comp'
-!End of the abilint section
 
  implicit none
 

@@ -345,13 +345,6 @@ CONTAINS  !=====================================================================
 
 subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_info_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -426,13 +419,6 @@ end subroutine screen_info_print
 
 subroutine fgg_free_0D(Fgg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -470,13 +456,6 @@ end subroutine fgg_free_0D
 !! SOURCE
 
 subroutine fgg_free_1D(Fgg,keep_q)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_free_1D'
-!End of the abilint section
 
  implicit none
 
@@ -524,13 +503,6 @@ end subroutine fgg_free_1D
 !! SOURCE
 
 subroutine fgg_init(Fgg,npw,nomega,nqlwl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_init'
-!End of the abilint section
 
  implicit none
 
@@ -587,13 +559,6 @@ end subroutine fgg_init
 !! SOURCE
 
 subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_fgg_qbz_set'
-!End of the abilint section
 
  implicit none
 
@@ -682,13 +647,6 @@ end subroutine screen_fgg_qbz_set
 
 pure function screen_ihave_fgg(W,iq_ibz,how)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_ihave_fgg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -750,13 +708,6 @@ end function screen_ihave_fgg
 
 subroutine screen_nullify(W)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -798,13 +749,6 @@ end subroutine screen_nullify
 !! SOURCE
 
 subroutine screen_free(W)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_free'
-!End of the abilint section
 
  implicit none
 
@@ -917,13 +861,6 @@ end subroutine screen_free
 
 subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 &  iomode,ngfftf,nfftf_tot,nsppol,nspden,ae_rhor,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_init'
-!End of the abilint section
 
  implicit none
 
@@ -1168,7 +1105,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      !
      ! Read data from file (use MPI-IO if possible)
      if (W%iomode /= IO_MODE_ETSF .and. xmpi_mpiio==1) then
-       call wrtout(std_out,ABI_FUNC//"read_screening with MPI_IO","COLL")
+       call wrtout(std_out, "read_screening with MPI_IO")
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,IO_MODE_MPI,comm,iqiA=iq_ibz)
      else
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,W%iomode,comm,iqiA=iq_ibz)
@@ -1288,13 +1225,6 @@ end subroutine screen_init
 !! SOURCE
 
 subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_symmetrizer'
-!End of the abilint section
 
  implicit none
 
@@ -1449,13 +1379,6 @@ end subroutine screen_symmetrizer
 
 subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out_ket)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_w0gemv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1565,13 +1488,6 @@ end subroutine screen_w0gemv
 
 subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1_symmetrize_ip'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1673,13 +1589,6 @@ end subroutine em1_symmetrize_ip
 !! SOURCE
 
 subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1_symmetrize_op'
-!End of the abilint section
 
  implicit none
 

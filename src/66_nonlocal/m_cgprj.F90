@@ -126,13 +126,6 @@ contains
 &                   natom,nattyp,ngfft,nloalg,npw_k,nspinor,ntypat,&
 &                   phkxred,ph1d,ph3d,ucvol,useylm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getcprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -452,13 +445,6 @@ contains
 & iorder_cprj,istwfk,kg,kpt,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
 & nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ctocprj'
-!End of the abilint section
 
  implicit none
 

@@ -188,13 +188,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
 &          xccc3d,xred,ylm,ylmgr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_positron'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -915,13 +908,6 @@ end subroutine setup_positron
 subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,nfft,ngfft,nhat,&
 &                      option,pawang,pawrad,pawrhoij,pawtab,rate,rate_paw,rhor,ucvol,xccc3d,&
 &                      rhor_dop_el,pawrhoij_dop_el,pawrhoij_ep) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'poslifetime'
-!End of the abilint section
 
  implicit none
 
@@ -1863,13 +1849,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                     filpsp,kg,mcg,mcprj,mpi_enreg,my_natom,&
 &                     n3xccc,nfft,ngfft,nhat,npwarr,occ,pawang,pawrad,&
 &                     pawrhoij,pawtab,rhor,xccc3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'posdoppler'
-!End of the abilint section
 
  implicit none
 
@@ -3358,13 +3337,6 @@ end subroutine posdoppler
 subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enreg,&
 &                      option,pawang,pawrad,pawrhoij,pawrhoij_ep,&
 &                      pawtab,rate,rhocorej)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'posratecore'
-!End of the abilint section
 
  implicit none
 

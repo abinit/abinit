@@ -9,7 +9,7 @@
 !!  wrt k, and the corresponding wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2018 ABINIT group (MJV)
+!! Copyright (C) 2016-2018 ABINIT group (MJV, HM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,18 +36,23 @@ MODULE m_ddk
  use m_kptrank
  use m_fstab
  use m_wfk
+ use m_wfd
+ use m_ebands
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_fstrings,      only : sjoin, itoa, endswith
+ use m_fstrings,      only : strcat, sjoin, itoa, endswith
  use m_symtk,         only : matr3inv
- use m_io_tools,      only : iomode_from_fname
- use defs_abitypes,   only : hdr_type
+ use m_io_tools,      only : iomode_from_fname, get_unit
+ use m_time,          only : cwtime
+ use defs_abitypes,   only : hdr_type, dataset_type
+ use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
  use m_crystal,       only : crystal_t, crystal_free
- use m_crystal_io,    only : crystal_from_hdr
- use defs_datatypes,  only : ebands_t
+ use m_crystal_io,    only : crystal_from_hdr, crystal_ncwrite
+ use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
+ use m_pawtab,        only : pawtab_type
 
  implicit none
 
@@ -71,11 +76,6 @@ MODULE m_ddk
 
  type,public :: ddk_t
 
-  !integer :: fh(3)
-  ! file handler
-  !  Fortran unit number if iomode==IO_MODE_FORTRAN
-  !  MPI file handler if iomode==IO_MODE_MPI
-
   integer :: comm
   ! MPI communicator used for IO.
 
@@ -90,10 +90,6 @@ MODULE m_ddk
 
   integer :: rw_mode = DDK_NOMODE
    ! (Read|Write) mode
-
-  !integer :: current_fpos
-  ! The current position of the file pointer used for sequential access with Fortran-IO
-  !  FPOS_EOF signals the end of file
 
   integer :: nsppol
    ! Number of spin polarizations.
@@ -177,13 +173,6 @@ CONTAINS
 
 subroutine ddk_init(ddk, paths, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -234,7 +223,6 @@ subroutine ddk_init(ddk, paths, comm)
 end subroutine ddk_init
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_ddk/eph_ddk
@@ -245,6 +233,7 @@ end subroutine ddk_init
 !!  Calculate the DDK matrix elements using the commutator formulation.
 !!
 !! INPUTS
+!!  prefix: Prefix for output EVK file.
 !!
 !! PARENTS
 !!      wfk_analyse
@@ -253,58 +242,21 @@ end subroutine ddk_init
 !!
 !! SOURCE
 
-
-
-subroutine eph_ddk(wfk_path,dtfil,dtset,&
-                   psps,pawtab,inclvkb,ngfftc,mpi_enreg,comm)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_wfk
- use m_wfd
-
- use m_ebands,          only : ebands_ncwrite
- use m_time,            only : cwtime, sec2str
- use m_vkbr,            only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
- use m_fstrings,        only : strcat, sjoin, itoa, ftoa, ktoa
- use m_io_tools,        only : iomode_from_fname, get_unit
- use m_cgtools,         only : dotprod_g
- use m_fftcore,         only : get_kg, kpgsph, sphere
- use m_crystal,         only : crystal_t
- use m_crystal_io,      only : crystal_ncwrite
- use m_pawtab,          only : pawtab_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_ddk'
-!End of the abilint section
+subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: wfk_path
+ character(len=*),intent(in) :: wfk_path,prefix
  integer,intent(in) :: comm
- type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
- type(wfk_t),target :: in_wfk
- type(wfd_t),target :: in_wfd
- type(vkbr_t) :: vkbr
- type(ebands_t) :: ebands
- type(crystal_t) :: cryst
- type(hdr_type) :: hdr_tmp
  type(pseudopotential_type),intent(in) :: psps
- type(mpi_type),intent(inout) :: mpi_enreg
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb=0, master=0
+ integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb0=0, master=0
  logical,parameter :: force_istwfk1=.True.
  integer :: iomode, mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
@@ -313,6 +265,12 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
+ type(wfk_t) :: in_wfk
+ type(wfd_t) :: in_wfd
+ type(vkbr_t) :: vkbr
+ type(ebands_t) :: ebands
+ type(crystal_t) :: cryst
+ type(hdr_type) :: hdr_tmp
 !arrays
  integer,intent(in) :: ngfftc(18)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
@@ -378,14 +336,16 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
  ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
 
- write(std_out,*) 'inclvkb: ', inclvkb
- write(std_out,*) 'nkpoints:', nkpt
- write(std_out,*) 'nbands:  ', mband
- write(std_out,*) 'spin:    ', nsppol
- write(std_out,*) 'spinor:  ', nspinor
- write(std_out,*) 'ngfft:   ', in_wfk%hdr%ngfft
- write(std_out,*) 'mpw:     ', mpw
- write(std_out,*) 'ecut:    ', ecut
+ if (my_rank == master) then
+   write(std_out, "(a, i0)") 'inclvkb: ', inclvkb
+   write(std_out, "(a, i0)") 'nkpoints:', nkpt
+   write(std_out, "(a, i0)") 'nbands:  ', mband
+   write(std_out, "(a, i0)") 'nspppol:    ', nsppol
+   write(std_out, "(a, i0)") 'nspinor:  ', nspinor
+   write(std_out, "(a, 3(i0,1x))") 'ngfft:   ', in_wfk%hdr%ngfft(1:3)
+   write(std_out, "(a, i0)") 'mpw:     ', mpw
+   write(std_out, "(a, f5.1)") 'ecut:    ', ecut
+ end if
 
  !create distribution of the wavefunctions mask
  keep_ur = .false.
@@ -411,7 +371,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  end do
 
  !initialize distributed wavefunctions object
- call wfd_init(in_wfd,cryst,pawtab,psps,keep_ur,paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,&
+ call wfd_init(in_wfd,cryst,pawtab,psps,keep_ur,paral_kgb0,dummy_npw,mband,nband,nkpt,nsppol,&
    bks_mask,dtset%nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,&
    ngfftc,dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
@@ -425,8 +385,7 @@ subroutine eph_ddk(wfk_path,dtfil,dtset,&
  iomode = iomode_from_fname(wfk_path)
  call wfd_read_wfk(in_wfd,wfk_path,iomode)
 
-do spin=1,nsppol ! Loop over spins
-
+ do spin=1,nsppol ! Loop over spins
    do ik=1,nkpt ! Loop over kpoints
      ! Only do a subset a k-points
      if (all(task_distrib(bandmin:bandmax,bandmin:bandmax,ik,spin) /= my_rank)) cycle
@@ -500,45 +459,53 @@ do spin=1,nsppol ! Loop over spins
  ABI_FREE(ug_v)
  ABI_FREE(kg_k)
  ABI_FREE(ihrc)
+ ABI_FREE(task_distrib)
 
  ! Gather the k-points computed by all processes
  call xmpi_sum_master(dipoles,master,comm,ierr)
 
  !write the matrix elements
 #ifdef HAVE_NETCDF
-   ! Output DDK file in netcdf format.
-   if (my_rank == master) then
+ ! Output DDK file in netcdf format.
+ if (my_rank == master) then
 
-     ! Have to build hdr on k-grid with info about perturbation.
-     call hdr_copy(in_wfk%hdr, hdr_tmp)
-     hdr_tmp%qptn = [0,0,0]
+   ! Have to build hdr on k-grid with info about perturbation.
+   call hdr_copy(in_wfk%hdr, hdr_tmp)
+   hdr_tmp%qptn = [0, 0, 0]
 
-     do ii=1,3
-         fname = strcat(dtfil%filnam_ds(4), '_', itoa(ii), "_EVK.nc")
-         NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
-         hdr_tmp%pertcase = (cryst%natom*3)+ii
-         NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-         NCF_CHECK(crystal_ncwrite(cryst, ncid))
-         NCF_CHECK(ebands_ncwrite(ebands, ncid))
-         ncerr = nctk_def_arrays(ncid, [ &
-           nctkarr_t('h1_matrix_elements', "dp", &
-            "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
-         NCF_CHECK(ncerr)
-         NCF_CHECK(nctk_set_datamode(ncid))
-         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:) )
-         NCF_CHECK(ncerr)
-         NCF_CHECK(nf90_close(ncid))
-     end do
-     call hdr_free(hdr_tmp)
-
-   end if
+   do ii=1,3
+       fname = strcat(prefix, '_', itoa(ii), "_EVK.nc")
+       NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
+       hdr_tmp%pertcase = (cryst%natom*3)+ii
+       NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
+       NCF_CHECK(crystal_ncwrite(cryst, ncid))
+       NCF_CHECK(ebands_ncwrite(ebands, ncid))
+       ncerr = nctk_def_arrays(ncid, [ &
+         nctkarr_t('h1_matrix_elements', "dp", &
+          "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins")], defmode=.True.)
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nctk_set_datamode(ncid))
+       ncerr = nf90_put_var(ncid, nctk_idname(ncid, "h1_matrix_elements"), dipoles(ii,:,:,:,:,:) )
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nf90_close(ncid))
+   end do
+   call hdr_free(hdr_tmp)
+ end if
 #endif
 
+ ! Block all procs here so that we know output files are available when code returns.
+ call xmpi_barrier(comm)
+
+ ! Free memory
  ABI_FREE(dipoles)
+
+ call wfk_close(in_wfk)
+ call wfd_free(in_wfd)
+ call ebands_free(ebands)
+ call crystal_free(cryst)
 
 end subroutine eph_ddk
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -563,13 +530,6 @@ end subroutine eph_ddk
 !! SOURCE
 
 subroutine ddk_read_fsvelocities(ddk, fstab, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_read_fsvelocities'
-!End of the abilint section
 
  implicit none
 
@@ -706,13 +666,6 @@ end subroutine ddk_read_fsvelocities
 
 subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_fs_average_veloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -773,7 +726,6 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 end subroutine ddk_fs_average_veloc
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_ddk/ddk_free
@@ -792,13 +744,6 @@ end subroutine ddk_fs_average_veloc
 !! SOURCE
 
 subroutine ddk_free(ddk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_free'
-!End of the abilint section
 
  implicit none
 
@@ -849,13 +794,6 @@ end subroutine ddk_free
 !! SOURCE
 
 subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddk_print'
-!End of the abilint section
 
  implicit none
 

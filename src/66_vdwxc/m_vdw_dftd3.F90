@@ -118,13 +118,6 @@ subroutine vdw_dftd3(e_vdw_dftd3,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_xc,&
 &          vdw_tol,vdw_tol_3bt,xred,znucl,dyn_vdw_dftd3,elt_vdw_dftd3,&
 &          fred_vdw_dftd3,str_vdw_dftd3,qphon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_dftd3'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -1574,13 +1567,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 
    subroutine comp_prod(a,b,c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'comp_prod'
-!End of the abilint section
-
    implicit none
  !Arguments ----------------------
    real(dp),intent(in) :: a(2),b(2)
@@ -1610,13 +1596,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !! SOURCE
 
 subroutine d3_cart2red(grad)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd3_cart2red'
-!End of the abilint section
 
 implicit none
 

@@ -20,7 +20,6 @@ t55o_DS23_GKK.nc
 t55o_DS33_GKK.nc
 t55o_DS11_EIG.nc
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% dirbasename = temperature-dependence
@@ -33,7 +32,7 @@ t55o_DS11_EIG.nc
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = S. Ponc\'e, Y. Gillet
-#%% keywords = NC, DFPT, EPH
+#%% keywords = NC, DFPT, EPH_OLD
 #%% description = 
 #%%  Diamond.
 #%%  Diamond dynamical temperature-dependent of the electronic structure using the temperature.py python script. 

@@ -41,13 +41,6 @@ SUBROUTINE libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_occ'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
@@ -103,13 +96,6 @@ SUBROUTINE libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec,comm)
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, &
   &                             libtetrabz_mpisum_d, libtetrabz_mpisum_dv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_fermieng'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
@@ -204,13 +190,6 @@ SUBROUTINE libtetrabz_occ_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig,nk_l
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_occ_main'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, &

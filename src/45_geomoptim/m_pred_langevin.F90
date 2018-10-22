@@ -81,13 +81,6 @@ contains
 
 subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,skipcycle)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_langevin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

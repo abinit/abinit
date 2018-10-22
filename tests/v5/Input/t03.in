@@ -39,7 +39,6 @@ vel
   2.5e-5 -6.5e-5  0.5e-5
  -4.5e-5  2.5e-5 -1.5e-5
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
