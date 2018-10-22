@@ -629,7 +629,7 @@ Variable(
     vartype="real",
     topics=['Bader_basic'],
     dimensions="scalar",
-    defaultval="$\pi$",
+    defaultval=r"$\pi$",
     mnemonics="THETA MAXimal angle",
     text=r"""
 Angular limits of integration of the Bader volume for the theta variables. The
