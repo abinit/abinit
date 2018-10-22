@@ -1331,7 +1331,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  call fftpac(1,mpi_enreg,1,n1,n2,n3,n4,n5,n6,ngfft,rhor,denpot,1)
 
  ABI_ALLOCATE(rhog,(2,nfft))
- call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(rhor)
  ABI_DEALLOCATE(denpot)

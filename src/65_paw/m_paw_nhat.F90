@@ -590,9 +590,9 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  do FFT
    ABI_ALLOCATE(work,(2,nfft))
    do ispden=1,min(2,nspden)
-     call fourdp(cplex,work,pawnhat(:,ispden),-1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,pawnhat(:,ispden),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,2,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,pawnhat(:,ispden),+1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,pawnhat(:,ispden),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(work)
 !  Destroy fake mpi_enreg
@@ -1018,9 +1018,9 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    ABI_ALLOCATE(work,(2,nfft))
    cplex=2
    do isp1=1,MIN(2,nspinor**2)
-     call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,cplex,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(work)
 !  Destroy fake mpi_enreg

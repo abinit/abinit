@@ -659,7 +659,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ABI_MALLOC(ks_rhog,(2,nfftf))
 
- call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp0)
+ call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp0)
 
  call timab(655,2,tsec) ! bse(mkrho)
  !
@@ -858,7 +858,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  end if
 
  ABI_MALLOC(qp_rhog,(2,nfftf))
- call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Wfd%paral_kgb,0)
+ call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
 
  ! States up to lomo-1 are useless now since only the states close to the gap are
  ! needed to construct the EXC Hamiltonian. Here we deallocate the wavefunctions

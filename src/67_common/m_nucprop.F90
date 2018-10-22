@@ -815,7 +815,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-  call fourdp(cplex,fofg,fofr,fftdir,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp) ! construct charge density in G space
+  call fourdp(cplex,fofg,fofr,fftdir,mpi_enreg,nfft,1,ngfft,tim_fourdp) ! construct charge density in G space
 
   ! the following loops over G vectors has been copied from hartre.F90 in order to be compatible with
   ! possible FFT parallelism

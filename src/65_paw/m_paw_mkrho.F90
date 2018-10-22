@@ -256,7 +256,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !  Compute compensated pseudo density in reciprocal space
    if (present(rhog)) then
-     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,1,pawfgr%ngfft,0)
    end if
  end if
 

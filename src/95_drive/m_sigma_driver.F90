@@ -903,9 +903,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ABI_MALLOC(ks_rhog,(2,nfftf))
  ABI_MALLOC(ks_taug,(2,nfftf*Dtset%usekden))
- call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
+ call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
  if(Dtset%usekden==1)then
-   call fourdp(1,ks_taug,ks_taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
+   call fourdp(1,ks_taug,ks_taur(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
  end if
 
  !The following steps have been gathered in the setvtr routine:
@@ -1260,8 +1260,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    ABI_MALLOC(qp_rhog,(2,nfftf))
    ABI_MALLOC(qp_taug,(2,nfftf*Dtset%usekden))
-   call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
-   if(Dtset%usekden==1)call fourdp(1,qp_taug,qp_taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
+   call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
+   if(Dtset%usekden==1)call fourdp(1,qp_taug,qp_taur(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
 
    ! ===========================================
    ! ==== Optional output of the QP density ====

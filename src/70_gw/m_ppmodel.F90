@@ -1448,7 +1448,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
@@ -1673,7 +1673,7 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))
@@ -1934,7 +1934,7 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
  ! FIXME this has to be fixed, rho(G) should be passed instead of doing FFT for each q
  ABI_MALLOC(tmp_rhor,(nfftf))
  tmp_rhor=rhor ! To avoid having to use intent(inout).
- call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,ngfftf,paral_kgb0,0)
+ call fourdp(1,rhog_dp,tmp_rhor,-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
  ABI_FREE(tmp_rhor)
 
  rhog(1:nfftf)=CMPLX(rhog_dp(1,1:nfftf),rhog_dp(2,1:nfftf))

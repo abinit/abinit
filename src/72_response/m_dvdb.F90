@@ -1483,7 +1483,7 @@ pcase_loop: &
 
      do ispden=1,nspden
        ! Get symmetric perturbation in G-space in workg_eq array.
-       call fourdp(cplex,workg_eq,v1scf(:,ispden,pcase_eq),-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+       call fourdp(cplex,workg_eq,v1scf(:,ispden,pcase_eq),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
 
        !call rotate_fqg(itirev_eq,symrec_eq,qpt,tnon,ngfft,nfft,nspden,workg_eq,workg)
        ind1=0
@@ -1554,7 +1554,7 @@ pcase_loop: &
 
    ! Get potential in real space (results in v1scf)
    do ispden=1,nspden
-     call fourdp(cplex,v1g(:,:,ispden),v1scf(:,ispden,pcase),+1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+     call fourdp(cplex,v1g(:,:,ispden),v1scf(:,ispden,pcase),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
 
      ! IS(q) = q + G0
      ! we want q so we have to multiply by exp(iG0r) in real space.
@@ -1746,7 +1746,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  ABI_MALLOC(v1g_qibz, (2*nfft,nspden,natom3))
  do mu=1,natom3
    do ispden=1,nspden
-     call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+     call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
    end do
  end do
 
@@ -1788,7 +1788,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    ! Transform to real space and take into account a possible shift.
    ! (results are stored in v1r_qbz)
    do ispden=1,nspden
-     call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+     call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
      !call times_eigr(tsign * g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
    end do
@@ -2340,7 +2340,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
  !    do ifft=1,nfft
  !      !cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
  !      !call fourdp(1,all_v1qr(:,:,ifft,ispden,mu),db%v1scf_rpt(:,ifft,ispden,mu),+1,&
- !      ! mpi_enreg_seq,nqbz,ngfft_qspace,paral_kgb0,tim_fourdp0)
+ !      ! mpi_enreg_seq,nqbz,1,ngfft_qspace,tim_fourdp0)
  !    end do
  !  end do
  !end do
@@ -2805,7 +2805,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  !    do ifft=1,nfft
  !      !cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
  !      !call fourdp(1,all_v1qr(:,:,ifft,ispden,mu),db%v1scf_rpt(:,ifft,ispden,mu),+1,&
- !      ! mpi_enreg_seq,nqbz,ngfft_qspace,paral_kgb0,tim_fourdp0)
+ !      ! mpi_enreg_seq,nqbz,1,ngfft_qspace,tim_fourdp0)
  !    end do
  !  end do
  !end do
@@ -4286,7 +4286,7 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 
  ! FFT to get the long-range potential in r space
  v1r_lr = zero
- call fourdp(2,v1G_lr,v1r_lr,1,MPI_enreg_seq,nfft,ngfft,1,0)
+ call fourdp(2,v1G_lr,v1r_lr,1,MPI_enreg_seq,nfft,1,ngfft,0)
 
  ! Multiply by  exp(i q . r)
  call times_eikr(qpt,ngfft,nfft,1,v1r_lr)

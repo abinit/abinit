@@ -1748,11 +1748,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          end if
        end if
 
-       call fourdp(cplex,rhog1,rhor1,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(cplex,rhog1,rhor1,-1,mpi_enreg,nfftf,1,ngfftf,0)
        if (.not.kramers_deg) then
-         !call fourdp(cplex,rhog1_pq,rhor1_pq,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+         !call fourdp(cplex,rhog1_pq,rhor1_pq,-1,mpi_enreg,nfftf,1,ngfftf,0)
          rhog1_pq=rhog1
-         call fourdp(cplex,rhog1_mq,rhor1_mq,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+         call fourdp(cplex,rhog1_mq,rhor1_mq,-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
      end if
 
@@ -1799,7 +1799,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !      Compute up+down rho1(G) by fft
        ABI_ALLOCATE(work,(cplex*nfftf))
        work(:)=rhor1(:,1)
-       call fourdp(cplex,rhog1,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(cplex,rhog1,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
        ABI_DEALLOCATE(work)
      end if ! rhor1 generated or read in from file
 

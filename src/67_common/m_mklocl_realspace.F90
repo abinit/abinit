@@ -302,7 +302,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
          rhor_testing(ii) = exp(-r/4._dp)
        end do
 !      Testing only, compute rhog_testing from rhor_testing
-       call fourdp(1,rhog_testing,rhor_testing,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+       call fourdp(1,rhog_testing,rhor_testing,-1,mpi_enreg,nfft,1,ngfft,0)
      end if
 
 !    Compute the interpolation of rho, using a fourier transform
@@ -341,7 +341,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
      ngfft_interpol(:) = ngfft(:)
      ngfft_interpol(1:3) = (/ n1 * nStep, n2 * nStep, n3 * nStep /)
      ngfft_interpol(4:6) = (/ n1 * nStep + 1, n2 * nStep + 1, n3 * nStep /)
-     call fourdp(1,rhog_interpol,rhor_work,1,mpi_enreg,nfft*n_interpol,ngfft_interpol,mpi_enreg%paral_kgb,0)
+     call fourdp(1,rhog_interpol,rhor_work,1,mpi_enreg,nfft*n_interpol,1,ngfft_interpol,0)
 
 !    Reorder rhor_interpol to be able to read it linearly
      jj = 0

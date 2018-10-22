@@ -1045,7 +1045,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
 !    Note, we end with ispden=1, so that rhog contains the total density
-     call fourdp(1,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
    end do ! End loop on spins
 
@@ -1150,7 +1150,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
 !    Note, we end with ispden=1, so that rhog contains the total density
-     call fourdp(1,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
 
    end do ! End loop on spins

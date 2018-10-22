@@ -861,7 +861,7 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
  do icall=1,NCALLS_FOR_TEST
    !
    ifft = empty_cache(CACHE_KBSIZE)
-   call fourdp(cplex,fofg,fofr,isign,Ftest%MPI_enreg,Ftest%nfft,Ftest%ngfft,Ftest%paral_kgb,0)
+   call fourdp(cplex,fofg,fofr,isign,Ftest%MPI_enreg,Ftest%nfft,1,Ftest%ngfft,0)
    !
    ! Store results at the first call.
    if (icall==1) then

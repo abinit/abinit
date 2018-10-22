@@ -1068,7 +1068,7 @@ contains
 !      call wrtout(std_out,message,'PERS')
 !      ENDDEBUG
 
-       call fourdp(cplex,rhog,work,-1,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,0)
+       call fourdp(cplex,rhog,work,-1,mpi_enreg,nfftdiel,1,ngfftdiel,0)
 
 !      DEBUG
 !      write(message,'(a,i3)')'Before Hartree, on proc ',me_loc

@@ -539,7 +539,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  if (usepaw==0) energies%h0=energies%h0 + alphaopt*energies%e_nlpsp_vfock
 
  rhor= rhor+(alphaopt-one)*nvresid
- call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+ call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,0)
 
  if (usepaw==1) then
    do iatom=1,my_natom

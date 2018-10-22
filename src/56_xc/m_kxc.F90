@@ -552,10 +552,10 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    if (option == 1) then
      do ikxc = 1,nkxc
-       call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+       call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
      end do
    else
-     call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+     call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end if
 
  else if ((option == 2).and.(nspden == 1)) then
@@ -576,7 +576,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
 !  Calculate the Fourier transform of the up-down channel of the AL(S)DA kernel.
 
-   call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+   call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
 
  else
    write (message,'(4a,i0)')'  Invalid option = ',option
@@ -980,7 +980,7 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut
 !Calculate the Fourier transform of the energy optimized kernel.
  tim_fourdp=0
  do ikxc = 1,nkxc
-   call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+   call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
  end do
 
 !Free memory.
@@ -1158,7 +1158,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  ABI_MALLOC(my_kxcg,(2,nfft_tot))
 
  do ikxc=1,nkxc
-   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft_tot,ngfft,paral_kgb0,0)
+   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
    kxcg(:,ikxc)=CMPLX(my_kxcg(1,:),my_kxcg(2,:))
  end do
 
@@ -1217,7 +1217,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 &       n3xccc,option,paral_kgb0,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
 
 !      FFT the first index to --> to G space
-       call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,ngfft,paral_kgb0,0)
+       call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
 
 !      kxcg(:,igp,iq)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
 !      kxcg(:,igp)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
@@ -1505,7 +1505,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ABI_MALLOC(my_kxcg,(2,nfft))
 
  do ikxc=1,nkxc
-   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft,ngfft,paral_kgb0,0)
+   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft,1,ngfft,0)
 !  kxcg(:,ikxc)=CMPLX(my_kxcg(1,:),my_kxcg(2,:))
  end do
 !TODO Check symmetry of kxcg

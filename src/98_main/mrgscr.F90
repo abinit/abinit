@@ -677,7 +677,7 @@ program mrgscr
      ABI_DT_FREE(pawrhoij)
 
      ABI_MALLOC(rhog,(2,nfft))
-     call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg,nfft,ngfft,paral_kgb0,0)
+     call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg,nfft,1,ngfft,0)
 
      ABI_MALLOC(nhat,(nfft,Hscr0%Hdr%nspden*Hscr0%Hdr%usepaw))
      compch_sph=greatest_real; compch_fft=greatest_real

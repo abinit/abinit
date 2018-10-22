@@ -276,7 +276,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (dtset%nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
@@ -765,7 +765,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  ABI_ALLOCATE(work,(nfft))
  work(:)=vresid(:,1)
  if (dtset%nspden>=2) work(:)=work(:)+vresid(:,2)
- call fourdp(1,vresg,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+ call fourdp(1,vresg,work,-1,mpi_enreg,nfft,1,ngfft,0)
  ABI_DEALLOCATE(work)
 
 !Determine wether a gaussan atomic density has to be used or not
