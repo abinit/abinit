@@ -1177,7 +1177,6 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
  integer,intent(in) :: fftalg,ndat,nthreads
  integer,optional,intent(in) :: unit
  integer :: nfailed
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -1343,7 +1342,6 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
      !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used","COLL")
      !  !CYCLE
      !end if
-
      ABI_MALLOC(fofg,     (2*ldxyz*ndat))
      ABI_MALLOC(fofr_ref, (cplex*ldxyz*ndat))
      ABI_MALLOC(fofr,     (cplex*ldxyz*ndat))
@@ -1372,6 +1370,7 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
      nfailed = nfailed + ierr
 
      write(info,"(a,i1,a)")sjoin(library,"fourdp (cplex "),cplex,") :"
+     !write(info,"(2a,i1,a,i0,a)")trim(library), "fourdp (cplex ", cplex,"), ndata = ",ndat," :"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
        write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
@@ -1387,9 +1386,7 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    !
  end do
 
- if (nthreads > 0) then
-   call xomp_set_num_threads(old_nthreads)
- end if
+ if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
 
 end function fftbox_utests
 !!***
@@ -3051,10 +3048,10 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  if (fftalga == FFT_FFTW3) then
    ! Call sequential or MPI FFTW3 version.
    if (nproc_fft == 1) then
-     !call wrtout(std_out,"FFTW3 SEQFOURDP","COLL")
+     !call wrtout(std_out,"FFTW3 SEQFOURDP")
      call fftw3_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat,isign,fofg,fofr)
    else
-     !call wrtout(std_out,"FFTW3 MPIFOURDP","COLL")
+     !call wrtout(std_out,"FFTW3 MPIFOURDP")
      call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    end if
@@ -3073,7 +3070,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
    call timab(260+tim_fourdp,2,tsec); return
  end if
 
- ! Here, deal  with the new SG FFT, complex-to-complex case
+ ! Here, deal with the new SG FFT, complex-to-complex case
  if (fftalga==FFT_SG2002 .and. (fftalgb==0 .or. cplex==2)) then
    call sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    !call sg2002_seqfourdp(cplex,nfft,ngfft,ndat,isign,fftn2_fofg,fofr)
@@ -3302,8 +3299,9 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  ! Take advantage of the fact that fofr is real, and that fofg has corresponding symmetry properties.
  if( (fftalgb==1 .and. cplex==1) .and. fftalga/=4 )then
    ABI_CHECK(nproc_fft == 1,"nproc > 1 not supported")
-   ABI_CHECK(ndat == 1,"ndat > 1 not supported")
-   call sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
+   do idat=1,ndat
+     call sg_fft_rc(cplex,fofg(1,1,idat),fofr(1,idat),isign,nfft,ngfft)
+   end do
  end if
 
  100 call timab(260+tim_fourdp,2,tsec)
@@ -3417,7 +3415,7 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
    write(message, '(a,a,a,i5,a,a)' )&
 &   'The allowed values of fftalg(A) are 1, 2, 3, and 4 .',ch10,&
 &   'The actual value of fftalg(A) is',fftalga,ch10,&
-&   'Action : check the value of fftalg in your input file.'
+&   'Action: check the value of fftalg in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -3521,6 +3519,7 @@ subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
    call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
+ ! TODO
  !case (FFT_DFTI)
  !   call dfti_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
  !&    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)

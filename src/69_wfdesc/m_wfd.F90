@@ -389,6 +389,9 @@ MODULE m_wfd
    ! The MPI_type structured datatype gather different information about the MPI parallelisation :
    ! number of processors, the index of my processor, the different groups of processors, etc ...
 
+ !contains
+   !procedure :: get_ur => wfd_get_ur
+   !procedure :: wfd_get_ur
  end type wfd_t
 
  public :: wfd_init                ! Main creation method.
@@ -628,28 +631,14 @@ subroutine kdata_free_0D(Kdata)
 !************************************************************************
 
  !@kdata_t
- if (allocated(Kdata%kg_k)) then
-   ABI_FREE(Kdata%kg_k)
- end if
- if (allocated(Kdata%igfft0)) then
-   ABI_FREE(Kdata%igfft0)
- end if
- if (allocated(Kdata%gbound)) then
-   ABI_FREE(Kdata%gbound)
- end if
+ ABI_SFREE(Kdata%kg_k)
+ ABI_SFREE(Kdata%igfft0)
+ ABI_SFREE(Kdata%gbound)
 
- if (allocated(Kdata%ph3d)) then
-   ABI_FREE(Kdata%ph3d)
- end if
- if (allocated(Kdata%phkxred)) then
-   ABI_FREE(Kdata%phkxred)
- end if
- if (allocated(Kdata%fnl_dir0der0)) then
-   ABI_FREE(Kdata%fnl_dir0der0)
- end if
- if (allocated(Kdata%ylm)) then
-   ABI_FREE(Kdata%ylm)
- end if
+ ABI_SFREE(Kdata%ph3d)
+ ABI_SFREE(Kdata%phkxred)
+ ABI_SFREE(Kdata%fnl_dir0der0)
+ ABI_SFREE(Kdata%ylm)
 
 end subroutine kdata_free_0D
 !!***
@@ -1126,36 +1115,16 @@ subroutine wfd_free(Wfd)
 
  !@wfd_t
  ! integer.
- if (allocated(Wfd%gvec)) then
-   ABI_FREE(Wfd%gvec)
- end if
- if (allocated(Wfd%irottb)) then
-   ABI_FREE(Wfd%irottb)
- end if
- if (allocated(Wfd%istwfk)) then
-   ABI_FREE(Wfd%istwfk)
- end if
- if (allocated(Wfd%nband)) then
-   ABI_FREE(Wfd%nband)
- end if
- if (allocated(Wfd%indlmn)) then
-   ABI_FREE(Wfd%indlmn)
- end if
- if (allocated(Wfd%nlmn_atm)) then
-   ABI_FREE(Wfd%nlmn_atm)
- end if
- if (allocated(Wfd%nlmn_sort)) then
-   ABI_FREE(Wfd%nlmn_sort)
- end if
- if (allocated(Wfd%nlmn_type)) then
-   ABI_FREE(Wfd%nlmn_type)
- end if
- if (allocated(Wfd%npwarr)) then
-   ABI_FREE(Wfd%npwarr)
- end if
- if (allocated(Wfd%bks_tab)) then
-   ABI_FREE(Wfd%bks_tab)
- end if
+ ABI_SFREE(Wfd%gvec)
+ ABI_SFREE(Wfd%irottb)
+ ABI_SFREE(Wfd%istwfk)
+ ABI_SFREE(Wfd%nband)
+ ABI_SFREE(Wfd%indlmn)
+ ABI_SFREE(Wfd%nlmn_atm)
+ ABI_SFREE(Wfd%nlmn_sort)
+ ABI_SFREE(Wfd%nlmn_type)
+ ABI_SFREE(Wfd%npwarr)
+ ABI_SFREE(Wfd%bks_tab)
 
  ! Free the MPI communicators.
  if (allocated(Wfd%bks_comm)) then
@@ -1164,18 +1133,12 @@ subroutine wfd_free(Wfd)
  end if
 
  ! real arrays.
- if (allocated(Wfd%kibz)) then
-   ABI_FREE(Wfd%kibz)
- end if
- if (allocated(Wfd%ph1d)) then
-   ABI_FREE(Wfd%ph1d)
- end if
- !
+ ABI_SFREE(Wfd%kibz)
+ ABI_SFREE(Wfd%ph1d)
+
  ! logical arrays.
- if (allocated(Wfd%keep_ur)) then
-   ABI_FREE(Wfd%keep_ur)
- end if
- !
+ ABI_SFREE(Wfd%keep_ur)
+
  ! datatypes.
  if (allocated(Wfd%Kdata)) then
    call kdata_free(Wfd%Kdata)

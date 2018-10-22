@@ -501,10 +501,9 @@ program fftprof
  ABI_DT_FREE(Ftest)
  call fftprof_free(Ftprof)
  ABI_DT_FREE(Ftprof)
+ call destroy_mpi_enreg(MPI_enreg)
 
  call flush_unit(std_out)
-
- call destroy_mpi_enreg(MPI_enreg)
 
  call abinit_doctor("__fftprof")
 
