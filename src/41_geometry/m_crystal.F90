@@ -268,7 +268,7 @@ CONTAINS  !=====================================================================
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb
+!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_ddb
 !!      m_effective_potential,m_effective_potential_file,m_tdep_abitypes,mover
 !!      optic,outscfcv,respfn,vtorho
 !!
@@ -961,7 +961,7 @@ end subroutine crystal_point_group
 
 !----------------------------------------------------------------------
 
-!!****f* m_crystal_io/crystal_ncwrite
+!!****f* m_crystal/crystal_ncwrite
 !! NAME
 !! crystal_ncwrite
 !!
@@ -1102,7 +1102,7 @@ end function crystal_ncwrite
 
 !----------------------------------------------------------------------
 
-!!****f* m_crystal_io/crystal_ncwrite_path
+!!****f* m_crystal/crystal_ncwrite_path
 !! NAME
 !! crystal_ncwrite_path
 !!

@@ -32,7 +32,6 @@ MODULE m_gruneisen
  use m_abicore
  use m_xmpi
  use m_crystal
- use m_crystal_io
  use m_tetrahedron
  use m_ddb
  use m_ddb_hdr

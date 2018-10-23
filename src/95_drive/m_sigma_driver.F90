@@ -57,7 +57,6 @@ module m_sigma_driver
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_crystal,       only : crystal_t, crystal_print
- use m_crystal_io,    only : crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
 &                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              enclose_degbands, get_gaps, gaps_free, gaps_t, gaps_print
@@ -2771,7 +2770,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  ! Create crystal_t data type
- call crystal_from_hdr(Cryst,Hdr_wfk,timrev,remove_inv)
+ cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
  call crystal_print(Cryst)
 
  if (Sigp%npwwfn>ng_kss) then ! cannot use more G"s for the wfs than those stored on file

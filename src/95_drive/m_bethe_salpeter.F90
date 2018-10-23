@@ -54,7 +54,6 @@ module m_bethe_salpeter
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
  use m_fft,             only : fourdp
  use m_crystal,         only : crystal_t, crystal_print
- use m_crystal_io,      only : crystal_from_hdr
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
@@ -1199,7 +1198,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
             ! 1 => do not use time-reversal symmetry
             ! 2 => take advantage of time-reversal symmetry
 
- call crystal_from_hdr(Cryst,Hdr_wfk,timrev,remove_inv)
+ cryst = hdr_get_crystal(Hdr_wfk,timrev,remove_inv)
  call crystal_print(Cryst)
  !
  ! Setup of the k-point list and symmetry tables in the  BZ -----------------------------------

@@ -35,7 +35,6 @@ MODULE m_ioarr
  use m_errors
  use m_nctk
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_hdr
  use m_pawrhoij
@@ -934,7 +933,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 ! *************************************************************************
 
  timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
- call crystal_from_hdr(crystal, hdr, timrev)
+ crystal = hdr_get_crystal(hdr, timrev)
 
  if (present(eigen)) then
      mband = maxval(hdr%nband)

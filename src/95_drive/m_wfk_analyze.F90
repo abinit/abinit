@@ -34,7 +34,6 @@ module m_wfk_analyze
  use m_errors
  use m_hdr
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_tetrahedron
  use m_nctk
@@ -216,7 +215,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
  call hdr_vs_dtset(wfk0_hdr,dtset)
 
- call crystal_from_hdr(cryst,wfk0_hdr,timrev2)
+ cryst = hdr_get_crystal(wfk0_hdr, timrev2)
  call crystal_print(cryst,header="crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)

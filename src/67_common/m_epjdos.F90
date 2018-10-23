@@ -34,7 +34,6 @@ module m_epjdos
  use m_cgtools
  use m_atomdata
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_nctk
 #ifdef HAVE_NETCDF

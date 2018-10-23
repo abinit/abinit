@@ -35,7 +35,6 @@ module m_gstate
  use libxc_functionals
  use m_exit
  use m_crystal
- use m_crystal_io
  use m_scf_history
  use m_abimover
  use m_wffile
@@ -1443,7 +1442,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
 
    ! Write tetrahedron tables.
-   call crystal_from_hdr(cryst, hdr, 2)
+   cryst = hdr_get_crystal(hdr, 2)
    tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
    dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
    if (ierr == 0) then

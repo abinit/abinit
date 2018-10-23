@@ -33,7 +33,6 @@ module m_frohlichmodel
  use m_abicore
  use m_errors
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_efmas_defs
  use m_ifc

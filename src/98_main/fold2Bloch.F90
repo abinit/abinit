@@ -47,7 +47,6 @@ program fold2Bloch
  use m_nctk
  use m_hdr
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_fold2block
 #ifdef HAVE_NETCDF
@@ -144,7 +143,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 
 #ifdef HAVE_NETCDF
  timrev = 2; if (any(wfk%hdr%kptopt == [3, 4])) timrev = 1
- call crystal_from_hdr(cryst, wfk%hdr, timrev)
+ cryst = hdr_get_crystal(wfk%hdr, timrev)
 
  NCF_CHECK(nctk_open_create(ncid, strcat(seedname, "_FOLD2BLOCH.nc"), xmpi_comm_self))
  fform = fform_from_ext("FOLD2BLOCH.nc")

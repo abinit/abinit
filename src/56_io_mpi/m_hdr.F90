@@ -42,6 +42,7 @@ MODULE m_hdr
  use m_xmpi
  use m_abicore
  use m_errors
+ use m_crystal
  use m_wffile
  use m_sort
 #ifdef HAVE_MPI2
@@ -97,6 +98,7 @@ MODULE m_hdr
  public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
  public :: hdr_check               ! Compare two headers.
  public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
+ public :: hdr_get_crystal
 
 ! Generic interface of the routines hdr_skip
  interface hdr_skip
@@ -4741,6 +4743,65 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!***
 
 end subroutine hdr_vs_dtset
+!!***
+
+!!****f* m_hdr/hdr_get_crystal
+!! NAME
+!!  hdr_get_crystal
+!!
+!! FUNCTION
+!!  Initializes a crystal_t data type starting from the abinit header.
+!!
+!! INPUTS
+!!  hdr<hdr_type>=the abinit header
+!!  timrev ==2 => take advantage of time-reversal symmetry
+!!         ==1 ==> do not use time-reversal symmetry
+!!  remove_inv [optional]= if .TRUE. the inversion symmetry is removed from the set of operations
+!!  even if it is present in the header
+!!
+!! OUTPUT
+!!  cryst<crystal_t>= the data type filled with data reported in the abinit header
+!!
+!! TODO
+!!  Add information on the use of time-reversal in the Abinit header.
+!!
+!! PARENTS
+!!      cut3d,eph,fold2Bloch,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mrgscr,setup_bse,setup_screening,setup_sigma,wfk_analyze
+!!
+!! CHILDREN
+!!      atomdata_from_znucl,crystal_init
+!!
+!! SOURCE
+
+type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
+
+!Arguments ------------------------------------
+ type(hdr_type),intent(in) :: hdr
+ integer,intent(in) :: timrev
+ logical,optional,intent(in) :: remove_inv
+
+!Local variables-------------------------------
+ integer :: space_group
+ logical :: rinv,use_antiferro
+! *********************************************************************
+
+ rinv=.FALSE.; if (PRESENT(remove_inv)) rinv=remove_inv
+ use_antiferro = (hdr%nspden==2.and.hdr%nsppol==1)
+
+ ! Consistency check
+ ABI_CHECK(any(timrev == [1, 2]),"timrev should be in (1|2)")
+ if (use_antiferro) then
+   ABI_CHECK(ANY(hdr%symafm==-1),"Wrong nspden, nsppol, symafm.")
+ end if
+
+ space_group=0 !FIXME not known
+
+ call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
+& hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
+& symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
+
+end function hdr_get_crystal
 !!***
 
 end module m_hdr

@@ -76,7 +76,6 @@ program mrgscr
  use m_numeric_tools,       only : iseven, cspint
  use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
- use m_crystal_io,          only : crystal_from_hdr
  use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
  use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
  use m_vcoul,               only : vcoul_t, vcoul_init, vcoul_free
@@ -290,7 +289,7 @@ program mrgscr
  end if
 
  timrev=2 ! This should be read from kptopt
- call crystal_from_hdr(Cryst,HScr0%Hdr,timrev,remove_inv=.FALSE.)
+ cryst = hdr_get_crystal(HScr0%Hdr,timrev,remove_inv=.FALSE.)
 
  kptopt=1
  call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)

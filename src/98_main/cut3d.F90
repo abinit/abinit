@@ -63,7 +63,6 @@ program cut3d
  use m_hdr
  use m_cut3d
  use m_crystal
- use m_crystal_io
 
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
@@ -759,7 +758,7 @@ program cut3d
          case (15)
            ! Write netcdf file.
            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-           call crystal_from_hdr(cryst, hdr, timrev)
+           cryst = hdr_get_crystal(hdr, timrev)
            call ngfft_seq(ngfft, [nr1, nr2, nr3])
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))

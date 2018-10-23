@@ -50,7 +50,6 @@ MODULE m_ddk
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
  use m_crystal,       only : crystal_t
- use m_crystal_io,    only : crystal_from_hdr
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
 
@@ -210,7 +209,7 @@ subroutine ddk_init(ddk, paths, comm)
  ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
 
  ! Init crystal_t
- call crystal_from_hdr(ddk%cryst, hdrs(1), timrev2)
+ ddk%cryst = hdr_get_crystal(hdrs(1), timrev2)
 
  ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
  call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
@@ -309,7 +308,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
 
  !read crystal
- call crystal_from_hdr(cryst, in_wfk%hdr, 2)
+ cryst = hdr_get_crystal(in_wfk%hdr, 2)
 
  !read ebands
  ebands = wfk_read_ebands(wfk_path,comm)

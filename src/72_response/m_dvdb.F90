@@ -54,7 +54,6 @@ module m_dvdb
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp
  use m_crystal,       only : crystal_t, crystal_print
- use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
@@ -471,7 +470,7 @@ subroutine dvdb_init(db, path, comm)
  end if
 
  ! Init crystal_t from the hdr read from file.
- call crystal_from_hdr(db%cryst, db%hdr_ref, timrev2)
+ db%cryst = hdr_get_crystal(db%hdr_ref, timrev2)
 
  ! Init Born effective charges
  ABI_CALLOC(db%zeff, (3, 3, db%natom))
