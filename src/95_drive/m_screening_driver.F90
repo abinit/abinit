@@ -52,7 +52,7 @@ module m_screening_driver
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_crystal,       only : crystal_free, crystal_t, crystal_print
- use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
+ use m_crystal_io,    only : crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
                              ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
@@ -1225,7 +1225,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
-         NCF_CHECK(crystal_ncwrite(cryst, unt_susc))
+         NCF_CHECK(cryst%ncwrite(unt_susc))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_susc))
 #endif
        else
@@ -1448,7 +1448,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
-         NCF_CHECK(crystal_ncwrite(cryst, unt_em1))
+         NCF_CHECK(cryst%ncwrite(unt_em1))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_em1))
 #endif
        else

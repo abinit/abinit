@@ -50,7 +50,6 @@ module m_phpi
  use m_kg,              only : getph
  use m_fftcore,         only : get_kg
  use m_crystal,         only : crystal_t
- use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : findqg0
  use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg, wfd_read_wfk
  use m_pawang,          only : pawang_type
@@ -560,16 +559,13 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_FREE(bras_kq)
      ABI_FREE(kets_k)
      ABI_FREE(h1kets_kq)
-
    end do ! ikfs
 
    call destroy_rf_hamiltonian(rf_hamkq)
-
  end do ! spin
 
  ! Gather the k-points computed by all processes
  call xmpi_sum_master(Pi_ph,master,comm,ierr)
-
 
  ! Output the results
  if (i_am_master) then
@@ -578,9 +574,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  end if
 
 #ifdef HAVE_NETCDF
- if (i_am_master) then
-   call out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
- end if
+ if (i_am_master) call out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 #endif
 
  ! Free memory
@@ -592,7 +586,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
  ! Free memory
-
  ABI_FREE(gkk)
  ABI_FREE(gkk_m)
  ABI_FREE(v1scf)
@@ -722,8 +715,7 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
 
  ! Write information of the crystal
- ncerr = crystal_ncwrite(cryst, ncid)
- NCF_CHECK(ncerr)
+ NCF_CHECK(cryst%ncwrite(ncid))
 
  ! Write the dimensions specified by ETSF
  one_dim = 1
@@ -733,18 +725,18 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  natom = natom3 / 3
 
  ncerr = nctk_def_dims(ncid, [&
-& nctkdim_t('current_one_dim', one_dim), &
-& nctkdim_t('number_of_atoms', natom), &
-& nctkdim_t('number_of_cartesian_directions', cart_dir), &
-& nctkdim_t('number_of_perturbations', natom3), &
-& nctkdim_t('cplex',cplex)], defmode=.True.)
+   nctkdim_t('current_one_dim', one_dim), &
+   nctkdim_t('number_of_atoms', natom), &
+   nctkdim_t('number_of_cartesian_directions', cart_dir), &
+   nctkdim_t('number_of_perturbations', natom3), &
+   nctkdim_t('cplex',cplex)], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ! Create the arrays
  ncerr = nctk_def_arrays(ncid, [&
- nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
- nctkarr_t('phonon_frequencies', "dp", 'number_of_perturbations'), &
- nctkarr_t('phonon_self_energy_realpart', "dp", 'number_of_perturbations')])
+   nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
+   nctkarr_t('phonon_frequencies', "dp", 'number_of_perturbations'), &
+   nctkarr_t('phonon_self_energy_realpart', "dp", 'number_of_perturbations')])
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_atomic_units(ncid, 'phonon_frequencies'))
@@ -758,7 +750,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
  ! Close file
  NCF_CHECK(nf90_close(ncid))
-
 
 #else
  MSG_ERROR("NETCDF support required to write Pi.nc file.")

@@ -32,7 +32,6 @@ module m_phonons
  use m_tetrahedron
  use m_nctk
  use iso_c_binding
- use m_crystal_io
  use m_atprj
  use m_sortph
  use m_ddb
@@ -1023,7 +1022,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 #ifdef HAVE_NETCDF
      ! TODO: make it optional?
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
      NCF_CHECK(nf90_close(ncid))
 #endif
@@ -1968,7 +1967,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
@@ -3323,7 +3322,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
    ! Should centralize everything in a single routine
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(cryst%ncwrite(ncid))
    call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
    NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))

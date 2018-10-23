@@ -48,7 +48,6 @@ module m_gkk
  use m_fftcore,        only : ngfft_seq, get_kg
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : findqg0
  use m_cgtools,        only : dotprod_g
  use m_kg,             only : getph
@@ -345,7 +344,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      fname = strcat(dtfil%filnam_ds(4), "_GKQ.nc")
 #ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKQ file")
-     NCF_CHECK(crystal_ncwrite(cryst, ncid))
+     NCF_CHECK(cryst%ncwrite(ncid))
      ! Write bands on k+q mesh.
      NCF_CHECK(ebands_ncwrite(ebands_kq, ncid))
      ncerr = nctk_def_dims(ncid, [nctkdim_t('number_of_phonon_modes', natom3)], defmode=.True.)
@@ -520,7 +519,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 #ifdef HAVE_NETCDF
      if (i_am_master) then
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-       NCF_CHECK(crystal_ncwrite(cryst, ncid))
+       NCF_CHECK(cryst%ncwrite(ncid))
        NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
        call gkk_ncwrite(gkk2d,qpt,1.0_dp, ncid)
        NCF_CHECK(nf90_close(ncid))
@@ -641,7 +640,7 @@ subroutine ncwrite_v1qnu(dvdb, cryst, ifc, nqlist, qlist, prtvol, path)
  ! Create netcdf file.
 #ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_create(ncid, path, comm))
- NCF_CHECK(crystal_ncwrite(cryst, ncid))
+ NCF_CHECK(cryst%ncwrite(ncid))
 
  ! Add other dimensions.
  ncerr = nctk_def_dims(ncid, [ &

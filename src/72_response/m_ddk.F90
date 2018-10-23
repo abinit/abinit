@@ -50,7 +50,7 @@ MODULE m_ddk
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
  use m_crystal,       only : crystal_t, crystal_free
- use m_crystal_io,    only : crystal_from_hdr, crystal_ncwrite
+ use m_crystal_io,    only : crystal_from_hdr
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
 
@@ -478,7 +478,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
        hdr_tmp%pertcase = (cryst%natom*3)+ii
        NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-       NCF_CHECK(crystal_ncwrite(cryst, ncid))
+       NCF_CHECK(cryst%ncwrite(ncid))
        NCF_CHECK(ebands_ncwrite(ebands, ncid))
        ncerr = nctk_def_arrays(ncid, [ &
          nctkarr_t('h1_matrix_elements', "dp", &

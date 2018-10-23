@@ -57,7 +57,7 @@ module m_sigma_driver
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_crystal,       only : crystal_free, crystal_t, crystal_print, idx_spatial_inversion
- use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
+ use m_crystal_io,    only : crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
 &                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              enclose_degbands, get_gaps, gaps_free, gaps_t, gaps_print
@@ -2329,7 +2329,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (wfd_iam_master(Wfd)) then
      NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), '_SIGRES.nc'), xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
-     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
+     NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(KS_Bst, ncid))
      NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid))
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.

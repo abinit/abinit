@@ -60,7 +60,6 @@ module m_sigmaph
  use m_cgtools,        only : dotprod_g
  use m_cgtk,           only : cgtk_rotate
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_be
  use m_double_grid,    only : double_grid_t
@@ -2212,7 +2211,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
    ncid = new%ncid
 
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    NCF_CHECK(edos_ncwrite(edos, ncid))
 

@@ -61,7 +61,6 @@ module m_phgamma
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam, asrif9
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
  use m_special_funcs,  only : fermi_dirac
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
@@ -2962,7 +2961,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
  ! Open the netcdf file used to store the results of the calculation.
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(prefix, "_ELIASHBERG.nc"), xmpi_comm_self))
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(cryst%ncwrite(ncid))
 
    ! Define dimensions.
    ncerr = nctk_def_dims(ncid, [&
@@ -3901,7 +3900,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! Open the netcdf file used to store the results of the calculation.
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_A2F.nc"), xmpi_comm_self))
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    NCF_CHECK(edos_ncwrite(edos, ncid))
 

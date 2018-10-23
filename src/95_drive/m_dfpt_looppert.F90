@@ -57,7 +57,6 @@ module m_dfpt_loopert
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
  use m_crystal,    only : crystal_init, crystal_free, crystal_t
- use m_crystal_io, only : crystal_ncwrite
  use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
  use m_fft,        only : fourdp
  use m_fftcore,    only : fftcore_set_mixprec
@@ -1999,7 +1998,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! Write the netCDF file.
      fname = strcat(gkkfilnam,".nc")
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
@@ -2060,7 +2059,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      hdr_tmp%qptn = dtset%qptn(1:3)
      NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
      call hdr_free(hdr_tmp)
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
      ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t('h1_matrix_elements', "dp", &
@@ -2340,7 +2339,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call eigr2d_init(eig2nkq,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
 #ifdef HAVE_NETCDF
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
-         NCF_CHECK(crystal_ncwrite(crystal, ncid))
+         NCF_CHECK(crystal%ncwrite(ncid))
          NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
          call eigr2d_ncwrite(eigr2d,dtset%qptn(:),dtset%wtq,ncid)
          NCF_CHECK(nf90_close(ncid))
@@ -2352,7 +2351,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
 #ifdef HAVE_NETCDF
            NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
-           NCF_CHECK(crystal_ncwrite(crystal, ncid))
+           NCF_CHECK(crystal%ncwrite(ncid))
            NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
            call eigr2d_ncwrite(eigi2d,dtset%qptn(:),dtset%wtq,ncid)
            NCF_CHECK(nf90_close(ncid))
@@ -2394,7 +2393,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      !write(std_out,*)' dfpt_looppert: will write ',fname
 #ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
 !    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
      call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
      NCF_CHECK(nf90_close(ncid))

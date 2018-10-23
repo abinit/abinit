@@ -54,7 +54,7 @@ module m_bethe_salpeter
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
  use m_fft,             only : fourdp
  use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
- use m_crystal_io,      only : crystal_ncwrite, crystal_from_hdr
+ use m_crystal_io,      only : crystal_from_hdr
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
@@ -78,8 +78,7 @@ module m_bethe_salpeter
  use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                              pawrhoij_free, pawrhoij_get_nspden, symrhoij
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init

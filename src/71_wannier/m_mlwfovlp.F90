@@ -52,7 +52,6 @@ module m_mlwfovlp
  use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_fftcore,  only : sphereboundary
  use m_crystal,  only : crystal_t
- use m_crystal_io, only : crystal_ncwrite
  use m_ebands,   only : ebands_ncwrite
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type, simp_gen
@@ -1196,7 +1195,7 @@ contains
 
      NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
      NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
      ncerr = nctk_def_dims(ncid, [ &

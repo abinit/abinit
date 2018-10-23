@@ -30,13 +30,20 @@ MODULE m_crystal
  use m_errors
  use m_abicore
  use m_atomdata
+ use m_xmpi
+ use m_nctk
+ use iso_c_binding
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
+ use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
+ use m_fstrings,       only : int2char10, sjoin, yesno
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
  use m_geometry,       only : metric, xred2xcart, remove_inversion, getspinrot
  use m_io_tools,       only : open_file
- use m_fstrings,       only : int2char10
 
  implicit none
 
@@ -63,7 +70,6 @@ MODULE m_crystal
   !integer :: bravais(11)                    ! bravais(1)=iholohedry, bravais(2)=center
                                              ! bravais(3:11)=coordinates of rprim in the axes of the conventional
                                              ! bravais lattice (*2 if center/=0)
-
   !integer :: vacuum(3)
   !integer,pointer ptsymrel(:,:,:)
   !ptsymrel(3,3,nptsym)
@@ -177,6 +183,10 @@ MODULE m_crystal
    ! title(ntypat)
    ! The content of first line read from the psp file
 
+ contains
+   procedure :: ncwrite => crystal_ncwrite
+   procedure :: ncwrite_path => crystal_ncwrite_path
+   !procedure :: free => crystal_free
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
@@ -190,6 +200,9 @@ MODULE m_crystal
  public :: symbol_type             ! Return the atomic symbol from the itypat index.
  public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: crystal_point_group     ! Return the symmetries of the point group of the crystal.
+ public :: crystal_ncwrite         ! Dump the object in a netcdf file associated to a ncid.
+ public :: crystal_ncwrite_path    ! Dump the object to file.
+
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
 !!***
@@ -283,7 +296,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  Cryst%natom  = natom
  Cryst%ntypat = ntypat
  Cryst%npsp   = npsp
-
  Cryst%space_group = space_group
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -315,8 +327,8 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 
  ABI_MALLOC(Cryst%title,(ntypat))
  Cryst%title = title
- !
- ! === Generate index table of atoms, in order for them to be used type after type ===
+
+ ! Generate index table of atoms, in order for them to be used type after type.
  ABI_MALLOC(Cryst%atindx,(natom))
  ABI_MALLOC(Cryst%atindx1,(natom))
  ABI_MALLOC(Cryst%nattyp,(ntypat))
@@ -353,7 +365,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
        Cryst%symrec(:,:,isym)=symrec
      end do
    else
-     ! * Remove inversion, just to be compatible with old GW implementation
+     ! Remove inversion, just to be compatible with old GW implementation
      ! TODO should be removed!
      call remove_inversion(nsym,symrel,tnons,nsym_noI,symrel_noI,tnons_noI,pinv)
      Cryst%nsym=nsym_noI
@@ -364,8 +376,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
      Cryst%symrel=symrel_noI
      Cryst%tnons=tnons_noI
      if (ANY(symafm==-1)) then
-       msg = 'Solve the problem with inversion before adding ferromagnetic symmetries '
-       MSG_BUG(msg)
+       MSG_BUG('Solve the problem with inversion before adding ferromagnetic symmetries')
      end if
      Cryst%symafm=1
      Cryst%use_antiferro=use_antiferro
@@ -378,7 +389,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    end if
 
  else
-   ! * Find symmetries symrec,symrel,tnons,symafm
+   ! Find symmetries symrec,symrel,tnons,symafm
    ! TODO This should be a wrapper around the abinit library whose usage is not so straightforward
    MSG_BUG('NotImplememented: symrel, symrec and tnons should be specied')
  end if
@@ -396,7 +407,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  Cryst%indsym=indsym
  ABI_FREE(indsym)
 
- ! === Rotation in spinor space ===
+ ! Rotations in spinor space
  ABI_MALLOC(Cryst%spinrot,(4,Cryst%nsym))
  do isym=1,Cryst%nsym
    call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
@@ -634,10 +645,10 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
  integer,intent(in) :: typat(natom)
  character(len=5),intent(out) :: symbols(natom)
  character(len=3) :: powerchar
+
 !Local variables-------------------------------
 !scalar
  integer :: ia,ii,itypat,jj
-!arrays
 ! *************************************************************************
 
 !  Fill the symbols array
@@ -940,6 +951,200 @@ end subroutine crystal_point_group
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_crystal_io/crystal_ncwrite
+!! NAME
+!! crystal_ncwrite
+!!
+!! FUNCTION
+!! Output system geometry to a file, using the NETCDF file format and ETSF I/O.
+!! Data are taken from the crystal_t object.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Object defining the unit cell and its symmetries.
+!!  ncid=NC file handle.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! NOTES
+!!  Alchemy not treated, since crystal should be initialized at the beginning of the run.
+!!
+!! PARENTS
+!!      anaddb,eig2tot,exc_spectra,dfpt_looppert,m_haydock,m_phonons,m_shirley
+!!      outscfcv,sigma
+!!
+!! CHILDREN
+!!      atomdata_from_znucl
+!!
+!! SOURCE
+
+integer function crystal_ncwrite(cryst, ncid) result(ncerr)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ class(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: ncid
+
+#ifdef HAVE_NETCDF
+!Local variables-------------------------------
+!scalars
+ integer :: itypat
+ character(len=500) :: msg
+ character(len=etsfio_charlen) :: symmorphic
+ type(atomdata_t) :: atom
+!arrays
+ character(len=2) :: symbols(cryst%ntypat)
+ character(len=80) :: psp_desc(cryst%ntypat),symbols_long(cryst%ntypat)
+
+! *************************************************************************
+
+ ! @crystal_t
+
+ ! TODO alchemy not treated correctly
+ if (isalchemical(cryst)) then
+   write(msg,"(3a)")&
+    "Alchemical crystals are not fully supported by the netcdf format",ch10,&
+    "Important parameters (e.g. znucl, symbols) are not written with the correct value"
+   MSG_WARNING(msg)
+ end if
+
+ symmorphic = yesno(isymmorphic(cryst))
+
+ ! Define dimensions.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2),&
+   nctkdim_t("character_string_length", 80), nctkdim_t("number_of_cartesian_directions", 3),&
+   nctkdim_t("number_of_reduced_dimensions", 3), nctkdim_t("number_of_vectors", 3),&
+   nctkdim_t("number_of_atoms", cryst%natom), nctkdim_t("number_of_atom_species", cryst%ntypat),&
+   nctkdim_t("number_of_symmetry_operations", cryst%nsym)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Define variables
+ NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "space_group"]))
+
+ ncerr = nctk_def_arrays(ncid, [ &
+  ! Atomic structure and symmetry operations
+  nctkarr_t("primitive_vectors", "dp", "number_of_cartesian_directions, number_of_vectors"), &
+  nctkarr_t("reduced_symmetry_matrices", "int", &
+    "number_of_reduced_dimensions, number_of_reduced_dimensions, number_of_symmetry_operations"), &
+  nctkarr_t("reduced_symmetry_translations", "dp", "number_of_reduced_dimensions, number_of_symmetry_operations"), &
+  nctkarr_t("atom_species", "int", "number_of_atoms"), &
+  nctkarr_t("reduced_atom_positions", "dp", "number_of_reduced_dimensions, number_of_atoms"), &
+  nctkarr_t("atomic_numbers", "dp", "number_of_atom_species"), &
+  nctkarr_t("atom_species_names", "char", "character_string_length, number_of_atom_species"), &
+  nctkarr_t("chemical_symbols", "char", "symbol_length, number_of_atom_species"), &
+  nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species"), &
+  ! Atomic information.
+  nctkarr_t("valence_charges", "dp", "number_of_atom_species"), &  ! NB: This variable is not written if alchemical
+  nctkarr_t("pseudopotential_types", "char", "character_string_length, number_of_atom_species") &
+ ])
+ NCF_CHECK(ncerr)
+
+ ! Some variables require the "symmorphic" attribute.
+ NCF_CHECK(nf90_put_att(ncid, vid("reduced_symmetry_matrices"), "symmorphic", symmorphic))
+ NCF_CHECK(nf90_put_att(ncid, vid("reduced_symmetry_translations"), "symmorphic", symmorphic))
+
+ ! At this point we have an ETSF-compliant file. Add additional data for internal use in abinit.
+ ! TODO add spinat.
+ ncerr = nctk_def_arrays(ncid, nctkarr_t('symafm', "int", "number_of_symmetry_operations"))
+ NCF_CHECK(ncerr)
+
+ ! Set-up atomic symbols.
+ do itypat=1,cryst%ntypat
+   call atomdata_from_znucl(atom,cryst%znucl(itypat))
+   symbols(itypat) = atom%symbol
+   write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
+   write(psp_desc(itypat),'(2a)') &
+&    cryst%title(itypat)(1:MIN(80,LEN_TRIM(cryst%title(itypat)))),REPEAT(CHAR(0),MAX(0,80-LEN_TRIM(cryst%title(itypat))))
+ end do
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, vid("space_group"), cryst%space_group))
+ NCF_CHECK(nf90_put_var(ncid, vid("primitive_vectors"), cryst%rprimd))
+ NCF_CHECK(nf90_put_var(ncid, vid("reduced_symmetry_matrices"), cryst%symrel))
+ NCF_CHECK(nf90_put_var(ncid, vid("reduced_symmetry_translations"), cryst%tnons))
+ NCF_CHECK(nf90_put_var(ncid, vid("atom_species"), cryst%typat))
+ NCF_CHECK(nf90_put_var(ncid, vid("reduced_atom_positions"), cryst%xred))
+ NCF_CHECK(nf90_put_var(ncid, vid("atomic_numbers"), cryst%znucl(1:cryst%ntypat)))
+ NCF_CHECK(nf90_put_var(ncid, vid("atom_species_names"), symbols_long))
+ NCF_CHECK(nf90_put_var(ncid, vid("chemical_symbols"), symbols))
+ NCF_CHECK(nf90_put_var(ncid, vid('atomic_mass_units'), cryst%amu))
+ NCF_CHECK(nf90_put_var(ncid, vid("pseudopotential_types"), psp_desc))
+ if (cryst%npsp == cryst%ntypat) then
+   NCF_CHECK(nf90_put_var(ncid, vid("valence_charges"), cryst%zion))
+ end if
+
+ NCF_CHECK(nf90_put_var(ncid, vid("symafm"), cryst%symafm))
+
+#else
+ MSG_ERROR("netcdf library not available")
+#endif
+
+contains
+ integer function vid(vname)
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+ end function vid
+
+end function crystal_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal_io/crystal_ncwrite_path
+!! NAME
+!! crystal_ncwrite_path
+!!
+!! FUNCTION
+!! Output system geometry to a file, using the NETCDF file format and ETSF I/O.
+!!
+!! INPUTS
+!!  crystal<crystal_t>=Object defining the unit cell and its symmetries.
+!!  path=filename
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function crystal_ncwrite_path(crystal, path) result(ncerr)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: path
+ class(crystal_t),intent(in) :: crystal
+
+#ifdef HAVE_NETCDF
+!Local variables-------------------------------
+!scalars
+ integer :: ncid
+
+! *************************************************************************
+
+ ncerr = nf90_noerr
+ if (file_exists(path)) then
+   NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
+ else
+   ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
+   NCF_CHECK_MSG(ncerr, sjoin("creating:", path))
+ end if
+
+ NCF_CHECK(crystal_ncwrite(crystal, ncid))
+ NCF_CHECK(nf90_close(ncid))
+#endif
+
+end function crystal_ncwrite_path
+!!***
 
 !!****f* m_crystal/prt_cif
 !! NAME
