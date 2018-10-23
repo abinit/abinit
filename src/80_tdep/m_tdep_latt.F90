@@ -54,13 +54,6 @@ contains
 subroutine tdep_make_inbox(tab,natom,tol,&
 &                temp) !Optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_inbox'
-!End of the abilint section
-
   implicit none
   integer :: natom,ii,jj,iatom
   double precision :: tol
@@ -86,13 +79,6 @@ end subroutine tdep_make_inbox
 
 !=====================================================================================================
  subroutine tdep_make_latt(InVar,Lattice)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_latt'
-!End of the abilint section
 
   implicit none
 

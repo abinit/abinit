@@ -126,13 +126,6 @@ contains
        &                    ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
        &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_efg'
-!End of the abilint section
-
     implicit none
 
     !Arguments ------------------------------------
@@ -399,13 +392,6 @@ contains
   subroutine calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,typat,usepaw,&
        &                  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_fc'
-!End of the abilint section
-
     implicit none
 
     !Arguments ------------------------------------
@@ -537,13 +523,6 @@ contains
 !! SOURCE
 
 subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_ion'
-!End of the abilint section
 
   implicit none
 
@@ -780,13 +759,6 @@ end subroutine make_efg_ion
 !! SOURCE
 
 subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_el'
-!End of the abilint section
 
   implicit none
 

@@ -46,13 +46,6 @@ CONTAINS
   ! External H field. (Too simple to be called?)
   subroutine Zeeman_Heff(N,Hext, Heff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Zeeman_Heff'
-!End of the abilint section
-
     integer, intent(in) :: N
     real(dp), intent(in) :: Hext(3,N)
     real(dp), intent(out) :: Heff(3,N)
@@ -61,13 +54,6 @@ CONTAINS
 
   ! Homogeneous uniaxial single ion anistropy (not used, to be removed?)
   subroutine homo_uniaxial_MCA_Heff(N, k1 ,k1dir , ms, S, Heff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'homo_uniaxial_MCA_Heff'
-!End of the abilint section
 
     integer, intent(in) :: N
     real(dp), intent(in) :: k1(N), k1dir(3,N), ms(N), S(3,N)
@@ -80,13 +66,6 @@ CONTAINS
 
   ! Uniaxial single ion anistropy
   subroutine uniaxial_MCA_Heff(N, k1 ,k1dir , ms, S, Heff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'uniaxial_MCA_Heff'
-!End of the abilint section
 
     integer, intent(in) :: N
     real(dp), intent(in) :: k1(N), k1dir(3,N), ms(N), S(3,N)
@@ -102,13 +81,6 @@ CONTAINS
 
   ! Exchange
   subroutine exchange_Heff(Nij, N, ilist, jlist, vallist, S, ms, Heff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exchange_Heff'
-!End of the abilint section
 
     integer, intent(in):: Nij, N
     integer, intent(in)::  ilist(Nij), jlist(Nij)
@@ -138,13 +110,6 @@ CONTAINS
 
   ! DM interaction
   subroutine DMI_Heff(Nint, N, ilist, jlist, vallist, S, ms, Heff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'DMI_Heff'
-!End of the abilint section
 
     integer, intent(in):: Nint, N, ilist(:), jlist(:)
     real(dp), intent(in) :: vallist(3, Nint), S(3,N), ms(N)

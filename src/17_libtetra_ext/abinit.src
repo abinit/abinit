@@ -28,7 +28,7 @@ sources = [
  "libtetrabz_occ_mod.F90",
  "libtetrabz_polcmplx_mod.F90",
  "libtetrabz_polstat_mod.F90",
- #
+ "m_simtet.F90",
  "m_kptrank.F90",
  "m_tetrahedron.F90",
  ]

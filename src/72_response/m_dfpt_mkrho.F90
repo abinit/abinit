@@ -38,7 +38,6 @@ module m_dfpt_mkrho
  use m_fftcore,         only : sphereboundary
  use m_fft,             only : fftpac, fourwf
  use m_spacepar,        only : symrhg
- use m_dtfil,           only : status
  use m_hamiltonian,     only : gs_hamiltonian_type
  use m_pawrhoij,        only : pawrhoij_type
  use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free
@@ -122,13 +121,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & kg,kg1,mband,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
 & occ_rbz,paral_kgb,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkrho'
-!End of the abilint section
 
  implicit none
 
@@ -608,7 +600,6 @@ end subroutine dfpt_mkrho
 !!
 !! CHILDREN
 !!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
-!!      status
 !!
 !! SOURCE
 
@@ -617,13 +608,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &                  mpi_enreg,natom,nband_k,ncpgr,npw_k,npw1_k,nspinor,occ_k,&
 &                  option,pawrhoij1,prtvol,rhoaug1,tim_fourwf,wf_corrected,&
 &                  wtk_k,comm_atom,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_accrho'
-!End of the abilint section
 
  implicit none
 
@@ -684,10 +668,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    ABI_ALLOCATE(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
    do ispinor=1,nspinor
-
-     if (prtvol>=10) then
-       call status(counter,filstat,iexit,level,'density update')
-     end if
 
 !  Part devoted to the accumulation of the 0-order potential part of the 2nd-order total energy
 !  --------------------------------------------------------------------------------------------
@@ -793,9 +773,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  else ! nvloc = 4
 ! The same lines of code are in 72_response/dfpt_mkrho.F90
 ! TODO merge these lines in a single routine??!!
-   if (prtvol>=10) then
-     call status(counter,filstat,iexit,level,'density update')
-   end if
    ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
    ABI_ALLOCATE(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 

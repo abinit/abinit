@@ -170,7 +170,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
- use m_abi_etsf
  use m_nctk
  use m_hdr
  use m_plowannier
@@ -216,13 +215,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outscfcv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

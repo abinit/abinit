@@ -76,13 +76,6 @@
 
  subroutine test_unused_arg(used_arg,unused_arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_unused_arg'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -129,13 +122,6 @@
 
  subroutine test_same_actual_arg(dummy_out1,dummy_out2,used_arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_same_actual_arg'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -178,13 +164,6 @@
 !! SOURCE
 
  subroutine test_dummy(dummy_out1,used_arg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_dummy'
-!End of the abilint section
 
  implicit none
 

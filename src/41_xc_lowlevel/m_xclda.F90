@@ -83,13 +83,6 @@ contains
 subroutine xcpzca(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
 &                dvxc)                            !Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcpzca'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -259,13 +252,6 @@ end subroutine xcpzca
 
 subroutine xcspol(exc,npts,nspden,order,rspts,vxc,zeta,ndvxc,& !Mandatory arguments
 &                 dvxc)                            !Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcspol'
-!End of the abilint section
 
  implicit none
 
@@ -764,13 +750,6 @@ end subroutine xcspol
 subroutine xctetr(exc,npt,order,rhor,rspts,vxc,& !Mandatory arguments
 &                 d2vxc,dvxc)                    !Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xctetr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -936,13 +915,6 @@ end subroutine xctetr
 subroutine xcwign(exc,npt,order,rspts,vxc,& !Mandatory arguments
 &                dvxc)                           !Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcwign'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1053,13 +1025,6 @@ end subroutine xcwign
 
 subroutine xchelu(exc,npt,order,rspts,vxc,dvxc)  ! dvxc is optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xchelu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1156,13 +1121,6 @@ end subroutine xchelu
 !! SOURCE
 
 subroutine xcxalp(exc,npt,order,rspts,vxc, dvxc)  ! dvxc is optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcxalp'
-!End of the abilint section
 
  implicit none
 
@@ -1268,13 +1226,6 @@ end subroutine xcxalp
 
 subroutine xclb(grho2_updn,npts,nspden,rho_updn,vxci)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xclb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1360,13 +1311,6 @@ end subroutine xclb
 !! SOURCE
 
 subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn,ngr2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xctfw'
-!End of the abilint section
 
  implicit none
 

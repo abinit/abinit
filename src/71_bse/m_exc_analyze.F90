@@ -99,13 +99,6 @@ contains
 
 subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_plot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -451,13 +444,6 @@ end subroutine exc_plot
 !! SOURCE
 
 subroutine exc_den(BSp,BS_files,ngfft,nfftot,Kmesh,ktabr,Wfd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_den'
-!End of the abilint section
 
  implicit none
 

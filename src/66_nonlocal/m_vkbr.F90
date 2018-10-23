@@ -132,13 +132,6 @@ CONTAINS  !=====================================================================
 
 subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vkbr_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -224,13 +217,6 @@ end subroutine vkbr_init
 
 subroutine vkbr_free_0D(vkbr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vkbr_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -267,13 +253,6 @@ end subroutine vkbr_free_0D
 !! SOURCE
 
 subroutine vkbr_free_1D(vkbr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vkbr_free_1D'
-!End of the abilint section
 
  implicit none
 
@@ -338,13 +317,6 @@ end subroutine vkbr_free_1D
 !! SOURCE
 
 subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'add_vnlr_commutator'
-!End of the abilint section
 
  implicit none
 
@@ -453,13 +425,6 @@ end subroutine add_vnlr_commutator
 !! SOURCE
 
 subroutine calc_vkb(cryst,psps,kpoint,npw_k,mpw,kg_k,vkbsign,vkb,vkbd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_vkb'
-!End of the abilint section
 
  implicit none
 
@@ -616,13 +581,6 @@ end subroutine calc_vkb
 
 function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nc_ihr_comm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -727,13 +685,6 @@ end function nc_ihr_comm
 !! SOURCE
 
 subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ccgradvnl_ylm'
-!End of the abilint section
 
  implicit none
 

@@ -138,13 +138,6 @@ CONTAINS  !=====================================================================
 subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 &                ngfft,cplex,nfft,pawrhoij,rdwr,rdwrpaw,wvl_den,single_proc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioarr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -221,7 +214,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  end if
  call wrtout(std_out,message,'COLL')
 
- call wrtout(std_out,ABI_FUNC//': file name is '//TRIM(fildata),'COLL')
+ call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata),'COLL')
 
 #ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.
@@ -707,13 +700,6 @@ end subroutine ioarr
 
 subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftdatar_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -924,13 +910,6 @@ end subroutine fftdatar_write
 
 subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspden,datar,mpi_enreg,eigen)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftdatar_write_from_hdr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1033,13 +1012,6 @@ end subroutine fftdatar_write_from_hdr
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
   check_hdr, allow_interp) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_rhor'
-!End of the abilint section
 
  implicit none
 
@@ -1353,13 +1325,6 @@ end subroutine read_rhor
 
 integer function fort_denpot_skip(unit, msg) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fort_denpot_skip'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1427,13 +1392,6 @@ end function fort_denpot_skip
 
 subroutine denpot_spin_convert(denpot_in,nspden_in,denpot_out,nspden_out,fform,&
 &                              istart_in,istart_out,nelem) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'denpot_spin_convert'
-!End of the abilint section
 
  implicit none
 

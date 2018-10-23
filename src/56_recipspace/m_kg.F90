@@ -108,13 +108,6 @@ contains
 
 subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getcut'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -157,9 +150,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
    write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,a,a)' ) ch10,&
 &   ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
 &   '         ecut(hartree)=',ecut_pw+tol8,ch10,'=> whole FFT box selected'
-   if(iout/=std_out) then
-     call wrtout(iout,message,'COLL')
-   end if
+   if(iout/=std_out) call wrtout(iout,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
  else
@@ -178,9 +169,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,3x,a,f10.5)' ) ch10,&
 &     ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
 &     '         ecut(hartree)=',ecut+tol8,'=> boxcut(ratio)=',boxcut+tol8
-     if(iout/=std_out) then
-       call wrtout(iout,message,'COLL')
-     end if
+     if(iout/=std_out) call wrtout(iout,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
@@ -190,9 +179,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
 &       '  Actio: try larger ngfft or smaller ecut.',ch10,&
 &       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        MSG_ERROR(message)
      end if
 
@@ -203,9 +190,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  is sufficient for exact treatment of convolution.',ch10,&
 &       '  Such a large boxcut is a waste : you could raise ecut',ch10,&
 &       '  e.g. ecut=',effcut*0.25_dp+tol8,' Hartrees makes boxcut=2',ch10
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
 
@@ -215,9 +200,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
 &       '  Be sure to test with larger ngfft(1:3) values.',ch10
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
 
@@ -259,13 +242,6 @@ end subroutine getcut
 !! SOURCE
 
 subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getmpw'
-!End of the abilint section
 
  implicit none
 
@@ -370,13 +346,6 @@ end subroutine getmpw
 !! SOURCE
 
 subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkkin'
-!End of the abilint section
 
  implicit none
 
@@ -536,13 +505,6 @@ end subroutine mkkin
 subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 & mode_paral,mpi_enreg,mpw,npwarr,npwtot,nsppol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpgio'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -565,10 +527,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
  real(dp) :: kpoint(3)
 
 ! *************************************************************************
-
-!DEBUG
-!write(std_out,*)' kpgio : enter '
-!ENDDEBUG
 
 !Define me
  me=mpi_enreg%me_kpt
@@ -640,9 +598,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if
 
- if (mpi_enreg%nproc>1) then
-   call wrtout(std_out,' kpgio: loop on k-points done in parallel','COLL')
- end if
+ !if (mpi_enreg%nproc>1) call wrtout(std_out,' kpgio: loop on k-points done in parallel','COLL')
 
 !XG030513 MPIWF : now, one should sum npwarr over all processors
 !of the WF group, to get npwtot (to be spread on all procs of the WF group
@@ -658,10 +614,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
      end if
    end if
  end do
-
-!DEBUG
-!write(std_out,*)' kpgio : exit '
-!ENDDEBUG
 
 end subroutine kpgio
 !!***
@@ -700,13 +652,6 @@ end subroutine kpgio
 !! SOURCE
 
 subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1d3d'
-!End of the abilint section
 
  implicit none
 
@@ -820,13 +765,6 @@ end subroutine ph1d3d
 
 subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -920,13 +858,6 @@ end subroutine getph
 !! SOURCE
 
 subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpgstr'
-!End of the abilint section
 
  implicit none
 
@@ -1044,13 +975,6 @@ end subroutine kpgstr
 
 subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkkpg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1160,13 +1084,6 @@ end subroutine mkkpg
 
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & kg,kgindex,mpi_enreg,npw_k,pwind_k1,symrec)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkpwind_k'
-!End of the abilint section
 
   implicit none
 
@@ -1311,13 +1228,6 @@ end subroutine mkpwind_k
 !! SOURCE
 
 subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mknucdipmom_k'
-!End of the abilint section
 
   implicit none
 

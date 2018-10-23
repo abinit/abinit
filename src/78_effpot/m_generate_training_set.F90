@@ -96,13 +96,6 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
  use m_supercell, only : supercell_type
  use m_geometry, only : xcart2xred
  use m_phonons ,only :thermal_supercell_make,thermal_supercell_free
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'generate_training_set'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------

@@ -166,13 +166,6 @@ CONTAINS
 
 subroutine init_results_img(natom,npspalch,nsppol,ntypalch,ntypat,results_img)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_img'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -250,13 +243,6 @@ end subroutine init_results_img
 !! SOURCE
 
 subroutine destroy_results_img(results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_img'
-!End of the abilint section
 
  implicit none
 
@@ -340,13 +326,6 @@ end subroutine destroy_results_img
 
 subroutine nullify_results_img(results_img)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nullify_results_img'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -401,13 +380,6 @@ end subroutine nullify_results_img
 !! SOURCE
 
 subroutine copy_results_img(results_img_in,results_img_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_results_img'
-!End of the abilint section
 
  implicit none
 
@@ -520,13 +492,6 @@ end subroutine copy_results_img
 
 subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 &                 master,allgather,only_one_per_img) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gather_results_img'
-!End of the abilint section
 
  implicit none
 
@@ -812,13 +777,6 @@ end subroutine gather_results_img
 subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
 &                              master,allgather,only_one_per_img) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gather_array_img_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -977,13 +935,6 @@ end subroutine gather_array_img_1D
 
 subroutine gather_array_img_2D(array_img,array_img_all,mpi_enreg,&
 &                              master,allgather,only_one_per_img) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gather_array_img_2D'
-!End of the abilint section
 
  implicit none
 
@@ -1145,13 +1096,6 @@ end subroutine gather_array_img_2D
 subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
 &                            master,only_one_per_img) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scatter_array_img'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1304,13 +1248,6 @@ end subroutine scatter_array_img
 !! SOURCE
 
 subroutine get_geometry_img(etotal,natom,nimage,results_img,fcart,rprimd,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_geometry_img'
-!End of the abilint section
 
  implicit none
 

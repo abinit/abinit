@@ -89,13 +89,6 @@ contains
 
 subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkinp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -807,10 +800,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
-   ! eph variables
-   if (optdriver==RUNL_EPH) then
-     cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,7,[0,1,2,3,4,5,6],iout)
+   !  eph variables
+   if (optdriver == RUNL_EPH) then
+     cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
+         10, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
@@ -818,14 +812,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
      end if
-
-     if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then
-       MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
+     if (dt%eph_task==-5) then
+       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
+
+     !if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then
+     !  MSG_ERROR_NOSTOP('EPH code does not yet support istwfk != 1. Regenerate WFK with istwfk = *1', ierr)
+     !end if
 
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_frohlichm',dt%eph_frohlichm,2,[0,1],iout)
-
    end if
 
 !  exchmix
@@ -2944,10 +2940,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  symsigma
-   if (dt%symsigma/=0.and.dt%symsigma/=1.and.dt%symsigma/=2) then
+   if (all(dt%symsigma /= [0, 1, -1])) then
      write(message, '(a,i0,a,a,a,a)' )&
-&     'symsigma  was input as',dt%symsigma,ch10,&
-&     'Input value must be 0, 1, or 2.',ch10,&
+&     'symsigma was input as ',dt%symsigma,ch10,&
+&     'Input value must be 0, 1, or -1.',ch10,&
 &     'Action: modify value of symsigma in input file.'
      MSG_ERROR_NOSTOP(message, ierr)
    end if

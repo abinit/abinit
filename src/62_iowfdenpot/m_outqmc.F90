@@ -87,13 +87,6 @@ contains
 
 subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outqmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -301,7 +294,7 @@ subroutine outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,res
  tmpr=r2s((results_gs%energies%e_localpsp+results_gs%energies%e_corepsp),'(f24.14)')
  write(io,'(1x,a)')trim(tmpr)
  write(io,"('Non-local potential energy')")
- tmpr=r2s(results_gs%energies%e_nonlocalpsp,'(f24.14)')
+ tmpr=r2s(results_gs%energies%e_nlpsp_vfock,'(f24.14)')
  write(io,'(1x,a)')trim(tmpr)
  write(io,"('Electron-electron energy (Hartree Energy + Exchange-Correlation Energy)')")
  tmpr=r2s((results_gs%energies%e_hartree+results_gs%energies%e_xc),'(f24.14)')
@@ -537,13 +530,6 @@ end subroutine outqmc
 
  function i2s(n)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'i2s'
-!End of the abilint section
-
  implicit none
 
 !Arguments ----------------------
@@ -620,13 +606,6 @@ end function i2s
 !! SOURCE
 
  function r2s(r,real_format)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'r2s'
-!End of the abilint section
 
  implicit none
 

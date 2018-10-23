@@ -84,13 +84,6 @@ program anaddb
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -538,7 +531,7 @@ program anaddb
    wminmax = zero
    do
      call mkphdos(Phdos, Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
-     wminmax, count_wminmax, comm)
+      "freq_displ", wminmax, count_wminmax, comm)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05

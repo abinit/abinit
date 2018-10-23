@@ -120,13 +120,6 @@ CONTAINS  !===========================================================
 
 subroutine get_point_group(ptg_name,nsym,nclass,sym,class_ids,class_names,Irreps)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_point_group'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -264,13 +257,6 @@ end subroutine get_point_group
 
 subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_classes'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -362,13 +348,6 @@ end subroutine get_classes
 
 subroutine show_character_tables(unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_character_tables'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -417,13 +396,6 @@ end subroutine show_character_tables
 !! SOURCE
 
 subroutine point_group_free(Ptg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'point_group_free'
-!End of the abilint section
 
  implicit none
 
@@ -478,13 +450,6 @@ end subroutine point_group_free
 
 subroutine point_group_init(Ptg,ptg_name)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'point_group_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -523,13 +488,6 @@ end subroutine point_group_init
 !! SOURCE
 
 subroutine point_group_print(Ptg,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'point_group_print'
-!End of the abilint section
 
  implicit none
 
@@ -620,13 +578,6 @@ end subroutine point_group_print
 
 subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'locate_sym'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -703,13 +654,6 @@ end subroutine locate_sym
 
 subroutine mult_table(nsym,sym,mtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mult_table'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -778,13 +722,6 @@ end subroutine mult_table
 !! SOURCE
 
 subroutine groupk_from_file(Lgrps,spgroup,fname,nkpt,klist,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'groupk_from_file'
-!End of the abilint section
 
  implicit none
 
@@ -951,13 +888,6 @@ end subroutine groupk_from_file
 
 subroutine irrep_free_0d(Irrep)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'irrep_free_0d'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -994,13 +924,6 @@ end subroutine irrep_free_0d
 
 subroutine irrep_free_1d(Irrep)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'irrep_free_1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1036,13 +959,6 @@ end subroutine irrep_free_1d
 !! SOURCE
 
 subroutine copy_irrep(In_irreps,Out_irreps,phase_fact)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_irrep'
-!End of the abilint section
 
  implicit none
 
@@ -1115,13 +1031,6 @@ end subroutine copy_irrep
 
 subroutine init_irrep(Irrep,nsym,irr_dim,irr_name)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_irrep'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1170,13 +1079,6 @@ end subroutine init_irrep
 !! SOURCE
 
 function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sum_irreps'
-!End of the abilint section
 
  implicit none
 
@@ -1239,13 +1141,6 @@ end function sum_irreps
 !! SOURCE
 
 subroutine groupk_free(Gk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'groupk_free'
-!End of the abilint section
 
  implicit none
 

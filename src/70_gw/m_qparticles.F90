@@ -118,13 +118,6 @@ CONTAINS  !=====================================================================
 
 subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,ngfftf,Sr,Bst,m_lda_to_qp,rho_qp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrqps'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -282,13 +275,6 @@ end subroutine wrqps
 
 subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 & nfftot,ngfftf,ucvol,paral_kgb,Cryst,Pawtab,MPI_enreg,nbsc,m_lda_to_qp,rhor_out,Pawrhoij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdqps'
-!End of the abilint section
 
  implicit none
 
@@ -587,13 +573,6 @@ end subroutine rdqps
 
 subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'show_QP'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -735,13 +714,6 @@ end subroutine show_QP
 !! SOURCE
 
 subroutine rdgw(Bst,fname,igwene,extrapolate)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdgw'
-!End of the abilint section
 
  implicit none
 
@@ -953,13 +925,6 @@ end subroutine rdgw
 !! SOURCE
 
 subroutine updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'updt_m_lda_to_qp'
-!End of the abilint section
 
  implicit none
 

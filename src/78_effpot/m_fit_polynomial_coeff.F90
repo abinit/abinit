@@ -122,13 +122,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_fit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1155,13 +1148,6 @@ end subroutine fit_polynomial_coeff_fit
 subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive,list_coeff,ncoeff,&
 &                                           nfixcoeff,nmodel,comm,verbose)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getPositive'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1359,13 +1345,6 @@ end subroutine fit_polynomial_coeff_getPositive
 !! SOURCE
 
 subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bound,comm,verbose)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getCoeffBound'
-!End of the abilint section
 
  implicit none
 
@@ -1636,13 +1615,6 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
 &                                     strten_coeffs,strten_diff,sqomega)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_solve'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1840,13 +1812,6 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
 &                                         natom,ncoeff_fit,ncoeff_max,ntime,strten_coeffs,&
 &                                         strten_diff,sqomega)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_computeGF'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1965,13 +1930,6 @@ end subroutine fit_polynomial_coeff_computeGF
 subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_out,fcart_out,&
 &                                     natom_sc,natom_uc,ncoeff_max,ntime,sc_size,strain,strten_out,&
 &                                     ucvol,coeffs,ncoeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_getFS'
-!End of the abilint section
 
  implicit none
 
@@ -2254,13 +2212,6 @@ end subroutine fit_polynomial_coeff_getFS
 subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
 &                                          compute_anharmonic,print_file)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_coeff_computeMSD'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2399,13 +2350,6 @@ end subroutine fit_polynomial_coeff_computeMSD
 !! SOURCE
 
 subroutine fit_polynomial_printSystemFiles(eff_pot,hist)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_polynomial_printSystemFiles'
-!End of the abilint section
 
  implicit none
 
@@ -2615,13 +2559,6 @@ end subroutine fit_polynomial_printSystemFiles
 !!***
 
 recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size,compute)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'genereList'
-!End of the abilint section
 
  implicit none
 

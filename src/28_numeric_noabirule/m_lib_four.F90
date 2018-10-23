@@ -53,13 +53,6 @@ contains
       SUBROUTINE nfourier(rindata,coutdata,iflag,Iwmax,L,Beta)
 
 !include 'param.dat'
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nfourier'
-!End of the abilint section
-
        IMPLICIT DOUBLE PRECISION (A-H,O-Z)
        IMPLICIT INTEGER(I-N)
        integer  Iwmax,L,iflag
@@ -159,13 +152,6 @@ contains
 !
       SUBROUTINE nfourier2(rindata,coutdata,iflag,om,L,Beta)
 !       include 'param.dat'
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nfourier2'
-!End of the abilint section
-
        IMPLICIT DOUBLE PRECISION (A-H,O-Z)
        IMPLICIT INTEGER(I-N)
        integer  L,iflag
@@ -261,13 +247,6 @@ contains
        SUBROUTINE invfourier(cindata,routdata,Iwmax,L,iflag,beta)
 
 !       include 'param.dat'
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invfourier'
-!End of the abilint section
-
        implicit none
        integer, intent(in) :: Iwmax
        complex*16, intent(in) :: cindata(1:Iwmax)    !vz_d

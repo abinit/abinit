@@ -197,20 +197,7 @@ CONTAINS
 
 subroutine eigr2d_init(eig2nkq,eigr2d,mband,nsppol,nkpt,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_init'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -255,13 +242,6 @@ end subroutine eigr2d_init
 !! SOURCE
 
 subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -315,14 +295,6 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -354,13 +326,6 @@ end subroutine eigr2d_ncwrite
 !! SOURCE
 
 subroutine eigr2d_free(eigr2d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_free'
-!End of the abilint section
 
  implicit none
 
@@ -410,20 +375,7 @@ end subroutine eigr2d_free
 
 subroutine fan_init(fan,fan2d,mband,nsppol,nkpt,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_init'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -473,20 +425,7 @@ end subroutine fan_init
 
 subroutine gkk_init(gkk,gkk2d,mband,nsppol,nkpt,natom,ncart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_init'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -531,13 +470,6 @@ end subroutine gkk_init
 !! SOURCE
 
 subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -593,13 +525,6 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -630,13 +555,6 @@ end subroutine fan_ncwrite
 !! SOURCE
 
 subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -695,14 +613,6 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -734,13 +644,6 @@ end subroutine gkk_ncwrite
 !! SOURCE
 
 subroutine fan_free(fan2d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_free'
-!End of the abilint section
 
  implicit none
 
@@ -785,13 +688,6 @@ end subroutine fan_free
 !! SOURCE
 
 subroutine gkk_free(gkk2d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_free'
-!End of the abilint section
 
  implicit none
 
@@ -900,13 +796,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 &  eigen1,eig2nkq,elph2_imagden,esmear,gh0c1_pert,gh1c_pert,ieig2rf,istwfk_pert,&
 &  mband,mk1mem,mpert,npert,mpi_enreg,mpw1,nkpt_rbz,npwar1,nspinor,nsppol,smdelta,&
 &  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eig2stern'
-!End of the abilint section
 
  implicit none
 
@@ -1400,13 +1289,6 @@ end subroutine eig2stern
 subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0,eigenq,eigen1,eig2nkq,&
 &  elph2_imagden,esmear,ieig2rf,mband,mpert,npert,mpi_enreg,doccde,&
 &  nkpt_rbz,nsppol,smdelta,rprimd,dtset,occ_rbz,hdr0,eigbrd,eigenq_fine,hdr_fine)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eig2tot'
-!End of the abilint section
 
  implicit none
 
@@ -1981,13 +1863,6 @@ end subroutine eig2tot
 
 subroutine outbsd(bdeigrf,dtset,eig2nkq,mpert,nkpt_rbz,unitout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outbsd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2070,13 +1945,6 @@ end subroutine outbsd
 !! SOURCE
 
 subroutine smeared_delta(eigen0,eigenq,esmear,mband,smdelta,smdfunc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smeared_delta'
-!End of the abilint section
 
  implicit none
 
@@ -2191,13 +2059,6 @@ end subroutine smeared_delta
 !! SOURCE
 
 subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,nkpt,nsppol,option,phfrq,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph2_fanddw'
-!End of the abilint section
 
  implicit none
 
