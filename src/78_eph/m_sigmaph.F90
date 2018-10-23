@@ -848,16 +848,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      if (sigma%qint_method > 0) then
        ! Weights for Re-Im with i.eta shift.
        ! FIXME: This part is broken now. Lot of memory allocated here!
-       ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+       if (.not. sigma%imag_only) ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
        ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
-
-       ! Map sigma%eph_doublegrid%dense -> ephwg%lgk%ibz
-       !if (sigma%use_doublegrid) then
-       !  call eph_double_grid_bz2ibz(sigma%eph_doublegrid, sigma%ephwg%lgk%ibz, sigma%ephwg%lgk%nibz,&
-       !                              sigma%ephwg%lgk%symrec_lg, sigma%ephwg%lgk%nsym_lg, &
-       !                              sigma%eph_doublegrid%bz2lgkibz)
-       !endif
 
        ! Precompute the weights for tetrahedron
        call sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
@@ -1301,7 +1294,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      if (sigma%qint_method > 0) then
        ABI_FREE(sigma%deltaw_pm)
-       ABI_FREE(sigma%cweights)
+       if (.not. sigma%imag_only) ABI_FREE(sigma%cweights)
      end if
 
      ! Print cache stats. The first k-point is expected to have lots of misses
