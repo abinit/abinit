@@ -234,10 +234,7 @@ CONTAINS  !===========================================================
 
 subroutine ifc_free(ifc)
 
- implicit none
-
 !Arguments ------------------------------------
-!array
  type(ifc_type),intent(inout) :: ifc
 
 ! ************************************************************************
@@ -258,7 +255,6 @@ subroutine ifc_free(ifc)
  ABI_SFREE(ifc%qbz)
  ABI_SFREE(ifc%zeff)
  ABI_SFREE(ifc%dynmat)
-
  !if (allocated(ifc%dynmat_lr)) then
  !  ABI_FREE(ifc%dynmat_lr)
  !end if
@@ -325,8 +321,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   prtsrlr,enunit, & ! TODO: TO BE REMOVED
   comm, &
   Ifc_coarse) ! Optional
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
@@ -675,8 +669,6 @@ end subroutine ifc_init
 
 subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift,comm
@@ -779,8 +771,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
 subroutine ifc_print(ifc,header,unit,prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
@@ -871,8 +861,6 @@ end subroutine ifc_print
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
                      nanaqdir, out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -982,8 +970,6 @@ end subroutine ifc_fourq
 !! SOURCE
 
 subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1099,8 +1085,6 @@ end subroutine ifc_get_dwdq
 !! SOURCE
 
 subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1325,8 +1309,6 @@ end subroutine ifc_speedofsound
 
 subroutine ifc_autocutoff(ifc, crystal, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ifc_type),intent(inout) :: ifc
@@ -1480,8 +1462,6 @@ end subroutine ifc_autocutoff
 
 subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_min,wghatm)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nrpt,nsphere
@@ -1614,8 +1594,6 @@ end subroutine corsifc9
 !! SOURCE
 
 subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1958,8 +1936,6 @@ end subroutine ifc_write
 subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
 & dist,invdlt,detdlt,rsiaf,sriaf,vect,indngb,posngb)
 
-implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ia,ifcana,ifcout,iout
@@ -2273,8 +2249,6 @@ end subroutine ifc_getiaf
 
 subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,nqpt,eigenvec)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -2469,8 +2443,6 @@ end subroutine omega_decomp
 
 subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nqshft
@@ -2585,8 +2557,6 @@ end subroutine ifc_outphbtrap
 
 subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nqshft,comm
@@ -2679,8 +2649,6 @@ end subroutine ifc_printbxsf
 
 subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 &  qnrml2, ncid, phfrq2l, polarity2l) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nph2l

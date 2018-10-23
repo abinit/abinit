@@ -89,8 +89,6 @@ contains
 subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 &  inclvkb,lomo_spin,lomo_min,max_band,nkbz,qpoint,opt_cvk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkbz,inclvkb,lomo_min,max_band
@@ -280,8 +278,6 @@ contains
 !! SOURCE
 
 pure function pdtqrc(R,C,b1,b2,b3)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

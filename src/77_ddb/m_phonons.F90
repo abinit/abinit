@@ -196,8 +196,6 @@ CONTAINS  !=====================================================================
 
 subroutine phdos_print(PHdos,fname)
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
  type(phonon_dos_type),intent(in) :: PHdos
@@ -327,8 +325,6 @@ end subroutine phdos_print
 
 subroutine phdos_print_debye(PHdos, ucvol)
 
-implicit none
-
 !Arguments ------------------------------------
  real(dp), intent(in) :: ucvol
  type(phonon_dos_type),intent(in) :: PHdos
@@ -441,8 +437,6 @@ end subroutine phdos_print_debye
 !! SOURCE
 
 subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
-
-implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: ntemper
@@ -561,8 +555,6 @@ end subroutine phdos_print_thermo
 
 subroutine phdos_free(PHdos)
 
- implicit none
-
 !Arguments -------------------------------
  type(phonon_dos_type),intent(inout) ::PHdos
 
@@ -631,8 +623,6 @@ end subroutine phdos_free
 
 subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
                    wminmax, count_wminmax, comm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1118,7 +1108,7 @@ end subroutine mkphdos
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
-!! PRB 94 075125 (2016) [[cite:Zacharias2016]]
+!!  PRB 94 075125 (2016) [[cite:Zacharias2016]]
 !!
 !! INPUTS
 !!
@@ -1136,8 +1126,6 @@ end subroutine mkphdos
 !! SOURCE
 
 subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1320,8 +1308,6 @@ end subroutine zacharias_supercell_make
 
 subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
 &                                 rlatt, temperature_K, thm_scells)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1523,8 +1509,6 @@ end subroutine thermal_supercell_make
 
 subroutine thermal_supercell_free(nscells, thm_scells)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nscells
@@ -1566,8 +1550,6 @@ end subroutine thermal_supercell_free
 !! SOURCE
 
 subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1619,8 +1601,6 @@ end subroutine zacharias_supercell_print
 !! SOURCE
 
 subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1675,8 +1655,6 @@ end subroutine thermal_supercell_print
 !! SOURCE
 
 subroutine phdos_ncwrite(phdos,ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1763,8 +1741,6 @@ end subroutine phdos_ncwrite
 !! SOURCE
 
 subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2076,8 +2052,6 @@ end subroutine mkphbs
 
 subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 
- implicit none
-
 !Arguments -------------------------------
 !scalras
  integer, intent(in) :: natom
@@ -2148,8 +2122,6 @@ end subroutine phdos_calc_vsound
 
 subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 
- implicit none
-
 !Arguments -------------------------------
 !scalras
  integer, intent(in) :: iunit
@@ -2216,8 +2188,6 @@ end subroutine phdos_print_vsound
 !! SOURCE
 
 subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2380,8 +2350,6 @@ end subroutine phdos_print_msqd
 
 subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,nqpts
@@ -2463,8 +2431,6 @@ end subroutine phonons_ncwrite
 !! SOURCE
 
  subroutine phonons_write_phfrq(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2559,8 +2525,6 @@ end subroutine phonons_write_phfrq
 !! SOURCE
 
 subroutine phonons_writeEPS(natom,nqpts,ntypat,typat,phfreq,phdispl_cart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2977,8 +2941,6 @@ end subroutine phonons_writeEPS
 
 subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbounds)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nqpts
@@ -3107,8 +3069,6 @@ end subroutine phonons_write_xmgrace
 !! SOURCE
 
 subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3239,8 +3199,6 @@ end subroutine phonons_write_gnuplot
 !! SOURCE
 
 subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3390,8 +3348,6 @@ end subroutine ifc_mkphbs
 !! SOURCE
 
 subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3626,17 +3582,13 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 &         qphon, rprimd, typat, xcart, znucl)
 
 
- implicit none
-
-! arguments
-! scalar
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: natom
  character(len=*),intent(in) :: outfile_radix
  real(dp), intent(in) :: freeze_displ
-
 !arrays
  integer,intent(in) :: typat(natom)
-
  real(dp),intent(in) :: displ(2,3*natom,3*natom)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: phfreq(3*natom)

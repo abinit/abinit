@@ -1050,100 +1050,40 @@ subroutine sigma_free(Sr)
 
  !@sigma_t
 !integer
- if (allocated(Sr%maxbnd)) then
-   ABI_FREE(Sr%maxbnd)
- end if
- if (allocated(Sr%minbnd)) then
-   ABI_FREE(Sr%minbnd)
- end if
+ ABI_SFREE(Sr%maxbnd)
+ ABI_SFREE(Sr%minbnd)
 
 !real
- if (allocated(Sr%degwgap)) then
-   ABI_FREE(Sr%degwgap)
- end if
- if (allocated(Sr%egwgap)) then
-   ABI_FREE(Sr%egwgap)
- end if
- if (allocated(Sr%en_qp_diago)) then
-   ABI_FREE(Sr%en_qp_diago)
- end if
- if (allocated(Sr%e0)) then
-   ABI_FREE(Sr%e0)
- end if
- if (allocated(Sr%e0gap)) then
-   ABI_FREE(Sr%e0gap)
- end if
- if (allocated(Sr%omega_r)) then
-   ABI_FREE(Sr%omega_r)
- end if
- if (allocated(Sr%kptgw)) then
-   ABI_FREE(Sr%kptgw)
- end if
- if (allocated(Sr%sigxme)) then
-   ABI_FREE(Sr%sigxme)
- end if
- if (allocated(Sr%x_mat)) then
-   ABI_FREE(Sr%x_mat)
- end if
- if (allocated(Sr%vxcme)) then
-   ABI_FREE(Sr%vxcme)
- end if
- if (allocated(Sr%vUme)) then
-   ABI_FREE(Sr%vUme)
- end if
+ ABI_SFREE(Sr%degwgap)
+ ABI_SFREE(Sr%egwgap)
+ ABI_SFREE(Sr%en_qp_diago)
+ ABI_SFREE(Sr%e0)
+ ABI_SFREE(Sr%e0gap)
+ ABI_SFREE(Sr%omega_r)
+ ABI_SFREE(Sr%kptgw)
+ ABI_SFREE(Sr%sigxme)
+ ABI_SFREE(Sr%x_mat)
+ ABI_SFREE(Sr%vxcme)
+ ABI_SFREE(Sr%vUme)
 
 !complex
- if (allocated(Sr%degw)) then
-   ABI_FREE(Sr%degw)
- end if
- if (allocated(Sr%dsigmee0)) then
-   ABI_FREE(Sr%dsigmee0)
- end if
- if (allocated(Sr%egw)) then
-   ABI_FREE(Sr%egw)
- end if
- if (allocated(Sr%eigvec_qp)) then
-   ABI_FREE(Sr%eigvec_qp)
- end if
- if (allocated(Sr%m_lda_to_qp)) then
-   ABI_FREE(Sr%m_lda_to_qp)
- end if
- if (allocated(Sr%hhartree)) then
-   ABI_FREE(Sr%hhartree)
- end if
- if (allocated(Sr%sigcme)) then
-   ABI_FREE(Sr%sigcme)
- end if
- if (allocated(Sr%sigmee)) then
-   ABI_FREE(Sr%sigmee)
- end if
- if (allocated(Sr%sigcmee0)) then
-   ABI_FREE(Sr%sigcmee0)
- end if
- if (allocated(Sr%sigcmesi)) then
-   ABI_FREE(Sr%sigcmesi)
- end if
- if (allocated(Sr%sigcme4sd)) then
-   ABI_FREE(Sr%sigcme4sd)
- end if
- if (allocated(Sr%sigxcme)) then
-   ABI_FREE(Sr%sigxcme)
- end if
- if (allocated(Sr%sigxcmesi)) then
-   ABI_FREE(Sr%sigxcmesi)
- end if
- if (allocated(Sr%sigxcme4sd)) then
-   ABI_FREE(Sr%sigxcme4sd)
- end if
- if (allocated(Sr%ze0)) then
-   ABI_FREE(Sr%ze0)
- end if
- if (allocated(Sr%omega_i)) then
-   ABI_FREE(Sr%omega_i)
- end if
- if (allocated(Sr%omega4sd)) then
-   ABI_FREE(Sr%omega4sd)
- end if
+ ABI_SFREE(Sr%degw)
+ ABI_SFREE(Sr%dsigmee0)
+ ABI_SFREE(Sr%egw)
+ ABI_SFREE(Sr%eigvec_qp)
+ ABI_SFREE(Sr%m_lda_to_qp)
+ ABI_SFREE(Sr%hhartree)
+ ABI_SFREE(Sr%sigcme)
+ ABI_SFREE(Sr%sigmee)
+ ABI_SFREE(Sr%sigcmee0)
+ ABI_SFREE(Sr%sigcmesi)
+ ABI_SFREE(Sr%sigcme4sd)
+ ABI_SFREE(Sr%sigxcme)
+ ABI_SFREE(Sr%sigxcmesi)
+ ABI_SFREE(Sr%sigxcme4sd)
+ ABI_SFREE(Sr%ze0)
+ ABI_SFREE(Sr%omega_i)
+ ABI_SFREE(Sr%omega4sd)
 
 end subroutine sigma_free
 !!***
