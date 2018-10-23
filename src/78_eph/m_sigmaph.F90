@@ -846,23 +846,23 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      end if
 
      !ABI_MALLOC(zvals, (nz, nbcalc_ks))
-     ndiv = 1
-     thisproc_nq = 1
-     iq_ibz_packed = 1
-     do iq_ibz=1,sigma%nqibz_k
-       ! Quick-parallelization over q-points
-       if (all(distrib_bq(1:nbsum, iq_ibz) /= my_rank)) cycle
-       thisproc_nq = thisproc_nq + 1
-     end do
-     if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
-     ABI_MALLOC(sigma%deltaw_pm, (2, nbcalc_ks, natom3, sigma%nbsum, thisproc_nq, ndiv))
-
      if (sigma%qint_method == 1) then
        ! Weights for Re-Im with i.eta shift.
        ! FIXME: This part is broken now. Lot of memory allocated here!
        !ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
        !ABI_MALLOC(deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+
+       ndiv = 1
+       thisproc_nq = 1
+       iq_ibz_packed = 1
+       do iq_ibz=1,sigma%nqibz_k
+         ! Quick-parallelization over q-points
+         if (all(distrib_bq(1:nbsum, iq_ibz) /= my_rank)) cycle
+         thisproc_nq = thisproc_nq + 1
+       end do
+       if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
+       ABI_MALLOC(sigma%deltaw_pm, (2, nbcalc_ks, natom3, sigma%nbsum, thisproc_nq, ndiv))
 
        ! Precompute the weights for tetrahedron
        call sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,distrib_bq,comm)
