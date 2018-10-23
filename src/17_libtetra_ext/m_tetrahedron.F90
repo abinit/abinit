@@ -115,6 +115,7 @@ public :: tetra_write              ! Write text file (XML format) with tetra inf
 public :: tetralib_has_mpi         ! Return True if the library has been compiled with MPI support.
 public :: tetra_get_onewk          ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 public :: tetra_get_onewk_wvals    ! Similar to tetra_get_onewk_wvalsa but reveives arbitrary list of frequency points.
+public :: tetra_get_onetetra_wvals ! Get weights for one tetrahedra with arbitrary list of frequency points
 !!***
 
 contains
@@ -2085,6 +2086,100 @@ subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz
  end do ! itetra
 
 end subroutine tetra_get_onewk_wvals
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_tetrahedron/tetra_get_onetetra_wvals
+!! NAME
+!! tetra_get_onetetra_wvals
+!!
+!! FUNCTION
+!! Calculate integration weights and their derivatives for a single k-point in the IBZ.
+!!
+!! INPUTS
+!! tetra<t_tetrahedron>=Object with tables for tetrahedron method.
+!! ik_ibz=Index of the k-point in the IBZ array
+!! bcorr=1 to include Blochl correction else 0.
+!! nw=number of energies in wvals
+!! nibz=number of irreducible kpoints
+!! wvals(nw)=Frequency points.
+!! eigen_ibz(nkibz)=eigenenergies for each k point
+!! [wtol]: If present, frequency points that differ by less that wtol are treated as equivalent.
+!!  and the tetrahedron integration is performed only once per frequency point.
+!!
+!! OUTPUT
+!!  weights(nw,2) = integration weights for
+!!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
+!!    for a given (band, k-point, spin).
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine tetra_get_onetetra_wvals(tetra, itetra, eigen_1tetra, bcorr, nw, wvals, weights, wtol)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'tetra_accumulate_wvals'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nw,bcorr
+ real(dp_), optional, intent(in) :: wtol
+ type(t_tetrahedron), intent(in) :: tetra
+!arrays
+ real(dp_),intent(in) :: wvals(nw)
+ real(dp_),intent(out) :: weights(nw, 2, 4)
+
+!Local variables-------------------------------
+!scalars
+ !integer,save :: done = 0
+ integer,parameter :: nene3=3
+ integer :: itetra,ii,idx,iw,ie
+ integer :: ind(4)
+ logical :: samew
+ real(dp_),parameter :: max_occ1 = one
+ real(dp_) :: enemin, enemax
+!arrays
+ real(dp_) :: theta_tmp(nene3,4), delta_tmp(nene3,4), eigen_1tetra(4)
+
+! *********************************************************************
+
+ ind = [1,2,3,4]
+ call sort_tetra(4, eigen_1tetra, ind, tol14)
+ weights = 0
+
+ !for all the frequencies
+ do iw=1,nw
+   samew = .False.
+   if (present(wtol)) then
+     if (iw > 1) samew = abs(wvals(iw) - wvals(iw - 1)) < wtol
+   end if
+   if (.not. samew) then
+     enemin = wvals(iw) - 0.01
+     enemax = wvals(iw) + 0.01
+     ie = nene3 / 2 + 1
+     call get_onetetra_(tetra, itetra, eigen_1tetra, enemin, enemax, max_occ1, nene3, bcorr, &
+        theta_tmp, delta_tmp)
+   end if
+
+   ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
+   do ii=1,4
+     idx = ind(ii)
+     weights(iw, 1, idx) = weights(iw, 1, idx) + delta_tmp(ie, ii)
+     weights(iw, 2, idx) = weights(iw, 2, idx) + theta_tmp(ie, ii)
+   end do
+ end do !iw
+
+end subroutine tetra_get_onetetra_wvals
 !!***
 
 end module m_tetrahedron
