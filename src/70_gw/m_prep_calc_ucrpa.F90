@@ -31,6 +31,35 @@
 MODULE m_prep_calc_ucrpa
 
  use defs_basis
+ use defs_datatypes
+ use m_abicore
+ use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
+ use m_xmpi
+ use m_defs_ptgroups
+ use m_errors
+
+ use m_time,          only : timab
+ use m_hide_blas,     only : xdotc
+ use m_geometry,      only : normv
+ use m_crystal,       only : crystal_t
+ use m_fft_mesh,      only : rotate_FFT_mesh
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
+ use m_gsphere,       only : gsphere_t, gsph_fft_tabs
+ use m_io_tools,      only : flush_unit, open_file
+ use m_vcoul,         only : vcoul_t
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
+ use m_pawang,        only : pawang_type
+ use m_pawtab,        only : pawtab_type
+ use m_pawfgrtab,     only : pawfgrtab_type
+ use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
+ use m_paw_nhat,      only : pawmknhat_psipsi
+ use m_paw_sym,       only : paw_symcprj
+ use m_wfd,           only : wfd_t
+ use m_oscillators,   only : rho_tw_g
+ use m_esymm,         only : esymm_t, esymm_failed
+ use m_read_plowannier, only : read_plowannier
+
  implicit none
 
  private
@@ -40,7 +69,6 @@ MODULE m_prep_calc_ucrpa
 
 contains
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/prep_calc_ucrpa
 !! NAME
 !! prep_calc_ucrpa
@@ -137,37 +165,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 & M1_q_m,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,&
 & Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
 & prtvol,pawcross,rhot1_q_m)
-
- use defs_basis
- use defs_datatypes
- use m_abicore
- use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
- use m_xmpi
- use m_defs_ptgroups
- use m_errors
-
- use m_time,          only : timab
- use m_hide_blas,     only : xdotc
- use m_geometry,      only : normv
- use m_crystal,       only : crystal_t
- use m_fft_mesh,      only : rotate_FFT_mesh
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
- use m_gsphere,       only : gsphere_t, gsph_fft_tabs
- use m_io_tools,      only : flush_unit, open_file
- use m_vcoul,         only : vcoul_t
- use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
- use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
- use m_pawang,        only : pawang_type
- use m_pawtab,        only : pawtab_type
- use m_pawfgrtab,     only : pawfgrtab_type
- use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
- use m_paw_nhat,      only : pawmknhat_psipsi
- use m_paw_sym,       only : paw_symcprj
- use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur
- use m_oscillators,   only : rho_tw_g
- use m_esymm,         only : esymm_t, esymm_failed
- use m_read_plowannier, only : read_plowannier
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -304,7 +301,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
 
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
+   call wfd%change_ngfft(Cryst,Psps,gwx_ngfft)
  end if
  gwx_mgfft   = MAXVAL(gwx_ngfft(1:3))
  gwx_fftalga = gwx_ngfft(7)/100
@@ -525,7 +522,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
    ABI_STAT_ALLOCATE(wfr_bdgw,(gwx_nfftot*nspinor,ib1:ib2), ierr)
    ABI_CHECK(ierr==0, "out of memory in wfr_bdgw")
    do jb=ib1,ib2
-     call wfd_get_ur(Wfd,jb,jk_ibz,spin,wfr_bdgw(:,jb))
+     call wfd%get_ur(jb,jk_ibz,spin,wfr_bdgw(:,jb))
 !     write(6,'(a,6i4)')"indforwfd" ,jb,jk_ibz,spin
    end do
 
@@ -537,7 +534,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      do jb=ib1,ib2
 !           write(6,*) "has_cprj",Wfd%Wave(jb,jk_ibz,spin)%has_cprj
            Wfd%Wave(jb,jk_ibz,spin)%has_cprj=1
-       call wfd_get_cprj(Wfd,jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+       call wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
        call paw_symcprj(jk_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        call pawcprj_copy(Cprj_ksum,Cprj_kgw(:,ibsp:ibsp+(nspinor-1)))
        ibsp=ibsp+nspinor
@@ -547,7 +544,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        ABI_ALLOCATE(ur_ae_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        ABI_ALLOCATE(ur_ps_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        do jb=ib1,ib2
-         call wfd_paw_get_aeur(Wfdf,jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+         call wfdf%paw_get_aeur(jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &          ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          ur_ae_bdgw(:,jb)=ur_ae_sum
          ur_ae_onsite_bdgw(:,jb)=ur_ae_onsite_sum
@@ -679,7 +676,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        ! * Skip empty states.
        !if (qp_occ(ib_sum,ik_ibz,spin)<tol_empty) CYCLE
 
-       call wfd_get_ur(Wfd,ib_sum,ik_ibz,spin,wfr_sum)
+       call wfd%get_ur(ib_sum,ik_ibz,spin,wfr_sum)
 !       write(6,'(a,3i4)')"indforwfd2" ,ib_sum,ik_ibz,spin
 !       write(6,*) wfd_ihave_ug(Wfd,ib_sum,ik_ibz,spin,"Stored"),Wfd%Wave(ib_sum,ik_ibz,spin)%has_ug
 !       write(6,*) wfd_ihave_ur(Wfd,ib_sum,ik_ibz,spin,"Stored"),Wfd%Wave(ib_sum,ik_ibz,spin)%has_ur
@@ -687,10 +684,10 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        if (Psps%usepaw==1) then ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call wfd_get_cprj(Wfd,ib_sum,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+         call wfd%get_cprj(ib_sum,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
          if (pawcross==1) then
-           call wfd_paw_get_aeur(Wfdf,ib_sum,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+           call wfdf%paw_get_aeur(ib_sum,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &              ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if

@@ -66,8 +66,7 @@ module m_phgamma
  use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt, listkk
  use defs_elphon,      only : gam_mult_displ, complete_gamma !, complete_gamma_tr
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
- use m_wfd,            only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
-                              wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
+ use m_wfd,            only : wfd_init, wfd_t
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
@@ -415,8 +414,6 @@ contains  !=====================================================
 
 subroutine phgamma_free(gams)
 
- implicit none
-
 !Arguments ------------------------------------
  type(phgamma_t),intent(inout) :: gams
 
@@ -472,8 +469,6 @@ end subroutine phgamma_free
 !! SOURCE
 
 subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transport,ngqpt,nsppol,nspinor,n0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -577,8 +572,6 @@ end subroutine phgamma_init
 
 subroutine phgamma_print(gams,cryst,ifc,ncid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(phgamma_t),intent(inout) :: gams
@@ -675,8 +668,6 @@ end subroutine phgamma_print
 
 subroutine tgamma_symm(cryst,qpt,tgamma)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst
@@ -755,8 +746,6 @@ end subroutine tgamma_symm
 !! SOURCE
 
 subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -885,8 +874,6 @@ end subroutine phgamma_eval_qibz
 !! SOURCE
 
 subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1031,8 +1018,6 @@ end subroutine phgamma_interp
 !! SOURCE
 
 subroutine phgamma_interp_setup(gams,cryst,action)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1223,8 +1208,6 @@ end subroutine phgamma_interp_setup
 
 subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gamma_out_ph,lambda_in_ph,lambda_out_ph)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_ibz,spin
@@ -1346,8 +1329,6 @@ end subroutine phgamma_vv_eval_qibz
 !! SOURCE
 
 subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out_ph,lambda_in_ph,lambda_out_ph)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1492,8 +1473,6 @@ end subroutine phgamma_vv_interp
 !! SOURCE
 
 subroutine phgamma_vv_interp_setup(gams,cryst,action)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1683,8 +1662,6 @@ end subroutine phgamma_vv_interp_setup
 !! SOURCE
 
 subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminmax,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1876,8 +1853,6 @@ end subroutine phgamma_linwid
 
 subroutine a2fw_free(a2f)
 
- implicit none
-
 !Arguments ------------------------------------
  type(a2fw_t),intent(inout) :: a2f
 
@@ -1937,8 +1912,6 @@ end subroutine a2fw_free
 
 subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshift,qshift,comm,&
   qintp,qptopt) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2378,8 +2351,6 @@ end subroutine a2fw_init
 
 real(dp) function a2fw_moment(a2f,nn,spin,out_int)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spin,nn
@@ -2448,8 +2419,6 @@ end function a2fw_moment
 !! SOURCE
 
 function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
-
- implicit none
 
  real(dp), dimension(3,3) :: a2fw_tr_moment
 
@@ -2524,8 +2493,6 @@ end function a2fw_tr_moment
 
 real(dp) function a2fw_logmoment(a2f,spin) result(res)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spin
@@ -2579,8 +2546,6 @@ end function a2fw_logmoment
 !! SOURCE
 
 real(dp) function a2fw_lambda_wij(a2f,wi,wj,spin) result(res)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2647,8 +2612,6 @@ end function a2fw_lambda_wij
 !! SOURCE
 
 subroutine a2fw_write(a2f, basename, post, ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2799,8 +2762,6 @@ end subroutine a2fw_write
 
 subroutine a2fw_ee_write(a2f,basename)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: basename
@@ -2912,8 +2873,6 @@ end subroutine a2fw_ee_write
 !! SOURCE
 
 subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,prefix,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3129,8 +3088,6 @@ end subroutine a2fw_solve_gap
 
 subroutine a2fw_tr_free(a2f_tr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(a2fw_tr_t),intent(inout) :: a2f_tr
 
@@ -3192,8 +3149,6 @@ end subroutine a2fw_tr_free
 
 subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshift,qshift,comm,&
   qintp,qptopt) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3556,8 +3511,6 @@ end subroutine a2fw_tr_init
 
 subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid
@@ -3740,8 +3693,6 @@ end subroutine a2fw_tr_write
 
 subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4012,7 +3963,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
- call wfd_print(wfd,header="Wavefunctions on the Fermi Surface",mode_paral='PERS')
+ call wfd%print(header="Wavefunctions on the Fermi Surface",mode_paral='PERS')
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -4021,9 +3972,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
  iomode = iomode_from_fname(wfk0_path)
 
- call wfd_read_wfk(wfd,wfk0_path,iomode)
+ call wfd%read_wfk(wfk0_path, iomode)
 
- if (.False.) call wfd_test_ortho(wfd,cryst,pawtab,unit=std_out,mode_paral="PERS")
+ if (.False.) call wfd%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
@@ -4287,7 +4238,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          kg_k(:,1:npw_k) = wfd%kdata(ik_ibz)%kg_k
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
-           call wfd_copy_cg(wfd, band, ik_ibz, spin, kets_k(1,1,ib2))
+           call wfd%copy_cg(band, ik_ibz, spin, kets_k(1,1,ib2))
          end do
        else
          ! Reconstruct u_k(G) from the IBZ image.
@@ -4301,7 +4252,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
-           call wfd_copy_cg(wfd, band, ik_ibz, spin, h1kets_kq)
+           call wfd%copy_cg(band, ik_ibz, spin, h1kets_kq)
            call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1,&
                             npw_kirr, wfd%kdata(ik_ibz)%kg_k,&
                             npw_k, kg_k, istwf_kirr, istwf_k, h1kets_kq, kets_k(:,:,ib2), work_ngfft, work)
@@ -4317,7 +4268,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
-           call wfd_copy_cg(wfd, band, ikq_ibz, spin, bras_kq(1,1,ib1))
+           call wfd%copy_cg(band, ikq_ibz, spin, bras_kq(1,1,ib1))
          end do
        else
          ! Reconstruct u_kq(G) from the IBZ image.
@@ -4332,7 +4283,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          !g0_kq =  g0ibz_kq + g0bz_kq
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
-           call wfd_copy_cg(wfd, band, ikq_ibz, spin, h1kets_kq)
+           call wfd%copy_cg(band, ikq_ibz, spin, h1kets_kq)
            call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
                             npw_kirr, wfd%kdata(ikq_ibz)%kg_k,&
                             npw_kq, kg_kq, istwf_kirr, istwf_kq, h1kets_kq, bras_kq(:,:,ib1), work_ngfft, work)
@@ -4599,7 +4550,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  end if
 
  call destroy_hamiltonian(gs_hamkq)
- call wfd_free(wfd)
+ call wfd%free()
  do spin=1,ebands%nsppol
    call fstab_free(fstab(spin))
  end do

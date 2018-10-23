@@ -257,8 +257,6 @@ CONTAINS  !=====================================================================
 
 subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -447,8 +445,6 @@ end subroutine write_sigma_header
 
 subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikcalc,ikibz
@@ -607,8 +603,6 @@ end subroutine write_sigma_results
 
 function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: io,ib,ikibz,is
@@ -646,8 +640,6 @@ end function gw_spectral_function
 !! SOURCE
 
 subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -793,8 +785,6 @@ end subroutine print_Sigma_perturbative
 
 subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iband,ik_ibz,isp
@@ -924,8 +914,6 @@ end subroutine print_Sigma_QPSC
 
 subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nkibz,usepawu
 !scalars
@@ -1054,8 +1042,6 @@ end subroutine sigma_init
 
 subroutine sigma_free(Sr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(sigma_t),intent(inout) :: Sr
@@ -1182,8 +1168,6 @@ end subroutine sigma_free
 
 pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: ex_energy
@@ -1243,8 +1227,6 @@ end function sigma_get_exene
 !! SOURCE
 
 subroutine find_wpoles_for_cd(Sigp,Sr,Kmesh,BSt,omega_max)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1353,8 +1335,6 @@ end subroutine find_wpoles_for_cd
 !! SOURCE
 
 integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1645,8 +1625,6 @@ end function sigma_ncwrite
 
 subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kptgw,mg0,my_nbks,proc_distrb,got,bks_mask,global)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsppol
@@ -1676,7 +1654,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
 
 !************************************************************************
 
- call wfd_update_bkstab(Wfd)
+ call wfd%update_bkstab()
 
  get_more=0; if (PRESENT(got)) get_more=got
 
@@ -1693,7 +1671,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
        if (Ltg_kgw%ibzq(iq_bz)==1) then
          bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
          if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
-         call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+         call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
          if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
        end if
      end do
@@ -1704,7 +1682,7 @@ subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kp
        ik_ibz = Kmesh%tab(ik_bz)
        bmask=.FALSE.; bmask(1:Wfd%nband(ik_ibz,spin))=.TRUE.
        if (PRESENT(bks_mask)) bmask = bks_mask(:,ik_bz,spin)
-       call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
+       call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,got=get_more,bmask=bmask)
        if (my_nband>0) proc_distrb(my_band_list(1:my_nband),ik_bz,spin)=Wfd%my_rank
      end do
    end if

@@ -38,6 +38,7 @@ module m_skw
  use m_time,           only : cwtime
  use m_numeric_tools,  only : imax_loc, vdiff_t, vdiff_eval, vdiff_print
  use m_bz_mesh,        only : isamek
+ use m_gsphere,        only : get_irredg
 
  implicit none
 
@@ -684,33 +685,16 @@ subroutine skw_free(skw)
 
 ! *********************************************************************
 
- if (allocated(skw%rpts)) then
-   ABI_FREE(skw%rpts)
- end if
- if (allocated(skw%ptg_symrel)) then
-   ABI_FREE(skw%ptg_symrel)
- end if
- if (allocated(skw%ptg_symrec)) then
-   ABI_FREE(skw%ptg_symrec)
- end if
+ ABI_SFREE(skw%rpts)
+ ABI_SFREE(skw%ptg_symrel)
+ ABI_SFREE(skw%ptg_symrec)
+ ABI_SFREE(skw%coefs)
 
- if (allocated(skw%coefs)) then
-   ABI_FREE(skw%coefs)
- end if
-
- if (allocated(skw%cached_srk)) then
-   ABI_FREE(skw%cached_srk)
- end if
+ ABI_SFREE(skw%cached_srk)
  skw%cached_kpt = huge(one)
-
- if (allocated(skw%cached_srk_dk1)) then
-   ABI_FREE(skw%cached_srk_dk1)
- end if
+ ABI_SFREE(skw%cached_srk_dk1)
  skw%cached_kpt_dk1 = huge(one)
-
- if (allocated(skw%cached_srk_dk2)) then
-   ABI_FREE(skw%cached_srk_dk2)
- end if
+ ABI_SFREE(skw%cached_srk_dk2)
  skw%cached_kpt_dk2 = huge(one)
 
 end subroutine skw_free
@@ -926,7 +910,6 @@ end subroutine mkstar_dk2
 
 subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 
- use m_gsphere,  only : get_irredg
  implicit none
 
 !Arguments ------------------------------------

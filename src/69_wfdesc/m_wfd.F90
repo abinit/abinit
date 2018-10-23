@@ -390,58 +390,101 @@ MODULE m_wfd
    ! number of processors, the index of my processor, the different groups of processors, etc ...
 
  contains
+   !procedure :: wfd_init                ! Main creation method.
+
+   procedure :: free => wfd_free
+   ! Destructor.
+   !procedure :: copy => wfd_copy
+   ! Copy routine
+   procedure :: norm2 => wfd_norm2
+   ! Compute <u(g)|u(g)> for the same k-point and spin.
+   procedure :: xdotc => wfd_xdotc
+   ! Compute <u_{b1ks}|u_{b2ks}> in reciprocal space
+   procedure :: reset_ur_cprj => wfd_reset_ur_cprj
+   ! Reinitialize memory storage of u(r) and <p_i|psi>
+   procedure :: get_many_ur => wfd_get_many_ur
+   ! Get many wavefunctions in real space from its (bands(:),k,s) indices.
+   procedure :: copy_cg => wfd_copy_cg
+   ! Return a copy of u(g) in a real(2,npw_k)) array (Abinit convention)
    procedure :: get_ur => wfd_get_ur
-   !procedure :: wfd_get_ur
+   ! Get one wavefunction in real space from its (b,k,s) indices.
+   procedure :: get_cprj => wfd_get_cprj
+   ! Get one PAW projection <Proj_i|Cnk> with all NL projectors from its (b,k,s) indices.
+   procedure :: change_ngfft => wfd_change_ngfft
+   ! Reinitialize internal FFT tables.
+   procedure :: nullify => wfd_nullify
+   ! Set all pointers to null()
+   procedure :: print => wfd_print
+   ! Printout of basic info.
+   procedure :: mkall_ur => wfd_mkall_ur
+   ! Calculate all ur owned by this node at once.
+   procedure :: ug2cprj => wfd_ug2cprj
+   ! Get PAW cprj from its (b,k,s) indices.
+   ! TODO: Remove
+   !procedure :: wfd_ptr_ug
+   ! Return a pointer to ug from its (b,k,s) indices. Use it carefully!
+   !procedure :: ptr_ur => wfd_ptr_ur
+   ! Return a pointer to ur from its (b,k,s) indices. Use it carefully!
+   procedure :: wave_free => wfd_wave_free
+   ! Free internal buffers used to store the wavefunctions.
+   procedure :: push_ug => wfd_push_ug
+   ! Modify the value of u(g)_ks stored in the object.
+   procedure :: extract_cgblock => wfd_extract_cgblock
+   ! Extract a block of wavefunctions for a given spin and k-points (uses the cg storage mode)
+   procedure :: ihave_ug => wfd_ihave_ug
+   ! True if the node has this ug with the specified status.
+   procedure :: ihave_ur => wfd_ihave_ur
+   ! True if the node has this ur with the specified status.
+   procedure :: ihave_cprj => wfd_ihave_cprj
+   ! True if the node has this cprj with the specified status.
+   procedure :: itreat_spin => wfd_itreat_spin
+   ! Test if the processor is treating a block of wavefunctions with the specified spin.
+   procedure :: my_bands => wfd_mybands
+   ! Returns the list of band indices of the u(g) owned by this node at given (k,s).
+   procedure :: show_bkstab => wfd_show_bkstab
+   ! Print a table showing the distribution of the wavefunctions.
+   procedure :: distribute_bands => wfd_distribute_bands
+   ! Distribute a set of bands taking into account the distribution of the ug.
+   procedure :: iterator_bks => wfd_iterator_bks
+   ! Iterator used to loop over bands, k-points and spin indices
+   procedure :: bks_distrb => wfd_bks_distrb
+   ! Distribute bands, k-points and spins
+   procedure :: update_bkstab => wfd_update_bkstab
+   ! Update the internal table with info on the distribution of the ugs.
+   procedure :: set_mpicomm => wfd_set_mpicomm
+   procedure :: rotate => wfd_rotate
+   ! Linear transformation of the wavefunctions stored in Wfd
+   procedure :: sanity_check => wfd_sanity_check
+   ! Debugging tool
+   procedure :: distribute_bbp => wfd_distribute_bbp
+   ! Distribute a set of (b,b') indices
+   procedure :: distribute_kb_kpbp => wfd_distribute_kb_kpbp
+   ! TODO: Remove
+   procedure :: iam_master => wfd_iam_master
+   procedure :: test_ortho => wfd_test_ortho
+   ! Test the orthonormalization of the wavefunctions.
+   !procedure :: barrier => wfd_barrier
+   procedure :: sym_ur => wfd_sym_ur
+   ! Symmetrize a wave function in real space
+   procedure :: paw_get_aeur => wfd_paw_get_aeur
+   ! Compute the AE PAW wavefunction in real space.
+   procedure :: plot_ur => wfd_plot_ur
+   ! Write u(r) to an external file in XSF format.
+   procedure :: write_wfk => wfd_write_wfk
+   ! Write u(g) to a WFK file.
+   procedure :: read_wfk => wfd_read_wfk
+   ! Read u(g) from the WFK file completing the initialization of the object.
+   procedure :: from_wfk => wfd_from_wfk
+   ! Simplified interface to initialize the object from a WFK file.
+   procedure :: mkrho => wfd_mkrho
+   ! Calculate the charge density on the fine FFT grid in real space.
+   procedure :: pawrhoij => wfd_pawrhoij
  end type wfd_t
 
  public :: wfd_init                ! Main creation method.
- public :: wfd_free                ! Destructor.
- public :: wfd_copy                ! Copy routine
- public :: wfd_norm2               ! Compute <u(g)|u(g)> for the same k-point and spin.
- public :: wfd_xdotc               ! Compute <u_{b1ks}|u_{b2ks}> in reciprocal space
- public :: wfd_reset_ur_cprj       ! Reinitialize memory storage of u(r) and <p_i|psi>
- public :: wfd_get_many_ur         ! Get many wavefunctions in real space from its (bands(:),k,s) indices.
- public :: wfd_copy_cg             ! Return a copy of u(g) in a real(2,npw_k)) array (Abinit convention)
- public :: wfd_get_ur              ! Get one wavefunction in real space from its (b,k,s) indices.
- public :: wfd_get_cprj            ! Get one PAW projection <Proj_i|Cnk> with all NL projectors from its (b,k,s) indices.
- public :: wfd_change_ngfft        ! Reinitialize internal FFT tables.
- public :: wfd_nullify             ! Set all pointers to null()
- public :: wfd_print               ! Printout of basic info.
- public :: wfd_mkall_ur            ! Calculate all ur owned by this node at once.
- public :: wfd_ug2cprj             ! Get PAW cprj from its (b,k,s) indices.
- public :: wfd_ptr_ug              ! Return a pointer to ug from its (b,k,s) indices. Use it carefully!
- public :: wfd_ptr_ur              ! Return a pointer to ur from its (b,k,s) indices. Use it carefully!
- public :: wfd_wave_free           ! Free internal buffers used to store the wavefunctions.
- public :: wfd_push_ug             ! Modify the value of u(g)_ks stored in the object.
- public :: wfd_extract_cgblock     ! Extract a block of wavefunctions for a given spin and k-points (uses the cg storage mode)
- public :: wfd_ihave_ug            ! True if the node has this ug with the specified status.
- public :: wfd_ihave_ur            ! True if the node has this ur with the specified status.
- public :: wfd_ihave_cprj          ! True if the node has this cprj with the specified status.
- public :: wfd_itreat_spin         ! Test if the processor is treating a block of wavefunctions with the specified spin.
- public :: wfd_mybands             ! Returns the list of band indices of the u(g) owned by this node at given (k,s).
- public :: wfd_show_bkstab         ! Print a table showing the distribution of the wavefunctions.
- public :: wfd_distribute_bands    ! Distribute a set of bands taking into account the distribution of the ug.
- public :: wfd_iterator_bks        ! Iterator used to loop over bands, k-points and spin indices
- public :: wfd_bks_distrb          ! Distribute bands, k-points and spins
- public :: wfd_update_bkstab       ! Update the internal table with info on the distribution of the ugs.
- public :: wfd_set_mpicomm
- public :: wfd_rotate              ! Linear transformation of the wavefunctions stored in Wfd
- public :: wfd_sanity_check        ! Debugging tool
- public :: wfd_distribute_bbp      ! Distribute a set of (b,b') indices
- public :: wfd_distribute_kb_kpbp
- public :: wfd_iam_master
- public :: wfd_test_ortho          ! Test the orthonormalization of the wavefunctions.
- public :: wfd_barrier
- public :: wfd_sym_ur              ! Symmetrize a wave function in real space
- public :: wfd_paw_get_aeur        ! Compute the AE PAW wavefunction in real space.
- public :: wfd_plot_ur             ! Write u(r) to an external file in XSF format.
- public :: wfd_write_wfk           ! Write u(g) to a WFK file.
- public :: wfd_read_wfk            ! Read u(g) from the WFK file completing the initialization of the object.
- public :: wfd_from_wfk            ! Simplified interface to initialize the object from a WFK file.
+ public :: wfd_copy
  !public :: wfd_get_socpert
- public :: wfd_mkrho               ! Calculate the charge density on the fine FFT grid in real space.
  public :: test_charge
- public :: wfd_pawrhoij
 !!***
 
 CONTAINS  !==============================================================================
@@ -465,8 +508,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -622,8 +663,6 @@ end subroutine kdata_init
 
 subroutine kdata_free_0D(Kdata)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kdata_t),intent(inout) :: Kdata
@@ -664,8 +703,6 @@ end subroutine kdata_free_0D
 
 subroutine kdata_free_1D(Kdata)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kdata_t),intent(inout) :: Kdata(:)
@@ -704,8 +741,6 @@ end subroutine kdata_free_1D
 !! SOURCE
 
 subroutine copy_kdata_0D(Kdata_in,Kdata_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -754,8 +789,6 @@ end subroutine copy_kdata_0D
 !! SOURCE
 
 subroutine copy_kdata_1D(Kdata_in,Kdata_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -830,8 +863,6 @@ end subroutine copy_kdata_1D
 
 subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,paral_kgb,npwwfn,mband,nband,nkibz,nsppol,bks_mask,&
 &  nspden,nspinor,ecutsm,dilatmx,istwfk,kibz,ngfft,gvec,nloalg,prtvol,pawprtvol,comm,opt_ecut)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1104,16 +1135,11 @@ end subroutine wfd_init
 
 subroutine wfd_free(Wfd)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !************************************************************************
 
- DBG_ENTER("COLL")
-
- !@wfd_t
  ! integer.
  ABI_SFREE(Wfd%gvec)
  ABI_SFREE(Wfd%irottb)
@@ -1152,8 +1178,6 @@ subroutine wfd_free(Wfd)
 
  call destroy_mpi_enreg(Wfd%MPI_enreg)
 
- DBG_EXIT("COLL")
-
 end subroutine wfd_free
 !!***
 
@@ -1177,9 +1201,7 @@ end subroutine wfd_free
 !!
 !! SOURCE
 
-subroutine wfd_copy(Wfd_in,Wfd_out)
-
- implicit none
+subroutine wfd_copy(Wfd_in, Wfd_out)
 
 !Arguments ------------------------------------
  type(wfd_t),intent(inout) :: Wfd_in,Wfd_out
@@ -1294,16 +1316,13 @@ end subroutine wfd_copy
 
 function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
  real(dp) :: norm2
  type(crystal_t),intent(in) :: Cryst
- type(wfd_t),target,intent(inout) :: Wfd
+ class(wfd_t),target,intent(inout) :: Wfd
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
-!arrays
 
 !Local variables ------------------------------
 !scalars
@@ -1383,13 +1402,11 @@ end function wfd_norm2
 
 function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band1,band2,ik_ibz,spin
  complex(gwpc) :: wfd_xdotc
- type(wfd_t),target,intent(inout) :: Wfd
+ class(wfd_t),target,intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
@@ -1475,11 +1492,8 @@ end function wfd_xdotc
 
 subroutine wfd_reset_ur_cprj(Wfd)
 
- implicit none
-
 !Arguments ------------------------------------
-!scalars
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 
 !************************************************************************
 
@@ -1529,12 +1543,10 @@ end subroutine wfd_reset_ur_cprj
 
 subroutine wfd_get_many_ur(Wfd,bands,ik_ibz,spin,ur)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: bands(:)
  complex(gwpc),intent(out) :: ur(Wfd%nfft*Wfd%nspinor*SIZE(bands))
@@ -1587,12 +1599,10 @@ end subroutine wfd_get_many_ur
 
 subroutine wfd_copy_cg(wfd,band,ik_ibz,spin,cg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
- type(wfd_t),intent(in) :: wfd
+ class(wfd_t),intent(in) :: wfd
 !arrays
  real(dp),intent(out) :: cg(2,*) ! npw_k*wfd%nspinor)
 
@@ -1653,8 +1663,6 @@ end subroutine wfd_copy_cg
 !! SOURCE
 
 subroutine wfd_get_ur(Wfd,band,ik_ibz,spin,ur)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1734,11 +1742,9 @@ end subroutine wfd_get_ur
 
 subroutine wfd_nullify(Wfd)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !************************************************************************
 
  !@wfd_t
@@ -1781,13 +1787,11 @@ end subroutine wfd_nullify
 
 subroutine wfd_print(Wfd,header,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 
 !Local variables-------------------------------
 !scalars
@@ -1876,13 +1880,11 @@ end subroutine wfd_print
 
 subroutine wfd_mkall_ur(Wfd,ncalc,force)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ncalc
  logical,optional,intent(in) :: force
- type(wfd_t),target,intent(inout) :: Wfd
+ class(wfd_t),target,intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -1974,13 +1976,11 @@ end subroutine wfd_mkall_ur
 
 subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sorted)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,idir,natom,band,ik_ibz,spin
  logical,optional,intent(in) :: sorted
- type(wfd_t),target,intent(inout) :: Wfd
+ class(wfd_t),target,intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
  type(pawcprj_type),intent(inout) :: cwaveprj(natom,Wfd%nspinor)
@@ -2113,8 +2113,6 @@ end subroutine wfd_ug2cprj
 
 subroutine wave_init_0D(Wave,usepaw,npw,nfft,nspinor,natom,nlmn_size,cprj_order)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,nfft,nspinor,usepaw,natom,cprj_order
@@ -2188,8 +2186,6 @@ end subroutine wave_init_0D
 !! SOURCE
 
 subroutine wave_free_0D(Wave,what)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2270,8 +2266,6 @@ end subroutine wave_free_0D
 
 subroutine wave_free_3D(Wave,what,mask)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),optional,intent(in) :: what
@@ -2340,8 +2334,6 @@ end subroutine wave_free_3D
 !! SOURCE
 
 subroutine wave_copy_0D(Wave_in,Wave_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2416,8 +2408,6 @@ end subroutine wave_copy_0D
 
 subroutine copy_wave_3D(Wave_in,Wave_out)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(wave_t),intent(in) :: Wave_in(:,:,:)
@@ -2479,13 +2469,11 @@ end subroutine copy_wave_3D
 
 subroutine wfd_push_ug(Wfd,band,ik_ibz,spin,Cryst,ug,update_ur,update_cprj)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin,band
  logical,optional,intent(in) :: update_ur,update_cprj
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
  complex(gwpc),intent(inout) :: ug(:)
@@ -2577,12 +2565,10 @@ end subroutine wfd_push_ug
 
 subroutine wfd_extract_cgblock(Wfd,band_list,ik_ibz,spin,cgblock)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 !arrays
  integer,intent(in) :: band_list(:)
  real(dp),intent(out) :: cgblock(:,:)
@@ -2644,8 +2630,6 @@ end subroutine wfd_extract_cgblock
 !! SOURCE
 
 function wfd_rank_has_ug(Wfd,rank,band,ik_ibz,spin)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2718,14 +2702,12 @@ end function wfd_rank_has_ug
 
 function wfd_ihave_ug(Wfd,band,ik_ibz,spin,how)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
  logical :: wfd_ihave_ug
  character(len=*),optional,intent(in) :: how
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 
 !************************************************************************
 
@@ -2768,14 +2750,12 @@ end function wfd_ihave_ug
 
 function wfd_ihave_ur(Wfd,band,ik_ibz,spin,how)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
  logical :: wfd_ihave_ur
  character(len=*),optional,intent(in) :: how
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 
 !************************************************************************
 
@@ -2818,14 +2798,12 @@ end function wfd_ihave_ur
 
 function wfd_ihave_cprj(Wfd,band,ik_ibz,spin,how)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
  logical :: wfd_ihave_cprj
  character(len=*),optional,intent(in) :: how
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 
 !************************************************************************
 
@@ -2865,14 +2843,12 @@ end function wfd_ihave_cprj
 
 function wfd_itreat_spin(Wfd,spin,comm_spin,rank_spin,nproc_spin) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spin
  logical :: ans
  integer,intent(out) :: comm_spin,rank_spin,nproc_spin
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 
 !************************************************************************
  comm_spin = Wfd%bks_comm(0,0,spin)
@@ -3040,7 +3016,7 @@ subroutine wfd_mybands(Wfd,ik_ibz,spin,how_manyb,my_band_list,how)
  integer,intent(in) :: ik_ibz,spin
  integer,intent(out) :: how_manyb
  character(len=*),optional,intent(in) :: how
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 !arrays
  integer,intent(out) :: my_band_list(Wfd%mband)
 
@@ -3094,7 +3070,7 @@ subroutine wfd_show_bkstab(Wfd,unit)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: unit
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -3339,35 +3315,35 @@ end subroutine wfd_ptr_ug
 !!
 !! SOURCE
 
-subroutine wfd_ptr_ur(Wfd,band,ik_ibz,spin,ptr_ur,ierr)
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: band,ik_ibz,spin
- integer,intent(out) :: ierr
- type(wfd_t),target,intent(in) :: Wfd
-!arrays
- complex(gwpc),ABI_CONTIGUOUS pointer :: ptr_ur(:)
-
-!Local variables ------------------------------
-!scalars
- !character(len=500) :: msg
-
-!************************************************************************
-
- if (wfd_ihave_ur(Wfd,band,ik_ibz,spin,how="Stored")) then
-   ptr_ur => Wfd%Wave(band,ik_ibz,spin)%ur
-   ierr=0
- else
-   !write(msg,'(a,i0,a,3(i0,1x))')" Node ",Wfd%my_rank," doesn't have ug for (band, ik_ibz, spin): ",band,ik_ibz,spin
-   !MSG_ERROR(msg)
-   ierr=1
-   nullify(ptr_ur)
- end if
-
-end subroutine wfd_ptr_ur
+!subroutine wfd_ptr_ur(Wfd,band,ik_ibz,spin,ptr_ur,ierr)
+!
+! implicit none
+!
+!!Arguments ------------------------------------
+!!scalars
+! integer,intent(in) :: band,ik_ibz,spin
+! integer,intent(out) :: ierr
+! type(wfd_t),target,intent(in) :: Wfd
+!!arrays
+! complex(gwpc),ABI_CONTIGUOUS pointer :: ptr_ur(:)
+!
+!!Local variables ------------------------------
+!!scalars
+! !character(len=500) :: msg
+!
+!!************************************************************************
+!
+! if (wfd_ihave_ur(Wfd,band,ik_ibz,spin,how="Stored")) then
+!   ptr_ur => Wfd%Wave(band,ik_ibz,spin)%ur
+!   ierr=0
+! else
+!   !write(msg,'(a,i0,a,3(i0,1x))')" Node ",Wfd%my_rank," doesn't have ug for (band, ik_ibz, spin): ",band,ik_ibz,spin
+!   !MSG_ERROR(msg)
+!   ierr=1
+!   nullify(ptr_ur)
+! end if
+!
+!end subroutine wfd_ptr_ur
 !!***
 
 !----------------------------------------------------------------------
@@ -3409,7 +3385,7 @@ subroutine wfd_wave_free(Wfd,what,bks_mask)
 
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
  character(len=*),optional,intent(in) :: what
 !arrays
  logical,optional,intent(in) :: bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
@@ -3658,7 +3634,7 @@ subroutine wfd_update_bkstab(Wfd,show)
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: show
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -3715,7 +3691,7 @@ subroutine wfd_set_mpicomm(Wfd)
 
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -3798,7 +3774,7 @@ subroutine wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmask)
 !scalars
  integer,intent(in) :: ik_ibz,spin
  integer,intent(out) :: my_nband
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 !arrays
  integer,intent(out) :: my_band_list(Wfd%mband)
  integer,optional,intent(inout) :: got(Wfd%nproc)
@@ -3889,7 +3865,7 @@ subroutine wfd_rotate(Wfd,Cryst,m_lda_to_qp,bmask)
 
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
  complex(dpc),target,intent(in) :: m_lda_to_qp(Wfd%mband,Wfd%mband,Wfd%nkibz,Wfd%nsppol)
@@ -4017,7 +3993,7 @@ function wfd_iterator_bks(Wfd, bks_mask) result(iter_bks)
 
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 !arrays
  logical,optional,intent(in) :: bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
  type(iter2_t) :: iter_bks
@@ -4081,7 +4057,7 @@ subroutine wfd_bks_distrb(Wfd,bks_distrb,got,bks_mask)
 
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
 !arrays
  integer,intent(out) :: bks_distrb(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
  integer,optional,intent(inout) :: got(Wfd%nproc)
@@ -4167,7 +4143,7 @@ subroutine wfd_sanity_check(Wfd)
 
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -4253,8 +4229,7 @@ subroutine wfd_dump_errinfo(Wfd,onfile)
 !Arguments ------------------------------------
 !scalars
  logical,optional,intent(in) :: onfile
- type(wfd_t),intent(in) :: Wfd
-!arrays
+ class(wfd_t),intent(in) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -4330,13 +4305,11 @@ end subroutine wfd_dump_errinfo
 
 subroutine wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,spin
  integer,intent(out) :: my_nbbp
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  character(len=*),intent(in) :: allup
 !arrays
  integer,intent(out) :: bbp_distrb(Wfd%mband,Wfd%mband)
@@ -4401,13 +4374,11 @@ end subroutine wfd_distribute_bbp
 
 subroutine wfd_distribute_kb_kpbp(Wfd,ik_ibz,ikp_ibz,spin,allup,my_nbbp,bbp_distrb,got,bbp_mask)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,ikp_ibz,spin
  integer,intent(out) :: my_nbbp
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  character(len=*),intent(in) :: allup
 !arrays
  integer,intent(out) :: bbp_distrb(Wfd%mband,Wfd%mband)
@@ -4505,7 +4476,6 @@ end subroutine wfd_distribute_kb_kpbp
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_wfd/wfd_get_cprj
 !! NAME
 !!  wfd_get_cprj
@@ -4538,13 +4508,11 @@ end subroutine wfd_distribute_kb_kpbp
 
 subroutine wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cprj_out,sorted)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
  logical,intent(in) :: sorted
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
  type(crystal_t),intent(in) :: Cryst
 !arrays
  type(pawcprj_type),intent(inout) :: Cprj_out(Wfd%natom,Wfd%nspinor)
@@ -4656,15 +4624,12 @@ end subroutine wfd_get_cprj
 
 subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: new_ngfft(18)
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
- type(wfd_t),intent(inout) :: Wfd
-!arrays
+ class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -4760,11 +4725,9 @@ end subroutine wfd_change_ngfft
 
 function wfd_iam_master(Wfd) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  logical :: ans
 
 !************************************************************************
@@ -4805,14 +4768,12 @@ end function wfd_iam_master
 
 subroutine wfd_test_ortho(Wfd,Cryst,Pawtab,unit,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: unit
  character(len=4),optional,intent(in) :: mode_paral
  type(crystal_t),intent(in) :: Cryst
- type(wfd_t),target,intent(inout) :: Wfd
+ class(wfd_t),target,intent(inout) :: Wfd
 !array
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
 
@@ -4976,8 +4937,6 @@ end subroutine wfd_test_ortho
 
 subroutine wfd_barrier(Wfd)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(wfd_t),intent(in) :: Wfd
@@ -5027,8 +4986,6 @@ end subroutine wfd_barrier
 
 subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur_kibz)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_bz,spin
@@ -5036,7 +4993,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  logical,optional,intent(in) :: with_umklp
  type(crystal_t),intent(in) :: Cryst
  type(kmesh_t),intent(in) :: Kmesh
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !arrays
  complex(gwpc),intent(out) :: ur_kbz(Wfd%nfft*Wfd%nspinor)
  complex(gwpc),optional,intent(out) :: ur_kibz(Wfd%nfft*Wfd%nspinor)
@@ -5211,12 +5168,10 @@ end subroutine wfd_sym_ur
 
 subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk_fname
- type(wfd_t),intent(in) :: Wfd
+ class(wfd_t),intent(in) :: Wfd
  type(Hdr_type),intent(in) :: Hdr
  type(ebands_t),intent(in) :: Bands
 
@@ -5394,13 +5349,11 @@ end subroutine wfd_write_wfk
 
 subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode
  character(len=*),intent(in) :: wfk_fname
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
 !scalars
@@ -5714,14 +5667,12 @@ end subroutine wfd_read_wfk
 
 subroutine wfd_from_wfk(Wfd,wfk_fname,iomode,Psps,Pawtab,ngfft,nloalg,keep_ur,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode,comm
  character(len=*),intent(in) :: wfk_fname
  logical,intent(in) :: keep_ur
- type(wfd_t),intent(out) :: Wfd
+ class(wfd_t),intent(out) :: Wfd
  type(pseudopotential_type),intent(in) :: Psps
 !arrays
  integer,intent(in) :: ngfft(18),nloalg(3)
@@ -5847,14 +5798,12 @@ end subroutine wfd_from_wfk
 
 subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae,ur_ae_onsite,ur_ps_onsite)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,ik_ibz,spin
  type(pseudopotential_type),intent(in) :: Psps
  type(crystal_t),intent(in) :: Cryst
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat)
  type(pawfgrtab_type),intent(in) :: Pawfgrtab(Cryst%natom)
@@ -5986,13 +5935,11 @@ end subroutine wfd_paw_get_aeur
 
 subroutine wfd_plot_ur(Wfd,Cryst,Psps,Pawtab,Pawrad,ngfftf,bks_mask)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: Cryst
  type(Pseudopotential_type),intent(in) :: Psps
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
  logical,target,intent(in) :: bks_mask(Wfd%mband,Wfd%nkibz,Wfd%nsppol)
@@ -6388,8 +6335,6 @@ end subroutine wfd_plot_ur
 subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 &                    optcalc) ! optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf
@@ -6398,7 +6343,7 @@ subroutine wfd_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(Pseudopotential_type),intent(in) :: Psps
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(out) :: rhor(nfftf,Wfd%nspden)
@@ -6620,8 +6565,6 @@ end subroutine wfd_mkrho
 subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
 & usepaw,usexcnhat,usefinegrid,compch_sph,compch_fft,omegaplasma)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,nspden,usefinegrid,usepaw,usexcnhat
@@ -6743,13 +6686,11 @@ end subroutine test_charge
 
 subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: kptopt,pawprtvol
  type(crystal_t),intent(in) :: Cryst
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
  type(ebands_t),intent(in) :: Bst
 !arrays
  type(pawrhoij_type),intent(inout) :: pawrhoij(Wfd%natom)

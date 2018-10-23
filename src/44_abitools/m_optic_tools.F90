@@ -425,7 +425,6 @@ subroutine linopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBS
  implicit none
 
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin,ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -444,8 +443,6 @@ real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
-
-
 
 !Local variables -------------------------
 !no_abirules

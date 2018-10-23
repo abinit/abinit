@@ -660,29 +660,29 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
  integer :: ia,ii,itypat,jj
 ! *************************************************************************
 
-!  Fill the symbols array
+ !  Fill the symbols array
+ do ia=1,natom
+   symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
+ end do
+ itypat = 0
+ do itypat =1,ntypat
+   ii = 0
    do ia=1,natom
-     symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
-   end do
-   itypat = 0
-   do itypat =1,ntypat
-     ii = 0
-     do ia=1,natom
-       if(typat(ia)==itypat) then
-         ii = ii + 1
-       end if
-     end do
-     if(ii>1)then
-       jj=1
-       do ia=1,natom
-         if(typat(ia)==itypat) then
-           write(powerchar,'(I0)') jj
-           symbols(ia) = trim(symbols(ia))//trim(powerchar)
-           jj=jj+1
-         end if
-       end do
+     if(typat(ia)==itypat) then
+       ii = ii + 1
      end if
    end do
+   if(ii>1)then
+     jj=1
+     do ia=1,natom
+       if(typat(ia)==itypat) then
+         write(powerchar,'(I0)') jj
+         symbols(ia) = trim(symbols(ia))//trim(powerchar)
+         jj=jj+1
+       end if
+     end do
+   end if
+ end do
 
 end subroutine symbols_crystal
 !!***

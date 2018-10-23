@@ -51,7 +51,7 @@ module m_phpi
  use m_fftcore,         only : get_kg
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : findqg0
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg, wfd_read_wfk
+ use m_wfd,             only : wfd_init, wfd_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type
@@ -103,8 +103,6 @@ contains  !=====================================================================
 
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -241,7 +239,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
  ABI_FREE(wfd_istwfk)
 
- call wfd_print(wfd_k,header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call wfd_k%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
 
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
@@ -252,7 +250,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ABI_FREE(wfd_istwfk)
 
- call wfd_print(wfd_kq,header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
+ call wfd_kq%print(header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -263,12 +261,12 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ! Read wafefunctions on the k-points grid and q-shifted k-points grid.
  iomode = iomode_from_fname(wfk0_path)
- call wfd_read_wfk(wfd_k,wfk0_path,iomode)
- if (.False.) call wfd_test_ortho(wfd_k,cryst,pawtab,unit=std_out,mode_paral="PERS")
+ call wfd_k%read_wfk(wfk0_path,iomode)
+ if (.False.) call wfd_k%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  iomode = iomode_from_fname(wfq_path)
- call wfd_read_wfk(wfd_kq,wfq_path,iomode)
- if (.False.) call wfd_test_ortho(wfd_kq,cryst,pawtab,unit=std_out,mode_paral="PERS")
+ call wfd_kq%read_wfk(wfq_path,iomode)
+ if (.False.) call wfd_kq%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
@@ -423,7 +421,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
      kg_k(:,1:npw_k) = wfd_k%kdata(ik)%kg_k
      do ib2=1,mband
-       call wfd_copy_cg(wfd_k, ib2, ik, spin, kets_k(1,1,ib2))
+       call wfd_k%copy_cg(ib2, ik, spin, kets_k(1,1,ib2))
      end do
 
      ! Copy u_kq(G)
@@ -431,7 +429,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
      kg_kq(:,1:npw_kq) = wfd_kq%kdata(ikq)%kg_k
      do ib1=1,mband_kq
-       call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras_kq(1,1,ib1))
+       call wfd_kq%copy_cg(ib1, ikq, spin, bras_kq(1,1,ib1))
      end do
 
      ! if PAW, one has to solve a generalized eigenproblem
@@ -603,8 +601,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_FREE(blkflg)
 
  call destroy_hamiltonian(gs_hamkq)
- call wfd_free(wfd_k)
- call wfd_free(wfd_kq)
+ call wfd_k%free()
+ call wfd_kq%free()
 
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)

@@ -379,11 +379,11 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_FREE(keep_ur)
  ABI_FREE(nband)
 
- call wfd_print(in_wfd,header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call in_wfd%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
 
  !Read Wavefunctions
  iomode = iomode_from_fname(wfk_path)
- call wfd_read_wfk(in_wfd,wfk_path,iomode)
+ call in_wfd%read_wfk(wfk_path,iomode)
 
  do spin=1,nsppol ! Loop over spins
    do ik=1,nkpt ! Loop over kpoints
@@ -500,7 +500,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_FREE(dipoles)
 
  call wfk_close(in_wfk)
- call wfd_free(in_wfd)
+ call in_wfd%free()
  call ebands_free(ebands)
  call cryst%free()
 

@@ -44,7 +44,7 @@ MODULE m_bseinterp
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse
- use m_wfd,               only : wfd_t, wfd_sym_ur, wfd_get_ur, wfd_change_ngfft
+ use m_wfd,               only : wfd_t
  use m_pawtab,            only : pawtab_type
 
  implicit none
@@ -134,8 +134,6 @@ CONTAINS  !=====================================================================
 
 subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
 &    Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab, method)
-
- implicit none
 
 !Arguments ---------------------------
 !scalars
@@ -234,8 +232,6 @@ end subroutine interpolator_init
 
 subroutine int_alloc_work(interpolator, work_size)
 
- implicit none
-
 !Arguments ---------------------------
 !scalars
  integer,intent(in) :: work_size
@@ -270,8 +266,6 @@ end subroutine int_alloc_work
 !! SOURCE
 
 subroutine int_free_work(interpolator)
-
- implicit none
 
 !Arguments ---------------------------
 !scalars
@@ -311,8 +305,6 @@ end subroutine int_free_work
 
 subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
 &   Kmesh_dense, Kmesh_coarse, BSp, Cryst, Psps, Pawtab)
-
- implicit none
 
 !Arguments ---------------------------
 !scalars
@@ -355,7 +347,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
  ABI_UNUSED(Pawtab(1)%basis_size)
 
  ! Ensure Wfd and Wfd_coarse use the same FFT mesh.
- call wfd_change_ngfft(Wfd_dense,Cryst,Psps,Wfd_coarse%ngfft)
+ call wfd_dense%change_ngfft(Cryst,Psps,Wfd_coarse%ngfft)
  nfft = Wfd_coarse%nfft
  nspinor = Wfd_coarse%nspinor
  nsppol = Bsp%nsppol
@@ -418,7 +410,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
 
        do ib_dense = BSp%lomo_spin(spin), BSp%humo_spin(spin)
          ! ur(ib_dense, ik_dense)
-         call wfd_sym_ur(Wfd_dense,Cryst,Kmesh_dense,ib_dense,ik_dense,spin,ur_dense)
+         call wfd_dense%sym_ur(Cryst,Kmesh_dense,ib_dense,ik_dense,spin,ur_dense)
 
          if (ANY(diffg0/=0)) then
            !ur_kbz = ur_kbz*e(ig0r)
@@ -439,7 +431,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
 
          do ib_coarse = bstart, bstop
            ! ur(ib_coarse, ik_coarse)
-           call wfd_sym_ur(Wfd_coarse,Cryst,Kmesh_coarse,ib_coarse,ik_coarse,spin,ur_coarse)
+           call wfd_coarse%sym_ur(Cryst,Kmesh_coarse,ib_coarse,ik_coarse,spin,ur_coarse)
 
            ! ovlp = < u_{ib_coarse,ik_coarse} | u_{ib_dense,ik_dense} >
            ovlp =  xdotc(nfft,ur_coarse,1,ur_dense,1)/nfft
@@ -493,8 +485,6 @@ end subroutine int_compute_overlaps
 !! SOURCE
 
 subroutine int_preprocess_tables(interpolator,double_grid)
-
- implicit none
 
 !Argument ------------------------------------
 !scalars
@@ -587,8 +577,6 @@ end subroutine int_preprocess_tables
 
 subroutine int_compute_corresp(interpolator,BSp,double_grid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(excparam),intent(in) :: BSp
@@ -677,8 +665,6 @@ end subroutine int_compute_corresp
 
 subroutine interpolator_normalize(interpolator)
 
- implicit none
-
 !Arguments ---------------------------
 !scalars
  type(interpolator_t),intent(inout) :: interpolator
@@ -737,8 +723,6 @@ end subroutine interpolator_normalize
 !! SOURCE
 
 subroutine interpolator_free(interpolator)
-
- implicit none
 
 !Arguments ---------------------------
  type(interpolator_t),intent(inout) :: interpolator
