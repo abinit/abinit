@@ -1335,7 +1335,7 @@ program mrgscr
    ABI_FREE(foundq)
  end if
 
- call crystal_free(Cryst)
+ call cryst%free()
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
  call destroy_mpi_enreg(MPI_enreg)

@@ -53,7 +53,7 @@ module m_dvdb
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp
- use m_crystal,       only : crystal_t, crystal_free, crystal_print
+ use m_crystal,       only : crystal_t, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
@@ -656,7 +656,7 @@ subroutine dvdb_free(db)
 
  ! types
  call hdr_free(db%hdr_ref)
- call crystal_free(db%cryst)
+ call db%cryst%free()
  call destroy_mpi_enreg(db%mpi_enreg)
 
  ! Clean cache

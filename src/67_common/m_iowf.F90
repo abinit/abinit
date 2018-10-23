@@ -44,7 +44,7 @@ MODULE m_iowf
  use m_numeric_tools,  only : mask2blocks
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_cgtools,        only : cg_zcopy
- use m_crystal,        only : crystal_t, crystal_free
+ use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_from_hdr
  use m_rwwf,           only : rwwf
  use m_mpinfo,         only : proc_distrb_cycle
@@ -392,7 +392,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_FREE(vkbsign)
        ABI_FREE(vkb)
        ABI_FREE(vkbd)
-       call crystal_free(crystal)
+       call crystal%free()
      end if
 
      if (done) return
@@ -415,7 +415,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
      !call crystal_from_hdr(crystal, hdr, 2)
      !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
-     !call crystal_free(crystal)
+     !call crystal%free()
      !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
      !NCF_CHECK(ncerr)
 #else
@@ -1321,7 +1321,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    end if !nctk_has_mpiio
  end if
 
- call crystal_free(crystal)
+ call crystal%free()
  if (response == 0) call ebands_free(gs_ebands)
 
  ABI_FREE(occ3d)

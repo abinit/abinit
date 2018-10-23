@@ -149,7 +149,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  NCF_CHECK(nctk_open_create(ncid, strcat(seedname, "_FOLD2BLOCH.nc"), xmpi_comm_self))
  fform = fform_from_ext("FOLD2BLOCH.nc")
  NCF_CHECK(hdr_ncwrite(wfk%hdr, ncid, fform, nc_define=.True.))
- NCF_CHECK(crystal_ncwrite(cryst, ncid))
+ NCF_CHECK(cryst%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
  ncerr = nctk_def_dims(ncid, [ &
@@ -168,7 +168,7 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
  NCF_CHECK(nf90_inq_varid(ncid, "spectral_weights", weights_varid))
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fold_matrix"), fold_matrix))
- call crystal_free(cryst)
+ call cryst%free()
 #endif
 
  call ebands_free(ebands)

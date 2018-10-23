@@ -44,7 +44,7 @@ MODULE m_eig2d
 
  use m_time,       only : timab
  use m_fstrings,   only : strcat
- use m_crystal,    only : crystal_init, crystal_free, crystal_t
+ use m_crystal,    only : crystal_init,  crystal_t
  use m_pawtab,     only : pawtab_type
  use m_ddb,        only : DDB_VERSION
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
@@ -1819,7 +1819,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    ABI_DEALLOCATE(gkk)
  end if
 
- call crystal_free(Crystal)
+ call crystal%free()
  call ebands_free(Bands)
  call eigr2d_free(eigr2d)
  call eigr2d_free(eigi2d)

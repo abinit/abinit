@@ -754,7 +754,7 @@ program optic
 
  call hdr_free(hdr)
  call ebands_free(ks_ebands)
- call crystal_free(cryst)
+ call cryst%free()
 
  call timein(tcpu,twall)
 

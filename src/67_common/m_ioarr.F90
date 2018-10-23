@@ -850,7 +850,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
      NCF_CHECK(nctk_open_modify(ncid, file_etsf, xmpi_comm_self))
      NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
      ! Add information on the crystalline structure.
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      if (present(ebands)) then
        NCF_CHECK(ebands_ncwrite(ebands, ncid))
      end if
@@ -950,7 +950,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
     call fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg)
  end if
 
- call crystal_free(crystal)
+ call crystal%free()
 
 end subroutine fftdatar_write_from_hdr
 !!***

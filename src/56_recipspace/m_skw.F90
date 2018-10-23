@@ -204,7 +204,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol; new%bcount = bcount
 
  ! Get point group operations.
- call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, include_timrev=cplex==1)
+ call cryst%get_point_group(new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, include_timrev=cplex==1)
 
  ! -----------------------
  ! Find nrwant star points

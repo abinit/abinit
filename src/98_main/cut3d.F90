@@ -768,7 +768,7 @@ program cut3d
            call init_distribfft_seq(mpi_enreg%distribfft, 'f', ngfft(2), ngfft(3), 'all')
 
            call fftdatar_write(varname,filnam,IO_MODE_ETSF,hdr,cryst,ngfft,cplex,nfft,nspden,grid_full,mpi_enreg)
-           call crystal_free(cryst)
+           call cryst%free()
 
          case(0)
            write(std_out,*)' Exit requested by user'

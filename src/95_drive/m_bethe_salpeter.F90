@@ -53,7 +53,7 @@ module m_bethe_salpeter
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
  use m_fft,             only : fourdp
- use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
+ use m_crystal,         only : crystal_t, crystal_print
  use m_crystal_io,      only : crystal_from_hdr
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
@@ -1004,7 +1004,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  !
  !* Destroy local data structures.
  call destroy_mpi_enreg(MPI_enreg_seq)
- call crystal_free(Cryst)
+ call cryst%free()
  call gsph_free(Gsph_x)
  call gsph_free(Gsph_c)
  call kmesh_free(Kmesh)

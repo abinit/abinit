@@ -1495,9 +1495,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    filename = strcat(dtfil%filnam_ds(4),"_DDB.nc")
 
    call outddbnc(filename, mpert, d2matr, blkflg, dtset%qptn, Crystal)
-
-   call crystal_free(Crystal)
-
+   call crystal%free()
 #endif
 
 

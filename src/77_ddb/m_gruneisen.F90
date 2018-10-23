@@ -725,7 +725,7 @@ subroutine gruns_free(gruns)
 
  if (allocated(gruns%ifc_vol)) then
    do ii=1,size(gruns%cryst_vol)
-     call crystal_free(gruns%cryst_vol(ii))
+     call gruns%cryst_vol(ii)%free()
    end do
    ABI_FREE(gruns%cryst_vol)
  end if
@@ -812,7 +812,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
 
    ! Write structure corresponding to iv0
-   NCF_CHECK(crystal_ncwrite(gruns%cryst_vol(iv0), ncid))
+   NCF_CHECK(gruns%cryst_vol(iv0)%ncwrite(ncid))
 
    ! Add important dimensions and additional metadata.
    ncerr = nctk_def_dims(ncid, [ &

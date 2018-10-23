@@ -1453,7 +1453,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
 
    call destroy_tetra(tetra)
-   call crystal_free(cryst)
+   call cryst%free()
  end if
 
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&

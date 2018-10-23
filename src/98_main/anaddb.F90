@@ -72,7 +72,7 @@ program anaddb
  use m_dtfil,          only : isfile
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_ddb_interpolate, only : ddb_interpolate
- use m_crystal,        only : crystal_t, crystal_free
+ use m_crystal,        only : crystal_t
  use m_dynmat,         only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_elphon,         only : elphon
  use m_harmonic_thermo,only : harmonic_thermo
@@ -897,7 +897,7 @@ program anaddb
 
  call asrq0_free(asrq0)
  call ifc_free(Ifc)
- call crystal_free(Crystal)
+ call crystal%free()
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)

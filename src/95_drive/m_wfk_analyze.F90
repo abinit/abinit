@@ -484,7 +484,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !=====================
  !==== Free memory ====
  !=====================
- call crystal_free(cryst)
+ call cryst%free()
  call ebands_free(ebands)
  call wfd_free(wfd)
  call pawfgr_destroy(pawfgr)

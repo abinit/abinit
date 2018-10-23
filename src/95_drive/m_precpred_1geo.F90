@@ -43,7 +43,7 @@ module m_precpred_1geo
 
  use m_fstrings,           only : strcat
  use m_geometry,           only : chkdilatmx
- use m_crystal,            only : crystal_init, crystal_free, crystal_t
+ use m_crystal,            only : crystal_init, crystal_t
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  use m_pred_delocint,      only : pred_delocint
  use m_pred_fire,          only : pred_fire
@@ -253,7 +253,7 @@ real(dp), allocatable :: xred(:,:)
          filename = strcat(filnam_ds4, "_DILATMX_STRUCT.nc")
          NCF_CHECK(crystal%ncwrite_path(filename))
 #endif
-         call crystal_free(crystal)
+         call crystal%free()
        end if
        call xmpi_barrier(comm_cell)
        write (dilatmx_errmsg, '(a,i0,3a)') &

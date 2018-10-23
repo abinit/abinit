@@ -51,7 +51,7 @@ use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian, destroy_ha
 use m_paw_dmft,         only : paw_dmft_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
-use m_crystal,          only : crystal_t, crystal_init, crystal_free, crystal_print
+use m_crystal,          only : crystal_t, crystal_init, crystal_print
 use m_io_kss,           only : make_gvec_kss
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
@@ -1590,7 +1590,7 @@ implicit none
 call dtset_free(dtset)
 call destroy_hamiltonian(gs_hamk)
 
-call crystal_free(Cryst)
+call cryst%free()
 call kmesh_free(Kmesh)
 call kmesh_free(Qmesh)
 call gsph_free(Gsphere)

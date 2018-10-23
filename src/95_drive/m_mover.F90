@@ -44,7 +44,7 @@ module m_mover
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
- use m_crystal,            only : crystal_t, crystal_init, crystal_free
+ use m_crystal,            only : crystal_t, crystal_init
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
@@ -183,7 +183,7 @@ contains
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare_and_copy
 !!      abihist_free,abihist_init,abimover_fin,abimover_ini
-!!      chkdilatmx,crystal_free,crystal_init,dtfil_init_time
+!!      chkdilatmx,crystal_init,dtfil_init_time
 !!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
 !!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
 !!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin

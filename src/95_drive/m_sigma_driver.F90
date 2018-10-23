@@ -56,7 +56,7 @@ module m_sigma_driver
  use m_fft_mesh,      only : get_gftt, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_crystal,       only : crystal_free, crystal_t, crystal_print, idx_spatial_inversion
+ use m_crystal,       only : crystal_t, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
 &                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
@@ -173,7 +173,7 @@ contains
 !!
 !! CHILDREN
 !!      calc_sigc_me,calc_sigx_me,calc_ucrpa,calc_vhxc_me,chkpawovlp
-!!      classify_bands,cohsex_me,crystal_free,denfgr,destroy_mpi_enreg
+!!      classify_bands,cohsex_me,denfgr,destroy_mpi_enreg
 !!      ebands_copy,ebands_free,ebands_interpolate_kpath,ebands_report_gap
 !!      ebands_update_occ,em1results_free,energies_init,esymm_free
 !!      fftdatar_write,fourdp,get_gftt,getph,gsph_free,hdr_free
@@ -2430,7 +2430,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call gsph_free(Gsph_x)
  call gsph_free(Gsph_c)
  call vcoul_free(Vcp)
- call crystal_free(Cryst)
+ call cryst%free()
  call sigma_free(Sr)
  call em1results_free(Er)
  call ppm_free(PPm)
@@ -3421,7 +3421,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  ! FIXME
  if (Dtset%symsigma/=0 .and. Sigp%nomegasr/=0) then
-   if (idx_spatial_inversion(Cryst) == 0) then
+   if (cryst%idx_spatial_inversion() == 0) then
      write(msg,'(5a)')' setup_sigma : BUG :',ch10,&
 &      'It is not possible to use symsigma/=0 to calculate the spectral function ',ch10,&
 &      'when the system does not have the spatial inversion. Please use symsigma=0 '

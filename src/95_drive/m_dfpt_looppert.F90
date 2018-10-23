@@ -56,7 +56,7 @@ module m_dfpt_loopert
  use m_atomdata,   only : atom_gauss
  use m_eig2d,      only : eigr2d_init,eigr2d_t, eigr2d_ncwrite,eigr2d_free, &
                           gkk_t, gkk_init, gkk_ncwrite,gkk_free, outbsd, eig2stern
- use m_crystal,    only : crystal_init, crystal_free, crystal_t
+ use m_crystal,    only : crystal_init, crystal_t
  use m_efmas,      only : efmas_main, efmas_analysis, print_efmas
  use m_fft,        only : fourdp
  use m_fftcore,    only : fftcore_set_mixprec
@@ -634,7 +634,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Get Dielectric Tensor and Effective Charges
 !  (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb_get_dielt_zeff(ddb,ddb_crystal,1,0,0,dielt,zeff)
-   call crystal_free(ddb_crystal)
+   call ddb_crystal%free()
    call ddb_free(ddb)
    ABI_DEALLOCATE(dummy)
  end if
@@ -2408,7 +2408,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Free memory.
  if(dtset%ieig2rf /= 3 .and. dtset%ieig2rf /= 4 .and. dtset%ieig2rf /= 5) call hdr_free(hdr0)
  ABI_DEALLOCATE(eigen0_copy)
- call crystal_free(crystal)
+ call crystal%free()
 
  ! GKK stuff (deprecated)
  call ebands_free(gkk_ebands)

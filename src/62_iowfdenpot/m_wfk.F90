@@ -4139,7 +4139,7 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
  ABI_FREE(bz2ibz)
  ABI_FREE(cg_kf)
 
- call crystal_free(cryst)
+ call cryst%free()
  call ebands_free(ebands_ibz)
  call ebands_free(ebands_full)
  call wfk_close(in_wfk)

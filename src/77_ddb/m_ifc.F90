@@ -52,7 +52,7 @@ MODULE m_ifc
  use m_copy,        only : alloc_copy
  use m_pptools,     only : printbxsf
  use m_ewald,       only : ewald9
- use m_crystal,     only : crystal_t, crystal_free
+ use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red, normv, mkrdim
  use m_kpts,        only : kpts_ibz_from_kptrlatt, smpbz
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &

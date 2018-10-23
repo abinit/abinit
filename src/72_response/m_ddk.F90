@@ -49,7 +49,7 @@ MODULE m_ddk
  use defs_abitypes,   only : hdr_type, dataset_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
- use m_crystal,       only : crystal_t, crystal_free
+ use m_crystal,       only : crystal_t
  use m_crystal_io,    only : crystal_from_hdr
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
@@ -502,7 +502,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  call wfk_close(in_wfk)
  call wfd_free(in_wfd)
  call ebands_free(ebands)
- call crystal_free(cryst)
+ call cryst%free()
 
 end subroutine eph_ddk
 !!***
@@ -756,15 +756,11 @@ subroutine ddk_free(ddk)
  ! integer arrays
 
  ! real arrays
- if (allocated(ddk%velocity)) then
-   ABI_DEALLOCATE(ddk%velocity)
- end if
- if (allocated(ddk%velocity_fsavg)) then
-   ABI_DEALLOCATE(ddk%velocity_fsavg)
- end if
+ ABI_SFREE(ddk%velocity)
+ ABI_SFREE(ddk%velocity_fsavg)
 
  ! types
- call crystal_free(ddk%cryst)
+ call ddk%cryst%free()
 
 end subroutine ddk_free
 !!***

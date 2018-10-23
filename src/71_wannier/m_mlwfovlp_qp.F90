@@ -39,7 +39,7 @@ module m_mlwfovlp_qp
  use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim, pawcprj_alloc, pawcprj_free
  use m_numeric_tools,  only : isordered
  use m_geometry,       only : metric
- use m_crystal,        only : crystal_t, crystal_free
+ use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_from_hdr
  use m_kpts,           only : listkk
  use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
@@ -227,7 +227,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  call crystal_from_hdr(Cryst,Hdr,gw_timrev)
  call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
- call crystal_free(Cryst)
+ call cryst%free()
  call kmesh_free(Kibz_mesh)
 
  ABI_MALLOC(ibz2bz,(nkibz,6))

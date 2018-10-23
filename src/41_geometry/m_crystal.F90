@@ -84,8 +84,6 @@ MODULE m_crystal
   integer :: ntypat
   ! Number of type of atoms
 
-  !$integer :: ntypalch,ntyppure
-
   integer :: npsp
   ! No. of pseudopotentials
 
@@ -184,25 +182,43 @@ MODULE m_crystal
    ! The content of first line read from the psp file
 
  contains
+
    procedure :: ncwrite => crystal_ncwrite
+   ! Write the object in netcdf format
+
    procedure :: ncwrite_path => crystal_ncwrite_path
-   !procedure :: free => crystal_free
+   ! Dump the object to netcdf file.
+
+   procedure :: isymmorphic
+   ! True if space group is symmorphic.
+
+   procedure :: idx_spatial_inversion
+   ! Return the index of the spatial inversion, 0 if not present.
+
+   procedure :: isalchemical
+   ! True if we are using alchemical pseudopotentials.
+
+   procedure :: free => crystal_free
+   ! Free memory.
+
+   procedure :: new_without_symmetries => crystal_without_symmetries
+   ! Return new object without symmetries (actually nsym = 1 and identity operation)
+
+   procedure :: get_point_group => crystal_point_group
+   ! Return the symmetries of the point group of the crystal.
+
+   procedure :: symbol_type
+   ! Return the atomic symbol from the itypat index.
+
+   procedure :: adata_type
+   ! Return atomic data from the itypat index.
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
- public :: crystal_without_symmetries ! Return new object without symmetries (actually nsym = 1 and identity operation)
- public :: crystal_free            ! Free memory.
  public :: crystal_print           ! Print dimensions and basic info stored in the object
- public :: idx_spatial_inversion   ! Return the index of the spatial inversion, 0 if not present.
- public :: isymmorphic             ! True if space group is symmorphic.
- public :: isalchemical            ! True if we are using alchemical pseudopotentials.
- public :: adata_type              ! Return atomic data from the itypat index.
- public :: symbol_type             ! Return the atomic symbol from the itypat index.
- public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
- public :: crystal_point_group     ! Return the symmetries of the point group of the crystal.
- public :: crystal_ncwrite         ! Dump the object in a netcdf file associated to a ncid.
- public :: crystal_ncwrite_path    ! Dump the object to file.
 
+ public :: symbols_crystal         ! Return an array with the atomic symbol:["Sr","Ru","O1","O2","O3"]
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
 !!***
@@ -438,7 +454,7 @@ type(crystal_t) function crystal_without_symmetries(self) result(new)
  implicit none
 
 !Arguments ------------------------------------
- type(crystal_t), intent(in) :: self
+ class(crystal_t), intent(in) :: self
 
 !Local variables-------------------------------
  integer,parameter :: timrev1 = 1, new_symafm(1) = 1
@@ -478,13 +494,9 @@ subroutine crystal_free(Cryst)
  implicit none
 
 !Arguments ------------------------------------
- type(crystal_t),intent(inout) :: Cryst
+ class(crystal_t),intent(inout) :: Cryst
 
 ! *********************************************************************
-
- DBG_ENTER("COLL")
-
- !@crystal_t
 
 !integer
  ABI_SFREE(Cryst%indsym)
@@ -507,8 +519,6 @@ subroutine crystal_free(Cryst)
 
 !character
  ABI_SFREE(Cryst%title)
-
- DBG_EXIT("COLL")
 
 end subroutine crystal_free
 !!***
@@ -612,9 +622,8 @@ end subroutine crystal_print
 !! symbols_crystal
 !!
 !! FUNCTION
-!! Return a array with the symbol of each atoms
-!! with indexation
-!! ["Sr","Ru","O1","O2","O3"] for example
+!! Return a array with the symbol of each atoms with indexation e.g.
+!! ["Sr","Ru","O1","O2","O3"]
 !!
 !! INPUTS
 !! natom = number of atoms
@@ -700,7 +709,7 @@ pure function idx_spatial_inversion(Cryst) result(inv_idx)
 !Arguments ------------------------------------
 !scalars
  integer :: inv_idx
- type(crystal_t),intent(in) :: Cryst
+ class(crystal_t),intent(in) :: Cryst
 
 !Local variables-------------------------------
 !scalars
@@ -740,7 +749,7 @@ pure function isymmorphic(Cryst) result(ans)
 !Arguments ------------------------------------
 !scalars
  logical :: ans
- type(crystal_t),intent(in) :: Cryst
+ class(crystal_t),intent(in) :: Cryst
 
 ! *************************************************************************
 
@@ -771,7 +780,7 @@ pure function isalchemical(Cryst) result(ans)
 !Arguments ------------------------------------
 !scalars
  logical :: ans
- type(crystal_t),intent(in) :: Cryst
+ class(crystal_t),intent(in) :: Cryst
 
 ! *************************************************************************
 
@@ -800,7 +809,7 @@ function adata_type(crystal,itypat) result(atom)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itypat
- type(crystal_t),intent(in) :: crystal
+ class(crystal_t),intent(in) :: crystal
  type(atomdata_t) :: atom
 
 ! *************************************************************************
@@ -823,7 +832,7 @@ end function adata_type
 !!
 !! SOURCE
 
-function symbol_type(crystal,itypat) result(symbol)
+function symbol_type(crystal, itypat) result(symbol)
 
  implicit none
 
@@ -831,7 +840,7 @@ function symbol_type(crystal,itypat) result(symbol)
 !scalars
  integer,intent(in) :: itypat
  character(len=2) :: symbol
- type(crystal_t),intent(in) :: crystal
+ class(crystal_t),intent(in) :: crystal
 
 !Local variables-------------------------------
 !scalars
@@ -839,7 +848,7 @@ function symbol_type(crystal,itypat) result(symbol)
 
 ! *************************************************************************
 
- atom = adata_type(crystal, itypat)
+ atom = crystal%adata_type(itypat)
  symbol = atom%symbol
 
 end function symbol_type
@@ -878,7 +887,7 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 
 !Arguments ------------------------------------
 !scalars
- type(crystal_t),intent(in) :: cryst
+ class(crystal_t),intent(in) :: cryst
  integer,intent(out) :: ptg_nsym
  logical,optional,intent(in) :: include_timrev
  logical,intent(out) :: has_inversion
@@ -1001,17 +1010,15 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
- ! @crystal_t
-
  ! TODO alchemy not treated correctly
- if (isalchemical(cryst)) then
+ if (cryst%isalchemical()) then
    write(msg,"(3a)")&
     "Alchemical crystals are not fully supported by the netcdf format",ch10,&
     "Important parameters (e.g. znucl, symbols) are not written with the correct value"
    MSG_WARNING(msg)
  end if
 
- symmorphic = yesno(isymmorphic(cryst))
+ symmorphic = yesno(cryst%isymmorphic())
 
  ! Define dimensions.
  ncerr = nctk_def_dims(ncid, [ &
@@ -1264,7 +1271,7 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  write (unitcif,'(2a)') '_chemical_formula_analytical              ', chemformula
 
 !FIXME: check that brvltt is correctly used here - is it equal to bravais(1) in the invars routines?
- if     (brvltt==1)then
+ if (brvltt==1) then
    write (unitcif,'(a)') '_symmetry_cell_setting             triclinic'
  else if(brvltt==2)then
    write (unitcif,'(a)') '_symmetry_cell_setting             monoclinic'
@@ -1323,7 +1330,6 @@ subroutine symrel2string(symrel1, tnon, string)
 
 !Arguments ------------------------------------
 !scalars
-!arrays
  integer, intent(in) :: symrel1(3,3)
  real(dp), intent(in) :: tnon(3)
  character(len=80), intent(out) :: string
@@ -1342,7 +1348,7 @@ subroutine symrel2string(symrel1, tnon, string)
  string = ''
  do i1=1,3
    if (abs(tnon(i1)) > tol10) then
-!    find fraction 1/n for tnon, otherwise do not know what to print
+     ! find fraction 1/n for tnon, otherwise do not know what to print
      if (abs(one-two*tnon(i1)) < tol10) string = trim(string)//'1/2'
      if (abs(one+two*tnon(i1)) < tol10) string = trim(string)//'-1/2'
 
@@ -1357,7 +1363,7 @@ subroutine symrel2string(symrel1, tnon, string)
      if (abs(five+six*tnon(i1)) < tol10) string = trim(string)//'-5/6'
    end if
    do i2=1,3
-!    FIXME: check if this is correct ordering for symrel(i1,i2) looks ok
+     ! FIXME: check if this is correct ordering for symrel(i1,i2) looks ok
      if (symrel1(i1,i2) == 1)  string = trim(string)//'+'//xyz(i2)
      if (symrel1(i1,i2) == -1) string = trim(string)//'-'//xyz(i2)
    end do
@@ -1476,12 +1482,12 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  end do
  close (iout)
 
-
 !output FORCES file for forces in same order as positions above
  fname = trim(fnameradix)//"_FORCES"
  if (open_file(fname,msg,newunit=iout) /= 0 ) then
    MSG_ERROR(msg)
  end if
+
 !ndisplacements
 !iatom_displaced displacement_red_coord(3)
 !forces_cart_ev_Angstr(3)

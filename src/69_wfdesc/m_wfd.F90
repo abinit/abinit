@@ -5785,7 +5785,7 @@ subroutine wfd_from_wfk(Wfd,wfk_fname,iomode,Psps,Pawtab,ngfft,nloalg,keep_ur,co
  ABI_FREE(wfd_nband)
 
  call hdr_free(Hdr)
- call crystal_free(Crystal)
+ call crystal%free()
 
  ! Read wavefunction from files.
  call wfd_read_wfk(Wfd,wfk_fname,iomode)
