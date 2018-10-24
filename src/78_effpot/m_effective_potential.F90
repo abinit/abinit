@@ -2927,19 +2927,45 @@ end subroutine effective_potential_distributeResidualForces
 !!
 !! SOURCE
 
-subroutine effective_potential_testEffPot(eff_pot,hist)
+subroutine effective_potential_testEffPot(eff_pot,hist,master,comm)
 
   implicit none
 
 !Arguments ------------------------------------
 !scalars
+  integer,intent(in) :: master,comm
+!logicals
 !array
   type(effective_potential_type),intent(in) :: eff_pot
   type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
+  integer :: natom, my_rank
+!logicals 
+  logical :: iam_master
+!arrays
+  real(dp),allocatable :: disp(:,:),du_delta(:,:,:)
 
 ! *************************************************************************
+  
+
+  !MPI variables
+  my_rank=xmpi_comm_rank(comm)
+  iam_master = (my_rank == master)
+
+  natom = size(hist%xred,2)
+  
+  ABI_ALLOCATE(disp,(3,natom)) 
+  ABI_ALLOCATE(du_delta,(6,3,natom))
+ 
+
+  call effective_potential_getDisp(disp,du_delta,natom,hist%rprimd,&
+&                                    eff_pot%supercell%rprimd,comm,xred_hist=hist%xred,&
+&                                    xcart_ref=eff_pot%supercell%xcart)
+
+
+  ABI_DEALLOCATE(disp) 
+  ABI_DEALLOCATE(du_delta)
 
   write(*,*) "I was here everything is nice so far"
 
