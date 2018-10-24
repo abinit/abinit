@@ -3674,7 +3674,8 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  ABI_DEALLOCATE(list)
  ABI_DEALLOCATE(xred_hist)
  ABI_DEALLOCATE(xred_ref)
-
+ ABI_DEALLOCATE(xcart_ref)
+ ABI_DEALLOCATE(xcart_hist)
 end subroutine effective_potential_file_mapHistToRef
 !!***
 

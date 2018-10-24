@@ -321,10 +321,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  comm=scfcv_args%mpi_enreg%comm_cell
  me=xmpi_comm_rank(comm)
 
+ mxhist=zero 
+
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
- mxhist=zero 
  if (ab_mover%restartxf<0)then
 !  Read history from file (and broadcast if MPI)
    if (me==master) then
@@ -387,6 +388,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  elseif(mxhist > 0 .and. mxhist  < 3)then
   nhisttot = mxhist ! Less than three MD-Steps
  end if
+
+ write(*,*) "mxhist", mxhist
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
