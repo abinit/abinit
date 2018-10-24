@@ -1,7 +1,7 @@
 # ===========================================
 # Makefile
 # Use it to build a standalone LIBPAW library
-#                                 M.T. Jan 15
+#                    M.T. jan 15 - rev oct 18
 # ===========================================
 
 # Define main directories
@@ -49,23 +49,24 @@ default: libpaw
 clean:
 	@$(RM) -rf build install
 
-libpaw: libpaw-mkbuilddir libpaw-objs libpaw-mklib libpaw-install
+libpaw: libpaw-install
 
 libpaw-mkbuilddir:
+	@$(ECHO) -n "Creating directories..."
 	@if ! $(TEST) -d $(BUILD_DIR); then $(MKDIR) $(BUILD_DIR);fi
 	@if ! $(TEST) -d $(INSTALL_DIR); then $(MKDIR) $(INSTALL_DIR);fi
 	@$(RM) -rf $(BUILD_DIR)/*
 	@if ! $(TEST) -d $(SRC_BUILD_DIR); then $(MKDIR) $(SRC_BUILD_DIR);fi
 	@$(CP) $(CONFIG_DIR)/Makefile.src $(SRC_BUILD_DIR)/Makefile
 	@$(CP) $(CONFIG_DIR)/libpaw.src $(SRC_BUILD_DIR)
+	@$(ECHO) " done!."
 
-libpaw-mklib:
+libpaw-mklib: libpaw-objs
 	@$(ECHO)
 	@$(AR) rvs $(BUILD_DIR)/libpaw.a $(LIBPAW_CONTENT) 2>&1
 
-libpaw-install:
-	@$(ECHO)
-	@$(ECHO) "Installing library and modules in "$(INSTALL_DIR)
+libpaw-install: libpaw-mklib | libpaw-mkbuilddir
+	@$(ECHO) -n "Installing library and modules in "$(INSTALL_DIR)
 	@if ! $(TEST) -d $(INSTALL_LIB_DIR); then $(MKDIR) $(INSTALL_LIB_DIR);fi
 	@$(RM) -rf $(INSTALL_LIB_DIR)/*
 	@$(CP) -rf $(BUILD_DIR)/libpaw.a $(INSTALL_LIB_DIR)
@@ -73,8 +74,9 @@ libpaw-install:
 	@$(RM) -rf $(INSTALL_INC_DIR)/*
 	@$(CP) $(SRC_BUILD_DIR)/*.mod $(INSTALL_INC_DIR)
 	@$(RM) -rf $(INSTALL_INC_DIR)/interfaces_??_libpaw.mod
+	@$(ECHO) " done!"
 
-libpaw-objs:
+libpaw-objs: libpaw-mkbuilddir
 	@$(CD) $(SRC_BUILD_DIR); \
 	$(MAKE) $(LIBPAW_OBJ) INCS=-I$(SRC_DIR)
 
@@ -83,3 +85,6 @@ libpaw-objs:
 	$(FC) $(FCFLAGS) -o $(@F) -c $<
 %.o: %.c
 	$(CC) $(CFLAGS) -o $(@F) -c $<
+
+#Force sequential compilation (this should be corrected)
+.NOTPARALLEL:

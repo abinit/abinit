@@ -10404,6 +10404,11 @@ the number of non-self-consistent loops is determined by [[nstep]].
     * The Default value of 0 -- for wavelets calculations ([[usewvl]] = 1) --
     corresponds to make 2 steps with 3 non-self consistent loops, 2 steps with 2
     non-self consistent loops, then the next ones with 1 non-self consistent loop.
+
+    * A negative value corresponds to make the abs([[nnsclo]]) first fixed potential determinations
+    of wavefunctions have 5 non-self consistent loops, and the next ones to have only 1 non-self
+    consistent loop.
+
 """,
 ),
 
