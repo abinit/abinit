@@ -546,9 +546,14 @@ contains
        call wrtout(ab_out,  msg, "COLL")
 
        call spin_hist_t_reset(self%spin_hist, array_to_zero=.False.)
+       ! set temperature
+       ! TODO make this into a subroutine
        self%params%spin_temperature=T
+       call spin_terms_t_set_params(self%spin_calculator%temperature=T)
+       self%spin_mover%temperature=T
        call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=T)
+
        ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
        if(i==0) then
           call spin_model_t_set_initial_spin(self)
@@ -556,7 +561,6 @@ contains
           call spin_hist_t_inc(self%spin_hist)
        endif
 
-       self%spin_mover%temperature=T
        write(post_fname, "(I4.4)") i+1
        call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
                & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
