@@ -88,7 +88,7 @@ program multibinit
  character(len=500) :: message
  type(multibinit_dtset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
- type(abihist) :: hist
+ type(abihist) :: hist, hist_trs ! TODO MARCUS: test set implementation hist_trs: hist_TRainingSET
  type(args_t) :: args
 
 !TODO hexu: add types for spin here.
@@ -264,7 +264,7 @@ program multibinit
      if(iam_master) then
 !    Read the MD file
        write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&       '-Reading the file the HIST file :',ch10,&
+&       '-Reading the training-set file :',ch10,&
 &       '-',trim(filnam(5)),ch10
 
        call wrtout(std_out,message,'COLL')
@@ -382,10 +382,38 @@ program multibinit
 !****************************************************************************************
 ! TEST SECTION test effective potential with regard to test-set 
 !****************************************************************************************
-!TEST_AM
-!Effective Hamiltonian, compute the energy for given patern
-! call mover_effpot(inp,filnam,reference_effective_potential,-2,comm,hist=hist)
-!TEST_AM
+   if(inp%test_effpot == 1)then 
+     if(iam_master) then
+!    Read the MD file
+       write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+&       '-Reading the test-set file :',ch10,&
+&       '-',trim(filnam(6)),ch10
+
+       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+       if(filnam(6)/=''.and.filnam(6)/='no')then
+         call effective_potential_file_readMDfile(filnam(6),hist,option=inp%ts_option)
+         if (hist%mxhist == 0)then
+           write(message, '(5a)' )&
+&           'The test-set ',trim(filnam(6)),' file is empty ',ch10,&
+&           'Action: add non-empty test-set'
+           MSG_ERROR(message)
+         end if
+       else
+           write(message, '(3a)' )&
+&           'There is no MD file to fit the coefficients ',ch10,&
+&           'Action: add MD file'
+           MSG_ERROR(message)
+       end if
+     end if
+!  MPI BROADCAST the history of the MD
+     call abihist_bcast(hist,master,comm)
+!  Map the hist in order to be consistent with the supercell into reference_effective_potential
+     call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
+
+     write(*,*) "READ TRAINING SET" 
+
+   end if ! End if(inp%test_effpot == 1)then 
 
 !****************************************************************************************
 
