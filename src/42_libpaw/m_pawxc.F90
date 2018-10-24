@@ -136,13 +136,6 @@ subroutine pawxc_xcpositron_wrapper(fnxc,grhoe2,ixcpositron,ngr,npt,posdensity0_
 &                                   rhoer,rhopr,vxce,vxcegr,vxcp,&
 &                                   dvxce,dvxcp) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcpositron_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -186,13 +179,6 @@ contains
 
 subroutine pawxc_xcpositron_abinit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcpositron_abinit'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -231,13 +217,6 @@ end subroutine pawxc_xcpositron_abinit
 !! SOURCE
 
 subroutine pawxc_xcpositron_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcpositron_local'
-!End of the abilint section
 
  implicit none
 
@@ -288,13 +267,6 @@ end subroutine pawxc_xcpositron_wrapper
 
 subroutine pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden,nvxcdgr,order)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_size_dvxc_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------------
@@ -330,13 +302,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_size_dvxc_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_size_dvxc_local'
-!End of the abilint section
 
  implicit none
 
@@ -466,13 +431,6 @@ end subroutine pawxc_size_dvxc_wrapper
 
 subroutine pawxc_xcmult_wrapper(depsxc,nfft,ngrad,nspden,nspgrad,rhonow)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcmult_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -511,13 +469,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_xcmult_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_xcmult_local'
-!End of the abilint section
 
  implicit none
 
@@ -594,13 +545,6 @@ end subroutine pawxc_xcmult_wrapper
 
 subroutine pawxc_mkdenpos_wrapper(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_mkdenpos_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -640,13 +584,6 @@ contains
 !! SOURCE
 
 subroutine pawxc_mkdenpos_local()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_mkdenpos_local'
-!End of the abilint section
 
  implicit none
 
@@ -860,13 +797,6 @@ end subroutine pawxc_mkdenpos_wrapper
 
 subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,nrad,nspden,option,&
 &                pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc'
-!End of the abilint section
 
  implicit none
 
@@ -1480,13 +1410,6 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 &                        nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,posdensity0_limit,&
 &                        rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcpositron'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1797,13 +1720,6 @@ end subroutine pawxcpositron
 subroutine pawxc_dfpt(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nhat1,nkxc,nrad,nspden,&
 &                 option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc,vxc1,xclevel,&
 &                 d2enxc_im) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_dfpt'
-!End of the abilint section
 
  implicit none
 
@@ -2643,13 +2559,6 @@ end subroutine pawxc_dfpt
 
  subroutine pawxcsph(exc,exexch,ixc,kxc,nkxc,nrad,nspden,pawrad,rho_updn,vxc,xclevel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2919,13 +2828,6 @@ end subroutine pawxcsph
 
 
 subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho1_updn,vxc1,xclevel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsph_dfpt'
-!End of the abilint section
 
  implicit none
 
@@ -3240,13 +3142,6 @@ end subroutine pawxcsph_dfpt
 
  subroutine pawxcsphpositron(calctype,fxc,ixcpositron,nrad,pawrad,posdensity0_limit,rho,rho_ep,vxce,vxcp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsphpositron'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3370,13 +3265,6 @@ end subroutine pawxcsphpositron
 
  subroutine pawxcsum(cplex1,cplex2,cplexsum,lmselect1,lmselect2,lm_size,nrad,nsums,&
 &                    option,pawang,rho1,rho2,sum1,sum2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcsum'
-!End of the abilint section
 
  implicit none
 
@@ -3760,13 +3648,6 @@ end subroutine pawxcsphpositron
 
  subroutine pawxcm(corexc,enxc,enxcdc,exexch,ixc,kxc,lm_size,lmselect,nhat,nkxc,non_magnetic_xc,nrad,nspden,option,&
 &                  pawang,pawrad,pawxcdev,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcm'
-!End of the abilint section
 
  implicit none
 
@@ -4570,13 +4451,6 @@ end subroutine pawxcsphpositron
 &                   option,pawang,pawrad,rhor1,usecore,usexcnhat,vxc1,xclevel,&
 &                   d2enxc_im) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcm_dfpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4906,13 +4780,6 @@ end subroutine pawxcsphpositron
 subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselect,lmselect_ep,&
 &                         nhat,nhat_ep,nrad,nspden,option,pawang,pawrad,pawxcdev,posdensity0_limit,&
 &                         rhor,rhor_ep,usecore,usexcnhat,vxc,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxcmpositron'
-!End of the abilint section
 
  implicit none
 
@@ -5413,13 +5280,6 @@ end subroutine pawxcmpositron
 
  subroutine pawxc_get_nkxc(nkxc,nspden,xclevel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_get_nkxc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5485,13 +5345,6 @@ end subroutine pawxcmpositron
 &           order,rho,vxcrho,xclevel, &
 &           dvxc,d2vxc,el_temp,exexch,fxcT,grho2,lrho,tau,vxcgrho,vxclrho,vxctau,xc_tb09_c) ! Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_drivexc_wrapper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5546,13 +5399,6 @@ contains
 
 subroutine pawxc_drivexc_abinit()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_drivexc_abinit'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -5600,13 +5446,6 @@ end subroutine pawxc_drivexc_abinit
 !! SOURCE
 
 subroutine pawxc_drivexc_libxc()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_drivexc_libxc'
-!End of the abilint section
 
  implicit none
 
@@ -5711,13 +5550,6 @@ end subroutine pawxc_drivexc_wrapper
 #if defined HAVE_LIBPAW_ABINIT
  use m_xc_noncoll, only : rotate_mag
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_rotate_mag'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5813,13 +5645,6 @@ end subroutine pawxc_rotate_mag
 #if defined HAVE_LIBPAW_ABINIT
  use m_xc_noncoll, only : rotate_back_mag
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_rotate_back_mag'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5898,13 +5723,6 @@ end subroutine pawxc_rotate_back_mag
 #if defined HAVE_LIBPAW_ABINIT
  use m_xc_noncoll, only : rotate_back_mag_dfpt
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxc_rotate_back_mag_dfpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

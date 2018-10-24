@@ -94,13 +94,6 @@ program mrgscr
  use m_screening,           only : mkdump_er, em1results_free, em1results_print,decompose_epsm1,&
 &                                  init_er_from_file, Epsilonm1_results
  use m_wfd,                 only : test_charge
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrgscr'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

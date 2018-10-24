@@ -79,13 +79,6 @@ contains
 
 subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -384,13 +377,6 @@ end subroutine ewald
 
 subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -654,13 +640,6 @@ end subroutine ewald2
 !! SOURCE
 
 subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ewald9'
-!End of the abilint section
 
  implicit none
 

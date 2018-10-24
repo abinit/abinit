@@ -89,13 +89,6 @@ contains
 
 subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkinp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -810,13 +803,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    !  eph variables
    if (optdriver == RUNL_EPH) then
      cond_string(1)='optdriver'; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,8, [0, 1, 2, 3, 4, -4, 5, 6], iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task, &
+         10, [0, 1, 2, -2, 3, 4, -4, 5, -5, 6], iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
      if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
+     end if
+     if (dt%eph_task==-5) then
+       ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
      end if
 
      !if (all(dt%eph_task /= [5, 6]) .and. any(dt%istwfk(1:nkpt) /= 1)) then

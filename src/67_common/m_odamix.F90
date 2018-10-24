@@ -146,7 +146,7 @@ contains
 !!   | e_hartree(IN)=Hartree part of total energy (hartree units)
 !!   | e_corepsp(IN)=psp core-core energy
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
-!!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
+!!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
 !!   | e_paw(IN)=PAW spherical part energy
@@ -189,13 +189,6 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          red_ptot,psps,rhog,rhor,rprimd,strsxc,ucvol,usepaw,&
 &          usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,xccc3d,xred,&
 &          taug,taur,vxctau,add_tfw) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'odamix'
-!End of the abilint section
 
  implicit none
 
@@ -522,7 +515,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 !& energies%e_entropy + energies%e_elecfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
  if (usepaw==0) then
-   etotal = etotal + energies%e_nonlocalpsp
+   etotal = etotal + energies%e_nlpsp_vfock
  else
    etotal = etotal + energies%e_paw
  end if
@@ -543,7 +536,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  write(std_out,*) " alphaopt",alphaopt
 
  energies%h0=(one-alphaopt)*energies%h0 + alphaopt*(energies%e_kinetic+energies%e_localpsp)
- if (usepaw==0) energies%h0=energies%h0 + alphaopt*energies%e_nonlocalpsp
+ if (usepaw==0) energies%h0=energies%h0 + alphaopt*energies%e_nlpsp_vfock
 
  rhor= rhor+(alphaopt-one)*nvresid
  call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)

@@ -84,13 +84,6 @@ CONTAINS  !=====================================================================
 
 subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkpawovlp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -247,13 +240,6 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
    function sqnrm_pawovlp(u1,u2,u3)
 !squared norm of a vector
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqnrm_pawovlp'
-!End of the abilint section
-
    real(dp) :: sqnrm_pawovlp
    real(dp),intent(in) :: u1,u2,u3
 
@@ -318,13 +304,6 @@ end subroutine chkpawovlp
 subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
 &                 electronpositron,& ! optional argument
 &                 mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawprt'
-!End of the abilint section
 
  implicit none
 

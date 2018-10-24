@@ -135,13 +135,6 @@ subroutine init_oper(paw_dmft,oper,nkpt,wtk,opt_ksloc)
  use m_matlu, only : init_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -243,13 +236,6 @@ subroutine destroy_oper(oper)
  use m_crystal, only : crystal_t
  use m_matlu, only : destroy_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -304,13 +290,6 @@ subroutine copy_oper(oper1,oper2)
  use defs_basis
  use m_matlu, only : copy_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -376,13 +355,6 @@ subroutine print_oper(oper,option,paw_dmft,prtopt)
  use m_matlu, only : print_matlu
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -528,13 +500,6 @@ subroutine inverse_oper(oper,option,prtopt,procb,iproc)
  use m_paw_dmft, only : paw_dmft_type
  use m_matlu, only : inverse_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inverse_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -622,13 +587,6 @@ subroutine loc_oper(oper,paw_dmft,option,jkpt,procb,iproc)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'loc_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -744,13 +702,6 @@ subroutine upfold_oper(oper,paw_dmft,option,procb,iproc)
  use defs_basis
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfold_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -865,13 +816,6 @@ subroutine identity_oper(oper,option)
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'identity_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -960,13 +904,6 @@ subroutine diff_oper(char1,char2,occup1,occup2,option,toldiff)
  use m_crystal, only : crystal_t
  use m_matlu, only : diff_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diff_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1038,13 +975,6 @@ subroutine trace_oper(oper,trace_ks,trace_loc,opt_ksloc)
  use defs_basis
  use m_matlu, only : trace_matlu
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trace_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1113,13 +1043,6 @@ subroutine prod_oper(oper1,oper2,oper3,opt_ksloc)
  use defs_basis
  use m_errors
  use m_matlu, only : prod_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prod_oper'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

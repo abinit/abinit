@@ -127,13 +127,6 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
 !  Taken from http://www.netlib.org/specfun/j0y0
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CALJY0'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: I,JINT
 !CS    REAL
@@ -456,13 +449,6 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
 !   (see comments heading CALJY0).
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESJ0'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: JINT
 !S    REAL  X, RESULT
@@ -483,13 +469,6 @@ SUBROUTINE CALJY0(ARG,RESULT,JINT)
 !C   (see comments heading CALJY0).
 !C
 !C--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESY0'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER JINT
 !CS    REAL  X, RESULT
@@ -595,13 +574,6 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
 !  Taken from http://www.netlib.org/specfun/j1y1
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CALJY1'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: I,JINT
       DIMENSION :: PJ0(7),PJ1(8),PLG(4),PY0(7),PY1(9),P0(6),P1(6),&
@@ -897,13 +869,6 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
 !   (see comments heading CALJY1).
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESJ1'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: JINT
 !CS    REAL
@@ -926,13 +891,6 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
 !   (see comments heading CALJY1).
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESY1'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: JINT
 !CS    REAL
@@ -1080,13 +1038,6 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
 !  Slightly modified by MG to follow f90 rules and double precision arithmetic
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CALCK0'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: I,JINT
 !CS    REAL
@@ -1224,13 +1175,6 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
 !  Latest Modification: January 19, 1988
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESK0'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: JINT
 !S    REAL
@@ -1258,13 +1202,6 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
 !  Latest Modification: January 19, 1988
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESEK0'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER JINT
 !S    REAL
@@ -1412,13 +1349,6 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
 !  Taken from http://www.netlib.org/specfun/k1
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CALCK1'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: I,JINT
 !CS    REAL
@@ -1549,13 +1479,6 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
 !   for arguments  XLEAST .LE. ARG .LE. XMAX.
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESK1'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER :: JINT
 !CS    REAL
@@ -1580,13 +1503,6 @@ SUBROUTINE CALCK1(ARG,RESULT,JINT)
 !   XLEAST .LE. ARG .LE. XMAX.
 !
 !--------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BESEK1'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER JINT
 !CS    REAL

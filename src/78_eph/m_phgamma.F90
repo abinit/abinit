@@ -416,13 +416,6 @@ contains  !=====================================================
 
 subroutine phgamma_free(gams)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -480,13 +473,6 @@ end subroutine phgamma_free
 !! SOURCE
 
 subroutine phgamma_init(gams,cryst,ifc,fstab,symdynmat,eph_scalprod,eph_transport,ngqpt,nsppol,nspinor,n0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_init'
-!End of the abilint section
 
  implicit none
 
@@ -592,13 +578,6 @@ end subroutine phgamma_init
 
 subroutine phgamma_print(gams,cryst,ifc,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -697,13 +676,6 @@ end subroutine phgamma_print
 
 subroutine tgamma_symm(cryst,qpt,tgamma)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tgamma_symm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -784,13 +756,6 @@ end subroutine tgamma_symm
 !! SOURCE
 
 subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_eval_qibz'
-!End of the abilint section
 
  implicit none
 
@@ -921,13 +886,6 @@ end subroutine phgamma_eval_qibz
 !! SOURCE
 
 subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_interp'
-!End of the abilint section
 
  implicit none
 
@@ -1074,13 +1032,6 @@ end subroutine phgamma_interp
 !! SOURCE
 
 subroutine phgamma_interp_setup(gams,cryst,action)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_interp_setup'
-!End of the abilint section
 
  implicit none
 
@@ -1230,15 +1181,9 @@ subroutine phgamma_interp_setup(gams,cryst,action)
    end if ! allocation and filling of rpt as well
 
  case ("FREE")
-   if (allocated(gams%vals_bz)) then
-     ABI_FREE(gams%vals_bz)
-   end if
-   if (allocated(gams%vals_rpt)) then
-     ABI_FREE(gams%vals_rpt)
-   end if
-   if (allocated(gams%vals_ee)) then
-     ABI_FREE(gams%vals_ee)
-   end if
+   ABI_SFREE(gams%vals_bz)
+   ABI_SFREE(gams%vals_rpt)
+   ABI_SFREE(gams%vals_ee)
 
  case default
    MSG_BUG(sjoin("Wrong action:",action))
@@ -1278,13 +1223,6 @@ end subroutine phgamma_interp_setup
 !! SOURCE
 
 subroutine phgamma_vv_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_in_ph,gamma_out_ph,lambda_in_ph,lambda_out_ph)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_vv_eval_qibz'
-!End of the abilint section
 
  implicit none
 
@@ -1409,13 +1347,6 @@ end subroutine phgamma_vv_eval_qibz
 !! SOURCE
 
 subroutine phgamma_vv_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_in_ph,gamma_out_ph,lambda_in_ph,lambda_out_ph)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_vv_interp'
-!End of the abilint section
 
  implicit none
 
@@ -1562,13 +1493,6 @@ end subroutine phgamma_vv_interp
 !! SOURCE
 
 subroutine phgamma_vv_interp_setup(gams,cryst,action)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_vv_interp_setup'
-!End of the abilint section
 
  implicit none
 
@@ -1719,18 +1643,10 @@ subroutine phgamma_vv_interp_setup(gams,cryst,action)
    end if
 
  case ("FREE")
-   if (allocated(gams%vals_in_bz)) then
-     ABI_FREE(gams%vals_in_bz)
-   end if
-   if (allocated(gams%vals_out_bz)) then
-     ABI_FREE(gams%vals_out_bz)
-   end if
-   if (allocated(gams%vals_in_rpt)) then
-     ABI_FREE(gams%vals_in_rpt)
-   end if
-   if (allocated(gams%vals_out_rpt)) then
-     ABI_FREE(gams%vals_out_rpt)
-   end if
+   ABI_SFREE(gams%vals_in_bz)
+   ABI_SFREE(gams%vals_out_bz)
+   ABI_SFREE(gams%vals_in_rpt)
+   ABI_SFREE(gams%vals_out_rpt)
 
  case default
    MSG_BUG(sjoin("Wrong action:",action))
@@ -1768,13 +1684,6 @@ end subroutine phgamma_vv_interp_setup
 !! SOURCE
 
 subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminmax,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phgamma_linwid'
-!End of the abilint section
 
  implicit none
 
@@ -1968,13 +1877,6 @@ end subroutine phgamma_linwid
 
 subroutine a2fw_free(a2f)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1985,26 +1887,14 @@ subroutine a2fw_free(a2f)
  ! @a2fw_t
 
  ! integer
- if (allocated(a2f%qshift)) then
-   ABI_FREE(a2f%qshift)
- end if
+ ABI_SFREE(a2f%qshift)
 
  ! real
- if (allocated(a2f%n0)) then
-   ABI_FREE(a2f%n0)
- end if
- if (allocated(a2f%omega)) then
-   ABI_FREE(a2f%omega)
- end if
- if (allocated(a2f%vals)) then
-   ABI_FREE(a2f%vals)
- end if
- if (allocated(a2f%vals_ee)) then
-   ABI_FREE(a2f%vals_ee)
- end if
- if (allocated(a2f%lambdaw)) then
-   ABI_FREE(a2f%lambdaw)
- end if
+ ABI_SFREE(a2f%n0)
+ ABI_SFREE(a2f%omega)
+ ABI_SFREE(a2f%vals)
+ ABI_SFREE(a2f%vals_ee)
+ ABI_SFREE(a2f%lambdaw)
 
 end subroutine a2fw_free
 !!***
@@ -2048,13 +1938,6 @@ end subroutine a2fw_free
 
 subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshift,qshift,comm,&
   qintp,qptopt) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_init'
-!End of the abilint section
 
  implicit none
 
@@ -2496,13 +2379,6 @@ end subroutine a2fw_init
 
 real(dp) function a2fw_moment(a2f,nn,spin,out_int)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_moment'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2573,13 +2449,6 @@ end function a2fw_moment
 !! SOURCE
 
 function a2fw_tr_moment(a2f_tr,nn,spin,out_int)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_moment'
-!End of the abilint section
 
  implicit none
 
@@ -2656,13 +2525,6 @@ end function a2fw_tr_moment
 
 real(dp) function a2fw_logmoment(a2f,spin) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_logmoment'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2718,13 +2580,6 @@ end function a2fw_logmoment
 !! SOURCE
 
 real(dp) function a2fw_lambda_wij(a2f,wi,wj,spin) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_lambda_wij'
-!End of the abilint section
 
  implicit none
 
@@ -2793,13 +2648,6 @@ end function a2fw_lambda_wij
 !! SOURCE
 
 subroutine a2fw_write(a2f, basename, post, ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_write'
-!End of the abilint section
 
  implicit none
 
@@ -2909,12 +2757,6 @@ subroutine write_a2fw_header()
 
  ! Output the header.
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_a2fw_header'
-!End of the abilint section
-
  write(unt,'(a)')              '#'
  write(unt,'(a)')              '# ABINIT package: a2F(w) file'
  write(unt,'(a)')              '#'
@@ -2957,13 +2799,6 @@ end subroutine a2fw_write
 !! SOURCE
 
 subroutine a2fw_ee_write(a2f,basename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_ee_write'
-!End of the abilint section
 
  implicit none
 
@@ -3025,13 +2860,6 @@ contains
 subroutine write_a2fw_header()
 
  ! Output the header.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_a2fw_header'
-!End of the abilint section
-
  write(unt,'(a)')              '#'
  write(unt,'(a)')              '# ABINIT package: a2F(e,eprime,w) file'
  write(unt,'(a)')              '#'
@@ -3085,13 +2913,6 @@ end subroutine a2fw_ee_write
 !! SOURCE
 
 subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,prefix,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_solve_gap'
-!End of the abilint section
 
  implicit none
 
@@ -3309,13 +3130,6 @@ end subroutine a2fw_solve_gap
 
 subroutine a2fw_tr_free(a2f_tr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3326,32 +3140,16 @@ subroutine a2fw_tr_free(a2f_tr)
  ! @a2fw_tr_t
 
  ! integer
- if (allocated(a2f_tr%qshift)) then
-   ABI_FREE(a2f_tr%qshift)
- end if
+ ABI_SFREE(a2f_tr%qshift)
 
  ! real
- if (allocated(a2f_tr%n0)) then
-   ABI_FREE(a2f_tr%n0)
- end if
- if (allocated(a2f_tr%omega)) then
-   ABI_FREE(a2f_tr%omega)
- end if
- if (allocated(a2f_tr%vals_in)) then
-   ABI_FREE(a2f_tr%vals_in)
- end if
- if (allocated(a2f_tr%vals_out)) then
-   ABI_FREE(a2f_tr%vals_out)
- end if
- if (allocated(a2f_tr%vals_tr)) then
-   ABI_FREE(a2f_tr%vals_tr)
- end if
- if (allocated(a2f_tr%vals_tr_gen)) then
-   ABI_FREE(a2f_tr%vals_tr_gen)
- end if
- if (allocated(a2f_tr%lambdaw_tr)) then
-   ABI_FREE(a2f_tr%lambdaw_tr)
- end if
+ ABI_SFREE(a2f_tr%n0)
+ ABI_SFREE(a2f_tr%omega)
+ ABI_SFREE(a2f_tr%vals_in)
+ ABI_SFREE(a2f_tr%vals_out)
+ ABI_SFREE(a2f_tr%vals_tr)
+ ABI_SFREE(a2f_tr%vals_tr_gen)
+ ABI_SFREE(a2f_tr%lambdaw_tr)
 
 end subroutine a2fw_tr_free
 !!***
@@ -3395,13 +3193,6 @@ end subroutine a2fw_tr_free
 
 subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshift,qshift,comm,&
   qintp,qptopt) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_init'
-!End of the abilint section
 
  implicit none
 
@@ -3766,13 +3557,6 @@ end subroutine a2fw_tr_init
 
 subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'a2fw_tr_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3817,15 +3601,15 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
    do iw=1,a2f_tr%nomega
      write(unt,'(e16.6, 2x, 3(3e16.6,1x), 2x,  3(3e16.6,1x), 2x,  3(3e16.6,1x))') a2f_tr%omega(iw), &
 &                 ((sum(a2f_tr%vals_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &
-&                 a2f_tr%vals_tr(iw,:,:,0,1)      ,      &  ! UP
-&                 a2f_tr%vals_tr(iw,:,:,0,2)                ! DOWN
+&                 a2f_tr%vals_tr(iw,:,:,0,1), &  ! UP
+&                 a2f_tr%vals_tr(iw,:,:,0,2)     ! DOWN
    end do
    write(unt,'(3a)') ch10, ch10, "# Frequency, lambda_tr_tot(w,i,j)dw, lambda_tr_spin1(w,i,j) ..."
    do iw=1,a2f_tr%nomega
      write(unt,'(e16.6, 2x, 3(3e16.6,1x), 2x, 3(3e16.6,1x), 2x,      3(3e16.6,1x), 2x,  3(3e16.6,1x))') a2f_tr%omega(iw), &
 &                 ((sum(a2f_tr%lambdaw_tr(iw,idir,jdir,0,:)), idir=1,3), jdir=1,3) , &  ! TOT
-&                 a2f_tr%lambdaw_tr(iw,:,:,0,1),      &  ! UP
-&                 a2f_tr%lambdaw_tr(iw,:,:,0,2)          ! DOWN
+&                 a2f_tr%lambdaw_tr(iw,:,:,0,1), &  ! UP
+&                 a2f_tr%lambdaw_tr(iw,:,:,0,2)     ! DOWN
    end do
  end if
 
@@ -3904,13 +3688,6 @@ contains
 subroutine write_a2fw_tr_header()
 
  ! Output the header.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_a2fw_tr_header'
-!End of the abilint section
-
  write(unt,'(a)')              '#'
  write(unt,'(a)')              '# ABINIT package: a2F_tr(w) file'
  write(unt,'(a)')              '#'
@@ -3965,13 +3742,6 @@ end subroutine a2fw_tr_write
 subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_phgamma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4006,7 +3776,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  integer :: spin,istwf_k,istwf_kq,istwf_kirr,npw_k,npw_kq,npw_kirr
  integer :: ii,ipw,mpw,my_mpw,mnb,ierr,my_kstart,my_kstop,cnt,ncid
  integer :: isig,n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
  integer :: iene, jene
 #ifdef HAVE_NETCDF
@@ -4043,15 +3813,15 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
- real(dp),allocatable ::  gs1c(:,:) !,gvnl_direc(:,:),pcon(:),sconjgr(:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
+ real(dp),allocatable ::  gs1c(:,:) !,gvnlx_direc(:,:),pcon(:),sconjgr(:,:)
  !real(dp),allocatable :: eloc0_k(:),enl0_k(:),enl1_k(:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:), rho1wfg(:,:),rho1wfr(:,:)
  real(dp),allocatable :: wt_k(:,:),wt_kq(:,:)
  real(dp),allocatable :: wt_k_en(:,:,:),wt_kq_en(:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
- !real(dp),allocatable :: cwave0(:,:),gvnl1(:,:)
+ !real(dp),allocatable :: cwave0(:,:),gvnlx1(:,:)
 
  real(dp), allocatable :: gvvvals_in_qibz(:,:,:,:,:,:,:)
  real(dp), allocatable :: gvvvals_out_qibz(:,:,:,:,:,:,:)
@@ -4331,8 +4101,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  usevnl = 0
  optlocal = 1  ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2     ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- opt_gvnl1 = 0 ! gvnl1 is output
- ABI_MALLOC(gvnl1, (2,usevnl))
+ opt_gvnlx1 = 0 ! gvnlx1 is output
+ ABI_MALLOC(gvnlx1, (2,usevnl))
  ABI_MALLOC(grad_berry, (2,nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -4610,8 +4380,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
-&                       grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
-&                       optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+&                       grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
+&                       optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
 
          call destroy_rf_hamiltonian(rf_hamkq)
@@ -4810,7 +4580,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  call wrtout(std_out, "Computation of tgamma matrices completed", "COLL", do_flush=.True.)
 
  ! Free memory
- ABI_FREE(gvnl1)
+ ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(work)

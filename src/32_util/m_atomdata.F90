@@ -102,13 +102,6 @@ contains
 
 subroutine atomdata_from_znucl(atom,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atomdata_from_znucl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -375,13 +368,6 @@ end subroutine atomdata_from_znucl
 !! SOURCE
 
 subroutine atomdata_from_symbol(atom,symbol) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atomdata_from_symbol'
-!End of the abilint section
 
  implicit none
 
@@ -650,13 +636,6 @@ end subroutine atomdata_from_symbol
 
 function znucl2symbol(znucl) result(symbol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'znucl2symbol'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -692,13 +671,6 @@ end function znucl2symbol
 !! SOURCE
 
 function symbol2znucl(symbol) result(znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symbol2znucl'
-!End of the abilint section
 
  implicit none
 
@@ -744,13 +716,6 @@ end function symbol2znucl
 !! SOURCE
 
 function atom_length(densty,zion,znucl) result(length)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atom_length'
-!End of the abilint section
 
  implicit none
 
@@ -881,13 +846,6 @@ end function atom_length
 !! SOURCE
 
 subroutine atom_gauss(ntypat, densty, ziontypat, znucltypat, gauss)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atom_gauss'
-!End of the abilint section
 
  implicit none
 

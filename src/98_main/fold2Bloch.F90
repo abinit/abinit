@@ -57,13 +57,6 @@ program fold2Bloch
  use m_fstrings,       only : strcat
  use m_io_tools,       only : get_unit, iomode_from_fname, open_file, prompt
  use defs_datatypes,   only : ebands_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fold2Bloch'
-!End of the abilint section
-
 implicit none
 
 !Arguments --------------------------------------------------------------

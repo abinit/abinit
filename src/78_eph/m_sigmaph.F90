@@ -419,15 +419,8 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph'
-!End of the abilint section
+subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc,&
+                   pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  implicit none
 
@@ -464,7 +457,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it,ndiv,thisproc_nq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop,iatom
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
@@ -497,7 +490,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
@@ -644,8 +637,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  usevnl = 0
  optlocal = 1  ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2     ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- opt_gvnl1 = 0 ! gvnl1 is output
- ABI_MALLOC(gvnl1, (2,usevnl))
+ opt_gvnlx1 = 0 ! gvnlx1 is output
+ ABI_MALLOC(gvnlx1, (2,usevnl))
  ABI_MALLOC(grad_berry, (2,nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -1026,8 +1019,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,ipc),&
-             grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
-             optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+             grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
+             optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
 
          call destroy_rf_hamiltonian(rf_hamkq)
@@ -1519,7 +1512,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call wrtout(std_out, sjoin("Total cpu-time:", sec2str(cpu_all), ", Total wall-time:", sec2str(wall_all), ch10))
 
  ! Free memory
- ABI_FREE(gvnl1)
+ ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(work)
@@ -1571,13 +1564,6 @@ end subroutine sigmaph
 !! SOURCE
 
 subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkknu_from_atm'
-!End of the abilint section
 
  implicit none
 
@@ -1646,13 +1632,6 @@ end subroutine gkknu_from_atm
 !! SOURCE
 
 type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_new'
-!End of the abilint section
 
  implicit none
 
@@ -2408,13 +2387,6 @@ end function sigmaph_new
 
 subroutine sigmaph_free(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2509,13 +2481,6 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_setup_kcalc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2604,13 +2569,6 @@ end subroutine sigmaph_setup_kcalc
 !! SOURCE
 
 subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_gather_and_write'
-!End of the abilint section
 
  implicit none
 
@@ -2984,13 +2942,6 @@ end subroutine sigmaph_gather_and_write
 
 subroutine sigmaph_print(self, dtset, unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3072,13 +3023,6 @@ end subroutine sigmaph_print
 !! SOURCE
 
 subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,distrib_bq,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_get_all_qweights'
-!End of the abilint section
 
  implicit none
 
@@ -3211,13 +3155,6 @@ end subroutine sigmaph_get_all_qweights
 !! SOURCE
 
 subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_sigfrohl'
-!End of the abilint section
 
  implicit none
 

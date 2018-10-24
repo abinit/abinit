@@ -55,7 +55,6 @@ getwfk -1        # Start from previous wavefunctions to ease convergence
 nkpthf  27          # number of k-point in the full-BZ 
 nbandhf  4         # number of occupied states
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

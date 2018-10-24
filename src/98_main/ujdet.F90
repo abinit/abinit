@@ -50,13 +50,6 @@ program ujdet
  use m_parser,      only : intagm, parsefile
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_dtfil,       only : isfile
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ujdet'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

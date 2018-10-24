@@ -30,14 +30,6 @@
 
 subroutine xmpi_alltoall_int(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoall_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -79,14 +71,6 @@ end subroutine xmpi_alltoall_int
 
 subroutine xmpi_alltoall_dp2d(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoall_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -126,13 +110,6 @@ end subroutine xmpi_alltoall_dp2d
 
 subroutine xmpi_alltoall_dp4d(xval, sendsize, recvbuf, recvsize, spaceComm, ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoall_dp4d'
-!End of the abilint section
 
  implicit none
 

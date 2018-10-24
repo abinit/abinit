@@ -167,13 +167,6 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_failed
  use m_read_plowannier, only : read_plowannier
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_calc_ucrpa'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

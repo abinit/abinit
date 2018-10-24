@@ -309,13 +309,6 @@ CONTAINS
 
 subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_open_read'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -450,13 +443,6 @@ end subroutine wfk_open_read
 !! SOURCE
 
 subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write_frm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_open_write'
-!End of the abilint section
 
  implicit none
 
@@ -670,13 +656,6 @@ end subroutine wfk_open_write
 
 subroutine wfk_close(Wfk, delete)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_close'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -783,13 +762,6 @@ end subroutine wfk_close
 
 subroutine wfk_print(wfk,unit,header,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -841,13 +813,6 @@ end subroutine wfk_print
 !! SOURCE
 
 integer function wfk_validate_ks(wfk, ik_ibz, spin, band) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_validate_ks'
-!End of the abilint section
 
  implicit none
 
@@ -923,13 +888,6 @@ end function wfk_validate_ks
 
 integer pure function wfk_findk(wfk, kpt, ktol) result(ikpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_findk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -984,13 +942,6 @@ end function wfk_findk
 !! SOURCE
 
 subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr, iskss)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_ncdef_dims_vars'
-!End of the abilint section
 
  implicit none
 
@@ -1083,13 +1034,6 @@ end subroutine wfk_ncdef_dims_vars
 !! SOURCE
 
 integer function wfk_compare(wfk1, wfk2) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_compare'
-!End of the abilint section
 
  implicit none
 
@@ -1194,13 +1138,6 @@ end function wfk_compare
 !! SOURCE
 
 subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_band_block'
-!End of the abilint section
 
  implicit none
 
@@ -1599,13 +1536,6 @@ end subroutine wfk_read_band_block
 
 subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_bks'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1858,13 +1788,6 @@ end subroutine wfk_read_bks
 !! SOURCE
 
 subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_write_band_block'
-!End of the abilint section
 
  implicit none
 
@@ -2270,13 +2193,6 @@ end subroutine wfk_write_band_block
 !! SOURCE
 
 subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_bmask'
-!End of the abilint section
 
  implicit none
 
@@ -2804,13 +2720,6 @@ end subroutine wfk_read_bmask
 
 type(ebands_t) function wfk_read_ebands(path, comm) result(ebands)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_ebands'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2872,13 +2781,6 @@ end function wfk_read_ebands
 
 subroutine wfk_read_eigk(Wfk,ik_ibz,spin,sc_mode,eig_k,occ_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_eigk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2934,13 +2836,6 @@ end subroutine wfk_read_eigk
 !! SOURCE
 
 subroutine wfk_read_eigenvalues(fname,eigen,Hdr_out,comm,occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_eigenvalues'
-!End of the abilint section
 
  implicit none
 
@@ -3033,13 +2928,6 @@ end subroutine wfk_read_eigenvalues
 
 subroutine wfk_write_h1mat(Wfk,sc_mode,eigen)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_write_h1mat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3098,13 +2986,6 @@ end subroutine wfk_write_h1mat
 !! SOURCE
 
 subroutine wfk_read_h1mat(fname, eigen, hdr_out, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_read_h1mat'
-!End of the abilint section
 
  implicit none
 
@@ -3182,13 +3063,6 @@ end subroutine wfk_read_h1mat
 
 subroutine wfk_rewind(wfk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_rewind'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3239,13 +3113,6 @@ end subroutine wfk_rewind
 !! SOURCE
 
 subroutine wfk_seek(Wfk,ik_ibz,spin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_seek'
-!End of the abilint section
 
  implicit none
 
@@ -3316,13 +3183,6 @@ end subroutine wfk_seek
 
 subroutine wfk_update_f90ptr(wfk, ik_ibz, spin)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_update_f90ptr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3365,13 +3225,6 @@ end subroutine wfk_update_f90ptr
 !! SOURCE
 
 subroutine wfk_compute_offsets(Wfk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_compute_offsets'
-!End of the abilint section
 
  implicit none
 
@@ -3513,13 +3366,6 @@ end subroutine wfk_compute_offsets
 
 subroutine wfk_show_offsets(Wfk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_show_offsets'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3600,13 +3446,6 @@ end subroutine wfk_show_offsets
 
 subroutine mpio_read_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_read_kg_k'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3686,13 +3525,6 @@ end subroutine mpio_read_kg_k
 #ifdef HAVE_MPI_IO
 
 subroutine mpio_write_kg_k(fh,offset,npw_disk,sc_mode,kg_k,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_write_kg_k'
-!End of the abilint section
 
  implicit none
 
@@ -3780,13 +3612,6 @@ end subroutine mpio_write_kg_k
 #ifdef HAVE_MPI_IO
 
 subroutine mpio_read_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_read_eigocc_k'
-!End of the abilint section
 
  implicit none
 
@@ -3917,13 +3742,6 @@ end subroutine mpio_read_eigocc_k
 
 subroutine mpio_write_eigocc_k(fh,offset,nband_disk,formeig,sc_mode,buffer,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpio_write_eigocc_k'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4049,13 +3867,6 @@ end subroutine mpio_write_eigocc_k
 !! SOURCE
 
 subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_tofullbz'
-!End of the abilint section
 
  implicit none
 
@@ -4361,13 +4172,6 @@ end subroutine wfk_tofullbz
 
 subroutine wfk_nc2fort(nc_path, fort_path)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_nc2fort'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4447,13 +4251,6 @@ end subroutine wfk_nc2fort
 !! SOURCE
 
 subroutine wfk_prof(wfk_fname, formeig, nband, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_prof'
-!End of the abilint section
 
  implicit none
 
@@ -4652,13 +4449,6 @@ end subroutine wfk_prof
 
 subroutine wfk_create_wfkfile(wfk_fname,Hdr,iomode,formeig,Kvars,cwtimes,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_create_wfkfile'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4767,13 +4557,6 @@ end subroutine wfk_create_wfkfile
 !! SOURCE
 
 subroutine wfk_check_wfkfile(wfk_fname,Hdr,iomode,method,formeig,Kvars,cwtimes,comm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_check_wfkfile'
-!End of the abilint section
 
  implicit none
 
@@ -4920,13 +4703,6 @@ end subroutine wfk_check_wfkfile
 
 subroutine fill_or_check(task,Hdr,Kvars,ik_ibz,spin,formeig,kg_k,cg_k,eig_k,occ_k,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fill_or_check'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5072,13 +4848,6 @@ end subroutine fill_or_check
 
 subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_diff'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5101,7 +4870,7 @@ subroutine wfk_diff(fname1,fname2,formeig,comm,ierr)
 
 ! *************************************************************************
 
- call wrtout(std_out,ABI_FUNC//": comparing "//TRIM(fname1)//" "//TRIM(fname2),"COLL")
+ call wrtout(std_out, "wfk_diff: comparing "//TRIM(fname1)//" "//TRIM(fname2))
 
  my_rank = xmpi_comm_rank(comm); nproc   = xmpi_comm_size(comm)
  sc_mode = xmpio_collective

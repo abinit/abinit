@@ -229,13 +229,6 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nk3xc1,nspden,cplex,pawxcdev,ty
 &          has_vhartree,has_vxc,has_vxcval,has_kxc,has_k3xc,has_vxc_ex, & ! optional arguments
 &          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -395,13 +388,6 @@ end subroutine paw_an_init
 
 subroutine paw_an_free(Paw_an)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -492,13 +478,6 @@ end subroutine paw_an_free
 
 subroutine paw_an_nullify(Paw_an)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -560,13 +539,6 @@ end subroutine paw_an_nullify
 
 subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
 &                      mpi_atmtab,comm_atom)  ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_copy'
-!End of the abilint section
 
  implicit none
 
@@ -766,13 +738,6 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
 subroutine paw_an_print(Paw_an,unit,mode_paral, &
 &                       mpi_atmtab,comm_atom,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -876,13 +841,6 @@ end subroutine paw_an_print
 !! SOURCE
 
 subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_gather'
-!End of the abilint section
 
  implicit none
 
@@ -1446,13 +1404,6 @@ subroutine paw_an_redistribute(paw_an,mpi_comm_in,mpi_comm_out,&
 &                 natom,mpi_atmtab_in,mpi_atmtab_out,paw_an_out,&
 &                 SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_redistribute'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1784,13 +1735,6 @@ end subroutine paw_an_redistribute
 
 subroutine paw_an_reset_flags(Paw_an)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_reset_flags'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1847,13 +1791,6 @@ end subroutine paw_an_reset_flags
 !! SOURCE
 
 subroutine paw_an_isendreceive_getbuffer(paw_an,npaw_an_send,atm_indx_recv,buf_int,buf_dp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_isendreceive_getbuffer'
-!End of the abilint section
 
 implicit none
 
@@ -2060,13 +1997,6 @@ end subroutine paw_an_isendreceive_getbuffer
 
 subroutine paw_an_isendreceive_fillbuffer(paw_an, atmtab_send,atm_indx_send,npaw_an_send,&
 &                                         buf_int,buf_int_size,buf_dp,buf_dp_size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_an_isendreceive_fillbuffer'
-!End of the abilint section
 
 implicit none
 !Arguments ------------------------------------

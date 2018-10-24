@@ -172,7 +172,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_rf2
  use m_kg
 
- use m_dtfil,      only : status
  use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
  use m_pawang,     only : pawang_type
  use m_pawfgrtab,  only : pawfgrtab_type
@@ -197,13 +196,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_nonlop,     only : nonlop
  use m_fourier_interpol, only : transgrid
  use m_cgprj,     only : getcprj
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_pert'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -303,8 +295,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
-
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  npert_phon = 0
  if(i1pert<=natom) npert_phon = npert_phon + 1
@@ -407,7 +397,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
  ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
  if (psps%useylm==1) then
-   call status(0,dtfil%filstat,iexit,level,'call initylmg ')
    option=2
    call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,&
    dtset%nkpt,npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
@@ -1229,8 +1218,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  ABI_DEALLOCATE(vlocal)
  ABI_DEALLOCATE(vlocal1_i2pert)
  ABI_DEALLOCATE(wfraug)
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
  DBG_EXIT("COLL")
 

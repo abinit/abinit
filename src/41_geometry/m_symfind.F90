@@ -104,13 +104,6 @@ contains
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  nucdipmom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symfind'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -495,13 +488,6 @@ end subroutine symfind
 
 subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symanal'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -667,13 +653,6 @@ end subroutine symanal
 !! SOURCE
 
 subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symbrav'
-!End of the abilint section
 
  implicit none
 
@@ -993,13 +972,6 @@ end subroutine symbrav
 subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 
  use m_numeric_tools, only : OPERATOR(.x.)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symspgr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1426,13 +1398,6 @@ end subroutine symspgr
 !! SOURCE
 
 subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symlatt'
-!End of the abilint section
 
  implicit none
 

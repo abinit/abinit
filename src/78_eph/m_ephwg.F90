@@ -191,13 +191,6 @@ contains
 type(ephwg_t) function ephwg_new( &
 &  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -273,13 +266,6 @@ end function ephwg_new
 
 type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, comm) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_from_ebands'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -332,13 +318,6 @@ end function ephwg_from_ebands
 !! SOURCE
 
 subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_setup_kpoint'
-!End of the abilint section
 
  implicit none
 
@@ -714,13 +693,6 @@ end subroutine ephwg_double_grid_setup_kpoint
 subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_pm, comm, &
                             broad)  ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_get_deltas'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -810,13 +782,6 @@ end subroutine ephwg_get_deltas
 !! SOURCE
 
 subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum, deltaw_pm, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_get_dweights'
-!End of the abilint section
 
  implicit none
 
@@ -950,13 +915,6 @@ end subroutine ephwg_get_dweights
 
 subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_zinv_weights'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1084,13 +1042,6 @@ end subroutine ephwg_zinv_weights
 
 subroutine ephwg_free(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1139,13 +1090,6 @@ end subroutine ephwg_free
 !! SOURCE
 
 !! subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
-!!
-!!
-!! !This section has been created automatically by the script Abilint (TD).
-!! !Do not modify the following lines by hand.
-!! #undef ABI_FUNC
-!! #define ABI_FUNC 'ephwg_test'
-!! !End of the abilint section
 !!
 !!  implicit none
 !!

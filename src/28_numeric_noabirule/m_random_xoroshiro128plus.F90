@@ -107,13 +107,6 @@ contains
   !> Initialize a collection of rng's for parallel use
   subroutine init_parallel(self, n_proc, rng)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_parallel'
-!End of the abilint section
-
     class(prng_t), intent(inout) :: self
     type(rng_t), intent(inout)   :: rng
     integer, intent(in)          :: n_proc
@@ -132,13 +125,6 @@ contains
   !> Set a seed for the rng
   subroutine set_seed(self, the_seed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_seed'
-!End of the abilint section
-
     class(rng_t), intent(inout) :: self
     integer(i8), intent(in)     :: the_seed(2)
 
@@ -153,13 +139,6 @@ contains
   ! to 2^64 calls to next(); it can be used to generate 2^64
   ! non-overlapping subsequences for parallel computations.
   subroutine jump(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jump'
-!End of the abilint section
 
     class(rng_t), intent(inout) :: self
     integer                     :: i, b
@@ -186,13 +165,6 @@ contains
   !> Return 4-byte integer
   integer(i4) function rand_int4(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_int4'
-!End of the abilint section
-
     class(rng_t), intent(inout) :: self
     !rand_int4 = int(self%next(), i4)
     rand_int4 = int(next(self), i4)
@@ -201,13 +173,6 @@ contains
   !> Return 8-byte integer
   integer(i8) function rand_int8(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_int8'
-!End of the abilint section
-
     class(rng_t), intent(inout) :: self
     !rand_int8 = self%next()
     rand_int8 = next(self)
@@ -215,13 +180,6 @@ contains
 
   !> Get a uniform [0,1) random real (double precision)
   real(dp) function rand_unif_01(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_unif_01'
-!End of the abilint section
 
     class(rng_t), intent(inout) :: self
     integer(i8)                 :: x
@@ -235,13 +193,6 @@ contains
 
 
   subroutine rand_unif_01_array(self, output, size_array)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_unif_01_array'
-!End of the abilint section
 
     class(rng_t), intent(inout) :: self
     integer, intent(in) :: size_array
@@ -261,13 +212,6 @@ contains
   !> http://en.wikipedia.org/wiki/Marsaglia_polar_method
   function rand_two_normals(self) result(rands)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_two_normals'
-!End of the abilint section
-
     class(rng_t), intent(inout) :: self
     real(dp)                    :: rands(2), sum_sq
     do
@@ -284,13 +228,6 @@ contains
   !> Return one normal random variates with mean 0 and variance 1.
   !> http://en.wikipedia.org/wiki/Marsaglia_polar_method
   function rand_normal(self) result(r)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_normal'
-!End of the abilint section
 
     class(rng_t), intent(inout) :: self
     real(dp) :: r, rands(2), sum_sq
@@ -315,13 +252,6 @@ contains
 
   subroutine rand_normal_array(self, a, asize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_normal_array'
-!End of the abilint section
-
     class(rng_t), intent(inout) :: self
     integer ,intent(in) :: asize
     real(dp), intent(inout) :: a(asize)
@@ -335,13 +265,6 @@ contains
   !> Return Poisson random variate with rate lambda. Works well for lambda < 30
   !> or so. For lambda >> 1 it can produce wrong results due to roundoff error.
   function rand_poisson(self, lambda) result(rr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_poisson'
-!End of the abilint section
 
     class(rng_t), intent(inout) :: self
     real(dp), intent(in)        :: lambda
@@ -362,13 +285,6 @@ contains
 
   !> Sample point on a rand_circle with given radius
   function rand_circle(self, radius) result(xy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_circle'
-!End of the abilint section
 
     class(rng_t), intent(inout) :: self
     real(dp), intent(in)        :: radius
@@ -392,13 +308,6 @@ contains
 
   !> Sample point on a rand_sphere with given radius
   function rand_sphere(self, radius) result(xyz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rand_sphere'
-!End of the abilint section
 
     class(rng_t), intent(inout) :: self
     real(dp), intent(in)        :: radius
@@ -424,13 +333,6 @@ contains
   !> Interal routine: get the next value (returned as 64 bit signed integer)
   function next(self) result(res)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'next'
-!End of the abilint section
-
     class(rng_t), intent(inout) :: self
     integer(i8)                 :: res
     integer(i8)                 :: t(2)
@@ -444,13 +346,6 @@ contains
 
   !> Helper function for next()
   pure function rotl(x, k) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotl'
-!End of the abilint section
 
     integer(i8), intent(in) :: x
     integer, intent(in)     :: k

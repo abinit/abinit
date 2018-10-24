@@ -286,13 +286,6 @@ CONTAINS  !=====================================================================
 
 function get_gaps(ebands,gaps,kmask) result(retcode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_gaps'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -397,20 +390,7 @@ end function get_gaps
 
 subroutine gaps_free(gaps)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaps_free'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaps_free'
-!End of the abilint section
 
 !Arguments ------------------------------------
  type(gaps_t),intent(inout) :: gaps
@@ -462,13 +442,6 @@ end subroutine gaps_free
 !! SOURCE
 
 subroutine gaps_print(gaps,header,unit,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaps_print'
-!End of the abilint section
 
  implicit none
 
@@ -582,13 +555,6 @@ subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
 & nband,nkpt,npwarr,nsppol,nspinor,tphysel,tsmear,occopt,occ,wtk,&
 & charge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -698,13 +664,6 @@ end subroutine ebands_init
 
 type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_from_hdr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -768,13 +727,6 @@ end function ebands_from_hdr
 
 type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_from_dtset'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -836,13 +788,6 @@ end function ebands_from_dtset
 
 subroutine ebands_free(ebands)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -894,13 +839,6 @@ end subroutine ebands_free
 !! SOURCE
 
 subroutine ebands_copy(ibands,obands)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_copy'
-!End of the abilint section
 
  implicit none
 
@@ -982,13 +920,6 @@ end subroutine ebands_copy
 !! SOURCE
 
 subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_print'
-!End of the abilint section
 
  implicit none
 
@@ -1097,13 +1028,6 @@ end subroutine ebands_print
 
 subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d,val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unpack_eneocc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1171,13 +1095,6 @@ end subroutine unpack_eneocc
 
 subroutine pack_eneocc(nkpt,nsppol,mband,nband,bantot,array3d,vect)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pack_eneocc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1236,13 +1153,6 @@ end subroutine pack_eneocc
 !! SOURCE
 
 subroutine get_eneocc_vect(ebands,arr_name,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_eneocc_vect'
-!End of the abilint section
 
  implicit none
 
@@ -1308,13 +1218,6 @@ end subroutine get_eneocc_vect
 
 subroutine put_eneocc_vect(ebands,arr_name,vect)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'put_eneocc_vect'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1372,13 +1275,6 @@ end subroutine put_eneocc_vect
 
 pure function get_bandenergy(ebands) result(band_energy)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_bandenergy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1425,13 +1321,6 @@ end function get_bandenergy
 !! SOURCE
 
 pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_valence_idx'
-!End of the abilint section
 
  implicit none
 
@@ -1491,13 +1380,6 @@ end function get_valence_idx
 
 pure subroutine get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_bands_from_erange'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1554,13 +1436,6 @@ end subroutine get_bands_from_erange
 !! SOURCE
 
 subroutine apply_scissor(ebands,scissor_energy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'apply_scissor'
-!End of the abilint section
 
  implicit none
 
@@ -1644,13 +1519,6 @@ end subroutine apply_scissor
 
 pure function get_occupied(ebands,tol_occ) result(occ_idx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_occupied'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1725,13 +1593,6 @@ end function get_occupied
 !! SOURCE
 
 subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,degblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'enclose_degbands'
-!End of the abilint section
 
  implicit none
 
@@ -1831,13 +1692,6 @@ end subroutine enclose_degbands
 
 subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_get_erange'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1908,13 +1762,6 @@ end subroutine ebands_get_erange
 
 pure function ebands_nelect_per_spin(ebands) result(nelect_per_spin)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_nelect_per_spin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1969,13 +1816,6 @@ end function ebands_nelect_per_spin
 !! SOURCE
 
 function get_minmax(ebands,arr_name) result(minmax)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_minmax'
-!End of the abilint section
 
  implicit none
 
@@ -2044,13 +1884,6 @@ end function get_minmax
 
 type(stats_t) function ebands_edstats(ebands) result(stats)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_edstats'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2111,13 +1944,6 @@ end function ebands_edstats
 
 pure logical function ebands_has_metal_scheme(ebands) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_has_metal_scheme'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2158,13 +1984,6 @@ end function ebands_has_metal_scheme
 !! SOURCE
 
 integer function ebands_write_bxsf(ebands, crystal, fname) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_write_bxsf'
-!End of the abilint section
 
  implicit none
 
@@ -2228,13 +2047,6 @@ end function ebands_write_bxsf
 !! SOURCE
 
 subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_update_occ'
-!End of the abilint section
 
  implicit none
 
@@ -2410,13 +2222,6 @@ end subroutine ebands_update_occ
 
 subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_set_scheme'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2482,13 +2287,6 @@ end subroutine ebands_set_scheme
 !! SOURCE
 
 subroutine ebands_set_fermie(ebands, fermie, msg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_set_fermie'
-!End of the abilint section
 
  implicit none
 
@@ -2579,13 +2377,6 @@ end subroutine ebands_set_fermie
 
 subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_set_nelect'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2605,8 +2396,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
 
  if (.not. ebands_has_metal_scheme(ebands)) then
-   msg = "set_nelect assumes a metallic occupation scheme. Use ebands_set_scheme!"
-   MSG_ERROR(msg)
+   MSG_ERROR("set_nelect assumes a metallic occupation scheme. Use ebands_set_scheme!")
  end if
 
  prev_fermie = ebands%fermie; prev_nelect = ebands%nelect
@@ -2616,6 +2406,7 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
  write(msg,"(2(a,es16.6),a,2(a,es16.6))")&
    "Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10,&
    "New fermi level: ",ebands%fermie,", with nelect: ",ebands%nelect
+ call wrtout(std_out, msg)
 
 end subroutine ebands_set_nelect
 !!***
@@ -2640,13 +2431,6 @@ end subroutine ebands_set_nelect
 !! SOURCE
 
 real(dp) pure function ebands_calc_nelect(self, kt, fermie) result(nelect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_calc_nelect'
-!End of the abilint section
 
  implicit none
 
@@ -2708,13 +2492,6 @@ end function ebands_calc_nelect
 !! SOURCE
 
 subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_report_gap'
-!End of the abilint section
 
  implicit none
 
@@ -2839,13 +2616,6 @@ end subroutine ebands_report_gap
 !! SOURCE
 
 integer function ebands_ncwrite(ebands,ncid) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -2997,14 +2767,6 @@ integer function ebands_ncwrite(ebands,ncid) result(ncerr)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -3033,13 +2795,6 @@ end function ebands_ncwrite
 !! SOURCE
 
 integer function ebands_ncwrite_path(ebands,path) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_ncwrite_path'
-!End of the abilint section
 
  implicit none
 
@@ -3104,13 +2859,6 @@ end function ebands_ncwrite_path
 !! SOURCE
 
 type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) result(edos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_get_edos'
-!End of the abilint section
 
  implicit none
 
@@ -3292,13 +3040,6 @@ end function ebands_get_edos
 
 subroutine edos_free(edos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'edos_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3341,13 +3082,6 @@ end subroutine edos_free
 !! SOURCE
 
 subroutine edos_write(edos, path)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'edos_write'
-!End of the abilint section
 
  implicit none
 
@@ -3434,13 +3168,6 @@ end subroutine edos_write
 
 integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'edos_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3491,13 +3218,6 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 contains
   pure function pre(istr) result(ostr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pre'
-!End of the abilint section
-
     character(len=*),intent(in) :: istr
     character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
     ostr = trim(prefix_) // trim(istr)
@@ -3529,13 +3249,6 @@ end function edos_ncwrite
 !! SOURCE
 
 subroutine edos_print(edos, unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'edos_print'
-!End of the abilint section
 
  implicit none
 
@@ -3594,20 +3307,7 @@ end subroutine edos_print
 integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermie_nest,&
   qpath_vertices,errmsg) result(skipnest)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_write_nesting'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_write_nesting'
-!End of the abilint section
 
 !Arguments ------------------------------------
  type(ebands_t),intent(in) :: ebands
@@ -3712,13 +3412,6 @@ end function ebands_write_nesting
 !! SOURCE
 
 subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, outb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_expandk'
-!End of the abilint section
 
  implicit none
 
@@ -3881,13 +3574,6 @@ end subroutine ebands_expandk
 
 type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, in_shiftk) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_downsample'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4024,13 +3710,6 @@ end function ebands_downsample
 !! SOURCE
 
 type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebspl_new'
-!End of the abilint section
 
  implicit none
 
@@ -4225,13 +3904,6 @@ end function ebspl_new
 
 subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebspl_eval_bks'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4312,13 +3984,6 @@ end subroutine ebspl_eval_bks
 !! SOURCE
 
 subroutine ebspl_free(ebspl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebspl_free'
-!End of the abilint section
 
  implicit none
 
@@ -4401,13 +4066,6 @@ end subroutine ebspl_free
 
 
 function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_interp_kmesh'
-!End of the abilint section
 
  implicit none
 
@@ -4546,13 +4204,6 @@ end function ebands_interp_kmesh
 
 type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_interp_kpath'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4688,13 +4339,6 @@ end function ebands_interp_kpath
 !! SOURCE
 
 subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_get_jdos'
-!End of the abilint section
 
  implicit none
 
@@ -4877,13 +4521,6 @@ end subroutine ebands_get_jdos
 !! SOURCE
 
 subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_prtbltztrp'
-!End of the abilint section
 
  implicit none
 
@@ -5108,13 +4745,6 @@ end subroutine ebands_prtbltztrp
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
        natom, nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_prtbltztrp_tau_out'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5310,13 +4940,6 @@ end subroutine ebands_prtbltztrp_tau_out
 
 subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_write'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -5378,13 +5001,6 @@ end subroutine ebands_write
 !! SOURCE
 
 subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_write_xmgrace'
-!End of the abilint section
 
  implicit none
 
@@ -5520,13 +5136,6 @@ end subroutine ebands_write_xmgrace
 !! SOURCE
 
 subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_write_gnuplot'
-!End of the abilint section
 
  implicit none
 
@@ -5682,13 +5291,6 @@ end subroutine ebands_write_gnuplot
 !! SOURCE
 
 subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ebands_interpolate_kpath'
-!End of the abilint section
 
  implicit none
 

@@ -103,13 +103,6 @@ CONTAINS  !=====================================================================
 
 subroutine dtset_chkneu(charge,dtset,occopt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtset_chkneu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -373,13 +366,6 @@ end subroutine dtset_chkneu
 !! SOURCE
 
 subroutine dtset_copy(dtout, dtin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtset_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1264,13 +1250,6 @@ end subroutine dtset_copy
 
 subroutine dtset_free(dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dtset_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1535,13 +1514,6 @@ end subroutine dtset_free
 
 subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,ndtset_alloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_getdtset'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1631,13 +1603,6 @@ end subroutine find_getdtset
 subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 
  use m_symkpt,     only : symkpt
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_npert_rbz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1951,13 +1916,6 @@ end subroutine get_npert_rbz
 
 subroutine testsusmat(compute,dielop,dielstrt,dtset,istep)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testsusmat'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -2042,13 +2000,6 @@ end subroutine testsusmat
 !! SOURCE
 
 subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'macroin'
-!End of the abilint section
 
  implicit none
 
@@ -2291,13 +2242,6 @@ end subroutine macroin
 
 subroutine macroin2(dtsets,ndtset_alloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'macroin2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2355,13 +2299,6 @@ end subroutine macroin2
 !! SOURCE
 
 subroutine chkvars (string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkvars'
-!End of the abilint section
 
  implicit none
 
@@ -2545,9 +2482,14 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' sigma_ngkpt sigma_nshiftk sigma_shiftk'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
- list_vars=trim(list_vars)//' spin_dipdip spin_dt spin_dynamics spin_mag_field spin_nctime spin_ntime'
- list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_qpoint spin_temperature spin_tolavg spin_tolvar'
- list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
+ list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
+ list_vars=trim(list_vars)//' spin_damping'
+ list_vars=trim(list_vars)//' spin_dipdip spin_dt spin_dynamics '
+ list_vars=trim(list_vars)//' spin_init_state spin_mag_field spin_nctime spin_ntime spin_ntime_pre'
+ list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_qpoint'
+ list_vars=trim(list_vars)//' spin_sia_add spin_sia_k1amp spin_sia_k1dir'
+ list_vars=trim(list_vars)//' spin_temperature spin_temperature_start spin_temperature_end'
+ list_vars=trim(list_vars)//'  spin_temperature_nstep spin_tolavg spin_tolvar spin_var_temperature spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma'
 !T

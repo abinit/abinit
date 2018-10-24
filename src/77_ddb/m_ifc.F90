@@ -234,13 +234,6 @@ CONTAINS  !===========================================================
 
 subroutine ifc_free(ifc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -332,13 +325,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   prtsrlr,enunit, & ! TODO: TO BE REMOVED
   comm, &
   Ifc_coarse) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_init'
-!End of the abilint section
 
  implicit none
 
@@ -689,13 +675,6 @@ end subroutine ifc_init
 
 subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_init_fromFile'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -800,13 +779,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
 subroutine ifc_print(ifc,header,unit,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -899,13 +871,6 @@ end subroutine ifc_print
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
                      nanaqdir, out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_fourq'
-!End of the abilint section
 
  implicit none
 
@@ -1017,13 +982,6 @@ end subroutine ifc_fourq
 !! SOURCE
 
 subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_get_dwdq'
-!End of the abilint section
 
  implicit none
 
@@ -1141,13 +1099,6 @@ end subroutine ifc_get_dwdq
 !! SOURCE
 
 subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_speedofsound'
-!End of the abilint section
 
  implicit none
 
@@ -1374,13 +1325,6 @@ end subroutine ifc_speedofsound
 
 subroutine ifc_autocutoff(ifc, crystal, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_autocutoff'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1536,13 +1480,6 @@ end subroutine ifc_autocutoff
 
 subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_min,wghatm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'corsifc9'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1677,13 +1614,6 @@ end subroutine corsifc9
 !! SOURCE
 
 subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_write'
-!End of the abilint section
 
  implicit none
 
@@ -1973,14 +1903,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 #ifdef HAVE_NETCDF
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -2035,13 +1957,6 @@ end subroutine ifc_write
 
 subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
 & dist,invdlt,detdlt,rsiaf,sriaf,vect,indngb,posngb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_getiaf'
-!End of the abilint section
 
 implicit none
 
@@ -2358,13 +2273,6 @@ end subroutine ifc_getiaf
 
 subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,nqpt,eigenvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'omega_decomp'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2561,13 +2469,6 @@ end subroutine omega_decomp
 
 subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_outphbtrap'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2684,13 +2585,6 @@ end subroutine ifc_outphbtrap
 
 subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_printbxsf'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2785,13 +2679,6 @@ end subroutine ifc_printbxsf
 
 subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
 &  qnrml2, ncid, phfrq2l, polarity2l) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_calcnwrite_nana_terms'
-!End of the abilint section
 
  implicit none
 

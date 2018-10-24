@@ -140,13 +140,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_classify_bands,  only : classify_bands
  use m_pspini,          only : pspini
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfk_analyze'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -531,13 +524,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 !! SOURCE
 
 subroutine read_wfd()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_wfd'
-!End of the abilint section
 
  implicit none
 

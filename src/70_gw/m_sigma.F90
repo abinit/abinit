@@ -257,13 +257,6 @@ CONTAINS  !=====================================================================
 
 subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_sigma_header'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -454,13 +447,6 @@ end subroutine write_sigma_header
 
 subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_sigma_results'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -621,13 +607,6 @@ end subroutine write_sigma_results
 
 function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gw_spectral_function'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -667,13 +646,6 @@ end function gw_spectral_function
 !! SOURCE
 
 subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_Sigma_perturbative'
-!End of the abilint section
 
  implicit none
 
@@ -821,13 +793,6 @@ end subroutine print_Sigma_perturbative
 
 subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_Sigma_QPSC'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -959,13 +924,6 @@ end subroutine print_Sigma_QPSC
 
 subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1096,13 +1054,6 @@ end subroutine sigma_init
 
 subroutine sigma_free(Sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1231,13 +1182,6 @@ end subroutine sigma_free
 
 pure function sigma_get_exene(sigma,kmesh,bands) result(ex_energy)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_get_exene'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1299,13 +1243,6 @@ end function sigma_get_exene
 !! SOURCE
 
 subroutine find_wpoles_for_cd(Sigp,Sr,Kmesh,BSt,omega_max)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_wpoles_for_cd'
-!End of the abilint section
 
  implicit none
 
@@ -1416,13 +1353,6 @@ end subroutine find_wpoles_for_cd
 !! SOURCE
 
 integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -1665,14 +1595,6 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1722,13 +1644,6 @@ end function sigma_ncwrite
 !! SOURCE
 
 subroutine sigma_distribute_bks(Wfd,Kmesh,Ltg_kgw,Qmesh,nsppol,can_symmetrize,kptgw,mg0,my_nbks,proc_distrb,got,bks_mask,global)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_distribute_bks'
-!End of the abilint section
 
  implicit none
 

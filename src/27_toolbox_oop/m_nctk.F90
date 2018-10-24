@@ -265,13 +265,6 @@ CONTAINS
 
 integer function nctk_idname(ncid, varname) result(varid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_idname'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -286,7 +279,6 @@ integer function nctk_idname(ncid, varname) result(varid)
 ! *********************************************************************
 
 #ifdef HAVE_NETCDF
- ! nctk_idname must be available outside CPP blocks due to a bug in abilint.
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
  if (ncerr /= nf90_noerr) then
@@ -316,13 +308,6 @@ end function nctk_idname
 
 function nctk_ncify(ipath) result(opath)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_ncify'
-!End of the abilint section
-
  character(len=fnlen),intent(in) :: ipath
  character(len=fnlen) :: opath
 
@@ -349,13 +334,6 @@ end function nctk_ncify
 !! SOURCE
 
 pure function nctk_string_from_occopt(occopt) result(smearing)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_string_from_occopt'
-!End of the abilint section
 
  integer,intent(in) :: occopt
  character(len=etsfio_charlen) :: smearing
@@ -414,13 +392,6 @@ end function nctk_string_from_occopt
 
 subroutine nctk_fort_or_ncfile(filename, iomode, errmsg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_fort_or_ncfile'
-!End of the abilint section
-
  character(len=*),intent(inout) :: filename
  character(len=*),intent(out) :: errmsg
  integer,intent(out) :: iomode
@@ -476,13 +447,6 @@ end subroutine nctk_fort_or_ncfile
 
 integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_try_fort_or_ncfile'
-!End of the abilint section
-
  character(len=*),intent(inout) :: filename
  character(len=*),intent(out) :: errmsg
  integer,optional,intent(in) :: unit
@@ -532,13 +496,6 @@ end function nctk_try_fort_or_ncfile
 !! SOURCE
 
 subroutine nctk_test_mpiio()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_test_mpiio'
-!End of the abilint section
 
  implicit none
 
@@ -617,20 +574,7 @@ end subroutine nctk_test_mpiio
 
 integer function str2xtype(string) result(xtype)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2xtype'
-!End of the abilint section
-
   implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2xtype'
-!End of the abilint section
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
@@ -676,20 +620,7 @@ end function str2xtype
 
 logical function bail_if_ncerr(ncerr, file, line) result(bail)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bail_if_ncerr'
-!End of the abilint section
-
   implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2xtype'
-!End of the abilint section
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncerr
@@ -729,13 +660,6 @@ end function bail_if_ncerr
 !! SOURCE
 
 integer function nctk_open_read(ncid, path, comm) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_open_read'
-!End of the abilint section
 
  implicit none
 
@@ -793,13 +717,6 @@ end function nctk_open_read
 !! SOURCE
 
 integer function nctk_open_create(ncid, path, comm) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_open_create'
-!End of the abilint section
 
  implicit none
 
@@ -864,13 +781,6 @@ end function nctk_open_create
 
 integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_open_modify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -930,13 +840,6 @@ end function nctk_open_modify
 !! SOURCE
 
 integer function nctk_add_etsf_header(ncid, title, history) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_add_etsf_header'
-!End of the abilint section
 
  implicit none
 
@@ -1008,13 +911,6 @@ end function nctk_add_etsf_header
 
 integer function nctk_set_defmode(ncid) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_set_defmode'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1054,13 +950,6 @@ end function nctk_set_defmode
 !! SOURCE
 
 integer function nctk_set_datamode(ncid, reserve) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_set_datamode'
-!End of the abilint section
 
  implicit none
 
@@ -1118,13 +1007,6 @@ end function nctk_set_datamode
 
 integer function nctk_set_collective(ncid, varid) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_set_collective'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1165,13 +1047,6 @@ end function nctk_set_collective
 !! SOURCE
 
 integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_one_dim'
-!End of the abilint section
 
  implicit none
 
@@ -1247,13 +1122,6 @@ end function nctk_def_one_dim
 
 integer function nctk_def_dim_list(ncid, nctkdims, defmode, prefix) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_dim_list'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1310,13 +1178,6 @@ end function nctk_def_dim_list
 
 integer function nctk_set_atomic_units(ncid, varname) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_set_atomic_units'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1359,13 +1220,6 @@ end function nctk_set_atomic_units
 !! SOURCE
 
 integer function nctk_def_basedims(ncid, defmode) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_basedims'
-!End of the abilint section
 
  implicit none
 
@@ -1429,13 +1283,6 @@ end function nctk_def_basedims
 
 subroutine ab_define_var(ncid, var_dim_id, var_id, var_type, var_name, var_mnemo, var_units)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ab_define_var'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1488,13 +1335,6 @@ end subroutine ab_define_var
 !! SOURCE
 
 integer function nctk_def_scalars_type(ncid, varnames, xtype, defmode, prefix) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_scalars_type'
-!End of the abilint section
 
  implicit none
 
@@ -1567,13 +1407,6 @@ end function nctk_def_scalars_type
 
 integer function nctk_def_iscalars(ncid, varnames, defmode, prefix) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_iscalars'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1619,13 +1452,6 @@ end function nctk_def_iscalars
 !! SOURCE
 
 integer function nctk_def_dpscalars(ncid, varnames, defmode, prefix) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_dpscalars'
-!End of the abilint section
 
  implicit none
 
@@ -1673,13 +1499,6 @@ end function nctk_def_dpscalars
 
 
 integer function nctk_def_one_array(ncid, nctk_array, defmode, varid, prefix) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_one_array'
-!End of the abilint section
 
  implicit none
 
@@ -1795,13 +1614,6 @@ end function nctk_def_one_array
 
 integer function nctk_def_array_list(ncid, nctk_arrays, defmode, prefix) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_def_array_list'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1860,13 +1672,6 @@ end function nctk_def_array_list
 
 integer function nctk_write_iscalars(ncid, varnames, values, datamode) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_write_iscalars'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1920,13 +1725,6 @@ end function nctk_write_iscalars
 !! SOURCE
 
 integer function nctk_write_dpscalars(ncid, varnames, values, datamode) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_write_dpscalars'
-!End of the abilint section
 
  implicit none
 
@@ -1983,13 +1781,6 @@ end function nctk_write_dpscalars
 
 integer function nctk_defnwrite_ivars(ncid, varnames, values) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_defnwrite_ivars'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2039,13 +1830,6 @@ end function nctk_defnwrite_ivars
 !! SOURCE
 
 integer function nctk_defnwrite_dpvars(ncid, varnames, values) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_defnwrite_dpvars'
-!End of the abilint section
 
  implicit none
 
@@ -2102,13 +1886,6 @@ end function nctk_defnwrite_dpvars
 !! SOURCE
 
 integer function nctk_write_ibz(fname, kpoints, weights) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_write_ibz'
-!End of the abilint section
 
  implicit none
 
@@ -2173,13 +1950,6 @@ end function nctk_write_ibz
 
 integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_get_dim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2242,13 +2012,6 @@ end function nctk_get_dim
 
 integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
    comm_fft,fftn3_distrib,ffti3_local,datar,action) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_write_datar'
-!End of the abilint section
 
  implicit none
 
@@ -2457,13 +2220,6 @@ end function nctk_write_datar
 integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
    comm_fft,fftn3_distrib,ffti3_local,datar) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_read_datar'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2593,13 +2349,6 @@ end function nctk_read_datar
 
 subroutine collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'collect_datar'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2683,13 +2432,6 @@ end subroutine collect_datar
 
 subroutine distrib_datar(ngfft,cplex,nfft,nspden,rhor_glob,master,comm_fft,fftn3_distrib,ffti3_local,rhor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'distrib_datar'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2760,13 +2502,6 @@ end subroutine distrib_datar
 
 subroutine var_from_id(ncid, varid, var)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'var_from_id'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2828,13 +2563,6 @@ end subroutine var_from_id
 
 subroutine var_from_name(ncid, name, var)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'var_from_name'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2883,13 +2611,6 @@ end subroutine var_from_name
 !! SOURCE
 
 subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctk_defwrite_nonana_terms'
-!End of the abilint section
 
  implicit none
 
@@ -2965,13 +2686,6 @@ end subroutine nctk_defwrite_nonana_terms
 
 subroutine create_nc_file (filename,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_nc_file'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -3030,13 +2744,6 @@ integer :: ncerr
 !! SOURCE
 
 subroutine write_var_netcdf(arr_int,arr_real,marr,narr,ncid,typevar,varname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_var_netcdf'
-!End of the abilint section
 
 implicit none
 
@@ -3123,13 +2830,6 @@ end subroutine write_var_netcdf
 !! SOURCE
 
 subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_eig'
-!End of the abilint section
 
 implicit none
 

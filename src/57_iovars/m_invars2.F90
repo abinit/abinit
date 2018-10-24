@@ -110,13 +110,6 @@ contains
 
 subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars2m'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -246,13 +239,6 @@ end subroutine invars2m
 !! SOURCE
 
 subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars2'
-!End of the abilint section
 
  implicit none
 

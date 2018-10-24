@@ -105,13 +105,6 @@ contains  !=====================================================================
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_phpi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -144,7 +137,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw,my_mpw,ierr,my_kstart,my_kstop,cnt
  integer :: n1,n2,n3,n4,n5,n6,nspden
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
  real(dp) :: cpu,wall,gflops
  real(dp) :: ecut,eshift,eig0nk,eig0mkq,dotr,doti
@@ -166,7 +159,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:)
  real(dp),allocatable ::  gs1c(:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
@@ -323,8 +316,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  usevnl = 0
  optlocal = 1  ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2     ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- opt_gvnl1 = 0 ! gvnl1 is output
- ABI_MALLOC(gvnl1, (2,usevnl))
+ opt_gvnlx1 = 0 ! gvnlx1 is output
+ ABI_MALLOC(gvnlx1, (2,usevnl))
  ABI_MALLOC(grad_berry, (2,nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -478,8 +471,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
          eshift = eig0nk - dtset%dfpt_sciss
 
          call getgh1c(berryopt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
-&                     grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
-&                     optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+&                     grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
+&                     optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
        ABI_FREE(kinpw1)
@@ -604,7 +597,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_FREE(gkk_m)
  ABI_FREE(v1scf)
  ABI_FREE(vlocal1)
- ABI_FREE(gvnl1)
+ ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(ph1d)
@@ -652,13 +645,6 @@ subroutine out_phpi(iout, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_phpi'
-!End of the abilint section
-
  integer,intent(in) :: iout
  integer,intent(in) :: natom3
 !arrays
@@ -717,13 +703,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_phpi_nc'
-!End of the abilint section
-
  integer,intent(in) :: natom3
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst

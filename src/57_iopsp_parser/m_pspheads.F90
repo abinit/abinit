@@ -89,13 +89,6 @@ contains
 
 subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inpspheads'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -564,13 +557,6 @@ end subroutine inpspheads
 
 subroutine pspheads_comm(npsp,pspheads,test_paw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspheads_comm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -745,13 +731,6 @@ end subroutine pspheads_comm
 
 subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsxml2ab'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -843,13 +822,6 @@ end subroutine pawpsxml2ab
 
 subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfheader2abi'
-!End of the abilint section
-
   implicit none
 
 !Arguments -------------------------------
@@ -929,13 +901,6 @@ end subroutine upfheader2abi
 !! SOURCE
 
 subroutine upfxc2abi(dft, pspxc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfxc2abi'
-!End of the abilint section
 
   implicit none
 

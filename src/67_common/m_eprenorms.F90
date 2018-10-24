@@ -129,13 +129,6 @@ CONTAINS  !=====================================================================
 
 subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_init'
-!End of the abilint section
-
  implicit none
 
 !Arugments -----------------------------------
@@ -191,13 +184,6 @@ end subroutine eprenorms_init
 
 subroutine eprenorms_free(Epren)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -252,13 +238,6 @@ end subroutine eprenorms_free
 !! SOURCE
 
 subroutine eprenorms_from_epnc(Epren,filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_from_epnc'
-!End of the abilint section
 
  implicit none
 
@@ -324,13 +303,6 @@ end subroutine eprenorms_from_epnc
 
 subroutine eprenorms_bcast(Epren,master,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eprenorms_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -392,13 +364,6 @@ end subroutine eprenorms_bcast
 !! SOURCE
 
 subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'renorm_bst'
-!End of the abilint section
 
  implicit none
 

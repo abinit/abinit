@@ -144,13 +144,6 @@ contains
 
 subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -400,10 +393,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      end if
 
    else if (abs(dtset%eph_extrael) > tol12) then
-     !NOT_IMPLEMENTED_ERROR()
-     ! TODO: Be careful with the trick used in elphon for passing the concentration
      call ebands_set_scheme(ebands, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
-     call ebands_set_nelect(ebands, ebands%nelect+dtset%eph_extrael, dtset%spinmagntarget, msg)
+     call ebands_set_nelect(ebands, ebands%nelect + dtset%eph_extrael, dtset%spinmagntarget, msg)
      call wrtout(ab_out,msg)
      if (use_wfq) then
        call ebands_set_scheme(ebands_kq, dtset%occopt, dtset%tsmear, dtset%spinmagntarget, dtset%prtvol)
@@ -428,11 +419,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')" eph%init: cpu: ",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
- call cwtime(cpu,wall,gflops,"start")
 
  ! =======================================
  ! Output useful info on electronic bands
  ! =======================================
+ call cwtime(cpu,wall,gflops,"start")
  if (my_rank == master) then
    ! Fermi Surface
    if (dtset%prtfsurf /= 0) then
@@ -450,7 +441,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      path = strcat(dtfil%filnam_ds(4), "_NEST")
      call wrtout(ab_out, sjoin("- Writing nesting factor to file:", path))
      if (ebands_write_nesting(ebands,cryst,path,dtset%prtnest,&
-     dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
+         dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
        MSG_WARNING(msg)
        call wrtout(ab_out,msg)
      end if
@@ -460,7 +451,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')" eph%edos: cpu:",cpu,", wall: ",wall
+ write(msg,'(2(a,f8.2))')" eph%ebands_postprocess: cpu:",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
@@ -526,12 +517,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
      !call phdos_print_debye(phdos, crystal%ucvol)
 
-!TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
-! Otherwise just leave these defaults.
-!MG: 1) Disabled for the time being because of SIGFPE in v8[41]
-!    2) I've added a new abinit variable (tmesh) to specifiy the list of temperatures.
+     !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
+     ! Otherwise just leave these defaults.
+     !MG: 1) Disabled for the time being because of SIGFPE in v8[41]
+     !    2) I've added a new abinit variable (tmesh) to specifiy the list of temperatures.
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
-!MG: Disabled for the time being because of SIGFPE in v8[41]
+     !MG: Disabled for the time being because of SIGFPE in v8[41]
      !call phdos_print_msqd(phdos, path, 1000, one, one)
      path = strcat(dtfil%filnam_ds(4), "_THERMO")
      call phdos_print_thermo(PHdos, path, 1000, zero, one)
@@ -619,9 +610,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
-
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
-&  pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+ call pspini(dtset, dtfil, ecore, psp_gencond, gsqcutc_eff, gsqcutf_eff, pawrad, pawtab, psps, cryst%rprimd, comm_mpi=comm)
 
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
@@ -638,7 +627,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
- case (2)
+ case (2, -2)
    ! Compute electron-phonon matrix elements
    call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
@@ -655,7 +644,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    !call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
 
- case (5)
+ case (5, -5)
    ! Interpolate the phonon potential
    call dvdb_interpolate_and_write(dvdb, dtset, dtfil%fnameabo_dvdb, ngfftc,ngfftf, cryst, &
      ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
@@ -671,7 +660,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !=====================
  !==== Free memory ====
  !=====================
-
  call crystal_free(cryst)
  call dvdb_free(dvdb)
  call ddb_free(ddb)
@@ -681,15 +669,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
- if(allocated(efmasdeg))then
+ if (allocated(efmasdeg)) then
    call efmasdeg_free_array(efmasdeg)
  endif
- if( allocated (efmasval))then
+ if (allocated(efmasval)) then
    call efmasval_free_array(efmasval)
  endif
- if(allocated(kpt_efmas))then
-   ABI_DEALLOCATE(kpt_efmas)
- endif
+ ABI_SFREE(kpt_efmas)
 
 !XG20180810: please do not remove. Otherwise, I get an error on my Mac.
  write(std_out,*)' eph : after free efmasval and kpt_efmas'

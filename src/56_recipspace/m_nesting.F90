@@ -85,13 +85,6 @@ CONTAINS  !=====================================================================
 
 subroutine bfactor(nkptfull,kptfull,nqpt,qpt,kptrank_t,nkpt,weight,nband,nestfactor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bfactor'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -184,13 +177,6 @@ end subroutine bfactor
 subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 & qpath_vertices,nqptfull,qptfull,base_name,gprimd,gmet,prtnest,qptrlatt,&
 & nsym,symrec) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mknesting'
-!End of the abilint section
 
  implicit none
 
@@ -351,13 +337,6 @@ end subroutine mknesting
 !! SOURCE
 
 subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prtnest,qpath_vertices)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outnesting'
-!End of the abilint section
 
  implicit none
 

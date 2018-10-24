@@ -45,7 +45,6 @@ module m_scfcv_core
  use m_cgtools
 
  use m_berryphase_new,   only : update_e_field_vars
- use m_dtfil,            only : status
  use m_time,             only : timab
  use m_fstrings,         only : int2char4, sjoin
  use m_symtk,            only : symmetrize_xred
@@ -283,13 +282,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &  pwind_alloc,pwnsfac,rec_set,resid,results_gs,rhog,rhor,rprimd,&
 &  scf_history,symrec,taug,taur,wffnew,wvl,xred,xred_old,ylm,ylmgr,conv_retcode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_core'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -368,6 +360,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  real(dp) :: val_min,vxcavg,vxcavg_dum
  real(dp) :: zion,wtime_step,now,prev
  character(len=10) :: tag
+ character(len=500) :: MY_NAME = "scfcv_core"
  character(len=1500) :: message
  !character(len=500) :: dilatmx_errmsg
  character(len=fnlen) :: fildata
@@ -435,11 +428,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  call timab(238,1,tsec)
  call timab(54,1,tsec)
 
- call status(0,dtfil%filstat,iexit,level,'enter')
-
  ! enable time limit handler if not done in callers.
- if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-   write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+ if (enable_timelimit_in(MY_NAME) == MY_NAME) then
+   write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
  end if
 
 ! Initialise non_magnetic_xc for rhohxc
@@ -723,7 +714,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      if (usefock==1) then
        ctocprj_choice = 1
        if (dtset%optforces == 1) then
-        ctocprj_choice = 2; ! ncpgr = 3 
+        ctocprj_choice = 2; ! ncpgr = 3
        end if
 !       if (dtset%optstress /= 0) then
 !         ncpgr = 6 ; ctocprj_choice = 3
@@ -966,8 +957,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    ABI_ALLOCATE(shiftvector,(1))
  end if
 
- call status(0,dtfil%filstat,iexit,level,'berryphase    ')
-
 !!PAW+DMFT: allocate structured datatype paw_dmft if dtset%usedmft=1
 !call init_sc_dmft(dtset%dmftbandi,dtset%dmftbandf,dtset%mband,dtset%nkpt,&
 !&  dtset%nsppol,dtset%usedmft,paw_dmft,dtset%usedmft)
@@ -1000,8 +989,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
 ! start SCF loop
  do istep=1,max(1,nstep)
-   call status(istep,dtfil%filstat,iexit,level,'loop istep    ')
-
    ! Handle time limit condition.
    if (istep == 1) prev = abi_wtime()
    if (istep  > 1) then
@@ -1010,7 +997,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      prev = now
      call wrtout(std_out, sjoin(" scfcv_core: previous iteration took ",sec2str(wtime_step)))
 
-     if (have_timelimit_in(ABI_FUNC)) then
+     if (have_timelimit_in(MY_NAME)) then
        if (istep > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
@@ -1555,7 +1542,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
      MSG_WARNING('THOMAS FERMI')
-     call vtorhotf(dtfil,dtset,energies%e_kinetic,energies%e_nonlocalpsp,&
+     call vtorhotf(dtfil,dtset,energies%e_kinetic,energies%e_nlpsp_vfock,&
 &     energies%entropy,energies%e_fermie,gprimd,grnl,irrzon,mpi_enreg,&
 &     dtset%natom,nfftf,dtset%nspden,dtset%nsppol,dtset%nsym,phnons,&
 &     rhog,rhor,rprimd,ucvol,vtrial)
@@ -1566,7 +1553,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 !  Recursion method
    if(dtset%userec==1)then
      call vtorhorec(dtset,&
-&     energies%e_kinetic,energies%e_nonlocalpsp,energies%entropy,energies%e_eigenvalues,&
+&     energies%e_kinetic,energies%e_nlpsp_vfock,energies%entropy,energies%e_eigenvalues,&
 &     energies%e_fermie,grnl,initialized,irrzon,nfftf,phnons,&
 &     rhog,rhor,vtrial,rec_set,istep-nstep,rprimd,gprimd)
      residm=zero
@@ -2274,8 +2261,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
    write(ab_xml_out, "(A)") '    </scfcvLoop>'
  end if
 
- call status(0,dtfil%filstat,iexit,level,'exit')
-
  call timab(249,2,tsec)
  call timab(238,2,tsec)
 
@@ -2389,7 +2374,7 @@ end subroutine scfcv_core
 !!   | e_hybcomp_v0(IN)=potential compensation energy for the hybrid functionals at frozen density
 !!   | e_hybcomp_v (IN)=potential compensation energy for the hybrid functionals at self-consistent density
 !!   | e_kinetic(IN)=kinetic energy part of total energy.
-!!   | e_nonlocalpsp(IN)=nonlocal pseudopotential part of total energy.
+!!   | e_nlpsp_vfock(IN)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(IN)=exchange-correlation energy (hartree)
 !!   | e_xcdc(IN)=exchange-correlation double-counting energy (hartree)
 !!   | e_paw(IN)=PAW spherical part energy
@@ -2432,13 +2417,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
 &  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'etotfor'
-!End of the abilint section
 
  implicit none
 
@@ -2589,7 +2567,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
 &     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
-     if (usepaw==0) etotal = etotal + energies%e_nonlocalpsp
+     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock
      if (usepaw/=0) etotal = etotal + energies%e_paw
    end if
 
@@ -2751,13 +2729,6 @@ subroutine wf_mixing(atindx1,cg,cprj,dtset,istep,mcg,mcprj,mpi_enreg,&
 
  !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj, dotprodm_sumdiag_cgcprj, lincom_cgcprj, cgcprj_cholesky
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wf_mixing'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

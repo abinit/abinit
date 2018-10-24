@@ -74,13 +74,6 @@ CONTAINS  !=====================================================================
 
 subroutine xomp_show_info(unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xomp_show_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -132,13 +125,6 @@ end subroutine xomp_show_info
 
 function xomp_get_max_threads()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xomp_get_max_threads'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -176,13 +162,6 @@ end function xomp_get_max_threads
 !! SOURCE
 
 function xomp_get_thread_num()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xomp_get_thread_num'
-!End of the abilint section
 
  implicit none
 
@@ -228,13 +207,6 @@ end function xomp_get_thread_num
 !! SOURCE
 
 function xomp_get_num_threads(open_parallel) result(nthreads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xomp_get_num_threads'
-!End of the abilint section
 
  implicit none
 
@@ -295,13 +267,6 @@ end function xomp_get_num_threads
 
 subroutine xomp_set_num_threads(nthreads)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xomp_set_num_threads'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -334,13 +299,6 @@ end subroutine xomp_set_num_threads
 !! SOURCE
 
 function xomp_in_parallel() result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xomp_in_parallel'
-!End of the abilint section
 
  implicit none
 
@@ -379,13 +337,6 @@ end function xomp_in_parallel
 !! SOURCE
 
 function xomp_get_num_cores_node()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xomp_get_num_cores_node'
-!End of the abilint section
 
  implicit none
 

@@ -62,13 +62,6 @@ subroutine contstr25a(istr1,istr2,rank,gm,gprimd,e2nl,aa,bb)
 
  use defs_basis
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'contstr25a'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

@@ -38,7 +38,6 @@ module m_nonlinear
  use m_ebands
  use m_xcdata
 
- use m_dtfil,    only : status
  use m_fstrings, only : sjoin, itoa
  use m_time,     only : timab
  use m_symtk,    only : symmetrize_xred, littlegroup_q
@@ -160,13 +159,6 @@ contains
 subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &                    pawang,pawrad,pawtab,psps,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlinear'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -260,7 +252,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  DBG_ENTER("COLL")
 
  call timab(501,1,tsec)
- call status(0,dtfil%filstat,iexit,level,'enter         ')
 
 !Structured debugging if dtset%prtvol==-level
  if(dtset%prtvol==-level)then
@@ -423,7 +414,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Symmetrize atomic coordinates over space group elements:
  call symmetrize_xred(indsym,natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
 
- call status(0,dtfil%filstat,iexit,level,'call sytens   ')
  call sytens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
  write(message, '(a,a,a,a,a)' ) ch10, &
@@ -509,8 +499,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    MSG_ERROR_NODUMP("aborting now")
  end if
 
- call status(0,dtfil%filstat,iexit,level,'call setup1   ')
-
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
@@ -520,7 +508,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Set up the basis sphere of planewaves
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
- call status(0,dtfil%filstat,iexit,level,'call kpgio(1) ')
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
@@ -535,7 +522,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 
 !Open and read pseudopotential files
  ecore = 0_dp
- call status(0,dtfil%filstat,iexit,level,'call pspini(1)')
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
@@ -569,8 +555,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
-
- call status(0,dtfil%filstat,iexit,level,'call inwffil(1')
 
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
@@ -740,7 +724,6 @@ end if
    optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
    optgr1=dtset%pawstgylm
    optgr2=dtset%pawstgylm
-   call status(0,dtfil%filstat,iexit,level,'call nhatgrid ')
    call nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfftf,psps%ntypat,&
 &   optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,dtset%typat,ucvol,xred,&
 &   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab )
@@ -913,7 +896,6 @@ end if
 
  _IBM6("Before rhotoxc")
 
- call status(0,dtfil%filstat,iexit,level,'call rhotoxc   ')
  call xcdata_init(xcdata,dtset=dtset)
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
@@ -998,7 +980,6 @@ end if
  if (pead/=0) then
 !  Initialize finite difference calculation of the ddk
 
-   call status(0,dtfil%filstat,iexit,level,'call getshell ')
    nkpt3 = 0
 
 !  Prepare first call to getkgrid (obtain number of k points in FBZ)
@@ -1038,12 +1019,10 @@ end if
    ABI_ALLOCATE(mpi_enreg%kpt_loc2ibz_sp,(0:mpi_enreg%nproc-1,1:mkmem_max, 1:2))
    ABI_ALLOCATE(mpi_enreg%mkmem,(0:mpi_enreg%nproc-1))
 
-   call status(0,dtfil%filstat,iexit,level,'call initmv   ')
    call initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 &   kpt3,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,&
 &   nkpt3,nneigh,npwarr,dtset%nsppol,occ,pwind)
 
-  call status(0,dtfil%filstat,iexit,level,'call pead_nl_loop ')
   call pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,gmet,gprimd,gsqcut,&
 &  hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,dtset%mgfft,&
 &  dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
@@ -1052,7 +1031,6 @@ end if
 
  else ! pead=0 in this case
 
-   call status(0,dtfil%filstat,iexit,level,'call dfptnl_loop ')
    call dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut,&
 &   hdr,kg,kxc,k3xc,dtset%mband,dtset%mgfft,mgfftf,&
 &   dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
@@ -1070,7 +1048,6 @@ end if
 
 !Complete missing elements using symmetry operations
  blkflg_sav = blkflg
- call status(0,dtfil%filstat,iexit,level,'call d3sym    ')
  call d3sym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
  blkflg_tmp = blkflg_sav
@@ -1095,12 +1072,9 @@ end if
 !Open the formatted derivative database file, and write the
 !preliminary information
  if (mpi_enreg%me == 0) then
-   call status(0,dtfil%filstat,iexit,level,'call ioddb8_ou')
-
    dscrpt=' Note : temporary (transfer) database '
 
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&                    1,xred=xred,occ=occ)
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
 
    call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
 
@@ -1370,7 +1344,6 @@ end if
 !(to avoid meaningless side-effects when comparing ouputs...)
  etotal = zero
 
- call status(0,dtfil%filstat,iexit,level,' exit         ')
  call timab(501,2,tsec)
 
  DBG_EXIT("COLL")
@@ -1402,13 +1375,6 @@ end if
 !! SOURCE
 
    subroutine print_chi2(d3cart0,msg,theunit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_chi2'
-!End of the abilint section
 
      implicit none
 
@@ -1457,13 +1423,6 @@ end if
 !! SOURCE
 
    subroutine print_dchidtau(d3cart0,msg,theunit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_dchidtau'
-!End of the abilint section
 
      implicit none
 
@@ -1543,13 +1502,6 @@ end subroutine nonlinear
 subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 &  kpt3,mband,mkmem,mpi_enreg,mpw,nband,nkpt2,&
 &  nkpt3,nneigh,npwarr,nsppol,occ,pwind)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmv'
-!End of the abilint section
 
  implicit none
 

@@ -140,13 +140,6 @@ contains
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1390,13 +1383,6 @@ contains
 
  subroutine read_chkunit(seed_name,nkpt,ndimwin,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_chkunit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1483,13 +1469,6 @@ end subroutine mlwfovlp
 
 subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 & filew90_ramn,filew90_mmn,filew90_eig,nsppol,seed_name)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_seedname'
-!End of the abilint section
 
  implicit none
 
@@ -1682,13 +1661,6 @@ end subroutine mlwfovlp_seedname
 & nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
 & proj_l,proj_m,proj_radial,proj_site,proj_s_loc,proj_s_qaxis_loc,proj_x,proj_z,proj_zona,&
 & real_lattice,recip_lattice,rprimd,seed_name,spin,spinors,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_setup'
-!End of the abilint section
 
  implicit none
 
@@ -1983,13 +1955,6 @@ end subroutine mlwfovlp_setup
 
 subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
 &  npwarr,nspinor,nsppol,ovikp,seed_name,spin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_pw'
-!End of the abilint section
 
  implicit none
 
@@ -2353,13 +2318,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 &nkpt,npwarr,nspinor,&
 &nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,proj_radial,&
 &proj_site,proj_x,proj_z,proj_zona,psps,spin,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_proj'
-!End of the abilint section
 
  implicit none
 
@@ -2880,13 +2838,6 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 &proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,&
 &rprimd,spin,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_projpaw'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3257,13 +3208,6 @@ end subroutine mlwfovlp_projpaw
 
 subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_radial'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3407,13 +3351,6 @@ end subroutine mlwfovlp_radial
 
 
 subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_ylmfac'
-!End of the abilint section
 
  implicit none
 
@@ -3671,13 +3608,6 @@ end subroutine mlwfovlp_ylmfac
 !! SOURCE
 
 subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_ylmfar'
-!End of the abilint section
 
  implicit none
 

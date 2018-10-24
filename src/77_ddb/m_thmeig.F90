@@ -83,13 +83,6 @@ subroutine thmeig(inp, ddb, crystal, &
 &                 natom, mpert, msize, d2asr, &
 &                 comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thmeig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1050,13 +1043,6 @@ end subroutine thmeig
 
 subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,ntetra,telphint,unit_phdos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outphdos'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1150,13 +1136,6 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
 !! SOURCE
 
 subroutine outg2f(deltaene,enemin,enemax,filnam,g2f,g2fsmear,kpnt,mband,nene,nkpt,nqpt,ntetra,telphint,unit_g2f)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outg2f'
-!End of the abilint section
 
  implicit none
 

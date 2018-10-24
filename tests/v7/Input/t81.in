@@ -89,7 +89,6 @@ jdtset 1 2 3 4
 #Definition of the SCF procedure
   nstep 100              # Maximal number of SCF cycles
   
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
