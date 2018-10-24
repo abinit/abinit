@@ -1413,13 +1413,13 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
  multibinit_dtset%test_effpot=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_effpot',tread,'DPR')
  if(tread==1) multibinit_dtset%test_effpot=dprarr(1)
- if(multibinit_dtset%test_effpot<0 .or. multibinit_dtset%test_effpot>0)then
-   write(message, '(a,f10.1,a,a,a,a,a)' )&
+ if(multibinit_dtset%test_effpot<0 .or. multibinit_dtset%test_effpot>1)then
+   write(message, '(a,i0,a,a,a,a,a)' )&
 &   'test_effpot is ',multibinit_dtset%test_effpot,'. The only allowed values',ch10,&
 &   'are 0 and 1.',ch10,&
-&   'Action: correct Temperature in your input file.'
+&   'Action: correct test_effpot in your input file.'
    MSG_ERROR(message)
  end if
 

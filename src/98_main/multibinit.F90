@@ -84,11 +84,11 @@ program multibinit
  real(dp) :: tsec(2)
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
- character(len=fnlen) :: filnam(17),tmpfilename,name
+ character(len=fnlen) :: filnam(18),tmpfilename,name
  character(len=500) :: message
  type(multibinit_dtset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
- type(abihist) :: hist, hist_trs ! TODO MARCUS: test set implementation hist_trs: hist_TRainingSET
+ type(abihist) :: hist, hist_tes ! TODO MARCUS: test set implementation hist_tes: hist_TestSet
  type(args_t) :: args
 
 !TODO hexu: add types for spin here.
@@ -118,7 +118,7 @@ program multibinit
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(2)
 #endif
 
 !Initialisation of the timing
@@ -392,8 +392,8 @@ program multibinit
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
        if(filnam(6)/=''.and.filnam(6)/='no')then
-         call effective_potential_file_readMDfile(filnam(6),hist,option=inp%ts_option)
-         if (hist%mxhist == 0)then
+         call effective_potential_file_readMDfile(filnam(6),hist_tes,option=inp%ts_option)
+         if (hist_tes%mxhist == 0)then
            write(message, '(5a)' )&
 &           'The test-set ',trim(filnam(6)),' file is empty ',ch10,&
 &           'Action: add non-empty test-set'
@@ -401,15 +401,15 @@ program multibinit
          end if
        else
            write(message, '(3a)' )&
-&           'There is no MD file to fit the coefficients ',ch10,&
-&           'Action: add MD file'
+&           'There is no test-set file ',ch10,&
+&           'Action: add test-set file'
            MSG_ERROR(message)
        end if
      end if
 !  MPI BROADCAST the history of the MD
-     call abihist_bcast(hist,master,comm)
+     call abihist_bcast(hist_tes,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
-     call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
+     call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm)
 
      write(*,*) "READ TRAINING SET" 
 
@@ -487,6 +487,7 @@ program multibinit
    call effective_potential_free(reference_effective_potential)
    call multibinit_dtset_free(inp)
    call abihist_free(hist)
+   call abihist_free(hist_tes)
    call spin_model_t_finalize(spin_model)
 !****************************************************************************************
 

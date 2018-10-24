@@ -122,13 +122,13 @@ subroutine init10(filnam,comm)
    write(std_out,*)' Give name for training-set file',&
 &                  ' (netcdf file or enter no): '
    read(std_in, '(a)',IOSTAT=io) filnam(5)
-   write(std_out,'(a,a)' )'-   ',trim(filnam(5)),& 
-   write(std_out,*)' Give name for Test-Set file',&
+   write(std_out,'(a,a)' )'-   ',trim(filnam(5)) 
+   write(std_out,*)' Give name for test-set file',&
 &                  ' (netcdf file or enter no): '
    read(std_in, '(a)',IOSTAT=io) filnam(6)
-   write(std_out,'(a,a)' )'-   ',trim(filnam(6)),& 
+   write(std_out,'(a,a)' )'-   ',trim(filnam(6)) 
 ! TODO hexu: shift ii, add possible file format for spin when needed
-   ii = 6
+   ii = 7
    !TODO hexu: shift ii
    do while (io>=0 .and. ii<19)
      write(std_out,*)' Give name for input derivative database (DDB or XML file): '
