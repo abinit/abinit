@@ -2905,6 +2905,49 @@ subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
 end subroutine effective_potential_distributeResidualForces
 !!***
 
+
+!MARCUS_EXPERIMENTAL_SECTION 
+!!****f* m_effective_potential/testEffPot
+!! NAME
+!!  testEffPot
+!!
+!! FUNCTION
+!!  Calculate the energy, forces for displacements provided 
+!!  in an test-set (input:hist) within a given effective potential 
+!!  (input: eff_pot)
+!!  If the test set is from DFT and contains DFT energies and forces 
+!!  calculate the Goal Function values and the MSD of the Energy with 
+!!  respect to the DFT energies 
+!!
+!! INPUTS
+!! eff_pot = effective_potential datatype
+!! hist = abihist datatype
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine effective_potential_testEffPot(eff_pot,hist)
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+  type(effective_potential_type),intent(in) :: eff_pot
+  type(abihist),intent(in) :: hist
+!Local variables-------------------------------
+!scalar
+
+! *************************************************************************
+
+  write(*,*) "I was here everything is nice so far"
+
+end subroutine effective_potential_testEffPot
+
+
+
+
 !AM_EXPERIMENTAL SECTION
 !!****f* m_effective_potential/equal
 !! NAME

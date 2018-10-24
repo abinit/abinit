@@ -410,8 +410,9 @@ program multibinit
      call abihist_bcast(hist_tes,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
      call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm)
-
-     write(*,*) "READ TRAINING SET" 
+     
+!  Call to test routine 
+     call effective_potential_testEffPot(reference_effective_potential,hist_tes)
 
    end if ! End if(inp%test_effpot == 1)then 
 
