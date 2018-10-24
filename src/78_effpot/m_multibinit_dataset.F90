@@ -112,6 +112,7 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: restartxf
   integer :: symdynmat
+  integer :: test_effpot ! TODO MARCUS add test_effpot for test-set implementation
   integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
@@ -336,7 +337,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%rifcsph=zero
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
-
+ multibinit_dtset%test_effpot=0 ! TODO MARCUS add test_effpot for test-set implementation
+ 
  multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=0
  multibinit_dtset%spin_calc_correlation_obs=0
@@ -1399,7 +1401,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 !T
 
-
  multibinit_dtset%temperature=325
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%temperature=dprarr(1)
@@ -1407,6 +1408,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    write(message, '(a,f10.1,a,a,a,a,a)' )&
 &   'Temperature is ',multibinit_dtset%temperature,'. The only allowed values',ch10,&
 &   'are positives values.',ch10,&
+&   'Action: correct Temperature in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%test_effpot=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
+ if(tread==1) multibinit_dtset%test_effpot=dprarr(1)
+ if(multibinit_dtset%test_effpot<0 .or. multibinit_dtset%test_effpot>0)then
+   write(message, '(a,f10.1,a,a,a,a,a)' )&
+&   'test_effpot is ',multibinit_dtset%test_effpot,'. The only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
 &   'Action: correct Temperature in your input file.'
    MSG_ERROR(message)
  end if

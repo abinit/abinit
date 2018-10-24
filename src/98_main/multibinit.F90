@@ -380,7 +380,7 @@ program multibinit
    end if
 
 !****************************************************************************************
-
+! TEST SECTION test effective potential with regard to test-set 
 !****************************************************************************************
 !TEST_AM
 !Effective Hamiltonian, compute the energy for given patern
