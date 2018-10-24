@@ -2940,11 +2940,12 @@ subroutine effective_potential_testEffPot(eff_pot,hist,master,comm)
   type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !scalar
-  integer :: natom, my_rank
+  integer :: itime
+  integer :: natom,ntime, my_rank
 !logicals 
   logical :: iam_master
 !arrays
-  real(dp),allocatable :: disp(:,:),du_delta(:,:,:)
+  real(dp),allocatable :: disp(:,:,:),du_delta(:,:,:,:)
 
 ! *************************************************************************
   
@@ -2954,15 +2955,18 @@ subroutine effective_potential_testEffPot(eff_pot,hist,master,comm)
   iam_master = (my_rank == master)
 
   natom = size(hist%xred,2)
-  
-  ABI_ALLOCATE(disp,(3,natom)) 
-  ABI_ALLOCATE(du_delta,(6,3,natom))
+  ntime = hist%mxhist 
+
+  ABI_ALLOCATE(disp,(3,natom,ntime)) 
+  ABI_ALLOCATE(du_delta,(6,3,natom,ntime))
  
+  do itime=1,ntime
+    write(*,*) "itime/ntime: ", itime,"/",ntime 
 
-  call effective_potential_getDisp(disp,du_delta,natom,hist%rprimd,&
-&                                    eff_pot%supercell%rprimd,comm,xred_hist=hist%xred,&
+    call effective_potential_getDisp(disp(:,:,itime),du_delta(:,:,:,itime),natom,hist%rprimd(:,:,itime),&
+&                                    eff_pot%supercell%rprimd,comm,xred_hist=hist%xred(:,:,itime),&
 &                                    xcart_ref=eff_pot%supercell%xcart)
-
+  enddo
 
   ABI_DEALLOCATE(disp) 
   ABI_DEALLOCATE(du_delta)
