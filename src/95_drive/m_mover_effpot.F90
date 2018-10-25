@@ -126,6 +126,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
  use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
  use m_mover,            only : mover
+ use m_io_tools,         only : get_unit, open_file
 implicit none
 
 !Arguments --------------------------------
@@ -138,9 +139,9 @@ implicit none
  type(abihist),optional,intent(inout):: hist
 !Local variables-------------------------------
 !scalar
- integer :: filetype,icoeff_bound,ii
+ integer :: filetype,icoeff_bound,ii, unit_out
 !integer :: iexit,initialized
- integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
+ integer :: jj,kk,nproc,icoeff,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
@@ -185,6 +186,8 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
+ character(len=50) :: name_file 
+ character(len=200):: term_name
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
 ! type(pspheader_type),allocatable :: pspheads(:)
@@ -548,13 +551,45 @@ implicit none
      !*************************************************************
      write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
 &     '-Monte Carlo / Molecular Dynamics ',ch10
+
+     ! Marcus: if wanted analyze anharmonic terms of effective potential && 
+     ! and print anharmonic contribution to file anharmonic_energy_terms.out
+     ! Open File and write header 
+     ncoeff = effective_potential%anharmonics_terms%ncoeff
+     name_file='anharmonic_energy_terms.out' 
+     unit_out = get_unit()
+     write(*,*) 'unit_out', unit_out 
+     if(inp%analyze_anh_pot == 1)then 
+       open(unit=unit_out,file=name_file,status='replace',form='formatted')
+       write(unit_out,*) '#---------------------------------------------#'
+       write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
+       write(unit_out,*) '#---------------------------------------------#'
+       write(unit_out,*) ''
+       write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
+       write(unit_out,*) '' 
+       write(unit_out,'(A)') 'Terms     Names' 
+       do icoeff=1,ncoeff
+         term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
+         write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
+       enddo  
+       write(unit_out,*) ''  
+       write(unit_out,'(A)',advance='no')  'Cycle/Terms'
+       do icoeff=1,ncoeff
+         if(icoeff<ncoeff)then
+         write(unit_out,'(I5)',advance='no') icoeff
+         else 
+         write(unit_out,'(I5)',advance='yes') icoeff
+         endif
+       enddo  
+     end if 
+
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
 &     verbose=verbose,writeHIST=writeHIST)
-
+     close(unit_out)
    else if(option== -1.or.option==-2)then
      !*************************************************************
      !   Try to bound the model

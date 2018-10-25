@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fit_polynomial_coeff
 !!
 !! NAME
@@ -120,7 +119,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   max_power_strain,initialize_data,&
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&
 &                                   positive,verbose,anharmstr,spcoupling,&
-&                                   only_odd_power,only_even_power)
+&                                   only_odd_power,only_even_power,prt_names)
 
  implicit none
 
@@ -133,7 +132,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
- integer,optional,intent(in) :: max_power_strain
+ integer,optional,intent(in) :: max_power_strain,prt_names
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
@@ -142,8 +141,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !scalar
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
- integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi
- integer :: rank_to_send
+ integer :: ncycle_tot,ncycle_max,need_prt_names,nproc,ntime,nsweep,size_mpi
+ integer :: rank_to_send,unit_names
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
  logical :: iam_master,need_verbose,need_positive,converge
@@ -167,6 +166,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  type(fit_data_type) :: fit_data
  character(len=1000) :: message
  character(len=fnlen) :: filename
+ character(len=5) :: powerstr,rangestr
+ character(len=200) :: namefile
  character(len=3)  :: i_char
  character(len=7)  :: j_char
 ! *************************************************************************
@@ -189,6 +190,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(spcoupling)) need_spcoupling = spcoupling
  need_only_odd_power = .FALSE.
  if(present(only_odd_power)) need_only_odd_power = only_odd_power
+ need_prt_names = 0
+ if(present(prt_names)) need_prt_names = prt_names 
  need_only_even_power = .FALSE.
  if(present(only_even_power)) need_only_even_power = only_even_power
  if(need_only_odd_power.and.need_only_even_power)then
@@ -296,7 +299,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                  only_odd_power=need_only_odd_power,&
 &                                  only_even_power=need_only_even_power)
  end if
-
 !Copy the initial coefficients from the model on the CPU 0
  ncoeff_tot = ncoeff_tot + ncoeff_model
  if(iam_master .and. ncoeff_model > 0) my_ncoeff = my_ncoeff + ncoeff_model
@@ -351,11 +353,37 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
  !wait everybody
  call xmpi_barrier(comm)
+  
+ if(need_prt_names == 1 .and. nproc == 1)then
+   unit_names = get_unit()
+   write (powerstr,'(I0,A1,I0)') power_disps(1),'-',power_disps(2)
+   write (rangestr,'(F4.2)') cutoff 
+   namefile='name-of-terms_range-'//trim(rangestr)//'_power-'//trim(powerstr)//'.out'
+   namefile=trim(namefile)
+   write(message,'(a)') " Printing of list of terms is asked"
+   call wrtout(std_out,message,'COLL')
+   write(message,'(a,a)') " Write list of generated terms to file: ",namefile
+   call wrtout(std_out,message,'COLL')
+   open(unit_names,file=namefile,status='replace')
+   do icoeff=1,ncoeff_tot
+       write(unit_names,*) icoeff, trim(my_coeffs(icoeff)%name ) ! Marcus Write name of coefficient to file
+   enddo
+   close(unit_names)
+ else if(need_prt_names == 1 .and. nproc /= 1)then
+   write(message, '(15a)' )ch10,&
+&        ' --- !WARNING',ch10,&
+&        '     The printing of the list of generated Terms has been requested.',ch10,&
+&        '     This option is currently limited to serial execution of multibinit ',ch10,&
+&        '     The terms are not printed.',ch10,&
+&        '     Action: Rerun in serial.',ch10,&
+&        ' ---',ch10
+     call wrtout(std_out,message,"COLL")
+ endif
 
 !Write the XML with the coefficient before the fit process
  if(iam_master)then
    filename = "terms_set.xml"
-!   call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.)
+!   call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.) 
  end if
 
 !Reset the output (we free the memory)
@@ -1621,7 +1649,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 !scalars
  integer,intent(in)  :: natom,ncoeff_fit,ncoeff_max,ntime
  integer,intent(out) :: info_out
- !arrays
+!arrays
  real(dp),intent(in) :: energy_coeffs(ncoeff_max,ntime)
  real(dp),intent(in) :: energy_diff(ntime)
  integer,intent(in)  :: list_coeffs(ncoeff_fit)
@@ -1694,7 +1722,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
      end do
      etmpB = etmpB + energy_diff(itime)*emu / (sqomega(itime)**3)
      etmpB = zero ! REMOVE THIS LINE TO TAKE INTO ACOUNT THE ENERGY     
-     
+
 !    Fill forces
      do ia=1,natom
        do mu=1,3
@@ -1846,7 +1874,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
  ffact = one/(3*natom*ntime)
  sfact = one/(6*ntime)
  efact = one/(ntime)
- 
+
 ! loop over the configuration
  do itime=1,ntime
 ! Fill energy
@@ -2326,6 +2354,9 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 end subroutine fit_polynomial_coeff_computeMSD
 !!***
 
+!!      m_fit_polynomial_coeff,multibinit
+!!      generelist,polynomial_coeff_free,polynomial_coeff_getname
+!!      polynomial_coeff_init,polynomial_term_free,polynomial_term_init,wrtout
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_printSystemFiles
 !!
