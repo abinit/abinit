@@ -53,6 +53,7 @@ module m_fit_polynomial_coeff
  public :: fit_polynomial_coeff_getPositive
  public :: fit_polynomial_coeff_getCoeffBound
  public :: fit_polynomial_coeff_solve
+ public :: fit_polynomial_coeff_testEffPot
  public :: fit_polynomial_printSystemFiles
  public :: genereList
 !!***
@@ -1054,8 +1055,9 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
    if(need_verbose) then
 !  Print the standard deviation after the fit
-     write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
-&                    ' Mean Standard Deviation values at the end of the fit process (meV/atm):',&
+     write(message,'(7a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+&                    ' Mean Standard Deviation values of the effective potential',ch10,& 
+&                    ' at the end of the fit process with respect to the training-set (meV/atm):',ch10,&
 &               ch10,'   Energy          : ',&
 &               gf_values(4,1)*Ha_EV*1000*factor ,ch10,&
 &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
@@ -2353,6 +2355,93 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 
 end subroutine fit_polynomial_coeff_computeMSD
 !!***
+
+!MARCUS_EXPERIMENTAL_SECTION 
+!!****f* m_effective_potential/testEffPot
+!! NAME
+!!  testEffPot
+!!
+!! FUNCTION
+!!  Calculate the energy, forces for displacements provided 
+!!  in an test-set (input:hist) within a given effective potential 
+!!  (input: eff_pot)
+!!  If the test set is from DFT and contains DFT energies and forces 
+!!  calculate the Goal Function values and the MSD of the Energy with 
+!!  respect to the DFT energies 
+!!
+!! INPUTS
+!! eff_pot = effective_potential datatype
+!! hist = abihist datatype
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm)
+
+       
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer,intent(in) :: master,comm
+!logicals
+!array
+  type(effective_potential_type),target,intent(in) :: eff_pot
+  type(abihist),intent(in) :: hist
+!Local variables-------------------------------
+!reals 
+  real(dp) :: factor,mse,msef,mses
+  real(dp),allocatable :: sqomega(:)
+  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
+!scalar
+  integer :: itime, test
+  integer :: natom,ntime, my_rank
+!logicals 
+  logical :: iam_master
+  type(effective_potential_type) :: pot_eff
+!strings/characters
+ character(len=1000) :: message
+!arrays
+! *************************************************************************
+  
+  !MPI variables
+  my_rank=xmpi_comm_rank(comm)
+  iam_master = (my_rank == master)
+
+  !Setting/Allocating other Variables 
+  natom = size(hist%xred,2)   
+  factor   = 1._dp/natom
+  ntime = hist%mxhist 
+  ABI_ALLOCATE(sqomega,(ntime))
+
+  call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
+&                                          compute_anharmonic=.TRUE.,print_file=.TRUE.)
+
+!  Print the standard deviation after the fit
+     write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+&                    ' Mean Standard Deviation values of the effective-potential',ch10,&
+&                    ' with respect to the test-set (meV/atm):',&
+&               ch10,'   Energy          : ',&
+&               mse*Ha_EV*1000*factor ,ch10,&
+&                    ' Goal function values of the effective.potential',ch10,& 
+&                    ' with respect to the test-set (eV^2/A^2):',ch10,&
+&                    '   Forces+Stresses : ',&
+&               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+&                    '   Forces          : ',&
+&               msef*(HaBohr_meVAng)**2,ch10,&
+&                    '   Stresses        : ',&
+&               mses*(HaBohr_meVAng)**2,ch10
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+
+
+  !Deallocating 
+  ABI_DEALLOCATE(sqomega)
+
+  write(*,*) "I was here everything is nice so far"
+
+end subroutine fit_polynomial_coeff_testEffPot
 
 !!      m_fit_polynomial_coeff,multibinit
 !!      generelist,polynomial_coeff_free,polynomial_coeff_getname

@@ -426,6 +426,9 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 end subroutine fit_data_compute
 !!***
 
+
+
+
 !!****f* m_fit_data/training_set_init
 !!
 !! NAME
