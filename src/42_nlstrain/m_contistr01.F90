@@ -59,13 +59,6 @@ subroutine contistr01(istr,rank,gm,gprimd,eisnl,aa,bb)
 
  use defs_basis
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'contistr01'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

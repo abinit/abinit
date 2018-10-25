@@ -89,13 +89,6 @@ contains
 subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 &  inclvkb,lomo_spin,lomo_min,max_band,nkbz,qpoint,opt_cvk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_optical_mels'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -287,13 +280,6 @@ contains
 !! SOURCE
 
 pure function pdtqrc(R,C,b1,b2,b3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pdtqrc'
-!End of the abilint section
 
  implicit none
 

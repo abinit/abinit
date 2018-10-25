@@ -3,6 +3,7 @@
 from __future__ import print_function, division, unicode_literals, absolute_import
 
 import os
+import io
 import re
 import traceback
 
@@ -530,9 +531,8 @@ class FortranKissParser(HasRegex):
         self.macros = {} if macros is None else macros
 
     def parse_file(self, path, include_files=False):
-        import io
-        with io.open(path, "rt") as fh:
 
+        with io.open(path, "rt", encoding="utf8") as fh:
             # Include Fortran files?
             if include_files:
                 lines = []
@@ -540,7 +540,7 @@ class FortranKissParser(HasRegex):
                     l =  line.strip().replace("'", "").replace('"', "")
                     if l.startswith("#include") and (l.endswith(".finc") or l.endswith(".F90")):
                         basename = l.split()[-1]
-                        with open(os.path.join(os.path.dirname(path), basename), "rt") as incfh:
+                        with io.open(os.path.join(os.path.dirname(path), basename), "rt", encoding="utf8") as incfh:
                             lines.extend(il for il in incfh)
                     else:
                         lines.append(line)

@@ -66,6 +66,7 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
  integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
+ integer,public,parameter :: xmpi_success        = MPI_SUCCESS
 #else
  ! Fake replacements for the sequential version.
  integer,public,parameter :: xmpi_world          = 0
@@ -79,6 +80,7 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_msg_len        = 1000
  integer,public,parameter :: xmpi_paral          = 0
  integer,public,parameter :: xmpi_info_null      = 0
+ integer,public,parameter :: xmpi_success        = 0
 #endif
 
 #ifdef HAVE_MPI
@@ -593,13 +595,6 @@ CONTAINS  !===========================================================
 
 subroutine xmpi_init()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_init'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------
@@ -688,13 +683,6 @@ end subroutine xmpi_init
 
 integer function xmpi_get_unit() result(unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_get_unit'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------
@@ -732,13 +720,6 @@ end function xmpi_get_unit
 !! SOURCE
 
 subroutine xmpi_end()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_end'
-!End of the abilint section
 
  implicit none
 
@@ -785,13 +766,6 @@ end subroutine xmpi_end
 !! SOURCE
 
 subroutine xmpi_abort(comm,mpierr,msg,exit_status)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_abort'
-!End of the abilint section
 
  implicit none
 
@@ -870,13 +844,6 @@ end subroutine xmpi_abort
 
 subroutine sys_exit(exit_status)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sys_exit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -922,13 +889,6 @@ end subroutine sys_exit
 !! SOURCE
 
 subroutine xmpi_show_info(unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_show_info'
-!End of the abilint section
 
  implicit none
 
@@ -994,13 +954,6 @@ end subroutine xmpi_show_info
 
 function xmpi_comm_rank(comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_rank'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1046,13 +999,6 @@ end function xmpi_comm_rank
 
 function xmpi_comm_size(comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_size'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1096,13 +1042,6 @@ end function xmpi_comm_size
 !! SOURCE
 
 subroutine xmpi_comm_free_0D(comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_free_0D'
-!End of the abilint section
 
  implicit none
 
@@ -1161,13 +1100,6 @@ end subroutine xmpi_comm_free_0D
 
 subroutine xmpi_comm_free_1D(comms)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_free_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1219,13 +1151,6 @@ end subroutine xmpi_comm_free_1D
 !! SOURCE
 
 subroutine xmpi_comm_free_2D(comms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_free_2D'
-!End of the abilint section
 
  implicit none
 
@@ -1281,13 +1206,6 @@ end subroutine xmpi_comm_free_2D
 !! SOURCE
 
 subroutine xmpi_comm_free_3D(comms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_free_3D'
-!End of the abilint section
 
  implicit none
 
@@ -1346,13 +1264,6 @@ end subroutine xmpi_comm_free_3D
 !! SOURCE
 
 subroutine xmpi_group_free(spaceGroup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_group_free'
-!End of the abilint section
 
  implicit none
 
@@ -1416,13 +1327,6 @@ end subroutine xmpi_group_free
 
 subroutine xmpi_group_incl(group,nranks,ranks,newgroup,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_group_incl'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1470,13 +1374,6 @@ end subroutine xmpi_group_incl
 !! SOURCE
 
 subroutine xmpi_comm_create(comm,group,newcomm,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_create'
-!End of the abilint section
 
  implicit none
 
@@ -1526,13 +1423,6 @@ end subroutine xmpi_comm_create
 !! SOURCE
 
 function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_subcomm'
-!End of the abilint section
 
  implicit none
 
@@ -1604,13 +1494,6 @@ end function xmpi_subcomm
 
 subroutine xmpi_comm_group(comm,spaceGroup,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_group'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1656,13 +1539,6 @@ end subroutine xmpi_comm_group
 !! SOURCE
 
 subroutine xmpi_comm_split(input_comm,color,key,output_comm,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_split'
-!End of the abilint section
 
  implicit none
 
@@ -1713,13 +1589,6 @@ end subroutine xmpi_comm_split
 
 subroutine xmpi_group_translate_ranks(spaceGroup1,nrank,ranks1,&
 &                                     spaceGroup2,ranks2,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_group_translate_ranks'
-!End of the abilint section
 
  implicit none
 
@@ -1774,13 +1643,6 @@ end subroutine xmpi_group_translate_ranks
 !! SOURCE
 
 subroutine xmpi_comm_translate_ranks(from_comm,nrank,from_ranks,to_comm,to_ranks)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_translate_ranks'
-!End of the abilint section
 
  implicit none
 
@@ -1839,13 +1701,6 @@ end subroutine xmpi_comm_translate_ranks
 
 subroutine xmpi_barrier(comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_barrier'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -1894,13 +1749,6 @@ end subroutine xmpi_barrier
 !! SOURCE
 
 subroutine xmpi_name(name_ch, mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_name'
-!End of the abilint section
 
  implicit none
 
@@ -1958,13 +1806,6 @@ end subroutine xmpi_name
 
 subroutine xmpi_iprobe(source,tag,mpicomm,flag,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_iprobe'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2015,13 +1856,6 @@ end subroutine xmpi_iprobe
 
 subroutine xmpi_wait(request,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_wait'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2070,13 +1904,6 @@ end subroutine xmpi_wait
 
 subroutine xmpi_waitall(array_of_requests,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_waitall'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2124,13 +1951,6 @@ end subroutine xmpi_waitall
 
 subroutine xmpi_request_free(requests,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_request_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2177,13 +1997,6 @@ end subroutine xmpi_request_free
 
 subroutine xmpi_error_string(mpierr,err_string,ilen,ierror)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_error_string'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -2229,13 +2042,6 @@ end subroutine xmpi_error_string
 !! SOURCE
 
 subroutine xmpi_comm_set_errhandler(comm,new_err_handler,old_err_handler,ierror)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_comm_set_errhandler'
-!End of the abilint section
 
  implicit none
 
@@ -2314,13 +2120,6 @@ end subroutine xmpi_comm_set_errhandler
 !! SOURCE
 
 subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop,warn_msg,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_split_work_i4b'
-!End of the abilint section
 
  implicit none
 
@@ -2414,13 +2213,6 @@ end subroutine xmpi_split_work_i4b
 
 subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_split_work2_i4b'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2496,13 +2288,6 @@ end subroutine xmpi_split_work2_i4b
 
 subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop,warn_msg,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_split_work2_i8b'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2574,13 +2359,6 @@ end subroutine xmpi_split_work2_i8b
 !! SOURCE
 
 subroutine xmpi_distab_4D(nprocs,task_distrib)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_distab_4D'
-!End of the abilint section
 
  implicit none
 
@@ -2660,13 +2438,6 @@ end subroutine xmpi_distab_4D
 !! SOURCE
 
 pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_distrib_with_replicas'
-!End of the abilint section
 
  implicit none
 
@@ -2784,13 +2555,6 @@ end function xmpi_distrib_with_replicas
 
 subroutine xmpio_type_struct(ncount,block_length,block_displ,block_type,new_type,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_type_struct'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2851,13 +2615,6 @@ end subroutine xmpio_type_struct
 !! SOURCE
 
 subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_get_info_frm'
-!End of the abilint section
 
  implicit none
 
@@ -3035,13 +2792,6 @@ end subroutine xmpio_get_info_frm
 
 subroutine xmpio_read_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_read_frm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3174,13 +2924,6 @@ end subroutine xmpio_read_frm
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_write_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_write_frm'
-!End of the abilint section
 
  implicit none
 
@@ -3323,13 +3066,6 @@ end subroutine xmpio_write_frm
 
 subroutine xmpio_create_fstripes(ncount,sizes,types,new_type,my_offpad,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_create_fstripes'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3423,13 +3159,6 @@ end subroutine xmpio_create_fstripes
 
 subroutine xmpio_create_fsubarray_2D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_create_fsubarray_2D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3521,13 +3250,6 @@ end subroutine xmpio_create_fsubarray_2D
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_create_fsubarray_3D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_create_fsubarray_3D'
-!End of the abilint section
 
  implicit none
 
@@ -3632,13 +3354,6 @@ end subroutine xmpio_create_fsubarray_3D
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_create_fsubarray_4D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_create_fsubarray_4D'
-!End of the abilint section
 
  implicit none
 
@@ -3752,13 +3467,6 @@ end subroutine xmpio_create_fsubarray_4D
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_check_frmarkers'
-!End of the abilint section
 
  implicit none
 
@@ -3948,13 +3656,6 @@ end subroutine xmpio_check_frmarkers
 
 subroutine xmpio_read_int(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_read_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4054,13 +3755,6 @@ end subroutine xmpio_read_int
 
 subroutine xmpio_read_dp(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_read_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4134,13 +3828,6 @@ end subroutine xmpio_read_dp
 
 function xmpio_max_address(offset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_max_address'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4192,13 +3879,6 @@ end function xmpio_max_address
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_write_frmarkers'
-!End of the abilint section
 
  implicit none
 
@@ -4402,13 +4082,6 @@ end subroutine xmpio_write_frmarkers
 
 subroutine xmpio_create_fherm_packed(array_of_starts,array_of_ends,is_fortran_file,my_offset,old_type,hmat_type,offset_err)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_create_fherm_packed'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4565,13 +4238,6 @@ end subroutine xmpio_create_fherm_packed
 
 subroutine xmpio_create_coldistr_from_fpacked(sizes,my_cols,old_type,new_type,my_offpad,offset_err)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_create_coldistr_from_fpacked'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4705,13 +4371,6 @@ end subroutine xmpio_create_coldistr_from_fpacked
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_type,new_type,my_offpad,offset_err)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpio_create_coldistr_from_fp3blocks'
-!End of the abilint section
 
  implicit none
 

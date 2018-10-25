@@ -113,6 +113,9 @@ module defs_basis
 ! the maximum length of a record in a file connected for sequential access.
  integer,public,parameter :: ABI_RECL=524288  ! 2**19
 
+ integer,public,parameter :: MAX_NSHIFTK = 210
+ ! Maximun number of shifts in input k-mesh.
+
 !Real constants
  real(dp), parameter :: zero=0._dp
  real(dp), parameter :: one=1._dp
@@ -221,6 +224,8 @@ module defs_basis
  real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
+ real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
+ real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
 
 !Complex constants
  complex(dpc), parameter :: czero=(0._dp,0._dp)
@@ -383,13 +388,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_log_status_state'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -433,13 +431,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_io_redirect'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -481,13 +472,6 @@ CONTAINS  !=====================================================================
 
 !Arguments-------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_kinds'
-!End of the abilint section
-
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
@@ -540,13 +524,6 @@ end subroutine print_kinds
 !! SOURCE
 
  integer pure function str2wfktask(str) result(wfk_task)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2wfktask'
-!End of the abilint section
 
  implicit none
 

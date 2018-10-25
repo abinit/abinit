@@ -101,13 +101,6 @@ CONTAINS
 SUBROUTINE VectorInt_init(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VectorInt_init'
-!End of the abilint section
-
   TYPE(VectorInt)     , INTENT(INOUT) :: this
   INTEGER, OPTIONAL, INTENT(IN   ) :: size
 !Local variables ------------------------------
@@ -157,13 +150,6 @@ END SUBROUTINE VectorInt_init
 SUBROUTINE VectorInt_setSize(this,new_tail)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VectorInt_setSize'
-!End of the abilint section
-
   TYPE(VectorInt), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: new_tail
 !Local variables ------------------------------
@@ -215,13 +201,6 @@ END SUBROUTINE VectorInt_setSize
 SUBROUTINE VectorInt_enlarge(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VectorInt_enlarge'
-!End of the abilint section
-
   TYPE(VectorInt)     , INTENT(INOUT)        :: this
   INTEGER             , INTENT(IN   )        :: size
 !Local variables ------------------------------
@@ -282,13 +261,6 @@ END SUBROUTINE VectorInt_enlarge
 SUBROUTINE VectorInt_pushBack(this, value)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VectorInt_pushBack'
-!End of the abilint section
-
   TYPE(VectorInt)    , INTENT(INOUT) :: this
   INTEGER, INTENT(IN   ) :: value
 !Local variables ------------------------------
@@ -340,13 +312,6 @@ END SUBROUTINE VectorInt_pushBack
 SUBROUTINE VectorInt_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VectorInt_clear'
-!End of the abilint section
-
   TYPE(VectorInt), INTENT(INOUT) :: this
   this%tail = 0 
 END SUBROUTINE VectorInt_clear
@@ -386,13 +351,6 @@ END SUBROUTINE VectorInt_clear
 SUBROUTINE VectorInt_print(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VectorInt_print'
-!End of the abilint section
-
   TYPE(VectorInt), INTENT(IN) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -446,13 +404,6 @@ END SUBROUTINE VectorInt_print
 SUBROUTINE VectorInt_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VectorInt_destroy'
-!End of the abilint section
-
   TYPE(VectorInt), INTENT(INOUT) :: this
 
   FREEIF(this%vec)

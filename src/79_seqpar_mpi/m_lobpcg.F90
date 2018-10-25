@@ -100,13 +100,6 @@ subroutine xprecon(cg,eval,blocksize,iterationnumber,kinpw,&
 &  mpi_enreg,npw,nspinor,optekin,optpcon,pcon,ghc,vect,vectsize,&
 &  timopt,tim_xprecon) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xprecon'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

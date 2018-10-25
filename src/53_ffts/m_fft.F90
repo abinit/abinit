@@ -181,13 +181,6 @@ CONTAINS  !===========================================================
 
 subroutine fft_allow_ialltoall(bool)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_allow_ialltoall'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -223,13 +216,6 @@ end subroutine fft_allow_ialltoall
 !! SOURCE
 
 subroutine fftbox_plan3(plan,dims,fftalg,isign)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_plan3'
-!End of the abilint section
 
  implicit none
 
@@ -273,13 +259,6 @@ end subroutine fftbox_plan3
 
 subroutine fftbox_plan3_many(plan,ndat,dims,embed,fftalg,isign)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_plan3_many'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -322,13 +301,6 @@ end subroutine fftbox_plan3_many
 !! SOURCE
 
 subroutine fftbox_plan3_init(plan,ndat,dims,embed,fftalg,fftcache,isign)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_plan3_init'
-!End of the abilint section
 
  implicit none
 
@@ -383,13 +355,6 @@ end subroutine fftbox_plan3_init
 
 subroutine fftbox_execute_ip_spc(plan,ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_execute_ip_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -433,13 +398,6 @@ end subroutine fftbox_execute_ip_spc
 
 subroutine fftbox_execute_ip_dpc(plan,ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_execute_ip_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -481,13 +439,6 @@ end subroutine fftbox_execute_ip_dpc
 !! SOURCE
 
 subroutine fftbox_execute_op_spc(plan,ff,gg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_execute_op_spc'
-!End of the abilint section
 
  implicit none
 
@@ -531,13 +482,6 @@ end subroutine fftbox_execute_op_spc
 !! SOURCE
 
 subroutine fftbox_execute_op_dpc(plan,ff,gg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_execute_op_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -590,13 +534,6 @@ end subroutine fftbox_execute_op_dpc
 !! SOURCE
 
 subroutine fft_ug_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_ug_dp'
-!End of the abilint section
 
  implicit none
 
@@ -652,13 +589,6 @@ end subroutine fft_ug_dp
 
 subroutine fft_ug_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_ug_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -709,13 +639,6 @@ end subroutine fft_ug_spc
 !! SOURCE
 
 subroutine fft_ug_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_ug_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -773,13 +696,6 @@ end subroutine fft_ug_dpc
 !! SOURCE
 
 subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_ur_dp'
-!End of the abilint section
 
  implicit none
 
@@ -840,13 +756,6 @@ end subroutine fft_ur_dp
 
 subroutine fft_ur_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_ur_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -903,13 +812,6 @@ end subroutine fft_ur_spc
 
 subroutine fft_ur_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_ur_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -960,13 +862,6 @@ end subroutine fft_ur_dpc
 !! SOURCE
 
 subroutine fftpad_spc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftpad_spc'
-!End of the abilint section
 
  implicit none
 
@@ -1065,13 +960,6 @@ end subroutine fftpad_spc
 !! SOURCE
 
 subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftpad_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1183,13 +1071,6 @@ end subroutine fftpad_dpc
 
 subroutine fft_poisson(ngfft,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_poisson'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1250,13 +1131,6 @@ end subroutine fft_poisson
 
 subroutine fft_use_lib_threads(logvar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_use_lib_threads'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1295,13 +1169,6 @@ end subroutine fft_use_lib_threads
 !! SOURCE
 
 function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_utests'
-!End of the abilint section
 
  implicit none
 
@@ -1549,13 +1416,6 @@ end function fftbox_utests
 
 function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftu_utests'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1604,7 +1464,7 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
  ldx = ngfft(4); ldy = ngfft(5); ldz = ngfft(6)
  mgfft = MAXVAL(ngfft(1:3))
 
-  nxyz =  nx* ny* nz
+ nxyz =  nx* ny* nz
  ldxyz = ldx*ldy*ldz
 
  ABI_CALLOC(cg_ref, (2, ldxyz*ndat))
@@ -1639,10 +1499,10 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 
    istwf_k = set_istwfk(kpoint)
 
-   ! * Calculate the number of G-vectors for this k-point.
+   ! Calculate the number of G-vectors for this k-point.
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
    !
-   ! * Allocate and calculate the set of G-vectors.
+   ! Allocate and calculate the set of G-vectors.
    ABI_MALLOC(kg_k,(3,npw_k))
    call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem1,MPI_enreg_seq,npw_k,npw_k_test)
 
@@ -1803,13 +1663,6 @@ end function fftu_utests
 !! SOURCE
 
 function fftbox_mpi_utests(fftalg,cplex,ndat,nthreads,comm_fft,unit) result(nfailed)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftbox_mpi_utests'
-!End of the abilint section
 
  implicit none
 
@@ -1985,13 +1838,6 @@ end function fftbox_mpi_utests
 !! SOURCE
 
 function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,unit) result(nfailed)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftu_mpi_utests'
-!End of the abilint section
 
  implicit none
 
@@ -2472,13 +2318,6 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
 &  paral_kgb,tim_fourwf,weight_r,weight_i, &
 &  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourwf'
-!End of the abilint section
 
  implicit none
 
@@ -3144,13 +2983,6 @@ end subroutine fourwf
 
 subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3538,13 +3370,6 @@ end subroutine fourdp
 
 subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ccfft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3654,13 +3479,6 @@ end subroutine ccfft
 
 subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourdp_mpi'
-!End of the abilint section
 
  implicit none
 
@@ -3795,13 +3613,6 @@ end subroutine fourdp_mpi
 subroutine fourwf_mpi(cplex,denpot,fofgin,fofgout,fofr,&
 &  gboundin,gboundout,istwf_k,kg_kin,kg_kout,me_g0,mgfft,ngfft,distribfft,n1,n2,n3,&
 &  npwin,npwout,n4,n5,n6,ndat,option,weight_r,weight_i,comm_fft,cplexwf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourwf_mpi'
-!End of the abilint section
 
  implicit none
 
@@ -4268,13 +4079,6 @@ end subroutine fourwf_mpi
 subroutine fftmpi_u(npw_k,n4,n5,n6,ndat,mgfft,ngfft,&
 &  istwf_k,gbound_k,kg_k,me_g0,distribfft,isign,fofg,fofr,comm_fft,cplexwf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftmpi_u'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4346,13 +4150,6 @@ end subroutine fftmpi_u
 
 subroutine zerosym(array,cplex,n1,n2,n3,&
 &                  ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zerosym'
-!End of the abilint section
 
  implicit none
 
@@ -4535,13 +4332,6 @@ end subroutine zerosym
 
 subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fourdp_6d'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4674,13 +4464,6 @@ end subroutine fourdp_6d
 !! SOURCE
 
 subroutine fftpac(ispden,mpi_enreg,nspden,n1,n2,n3,nd1,nd2,nd3,ngfft,aa,bb,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftpac'
-!End of the abilint section
 
  implicit none
 
@@ -4824,13 +4607,6 @@ end subroutine fftpac
 !! SOURCE
 
 subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,nright,paral_kgb,right,sizeindex)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indirect_parallel_Fourier'
-!End of the abilint section
 
  implicit none
 

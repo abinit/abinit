@@ -38,13 +38,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_phdos'
-!End of the abilint section
-
   implicit none
 
   integer :: prtdos,nqpt,ii,jj,iqpt,iatom
@@ -118,7 +111,7 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   wminmax = zero
   do
     call mkphdos(PHdos,Crystal,Ifc,prtdos,InVar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
-      wminmax, count_wminmax, XMPI_WORLD)
+      "freq_displ", wminmax, count_wminmax, XMPI_WORLD)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
@@ -166,13 +159,6 @@ end subroutine tdep_calc_phdos
 
 subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_thermo'
-!End of the abilint section
-
   implicit none
 
   integer :: iomega,itemp,iatom,itypat
@@ -193,9 +179,9 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
 ! ===========================================================================
   mass_amu=zero
   do iatom=1,InVar%natom_unitcell
-    itypat=InVar%typat_unitcell(iatom) 
+    itypat=InVar%typat_unitcell(iatom)
     mass_amu=mass_amu+InVar%amu(itypat)
-  end do  
+  end do
   mass_amu=mass_amu*amu_emass/real(InVar%natom_unitcell)
 
   open(unit=20,file=trim(InVar%output_prefix)//'thermo.dat')
@@ -282,20 +268,13 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
     Ftot=U0*Ha_eV+freeE+DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature*100)**2
     write(20,'(1x,i5,8(1x,f15.5))') itemp*100,freeE,U0*Ha_eV+freeE,heatcapa,entropy,internalE,&
 &                          DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature)**2,Ftot,(MSD)**0.5
-  end do  
+  end do
   close(20)
 
 end subroutine tdep_calc_thermo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_elastic'
-!End of the abilint section
 
   implicit none
 

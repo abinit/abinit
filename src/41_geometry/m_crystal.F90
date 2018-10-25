@@ -180,6 +180,7 @@ MODULE m_crystal
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
+ public :: crystal_without_symmetries ! Return new object without symmetries (actually nsym = 1 and identity operation)
  public :: crystal_free            ! Free memory.
  public :: crystal_print           ! Print dimensions and basic info stored in the object
  public :: idx_spatial_inversion   ! Return the index of the spatial inversion, 0 if not present.
@@ -250,13 +251,6 @@ CONTAINS  !=====================================================================
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 & zion,znucl,timrev,use_antiferro,remove_inv,title,&
 & symrel,tnons,symafm) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'crystal_init'
-!End of the abilint section
 
  implicit none
 
@@ -394,7 +388,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
  !
- ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym(:,:,:)=zero
+ ABI_MALLOC(indsym,(4,Cryst%nsym,natom)); indsym = 0
  tolsym8=tol8
  call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
 
@@ -409,6 +403,42 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  end do
 
 end subroutine crystal_init
+!!***
+
+!!****f* m_crystal/crystal_without_symmetries
+!! NAME
+!!  crystal_without_symmetries
+!!
+!! FUNCTION
+!!  Return new crystal_t object without symmetries (actually nsym = 1 and identity operation)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(crystal_t) function crystal_without_symmetries(self) result(new)
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(crystal_t), intent(in) :: self
+
+!Local variables-------------------------------
+ integer,parameter :: timrev1 = 1, new_symafm(1) = 1
+ real(dp),parameter :: new_tnons(3,1) = zero
+! *************************************************************************
+
+ call crystal_init(self%amu, new, 1, self%natom, self%npsp, self%ntypat, 1, self%rprimd, self%typat, &
+  self%xred, self%zion, self%znucl, timrev1, .False., .False., self%title, &
+  symrel=identity_3d, tnons=new_tnons, symafm=new_symafm)
+
+end function crystal_without_symmetries
 !!***
 
 !----------------------------------------------------------------------
@@ -434,13 +464,6 @@ end subroutine crystal_init
 
 subroutine crystal_free(Cryst)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'crystal_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -453,58 +476,26 @@ subroutine crystal_free(Cryst)
  !@crystal_t
 
 !integer
- if (allocated(Cryst%indsym))  then
-   ABI_FREE(Cryst%indsym)
- end if
- if (allocated(Cryst%symafm))  then
-   ABI_FREE(Cryst%symafm)
- end if
- if (allocated(Cryst%symrec))  then
-   ABI_FREE(Cryst%symrec)
- end if
- if (allocated(Cryst%symrel))  then
-   ABI_FREE(Cryst%symrel)
- end if
- if (allocated(Cryst%atindx))  then
-   ABI_FREE(Cryst%atindx)
- end if
- if (allocated(Cryst%atindx1))  then
-   ABI_FREE(Cryst%atindx1)
- end if
- if (allocated(Cryst%typat  ))  then
-   ABI_FREE(Cryst%typat)
- end if
- if (allocated(Cryst%nattyp))  then
-   ABI_FREE(Cryst%nattyp)
- end if
+ ABI_SFREE(Cryst%indsym)
+ ABI_SFREE(Cryst%symafm)
+ ABI_SFREE(Cryst%symrec)
+ ABI_SFREE(Cryst%symrel)
+ ABI_SFREE(Cryst%atindx)
+ ABI_SFREE(Cryst%atindx1)
+ ABI_SFREE(Cryst%typat)
+ ABI_SFREE(Cryst%nattyp)
 
 !real
- if (allocated(Cryst%tnons))  then
-   ABI_FREE(Cryst%tnons)
- end if
- if (allocated(Cryst%xcart))  then
-   ABI_FREE(Cryst%xcart)
- end if
- if (allocated(Cryst%xred))  then
-   ABI_FREE(Cryst%xred)
- end if
- if (allocated(Cryst%zion))  then
-   ABI_FREE(Cryst%zion)
- end if
- if (allocated(Cryst%znucl))  then
-   ABI_FREE(Cryst%znucl)
- end if
- if (allocated(Cryst%amu))  then
-   ABI_FREE(Cryst%amu)
- end if
- if (allocated(Cryst%spinrot)) then
-    ABI_FREE(Cryst%spinrot)
- end if
+ ABI_SFREE(Cryst%tnons)
+ ABI_SFREE(Cryst%xcart)
+ ABI_SFREE(Cryst%xred)
+ ABI_SFREE(Cryst%zion)
+ ABI_SFREE(Cryst%znucl)
+ ABI_SFREE(Cryst%amu)
+ ABI_SFREE(Cryst%spinrot)
 
 !character
- if (allocated(Cryst%title))  then
-   ABI_FREE(Cryst%title)
- end if
+ ABI_SFREE(Cryst%title)
 
  DBG_EXIT("COLL")
 
@@ -540,13 +531,6 @@ end subroutine crystal_free
 !! SOURCE
 
 subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'crystal_print'
-!End of the abilint section
 
  implicit none
 
@@ -640,13 +624,6 @@ end subroutine crystal_print
 
 subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symbols_crystal'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -667,9 +644,9 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
    do ia=1,natom
      symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
    end do
-   itypat = zero
+   itypat = 0
    do itypat =1,ntypat
-     ii = zero
+     ii = 0
      do ia=1,natom
        if(typat(ia)==itypat) then
          ii = ii + 1
@@ -690,7 +667,6 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
 end subroutine symbols_crystal
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_crystal/idx_spatial_inversion
@@ -707,13 +683,6 @@ end subroutine symbols_crystal
 !! SOURCE
 
 pure function idx_spatial_inversion(Cryst) result(inv_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'idx_spatial_inversion'
-!End of the abilint section
 
  implicit none
 
@@ -755,13 +724,6 @@ end function idx_spatial_inversion
 
 pure function isymmorphic(Cryst) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isymmorphic'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -793,13 +755,6 @@ end function isymmorphic
 
 pure function isalchemical(Cryst) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isalchemical'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -828,13 +783,6 @@ end function isalchemical
 !! SOURCE
 
 function adata_type(crystal,itypat) result(atom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'adata_type'
-!End of the abilint section
 
  implicit none
 
@@ -865,13 +813,6 @@ end function adata_type
 !! SOURCE
 
 function symbol_type(crystal,itypat) result(symbol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symbol_type'
-!End of the abilint section
 
  implicit none
 
@@ -921,13 +862,6 @@ end function symbol_type
 !! SOURCE
 
 subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion, include_timrev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'crystal_point_group'
-!End of the abilint section
 
  implicit none
 
@@ -1029,13 +963,6 @@ end subroutine crystal_point_group
 
 subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 &   spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_cif'
-!End of the abilint section
 
  implicit none
 
@@ -1187,13 +1114,6 @@ end subroutine prt_cif
 
 subroutine symrel2string(symrel1, tnon, string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrel2string'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1274,13 +1194,6 @@ end subroutine symrel2string
 !! SOURCE
 
 subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtposcar'
-!End of the abilint section
 
  implicit none
 

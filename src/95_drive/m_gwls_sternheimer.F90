@@ -87,13 +87,6 @@ use m_errors
 
 use m_time,      only : timab
 use m_gstateimg, only : gstateimg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gwls_sternheimer'
-!End of the abilint section
-
 implicit none
 !Arguments ------------------------------------
 !scalars

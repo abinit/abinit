@@ -122,13 +122,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  use TRIQS_CTQMC !Triqs module
 #endif
  use ISO_C_BINDING
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'qmc_prep_ctqmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2341,13 +2334,6 @@ subroutine testcode_ctqmc(dmftqmc_l,fw1_nd,fw1,gtmp_nd,gw_tmp_nd,levels_ctqmc,hy
  use m_greenhyb
  !use m_self, only : self_type,initialize_self,destroy_self,print_self,rw_self
  use m_io_tools, only : flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testcode_ctqmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

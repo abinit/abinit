@@ -88,13 +88,6 @@ CONTAINS
 
 subroutine pawnabla_init(mpsang,ntypat,pawrad,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawnabla_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -262,13 +255,6 @@ end subroutine pawnabla_init
 !! SOURCE
 
 subroutine pawnabla_core_init(mpsang,ntypat,pawrad,pawtab,phi_cor,indlmn_cor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawnabla_core_init'
-!End of the abilint section
 
  implicit none
 

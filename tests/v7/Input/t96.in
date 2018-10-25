@@ -151,7 +151,6 @@ ndtset 13 jdtset 1 2 3 4 5 6  22 23 24 25 26 12 13
  prtwf 0 prteig 0 prtden 0
  prtvol 10
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

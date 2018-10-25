@@ -2,13 +2,13 @@
 #Test for multibinit, just read xml and run spin dynamics
 ##############################################################################
 prt_model = 0
-ncell =   15 15 15
+ncell =   16 16 16
 
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
-spin_mag_field= 0.0 0.0 0.0
-spin_dynamics=1
+spin_dynamics=1    
+spin_init_state = 2
 spin_temperature = 600
 spin_ntime =10000
 spin_nctime=100
@@ -16,12 +16,12 @@ spin_dt=1e-16 s
 spin_qpoint = 0.0 0.0 0.0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% need_cpp_vars = HAVE_NETCDF, HAVE_LIBXML
+#%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
 #%% system_xml = tmulti5_1.xml
+#%% exclude_hosts = nag@abiref
 #%% coeff_xml = no
 #%% [files]
 #%% files_to_test = 

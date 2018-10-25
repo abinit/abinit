@@ -142,13 +142,6 @@ contains
 subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci, & !Mandatory Arguments
 &                d2vxci,dvxcdgr,dvxci,exexch,grho2_updn)                          !Optional Arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcpbe'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

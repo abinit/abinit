@@ -165,13 +165,6 @@ CONTAINS  !===========================================================
 
 pure function clp(x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -212,13 +205,6 @@ end function clp
 !! SOURCE
 
 elemental function factorial(nn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'factorial'
-!End of the abilint section
 
  implicit none
 
@@ -268,13 +254,6 @@ end function factorial
 !! SOURCE
 
 pure function permutations(nn,kk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'permutations'
-!End of the abilint section
 
  implicit none
 
@@ -328,13 +307,6 @@ end function permutations
 
 elemental function binomcoeff(n,k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'binomcoeff'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -375,13 +347,6 @@ end function binomcoeff
 !! SOURCE
 
 function laguerre(x,n,a)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'laguerre'
-!End of the abilint section
 
  implicit none
 
@@ -451,13 +416,6 @@ end function laguerre
 
 
 function RadFnH(r,n,l,Z)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'RadFnH'
-!End of the abilint section
 
  implicit none
 
@@ -533,13 +491,6 @@ end function RadFnH
 !! SOURCE
 
 recursive function IRadFnH(a,b,n,l,Z,m) result(x)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'IRadFnH'
-!End of the abilint section
 
  implicit none
 
@@ -620,13 +571,6 @@ end function IRadFnH
 
 elemental function dirac_delta(arg,sigma)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dirac_delta'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -667,13 +611,6 @@ end function dirac_delta
 !! SOURCE
 
 elemental function gaussian(arg,sigma)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussian'
-!End of the abilint section
 
  implicit none
 
@@ -719,13 +656,6 @@ end function gaussian
 !! SOURCE
 
 elemental function abi_derf(yy) result(derf_yy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_derf'
-!End of the abilint section
 
  implicit none
 
@@ -879,13 +809,6 @@ end function abi_derf
 
 elemental function abi_derfc(yy) result(derfc_yy)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_derfc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1029,13 +952,6 @@ end function abi_derfc
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GAMMA_FUNCTION'
-!End of the abilint section
 
   implicit none
 
@@ -1195,20 +1111,7 @@ end subroutine GAMMA_FUNCTION
 
 subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'besjm'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'besjm'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -1422,13 +1325,6 @@ end subroutine besjm
 
 subroutine sbf8(nm,xx,sb_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sbf8'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------------------------------------------------
@@ -1507,13 +1403,6 @@ end subroutine sbf8
 
 function fermi_dirac(energy, mu, temperature)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fermi_dirac'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1561,13 +1450,6 @@ end function fermi_dirac
 !! SOURCE
 
 function bose_einstein(energy, temperature)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bose_einstein'
-!End of the abilint section
 
  implicit none
 
@@ -1619,13 +1501,6 @@ end function bose_einstein
 
 elemental function k_fermi(rhor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k_fermi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1661,13 +1536,6 @@ end function k_fermi
 !! SOURCE
 
 elemental function k_thfermi(rhor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k_thfermi'
-!End of the abilint section
 
  implicit none
 
@@ -1714,13 +1582,6 @@ end function k_thfermi
 !! SOURCE
 
 type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jlspline_new'
-!End of the abilint section
 
  implicit none
 
@@ -1801,13 +1662,6 @@ end function jlspline_new
 
 subroutine jlspline_free(jlspl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jlspline_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1845,13 +1699,6 @@ end subroutine jlspline_free
 !! SOURCE
 
 real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jlspline_integral'
-!End of the abilint section
 
  implicit none
 
@@ -1903,13 +1750,6 @@ end function jlspline_integral
 !! SOURCE
 
 type (gspline_t) function gspline_new(sigma) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gspline_new'
-!End of the abilint section
 
  implicit none
 
@@ -1975,13 +1815,6 @@ end function gspline_new
 !! SOURCE
 
 pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gspline_eval'
-!End of the abilint section
 
  implicit none
 
@@ -2053,13 +1886,6 @@ end subroutine gspline_eval
 !! SOURCE
 
 subroutine gspline_free(self)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gspline_free'
-!End of the abilint section
 
  implicit none
 

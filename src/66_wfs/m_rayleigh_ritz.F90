@@ -76,7 +76,7 @@ contains
 !!  cg(2,*)=updated wavefunctions
 !!  ghc(2,*)=updated ghc
 !!  gsc(2,*)=updated gsc
-!!  gvnlc(2,*)=updated gvnlc
+!!  gvnlxc(2,*)=updated gvnlxc
 !!
 !! PARENTS
 !!      chebfi
@@ -88,21 +88,14 @@ contains
 !!
 !! SOURCE
 
-subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rayleigh_ritz_subdiago'
-!End of the abilint section
+subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
  implicit none
 
  ! Arguments
  type(mpi_type),intent(inout) :: mpi_enreg
  integer,intent(in) :: nband,npw,nspinor,usepaw,istwf_k
- real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlc(2,npw*nspinor*nband)
+ real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlxc(2,npw*nspinor*nband)
  real(dp),intent(out) :: eig(nband)
 
  ! Locals
@@ -210,8 +203,8 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gsc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gsc = gtempc
  else
-   call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
-   gvnlc = gtempc
+   call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
+   gvnlxc = gtempc
  end if
  ABI_DEALLOCATE(evec)
  call timab(timer_subdiago, 2, tsec)
@@ -230,13 +223,13 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  end if
  call timab(timer_ortho, 2, tsec)
 
- ! rotate ghc, gsc and gvnlc
+ ! rotate ghc, gsc and gvnlxc
  call timab(timer_rotation, 1, tsec)
  call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, ghc,npw*nspinor,x_cplx=2)
  if(paw) then
    call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gsc,npw*nspinor,x_cplx=2)
  else
-   call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gvnlc,npw*nspinor,x_cplx=2)
+   call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gvnlxc,npw*nspinor,x_cplx=2)
  end if
  call timab(timer_rotation, 2, tsec)
 
@@ -265,13 +258,13 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  write(message, *) 'Diagonalization done'
  call wrtout(std_out,message,'COLL')
 
- ! Rotate ghc and gvnlc according to evecs
+ ! Rotate ghc and gvnlxc according to evecs
  call timab(timer_rotation, 1, tsec)
  call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,ghc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
  ghc = gtempc
  if(.not. paw) then
-   call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,gvnlc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
-   gvnlc = gtempc
+   call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,gvnlxc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
+   gvnlxc = gtempc
  end if
  call timab(timer_rotation, 2, tsec)
 
@@ -303,7 +296,7 @@ end subroutine rayleigh_ritz_subdiago
 !!  cg(2,*)=updated wavefunctions
 !!  ghc(2,*)=updated ghc
 !!  gsc(2,*)=updated gsc
-!!  gvnlc(2,*)=updated gvnlc
+!!  gvnlxc(2,*)=updated gvnlxc
 !!
 !! PARENTS
 !!      chebfi
@@ -318,14 +311,7 @@ end subroutine rayleigh_ritz_subdiago
 !!
 !! SOURCE
 
-subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rayleigh_ritz_distributed'
-!End of the abilint section
+subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
  implicit none
 
@@ -334,13 +320,13 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  ! Arguments
  type(mpi_type),intent(inout) :: mpi_enreg
  integer,intent(in) :: nband,npw,nspinor,usepaw,istwf_k
- real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlc(2,npw*nspinor*nband)
+ real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlxc(2,npw*nspinor*nband)
  real(dp),intent(out) :: eig(nband)
 
  ! Locals
  integer :: blocksize,nbproc,iproc,ierr,cplx,vectsize
  integer :: buffsize_iproc(2), coords_iproc(2), grid_dims(2)
- real(dp) :: cg_new(2,npw*nspinor*nband),gsc_or_vnlc_new(2,npw*nspinor*nband),ghc_new(2,npw*nspinor*nband)
+ real(dp) :: cg_new(2,npw*nspinor*nband),gsc_or_vnlxc_new(2,npw*nspinor*nband),ghc_new(2,npw*nspinor*nband)
  real(dp), allocatable :: ham_iproc(:,:), ovl_iproc(:,:), evec_iproc(:,:), left_temp(:,:), right_temp(:,:)
  real(dp) :: tsec(2)
  type(matrix_scalapack) :: sca_ham, sca_ovl, sca_evec
@@ -493,7 +479,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  !======================================================================================================
  call timab(timer_rotation, 1, tsec)
  cg_new = zero
- gsc_or_vnlc_new = zero
+ gsc_or_vnlxc_new = zero
  ghc_new = zero
  do iproc=0,nbproc-1
    ! Compute the contribution to the rotated matrices from this block
@@ -544,12 +530,12 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
      call from_mat_to_block_cyclic(gsc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
    else
-     call from_mat_to_block_cyclic(gvnlc, npw*nspinor, nband, left_temp, &
+     call from_mat_to_block_cyclic(gvnlxc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
    end if
    call abi_xgemm('n','n',vectsize,buffsize_iproc(2),buffsize_iproc(1),cone,left_temp,vectsize,&
 &   evec_iproc, buffsize_iproc(1), czero, right_temp, vectsize, x_cplx=cplx)
-   call from_block_cyclic_to_mat(gsc_or_vnlc_new, npw*nspinor, nband, right_temp, &
+   call from_block_cyclic_to_mat(gsc_or_vnlxc_new, npw*nspinor, nband, right_temp, &
 &   buffsize_iproc(2), blocksize, coords_iproc(2), grid_dims(2))
 
    ABI_DEALLOCATE(evec_iproc)
@@ -561,9 +547,9 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nban
  cg = cg_new
  ghc = ghc_new
  if(usepaw == 1) then
-   gsc = gsc_or_vnlc_new
+   gsc = gsc_or_vnlxc_new
  else
-   gvnlc = gsc_or_vnlc_new
+   gvnlxc = gsc_or_vnlxc_new
  end if
  call timab(timer_rotation, 2, tsec)
 
@@ -598,13 +584,6 @@ end subroutine rayleigh_ritz_distributed
 !!
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'from_mat_to_block_cyclic'
-!End of the abilint section
 
  implicit none
 
@@ -662,13 +641,6 @@ end subroutine from_mat_to_block_cyclic
 !! SOURCE
 
 subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'from_block_cyclic_to_mat'
-!End of the abilint section
 
  implicit none
 

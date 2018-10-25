@@ -224,13 +224,6 @@ CONTAINS !===========================================================
 
 subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -358,13 +351,6 @@ end subroutine scf_history_init
 
 subroutine scf_history_free(scf_history)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -457,13 +443,6 @@ end subroutine scf_history_free
 !! SOURCE
 
 subroutine scf_history_nullify(scf_history)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_nullify'
-!End of the abilint section
 
  implicit none
 

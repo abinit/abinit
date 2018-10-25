@@ -152,13 +152,6 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
 & Cryst,BSt,Pawtab,Pawrad,Pawang,Psps,tolsym,BSym,&
 & EDIFF_TOL) ! optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'classify_bands'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -585,13 +578,6 @@ end subroutine classify_bands
 
 subroutine rotate_cprj(kpoint,isym,nspinor,nbnds,natom,nsym,typat,indsym,Cprj_in,Cprj_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_cprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -675,13 +661,6 @@ end subroutine rotate_cprj
 !! SOURCE
 
 function paw_phirotphj(nspinor,natom,typat,zarot_isym,Pawtab,Psps,Cprj_b1,Cprj_b2,conjg_left) result(omat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_phirotphj'
-!End of the abilint section
 
  implicit none
 

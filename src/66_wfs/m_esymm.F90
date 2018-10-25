@@ -256,13 +256,6 @@ CONTAINS  !=====================================================================
 
 subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF_TOL,ene_k,tolsym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -854,13 +847,6 @@ end subroutine esymm_init
 
 subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -977,13 +963,6 @@ end subroutine esymm_print
 
 subroutine esymm_free_0D(esymm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1064,13 +1043,6 @@ end subroutine esymm_free_0D
 
 subroutine esymm_free_2D(esymm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_free_2D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1111,13 +1083,6 @@ end subroutine esymm_free_2D
 !! SOURCE
 
 subroutine esymm_finalize(esymm,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_finalize'
-!End of the abilint section
 
  implicit none
 
@@ -1375,13 +1340,6 @@ end subroutine esymm_finalize
 
 function which_irrep(esymm,trace,tolerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'which_irrep'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1431,13 +1389,6 @@ end function which_irrep
 !! SOURCE
 
 subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_symmetrize_mels'
-!End of the abilint section
 
  implicit none
 
@@ -1536,13 +1487,6 @@ end subroutine esymm_symmetrize_mels
 
 function esymm_failed(esymm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'esymm_failed'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1576,13 +1520,6 @@ end function esymm_failed
 !! SOURCE
 
 subroutine polish_irreps(Irreps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polish_irreps'
-!End of the abilint section
 
  implicit none
 

@@ -340,13 +340,6 @@ CONTAINS  !=====================================================================
 subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,nkpt,nspden,&
 &nspinor,nsppol,occ,usedmft,paw_dmft,use_sc_dmft,dmft_solv,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_sc_dmft'
-!End of the abilint section
-
  implicit none
 
 
@@ -470,7 +463,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
   paw_dmft%mbandc = 0
  endif
   
- if(mpi_enreg%paral_kgb/=0) then
+ if(paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb/=0) then
    call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
  end if
 
@@ -556,13 +549,6 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  use defs_abitypes
  use m_splines
  !use m_CtqmcInterface
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_dmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -863,13 +849,6 @@ end subroutine init_dmft
 
 subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'construct_nwli_dmft'
-!End of the abilint section
-
  implicit none
 
  type(paw_dmft_type), intent(in) :: paw_dmft
@@ -938,13 +917,6 @@ end subroutine construct_nwli_dmft
 
 subroutine construct_nwlo_dmft(paw_dmft)
  use m_splines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'construct_nwlo_dmft'
-!End of the abilint section
-
  implicit none
 
  type(paw_dmft_type), intent(inout) :: paw_dmft
@@ -1227,13 +1199,6 @@ end subroutine construct_nwlo_dmft
 
 subroutine destroy_dmft(paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_dmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1301,13 +1266,6 @@ end subroutine destroy_dmft
 
 subroutine destroy_sc_dmft(paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_sc_dmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1364,13 +1322,6 @@ end subroutine destroy_sc_dmft
 !! SOURCE
 
 subroutine print_dmft(paw_dmft,pawprtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_dmft'
-!End of the abilint section
 
  implicit none
 
@@ -1466,13 +1417,6 @@ end subroutine print_dmft
 
 subroutine print_sc_dmft(paw_dmft,pawprtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_sc_dmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1541,13 +1485,6 @@ end subroutine print_sc_dmft
 
 subroutine saveocc_dmft(paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'saveocc_dmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1612,13 +1549,6 @@ end subroutine saveocc_dmft
 !! SOURCE
 
 subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'readocc_dmft'
-!End of the abilint section
 
  implicit none
 
@@ -1703,13 +1633,6 @@ end subroutine readocc_dmft
 
 subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_sc_dmft_paralkgb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1760,13 +1683,6 @@ end subroutine init_sc_dmft_paralkgb
 !! SOURCE
 
 subroutine destroy_sc_dmft_paralkgb(paw_dmft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_sc_dmft_paralkgb'
-!End of the abilint section
 
  implicit none
 

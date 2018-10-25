@@ -74,13 +74,6 @@ program cut3d
  use m_distribfft,      only : init_distribfft_seq
  use m_ioarr,           only : fftdatar_write
  use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

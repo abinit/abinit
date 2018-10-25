@@ -200,13 +200,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcref'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -850,13 +843,6 @@ end subroutine prcref
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
 &  etotal,pawtab,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcref_PMA'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -1378,13 +1364,6 @@ end subroutine prcref_PMA
 
 subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral_kgb,qphon,rprimd,vresid,vrespc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'moddiel'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -1624,13 +1603,6 @@ end subroutine moddiel
 !! SOURCE
 
 subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dielmt'
-!End of the abilint section
 
  implicit none
 
@@ -1996,13 +1968,6 @@ end subroutine dielmt
 
 subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 &  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dieltcel'
-!End of the abilint section
 
  implicit none
 
@@ -2479,13 +2444,6 @@ end subroutine dieltcel
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcrskerker1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2703,13 +2661,6 @@ end subroutine prcrskerker1
 !! SOURCE
 
 subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vrespc,natom,xred,mpi_enreg,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcrskerker2'
-!End of the abilint section
 
  implicit none
 
@@ -3020,13 +2971,6 @@ end subroutine prcrskerker2
 
 subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgpr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3119,13 +3063,6 @@ end subroutine cgpr
 
 subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linmin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3184,13 +3121,6 @@ end subroutine linmin
 !! SOURCE
 
 subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bracketing'
-!End of the abilint section
 
  implicit none
 
@@ -3302,13 +3232,6 @@ end subroutine bracketing
 !! SOURCE
 
 function brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,itmax,v,grad,ax,xx,bx,tol,xmin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'brent'
-!End of the abilint section
 
  implicit none
 

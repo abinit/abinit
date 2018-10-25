@@ -77,13 +77,6 @@ CONTAINS  !=====================================================================
  ! date: 1999-12-11  time: 00:51:44
 
  ! n.b. arguments wa & lwa have been removed.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lmdif1'
-!End of the abilint section
-
  integer, intent(in)        :: m
  integer, intent(in)        :: n
  real (dp), intent(in out)  :: x(:)
@@ -252,13 +245,6 @@ CONTAINS  !=====================================================================
                   mode, factor, nprint, info, nfev, fjac, ipvt)
 
  ! N.B. Arguments LDFJAC, DIAG, QTF, WA1, WA2, WA3 & WA4 have been removed.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lmdif'
-!End of the abilint section
-
  integer, intent(in)        :: m
  integer, intent(in)        :: n
  real (dp), intent(in out)  :: x(:)
@@ -718,13 +704,6 @@ CONTAINS  !=====================================================================
  ! Date: 1999-12-09  Time: 12:46:12
 
  ! N.B. Arguments LDR, WA1 & WA2 have been removed.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lmpar'
-!End of the abilint section
-
  integer, intent(in)        :: n
  real (dp), intent(in out)  :: r(:,:)
  integer, intent(in)        :: ipvt(:)
@@ -987,13 +966,6 @@ CONTAINS  !=====================================================================
  ! Date: 1999-12-09  Time: 12:46:17
 
  ! N.B. Arguments LDA, LIPVT & WA have been removed.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'qrfac'
-!End of the abilint section
-
  integer, intent(in)        :: m
  integer, intent(in)        :: n
  real (dp), intent(in out)  :: a(:,:)
@@ -1170,13 +1142,6 @@ CONTAINS  !=====================================================================
  SUBROUTINE qrsolv(n, r, ipvt, diag, qtb, x, sdiag)
 
  ! N.B. Arguments LDR & WA have been removed.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'qrsolv'
-!End of the abilint section
-
  integer, intent(in)        :: n
  real (dp), intent(in out)  :: r(:,:)
  integer, intent(in)        :: ipvt(:)
@@ -1385,13 +1350,6 @@ CONTAINS  !=====================================================================
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'enorm'
-!End of the abilint section
-
  real (dp)              :: fn_val
  integer, intent(in)    :: n
 !arrays
@@ -1521,13 +1479,6 @@ CONTAINS  !=====================================================================
  ! Date: 1999-12-09  Time: 12:45:44
 
  ! N.B. Arguments LDFJAC & WA have been removed.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fdjac2'
-!End of the abilint section
-
  integer, intent(in)        :: m
  integer, intent(in)        :: n
  real (dp), intent(in out)  :: x(n)
@@ -1665,13 +1616,6 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 subroutine lm_fit_print_info(info,msg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lm_fit_print_info'
-!End of the abilint section
 
   implicit none
 

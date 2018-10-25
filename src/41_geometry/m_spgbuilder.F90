@@ -91,13 +91,6 @@ contains
 
 subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gensymspgr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -605,13 +598,6 @@ end subroutine gensymspgr
 !! SOURCE
 
 subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gensymshub'
-!End of the abilint section
 
  implicit none
 
@@ -1320,13 +1306,6 @@ end subroutine gensymshub
 !! SOURCE
 
 subroutine gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gensymshub4'
-!End of the abilint section
 
  implicit none
 

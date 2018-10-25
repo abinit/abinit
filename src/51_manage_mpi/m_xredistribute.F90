@@ -92,13 +92,6 @@ CONTAINS  !===========================================================
 subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
   &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xredistribute_mpi_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -173,13 +166,6 @@ end subroutine xredistribute_mpi_dp
 !! SOURCE
 subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
   &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xredistribute_mpi_2d_dp'
-!End of the abilint section
 
  implicit none
 

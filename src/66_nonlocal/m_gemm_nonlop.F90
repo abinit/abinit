@@ -114,13 +114,6 @@ contains
 !! SOURCE
  subroutine init_gemm_nonlop(nkpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_gemm_nonlop'
-!End of the abilint section
-
   integer,intent(in) :: nkpt
   integer :: ikpt
 
@@ -153,13 +146,6 @@ contains
 !!
 !! SOURCE
  subroutine destroy_gemm_nonlop(nkpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_gemm_nonlop'
-!End of the abilint section
 
   implicit none
 
@@ -203,13 +189,6 @@ contains
  subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k)
 
   use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_gemm_nonlop'
-!End of the abilint section
-
   implicit none
 
   integer, intent(in) :: ikpt
@@ -349,13 +328,6 @@ contains
 
   use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
   use m_time,    only : cwtime
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gemm_nonlop'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------

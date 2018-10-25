@@ -92,13 +92,6 @@ CONTAINS
 
 function ylmc(il,im,kcart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -261,13 +254,6 @@ end function ylmc
 
 subroutine ylmcd(il,im,kcart,dth,dphi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmcd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -412,13 +398,6 @@ end subroutine ylmcd
 !! SOURCE
 
 subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylm_cmplx'
-!End of the abilint section
 
  implicit none
 
@@ -571,13 +550,6 @@ end subroutine ylm_cmplx
 !! SOURCE
 
 subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initylmr'
-!End of the abilint section
 
  implicit none
 
@@ -788,13 +760,6 @@ end subroutine initylmr
 
 subroutine ys(lp,mp,ll,mm,ys_val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ys'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -864,13 +829,6 @@ end subroutine ys
 
 subroutine lxyz(lp,mp,idir,ll,mm,lidir)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lxyz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -935,13 +893,6 @@ end subroutine lxyz
 
 subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slxyzs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1000,13 +951,6 @@ end subroutine slxyzs
 !! SOURCE
 
 subroutine plm_coeff(blm,mpsang,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_coeff'
-!End of the abilint section
 
  implicit none
 
@@ -1115,13 +1059,6 @@ end subroutine plm_coeff
 
 function ass_leg_pol(l,m,xarg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ass_leg_pol'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1199,13 +1136,6 @@ end function ass_leg_pol
 !! SOURCE
 
 subroutine plm_d2theta(mpsang,plm_d2t,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_d2theta'
-!End of the abilint section
 
  implicit none
 
@@ -1291,13 +1221,6 @@ end subroutine plm_d2theta
 !! SOURCE
 
 function plm_dphi(ll,mm,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dphi'
-!End of the abilint section
 
  implicit none
 
@@ -1386,13 +1309,6 @@ end function plm_dphi
 !! SOURCE
 
 function plm_dtheta(ll,mm,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dtheta'
-!End of the abilint section
 
  implicit none
 
@@ -1485,13 +1401,6 @@ end function plm_dtheta
 
 subroutine pl_deriv(mpsang,pl_d2,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pl_deriv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1565,13 +1474,6 @@ end subroutine pl_deriv
 !! SOURCE
 
 subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkeuler'
-!End of the abilint section
 
  implicit none
 
@@ -1665,13 +1567,6 @@ end subroutine mkeuler
 
 elemental function dble_factorial(nn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dble_factorial'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1727,13 +1622,6 @@ end function dble_factorial
 !! SOURCE
 
 function dbeta(cosbeta,ll,mp,mm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbeta'
-!End of the abilint section
 
  implicit none
 
@@ -1821,13 +1709,6 @@ end function dbeta
 
 pure function phim(costheta,sintheta,mm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1890,13 +1771,6 @@ pure function phim(costheta,sintheta,mm)
 !! SOURCE
 
 subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,wrt_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_mlms2jmj'
-!End of the abilint section
 
  implicit none
 
@@ -2166,13 +2040,6 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 
 subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitfi,wrt_mode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_slm2ylm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2331,13 +2198,6 @@ end subroutine mat_slm2ylm
 
 subroutine create_slm2ylm(lcor,slmtwoylm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_slm2ylm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2399,13 +2259,6 @@ end subroutine create_slm2ylm
 !! SOURCE
 
 subroutine create_mlms2jmj(lcor,mlmstwojmj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_mlms2jmj'
-!End of the abilint section
 
  implicit none
 
@@ -2525,13 +2378,6 @@ end subroutine create_mlms2jmj
 !! SOURCE
 
 subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setsym_ylm'
-!End of the abilint section
 
  implicit none
 
@@ -2685,13 +2531,6 @@ end subroutine setsym_ylm
 !! SOURCE
 
  subroutine setnabla_ylm(ang_phipphj,mpsang)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setnabla_ylm'
-!End of the abilint section
 
  implicit none
 
