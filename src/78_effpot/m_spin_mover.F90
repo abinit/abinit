@@ -270,15 +270,14 @@ contains
           call spin_mover_t_run_one_step(self, calculator, hist)
           call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
           if(mod(counter, hist%spin_nctime)==0) then
-             call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), hist%Snorm(:,hist%ihist_prev))
+             call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+                  hist%Snorm(:,hist%ihist_prev), hist%energy(hist%ihist_prev))
              write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/Ha_J
-          ! total : 13+4+...= 64 
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
-
- 
+             ! total : 13+4+...= 64 
+             call wrtout(std_out,msg,'COLL')
+             call wrtout(ab_out, msg, 'COLL')
           endif
           t=t+self%dt
        end do
@@ -297,14 +296,14 @@ contains
        call spin_mover_t_run_one_step(self, calculator, hist)
        call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
        if(mod(counter, hist%spin_nctime)==0) then
-          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), hist%Snorm(:,hist%ihist_prev))
+          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+               hist%Snorm(:,hist%ihist_prev), hist%energy(hist%ihist_prev))
           call spin_ncfile_t_write_one_step(ncfile, hist)
           write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                & ob%Mst_norm_total/ob%Snorm_total, &
                & hist%etot(hist%ihist_prev)/Ha_J
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
-
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
        endif
        t=t+self%dt
     enddo

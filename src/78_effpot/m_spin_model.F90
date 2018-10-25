@@ -395,8 +395,9 @@ contains
     class(spin_model_t), intent(inout) :: self
     type(spin_ncfile_t), intent(out) :: spin_ncfile
     character(len=*) :: fname
-    call spin_ncfile_t_init(spin_ncfile, trim(fname))
+    call spin_ncfile_t_init(spin_ncfile, trim(fname), self%params%spin_write_traj)
     call spin_ncfile_t_def_sd(spin_ncfile, self%spin_hist )
+    call spin_ncfile_t_def_ob(spin_ncfile, self%spin_ob)
     !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
     call spin_ncfile_t_write_supercell(spin_ncfile, self%spin_calculator)
     call spin_ncfile_t_write_parameters(spin_ncfile, self%params)
@@ -563,7 +564,7 @@ contains
 
        write(post_fname, "(I4.4)") i+1
        call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
-               & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
+               & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc', self%params%spin_write_traj)
        call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
        call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, & 
                & self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)

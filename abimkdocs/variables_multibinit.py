@@ -1008,6 +1008,21 @@ The corresponding _spinhist.nc  file has the corresponding temperature in the fi
 
 
 Variable(
+    abivarname="spin_write_traj@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="SPIN WRITE TRAJectory to spinhist.nc file",
+    text="""
+Switch for writting of spin trajectory file. 0: off. 1 on.
+The trajectory is needed for postprocessing of correlation functions.
+""",
+),
+
+
+Variable(
     abivarname="spin_temperature_start@multibinit",
     varset="multibinit",
     vartype="real",

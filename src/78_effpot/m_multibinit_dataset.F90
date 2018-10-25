@@ -139,6 +139,7 @@ module m_multibinit_dataset
   integer :: spin_sia_add
   integer :: spin_temperature_nstep    ! var temperature number of steps
   integer :: spin_var_temperature
+  integer :: spin_write_traj
 
 ! Real(dp)
   real(dp) :: bmass
@@ -358,7 +359,8 @@ multibinit_dtset%spin_temperature_nstep= 0
 multibinit_dtset%spin_tolavg=1d-2 ! TODO hexu: to be decided. should it be a function of temperature?
 multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above. 
 
-multibinit_dtset%spin_var_temperature=0 ! or 0 ?
+multibinit_dtset%spin_var_temperature=0 
+multibinit_dtset%spin_write_traj=1 
 
 !=======================================================================
 !Arrays
@@ -1356,6 +1358,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
+ multibinit_dtset%spin_write_traj=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_write_traj',tread,'INT')
+ if(tread==1) multibinit_dtset%spin_write_traj=intarr(1)
+ if(multibinit_dtset%spin_write_traj/=0.and.multibinit_dtset%spin_write_traj/=1)then
+    write(message, '(a,i0,a,a,a,a,a)' )&
+         &   'spin_write_traj is',multibinit_dtset%spin_write_traj,'. The only allowed values',ch10,&
+         &   'are 0, or 1.',ch10,&
+         &   'Action: correct spin_write_traj in your input file.'
+    MSG_ERROR(message)
+ end if
+
 
 
  multibinit_dtset%symdynmat=1
@@ -2221,7 +2234,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
     write(nunit, '(6x, a22, 5x, F10.5)') 'spin_temperature_start', multibinit_dtset%spin_temperature_start
     write(nunit, '(6x, a22, 5x, F10.5)') 'spin_temperature_end', multibinit_dtset%spin_temperature_end
     write(nunit, '(6x, a22, 5x, I12.1)') 'spin_temperature_nstep', multibinit_dtset%spin_temperature_nstep
-
+    write(nunit, '(13x, a15, I12.1)') 'spin_write_traj', multibinit_dtset%spin_write_traj
  end if
 
  if(multibinit_dtset%confinement==1)then
