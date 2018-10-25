@@ -80,6 +80,7 @@ program multibinit
  integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
  integer :: option
  logical :: iam_master
+ logical :: need_analyze_anh_pot
  real(dp) :: tcpu,tcpui,twall,twalli
  real(dp) :: tsec(2)
  character(len=24) :: codename,start_datetime
@@ -410,9 +411,11 @@ program multibinit
      call abihist_bcast(hist_tes,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
      call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm)
-     
+     !  Initialize if to print anharmonic contribution to energy or not   
+     need_analyze_anh_pot = .FALSE.
+     if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.  
 !  Call to test routine 
-     call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,print_anharmonic=.TRUE.)
+     call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,print_anharmonic=need_analyze_anh_pot)
 
    end if ! End if(inp%test_effpot == 1)then 
 

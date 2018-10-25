@@ -615,7 +615,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
 
-           INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
+           INQUIRE(FILE='MD_anharmonic_terms_energy.out',OPENED=file_opened,number=unit_out)
              if(file_opened .eqv. .TRUE.)then
                write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
              endif
@@ -626,7 +626,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
+&           filename='MD_anharmonic_terms_energy.out')
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then

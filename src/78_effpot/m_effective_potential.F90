@@ -2213,13 +2213,14 @@ end subroutine effective_potential_writeAbiInput
 
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                       displacement,du_delta,strain,xred,&
-&                                       compute_anharmonic,verbose)
+&                                       compute_anharmonic,verbose,filename)
 
   implicit none
 
 !Arguments ------------------------------------
 !scalars
   integer, intent(in) :: natom
+  character(len=fnlen),optional,intent(in) :: filename 
 !array
   type(effective_potential_type),intent(in) :: eff_pot
   real(dp),intent(out) :: energy
@@ -2250,7 +2251,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff) 
   real(dp),allocatable :: xcart(:,:)
   character(len=500) :: msg
-
+  character(len=fnlen) :: name_file
 ! *************************************************************************
 
   !MPI variables
@@ -2262,6 +2263,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   do ii = 1, 3
     sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
   end do
+  name_file = filename !! TODO MARCUS CHECK AS OPTIONAL VARIABLE
 
   need_verbose = .TRUE.
   if(present(verbose)) then
@@ -2533,7 +2535,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                  energy_part,energy_coeff_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
 &                                  sc_size,strain_tmp,strten_part,eff_pot%mpi_coeff%my_ncell,&
-&                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
+&                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm,& 
+&                                  filename=name_file)
 
     if(need_verbose)then
       write(msg, '(a,1ES24.16,a)' ) ' Energy of the fitted coefficient          :',&
@@ -2940,7 +2943,7 @@ subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
 !Strings/Characters 
   character(len=fnlen) :: filename
 !array
-  type(anharmonics_terms_type ),intent(inout) :: anh_terms
+  type(anharmonics_terms_type ),intent(in) :: anh_terms
 !Local variables-------------------------------
 !scalar
   integer :: icoeff,unit_out 
@@ -2965,10 +2968,10 @@ subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
   write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
   write(unit_out,*) '' 
   write(unit_out,'(A)') 'Terms     Names' 
-  !do icoeff=1,ncoeff
-  !  term_name = anh_terms%coefficients(icoeff)%name
-  !  write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
-  !enddo  
+  do icoeff=1,ncoeff
+    term_name = anh_terms%coefficients(icoeff)%name
+    write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
+  enddo  
   write(unit_out,*) ''  
   write(unit_out,'(A)',advance='no')  'Cycle/Terms'
   do icoeff=1,ncoeff
@@ -2978,8 +2981,7 @@ subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
     write(unit_out,'(I5)',advance='yes') icoeff
     endif
   enddo 
-  close(unit_out)
-  call anharmonics_terms_free(anh_terms)
+  !close(unit_out)
 
 end subroutine effective_potential_writeAnhHead
 

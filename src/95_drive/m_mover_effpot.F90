@@ -149,7 +149,7 @@ implicit none
 ! real(dp):: time_q,time_b
  logical :: iam_master
  integer, parameter:: master=0
- logical :: verbose,writeHIST
+ logical :: verbose,writeHIST,file_opened
 !real(dp) :: cpui
 !character(len=6) :: codvsn
 
@@ -186,7 +186,7 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
- character(len=50) :: name_file 
+ character(len=fnlen) :: name_file 
  character(len=200):: term_name
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
@@ -556,31 +556,10 @@ implicit none
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
      ! Open File and write header 
      ncoeff = effective_potential%anharmonics_terms%ncoeff
-     name_file='anharmonic_energy_terms.out' 
-     unit_out = get_unit()
-     write(*,*) 'unit_out', unit_out 
-     if(inp%analyze_anh_pot == 1)then 
-       open(unit=unit_out,file=name_file,status='replace',form='formatted')
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) ''
-       write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
-       write(unit_out,*) '' 
-       write(unit_out,'(A)') 'Terms     Names' 
-       do icoeff=1,ncoeff
-         term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
-         write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
-       enddo  
-       write(unit_out,*) ''  
-       write(unit_out,'(A)',advance='no')  'Cycle/Terms'
-       do icoeff=1,ncoeff
-         if(icoeff<ncoeff)then
-         write(unit_out,'(I5)',advance='no') icoeff
-         else 
-         write(unit_out,'(I5)',advance='yes') icoeff
-         endif
-       enddo  
+     name_file='MD' 
+     if(inp%analyze_anh_pot == 1)then
+       call effective_potential_writeAnhHead(ncoeff,name_file,&
+&                        effective_potential%anharmonics_terms)      
      end if 
 
      call wrtout(ab_out,message,'COLL')
@@ -588,8 +567,9 @@ implicit none
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST)
-     close(unit_out)
+&     verbose=verbose,writeHIST=writeHIST)     
+     INQUIRE(FILE='MD_anharmonic_terms_energy.out',OPENED=file_opened,number=unit_out)
+     if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
      !*************************************************************
      !   Try to bound the model

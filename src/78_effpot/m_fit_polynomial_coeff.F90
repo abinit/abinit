@@ -2404,7 +2404,6 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   integer :: natom,ntime,ncoeff,my_rank
 !logicals 
   logical :: iam_master, need_print_anharmonic
-  type(effective_potential_type) :: pot_eff
 !strings/characters
  character(len=fnlen) :: filename 
  character(len=1000) :: message

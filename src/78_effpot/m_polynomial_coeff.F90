@@ -965,13 +965,14 @@ end subroutine polynomial_coeff_writeXML
 !! SOURCE
 !!
 subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart,natom_sc,natom_uc,ncoeff,sc_size,&
-&                                    strain,strten,ncell,index_cells,comm)
+&                                    strain,strten,ncell,index_cells,comm,filename)
 
 !Arguments ------------------------------------
 ! scalar
   real(dp),intent(out):: energy
   integer, intent(in) :: ncell,ncoeff,natom_sc,natom_uc
   integer, intent(in) :: comm
+  character(len=fnlen),optional,intent(in) :: filename 
 ! array
   real(dp),intent(out):: strten(6)
   real(dp),intent(in) :: strain(6)
@@ -992,6 +993,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   integer :: cell_atoma1(3),cell_atoma2(3)
   integer :: cell_atomb1(3),cell_atomb2(3)
   character(len=500) :: msg
+  character(len=fnlen) :: name_file
 ! *************************************************************************
 
 ! Check
@@ -999,6 +1001,8 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
     write(msg,'(a,a)')' No supercell found for getEnergy'
     MSG_ERROR(msg)
   end if
+
+  name_file = filename
 
 ! Initialisation of variables
   energy     = zero
@@ -1194,9 +1198,9 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   call xmpi_sum(fcart , comm, ierr)
   call xmpi_sum(strten , comm, ierr)
 
-
+  write(*,*) "name_file: ",name_file !! TODO MARCUS CHECK why name doesn't get passed from mover to effective_potential_evaluate
 !Write to anharmonic_energy_terms.out ORIGINAL  
-  INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
+  INQUIRE(FILE=name_file,OPENED=file_opened,number=unit_out)
   if(file_opened .eqv. .TRUE.)then
     do icoeff=1,ncoeff
       call xmpi_sum(energy_coeff(icoeff), comm, ierr)
