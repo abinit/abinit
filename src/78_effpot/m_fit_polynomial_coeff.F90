@@ -37,7 +37,7 @@ module m_fit_polynomial_coeff
  use m_strain,only : strain_type,strain_get
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
- use m_effective_potential,only : effective_potential_getDisp
+ use m_effective_potential,only : effective_potential_getDisp, effective_potential_writeAnhHead
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
  use m_io_tools,   only : open_file,get_unit
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
@@ -381,11 +381,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(std_out,message,"COLL")
  endif
 
-!Write the XML with the coefficient before the fit process
- if(iam_master)then
-   filename = "terms_set.xml"
-!   call polynomial_coeff_writeXML(my_coeffs,my_ncoeff,filename=filename,newfile=.true.) 
- end if
 
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
@@ -1070,12 +1065,13 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
-
+    
+   filename = "fit_TRS_diff"
 !  Set the final set of coefficients into the eff_pot type
    call effective_potential_setCoeffs(coeffs_tmp(1:ncycle_tot),eff_pot,ncycle_tot)
    call fit_polynomial_coeff_computeMSD(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
 &                                       natom_sc,ntime,fit_data%training_set%sqomega,&
-&                                       compute_anharmonic=.TRUE.,print_file=.TRUE.)
+&                                       compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
 
 !    if(need_verbose) then
 ! !  Print the standard deviation after the fit
@@ -2240,7 +2236,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! SOURCE
 
 subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
-&                                          compute_anharmonic,print_file)
+&                                          compute_anharmonic,print_file,filename)
 
  implicit none
 
@@ -2253,6 +2249,8 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  real(dp) :: sqomega(ntime)
  type(effective_potential_type),intent(in) :: eff_pot
  type(abihist),intent(in) :: hist
+!Strings/Characters
+ character(len=fnlen),optional :: filename
 !Local variables-------------------------------
 !scalar
  integer :: ii,ia,mu,unit_energy,unit_stress
@@ -2261,6 +2259,8 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
+!Strings/Characters 
+ character(len=fnlen) :: file_energy, file_stress
  character(len=500) :: msg
 ! type(abihist) :: hist_out
 ! character(len=200) :: filename_hist
@@ -2282,21 +2282,25 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
    need_anharmonic = compute_anharmonic
  end if
 
- if(present(print_file))then
+ if(present(print_file) .and. present(filename))then
 !   call abihist_init(hist_out,natom,ntime,.false.,.false.)
    need_print=print_file
+   file_energy=trim(filename)//'_energy.dat'
    unit_energy = get_unit()
-   if (open_file('fit_diff_energy.dat',msg,unit=unit_energy,form="formatted",&
+   if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
-
    unit_stress = get_unit()
-   if (open_file('fit_diff_stress.dat',msg,unit=unit_stress,form="formatted",&
+   file_stress=trim(filename)//'_stress.dat'
+   if (open_file(file_stress,msg,unit=unit_stress,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
-
+ else 
+   write(msg,'(a)')' You asked for printing of the MSD-values',ch10,& 
+&        ' without specifying a filename or the inverse'
+   MSG_ERROR(msg) 
  end if
 
  mse  = zero
@@ -2377,7 +2381,7 @@ end subroutine fit_polynomial_coeff_computeMSD
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm)
+subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic)
 
        
   implicit none
@@ -2386,8 +2390,9 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm)
 !scalars
   integer,intent(in) :: master,comm
 !logicals
+  logical,optional,intent(in) :: print_anharmonic
 !array
-  type(effective_potential_type),target,intent(in) :: eff_pot
+  type(effective_potential_type),intent(inout) :: eff_pot
   type(abihist),intent(in) :: hist
 !Local variables-------------------------------
 !reals 
@@ -2396,11 +2401,12 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm)
   real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !scalar
   integer :: itime, test
-  integer :: natom,ntime, my_rank
+  integer :: natom,ntime,ncoeff,my_rank
 !logicals 
-  logical :: iam_master
+  logical :: iam_master, need_print_anharmonic
   type(effective_potential_type) :: pot_eff
 !strings/characters
+ character(len=fnlen) :: filename 
  character(len=1000) :: message
 !arrays
 ! *************************************************************************
@@ -2409,14 +2415,24 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm)
   my_rank=xmpi_comm_rank(comm)
   iam_master = (my_rank == master)
 
+  !Initialisation of optional arguments
+  need_print_anharmonic = .FALSE. 
+  if(present(print_anharmonic)) need_print_anharmonic = print_anharmonic
+
   !Setting/Allocating other Variables 
   natom = size(hist%xred,2)   
   factor   = 1._dp/natom
   ntime = hist%mxhist 
   ABI_ALLOCATE(sqomega,(ntime))
+  filename = 'fit_TES_diff'
+  ncoeff = eff_pot%anharmonics_terms%ncoeff 
+
+  if(need_print_anharmonic) call effective_potential_writeAnhHead(ncoeff,&
+&                            filename,eff_pot%anharmonics_terms)                  
 
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
-&                                          compute_anharmonic=.TRUE.,print_file=.TRUE.)
+&                                          compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
+
 
 !  Print the standard deviation after the fit
      write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&

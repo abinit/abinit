@@ -412,7 +412,7 @@ program multibinit
      call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm)
      
 !  Call to test routine 
-     call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm)
+     call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,print_anharmonic=.TRUE.)
 
    end if ! End if(inp%test_effpot == 1)then 
 

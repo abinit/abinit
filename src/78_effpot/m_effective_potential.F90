@@ -82,6 +82,7 @@ module m_effective_potential
  public :: effective_potential_setSupercell
  public :: effective_potential_writeAbiInput
  public :: effective_potential_writeXML
+ public :: effective_potential_writeAnhHead
  !AM_EXPERIMENTAL
  public :: effective_potential_computeGradient
 ! public :: effective_potential_effpot2ddb
@@ -2904,6 +2905,83 @@ subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
 
 end subroutine effective_potential_distributeResidualForces
 !!***
+
+!****f* m_effective_potential/effective_potential_writeAnhHead
+!!
+!! NAME
+!! effective_potential_writeAnhHead
+!!
+!! FUNCTION
+!! Write Header of anharmonic_energy_terms.out file 
+!!
+!! INPUTS
+!! natom   = number of atoms
+!! eff_pot = effective potential structure
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_mover_effpot 
+!!      m_fit_polynomial_coeff_testEffPot 
+!!      m_fit_polynomial_coeff_fit 
+!!
+!! CHILDREN
+!!      ab_define_var,isfile,wrtout
+!!
+!! SOURCE
+
+subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: ncoeff
+!Strings/Characters 
+  character(len=fnlen) :: filename
+!array
+  type(anharmonics_terms_type ),intent(inout) :: anh_terms
+!Local variables-------------------------------
+!scalar
+  integer :: icoeff,unit_out 
+!Strings/Characters 
+  character(len=fnlen) :: name_file
+  character(len=200):: term_name
+!array
+
+! *************************************************************************
+
+  ! Marcus: if wanted: analyze anharmonic terms of effective potential && 
+  ! and print anharmonic contribution to file anharmonic_energy_terms.out
+  ! Open File and write header 
+  name_file=trim(filename)//'_anharmonic_terms_energy.out' 
+  unit_out = get_unit()
+  write(*,*) 'unit_out', unit_out 
+  open(unit=unit_out,file=name_file,status='replace',form='formatted')
+  write(unit_out,*) '#---------------------------------------------#'
+  write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
+  write(unit_out,*) '#---------------------------------------------#'
+  write(unit_out,*) ''
+  write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
+  write(unit_out,*) '' 
+  write(unit_out,'(A)') 'Terms     Names' 
+  !do icoeff=1,ncoeff
+  !  term_name = anh_terms%coefficients(icoeff)%name
+  !  write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
+  !enddo  
+  write(unit_out,*) ''  
+  write(unit_out,'(A)',advance='no')  'Cycle/Terms'
+  do icoeff=1,ncoeff
+    if(icoeff<ncoeff)then
+    write(unit_out,'(I5)',advance='no') icoeff
+    else 
+    write(unit_out,'(I5)',advance='yes') icoeff
+    endif
+  enddo 
+  close(unit_out)
+  call anharmonics_terms_free(anh_terms)
+
+end subroutine effective_potential_writeAnhHead
 
 
 !AM_EXPERIMENTAL SECTION
