@@ -7,7 +7,6 @@ ncell =   16 16 16
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
-spin_mag_field = 0.0 0.0 0.0    ! external magnetic field (Tesla)
 spin_dynamics = 1               ! switch on spin dynamics
 spin_init_state = 2             ! ferromagnetic initial state
 
@@ -36,5 +35,6 @@ spin_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each
 #%% authors = X. He
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read xml  and run spin dynamics
+#%%   read xml  and run spin dynamics. 
+#%%   Note: Spin_ntime is small.
 #%%<END TEST_INFO>
