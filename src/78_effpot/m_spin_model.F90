@@ -551,14 +551,8 @@ contains
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out, msg, "COLL")
 
-    write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, (I13, 3X) )" ) &
-         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (ii, ii=1, self%spin_ob%nsublatt)
-    call wrtout(Tfile, Tmsg, "COLL")
-
-
     do i=1, T_nstep
        T=T_start+(i-1)*T_step
-       Tlist(i)=T
 
        msg=repeat("=", 79)
        call wrtout(std_out, msg, "COLL")
@@ -593,30 +587,53 @@ contains
 
        call spin_ncfile_t_close(spin_ncfile)
        ! save observables
+       Tlist(i)=T
        chi_list(i)=self%spin_ob%chi
        Cv_list(i)=self%spin_ob%Cv
        binderU4_list(i)=self%spin_ob%binderU4
        !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
        Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
        Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
-
-       msg=repeat("-", 79)
-       call wrtout(std_out, msg, "COLL")
-       call wrtout(ab_out, msg, "COLL")
-       write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, (I13, 3X) )" ) &
-            "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (ii, ii=1, self%spin_ob%nsublatt)
-       call wrtout(std_out, Tmsg, "COLL")
-       call wrtout(ab_out,  Tmsg, "COLL")
-
-
-       write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(E13.5, 3X) )" ) &
-            T, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
-            & (Mst_sub_norm_list(ii,i)/mu_B_SI, ii=1, self%spin_ob%nsublatt)
-       call wrtout(std_out, Tmsg, "COLL")
-       call wrtout(ab_out,  Tmsg, "COLL")
-       call wrtout(Tfile, Tmsg, "COLL")
     end do
 
+
+    ! write summary of MvT run
+    msg=repeat("=", 79)
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+
+    write(msg, *) "Summary of various T run: "
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+
+    write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13)" ) &
+         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out,  msg, "COLL")
+
+    do i = 1, T_nstep
+       write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5 )" ) &
+            T, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+    end do
+
+    msg=repeat("=", 79)
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+ 
+
+    ! write to .varT file
+    write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
+         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (ii, ii=1, self%spin_ob%nsublatt)
+    call wrtout(Tfile, Tmsg, "COLL")
+
+    do i = 1, T_nstep
+       write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
+            Tlist(i), Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
+            & (Mst_sub_norm_list(ii,i)/mu_B_SI, ii=1, self%spin_ob%nsublatt)
+       call wrtout(Tfile, Tmsg, "COLL")
+    end do
     iostat= close_unit(unit=Tfile, iomsg=iomsg)
 
   end subroutine spin_model_t_run_various_T

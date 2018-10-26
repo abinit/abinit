@@ -70,9 +70,9 @@ module m_spin_ncfile
      ! variable ids for spin/lattice coupling
      integer :: ihist_g_id
 
-
      integer :: itime
      integer :: write_traj
+     character(len=fnlen) :: filename
   end type spin_ncfile_t
 
 contains
@@ -86,6 +86,7 @@ contains
 
     self%itime=0
     self%write_traj=write_traj
+    self%filename=trim(filename)
 
 #if defined HAVE_NETCDF
     write(std_out,*) 'Write iteration in spin HIST netCDF file'
@@ -334,9 +335,9 @@ end subroutine spin_ncfile_t_def_ob
     class(spin_ncfile_t), intent(inout) :: self
     integer :: ncerr
 #if defined HAVE_NETCDF
-    write(std_out, *) "Closing spin hist file"
+    write(std_out, *) "Closing spin hist file"//trim(self%filename)//"."
     ncerr=nf90_close(self%ncid)
-    !NCF_CHECK_MSG(ncerr, "close netcdf spin history file")
+    !NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
 #endif
   end subroutine spin_ncfile_t_close
 

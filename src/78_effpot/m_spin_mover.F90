@@ -268,9 +268,9 @@ contains
           counter=counter+1
           call spin_mover_t_run_one_step(self, calculator, hist)
           call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
-          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
-               hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
           if(mod(counter, hist%spin_nctime)==0) then
+             call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+                  hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
              write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/Ha_J
@@ -295,9 +295,9 @@ contains
        counter=counter+1
        call spin_mover_t_run_one_step(self, calculator, hist)
        call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
+       call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+            hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
        if(mod(counter, hist%spin_nctime)==0) then
-          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
-               hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
           call spin_ncfile_t_write_one_step(ncfile, hist)
           write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                & ob%Mst_norm_total/ob%Snorm_total, &
@@ -312,8 +312,6 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-
-
     write(msg, "(A27)") "Summary of spin dynamics:"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
@@ -327,13 +325,25 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-
     do i =1, ob%nsublatt
        write(msg, "(6X, 2X, I5.4, 8X, 4F10.5)")  i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
             sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B_SI)**2))
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
     end do
+    msg=repeat("-", 65)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+
+
+    write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13 )" ) &
+         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+    write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X )" ) &
+         self%temperature , ob%Cv, ob%chi,  ob%binderU4, ob%Avg_Mst_norm_total/ob%snorm_total
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out,  msg, "COLL")
 
     msg=repeat("=", 65)
     call wrtout(std_out,msg,'COLL')
