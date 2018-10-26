@@ -1198,13 +1198,11 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
   call xmpi_sum(fcart , comm, ierr)
   call xmpi_sum(strten , comm, ierr)
 
-  write(*,*) "name_file: ",name_file !! TODO MARCUS CHECK why name doesn't get passed from mover to effective_potential_evaluate
 !Write to anharmonic_energy_terms.out ORIGINAL  
   INQUIRE(FILE=name_file,OPENED=file_opened,number=unit_out)
   if(file_opened .eqv. .TRUE.)then
     do icoeff=1,ncoeff
       call xmpi_sum(energy_coeff(icoeff), comm, ierr)
-     !write(*,*) 'term ',icoeff,' :', energy_coeff(icoeff)
      ! Marcus write energy contributions of anharmonic terms to file 
       if(icoeff <ncoeff)then      
         write(unit_out,'(A,1ES24.16)',advance='no')  '    ',energy_coeff(icoeff)

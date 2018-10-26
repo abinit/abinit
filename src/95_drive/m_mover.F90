@@ -236,7 +236,7 @@ character(len=500) :: message
 character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
-character(len=fnlen) :: filename,fname_ddb
+character(len=fnlen) :: filename,fname_ddb, name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
@@ -388,8 +388,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  elseif(mxhist > 0 .and. mxhist  < 3)then
   nhisttot = mxhist ! Less than three MD-Steps
  end if
-
- write(*,*) "mxhist", mxhist
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -614,20 +612,20 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          else
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
-
-           INQUIRE(FILE='MD_anharmonic_terms_energy.out',OPENED=file_opened,number=unit_out)
+           name_file='MD_anharmonic_terms_energy.out'
+           INQUIRE(FILE=name_file,OPENED=file_opened,number=unit_out)
              if(file_opened .eqv. .TRUE.)then
                write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
              endif
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
-             end if 
+             end if
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
-&           filename='MD_anharmonic_terms_energy.out')
+&           filename=name_file)
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then
@@ -730,7 +728,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    ###
 
 #if defined HAVE_NETCDF
-     if (need_writeHIST.and.me==master) then
+     if (need_writeHIST.and.me==master) then ! TODO MARCUS after lunch debug filename here
        ifirst=merge(0,1,(itime>1.or.icycle>1))
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
 &       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)

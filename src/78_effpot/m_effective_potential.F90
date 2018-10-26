@@ -2264,7 +2264,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
   end do
   name_file = filename !! TODO MARCUS CHECK AS OPTIONAL VARIABLE
-
   need_verbose = .TRUE.
   if(present(verbose)) then
     need_verbose = verbose
@@ -2959,7 +2958,6 @@ subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
   ! Open File and write header 
   name_file=trim(filename)//'_anharmonic_terms_energy.out' 
   unit_out = get_unit()
-  write(*,*) 'unit_out', unit_out 
   open(unit=unit_out,file=name_file,status='replace',form='formatted')
   write(unit_out,*) '#---------------------------------------------#'
   write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
