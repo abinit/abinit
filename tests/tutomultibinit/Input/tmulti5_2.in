@@ -7,34 +7,33 @@ prt_model = 0
 #--------------------------------------------------------------
 #Monte carlo / molecular dynamics
 #--------------------------------------------------------------
-dynamics =  0                   ! Disable molecular dynamics
+dynamics =  0    ! disable molecular dynamics
 
-ncell =   6 6 6                 ! Size of supercell (Is this too small?)
+ncell =   6 6 6  ! size of supercell. Is it too small?
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
-spin_dynamics=1                 ! Run spin dynamics
-spin_mag_field = 0.0 0.0 0.0    ! External magnetic field
-spin_ntime_pre = 1000           ! Warming up steps (Is this enough?) 
-spin_ntime = 20000              ! Number of steps. (Is this enough?)
-spin_nctime = 100               ! Number of time steps between two writes 
-                                ! into netcdf
-spin_dt = 1e-16 s               ! Time step (Is this too large?)
-spin_init_state = 2             ! Ferromagnetic initial state (problematic?) 
-spin_qpoint = 0.0 0.0 0.0       ! Wave vector of spin order  
+spin_dynamics=1  ! enable spin dynamics
+spin_mag_field= 0.0 0.0 0.0   ! external magnetic field
+spin_ntime_pre =1000          ! warming up steps. Is it enough?
+spin_ntime =20000             ! number of steps. Is it enough?
+spin_nctime=100               ! number of  time steps between two nc file write
+spin_dt=1e-16 s               ! time step. Is it too small?
+spin_init_state = 2           ! FM initial state. May cause some trouble
 
-#Variable temperature
-spin_var_temperature = 1        ! Variable temperature calculation
-spin_temperature_start = 0      ! Starting temperature
-spin_temperature_end = 500      ! Final temperature (Smaller than Neel temp.?)
-spin_temperature_nstep = 6      ! Number of temperature steps (Is this enough?)
+spin_var_temperature=1        ! switch on variable temperature calculation
+spin_temperature_start=0      ! starting point of temperature
+spin_temperature_end=500      ! ending point of temperature. smaller than Neel T?
+spin_temperature_nstep=6      ! number of temperature steps. Enough?
 
-#Single ion anisotropy
-spin_sia_add = 1                ! Add a single ion anistropy (SIA) to all                                       ! ions.
-spin_sia_k1amp = 1e-22          ! Amplitude of SIA (Is this an appropriate                                      ! value?)
-spin_sia_k1dir = 0.0 0.0 1.0    ! Direction of SIA.
+spin_sia_add = 1              ! add a single ion anistropy (SIA) term?
+spin_sia_k1amp = 1e-22        ! amplitude of SIA, how large should be used?
+spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA
+
+spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
 
 
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
