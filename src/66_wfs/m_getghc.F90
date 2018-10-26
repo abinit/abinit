@@ -601,7 +601,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (gs_ham%usepaw==1) gsc_ptr => gsc
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
-  end if ! end type_calc 0 or 2 for nonlop application
+   end if ! end type_calc 0 or 2 for nonlop application
 
 !  Calculation of the Fock exact exchange term
    if (has_fock) then
