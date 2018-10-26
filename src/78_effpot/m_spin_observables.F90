@@ -42,7 +42,7 @@ module m_spin_observables
   !!***
   type, public :: spin_observable_t
      logical :: calc_thermo_obs, calc_correlation_obs, calc_traj_obs
-     integer :: nspins, nsublatt, ntime
+     integer :: nspins, nsublatt, ntime, nscell
      real(dp) :: temperature
      integer, allocatable :: isublatt(:), nspins_sub(:)
      real(dp) :: energy
@@ -56,15 +56,16 @@ module m_spin_observables
      ! Mst_total: staggerd M total
      ! Mst_norm : ||Mst_total||
      real(dp) ::  M_total(3), Mst_total(3), M_total_norm,  Mst_norm_total, Snorm_total
+     real(dp), allocatable :: Avg_Mst_sub_norm(:)
+     real(dp) :: Avg_Mst_norm_total
      real(dp) :: binderU4, chi, Cv
-
 
      ! variables for calculate Cv
      real(dp) :: avg_E_t   ! average energy E over time
      real(dp) :: avg_E2_t  ! average E^2 over time
-     real(dp) :: avg_m_t   ! average of sum(Mst_sub_norm) over t
-     real(dp) :: avg_m2_t  ! average of sum(Mst_sub_norm**2) over t
-     real(dp) :: avg_m4_t  !average of sum(Mst_sub_norm**4) over t
+     real(dp) :: avg_m_t   ! average of sum(Mst_norm_total) over t
+     real(dp) :: avg_m2_t  ! average of sum(Mst_norm_total**2) over t
+     real(dp) :: avg_m4_t  !average of sum(Mst_sub_total_norm**4) over t
 
   end type spin_observable_t
 
@@ -111,6 +112,8 @@ contains
     ABI_ALLOCATE(self%Mst_sub,(3, self%nsublatt) )
     ABI_ALLOCATE(self%Mst_sub_norm, (self%nsublatt))
 
+    ABI_ALLOCATE(self%Avg_Mst_sub_norm, (self%nsublatt))
+
     do i =1, self%nspins
        self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_qpoint, supercell%Rvec(:,i))))
     end do
@@ -121,7 +124,11 @@ contains
   subroutine ob_reset(self, params)
     ! set values to zeros.
     class(spin_observable_t), intent(inout) :: self
-    class(multibinit_dtset_type), intent(in) :: params
+    class(multibinit_dtset_type), optional, intent(in) :: params
+    if (present(params)) then
+       self%temperature=params%spin_temperature
+       self%nscell = product(params%ncell)
+    end if
     self%ntime=0
     self%Cv=0.0
     self%binderU4=0.0
@@ -130,7 +137,14 @@ contains
     self%Mst_norm_total=0.0
     self%Mst_sub(:,:)=0.0
     self%Mst_sub_norm(:)=0.0
-    self%temperature=params%spin_temperature
+    self%Avg_Mst_sub_norm(:) =0.0
+    self%Avg_Mst_norm_total = 0.0
+    self%avg_e_t=0.0
+    self%avg_e2_t=0.0
+
+    self%avg_m_t=0.0
+    self%avg_m2_t=0.0
+    self%avg_m4_t=0.0
   end subroutine ob_reset
 
   subroutine ob_finalize(self)
@@ -161,6 +175,9 @@ contains
     if (allocated(self%Mst_sub_norm)) then
        ABI_DEALLOCATE(self%Mst_sub_norm)
     endif
+    if (allocated(self%Avg_Mst_sub_norm)) then
+       ABI_DEALLOCATE(self%Avg_Mst_sub_norm)
+    endif
 
   end subroutine ob_finalize
 
@@ -184,11 +201,13 @@ contains
        self%M_total(:) = self%M_total + self%S(:, i)*self%Snorm(i)
     end do
 
-    self%Mst_sub_norm =sqrt(sum(self%Mst_sub**2, dim=1))
-    self%Mst_norm_total= sum(self%Mst_sub_norm)
-    self%M_total_norm = sqrt(sum(self%M_total**2))
-    self%Snorm_total = sum(self%Snorm)
+    self%Mst_sub_norm(:) =sqrt(sum(self%Mst_sub**2, dim=1))/self%nscell
+    self%Mst_norm_total= sum(self%Mst_sub_norm(:))
+    !self%M_total_norm = sqrt(sum(self%M_total**2))/self%nscell
+    self%Snorm_total = sum(self%Snorm)/self%nscell
 
+    self%avg_Mst_sub_norm(:)=(self%avg_Mst_sub_norm(:)*self%ntime + self%Mst_sub_norm(:))/(self%ntime+1)
+    self%avg_Mst_norm_total=(self%avg_Mst_norm_total*self%ntime + self%Mst_norm_total)/(self%ntime+1)
   end subroutine ob_calc_staggered_M
 
   subroutine ob_calc_traj_obs(self)
@@ -201,24 +220,24 @@ contains
     ! Cv
     self%avg_E_t = (self%avg_E_t*self%ntime + self%energy)/(self%ntime+1)
     self%avg_E2_t = (self%avg_E2_t*self%ntime + self%energy**2)/(self%ntime+1)
-    if(self%temperature<1d-20) then
-       self%Cv=0.0
+    if(self%temperature<1d-10) then
+       self%Cv=0.0d0
     else
        self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2/kb_SI
     end if
 
 
     !
-    avgm=self%Mst_norm_total/self%nsublatt
+    avgm=self%Mst_norm_total
 
     self%avg_m_t =  (self%avg_m_t*self%ntime + avgm)/(self%ntime+1)
-    self%avg_m2_t = (self%avg_m_t*self%ntime + avgm**2)/(self%ntime+1)
-    self%avg_m4_t = (self%avg_m_t*self%ntime + avgm**4)/(self%ntime+1)
+    self%avg_m2_t = (self%avg_m2_t*self%ntime + avgm**2)/(self%ntime+1)
+    self%avg_m4_t = (self%avg_m4_t*self%ntime + avgm**4)/(self%ntime+1)
 
     self%binderU4 = 1.0-self%avg_m4_t/self%avg_m2_t**2/3.0
 
-    if(self%temperature<1d-20) then
-       self%chi=0.0
+    if(self%temperature<1d-10) then
+       self%chi=0.0d0
     else
        self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature
     endif
@@ -246,6 +265,7 @@ contains
     if(self%calc_correlation_obs) then
        call ob_calc_correlation_obs(self)
     endif
+    self%ntime=self%ntime+1
 
   end subroutine ob_calc_observables
 

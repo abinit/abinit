@@ -35,7 +35,7 @@ module m_spin_mover
   use defs_basis
   use m_errors
   use m_abicore
-  use m_spin_observables , only : spin_observable_t, ob_calc_observables
+  use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
   use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, spin_terms_t_get_gamma_l, spin_terms_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
@@ -56,8 +56,8 @@ module m_spin_mover
   !! temperature.
   !! nspins number of magnetic atoms
   !! SOURCE
-  
-  
+
+
   type spin_mover_t
      integer :: nspins
      real(dp) :: dt, total_time, temperature, pre_time
@@ -100,7 +100,7 @@ contains
     self%total_time=total_time
     self%temperature=temperature
   end subroutine spin_mover_t_initialize
-!!***
+  !!***
 
 
 
@@ -126,7 +126,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  
+
   subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
 
     !class (spin_mover_t), intent(inout):: self
@@ -160,7 +160,7 @@ contains
     end do
   end subroutine spin_mover_t_run_one_step_HeunP
   !!***
- 
+
   subroutine spin_mover_t_run_one_step_DM(self, calculator, S_in, S_out, etot)
 
     ! TODO: implement Depondt & Mertens (2009) method. 
@@ -244,34 +244,33 @@ contains
     counter=0
     write(msg, *) " Beginning spin dynamic steps :"
 
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
     msg=repeat("=", 65)
 
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
     write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "Energy (Ha)"
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
     msg=repeat("-", 65)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
     if (abs(self%pre_time) > 1e-30) then
-       msg="Pre-run:"
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+       msg="Warming up run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
 
- 
        do while(t<self%pre_time)
           counter=counter+1
           call spin_mover_t_run_one_step(self, calculator, hist)
           call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
+          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+               hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
           if(mod(counter, hist%spin_nctime)==0) then
-             call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
-                  hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
              write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/Ha_J
@@ -284,12 +283,13 @@ contains
        t=0.0
        counter=0
        call spin_hist_t_reset(hist,array_to_zero=.False.)
-       msg="Formal run:"
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+       msg="Measurement run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
 
 
     endif
+    call ob_reset(ob)
 
     do while(t<self%total_time)
        counter=counter+1
@@ -309,42 +309,42 @@ contains
     enddo
 
     msg=repeat("-", 65)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
 
 
     write(msg, "(A27)") "Summary of spin dynamics:"
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
     write(msg, "(A65)") "At the end of the run, the average spin at each sublattice is"
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
 
     write(msg, "(6X, A10, 5X, 3A10, A11)")  'Sublattice', '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
 
     do i =1, ob%nsublatt
        write(msg, "(6X, 2X, I5.4, 8X, 4F10.5)")  i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
             sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B_SI)**2))
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
     end do
 
     msg=repeat("=", 65)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out, msg, 'COLL')
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
 
 
 
   end subroutine spin_mover_t_run_time
-!!***
+  !!***
 
-  
+
   !!****f* m_spin_mover/spin_mover_t_finalize
   !!
   !! NAME

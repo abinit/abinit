@@ -551,8 +551,10 @@ contains
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out, msg, "COLL")
 
-    write(Tmsg, "(A1, 5X, A13, 5X, A13, 5X, A13, 5X, A13, 5X, A13, 5X, (I13, 5X) )" ) &
-         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (i, i=1, self%spin_ob%nsublatt)
+    write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, (I13, 3X) )" ) &
+         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (ii, ii=1, self%spin_ob%nsublatt)
+    call wrtout(Tfile, Tmsg, "COLL")
+
 
     do i=1, T_nstep
        T=T_start+(i-1)*T_step
@@ -594,9 +596,9 @@ contains
        chi_list(i)=self%spin_ob%chi
        Cv_list(i)=self%spin_ob%Cv
        binderU4_list(i)=self%spin_ob%binderU4
-       Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)
-       Mst_sub_norm_list(:,i)=self%spin_ob%Mst_sub_norm(:)
-       Mst_norm_total_list(i)=self%spin_ob%Mst_norm_total
+       !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
+       Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
+       Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
 
        msg=repeat("-", 79)
        call wrtout(std_out, msg, "COLL")
@@ -607,9 +609,9 @@ contains
        call wrtout(ab_out,  Tmsg, "COLL")
 
 
-       write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, (E13.5, 3X) )" ) &
+       write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(E13.5, 3X) )" ) &
             T, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
-            & (Mst_sub_norm_list(:, ii), ii=1, self%spin_ob%nsublatt)
+            & (Mst_sub_norm_list(ii,i)/mu_B_SI, ii=1, self%spin_ob%nsublatt)
        call wrtout(std_out, Tmsg, "COLL")
        call wrtout(ab_out,  Tmsg, "COLL")
        call wrtout(Tfile, Tmsg, "COLL")
