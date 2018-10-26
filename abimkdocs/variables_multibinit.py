@@ -746,11 +746,12 @@ Variable(
     vartype="integer",
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="SPIN CALCulate THERMO dynamics OBServables",
     text="""
 Flag to calculate spin thermo dynamics observables,
 including the specific heat, magnetic susceptibility, Binder U4 value.
+It's recommend to always calculate these observables.
 
 * 0 --> do not calculate.
 

@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 27 Oct 2018.
-- ( at 00h01 )
+- ( at 00h21 )
   
 -  nproc =    1
 
@@ -1474,10 +1474,10 @@ Measurement run:
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         38.4  wall=         38.4
+- Proc.   0 individual time (sec): cpu=         38.3  wall=         38.3
 
 ================================================================================
 
-+Total cpu time     38.383  and wall time     38.384 sec
++Total cpu time     38.344  and wall time     38.345 sec
 
  multibinit : the run completed succesfully.

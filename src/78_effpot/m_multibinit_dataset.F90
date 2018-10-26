@@ -335,7 +335,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%temperature=325
 
  multibinit_dtset%spin_calc_traj_obs=0
- multibinit_dtset%spin_calc_thermo_obs=0
+ multibinit_dtset%spin_calc_thermo_obs=1
  multibinit_dtset%spin_calc_correlation_obs=0
  multibinit_dtset%spin_dipdip=0
  multibinit_dtset%spin_dynamics=1
@@ -1098,7 +1098,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_ERROR(message)
  end if
 
- multibinit_dtset%spin_calc_thermo_obs=0
+ multibinit_dtset%spin_calc_thermo_obs=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_calc_thermo_obs',tread,'INT')
  if(tread==1) multibinit_dtset%spin_calc_thermo_obs=intarr(1)
  if(multibinit_dtset%spin_calc_thermo_obs>1.or.multibinit_dtset%spin_calc_thermo_obs<0)then
