@@ -570,7 +570,7 @@ contains
        ! set temperature
        ! TODO make this into a subroutine set_params
        self%params%spin_temperature=T
-       call spin_terms_t_set_params(self%spin_calculator,temperature=T)
+       call spin_terms_t_set_params(self%spin_calculator, temperature=T)
        self%spin_mover%temperature=T
        call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=T)

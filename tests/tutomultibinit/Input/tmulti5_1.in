@@ -7,13 +7,17 @@ ncell =   16 16 16
 #-------------------------------------------------------------
 #Spin dynamics
 #------------------------------------------------------------
-spin_dynamics=1    
-spin_init_state = 2
-spin_temperature = 600
-spin_ntime =10000
-spin_nctime=100
-spin_dt=1e-16 s
-spin_qpoint = 0.0 0.0 0.0
+spin_mag_field = 0.0 0.0 0.0    ! external magnetic field (Tesla)
+spin_dynamics = 1               ! switch on spin dynamics
+spin_init_state = 2             ! ferromagnetic initial state
+
+spin_temperature = 600          ! temperature of spin (Kelvin)
+spin_ntime = 10000              ! Total number of time steps
+spin_nctime = 100               ! Number of time steps between two writes 
+                                ! into netcdf 
+spin_dt = 1e-16 s               ! Time step (seconds)  
+spin_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each 
+                                ! sublattice.
 
 
 #%%<BEGIN TEST_INFO>

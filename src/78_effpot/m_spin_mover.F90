@@ -242,7 +242,7 @@ contains
     character(len=80) :: msg
     t=0.0
     counter=0
-    write(msg, *) " Begining spin dynamic steps :"
+    write(msg, *) " Beginning spin dynamic steps :"
 
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
@@ -314,7 +314,7 @@ contains
 
 
 
-    write(msg, "(A30)") "Summary of spin dynamics:"
+    write(msg, "(A27)") "Summary of spin dynamics:"
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
 
@@ -323,13 +323,13 @@ contains
      call wrtout(ab_out, msg, 'COLL')
 
 
-    write(msg, "(8X, 10X, A5, A2, 4X, 4A10)")  'ID', ": ", '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
+    write(msg, "(6X, A10, 5X, 3A10, A11)")  'Sublattice', '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
 
 
     do i =1, ob%nsublatt
-       write(msg, "(8X, A10, I5.4, A2, 4X, 4F10.5)") "Sublattice", i, ": ", (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
+       write(msg, "(6X, 2X, I5.4, 8X, 4F10.5)")  i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
             sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B_SI)**2))
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
