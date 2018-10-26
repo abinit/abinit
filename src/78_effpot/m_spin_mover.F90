@@ -271,7 +271,7 @@ contains
           call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
           if(mod(counter, hist%spin_nctime)==0) then
              call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
-                  hist%Snorm(:,hist%ihist_prev), hist%energy(hist%ihist_prev))
+                  hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
              write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/Ha_J
@@ -297,7 +297,7 @@ contains
        call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
        if(mod(counter, hist%spin_nctime)==0) then
           call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
-               hist%Snorm(:,hist%ihist_prev), hist%energy(hist%ihist_prev))
+               hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
           call spin_ncfile_t_write_one_step(ncfile, hist)
           write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
                & ob%Mst_norm_total/ob%Snorm_total, &

@@ -143,7 +143,7 @@ contains
 
     call ab_define_var(self%ncid, (/self%three, self%nsublatt, self%ntime/), self%Mst_sub_id, NF90_DOUBLE, "Mst_sub", "Sublattice staggered M", "Bohr magneton")
     call ab_define_var(self%ncid, (/ self%nsublatt, self%ntime/), self%Mst_sub_norm_id, NF90_DOUBLE, "Mst_sub_norm", "Norm of sublattice staggered M", "Bohr magneton")
-    call ab_define_var(self%ncid, (/self%ntime/), self%Ms_norm_total_id, NF90_DOUBLE, "Mst_norm_total", "total Norm of sublattice M", "Bohr magneton")
+    call ab_define_var(self%ncid, (/self%ntime/), self%Mst_norm_total_id, NF90_DOUBLE, "Mst_norm_total", "total Norm of sublattice M", "Bohr magneton")
     call ab_define_var(self%ncid, (/self%ntime/), self%Snorm_total_id, NF90_DOUBLE, "Snorm_sub", "Snorm of sublattice", "Bohr magneton")
 
     if(ob%calc_thermo_obs)then
@@ -203,10 +203,10 @@ end subroutine spin_ncfile_t_def_ob
             &      start=[1, 1, itime], count=[3, ob%nsublatt, 1])
        ncerr=nf90_put_var(self%ncid, self%Mst_sub_norm_id, ob%Mst_sub_norm, &
             &      start=[ 1, itime], count=[ob%nsublatt, 1])
-       ncerr=nf90_put_var(self%ncid, self%Mst_norm_total_id, ob%Mst_norm_total_id, &
+       ncerr=nf90_put_var(self%ncid, self%Mst_norm_total_id, [ob%Mst_norm_total], &
             &      start=[itime], count=[1])
 
-       ncerr=nf90_put_var(self%ncid, self%Snorm_total_id, ob%Snorm_total, &
+       ncerr=nf90_put_var(self%ncid, self%Snorm_total_id, [ob%Snorm_total], &
             &      start=[itime], count=[1])
 
        if(ob%calc_traj_obs)then

@@ -70,6 +70,7 @@ module m_spin_observables
 
   public :: ob_initialize
   public :: ob_finalize
+  public :: ob_reset
   public :: ob_calc_staggered_M
   public :: ob_calc_thermo_obs
   public :: ob_calc_correlation_obs
@@ -190,7 +191,7 @@ contains
 
   end subroutine ob_calc_staggered_M
 
-  subroutine ob_calc_traj_obs(self )
+  subroutine ob_calc_traj_obs(self)
     class(spin_observable_t) :: self
   end subroutine ob_calc_traj_obs
 
@@ -232,7 +233,7 @@ contains
        call ob_calc_thermo_obs(self)
     end if
     if(self%calc_correlation_obs) then
-       call calc_correlation_obs(self)
+       call ob_calc_correlation_obs(self)
     endif
 
   end subroutine ob_calc_observables
