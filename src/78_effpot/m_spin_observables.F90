@@ -199,19 +199,30 @@ contains
     class(spin_observable_t) :: self
     real(dp) :: avgm
     ! Cv
-    self%avg_E_t = (self%avg_E_t*self%ntime + self%energy)/self%ntime
-    self%avg_E2_t = (self%avg_E2_t*self%ntime + self%energy**2)/self%ntime
-    self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2/kb_SI
+    self%avg_E_t = (self%avg_E_t*self%ntime + self%energy)/(self%ntime+1)
+    self%avg_E2_t = (self%avg_E2_t*self%ntime + self%energy**2)/(self%ntime+1)
+    if(self%temperature<1d-20) then
+       self%Cv=0.0
+    else
+       self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2/kb_SI
+    end if
+
 
     !
     avgm=self%Mst_norm_total/self%nsublatt
 
-    self%avg_m_t =  (self%avg_m_t*self%ntime + avgm)/self%ntime
-    self%avg_m2_t = (self%avg_m_t*self%ntime + avgm**2)/self%ntime
-    self%avg_m4_t = (self%avg_m_t*self%ntime + avgm**4)/self%ntime
+    self%avg_m_t =  (self%avg_m_t*self%ntime + avgm)/(self%ntime+1)
+    self%avg_m2_t = (self%avg_m_t*self%ntime + avgm**2)/(self%ntime+1)
+    self%avg_m4_t = (self%avg_m_t*self%ntime + avgm**4)/(self%ntime+1)
 
     self%binderU4 = 1.0-self%avg_m4_t/self%avg_m2_t**2/3.0
-    self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature
+
+    if(self%temperature<1d-20) then
+       self%chi=0.0
+    else
+       self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature
+    endif
+
 
   end subroutine ob_calc_thermo_obs
 

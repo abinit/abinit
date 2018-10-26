@@ -567,7 +567,6 @@ contains
        call wrtout(ab_out,  msg, "COLL")
 
        call spin_hist_t_reset(self%spin_hist, array_to_zero=.False.)
-       call ob_reset(self%spin_ob, self%params)
        ! set temperature
        ! TODO make this into a subroutine set_params
        self%params%spin_temperature=T
@@ -575,7 +574,7 @@ contains
        self%spin_mover%temperature=T
        call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=T)
-
+       call ob_reset(self%spin_ob, self%params)
        ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
        if(i==0) then
           call spin_model_t_set_initial_spin(self)
@@ -599,18 +598,17 @@ contains
        Mst_sub_norm_list(:,i)=self%spin_ob%Mst_sub_norm(:)
        Mst_norm_total_list(i)=self%spin_ob%Mst_norm_total
 
-
        msg=repeat("-", 79)
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
-       write(Tmsg, "(A1, 5X, A13, 5X, A13, 5X, A13, 5X, A13, 5X, A13, 5X, (I13, 5X) )" ) &
+       write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, (I13, 3X) )" ) &
             "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (ii, ii=1, self%spin_ob%nsublatt)
        call wrtout(std_out, Tmsg, "COLL")
        call wrtout(ab_out,  Tmsg, "COLL")
 
 
-       write(Tmsg, "(6X, F13.5, 5X, ES13.5, 5X, ES13.5, 5X, E13.5, 5X, ES13.5, 5X, (E13.5, 5X) )" ) &
-            T, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i),&
+       write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, (E13.5, 3X) )" ) &
+            T, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
             & (Mst_sub_norm_list(:, ii), ii=1, self%spin_ob%nsublatt)
        call wrtout(std_out, Tmsg, "COLL")
        call wrtout(ab_out,  Tmsg, "COLL")
