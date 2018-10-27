@@ -2,16 +2,14 @@
 #Test for multibinit, just read xml and run spin dynamics
 ##############################################################################
 prt_model = 0
-ncell =   16 16 16
+ncell =   16 16 16              ! number of unit cells in supercell
 
-#-------------------------------------------------------------
-#Spin dynamics
-#------------------------------------------------------------
 spin_dynamics = 1               ! switch on spin dynamics
 spin_init_state = 2             ! ferromagnetic initial state
 
 spin_temperature = 600          ! temperature of spin (Kelvin)
-spin_ntime = 10000              ! Total number of time steps
+spin_ntime_pre = 10000          ! time steps for thermolization
+spin_ntime = 10000              ! time steps for measurement
 spin_nctime = 100               ! Number of time steps between two writes 
                                 ! into netcdf 
 spin_dt = 1e-16 s               ! Time step (seconds)  

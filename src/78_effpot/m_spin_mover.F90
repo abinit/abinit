@@ -260,7 +260,7 @@ contains
     call wrtout(ab_out, msg, 'COLL')
 
     if (abs(self%pre_time) > 1e-30) then
-       msg="Warming up run:"
+       msg="Thermolization run:"
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
 
