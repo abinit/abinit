@@ -1282,7 +1282,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
 ! === Calculate the contribution to energy ===
 ! ============================================
 !* Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
-!* at each convergence step. (consistent definition with the defintion of hartree energy)
+!* at each convergence step. (consistent definition with the definition of hartree energy)
  if (fockcommon%ieigen/=0) then
    eigen=zero
 !* Dot product of cwavef and ghc

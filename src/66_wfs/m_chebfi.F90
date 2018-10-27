@@ -144,7 +144,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  real(dp), allocatable, dimension(:,:), target :: cg_alltoall2,gsc_alltoall2,ghc_alltoall2,gvnlxc_alltoall2
  real(dp), pointer, dimension(:,:) :: cg_filter, gsc_filter, ghc_filter, gvnlxc_filter
  real(dp) :: resid_vec(2, npw*nspinor)
- logical :: paw
+ logical :: has_fock,paw
  integer :: shift, shift_cg_loadbalanced
  integer :: iband, iline, ispinor
  integer :: sij_opt, cpopt
@@ -182,6 +182,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
  !Initializations
  paw = gs_hamk%usepaw == 1
+ has_fock=(associated(gs_hamk%fockcommon))
  mcg = npw*nspinor*nband
 
  ! Init pcon
@@ -472,7 +473,8 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    ghc_filter(:, shift+1:shift+npw_filter*nspinor) = ghc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
    if(paw) then
      gsc_filter(:, shift+1:shift+npw_filter*nspinor) = gsc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
-   else
+   endif
+   if(.not.paw .or. has_fock)then
      gvnlxc_filter(:, shift+1:shift+npw_filter*nspinor) = gvnlxc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
    end if
  end do
@@ -555,9 +557,9 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! _subdiago might use less memory when using only one proc, should maybe call it, or just remove it
  ! and always call _distributed
 #if defined HAVE_LINALG_SCALAPACK
- call rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
+ call rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
 #else
- call rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
+ call rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
 #endif
 
  ! Build residuals
@@ -579,7 +581,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    call dotprod_g(resid(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,resid_vec,&
 &   resid_vec,mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 
-   if(.not. paw) then
+   if(.not. paw .or. has_fock) then
      call dotprod_g(enlx(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
 &     gvnlxc(:, shift+1:shift+npw_filter*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if

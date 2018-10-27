@@ -88,7 +88,7 @@ contains
 !!
 !! SOURCE
 
-subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
+subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -104,6 +104,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,
  integer,intent(in) :: nband,npw,nspinor,usepaw,istwf_k
  real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlxc(2,npw*nspinor*nband)
  real(dp),intent(out) :: eig(nband)
+ logical :: has_fock
 
  ! Locals
  real(dp), allocatable :: subham(:), totham(:,:)
@@ -209,7 +210,8 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,
  if(usepaw == 1) then
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gsc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gsc = gtempc
- else
+ endif
+ if(usepaw==0 .or has_fock)then
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gvnlxc = gtempc
  end if
@@ -223,7 +225,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,
 
  ! orthonormalization
  call timab(timer_ortho, 1, tsec)
- if (paw) then
+ if (usepaw==1) then
    call abi_xorthonormalize(cg, gsc,nband, mpi_enreg%comm_bandspinorfft, sqgram, npw*nspinor, 2)
  else
    call abi_xorthonormalize(cg, cg, nband, mpi_enreg%comm_bandspinorfft, sqgram, npw*nspinor, 2)
@@ -233,9 +235,10 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,
  ! rotate ghc, gsc and gvnlxc
  call timab(timer_rotation, 1, tsec)
  call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, ghc,npw*nspinor,x_cplx=2)
- if(paw) then
+ if(usepaw==1) then
    call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gsc,npw*nspinor,x_cplx=2)
- else
+ endif
+ if(usepaw==0 .or has_fock)then
    call abi_xtrsm('r','u','n','n',npw*nspinor,nband,cone,sqgram,nband, gvnlxc,npw*nspinor,x_cplx=2)
  end if
  call timab(timer_rotation, 2, tsec)
@@ -269,7 +272,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,
  call timab(timer_rotation, 1, tsec)
  call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,ghc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
  ghc = gtempc
- if(.not. paw) then
+ if(usepaw==0 .or has_fock)then
    call abi_xgemm('n','n',npw*nspinor,nband, nband,cone,gvnlxc, npw*nspinor, evec, nband, czero, gtempc, npw*nspinor, x_cplx=2)
    gvnlxc = gtempc
  end if
@@ -318,7 +321,7 @@ end subroutine rayleigh_ritz_subdiago
 !!
 !! SOURCE
 
-subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
+subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -336,6 +339,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nba
  integer,intent(in) :: nband,npw,nspinor,usepaw,istwf_k
  real(dp),intent(inout) :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband),ghc(2,npw*nspinor*nband),gvnlxc(2,npw*nspinor*nband)
  real(dp),intent(out) :: eig(nband)
+ logical :: has_fock
 
  ! Locals
  integer :: blocksize,nbproc,iproc,ierr,cplx,vectsize
@@ -543,7 +547,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nba
    if(usepaw == 1) then
      call from_mat_to_block_cyclic(gsc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
-   else
+   endif
+   if(usepaw==0 .or. use_fock)then
      call from_mat_to_block_cyclic(gvnlxc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
    end if
@@ -562,7 +567,8 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,istwf_k,mpi_enreg,nba
  ghc = ghc_new
  if(usepaw == 1) then
    gsc = gsc_or_vnlxc_new
- else
+ endif
+ if(usepaw==0 .or. has_fock)then
    gvnlxc = gsc_or_vnlxc_new
  end if
  call timab(timer_rotation, 2, tsec)
