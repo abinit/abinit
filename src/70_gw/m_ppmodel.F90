@@ -57,8 +57,8 @@ MODULE m_ppmodel
  integer,public,parameter :: PPM_ENGEL_FARID     = 4
 
  ! Flags giving the status of the pointers defined in ppmodel_t
- integer,private,parameter :: PPM_ISPOINTER  =1 ! The pointer is used to store the address in memory.
- integer,private,parameter :: PPM_ISALLOCATED=2 ! The pointer is used as an allocable array.
+ integer,private,parameter :: PPM_ISPOINTER   = 1 ! The pointer is used to store the address in memory.
+ integer,private,parameter :: PPM_ISALLOCATED = 2 ! The pointer is used as an allocable array.
 
  ! Flags giving the status of the plasmon-pole tables
  integer,private,parameter :: PPM_NOTAB         = 0
@@ -227,8 +227,6 @@ CONTAINS  !=====================================================================
 
 subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz
@@ -346,8 +344,6 @@ end subroutine ppm_get_qbz
 
 subroutine ppm_nullify(PPm)
 
- implicit none
-
 !Arguments ------------------------------------
  type(ppmodel_t),intent(inout) :: PPm
 ! *********************************************************************
@@ -381,8 +377,6 @@ end subroutine ppm_nullify
 !! SOURCE
 
 subroutine ppm_free(PPm)
-
- implicit none
 
 !Arguments ------------------------------------
  type(ppmodel_t),intent(inout) :: PPm
@@ -491,8 +485,6 @@ end subroutine ppm_free
 
 subroutine ppm_mallocq(PPm,iq_ibz)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: iq_ibz
  type(ppmodel_t),intent(inout) :: PPm
@@ -534,8 +526,6 @@ end subroutine ppm_mallocq
 !! SOURCE
 
 subroutine ppm_table_free(PPm,iq_ibz)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: iq_ibz
@@ -586,8 +576,6 @@ end subroutine ppm_table_free
 !! SOURCE
 
 subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mqmem,nqibz,npwe,ppmodel,invalid_freq
@@ -737,8 +725,6 @@ end subroutine ppm_init
 subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngfftf,rhor_tot,&
 & iqiA) !Optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwe,nomega
@@ -859,8 +845,6 @@ end subroutine setup_ppmodel
 !! SOURCE
 
 subroutine getem1_from_ppm(PPm,mpwc,iqibz,zcut,nomega,omega,Vcp,em1q,only_ig1,only_ig2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1005,8 +989,6 @@ end subroutine getem1_from_ppm
 
 subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nomega
@@ -1121,8 +1103,6 @@ end subroutine getem1_from_ppm_one_ggp
 !! SOURCE
 
 subroutine get_ppm_eigenvalues(PPm,iqibz,zcut,nomega,omega,Vcp,eigenvalues)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1268,8 +1248,6 @@ end subroutine get_ppm_eigenvalues
 
 subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nomega,npwc
@@ -1400,8 +1378,6 @@ end subroutine cppm1par
 !! SOURCE
 
 subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatwsq,omegatw,invalid_freq)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1617,8 +1593,6 @@ end subroutine cppm2par
 !! SOURCE
 
 subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw,eigtot)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1884,8 +1858,6 @@ end subroutine cppm3par
 
 subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwc
@@ -2146,8 +2118,6 @@ end subroutine cppm4par
 
 subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwc
@@ -2255,8 +2225,6 @@ end subroutine cqratio
 
 subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
 & omegame0i,zcut,theta_mu_minus_e0i,eig,npwx,ket,sigcme)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2441,8 +2409,6 @@ end subroutine calc_sig_ppm
 
 subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_ggw,nfftf,ngfftf,rhor_tot)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwe,nomega,iq_bz
@@ -2599,8 +2565,6 @@ end subroutine ppm_symmetrizer
 
 subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,gvec,ngfftf,rhor_tot)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,npwe,nomega,iq_ibz
@@ -2727,8 +2691,6 @@ end subroutine new_setup_ppmodel
 !! SOURCE
 
 subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu_minus_e0i,npwx,ket,sigcme)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

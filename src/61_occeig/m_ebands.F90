@@ -286,8 +286,6 @@ CONTAINS  !=====================================================================
 
 function get_gaps(ebands,gaps,kmask) result(retcode)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),target,intent(in)  :: ebands
@@ -390,8 +388,6 @@ end function get_gaps
 
 subroutine gaps_free(gaps)
 
- implicit none
-
 !Arguments ------------------------------------
  type(gaps_t),intent(inout) :: gaps
 
@@ -442,8 +438,6 @@ end subroutine gaps_free
 !! SOURCE
 
 subroutine gaps_print(gaps,header,unit,mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -555,8 +549,6 @@ subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
 & nband,nkpt,npwarr,nsppol,nspinor,tphysel,tsmear,occopt,occ,wtk,&
 & charge, kptopt, kptrlatt_orig, nshiftk_orig, shiftk_orig, kptrlatt, nshiftk, shiftk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot,nkpt,nsppol,nspinor,occopt
@@ -664,8 +656,6 @@ end subroutine ebands_init
 
 type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband
@@ -727,8 +717,6 @@ end function ebands_from_hdr
 
 type(ebands_t) function ebands_from_dtset(dtset, npwarr) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtset
@@ -788,8 +776,6 @@ end function ebands_from_dtset
 
 subroutine ebands_free(ebands)
 
- implicit none
-
 !Arguments ------------------------------------
  class(ebands_t),intent(inout) :: ebands
 ! *************************************************************************
@@ -838,8 +824,6 @@ end subroutine ebands_free
 !! SOURCE
 
 subroutine ebands_copy(ibands,obands)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -919,8 +903,6 @@ end subroutine ebands_copy
 !! SOURCE
 
 subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1027,8 +1009,6 @@ end subroutine ebands_print
 
 subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d,val)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,nsppol,mband
@@ -1094,8 +1074,6 @@ end subroutine unpack_eneocc
 
 subroutine pack_eneocc(nkpt,nsppol,mband,nband,bantot,array3d,vect)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,nsppol,mband,bantot
@@ -1152,8 +1130,6 @@ end subroutine pack_eneocc
 !! SOURCE
 
 subroutine get_eneocc_vect(ebands,arr_name,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1217,8 +1193,6 @@ end subroutine get_eneocc_vect
 
 subroutine put_eneocc_vect(ebands,arr_name,vect)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: arr_name
@@ -1274,8 +1248,6 @@ end subroutine put_eneocc_vect
 
 pure real(dp) function get_bandenergy(ebands) result(band_energy)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(in) :: ebands
@@ -1319,8 +1291,6 @@ end function get_bandenergy
 !! SOURCE
 
 pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1378,8 +1348,6 @@ end function get_valence_idx
 
 pure subroutine get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(in) :: ebands
@@ -1434,8 +1402,6 @@ end subroutine get_bands_from_erange
 !! SOURCE
 
 subroutine apply_scissor(ebands,scissor_energy)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1517,8 +1483,6 @@ end subroutine apply_scissor
 
 pure function get_occupied(ebands,tol_occ) result(occ_idx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),optional,intent(in) :: tol_occ
@@ -1591,8 +1555,6 @@ end function get_occupied
 !! SOURCE
 
 subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,degblock)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1690,8 +1652,6 @@ end subroutine enclose_degbands
 
 subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpts
@@ -1760,8 +1720,6 @@ end subroutine ebands_get_erange
 
 pure function ebands_nelect_per_spin(ebands) result(nelect_per_spin)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(in) :: ebands
@@ -1814,8 +1772,6 @@ end function ebands_nelect_per_spin
 !! SOURCE
 
 function get_minmax(ebands,arr_name) result(minmax)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1882,8 +1838,6 @@ end function get_minmax
 
 type(stats_t) function ebands_edstats(ebands) result(stats)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(in) :: ebands
@@ -1942,8 +1896,6 @@ end function ebands_edstats
 
 pure logical function ebands_has_metal_scheme(ebands) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
  class(ebands_t),intent(in) :: ebands
 
@@ -1981,8 +1933,6 @@ end function ebands_has_metal_scheme
 !! SOURCE
 
 integer function ebands_write_bxsf(ebands, crystal, fname) result(ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2044,8 +1994,6 @@ end function ebands_write_bxsf
 !! SOURCE
 
 subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2219,8 +2167,6 @@ end subroutine ebands_update_occ
 
 subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(inout) :: ebands
@@ -2284,8 +2230,6 @@ end subroutine ebands_set_scheme
 !! SOURCE
 
 subroutine ebands_set_fermie(ebands, fermie, msg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2374,8 +2318,6 @@ end subroutine ebands_set_fermie
 
 subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(ebands_t),intent(inout) :: ebands
@@ -2428,8 +2370,6 @@ end subroutine ebands_set_nelect
 !! SOURCE
 
 real(dp) pure function ebands_calc_nelect(self, kt, fermie) result(nelect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2489,8 +2429,6 @@ end function ebands_calc_nelect
 !! SOURCE
 
 subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2613,8 +2551,6 @@ end subroutine ebands_report_gap
 !! SOURCE
 
 integer function ebands_ncwrite(ebands,ncid) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2793,8 +2729,6 @@ end function ebands_ncwrite
 
 integer function ebands_ncwrite_path(ebands,path) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -2856,8 +2790,6 @@ end function ebands_ncwrite_path
 !! SOURCE
 
 type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) result(edos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3037,14 +2969,11 @@ end function ebands_get_edos
 
 subroutine edos_free(edos)
 
- implicit none
-
 !Arguments ------------------------------------
  type(edos_t),intent(inout) :: edos
 
 ! *********************************************************************
 
- !@edos_t
 !real
  ABI_SFREE(edos%mesh)
  ABI_SFREE(edos%dos)
@@ -3079,8 +3008,6 @@ end subroutine edos_free
 !! SOURCE
 
 subroutine edos_write(edos, path)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: path
@@ -3165,8 +3092,6 @@ end subroutine edos_write
 
 integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
  type(edos_t),intent(in) :: edos
@@ -3214,7 +3139,6 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 
 contains
   pure function pre(istr) result(ostr)
-
     character(len=*),intent(in) :: istr
     character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
     ostr = trim(prefix_) // trim(istr)
@@ -3246,8 +3170,6 @@ end function edos_ncwrite
 !! SOURCE
 
 subroutine edos_print(edos, unit)
-
- implicit none
 
 !Arguments ------------------------------------
  type(edos_t),intent(in) :: edos
@@ -3303,8 +3225,6 @@ end subroutine edos_print
 
 integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermie_nest,&
   qpath_vertices,errmsg) result(skipnest)
-
- implicit none
 
 !Arguments ------------------------------------
  class(ebands_t),intent(in) :: ebands
@@ -3409,8 +3329,6 @@ end function ebands_write_nesting
 !! SOURCE
 
 subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, outb)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3571,8 +3489,6 @@ end subroutine ebands_expandk
 
 type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, in_shiftk) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: in_nshiftk
@@ -3707,8 +3623,6 @@ end function ebands_downsample
 !! SOURCE
 
 type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3901,8 +3815,6 @@ end function ebspl_new
 
 subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,spin
@@ -3981,8 +3893,6 @@ end subroutine ebspl_eval_bks
 !! SOURCE
 
 subroutine ebspl_free(ebspl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4063,8 +3973,6 @@ end subroutine ebspl_free
 
 
 function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm) result(new)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4201,8 +4109,6 @@ end function ebands_interp_kmesh
 
 type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -4336,8 +4242,6 @@ end function ebands_interp_kpath
 !! SOURCE
 
 subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4518,8 +4422,6 @@ end subroutine ebands_get_jdos
 !! SOURCE
 
 subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4742,8 +4644,6 @@ end subroutine ebands_prtbltztrp
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
        natom, nband, nelec, nkpt, nspinor, nsppol, nsym, rprimd, symrel, tau_k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom, nsym, nband, nkpt, nsppol, nspinor, ntemper
@@ -4937,8 +4837,6 @@ end subroutine ebands_prtbltztrp_tau_out
 
 subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: prtebands
@@ -4998,8 +4896,6 @@ end subroutine ebands_write
 !! SOURCE
 
 subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5133,8 +5029,6 @@ end subroutine ebands_write_xmgrace
 !! SOURCE
 
 subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5288,8 +5182,6 @@ end subroutine ebands_write_gnuplot
 !! SOURCE
 
 subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

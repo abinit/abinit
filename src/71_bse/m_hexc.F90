@@ -247,8 +247,6 @@ CONTAINS  !=====================================================================
 
 subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BSt, QP_BSt, comm)
 
- implicit none
-
 !Arguments ---------------------------
 !scalars
  integer,intent(in) :: comm

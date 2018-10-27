@@ -163,8 +163,6 @@ contains  !============================================================
 
 subroutine fstab_free(fstab)
 
- implicit none
-
 !Arguments ------------------------------------
  type(fstab_t),intent(inout) :: fstab
 
@@ -223,8 +221,6 @@ end subroutine fstab_free
 !! SOURCE
 
 subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshiftk, shiftk, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -519,8 +515,6 @@ end subroutine fstab_init
 
 integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(fstab_t),intent(in) :: fstab
@@ -568,8 +562,6 @@ end function fstab_findkg0
 !! SOURCE
 
 subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -648,8 +640,6 @@ end subroutine fstab_weights_ibz
 !! SOURCE
 
 subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -730,8 +720,6 @@ end subroutine fstab_print
 !! SOURCE
 
 subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
