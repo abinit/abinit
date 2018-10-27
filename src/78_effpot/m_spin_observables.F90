@@ -220,7 +220,7 @@ contains
     ! Cv
     self%avg_E_t = (self%avg_E_t*self%ntime + self%energy)/(self%ntime+1)
     self%avg_E2_t = (self%avg_E2_t*self%ntime + self%energy**2)/(self%ntime+1)
-    if(self%temperature<1d-10) then
+    if(self%temperature<1d-12) then
        self%Cv=0.0d0
     else
        self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2/kb_SI
@@ -236,10 +236,10 @@ contains
 
     self%binderU4 = 1.0-self%avg_m4_t/self%avg_m2_t**2/3.0
 
-    if(self%temperature<1d-10) then
-       self%chi=0.0d0
+    if(self%temperature<1d-12) then
+       self%chi=(self%avg_m2_t-self%avg_m_t**2)
     else
-       self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature
+       self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature/kb_SI
     endif
 
 
