@@ -362,7 +362,7 @@ program multibinit
 &         fit_tolMSDFS=inp%fit_tolMSDFS,&
 &         verbose=.true.,positive=.false.,&
 &         anharmstr=inp%fit_anhaStrain==1,&
-&         spcoupling=inp%fit_SPCoupling==1)
+&         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names)
        end if
      else
        write(message, '(3a)' )&

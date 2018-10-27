@@ -60,6 +60,7 @@ module m_multibinit_dataset
     
 ! Integer
   integer :: asr
+  integer :: analyze_anh_pot
   integer :: brav
   integer :: chneut
   integer :: confinement
@@ -102,6 +103,7 @@ module m_multibinit_dataset
   integer :: nsphere
   integer :: optcell
   integer :: prt_model
+  integer :: prt_names
   integer :: dipdip_prt
   integer :: prt_phfrq
   integer :: prt_ifc
@@ -270,6 +272,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 !Scalars
 !=====================================================================
  multibinit_dtset%asr=2
+ multibinit_dtset%analyze_anh_pot=0 
  multibinit_dtset%brav=1
  multibinit_dtset%bmass=0
  multibinit_dtset%chneut=0
@@ -323,6 +326,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%nsphere=0
  multibinit_dtset%optcell=0
  multibinit_dtset%prt_model=0
+ multibinit_dtset%prt_names=0
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
  multibinit_dtset%strcpling = -1
@@ -553,6 +557,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !  is to be applied after the analysis of IFCs
 !  3,4 are for rotational invariance (under development)
 !  5 is for hermitian imposition of the ASR
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%analyze_anh_pot=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'analyze_anh_pot',tread,'INT')
+ if(tread==1) multibinit_dtset%analyze_anh_pot=intarr(1)
+ if(multibinit_dtset%analyze_anh_pot < 0 .or. multibinit_dtset%analyze_anh_pot > 1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'analyze_anh_pot is',multibinit_dtset%analyze_anh_pot,', but the only allowed values',ch10,&
+&   'are 0 and 1 .',ch10,&
+&   'Action: correct analyze_anh_pot in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -971,6 +986,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'prt_model is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct prt_model in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%prt_names=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_names',tread,'INT')
+ if(tread==1) multibinit_dtset%prt_names=intarr(1)
+ if(multibinit_dtset%prt_names<0.or.multibinit_dtset%prt_names>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'prt_names is',multibinit_dtset%prt_names,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct prt_names in your input file.'
    MSG_ERROR(message)
  end if
 

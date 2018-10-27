@@ -72,7 +72,7 @@ module m_mover
  use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
-
+ use m_effective_potential_file, only : effective_potential_file_mapHistToRef 
  implicit none
 
  private
@@ -228,8 +228,8 @@ type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,nshell,ntime,option,comm
-integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
+integer :: nloop,nshell,ntime,option,comm, mxhist 
+integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
 character(len=500) :: dilatmx_errmsg
@@ -241,7 +241,7 @@ real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
-logical :: skipcycle
+logical :: skipcycle, file_opened
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
@@ -320,6 +320,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  comm=scfcv_args%mpi_enreg%comm_cell
  me=xmpi_comm_rank(comm)
 
+ mxhist=zero 
+
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
@@ -330,6 +332,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
+   mxhist = hist_prev%mxhist ! Wirte number of MD-steps into mxhist  
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
@@ -370,17 +373,23 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  iexit=0; timelimit_exit=0
  ncycle=specs%ncycle
 
- if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0) then
+ if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
    ncycle=scfcv_args%dtset%hmctt
-   if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0) then
+   if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
      ncycle=ncycle+scfcv_args%dtset%hmcsst
    endif
  endif
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
-
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1) nhisttot = specs%nhist ! We don't need to store all the history
+ if(specs%nhist/=-1 .and. mxhist >= 3)then   ! then .and. hist%mxhist > 3 
+  nhisttot = specs%nhist! We don't need to store all the history
+ elseif(mxhist > 0 .and. mxhist  < 3)then
+  nhisttot = mxhist ! Less than three MD-Steps
+ end if
+
+ write(*,*) "mxhist", mxhist
+
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
@@ -389,7 +398,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !If effective potential is present,
 !  forces will be compute with it
- if (present(effective_potential)) then
+ if (present(effective_potential))then
    need_scfcv_cycle = .FALSE.
    if(need_verbose)then
      write(message,'(2a,i2,5a,80a)')&
@@ -604,6 +613,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          else
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
+
+           INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
+             if(file_opened .eqv. .TRUE.)then
+               write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
+             endif
+             if(itime == 1 .and. ab_mover%restartxf==-3)then
+               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
+               xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
+             end if 
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
@@ -831,7 +849,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
-     if (ab_mover%ionmov==13) then
+     if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then 
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)
@@ -1648,7 +1666,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use netcdf
 #endif
 
- use m_io_tools,   only : open_file
+ use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
  implicit none
 
