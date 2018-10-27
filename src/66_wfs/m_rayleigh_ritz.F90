@@ -211,7 +211,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enr
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gsc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gsc = gtempc
  endif
- if(usepaw==0 .or has_fock)then
+ if(usepaw==0 .or. has_fock)then
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlxc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gvnlxc = gtempc
  end if
