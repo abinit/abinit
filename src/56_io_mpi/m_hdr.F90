@@ -3651,7 +3651,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  !character(len=28), save :: occfmt='(2x, f4.1,t41,   a,2x, f4.1)'
  !character(len=28), save :: wtkfmt='(2x, f7.3,t41,   a,2x, f7.3)'
  !character(len=28), save :: zatfmt='(2x, f6.2,t41,   a,2x, f6.2)'
- character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt
+ character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt, typfmt
 !scalars
  integer,parameter :: mwarning=5,nkpt_max=5
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
@@ -3660,7 +3660,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  integer :: twvl,txred,enough
  real(dp) :: rms
  logical :: tfform2,tfform52
- character(len=26) :: typfmt
+ !character(len=26) :: typfmt
  character(len=500) :: msg
  type(abifile_t) :: abifile,abifile0
 
@@ -3932,7 +3932,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsym,12
      istop=min(istart+11,nsym)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),',i3,t41,a,2x,',itoa(nelm),'i3)')
+     !call mk_hdr_check_fmt(nelm,typfmt)
      write(msg,fmt=typfmt) hdr%symafm(istart:istop),'|',hdr0%symafm(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -3975,7 +3976,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,natom,12
      istop=min(istart+11,natom)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),',i3,t41,a,2x,',itoa(nelm),'i3)')
+     !call mk_hdr_check_fmt(nelm,typfmt)
      write(msg,fmt=typfmt) hdr%typat(istart:istop),'|',hdr0%typat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -3997,7 +3999,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,npsp  ,12
      istop=min(istart+11,npsp  )
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     !call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),',i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%so_psp  (istart:istop),'|',hdr0%so_psp  (istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4018,7 +4021,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nkpt,12
      istop=min(istart+11,nkpt)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     !call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),',i3,t41,a,2x,',itoa(nelm),'i3)')
      if (istart<=100) then
        write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
        call wrtout(std_out,msg,mode_paral)
