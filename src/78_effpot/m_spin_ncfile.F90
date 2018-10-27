@@ -142,15 +142,23 @@ contains
     ncerr = nf90_redef(self%ncid)
     ncerr = nf90_def_dim(self%ncid, "nsublatt", ob%nsublatt, self%nsublatt)
 
-    call ab_define_var(self%ncid, (/self%three, self%nsublatt, self%ntime/), self%Mst_sub_id, NF90_DOUBLE, "Mst_sub", "Sublattice staggered M", "Bohr magneton")
-    call ab_define_var(self%ncid, (/ self%nsublatt, self%ntime/), self%Mst_sub_norm_id, NF90_DOUBLE, "Mst_sub_norm", "Norm of sublattice staggered M", "Bohr magneton")
-    call ab_define_var(self%ncid, (/self%ntime/), self%Mst_norm_total_id, NF90_DOUBLE, "Mst_norm_total", "total Norm of sublattice M", "Bohr magneton")
-    call ab_define_var(self%ncid, (/self%ntime/), self%Snorm_total_id, NF90_DOUBLE, "Snorm_sub", "Snorm of sublattice", "Bohr magneton")
+    call ab_define_var(self%ncid, (/self%three, self%nsublatt, self%ntime/),& 
+           & self%Mst_sub_id, NF90_DOUBLE, "Mst_sub", "Sublattice staggered M", "Bohr magneton")
+    call ab_define_var(self%ncid, (/ self%nsublatt, self%ntime/), & 
+          &  self%Mst_sub_norm_id, NF90_DOUBLE, "Mst_sub_norm", &
+          &  "Norm of sublattice staggered M", "Bohr magneton")
+    call ab_define_var(self%ncid, (/self%ntime/), self%Mst_norm_total_id, &
+           & NF90_DOUBLE, "Mst_norm_total", "total Norm of sublattice M", "Bohr magneton")
+    call ab_define_var(self%ncid, (/self%ntime/), self%Snorm_total_id, &
+           & NF90_DOUBLE, "Snorm_sub", "Snorm of sublattice", "Bohr magneton")
 
     if(ob%calc_thermo_obs)then
-       call ab_define_var(self%ncid, (/self%ntime/), self%binderU4_id, NF90_DOUBLE, "BinderU4", "Binder U4", "1")
-       call ab_define_var(self%ncid, (/self%ntime/), self%Cv_id, NF90_DOUBLE, "Cv", "Specific heat", "Joule/K")
-       call ab_define_var(self%ncid, (/self%ntime/), self%chi_id, NF90_DOUBLE, "chi", "magnetic susceptibility", "1")
+       call ab_define_var(self%ncid, (/self%ntime/), self%binderU4_id, & 
+               & NF90_DOUBLE, "BinderU4", "Binder U4", "1")
+       call ab_define_var(self%ncid, (/self%ntime/), self%Cv_id, &
+               & NF90_DOUBLE, "Cv", "Specific heat", "Joule/K")
+       call ab_define_var(self%ncid, (/self%ntime/), self%chi_id, &
+               &NF90_DOUBLE, "chi", "magnetic susceptibility", "1")
     endif
 
     if(ob%calc_traj_obs)then
