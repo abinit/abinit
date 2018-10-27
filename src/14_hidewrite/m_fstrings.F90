@@ -106,6 +106,7 @@ MODULE m_fstrings
    module procedure strcat_2
    module procedure strcat_3
    module procedure strcat_4
+   module procedure strcat_5
  end interface strcat
 
  interface ltoa
@@ -1054,6 +1055,28 @@ pure function strcat_4(str1, str2, str3, str4) result(ostr)
  ostr = TRIM(str1)//TRIM(str2)//TRIM(str3)//TRIM(str4)
 
 end function strcat_4
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/strcat_5
+!! NAME
+!! strcat_5
+!!
+!! FUNCTION
+!!  Concatenate 5 strings
+!!
+
+pure function strcat_5(str1, str2, str3, str4, str5) result(ostr)
+
+ character(len=*),intent(in) :: str1,str2,str3,str4,str5
+ character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+LEN_TRIM(str4)+LEN_TRIM(str5)) :: ostr
+
+! *********************************************************************
+
+ ostr = TRIM(str1)//TRIM(str2)//TRIM(str3)//TRIM(str4)//trim(str5)
+
+end function strcat_5
 !!***
 
 !----------------------------------------------------------------------

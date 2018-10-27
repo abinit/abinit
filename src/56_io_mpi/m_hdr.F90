@@ -55,7 +55,7 @@ MODULE m_hdr
 
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
- use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust
+ use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust, strcat
  use m_symtk,         only : print_symmetries
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
@@ -3646,11 +3646,12 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  type(hdr_type),intent(in) :: hdr,hdr0
 
 !Local variables-------------------------------
- character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
- character(len=24), save :: bndfmt='(2x, i4,t41,   a,2x, i4)'
- character(len=28), save :: occfmt='(2x, f4.1,t41,   a,2x, f4.1)'
- character(len=28), save :: wtkfmt='(2x, f7.3,t41,   a,2x, f7.3)'
- character(len=28), save :: zatfmt='(2x, f6.2,t41,   a,2x, f6.2)'
+ !character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
+ !character(len=24), save :: bndfmt='(2x, i4,t41,   a,2x, i4)'
+ !character(len=28), save :: occfmt='(2x, f4.1,t41,   a,2x, f4.1)'
+ !character(len=28), save :: wtkfmt='(2x, f7.3,t41,   a,2x, f7.3)'
+ !character(len=28), save :: zatfmt='(2x, f6.2,t41,   a,2x, f6.2)'
+ character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt
 !scalars
  integer,parameter :: mwarning=5,nkpt_max=5
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
@@ -3879,9 +3880,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsppol*nkpt,9
      istop = min(istart + 8,nsppol*nkpt)
      mu = istop - istart + 1
-!    generate a format specifier
-     bndfmt(5:5) = number(mu)
-     bndfmt(21:21) = number(mu)
+     ! generate a format specifier
+     bndfmt = strcat('(2x,',itoa(mu),'i4,t41,a,2x,',itoa(mu),'i4)')
+     !bndfmt(5:5) = number(mu)
+     !bndfmt(21:21) = number(mu)
      if (istart<=100) then
        write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
        call wrtout(std_out,msg,mode_paral)
@@ -4106,8 +4108,9 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    istop = min(nkpt,nkpt_max)
    do ii = 1, istop, 5
      mu = min(5, istop - ii + 1)
-     wtkfmt(5:5) = number(mu)
-     wtkfmt(23:23) = number(mu)
+     !wtkfmt(5:5) = number(mu)
+     !wtkfmt(23:23) = number(mu)
+     wtkfmt = strcat('(2x,',itoa(mu),'f7.3,t41,a,2x,',itoa(mu),'f7.3)')
      write(msg, wtkfmt)hdr%wtk(ii:min(istop, ii + 5 - 1)),'|',hdr0%wtk(ii:min(istop, ii + 5 - 1))
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4140,8 +4143,9 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,bantot_eff,9
      istop = min(istart+8,bantot_eff)
      mu = istop - istart + 1
-     occfmt(5:5) = number(mu)
-     occfmt(23:23) = number(mu)
+     !occfmt(5:5) = number(mu)
+     !occfmt(23:23) = number(mu)
+     occfmt = strcat('(2x,',itoa(mu),'f4.1,t41,a,2x,',itoa(mu),'f4.1)')
      write(msg,fmt=occfmt)hdr%occ(istart:istop),'|', hdr0%occ(istart:istop)
      call wrtout(std_out,msg,mode_paral)
      if(istart>9*nkpt_max)then
@@ -4195,8 +4199,9 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,ntypat,6
      istop = min(istart+5,ntypat)
      mu = istop-istart+1
-     zatfmt(5:5) = number(mu)
-     zatfmt(23:23) = number(mu)
+     !zatfmt(5:5) = number(mu)
+     !zatfmt(23:23) = number(mu)
+     zatfmt = strcat('(2x,',itoa(mu),'f6.2,t41,a,2x,',itoa(mu),'f6.2)')
      write(msg,fmt=zatfmt) hdr%znucltypat(istart:istop),'|',hdr0%znucltypat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
