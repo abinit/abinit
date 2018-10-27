@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 27 Oct 2018.
-- ( at 00h19 )
+- ( at 12h48 )
   
 -  nproc =    1
 
@@ -189,16 +189,16 @@ dipdip_range        16        16        16
          0001          -0.33238   0.12341   0.29302   0.45996
 -----------------------------------------------------------------
 # Temperature              Cv             chi        BinderU4             Mst
-    600.00000     3.74360E-18     3.84959E-52     0.63864E+00     4.30472E-01
+    600.00000     3.74360E-18     2.78824E-29     0.63864E+00     4.30472E-01
 =================================================================
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.6
 
 ================================================================================
 
-+Total cpu time      6.807  and wall time      6.807 sec
++Total cpu time      6.621  and wall time      6.621 sec
 
  multibinit : the run completed succesfully.

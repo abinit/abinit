@@ -613,7 +613,7 @@ contains
 
     do i = 1, T_nstep
        write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5 )" ) &
-            T, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total
+            Tlist(i), Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
     end do
