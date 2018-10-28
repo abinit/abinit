@@ -271,7 +271,7 @@ contains
           if(mod(counter, hist%spin_nctime)==0) then
              call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
                   hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
-             write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
+             write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/Ha_J
              ! total : 13+4+...= 64 
@@ -299,7 +299,7 @@ contains
             hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
        if(mod(counter, hist%spin_nctime)==0) then
           call spin_ncfile_t_write_one_step(ncfile, hist)
-          write(msg, "(I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") counter, t, &
+          write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t, &
                & ob%Mst_norm_total/ob%Snorm_total, &
                & hist%etot(hist%ihist_prev)/Ha_J
           call wrtout(std_out,msg,'COLL')
