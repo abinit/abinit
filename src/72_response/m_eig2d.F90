@@ -577,8 +577,8 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
    nctkarr_t('current_q_point', "dp", 'number_of_cartesian_directions'),&
    nctkarr_t('current_q_point_weight', "dp", 'current_one_dim'),&
    nctkarr_t('second_derivative_eigenenergies_actif', "dp", &
-&'product_mband_nsppol2, number_of_kpoints, number_of_cartesian_directions, &
-&number_of_atoms, number_of_cartesian_directions, number_of_atoms, max_number_of_states')])
+   'product_mband_nsppol2, number_of_kpoints, number_of_cartesian_directions, &
+   number_of_atoms, number_of_cartesian_directions, number_of_atoms, max_number_of_states')])
  NCF_CHECK(ncerr)
 
 ! Write data
