@@ -168,14 +168,13 @@ contains
     ! Depondt & Mertens method to roate S_in
     real(dp), intent(in) :: S_in(3), Heff(3), dt
     real(dp), intent(inout) :: S_out(3)
-    real(dp):: B(3) , w, u, Bnorm, R(3,3), cosw, sinw
-    integer :: i, j
+    real(dp) :: B(3) , w, u, Bnorm, R(3,3), cosw, sinw
     Bnorm=sqrt(sum(Heff*Heff))
     B(:)=Heff(:)/Bnorm
     w=Bnorm*dt
     !print *, w
     cosw=cos(w)
-    sinw=sin(w)
+    sinw=1.0d0-cosw*cosw
     u=1.0d0-cosw
     R(1,1)=B(1)*B(1)*u+cosw
     R(2,1)=B(1)*B(2)*u+B(3)*sinw
@@ -189,12 +188,6 @@ contains
     R(2,3)=B(2)*B(3)*u-B(1)*sinw
     R(3,3)=B(3)*B(3)*u+cosw
     S_out=matmul(R, S_in)
-    !S_out(:)=0.0_dp
-    !do j=1, 3
-    !   do i=1, 3
-    !      S_out(i)=S_out(i)+R(i,j)*S_in(j)
-    !   end do
-    !end do
   end subroutine rotate_S_DM
 
   subroutine spin_mover_t_run_one_step_DM(self, calculator, S_in, S_out, etot)
