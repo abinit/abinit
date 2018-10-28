@@ -476,11 +476,11 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  cart_dir = 3
 
  ncerr = nctk_def_dims(ncid, [&
-& nctkdim_t('current_one_dim', one_dim), &
-& nctkdim_t('number_of_atoms', natom), &
-& nctkdim_t('number_of_cartesian_directions', cart_dir), &
-& nctkdim_t('number_of_perturbations', mpert), &
-& nctkdim_t('cplex',cplex)], defmode=.True.)
+  nctkdim_t('current_one_dim', one_dim), &
+  nctkdim_t('number_of_atoms', natom), &
+  nctkdim_t('number_of_cartesian_directions', cart_dir), &
+  nctkdim_t('number_of_perturbations', mpert), &
+  nctkdim_t('cplex',cplex)], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ! Create the arrays

@@ -295,11 +295,11 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [&
-&  nctkarr_t('current_q_point', "dp", 'number_of_cartesian_directions'),&
-&  nctkarr_t('current_q_point_weight', "dp", 'current_one_dim'),&
-&  nctkarr_t('second_derivative_eigenenergies', "dp", &
-&    'cplex, product_mband_nsppol, number_of_kpoints, number_of_cartesian_directions, number_of_atoms,&
-& number_of_cartesian_directions, number_of_atoms')])
+   nctkarr_t('current_q_point', "dp", 'number_of_cartesian_directions'), &
+   nctkarr_t('current_q_point_weight', "dp", 'current_one_dim'), &
+   nctkarr_t('second_derivative_eigenenergies', "dp", &
+     'cplex, product_mband_nsppol, number_of_kpoints, number_of_cartesian_directions, number_of_atoms, &
+   number_of_cartesian_directions, number_of_atoms')])
  NCF_CHECK(ncerr)
 
 ! Write data
