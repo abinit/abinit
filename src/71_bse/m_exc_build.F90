@@ -666,6 +666,10 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          !
          ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
          call gsph_fft_tabs(Gsph_c,g0,mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
          if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
          if (use_padfft==0) then
            ABI_FREE(gbound)
@@ -2380,6 +2384,10 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
  call gsph_fft_tabs(Gsph_x,(/0,0,0/),mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
  if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
  if (use_padfft==0) then
    ABI_FREE(gbound)
    ABI_MALLOC(gbound,(2*mgfft_osc+8,2*use_padfft))

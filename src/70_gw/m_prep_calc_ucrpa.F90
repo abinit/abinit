@@ -629,7 +629,10 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      call gsph_fft_tabs(Gsph_x,g0,gwx_mgfft,gwx_ngfft,use_padfft,gwx_gbound,igfftxg0)
 
      if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-     !use_padfft=0
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
      if (use_padfft==0) then
        ABI_DEALLOCATE(gwx_gbound)
        ABI_ALLOCATE(gwx_gbound,(2*gwx_mgfft+8,2*use_padfft))

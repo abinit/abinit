@@ -494,6 +494,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
      if (ANY(gwx_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
      !use_padfft=0
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
      if (use_padfft==0) then
        ABI_FREE(gwx_gbound)
        ABI_MALLOC(gwx_gbound,(2*gwx_mgfft+8,2*use_padfft))

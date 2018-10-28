@@ -528,6 +528,10 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2))
      call gsph_fft_tabs(Gsph_c,g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
      if ( ANY(gwc_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
      if (use_padfft==0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2*use_padfft))
