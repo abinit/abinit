@@ -357,7 +357,7 @@ contains
     call wrtout(ab_out, msg, 'COLL')
 
     do i =1, ob%nsublatt
-       write(msg, "(6X, 2X, I5.4, 8X, 4F10.5)")  i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
+       write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
             sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B_SI)**2))
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')

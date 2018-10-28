@@ -15,8 +15,8 @@ ncell =   6 6 6  ! size of supercell. Is it too small?
 #------------------------------------------------------------
 spin_dynamics=1  ! enable spin dynamics
 spin_mag_field= 0.0 0.0 0.0   ! external magnetic field
-spin_ntime_pre =1000          ! warming up steps. Is it enough?
-spin_ntime =20000             ! number of steps. Is it enough?
+spin_ntime_pre =10000          ! warming up steps. Is it enough?
+spin_ntime =10000             ! number of steps. Is it enough?
 spin_nctime=100               ! number of  time steps between two nc file write
 spin_dt=1e-16 s               ! time step. Is it too small?
 spin_init_state = 2           ! FM initial state. May cause some trouble
