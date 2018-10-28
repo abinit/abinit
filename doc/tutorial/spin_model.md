@@ -8,7 +8,7 @@ authors: xuhe, NH
 
 This lesson aims at showing how to build a spin model and run a spin dynamics calculation.
 
-**Before beginning, it is important to know the theory of spin dynamics, which can be found in the literature (e.g.[[cite: Evans2014]] ).**
+**Before beginning, it is important to know the theory of spin dynamics, which can be found in the literature (e.g.[[cite: Evans2014]], [[cite: Eriksson2017]] ).**
 
 With this lesson, you will learn to:
 

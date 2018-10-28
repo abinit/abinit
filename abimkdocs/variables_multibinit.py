@@ -824,12 +824,12 @@ Flag to run spin dynamics.
 
 * 1 --> Run spin dynamics with HeunP integration method.
 
-* 2 --> Run spin dynamics with Depondt-Mertens method.
+* 2 --> Run spin dynamics with Depondt-Mertens method [[cite:Depondt2009]].
 
 The HeunP method does less computation for each step,
 whereas the Depondt-Mertens method allow larger time step.
 For system with very simple interaction terms, HeunP could be faster.
-Otherwise, use Depondt-Mertens method.
+Otherwise, use Depondt-Mertens method can be more efficient.
 """,
 ),
 
