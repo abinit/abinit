@@ -36,7 +36,9 @@ module m_spin_mover
   use m_errors
   use m_abicore
   use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
-  use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, spin_terms_t_get_gamma_l, spin_terms_t
+  use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, &
+       & spin_terms_t_get_gamma_l, spin_terms_t, spin_terms_t_total_Heff, spin_terms_t_get_etot, &
+       & spin_terms_t_Hrotate
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   implicit none
@@ -59,7 +61,7 @@ module m_spin_mover
 
 
   type spin_mover_t
-     integer :: nspins
+     integer :: nspins, method
      real(dp) :: dt, total_time, temperature, pre_time
      !CONTAINS
      !   procedure :: initialize => spin_mover_t_initialize
@@ -89,16 +91,17 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature, pre_time)
+  subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature, pre_time, method)
     !class (spin_mover_t):: self
     type(spin_mover_t), intent(inout) :: self
     real(dp), intent(in) :: dt, total_time, pre_time,temperature
-    integer, intent(in) :: nspins
+    integer, intent(in) :: nspins, method
     self%nspins=nspins
     self%dt=dt
     self%pre_time=pre_time
     self%total_time=total_time
     self%temperature=temperature
+    self%method=method
   end subroutine spin_mover_t_initialize
   !!***
 
@@ -161,41 +164,71 @@ contains
   end subroutine spin_mover_t_run_one_step_HeunP
   !!***
 
-  subroutine spin_mover_t_run_one_step_DM(self, calculator, S_in, S_out, etot)
+  subroutine rotate_S_DM(S_in, Heff, dt, S_out)
+    ! Depondt & Mertens method to roate S_in
+    real(dp), intent(in) :: S_in(3), Heff(3), dt
+    real(dp), intent(inout) :: S_out(3)
+    real(dp):: B(3) , w, u, Bnorm, R(3,3), cosw, sinw
+    integer :: i, j
+    Bnorm=sqrt(sum(Heff*Heff))
+    B(:)=Heff(:)/Bnorm
+    w=Bnorm*dt
+    !print *, w
+    cosw=cos(w)
+    sinw=sin(w)
+    u=1.0d0-cosw
+    R(1,1)=B(1)*B(1)*u+cosw
+    R(2,1)=B(1)*B(2)*u+B(3)*sinw
+    R(3,1)=B(1)*B(3)*u-B(2)*sinw
 
-    ! TODO: implement Depondt & Mertens (2009) method. 
+    R(1,2)=B(1)*B(2)*u-B(3)*sinw
+    R(2,2)=B(2)*B(2)*u+cosw
+    R(3,2)=B(2)*B(3)*u+B(1)*sinw
+
+    R(1,3)=B(1)*B(3)*u+B(2)*sinw
+    R(2,3)=B(2)*B(3)*u-B(1)*sinw
+    R(3,3)=B(3)*B(3)*u+cosw
+    S_out=matmul(R, S_in)
+    !S_out(:)=0.0_dp
+    !do j=1, 3
+    !   do i=1, 3
+    !      S_out(i)=S_out(i)+R(i,j)*S_in(j)
+    !   end do
+    !end do
+  end subroutine rotate_S_DM
+
+  subroutine spin_mover_t_run_one_step_DM(self, calculator, S_in, S_out, etot)
+    ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     type(spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
-    real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
-         & H_lang(3, self%nspins)
+    real(dp) :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
     ! predict
-    !call calculator%get_Langevin_Heff(self%dt, self%temperature, H_lang)
-    call spin_terms_t_get_Langevin_Heff(calculator, self%dt, self%temperature, H_lang)
+    call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
 
-    !call calculator%get_dSdt(S_in, H_lang, dSdt)
-    call spin_terms_t_get_dSdt(calculator, S_in, H_lang, dSdt)
-    !$OMP PARALLEL DO
-    do i =1, self%nspins
-       S_out(:,i)=  S_in(:,i) +dSdt(:,i) * self%dt
+    call spin_terms_t_get_Langevin_Heff(calculator, self%dt, self%temperature, H_lang)
+    Htmp(:,:)=Heff(:,:)+H_lang(:,:)
+
+    call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
+    do i=1, self%nspins
+     call rotate_S_DM(S_in(:,i), Htmp(:,i), self%dt, S_out(:,i))
     end do
-    !$OMP END PARALLEL DO
 
     ! correction
-    !call calculator%get_dSdt(S_out, H_lang, dSdt2)
-    call spin_terms_t_get_dSdt(calculator, S_out, H_lang, dSdt2)
-    etot=calculator%etot
-    !$OMP PARALLEL DO private(i)
-    do i =1, self%nspins
-       S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
-       S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
-    end do
-  end subroutine spin_mover_t_run_one_step_DM
-  !!***
+    call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
+    Heff(:,:)=(Heff(:,:)+Htmp(:,:))*0.5_dp
+    Htmp(:,:)=Heff(:,:)+H_lang(:,:)
+    call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
 
+    do i=1, self%nspins
+       call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
+    end do
+
+    call spin_terms_t_get_etot(calculator, S_out, Heff, etot)
+  end subroutine spin_mover_t_run_one_step_DM
 
 
   subroutine spin_mover_t_run_one_step(self, calculator, hist)
@@ -204,7 +237,12 @@ contains
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t),intent(inout) :: hist
     real(dp) :: S_out(3,self%nspins), etot
-    call spin_mover_t_run_one_step_HeunP(self, calculator, spin_hist_t_get_S(hist), S_out, etot)
+    if(self%method==1) then
+       call spin_mover_t_run_one_step_HeunP(self, calculator, spin_hist_t_get_S(hist), S_out, etot)
+    else if (self%method==2) then
+       call spin_mover_t_run_one_step_DM(self, calculator, spin_hist_t_get_S(hist), S_out, etot)
+    end if
+
     ! do not inc until time is set to hist.
     call spin_hist_t_set_vars(hist=hist, S=S_out, Snorm=calculator%ms, etot=etot, inc=.False.)
   end subroutine spin_mover_t_run_one_step

@@ -211,7 +211,7 @@ contains
     !    & total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
          &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature, &
-         & pre_time=self%params%spin_dt*self%params%spin_ntime_pre)
+         & pre_time=self%params%spin_dt*self%params%spin_ntime_pre, method=self%params%spin_dynamics)
 
     call ob_initialize(self%spin_ob, self%spin_calculator, self%params)
 
