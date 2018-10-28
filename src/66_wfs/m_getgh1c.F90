@@ -281,7 +281,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      weight=one ; tim_fourwf=4
      call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gh1c,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&     npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &     use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      if(gs_hamkq%nspinor==2)then
        ABI_ALLOCATE(cwave_sp,(2,npw))
@@ -293,7 +293,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end do
        call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave_sp,gh1c_sp,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !$OMP PARALLEL DO
        do ipw=1,npw1
@@ -322,13 +322,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c2=v22*phi2
        vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_DEALLOCATE(vlocal1_tmp)
        cplex1=2
@@ -357,7 +357,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
        call fourwf(cplex1,vlocal1_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi2
        if(rf_hamkq%cplex==1) then
@@ -381,7 +381,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
        call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_DEALLOCATE(vlocal1_tmp)
 !      Build gh1c from pieces

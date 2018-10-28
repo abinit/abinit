@@ -154,13 +154,11 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
  use m_pawcprj,       only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, paw_overlap
  use m_paw_nhat,      only : pawmknhat_psipsi
  use m_paw_sym,       only : paw_symcprj
- use m_wfd,           only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_paw_get_aeur, wfd_get_many_ur,&
-&                            wfd_sym_ur
+ use m_wfd,           only : wfd_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_oscillators,   only : rho_tw_g
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_ptgroups,      only : sum_irreps
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -264,7 +262,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &  ' bands from ',ib1,' to ',ib2,ch10
  call wrtout(std_out,msg,'COLL')
 
- if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
+ if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,gwx_ngfft)
  gwx_mgfft = MAXVAL(gwx_ngfft(1:3))
  gwx_fftalga = gwx_ngfft(7)/100; gwx_fftalgb = MOD(gwx_ngfft(7),100)/10
 
@@ -427,7 +425,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    ! Load wavefunctions for GW corrections.
    ABI_STAT_MALLOC(wfr_bdgw, (gwx_nfftot*nspinor,ib1:ib2), ierr)
    ABI_CHECK(ierr==0, "Out of memory in wfr_bdgw")
-   call wfd_get_many_ur(Wfd, [(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
+   call wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
 
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
@@ -436,7 +434,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
-       call wfd_get_cprj(Wfd,jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+       call wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
        call paw_symcprj(jk_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        call pawcprj_copy(Cprj_ksum,Cprj_kgw(:,ibsp:ibsp+(nspinor-1)))
        ibsp=ibsp+nspinor
@@ -446,7 +444,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ABI_MALLOC(ur_ae_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        ABI_MALLOC(ur_ps_onsite_bdgw,(nfftf*nspinor,ib1:ib2))
        do jb=ib1,ib2
-         call wfd_paw_get_aeur(Wfdf,jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+         call wfdf%paw_get_aeur(jb,jk_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &          ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          ur_ae_bdgw(:,jb)=ur_ae_sum
          ur_ae_onsite_bdgw(:,jb)=ur_ae_onsite_sum
@@ -496,6 +494,10 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
      if (ANY(gwx_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
      !use_padfft=0
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
      if (use_padfft==0) then
        ABI_FREE(gwx_gbound)
        ABI_MALLOC(gwx_gbound,(2*gwx_mgfft+8,2*use_padfft))
@@ -537,16 +539,16 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        ! Skip empty states.
        if (qp_occ(ib_sum,ik_ibz,spin)<tol_empty) CYCLE
 
-       call wfd_get_ur(Wfd,ib_sum,ik_ibz,spin,ur_ibz)
+       call wfd%get_ur(ib_sum,ik_ibz,spin,ur_ibz)
 
        if (Psps%usepaw==1) then
          ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call wfd_get_cprj(Wfd,ib_sum,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+         call wfd%get_cprj(ib_sum,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
          if (pawcross==1) then
-           call wfd_paw_get_aeur(Wfdf,ib_sum,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
+           call wfdf%paw_get_aeur(ib_sum,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,&
 &              ur_ae_sum,ur_ae_onsite_sum,ur_ps_onsite_sum)
          end if
        end if

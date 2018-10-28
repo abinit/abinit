@@ -57,7 +57,6 @@ MODULE m_io_kss
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
  use m_crystal ,         only : crystal_t
- use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_kg,               only : mkkin, mkkpg
  use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
@@ -275,7 +274,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    ! FIXME: Check symmorphi trick and crystal%symrel!
    ! We currently use the dataset symmetries, as defined in the Hdr structure
    ! instead of the symmetries recomputed in outkss.
-   NCF_CHECK(crystal_ncwrite(crystal, kss_unt))
+   NCF_CHECK(crystal%ncwrite(kss_unt))
 
    ! Defined G-vectors and wavefunctions.
    call wfk_ncdef_dims_vars(kss_unt, my_hdr, fform, iskss=.True.)

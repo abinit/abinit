@@ -15,7 +15,6 @@ module m_tdep_phdos
   use m_ifc,              only : ifc_type,ifc_fourq
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
-!FB  use m_crystal_io,       only : crystal_ncwrite
   use m_tdep_qpt,         only : Qpoints_type
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type

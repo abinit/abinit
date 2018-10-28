@@ -42,7 +42,7 @@ module m_effective_potential_file
  use m_io_tools,   only : open_file
  use m_geometry,   only : xcart2xred, xred2xcart, metric
  use m_symfind,    only : symfind, symlatt
- use m_crystal,    only : crystal_t, crystal_init, crystal_free
+ use m_crystal,    only : crystal_t, crystal_init
  use m_dynmat,     only : dfpt_prtph
  use m_abihist,    only : abihist,abihist_init,abihist_free,abihist_copy,read_md_hist
  use m_ddb_internalstr, only : ddb_internalstr
@@ -242,7 +242,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
   use m_multibinit_dataset
   use m_ddb, only : ddb_from_file,ddb_free
   use m_strain
-  use m_crystal, only : crystal_t, crystal_free
+  use m_crystal, only : crystal_t
   use m_dynmat, only : bigbx9
   implicit none
 
@@ -421,7 +421,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
  end if
 
 ! Deallocation of array
-  call crystal_free(Crystal)
+  call crystal%free()
   call ddb_free(ddb)
 
 end subroutine effective_potential_file_read
@@ -2196,7 +2196,7 @@ end subroutine system_getDimFromXML
 
 !DEALLOCATION OF TYPES
  call ifc_free(ifcs)
- call crystal_free(crystal)
+ call crystal%free()
 
 end subroutine system_xml2effpot
 !!***

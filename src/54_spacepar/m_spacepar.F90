@@ -294,7 +294,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  end if
 
  ! Fourier Transform Vhartree. Vh in reciprocal space was stored in work1
- call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(work1)
 
@@ -611,7 +611,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
    end if
    if(present(rdfuncr)) then
      do ifunc=1,nfunc
-       call fourdp(1,rdfuncg(:,:,ifunc),rdfuncr(:,ifunc),-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(1,rdfuncg(:,:,ifunc),rdfuncr(:,ifunc),-1,mpi_enreg,nfft,1,ngfft,0)
      end do
    end if
  else
@@ -686,7 +686,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 !get the result back into real space
  if(present(laplacerdfuncr)) then
    do ifunc=1,nfunc
-     call fourdp(1,laplacerdfuncg(:,:,ifunc),laplacerdfuncr(:,ifunc),1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,laplacerdfuncg(:,:,ifunc),laplacerdfuncr(:,ifunc),1,mpi_enreg,nfft,1,ngfft,0)
    end do
  end if
 
@@ -781,7 +781,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Obtain rho(G) in wkcmpx from input rho(r)
  work(:)=frin(:)
 
- call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
 
 !Gradient calculation for three reduced components in turn.
 !Code duplicated to remove logic from loops.
@@ -827,7 +827,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
      end do
    end if !idir
 
-   call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,1,ngfft,0)
 
 !$OMP PARALLEL DO
    do ifft=1,nfft
@@ -1028,7 +1028,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 
 !Fourier Transform Vhartree.
 !Vh in reciprocal space was stored in work1
- call fourdp(1,work1,vhartr1,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,work1,vhartr1,1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(work1)
 
@@ -1168,7 +1168,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !  If not using symmetry, still want total density in G space rho(G).
 !  Fourier transform (incl normalization) to get rho(G)
    work(:)=rhor(:,1)
-   call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,1,ngfft,0)
  else
 
 !  Treat either full density, spin-up density or magnetization
@@ -1200,17 +1200,17 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !    rhor -fft-> rhog    (rhog is used as work space)
 !    Note : it should be possible to reuse rhog in the antiferromagnetic case this would avoid one FFT
      work(:)=rhor(:,ispden)
-     call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,1,ngfft,0)
      if (nspden==4) then
        ABI_ALLOCATE(magngx,(2,nfft))
        ABI_ALLOCATE(magngy,(2,nfft))
        ABI_ALLOCATE(magngz,(2,nfft))
        work(:)=rhor(:,2)
-       call fourdp(cplex,magngx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngx,work,-1,mpi_enreg,nfft,1,ngfft,0)
        work(:)=rhor(:,3)
-       call fourdp(cplex,magngy,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngy,work,-1,mpi_enreg,nfft,1,ngfft,0)
        work(:)=rhor(:,4)
-       call fourdp(cplex,magngz,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngz,work,-1,mpi_enreg,nfft,1,ngfft,0)
      end if
 
 !    Begins the timing here only , to exclude FFTs
@@ -1439,14 +1439,14 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
      call timab(17,2,tsec)
 
 !    Pull out full or spin up density, now symmetrized
-     call fourdp(cplex,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
      if (nspden==4) then
-       call fourdp(cplex,magngx,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngx,work,1,mpi_enreg,nfft,1,ngfft,0)
        rhor(:,2)=work(:)
-       call fourdp(cplex,magngy,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngy,work,1,mpi_enreg,nfft,1,ngfft,0)
        rhor(:,3)=work(:)
-       call fourdp(cplex,magngz,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngz,work,1,mpi_enreg,nfft,1,ngfft,0)
        rhor(:,4)=work(:)
        ABI_DEALLOCATE(magngx)
        ABI_DEALLOCATE(magngy)
@@ -1988,7 +1988,7 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
  do ispden = 1, nspden
 
 ! fft input rhor1 to reciprocal space: uses work* as a buffer
-   call fourdp(cplex,workg,rhor1(:,ispden),-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+   call fourdp(cplex,workg,rhor1(:,ispden),-1,mpi_enreg,nfft,1,ngfft,0)
 
 ! below taken from irrzg and setsym
 !  Loop over reciprocal space grid points:
@@ -2054,7 +2054,7 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 
 ! FFT back to real space to get rhor1_eq
 !    Pull out full or spin up density, now symmetrized
-   call fourdp(cplex,workg_eq,rhor1_eq(:,ispden),1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+   call fourdp(cplex,workg_eq,rhor1_eq(:,ispden),1,mpi_enreg,nfft,1,ngfft,0)
 
  end do !nspden
 

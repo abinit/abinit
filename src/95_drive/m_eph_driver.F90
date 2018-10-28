@@ -35,7 +35,6 @@ module m_eph_driver
  use m_xomp
  use m_hdr
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_efmas_defs
  use m_ddk
@@ -347,7 +346,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
    call hdr_vs_dtset(wfk0_hdr,dtset)
 
-   call crystal_from_hdr(cryst,wfk0_hdr,timrev2)
+   cryst = hdr_get_crystal(wfk0_hdr, timrev2)
    call crystal_print(cryst,header="crystal structure from WFK file")
 
    ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
@@ -465,7 +464,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if (use_wfk) then
    call ddb_from_file(ddb,ddb_path,brav1,dtset%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
-   call crystal_free(cryst_ddb)
+   call cryst_ddb%free()
  else
    call ddb_from_file(ddb,ddb_path,brav1,dtset%natom,natifc0,dummy_atifc,cryst,comm, prtvol=dtset%prtvol)
  end if
@@ -531,7 +530,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, sjoin("Creating PHDOS.nc file:", path))
-     NCF_CHECK(crystal_ncwrite(cryst, ncid))
+     NCF_CHECK(cryst%ncwrite(ncid))
      call phdos_ncwrite(phdos, ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
@@ -660,7 +659,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !=====================
  !==== Free memory ====
  !=====================
- call crystal_free(cryst)
+ call cryst%free()
  call dvdb_free(dvdb)
  call ddb_free(ddb)
  call ddk_free(ddk)

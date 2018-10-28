@@ -186,8 +186,6 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &  Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,&
 &  nfftot_gw,ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q,chi0_sumrule,Wfd,Wfdf)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbvw,nfftot_gw,nfftf_tot
@@ -275,7 +273,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  call cwtime(cpu_time,wall_time,gflops,"start")
 
  ! Change FFT mesh if needed
- if (ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3))) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
+ if (ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3))) call wfd%change_ngfft(Cryst,Psps,ngfft_gw)
 
  gw_mgfft = MAXVAL(ngfft_gw(1:3)); gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
  if (Dtset%pawcross==1) mgfftf = MAXVAL(ngfftf(1:3))
@@ -474,7 +472,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ik_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd_distribute_bbp(Wfd,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
+     call wfd%distribute_bbp(ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
@@ -586,14 +584,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
        ug1 => Wfd%Wave(band1,ik_ibz,spin)%ug
-       call wfd_get_ur(Wfd,band1,ik_ibz,spin,ur1_kibz)
+       call wfd%get_ur(band1,ik_ibz,spin,ur1_kibz)
 
        if (Psps%usepaw==1) then
-         call wfd_get_cprj(Wfd,band1,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
+         call wfd%get_cprj(band1,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
          call pawcprj_copy(Cprj1_ibz,Cprj1_bz)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj1_bz)
          if (Dtset%pawcross==1) then
-           call wfd_paw_get_aeur(Wfdf,band1,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae1,ur_ae_onsite1,ur_ps_onsite1)
+           call wfdf%paw_get_aeur(band1,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae1,ur_ae_onsite1,ur_ps_onsite1)
          end if
        end if
 
@@ -625,14 +623,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
          end if
 
          ug2 => Wfd%Wave(band2,ik_ibz,spin)%ug
-         call wfd_get_ur(Wfd,band2,ik_ibz,spin,ur2_kibz)
+         call wfd%get_ur(band2,ik_ibz,spin,ur2_kibz)
 
          if (Psps%usepaw==1) then
-           call wfd_get_cprj(Wfd,band2,ik_ibz,spin,Cryst,Cprj2_ibz,sorted=.FALSE.)
+           call wfd%get_cprj(band2,ik_ibz,spin,Cryst,Cprj2_ibz,sorted=.FALSE.)
            call pawcprj_copy(Cprj2_ibz,Cprj2_bz)
            call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj2_bz)
            if (Dtset%pawcross==1) then
-             call wfd_paw_get_aeur(Wfdf,band2,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae2,ur_ae_onsite2,ur_ps_onsite2)
+             call wfdf%paw_get_aeur(band2,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae2,ur_ae_onsite2,ur_ps_onsite2)
            end if
          end if
 
@@ -1136,8 +1134,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 & Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftot_gw,ngfftf,nfftf_tot,&
 & chi0,ktabr,ktabrf,Ltg_q,chi0_sumrule,Wfd,Wfdf)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbvw,nfftot_gw,nfftf_tot
@@ -1229,7 +1225,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  endif
 ! End of reading forlb.ovlp
 
- if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
+ if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfft_gw)
  gw_mgfft = MAXVAL(ngfft_gw(1:3))
  gw_fftalga = ngfft_gw(7)/100 !; gw_fftalgc=MOD(ngfft_gw(7),10)
 
@@ -1337,7 +1333,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
      call chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
 
-     call wfd_distribute_kb_kpbp(Wfd,ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
+     call wfd%distribute_kb_kpbp(ikmq_ibz,ik_ibz,spin,allup,my_nbbp,bbp_ks_distrb(:,:,ik_bz,spin),got,bbp_mask)
      my_nbbpks = my_nbbpks + my_nbbp
    end do
  end do
@@ -1507,6 +1503,10 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2))
      call gsph_fft_tabs(Gsph_epsG0,g0,gw_mgfft,ngfft_gw,use_padfft,gw_gbound,igfftepsG0)
      if ( ANY(gw_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
      if (use_padfft==0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gw_mgfft+8,2*use_padfft))
@@ -1526,13 +1526,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
      do band1=1,nbmax ! Loop over "conduction" states.
        if (ALL(bbp_ks_distrb(band1,:,ik_bz,spin) /= Wfd%my_rank)) CYCLE
 
-       call wfd_get_ur(Wfd,band1,ikmq_ibz,spin,ur1_kmq_ibz)
+       call wfd%get_ur(band1,ikmq_ibz,spin,ur1_kmq_ibz)
 
        if (Psps%usepaw==1) then
-         call wfd_get_cprj(Wfd,band1,ikmq_ibz,spin,Cryst,Cprj1_kmq,sorted=.FALSE.)
+         call wfd%get_cprj(band1,ikmq_ibz,spin,Cryst,Cprj1_kmq,sorted=.FALSE.)
          call paw_symcprj(ikmq_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj1_kmq)
          if (Dtset%pawcross==1) then
-           call wfd_paw_get_aeur(Wfdf,band1,ikmq_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae1,ur_ae_onsite1,ur_ps_onsite1)
+           call wfdf%paw_get_aeur(band1,ikmq_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae1,ur_ae_onsite1,ur_ps_onsite1)
          end if
        end if
 
@@ -1565,13 +1565,13 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 
          deltaeGW_b1kmq_b2k=e_b1_kmq-qp_energy(band2,ik_ibz,spin)
 
-         call wfd_get_ur(Wfd,band2,ik_ibz,spin,ur2_k_ibz)
+         call wfd%get_ur(band2,ik_ibz,spin,ur2_k_ibz)
 
          if (Psps%usepaw==1) then
-           call wfd_get_cprj(Wfd,band2,ik_ibz,spin,Cryst,Cprj2_k,sorted=.FALSE.)
+           call wfd%get_cprj(band2,ik_ibz,spin,Cryst,Cprj2_k,sorted=.FALSE.)
            call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj2_k)
            if (Dtset%pawcross==1) then
-             call wfd_paw_get_aeur(Wfdf,band2,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae2,ur_ae_onsite2,ur_ps_onsite2)
+             call wfdf%paw_get_aeur(band2,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae2,ur_ae_onsite2,ur_ps_onsite2)
            end if
          end if
 
@@ -1977,8 +1977,6 @@ end subroutine cchi0
 subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,use_tr,usepawu,&
 &  ngfft_gw,chi0,chi0_head,chi0_lwing,chi0_uwing)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: usepawu
@@ -2084,7 +2082,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
      ! Distribute bands.
      bmask=.FALSE.; bmask(1:nband_k)=.TRUE. ! TODO only bands around EF should be included.
-     call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
+     call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
      if (my_nband==0) CYCLE
 
      if (Wfd%usepaw==0.and.inclvkb/=0) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
@@ -2100,7 +2098,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
          comm_kbbs = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k)
        else
          ! Matrix elements of i[H,r] for PAW.
-         call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cp_bks,sorted=.FALSE.)
+         call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp_bks,sorted=.FALSE.)
          comm_kbbs = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug,ug,kg_k,Cp_bks,Cp_bks,HUr)
        end if
 
@@ -2196,7 +2194,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  ABI_FREE(ihr_comm)
  ABI_FREE(qlwl)
 
- if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_gw)
+ if ( ANY(ngfft_gw(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfft_gw)
 
  ! TODO take into account the case of random k-meshes.
  kptopt=3
@@ -2304,7 +2302,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
      ! Distribute bands.
      bmask=.FALSE.; bmask(1:nband_k)=.TRUE. ! TODO only bands around EF should be included.
-     call wfd_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
+     call wfd%distribute_bands(ik_ibz,spin,my_nband,my_band_list,bmask=bmask)
      if (my_nband==0) CYCLE
 
      write(msg,'(2(a,i4),a,i2,a,i3)')' ik = ',ik_bz,' / ',Kmesh%nbz,' spin = ',spin,' done by processor ',Wfd%my_rank
@@ -2313,10 +2311,10 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      do lbidx=1,my_nband
        ! Loop over bands treated by this node.
        band=my_band_list(lbidx)
-       call wfd_get_ur(Wfd,band,ik_ibz,spin,ur1)
+       call wfd%get_ur(band,ik_ibz,spin,ur1)
 
        if (Psps%usepaw==1) then
-         call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
+         call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cprj1_ibz,sorted=.FALSE.)
          call pawcprj_copy(Cprj1_ibz,Cprj1_bz)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj1_bz)
        end if

@@ -629,6 +629,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
    if (check_conv) then
      do idynimage=1,ndynimage
+       _IBM6("hello world")
        iimage=list_dynimage(idynimage)
        delta_energy=delta_energy &
 &       +abs(results_img(iimage,itimimage)%results_gs%etotal &

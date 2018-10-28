@@ -240,8 +240,6 @@ CONTAINS  !===========================================================
 
 subroutine ddb_free(ddb)
 
- implicit none
-
 !Arguments ------------------------------------
  type(ddb_type),intent(inout) :: ddb
 
@@ -277,8 +275,6 @@ end subroutine ddb_free
 !! SOURCE
 
 subroutine ddb_copy(iddb, oddb)
-
- implicit none
 
 !Arguments ------------------------------------
 !array
@@ -332,8 +328,6 @@ end subroutine ddb_copy
 !! SOURCE
 
 subroutine ddb_malloc(ddb,msize,nblok,natom,ntypat)
-
- implicit none
 
 !Arguments ------------------------------------
 !array
@@ -390,8 +384,6 @@ end subroutine ddb_malloc
 !! SOURCE
 
 subroutine ddb_bcast(Ddb, master, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !array
@@ -491,8 +483,6 @@ end subroutine ddb_bcast
 
 
 subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -751,8 +741,6 @@ end subroutine gtblk9
 
 subroutine gamma9(gamma,qphon,qphnrm,qtol)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(out) :: gamma
@@ -822,8 +810,6 @@ end subroutine gamma9
 
 subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1074,8 +1060,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
 & mband,mpert,msize,msym,natifc,natom,nkpt,nsym,ntypat,&
 & rmet,rprim,symrec,symrel,symafm,tnons,typat,ucvol,xcart,xred,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 ! NOTE: these are used for dimensioning and then re-assigned in ioddb8.
 !   This is almost definitely bad practice. In particular
@@ -1311,8 +1295,6 @@ end subroutine rdddb9
 
 subroutine chkin9(atifc,natifc,natom)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natifc,natom
@@ -1396,8 +1378,6 @@ end subroutine chkin9
 !! SOURCE
 
 subroutine nlopt(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd,ucvol)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1549,8 +1529,6 @@ end subroutine nlopt
 !! SOURCE
 
 subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1770,8 +1748,6 @@ end subroutine ddb_from_file
 subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
 & mpert,msize,natom,nblok,nkpt,rprimd)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,msize
@@ -1883,8 +1859,6 @@ end subroutine carttransf
 subroutine carteig2d(blkflg,blkval,carflg,d2cart,&
 & gprimd,iblok,mpert,natom,nblok,rprimd)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok
@@ -1987,8 +1961,6 @@ end subroutine carteig2d
 
 subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok
@@ -2078,8 +2050,6 @@ end subroutine dtech9
 !! SOURCE
 
 subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr,nlflag)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2256,8 +2226,6 @@ end subroutine dtchi
 
 integer function ddb_get_etotal(ddb,etotal) result(iblok)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  real(dp),intent(out) :: etotal
@@ -2330,8 +2298,6 @@ end function ddb_get_etotal
 !! SOURCE
 
 integer function ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff) result(iblok)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2420,8 +2386,6 @@ end function ddb_get_dielt_zeff
 
 integer function ddb_get_dielt(ddb,rftyp,dielt) result(iblok)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: rftyp
@@ -2508,8 +2472,6 @@ end function ddb_get_dielt
 
 integer function ddb_get_dchidet(ddb,ramansr,nlflag,dchide,dchidt) result(iblok)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ramansr, nlflag
@@ -2585,8 +2547,6 @@ end function ddb_get_dchidet
 !! SOURCE
 
 type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2704,8 +2664,6 @@ end function ddb_get_asrq0
 subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
                       out_eigvec,out_displ_red)   ! Optional [out]
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: rftyp,symdynmat
@@ -2797,8 +2755,6 @@ end subroutine ddb_diagoq
 
 subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom, msize, mpert
@@ -2848,29 +2804,16 @@ end subroutine asrq0_apply
 
 subroutine asrq0_free(asrq0)
 
- implicit none
-
 !Arguments ------------------------------------
  type(asrq0_t),intent(inout) :: asrq0
 
 ! ************************************************************************
 
  ! real
- if (allocated(asrq0%d2asr)) then
-   ABI_FREE(asrq0%d2asr)
- end if
-
- if (allocated(asrq0%singular)) then
-   ABI_FREE(asrq0%singular)
- end if
-
- if (allocated(asrq0%uinvers)) then
-   ABI_FREE(asrq0%uinvers)
- end if
-
- if (allocated(asrq0%vtinvers)) then
-   ABI_FREE(asrq0%vtinvers)
- end if
+ ABI_SFREE(asrq0%d2asr)
+ ABI_SFREE(asrq0%singular)
+ ABI_SFREE(asrq0%uinvers)
+ ABI_SFREE(asrq0%vtinvers)
 
 end subroutine asrq0_free
 !!***
@@ -2930,8 +2873,6 @@ end subroutine asrq0_free
 
 subroutine ddb_write_blok(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
 &     blkval2,kpt) !optional
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3108,8 +3049,6 @@ end subroutine ddb_write_blok
 
 subroutine dfptnl_doutput(blkflg,d3,mband,mpert,nkpt,natom,ntypat,unddb)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mband,mpert,nkpt,unddb,natom,ntypat
@@ -3204,8 +3143,6 @@ end subroutine dfptnl_doutput
 
 
 subroutine ddb_to_dtset(comm,dtset,filename,psps)
-
- implicit none
 
  !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -3417,8 +3354,6 @@ end subroutine ddb_to_dtset
 !! SOURCE
 
 subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3741,8 +3676,6 @@ end subroutine mblktyp1
 !! SOURCE
 
 subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

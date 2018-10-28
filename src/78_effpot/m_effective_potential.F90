@@ -56,7 +56,7 @@ module m_effective_potential
  use m_special_funcs,  only : factorial
  use m_copy,           only : alloc_copy
  use m_geometry,       only : fred2fcart,fcart2fred, xcart2xred, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
+ use m_crystal,        only : crystal_t, crystal_init, crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
@@ -491,7 +491,7 @@ subroutine effective_potential_free(eff_pot)
    call anharmonics_terms_free(eff_pot%anharmonics_terms)
    call harmonics_terms_free(eff_pot%harmonics_terms)
    call destroy_supercell(eff_pot%supercell)
-   call crystal_free(eff_pot%crystal)
+   call eff_pot%crystal%free()
    call effective_potential_freempi(eff_pot)
    call polynomial_conf_free(eff_pot%confinement)
 

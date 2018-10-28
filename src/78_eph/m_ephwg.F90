@@ -42,7 +42,6 @@ module m_ephwg
  use netcdf
 #endif
  use m_crystal
- use m_crystal_io
  use m_ifc
  use m_lgroup
  use m_ebands

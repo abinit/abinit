@@ -639,7 +639,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          call fourwf(1,rhoaug(:,:,:,1),cwavef,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &         istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
 &         gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&         dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&         tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
          if(dtset%nspinor==2)then
            ABI_ALLOCATE(cwavef1,(2,npw_k))
@@ -651,34 +651,34 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
 &             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&             dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
            else if(dtset%nspden==4) then
-!            Build the four components of rho. We use only norm quantities and, so fourwf.
-!$\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
-!$\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
-!$\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+             ! Build the four components of rho. We use only norm quantities and, so fourwf.
+             ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+             ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+             ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
              ABI_ALLOCATE(cwavef_x,(2,npw_k))
              ABI_ALLOCATE(cwavef_y,(2,npw_k))
-!$(\Psi^{1}+\Psi^{2})$
+             !$(\Psi^{1}+\Psi^{2})$
              cwavef_x(:,:)=cwavef(:,1:npw_k)+cwavef1(:,1:npw_k)
-!$(\Psi^{1}-i \Psi^{2})$
+             !$(\Psi^{1}-i \Psi^{2})$
              cwavef_y(1,:)=cwavef(1,1:npw_k)+cwavef1(2,1:npw_k)
              cwavef_y(2,:)=cwavef(2,1:npw_k)-cwavef1(1,1:npw_k)
-! z component
+             ! z component
              call fourwf(1,rhoaug(:,:,:,4),cwavef1,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,dtset%paral_kgb,&
+&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
-! x component
+             ! x component
              call fourwf(1,rhoaug(:,:,:,2),cwavef_x,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,dtset%paral_kgb,&
+&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
-! y component
+             ! y component
              call fourwf(1,rhoaug(:,:,:,3),cwavef_y,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,dtset%paral_kgb,&
+&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
              ABI_DEALLOCATE(cwavef_x)

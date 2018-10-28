@@ -37,7 +37,7 @@ MODULE m_esymm
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
  use m_hide_lapack,    only : xgeev, xginv
- use m_crystal,        only : crystal_t, idx_spatial_inversion
+ use m_crystal,        only : crystal_t
  use m_defs_ptgroups,  only : point_group_t, irrep_t
  use m_ptgroups,       only : get_classes, point_group_init, irrep_free,&
 &                             copy_irrep, init_irrep, mult_table, sum_irreps
@@ -314,7 +314,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  esymm%nbnds          = nbnds
  esymm%only_trace     = only_trace
  esymm%tol_deg        = EDIFF_TOL
- esymm%has_spatial_inv= (idx_spatial_inversion(Cryst) /= 0)
+ esymm%has_spatial_inv= (cryst%idx_spatial_inversion() /= 0)
  esymm%can_use_tr     = .TRUE. !TODO this should be input
  esymm%has_chtabs     = .FALSE.
  esymm%kpt            = kpt_in(:)
