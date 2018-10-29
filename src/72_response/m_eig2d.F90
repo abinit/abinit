@@ -275,6 +275,7 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
 #ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
+ character(len=200) :: temp
 
 ! *************************************************************************
 
@@ -294,12 +295,15 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
    nctkdim_t('product_mband_nsppol', eigr2d%mband*eigr2d%nsppol)], defmode=.True.)
  NCF_CHECK(ncerr)
 
+ temp='cplex,product_mband_nsppol,number_of_kpoints,number_of_cartesian_directions,number_of_atoms,' //&
+      'number_of_cartesian_directions , number_of_atoms'
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t('current_q_point', "dp", 'number_of_cartesian_directions'), &
    nctkarr_t('current_q_point_weight', "dp", 'current_one_dim'), &
-   nctkarr_t('second_derivative_eigenenergies', "dp",&
-   &'cplex, product_mband_nsppol, number_of_kpoints, number_of_cartesian_directions, number_of_atoms,&
-   &number_of_cartesian_directions, number_of_atoms')])
+   nctkarr_t('second_derivative_eigenenergies', "dp", temp )])
+!   nctkarr_t('second_derivative_eigenenergies', "dp",&
+!   &'cplex, product_mband_nsppol, number_of_kpoints, number_of_cartesian_directions, number_of_atoms,&
+!   &number_of_cartesian_directions, number_of_atoms')])
  NCF_CHECK(ncerr)
 
 ! Write data
@@ -551,6 +555,8 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
 #ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
+ character(len=200) :: temp
+
 
 ! *************************************************************************
 
@@ -573,12 +579,15 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  ], defmode=.True.)
  NCF_CHECK(ncerr)
 
+ temp= 'product_mband_nsppol2, number_of_kpoints, number_of_cartesian_directions,' //&
+   'number_of_atoms, number_of_cartesian_directions, number_of_atoms, max_number_of_states'
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t('current_q_point', "dp", 'number_of_cartesian_directions'),&
    nctkarr_t('current_q_point_weight', "dp", 'current_one_dim'),&
-   nctkarr_t('second_derivative_eigenenergies_actif', "dp",&
-   &'product_mband_nsppol2, number_of_kpoints, number_of_cartesian_directions,&
-   &number_of_atoms, number_of_cartesian_directions, number_of_atoms, max_number_of_states')])
+   nctkarr_t('second_derivative_eigenenergies_actif', "dp", temp )])
+!   nctkarr_t('second_derivative_eigenenergies_actif', "dp",&
+!   &'product_mband_nsppol2, number_of_kpoints, number_of_cartesian_directions,&
+!   &number_of_atoms, number_of_cartesian_directions, number_of_atoms, max_number_of_states')])
  NCF_CHECK(ncerr)
 
 ! Write data
