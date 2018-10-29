@@ -14,42 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 28 Oct 2018.
-- ( at 21h20 )
+.Starting date : Mon 29 Oct 2018.
+- ( at 15h02 )
   
 -  nproc =    1
-
-  Give name for      formatted input file : 
--   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/tutomultibinit/Input/tmulti5_1.in
-  Give name for     formatted output file : 
--   tmulti5_1.out
-  Give name for input derivative database of reference structure (DDB or XML file): 
--   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/tutomultibinit/Input/tmulti5_1.xml
-  Give name for input coefficients from fitted polynomial (XML file or enter no): 
--   /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/tutomultibinit/Input/no
-  Give name for molecular dynamics (netcdf file or enter no): 
--   no
-  Give name for input derivative database (DDB or XML file): 
--   
--begin at tcpu      0.000  and twall      0.000 sec
 
 ================================================================================
 
  Read the information in the reference structure in 
 -/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/tutomultibinit/Input/tmulti5_1.xml
  to initialize the multibinit input
-
- The file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/tutomultibinit/Input/tmulti5_1.xml is XML file (extraction of all informations)
- system_getDimFromXML :-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/tutomultibinit/Input/tmulti5_1.xml to read dimensions (before initialisation)
--instrng: 40 lines of input have been read from file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/tutomultibinit/Input/tmulti5_1.in
-
-
- --- !WARNING
-     The range of dipdip_range (  0  0  0)
-     But the range of the cell for the simulation is 16 16 16)
-     dipdip_range is set to ncell.
- ---
-
 
 ================================================================================
 
@@ -93,21 +67,7 @@ dipdip_range        16        16        16
        atifc         1
  Description of grid 1 :
         brav         1
-reading xml: system.
-unit_cell: 
-		1.88973e+00	0.00000e+00	0.00000e+00
-		0.00000e+00	1.88973e+00	0.00000e+00
-		0.00000e+00	0.00000e+00	1.88973e+00
-	
-reading xml: exchange.
- 6 terms readed
-reading xml: DMI.
- 0 terms readed.
-reading xml: uniaxial single ion anisotropy.
- 0 terms readed.
-reading xml: bilinear.
- 0 terms readed.
-Reading xml finished!       ngqpt         1         1         1
+       ngqpt         1         1         1
       nqshft         1
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -118,41 +78,6 @@ Reading xml finished!       ngqpt         1         1         1
 
 ================================================================================
 
- Spin model: setting structure.
- Spin model: setting exchange terms.
- Spin model: setting dmi terms.
- Spin model: setting uniaxial SIA terms.
- Spin model: setting SIA terms.
- Spin model: setting bilinear terms.
- ==========spin terms===============
- Number of terms:            6
- i=           1   j=           1   R=           0          -1           0  Value= 
-   5.9999999999999998E-021   0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        5.9999999999999998E-021   0.0000000000000000     
-   0.0000000000000000        0.0000000000000000        5.9999999999999998E-021
- i=           1   j=           1   R=           1           0           0  Value= 
-   5.9999999999999998E-021   0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        5.9999999999999998E-021   0.0000000000000000     
-   0.0000000000000000        0.0000000000000000        5.9999999999999998E-021
- i=           1   j=           1   R=           0           1           0  Value= 
-   5.9999999999999998E-021   0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        5.9999999999999998E-021   0.0000000000000000     
-   0.0000000000000000        0.0000000000000000        5.9999999999999998E-021
- i=           1   j=           1   R=           0           0           1  Value= 
-   5.9999999999999998E-021   0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        5.9999999999999998E-021   0.0000000000000000     
-   0.0000000000000000        0.0000000000000000        5.9999999999999998E-021
- i=           1   j=           1   R=          -1           0           0  Value= 
-   5.9999999999999998E-021   0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        5.9999999999999998E-021   0.0000000000000000     
-   0.0000000000000000        0.0000000000000000        5.9999999999999998E-021
- i=           1   j=           1   R=           0           0          -1  Value= 
-   5.9999999999999998E-021   0.0000000000000000        0.0000000000000000     
-   0.0000000000000000        5.9999999999999998E-021   0.0000000000000000     
-   0.0000000000000000        0.0000000000000000        5.9999999999999998E-021
- ===================================
- Write iteration in spin HIST netCDF file
- Defining variables in spin hist netcdf file.
   Beginning spin dynamic steps :
 =================================================================
     Iteration          time(s)       Avg_Mst/Ms      Energy (Ha)
@@ -468,24 +393,14 @@ Measurement run:
 # Temperature              Cv             chi        BinderU4             Mst
     600.00000     4.49855E-19     4.13458E-30     0.66368E+00     4.20167E-01
 =================================================================
- Closing spin hist filetmulti5_1.out_spinhist.nc.
 
 ================================================================================
 
- Proc.   0 individual time (sec): cpu=         54.6  wall=         54.7
+-
+- Proc.   0 individual time (sec): cpu=         54.5  wall=         54.6
 
 ================================================================================
 
-+Total cpu time     54.635  and wall time     54.701 sec
++Total cpu time     54.475  and wall time     54.558 sec
 
  multibinit : the run completed succesfully.
---- !FinalSummary
-program: multibinit
-version: 8.11.1
-start_datetime: Sun Oct 28 21:20:11 2018
-end_datetime: Sun Oct 28 21:21:06 2018
-overall_cpu_time:          54.6
-overall_wall_time:          54.7
-mpi_procs: 1
-omp_threads: 1
-...
