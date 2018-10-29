@@ -60,7 +60,7 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,   only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_crystal,            only : crystal_init, crystal_free, crystal_t
+ use m_crystal,            only : crystal_init, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
@@ -502,6 +502,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(dtset%nnsclo>0) then
    ! ===== Self-consistent + imposed =====
      nnsclo_now=dtset%nnsclo
+   else if (dtset%nnsclo<0) then
+   ! ===== Self-consistent + imposed during abs(nnsclo) steps =====
+     nnsclo_now=1
+     if (istep<=abs(dtset%nnsclo)) nnsclo_now=merge(5,dtset%useria,dtset%useria==0)
    else
    ! ===== Self-consistent + default =====
      nnsclo_now=1
@@ -1322,7 +1326,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call destroy_dmft(paw_dmft)
 
 !        ==  destroy crystal_t cryst_struc
-         call crystal_free(cryst_struc)
+         call cryst_struc%free()
          call destroy_oper(lda_occup)
        end if ! dmft_ldaocc
        call timab(991,2,tsec)

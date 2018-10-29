@@ -511,8 +511,11 @@ class AbinitProject(object):
                 try:
                     used_mod = self.all_modules[use_name]
                 except KeyError:
-                    raise RuntimeError(("Fortran module `%s` used by `%s` not found in Abinit project.\n" +
-                                        "Add it to the EXTERNAL_MODS set if it's not a typo.") % (use_name, fort_file.path))
+                    raise RuntimeError((
+                        "Cannot find Fortran module `%s`\n used by `%s`\nin Abinit project.\n" +
+                        "It may be a syntax error or a stale import if you've removed the module.\n" +
+                        "If it's an external module (e.g. mpi), add it to the EXTERNAL_MODS list in ~abinit/src/fkiss/project.py."
+                        ) % (use_name, fort_file.path))
                 fort_file.all_used_mods.append(used_mod)
 
                 # FIXME

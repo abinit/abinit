@@ -143,7 +143,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      if (optout==1.and.optin/=1) then
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
-       call fourdp(cplex,rhogf,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,rhogf,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
      end if
    end if
@@ -153,7 +153,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      if (optout==1.and.optin/=1) then
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhorf(:,1)
-       call fourdp(cplex,rhog,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,rhog,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
      end if
    end if
@@ -189,7 +189,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
@@ -205,7 +205,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !    call zerosym(vectg,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !    &        comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftf))
-     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
      rhorf(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
      ABI_DEALLOCATE(vectg)
@@ -226,7 +226,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
@@ -242,7 +242,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !    call zerosym(rhogf,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !    &        comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftf))
-     call fourdp(cplex,rhogf,workfft,1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+     call fourdp(cplex,rhogf,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
      rhorf(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
    end if
@@ -255,7 +255,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        vectg(:,:)=zero
        ABI_ALLOCATE(workfft,(cplex*nfftc))
        workfft(:)=rhor(:,ispden)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftc,1,ngfftc,0)
        ABI_DEALLOCATE(workfft)
        call zerosym(work,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
@@ -270,7 +270,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !      call zerosym(vectg,2,ngfftf(1),ngfftf(2),ngfftf(3),&
 !      &          comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(workfft,(cplex*nfftf))
-       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftf,1,ngfftf,0)
        rhorf(:,ispden)=workfft(:)
        ABI_DEALLOCATE(workfft)
      end do
@@ -302,7 +302,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
        ABI_DEALLOCATE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
@@ -316,7 +316,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      call zerosym(vectg,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftc))
-     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+     call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
      rhor(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
      ABI_DEALLOCATE(vectg)
@@ -330,7 +330,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      else
        ABI_ALLOCATE(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,1)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
        ABI_DEALLOCATE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
@@ -344,7 +344,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
      call zerosym(rhog,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_ALLOCATE(workfft,(cplex*nfftc))
-     call fourdp(cplex,rhog,workfft,1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+     call fourdp(cplex,rhog,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
      rhor(:,1)=workfft(:)
      ABI_DEALLOCATE(workfft)
    end if
@@ -357,7 +357,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        vectg(:,:)=zero
        ABI_ALLOCATE(workfft,(cplex*nfftf))
        workfft(:)=rhorf(:,ispden)
-       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,ngfftf,paral_kgb,0)
+       call fourdp(cplex,work,workfft,-1,mpi_enreg,nfftf,1,ngfftf,0)
        ABI_DEALLOCATE(workfft)
        if(mpi_enreg%nproc_fft > 1 .and. mpi_enreg%paral_kgb==1) then
          call indirect_parallel_Fourier&
@@ -370,7 +370,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
        call zerosym(vectg,2,ngfftc(1),ngfftc(2),ngfftc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(workfft,(cplex*nfftc))
-       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,ngfftc,paral_kgb,0)
+       call fourdp(cplex,vectg,workfft,1,mpi_enreg,nfftc,1,ngfftc,0)
        rhor(:,ispden)=workfft(:)
        ABI_DEALLOCATE(workfft)
      end do

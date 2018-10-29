@@ -60,7 +60,6 @@ module m_sigmaph
  use m_cgtools,        only : dotprod_g
  use m_cgtk,           only : cgtk_rotate
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_be
  use m_double_grid,    only : double_grid_t
@@ -417,8 +416,6 @@ contains  !=====================================================
 subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc,&
                    pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk0_path
@@ -605,15 +602,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
- call wfd_print(wfd,header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
+ call wfd%print(header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
  ABI_FREE(wfd_istwfk)
 
- call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
- if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
+ call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ if (.False.) call wfd%test_ortho(cryst, pawtab, unit=std_out, mode_paral="PERS")
 
  ! TODO FOR PAW
  usecprj = 0
@@ -795,7 +792,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
      do ib_k=1,nbcalc_ks
        band_ks = ib_k + bstart_ks - 1
-       call wfd_copy_cg(wfd, band_ks, ik_ibz, spin, kets_k(1,1,ib_k))
+       call wfd%copy_cg(band_ks, ik_ibz, spin, kets_k(1,1,ib_k))
        sigma%e0vals(ib_k) = ebands%eig(band_ks, ik_ibz, spin)
      end do
 
@@ -1039,12 +1036,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Be careful with time-reversal symmetry.
          if (isirr_kq) then
            ! Copy u_kq(G)
-           call wfd_copy_cg(wfd, ibsum_kq, ikq_ibz, spin, bra_kq)
+           call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
          else
            ! Reconstruct u_kq(G) from the IBZ image.
            ! Use cgwork as workspace array, results stored in bra_kq
            !g0_kq =  g0ibz_kq + g0bz_kq
-           call wfd_copy_cg(wfd, ibsum_kq, ikq_ibz, spin, cgwork)
+           call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
            call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
                             npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
@@ -1508,7 +1505,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call destroy_hamiltonian(gs_hamkq)
  call sigmaph_free(sigma)
- call wfd_free(wfd)
+ call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
 
@@ -1545,8 +1542,6 @@ end subroutine sigmaph
 !! SOURCE
 
 subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1613,8 +1608,6 @@ end subroutine gkknu_from_atm
 !! SOURCE
 
 type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2212,7 +2205,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
    ncid = new%ncid
 
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    NCF_CHECK(edos_ncwrite(edos, ncid))
 
@@ -2369,8 +2362,6 @@ end function sigmaph_new
 
 subroutine sigmaph_free(self)
 
- implicit none
-
 !Arguments ------------------------------------
  type(sigmaph_t),intent(inout) :: self
 
@@ -2463,8 +2454,6 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc, prtvol, comm
  type(crystal_t),intent(in) :: cryst
@@ -2545,8 +2534,6 @@ end subroutine sigmaph_setup_kcalc
 !! SOURCE
 
 subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc, spin, prtvol, comm
@@ -2918,8 +2905,6 @@ end subroutine sigmaph_gather_and_write
 
 subroutine sigmaph_print(self, dtset, unt)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: unt
  type(dataset_type),intent(in) :: dtset
@@ -3000,8 +2985,6 @@ end subroutine sigmaph_print
 
 subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(sigmaph_t),intent(inout) :: sigma
@@ -3081,8 +3064,6 @@ end subroutine sigmaph_get_all_qweights
 !! SOURCE
 
 subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
-
- implicit none
 
 !Arguments ------------------------------------
  type(sigmaph_t),intent(inout) :: sigma

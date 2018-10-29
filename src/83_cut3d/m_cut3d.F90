@@ -2079,7 +2079,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      call fourwf(cplex,denpot,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),fofgout,fofr,gbound,gbound,&
 &     istwfk(ckpt),kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,&
-&     npw_k,n4,n5,n6,0,paral_kgb,tim_fourwf0,weight,weight)
+&     npw_k,n4,n5,n6,0,tim_fourwf0,weight,weight)
 
 !    TODO
 !    call fft_ug_dp(npw_k,nfft,nspinor,ndat1,mgfft,ngfft,istwf_k(ckpt),kg_k,gbound,cgcband,fofr)

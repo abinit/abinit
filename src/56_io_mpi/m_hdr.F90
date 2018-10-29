@@ -42,6 +42,7 @@ MODULE m_hdr
  use m_xmpi
  use m_abicore
  use m_errors
+ use m_crystal
  use m_wffile
  use m_sort
 #ifdef HAVE_MPI2
@@ -54,7 +55,7 @@ MODULE m_hdr
 
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
- use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust
+ use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust, strcat
  use m_symtk,         only : print_symmetries
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
@@ -97,6 +98,7 @@ MODULE m_hdr
  public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
  public :: hdr_check               ! Compare two headers.
  public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
+ public :: hdr_get_crystal
 
 ! Generic interface of the routines hdr_skip
  interface hdr_skip
@@ -3644,11 +3646,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  type(hdr_type),intent(in) :: hdr,hdr0
 
 !Local variables-------------------------------
- character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
- character(len=24), save :: bndfmt='(2x, i4,t41,   a,2x, i4)'
- character(len=28), save :: occfmt='(2x, f4.1,t41,   a,2x, f4.1)'
- character(len=28), save :: wtkfmt='(2x, f7.3,t41,   a,2x, f7.3)'
- character(len=28), save :: zatfmt='(2x, f6.2,t41,   a,2x, f6.2)'
+ character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt, typfmt
 !scalars
  integer,parameter :: mwarning=5,nkpt_max=5
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
@@ -3657,7 +3655,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  integer :: twvl,txred,enough
  real(dp) :: rms
  logical :: tfform2,tfform52
- character(len=26) :: typfmt
  character(len=500) :: msg
  type(abifile_t) :: abifile,abifile0
 
@@ -3877,9 +3874,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsppol*nkpt,9
      istop = min(istart + 8,nsppol*nkpt)
      mu = istop - istart + 1
-!    generate a format specifier
-     bndfmt(5:5) = number(mu)
-     bndfmt(21:21) = number(mu)
+     ! generate a format specifier
+     bndfmt = strcat('(2x,',itoa(mu),'i4,t41,a,2x,',itoa(mu),'i4)')
      if (istart<=100) then
        write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
        call wrtout(std_out,msg,mode_paral)
@@ -3928,7 +3924,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsym,12
      istop=min(istart+11,nsym)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%symafm(istart:istop),'|',hdr0%symafm(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -3971,7 +3967,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,natom,12
      istop=min(istart+11,natom)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%typat(istart:istop),'|',hdr0%typat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -3993,7 +3989,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,npsp  ,12
      istop=min(istart+11,npsp  )
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%so_psp  (istart:istop),'|',hdr0%so_psp  (istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4014,7 +4010,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nkpt,12
      istop=min(istart+11,nkpt)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      if (istart<=100) then
        write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
        call wrtout(std_out,msg,mode_paral)
@@ -4104,8 +4100,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    istop = min(nkpt,nkpt_max)
    do ii = 1, istop, 5
      mu = min(5, istop - ii + 1)
-     wtkfmt(5:5) = number(mu)
-     wtkfmt(23:23) = number(mu)
+     wtkfmt = strcat('(2x,',itoa(mu),'f7.3,t41,a,2x,',itoa(mu),'f7.3)')
      write(msg, wtkfmt)hdr%wtk(ii:min(istop, ii + 5 - 1)),'|',hdr0%wtk(ii:min(istop, ii + 5 - 1))
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4138,8 +4133,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,bantot_eff,9
      istop = min(istart+8,bantot_eff)
      mu = istop - istart + 1
-     occfmt(5:5) = number(mu)
-     occfmt(23:23) = number(mu)
+     occfmt = strcat('(2x,',itoa(mu),'f4.1,t41,a,2x,',itoa(mu),'f4.1)')
      write(msg,fmt=occfmt)hdr%occ(istart:istop),'|', hdr0%occ(istart:istop)
      call wrtout(std_out,msg,mode_paral)
      if(istart>9*nkpt_max)then
@@ -4193,8 +4187,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,ntypat,6
      istop = min(istart+5,ntypat)
      mu = istop-istart+1
-     zatfmt(5:5) = number(mu)
-     zatfmt(23:23) = number(mu)
+     zatfmt = strcat('(2x,',itoa(mu),'f6.2,t41,a,2x,',itoa(mu),'f6.2)')
      write(msg,fmt=zatfmt) hdr%znucltypat(istart:istop),'|',hdr0%znucltypat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4417,63 +4410,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
  write(msg,'(80a)') ('=',ii=1,80)
  call wrtout(std_out,msg,mode_paral)
-
- CONTAINS
-!!***
-
-!!****f* hdr_check/mk_hdr_check_fmt
-!! NAME
-!! mk_hdr_check_fmt
-!!
-!! FUNCTION
-!! make a format needed in hdr_check, for arrays of nint integers each of format i3
-!!
-!! INPUTS
-!!  nelm=number of elements to be printed
-!!
-!! OUTPUT
-!!  character(len=26), typfmt= format needed
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine mk_hdr_check_fmt(nelm,typfmt)
-
-   implicit none
-
-!  Arguments ------------------------------------
-!  scalars
-   integer,intent(in) :: nelm
-   character(len=26),intent(out) :: typfmt
-
-!  Local variables-------------------------------
-!  scalars
-   integer :: ii
-   character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
-   character(len=26), parameter :: templatefmt='(2x,  i3,t41   ,a,2x,  i3)'
-!  *************************************************************************
-
-!  Initialize the format
-   typfmt=templatefmt
-
-!  Generate the type format specifier
-   ii=nelm/10
-   if ( ii /= 0 ) then
-     typfmt(5:5) = number(ii)
-     typfmt(22:22) = number(ii)
-   else
-     typfmt(5:5) = ' '
-     typfmt(22:22) = ' '
-   end if
-   ii = nelm - 10 * (nelm/10)
-   typfmt(6:6) = number(ii)
-   typfmt(23:23) = number(ii)
-
- end subroutine mk_hdr_check_fmt
 
 end subroutine hdr_check
 !!***
@@ -4741,6 +4677,65 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!***
 
 end subroutine hdr_vs_dtset
+!!***
+
+!!****f* m_hdr/hdr_get_crystal
+!! NAME
+!!  hdr_get_crystal
+!!
+!! FUNCTION
+!!  Initializes a crystal_t data type starting from the abinit header.
+!!
+!! INPUTS
+!!  hdr<hdr_type>=the abinit header
+!!  timrev ==2 => take advantage of time-reversal symmetry
+!!         ==1 ==> do not use time-reversal symmetry
+!!  remove_inv [optional]= if .TRUE. the inversion symmetry is removed from the set of operations
+!!  even if it is present in the header
+!!
+!! OUTPUT
+!!  cryst<crystal_t>= the data type filled with data reported in the abinit header
+!!
+!! TODO
+!!  Add information on the use of time-reversal in the Abinit header.
+!!
+!! PARENTS
+!!      cut3d,eph,fold2Bloch,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mrgscr,setup_bse,setup_screening,setup_sigma,wfk_analyze
+!!
+!! CHILDREN
+!!      atomdata_from_znucl,crystal_init
+!!
+!! SOURCE
+
+type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
+
+!Arguments ------------------------------------
+ type(hdr_type),intent(in) :: hdr
+ integer,intent(in) :: timrev
+ logical,optional,intent(in) :: remove_inv
+
+!Local variables-------------------------------
+ integer :: space_group
+ logical :: rinv,use_antiferro
+! *********************************************************************
+
+ rinv=.FALSE.; if (PRESENT(remove_inv)) rinv=remove_inv
+ use_antiferro = (hdr%nspden==2.and.hdr%nsppol==1)
+
+ ! Consistency check
+ ABI_CHECK(any(timrev == [1, 2]),"timrev should be in (1|2)")
+ if (use_antiferro) then
+   ABI_CHECK(ANY(hdr%symafm==-1),"Wrong nspden, nsppol, symafm.")
+ end if
+
+ space_group=0 !FIXME not known at this level.
+
+ call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
+& hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
+& symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
+
+end function hdr_get_crystal
 !!***
 
 end module m_hdr

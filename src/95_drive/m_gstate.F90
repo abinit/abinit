@@ -35,7 +35,6 @@ module m_gstate
  use libxc_functionals
  use m_exit
  use m_crystal
- use m_crystal_io
  use m_scf_history
  use m_abimover
  use m_wffile
@@ -1101,10 +1100,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !      Compute up+down rho(G) by fft
        ABI_ALLOCATE(work,(nfftf))
        work(:)=rhor(:,1)
-       call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
        if(dtset%usekden==1)then
          work(:)=taur(:,1)
-         call fourdp(1,taug,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+         call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
        ABI_DEALLOCATE(work)
 
@@ -1203,10 +1202,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Compute up+down rho(G) by fft
      ABI_ALLOCATE(work,(nfftf))
      work(:)=rhor(:,1)
-     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
      if(dtset%usekden==1)then
        work(:)=taur(:,1)
-       call fourdp(1,taug,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
      ABI_DEALLOCATE(work)
 
@@ -1443,7 +1442,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
 
    ! Write tetrahedron tables.
-   call crystal_from_hdr(cryst, hdr, 2)
+   cryst = hdr_get_crystal(hdr, 2)
    tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
    dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
    if (ierr == 0) then
@@ -1453,7 +1452,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
 
    call destroy_tetra(tetra)
-   call crystal_free(cryst)
+   call cryst%free()
  end if
 
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&

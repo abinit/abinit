@@ -304,7 +304,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
-       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work)
      if (dtset%iprcel<=78) then
@@ -322,7 +322,7 @@ subroutine prcref(atindx,dielar,dielinv,&
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(work,(nfftprc))
-       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
        ABI_DEALLOCATE(work)
@@ -331,7 +331,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
      end if
      do ispden=1,dtset%nspden
-       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work3)
@@ -379,7 +379,7 @@ subroutine prcref(atindx,dielar,dielinv,&
        work2(:)=vresid(:,1)
 !      Must average over spins in the case of a potential residual
        if(dtset%nspden/=1.and.optres==0)work2(:)=(work2(:)+vresid(:,2))*half
-       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work1(:,:)=reshape(vresid(:,1),(/2,nfftprc/))
        if(dtset%nspden/=1.and.optres==0)work1(:,:)=(work1(:,:)+reshape(vresid(:,2),(/2,nfftprc/)))*half
@@ -440,7 +440,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_DEALLOCATE(mask)
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work2(:)=reshape(work1(:,:),(/nfftprc*2/))
      end if
@@ -561,7 +561,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(work,(nfft))
      ABI_ALLOCATE(rhog_wk,(2,nfft))
      work(:)=rhor_wk(:,1)
-     call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
      ABI_DEALLOCATE(work)
 
 !    Compute structure factor phases for new atomic pos:
@@ -954,7 +954,7 @@ end subroutine prcref
      ABI_ALLOCATE(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
-       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work)
      if (dtset%iprcel<=78) then
@@ -972,7 +972,7 @@ end subroutine prcref
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(work,(nfftprc))
-       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
        ABI_DEALLOCATE(work)
@@ -981,7 +981,7 @@ end subroutine prcref
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
      end if
      do ispden=1,dtset%nspden
-       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work3)
@@ -1029,7 +1029,7 @@ end subroutine prcref
        work2(:)=vresid(:,1)
 !      Must average over spins if needed.
        if(dtset%nspden/=1)work2(:)=(work2(:)+vresid(:,2))*half
-       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work1(:,:)=reshape(vresid(:,1),(/2,nfftprc/))
        if (dtset%nspden/=1) work1(:,:)=(work1(:,:)+reshape(vresid(:,2),(/2,nfftprc/)))*half
@@ -1079,7 +1079,7 @@ end subroutine prcref
 
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work2(:)=reshape(work1(:,:),(/nfftprc*2/))
      end if
@@ -1196,7 +1196,7 @@ end subroutine prcref
    ABI_ALLOCATE(work,(nfft))
    ABI_ALLOCATE(rhog_wk,(2,nfft))
    work(:)=rhor_wk(:,1)
-   call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
    ABI_DEALLOCATE(work)
 
 !  Compute structure factor phases for new atomic pos:
@@ -1476,7 +1476,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 !    Do fft from real space (work2) to G space (work1)
      if (optreal==1) then
        work2(:)=vresid(:,ispden)
-       call fourdp(cplex,work1,work2,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,work1,work2,-1,mpi_enreg,nfft,1,ngfft,0)
      else
 !      work1(:,:)=reshape(vresid(:,ispden),(/2,nfft/))
 !      Reshape function does not work with big arrays for some compilers
@@ -1538,7 +1538,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(cplex,work1,work2,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
        vrespc(:,ispden)=work2(:)
      else
 !      vrespc(:,ispden)=reshape(work1(:,:),(/nfft*2/))
@@ -2184,7 +2184,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 !  ENDDEBUG
    call initmpi_seq(mpi_enreg_seq)
    call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
-   call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,ngfft,paral_kgb,0) ! trsfrm R to G
+   call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,1,ngfft,0) ! trsfrm R to G
    call destroy_mpi_enreg(mpi_enreg_seq)
 
 !  Compute difference in G vectors

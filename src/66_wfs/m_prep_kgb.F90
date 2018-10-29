@@ -1084,12 +1084,12 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       cwavef_fft,2*recvcount_fft, 2*recvdisp_fft, mpi_enreg%comm_fft,ier)
        call fourwf(1,rhoaug,cwavef_fft,dummy,wfraug,gbound_,gbound_,&
 &       istwf_k_,kg_k_fft,kg_k_fft,mgfft,mpi_enreg,1,&
-&       ngfft,npw_fft,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       ngfft,npw_fft,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=use_gpu_cuda_)
      else
        call fourwf(1,rhoaug,cwavef_alltoall2,dummy,wfraug,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,1,&
-&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=use_gpu_cuda_)
      end if
      if (option_fourwf==0.and.nproc_fft>1) then
@@ -1179,14 +1179,14 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &           cwavef_fft(:,(npw_fft*(iibandpp-1))+1:(npw_fft*iibandpp)), &
 &           dummy,wfraug_ptr,gbound_,gbound_,&
 &           istwf_k_,kg_k_fft,kg_k_fft,mgfft,mpi_enreg,1,&
-&           ngfft,npw_fft,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&           ngfft,npw_fft,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
 &           use_gpu_cuda=use_gpu_cuda_)
          else
            call fourwf(1,rhoaug,&
 &           cwavef_alltoall1(:,(ndatarecv*(iibandpp-1))+1:(ndatarecv*iibandpp)),&
 &           dummy,wfraug_ptr,gbound_,gbound_,&
 &           istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,1,&
-&           ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&           ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,&
 &           tim_fourwf,weight,weight)
          end if
          if (option_fourwf==0.and.nproc_fft>1) then
@@ -1287,7 +1287,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       ewavef_alltoall_sym(:,(ndatarecv_tot*(iibandpp-1))+1:(ndatarecv_tot*iibandpp)),&
 &       dummy,wfraug_ptr,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,1,&
-&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&
 &       tim_fourwf,weight1,weight2)
        if (option_fourwf==0) then
          if (modulo(bandpp,2)==0) then

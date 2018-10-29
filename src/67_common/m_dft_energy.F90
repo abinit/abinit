@@ -883,7 +883,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    ABI_DEALLOCATE(rhowfr)
    ABI_DEALLOCATE(rhowfg)
    rhor(:,:)=rhor(:,:)+nhat(:,:)
-   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
 
  end if
 

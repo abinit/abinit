@@ -1327,7 +1327,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    ABI_ALLOCATE(nresg,(2,nfft))
    ABI_ALLOCATE(dummy,(nfft))
    dummy(:)=nresid(:,1)
-   call fourdp(1,nresg,dummy,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,nresg,dummy,-1,mpi_enreg,nfft,1,ngfft,0)
    ABI_DEALLOCATE(dummy)
  end if
 

@@ -49,8 +49,7 @@ MODULE m_ddk
  use defs_abitypes,   only : hdr_type, dataset_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
- use m_crystal,       only : crystal_t, crystal_free
- use m_crystal_io,    only : crystal_from_hdr, crystal_ncwrite
+ use m_crystal,       only : crystal_t
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
 
@@ -210,7 +209,7 @@ subroutine ddk_init(ddk, paths, comm)
  ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
 
  ! Init crystal_t
- call crystal_from_hdr(ddk%cryst, hdrs(1), timrev2)
+ ddk%cryst = hdr_get_crystal(hdrs(1), timrev2)
 
  ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
  call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
@@ -309,7 +308,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
 
  !read crystal
- call crystal_from_hdr(cryst, in_wfk%hdr, 2)
+ cryst = hdr_get_crystal(in_wfk%hdr, 2)
 
  !read ebands
  ebands = wfk_read_ebands(wfk_path,comm)
@@ -379,11 +378,11 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_FREE(keep_ur)
  ABI_FREE(nband)
 
- call wfd_print(in_wfd,header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call in_wfd%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
 
  !Read Wavefunctions
  iomode = iomode_from_fname(wfk_path)
- call wfd_read_wfk(in_wfd,wfk_path,iomode)
+ call in_wfd%read_wfk(wfk_path,iomode)
 
  do spin=1,nsppol ! Loop over spins
    do ik=1,nkpt ! Loop over kpoints
@@ -478,7 +477,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
        hdr_tmp%pertcase = (cryst%natom*3)+ii
        NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-       NCF_CHECK(crystal_ncwrite(cryst, ncid))
+       NCF_CHECK(cryst%ncwrite(ncid))
        NCF_CHECK(ebands_ncwrite(ebands, ncid))
        ncerr = nctk_def_arrays(ncid, [ &
          nctkarr_t('h1_matrix_elements', "dp", &
@@ -500,9 +499,9 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_FREE(dipoles)
 
  call wfk_close(in_wfk)
- call wfd_free(in_wfd)
+ call in_wfd%free()
  call ebands_free(ebands)
- call crystal_free(cryst)
+ call cryst%free()
 
 end subroutine eph_ddk
 !!***
@@ -756,15 +755,11 @@ subroutine ddk_free(ddk)
  ! integer arrays
 
  ! real arrays
- if (allocated(ddk%velocity)) then
-   ABI_DEALLOCATE(ddk%velocity)
- end if
- if (allocated(ddk%velocity_fsavg)) then
-   ABI_DEALLOCATE(ddk%velocity_fsavg)
- end if
+ ABI_SFREE(ddk%velocity)
+ ABI_SFREE(ddk%velocity_fsavg)
 
  ! types
- call crystal_free(ddk%cryst)
+ call ddk%cryst%free()
 
 end subroutine ddk_free
 !!***

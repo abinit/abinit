@@ -1095,7 +1095,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &         ph1df,psps,psps%qgrid_vl,rhor,rprimd,scf_history,ucvol,&
 &         psps%usepaw,xred,xred_old,ylm,psps%ziontypat,psps%znuclpsp)
        end if
-       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
 
    end if ! moved_atm_inside==1 .or. istep==1
@@ -1281,7 +1281,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        if (dtfil%ireadwf/=0.and.dtfil%ireadden==0.and.initialized==0) then
          rhor(:,:)=rhor(:,:)+nhat(:,:)
          if(dtset%usewvl==0) then
-           call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+           call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
          end if
        end if
        call timab(558,2,tsec)

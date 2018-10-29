@@ -520,9 +520,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
        vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
 
 !      Fourier transform of Vxc_core/vxc10_core to use in atm2fft (reciprocal space calculation)
-       call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-       call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-       call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+       call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft,0)
+       call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft, 0)
+       call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,1, ngfft, 0)
 
        call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_tmp2,dummy_in,gmet,gprimd,&
 &       dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&
@@ -581,9 +581,9 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
          ABI_ALLOCATE(vxc_coreg,(2,nfft))
          ABI_ALLOCATE(vxc1is_coreg,(2,nfft))
          vxc10_coreg(:,:)=zero;vxc10_coreg(:,:)=zero;vxc1is_coreg(:,:)=zero;
-         call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-         call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
-         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+         call fourdp(1,vxc10_coreg,vxc10_core,-1,mpi_enreg,nfft,1, ngfft, 0)
+         call fourdp(1,vxc_coreg,vxc_core,-1,mpi_enreg,nfft,1, ngfft,0)
+         call fourdp(1,vxc1is_coreg,vxc1is_core,-1,mpi_enreg,nfft,1, ngfft, 0)
          optatm=0;optdyfr=0;optgr=0;optstr=0;optv=0;optn=1;optn2=1;opteltfr=1;corstr=zero
          call atm2fft(atindx,dummy_out1,dummy_out2,dummy_out3,dummy_out4,eltfrxc_test2,dummy_in,gmet,gprimd,&
 &         dummy_out5,dummy_out6,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,dtset%ntypat,&

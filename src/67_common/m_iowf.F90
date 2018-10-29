@@ -44,8 +44,7 @@ MODULE m_iowf
  use m_numeric_tools,  only : mask2blocks
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_cgtools,        only : cg_zcopy
- use m_crystal,        only : crystal_t, crystal_free
- use m_crystal_io,     only : crystal_ncwrite, crystal_from_hdr
+ use m_crystal,        only : crystal_t
  use m_rwwf,           only : rwwf
  use m_mpinfo,         only : proc_distrb_cycle
  use m_vkbr,           only : calc_vkb
@@ -353,7 +352,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_MALLOC(kg_disk, (3, mpw_disk))
 
        timrev = 2 ! FIXME: Use abinit convention for timrev
-       call crystal_from_hdr(crystal, hdr, timrev)
+       crystal = hdr_get_crystal(hdr, timrev)
 
        ! For each k-point: read full G-vector list from file, compute KB data and write to file.
        do ikpt=1,nkpt
@@ -392,7 +391,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
        ABI_FREE(vkbsign)
        ABI_FREE(vkb)
        ABI_FREE(vkbd)
-       call crystal_free(crystal)
+       call crystal%free()
      end if
 
      if (done) return
@@ -413,9 +412,9 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !call crystal_from_hdr(crystal, hdr, 2)
-     !NCF_CHECK(crystal_ncwrite_path(crystal, nctk_ncify(filnam)))
-     !call crystal_free(crystal)
+     !crystal = hdr_get_crystal(hdr, 2)
+     !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
+     !call crystal%free()
      !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
      !NCF_CHECK(ncerr)
 #else
@@ -812,7 +811,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
  ! FIXME: Use abinit convention for timrev
  timrev = 2
- call crystal_from_hdr(crystal, hdr, timrev)
+ crystal = hdr_get_crystal(hdr, timrev)
 
  ! TODO
  ! Be careful with response == 1.
@@ -882,7 +881,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        NCF_CHECK_MSG(ncerr, sjoin("create_par: ", path))
 
        call wfk_ncdef_dims_vars(ncid, hdr, fform2, write_hdr=.True.)
-       NCF_CHECK(crystal_ncwrite(crystal, ncid))
+       NCF_CHECK(crystal%ncwrite(ncid))
 
        if (response == 0) then
          NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
@@ -1064,7 +1063,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      if (iam_master) then
        call wfk_open_write(wfk,hdr,path,formeig,iomode,get_unit(),xmpi_comm_self,write_hdr=.True.)
 
-       NCF_CHECK(crystal_ncwrite(crystal, wfk%fh))
+       NCF_CHECK(crystal%ncwrite(wfk%fh))
        !write(std_out,*)"after crystal_ncwrite"
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
@@ -1160,7 +1159,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        NCF_CHECK_MSG(ncerr, sjoin("create_par:", path))
 
        call wfk_ncdef_dims_vars(ncid, hdr, fform2, write_hdr=.True.)
-       NCF_CHECK(crystal_ncwrite(crystal, ncid))
+       NCF_CHECK(crystal%ncwrite(ncid))
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
        if (response == 0) then
@@ -1321,7 +1320,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    end if !nctk_has_mpiio
  end if
 
- call crystal_free(crystal)
+ call crystal%free()
  if (response == 0) call ebands_free(gs_ebands)
 
  ABI_FREE(occ3d)

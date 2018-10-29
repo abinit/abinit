@@ -22,12 +22,10 @@ module m_tdep_abitypes
   use m_tdep_phij,        only : tdep_build_phij33
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
-  use m_ifc,              only : ifc_type, ifc_init, ifc_print
-  use m_crystal_io,       only : crystal_ncwrite
+  use m_ifc,              only : ifc_type, ifc_init, ifc_print, ifc_write
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
   use m_kpts,             only : smpbz
-  use m_ifc,              only : ifc_write
 
   implicit none
 
@@ -349,7 +347,7 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   NCF_CHECK_MSG(nctk_open_create(ncid, trim(InVar%output_prefix)//"anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
-  NCF_CHECK(crystal_ncwrite(Crystal,ncid))
+  NCF_CHECK(crystal%ncwrite(ncid))
 !JB  call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
   call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
   write(InVar%stdout,'(a)') ' ------- achieved'
@@ -459,7 +457,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
           isym =Shell2at%neighbours(eatom,ishell)%sym_in_shell(iatshell)
           trans=Shell2at%neighbours(eatom,ishell)%transpose_in_shell(iatshell)
           if (fatom.lt.eatom) cycle
-          call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans) 
+          call tdep_build_phij33(isym,Phij_ref(:,:,ishell),Phij_33,Sym,trans)
 !         Symetrization of the Phij_NN matrix
           Phij_NN((eatom-1)*3+1:(eatom-1)*3+3,3*(fatom-1)+1:3*(fatom-1)+3)=Phij_33(:,:)
           do ii=1,3
