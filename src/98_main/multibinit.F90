@@ -363,7 +363,7 @@ program multibinit
 &         fit_tolMSDFS=inp%fit_tolMSDFS,&
 &         verbose=.true.,positive=.false.,&
 &         anharmstr=inp%fit_anhaStrain==1,&
-&         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names)
+&         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot)
        end if
      else
        write(message, '(3a)' )&
@@ -385,7 +385,7 @@ program multibinit
 !****************************************************************************************
    if(inp%test_effpot == 1)then 
      if(iam_master) then
-!    Read the MD file
+!    Read the test-set .nc file
        write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
 &       '-Reading the test-set file :',ch10,&
 &       '-',trim(filnam(6)),ch10

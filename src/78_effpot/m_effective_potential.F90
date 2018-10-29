@@ -2263,7 +2263,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   do ii = 1, 3
     sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
   end do
-  name_file = filename !! TODO MARCUS CHECK AS OPTIONAL VARIABLE
+  !name_file = filename !! TODO MARCUS CHECK AS OPTIONAL VARIABLE
   need_verbose = .TRUE.
   if(present(verbose)) then
     need_verbose = verbose
@@ -2535,7 +2535,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
 &                                  sc_size,strain_tmp,strten_part,eff_pot%mpi_coeff%my_ncell,&
 &                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm,& 
-&                                  filename=name_file)
+&                                  filename=filename)
 
     if(need_verbose)then
       write(msg, '(a,1ES24.16,a)' ) ' Energy of the fitted coefficient          :',&
@@ -2956,7 +2956,7 @@ subroutine effective_potential_writeAnhHead(ncoeff,filename,anh_terms)
   ! Marcus: if wanted: analyze anharmonic terms of effective potential && 
   ! and print anharmonic contribution to file anharmonic_energy_terms.out
   ! Open File and write header 
-  name_file=trim(filename)//'_anharmonic_terms_energy.out' 
+  name_file=trim(filename)//'_anharmonic_terms_energy.dat' 
   unit_out = get_unit()
   open(unit=unit_out,file=name_file,status='replace',form='formatted')
   write(unit_out,*) '#---------------------------------------------#'

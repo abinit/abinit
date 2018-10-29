@@ -568,7 +568,7 @@ implicit none
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
 &     verbose=verbose,writeHIST=writeHIST)     
-     INQUIRE(FILE='MD_anharmonic_terms_energy.out',OPENED=file_opened,number=unit_out)
+     INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
      !*************************************************************
