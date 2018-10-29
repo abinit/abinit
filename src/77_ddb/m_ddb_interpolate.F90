@@ -483,22 +483,17 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
   nctkdim_t('cplex',cplex)], defmode=.True.)
  NCF_CHECK(ncerr)
 
- ! Create the arrays
+! Create the arrays
  ncerr = nctk_def_arrays(ncid, [&
- nctkarr_t('atomic_masses_amu', "dp", 'number_of_atom_species'),&
+ &nctkarr_t('atomic_masses_amu', "dp", 'number_of_atom_species'),&
  nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
- nctkarr_t('second_derivative_of_energy', "dp", 'cplex, &
- number_of_cartesian_directions, number_of_atoms, &
- number_of_cartesian_directions, number_of_atoms'), &
- nctkarr_t('second_derivative_of_energy_mask', "i", &
- 'number_of_cartesian_directions, number_of_atoms, &
- number_of_cartesian_directions, number_of_atoms'), &
- nctkarr_t('born_effective_charge_tensor', "dp", '&
- number_of_cartesian_directions, number_of_atoms, &
- number_of_cartesian_directions'), &
+ nctkarr_t('second_derivative_of_energy', "dp", &
+ &'cplex, number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
+ nctkarr_t('second_derivative_of_energy_mask', "i",&
+ &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
+ nctkarr_t('born_effective_charge_tensor', "dp",'number_of_cartesian_directions,number_of_atoms,number_of_cartesian_directions'),&
  nctkarr_t('born_effective_charge_tensor_mask', "i",&
- 'number_of_cartesian_directions, number_of_atoms, &
- number_of_cartesian_directions')])
+ &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions')])
  NCF_CHECK(ncerr)
 
 ! Write data
