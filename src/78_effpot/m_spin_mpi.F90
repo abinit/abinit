@@ -1,5 +1,5 @@
   !{\src2tex{textfont=tt}}
-  !!****m* ABINIT/m_spin_model_primitive
+  !!****m* ABINIT/m_spin_mpi
   !! NAME
   !! m_spin_mpi
   !!

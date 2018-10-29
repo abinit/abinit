@@ -138,7 +138,7 @@ Measurement run:
           .....
 ```
 
-Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment . If all the spins for the wave-vector ($\vec{q}$) [[MULTIBINIT:spin_qpoint]] are aligned , this value is 1.0. It deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system.
+Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment . If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_qpoint]] are aligned , this value is 1.0. It deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system.
 
 There are two stages, the warming up and measurement, in the whole spin dynamics process. The thermolization process the spins evove so that they get to the equilibrium state with temperature defined in the input. And during the measurement stage, the steps are sampled for the calculation of the observables. 
 
@@ -190,21 +190,21 @@ In the netcdf file, the trajectories of the spins can be found. They can be furt
 
 We are now coming back to the values chosen for the input variables in the tmulti5_1.in file. It is essential to choose these values such that the results of the calculation are meaningful. Therefore, we recommend a convergence study concerning the following parameters: 
 
-* time step ([[MULTIBINIT: spin_dt]]):
+* time step ([[multibinit: spin_dt]]):
 
     Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.   (<!--TODO: there must be a better way.-->)
 
-* supercell size ([[MULTIBINIT:ncell]])
+* supercell size ([[multibinit:ncell]])
 
   Due to the periodic boundary condition, the spins between periods could be correlated with each other, which can lead to an artificial increase in, e.g., the phase transition temperature. Also, certain quantities cannot be sampled using a small box. Hence, it is required to test if the quantity of interest is converged with the supercell size.
 
   For anti-ferromagnetic structures, or more generally, structures with non-zero wave vector, the box size should allow the spins to fit to the q-vector, i.e. ($\vec{q}\cdot \vec{n}$) should be integers. For some structures, it is not easy or sometimes impossible to find such $\vec{n}$. In these cases, a large box is usually required.  
 
-* Thermolization time([[MULTIBINIT: spin_ntime_pre]])
+* Thermolization time([[multibinit: spin_ntime_pre]])
 
     The thermolization time should at least allow the spins to relax to the equilibrium state. To see how much time is needed for the system to get to the equilibrium state, we can plot the magnetic moment as function of time. It should be noted that the relaxation to the equilibrium state usually takes much longer near the phase transition temperature. Therefore, it is important to test the relaxation time.
 
-* Measurement time ([[MULTIBINIT: spin_ntime]])
+* Measurement time ([[multibinit: spin_ntime]])
 
    In order to calculate some observables, longer times (e.g. 10 times the relaxation time) are required so enough samples can be generated.  
 
@@ -212,7 +212,7 @@ We are now coming back to the values chosen for the input variables in the tmult
 
 A most common usage of spin dynamics is to calculate the magnetic quantities (e.g. magnetic moments, susceptibility, specific heat ) as a function of temperature and determine the critical  temperature where a phase transition from one magnetic phase to another occurs. 
 
-By setting [[MULTIBINIT:spin_var_temperature]] to 1 and specifying the starting temperature, final temperature, and the number of steps, a series of calculations will be carried out. (See e.g. ~abinit/tests/tutoMULTIBINIT/Input/tmulti5_2.* )
+By setting [[multibinit:spin_var_temperature]] to 1 and specifying the starting temperature, final temperature, and the number of steps, a series of calculations will be carried out. (See e.g. ~abinit/tests/tutomultibinit/Input/tmulti5_2.* )
 
 (*Note that some of the parameters in the input file are set to "bad" values. Let's try to tune them to make a meaningful calculation.* )
 
