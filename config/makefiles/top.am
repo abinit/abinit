@@ -75,7 +75,7 @@ robodoc:
 	rm -rf tmp-robodoc robodoc-html && mkdir tmp-robodoc
 	cp -rf $(top_srcdir)/src/[0-9]* tmp-robodoc
 	cp $(top_srcdir)/config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
-	cd tmp-robodoc && rm */*.in && rm */interfaces* && robodoc > ../robodoc.log 2> ../robodoc.err
+	cd tmp-robodoc && rm */*.in && robodoc > ../robodoc.log 2> ../robodoc.err
 	mv -f tmp-robodoc/www/robodoc robodoc-html
 	tardir=robodoc-html && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >robodoc-html-$(VERSION).tar.gz
 	rm -rf robodoc-html tmp-robodoc

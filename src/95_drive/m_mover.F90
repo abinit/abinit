@@ -44,14 +44,13 @@ module m_mover
  use m_fstrings,           only : strcat, sjoin, indent
  use m_symtk,              only : matr3inv, symmetrize_xred
  use m_geometry,           only : fcart2fred, chkdilatmx, xred2xcart
- use m_crystal,            only : crystal_init, crystal_free, crystal_t
- use m_crystal_io,         only : crystal_ncwrite_path
+ use m_crystal,            only : crystal_t, crystal_init
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
  use m_scfcv,              only : scfcv_t, scfcv_run
- use m_effective_potential,only : effective_potential_type,effective_potential_evaluate
- use m_dtfil,              only : dtfil_init_time, status
+ use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
+ use m_dtfil,              only : dtfil_init_time
  use m_initylmg,           only : initylmg
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
@@ -73,7 +72,7 @@ module m_mover
  use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
-
+ use m_effective_potential_file, only : effective_potential_file_mapHistToRef 
  implicit none
 
  private
@@ -184,7 +183,7 @@ contains
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare_and_copy
 !!      abihist_free,abihist_init,abimover_fin,abimover_ini
-!!      chkdilatmx,crystal_free,crystal_init,dtfil_init_time
+!!      chkdilatmx,crystal_init,dtfil_init_time
 !!      effective_potential_evaluate,erlxconv,fcart2fred,fconv,hist2var
 !!      initylmg,matr3inv,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
 !!      pred_diisrelax,pred_hmc,pred_isokinetic,pred_isothermal,pred_langevin
@@ -199,13 +198,6 @@ contains
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
 & effective_potential,filename_ddb,verbose,writeHIST)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mover'
-!End of the abilint section
 
 implicit none
 
@@ -236,19 +228,20 @@ type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: irshift,itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
-integer :: nloop,nshell,ntime,option,comm
-integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
+integer :: nloop,nshell,ntime,option,comm, mxhist 
+integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
 character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename,fname_ddb
+character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
-logical :: skipcycle
+logical :: skipcycle, file_opened
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
@@ -264,12 +257,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  need_writeHIST=.TRUE.
  if(present(writeHIST)) need_writeHIST = writeHIST
 
- call status(0,dtfil%filstat,iexit,level,'init          ')
-
  ! enable time limit handler if not done in callers.
- if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
+ if (enable_timelimit_in(MY_NAME) == MY_NAME) then
    if (need_verbose) then
-     write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+     write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
    end if
  end if
 
@@ -329,6 +320,8 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  comm=scfcv_args%mpi_enreg%comm_cell
  me=xmpi_comm_rank(comm)
 
+ mxhist=zero 
+
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
@@ -339,6 +332,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
    call abihist_bcast(hist_prev,master,comm)
 
+   mxhist = hist_prev%mxhist ! Wirte number of MD-steps into mxhist  
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
@@ -379,17 +373,23 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  iexit=0; timelimit_exit=0
  ncycle=specs%ncycle
 
- if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0) then
+ if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
    ncycle=scfcv_args%dtset%hmctt
-   if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0) then
+   if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
      ncycle=ncycle+scfcv_args%dtset%hmcsst
    endif
  endif
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
-
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1) nhisttot = specs%nhist ! We don't need to store all the history
+ if(specs%nhist/=-1 .and. mxhist >= 3)then   ! then .and. hist%mxhist > 3 
+  nhisttot = specs%nhist! We don't need to store all the history
+ elseif(mxhist > 0 .and. mxhist  < 3)then
+  nhisttot = mxhist ! Less than three MD-Steps
+ end if
+
+ write(*,*) "mxhist", mxhist
+
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
@@ -398,7 +398,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !If effective potential is present,
 !  forces will be compute with it
- if (present(effective_potential)) then
+ if (present(effective_potential))then
    need_scfcv_cycle = .FALSE.
    if(need_verbose)then
      write(message,'(2a,i2,5a,80a)')&
@@ -488,7 +488,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      prev = now
      write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
      if(need_verbose)call wrtout(std_out, message, "COLL")
-     if (have_timelimit_in(ABI_FUNC)) then
+     if (have_timelimit_in(MY_NAME)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
@@ -613,6 +613,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          else
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
+
+           INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
+             if(file_opened .eqv. .TRUE.)then
+               write(unit_out,'(I7)',advance='no') itime !If wanted Write cycle to anharmonic_energy_contribution file
+             endif
+             if(itime == 1 .and. ab_mover%restartxf==-3)then
+               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
+               xred(:,:) = hist%xred(:,:,hist%mxhist) ! Fill xred with new ordering
+             end if 
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,&
 &           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
@@ -840,7 +849,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
-     if (ab_mover%ionmov==13) then
+     if (ab_mover%ionmov==13 .and. hist%mxhist >= 2) then 
        if (itime_hist>2) then
          ihist_prev2 = abihist_findIndex(hist,-2)
          vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)- hist%rprimd(:,:,ihist_prev2))/(two*ab_mover%dtion)
@@ -958,8 +967,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
- call status(0,dtfil%filstat,iexit,level,'exit          ')
-
 contains
 !!***
 
@@ -1015,13 +1022,6 @@ contains
 !! SOURCE
 
 subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,tolmxf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fconv'
-!End of the abilint section
 
  implicit none
 
@@ -1145,13 +1145,6 @@ end subroutine fconv
 
 subroutine erlxconv(hist,iexit,itime,itime_hist,ntime,tolmxde)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'erlxconv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1251,13 +1244,6 @@ end subroutine mover
 !! SOURCE
 
 subroutine prtxfase(ab_mover,hist,itime,iout,pos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtxfase'
-!End of the abilint section
 
 implicit none
 
@@ -1525,13 +1511,6 @@ implicit none
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gettag'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -1592,13 +1571,6 @@ implicit none
 
 
 subroutine prtnatom(atlist,iout,message,natom,prtallatoms,thearray)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtnatom'
-!End of the abilint section
 
 implicit none
 
@@ -1694,15 +1666,8 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use netcdf
 #endif
 
- use m_io_tools,   only : open_file
+ use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrt_moldyn_netcdf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

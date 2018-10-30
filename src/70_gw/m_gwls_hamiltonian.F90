@@ -51,7 +51,7 @@ use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian, destroy_ha
 use m_paw_dmft,         only : paw_dmft_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
-use m_crystal,          only : crystal_t, crystal_init, crystal_free, crystal_print
+use m_crystal,          only : crystal_t, crystal_init, crystal_print
 use m_io_kss,           only : make_gvec_kss
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
@@ -216,13 +216,6 @@ subroutine DistributeValenceWavefunctions()
 ! susceptibility operator.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'DistributeValenceWavefunctions'
-!End of the abilint section
-
 implicit none
 
 integer  :: iblk, mb, v
@@ -324,13 +317,6 @@ subroutine DistributeValenceKernel()
 ! A better (forthcoming) algorithm would only distribute the actual kernel,
 ! not all valence bands.
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'DistributeValenceKernel'
-!End of the abilint section
-
 implicit none
 
 integer  :: mb, n
@@ -416,13 +402,6 @@ subroutine pc_k_valence_kernel(psi_inout,n)
 ! array containing the kernel (defined in this module) is already prepared
 ! and ready to be used.
 !================================================================================
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pc_k_valence_kernel'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(inout) :: psi_inout(2,npw_g)
@@ -513,13 +492,6 @@ end subroutine pc_k_valence_kernel
 !! SOURCE
 
 subroutine wf_block_distribute(psik, psik_alltoall, direction)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wf_block_distribute'
-!End of the abilint section
 
 implicit none
 
@@ -654,13 +626,6 @@ use m_cgtools
 ! This subroutine computes the exchange energy in band+FFT parallel
 !
 !================================================================================
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exchange'
-!End of the abilint section
-
 implicit none
 real(dp) :: exchange
 
@@ -797,13 +762,6 @@ end function exchange
 
 function dft_xc_energy(e)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dft_xc_energy'
-!End of the abilint section
-
 implicit none
 real(dp) :: dft_xc_energy
 integer, intent(in) :: e
@@ -857,7 +815,7 @@ call wf_block_distribute(psik_e,  psik_e_alltoall,1) ! LA -> FFT
 !  psir3 is a dummy, not used here.
 
 call fourwf(cplex,vxc(:,:,:,ispden),psik_e_alltoall,psik_out,psir3,gbound,gbound,istwfk(ckpt),kg_k_gather,kg_k_gather,mgfft,&
-&             mpi_enreg,1,ngfft,npw_g,npw_g,n4,n5,n6,option,dtset%paral_kgb,tim_fourwf,weight,weight)
+&             mpi_enreg,1,ngfft,npw_g,npw_g,n4,n5,n6,option,tim_fourwf,weight,weight)
 
 
 tmpc = cg_zdotc(npw_g, psik_e_alltoall,psik_out)
@@ -924,13 +882,6 @@ subroutine set_precondition(lambda,omega)
 ! TODO :
 ! - eliminate the 2 "if(kinpw(i) < huge(0.0_dp)*1.0d-11)"
 !   since ecutsm = 0.0 always (check if that's true in this gw_sternheimer subroutine).
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_precondition'
-!End of the abilint section
-
 implicit none
 
 real(dp), intent(in), optional :: lambda, omega
@@ -1033,13 +984,6 @@ end subroutine set_precondition
 
 subroutine unset_precondition()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unset_precondition'
-!End of the abilint section
-
 implicit none
 ! *************************************************************************
 
@@ -1071,13 +1015,6 @@ end subroutine unset_precondition
 !! SOURCE
 
 subroutine precondition(psi_out,psi_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precondition'
-!End of the abilint section
 
 implicit none
 
@@ -1118,13 +1055,6 @@ end subroutine precondition
 
 subroutine precondition_cplx(psi_out,psi_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precondition_cplx'
-!End of the abilint section
-
 implicit none
 
 complex(dpc), intent(out) :: psi_out(npw_g)
@@ -1163,13 +1093,6 @@ end subroutine precondition_cplx
 !! SOURCE
 
 subroutine sqrt_vc_k(psi_inout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqrt_vc_k'
-!End of the abilint section
 
 implicit none
 
@@ -1215,13 +1138,6 @@ end subroutine sqrt_vc_k
 
 subroutine Hpsik(psi_out,psi_in,cte)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Hpsik'
-!End of the abilint section
-
 implicit none
 
 !External variables
@@ -1245,7 +1161,7 @@ real(dp), intent(in), optional :: cte
 !Hpsik,            O
 !gsc,              D              (output for PAW : <G|S|C>)
 !gs_hamk,          T
-!gvnlc,            D              (<G|Vnonlocal|C>)
+!gvnlxc,            D              (<G|Vnonlocal+VFockACE|C>)
 !eshift,           I              (<G|H-eshift.S|C>)
 !mpi_enreg,        T
 !ndat,             Fixed to 1     (# of FFTs to do in //)
@@ -1305,13 +1221,6 @@ end subroutine Hpsik
 
 subroutine Hpsikc(psi_out,psi_in,cte)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Hpsikc'
-!End of the abilint section
-
 implicit none
 
 !External variables
@@ -1358,13 +1267,6 @@ end subroutine Hpsikc
 !!! SOURCE
 !
 !subroutine pc_k(psi_inout,n,eig_e,above)
-!
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'pc_k'
-!!End of the abilint section
 !
 !implicit none
 !real(dp), intent(inout) :: psi_inout(2,npw_kb)
@@ -1449,13 +1351,6 @@ end subroutine Hpsikc
 
 subroutine g_to_r(psi_out,psi_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g_to_r'
-!End of the abilint section
-
 implicit none
 real(dp), intent(out) :: psi_out(2,n4,n5,n6)
 real(dp), intent(in)  :: psi_in(2,npw_g)
@@ -1470,7 +1365,7 @@ cplex  = 2 ! complex potential
 psig4 = psi_in
 psi_out = zero
 call fourwf(cplex,dummy3,psig4,dummy2,psi_out,gbound,gbound,istwfk(ckpt),kg_k_gather,kg_k_gather,mgfft,mpi_enreg, &
-1,ngfft,npw_g,npw_g,n4,n5,n6,option,dtset%paral_kgb,tim_fourwf,weight,weight)
+1,ngfft,npw_g,npw_g,n4,n5,n6,option,tim_fourwf,weight,weight)
 psi_out = psi_out/sqrt(ucvol)
 
 !! This comes from prep_fourwf
@@ -1529,13 +1424,6 @@ end subroutine g_to_r
 
 subroutine gr_to_g(psig_out,psir_in,psig_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gr_to_g'
-!End of the abilint section
-
 implicit none
 real(dp), intent(in)  :: psir_in(2,n4,n5,n6)
 real(dp), intent(in), optional :: psig_in(2,npw_g)
@@ -1569,7 +1457,7 @@ denpot, & ! real space wavefunction, in denpot format
 psig4, & ! fourier space wavefunction
 psig_out, & ! result, in FFT configuration
 psir3,gbound,gbound,istwfk(ckpt),kg_k_gather,kg_k_gather,mgfft,mpi_enreg,1, & ! Various other arguments
-ngfft,npw_g,npw_g,n4,n5,n6,option,dtset%paral_kgb,tim_fourwf,weight,weight)
+ngfft,npw_g,npw_g,n4,n5,n6,option,tim_fourwf,weight,weight)
 
 end subroutine gr_to_g
 !!***
@@ -1607,13 +1495,6 @@ subroutine kbkb_to_kb(psik_out,psik_in_1,psik_in_2)
 !
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kbkb_to_kb'
-!End of the abilint section
-
 implicit none
 real(dp), intent(out) :: psik_out(2,npw_kb)
 real(dp), intent(inout)  :: psik_in_1(2,npw_kb), psik_in_2(2,npw_kb)
@@ -1665,13 +1546,6 @@ end subroutine kbkb_to_kb
 subroutine build_vxc(vxc2,nfft2,nspden2)
 !Only transcribe the argument vxc2 in the module; the change from dg to sg is done in build_H (and stored in vxc), since the
 !arguments of fftpac are built in build_H.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_vxc'
-!End of the abilint section
-
 implicit none
 
 !We need the dimensions of vxc since they don't exist yet in the module; build_vxc being called before build_H.
@@ -1711,19 +1585,12 @@ end subroutine build_vxc
 
 subroutine destroy_H
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_H'
-!End of the abilint section
-
 implicit none
 
 call dtset_free(dtset)
 call destroy_hamiltonian(gs_hamk)
 
-call crystal_free(Cryst)
+call cryst%free()
 call kmesh_free(Kmesh)
 call kmesh_free(Qmesh)
 call gsph_free(Gsphere)
@@ -1877,13 +1744,6 @@ subroutine build_H(dtset2,mpi_enreg2,cpopt2,cg2,gs_hamk2,kg_k2,kinpw2)
 !use m_bandfft_kpt
 use m_cgtools
 use m_wfutils
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_H'
-!End of the abilint section
-
 implicit none
 
 !Arguments of gw_sternheimer, reveived as argument by build_H-------------------------

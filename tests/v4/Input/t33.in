@@ -26,7 +26,6 @@ phimax   1.57079632679    #
                  # is seen on TWO finite elements, while being at a larger
                  # distance that the default value of dpclim
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = aim

@@ -169,13 +169,6 @@ CONTAINS  !=====================================================================
 subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
 &                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usepotzero)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawinit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -680,13 +673,6 @@ end subroutine pawinit
 !! SOURCE
 
 subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_gencond'
-!End of the abilint section
 
  implicit none
 

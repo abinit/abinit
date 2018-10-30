@@ -77,16 +77,9 @@ subroutine init10(filnam,comm)
  use defs_basis
  use m_xmpi
  use m_errors
- use m_ab7_invars
 
  use m_fstrings,     only : int2char4
  use m_io_tools,     only : open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init10'
-!End of the abilint section
 
  implicit none
 
@@ -101,7 +94,6 @@ subroutine init10(filnam,comm)
  integer,parameter :: master=0
  integer :: me,nproc,ierr
  integer :: ii,io
-!arrays
 ! *********************************************************************
 
 !Determine who I am in comm

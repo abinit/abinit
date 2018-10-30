@@ -1,7 +1,7 @@
 # ===========================================
 # Makefile (include)
 # Use it to build a standalone LIBPAW library
-#                                 M.T. Dec 15
+#                                 M.T. dec 15
 # ===========================================
 
 # FC : Fortran compiler (use mpif90 to include MPI)

@@ -120,13 +120,6 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &                  qchrg,qgrid,rcpsp,rms,useylm,vlspl,xcccrc,xccc1d,&
 &                  zion,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp1in'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -457,13 +450,6 @@ end subroutine psp1in
 subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 &  vloc,wksincos,yp1,ypn,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp1lo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -630,13 +616,6 @@ end subroutine psp1lo
 
 subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
 &                  qgrid,rad,vloc,vpspll,wfll,wksincos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp1nl'
-!End of the abilint section
 
  implicit none
 
@@ -907,13 +886,6 @@ end subroutine psp1nl
 
 subroutine der_int(ff,df,rr,dr,nlast,smf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'der_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1020,13 +992,6 @@ end subroutine der_int
 !! SOURCE
 
 subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sincos'
-!End of the abilint section
 
  implicit none
 
@@ -1145,13 +1110,6 @@ end subroutine sincos
 
 subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp4cc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1268,13 +1226,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gg_psp4(x)
 !Expression of 7 May 1992
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gg_psp4'
-!End of the abilint section
-
    real(dp) :: gg_psp4
    real(dp),intent(in) :: x
    gg_psp4=(1.d0+x**2*(a2 +x**2*(a4 +x**2*(a6 +x**2*(a8 + &
@@ -1284,13 +1235,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gp_psp4(x)
 !gp(x) is the derivative of gg(x) wrt x
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gp_psp4'
-!End of the abilint section
-
    real(dp) :: gp_psp4
    real(dp),intent(in) :: x
    gp_psp4=2.d0*x*((a2+x**2*(2.d0*a4+x**2*(3.d0*a6+x**2*(              &
@@ -1304,13 +1248,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gpp_1_psp4(x)
 !gpp(x) is the second derivative of gg(x) wrt x
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpp_1_psp4'
-!End of the abilint section
-
    real(dp) :: gpp_1_psp4
    real(dp),intent(in) :: x
    gpp_1_psp4= ( 2.d0*a4+ x**2*(3.d0*2.d0*a6 +x**2*(               &
@@ -1323,13 +1260,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gpp_2_psp4(x)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpp_2_psp4'
-!End of the abilint section
-
    real(dp) :: gpp_2_psp4
    real(dp),intent(in) :: x
    gpp_2_psp4=(a2+x**2*(2.d0*a4+x**2*(3.d0*a6+x**2*(                 &
@@ -1340,13 +1270,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
  end function gpp_2_psp4
 
    function gpp_3_psp4(x)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gpp_3_psp4'
-!End of the abilint section
 
    real(dp) :: gpp_3_psp4
    real(dp),intent(in) :: x

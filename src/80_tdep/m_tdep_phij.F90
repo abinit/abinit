@@ -41,13 +41,6 @@ contains
 !====================================================================================================
 subroutine tdep_calc_pijfcoeff(CoeffMoore,InVar,proj,Shell1at,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_pijfcoeff'
-!End of the abilint section
-
   implicit none
 
   type(Input_Variables_type),intent(in) :: InVar
@@ -96,13 +89,6 @@ end subroutine tdep_calc_pijfcoeff
 
 !====================================================================================================
 subroutine tdep_calc_phijfcoeff(CoeffMoore,InVar,proj,Shell2at,Sym,ucart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_phijfcoeff'
-!End of the abilint section
 
   implicit none
 
@@ -180,13 +166,6 @@ end subroutine tdep_calc_phijfcoeff
 
 !=====================================================================================================
 subroutine tdep_build_pijN(InVar,ntotcoeff,proj,Pij_coeff,Pij_N,Shell1at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_build_pijN'
-!End of the abilint section
 
   implicit none
 
@@ -273,13 +252,6 @@ end subroutine tdep_build_pijN
 
 !=====================================================================================================
 subroutine tdep_build_phijNN(distance,InVar,ntotcoeff,proj,Phij_coeff,Phij_NN,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_build_phijNN'
-!End of the abilint section
 
   implicit none
 
@@ -521,13 +493,6 @@ end subroutine tdep_build_phijNN
 !=====================================================================================================
 subroutine tdep_calc_dij(dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rlatt_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_dij'
-!End of the abilint section
-
   implicit none
 
   type(Input_Variables_type),intent(in) :: InVar
@@ -672,13 +637,6 @@ end subroutine tdep_calc_dij
 !=====================================================================================================
 subroutine tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_write_dij'
-!End of the abilint section
-
   implicit none
 
   type(Input_Variables_type),intent(in) :: InVar
@@ -728,13 +686,6 @@ end subroutine tdep_write_dij
 !=====================================================================================================
 subroutine tdep_build_phij33(isym,Phij_ref,Phij_33,Sym,trans) 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_build_phij33'
-!End of the abilint section
-
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -769,13 +720,6 @@ end subroutine tdep_build_phij33
 !=====================================================================================================
 subroutine tdep_init_eigen2nd(Eigen2nd,natom_unitcell,nqpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_eigen2nd'
-!End of the abilint section
-
   implicit none
 
   integer, intent(in) :: natom_unitcell,nqpt
@@ -789,13 +733,6 @@ end subroutine tdep_init_eigen2nd
 !=====================================================================================================
 subroutine tdep_destroy_eigen2nd(Eigen2nd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_destroy_eigen2nd'
-!End of the abilint section
-
   implicit none
 
   type(Eigen_Variables_type),intent(inout) :: Eigen2nd
@@ -807,13 +744,6 @@ end subroutine tdep_destroy_eigen2nd
 
 !=====================================================================================================
 subroutine tdep_write_yaml(Eigen2nd,Qpt,Prefix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_write_yaml'
-!End of the abilint section
 
   implicit none
 

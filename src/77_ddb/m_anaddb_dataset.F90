@@ -225,13 +225,6 @@ contains
 
 subroutine anaddb_dtset_free(anaddb_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_dtset_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -310,13 +303,6 @@ end subroutine anaddb_dtset_free
 !! SOURCE
 
 subroutine invars9 (anaddb_dtset,lenstr,natom,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars9'
-!End of the abilint section
 
  implicit none
 
@@ -1773,13 +1759,6 @@ end subroutine invars9
 
 subroutine outvars_anaddb (anaddb_dtset,nunit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvars_anaddb'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2103,13 +2082,6 @@ end subroutine outvars_anaddb
 
 subroutine anaddb_init(filnam)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2166,13 +2138,6 @@ end subroutine anaddb_init
 !! SOURCE
 
 subroutine anaddb_chkvars(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_chkvars'
-!End of the abilint section
 
  implicit none
 

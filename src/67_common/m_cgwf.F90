@@ -119,7 +119,8 @@ contains
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in sthe WFs subspace
 !!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
-!!  subvnl(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian expressed in sthe WFs subspace
+!!  subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
+!!   expressed in the WFs subspace
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)
@@ -156,14 +157,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                mpw,nband,nbdblock,nkpt,nline,npw,npwarr,&
 &                nspinor,nsppol,ortalg,prtvol,pwind,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
-&                subvnl,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgwf'
-!End of the abilint section
+&                subvnlx,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
 
  implicit none
 
@@ -185,7 +179,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
  real(dp),intent(inout) :: dphase_k(3)
  real(dp),intent(out) :: subham(nband*(nband+1)),subovl(nband*(nband+1)*use_subovl)
- real(dp),intent(out) :: subvnl(nband*(nband+1)*(1-gs_hamk%usepaw))
+ real(dp),intent(out) :: subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
@@ -213,7 +207,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),allocatable :: gh_direc(:,:),gh_direcws(:,:),ghc(:,:),ghc_all(:,:),ghcws(:,:)
  real(dp),allocatable :: grad_berry(:,:),grad_total(:,:),gs_direc(:,:)
  real(dp) :: gsc_dummy(0,0)
- real(dp),allocatable :: gvnlc(:,:),gvnl_direc(:,:),gvnl_dummy(:,:)
+ real(dp),allocatable :: gvnlxc(:,:),gvnlx_direc(:,:),gvnlx_dummy(:,:)
  real(dp),allocatable :: pcon(:),pwnsfac_k(:,:),scprod(:,:),scwavef(:,:)
  real(dp),allocatable :: smat_inv(:,:,:),smat_k(:,:,:),smat_k_paw(:,:,:),swork(:,:),vresid(:,:),work(:,:)
  real(dp),pointer :: kinpw(:)
@@ -271,14 +265,14 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
  ABI_ALLOCATE(pcon,(npw))
  ABI_ALLOCATE(ghc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnlc,(2,npw*nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
  ABI_ALLOCATE(conjgr,(2,npw*nspinor))
  ABI_ALLOCATE(cwavef,(2,npw*nspinor))
  ABI_ALLOCATE(direc,(2,npw*nspinor))
  ABI_ALLOCATE(scprod,(2,nband))
 
  ABI_ALLOCATE(gh_direc,(2,npw*nspinor))
- ABI_ALLOCATE(gvnl_direc,(2,npw*nspinor))
+ ABI_ALLOCATE(gvnlx_direc,(2,npw*nspinor))
  ABI_ALLOCATE(vresid,(2,npw*nspinor))
 
  if (gen_eigenpb)  then
@@ -310,9 +304,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  if (wfopta10==2 .or. wfopta10==3) then
    ABI_ALLOCATE(ghcws,(2,npw*nspinor))
    ABI_ALLOCATE(gh_direcws,(2,npw*nspinor))
-   ABI_ALLOCATE(gvnl_dummy,(2,npw*nspinor))
+   ABI_ALLOCATE(gvnlx_dummy,(2,npw*nspinor))
  else
-   ABI_ALLOCATE(gvnl_dummy,(0,0))
+   ABI_ALLOCATE(gvnlx_dummy,(0,0))
  end if
 
 !if "generalized eigenproblem", not sure of wfoptalg=2,3 algorithms
@@ -435,13 +429,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=1
        if (finite_field .and. gs_hamk%usepaw == 1) then
-         call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlc,&
+         call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlxc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
          call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,natom,iband,0,ikpt,&
 &         1,isppol,mband,1,natom,1,mband,dimlmn,nspinor,nsppol,0,&
 &         mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
        else
-         call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlc,&
+         call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
        end if
 
@@ -510,7 +504,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      end if
 
      if (prtvol==-level) then
-       write(message,'(a,f14.6)')' cgwf : xnorm = ',xnorm
+       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
        call wrtout(std_out,message,'PERS')
      end if
 
@@ -527,7 +521,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 !      By setting ieigen to iband, Fock contrib. of this iband to the energy will be calculated
        call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=0
-       call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlc,&
+       call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc,&
 &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
      end if
 
@@ -542,7 +536,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          sij_opt=0
          work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
        end if
-       call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnl_dummy,&
+       call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
 &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
        if (gen_eigenpb) then
          ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
@@ -560,7 +554,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! === COMPUTE THE RESIDUAL ===
 
          ! Compute lambda = <C|H|C> or <C|(H-zshift)**2|C>
-
          call dotprod_g(chc,doti,istwf_k,npw*nspinor,1,cwavef,ghc,me_g0,mpi_enreg%comm_spinorfft)
          lam0=chc
 
@@ -620,7 +613,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          call sqnorm_g(resid(iband),istwf_k,npw*nspinor,vresid,me_g0,mpi_enreg%comm_fft)
 
          if (prtvol==-level) then
-           write(message,'(a,i0,2f14.6)')' cgwf : iline,eval,resid = ',iline,eval,resid(iband)
+           write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -632,7 +625,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (resid(iband)<tolwfr) then
            if (prtvol>=10) then
              write(message, '(a,i4,a,i2,a,es12.4)' ) &
-&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations : resid =',resid(iband)
+&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
              call wrtout(std_out,message,'PERS')
            end if
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -641,7 +634,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! If user require exiting the job, stop line minimisations
          if (quit==1) then
-           write(message, '(a,i0)' )' cgwf : user require exiting => skip update of band ',iband
+           write(message, '(a,i0)' )' cgwf: user require exiting => skip update of band ',iband
            call wrtout(std_out,message,'PERS')
 
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -795,8 +788,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            gamma=dotgg/dotgp
            dotgp=dotgg
 
-           if(prtvol==-level)then
-             write(message,'(a,2es16.6)')' cgwf : dotgg,gamma = ',dotgg,gamma
+           if (prtvol==-level)then
+             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
              call wrtout(std_out,message,'PERS')
            end if
 
@@ -859,7 +852,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! Compute gh_direc = <G|H|D> and eventually gs_direc = <G|S|D>
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
-         call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnl_direc,&
+         call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
 &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
 
          if(wfopta10==2 .or. wfopta10==3)then
@@ -873,7 +866,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
              work(:,:)=gh_direc(:,:)-zshift(iband)*direc(:,:)
            end if
 
-           call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnl_dummy,&
+           call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnlx_dummy,&
 &           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
 
            if (gen_eigenpb) then
@@ -898,7 +891,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
-           write(message,'(a,3f14.6)') 'cgwf : chc,dhc,dhd=',chc,dhc,dhd
+           write(message,'(a,3f14.6)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -1084,10 +1077,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (use_vnl==1) then
 !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
-             gvnlc(1,ipw)=gvnlc(1,ipw)*costh + gvnl_direc(1,ipw)*sintn
-             gvnlc(2,ipw)=gvnlc(2,ipw)*costh + gvnl_direc(2,ipw)*sintn
+             gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
+             gvnlxc(2,ipw)=gvnlxc(2,ipw)*costh + gvnlx_direc(2,ipw)*sintn
            end do
-!          call cg_zaxpby(npw*nspinor,(/sintn,zero/),gvnl_direc,(/costh,zero/),gvnlc)
+!          call cg_zaxpby(npw*nspinor,(/sintn,zero/),gvnlx_direc,(/costh,zero/),gvnlxc)
          end if
 
          if (gen_eigenpb) then
@@ -1210,7 +1203,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
      ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
      if (xmpi_paral==0 .and. mpi_enreg%paral_kgb==0 .and. iband==nband .and. prtvol/=0) then
-       write(message,'(a,i0)')' cgwf : number of one-way 3D ffts skipped in cgwf until now =',nskip
+       write(message,'(a,i0)')' cgwf: number of one-way 3D ffts skipped in cgwf until now =',nskip
        call wrtout(std_out,message,'PERS')
      end if
 
@@ -1219,9 +1212,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    !  ======================================================================
    !  ============= COMPUTE HAMILTONIAN IN WFs SUBSPACE ====================
    !  ======================================================================
-   call mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
+   call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
-&   nspinor,subham,subovl,subvnl,use_subovl,use_vnl,me_g0)
+&   nspinor,subham,subovl,subvnlx,use_subovl,use_vnl,me_g0)
 
  end do ! iblock End loop over block of bands
 
@@ -1251,12 +1244,12 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! Debugging ouputs
  if(prtvol==-level)then
    isubh=1
-   if (use_vnl==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnl(isubh:isubh+1)'
-   if (use_vnl==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
+   if (use_vnl==1) write(message,'(a)') ' cgwf: isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
+   if (use_vnl==0) write(message,'(a)') ' cgwf: isubh  subham(isubh:isubh+1)'
    do iband=1,nband
      do ii=1,iband
        if (use_vnl==1) then
-         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnl(isubh:isubh+1)
+         write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
        else
          write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
        end if
@@ -1275,9 +1268,9 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ABI_DEALLOCATE(pcon)
  ABI_DEALLOCATE(scprod)
  ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlc)
+ ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gh_direc)
- ABI_DEALLOCATE(gvnl_direc)
+ ABI_DEALLOCATE(gvnlx_direc)
  ABI_DEALLOCATE(vresid)
  ABI_DEALLOCATE(gs_direc)
 
@@ -1294,7 +1287,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ABI_DEALLOCATE(ghcws)
    ABI_DEALLOCATE(gh_direcws)
  end if
- ABI_DEALLOCATE(gvnl_dummy)
+ ABI_DEALLOCATE(gvnlx_dummy)
 
  if(wfopta10==2.or.wfopta10==3)  then
    ABI_DEALLOCATE(work)
@@ -1404,13 +1397,6 @@ end subroutine cgwf
 
 subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &  efield_dot,iline,nkpt,nstr,hel,phase_end,phase_init,sdeg,sinth,thetam)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linemin'
-!End of the abilint section
 
  implicit none
 
@@ -1602,12 +1588,11 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
      !write(101,'(i6,3f16.9)')igrid,theta,esave(igrid),e1save(igrid)
    end do
    write(message,'(6a)')ch10,&
-&   ' linemin : ERROR - ',ch10,&
-&   '  Cannot find theta_min. No minimum exists : the field is too strong ! ',ch10,&
+&   ' linemin: ERROR - ',ch10,&
+&   '  Cannot find theta_min. No minimum exists: the field is too strong ! ',ch10,&
 &   '  Try decreasing difference between D and 4 Pi P by changing structure or D (only for fixed D calculation)'
    call wrtout(std_out,message,'COLL')
-   message = ' linemin cannot find theta_min'
-   MSG_ERROR(message)
+   MSG_ERROR('linemin cannot find theta_min')
  end if
 
 !Compute the mimum of E(theta)
@@ -1640,7 +1625,6 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 !DEBUG
 !write(std_out,*)'linemin : thetam = ',thetam
 !ENDDEBUG
-
 
 !---------------------------------------------------------------------------
 
@@ -1729,13 +1713,6 @@ end subroutine linemin
 
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
 &    hel,nkpt,nstr,sdeg,theta)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'etheta'
-!End of the abilint section
 
  implicit none
 
@@ -1846,14 +1823,15 @@ end subroutine etheta
 !!  ghc(2,npw_k*nspinor)=<G|H|C band,k> for the current state
 !!                       This is an input in non-blocked algorithm
 !!                               an output in blocked algorithm
-!!  gvnlc(2,npw_k*nspinor)=<G|Vnl|C band,k> for the current state
+!!  gvnlxc(2,npw_k*nspinor)=<G|Vnl|C band,k> for the current state
 !!                       This is an input in non-blocked algorithm
 !!                               an output in blocked algorithm
 !!  isubh=index of current state in array subham
 !!  isubo=index of current state in array subovl
 !!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
-!!  subvnl(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian expressed in the WFs subspace
+!!  subvnlx(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
+!!   expressed in the WFs subspace
 !!
 !! PARENTS
 !!      cgwf
@@ -1862,16 +1840,9 @@ end subroutine etheta
 !!
 !! SOURCE
 
-subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
+subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
-&                    nspinor,subham,subovl,subvnl,use_subovl,use_vnl,me_g0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mksubham'
-!End of the abilint section
+&                    nspinor,subham,subovl,subvnlx,use_subovl,use_vnl,me_g0)
 
  implicit none
 
@@ -1883,10 +1854,10 @@ subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
 !arrays
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: gsc(2,mgsc)
- real(dp),intent(inout) :: ghc(2,npw_k*nspinor),gvnlc(2,npw_k*nspinor)
+ real(dp),intent(inout) :: ghc(2,npw_k*nspinor),gvnlxc(2,npw_k*nspinor)
  real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
  real(dp),intent(inout) :: subovl(nband_k*(nband_k+1)*use_subovl)
- real(dp),intent(inout) :: subvnl(nband_k*(nband_k+1)*use_vnl)
+ real(dp),intent(inout) :: subvnlx(nband_k*(nband_k+1)*use_vnl)
 
 !Local variables-------------------------------
 !scalars
@@ -1926,16 +1897,16 @@ subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
          do ipw=1,npw_k*nspinor
            cgreipw=cg(1,ipw+iwavef)
            cgimipw=cg(2,ipw+iwavef)
-           cvcre=cvcre+cgreipw*gvnlc(1,ipw)+cgimipw*gvnlc(2,ipw)
-           cvcim=cvcim+cgreipw*gvnlc(2,ipw)-cgimipw*gvnlc(1,ipw)
+           cvcre=cvcre+cgreipw*gvnlxc(1,ipw)+cgimipw*gvnlxc(2,ipw)
+           cvcim=cvcim+cgreipw*gvnlxc(2,ipw)-cgimipw*gvnlxc(1,ipw)
          end do
-         subvnl(isubh  )=cvcre
-         subvnl(isubh+1)=cvcim
+         subvnlx(isubh  )=cvcre
+         subvnlx(isubh+1)=cvcim
 #else
 !        New version with BLAS1, will require some update of the refs.
-         cvc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),gvnlc)
-         subvnl(isubh  )=cvc(1)
-         subvnl(isubh+1)=cvc(2)
+         cvc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),gvnlxc)
+         subvnlx(isubh  )=cvc(1)
+         subvnlx(isubh+1)=cvc(2)
          chc = cg_zdotc(npw_k*nspinor,cg(1,1+iwavef),ghc)
          chcre = chc(1)
          chcim = chc(2)
@@ -1955,7 +1926,7 @@ subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
 !      Use the time-reversal symmetry, but should not double-count G=0
        if(istwf_k==2 .and. me_g0==1) then
          chcre = half*cg(1,1+iwavef)*ghc(1,1)
-         if (use_vnl==1) cvcre=half*cg(1,1+iwavef)*gvnlc(1,1)
+         if (use_vnl==1) cvcre=half*cg(1,1+iwavef)*gvnlxc(1,1)
          ipw1=2
        else
          chcre=zero; ipw1=1
@@ -1976,14 +1947,14 @@ subroutine mksubham(cg,ghc,gsc,gvnlc,iblock,icg,igsc,istwf_k,&
              cgreipw=cg(1,ipw+iwavef)
              cgimipw=cg(2,ipw+iwavef)
              chcre=chcre+cgreipw*ghc(1,ipw)+cgimipw*ghc(2,ipw)
-             cvcre=cvcre+cgreipw*gvnlc(1,ipw)+cgimipw*gvnlc(2,ipw)
+             cvcre=cvcre+cgreipw*gvnlxc(1,ipw)+cgimipw*gvnlxc(2,ipw)
            end do
          end do
          chcre=two*chcre
          cvcre=two*cvcre
 !        Store real and imag parts in Hermitian storage mode:
-         subvnl(isubh  )=cvcre
-         subvnl(isubh+1)=zero
+         subvnlx(isubh  )=cvcre
+         subvnlx(isubh+1)=zero
        end if
        subham(isubh  )=chcre
        subham(isubh+1)=zero
@@ -2110,13 +2081,6 @@ end subroutine mksubham
 subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield,grad_berry,&
 &                          gs_hamk,iband,icg,ikpt,isppol,mband,mcg,mcgq,mkgq,mpi_enreg,mpw,natom,nkpt,&
 &                          npw,npwarr,nspinor,nsppol,pwind,pwind_alloc,pwnsfac,pwnsfacq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_grad_berry'
-!End of the abilint section
 
   implicit none
 

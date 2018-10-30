@@ -77,13 +77,6 @@ program tdep
   use netcdf
 #endif
   use m_io_tools
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep'
-!End of the abilint section
-
   implicit none
 
   integer :: natom,jatom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ntotcoeff,ntotconst

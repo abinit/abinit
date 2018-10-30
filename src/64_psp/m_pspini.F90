@@ -134,13 +134,6 @@ contains
 
 subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,rprimd,comm_mpi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspini'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -681,13 +674,6 @@ end subroutine pspini
 
 subroutine pspcor(ecore,epsatm,natom,ntypat,typat,zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspcor'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -829,13 +815,6 @@ end subroutine pspcor
 
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspatm'
-!End of the abilint section
 
  implicit none
 
@@ -1456,13 +1435,6 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  use m_errors
 
  use defs_datatypes, only : nctab_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp_dump_outputs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

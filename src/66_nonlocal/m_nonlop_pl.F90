@@ -189,13 +189,6 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 &                     ntypat,only_SO,phkxredin,phkxredout,ph1d,ph3din,ph3dout,signs,&
 &                     ucvol,vectin,vectout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop_pl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1321,13 +1314,6 @@ contains
 
 subroutine trace2(gxa,gmet,trace)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trace2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1394,13 +1380,6 @@ end subroutine trace2
 !! SOURCE
 
 subroutine strsocv(red,gprimd,cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strsocv'
-!End of the abilint section
 
  implicit none
 
@@ -1486,13 +1465,6 @@ end subroutine strsocv
 !! SOURCE
 
 subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scalewf_nonlop'
-!End of the abilint section
 
  implicit none
 
@@ -1605,13 +1577,6 @@ end subroutine scalewf_nonlop
 !! SOURCE
 
 subroutine ddkten(compact,idir,rank,temp,tmpfac)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddkten'
-!End of the abilint section
 
  implicit none
 

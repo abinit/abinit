@@ -118,13 +118,6 @@ CONTAINS
 
 subroutine args_gs_init(args_gs,amu,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_gs_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -172,13 +165,6 @@ end subroutine args_gs_init
 !! SOURCE
 
 subroutine args_gs_free(args_gs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_gs_free'
-!End of the abilint section
 
  implicit none
 

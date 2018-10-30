@@ -45,13 +45,6 @@ contains
 !====================================================================================================
  subroutine tdep_init_shell1at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell1at,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_shell1at'
-!End of the abilint section
-
   implicit none
   type(Input_Variables_type),intent(in) :: InVar
   type(Shell_Variables_type),intent(out) :: Shell1at
@@ -167,13 +160,6 @@ contains
 
 !====================================================================================================
  subroutine tdep_init_shell2at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_shell2at'
-!End of the abilint section
 
   implicit none
   type(Input_Variables_type),intent(in) :: InVar
@@ -334,13 +320,6 @@ contains
 
 !====================================================================================================
  subroutine tdep_init_shell3at(distance,InVar,norder,nshell_max,ntotcoeff,order,proj,Shell3at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_shell3at'
-!End of the abilint section
 
   implicit none
   type(Input_Variables_type),intent(in) :: InVar
@@ -702,13 +681,6 @@ contains
 
 !====================================================================================================
  subroutine tdep_destroy_shell(natom,order,Shell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_destroy_shell'
-!End of the abilint section
 
   implicit none
   integer, intent(in) :: natom,order

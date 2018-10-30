@@ -124,13 +124,6 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -330,13 +323,6 @@ subroutine destroy_hu(hu,ntypat,t2g)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -394,13 +380,6 @@ subroutine print_hu(hu,ntypat,prtopt)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -474,13 +453,6 @@ subroutine vee2udens_hu(hu,ntypat,prtopt)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vee2udens_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -573,13 +545,6 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
  use m_errors
 
  use m_crystal,          only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotatevee_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1058,13 +1023,6 @@ subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printvee_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1417,13 +1375,6 @@ subroutine vee2udensatom_hu(ndim,nspinor,udens_atoms,veetemp,basis,prtonly)
 
  use defs_basis
  use m_crystal, only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vee2udensatom_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1517,13 +1468,6 @@ end subroutine vee2udensatom_hu
 function reddd(mi,ndim)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'reddd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1580,13 +1524,6 @@ subroutine vee_slm2ylm_hu(lcor,mat_inp_c,mat_out_c,option,prtvol)
  use defs_basis
  use m_errors
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vee_slm2ylm_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1738,13 +1675,6 @@ subroutine vee_ndim2tndim_hu_r(lcor,mat_inp_c,mat_out_c,option)
  use defs_basis
  use m_errors
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vee_ndim2tndim_hu_r'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1828,13 +1758,6 @@ subroutine vee_ndim2tndim_hu(lcor,mat_inp_c,mat_out_c,option)
  use defs_basis
  use m_errors
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vee_ndim2tndim_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1917,13 +1840,6 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
  use defs_basis
  use m_errors
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vee_ylm2jmj_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2083,13 +1999,6 @@ subroutine udens_slatercondon_hu(fk,lcor)
  use defs_basis
  use m_errors
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'udens_slatercondon_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2365,13 +2274,6 @@ subroutine udens_inglis_hu(fk,lcor)
  use defs_basis
  use m_errors
  use m_abicore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'udens_inglis_hu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------

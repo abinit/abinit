@@ -225,13 +225,6 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
 &  lmnsize,ngrhoij,nlmnmix,pawtab,use_rhoij_,use_rhoijp,& ! Optional
 &  use_rhoijres,use_rhoijim,comm_atom,mpi_atmtab)         ! Optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_alloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -396,13 +389,6 @@ end subroutine pawrhoij_alloc
 
 subroutine pawrhoij_free(pawrhoij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -474,13 +460,6 @@ end subroutine pawrhoij_free
 !! SOURCE
 
 subroutine pawrhoij_nullify(pawrhoij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_nullify'
-!End of the abilint section
 
  implicit none
 
@@ -558,13 +537,6 @@ end subroutine pawrhoij_nullify
 subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 &          keep_cplex,keep_itypat,keep_nspden,& ! optional arguments
 &          mpi_atmtab,comm_atom)            ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1233,13 +1205,6 @@ end subroutine pawrhoij_copy
  subroutine pawrhoij_gather(pawrhoij_in,pawrhoij_gathered,master,comm_atom, &
 &    with_grhoij,with_lmnmix,with_rhoijp,with_rhoijres,with_rhoijim,with_rhoij_) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_gather'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1579,13 +1544,6 @@ end subroutine pawrhoij_gather
 !! SOURCE
 
  subroutine pawrhoij_bcast(pawrhoij_in,pawrhoij_out,master,mpicomm,comm_atom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_bcast'
-!End of the abilint section
 
  implicit none
 
@@ -1981,13 +1939,6 @@ end subroutine pawrhoij_bcast
 &           natom,mpi_atmtab_in,mpi_atmtab_out,pawrhoij_out,&
 &           SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_redistribute'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2348,13 +2299,6 @@ end subroutine pawrhoij_redistribute
 
 subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,typat,&
 &                   headform,rdwr_mode,form,natinc,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_io'
-!End of the abilint section
 
  implicit none
 
@@ -2729,13 +2673,6 @@ end subroutine pawrhoij_io
 
 subroutine pawrhoij_unpack(rhoij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_unpack'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2794,13 +2731,6 @@ end subroutine pawrhoij_unpack
 
 subroutine pawrhoij_init_unpacked(rhoij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_init_unpacked'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2851,13 +2781,6 @@ end subroutine pawrhoij_init_unpacked
 !! SOURCE
 
 subroutine pawrhoij_free_unpacked(rhoij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_free_unpacked'
-!End of the abilint section
 
  implicit none
 
@@ -2913,13 +2836,6 @@ end subroutine pawrhoij_free_unpacked
 !! SOURCE
 
 subroutine pawrhoij_mpisum_unpacked_1D(pawrhoij,comm1,comm2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_mpisum_unpacked_1D'
-!End of the abilint section
 
  implicit none
 
@@ -3010,13 +2926,6 @@ end subroutine pawrhoij_mpisum_unpacked_1D
 !! SOURCE
 
 subroutine pawrhoij_mpisum_unpacked_2D(pawrhoij,comm1,comm2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_mpisum_unpacked_2D'
-!End of the abilint section
 
  implicit none
 
@@ -3111,13 +3020,6 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 
 function pawrhoij_get_nspden(nspden,nspinor,spnorb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_get_nspden'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -3206,13 +3108,6 @@ end function pawrhoij_get_nspden
 subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
 &                   ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
 &                   mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrhoij'
-!End of the abilint section
 
  implicit none
 
@@ -4014,13 +3909,6 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
  contains
    function symrhoij_symcart(aprim,bprim,symred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrhoij_symcart'
-!End of the abilint section
-
    implicit none
    real(dp) :: symrhoij_symcart(3,3)
    integer,intent(in) :: symred(3,3)
@@ -4077,13 +3965,6 @@ end subroutine symrhoij
 !! SOURCE
 
 subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,buf_int,buf_dp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_isendreceive_getbuffer'
-!End of the abilint section
 
  implicit none
 
@@ -4235,13 +4116,6 @@ end subroutine pawrhoij_isendreceive_getbuffer
 !!
 subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,nrhoij_send,&
 &                                           buf_int,buf_int_size,buf_dp,buf_dp_size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_isendreceive_fillbuffer'
-!End of the abilint section
 
 implicit none
 

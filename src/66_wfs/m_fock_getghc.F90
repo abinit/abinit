@@ -103,13 +103,6 @@ contains
 
 subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_getghc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -140,7 +133,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
  real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
- real(dp), allocatable :: gvnlc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
+ real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
  real(dp), allocatable :: vfock(:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
  real(dp), allocatable,target ::cwavef_r(:,:,:,:)
@@ -235,7 +228,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      forikpt=zero
    end if
    ABI_ALLOCATE(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3)))
-   ABI_ALLOCATE(gvnlc,(2,npw*nspinor))
+   ABI_ALLOCATE(gvnlxc,(2,npw*nspinor))
    ABI_ALLOCATE(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim))
  end if
 
@@ -251,7 +244,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ==========================================
  cwavef_r=zero
  call fourwf(0,rhodum0,cwavef,rhodum,cwavef_r,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
-& mgfftf,mpi_enreg,ndat1,ngfftf,npw,1,n4f,n5f,n6f,0,mpi_enreg%paral_kgb,tim_fourwf0,weight1,weight1,&
+& mgfftf,mpi_enreg,ndat1,ngfftf,npw,1,n4f,n5f,n6f,0,tim_fourwf0,weight1,weight1,&
 & use_gpu_cuda=gs_ham%use_gpu_cuda)
  cwavef_r=cwavef_r*invucvol
 
@@ -343,7 +336,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        cwaveocc_r=zero
        call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
 &       gbound_kp,gbound_kp,jstwfk,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat1,ngfftf,&
-&       npwj,1,n4f,n5f,n6f,tim_fourwf0,mpi_enreg%paral_kgb,0,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
+&       npwj,1,n4f,n5f,n6f,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
 
@@ -389,8 +382,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        rhor_munu(2,:)=rhor_munu(2,:)-rho12(2,:,nspinor)
      end if
 
-    !Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
-     call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ngfftf,mpi_enreg%paral_kgb,tim_fourdp0)
+     ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
+     call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp0)
      call timab(1509,2,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
@@ -425,7 +418,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      end do
 
 
-     call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,ngfftf,mpi_enreg%paral_kgb,tim_fourdp0)
+     call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp0)
 
 #endif
      call timab(1510,2,tsec)
@@ -458,9 +451,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        if(need_ghc) then
          choice=1
          call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
-&         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlc,enl=dijhat,&
+&         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlxc,enl=dijhat,&
 &         select_k=K_H_KPRIME)
-         ghc2=ghc2-gvnlc*occ*wtk
+         ghc2=ghc2-gvnlxc*occ*wtk
        end if
 
 ! Forces calculation
@@ -614,7 +607,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    ABI_DEALLOCATE(vfock)
    ABI_DEALLOCATE(vqg)
    if (fockcommon%usepaw==1) then
-     ABI_DEALLOCATE(gvnlc)
+     ABI_DEALLOCATE(gvnlxc)
      ABI_DEALLOCATE(grnhat12)
      if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
        ABI_DEALLOCATE(forikpt)
@@ -657,7 +650,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  call fftpac(1,mpi_enreg,nspden_fock,cplex_fock*n1f,n2f,n3f,cplex_fock*n4f,n5f,n6f,ngfft,vlocpsi_r,psilocal,2)
 
  call fourwf(0,rhodum0,rhodum,ghc1,psilocal,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
-& mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,mpi_enreg%paral_kgb,tim_fourwf0,weight1,weight1,&
+& mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf0,weight1,weight1,&
 & use_gpu_cuda=gs_ham%use_gpu_cuda)
  ABI_DEALLOCATE(psilocal)
 
@@ -676,7 +669,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! ===============================
 
  if (fockcommon%usepaw==1) then
-   ABI_DEALLOCATE(gvnlc)
+   ABI_DEALLOCATE(gvnlxc)
    ABI_DEALLOCATE(grnhat12)
    if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
      ABI_DEALLOCATE(forikpt)
@@ -801,13 +794,6 @@ end subroutine fock_getghc
 subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,&
 &  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock2ACE'
-!End of the abilint section
 
  implicit none
 
@@ -1213,13 +1199,6 @@ end subroutine fock2ACE
 !! SOURCE
 
 subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_ACE_getghc'
-!End of the abilint section
 
  implicit none
 

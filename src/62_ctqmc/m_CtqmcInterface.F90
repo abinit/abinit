@@ -116,13 +116,6 @@ CONTAINS
 SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,MPI_COMM)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_init'
-!End of the abilint section
-
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: MPI_COMM
   INTEGER, INTENT(IN) :: iseed
@@ -216,13 +209,6 @@ END SUBROUTINE CtqmcInterface_init
 SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_setOpts'
-!End of the abilint section
-
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
@@ -295,13 +281,6 @@ END SUBROUTINE CtqmcInterface_setOpts
 SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_run'
-!End of the abilint section
-
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
   COMPLEX(KIND=8) , DIMENSION(:,:)          , INTENT(IN   ) :: G0omega
   DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(  OUT) :: Gtau
@@ -407,13 +386,6 @@ END SUBROUTINE CtqmcInterface_run
 SUBROUTINE CtqmcInterface_setSweeps(this, sweeps)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_setSweeps'
-!End of the abilint section
-
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
   DOUBLE PRECISION, INTENT(IN) :: sweeps
 
@@ -454,13 +426,6 @@ END SUBROUTINE CtqmcInterface_setSweeps
 SUBROUTINE CtqmcInterface_finalize(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CtqmcInterface_finalize'
-!End of the abilint section
-
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
 
   !IF ( this%Hybrid%init .EQV. .TRUE. ) THEN

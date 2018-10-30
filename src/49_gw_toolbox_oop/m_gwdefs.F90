@@ -417,13 +417,6 @@ CONTAINS  !=====================================================================
 
 subroutine em1params_free(Ep)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1params_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -479,13 +472,6 @@ end subroutine em1params_free
 
 subroutine sigijtab_free(Sigijtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigijtab_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -535,13 +521,6 @@ end subroutine sigijtab_free
 !! SOURCE
 
 subroutine sigparams_free(Sigp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigparams_free'
-!End of the abilint section
 
  implicit none
 
@@ -616,13 +595,6 @@ end subroutine sigparams_free
 
 function sigma_type_from_key(key) result(sigma_type)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_type_from_key'
-!End of the abilint section
-
  implicit none
 
  integer,intent(in) :: key
@@ -672,13 +644,6 @@ end function sigma_type_from_key
 
 pure logical function sigma_is_herm(Sigp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_is_herm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------
@@ -717,13 +682,6 @@ end function sigma_is_herm
 
 pure logical function sigma_needs_w(Sigp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_needs_w'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------
@@ -761,13 +719,6 @@ end function sigma_needs_w
 
 pure logical function sigma_needs_ppm(Sigp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_needs_ppm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------
@@ -803,13 +754,6 @@ end function sigma_needs_ppm
 !! SOURCE
 
 function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g0g0w'
-!End of the abilint section
 
  implicit none
 

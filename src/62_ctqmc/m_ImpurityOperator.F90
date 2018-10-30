@@ -154,13 +154,6 @@ CONTAINS
 SUBROUTINE ImpurityOperator_init(this, flavors, beta)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_init'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: flavors
   !DOUBLE PRECISION      , INTENT(IN   ) :: U
@@ -244,13 +237,6 @@ END SUBROUTINE ImpurityOperator_init
 SUBROUTINE ImpurityOperator_reset(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_reset'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                               :: IT
@@ -310,13 +296,6 @@ END SUBROUTINE ImpurityOperator_reset
 SUBROUTINE ImpurityOperator_computeU(this, U, J)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_computeU'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION      , INTENT(IN   ) :: U
   DOUBLE PRECISION      , INTENT(IN   ) :: J
@@ -390,13 +369,6 @@ END SUBROUTINE ImpurityOperator_computeU
 SUBROUTINE ImpurityOperator_setUmat(this, matU)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_setUmat'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: matU
   INTEGER :: iflavor1
@@ -448,13 +420,6 @@ END SUBROUTINE ImpurityOperator_setUmat
 SUBROUTINE ImpurityOperator_setMu(this, mu)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_setMu'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ) :: mu
   INTEGER :: iflavor
@@ -502,13 +467,6 @@ END SUBROUTINE ImpurityOperator_setMu
 SUBROUTINE ImpurityOperator_activateParticle(this,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_activateParticle'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: flavor
 
@@ -560,13 +518,6 @@ END SUBROUTINE ImpurityOperator_activateParticle
 DOUBLE PRECISION FUNCTION ImpurityOperator_getAvailableTime(this, time, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getAvailableTime'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN   ) :: this
   DOUBLE PRECISION      , INTENT(IN   ) :: time
   INTEGER               , INTENT(OUT  ) :: position
@@ -647,13 +598,6 @@ END FUNCTION ImpurityOperator_getAvailableTime
 DOUBLE PRECISION FUNCTION ImpurityOperator_getAvailedTime(this, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getAvailedTime'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN   ) :: this
   INTEGER               , INTENT(IN   ) :: position
   DOUBLE PRECISION                      :: T_avail
@@ -718,13 +662,6 @@ END FUNCTION ImpurityOperator_getAvailedTime
 SUBROUTINE ImpurityOperator_add(this, CdagC_1, position_val)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_add'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   INTEGER               , INTENT(IN   ) :: position_val
@@ -841,13 +778,6 @@ END SUBROUTINE ImpurityOperator_add
 FUNCTION ImpurityOperator_getSegment(this,position_val)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getSegment'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: position_val
 !Local variables ------------------------------
@@ -918,13 +848,6 @@ END FUNCTION ImpurityOperator_getSegment
 SUBROUTINE ImpurityOperator_remove(this,ieme)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_remove'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: ieme
 !Local variables ------------------------------
@@ -1009,13 +932,6 @@ END SUBROUTINE ImpurityOperator_remove
 DOUBLE PRECISION FUNCTION ImpurityOperator_getNewOverlap(this, CdagC_1)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getNewOverlap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN) :: CdagC_1
 !Local variables ------------------------------
@@ -1091,13 +1007,6 @@ END FUNCTION ImpurityOperator_getNewOverlap
 DOUBLE PRECISION FUNCTION ImpurityOperator_getsign(this, time2, i, action, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getsign'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   DOUBLE PRECISION, INTENT(IN) :: time2, action
   INTEGER ,  INTENT(IN) :: i,position
@@ -1217,13 +1126,6 @@ END FUNCTION ImpurityOperator_getsign
 
 FUNCTION ImpurityOperator_getTraceAdd(this, CdagC_1) RESULT(trace)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getTraceAdd'
-!End of the abilint section
-
   TYPE(ImpurityOperator)          , INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   LOGICAL          :: antiseg
@@ -1292,13 +1194,6 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !! SOURCE
 
 FUNCTION ImpurityOperator_getTraceRemove(this, position) RESULT(trace)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getTraceRemove'
-!End of the abilint section
 
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: position
@@ -1372,13 +1267,6 @@ END FUNCTION ImpurityOperator_getTraceRemove
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSegFlav(this,CdagC_1,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapSegFlav'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !  TYPE(CdagC)           , INTENT(IN) :: CdagC_1
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN) :: CdagC_1
@@ -1552,13 +1440,6 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapFlavor(this,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapFlavor'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER,      OPTIONAL, INTENT(IN) :: flavor
 !Local variables ------------------------------
@@ -1615,13 +1496,6 @@ END FUNCTION ImpurityOperator_overlapflavor
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapSwap(this,flavor1,flavor2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapSwap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER               , INTENT(IN) :: flavor1
   INTEGER               , INTENT(IN) :: flavor2
@@ -1686,13 +1560,6 @@ END FUNCTION ImpurityOperator_overlapSwap
 SUBROUTINE ImpurityOperator_swap(this,flavor1, flavor2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_swap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN   ) :: flavor1
   INTEGER               , INTENT(IN   ) :: flavor2
@@ -1758,13 +1625,6 @@ END SUBROUTINE ImpurityOperator_swap
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapIJ(this,i,j)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_overlapIJ'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   INTEGER               , INTENT(IN) :: i
   INTEGER               , INTENT(IN) :: j
@@ -1832,13 +1692,6 @@ END FUNCTION ImpurityOperator_overlapIJ
 SUBROUTINE ImpurityOperator_measDE(this,DE)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_measDE'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(INOUT) :: DE
 !Local variables ------------------------------
@@ -1900,13 +1753,6 @@ END SUBROUTINE ImpurityOperator_measDE
 SUBROUTINE ImpurityOperator_cleanOverlaps(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_cleanOverlaps'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                                       :: iflavor1
@@ -1961,13 +1807,6 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 DOUBLE PRECISION FUNCTION ImpurityOperator_measN(this,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_measN'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER,      OPTIONAL, INTENT(IN) :: flavor
 !Local variables ------------------------------
@@ -2031,13 +1870,6 @@ END FUNCTION ImpurityOperator_measN
 SUBROUTINE ImpurityOperator_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_destroy'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                               :: IT
@@ -2092,13 +1924,6 @@ END SUBROUTINE ImpurityOperator_destroy
 SUBROUTINE ImpurityOperator_getErrorOverlap(this,DE)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getErrorOverlap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(INOUT) :: DE
 !Local variables ------------------------------
@@ -2164,13 +1989,6 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 SUBROUTINE ImpurityOperator_doCheck(this,opt_check)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_doCheck'
-!End of the abilint section
-
   TYPE(ImpurityOperator) , INTENT(INOUT) :: this
   INTEGER                , INTENT(IN   ) :: opt_check
 
@@ -2217,13 +2035,6 @@ END SUBROUTINE ImpurityOperator_doCheck
 SUBROUTINE ImpurityOperator_checkOverlap(this, Tmin, Tmax, iOverlap, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_checkOverlap'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(INOUT)  :: this
   DOUBLE PRECISION      , INTENT(IN   )  :: Tmin
   DOUBLE PRECISION      , INTENT(IN   )  :: Tmax
@@ -2344,13 +2155,6 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 DOUBLE PRECISION FUNCTION ImpurityOperator_getError(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_getError'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
 !Local variables ------------------------------
 !  DOUBLE PRECISION :: tolerance
@@ -2402,13 +2206,6 @@ END FUNCTION ImpurityOperator_getError
 SUBROUTINE ImpurityOperator_printLatex(this, ostream, isweep)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ImpurityOperator_printLatex'
-!End of the abilint section
-
   TYPE(ImpurityOperator), INTENT(IN) :: this
   INTEGER               , INTENT(IN) :: ostream
   INTEGER               , INTENT(IN) :: isweep

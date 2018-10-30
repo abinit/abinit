@@ -44,8 +44,7 @@ MODULE m_eig2d
 
  use m_time,       only : timab
  use m_fstrings,   only : strcat
- use m_crystal,    only : crystal_init, crystal_free, crystal_t
- use m_crystal_io, only : crystal_ncwrite
+ use m_crystal,    only : crystal_init,  crystal_t
  use m_pawtab,     only : pawtab_type
  use m_ddb,        only : DDB_VERSION
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
@@ -197,20 +196,7 @@ CONTAINS
 
 subroutine eigr2d_init(eig2nkq,eigr2d,mband,nsppol,nkpt,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_init'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -255,13 +241,6 @@ end subroutine eigr2d_init
 !! SOURCE
 
 subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -319,14 +298,6 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -358,13 +329,6 @@ end subroutine eigr2d_ncwrite
 !! SOURCE
 
 subroutine eigr2d_free(eigr2d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eigr2d_free'
-!End of the abilint section
 
  implicit none
 
@@ -414,20 +378,7 @@ end subroutine eigr2d_free
 
 subroutine fan_init(fan,fan2d,mband,nsppol,nkpt,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_init'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -477,20 +428,7 @@ end subroutine fan_init
 
 subroutine gkk_init(gkk,gkk2d,mband,nsppol,nkpt,natom,ncart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_init'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -535,13 +473,6 @@ end subroutine gkk_init
 !! SOURCE
 
 subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -602,13 +533,6 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -639,13 +563,6 @@ end subroutine fan_ncwrite
 !! SOURCE
 
 subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -704,14 +621,6 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -743,13 +652,6 @@ end subroutine gkk_ncwrite
 !! SOURCE
 
 subroutine fan_free(fan2d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fan_free'
-!End of the abilint section
 
  implicit none
 
@@ -794,13 +696,6 @@ end subroutine fan_free
 !! SOURCE
 
 subroutine gkk_free(gkk2d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkk_free'
-!End of the abilint section
 
  implicit none
 
@@ -909,13 +804,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 &  eigen1,eig2nkq,elph2_imagden,esmear,gh0c1_pert,gh1c_pert,ieig2rf,istwfk_pert,&
 &  mband,mk1mem,mpert,npert,mpi_enreg,mpw1,nkpt_rbz,npwar1,nspinor,nsppol,smdelta,&
 &  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eig2stern'
-!End of the abilint section
 
  implicit none
 
@@ -1410,13 +1298,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &  elph2_imagden,esmear,ieig2rf,mband,mpert,npert,mpi_enreg,doccde,&
 &  nkpt_rbz,nsppol,smdelta,rprimd,dtset,occ_rbz,hdr0,eigbrd,eigenq_fine,hdr_fine)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eig2tot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1859,7 +1740,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    end if
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
-   NCF_CHECK(crystal_ncwrite(Crystal,ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(Bands, ncid))
    call eigr2d_ncwrite(eigr2d,dtset%qptn(:),dtset%wtq,ncid)
    NCF_CHECK(nf90_close(ncid))
@@ -1875,7 +1756,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      fname = strcat(dtfil%filnam_ds(4),"_FAN.nc")
      call fan_init(fan,fan2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating FAN file")
-     NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(Bands, ncid))
      call fan_ncwrite(fan2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
@@ -1894,7 +1775,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      fname = strcat(dtfil%filnam_ds(4),"_GKK.nc")
      call gkk_init(gkk,gkk2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom,3)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-     NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(Bands, ncid))
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
@@ -1926,7 +1807,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
 #ifdef HAVE_NETCDF
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
-       NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+       NCF_CHECK(crystal%ncwrite(ncid))
        NCF_CHECK(ebands_ncwrite(Bands, ncid))
        call eigr2d_ncwrite(eigi2d,dtset%qptn(:),dtset%wtq,ncid)
        NCF_CHECK(nf90_close(ncid))
@@ -1947,7 +1828,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    ABI_DEALLOCATE(gkk)
  end if
 
- call crystal_free(Crystal)
+ call crystal%free()
  call ebands_free(Bands)
  call eigr2d_free(eigr2d)
  call eigr2d_free(eigi2d)
@@ -1989,13 +1870,6 @@ end subroutine eig2tot
 !! SOURCE
 
 subroutine outbsd(bdeigrf,dtset,eig2nkq,mpert,nkpt_rbz,unitout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outbsd'
-!End of the abilint section
 
  implicit none
 
@@ -2079,13 +1953,6 @@ end subroutine outbsd
 !! SOURCE
 
 subroutine smeared_delta(eigen0,eigenq,esmear,mband,smdelta,smdfunc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smeared_delta'
-!End of the abilint section
 
  implicit none
 
@@ -2200,13 +2067,6 @@ end subroutine smeared_delta
 !! SOURCE
 
 subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,nkpt,nsppol,option,phfrq,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'elph2_fanddw'
-!End of the abilint section
 
  implicit none
 

@@ -255,13 +255,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
 &                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'forstr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -351,7 +344,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  ABI_ALLOCATE(grnl,(3*dtset%natom*optfor))
  grnl(:)=zero
 
-!Compute nonlocal pseudopotential parts of forces and stress tensor
+!Compute nonlocal psp + potential Fock ACE parts of forces and stress tensor
 !-involves summations over wavefunctions at all k points
  if (dtset%tfkinfunc>0.and.stress_needed==1) then
    kinstr(1:3)=-two/three*energies%e_kinetic/ucvol ; kinstr(4:6)=zero
@@ -616,13 +609,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
 &  stress_needed,symrec,typat,usecprj,usefock,use_gpu_cuda,wtk,xred,ylm,ylmgr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'forstrnps'
-!End of the abilint section
 
  implicit none
 
@@ -1264,13 +1250,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &                 nkxc,nresid,n3xccc,optnc,optxc,pawang,pawfgrtab,pawrhoij,pawtab,&
 &                 rhor,rprimd,usepaw,vresid,xccc3d,xred,vxc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nres2vres'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1348,7 +1327,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    ABI_ALLOCATE(nresg,(2,nfft))
    ABI_ALLOCATE(dummy,(nfft))
    dummy(:)=nresid(:,1)
-   call fourdp(1,nresg,dummy,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,nresg,dummy,-1,mpi_enreg,nfft,1,ngfft,0)
    ABI_DEALLOCATE(dummy)
  end if
 

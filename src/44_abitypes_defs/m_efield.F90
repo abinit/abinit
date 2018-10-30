@@ -251,13 +251,6 @@ contains
 
 subroutine destroy_efield(dtefield)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_efield'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

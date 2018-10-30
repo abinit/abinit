@@ -101,13 +101,6 @@ epsilon_eigenvalues,Lbasis,debug)
 ! implicit dielectic operator and then diagonalizes the banded
 ! Lanczos matrix.
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'driver_generate_dielectric_matrix'
-!End of the abilint section
-
 implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)
@@ -198,13 +191,6 @@ subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,kmax,outpu
 ! implicit dielectic operator and then diagonalizes the banded
 ! Lanczos matrix.
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'GeneratePrintDielectricEigenvalues'
-!End of the abilint section
-
 implicit none
 interface
   subroutine epsilon_matrix_function(v_out,v_in,l)
@@ -427,13 +413,6 @@ subroutine Driver_GeneratePrintDielectricEigenvalues(dtset)
 !----------------------------------------------------------------------
 ! Compute the eigenvalues of the various dielectric operators
 !----------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Driver_GeneratePrintDielectricEigenvalues'
-!End of the abilint section
-
 type(dataset_type),intent(in) :: dtset
 
 integer  ::  kmax_exact, kmax_model, kmax

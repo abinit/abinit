@@ -124,13 +124,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
  use m_paw_dmft, only: paw_dmft_type
  use m_mpinfo,   only : proc_distrb_cycle
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'datafordmft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -759,13 +752,6 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 
  use m_abicore
  use m_io_tools,  only : open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psichi_print'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -927,13 +913,6 @@ subroutine psichi_check(dtset,nattyp,nkpt,my_nspinor,&
  use m_abicore
 
  use m_matlu, only: matlu_type,init_matlu,sym_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psichi_check'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1070,13 +1049,6 @@ end subroutine datafordmft
  use m_paw_dmft, only : paw_dmft_type
  use m_oper, only : oper_type,loc_oper
  use m_matlu, only : sym_matlu, print_matlu, checkdiag_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_levels'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1197,13 +1169,6 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
  use m_crystal, only : crystal_t
  use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper,diff_oper
  use m_matlu, only : matlu_type,sym_matlu,print_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psichi_renormalization'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1384,13 +1349,6 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
  use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper
  use m_matlu, only : gather_matlu,sym_matlu,print_matlu,add_matlu
  use m_matrix, only : invsqrt_matrix
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normalizepsichi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1642,13 +1600,6 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
  use m_matlu, only : matlu_type,init_matlu,add_matlu,destroy_matlu,print_matlu,sym_matlu
  use m_paw_dmft, only: paw_dmft_type
  use m_pawang, only : pawang_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hybridization_asymptotic_coefficient'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

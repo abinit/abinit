@@ -95,13 +95,6 @@ contains
 
 subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_verlet'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

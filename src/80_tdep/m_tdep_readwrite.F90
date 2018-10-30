@@ -110,13 +110,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_print_Aknowledgments(InVar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_print_Aknowledgments'
-!End of the abilint section
-
   implicit none 
 
   type(Input_Variables_type) :: InVar
@@ -161,13 +154,6 @@ contains
 #if defined HAVE_NETCDF
  use netcdf
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_ReadEcho'
-!End of the abilint section
-
   implicit none 
 
   integer :: ii,jj,tmp,istep,iatom,this_istep
