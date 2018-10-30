@@ -1544,8 +1544,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
        else
          write(msg, '(a,es21.14)' ) &
 &         '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
-         call wrtout(iout,msg,'COLL')
        endif
+       call wrtout(iout,msg,'COLL')
      else
        write(msg, '(a,es21.14)' ) &
 &       '    Spherical terms = ',energies%e_paw
