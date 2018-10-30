@@ -8,8 +8,6 @@ EXTRA_DIST += \
 	RELNOTES \
 	autogen.sh \
 	mkrobodoc.sh \
-	post_configure_nag.sh \
-	pre_configure_nag.sh \
 	wipeout.sh
 
 # Additional files to clean
