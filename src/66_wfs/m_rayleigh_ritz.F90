@@ -67,7 +67,7 @@ contains
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point
-!!  usepaw=do we use the PAW method
+!!  usepaw=if 1 we use the PAW method
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
