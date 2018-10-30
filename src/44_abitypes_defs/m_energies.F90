@@ -557,13 +557,20 @@ end subroutine energies_to_array
 !============= Evaluate some parts of the energy ===========
 
  if (optdc==0.or.optdc==2) then
-   eint = energies%e_kinetic + energies%e_hartree + energies%e_xc &
+   eint = energies%e_kinetic + energies%e_hartree + energies%e_xc+ &
 !&  +two*energies%e_fock-energies%e_fock0+&  ! The Fock energy is already included in the non_local part ...
-&   -energies%e_fock0+&
+!&  energies%e_nlpsp_vfock - energies%e_fock0+&
 &   energies%e_hybcomp_E0 -energies%e_hybcomp_v0 + energies%e_hybcomp_v+&
 &   energies%e_localpsp + energies%e_corepsp
-   if (usepaw==0) eint = eint + energies%e_nlpsp_vfock
-   if (usepaw==1) eint = eint + energies%e_paw
+
+!  See similar section in m_scfcv_core.F90
+!  XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
+   if (usepaw==0) eint = eint + energies%e_nlpsp_vfock - energies%e_fock0
+!  XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true.
+!  if (usepaw==1) eint = eint + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
+!  XG 20181025 So, the following is giving a non-variational expression ...
+   if (usepaw==1) eint = eint + energies%e_paw + energies%e_fock
+
    if (dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) eint=eint+energies%e_elecfield    !!HONG
    eint = eint + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd

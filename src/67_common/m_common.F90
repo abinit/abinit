@@ -1521,6 +1521,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
 &       '    XC energy       = ',energies%e_xc+&
+!XG20181025 This should NOT be a part of the XC energy, but treated separately, see below
+&       energies%e_fock+&
+!
 &       energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v,ch10,&
 &       eneName            ,enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
@@ -1537,16 +1540,26 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (usepaw==0) then
        if(abs(energies%e_fock0)<tol8)then
          write(msg, '(a,es21.14)' ) &
-&         '    NL   psp  energy= ',energies%e_nlpsp_vfock-energies%e_fock0
+&         '    NL   psp  energy= ',energies%e_nlpsp_vfock
        else
          write(msg, '(a,es21.14)' ) &
 &         '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
+         call wrtout(iout,msg,'COLL')
        endif
      else
        write(msg, '(a,es21.14)' ) &
-&       '    Spherical terms = ',energies%e_paw-energies%e_fock0
+&       '    Spherical terms = ',energies%e_paw
+       call wrtout(iout,msg,'COLL')
+!XG20181025 Does not work (yet)...
+!       if(abs(energies%e_nlpsp_vfock)>tol8)then
+!         write(msg, '(a,es21.14)' ) &
+!&         '    Fock-type term  = ',energies%e_nlpsp_vfock
+!         call wrtout(iout,msg,'COLL')
+!         write(msg, '(a,es21.14)' ) &
+!&         '    -frozen Fock en.= ',-energies%e_fock0
+!         call wrtout(iout,msg,'COLL')
+!       endif
      end if
-     call wrtout(iout,msg,'COLL')
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
        call wrtout(iout,msg,'COLL')

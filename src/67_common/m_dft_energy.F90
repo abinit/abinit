@@ -500,6 +500,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  energies%e_eigenvalues=zero
  energies%e_kinetic=zero
  energies%e_nlpsp_vfock=zero
+ energies%e_fock0=zero
  bdtot_index=0
  icg=0
 
@@ -733,6 +734,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
          do iblocksize=1,blocksize
            iband=(iblock-1)*blocksize+iblocksize
            energies%e_eigenvalues=energies%e_eigenvalues+dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
+!          WARNING : the Fock contribution is NOT computed !!!
            energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
          end do
 
@@ -817,8 +819,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&   energies%e_localpsp + energies%e_corepsp
-   if (psps%usepaw==0) etotal=etotal + energies%e_nlpsp_vfock
+!&   energies%e_nlpsp_vfock - energies%e_fock0 +
+!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock 
+&   energies%e_nlpsp_vfock + energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
    etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &

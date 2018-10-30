@@ -603,8 +603,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
 
      if (gs_ham%usepaw==1 .and. has_fock)then
-       ABI_ALLOCATE(gvnlc,(2,npw_k2*my_nspinor*ndat))
-       gvnlc=gvnlxc
+       if (fock_get_getghc_call(fock)==1) then
+         ABI_ALLOCATE(gvnlc,(2,npw_k2*my_nspinor*ndat))
+         gvnlc=gvnlxc
+       endif
      endif
 
 !    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
