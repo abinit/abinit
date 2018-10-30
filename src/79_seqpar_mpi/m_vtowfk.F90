@@ -199,6 +199,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !     subovl should be Identity (in that case we should use use_subovl=0)
 !     But this is true only if conjugate gradient algo. converges
  integer :: use_subovl=0
+ integer :: use_subvnlx=0
+ integer :: use_totvnlx=0
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,pidx,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,jj,mgsc,my_nspinor,n1,n2,n3 !kk
@@ -292,9 +294,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        else if (istwf_k==2) then
          ABI_ALLOCATE(totvnlx,(nband_k,nband_k))
        end if
+       use_totvnlx=1
      else
        ABI_DEALLOCATE(subvnlx)
        ABI_ALLOCATE(subvnlx,(nband_k*(nband_k+1)))
+       use_subvnlx=1
      end if
    end if
 
@@ -403,11 +407,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
 !      =========================================================================
      else
+!      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
+       use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &       gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
 &       mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
 &       dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,wfoptalg,zshift)
+&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
      end if
    end if
 
@@ -936,13 +942,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if(wfopta10 /= 1 .and. .not. newlobpcg) then
    ABI_DEALLOCATE(evec)
    ABI_DEALLOCATE(subham)
-   !if (gs_hamk%usepaw==0) then
-   !if (wfopta10==4) then
    ABI_DEALLOCATE(totvnlx)
-   !else
    ABI_DEALLOCATE(subvnlx)
-   !end if
-   !end if
    ABI_DEALLOCATE(subovl)
  end if
  if ( .not. newlobpcg ) then
