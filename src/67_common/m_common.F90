@@ -1462,7 +1462,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !scalars
  integer :: ipositron,mu,optdc
  logical :: directE_avail,testdmft
- real(dp) :: eent,enevalue,etotal,etotaldc
+ real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
  character(len=22) :: eneName
  character(len=500) :: msg
 !arrays
@@ -1518,13 +1518,14 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
      if (ipositron/=1) then
+       exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
+!XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
+!      At present, there is still a problem with the variational formulation for the Fock term with PAW. 
+!      So, for the time being, keep it inside.
+       if(usepaw==1)exc_semilocal=exc_semilocal+energies%e_fock
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
-&       '    XC energy       = ',energies%e_xc+&
-!XG20181025 This should NOT be a part of the XC energy, but treated separately, see below
-&       energies%e_fock+&
-!
-&       energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v,ch10,&
+&       '    XC energy       = ',exc_semilocal,ch10,&
 &       eneName            ,enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
