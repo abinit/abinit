@@ -1081,7 +1081,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
    if(need_prt_anh .and. ncoeff_model > 0 )then 
      call effective_potential_writeAnhHead(ncoeff_model,filename,&
 &                                     eff_pot%anharmonics_terms) 
-   else
+   else if (need_prt_anh)then
      write(message, '(6a,I3,3a)' )ch10,&
 &          ' --- !WARNING',ch10,&
 &          '     Printing of anharmonic terms has been asked,but',ch10,&
