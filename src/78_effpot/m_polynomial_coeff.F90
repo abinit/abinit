@@ -1002,7 +1002,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart
     MSG_ERROR(msg)
   end if
 
-  name_file = filename
+  if(present(filename)) name_file = filename
 
 ! Initialisation of variables
   energy     = zero

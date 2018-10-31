@@ -2263,7 +2263,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   do ii = 1, 3
     sc_size(ii) = eff_pot%supercell%rlatt(ii,ii)
   end do
-  !name_file = filename !! TODO MARCUS CHECK AS OPTIONAL VARIABLE
+
+
   need_verbose = .TRUE.
   if(present(verbose)) then
     need_verbose = verbose

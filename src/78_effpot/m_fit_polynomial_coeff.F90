@@ -43,6 +43,7 @@ module m_fit_polynomial_coeff
  use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
  use m_random_zbq
  use m_fit_data
+ use m_geometry, only: metric 
 
  implicit none
 
@@ -2337,7 +2338,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  msef = zero
  mses = zero
 
- do ii=1,ntime
+ do ii=1,ntime ! Loop over configurations
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
    if(anh_opened .eqv. .TRUE.)then
@@ -2370,15 +2371,15 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 ! &                    real(100,dp),(/real(100,dp),real(100,dp)/))
 
    mse  = mse  + abs(hist%etot(ii) - energy)
-   do ia=1,natom
-     do mu=1,3
+   do ia=1,natom ! Loop over atoms
+     do mu=1,3   ! Loop over cartesian directions
        msef = msef + (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2
      end do
    end do
-   do mu=1,6
+   do mu=1,6 ! Loop over stresses
      mses = mses + sqomega(ii)*(hist%strten(mu,ii) - strten(mu))**2
    end do
- end do
+   end do ! End loop itime 
 
  mse  = mse  /  ntime
  msef = msef / (3*natom*ntime)
@@ -2431,7 +2432,8 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 !Local variables-------------------------------
 !reals 
   real(dp) :: factor,mse,msef,mses
-  real(dp),allocatable :: sqomega(:)
+  type(fit_data_type) :: test_data
+  real(dp),allocatable :: sqomega(:),ucvol(:)
   real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !scalar
   integer :: itime, test,unit_anh
@@ -2442,6 +2444,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
  character(len=fnlen) :: filename 
  character(len=1000) :: message
 !arrays
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
 ! *************************************************************************
   
   !MPI variables
@@ -2457,14 +2460,26 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   factor   = 1._dp/natom
   ntime = hist%mxhist 
   ABI_ALLOCATE(sqomega,(ntime))
+  ABI_ALLOCATE(ucvol,(ntime))
+  sqomega = zero 
   filename = 'TES_fit_diff'
-  ncoeff = eff_pot%anharmonics_terms%ncoeff 
+  ncoeff = eff_pot%anharmonics_terms%ncoeff
+   
+  do itime=1,ntime 
+!  Compute \Omega^{2} and ucvol for each time
+   call metric(gmet,gprimd,-1,rmet,hist%rprimd(:,:,itime),ucvol(itime))
+!  Formula: sqomega(itime) = (((ucvol(itime)**(-2.))* ((natom)**(0.5)))**(-1.0/3.0))**2
+!   Compact form:
+   sqomega(itime) = ((ucvol(itime)**(4.0/3.0)) / ((natom)**(1/3.0)))
+  end do 
 
+       
   if(need_print_anharmonic) call effective_potential_writeAnhHead(ncoeff,&
 &                            filename,eff_pot%anharmonics_terms)                  
 
-  call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
-&                                          compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
+  call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,&
+&                                      sqomega,&
+&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
 
 
 !  Print the standard deviation after the fit
@@ -2485,8 +2500,9 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
      call wrtout(std_out,message,'COLL')
 
 
-  !Deallocating 
+  !Deallocating
   ABI_DEALLOCATE(sqomega)
+  ABI_DEALLOCATE(ucvol)
 
   INQUIRE(FILE='TES_fit_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh)
   if(file_opened) close(unit_anh)
