@@ -54,13 +54,6 @@ program band2eps
  use m_fstrings,      only : int2char4, tolower, inupper
  use m_time,          only : asctime
  use m_parser,        only : instrng
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'band2eps'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------

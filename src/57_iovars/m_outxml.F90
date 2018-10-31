@@ -69,13 +69,6 @@ contains
 
 subroutine outxml_open(filename)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxml_open'
-!End of the abilint section
-
   implicit none
 
 !Arguments -------------------------------
@@ -125,13 +118,6 @@ end subroutine outxml_open
 !! SOURCE
 
 subroutine outxml_finalise(tsec, values)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxml_finalise'
-!End of the abilint section
 
   implicit none
 
@@ -185,13 +171,6 @@ end subroutine outxml_finalise
 !! SOURCE
 
 subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_resultsgs_XML'
-!End of the abilint section
 
  implicit none
 
@@ -308,13 +287,6 @@ end subroutine out_resultsgs_XML
 !! SOURCE
 
 subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_geometry_XML'
-!End of the abilint section
 
  implicit none
 

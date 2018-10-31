@@ -41,7 +41,6 @@ module m_dfpt_scfcv
  use netcdf
 #endif
 
- use m_dtfil,    only : status
  use m_cgtools,  only : mean_fftr, overlap_g, dotprod_vn, dotprod_vn, dotprod_g
  use m_fstrings, only : int2char4, sjoin
  use m_geometry, only : metric, stresssym
@@ -288,13 +287,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  cg_mq,cg1_mq,cg1_active_mq,docckde_mq,eigen_mq,eigen1_mq,gh0c1_set_mq,gh1c_set_mq,&
 &  kg1_mq,npwar1_mq,occk_mq,resid_mq,residm_mq,rhog1_pq,rhog1_mq,rhor1_pq,rhor1_mq)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_scfcv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -411,6 +403,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq,enl0_mq
  real(dp) :: enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
  character(len=500) :: msg
+ character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
 !character(len=fnlen) :: fi1o_vtk
  integer  :: prtopt
@@ -447,14 +440,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  call timab(120,1,tsec)
  call timab(154,1,tsec)
 
- call status(0,dtfil%filstat,iexit,level,'init          ')
-
  ! intel 18 really needs this to be initialized
  maxfor = zero
 
  ! enable time limit handler if not done in callers.
- if (enable_timelimit_in(ABI_FUNC) == ABI_FUNC) then
-   write(std_out,*)"Enabling timelimit check in function: ",trim(ABI_FUNC)," with timelimit: ",trim(sec2str(get_timelimit()))
+ if (enable_timelimit_in(MY_NAME) == MY_NAME) then
+   write(std_out,*)"Enabling timelimit check in function: ",trim(MY_NAME)," with timelimit: ",trim(sec2str(get_timelimit()))
  end if
 
 !Parallelism data
@@ -699,13 +690,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     call wrtout(std_out,sjoin("dfpt_scfcv: previous iteration took ",sec2str(wtime_step)))
+     call wrtout(std_out,sjoin(" dfpt_scfcv: previous iteration took ",sec2str(wtime_step)))
 
-     if (have_timelimit_in(ABI_FUNC)) then
+     if (have_timelimit_in(MY_NAME)) then
        if (istep > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then
-           write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in dfpt_scfcv."
+           write(msg,"(3a)")" Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in dfpt_scfcv."
            MSG_COMMENT(msg)
            call wrtout(ab_out, msg, "COLL")
            timelimit_exit = 1
@@ -763,13 +754,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        if (dtfil%ireadwf/=0.and.dtset%get1den==0.and.dtset%ird1den==0.and.initialized==0) then
          rhor1(:,:)=rhor1(:,:)+nhat1(:,:)
-         call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+         call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf,0)
        end if
        call timab(564,2,tsec)
      end if
 !    Set initial guess for 1st-order potential
 !    ----------------------------------------------------------------------
-     call status(istep,dtfil%filstat,iexit,level,'get vtrial1   ')
      option=1;optene=0;if (iscf_mod==-2) optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
@@ -853,7 +843,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call paw_an_reset_flags(paw_an1) ! Force the recomputation of on-site potentials
      call paw_ij_reset_flags(paw_ij1,self_consistent=.true.) ! Force the recomputation of Dij
      option=0;if (dtset%iscf>0.and.dtset%iscf<10.and.nstep>0) option=1
-     call status(istep,dtfil%filstat,iexit,level,'call pawdenpot')
      call pawdenpot(dum,epaw1,epawdc1_dum,ipert,dtset%ixc,my_natom,dtset%natom,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,&
 &     dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
@@ -861,7 +850,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !    First-order Dij computation
-     call status(istep,dtfil%filstat,iexit,level,'call pawdij   ')
      call timab(561,1,tsec)
      if (has_dijfr>0) then
        !vpsp1 contribution to Dij already stored in frozen part of Dij
@@ -882,7 +870,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        ABI_DEALLOCATE(vtrial1_tmp)
      end if
 
-     call status(istep,dtfil%filstat,iexit,level,'call symdij   ')
      call symdij(gprimd,indsy1,ipert,my_natom,dtset%natom,nsym1,psps%ntypat,0,&
 &     paw_ij1,pawang1,dtset%pawprtvol,pawtab,rprimd,symaf1,symrc1, &
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
@@ -893,7 +880,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  ######################################################################
 !  The following steps are done only when nstep>0
 !  ----------------------------------------------------------------------
-   call status(istep,dtfil%filstat,iexit,level,'loop istep    ')
 
    if(iscf_mod>0.and.nstep>0)then
      write(msg, '(a,a,i4)' )ch10,' ITER STEP NUMBER  ',istep
@@ -956,8 +942,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        rhor1_mq(2*ifft  ,:) =-rhor1_pq(2*ifft  ,:)
      end do
      rhor1=rhor1_pq
-     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
-     call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+     call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
    end if
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -1026,7 +1012,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call xmpi_sum(quit_sum,spaceComm,ierr)
 
      if (quit_sum>0) exit
-     call status(istep,dtfil%filstat,iexit,level,'call newrho   ')
 !    INSERT HERE CALL TO NEWRHO3 : to be implemented
      if (psps%usepaw==1) then
        MSG_BUG("newrho3 not implemented: use potential mixing!")
@@ -1040,7 +1025,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    if (ipert<dtset%natom+10) then
      optene=1
-     call status(istep,dtfil%filstat,iexit,level,'call dfpt_rhotov   ')
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1,rhor,rhor1,&
@@ -1081,7 +1065,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      call timab(152,1,tsec)
      choice=2
-     call status(istep,dtfil%filstat,iexit,level,'print info    ')
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
 &     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
@@ -1312,7 +1295,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if (psps%usepaw==0.and.dtset%userie/=919.and. &
 & (ipert==dtset%natom+3.or.ipert==dtset%natom+4)) then
-   call status(0,dtfil%filstat,iexit,level,'enter dfpt_nselt  ')
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
@@ -1331,7 +1313,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !MT oct. 2015: this works perfectly on all automatic tests
  if(ipert<=dtset%natom+4)then
    if (psps%usepaw==1.or.dtset%userie==919) then
-     call status(0,dtfil%filstat,iexit,level,'enter dfpt_nstpaw ')
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
 &     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,ncpgr,&
@@ -1341,7 +1322,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     symrl1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,wtk_rbz,&
 &     xccc3d1,xred,ylm,ylm1,ylmgr1)
    else
-     call status(0,dtfil%filstat,iexit,level,'enter dfpt_nstdy  ')
      if (dtset%nspden==4) then
        call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
 &       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,mpert,mpi_enreg,&
@@ -1529,8 +1509,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_DATATYPE_DEALLOCATE(paw_ij1)
  ABI_DEALLOCATE(nhat1)
 
- call status(0,dtfil%filstat,iexit,level,'exit')
-
  call timab(160,2,tsec)
  call timab(120,2,tsec)
 
@@ -1598,13 +1576,6 @@ end subroutine dfpt_scfcv
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
 &                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
 &                enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_etot'
-!End of the abilint section
 
  implicit none
 
@@ -1751,13 +1722,6 @@ subroutine newfermie1(cplex,fermie1,fe1fixed,ipert,istep,ixc,my_natom,natom,nfft
 &                     pawrhoij1,pawrhoijfermi,pawtab,pawxcdev,prtvol,rhorfermi,&
 &                     ucvol,usepaw,usexcnhat,vtrial1,vxc1,xclevel,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newfermie1'
-!End of the abilint section
 
  implicit none
 
@@ -1957,13 +1921,6 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
 &          mpi_enreg,my_natom,nfft,nfftmix,ngfft,ngfftmix,npawmix,pawrhoij,&
 &          qphon,rhor,rprimd,usepaw,vresid,vtrial)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_newvtr'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -2034,16 +1991,16 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
    vtrial0=vtrial;vresid0=vresid
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
-     call fourdp(cplex,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
+     call fourdp(cplex,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
    end do
  else
    ABI_ALLOCATE(vtrialg,(2,nfft,dtset%nspden))
    ABI_ALLOCATE(vreswk,(2,nfft))
    do ispden=1,dtset%nspden
      fact=dielar(4);if (ispden>1) fact=dielar(7)
-     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
-     call fourdp(cplex,vreswk,vresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
+     call fourdp(cplex,vreswk,vresid(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
      do ifft=1,nfft
        if (ffttomix(ifft)>0) then
          jfft=2*ffttomix(ifft)
@@ -2258,7 +2215,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
    vtrial=vtrial0
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1, ngfft,0)
    end do
  else
    do ispden=1,dtset%nspden
@@ -2267,7 +2224,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
        vtrialg(1,jfft,ispden)=vtrial0(2*ifft-1,ispden)
        vtrialg(2,jfft,ispden)=vtrial0(2*ifft  ,ispden)
      end do
-     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(vtrialg)
  end if
@@ -2388,13 +2345,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
  use m_spacepar,   only : hartrestr
  use m_mkcore,      only : dfpt_mkcore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nselt'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2470,8 +2420,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 !Update list of computed matrix elements
  if((ipert==natom+3) .or. (ipert==natom+4)) then
-!  Eventually expand when strain coupling to other perturbations is
-!  implemented
+!  Eventually expand when strain coupling to other perturbations is implemented
    do ipert1=natom+3,natom+4
      do idir1=1,3
        blkflg(idir1,ipert1,idir,ipert)=1
@@ -2479,14 +2428,11 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
    end do
  end if
 
-!allocate(enl1nk(mbdkpsp))
  ABI_ALLOCATE(d2bbb_k,(2,3,mband,mband*prtbbb))
  ABI_ALLOCATE(d2nl_k,(2,3,mpert))
 
-
  ABI_ALLOCATE(kg_k,(3,mpw))
  ABI_ALLOCATE(kg1_k,(3,mpw1))
-
 
  n1=ngfft(1) ; n2=ngfft(2) ; n3=ngfft(3)
  n4=ngfft(4) ; n5=ngfft(5) ; n6=ngfft(6)
@@ -2799,13 +2745,6 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  use m_hamiltonian, only : gs_hamiltonian_type,load_k_hamiltonian
  use m_mkffnl,      only : mkffnl
  use m_nonlop,      only : nonlop
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nsteltwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2841,11 +2780,6 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
  type(pawcprj_type) :: cprj_dum(0,0)
 
 ! *********************************************************************
-
-
-!DEBUG
-!write(std_out,*)' dfpt_nstwf : enter '
-!ENDDEBUG
 
 !Init me
  ABI_ALLOCATE(ghc,(2,npw1_k*nspinor))
@@ -3077,13 +3011,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use m_dynmat,    only : dfpt_sygra
  use m_dfpt_mkvxc,     only : dfpt_mkvxc
  use m_mkcore,         only : dfpt_mkcore
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_nstdy'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3146,10 +3073,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
  DBG_ENTER("COLL")
 
-!Not valid for PAW
  if (psps%usepaw==1) then
-   msg='This routine cannot be used for PAW (use pawnst3 instead) !'
-   MSG_BUG(msg)
+   MSG_BUG('This routine cannot be used for PAW (use pawnst3 instead) !')
  end if
 
 !Keep track of total time spent in dfpt_nstdy
@@ -3204,8 +3129,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  if (ipert /= dtset%natom + 1) then
    do ipert1=1,mpert
      do idir1=1,3
-       if(ipert1 <= dtset%natom .or. ipert1==dtset%natom+2 &
-&       .and. ddkfil(idir1)/=0) then
+       if(ipert1 <= dtset%natom .or. ipert1==dtset%natom+2 .and. ddkfil(idir1)/=0) then
          blkflg(idir1,ipert1,idir,ipert)=1
        end if
      end do
@@ -3675,13 +3599,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
  use m_spacepar,    only : symrhg
  use m_mkffnl,      only : mkffnl
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_rhofermi'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -3773,7 +3690,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  if (cplex/=1) then
    MSG_BUG('wrong cplex/=1 argument !')
  end if
-
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
@@ -3878,7 +3794,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    do ikpt=1,nkpt_rbz
 
      counter=100*ikpt+isppol
-     call status(counter,dtfil%filstat,iexit,level,'loop ikpt     ')
      nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
      istwf_k=istwfk_rbz(ikpt)
      npw_k=npwarr(ikpt)
@@ -3973,7 +3888,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !    Compute nonlocal form factors ffnlk at (k+G)
      if (ipert<=natom ) then
        ider=0;idir0=0
-       call status(counter,dtfil%filstat,iexit,level,'call mkffnl(0)')
        call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
 &       gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &       psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,dtset%ntypat,&
@@ -3994,7 +3908,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      end if
      dimffnl1=1+ider;if (ider==1.and.idir0==0) dimffnl1=dimffnl1+2*psps%useylm
      ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,dtset%ntypat))
-     call status(counter,dtfil%filstat,iexit,level,'call mkffnl(1)')
      call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
 &     psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
 &     npw1_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
@@ -4008,13 +3921,11 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      if (ipert==natom+3.or.ipert==natom+4) then
        if (ipert==natom+3) istr=idir
        if (ipert==natom+4) istr=idir+3
-       call status(counter,dtfil%filstat,iexit,level,'call kpgstr   ')
        call kpgstr(dkinpw,dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,gprimd,istr,&
 &       kg_k,kpoint,npw_k)
      end if
 
 !    Compute (1/2) (2 Pi)**2 (k+q+G)**2:
-     call status(counter,dtfil%filstat,iexit,level,'call mkkin(1) ')
 !     call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k)
      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
@@ -4045,7 +3956,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !    Compute fixed contributions to 1st-order Fermi energy
 !    and Fermi level charge density
-     call status(counter,dtfil%filstat,iexit,level,'call dfpt_wfkfermi  ')
      fe1fixed_k(:)=zero ; fe1norm_k(:)=zero
 
 !    Note that dfpt_wfkfermi is called with kpoint, while kpt is used inside dfpt_wfkfermi
@@ -4080,7 +3990,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      if (allocated(ph3d1)) then
        ABI_DEALLOCATE(ph3d1)
      end if
-     call status(counter,dtfil%filstat,iexit,level,'after dfpt_wfkfermi ')
 
 !    Save eigenvalues (hartree)
      eigen1 (1+bd2tot_index : 2*nband_k**2+bd2tot_index) = eig1_k(:)
@@ -4160,7 +4069,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(kg1_k)
 
- call status(0,dtfil%filstat,iexit,level,'after loops   ')
  call timab(124,2,tsec)
 
 
@@ -4239,7 +4147,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  end if
 
 !Symmetrize the density
- call status(0,dtfil%filstat,iexit,level,'call symrhg   ')
 !In order to have the symrhg working in parallel on FFT coefficients, the size
 !of irzzon1 and phnons1 should be set to nfftot. Therefore, nsym\=1 does not work.
 !We also have the spin-up density, symmetrized, in rhorfermi(:,2).
@@ -4378,13 +4285,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
  use m_getgh1c,     only : getgh1c
  use m_dfpt_mkrho,  only : dfpt_accrho
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_wfkfermi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4436,7 +4336,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  end if
 
 !Debugging statements
- call status(0,dtfil%filstat,iexit,level,'enter dfpt_wfkfermi')
  if(prtvol==-level)then
    write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,'dfpt_wfkfermi : enter'
    call wrtout(std_out,msg,'PERS')
@@ -4478,10 +4377,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  fe1fixed_k(:)=zero; fe1norm_k(:)=zero
 
 !Read the npw and kg records of wf files
- call status(0,dtfil%filstat,iexit,level,'before WffRead')
-
  call timab(139,1,tsec)
-
 
 !Loop over bands
  do iband=1,nband_k
@@ -4489,10 +4385,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !  Skip bands not treated by current proc
    if(mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me) cycle
-
-   if(prtvol>=10)then
-     call status(counter,dtfil%filstat,iexit,level,'loop iband    ')
-   end if
 
 !  Select occupied bands
    if(abs(occ_k(iband))>tol8.and.abs(rocceig(iband,iband))>tol8)then
@@ -4522,11 +4414,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
        call pawcprj_axpby(zero,wtband,cwaveprj_tmp,cwaveprjq)
      end if
 
-     if(prtvol>=10)then
-       call status(0,dtfil%filstat,iexit,level,'after wf read ')
-     end if
-
-
 !    Apply H^(1)-Esp.S^(1) to Psi^(0) (H(^1)=only (NL+kin) frozen part)
      lambda=eig0_k(iband)
      call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnlx1,&
@@ -4554,7 +4441,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
  call timab(139,2,tsec)
  call timab(130,1,tsec)
- call status(0,dtfil%filstat,iexit,level,'after loops   ')
 
  ABI_DEALLOCATE(cwave0)
  ABI_DEALLOCATE(cwaveq)
@@ -4571,8 +4457,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
    write(msg,'(a,a1,a,i2,a)')' fermie3 : exit prtvol=-',level,', debugging mode => stop '
    MSG_ERROR(msg)
  end if
-
- call status(0,dtfil%filstat,iexit,level,'exit dfpt_wfkfermi')
 
  call timab(130,2,tsec)
 

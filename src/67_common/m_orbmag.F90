@@ -48,7 +48,7 @@ module m_orbmag
   use m_geometry,         only : metric
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian,destroy_hamiltonian,&
-       &                         load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
+                                 load_spin_hamiltonian,load_k_hamiltonian,gs_hamiltonian_type
   use m_initylmg,         only : initylmg
   use m_kg,               only : getph,mkkin,mkpwind_k,mknucdipmom_k,ph1d3d
   use m_kpts,             only : listkk, smpbz
@@ -62,10 +62,9 @@ module m_orbmag
   use m_paw_sphharm,      only : initylmr,setsym_ylm
   use m_pawtab,           only : pawtab_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
-       &                         pawcprj_get, pawcprj_put, pawcprj_getdim, pawcprj_set_zero
+                                 pawcprj_get, pawcprj_put, pawcprj_getdim, pawcprj_set_zero
   use m_symtk,            only : symatm
   use m_time,             only : timab
-
 
   implicit none
 
@@ -188,13 +187,6 @@ CONTAINS  !=====================================================================
 
   subroutine destroy_orbmag(dtorbmag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_orbmag'
-!End of the abilint section
-
     implicit none
 
     !Arguments ------------------------------------
@@ -296,13 +288,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
      &                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
      &                     rprimd,symrec,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initorbmag'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -345,6 +330,10 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 
   call timab(1001,1,tsec)
   call timab(1002,1,tsec)
+
+  spaceComm=mpi_enreg%comm_cell
+  nproc=xmpi_comm_size(spaceComm)
+  me=xmpi_comm_rank(spaceComm)
 
   !save the current value of nspinor
   dtorbmag%nspinor = dtset%nspinor
@@ -399,7 +388,7 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
   call timab(1003,1,tsec)
 
   call listkk(rdum,gmet,dtorbmag%indkk_f2ibz,dtset%kptns,dtorbmag%fkptns,dtset%nkpt,&
-       & dtorbmag%fnkpt,dtset%nsym,1,dtset%symafm,symrec,0,use_symrec=.True.)
+       & dtorbmag%fnkpt,dtset%nsym,1,dtset%symafm,symrec,0, spaceComm, use_symrec=.True.)
 
   call timab(1003,2,tsec)
   call timab(1004,1,tsec)
@@ -455,9 +444,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
   ! !------------------------------------------------------------------------------
   ! !------------------- Compute variables related to MPI // ----------------------
   ! !------------------------------------------------------------------------------
-  spaceComm=mpi_enreg%comm_cell
-  nproc=xmpi_comm_size(spaceComm)
-  me=xmpi_comm_rank(spaceComm)
 
   if (nproc==1) then
      dtorbmag%fmkmem = dtorbmag%fnkpt
@@ -939,13 +925,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
      &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
      &            symrec,usecprj,usepaw,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chern_number'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -1376,13 +1355,6 @@ end subroutine chern_number
 subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'orbmag'
-!End of the abilint section
 
  implicit none
 
@@ -2126,13 +2098,6 @@ end subroutine orbmag
 
 subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
      & istwf_k,kg,mcg,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ctocprjb'
-!End of the abilint section
 
   implicit none
 

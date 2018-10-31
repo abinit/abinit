@@ -78,13 +78,6 @@ CONTAINS  !===========================================================
 
 subroutine prmat (mat, ni, nj, mi, unitm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prmat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -163,13 +156,6 @@ end subroutine prmat
 !! SOURCE
 
 subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znucl,nunit,realrecip)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printxsf'
-!End of the abilint section
 
  implicit none
 
@@ -302,13 +288,6 @@ end subroutine printxsf
 
 subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_fofr_ri'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------------------
@@ -396,13 +375,6 @@ end subroutine print_fofr_ri
 
 
 subroutine print_fofr_xyzri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,conv_fact,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_fofr_xyzri'
-!End of the abilint section
 
  implicit none
 
@@ -498,13 +470,6 @@ end subroutine print_fofr_xyzri
 
 
 subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xcart,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_fofr_cube'
-!End of the abilint section
 
  implicit none
 
@@ -612,13 +577,6 @@ end subroutine print_fofr_cube
 
 subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 & nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printbxsf'
-!End of the abilint section
 
  implicit none
 
@@ -866,13 +824,6 @@ end subroutine printbxsf
 
 subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 & nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printvtk'
-!End of the abilint section
 
  implicit none
 

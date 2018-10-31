@@ -78,13 +78,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  use m_cgtools, only : dotprod_g
  use iso_c_binding
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lobpcgwf2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -121,7 +114,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp), pointer :: eig_ptr(:,:) => NULL()
  real(dp), pointer :: resid_ptr(:,:) => NULL()
 
- ! Stupid things for NC
+ ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
  integer :: iband, shift
@@ -309,13 +302,6 @@ end subroutine lobpcgwf2
 #ifdef HAVE_OPENMP
    use omp_lib
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghc_gsc'
-!End of the abilint section
-
   type(xgBlock_t), intent(inout) :: X
   type(xgBlock_t), intent(inout) :: AX
   type(xgBlock_t), intent(inout) :: BX
@@ -384,13 +370,6 @@ end subroutine lobpcgwf2
 
  subroutine precond(W)
    use m_xg, only : xg_t, xgBlock_colwiseMul
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precond'
-!End of the abilint section
-
    type(xgBlock_t), intent(inout) :: W
    integer :: ispinor
    !integer :: cplx

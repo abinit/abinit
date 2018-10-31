@@ -129,13 +129,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 &                 prtvol,sij_opt,tim_getghc,type_calc,&
 &                 kg_fft_k,kg_fft_kp,select_k) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -298,8 +291,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !  fourwf can only process with one value of istwf_k
    if (.not.k1_eq_k2) then
-     msg='vlocal (fourwf) cannot be computed with k/=k^prime!'
-     MSG_BUG(msg)
+     MSG_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
 !  Eventually adjust load balancing for FFT (by changing FFT distrib)
@@ -368,12 +360,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if (have_to_reequilibrate) then
          call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
+&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
        else
          call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
        end if
 
@@ -383,7 +375,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ABI_ALLOCATE(ghc1,(2,npw_k2*ndat))
          call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
          do idat=1,ndat
            do ipw =1, npw_k2
@@ -397,7 +389,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ABI_ALLOCATE(ghc2,(2,npw_k2*ndat))
          call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &         use_gpu_cuda=gs_ham%use_gpu_cuda)
          do idat=1,ndat
            do ipw=1,npw_k2
@@ -423,7 +415,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (nspinor1TreatedByThisProc) then
        call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
 !    ghc2=v22*phi2
@@ -431,7 +423,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (nspinor2TreatedByThisProc) then
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
      ABI_DEALLOCATE(vlocal_tmp)
@@ -449,7 +441,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (nspinor1TreatedByThisProc) then
        call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
 !    ghc4=(re(v12)+im(v12))*phi2
@@ -463,7 +455,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        end do
        call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
      ABI_DEALLOCATE(vlocal_tmp)
@@ -810,13 +802,6 @@ end subroutine getghc
 subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mpi_enreg,&
 &                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vxctaulocal,use_gpu_cuda)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghc_mGGA'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -896,7 +881,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
    call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work,gbound_k,gbound_k,&
 &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&   mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&   tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
@@ -908,7 +893,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
    do idir=1,3
      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
@@ -968,7 +953,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
@@ -980,7 +965,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      do idir=1,3
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&      tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
@@ -1028,7 +1013,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
@@ -1040,7 +1025,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      do idir=1,3
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&      tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
@@ -1112,13 +1097,6 @@ end subroutine getghc_mGGA
 
 subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 &                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgsc'
-!End of the abilint section
 
  implicit none
 
@@ -1315,13 +1293,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_OPENMP
    use omp_lib
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multithreaded_getghc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1458,13 +1429,6 @@ end subroutine multithreaded_getghc
 !! SOURCE
 
 subroutine getghcnd(cwavef,ghcnd,gs_ham,my_nspinor,ndat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getghcnd'
-!End of the abilint section
 
  implicit none
 

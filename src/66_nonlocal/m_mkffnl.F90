@@ -187,13 +187,6 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
 &                   kg,kpg,kpt,lmnmax,lnmax,mpsang,mqgrid,nkpg,npw,ntypat,pspso,&
 &                   qgrid,rmet,usepaw,useylm,ylm,ylm_gr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkffnl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

@@ -37,7 +37,6 @@ module m_dfpt_vtowfk
  use m_rf2
  use m_rf2_init,         only : rf2_init
 
- use m_dtfil,        only : status
  use m_time,         only : timab
  use m_pawrhoij,     only : pawrhoij_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_put, pawcprj_free, pawcprj_get, pawcprj_copy, pawcprj_zaxpby
@@ -189,13 +188,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 & n4,n5,n6,occ_k,pawrhoij1,prtvol,psps,resid_k,rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,&
 & ddk_f,wtk_k,nlines_done,cg1_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_vtowfk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -293,7 +285,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  end if
 
 !Read the npw and kg records of wf files
- call status(0,dtfil%filstat,iexit,level,'before WffRead')
  test_ddk=0
  if ((ipert==natom+2.and.sum((dtset%qptn(1:3))**2)<1.0d-7.and.&
 & (dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
@@ -688,13 +679,6 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,eig1,&
 &               iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,&
 &               nspinor,timcount,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'full_active_wf1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -834,13 +818,6 @@ end subroutine full_active_wf1
 subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fermie1,ghc,iband, &
 &          ibgq,icgq,istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband,npw1,nspinor,occ,rocceig,timcount,&
 &          usepaw,wf_corrected)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'corrmetalwf1'
-!End of the abilint section
 
  implicit none
 

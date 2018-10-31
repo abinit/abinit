@@ -110,13 +110,6 @@ CONTAINS
 
  subroutine init_invovl(nkpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_invovl'
-!End of the abilint section
-
   integer, intent(in) :: nkpt
   integer :: ikpt
 
@@ -149,13 +142,6 @@ CONTAINS
 !!
 !! SOURCE
  subroutine destroy_invovl(nkpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_invovl'
-!End of the abilint section
 
   integer, intent(in) :: nkpt
   integer :: ikpt
@@ -200,13 +186,6 @@ CONTAINS
 subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_invovl'
-!End of the abilint section
-
  implicit none
 
  type(gs_hamiltonian_type),intent(in) :: ham
@@ -464,13 +443,6 @@ end subroutine make_invovl
 
  subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'apply_invovl'
-!End of the abilint section
-
  implicit none
 
  ! args
@@ -620,13 +592,6 @@ end subroutine apply_invovl
 subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj)
 
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_inner'
-!End of the abilint section
-
  implicit none
 
  integer,intent(in) :: ndat,cplx
@@ -739,13 +704,6 @@ end subroutine solve_inner
 subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y)
 
   use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'apply_block'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx

@@ -24,12 +24,6 @@
 subroutine xmpi_min_intv(xval,xmin,spaceComm,ier)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_min_intv'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -86,12 +80,6 @@ end subroutine xmpi_min_intv
 !! SOURCE
 subroutine xmpi_min_dpv(xval,xmin,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_min_dpv'
-!End of the abilint section
 
  implicit none
 

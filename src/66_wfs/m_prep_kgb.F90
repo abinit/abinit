@@ -100,13 +100,6 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlxc,gwavef,swavef,lambda,blocksize,&
 &                      mpi_enreg,prtvol,sij_opt,cpopt,cwaveprj,&
 &                      already_transposed) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_getghc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -616,13 +609,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 &                      blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc,&
 &                      tim_nonlop,cwavef,gvnlc,already_transposed)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_nonlop'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -929,13 +915,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &          mpi_enreg,nband_k,ndat,ngfft,npw_k,n4,n5,n6,occ_k,option_fourwf,ucvol,wtk,&
 &          bandfft_kpt_tab,use_gpu_cuda) ! Optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_fourwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1104,12 +1083,12 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       cwavef_fft,2*recvcount_fft, 2*recvdisp_fft, mpi_enreg%comm_fft,ier)
        call fourwf(1,rhoaug,cwavef_fft,dummy,wfraug,gbound_,gbound_,&
 &       istwf_k_,kg_k_fft,kg_k_fft,mgfft,mpi_enreg,1,&
-&       ngfft,npw_fft,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       ngfft,npw_fft,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=use_gpu_cuda_)
      else
        call fourwf(1,rhoaug,cwavef_alltoall2,dummy,wfraug,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,1,&
-&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=use_gpu_cuda_)
      end if
      if (option_fourwf==0.and.nproc_fft>1) then
@@ -1199,14 +1178,14 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &           cwavef_fft(:,(npw_fft*(iibandpp-1))+1:(npw_fft*iibandpp)), &
 &           dummy,wfraug_ptr,gbound_,gbound_,&
 &           istwf_k_,kg_k_fft,kg_k_fft,mgfft,mpi_enreg,1,&
-&           ngfft,npw_fft,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&           ngfft,npw_fft,1,n4,n5,n6,option_fourwf,tim_fourwf,weight,weight,&
 &           use_gpu_cuda=use_gpu_cuda_)
          else
            call fourwf(1,rhoaug,&
 &           cwavef_alltoall1(:,(ndatarecv*(iibandpp-1))+1:(ndatarecv*iibandpp)),&
 &           dummy,wfraug_ptr,gbound_,gbound_,&
 &           istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,1,&
-&           ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&           ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,&
 &           tim_fourwf,weight,weight)
          end if
          if (option_fourwf==0.and.nproc_fft>1) then
@@ -1307,7 +1286,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       ewavef_alltoall_sym(:,(ndatarecv_tot*(iibandpp-1))+1:(ndatarecv_tot*iibandpp)),&
 &       dummy,wfraug_ptr,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,1,&
-&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,&
 &       tim_fourwf,weight1,weight2)
        if (option_fourwf==0) then
          if (modulo(bandpp,2)==0) then
@@ -1435,13 +1414,6 @@ subroutine prep_wavef_sym_do(mpi_enreg,bandpp,nspinor,&
 &     recvcounts_sym,rdispls_sym,&
 &     ewavef_alltoall_sym,&
 &     index_wavef_send)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_wavef_sym_do'
-!End of the abilint section
 
  implicit none
 
@@ -1712,13 +1684,6 @@ subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
 &     gwavef_alltoall_sym,&
 &     index_wavef_send)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_wavef_sym_undo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1941,13 +1906,6 @@ subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
                              recvcounts,rdispls,&
                              index_wavef_band)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_index_wavef_bandpp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2033,13 +1991,6 @@ end subroutine prep_index_wavef_bandpp
 !! SOURCE
 
 subroutine prep_sort_wavef_spin(nproc_band,nspinor,ndatarecv,recvcounts,rdispls,index_wavef)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prep_sort_wavef_spin'
-!End of the abilint section
 
  implicit none
 

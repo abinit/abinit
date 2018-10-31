@@ -57,7 +57,6 @@ MODULE m_io_kss
  use m_fftcore,          only : get_kg, sphere
  use m_fft,              only : fftpac
  use m_crystal ,         only : crystal_t
- use m_crystal_io,       only : crystal_ncwrite
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_kg,               only : mkkin, mkkpg
  use m_ksdiago,          only : ksdiago, init_ddiago_ctl, ddiago_ctl_type
@@ -122,13 +121,6 @@ CONTAINS  !===========================================================
 
 subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2,tnons2,occ,gbig,shlim,&
 &  crystal,Dtset,Hdr,Psps,iomode,kss_unt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_kss_header'
-!End of the abilint section
 
  implicit none
 
@@ -282,7 +274,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
    ! FIXME: Check symmorphi trick and crystal%symrel!
    ! We currently use the dataset symmetries, as defined in the Hdr structure
    ! instead of the symmetries recomputed in outkss.
-   NCF_CHECK(crystal_ncwrite(crystal, kss_unt))
+   NCF_CHECK(crystal%ncwrite(kss_unt))
 
    ! Defined G-vectors and wavefunctions.
    call wfk_ncdef_dims_vars(kss_unt, my_hdr, fform, iskss=.True.)
@@ -377,13 +369,6 @@ end subroutine write_kss_header
 !! SOURCE
 
 subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_vkb'
-!End of the abilint section
 
  implicit none
 
@@ -516,13 +501,6 @@ end subroutine write_vkb
 subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,&
 &          nbandksseff,natom,Psps,ene_k,occ_k,rprimd,gbig,wfg,Cprjnk_k,iomode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_kss_wfgk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -653,13 +631,6 @@ end subroutine write_kss_wfgk
 
 subroutine k2gamma_centered(kpoint,npw_k,istwf_k,ecut,kg_k,kss_npw,nspinor,nbandksseff,ngfft,gmet,&
 &  MPI_enreg,gbig,ug,icg,cg,eig_vec)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k2gamma_centered'
-!End of the abilint section
 
  implicit none
 
@@ -853,13 +824,6 @@ end subroutine k2gamma_centered
 
 subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,prtvol,npwkss,gvec_kss,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_gvec_kss'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1021,13 +985,6 @@ end subroutine make_gvec_kss
 subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_ij, mpi_enreg, &
   rprimd, xred, eigen, npwarr, kg, ylm, ngfftc, nfftc, ngfftf, nfftf, vtrial,&
   electronpositron) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gshgg_mkncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -1465,13 +1422,6 @@ end subroutine gshgg_mkncwrite
 
 subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kss_calc_vkb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1713,13 +1663,6 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 & prtvol,Psps,rprimd,vtrial,xred,cg,usecprj,Cprj,eigen,ierr)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outkss'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2565,13 +2508,6 @@ contains
 
 subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,ntypat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memkss'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2702,13 +2638,6 @@ end subroutine memkss
 !! SOURCE
 
 subroutine dsksta(ishm,usepaw,nbandkss,mpsang,natom,ntypat,npwkss,nkpt,nspinor,nsppol,nsym2,dimlmn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dsksta'
-!End of the abilint section
 
  implicit none
 

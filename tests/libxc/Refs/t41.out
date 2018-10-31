@@ -673,9 +673,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.5677 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.8643 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :  -0.3750 -0.3750  0.0000
+   Minimum direct gap =   5.5677 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.8643 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :  -0.3750 -0.3750  0.0000
  SIGMA fundamental parameters:
  Hartree-Fock
  number of plane-waves for SigmaX                  137
@@ -838,9 +838,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.5677 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.8643 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :  -0.3750 -0.3750  0.0000
+   Minimum direct gap =   5.5677 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.8643 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :  -0.3750 -0.3750  0.0000
  SIGMA fundamental parameters:
  Hartree-Fock
  number of plane-waves for SigmaX                  137
@@ -1003,9 +1003,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.996     151.959
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.5677 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   3.8643 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :  -0.3750 -0.3750  0.0000
+   Minimum direct gap =   5.5677 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.8643 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :  -0.3750 -0.3750  0.0000
  SIGMA fundamental parameters:
  Hartree-Fock
  number of plane-waves for SigmaX                  137

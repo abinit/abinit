@@ -44,13 +44,6 @@ CONTAINS
 
 DOUBLE PRECISION FUNCTION Stat_average(tab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Stat_average'
-!End of the abilint section
-
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: tab
   !INTEGER :: sizet
 
@@ -62,13 +55,6 @@ END FUNCTION Stat_average
 !!***
 
 DOUBLE PRECISION FUNCTION Stat_variance(tab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Stat_variance'
-!End of the abilint section
 
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: tab
   INTEGER                                    :: sizet
@@ -94,13 +80,6 @@ END FUNCTION Stat_variance
 !!***
 
 DOUBLE PRECISION FUNCTION Stat_coVariance(tab1, tab2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Stat_coVariance'
-!End of the abilint section
 
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: tab1
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: tab2
@@ -134,13 +113,6 @@ END FUNCTION Stat_coVariance
 !!***
 
 DOUBLE PRECISION FUNCTION Stat_deviation(tab1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Stat_deviation'
-!End of the abilint section
 
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN) :: tab1
 
@@ -181,13 +153,6 @@ END FUNCTION Stat_deviation
 
 SUBROUTINE Stat_linearReg(tabX, tabY, a, b, R)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Stat_linearReg'
-!End of the abilint section
-
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN ) :: tabX
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN ) :: tabY
   DOUBLE PRECISION              , INTENT(OUT) :: a
@@ -237,13 +202,6 @@ END SUBROUTINE Stat_linearReg
 
 SUBROUTINE Stat_powerReg(tabX, tabY, a, b, R)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Stat_powerReg'
-!End of the abilint section
-
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN ) :: tabX
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN ) :: tabY
   DOUBLE PRECISION              , INTENT(OUT) :: a
@@ -284,13 +242,6 @@ END SUBROUTINE Stat_powerReg
 !!***
 
 DOUBLE PRECISION FUNCTION Stat_simpson(func, a, b, N)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Stat_simpson'
-!End of the abilint section
 
   DOUBLE PRECISION, DIMENSION(:), POINTER :: func     !vz_i
   DOUBLE PRECISION                       , INTENT(IN) :: a

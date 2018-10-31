@@ -171,13 +171,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          atvshift,fatvshift,natvshift,nucdipmom,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1094,13 +1087,6 @@ end subroutine pawdij
 
 subroutine pawdijhartree(cplex_rf,dijhartree,nspden,pawrhoij,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijhartree'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1218,13 +1204,6 @@ end subroutine pawdijhartree
 
 subroutine pawdijxc(cplex_rf,cplex_dij,dijxc,ndij,nspden,nsppol,&
 &                   pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijxc'
-!End of the abilint section
 
  implicit none
 
@@ -1515,13 +1494,6 @@ end subroutine pawdijxc
 !! SOURCE
 
 subroutine pawdijfock(cplex_rf,cplex_dij,dijfock_vv,dijfock_cv,hyb_mixing,hyb_mixing_sr,ndij,nspden,nsppol,pawrhoij,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijfock'
-!End of the abilint section
 
  implicit none
 
@@ -1819,13 +1791,6 @@ end subroutine pawdijfock
 subroutine pawdijxcm(cplex_rf,cplex_dij,dijxc,lmselect,ndij,nspden,nsppol,&
 &                    pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijxcm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2088,13 +2053,6 @@ subroutine pawdijhat(cplex_rf,cplex_dij,dijhat,gprimd,iatom,ipert,&
 &                    natom,ndij,ngrid,ngridtot,nspden,nsppol,pawang,pawfgrtab,&
 &                    pawtab,Pot,qphon,ucvol,xred,&
 &                    mpi_comm_grid) ! Optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijhat'
-!End of the abilint section
 
  implicit none
 
@@ -2405,13 +2363,6 @@ end subroutine pawdijhat
 
 subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijnd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2556,13 +2507,6 @@ end subroutine pawdijnd
 
 subroutine pawdijso(cplex_rf,cplex_dij,dijso,ndij,nspden,&
 &                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijso'
-!End of the abilint section
 
  implicit none
 
@@ -2763,13 +2707,6 @@ end subroutine pawdijso
 
 subroutine pawdiju(cplex_rf,cplex_dij,dijpawu,ndij,nsppol,pawtab,vpawu,&
 &                  natvshift,atvshift,fatvshift) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdiju'
-!End of the abilint section
 
  implicit none
 
@@ -2991,13 +2928,6 @@ end subroutine pawdiju
 
 subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab,diju_im)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdiju_euijkl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -3164,13 +3094,6 @@ end subroutine pawdiju_euijkl
 
 subroutine pawdijexxc(cplex_rf,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
 &                      pawang,pawrad,pawtab,vpawx,vxc_ex)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijexxc'
-!End of the abilint section
 
  implicit none
 
@@ -3481,13 +3404,6 @@ end subroutine pawdijexxc
 subroutine pawdijfr(cplex_rf,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,ntypat,&
 &          option,paw_ij1,pawang,pawfgrtab,pawrad,pawtab,qphon,rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijfr'
-!End of the abilint section
 
  implicit none
 
@@ -4120,13 +4036,6 @@ end subroutine pawdijfr
  subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
 &                    pawprtvol,pawtab,vpawu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpupot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -4413,13 +4322,6 @@ end subroutine pawdijfr
 
  subroutine pawxpot(ndij,pawprtvol,pawrhoij,pawtab,vpawx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxpot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -4576,13 +4478,6 @@ end subroutine pawdijfr
 subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 &                 paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec, &
 &                 mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij'
-!End of the abilint section
 
  implicit none
 
@@ -5240,13 +5135,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  contains
    function symdij_symcart(aprim,bprim,symred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij_symcart'
-!End of the abilint section
-
    implicit none
    real(dp) :: symdij_symcart(3,3)
    integer,intent(in) :: symred(3,3)
@@ -5321,13 +5209,6 @@ end subroutine symdij
 subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
 &                     paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij_all'
-!End of the abilint section
 
  implicit none
 
@@ -5474,13 +5355,6 @@ end subroutine symdij_all
 !! SOURCE
 
 subroutine pawdij_gather(dij_in,dij_out,comm_atom,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij_gather'
-!End of the abilint section
 
  implicit none
 
@@ -5647,13 +5521,6 @@ end subroutine pawdij_gather
 
 subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 &           test_value,title_msg,unit,Ha_or_eV,opt_prtvol,mode_paral) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij_print_dij'
-!End of the abilint section
 
  implicit none
 

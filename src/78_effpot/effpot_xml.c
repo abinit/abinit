@@ -1131,7 +1131,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
 
     // read unit cell
     if (!xmlStrcmp(cur->name, (const xmlChar *)("unit_cell"))) {
-      printf("%s\n", cur->name);
+      //printf("%s\n", cur->name);
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       printf("unit_cell: %s\n", key);
       string2Array((char *)key, unitcell, &size);
@@ -1143,7 +1143,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     // read atoms
     if (!xmlStrcmp(cur->name, BAD_CAST "atom")) {
       (*natoms)++;
-      printf("%s\n", cur->name);
+      //printf("%s\n", cur->name);
       int ind_spin = -1;
       // mass
       key = xmlGetProp(cur, BAD_CAST "mass");
@@ -1241,20 +1241,21 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     fprintf(stderr, "Number of positions not equal to number of atoms.\n");
   }
   copyArraytoCArray(&spinat_array, spinat, &size);
-  if ((int)size / 3 != *nspins) {
-    fprintf(stderr, "Number of spinat not equal to number of magnetic atoms.\n");
-  }
+
+  //if ((int)size / 3 != *nspins) {
+  //  fprintf(stderr, "Number of spinat not equal to number of magnetic atoms.\n");
+  //}
   copyArraytoCArray(&gyroratio_array, gyroratios, &size);
-  if ((int)size != *nspins) {
-    fprintf(stderr,
-            "Number of gyroratios not equal to number of magnetic atoms");
-  }
+  //if ((int)size != *nspins) {
+  //  fprintf(stderr,
+  //          "Number of gyroratios not equal to number of magnetic atoms");
+  //}
 
   copyArraytoCArray(&damping_factor_array, damping_factors, &size);
-  if ((int)size != *nspins) {
-    fprintf(stderr,
-            "Number of damping_factors not equal to number of magnetic atoms");
-  }
+  //if ((int)size != *nspins) {
+  //  fprintf(stderr,
+  //          "Number of damping_factors not equal to number of magnetic atoms");
+  //}
   //
   //
   freeIntArray(&index_spin_array);
@@ -1855,4 +1856,6 @@ void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
 	fprintf(stderr, "Cannot read xml file. Please install abinit with libxml enabled.\n");
 	exit(1);
 }
+
+
 #endif

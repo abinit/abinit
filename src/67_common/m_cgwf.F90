@@ -160,13 +160,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
 &                subvnlx,tolrde,tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -506,7 +499,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
      end if
 
      if (prtvol==-level) then
-       write(message,'(a,f14.6)')' cgwf : xnorm = ',xnorm
+       write(message,'(a,f14.6)')' cgwf: xnorm = ',xnorm
        call wrtout(std_out,message,'PERS')
      end if
 
@@ -556,7 +549,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! === COMPUTE THE RESIDUAL ===
 
          ! Compute lambda = <C|H|C> or <C|(H-zshift)**2|C>
-
          call dotprod_g(chc,doti,istwf_k,npw*nspinor,1,cwavef,ghc,me_g0,mpi_enreg%comm_spinorfft)
          lam0=chc
 
@@ -616,7 +608,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          call sqnorm_g(resid(iband),istwf_k,npw*nspinor,vresid,me_g0,mpi_enreg%comm_fft)
 
          if (prtvol==-level) then
-           write(message,'(a,i0,2f14.6)')' cgwf : iline,eval,resid = ',iline,eval,resid(iband)
+           write(message,'(a,i0,2f14.6)')' cgwf: iline,eval,resid = ',iline,eval,resid(iband)
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -628,7 +620,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (resid(iband)<tolwfr) then
            if (prtvol>=10) then
              write(message, '(a,i4,a,i2,a,es12.4)' ) &
-&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations : resid =',resid(iband)
+&             ' cgwf: band ',iband,' converged after ',iline,' line minimizations: resid =',resid(iband)
              call wrtout(std_out,message,'PERS')
            end if
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -637,7 +629,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
          ! If user require exiting the job, stop line minimisations
          if (quit==1) then
-           write(message, '(a,i0)' )' cgwf : user require exiting => skip update of band ',iband
+           write(message, '(a,i0)' )' cgwf: user require exiting => skip update of band ',iband
            call wrtout(std_out,message,'PERS')
 
            nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
@@ -791,8 +783,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            gamma=dotgg/dotgp
            dotgp=dotgg
 
-           if(prtvol==-level)then
-             write(message,'(a,2es16.6)')' cgwf : dotgg,gamma = ',dotgg,gamma
+           if (prtvol==-level)then
+             write(message,'(a,2es16.6)')' cgwf: dotgg,gamma = ',dotgg,gamma
              call wrtout(std_out,message,'PERS')
            end if
 
@@ -894,7 +886,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          dhd=dhd*xnorm**2
 
          if(prtvol==-level)then
-           write(message,'(a,3f14.6)') 'cgwf : chc,dhc,dhd=',chc,dhc,dhd
+           write(message,'(a,3f14.6)') 'cgwf: chc,dhc,dhd=',chc,dhc,dhd
            call wrtout(std_out,message,'PERS')
          end if
 
@@ -1206,7 +1198,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
      ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
      if (xmpi_paral==0 .and. mpi_enreg%paral_kgb==0 .and. iband==nband .and. prtvol/=0) then
-       write(message,'(a,i0)')' cgwf : number of one-way 3D ffts skipped in cgwf until now =',nskip
+       write(message,'(a,i0)')' cgwf: number of one-way 3D ffts skipped in cgwf until now =',nskip
        call wrtout(std_out,message,'PERS')
      end if
 
@@ -1401,13 +1393,6 @@ end subroutine cgwf
 subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 &  efield_dot,iline,nkpt,nstr,hel,phase_end,phase_init,sdeg,sinth,thetam)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linemin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1598,12 +1583,11 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
      !write(101,'(i6,3f16.9)')igrid,theta,esave(igrid),e1save(igrid)
    end do
    write(message,'(6a)')ch10,&
-&   ' linemin : ERROR - ',ch10,&
-&   '  Cannot find theta_min. No minimum exists : the field is too strong ! ',ch10,&
+&   ' linemin: ERROR - ',ch10,&
+&   '  Cannot find theta_min. No minimum exists: the field is too strong ! ',ch10,&
 &   '  Try decreasing difference between D and 4 Pi P by changing structure or D (only for fixed D calculation)'
    call wrtout(std_out,message,'COLL')
-   message = ' linemin cannot find theta_min'
-   MSG_ERROR(message)
+   MSG_ERROR('linemin cannot find theta_min')
  end if
 
 !Compute the mimum of E(theta)
@@ -1636,7 +1620,6 @@ subroutine linemin(bcut,chc,costh,detovc,detovd,dhc,dhd,dphase_aux1,&
 !DEBUG
 !write(std_out,*)'linemin : thetam = ',thetam
 !ENDDEBUG
-
 
 !---------------------------------------------------------------------------
 
@@ -1725,13 +1708,6 @@ end subroutine linemin
 
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
 &    hel,nkpt,nstr,sdeg,theta)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'etheta'
-!End of the abilint section
 
  implicit none
 
@@ -1862,13 +1838,6 @@ end subroutine etheta
 subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
 &                    nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mksubham'
-!End of the abilint section
 
  implicit none
 
@@ -2107,13 +2076,6 @@ end subroutine mksubham
 subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield,grad_berry,&
 &                          gs_hamk,iband,icg,ikpt,isppol,mband,mcg,mcgq,mkgq,mpi_enreg,mpw,natom,nkpt,&
 &                          npw,npwarr,nspinor,nsppol,pwind,pwind_alloc,pwnsfac,pwnsfacq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_grad_berry'
-!End of the abilint section
 
   implicit none
 

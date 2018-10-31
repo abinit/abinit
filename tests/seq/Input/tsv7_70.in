@@ -57,7 +57,6 @@ berryopt1 -1       rfdir    1 1 1
 
 berryopt2  4       efield2   0.0001  0.0000  0.0000    getwfk2  1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

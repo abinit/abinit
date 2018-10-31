@@ -82,13 +82,6 @@ CONTAINS !===========================================================
 
 subroutine atompaw_shpfun(ll,mesh,norm,pawtab,shapefunc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atompaw_shpfun'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -210,13 +203,6 @@ end subroutine atompaw_shpfun
 
  subroutine atompaw_shapebes(al,ql,ll,rc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atompaw_shapebes'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -282,13 +268,6 @@ end subroutine atompaw_shapebes
 !! SOURCE
 
  subroutine atompaw_vhnzc(ncore,radmesh_core,vhnzc,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atompaw_vhnzc'
-!End of the abilint section
 
  implicit none
 
@@ -361,13 +340,6 @@ end subroutine atompaw_shapebes
 
  subroutine atompaw_dij0(indlmn,kij,lmnmax,ncore,opt_init,pawtab,&
 &                        radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atompaw_dij0'
-!End of the abilint section
 
  implicit none
 
@@ -569,13 +541,6 @@ end subroutine atompaw_shapebes
 
  subroutine atompaw_kij(indlmn,kij,lmnmax,ncore,opt_init,opt_vhnzc,pawtab, &
 &                       radmesh,radmesh_core,radmesh_vloc,vhtnzc,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atompaw_kij'
-!End of the abilint section
 
  implicit none
 

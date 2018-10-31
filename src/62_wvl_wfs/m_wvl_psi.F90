@@ -92,13 +92,6 @@ subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xc
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : hpsitopsi, calculate_energy_and_gradient
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_hpsitopsi'
-!End of the abilint section
-
   implicit none
 
 !Arguments -------------------------------
@@ -235,13 +228,6 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: psitohpsi, KS_POTENTIAL, total_energies
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_psitohpsi'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -366,13 +352,6 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: nonlocal_forces
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nl_gradient'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -471,13 +450,6 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: CalculateTailCorrection
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_tail_corrections'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

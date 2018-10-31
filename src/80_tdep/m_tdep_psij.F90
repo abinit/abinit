@@ -35,13 +35,6 @@ contains
 !====================================================================================================
 subroutine tdep_calc_psijfcoeff(CoeffMoore,InVar,proj,Shell3at,Sym,ucart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_psijfcoeff'
-!End of the abilint section
-
   implicit none
 
   type(Input_Variables_type),intent(in) :: InVar
@@ -138,13 +131,6 @@ end subroutine tdep_calc_psijfcoeff
 
 !=====================================================================================================
 subroutine tdep_calc_psijtot(distance,InVar,ntotcoeff,proj,Psij_coeff,Psij_ref,Shell3at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_psijtot'
-!End of the abilint section
 
   implicit none
 
@@ -274,13 +260,6 @@ end subroutine tdep_calc_psijtot
 !=====================================================================================================
 subroutine tdep_calc_gruneisen(distance,Eigen2nd,Gruneisen,iqpt,InVar,Lattice,Psij_ref,qpt_cart,Rlatt_cart,Shell3at,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_gruneisen'
-!End of the abilint section
-
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -368,13 +347,6 @@ end subroutine tdep_calc_gruneisen
 !=====================================================================================================
 subroutine tdep_build_psij333(isym,InVar,Psij_ref,Psij_333,Sym,trans) 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_build_psij333'
-!End of the abilint section
-
   implicit none
 
   type(Symetries_Variables_type),intent(in) :: Sym
@@ -428,13 +400,6 @@ end subroutine tdep_build_psij333
 
 !=====================================================================================================
 subroutine tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref,Rlatt_cart,Shell3at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_alpha_gamma'
-!End of the abilint section
 
   implicit none
 
@@ -627,13 +592,6 @@ end subroutine tdep_calc_alpha_gamma
 
 !=====================================================================================================
 subroutine tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rlatt_cart,Shell3at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_write_gruneisen'
-!End of the abilint section
 
   implicit none
 

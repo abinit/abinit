@@ -226,13 +226,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
 & add_tfw) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -894,7 +887,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    ABI_DEALLOCATE(rhowfr)
    ABI_DEALLOCATE(rhowfg)
    rhor(:,:)=rhor(:,:)+nhat(:,:)
-   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
 
  end if
 
@@ -957,13 +950,6 @@ end subroutine energy
 !! SOURCE
 
 subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,resid_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkresi'
-!End of the abilint section
 
  implicit none
 

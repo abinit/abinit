@@ -143,13 +143,6 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
 &          pawang_sym,pawnhat,pawrhoij0,rhog) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmkrho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -263,7 +256,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !  Compute compensated pseudo density in reciprocal space
    if (present(rhog)) then
-     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,1,pawfgr%ngfft,0)
    end if
  end if
 
@@ -349,13 +342,6 @@ end subroutine pawmkrho
  subroutine denfgr(atindx1,gmet,spaceComm_in,my_natom,natom,nattyp,ngfft,nhat,nspinor,nsppol,nspden,ntypat, &
 & pawfgr,pawrad,pawrhoij,pawtab,prtvol,rhor,rhor_paw,rhor_n_one,rhor_nt_one,rprimd,typat,ucvol,xred,&
 & abs_n_tilde_nt_diff,znucl,mpi_atmtab,comm_atom) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'denfgr'
-!End of the abilint section
 
  implicit none
 

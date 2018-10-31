@@ -102,13 +102,6 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,&
  use m_abicore
  use m_errors
  use m_sort
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symkpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------

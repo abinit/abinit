@@ -126,13 +126,6 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &          pawgrnhat,pawnhat,pawrhoij,pawrhoij0,pawtab,qphon,rprimd,ucvol,usewvl,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_wvl,me_g0,paral_kgb,distribfft) ! optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmknhat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -597,9 +590,9 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 !  do FFT
    ABI_ALLOCATE(work,(2,nfft))
    do ispden=1,min(2,nspden)
-     call fourdp(cplex,work,pawnhat(:,ispden),-1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,pawnhat(:,ispden),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,2,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,pawnhat(:,ispden),+1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,pawnhat(:,ispden),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(work)
 !  Destroy fake mpi_enreg
@@ -684,13 +677,6 @@ end subroutine pawmknhat
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmknhat_psipsi'
-!End of the abilint section
 
  implicit none
 
@@ -1032,9 +1018,9 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    ABI_ALLOCATE(work,(2,nfft))
    cplex=2
    do isp1=1,MIN(2,nspinor**2)
-     call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,cplex,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(work)
 !  Destroy fake mpi_enreg
@@ -1102,13 +1088,6 @@ end subroutine pawmknhat_psipsi
 subroutine pawnhatfr(ider,idir,ipert,my_natom,natom,nspden,ntypat,&
 &                    pawang,pawfgrtab,pawrhoij,pawtab,rprimd, &
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawnhatfr'
-!End of the abilint section
 
  implicit none
 
@@ -1465,13 +1444,6 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 &                    pawang,pawtab,ph3d_diel,typat,wfprod,wfraug, &
 &                    mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawsushat'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1496,7 +1468,7 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
 !Local variables ---------------------------------------
 !scalars
  integer :: cplex,iatm,iatom,iatom_tot,ibsp1,ibsp2,ierr,il,ilmn,ils,ilslm,ipw
- integer :: itypat,j0lmn,jlmn,klm,klmn,lmax,lmin,mm,my_comm_atom,my_comm_fft,my_natom,paral_kgb_fft,tim_fourwf
+ integer :: itypat,j0lmn,jlmn,klm,klmn,lmax,lmin,mm,my_comm_atom,my_comm_fft,my_natom,tim_fourwf
  real(dp) :: phil1,phil2,sgn,weight_dum,wf1,wf2
  logical :: my_atmtab_allocated,parity,paral_atom
  type(distribfft_type),pointer :: my_distribfft
@@ -1647,16 +1619,18 @@ subroutine pawsushat(atindx,cprj_k,gbound_diel,gylmg_diel,iband1,iband2,ispinor1
    ABI_DATATYPE_DEALLOCATE(mpi_enreg_fft%distribfft)
    if (present(comm_fft)) then
      call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
-     my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
+     my_comm_fft=comm_fft
+     mpi_enreg_fft%paral_kgb = paral_kgb
    else
-     my_comm_fft=xmpi_comm_self;paral_kgb_fft=0;
+     my_comm_fft=xmpi_comm_self
+     mpi_enreg_fft%paral_kgb = 0
      mpi_enreg_fft%distribfft => my_distribfft
    end if
 !  do FFT
    ABI_ALLOCATE(wfraug_paw,(2,ndiel4,ndiel5,ndiel6))
    call fourwf(1,dummy,wfprod_paw,dummy,wfraug_paw,gbound_diel,gbound_diel,&
 &   istwf_k,kg_diel,kg_diel,mgfftdiel,mpi_enreg_fft,1,ngfftdiel,1,npwdiel,&
-&   ndiel4,ndiel5,ndiel6,0,paral_kgb_fft,tim_fourwf,weight_dum,weight_dum)
+&   ndiel4,ndiel5,ndiel6,0,tim_fourwf,weight_dum,weight_dum)
    wfraug(:,:,:,:)=wfraug(:,:,:,:)+wfraug_paw(:,:,:,:)
    ABI_DEALLOCATE(wfraug_paw)
    call unset_mpi_enreg_fft(mpi_enreg_fft)
@@ -1740,13 +1714,6 @@ end subroutine pawsushat
 subroutine nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfft,ntypat,&
 & optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,typat,ucvol,xred, &
 & mpi_atmtab,comm_atom,comm_fft,distribfft,typord) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nhatgrid'
-!End of the abilint section
 
  implicit none
 
@@ -1987,13 +1954,6 @@ end subroutine nhatgrid
 subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 & nattyp,ntypat,n1,n1i,n2,n2i,n3,n3pi,optcut,optgr0,optgr1,optgr2,optrad,&
 & pawfgrtab,pawtab,psppar,rprimd,shift,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nhatgrid'
-!End of the abilint section
 
  implicit none
 

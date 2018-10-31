@@ -86,13 +86,6 @@ contains
 
 subroutine cont13(rank1,rank3,rank2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont13'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -177,13 +170,6 @@ end subroutine cont13
 !! SOURCE
 
 subroutine cont22(gxa,gmet,rank2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont22'
-!End of the abilint section
 
  implicit none
 
@@ -310,13 +296,6 @@ end subroutine cont22
 
 subroutine cont22cso(gxa1,gxa2,gmet,rank2c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont22cso'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -430,13 +409,6 @@ end subroutine cont22cso
 !! SOURCE
 
 subroutine cont22so(gxa1,gxa2,amet,rank2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont22so'
-!End of the abilint section
 
  implicit none
 
@@ -587,13 +559,6 @@ end subroutine cont22so
 
 subroutine cont24(gxa,rank4,rank2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont24'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -701,13 +666,6 @@ end subroutine cont24
 !! SOURCE
 
 subroutine cont3(gxa,gmet,rank2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont3'
-!End of the abilint section
 
  implicit none
 
@@ -945,13 +903,6 @@ end subroutine cont3
 
 subroutine cont33cso(gxa1,gxa2,gmet,rank2c)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont33cso'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1170,13 +1121,6 @@ end subroutine cont33cso
 !! SOURCE
 
 subroutine cont33so(gxa1,gxa2,gmet,amet,rank2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont33so'
-!End of the abilint section
 
  implicit none
 
@@ -1448,13 +1392,6 @@ end subroutine cont33so
 
 subroutine cont35(gxa,rank5,rank2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cont35'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1615,13 +1552,6 @@ end subroutine cont35
 !! SOURCE
 
 subroutine metcon(rank,gmet,aa,bb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metcon'
-!End of the abilint section
 
  implicit none
 
@@ -1832,13 +1762,6 @@ subroutine metcon(rank,gmet,aa,bb)
 
    function con_met(ii,i1,i2,i3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'con_met'
-!End of the abilint section
-
    real(dp) :: con_met
    integer :: ii,i1,i2,i3
    real(dp)::coniii,conijk
@@ -1944,13 +1867,6 @@ end subroutine metcon
 !! SOURCE
 
 subroutine metcon_so(rank,gmet,amet,aa,bb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metcon_so'
-!End of the abilint section
 
  implicit none
 
@@ -2132,13 +2048,6 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 
    function cona_metso(ii,i1,i2,i3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cona_metso'
-!End of the abilint section
-
    real(dp) :: cona_metso
    integer,intent(in) :: ii,i1,i2,i3
    real(dp) :: coniii, conijk
@@ -2176,13 +2085,6 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 
 
    function con_metso(ii,i1,i2,i3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'con_metso'
-!End of the abilint section
 
    real(dp) :: con_metso
    integer,intent(in) :: ii,i1,i2,i3
@@ -2239,13 +2141,6 @@ end subroutine metcon_so
 !! SOURCE
 
 subroutine metric_so(amet,gprimd,pauli)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metric_so'
-!End of the abilint section
 
  implicit none
 

@@ -83,13 +83,6 @@ CONTAINS
 
 subroutine no_mpiotk()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'no_mpiotk'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -134,13 +127,6 @@ end subroutine no_mpiotk
 
 subroutine setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,&
 &  my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_fsuba_dp2D'
-!End of the abilint section
 
  implicit none
 
@@ -262,13 +248,6 @@ end subroutine setup_fsuba_dp2D
 !! SOURCE
 
 subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpiotk_read_fsuba_dp2D'
-!End of the abilint section
 
  implicit none
 
@@ -412,13 +391,6 @@ end subroutine mpiotk_read_fsuba_dp2D
 
 subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpiotk_write_fsuba_dp2D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -558,13 +530,6 @@ end subroutine mpiotk_write_fsuba_dp2D
 !! SOURCE
 
 subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpiotk_read_fsuba_dpc3D'
-!End of the abilint section
 
  implicit none
 
@@ -763,13 +728,6 @@ end subroutine mpiotk_read_fsuba_dpc3D
 !! SOURCE
 
 subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpiotk_read_fsuba_dpc4D'
-!End of the abilint section
 
  implicit none
 

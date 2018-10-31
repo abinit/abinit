@@ -52,7 +52,6 @@
  toldff 1.0d-6
  wtk  1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

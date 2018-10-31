@@ -93,13 +93,6 @@ contains
 
 subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,nblok,piezo,ucvol,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_piezo'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------------

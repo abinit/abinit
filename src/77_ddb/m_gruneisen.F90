@@ -32,7 +32,6 @@ MODULE m_gruneisen
  use m_abicore
  use m_xmpi
  use m_crystal
- use m_crystal_io
  use m_tetrahedron
  use m_ddb
  use m_ddb_hdr
@@ -129,13 +128,6 @@ contains  !===========================================================
 !! SOURCE
 
 type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_new'
-!End of the abilint section
 
  implicit none
 
@@ -267,13 +259,6 @@ end function gruns_new
 
 subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_fourq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -368,13 +353,6 @@ end subroutine gruns_fourq
 !! SOURCE
 
 subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_qpath'
-!End of the abilint section
 
  implicit none
 
@@ -508,13 +486,6 @@ end subroutine gruns_qpath
 !! SOURCE
 
 subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_qmesh'
-!End of the abilint section
 
  implicit none
 
@@ -739,13 +710,6 @@ end subroutine gruns_qmesh
 
 subroutine gruns_free(gruns)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -760,7 +724,7 @@ subroutine gruns_free(gruns)
 
  if (allocated(gruns%ifc_vol)) then
    do ii=1,size(gruns%cryst_vol)
-     call crystal_free(gruns%cryst_vol(ii))
+     call gruns%cryst_vol(ii)%free()
    end do
    ABI_FREE(gruns%cryst_vol)
  end if
@@ -810,13 +774,6 @@ end subroutine gruns_free
 
 subroutine gruns_anaddb(inp, prefix, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gruns_anaddb'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -854,7 +811,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
 
    ! Write structure corresponding to iv0
-   NCF_CHECK(crystal_ncwrite(gruns%cryst_vol(iv0), ncid))
+   NCF_CHECK(gruns%cryst_vol(iv0)%ncwrite(ncid))
 
    ! Add important dimensions and additional metadata.
    ncerr = nctk_def_dims(ncid, [ &

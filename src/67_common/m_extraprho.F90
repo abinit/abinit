@@ -128,13 +128,6 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 & pawtab,ph1d,psps,qgrid,rhor,rprimd,scf_history,ucvol,usepaw,&
 & xred_new,xred_old,ylm,zion,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extraprho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -560,13 +553,6 @@ end subroutine extraprho
 
 subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 & nattyp,ngfft,npwarr,ntypat,pawtab,psps,rprimd,scf_history,usepaw,xred_old,ylm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extrapwf'
-!End of the abilint section
 
  implicit none
 
@@ -1183,13 +1169,6 @@ end subroutine extrapwf
 
  !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj,cgcprj_cholesky,lincom_cgcprj
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extrapwf_biortho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

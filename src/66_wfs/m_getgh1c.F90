@@ -128,13 +128,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &          gvnlx1,idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,&
 &          rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgh1c'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -218,29 +211,24 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
  if (size(cwave)<2*npw*my_nspinor) then
-   msg='wrong size for cwave!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for cwave!')
  end if
  if (size(gh1c)<2*npw1*my_nspinor) then
-   msg='wrong size for gh1c!'
-   MSG_BUG(msg)
+   MSG_BUG('wrong size for gh1c!')
  end if
  if (usevnl/=0) then
    if (size(gvnlx1)<2*npw1*my_nspinor) then
-     msg='wrong size for gvnlx1!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for gvnlx1!')
    end if
  end if
  if (sij_opt==1) then
    if (size(gs1c)<2*npw1*my_nspinor) then
-     msg='wrong size for gs1c!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for gs1c!')
    end if
  end if
  if (berryopt>=4) then
    if (size(grad_berry)<2*npw1*my_nspinor) then
-     msg='wrong size for grad_berry!'
-     MSG_BUG(msg)
+     MSG_BUG('wrong size for grad_berry!')
    end if
  end if
 
@@ -252,20 +240,17 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (usecprj/=0) then
      ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
-       msg='wrong size for cwaveprj!'
-       MSG_BUG(msg)
+       MSG_BUG('wrong size for cwaveprj!')
      end if
      if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
        if (ncpgr/=1)then
-         msg='Projected WFs (cprj) derivatives are not correctly stored !'
-         MSG_BUG(msg)
+         MSG_BUG('Projected WFs (cprj) derivatives are not correctly stored !')
        end if
      end if
    end if
  else
    if(usecprj==1)then
-     msg='usecprj==1 not allowed for NC psps !'
-     MSG_BUG(msg)
+     MSG_BUG('usecprj==1 not allowed for NC psps !')
    end if
  end if
 
@@ -296,7 +281,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      weight=one ; tim_fourwf=4
      call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gh1c,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&     npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&     npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &     use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      if(gs_hamkq%nspinor==2)then
        ABI_ALLOCATE(cwave_sp,(2,npw))
@@ -308,7 +293,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end do
        call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave_sp,gh1c_sp,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !$OMP PARALLEL DO
        do ipw=1,npw1
@@ -337,13 +322,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c2=v22*phi2
        vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_DEALLOCATE(vlocal1_tmp)
        cplex1=2
@@ -372,7 +357,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
        call fourwf(cplex1,vlocal1_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi2
        if(rf_hamkq%cplex==1) then
@@ -396,7 +381,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end if
        call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_DEALLOCATE(vlocal1_tmp)
 !      Build gh1c from pieces
@@ -413,8 +398,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_DEALLOCATE(cwavef1)
        ABI_DEALLOCATE(cwavef2)
      else
-       msg='nspinor/=1 for Non-collinear calculations!'
-       MSG_BUG(msg)
+       MSG_BUG('nspinor/=1 for Non-collinear calculations!')
      end if
    end if ! nvloc
 
@@ -740,14 +724,12 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (associated(gs_hamkq%kinpw_kp)) then
    kinpw1 => gs_hamkq%kinpw_kp
  else if (optnl>=1.or.usevnl2.or.has_kin) then
-   msg='need kinpw1 allocated!'
-   MSG_BUG(msg)
+   MSG_BUG('need kinpw1 allocated!')
  end if
  if (associated(rf_hamkq%dkinpw_k)) then
    dkinpw => rf_hamkq%dkinpw_k
  else if (has_kin) then
-   msg='need dkinpw allocated!'
-   MSG_BUG(msg)
+   MSG_BUG('need dkinpw allocated!')
  end if
 
  if (has_kin) then
@@ -856,13 +838,6 @@ end subroutine getgh1c
 subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvloc,&
 &                                pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rf_transgrid_and_pack'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -965,13 +940,6 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,dkinpw,nkpg,&               ! In
 &                nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                     ! Out
 &                ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                               ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgh1c_setup'
-!End of the abilint section
 
  implicit none
 
@@ -1253,13 +1221,6 @@ end subroutine getgh1c_setup
 
 subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 &                 mpi_enreg,natom,nband,npw1,nspinor,optcprj,s1cwave0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getdc1'
-!End of the abilint section
 
  implicit none
 
