@@ -548,7 +548,7 @@ subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_
      call from_mat_to_block_cyclic(gsc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
    endif
-   if(usepaw==0 .or. use_fock)then
+   if(usepaw==0 .or. has_fock)then
      call from_mat_to_block_cyclic(gvnlxc, npw*nspinor, nband, left_temp, &
 &     buffsize_iproc(1), blocksize, coords_iproc(1), grid_dims(1))
    end if
