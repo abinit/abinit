@@ -329,6 +329,21 @@ contains
     call c_f_pointer(p_bi_Rlist, bi_Rlist, [bi_nnz*3])
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
+
+    ! change of units to a.u.
+
+    ! unitcell already Bohr
+
+    !gyroratios already in a.u. (unit=1)
+
+    ! masses already in a.u.
+
+    ! J, DMI, k1, bi are in eV
+    exc_vallist(:) =exc_vallist(:) * eV_Ha
+    dmi_vallist(:) = dmi_vallist(:) * eV_Ha
+    uni_amplitude_list(:) = uni_amplitude_list(:) * eV_Ha
+    bi_vallist(:) = bi_vallist(:) * eV_Ha
+
     print *, "Spin model: setting structure."
     uc(:,:)=transpose(reshape(unitcell, [3,3]))
     call spin_model_primitive_t_set_atoms(self,natoms,uc, & 
@@ -747,7 +762,7 @@ contains
           enddo
        enddo
        print *, 'i=',  self%total_ilist%data(i), '  j=', self%total_jlist%data(i), &
-            '  R=', R , ' Value= '
+            '  R=', R , ' Value (Ha)= '
        do ii=1, 3
           write(*, *) tmp(ii, :)
        end do

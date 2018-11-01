@@ -194,7 +194,7 @@ end subroutine spin_ncfile_t_def_ob
             &      hist%heff(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspins, 1])
 
        ncerr=nf90_put_var(self%ncid, self%snorm_id, &
-            &      hist%snorm(:,hist%ihist_prev), start=[1, itime], count=[hist%nspins, 1])
+            &      hist%snorm(:,hist%ihist_prev)/mu_B, start=[1, itime], count=[hist%nspins, 1])
     end if
     !ncerr=nf90_put_var(self%ncid, self%ihist_g_id, [hist%ihist_latt(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%itime_id, &
@@ -215,7 +215,7 @@ end subroutine spin_ncfile_t_def_ob
        ncerr=nf90_put_var(self%ncid, self%Mst_norm_total_id, [ob%Mst_norm_total], &
             &      start=[itime], count=[1])
 
-       ncerr=nf90_put_var(self%ncid, self%Snorm_total_id, [ob%Snorm_total], &
+       ncerr=nf90_put_var(self%ncid, self%Snorm_total_id, [ob%Snorm_total/mu_B], &
             &      start=[itime], count=[1])
 
        if(ob%calc_traj_obs)then
@@ -273,21 +273,27 @@ end subroutine spin_ncfile_t_def_ob
 #if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
 
-    call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id, &
-         & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with units", "bohr")
-    call ab_define_var(self%ncid, (/self%three, self%nspins/), pos_id, &
-         & NF90_DOUBLE, "xcart_spin","position of spin in cartesian coordinates", "bohr")
-    call ab_define_var(self%ncid, (/ self%nspins/), ispin_prim_id, &
-         & NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
-    call ab_define_var(self%ncid, (/self%three, self%nspins/), rvec_id, &
+    call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
+         & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with&
+         & units", "bohr")
+    call ab_define_var(self%ncid, (/self%three, self%nspins/), pos_id,&
+         & NF90_DOUBLE, "xcart_spin","position of spin in cartesian&
+         & coordinates", "bohr")
+    call ab_define_var(self%ncid, (/ self%nspins/), ispin_prim_id, NF90_INT,&
+         & "ispin_prim", "index of spin in primitive cell", "dimensionless")
+    call ab_define_var(self%ncid, (/self%three, self%nspins/), rvec_id,&
          & NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
-    call ab_define_var(self%ncid, (/ self%nspins/), iatoms_id, &
-         & NF90_INT, "iatoms", "indices of atoms with spin", "dimensionless")
+    call ab_define_var(self%ncid, (/ self%nspins/), iatoms_id, NF90_INT,&
+         & "iatoms", "indices of atoms with spin", "dimensionless")
 
-    !ncerr=nf90_def_var(self%ncid, "unitcell", NF90_DOUBLE, [self%three, self%three], unitcell_id)
-    !ncerr=nf90_def_var(self%ncid, "xred", NF90_DOUBLE, [self%three, self%nspins], pos_id)
-    !ncerr=nf90_def_var(self%ncid, "ispin_prim", NF90_INT, [self%nspins], ispin_prim_id)
-    !ncerr=nf90_def_var(self%ncid, "rvec", NF90_INT, [self%three,self%nspins], rvec_id)
+    !ncerr=nf90_def_var(self%ncid, "unitcell", NF90_DOUBLE, [self%three,
+    !self%three], unitcell_id)
+    !ncerr=nf90_def_var(self%ncid, "xred", NF90_DOUBLE, [self%three,
+    !self%nspins], pos_id)
+    !ncerr=nf90_def_var(self%ncid, "ispin_prim", NF90_INT, [self%nspins],
+    !ispin_prim_id)
+    !ncerr=nf90_def_var(self%ncid, "rvec", NF90_INT, [self%three,self%nspins],
+    !rvec_id)
     ncerr=nf90_enddef(self%ncid)
 
     ncerr=nf90_put_var(self%ncid, rprimd_id, scell%cell)
@@ -311,30 +317,33 @@ end subroutine spin_ncfile_t_def_ob
 
     ! dims 
     ! vars
-    call ab_define_var(self%ncid, (/self%three/), qpoint_id, &
-         & NF90_DOUBLE, "spin_qpoint", "spin QPOINT", "dimensionless")
+    call ab_define_var(self%ncid, (/self%three/), qpoint_id, NF90_DOUBLE,&
+         & "spin_qpoint", "spin QPOINT", "dimensionless")
     ! TODO should change ncell to 3*3 matrix
-    call ab_define_var(self%ncid, (/self%three/), ncell_id, &
-         & NF90_INT, "ncell", "supercell matrix (only diagonal)", "dimensionless")
-    call ab_define_var(self%ncid, dim0, temperature_id, &
-         & NF90_DOUBLE, "spin_temperature", "Spin temperature", "Kelvin")
-    call ab_define_var(self%ncid, dim0, dt_id, &
-         & NF90_DOUBLE, "spin_dt", "Spin time step", "second")
-    call ab_define_var(self%ncid, (/self%three/), mfield_id, &
-         & NF90_DOUBLE, "spin_mag_field", "magnetic field for spin dynamics", "Tesla")
-    !ncerr=nf90_def_var(self%ncid, "spin_qpoint", NF90_DOUBLE, [self%three], qpoint_id)
+    call ab_define_var(self%ncid, (/self%three/), ncell_id, NF90_INT, "ncell",&
+         & "supercell matrix (only diagonal)", "dimensionless")
+    call ab_define_var(self%ncid, dim0, temperature_id, NF90_DOUBLE,&
+         & "spin_temperature", "Spin temperature", "Kelvin")
+    call ab_define_var(self%ncid, dim0, dt_id, NF90_DOUBLE, "spin_dt", "Spin&
+         & time step", "second")
+    call ab_define_var(self%ncid, (/self%three/), mfield_id, NF90_DOUBLE,&
+         & "spin_mag_field", "magnetic field for spin dynamics", "Tesla")
+    !ncerr=nf90_def_var(self%ncid, "spin_qpoint", NF90_DOUBLE, [self%three],
+    !qpoint_id)
     !ncerr=nf90_def_var(self%ncid, "ncell", NF90_INT, [self%three], ncell_id)
-    !ncerr=nf90_def_var(self%ncid, "spin_temperature", NF90_DOUBLE,  temperature_id)
+    !ncerr=nf90_def_var(self%ncid, "spin_temperature", NF90_DOUBLE,
+    !temperature_id)
     !ncerr=nf90_def_var(self%ncid, "spin_dt", NF90_DOUBLE,  dt_id)
-    !ncerr=nf90_def_var(self%ncid, "spin_mag_field", NF90_DOUBLE, [self%three],  mfield_id)
+    !ncerr=nf90_def_var(self%ncid, "spin_mag_field", NF90_DOUBLE, [self%three],
+    !mfield_id)
 
     ncerr=nf90_enddef(self%ncid)
     ! put vars
     ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_qpoint)
     ncerr=nf90_put_var(self%ncid, ncell_id, params%ncell)
-    ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature)
-    ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt)
-    ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field)
+    ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature/Ha_K)
+    ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt/Time_Sec)
+    ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field/Bfield_Tesla)
 #endif
   end subroutine spin_ncfile_t_write_parameters
 

@@ -223,7 +223,7 @@ contains
     if(self%temperature<1d-12) then
        self%Cv=0.0d0
     else
-       self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2/kb_SI
+       self%Cv = (self%avg_E2_t-self%avg_E_t**2)/self%temperature**2
     end if
 
 
@@ -239,7 +239,7 @@ contains
     if(self%temperature<1d-12) then
        self%chi=(self%avg_m2_t-self%avg_m_t**2)
     else
-       self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature/kb_SI
+       self%chi = (self%avg_m2_t-self%avg_m_t**2)/self%temperature
     endif
 
 

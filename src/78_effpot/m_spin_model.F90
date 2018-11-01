@@ -547,7 +547,7 @@ contains
 
     write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
          & "Starting temperature dependent calculations. T from ", &
-         & T_start, "K to ", T_end, " K."
+         & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out, msg, "COLL")
 
@@ -558,7 +558,7 @@ contains
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
 
-       write(msg, "(A13, 5X, ES13.5, A3)") "Temperature: ", T, " K."
+       write(msg, "(A13, 5X, ES13.5, A3)") "Temperature: ", T*Ha_K, " K."
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out,  msg, "COLL")
 
@@ -631,7 +631,7 @@ contains
     do i = 1, T_nstep
        write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
             Tlist(i), Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
-            & (Mst_sub_norm_list(ii,i)/mu_B_SI, ii=1, self%spin_ob%nsublatt)
+            & (Mst_sub_norm_list(ii,i)/mu_B, ii=1, self%spin_ob%nsublatt)
        call wrtout(Tfile, Tmsg, "COLL")
     end do
     iostat= close_unit(unit=Tfile, iomsg=iomsg)
@@ -664,13 +664,17 @@ contains
   end subroutine spin_model_t_run_MvH
   !!***
 
-  !! convert unit of input variables into S.I. unit
-  !! TODO This is temporary and should be removed
-  !!         a.u. should be used internally. 
+  !! convert unit of input variables into atomic unit.
+  !! In the input file, temperature is in Kelvin
   subroutine spin_model_t_unit_conversion(self)
 
     class(spin_model_t), intent(inout) :: self
-    self%params%spin_dt = self%params%spin_dt*Time_Sec
+
+    self%params%spin_dt = self%params%spin_dt
+    ! Kelvin to Hartree 
+    self%params%spin_temperature = self%params%spin_temperature/Ha_K
+    self%params%spin_temperature_start=self%params%spin_temperature_start/Ha_K
+    self%params%spin_temperature_end=self%params%spin_temperature_end/Ha_K
   end subroutine spin_model_t_unit_conversion
 
 end module m_spin_model

@@ -48,7 +48,7 @@ module  m_spin_terms
   !!***
 
   ! TODO move parameters to somewhere (where?)
-  real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
+  !real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t
      integer :: nspins
      real(dp) :: etot
@@ -160,7 +160,7 @@ contains
     self%spinat(:,:)=spinat(:,:)
 
     ABI_ALLOCATE( self%ms, (nspins) )
-    self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))*bohr_mag
+    self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))* mu_B
 
     ABI_ALLOCATE( self%ispin_prim, (nspins))
     ABI_ALLOCATE(self%rvec, (3, nspins))
@@ -170,7 +170,7 @@ contains
 
     ABI_ALLOCATE( self%S, (3, nspins))
     do i=1,nspins
-       self%S(:,i)=self%spinat(:,i)/self%ms(i)*bohr_mag
+       self%S(:,i)=self%spinat(:,i)/self%ms(i)
     end do
 
     self%has_external_hfield=.False.
@@ -183,7 +183,7 @@ contains
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ! Defautl gyro_ratio
     ! TODO remove this, use gyroration from xml
-    self%gyro_ratio(:)=gyromagnetic_ratio
+    self%gyro_ratio(:)=1.0_dp !gyromagnetic_ratio
 
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
     ABI_ALLOCATE( self%gamma_l, (nspins))
@@ -271,7 +271,8 @@ contains
        self%temperature=temperature
     end if
 
-    self%H_lang_coeff(:)=sqrt(2.0*self%gilbert_damping(:)*boltzmann* self%temperature &
+    ! * kb in SI unit.
+    self%H_lang_coeff(:)=sqrt(2.0*self%gilbert_damping(:)* self%temperature &
          &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
 
   end subroutine spin_terms_t_set_params
