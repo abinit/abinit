@@ -1287,7 +1287,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
  multibinit_dtset%spin_sia_k1amp=0.0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1amp',tread,'DPR')
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_sia_k1amp',tread,'ENE')
  if(tread==1) multibinit_dtset%spin_sia_k1amp=dprarr(1)
 
  multibinit_dtset%spin_sia_k1dir(:)= [0.0,0.0,1.0]

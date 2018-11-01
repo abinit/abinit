@@ -174,11 +174,11 @@ contains
     self%xml_fname=filenames(3)
 
     ! read input
+    ! unit conversion
+    self%params=params
+    call spin_model_t_unit_conversion(self)
     !call self%spin_primitive%initialize()
     call spin_model_primitive_t_initialize(self%spin_primitive)
-    self%params=params
-    ! TODO: remove this and use a.u. everywhere.
-    call spin_model_t_unit_conversion(self)
     !call self%read_xml(xml_fname)
     call spin_model_t_read_xml(self, trim(self%xml_fname)//char(0))
     !call self%spin_primitive%print_terms()
@@ -197,7 +197,6 @@ contains
 
     call spin_model_t_set_params(self)
 
-    !TODO hexu: mxhist, has_latt, natoms should be input with their true values when lattice part also added
     call spin_hist_t_init(hist=self%spin_hist, nspins=self%nspins, &
          &   mxhist=3, has_latt=.False.)
 
@@ -207,8 +206,6 @@ contains
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self)
 
-    !call self%spin_mover%initialize(self%nspins, dt=params%dtspin, & 
-    !    & total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
          &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature, &
          & pre_time=self%params%spin_dt*self%params%spin_ntime_pre, method=self%params%spin_dynamics)
@@ -667,10 +664,7 @@ contains
   !! convert unit of input variables into atomic unit.
   !! In the input file, temperature is in Kelvin
   subroutine spin_model_t_unit_conversion(self)
-
     class(spin_model_t), intent(inout) :: self
-
-    self%params%spin_dt = self%params%spin_dt
     ! Kelvin to Hartree 
     self%params%spin_temperature = self%params%spin_temperature/Ha_K
     self%params%spin_temperature_start=self%params%spin_temperature_start/Ha_K

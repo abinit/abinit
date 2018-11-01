@@ -961,8 +961,8 @@ Variable(
     mnemonics="SPIN Single Ion Anistropy K1 AMPtitude",
     text=r"""
 User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
-The direction is defined with [[multibinit:spin_sia_k1dir]].
-Default value: 0.0.
+The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit, 
+put eV or Ry at the end.
 """,
 ),
 
