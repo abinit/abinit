@@ -3316,11 +3316,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  wfoptalg
 !  Must be greater or equal to 0
    call chkint_ge(0,0,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,0,iout)
-!  wfoptalg==0,1,4,10 or 14 if PAW
+!  wfoptalg==0,1,4,10,14 or 114 if PAW
    if (usepaw==1) then
      write(cond_string(1), "(A)") 'usepaw'
      cond_values(1)=1
      call chkint_eq(0,1,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,6,(/0,1,4,10,14,114/),iout)
+   end if
+!  wfoptalg/=114 if PAW+Fock
+   if (usepaw==1 .and. dt%usefock==1) then
+     write(cond_string(1), "(A)") 'usepaw'
+     write(cond_string(2), "(A)") 'usefock'
+     cond_values(1)=1
+     cond_values(1)=2
+     call chkint_ne(1,2,cond_string,cond_values,ierr,'wfoptalg',dt%wfoptalg,1,(/114/),iout)
    end if
 
    ! Check if FFT library supports MPI-FFT.
