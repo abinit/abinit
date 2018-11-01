@@ -127,7 +127,7 @@ contains
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
 !!  ==== if (gs_hamk%usepaw==0) ====
-!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential + potential Fock ACE part of total energy, at this k-point
+!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential + potential Fock-type part of total energy, at this k-point
 !!  ==== if (gs_hamk%usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
@@ -180,7 +180,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp), intent(in) :: zshift(nband_k)
  real(dp), intent(out) :: eig_k(nband_k),ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
- real(dp), intent(out) :: enlx_k(nband_k*(1-gs_hamk%usepaw))
+ real(dp), intent(out) :: enlx_k(nband_k)
  real(dp), intent(out) :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(out) :: resid_k(nband_k)
  real(dp), intent(inout) :: cg(2,mcg),rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
@@ -941,7 +941,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if (gs_hamk%usepaw==0) then
      write(message, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
-&     ' mean non-local energy (hartree) for ',nband_k,' bands',ch10,&
+&     ' mean NL+Fock-type energy (hartree) for ',nband_k,' bands',ch10,&
 &     '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
      call wrtout(std_out,message,'PERS')
 

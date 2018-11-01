@@ -124,7 +124,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  real(dp),intent(inout), target :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband)
  real(dp),intent(in) :: kinpw(npw)
  real(dp),intent(out) :: resid(nband)
- real(dp),intent(out) :: enlx(nband*(1-gs_hamk%usepaw))
+ real(dp),intent(out) :: enlx(nband)
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
