@@ -282,7 +282,7 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "Energy (Ha)"
+    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
@@ -304,7 +304,7 @@ contains
                   hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
              write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
-                  & hist%etot(hist%ihist_prev)
+                  & hist%etot(hist%ihist_prev)/ob%ncell
              ! total : 13+4+...= 64 
              call wrtout(std_out,msg,'COLL')
              call wrtout(ab_out, msg, 'COLL')
