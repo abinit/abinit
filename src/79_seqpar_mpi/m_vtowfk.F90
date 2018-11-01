@@ -273,7 +273,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_CHECK(ierr==0, "out of memory in gsc")
    gsc=zero
  end if
-
+ 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
    !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
@@ -372,7 +372,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        if (wfopta10==4) then
          if ( .not. newlobpcg ) then
            call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx)
+&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
 !          In case of FFT parallelism, exchange subspace arrays
            spaceComm=mpi_enreg%comm_bandspinorfft
            call xmpi_sum(subham,spaceComm,ierr)
