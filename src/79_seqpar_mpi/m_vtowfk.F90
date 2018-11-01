@@ -403,7 +403,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      =========================================================================
      else
 !      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
-       use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
+!      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &       gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
 &       mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&

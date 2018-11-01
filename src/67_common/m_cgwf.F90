@@ -120,7 +120,7 @@ contains
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
 !!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
-!!  subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
+!!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
 !!
 !! SIDE EFFECTS
@@ -180,7 +180,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
  real(dp),intent(inout) :: dphase_k(3)
  real(dp),intent(out) :: subham(nband*(nband+1)),subovl(nband*(nband+1)*use_subovl)
- real(dp),intent(out) :: subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))
+ real(dp),intent(out) :: subvnlx(nband*(nband+1)*use_subvnlx)
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
