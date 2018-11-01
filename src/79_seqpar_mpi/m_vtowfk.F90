@@ -187,7 +187,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: newlobpcg
+ logical :: has_fock,newlobpcg
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -233,6 +233,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
  istwf_k=gs_hamk%istwf_k
+ has_fock=(associated(gs_hamk%fockcommon))
  quit=0
 
 !Parallelization over spinors management
@@ -281,8 +282,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    ABI_ALLOCATE(subvnlx,(0))
    ABI_ALLOCATE(totvnlx,(0,0))
-   if (gs_hamk%usepaw==0) then
-     if (wfopta10==4) then
+   if (wfopta10==4) then
+!    Later, will have to generalize to Fock case, like when wfopta10/=4
+     if (gs_hamk%usepaw==0) then
        ABI_DEALLOCATE(totvnlx)
        if (istwf_k==1) then
          ABI_ALLOCATE(totvnlx,(2*nband_k,nband_k))
@@ -290,7 +292,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ABI_ALLOCATE(totvnlx,(nband_k,nband_k))
        end if
        use_totvnlx=1
-     else
+     endif
+   else
+     if (gs_hamk%usepaw==0 .or. has_fock) then
        ABI_DEALLOCATE(subvnlx)
        ABI_ALLOCATE(subvnlx,(nband_k*(nband_k+1)))
        use_subvnlx=1
