@@ -1165,11 +1165,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial2,wtk_rbz,xred,ylm,ylm1,ylmgr1,1)
 
-   write(msg,'(a)') ' '//NEW_LINE('A')//'&
-&   ---------------------------------'
+   write(msg,'(a)') ' '//char(10)//&
+'   ---------------------------------'
    call wrtout(ab_out,msg,'COLL')
-   write(msg,'(a,a)')'  The charge sum rule is activated'//NEW_LINE('A')//'&
-&   ---------------------------------'
+   write(msg,'(a,a)')'  The charge sum rule is activated'//char(10)//&
+'   ---------------------------------'
    call wrtout(ab_out,msg,'COLL')
    write(msg,'(a,i4)') ' Z_ion (psp):',Z_kappa
    call wrtout(ab_out,msg,'COLL')
@@ -1178,8 +1178,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    write(msg,'(a,f12.8)') ' Renormalisation: ',renorm
    call wrtout(ab_out,msg,'COLL')
    if (renorm > 0.01 ) then
-     write(msg,'(a,a)')'   WARNING: The renormalisation seems large (> 0.01).'//NEW_LINE('A')//'&
-&     You might consider increasing the k-point grid.'
+     write(msg,'(a,a)')'   WARNING: The renormalisation seems large (> 0.01).'//char(10)//&
+'     You might consider increasing the k-point grid.'
      MSG_WARNING(msg)
      call wrtout(ab_out,msg,'COLL')
    end if
