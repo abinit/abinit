@@ -133,7 +133,7 @@ contains
   write(stdout,'(a)') ' of the ABINIT implementation.'
   write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [1] Thermal evolution of vibrational properties of $\\alpha$-U' 
+  write(stdout,'(a)') '.[1] Thermal evolution of vibrational properties of $\\alpha$-U' 
   write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' This paper is also available at http://www.arxiv.org/abs/xxxx'
