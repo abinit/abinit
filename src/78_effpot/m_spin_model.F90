@@ -625,7 +625,7 @@ contains
 
     ! write to .varT file
     write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
-         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (ii, ii=1, self%spin_ob%nsublatt)
+         "#", "Temperature (K)", "Cv (1)", "chi (1)",  "BinderU4 (1)", "Mst (mu_B)", (ii, ii=1, self%spin_ob%nsublatt)
     call wrtout(Tfile, Tmsg, "COLL")
 
     do i = 1, T_nstep
