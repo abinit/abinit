@@ -30,7 +30,6 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-static double const eV=1.6e-19;
 
 //define type for dynamical double format array 
 typedef struct {
@@ -1332,7 +1331,7 @@ int xml_read_spin_exchange( char * fname, int *exc_nnz, int *exc_ilist[],
               xmlFree(key);
               for(i=0; i< size; i++)
                 {
-                  (*exc_vallist)[counter*3+i]=dtmp[i]*eV;
+                  (*exc_vallist)[counter*3+i]=dtmp[i];
                 }
             }
 
@@ -1414,7 +1413,7 @@ int xml_read_spin_dmi( char * fname, int *dmi_nnz, int *dmi_ilist[],
               xmlFree(key);
               for(i=0; i< size; i++)
                 {
-                  (*dmi_vallist)[counter*3+i]=dtmp[i]*eV;
+                  (*dmi_vallist)[counter*3+i]=dtmp[i];
                 }
             }
 
@@ -1491,7 +1490,7 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
               xmlFree(key);
               for(i=0; i< size; i++)
                 {
-                  (*uni_amplitude_list)[i]=dtmp[i]*eV;
+                  (*uni_amplitude_list)[i]=dtmp[i];
                 }
             }
             if (!xmlStrcmp(cur3->name, BAD_CAST"direction")) {
@@ -1585,7 +1584,7 @@ int xml_read_spin_bilinear( char * fname, int *bi_nnz, int *bi_ilist[],
               xmlFree(key);
               for(i=0; i< size; i++)
                 {
-                  (*bi_vallist)[counter*9+i]=dtmp[i]*eV;
+                  (*bi_vallist)[counter*9+i]=dtmp[i];
                 }
             }
 

@@ -282,7 +282,7 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "Energy (Ha)"
+    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
@@ -304,7 +304,7 @@ contains
                   hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
              write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
-                  & hist%etot(hist%ihist_prev)
+                  & hist%etot(hist%ihist_prev)/ob%ncell
              ! total : 13+4+...= 64 
              call wrtout(std_out,msg,'COLL')
              call wrtout(ab_out, msg, 'COLL')
@@ -330,7 +330,7 @@ contains
             hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
        if(mod(counter, hist%spin_nctime)==0) then
           call spin_ncfile_t_write_one_step(ncfile, hist)
-          write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t, &
+          write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                & ob%Mst_norm_total/ob%Snorm_total, &
                & hist%etot(hist%ihist_prev)
           call wrtout(std_out,msg,'COLL')
@@ -357,8 +357,9 @@ contains
     call wrtout(ab_out, msg, 'COLL')
 
     do i =1, ob%nsublatt
-       write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B_SI , ii=1, 3), &
-            sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B_SI)**2))
+       print *, mu_B
+       write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B , ii=1, 3), &
+            sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B)**2))
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
     end do
@@ -372,7 +373,7 @@ contains
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out, msg, "COLL")
     write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X )" ) &
-         self%temperature , ob%Cv, ob%chi,  ob%binderU4, ob%Avg_Mst_norm_total/ob%snorm_total
+         self%temperature*Ha_K , ob%Cv, ob%chi,  ob%binderU4, ob%Avg_Mst_norm_total/ob%snorm_total
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out,  msg, "COLL")
 
