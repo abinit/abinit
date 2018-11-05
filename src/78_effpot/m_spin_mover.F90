@@ -174,7 +174,7 @@ contains
     w=Bnorm*dt
     !print *, w
     cosw=cos(w)
-    sinw=1.0d0-cosw*cosw
+    sinw=sin(w)
     u=1.0d0-cosw
     R(1,1)=B(1)*B(1)*u+cosw
     R(2,1)=B(1)*B(2)*u+B(3)*sinw
@@ -335,7 +335,7 @@ contains
           call spin_ncfile_t_write_one_step(ncfile, hist)
           write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                & ob%Mst_norm_total/ob%Snorm_total, &
-               & hist%etot(hist%ihist_prev)
+               & hist%etot(hist%ihist_prev)/ob%nscell
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
        endif
@@ -360,7 +360,6 @@ contains
     call wrtout(ab_out, msg, 'COLL')
 
     do i =1, ob%nsublatt
-       print *, mu_B
        write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B , ii=1, 3), &
             sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B)**2))
        call wrtout(std_out,msg,'COLL')
