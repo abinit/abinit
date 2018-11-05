@@ -206,9 +206,12 @@ contains
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 
     call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
+
+!$OMP PARALLEL DO 
     do i=1, self%nspins
      call rotate_S_DM(S_in(:,i), Htmp(:,i), self%dt, S_out(:,i))
     end do
+!$OMP END PARALLEL DO
 
     ! correction
     call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
