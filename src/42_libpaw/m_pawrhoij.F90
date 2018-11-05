@@ -727,6 +727,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          pawrhoij_out(irhoij)%rhoijselect=0
        end if
      end if
+     pawrhoij_out(irhoij)%use_rhoijp=use_rhoijp
      if (use_rhoijp>0) then
        if (change_dim) then
          if(allocated(pawrhoij_out(irhoij)%rhoijp)) then
@@ -1368,7 +1369,7 @@ end subroutine pawrhoij_copy
    if (with_rhoijp_) use_rhoijp=pawrhoij_in(irhoij)%use_rhoijp
    if (with_rhoijres_)use_rhoijres=pawrhoij_in(irhoij)%use_rhoijres
    if (with_rhoij__) use_rhoij_=pawrhoij_in(irhoij)%use_rhoij_
-   buf_int_size=buf_int_size+17
+   buf_int_size=buf_int_size+16
    if (use_rhoijp>0) then
      nselect=pawrhoij_in(irhoij)%nrhoijsel
      buf_int_size=buf_int_size+nselect
@@ -1538,7 +1539,7 @@ end subroutine pawrhoij_copy
        pawrhoij_gathered(jrhoij)%rhoijselect(1:nselect)=buf_int_all(indx_int:indx_int+nselect-1)
        if (nselect < lmn2_size )pawrhoij_gathered(jrhoij)%rhoijselect(nselect+1:lmn2_size)=0
        indx_int=indx_int+nselect
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijp,(cplex*lmn2_size,nspden))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijp,(qphase*cplex*lmn2_size,nspden))
        do isp=1,nspden
          do ii=1,qphase
            jj=(ii-1)*cplex*lmn2_size
@@ -1556,7 +1557,7 @@ end subroutine pawrhoij_copy
        indx_int=indx_int+lmnmix
      end if
      if (ngrhoij>0) then
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%grhoij,(ngrhoij,cplex*lmn2_size,nspden))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%grhoij,(ngrhoij,qphase*cplex*lmn2_size,nspden))
        do isp=1,nspden
          do ii=1,cplex*qphase*lmn2_size
            pawrhoij_gathered(jrhoij)%grhoij(1:ngrhoij,ii,isp)=buf_dp_all(indx_dp:indx_dp+ngrhoij-1)
@@ -1565,7 +1566,7 @@ end subroutine pawrhoij_copy
        end do
      end if
      if (use_rhoijres>0) then
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijres,(cplex*lmn2_size,nspden))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijres,(qphase*cplex*lmn2_size,nspden))
        do isp=1,nspden
          pawrhoij_gathered(jrhoij)%rhoijres(1:cplex*qphase*lmn2_size,isp)= &
 &                                buf_dp_all(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
@@ -1573,7 +1574,7 @@ end subroutine pawrhoij_copy
        end do
      end if
      if (use_rhoij_>0) then
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoij_,(cplex*lmn2_size,rhoij_size2))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoij_,(qphase*cplex*lmn2_size,rhoij_size2))
        do isp=1,rhoij_size2
          pawrhoij_gathered(jrhoij)%rhoij_(1:cplex*qphase*lmn2_size,isp)= &
 &                                buf_dp_all(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
@@ -1730,7 +1731,7 @@ end subroutine pawrhoij_gather
      use_rhoijp  =pawrhoij_in(jrhoij)%use_rhoijp
      use_rhoijres=pawrhoij_in(jrhoij)%use_rhoijres
      use_rhoij_  =pawrhoij_in(jrhoij)%use_rhoij_
-     buf_int_size_i(irhoij)=buf_int_size_i(irhoij)+17
+     buf_int_size_i(irhoij)=buf_int_size_i(irhoij)+16
      if (ngrhoij>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*qphase*lmn2_size*nspden*ngrhoij
      if (use_rhoijres>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*qphase*lmn2_size*nspden
      if (use_rhoijp>0) then
@@ -4627,8 +4628,8 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
      do isp=1,nspden
        do ii=1,qphase
          jj=(ii-1)*cplex*lmn2_size
-         pawrhoij1%rhoijp(ii+1:ii+cplex*nselect,isp)=buf_dp(indx_dp:indx_dp+cplex*nselect-1)
-         if (nselect<lmn2_size)pawrhoij1%rhoijp(ii+cplex*nselect+1:ii+cplex*lmn2_size,isp)=zero
+         pawrhoij1%rhoijp(jj+1:jj+cplex*nselect,isp)=buf_dp(indx_dp:indx_dp+cplex*nselect-1)
+         if (nselect<lmn2_size)pawrhoij1%rhoijp(jj+cplex*nselect+1:jj+cplex*lmn2_size,isp)=zero
          indx_dp=indx_dp+cplex*nselect
        end do
      end do
@@ -4756,7 +4757,7 @@ implicit none
    use_rhoijp=pawrhoij1%use_rhoijp
    use_rhoijres=pawrhoij1%use_rhoijres
    use_rhoij_=pawrhoij1%use_rhoij_
-   buf_int_size=buf_int_size+17
+   buf_int_size=buf_int_size+16
    if (use_rhoijp>0) then
      nselect=pawrhoij1%nrhoijsel
      buf_int_size=buf_int_size+nselect
