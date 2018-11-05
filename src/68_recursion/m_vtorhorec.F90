@@ -2526,7 +2526,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
 
  isign = -1
- call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,ngfft,1,0)
+ call fourdp(1,ZT_p,T_p,isign,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(T_p)
 
@@ -2717,7 +2717,7 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 !  --Convolution with the Green kernel
 !  --FFT of vn
    isign = -1
-   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,ngfft,1,tim_fourdp)
+   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,1,ngfft,tim_fourdp)
 
 !  --F(T)F(vn)
    do ii = 0,nfft-1
@@ -2729,7 +2729,7 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 
 !  --F^-1(F(T)F(vn))
    isign = 1
-   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,ngfft,1,tim_fourdp)
+   call fourdp(1,Zvtempo,vn,isign,mpi_enreg,nfft,1,ngfft,tim_fourdp)
 
 !  --Computation of exp(-beta*V/8*p)*un or exp(-beta*V/4*p)*un
 !  depending on if nl part has to be calculated or not.
@@ -2937,7 +2937,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 !  --Convolution with the Green kernel
 !  --FFT of vn
    isign = -1
-   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,rset%ngfftrec,1,6)
+   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,1,rset%ngfftrec,6)
 
 !  --F(T)F(vn)
    do ii = 0,rset%nfftrec-1
@@ -2949,7 +2949,7 @@ subroutine recursion_nl(exppot,un,rho_out,rset,ngfft, &
 
 !  --F^-1(F(T)F(vn))
    isign = 1
-   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,rset%ngfftrec,1,6)
+   call fourdp(1,Zvtempo,vn,isign,mpi_loc,rset%nfftrec,1,rset%ngfftrec,6)
 
 !  --Computation of exp(-beta*V/2*p)*vn
    vn = inf_ucvol * exppot * vn

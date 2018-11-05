@@ -76,7 +76,6 @@ program mrgscr
  use m_numeric_tools,       only : iseven, cspint
  use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
- use m_crystal_io,          only : crystal_from_hdr
  use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
  use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
  use m_vcoul,               only : vcoul_t, vcoul_init, vcoul_free
@@ -290,7 +289,7 @@ program mrgscr
  end if
 
  timrev=2 ! This should be read from kptopt
- call crystal_from_hdr(Cryst,HScr0%Hdr,timrev,remove_inv=.FALSE.)
+ cryst = hdr_get_crystal(HScr0%Hdr,timrev,remove_inv=.FALSE.)
 
  kptopt=1
  call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
@@ -677,7 +676,7 @@ program mrgscr
      ABI_DT_FREE(pawrhoij)
 
      ABI_MALLOC(rhog,(2,nfft))
-     call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg,nfft,ngfft,paral_kgb0,0)
+     call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg,nfft,1,ngfft,0)
 
      ABI_MALLOC(nhat,(nfft,Hscr0%Hdr%nspden*Hscr0%Hdr%usepaw))
      compch_sph=greatest_real; compch_fft=greatest_real
@@ -1335,7 +1334,7 @@ program mrgscr
    ABI_FREE(foundq)
  end if
 
- call crystal_free(Cryst)
+ call cryst%free()
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
  call destroy_mpi_enreg(MPI_enreg)

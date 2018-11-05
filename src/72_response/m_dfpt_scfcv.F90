@@ -386,7 +386,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
  integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
- integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
+ integer :: istep,istep_fock_outer,istep_mix,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
  integer :: optene,optfr,option,optres,prtfor,quit,quit_sum,qzero
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
@@ -506,9 +506,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  choice=1 ; prtfor=0 ; diffor=zero ; res2=zero
  ABI_ALLOCATE(fcart,(3,dtset%natom))
 
+!At present, no double loop
+ istep_mix=1 ; istep_fock_outer=1
+
  call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 & etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-& 1,iscf_mod,istep,kpt_rbz,maxfor,&
+& 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&
@@ -751,7 +754,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        if (dtfil%ireadwf/=0.and.dtset%get1den==0.and.dtset%ird1den==0.and.initialized==0) then
          rhor1(:,:)=rhor1(:,:)+nhat1(:,:)
-         call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+         call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf,0)
        end if
        call timab(564,2,tsec)
      end if
@@ -939,8 +942,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        rhor1_mq(2*ifft  ,:) =-rhor1_pq(2*ifft  ,:)
      end do
      rhor1=rhor1_pq
-     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
-     call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+     call fourdp(cplex,rhog1_mq,rhor1_mq(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
    end if
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -996,7 +999,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-&     1,iscf_mod,istep,kpt_rbz,maxfor,&
+&     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
@@ -1064,7 +1067,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 &     etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-&     1,iscf_mod,istep,kpt_rbz,maxfor,&
+&     1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 &     mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 &     nstep,occ_rbz,0,prtfor,0,&
 &     quit,res2,resid,residm,response,&
@@ -1073,7 +1076,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !     if(.not.kramers_deg) then
 !       call scprqt(choice,cpus,deltae_mq,diffor,dtset,eigen0,&
 !&       etotal_mq,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-!&       1,iscf_mod,istep,kpt_rbz,maxfor,&
+!&       1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 !&       mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 !&       nstep,occ_rbz,0,prtfor,0,&
 !&       quit,res2_mq,resid_mq,residm_mq,response,&
@@ -1363,7 +1366,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  choice=3
  call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
 & etotal,favg,fcart,fermie,dtfil%fnametmp_eig,dtfil%filnam_ds(1),&
-& 1,iscf_mod,istep,kpt_rbz,maxfor,&
+& 1,iscf_mod,istep,istep_fock_outer,istep_mix,kpt_rbz,maxfor,&
 & mvdum,mpi_enreg,nband_rbz,nkpt_rbz,&
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&
@@ -1988,16 +1991,16 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
    vtrial0=vtrial;vresid0=vresid
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
-     call fourdp(cplex,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
+     call fourdp(cplex,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
    end do
  else
    ABI_ALLOCATE(vtrialg,(2,nfft,dtset%nspden))
    ABI_ALLOCATE(vreswk,(2,nfft))
    do ispden=1,dtset%nspden
      fact=dielar(4);if (ispden>1) fact=dielar(7)
-     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
-     call fourdp(cplex,vreswk,vresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
+     call fourdp(cplex,vreswk,vresid(:,ispden),-1,mpi_enreg,nfft,1, ngfft, 0)
      do ifft=1,nfft
        if (ffttomix(ifft)>0) then
          jfft=2*ffttomix(ifft)
@@ -2212,7 +2215,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
    vtrial=vtrial0
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1, ngfft,0)
    end do
  else
    do ispden=1,dtset%nspden
@@ -2221,7 +2224,7 @@ subroutine dfpt_newvtr(cplex,dbl_nnsclo,dielar,dtset,etotal,ffttomix,&
        vtrialg(1,jfft,ispden)=vtrial0(2*ifft-1,ispden)
        vtrialg(2,jfft,ispden)=vtrial0(2*ifft  ,ispden)
      end do
-     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(cplex,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,0)
    end do
    ABI_DEALLOCATE(vtrialg)
  end if

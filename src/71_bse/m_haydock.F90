@@ -39,7 +39,7 @@ MODULE m_haydock
 #endif
 
  use m_time,              only : timab
- use m_fstrings,          only : indent, strcat, sjoin, itoa, int2char4
+ use m_fstrings,          only : strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
  use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
@@ -47,15 +47,13 @@ MODULE m_haydock
  use m_hide_blas,         only : xdotc, xgemv
  use m_hide_lapack,       only : matrginv
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
- use m_fft_mesh,          only : calc_ceigr
  use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
- use m_crystal_io,        only : crystal_ncwrite
  use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_paw_hr,            only : pawhur_t
- use m_wfd,               only : wfd_t, wfd_sym_ur, wfd_get_ur, wfd_change_ngfft, wfd_wave_free
- use m_bse_io,            only : exc_read_rcblock, exc_write_optme
+ use m_wfd,               only : wfd_t
+ use m_bse_io,            only : exc_write_optme
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
  use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
@@ -107,8 +105,6 @@ CONTAINS  !=====================================================================
 
 subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,Epren,&
 & Kmesh_dense, KS_BSt_dense, QP_BSt_dense, Wfd_dense, Vcp_dense, grid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -277,10 +273,8 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
  ! Free WFD descriptor, we don't need ur and ug anymore !
  ! We make space for interpolated hamiltonian
- call wfd_wave_free(Wfd,"All")
- if(BSp%use_interp) then
-   call wfd_wave_free(Wfd_dense,"All")
- end if
+ call wfd%wave_free("All")
+ if(BSp%use_interp) call wfd_dense%wave_free("All")
 
  ! Build interpolated hamiltonian
  if(BSp%use_interp) then
@@ -555,7 +549,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 #ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
      NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
+     NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
      call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
@@ -630,8 +624,6 @@ end subroutine exc_haydock_driver
 
 subroutine haydock_herm(BSp,BS_files,Cryst,Hdr_bse,my_t1,my_t2,&
 & nkets,kets,green,hexc,hexc_i,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -915,8 +907,6 @@ subroutine haydock_herm_algo(niter_done,niter_max,nomega,omega,tol_iter,check,&
 & green,inn,is_converged,&
 & hexc, hexc_i, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: niter_max,niter_done,nomega
@@ -1091,8 +1081,6 @@ end subroutine haydock_herm_algo
 
 subroutine haydock_restart(BSp,restart_file,ftype,iq_search,hsize,niter_file,aa_file,bb_file,phi_nm1_file,phi_n_file,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,hsize,iq_search,ftype
@@ -1209,8 +1197,6 @@ end subroutine haydock_restart
 !! SOURCE
 
 subroutine haydock_mdf_to_tensor(BSp,Cryst,eps,tensor_cart,tensor_red,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1336,8 +1322,6 @@ end subroutine haydock_mdf_to_tensor
 !! SOURCE
 
 subroutine haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,green,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1593,8 +1577,6 @@ end subroutine haydock_psherm
 
 subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
 &  factor,term_type,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,green,inn,is_converged,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1889,8 +1871,6 @@ end subroutine haydock_psherm_optalgo
 !! SOURCE
 
 subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,ep_renorms,green,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2200,8 +2180,6 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
 &  factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
 &  green,inn,is_converged,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: niter_tot,niter_done,nomega,comm,hsize,my_t1,my_t2,term_type
@@ -2492,8 +2470,6 @@ end subroutine haydock_bilanczos_optalgo
 !! SOURCE
 
 subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

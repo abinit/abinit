@@ -311,7 +311,7 @@ subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 ! write (std_out,*) ' m_hidecudarec/cudarec : enter'
 !ENDDEBUG
 
- call fourdp(1,rset%ZT_p,T_p,1,rset%mpi,rset%nfftrec,rset%ngfftrec,1,0)
+ call fourdp(1,rset%ZT_p,T_p,1,rset%mpi,rset%nfftrec,1,rset%ngfftrec,0)
  T_p = (one/rset%nfftrec)*T_p
 
  if(.not.(rset%tronc)) then

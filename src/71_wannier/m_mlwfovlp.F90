@@ -52,7 +52,6 @@ module m_mlwfovlp
  use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_fftcore,  only : sphereboundary
  use m_crystal,  only : crystal_t
- use m_crystal_io, only : crystal_ncwrite
  use m_ebands,   only : ebands_ncwrite
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type, simp_gen
@@ -1052,7 +1051,7 @@ contains
              tim_fourwf=0
              call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
 &             gbound,gbound,dtset%istwfk(ikpt),kg_k,kg_k,mgfft,&
-&             mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,dtset%paral_kgb,&
+&             mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 !            do jj3=1,n3,spacing
 !            do jj2=1,n2,spacing
@@ -1196,7 +1195,7 @@ contains
 
      NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
      NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
      ncerr = nctk_def_dims(ncid, [ &
@@ -1482,7 +1481,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
  integer::isppol
  character(len=fnlen) :: test_win1,test_win2,test_win3
  logical :: lfile
- character(len=2000) :: message   
+ character(len=2000) :: message
  character(len=10)::postfix
 ! *************************************************************************
 

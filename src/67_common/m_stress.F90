@@ -264,7 +264,7 @@ contains
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
@@ -526,7 +526,7 @@ contains
  if (abs(ipositron)==2) then
    ABI_ALLOCATE(rhog_ep,(2,nfft))
    ABI_ALLOCATE(dummy,(6))
-   call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    rhog_ep=-rhog_ep
    call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)

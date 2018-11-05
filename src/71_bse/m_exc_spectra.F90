@@ -45,7 +45,6 @@ MODULE m_exc_spectra
  use m_hide_blas,       only : xdotu,xdotc
  use m_special_funcs,   only : dirac_delta
  use m_crystal,         only : crystal_t
- use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : kmesh_t
  use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
@@ -279,9 +278,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 #ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
-     ! Write structure
-     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
-     ! Write QP energies
+     NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(QP_BSt, ncid))
      ! Write dielectric functions.
      call mdfs_ncwrite(ncid, Bsp, eps_exc,eps_rpanlf,eps_gwnlf)

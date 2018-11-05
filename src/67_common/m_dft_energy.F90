@@ -94,6 +94,7 @@ contains
 !! enl=nonlocal pseudopotential energy
 !! Also, compute new density from provided wfs, after the evaluation
 !! of ehart, enxc, and eei.
+!! WARNING XG180913 : At present, Fock energy not computed !
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
@@ -492,6 +493,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  energies%e_eigenvalues=zero
  energies%e_kinetic=zero
  energies%e_nlpsp_vfock=zero
+ energies%e_fock0=zero
  bdtot_index=0
  icg=0
 
@@ -582,7 +584,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      ABI_DEALLOCATE(vlocal_tmp)
    end if
 
-!  Continue Hamlitonian initializaton
+!  Continue Hamiltonian initialization
    call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
    if (with_vxctau) then
      call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
@@ -725,6 +727,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
          do iblocksize=1,blocksize
            iband=(iblock-1)*blocksize+iblocksize
            energies%e_eigenvalues=energies%e_eigenvalues+dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
+!          WARNING : the Fock contribution is NOT computed !!!
            energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
          end do
 
@@ -809,8 +812,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&   energies%e_localpsp + energies%e_corepsp
-   if (psps%usepaw==0) etotal=etotal + energies%e_nlpsp_vfock
+!&   energies%e_nlpsp_vfock - energies%e_fock0 +
+!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock 
+&   energies%e_nlpsp_vfock + energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
    etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
@@ -883,7 +887,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    ABI_DEALLOCATE(rhowfr)
    ABI_DEALLOCATE(rhowfg)
    rhor(:,:)=rhor(:,:)+nhat(:,:)
-   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
 
  end if
 

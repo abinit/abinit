@@ -615,7 +615,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  call scprqt(choice,cpus,deltae,diffor,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
-& dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
+& dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 & maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 & occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 & psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode)
@@ -1095,7 +1095,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &         ph1df,psps,psps%qgrid_vl,rhor,rprimd,scf_history,ucvol,&
 &         psps%usepaw,xred,xred_old,ylm,psps%ziontypat,psps%znuclpsp)
        end if
-       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
 
    end if ! moved_atm_inside==1 .or. istep==1
@@ -1140,9 +1140,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        fock%fock_common%forces=zero
      end if
 
-     if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf) then
+     if (istep==1 .or. istep_updatedfock==fock%fock_common%nnsclo_hf .or. &
+&        (fock%fock_common%nnsclo_hf>1 .and. fock%fock_common%scf_converged) ) then
 
        istep_updatedfock=1
+       fock%fock_common%scf_converged=.false.
 
        !Possibly mix the wavefunctions from different steps before computing the Fock operator
        if(wfmixalg/=0 .and. .not. (wfmixalg==2 .and. abs(scf_history_wf%alpha-one)<tol8) )then
@@ -1208,6 +1210,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &         dtset%mpw,dtset%natom,dtset%natom,dtset%nband,dtset%nfft,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,&
 &         dtset%nspinor,dtset%nsppol,dtset%ntypat,occ,dtset%optforces,paw_ij,pawtab,ph1d,psps,rprimd,&
 &         dtset%typat,usecprj,dtset%use_gpu_cuda,dtset%wtk,xred,ylm)
+         energies%e_fock0=fock%fock_common%e_fock0
        end if
 
        !Should place a test on whether there should be the final exit of the istep loop.
@@ -1281,7 +1284,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        if (dtfil%ireadwf/=0.and.dtfil%ireadden==0.and.initialized==0) then
          rhor(:,:)=rhor(:,:)+nhat(:,:)
          if(dtset%usewvl==0) then
-           call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+           call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
          end if
        end if
        call timab(558,2,tsec)
@@ -1635,7 +1638,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      end if
      call scprqt(choice,cpus,deltae,diffor,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
-&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
+&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 &     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
@@ -1841,7 +1844,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,&
 &     eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,&
-&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,dtset%kptns,&
+&     dtfil%filnam_ds(1),initialized0,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,&
 &     maxfor,moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,nstep,&
 &     occ,optres,prtfor,prtxml,quit,res2,resid,residm,response,tollist,&
 &     psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
@@ -2087,7 +2090,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& grxc,gsqcut,hdr,indsym,irrzon,istep,istep_fock_outer,istep_mix,&
+& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,&
@@ -2563,18 +2567,27 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 !  Compute total (free)- energy by direct scheme
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&     energies%e_localpsp + energies%e_corepsp + energies%e_fock+&
+      energies%e_localpsp + energies%e_corepsp +&
+!&    two*energies%e_fock - energies%e_fock0 +&   ! The Fock energy is already included in the non-local one
+!&     energies%e_nlpsp_vfock - energies%e_fock0 +&
 &     energies%e_entropy + energies%e_elecfield + energies%e_magfield+&
 &     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
-     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock
-     if (usepaw/=0) etotal = etotal + energies%e_paw
+
+!    See similar section in m_energies.F90
+!    XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
+     if (usepaw==0) etotal = etotal + energies%e_nlpsp_vfock - energies%e_fock0 
+!    XG 20181025 I was expecting the following to give also a variational energy in case of PAW, but this is not true. 
+!    if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_nlpsp_vfock - energies%e_fock0
+!    XG 20181025 So, the following is giving a non-variational expression ...
+     if (usepaw==1) etotal = etotal + energies%e_paw + energies%e_fock
+
    end if
 
 !  Compute total (free) energy by double-counting scheme
    if (optene==1) then
      etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc &
-&     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc+ energies%e_fock- energies%e_fockdc &
+&     - energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc- energies%e_fock0 &
 &     + energies%e_entropy + energies%e_elecfield + energies%e_magfield &
 &     + energies%e_hybcomp_E0 - energies%e_hybcomp_v0
      etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd

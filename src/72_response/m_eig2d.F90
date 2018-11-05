@@ -44,8 +44,7 @@ MODULE m_eig2d
 
  use m_time,       only : timab
  use m_fstrings,   only : strcat
- use m_crystal,    only : crystal_init, crystal_free, crystal_t
- use m_crystal_io, only : crystal_ncwrite
+ use m_crystal,    only : crystal_init,  crystal_t
  use m_pawtab,     only : pawtab_type
  use m_ddb,        only : DDB_VERSION
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
@@ -1732,7 +1731,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    end if
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
-   NCF_CHECK(crystal_ncwrite(Crystal,ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(Bands, ncid))
    call eigr2d_ncwrite(eigr2d,dtset%qptn(:),dtset%wtq,ncid)
    NCF_CHECK(nf90_close(ncid))
@@ -1748,7 +1747,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      fname = strcat(dtfil%filnam_ds(4),"_FAN.nc")
      call fan_init(fan,fan2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating FAN file")
-     NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(Bands, ncid))
      call fan_ncwrite(fan2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
@@ -1767,7 +1766,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      fname = strcat(dtfil%filnam_ds(4),"_GKK.nc")
      call gkk_init(gkk,gkk2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom,3)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-     NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(Bands, ncid))
      call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
      NCF_CHECK(nf90_close(ncid))
@@ -1799,7 +1798,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
 #ifdef HAVE_NETCDF
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
-       NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+       NCF_CHECK(crystal%ncwrite(ncid))
        NCF_CHECK(ebands_ncwrite(Bands, ncid))
        call eigr2d_ncwrite(eigi2d,dtset%qptn(:),dtset%wtq,ncid)
        NCF_CHECK(nf90_close(ncid))
@@ -1820,7 +1819,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    ABI_DEALLOCATE(gkk)
  end if
 
- call crystal_free(Crystal)
+ call crystal%free()
  call ebands_free(Bands)
  call eigr2d_free(eigr2d)
  call eigr2d_free(eigi2d)

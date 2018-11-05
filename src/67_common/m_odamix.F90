@@ -508,15 +508,13 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 
  etotal = energies%e_kinetic+ energies%e_hartree + energies%e_xc + &
-& energies%e_localpsp + energies%e_corepsp + &
+& energies%e_localpsp + energies%e_nlpsp_vfock - energies%e_fock0 + energies%e_corepsp + &
 & energies%e_entropy + energies%e_elecfield + energies%e_magfield
 !etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
 !& energies%e_xcdc + energies%e_corepsp + &
 !& energies%e_entropy + energies%e_elecfield
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
- if (usepaw==0) then
-   etotal = etotal + energies%e_nlpsp_vfock
- else
+ if (usepaw==1) then
    etotal = etotal + energies%e_paw
  end if
 
@@ -536,10 +534,10 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  write(std_out,*) " alphaopt",alphaopt
 
  energies%h0=(one-alphaopt)*energies%h0 + alphaopt*(energies%e_kinetic+energies%e_localpsp)
- if (usepaw==0) energies%h0=energies%h0 + alphaopt*energies%e_nlpsp_vfock
+ energies%h0=energies%h0 + alphaopt*energies%e_nlpsp_vfock
 
  rhor= rhor+(alphaopt-one)*nvresid
- call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+ call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,0)
 
  if (usepaw==1) then
    do iatom=1,my_natom

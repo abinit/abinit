@@ -89,7 +89,7 @@ contains
 !! type_calc= option governing which part of Hamitonian is to be applied:
 !             0: whole Hamiltonian
 !!            1: local part only
-!!            2: non-local+kinetic only (added to the exixting Hamiltonian)
+!!            2: non-local+Fock+kinetic only (added to the existing Hamiltonian)
 !!            3: local + kinetic only (added to the existing Hamiltonian)
 !! ===== Optional inputs =====
 !!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT tranformation
@@ -109,6 +109,7 @@ contains
 !!                                          or <G|H-lambda.S|C> (if sij_opt=-1)
 !!  gvnlxc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal+VFockACE|C> (if sij_opt>=0)
 !!                                            or <G|Vnonlocal+VFockACE-lambda.S|C> (if sij_opt=-1)
+!!      include Vnonlocal if NCPP and non-local Fock if associated(gs_ham%fockcommon)
 !!  if (sij_opt=1)
 !!    gsc(2,npw*my_nspinor*ndat)=matrix elements <G|S|C> (S=overlap).
 !!
@@ -166,7 +167,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp),target :: nonlop_dum(1,1)
  real(dp),allocatable :: buff_wf(:,:),cwavef1(:,:),cwavef2(:,:),cwavef_fft(:,:),cwavef_fft_tr(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghcnd(:,:),ghc_mGGA(:,:)
- real(dp),allocatable :: vlocal_tmp(:,:,:),work(:,:,:,:)
+ real(dp),allocatable :: gvnlc(:,:),vlocal_tmp(:,:,:),work(:,:,:,:)
  real(dp), pointer :: kinpw_k1(:),kinpw_k2(:),kpt_k1(:),kpt_k2(:)
  real(dp), pointer :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
@@ -290,8 +291,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
 !  fourwf can only process with one value of istwf_k
    if (.not.k1_eq_k2) then
-     msg='vlocal (fourwf) cannot be computed with k/=k^prime!'
-     MSG_BUG(msg)
+     MSG_BUG('vlocal (fourwf) cannot be computed with k/=k^prime!')
    end if
 
 !  Eventually adjust load balancing for FFT (by changing FFT distrib)
@@ -360,12 +360,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        if (have_to_reequilibrate) then
          call fourwf(1,gs_ham%vlocal,cwavef_fft,cwavef_fft,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k_fft,kg_k_fft,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
+&         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
        else
          call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
        end if
 
@@ -375,7 +375,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ABI_ALLOCATE(ghc1,(2,npw_k2*ndat))
          call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
          do idat=1,ndat
            do ipw =1, npw_k2
@@ -389,7 +389,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          ABI_ALLOCATE(ghc2,(2,npw_k2*ndat))
          call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &         use_gpu_cuda=gs_ham%use_gpu_cuda)
          do idat=1,ndat
            do ipw=1,npw_k2
@@ -415,7 +415,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (nspinor1TreatedByThisProc) then
        call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
 !    ghc2=v22*phi2
@@ -423,7 +423,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (nspinor2TreatedByThisProc) then
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
      ABI_DEALLOCATE(vlocal_tmp)
@@ -441,7 +441,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (nspinor1TreatedByThisProc) then
        call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
 !    ghc4=(re(v12)+im(v12))*phi2
@@ -455,7 +455,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        end do
        call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
-&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_ham%use_gpu_cuda)
      end if
      ABI_DEALLOCATE(vlocal_tmp)
@@ -559,7 +559,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  if ((type_calc==0).or.(type_calc==2).or.(type_calc==3)) then
 
 !============================================================
-! Application of the non-local potential
+! Application of the non-local potential and the Fock potential
 !============================================================
 
    if ((type_calc==0).or.(type_calc==2)) then
@@ -593,10 +593,36 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (gs_ham%usepaw==1) gsc_ptr => gsc
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
-  end if ! end type_calc 0 or 2 for nonlop application
-  if (type_calc == 3) then ! for kinetic and local only, nonlocal should be zero
+
+     if (gs_ham%usepaw==1 .and. has_fock)then
+       if (fock_get_getghc_call(fock)==1) then
+         ABI_ALLOCATE(gvnlc,(2,npw_k2*my_nspinor*ndat))
+         gvnlc=gvnlxc
+       endif
+     endif
+
+!    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
+     if (has_fock) then
+       if (fock_get_getghc_call(fock)==1) then
+         if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
+         do idat=1,ndat
+           if (fock%use_ACE==0) then
+             if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
+             call fock_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),cwaveprj_idat,&
+&             gvnlxc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
+           else
+             call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
+&             gvnlxc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
+           end if
+         end do ! idat
+       end if
+     end if
+
+   else if (type_calc == 3) then ! for kinetic and local only, nonlocal and vfock should be zero
+
      gvnlxc(:,:) = zero
-  end if
+
+   end if ! if(type_calc...
 
 !============================================================
 ! Assemble kinetic, local, nonlocal and Fock contributions
@@ -694,22 +720,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end do ! idat
    end if
 
-!  Calculation of the Fock exact exchange term
-   if (has_fock) then
-     if (fock_get_getghc_call(fock)==1) then
-       if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
-       do idat=1,ndat
-         if (fock%use_ACE==0) then
-           if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
-           call fock_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),cwaveprj_idat,&
-&           ghc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-         else
-           call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
-&           ghc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-         end if
-       end do ! idat
-     end if
-   end if
+!  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc
+   if (gs_ham%usepaw==1 .and. has_fock)then
+     gvnlxc=gvnlxc-gvnlc
+     ABI_DEALLOCATE(gvnlc)
+   endif
 
 !  Structured debugging : if prtvol=-level, stop here.
    if(prtvol==-level)then
@@ -866,7 +881,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
    call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef,ghc1,work,gbound_k,gbound_k,&
 &   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&   mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&   tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
    do idat=1,ndat
      do ipw=1,npw_k
@@ -878,7 +893,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
    do idir=1,3
      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
      istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
@@ -938,7 +953,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef1,ghc1,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
@@ -950,7 +965,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      do idir=1,3
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&      tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
@@ -998,7 +1013,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !    STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
      call fourwf(1,vxctaulocal(:,:,:,:,1),lcwavef2,ghc2,work,gbound_k,gbound_k,&
 &     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&     mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
        do ipw=1,npw_k
@@ -1010,7 +1025,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
      do idir=1,3
        call fourwf(1,vxctaulocal(:,:,:,:,1+idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
        istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-&       mpi_enreg%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+&      tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
@@ -1364,7 +1379,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
        gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
-       select_k=select_k_default)
+       select_K=select_k_default)
      end if
    end if
  end if

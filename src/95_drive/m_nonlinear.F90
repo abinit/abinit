@@ -786,7 +786,7 @@ end if
 !  Compute up+down rho(G) by fft
    ABI_ALLOCATE(work,(nfftf))
    work(:)=rhor(:,1)
-   call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+   call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
    ABI_DEALLOCATE(work)
 
  else
@@ -830,7 +830,7 @@ end if
 &   mpi_atmtab=mpi_enreg%my_atmtab, comm_atom=mpi_enreg%comm_atom)
    if (dtset%getden==0) then
      rhor(:,:)=rhor(:,:)+nhat(:,:)
-     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
    end if
    call timab(558,2,tsec)
  else

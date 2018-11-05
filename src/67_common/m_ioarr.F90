@@ -35,7 +35,6 @@ MODULE m_ioarr
  use m_errors
  use m_nctk
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_hdr
  use m_pawrhoij
@@ -850,7 +849,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
      NCF_CHECK(nctk_open_modify(ncid, file_etsf, xmpi_comm_self))
      NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
      ! Add information on the crystalline structure.
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      if (present(ebands)) then
        NCF_CHECK(ebands_ncwrite(ebands, ncid))
      end if
@@ -934,7 +933,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 ! *************************************************************************
 
  timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
- call crystal_from_hdr(crystal, hdr, timrev)
+ crystal = hdr_get_crystal(hdr, timrev)
 
  if (present(eigen)) then
      mband = maxval(hdr%nband)
@@ -950,7 +949,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
     call fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg)
  end if
 
- call crystal_free(crystal)
+ call crystal%free()
 
 end subroutine fftdatar_write_from_hdr
 !!***

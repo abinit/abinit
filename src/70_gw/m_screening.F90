@@ -2838,7 +2838,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
        MSG_ERROR(sjoin("Unknown model_type:",itoa(model_type)))
      end select
 
-     call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,ngfft,paral_kgb0,tim_fourdp0)
+     call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,1,ngfft,tim_fourdp0)
      !
      ! Here, unlike the other parts of the code, the unsymmetrized e^{-1} is used.
      do ig1=1,npw
