@@ -1878,7 +1878,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  nucdipmom
 
-   if (any(abs(dt%nucdipmom)>0)) then
+   if (any(abs(dt%nucdipmom)>tol8)) then
 
 !    nucdipmom requires PAW
      if(usepaw/=1)then
@@ -1910,6 +1910,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
 &       ' => stop ',ch10,&
 &       'Action: re-run with kptopt greater than 2 '
+       MSG_ERROR_NOSTOP(message,ierr)
+     end if
+
+     ! nucdipmom is not currently compatible with spinat (this is necessary because both are used in symfind)
+     if( any(abs(dt%spinat) > tol8) ) then
+       write(message, '(3a)' )&
+&       ' Nuclear dipole moments (variable nucdipmom) input as nonzero but spinat is also nonzero => stop',ch10,&
+&       'Action: re-run with spinat zero '
        MSG_ERROR_NOSTOP(message,ierr)
      end if
 
