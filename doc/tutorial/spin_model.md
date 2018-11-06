@@ -164,19 +164,19 @@ The following observables are printed, which are:
 
 * Cv: volume specific heat, which is
 
-  $C_v=(<E^2>-<E>^2)/(k_B T^2)$ . 
+  $C_v=(<E^2>-<E>^2)/(k_B^2 T^2)$ . 
 
-  At zero temperature $C_v=0$
+  The $<E>$ means average of energy of the unitcell over the observation time. At zero temperature $C_v=0$. 
 
 * chi ($\chi$): the isothermal suceptibility, which is:
 
   $\chi=\frac{\partial <m>}{\partial E}= (<m^2>-<m>^2)/(k_B T)$ .
 
-  At zero temperature, $\chi$ is not well defined <!--TODO: check this-->. 
+ The $<m>$ is the average of total staggered magnetic moment.  At zero temperature, $\chi$ is not well defined. <!--TODO: check this-->. 
 
 * BinderU4: The Binder cumulant, which is 
 
-  $U_4=1-\frac{<m^4>}{3<m^2>^2}$  .
+  $U_4=1-\frac{<m^4>}{3<m^2>^2}$.
 
   In a 3D Heisenberg system, $U_4$ goes to 2/3 when $T<T_C$ and goes to 4/9 when $T >T_C$ . 
 
@@ -192,7 +192,7 @@ We are now coming back to the values chosen for the input variables in the tmult
 
 * time step ([[multibinit: spin_dt]]):
 
-    Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.   (<!--TODO: there must be a better way.-->)
+    Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.  (<!--TODO: there must be a better way.-->)
 
 * supercell size ([[multibinit:ncell]])
 

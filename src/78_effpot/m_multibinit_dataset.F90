@@ -1273,7 +1273,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ABI_ALLOCATE(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_qpoint',tread,'DPR')
- if(tread==1) multibinit_dtset%spin_mag_field(1:3)= dprarr(1:3)
+ if(tread==1) multibinit_dtset%spin_qpoint(1:3)= dprarr(1:3)
 
 
  multibinit_dtset%spin_sia_add=0
