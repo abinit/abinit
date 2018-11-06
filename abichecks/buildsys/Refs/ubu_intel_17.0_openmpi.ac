@@ -769,7 +769,7 @@ enable_netcdf_default="yes"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+with_fft_flavor="fftw3-mkl"
 
 # Include flags for the FFT library (default is unset)
 #
