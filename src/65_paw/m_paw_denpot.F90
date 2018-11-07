@@ -866,7 +866,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !    Compute spin-orbit contribution to on-site energy
      if (option/=1.and.cplex_rhoij==2) then
-!TEST
        call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
      end if
 
@@ -1545,8 +1544,7 @@ subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab
  character(len=500) :: msg
 !arrays
  real(dp),pointer :: rhoij(:,:)
-!TEST
-real(dp) :: etest
+
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1567,7 +1565,7 @@ real(dp) :: etest
 
 !Special treatment for nspden
  nsploop=nspden_rhoij
- if (nspden_dij==1) nsploop=min(nspden_rhoij,2)
+ if (nspden_dij==1.and.nspden_rhoij==4) nsploop=1
 
 !Non-collinear case: need a temporary rhoij
  if (nspden_rhoij==4.and.nspden_dij==4) then
