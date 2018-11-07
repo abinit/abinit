@@ -131,6 +131,7 @@ contains
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
  real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),sxred0(3)
+ real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3),symspinat2(3),symxred2(3),trialnons(3)
  real(dp),allocatable :: local_nucdipmom(:,:,:),nucdipmomcl(:,:),nucdipmomred(:,:,:)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
@@ -238,8 +239,8 @@ contains
 &             abs(local_nucdipmom(3,1,iatom)-nucdipmomcl(3,iclass))<tolsym
          ! note in the following test, m_chkinp/chkinp has already prevented nucdipmom to be
          ! nonzero when spinat is nonzero
-         if( (test_samespin .or. test_sameabscollin .or. test_sameabsnoncoll) .OR. &
-&             test_samenucdipmom) then
+         if( (test_samespin .or. test_sameabscollin .or. test_sameabsnoncoll) .AND. &
+              & test_samenucdipmom ) then
 !          DEBUG
 !          write(std_out,*)' symfind : find it belongs to class iclass=',iclass
 !          write(std_out,*)' symfind : spinat(:,iatom)=',spinat(:,iatom)
@@ -277,7 +278,7 @@ contains
 !end do
 !ENDDEBUG
 
-!Select the class with the least number of atoms, and non-zero spinat or nucdipmom if any
+!Select the class with the least number of atoms, and non-zero spinat if any
 !It is important to select a magnetic class of atom, if any, otherwise
 !the determination of the initial (inclusive) set of symmetries takes only
 !non-magnetic symmetries, and not both magnetic and non-magnetic ones, see later.
@@ -294,12 +295,13 @@ contains
        iclass0=iclass
        natom0=natomcl(iclass)
        spinatcl20=spinatcl2
-     else if( (natomcl(iclass)<natom0 .and. (nucdipmomcl20<tolsym .or. nucdipmomcl2>tolsym))  &
-&     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)                         )then
-       iclass0=iclass
-       natom0=natomcl(iclass)
-       nucdipmomcl20=nucdipmomcl2
      end if
+!      if( (natomcl(iclass)<natom0 .and. (nucdipmomcl20<tolsym .or. nucdipmomcl2>tolsym))  &
+! &     .or. (nucdipmomcl20<tolsym .and. nucdipmomcl2>tolsym)                         )then
+!        iclass0=iclass
+!        natom0=natomcl(iclass)
+!        nucdipmomcl20=nucdipmomcl2
+!      end if
    end do
  end if
 
@@ -318,13 +320,11 @@ contains
  if (noncoll==1) then
    ABI_ALLOCATE(spinatred,(3,natom))
    do iatom=1,natom
-!      do ii=1,3
-!        spinatred(ii,iatom)=gprimd(1,ii)*spinat(1,iatom) &
-! &       +gprimd(2,ii)*spinat(2,iatom) &
-! &       +gprimd(3,ii)*spinat(3,iatom)
-      !      end do
-      ! re-write above loop for readability
-      spinatred(1:3,iatom) = MATMUL(TRANSPOSE(gprimd),spinat(1:3,iatom))
+     do ii=1,3
+       spinatred(ii,iatom)=gprimd(1,ii)*spinat(1,iatom) &
+&       +gprimd(2,ii)*spinat(2,iatom) &
+&       +gprimd(3,ii)*spinat(3,iatom)
+     end do
    end do
  end if
 
