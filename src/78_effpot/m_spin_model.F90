@@ -575,7 +575,7 @@ contains
           call spin_hist_t_inc(self%spin_hist)
        endif
 
-       write(post_fname, "(I4.4)") i+1
+       write(post_fname, "(I4.4)") i
        call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
             & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
        call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
@@ -610,7 +610,7 @@ contains
 
     do i = 1, T_nstep
        write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5 )" ) &
-            Tlist(i), Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total
+            Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total
        call wrtout(std_out, msg, "COLL")
        call wrtout(ab_out, msg, "COLL")
     end do
@@ -627,7 +627,7 @@ contains
 
     do i = 1, T_nstep
        write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
-            Tlist(i), Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
+            Tlist(i)*Ha_K, Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
             & (Mst_sub_norm_list(ii,i)/mu_B, ii=1, self%spin_ob%nsublatt)
        call wrtout(Tfile, Tmsg, "COLL")
     end do
