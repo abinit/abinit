@@ -164,7 +164,8 @@ void effpot_xml_checkXML(char *filename,char *name_xml){
      return;
   }
   xmlFreeDoc(doc);
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, int *loc_nrpt,\
@@ -229,7 +230,8 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
   *loc_nrpt   = irpt1;
   *tot_nrpt   = irpt2;
   *ntypat = itypat;
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *nqpt,
@@ -601,7 +603,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   //          irpt1,irpt2);
   //  exit(0);
   //}
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
@@ -651,7 +654,8 @@ void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
     cur = cur->next;
   }
   xmlFreeDoc(doc);  
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voigt,
@@ -776,7 +780,8 @@ void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voig
     cur = cur->next;
   }
   xmlFreeDoc(doc);
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
@@ -944,7 +949,8 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
     cur = cur->next;
   }
   xmlFreeDoc(doc);
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
   
 void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_max){
@@ -998,7 +1004,8 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   *ncoeff = icoeff;
   *nterm_max = iterm;
   *ndisp_max = idisp;
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 
@@ -1024,7 +1031,8 @@ void effpot_xml_getNumberKey(char *filename,char*name_key,int*result){
   }
   xmlFreeDoc(doc);
   *result = i;
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getValue(char *filename,char*name_key,char*result){
@@ -1052,7 +1060,8 @@ void effpot_xml_getValue(char *filename,char*name_key,char*result){
     cur = cur->next;
   }
   xmlFreeDoc(doc);
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,char*result){  
@@ -1079,7 +1088,8 @@ void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,c
     cur = cur->next;
   }
   xmlFreeDoc(doc);
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 /****************************************************/
@@ -1273,7 +1283,8 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   freeArray(&damping_factor_array);
   freeArray(&position_array);
   freeArray(&spinat_array);
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
   return 0;
 }
 
@@ -1654,7 +1665,8 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
   printf(" %d terms read\n", *bi_nnz);
 
   printf("Reading xml done!\n");
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
@@ -1801,7 +1813,8 @@ int test_read_xml() {
   }
 
 
-  fflush();
+  fflush(stdout);
+  fflush(stderr);
   return 0;
 }
 
