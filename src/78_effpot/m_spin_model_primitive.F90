@@ -277,6 +277,7 @@ contains
     logical, optional, intent(in) :: use_exchange, use_dmi, use_sia, use_bi
     logical :: uexc, udmi, usia, ubi
     real(dp) :: ref_energy
+
     type(c_ptr) ::  p_unitcell,         &
          p_masses,  p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
@@ -298,6 +299,9 @@ contains
          bi_vallist(:)=>null()
 
     real(dp) :: uc(3,3)
+
+    write(*,'(A58)') "Reading parameters from xml file and setting up spin model"
+    write(*,'(A80)') " "
 
     call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
          natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
@@ -344,7 +348,9 @@ contains
     uni_amplitude_list(:) = uni_amplitude_list(:) * eV_Ha
     bi_vallist(:) = bi_vallist(:) * eV_Ha
 
-    print *, "Spin model: setting structure."
+    write(*,'(A80)') " "
+    write(*,'(A21)') "Setting up spin model"
+    write(*,'(A15)') "Setting system"
     uc(:,:)=transpose(reshape(unitcell, [3,3]))
     call spin_model_primitive_t_set_atoms(self,natoms,uc, & 
             & reshape(positions, [3, natoms]), &
@@ -364,12 +370,12 @@ contains
     end if
 
     if(uexc) then
-       print *, "Spin model: setting exchange terms."
+       write(*,'(A23)') "Setting exchange terms"
        call spin_model_primitive_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
             reshape(exc_Rlist, (/3, exc_nnz /)), &
             reshape(exc_vallist, (/3, exc_nnz/)))
     else
-       print *, "Spin model: exchange term from xml file not used."
+       print *, " Exchange term from xml file not used"
     endif
 
     if(.not. present(use_dmi))  then
@@ -378,16 +384,16 @@ contains
        udmi=use_dmi
     end if
     if (udmi) then
-       print *, "Spin model: setting dmi terms."
+       write(*,'(A18)') "Setting DMI terms"
        ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
        !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
        !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
        call spin_model_primitive_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
             Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
             vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
-       print *, "Spin model: setting uniaxial SIA terms."
+       write(*,'(A27)') " Setting uniaxial SIA terms"
     else
-       print *, "Spin model: DMI term from xml file not used."
+       print *, " DMI term from xml file not used"
     end if
     !call self%set_uni(uni_nnz, uni_ilist, uni_amplitude_list, &
     !     reshape(uni_direction_list, [3, uni_nnz]) )
@@ -398,14 +404,14 @@ contains
        usia=use_sia
     end if
     if (usia) then
-       print *, "Spin model: setting SIA terms."
+       write(*,'(A18)') "Setting SIA terms"
        call spin_model_primitive_t_set_uni(self, uni_nnz, uni_ilist, uni_amplitude_list, &
             reshape(uni_direction_list, [3, uni_nnz]) )
     !call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
     !     Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
     !     vallist = reshape(bi_vallist, (/3,3, bi_nnz/)) )
     else
-       print *, "Spin model: SIA term in xml file not used."
+       print *, " SIA term in xml file not used"
     end if
 
     if(.not. present(use_bi)) then
@@ -415,12 +421,12 @@ contains
     endif
 
     if (ubi) then
-       print *, "Spin model: setting bilinear terms."
+       write(*,'(A23)') "Setting bilinear terms"
        call spin_model_primitive_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
             Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
             vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
     else
-       print *, "Spin model: Bilinear term in xml file not used."
+       print *, " Bilinear term in xml file not used"
     endif
 
     call xml_free_spin(xml_fname, ref_energy, p_unitcell,                 &
@@ -751,9 +757,16 @@ contains
 
     class(spin_model_primitive_t) :: self
     integer :: i, ii, jj,  R(3)
+    character(len=80) :: msg
     real(dp) :: tmp(3, 3)
-    print *, "==========spin terms==============="
-    print *, "Number of terms: ",  self%total_nnz
+
+    msg=repeat("=", 34)
+    write(msg, '(A34, 1X, A10, 1x, A34)') msg, 'spin terms', msg
+    call wrtout(std_out,msg,'COLL')
+
+    write(msg, '(1X, A16, 2X, I5.3)') 'Number of terms:',  self%total_nnz
+    call wrtout(std_out,msg,'COLL')
+
     do i=1, self%total_nnz
        do ii=1,3
           R(ii)=self%total_Rlist(ii)%data(i)
@@ -761,13 +774,30 @@ contains
              tmp(jj, ii)=self%total_val_list(jj, ii)%data(i)
           enddo
        enddo
-       print *, 'i=',  self%total_ilist%data(i), '  j=', self%total_jlist%data(i), &
-            '  R=', R , ' Value (Ha)= '
+
+       msg=repeat("-", 64)
+       write(msg, '(1X, A64)') msg
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+
+       write(msg, "(2X, A3, I5.4, 2X, A3, I5.4, 5X, A3, I4.2, I5.2, I5.2)")  & 
+            'i =', self%total_ilist%data(i), 'j =', self%total_jlist%data(i), 'R =', R
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+       write(msg, "(2X, A12)") 'Hessian (Ha)'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
        do ii=1, 3
-          write(*, *) tmp(ii, :)
+         write(msg, "(3ES21.12)") tmp(ii, :)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out, msg, 'COLL')
        end do
     end do
-    print *, "==================================="
+    
+    msg=repeat("=", 80)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    
   end subroutine spin_model_primitive_t_print_terms
 
 end module m_spin_model_primitive

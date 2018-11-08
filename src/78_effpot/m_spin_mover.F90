@@ -273,23 +273,27 @@ contains
     !real(dp) ::  S(3, self%nspins)
     real(dp):: t
     integer :: counter, i, ii
-    character(len=80) :: msg
+    character(len=80) :: msg, msg_empty
     t=0.0
     counter=0
-    write(msg, *) " Beginning spin dynamic steps :"
 
+    msg_empty=ch10
+
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    msg=repeat("=", 65)
-
+    write(msg, '(A20)') "Spin dynamic steps:"
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
+    write(msg, "(A13, 4X, A13, 6X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    msg=repeat("-", 65)
+    msg=repeat("-", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
@@ -342,7 +346,7 @@ contains
        t=t+self%dt
     enddo
 
-    msg=repeat("-", 65)
+    msg=repeat("-", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
@@ -354,7 +358,6 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-
     write(msg, "(6X, A10, 5X, 3A10, A11)")  'Sublattice', '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
@@ -365,10 +368,9 @@ contains
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
     end do
-    msg=repeat("-", 65)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
 
+    call wrtout(std_out,msg_empty,'COLL')
+    call wrtout(ab_out, msg_empty, 'COLL')
 
     write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13 )" ) &
          "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
@@ -379,7 +381,7 @@ contains
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out,  msg, "COLL")
 
-    msg=repeat("=", 65)
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
