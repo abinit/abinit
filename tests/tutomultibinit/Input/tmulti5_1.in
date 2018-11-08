@@ -36,5 +36,7 @@ spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read xml  and run spin dynamics. 
+#%%   The system is a simple cubic system with one spin per uc.
+#%%   The exchange is defined so that the Tc is about 620 K.
 #%%   Note: ncell, spin_ntime_pre, and spin_ntime are small.
 #%%<END TEST_INFO>

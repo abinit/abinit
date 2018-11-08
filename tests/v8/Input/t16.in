@@ -20,6 +20,7 @@ spin_nctime=100
 spin_dt=1e-16 s
 
 
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
