@@ -172,8 +172,6 @@ CONTAINS
 
 subroutine ddk_init(ddk, paths, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: paths(3)
@@ -243,8 +241,6 @@ end subroutine ddk_init
 
 subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk_path,prefix
@@ -257,7 +253,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
 !scalars
  integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb0=0, master=0
  logical,parameter :: force_istwfk1=.True.
- integer :: iomode, mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
+ integer :: mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: in_iomode, ii, ik, bandmin, bandmax, istwf_k
  integer :: my_rank, nproc, ierr
@@ -380,9 +376,8 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
 
  call in_wfd%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
 
- !Read Wavefunctions
- iomode = iomode_from_fname(wfk_path)
- call in_wfd%read_wfk(wfk_path,iomode)
+ ! Read Wavefunctions
+ call in_wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
 
  do spin=1,nsppol ! Loop over spins
    do ik=1,nkpt ! Loop over kpoints
@@ -530,8 +525,6 @@ end subroutine eph_ddk
 
 subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -551,15 +544,14 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
  type(fstab_t), pointer :: fs
  character(len=500) :: msg
 !arrays
- real(dp), allocatable :: eigen1(:)
- real(dp), allocatable :: velocityp(:,:)
+ real(dp), allocatable :: eigen1(:), velocityp(:,:)
 
 !************************************************************************
 
- if (ddk%rw_mode /= ddk_NOMODE) then
+ if (ddk%rw_mode /= DDK_NOMODE) then
    MSG_ERROR("ddk should be in ddk_NOMODE before open_read is called.")
  end if
- ddk%rw_mode = ddk_READMODE
+ ddk%rw_mode = DDK_READMODE
 
  ddk%maxnb = maxval(fstab(:)%maxnb)
  ddk%nkfs = maxval(fstab(:)%nkfs)
@@ -665,8 +657,6 @@ end subroutine ddk_read_fsvelocities
 
 subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !integer,intent(in) :: comm  ! could distribute this over k in the future
@@ -678,9 +668,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 !Local variables-------------------------------
 !scalars
  integer :: idir, ikfs, isppol, ik_ibz, iene
- integer :: iband
- integer :: mnb, nband_k
- integer :: nsig
+ integer :: iband, mnb, nband_k, nsig
  type(fstab_t), pointer :: fs
 !arrays
  real(dp), allocatable :: wtk(:,:)
@@ -744,8 +732,6 @@ end subroutine ddk_fs_average_veloc
 
 subroutine ddk_free(ddk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ddk_t),intent(inout) :: ddk
@@ -789,8 +775,6 @@ end subroutine ddk_free
 !! SOURCE
 
 subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1085,13 +1085,6 @@ end subroutine mkkpg
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & kg,kgindex,mpi_enreg,npwarr,pwind_k1,symrec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkpwind_k'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -1282,7 +1275,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
   ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
   ! 4\pi i comes from series expansion of plane waves, and ucvol comes from integration over space
   cscale_conversion = CMPLX(zero,four_pi*scale_conversion/ucvol)
-  
+
   ! make list of atoms with non-zero nuclear magnetic dipoles
   atom_nd_tot = 0
   do iatom = 1, natom
