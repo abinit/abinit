@@ -53,6 +53,10 @@ MODULE m_kg
  public :: kpgstr       ! Derivative of kinetic energy operator in reciprocal space.
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
  public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
+#ifdef MR_DEV
+ public :: mkkin_metdqdq.F90 ! Compute the second q-gradient of the derivative of the kinetic energy operator w.r.t a metric
+                             ! perturbation
+#endif
 
 contains
 !!***
@@ -1416,6 +1420,123 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
 
 end subroutine mknucdipmom_k
 !!***
+
+#ifdef MR_DEV
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mkkin_metdqdq
+!! NAME
+!! mkkin_metdqdq
+!!
+!! FUNCTION
+!! Compute elements of the second q-gradient of the metric
+!! kinetic energy operator in reciprocal
+!! space at given k point wrt cartesian q components.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1999-2017 ABINIT group (DRH, XG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  effmass=effective mass for electrons (1. in common case)
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  idir= strain perturbation direction
+!!  kg(3,npw) = integer coordinates of planewaves in basis sphere.
+!!  kpt(3)    = reduced coordinates of k point
+!!  npw       = number of plane waves at kpt.
+!!  qdir      = direction of the first q-gradient
+!!
+!! OUTPUT
+!!  dqdqkinpw(npw)=d/deps(istr) ( (1/2)*(2 pi)**2 * (k+G)**2 )
+!!
+!! NOTES
+!!
+!!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
+!!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
+!!    in the reduced to cartesian derivative conversion process) is here
+!!    explicictly included in the formulas.
+!!
+!!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
+!!    because this term is not symmetric w.r.t permutations of the two strain
+!!    indices.
+!!
+!!  **A -i factor has been factorized out in all the contributions of the second
+!!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
+!!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
+!!
+!! PARENTS
+!!      getgh1dqc_setup
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkkin_metdqdq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: idir,npw,qdir
+ real(dp),intent(in) :: effmass
+!arrays
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: gprimd(3,3),kpt(3)
+ real(dp),intent(out) :: dqdqkinpw(npw)
+
+!Local variables -------------------------
+!scalars
+ integer :: beta,delta,gamma,ig,ka,kb
+ real(dp) :: delbd,delbg,deldg
+ real(dp) :: dkinetic,gpk1,gpk2,gpk3,htpi
+ real(dp) :: gpkc(3)
+!arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+
+! *********************************************************************
+
+!htpi is (1/2) (2 Pi):
+ htpi=0.5_dp*two_pi
+
+ ka=idx(2*idir-1);kb=idx(2*idir)
+
+!For easier formula implementation
+ beta=ka
+ delta=kb
+ gamma=qdir
+
+!Kronecker deltas
+ delbd=0.0_dp; delbg=0.0_dp; deldg=0.0_dp
+ if (beta==delta) delbd=1.0_dp
+ if (beta==gamma) delbg=1.0_dp
+ if (delta==gamma) deldg=1.0_dp
+
+ do ig=1,npw
+   gpk1=dble(kg(1,ig))+kpt(1)
+   gpk2=dble(kg(2,ig))+kpt(2)
+   gpk3=dble(kg(3,ig))+kpt(3)
+
+!  Obtain G in cartesian coordinates
+   gpkc(1)=gprimd(1,1)*gpk1+gprimd(1,2)*gpk2+gprimd(1,3)*gpk3
+   gpkc(2)=gprimd(2,1)*gpk1+gprimd(2,2)*gpk2+gprimd(2,3)*gpk3
+   gpkc(3)=gprimd(3,1)*gpk1+gprimd(3,2)*gpk2+gprimd(3,3)*gpk3
+
+   dkinetic=htpi*(2.0_dp*deldg*gpkc(beta)+delbg*gpkc(delta)+ &
+ & delbd*gpkc(gamma))
+
+   dqdqkinpw(ig)=dkinetic/effmass
+ end do
+
+end subroutine mkkin_metdqdq
+!!***
+#endif
 
 end module m_kg
 !!***

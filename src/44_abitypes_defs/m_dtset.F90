@@ -1701,6 +1701,18 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 
  ABI_ALLOCATE(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
+
+#ifdef MR_DEV
+!MR modi:
+!Desactivate perturbation symmetries temporarily
+ do ipert=1,dtset%natom+6
+   do idir=1,3
+     if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+   end do
+ end do
+!........
+#endif
+
  npert=0
 ! ABI_ALLOCATE(pert_tmp,(3*mpert))
 
