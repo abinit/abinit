@@ -2616,7 +2616,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
        if (bsize > 0) then
          NCF_CHECK(nf90_def_dim(ncid, "rhoijselect_atoms_dim", bsize, bsize_id))
-         NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_cplex, bufsize_id))
+         NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_qphase*my_cplex, bufsize_id))
          ! Define variables.
          NCF_CHECK(nf90_def_var(ncid, "rhoijselect_atoms", NF90_INT, bsize_id, ibuffer_id))
          NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
@@ -3586,9 +3586,12 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
        if (my_nspden==2) write(msg,'(a,i3,a,i1)')' Atom #',iatom,' - Spin component ',irhoij
        if (my_nspden==4) write(msg,'(a,i3,2a)') ' Atom #',iatom,' - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
      else
-       if (my_nspden==1) write(msg,'(a,i3,a,i1,a)')   ' Atom #',iatom,' - L=',my_l_only,' ONLY'
-       if (my_nspden==2) write(msg,'(a,i3,a,i1,a,i1)')' Atom #',iatom,' - L=',my_l_only,' ONLY - Spin component ',irhoij
-       if (my_nspden==4) write(msg,'(a,i3,a,i1,3a)')  ' Atom #',iatom,' - L=',my_l_only,' ONLY - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
+       if (my_nspden==1) write(msg,'(a,i3,a,i1,a)')   ' Atom #',iatom,&
+&                        ' - L=',my_l_only,' ONLY'
+       if (my_nspden==2) write(msg,'(a,i3,a,i1,a,i1)')' Atom #',iatom,&
+&                        ' - L=',my_l_only,' ONLY - Spin component ',irhoij
+       if (my_nspden==4) write(msg,'(a,i3,a,i1,3a)')  ' Atom #',iatom,&
+&                        ' - L=',my_l_only,' ONLY - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
      end if
      call wrtout(my_unt,msg,my_mode)
    else if (my_l_only>=0) then

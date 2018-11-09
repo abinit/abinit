@@ -735,6 +735,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
        my_nattyp(jj)=my_nattyp(jj)+1
      end do
    end if
+   qphase_rhoij=merge(2,1,any(qphon(:)>tol8))
  else
 !  Do the allocation to avoid uninitialised variables.
    ABI_ALLOCATE(my_nattyp,(1))
@@ -746,10 +747,10 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    ABI_ALLOCATE(shape_type,(1))
    ABI_ALLOCATE(pawver,(1))
    ABI_ALLOCATE(rshp,(1))
-   qphase_rhoij=merge(2,1,any(qphon(:)>tol8))
    rhoij_nspden=nspden
    l_size_max=1
    l_max=1
+   qphase_rhoij=1
  end if
 
  n_fftgr=1;iscf10=mod(iscf,10)
