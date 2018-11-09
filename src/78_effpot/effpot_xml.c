@@ -1152,7 +1152,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     if (!xmlStrcmp(cur->name, (const xmlChar *)("unit_cell"))) {
       //printf("%s\n", cur->name);
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      printf("  unit_cell: %s\n", key);
+      //printf("  unit_cell: %s\n", key);
       string2Array((char *)key, unitcell, &size);
       xmlFree(key);
       key = xmlGetProp(cur, BAD_CAST "units");

@@ -375,7 +375,7 @@ contains
             reshape(exc_Rlist, (/3, exc_nnz /)), &
             reshape(exc_vallist, (/3, exc_nnz/)))
     else
-       print *, " Exchange term from xml file not used"
+       write(*, '(A38)') " Exchange term from xml file not used."
     endif
 
     if(.not. present(use_dmi))  then
