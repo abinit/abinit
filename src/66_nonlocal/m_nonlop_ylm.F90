@@ -80,10 +80,12 @@ contains
 !!          =1 => non-local energy contribution
 !!          =2 => 1st derivative(s) with respect to atomic position(s)
 !!          =3 => 1st derivative(s) with respect to strain(s)
+!!          =22=> mixed 2nd derivative(s) with respect to atomic pos. and q vector (at q=0)
 !!          =23=> 1st derivative(s) with respect to atomic pos. and
 !!                1st derivative(s) with respect to atomic pos. and strains
 !!          =4 => 2nd derivative(s) with respect to 2 atomic pos.
 !!          =24=> 1st derivative(s) with respect to atm. pos. and
+!!          =33=> mixed 2nd derivative(s) with respect to strain and q vector (at q=0)
 !!                2nd derivative(s) with respect to 2 atomic pos.
 !!          =5 => 1st derivative(s) with respect to k wavevector, typically
 !!                sum_ij [ |p_i> D_ij <dp_j/dk| + |dp_i/dk> D_ij < p_j| ]
@@ -106,7 +108,7 @@ contains
 !!                (derivative with respect to k of choice 51), typically
 !!                sum_ij [ |dp_i/dk1> D_ij <dp_j/dk2| + |p_i> D_ij < d2p_j/dk1dk2| ]
 !!    Only choices 1,2,3,23,4,5,6 are compatible with useylm=0.
-!!    Only choices 1,2,3,5,51,52,53,7,8,81 are compatible with signs=2
+!!    Only choices 1,2,22,3,5,33,51,52,53,7,8,81 are compatible with signs=2
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  dimenl1,dimenl2=dimensions of enl (see enl)
 !!  dimekbq=1 if enl factors do not contain a exp(-iqR) phase, 2 is they do
@@ -132,10 +134,11 @@ contains
 !!          for the application of the nonlocal operator to the |out> vector
 !!  -----------------------------------------------------------
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-!!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
+!!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,signs=2S)
 !!                          for choice 53, twisted derivative involves idir+1 and idir-1
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
+!!                        - strain component (1:9) in the case (choice=33,signs=2)
 !!  indlmn(6,i,ntypat)= array giving l,m,n,lm,ln,s for i=lmn
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  kgin(3,npwin)=integer coords of planewaves in basis sphere, for the |in> vector
@@ -196,6 +199,7 @@ contains
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1D structure factors phase information
 !!  ph3din(2,npwin,matblk)=3D structure factors, for each atom and plane wave (in)
 !!  ph3dout(2,npwout,matblk)=3-dim structure factors, for each atom and plane wave (out)
+!!  [qdir]= optional,direction of the q-gradient (only for choice=22 and choice=33)
 !!  signs= if 1, get contracted elements (energy, forces, stress, ...)
 !!         if 2, applies the non-local operator to a function in reciprocal space
 !!  sij(dimenl1,ntypat*(paw_opt/3))=overlap matrix components (only if paw_opt=2, 3 or 4)
@@ -239,6 +243,11 @@ contains
 !! --If (paw_opt==4)
 !!      not available
 !! ==== if (signs==2) ====
+!! --if (paw_opt=0)
+!!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
+!!                or one of its derivatives to the input vect.  
+!!      if (choice=22) <G|d2V_nonlocal/d(atm. pos)dq|vect_in> (at q=0)
+!!      if (choice=33) <G|d2V_nonlocal/d(strain)dq|vect_in> (at q=0)
 !! --if (paw_opt=0, 1 or 4)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.:
@@ -310,6 +319,20 @@ contains
 !! the same is true for the pairs npwin-npwout, ffnlin-ffnlout,
 !! kgin-kgout, ph3din-ph3dout, phkredin-phkxredout).
 !!
+!! Notes about choice==33:
+!!  **Since the 2nd derivative w.r.t q-vector is calculated along cartesian
+!!    directions, the 1/twopi**2 factor (that in the rest of the code is applied
+!!    in the reduced to cartesian derivative conversion process) is here 
+!!    explicictly included in the formulas.
+!!  
+!!  **Notice that idir=1-9, in contrast to the strain perturbation (idir=1-6),
+!!    because this term is not symmetric w.r.t permutations of the two strain
+!!    indices.
+!!
+!!  **A -i factor has been factorized out in all the contributions of the second
+!!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
+!!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
+!!
 !! TODO
 !! * Complete implementation of spin-orbit
 !!
@@ -327,7 +350,7 @@ contains
 &                      kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
-&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left)
+&                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left,qdir)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -343,6 +366,7 @@ contains
  integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,nkpgin,nkpgout,nnlout
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,signs
+ integer,intent(in),optional :: qdir
  real(dp),intent(in) :: lambda,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -413,8 +437,8 @@ contains
 
 !signs=2, less choices
  if (signs==2) then
-   check=(choice==0.or.choice==1.or.choice==2.or.choice==3 .or.&
-&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.choice==54.or.&
+   check=(choice==0.or.choice==1.or.choice==2.or.choice==22.or.choice==3 .or.&
+&   choice==5.or.choice==33.or.choice==51.or.choice==52.or.choice==53.or.choice==54.or.&
 &   choice==7.or.choice==8.or.choice==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=2)')
  end if
@@ -422,6 +446,10 @@ contains
  if (choice==3.and.signs==2) then
    check=(idir>=1.and.idir<=6)
    ABI_CHECK(check,'BUG: choice=3 and signs=2 requires 1<=idir<=6')
+!1<=idir<=9 is required when choice= 33 and signs=2
+ else if (choice==33.and.signs==2) then
+   check=(idir>=1.and.idir<=9)
+   ABI_CHECK(check,'BUG: choice= 33 and signs=2 requires 1<=idir<=9')
 !1<=idir<=9 is required when choice==8/81 and signs=2
  else if ((choice==8.or.choice==81.or.choice==54).and.signs==2) then
    check=(idir>=1.and.idir<=9)
@@ -431,6 +459,12 @@ contains
    check=(signs/=2.or.choice<=1.or.choice==7.or.(idir>=1.and.idir<=3))
    ABI_CHECK(check,'BUG: signs=2 requires 1<=idir<=3')
  end if
+!1<=qdir<=3 is required when choice==22 or choice==33 and signs=2
+ if ((choice==22.or.choice==33).and.signs==2) then
+   check=(qdir>=1.and.qdir<=3)
+   ABI_CHECK(check,'BUG: choice=22 and signs=2 requires 1<=idir<=3')
+ end if
+
 !check allowed values for cpopt
  check=(cpopt>=-1.and.cpopt<=4)
  ABI_CHECK(check,'bad value for cpopt')
@@ -476,6 +510,10 @@ contains
    if (signs==2) ndgxdt=1
    if (signs==2) ndgxdtfac=1
  end if
+ if (choice==22) then
+   if (signs==2) ndgxdt=1
+   if (signs==2) ndgxdtfac=1
+ end if
  if (choice==3) then
    if (signs==1) ndgxdt=6
    if (signs==2) ndgxdt=1
@@ -499,6 +537,12 @@ contains
    if(signs==2) ndgxdt=1
    if(signs==2) ndgxdtfac=1
  end if
+ if (choice==33) then
+   if(signs==2) ndgxdt=2
+   if(signs==2) ndgxdtfac=2
+   if(signs==2) nd2gxdt=3
+   if(signs==2) nd2gxdtfac=3
+ end if 
  if (choice==51) then
    if(signs==1) ndgxdt=3
    if(signs==2) ndgxdt=1
@@ -593,7 +637,7 @@ contains
 
 !Eventually re-compute (k+G) vectors (and related data)
  nkpgin_=0
- if (choice==2.or.choice==54) nkpgin_=3
+ if (choice==2.or.choice==22.or.choice==33.or.choice==54) nkpgin_=3
  if (signs==1) then
    if (choice==4.or.choice==24) nkpgin_=9
    if (choice==3.or.choice==23.or.choice==6) nkpgin_=3
@@ -607,7 +651,7 @@ contains
    kpgin_  => kpgin
  end if
  nkpgout_=0
- if ((choice==2.or.choice==54).and.signs==2) nkpgout_=3
+ if ((choice==2.or.choice==22.or.choice==3.or.choice==54).and.signs==2) nkpgout_=3
  if (nkpgout<nkpgout_) then
    ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
    call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
@@ -784,7 +828,7 @@ contains
        if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
          call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &         ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
-&         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin)
+&         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
        end if
 
 !      Transfer result to output variable cprj (if requested)
@@ -883,7 +927,7 @@ contains
            call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &           d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
 &           idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
-&           nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout)
+&           nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
          end if
 
        end if ! choice==0
