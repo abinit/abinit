@@ -1499,12 +1499,6 @@ end subroutine pawdensities
 !! SOURCE
 
 subroutine pawaccenergy(epaw,pawrhoij,dij,cplex_dij,qphase_dij,nspden_dij,pawtab,epaw_im)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawaccenergy'
 !End of the abilint section
 
  implicit none
@@ -1682,13 +1676,6 @@ end subroutine pawaccenergy
 !! SOURCE
 
 subroutine pawaccenergy_nospin(epaw,pawrhoij,dij,cplex_dij,qphase_dij,pawtab,epaw_im)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawaccenergy_nospin'
-!End of the abilint section
 
  implicit none
 

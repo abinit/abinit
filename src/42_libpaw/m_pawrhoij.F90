@@ -3147,13 +3147,6 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 subroutine pawrhoij_filter(rhoij,rhoijselect,nselect,cplex,qphase,lmn2_size,nspden, &
 &                          rhoij_input) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_filter'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3370,14 +3363,6 @@ end subroutine pawrhoij_inquire_dim
 subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
 &          rhoijselect,test_value,title_msg,unit,opt_prtvol,&
 &          l_only,indlmn,mode_paral) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_print_rhoij'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
