@@ -29,7 +29,7 @@ module m_multipoles
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_distribfft
  use m_xmpi
  use m_atomdata
@@ -82,13 +82,6 @@ contains
 
 subroutine multipoles_fftr(arraysp,dipole,nfft,ngfft,nspden,rprimd,origin,&
 &                          distribfft,mpi_comm_grid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multipoles_fftr'
-!End of the abilint section
 
  implicit none
 
@@ -244,14 +237,6 @@ end subroutine multipoles_fftr
 subroutine multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,nspden,&
 &                         ntypat,rprimd,typat,ucvol,unit_out,xred,ziontypat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'multipoles_out'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -380,14 +365,6 @@ end subroutine multipoles_out
 
 subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 &  rhor,rprimd,typat,ucvol,vtrial,xred,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out1dm'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

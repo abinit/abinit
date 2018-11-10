@@ -57,6 +57,8 @@ dmft_rslf 0
 dmft_mxsf 0.7
 dmft_dc 1
 dmft_t2g 1   # special value for t2g only calculation.
+# For historical purposes only, do not use outside of tests
+dmft_occnd_imag 0
 
 # == CTQMC
 dmft_solv 5 # CTQMC
@@ -78,7 +80,6 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 ##150 seq psp1=23v.paw psp2=38sr.paw psp3=8o.2.paw opt=-medium DS3AT=Gtau.dat
 ##%%                  t27o_DS2_atom_01_Gtau_01.dat,  tolnlines =0, tolabs =0.0e-00, tolrel = 0.0e-00, fld_options=-medium
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

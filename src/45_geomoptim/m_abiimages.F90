@@ -39,7 +39,7 @@
 
 module m_abiimages
 
- use m_profiling_abi
+ use m_abicore
  use defs_basis
  use m_abihist
  use m_xmpi
@@ -120,13 +120,6 @@ contains
 
 subroutine abiimages_ini(images,nimages,natom,nrecord)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abiimages_ini'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -181,13 +174,6 @@ end subroutine abiimages_ini
 !! SOURCE
 
 subroutine abiimages_fin(images)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abiimages_fin'
-!End of the abilint section
 
  implicit none
 

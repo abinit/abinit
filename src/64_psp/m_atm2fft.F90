@@ -28,7 +28,7 @@ module m_atm2fft
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -36,7 +36,7 @@ module m_atm2fft
  use defs_datatypes,only : pseudopotential_type
  use m_pawtab,      only : pawtab_type
  use m_distribfft,  only : distribfft_type
- use m_fft,         only : zerosym
+ use m_fft,         only : zerosym, fourdp
  use m_mpinfo,      only : set_mpi_enreg_fft, unset_mpi_enreg_fft, initmpi_seq
 
  implicit none
@@ -193,15 +193,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &                  optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
 &                  psps,pawtab,ph1d,qgrid,qprtrb,rhog,strn,strv,ucvol,usepaw,vg,vg1,vg1_core,vprtrb,vspl,&
 &                  is2_in,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atm2fft'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -770,13 +761,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      xnorm=one/ucvol
      if (optv==1) then
        call zerosym(workv,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
-       call fourdp(1,workv,atmvloc,1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+       call fourdp(1,workv,atmvloc,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmvloc(:)=atmvloc(:)*xnorm
        ABI_DEALLOCATE(workv)
      end if
      if (optn==1) then
        call zerosym(workn,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
-       call fourdp(1,workn,atmrho,1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+       call fourdp(1,workn,atmrho,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmrho(:)=atmrho(:)*xnorm
        ABI_DEALLOCATE(workn)
      end if
@@ -877,13 +868,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
    function gsq_atm(i1,i2,i3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsq_atm'
-!End of the abilint section
-
    real(dp) :: gsq_atm
    integer,intent(in) :: i1,i2,i3
    gsq_atm=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+dble(i3*i3)*gmet(3,3) &
@@ -892,13 +876,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
    function dgsqds_atm(i1,i2,i3,is)
 !Define dG^2/ds based on G space metric derivative
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dgsqds_atm'
-!End of the abilint section
-
    real(dp) :: dgsqds_atm
    integer,intent(in) :: i1,i2,i3,is
    dgsqds_atm=dble(i1*i1)*dgm(1,1,is)+dble(i2*i2)*dgm(2,2,is)+&
@@ -910,13 +887,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
    function d2gsqds_atm(i1,i2,i3,is1,is2)
 !  Define 2dG^2/ds1ds2  based on G space metric derivative
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'd2gsqds_atm'
-!End of the abilint section
-
    real(dp) :: d2gsqds_atm
    integer,intent(in) :: i1,i2,i3,is1,is2
    d2gsqds_atm=dble(i1*i1)*d2gm(1,1,is1,is2)+&
@@ -1022,14 +992,6 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 &                   ph1d,qgrid,qphon,typat,ucvol,usepaw,xred,psps,pawtab,&
 &                   atmrhor1,atmrhog1,atmvlocr1,atmvlocg1,distribfft,gauss,comm_fft,me_g0,optn_in,&
 &                   optn2_in,optv_in,paral_kgb,vspl) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_atm2fft'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -1525,7 +1487,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
          else if (qeq05) then !q=1/2; this doesn't work in parallel
            call zerosym(workv(:,:,id),2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
          end if
-         call fourdp(cplex,workv(:,:,id),atmvlocr1(:,id),1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+         call fourdp(cplex,workv(:,:,id),atmvlocr1(:,id),1,mpi_enreg_fft,nfft,1,ngfft,0)
          atmvlocr1(:,id)=atmvlocr1(:,id)*xnorm
        end do
 
@@ -1541,7 +1503,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
          else if (qeq05) then !q=1/2; this doesn't work in parallel
            call zerosym(workn(:,:,id),2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
          end if
-         call fourdp(cplex,workn(:,:,id),atmrhor1(:,id),1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+         call fourdp(cplex,workn(:,:,id),atmrhor1(:,id),1,mpi_enreg_fft,nfft,1,ngfft,0)
          atmrhor1(:,id)=atmrhor1(:,id)*xnorm
        end do
        !if (present(atmrhog1)) atmrhog1 = workn

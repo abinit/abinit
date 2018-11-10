@@ -29,7 +29,7 @@ module m_stress
  use defs_basis
  use defs_abitypes
  use m_efield
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -41,7 +41,7 @@ module m_stress
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_fft,              only : zerosym
+ use m_fft,              only : zerosym, fourdp
  use m_mpinfo,           only : ptabs_fourdp
  use m_vdw_dftd2,        only : vdw_dftd2
  use m_vdw_dftd3,        only : vdw_dftd3
@@ -179,15 +179,6 @@ contains
 &                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'stress'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -273,7 +264,7 @@ contains
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
      v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
@@ -535,7 +526,7 @@ contains
  if (abs(ipositron)==2) then
    ABI_ALLOCATE(rhog_ep,(2,nfft))
    ABI_ALLOCATE(dummy,(6))
-   call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    rhog_ep=-rhog_ep
    call strhar(electronpositron%e_hartree,gsqcut,dummy,mpi_enreg,nfft,ngfft,rhog_ep,rprimd)
    strten(:)=strten(:)+dummy(:);harstr(:)=harstr(:)+dummy(:)
@@ -714,13 +705,6 @@ end subroutine stress
 
 subroutine strhar(ehart,gsqcut,harstr,mpi_enreg,nfft,ngfft,rhog,rprimd,&
 &                 rhog2) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strhar'
-!End of the abilint section
 
  implicit none
 

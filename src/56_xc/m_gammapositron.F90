@@ -27,7 +27,7 @@ module m_gammapositron
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_electronpositron
 
@@ -92,13 +92,6 @@ contains
 !! SOURCE
 
 subroutine gammapositron(gamma,grhocore2,grhoe2,igamma,ngr,npt,rhocore,rhoer,rhopr,usecore)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gammapositron'
-!End of the abilint section
 
  implicit none
 
@@ -318,13 +311,6 @@ end subroutine gammapositron
 
 subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
 &                            n3xccc,nfft,ngfft,rhor_e,rhor_p,xccc3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gammapositron_fft'
-!End of the abilint section
 
  implicit none
 

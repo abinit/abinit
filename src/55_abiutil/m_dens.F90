@@ -27,7 +27,7 @@ MODULE m_dens
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_splines
 
@@ -87,13 +87,6 @@ contains
 
 subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
   natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,prtcharge,hcharge,hden,hweight)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dens_hirsh'
-!End of the abilint section
 
  implicit none
 
@@ -438,13 +431,6 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
                       mpi_enreg,nfft,ngfft,ntypat,ratsph,rhor, &
                       typat,Vmagconstr,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mag_constr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -689,14 +675,6 @@ end subroutine mag_constr
 
 subroutine mag_constr_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsph,rhor,rprimd,spinat,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mag_constr_e'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -863,14 +841,6 @@ end subroutine mag_constr_e
 
 subroutine calcdensph(gmet,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,nunit,ratsph,rhor,rprimd,typat,ucvol,xred,&
 &    prtopt,cplex,intgden,dentot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcdensph'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1361,13 +1331,6 @@ end subroutine calcdensph
 
 function radsmear(r, rsph, rsm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'radsmear'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1431,13 +1394,6 @@ end function radsmear
 !! SOURCE
 
 subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'printmagvtk'
-!End of the abilint section
 
  implicit none
 

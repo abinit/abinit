@@ -27,7 +27,7 @@
 module m_mkcore_wvl
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
  use m_xmpi
@@ -120,13 +120,6 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_wvl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -567,14 +560,6 @@ subroutine mkcore_wvl_old(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: ext_buffers,ind_positions
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_wvl_old'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -944,13 +929,6 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 &          nfgd,nfgd_r0,nspden,n3xccc,option,pawtab,rmet,rr,strdia,vxc,xccc3d,&
 &          rred) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_inner'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1123,7 +1101,7 @@ end module m_mkcore_wvl
 !%%
 !%%  use defs_basis
 !%%  use defs_abitypes
-!%%  use m_profiling_abi
+!%%  use m_abicore
 !%%  use m_errors
 !%%  use m_xmpi
 !%%
@@ -1133,14 +1111,6 @@ end module m_mkcore_wvl
 !%%  use m_pawrad,   only : pawrad_type, pawrad_init, pawrad_free
 !%%  use m_pawtab,   only : pawtab_type
 !%%  use m_mpinfo,   only : ptabs_fourdp
-!%%
-!%% !This section has been created automatically by the script Abilint (TD).
-!%% !Do not modify the following lines by hand.
-!%% #undef ABI_FUNC
-!%% #define ABI_FUNC 'mkcore_paw'
-!%%  use interfaces_14_hidewrite
-!%%  use interfaces_67_common, except_this_one => mkcore_paw
-!%% !End of the abilint section
 !%%
 !%%  implicit none
 !%%

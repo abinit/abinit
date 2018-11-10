@@ -25,7 +25,7 @@
 module m_predict_steepest
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_mep
 
  use m_results_img, only : results_img_type,get_geometry_img
@@ -93,13 +93,6 @@ contains
 
 subroutine predict_steepest(itimimage,itimimage_eff,list_dynimage,mep_param,natom,&
 &                           ndynimage,nimage,ntimimage_stored,results_img)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'predict_steepest'
-!End of the abilint section
 
  implicit none
 

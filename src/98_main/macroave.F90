@@ -57,7 +57,7 @@ program macroave
  use defs_basis
  use defs_abitypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -68,13 +68,6 @@ program macroave
 
  use m_fstrings,        only : sjoin, strcat, endswith
  use m_io_tools,        only : file_exists, open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'macroave'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------

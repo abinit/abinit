@@ -685,8 +685,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     211.750     211.714
        -0.000   0.000  -0.998   0.000  -0.123   0.000  -0.123  -0.000  -0.123
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  28.5776
-  dielectric constant without local fields =  31.4722
+  dielectric constant =  28.5774
+  dielectric constant without local fields =  31.4720
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     90.34  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -888,9 +888,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     211.750     211.714
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5233 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.5903 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5233 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.5903 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27

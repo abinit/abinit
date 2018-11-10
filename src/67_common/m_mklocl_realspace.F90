@@ -35,7 +35,7 @@ module m_mklocl_realspace
  use defs_abitypes
  use defs_wvltypes
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,        only : timab
@@ -46,6 +46,8 @@ module m_mklocl_realspace
  use m_paw_numeric, only : paw_splint, paw_splint_der
  use m_psolver,     only : psolver_hartree, psolver_kernel
  use m_abi2big,     only : wvl_rhov_abi2big
+ use m_wvl_wfs,     only : derf_ab
+ use m_fft,         only : fourdp
 
 
  implicit none
@@ -115,14 +117,6 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
 #else
  use defs_wvltypes, only : coulomb_operator
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mklocl_realspace'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -308,7 +302,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
          rhor_testing(ii) = exp(-r/4._dp)
        end do
 !      Testing only, compute rhog_testing from rhor_testing
-       call fourdp(1,rhog_testing,rhor_testing,-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+       call fourdp(1,rhog_testing,rhor_testing,-1,mpi_enreg,nfft,1,ngfft,0)
      end if
 
 !    Compute the interpolation of rho, using a fourier transform
@@ -347,7 +341,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg,natom,nattyp,nfft,ngfft,nscf
      ngfft_interpol(:) = ngfft(:)
      ngfft_interpol(1:3) = (/ n1 * nStep, n2 * nStep, n3 * nStep /)
      ngfft_interpol(4:6) = (/ n1 * nStep + 1, n2 * nStep + 1, n3 * nStep /)
-     call fourdp(1,rhog_interpol,rhor_work,1,mpi_enreg,nfft*n_interpol,ngfft_interpol,mpi_enreg%paral_kgb,0)
+     call fourdp(1,rhog_interpol,rhor_work,1,mpi_enreg,nfft*n_interpol,1,ngfft_interpol,0)
 
 !    Reorder rhor_interpol to be able to read it linearly
      jj = 0
@@ -633,13 +627,6 @@ subroutine createIonicPotential_new(fftn3_distrib,ffti3_local,geocode,iproc,&
 &  hxh,hyh,hzh,n1i,n2i,n3d,n3i,kernel,pot_ion,spaceworld,pawtab,usepaw)
 
  use defs_wvltypes, only : coulomb_operator
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'createIonicPotential_new'
-!End of the abilint section
-
 implicit none
 
 !Arguments -------------------------------
@@ -912,14 +899,6 @@ implicit none
 
 subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcVloc_mklocl'
- use interfaces_43_wvl_wrappers
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -957,13 +936,6 @@ subroutine calcVloc_mklocl(yy,xx,rloc,Z)
 !! SOURCE
 
 function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vloc_zero_mklocl'
-!End of the abilint section
 
  implicit none
 
@@ -1039,13 +1011,6 @@ end subroutine createIonicPotential_new
 subroutine local_forces_new(fftn3_distrib,ffti3_local,&
      geocode,iproc,ntypes,nat,iatype,rxyz,gridcart,psppar,nelpsp,hxh,hyh,hzh,&
      n1,n2,n3,n3d,rho,pot,floc,pawtab,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'local_forces_new'
-!End of the abilint section
 
   implicit none
 
@@ -1247,14 +1212,6 @@ subroutine local_forces_new(fftn3_distrib,ffti3_local,&
 
 subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcdVloc_mklocl'
- use interfaces_43_wvl_wrappers
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -1292,13 +1249,6 @@ subroutine calcdVloc_mklocl(yy,xx,rloc,Z)
 !! SOURCE
 
 function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvloc_zero_mklocl'
-!End of the abilint section
 
  implicit none
 
@@ -1375,13 +1325,6 @@ end subroutine local_forces_new
 
 subroutine ind_positions_mklocl(periodic,i,n,j,go)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ind_positions_mklocl'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1453,14 +1396,6 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  use BigDFT_API, only : ELECTRONIC_DENSITY,createIonicPotential,local_forces
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mklocl_wavelets'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1682,13 +1617,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'local_forces_wvl'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1901,14 +1829,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 
 subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calcdVloc_wvl'
- use interfaces_43_wvl_wrappers
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -1946,13 +1866,6 @@ subroutine calcdVloc_wvl(yy,xx,rloc,Z)
 !! SOURCE
 
 function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvloc_zero_wvl'
-!End of the abilint section
 
  implicit none
 

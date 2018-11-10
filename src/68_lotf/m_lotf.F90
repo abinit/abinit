@@ -12,6 +12,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -22,19 +23,19 @@ module LOTFPATH
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use defs_param_lotf, only : lotfvar
 
  implicit none
- public  
+ public
 
  !--Lotf variables used in non-lotf procedure (ex.moldyn)
- real(dp),allocatable,dimension(:,:) :: alpha,alpha_in,alpha_end  
+ real(dp),allocatable,dimension(:,:) :: alpha,alpha_in,alpha_end
 
  real(dp),private :: epotlotf
  integer,private,allocatable,dimension(:)   :: nneig,nneig_old
- integer,private,allocatable,dimension(:,:) :: neighl,neighl_old 
+ integer,private,allocatable,dimension(:,:) :: neighl,neighl_old
  real(dp),private,allocatable,dimension(:,:) :: xcartfit,velfit,fcartfit
  character(len=500),private :: message
 
@@ -52,26 +53,28 @@ module LOTFPATH
 
  private :: alpha_update
 
-contains 
+contains
 !!***
 
- !!****f* lotfpath/init_lotf
- !! NAME
- !! init_lotf
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* lotfpath/init_lotf
+!! NAME
+!! init_lotf
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
 !!      m_pred_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine init_lotf(itime,natom,acell,rprimd,xcart)
-  ! natom : number of atoms, abinit notation    
-  ! acell : cell length, abinit notation    
+  ! natom : number of atoms, abinit notation
+  ! acell : cell length, abinit notation
 
   use glue_lotf,only  : glue_init
   use pbc_lotf,only   : pbc_init
@@ -83,14 +86,6 @@ contains
 &                  bond_atom_init,     &
 &                  bond_matrix_alloc,  &
 &                  bond_matrix_set
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_lotf'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   integer,intent(in) :: itime
   integer,intent(in) :: natom
   real(dp),intent(in) :: acell(3),rprimd(3,3)
@@ -101,13 +96,13 @@ contains
 
 ! *************************************************************************
 
-  ! I should modify units : LOTF uses atomic units  
-  !                         ABINIT uses  ??? 
+  ! I should modify units : LOTF uses atomic units
+  !                         ABINIT uses  ???
 
   ! !-----------------------------------------
   ! Transfered in gstate
   ! call lotfvar_init(natom,&
-  !   &               2, & !--version: set type of MD algo 
+  !   &               2, & !--version: set type of MD algo
   !   &           itime, & !--nstart: initial step
   !   &           nitex,& !--nitex: number of LOTF steps
   !   &               40,& !--nneigx: roughly decide the number of neighbours
@@ -116,19 +111,19 @@ contains
   !   )
 
   !-----------------------------------------
-  !--Prepare LOTF variables used in moldyn.f90 
+  !--Prepare LOTF variables used in moldyn.f90
 
-  !--initialize potential energy : 
+  !--initialize potential energy :
    epotlotf = zero
 
    ABI_ALLOCATE(fcartfit,(3,natom))
    ABI_ALLOCATE(xcartfit,(3,natom))
    ABI_ALLOCATE(velfit,(3,natom))
 
-   ABI_ALLOCATE(neighl,(lotfvar%nneigx,natom))  
-   ABI_ALLOCATE(nneig,(lotfvar%nneigx))  
-   ABI_ALLOCATE(neighl_old,(lotfvar%nneigx,natom))  
-   ABI_ALLOCATE(nneig_old,(lotfvar%nneigx))  
+   ABI_ALLOCATE(neighl,(lotfvar%nneigx,natom))
+   ABI_ALLOCATE(nneig,(lotfvar%nneigx))
+   ABI_ALLOCATE(neighl_old,(lotfvar%nneigx,natom))
+   ABI_ALLOCATE(nneig_old,(lotfvar%nneigx))
    neighl = 0
    nneig = 0
    neighl_old = 0
@@ -149,29 +144,29 @@ contains
   !--Init cell and pbc_lotf
    call pbc_init(rprimd)
 
-  !--Initializes Glue, here we suppose we have atomic units.   
-   call Glue_INIT() 
+  !--Initializes Glue, here we suppose we have atomic units.
+   call Glue_INIT()
 
-  !--Initializes cut-off radius 
-   call cutoff_init() 
+  !--Initializes cut-off radius
+   call cutoff_init()
 
   !--last argument is to force the search for neighbors in upd_lis0
    call upd_lis0(xcart,neighl,nneig,itime)
 
-  ! SMALL_FIT FINDS A RESTRICTED REGION WHERE THE FIT WILL BE 
-  ! PERFOMED. dimensionS WILL BE SET ACCORDING THE NUMBER OF ATOMS 
+  ! SMALL_FIT FINDS A RESTRICTED REGION WHERE THE FIT WILL BE
+  ! PERFOMED. dimensionS WILL BE SET ACCORDING THE NUMBER OF ATOMS
   ! IN THIS SMALL REGION
-  ! if niter=lotfvar%n0 it will set some dimensions for later use 
+  ! if niter=lotfvar%n0 it will set some dimensions for later use
 
   !--set tafit
    call bond_tafit_init(lotfvar%natom)
    call SMALLFIT(xcart,nfitdum)
 
-  !--set nfitmax,ifit,nfit 
+  !--set nfitmax,ifit,nfit
    call bond_fit_set(lotfvar%natom,nfitdum)
 
   !--Initialize nbondex,neighl,neeig
-   call bond_atom_init(lotfvar%nneigx,nneig,neighl)  
+   call bond_atom_init(lotfvar%nneigx,nneig,neighl)
 
   !---------------------------------------------
   !--Initialize/creates arrays needed by updlis :
@@ -183,7 +178,7 @@ contains
    call bond_matrix_set(nneig,neighl)
 
   !--initialize bond parms alpha
-   ABI_ALLOCATE(alpha,(3,nbondex)) 
+   ABI_ALLOCATE(alpha,(3,nbondex))
    ABI_ALLOCATE(alpha_in,(3,nbondex))
    ABI_ALLOCATE(alpha_end,(3,nbondex))
    alpha = zero
@@ -200,39 +195,33 @@ contains
  end subroutine init_lotf
  !!***
 
-
-
- !!****f* lothpath/end_lotf
- !! NAME
- !! end_lotf
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* lothpath/end_lotf
+!! NAME
+!! end_lotf
 !!
- !! CHILDREN
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
- subroutine end_LOTF() 
+!! SOURCE
+
+ subroutine end_LOTF()
+
   use work_var_lotf
   use bond_lotf
 
   !--init_lotf
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'end_LOTF'
-!End of the abilint section
-
    ABI_DEALLOCATE(alpha)
    ABI_DEALLOCATE(alpha_in)
    ABI_DEALLOCATE(alpha_end)
-   ABI_DEALLOCATE(nneig) 
-   ABI_DEALLOCATE(neighl) 
+   ABI_DEALLOCATE(nneig)
+   ABI_DEALLOCATE(neighl)
    ABI_DEALLOCATE(fcartfit)
    ABI_DEALLOCATE(xcartfit)
    ABI_DEALLOCATE(velfit)
@@ -246,32 +235,34 @@ contains
  !!***
 
 
- !!****f* lothpath/fitclus
- !! NAME
- !! fitclus
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* lothpath/fitclus
+!! NAME
+!! fitclus
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
 !!      m_pred_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
- subroutine fitclus(tfor,forc_in,tau0,alpha_tr,nqmin,nqmax)      
+!! SOURCE
 
-  ! tfor : true if the forces are given in input 
+ subroutine fitclus(tfor,forc_in,tau0,alpha_tr,nqmin,nqmax)
+
+  ! tfor : true if the forces are given in input
   !        false if fitclus calculates the forces
-  ! forc_in(3,natom) : input forces to be fitted 
-  ! tau0(3,natom) : atomic positions 
-  ! alpha_tr(3,nbondex) : two body potential parameters 
-  ! neighl(lotfvar%nneigx,natom) : list of neighbours 
-  ! nneig(natom) : number of neighbours 
+  ! forc_in(3,natom) : input forces to be fitted
+  ! tau0(3,natom) : atomic positions
+  ! alpha_tr(3,nbondex) : two body potential parameters
+  ! neighl(lotfvar%nneigx,natom) : list of neighbours
+  ! nneig(natom) : number of neighbours
   ! nqmin : lowest  index for the quantum atoms (nqmin = 1 ) !!!!NOT USED!!!
   ! nqmax : maximum index for the quantum atoms ( nqmax = natom)!!!!NOT USED!!!
-  ! niter  : iteration number (itime) 
+  ! niter  : iteration number (itime)
 
   use work_var_lotf,only : rcut,ifixed
   use bond_lotf,only : nbondex,ifit,ibn_tots,nfitmax,imat,tafit,&
@@ -280,24 +271,16 @@ contains
   use glue_lotf, only : dphi,calc_coord_new_d,eval_u_n,eval_Upp_n
   use eval_lotf,only : tuneparms,phi_n_calc,calc_coord2,eval_forces_U_n,eval_forces_U_n_2,eval_force_devs_new_d
 
-  !--Evaluates "real" forces from external source, and computes 
+  !--Evaluates "real" forces from external source, and computes
   ! the istantaneous best fit of the current model.
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fitclus'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
   !Arguments ------------------------------------
-  logical,intent(in) :: tfor 
+  logical,intent(in) :: tfor
   integer,intent(in) :: nqmin, nqmax
   real(dp),intent(in) :: forc_in(3,lotfvar%natom)
   real(dp) :: tau0(3,lotfvar%natom)
   real(dp),intent(out) :: alpha_tr(3,nbondex)
-  !Local ---------------------------------------- 
+  !Local ----------------------------------------
   real(dp), allocatable :: fspare(:,:),alpha_fce(:,:,:,:)
   real(dp)              :: rcut_fit_int, rcf2_int
   integer  :: i,j,k, iprecmass, iat
@@ -337,13 +320,13 @@ contains
   ! #####################  end DECLARATION #########################
    call wrtout(std_out,' LOTF : FITCLUS','COLL')
 
-   iwrdri = 0 
+   iwrdri = 0
 
    ABI_ALLOCATE(fspare,(3,nbondex))
    ABI_ALLOCATE(alpha_fce,(3,2,nbondex,1))
 
   !--(0,-2) initialises a few parameters
-   rcut_fit_int = rcut 
+   rcut_fit_int = rcut
    rcf2_int     = rcut_fit_int * rcut_fit_int
 
    dmaspars = (/ 0.01_dp, 0.1_dp,  0.1_dp /)
@@ -351,7 +334,7 @@ contains
 
   !--Not needed in this case... see if we can safely get rid of it
   !     dt_ang          = zero
-  ! (0,-1) sets (optional: preconditions) masses of bond parameters 
+  ! (0,-1) sets (optional: preconditions) masses of bond parameters
 
    iprecmass = 0
 
@@ -362,10 +345,10 @@ contains
    dcost_dalpha = zero
 
   !--set constant array for speed-up : fact(i)
-   do i = 1,nfit   
-     iat = ifit(i) 
-     fact2(i) =        real(ifixed(iat),dp)  
-     fact(i)  = half * real(ifixed(iat),dp)  
+   do i = 1,nfit
+     iat = ifit(i)
+     fact2(i) =        real(ifixed(iat),dp)
+     fact(i)  = half * real(ifixed(iat),dp)
    end do
 
   !--(0,0) decides which parameters will be fitted
@@ -374,15 +357,15 @@ contains
   !--(1,0) computes true forces: needs the external "expensive" routine.
    fcold = zero
 
-   if (tfor) then ! tfor = true <-> WE CALCULATE THE FORCES HERE ! 
+   if (tfor) then ! tfor = true <-> WE CALCULATE THE FORCES HERE !
      do i =1, nfit
        iat = ifit(i)
       !write(97,*) iat,forc_in(1,iat)
        ffit(:,i) = forc_in(:,iat)
      end do
-   else 
+   else
      MSG_ERROR('LOTF : HERE WE SHOULD HAVE THE FORCES ALREADY !! ')
-   end if ! TFOR 
+   end if ! TFOR
 
   !--THE REST OF THE ROUTINE IS THE FIT
    write(message,'(2(a,i8,a))')&
@@ -395,8 +378,8 @@ contains
    alpha_dum = zero
    alpha_old = zero
 
-  !--(1,2) initialises the parameter set Alpha_dum, which IS modified 
-  !       in the optimisation section      
+  !--(1,2) initialises the parameter set Alpha_dum, which IS modified
+  !       in the optimisation section
    forall(ibn=1:ibn_tots)  alpha_dum(:,ibn) = (/ dphi,one, zero /)
 
   !--(2,0) computes derivatives of the ionic forces wrt parameters
@@ -406,14 +389,14 @@ contains
    nitmax = 1000000
 
    icheck     = 0
-   nwarn      = 0 
+   nwarn      = 0
    dcost      = zero
-   dcost_old  = zero 
+   dcost_old  = zero
    alpha_fce  = zero
    dcost_rms  = one
 
   !###################################
-  !--MAIN MINIMISATION LOOP BEGINS 
+  !--MAIN MINIMISATION LOOP BEGINS
   !###################################
    main_minimization: do while(dcost_rms >  prec_lotf)
     ! if(mod(icheck,20)==1.and.(lotfvar%me==1)) write(*,*)  icheck&
@@ -437,7 +420,7 @@ contains
       ! so I run over fit atoms and ALL its neighbours twice, as I did in Force_Glue...
 
       !--Also: I only consider 1 parameter as variable, alpha(1,:)
-      ! therefore I don't use t_2nd nor tfit(:,ibn_count) 
+      ! therefore I don't use t_2nd nor tfit(:,ibn_count)
 
       !--(I) Pair potential (and its forces), coordination,  U, and  Up
        nlist(:) = 0
@@ -463,7 +446,7 @@ contains
            nlist(j) = i
          end do
 
-         if (tafit(iat)) then !--Only for fit atoms 
+         if (tafit(iat)) then !--Only for fit atoms
 
           !--Pair potential (and its forces) & coordination(i)
            call phi_n_calc(alpha_dum,nneig(iat),nlist,tau0(:,iat),&
@@ -538,7 +521,7 @@ contains
            nlist(j) = i
          end do
 
-         if(tafit(iat)) then ! Only for fit atoms 
+         if(tafit(iat)) then ! Only for fit atoms
 
           !--Pair potential (and its forces) & coordination(i)
            call phi_n_calc(alpha_dum,nneig(iat),nlist,tau0(:,iat),&
@@ -549,7 +532,7 @@ contains
              forc0_dum(:,imat(i)) = forc0_dum(:,imat(i)) + forcv(:,j)
            end do
 
-          !--Up(coord(i)) & Upp(coord(i)) 
+          !--Up(coord(i)) & Upp(coord(i))
            call eval_Upp_n(coordatom(iat),up_list(iat),upp_list(iat)) ! Up and Upp
          else   ! non fit atoms
 
@@ -635,7 +618,7 @@ contains
      do i = 1,nfit
        dcost = dcost+fact(i)*sum((forc0_dum(:,i)-ffit(:,i))**2,dim=1)
      end do
-     dcost_rms = (sqrt((two*dcost)/nfit))*two*13.6058d0/0.529177d0 
+     dcost_rms = (sqrt((two*dcost)/nfit))*two*13.6058d0/0.529177d0
 
     !--minimisation is achived
      if(dcost_rms < prec_lotf) exit
@@ -674,14 +657,14 @@ contains
 
 
     !--parameter OPTIMIZATION STEP --------------------------- start
-     icheck = icheck + 1 
+     icheck = icheck + 1
 
      if(icheck ==1) alpha_old(:,:ibn_tot) = alpha_dum(:,:ibn_tot)
 
     !-----------------------------------------
     !--damped dynamics
 
-    !--(1) damping factor 
+    !--(1) damping factor
      if(icheck > 40) then
        dampfact = 0.6
        if(icheck > 200)  dampfact = 0.6
@@ -701,22 +684,22 @@ contains
        if(icheck==nitmax/2) dcost_check = dcost_rms
 
       !--II BODY
-       bodyii: do  ibn_count = 1, ibn_tot       
+       bodyii: do  ibn_count = 1, ibn_tot
          if( (lotfvar%me == (mod(ibn_count-1,lotfvar%nproc)+1)) ) then
-           if(.not.t_2nd(ibn_count)) cycle 
+           if(.not.t_2nd(ibn_count)) cycle
 
           !--(2) updating strategy
-           do n=1,3  
+           do n=1,3
              dummy = alpha_dum(n,ibn_count)
              if(tfit(n,ibn_count)) then
                vel   = (alpha_dum(n,ibn_count)-alpha_old(n,ibn_count))
                force = dcost_dalpha(n,ibn_count)
 
-               fcold(n,ibn_count) = force    
+               fcold(n,ibn_count) = force
 
-              !--(3) Verlet step 
-               alpha_dum(n,ibn_count) = alpha_dum(n,ibn_count)& 
-&               + dampfact * vel + dt_par(n) * dt_par(n) * force/dmaspars(n) 
+              !--(3) Verlet step
+               alpha_dum(n,ibn_count) = alpha_dum(n,ibn_count)&
+&               + dampfact * vel + dt_par(n) * dt_par(n) * force/dmaspars(n)
 
               !--(4) bound control for the parameters
                if(alpha_dum(1,ibn_count)  >  6.1d0) then
@@ -726,21 +709,21 @@ contains
                 !MSG_ERROR('LOTF: Alpha1 reaches 2 au... Too small value!')
                end if
 
-             end if   ! tfit(n)  
+             end if   ! tfit(n)
 
              alpha_old(n,ibn_count) = dummy
            end do
 
-         else 
-           alpha_old(:,ibn_count) = zero 
+         else
+           alpha_old(:,ibn_count) = zero
            alpha_dum(:,ibn_count) = zero
          end if
-         
+
        end do bodyii
-       
+
        call dlvsum(lotfvar%me-1,lotfvar%nproc,alpha_dum,3*ibn_tot)
 
-       dcost_rms=(sqrt((two*dcost)/nfit))*two*13.6058d0/0.529177d0 
+       dcost_rms=(sqrt((two*dcost)/nfit))*two*13.6058d0/0.529177d0
 
       !--Minimization is not achived
       !if(dcost_rms >  prec_lotf)  cycle
@@ -759,7 +742,7 @@ contains
    if(lotfvar%me==1) then
 
      alpha_avg(:) = sum(alpha_dum(:,:ibn_tots),dim=2)
-     alpha_avg(:) = (one/ibn_tots)*alpha_avg(:)  
+     alpha_avg(:) = (one/ibn_tots)*alpha_avg(:)
 
      alpha_disp(:) = zero
      do i=1,ibn_tots
@@ -778,14 +761,14 @@ contains
      write(message,'(a,2f12.8,a)')'FIT.PREC. : ',dcost, dcost_rms,' EV/A '
      call wrtout(std_out,message,'COLL')
 
-     toeva = 2.d0*13.6058d0/0.529177d0   
+     toeva = 2.d0*13.6058d0/0.529177d0
      do i = 1,nfit
        dtest = zero
        do k=1,3
          dtest = dtest+sqrt(fact2(i)*(forc0_dum(k,i)-ffit(k,i))**2)*toeva
        end do
-       if(dtest > dtm) then 
-         dtm = dtest 
+       if(dtest > dtm) then
+         dtm = dtest
          iem = ifit(i)
        end if
      end do
@@ -820,30 +803,32 @@ contains
  !!***
 
 
- !!****f* lothpath/upd_lis
- !! NAME
- !! upd_lis
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* lothpath/upd_lis
+!! NAME
+!! upd_lis
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
- subroutine  upd_lis(tau0,niter,alpha_dum) 
-  ! lotfvar%nneigx : max number of neighbours
-  ! tau0(3,natom) : atomic positions 
-  ! neighl(lotfvar%nneigx,natom) : list of neighbours 
-  ! neighl_old(lotfvar%nneigx,natom) : old list of neighbours 
-  ! nneig_old(natom) : old number of neighbours 
-  ! niter  : iteration number (itime) 
+!! SOURCE
 
-  !  updates the neighbour list for each atom, and updates the active 
-  !  parameter lists 
+ subroutine  upd_lis(tau0,niter,alpha_dum)
+  ! lotfvar%nneigx : max number of neighbours
+  ! tau0(3,natom) : atomic positions
+  ! neighl(lotfvar%nneigx,natom) : list of neighbours
+  ! neighl_old(lotfvar%nneigx,natom) : old list of neighbours
+  ! nneig_old(natom) : old number of neighbours
+  ! niter  : iteration number (itime)
+
+  !  updates the neighbour list for each atom, and updates the active
+  !  parameter lists
 
   USE GLUE_LOTF,only : dphi
   use work_var_lotf,only : smallfit
@@ -851,14 +836,6 @@ contains
 &                  nfitmax,imat,bond_matrix_set,bond_compute,&
 &                  bond_fit_set,nbondex
   use eval_lotf,only : upd_lis0
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upd_lis'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -870,7 +847,7 @@ contains
   integer :: ifo,jato,jb_old
   integer :: iat,jat,nfitdum
   integer :: jbo(nbondex)
-  !take care nsurf_at*(nbond_at)/2 
+  !take care nsurf_at*(nbond_at)/2
 
 ! *************************************************************************
 
@@ -883,29 +860,29 @@ contains
   !--set tafit and compute nfitdum
    call SMALLFIT(tau0,nfitdum)
 
-  !--control nfitmax and set ifit,nfit 
+  !--control nfitmax and set ifit,nfit
    call bond_fit_set(lotfvar%natom,nfitdum)
 
   !--Updates bond matrix, associates the bond to the atom neighlists
    call bond_compute(nneig,neighl)
 
-  !--CREATES THE REORDERING ARRAY (ibmat) 
+  !--CREATES THE REORDERING ARRAY (ibmat)
   !  ONLY variational BONDS ARE CONSIDERED IN HISTORY
-   do ibn_count = 1, ibn_tot  ! only on fitted atoms pairs 
-    !--finds to which atoms it corresponds               
+   do ibn_count = 1, ibn_tot  ! only on fitted atoms pairs
+    !--finds to which atoms it corresponds
      iat = ibnd_mat(1,ibn_count)
      jat = ibnd_mat(2,ibn_count)
 
-     ifo = imat(iat)    !--imat finds the old atomic 'fitted number'   
+     ifo = imat(iat)    !--imat finds the old atomic 'fitted number'
      if(iat > jat) MSG_ERROR('UPDLIS 177')
 
     !--Set to 0, finds to which old bond (if any) these two correspond
      jb_old = 0               !--atom jat is a new neighbour of atom iat
      do j =1,nneig_old(iat)
        jato = neighl_old(j,iat)
-       if(jato==jat) then     
+       if(jato==jat) then
          jb_old = ibmat(j,ifo)  !--atom jat was already a neighbour of atom iat
-         exit  
+         exit
        end if
      end do
      jbo(ibn_count) = jb_old  !--index array for reordering
@@ -914,7 +891,7 @@ contains
   !--updates bond matrix, associates the bond to the atom neighlists
    call bond_matrix_set(nneig,neighl)
 
-   
+
    write(message,'(2a,2(a,i8,a),(a,2i8,a),a,i8,a)') &
 &   ' LOTF : UPD_LIS',ch10,&
 &   ' ITERATION:  ',niter,ch10,&
@@ -943,41 +920,36 @@ contains
 
 
  end subroutine upd_lis
- !!***
+!!***
 
 
- !!****f* lothpath/force0
- !! NAME
- !! force0
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* lothpath/force0
+!! NAME
+!! force0
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
- subroutine force0(tau0,forc0,alpha_tr,amass) 
-  ! tau0(3,natom) : atomic positions (input) 
-  ! forc0(3,natom) : atomic forces(output) 
-  ! alpha_tr(3,nbondex) : two body potential parameters 
-  ! neighl(lotfvar%nneigx,natom) : list of neighbours 
-  ! nneig(natom) : number of neighbours 
-  ! epotlotf : potential energy (parameter dependent) 
+!! SOURCE
+
+ subroutine force0(tau0,forc0,alpha_tr,amass)
+  ! tau0(3,natom) : atomic positions (input)
+  ! forc0(3,natom) : atomic forces(output)
+  ! alpha_tr(3,nbondex) : two body potential parameters
+  ! neighl(lotfvar%nneigx,natom) : list of neighbours
+  ! nneig(natom) : number of neighbours
+  ! epotlotf : potential energy (parameter dependent)
   use glue_lotf,only : eval_U_n
   use tools_lotf,only : dlvsum
   use bond_lotf,only : ibn_tot,nbondex,tafit
   use eval_lotf, only : phi_n_calc,calc_coord2,eval_forces_u_n
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'force0'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -986,9 +958,9 @@ contains
   real(dp),intent(out) :: forc0(3,lotfvar%natom)
   real(dp),intent(in) :: alpha_tr(3,nbondex)
   !Local ----------------------------------------
-  integer :: i, j 
+  integer :: i, j
   integer :: istride,ibmin,ibmax,iat
-  logical  :: tcalc(3) 
+  logical  :: tcalc(3)
   real(dp) :: epotlotf_dum
   real(dp) :: epotlotf_2
   real(dp) :: stress(3,3)
@@ -1005,7 +977,7 @@ contains
    epotlotf_2 = zero
    tcalc(:) = .false.
 
-   forc0(:,:) = zero    ! MODifIED FOR ABINITttime 23/07/2008 
+   forc0(:,:) = zero    ! MODifIED FOR ABINITttime 23/07/2008
 
   !--parallel version
    istride = ibn_tot/lotfvar%nproc
@@ -1036,7 +1008,7 @@ contains
        call phi_n_calc(alpha_tr,nneig(iat),nlist,tau0(1,iat),&
        tauv,epotlotf_dum,forcv,coordatom(iat),alpha_fdum_v)
       !--PAIR energy: Fit atoms and NEIGHBOURS --> OK
-       epotlotf_2 = epotlotf_2 + epotlotf_dum 
+       epotlotf_2 = epotlotf_2 + epotlotf_dum
 
        forc0(:,iat) = forc0(:,iat) + forcv(:,0)
        do j = 1,nneig(iat)
@@ -1045,7 +1017,7 @@ contains
        end do
 
        call eval_U_n(coordatom(iat),epotlotf_dum2,up_list(iat))
-       epotlotf_2 = epotlotf_2 + epotlotf_dum2 ! GLUE energy: Fit atoms ONLY --> OK 
+       epotlotf_2 = epotlotf_2 + epotlotf_dum2 ! GLUE energy: Fit atoms ONLY --> OK
 
      else
 
@@ -1077,38 +1049,30 @@ contains
      forc0(:,iat) = forc0(:,iat)/amass(iat)
    end do
 
-   epotlotf = epotlotf + epotlotf_2 
+   epotlotf = epotlotf + epotlotf_2
   !--ends parallelisation
 
  end subroutine force0
  !!***
 
-
-
- !!****f* lothpath/intparms
- !! NAME
- !! intparms
- !!
- !! FUNCTION
- !!  
- !! INPUTS
- !! PARENTS
+!!****f* lothpath/intparms
+!! NAME
+!! intparms
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_pred_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE 
+!! SOURCE
+
  subroutine intparms(itime)
   use bond_lotf,only : ibn_tot
   use tools_lotf,only : pinterp,pinterp_nolinear
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intparms'
-!End of the abilint section
-
   implicit none
   !Arguments ------------------------------------
   integer,intent(in) :: itime!,nitex
@@ -1125,7 +1089,7 @@ contains
   !--Select here the type of interpolation....................
    interp_type = 1
   !   interp_type = 2
-  !--II body 
+  !--II body
    if(interp_type==1) then
      do ibn = 1, ibn_tot
        call pinterp(alpha_in(:,ibn),alpha_end(:,ibn),alpha(:,ibn),3,lotfvar%nitex,nitdu)
@@ -1134,17 +1098,16 @@ contains
  end subroutine intparms
  !!***
 
- !!****f* lothpath/alpha_update
- !! NAME
- !! alpha_update
- !!
- !! FUNCTION
- !!  updates parameter list
- !! INPUTS
- !!  dphi=parameter to reinatialise bond parameters
- !!  jbo= index array for reordering
- !! CHILDREN
- !!
+!!****f* lothpath/alpha_update
+!! NAME
+!! alpha_update
+!!
+!! FUNCTION
+!!  updates parameter list
+!! INPUTS
+!!  dphi=parameter to reinatialise bond parameters
+!!  jbo= index array for reordering
+!!
 !! PARENTS
 !!      m_lotf
 !!
@@ -1154,30 +1117,23 @@ contains
  !! SOURCE
  subroutine alpha_update(dphi,jbo,alpha_dum)
   use bond_lotf,only : ibn_tot
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alpha_update'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
   real(dp),intent(in) :: dphi
-  integer,intent(in) :: jbo(:) 
+  integer,intent(in) :: jbo(:)
   real(dp),intent(inout) :: alpha_dum(:,:)
   !Local ---------------------------
   integer :: ibn,jb_old
-  real(dp) :: alphawork(3,ibn_tot) 
+  real(dp) :: alphawork(3,ibn_tot)
 
 ! *************************************************************************
 
    do ibn = 1,ibn_tot
      jb_old = jbo(ibn)
-     if(jb_old /= 0) then        
+     if(jb_old /= 0) then
       !--swaps old parms
-       alphawork(:,ibn) = alpha_dum(:,jb_old) 
+       alphawork(:,ibn) = alpha_dum(:,jb_old)
      else
       !--or reinitialise bond parms
        alphawork(:,ibn) = (/ dphi, one, zero /)
@@ -1189,24 +1145,18 @@ contains
  end subroutine alpha_update
  !!***
 
- !!****f* lothpath/lotf_extrapolation
- !! NAME
- !! lotf_extrapolation
- !!
- !! FUNCTION
- !!  return true if mod(itime,nitex) == 0
- !! INPUTS
- !! CHILDREN
- !!
- !! SOURCE
+!!****f* lothpath/lotf_extrapolation
+!! NAME
+!! lotf_extrapolation
+!!
+!! FUNCTION
+!!  return true if mod(itime,nitex) == 0
+!! INPUTS
+!! CHILDREN
+!!
+!! SOURCE
+
  function lotf_extrapolation(itime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lotf_extrapolation'
-!End of the abilint section
 
   implicit none
 
@@ -1229,38 +1179,31 @@ contains
  end function lotf_extrapolation
  !!***
 
- !!****f* lothpath/force_to_vel
- !! NAME
- !! force_to_vel
- !!
- !! FUNCTION
- !!  Compute velocity starting from : vel_in,v2gauss and forces
- !! INPUTS
- !!  v2gauss=gauss factor (2*kinetic energy)
- !!  dtion=time step for Molecular Dynamics
- !!  amass(natom)=masse of the ions
- !!  vel_in(3,natom)=initial velocity of ions
- !!  fcart(3,natom)=force on ions
- !! OUT
- !!  vel_out(3,natom)=new velocity of ions
- !! SIDE EFFECTS
- !! CHILDREN
- !!
+!!****f* lothpath/force_to_vel
+!! NAME
+!! force_to_vel
+!!
+!! FUNCTION
+!!  Compute velocity starting from : vel_in,v2gauss and forces
+!! INPUTS
+!!  v2gauss=gauss factor (2*kinetic energy)
+!!  dtion=time step for Molecular Dynamics
+!!  amass(natom)=masse of the ions
+!!  vel_in(3,natom)=initial velocity of ions
+!!  fcart(3,natom)=force on ions
+!!
+!! OUTPUTS
+!!  vel_out(3,natom)=new velocity of ions
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine force_to_vel(v2gauss,dtion,amass,vel_in,fcart,vel_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'force_to_vel'
-!End of the abilint section
 
   implicit none
 
@@ -1300,41 +1243,35 @@ contains
  end subroutine force_to_vel
  !!***
 
- !!****f* lothpath/vel_to_gauss
- !! NAME
- !! vel_to_gauss
- !!
- !! FUNCTION
- !!  Compute gauss factor sum(v**2*m) the double of kinetic energy
- !!  If present vtest compute also sum(v)/(3*sum(m))
- !! INPUTS
- !!  vel_in(3,natom)=velocity to use
- !!  amass(natom)=masse of the ions
- !! OUT
- !!  v2gauss=2*kinetic energy
- !!  vtest=pick velocity
- !! CHILDREN
- !!
+!!****f* lothpath/vel_to_gauss
+!! NAME
+!! vel_to_gauss
+!!
+!! FUNCTION
+!!  Compute gauss factor sum(v**2*m) the double of kinetic energy
+!!  If present vtest compute also sum(v)/(3*sum(m))
+!! INPUTS
+!!  vel_in(3,natom)=velocity to use
+!!  amass(natom)=masse of the ions
+!!
+!! OUTPUT
+!!  v2gauss=2*kinetic energy
+!!  vtest=pick velocity
+!!
 !! PARENTS
 !!      m_lotf,m_pred_lotf
 !!
 !! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine vel_to_gauss(vel_in,amass,v2gauss,vtest)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vel_to_gauss'
-!End of the abilint section
 
   implicit none
 
   !Arguments ------------------------------------
-  real(dp),intent(out) :: v2gauss 
+  real(dp),intent(out) :: v2gauss
   real(dp),intent(out),optional :: vtest
   real(dp),intent(in) :: vel_in(:,:)
   real(dp),intent(in) :: amass(:)
@@ -1365,40 +1302,35 @@ contains
  end subroutine vel_to_gauss
  !!***
 
- !!****f* lothpath/vel_rescale
- !! NAME
- !! vel_rescale
- !!
- !! FUNCTION
- !!  Starting from the velocity, it recompute the velocities in the
- !!  center of mass. Then compute the gauss factor and renormalises
- !!  the velocities with respect the gauss distribution. Then is
- !!  recompute the gauss factor
- !! INPUTS
- !!  mditemp=temperature of ions
- !!  amass(natom)=masse of the ions
- !! OUT
- !!  v2gauss=2*kinetic energy
- !! SIDE EFFECTS
- !!  vel(3,natom)=velocity of ions
- !! CHILDREN
- !!
+!!****f* lothpath/vel_rescale
+!! NAME
+!! vel_rescale
+!!
+!! FUNCTION
+!!  Starting from the velocity, it recompute the velocities in the
+!!  center of mass. Then compute the gauss factor and renormalises
+!!  the velocities with respect the gauss distribution. Then is
+!!  recompute the gauss factor
+!!
+!! INPUTS
+!!  mditemp=temperature of ions
+!!  amass(natom)=masse of the ions
+!!
+!! OUTPUTS
+!!  v2gauss=2*kinetic energy
+!!
+!! SIDE EFFECTS
+!!  vel(3,natom)=velocity of ions
+!!
 !! PARENTS
 !!      m_lotf,m_pred_lotf
 !!
 !! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine vel_rescale(mditemp,vel,amass,v2gauss)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vel_rescale'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   real(dp),intent(in) :: mditemp
   real(dp),intent(out) :: v2gauss
@@ -1431,7 +1363,7 @@ contains
 
   !--Compute the variance and print
    sigma2 = (v2gauss/(3._dp*natom)-amass(1)*vtest**2)/kb_HaK
-   
+
    write(message, '(a,d12.5,a,D12.5)' )&
 &   ' --- LOTF STEP : Effective temperature',&
 &   v2gauss/(3*natom*kb_HaK),' From variance', sigma2
@@ -1440,52 +1372,45 @@ contains
 
 
  end subroutine vel_rescale
- !!***
+!!***
 
- !!****f* lothpath/extrapolation_loop
- !! NAME
- !! extrapolation_loop
- !!
- !! FUNCTION
- !!  Compute the LOTF extrapolation:
- !!  Starting from xcart_0,vel_0,fcart_0, it computes in first the new
- !!  bond, then the forces on the atoms. 
- !!  At this point if compute the position,speed and forces on atoms
- !!  upto the step nitex:  xcart_nitex, vel_nitex, fcart_nitex
- !!  This will be used in a SCF to compute the forces in the final
- !!  point of the LOTF approximation.
- !!  In output the positions (extrapoled) in the step ntitex.
- !!
- !! INPUTS
- !!  itime=numeber of MD step
- !!  mditemp=temperature of ions
- !!  dtion=time step for Molecular Dynamics
- !!  amass(natom)=masse of the ions 
- !!  xcart(3,natom)=position of the ions initial
- !!  vel(3,natom)=speed of the ions initial
- !! OUT
- !!  xcart_next(3,natom)=positions of the ions final step
- !!  the following variable are used as work variables:
- !!  vel_nexthalf(3,natom)=velocity of ions in next half step
- !! SIDE EFFECTS
- !! CHILDREN
- !!
+!!****f* lothpath/extrapolation_loop
+!! NAME
+!! extrapolation_loop
+!!
+!! FUNCTION
+!!  Compute the LOTF extrapolation:
+!!  Starting from xcart_0,vel_0,fcart_0, it computes in first the new
+!!  bond, then the forces on the atoms.
+!!  At this point if compute the position,speed and forces on atoms
+!!  upto the step nitex:  xcart_nitex, vel_nitex, fcart_nitex
+!!  This will be used in a SCF to compute the forces in the final
+!!  point of the LOTF approximation.
+!!  In output the positions (extrapoled) in the step ntitex.
+!!
+!! INPUTS
+!!  itime=numeber of MD step
+!!  mditemp=temperature of ions
+!!  dtion=time step for Molecular Dynamics
+!!  amass(natom)=masse of the ions
+!!  xcart(3,natom)=position of the ions initial
+!!  vel(3,natom)=speed of the ions initial
+!!
+!! OUT
+!!  xcart_next(3,natom)=positions of the ions final step
+!!  the following variable are used as work variables:
+!!  vel_nexthalf(3,natom)=velocity of ions in next half step
+!!
 !! PARENTS
 !!      m_pred_lotf
 !!
 !! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine extrapolation_loop(itime,mditemp,dtion,amass,&
 &                           xcart,vel,xcart_next,vel_nexthalf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extrapolation_loop'
-!End of the abilint section
 
   implicit none
 
@@ -1497,7 +1422,7 @@ contains
   real(dp),intent(in) :: xcart(:,:)
   real(dp),intent(out) :: vel_nexthalf(:,:)
   real(dp),intent(out) :: xcart_next(:,:)
-  !Local --------------------------- 
+  !Local ---------------------------
   integer :: itex
   real(dp) :: v2gauss
 
@@ -1506,7 +1431,7 @@ contains
   !--inital values for position and forces
    xcartfit(:,:) = xcart(:,:)
    velfit(:,:) = vel(:,:)
-   
+
   !--Update bond variables and alpha
    call upd_lis(xcartfit,itime,alpha_in)
 
@@ -1522,7 +1447,7 @@ contains
     !--Compute rescaled velfit (center of mass speed and gaussian)
      call vel_rescale(mditemp,velfit,amass,v2gauss)
 
-    ! start  verletvel here  
+    ! start  verletvel here
      if(itime==1.AND.itex==1) then  ! check this
        vel_nexthalf(:,:) = velfit(:,:)
        xcart_next(:,:) = xcartfit(:,:)
@@ -1533,64 +1458,57 @@ contains
       !--Computation of the next positions
        xcart_next(:,:) = xcartfit(:,:)+vel_nexthalf(:,:)*dtion
 
-       
+
       !--compute fcartfit and alpha (fcartfit is the accelleration)
        call force0(xcart_next,fcartfit,alpha,amass)
-       
+
 
       !--Computation of vel(:,:) at the next positions
       !--Computation of v2gauss
        call vel_to_gauss(vel_nexthalf,amass,v2gauss)
 
-      !--Compute velocity from force 
+      !--Compute velocity from force
        call force_to_vel(v2gauss,dtion,amass,vel_nexthalf,fcartfit,velfit)
      end if
      xcartfit = xcart_next
-     
+
    end do do_itex
-   
+
  end subroutine extrapolation_loop
  !!***
 
- !!****f* lothpath/lotf_interpolation
- !! NAME
- !! lotf_interpolation
- !!
- !! FUNCTION
- !!  Compute the LOTF interpolation:
- !!    
- !!
- !! INPUTS
- !!  itime=numeber of MD step
- !!  dtion=time step for Molecular Dynamics
- !!  amass(natom)=masse of the ions 
- !!  xcart(3,natom)=position of the ions initial
- !! OUT
- !!  xcart_next(3,natom)=positions of the ions final step
- !!  vel_nexthalf(3,natom)=velocity of ions in next half step
- !! SIDE EFFECTS
- !!  v2gauss=gauss factor (twice the kinetic energy) (initial and final)
- !!  vel(3,natom)=velocity of ions
- !!  fcart_m(3,natom)=forces on ions in 
- !! CHILDREN
- !!
+!!****f* lothpath/lotf_interpolation
+!! NAME
+!! lotf_interpolation
+!!
+!! FUNCTION
+!!  Compute the LOTF interpolation:
+!!
+!! INPUTS
+!!  itime=numeber of MD step
+!!  dtion=time step for Molecular Dynamics
+!!  amass(natom)=masse of the ions
+!!  xcart(3,natom)=position of the ions initial
+!!
+!! OUTPUTS
+!!  xcart_next(3,natom)=positions of the ions final step
+!!  vel_nexthalf(3,natom)=velocity of ions in next half step
+!!
+!! SIDE EFFECTS
+!!  v2gauss=gauss factor (twice the kinetic energy) (initial and final)
+!!  vel(3,natom)=velocity of ions
+!!  fcart_m(3,natom)=forces on ions in
+!!
 !! PARENTS
 !!      m_pred_lotf
 !!
 !! CHILDREN
 !!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine lotf_interpolation(itime,dtion,v2gauss,amass,xcart,vel,&
 &                           fcart_m,xcart_next,vel_nexthalf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lotf_interpolation'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 
@@ -1606,7 +1524,7 @@ contains
   real(dp),intent(out) :: xcart_next(:,:)
 
 ! *************************************************************************
-   
+
    write(message,'(a,i8)') ' ---LOTF interpolation: itime=',itime
    call wrtout(std_out,message,'COLL')
 
@@ -1615,10 +1533,10 @@ contains
     !--itime=0 fist step
      vel_nexthalf(:,:) = vel(:,:)
      xcart_next(:,:)  = xcart(:,:)
-   else 
+   else
     !--Computation of vel_nexthalf (4.16 de Ref.1)
      call force_to_vel(v2gauss,dtion,amass,vel,fcart_m,vel_nexthalf)
-     
+
     !--Computation of the next positions
      xcart_next(:,:) = xcart(:,:)+vel_nexthalf(:,:)*dtion
 
@@ -1635,4 +1553,3 @@ contains
 
 end module LOTFPATH
 !!***
-

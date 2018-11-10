@@ -28,7 +28,7 @@
 MODULE m_distribfft
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  implicit none
@@ -137,13 +137,6 @@ CONTAINS !===========================================================
 !! SOURCE
 
 subroutine init_distribfft(distribfft_arg,grid_type,nproc_fft,n2,n3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_distribfft'
-!End of the abilint section
 
  implicit none
 
@@ -273,13 +266,6 @@ end subroutine init_distribfft
 
 subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_distribfft_seq'
-!End of the abilint section
-
  implicit none
 
 
@@ -408,13 +394,6 @@ end subroutine init_distribfft_seq
 
 subroutine destroy_distribfft(distribfft_arg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_distribfft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -493,13 +472,6 @@ end subroutine destroy_distribfft
 !! SOURCE
 
 subroutine copy_distribfft(distribfft_src, distribfft_dst)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_distribfft'
-!End of the abilint section
 
  implicit none
 

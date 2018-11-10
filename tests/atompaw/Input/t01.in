@@ -21,7 +21,6 @@ UPFDX 0.005d0   UPFXMIN -9.d0     UPFZMESH 1.d0
 0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = atompaw

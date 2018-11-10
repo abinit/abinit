@@ -29,7 +29,7 @@
 module m_scfcv
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use defs_datatypes
  use defs_abitypes
@@ -46,12 +46,13 @@ module m_scfcv
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
+ use m_pawcprj,          only : pawcprj_type
  use m_pawrhoij,         only : pawrhoij_type
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
  use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
- use m_scfcv_core,       only : scfcv
+ use m_scfcv_core,       only : scfcv_core
 
  implicit none
 
@@ -82,6 +83,7 @@ module m_scfcv
  type, public :: scfcv_t
   !scalars
    integer,pointer :: mcg => null()
+   integer,pointer :: mcprj => null()
    integer,pointer :: my_natom => null()
    integer,pointer :: ndtpawuj => null()
    integer,pointer :: pwind_alloc => null()
@@ -137,7 +139,7 @@ module m_scfcv
    type(pawtab_type), pointer :: pawtab(:) => null()
    type(macro_uj_type),pointer :: dtpawuj(:) => null()
    type(pawrhoij_type), pointer :: pawrhoij(:) => null()
-
+   type(pawcprj_type),pointer :: cprj(:,:) => null()
    ! PRIVATE ATTRIBUTS
    type(entropyDMFT_t) ABI_PRIVATE :: entropyDMFT
  end type scfcv_t
@@ -175,9 +177,9 @@ contains
 !!
 !! SOURCE
 
-subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
+subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
 &  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
-&  indsym,initialized,irrzon,kg,mcg,mpi_enreg,my_natom,nattyp,ndtpawuj,&
+&  indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
 &  resid,results_gs,scf_history,fatvshift,&
@@ -186,15 +188,8 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_init'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
- integer,intent(in),target :: mcg,my_natom,ndtpawuj,pwind_alloc
+ integer,intent(in),target :: mcg,mcprj,my_natom,ndtpawuj,pwind_alloc
  integer,intent(in),target :: initialized,nfftf
  real(dp),intent(in),target :: cpus,ecore
  real(dp),intent(in),target :: fatvshift
@@ -241,7 +236,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
 ! type(electronpositron_type),intent(in),target :: electronpositron
  type(paw_dmft_type), intent(in),target :: paw_dmft
  type(wffile_type),intent(in),target :: wffnew,wffnow
-
+ type(pawcprj_type), allocatable,intent(in),target :: cprj(:,:)
 !Local variables -------------------------
 !scalars
  logical :: DEBUG=.FALSE.
@@ -282,6 +277,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
  this%indsym=>indsym
  this%kg=>kg
  this%mcg=>mcg
+ this%mcprj=>mcprj
  this%my_natom=>my_natom
  this%nattyp=>nattyp
  this%ndtpawuj=>ndtpawuj
@@ -298,6 +294,7 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cpus,&
  this%ylmgr=>ylmgr
 
  this%cg=>cg
+ this%cprj=>cprj
  this%dmatpawu=>dmatpawu
  this%dtefield=>dtefield
  this%dtorbmag=>dtorbmag
@@ -381,13 +378,6 @@ end subroutine scfcv_init
 subroutine scfcv_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_destroy'
-!End of the abilint section
-
 type(scfcv_t), intent(inout) :: this
 
 !Local variables-------------------------------
@@ -398,6 +388,7 @@ type(scfcv_t), intent(inout) :: this
 
  !scalars
  this%mcg => null()
+ this%mcprj => null()
  this%my_natom => null()
  this%ndtpawuj => null()
  this%pwind_alloc => null()
@@ -440,6 +431,7 @@ type(scfcv_t), intent(inout) :: this
  this%ylm => null()
  this%ylmgr => null()
  this%cg => null()
+ this%cprj => null()
  this%dmatpawu => null()
  this%eigen => null()
  this%occ => null()
@@ -495,13 +487,6 @@ end subroutine scfcv_destroy
 subroutine scfcv_run(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_run'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer:: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -565,14 +550,6 @@ end subroutine scfcv_run
 !!subroutine scfcv_reformatWFK(this,rhog, rhor, rprimd, xred, xred_old)
 !!
 !!
-!!!This section has been created automatically by the script Abilint (TD).
-!!!Do not modify the following lines by hand.
-!!#undef ABI_FUNC
-!!#define ABI_FUNC 'scfcv_reformatWFK'
-!! use interfaces_67_common
-!! use interfaces_79_seqpar_mpi
-!!!End of the abilint section
-!!
 !! type(scfcv_t), intent(inout) :: this
 !! real(dp), intent(inout) :: xred(3,this%dtset%natom)
 !! real(dp), intent(inout) :: xred_old(3,this%dtset%natom)
@@ -632,13 +609,6 @@ subroutine scfcv_runWEntropyDMFT(this,electronpositron,rhog,rhor,rprimd,xred,xre
 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_runWEntropyDMFT'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -721,13 +691,6 @@ end subroutine scfcv_runWEntropyDMFT
 
 subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scfcv_scfcv'
-!End of the abilint section
-
  type(scfcv_t), intent(inout) :: this
  type(electronpositron_type),pointer :: electronpositron
  real(dp), intent(inout) :: rprimd(3,3)
@@ -737,9 +700,11 @@ subroutine scfcv_scfcv(this,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv
  real(dp), pointer, intent(inout) :: rhor(:,:)
  integer , intent(out)   :: conv_retcode
 
-   call scfcv(this%atindx,this%atindx1,this%cg,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,this%dtorbmag,this%dtpawuj,&
+   call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
+&    this%dtorbmag,this%dtpawuj,&
 &    this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%indsym,&
-&    this%initialized,this%irrzon,this%kg,this%mcg,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,this%nfftf,this%npwarr,&
+&    this%initialized,this%irrzon,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
+&    this%nfftf,this%npwarr,&
 &    this%occ,this%paw_dmft,this%pawang,this%pawfgr,this%pawrad,this%pawrhoij,this%pawtab,this%phnons,this%psps,this%pwind,&
 &    this%pwind_alloc,this%pwnsfac,this%rec_set,this%resid,this%results_gs,rhog,rhor,rprimd,&
 &    this%scf_history,this%symrec,this%taug,this%taur,this%wffnew,this%wvl,xred,xred_old,this%ylm,this%ylmgr,&

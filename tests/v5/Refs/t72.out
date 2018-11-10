@@ -557,7 +557,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      66.375      66.256
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+       -0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
 
     2   0.000 -18.921  -3.048   3.972   1.429   3.973   1.429   3.974   1.430
        -0.000  -0.000  -0.001   0.000  -0.000   0.000  -0.001   0.001  -0.000
@@ -571,8 +571,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      66.375      66.256
        -0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  14.5924
-  dielectric constant without local fields =  14.5963
+  dielectric constant =  14.5922
+  dielectric constant without local fields =  14.5961
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :    196.35  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -580,10 +580,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      66.375      66.256
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.069   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-      0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
+     -0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.069   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
-      0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
+     -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000
 
 
    Upper and lower wings at the    2 th omega   0.0000  29.1080 [eV]

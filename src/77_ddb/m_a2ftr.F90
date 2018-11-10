@@ -30,7 +30,7 @@ module m_a2ftr
  use defs_datatypes
  use defs_elphon
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_kptrank
  use m_splines
@@ -107,14 +107,6 @@ contains
 !! SOURCE
 
 subroutine mka2f_tr(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,pair2red,elph_tr_ds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f_tr'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1071,14 +1063,6 @@ end subroutine mka2f_tr
 
 subroutine mka2f_tr_lova(crystal,ifc,elph_ds,ntemper,tempermin,temperinc,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mka2f_tr_lova'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1699,14 +1683,6 @@ end subroutine mka2f_tr_lova
 !! SOURCE
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_tau_k'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

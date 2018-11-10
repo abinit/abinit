@@ -24,11 +24,11 @@ MODULE m_paw_mkrho
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
- use m_time, only : timab
 
+ use m_time, only : timab
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type,pawrad_deducer0
  use m_pawtab,           only : pawtab_type,pawtab_get_lsize
@@ -46,6 +46,7 @@ MODULE m_paw_mkrho
  use m_io_tools,         only : open_file
  use m_geometry,         only : xred2xcart
  use m_pptools,          only : printxsf
+ use m_fft,              only : fourdp
 
  implicit none
 
@@ -141,14 +142,6 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
 &          pawang_sym,pawnhat,pawrhoij0,rhog) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmkrho'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -263,7 +256,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
 
 !  Compute compensated pseudo density in reciprocal space
    if (present(rhog)) then
-     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,1,pawfgr%ngfft,0)
    end if
  end if
 
@@ -349,14 +342,6 @@ end subroutine pawmkrho
  subroutine denfgr(atindx1,gmet,spaceComm_in,my_natom,natom,nattyp,ngfft,nhat,nspinor,nsppol,nspden,ntypat, &
 & pawfgr,pawrad,pawrhoij,pawtab,prtvol,rhor,rhor_paw,rhor_n_one,rhor_nt_one,rprimd,typat,ucvol,xred,&
 & abs_n_tilde_nt_diff,znucl,mpi_atmtab,comm_atom) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'denfgr'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

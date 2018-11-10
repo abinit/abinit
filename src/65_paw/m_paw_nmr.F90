@@ -26,7 +26,7 @@ MODULE m_paw_nmr
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_symtk,      only : matpointsym
@@ -101,13 +101,6 @@ CONTAINS  !=====================================================================
 subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij,pawrad,pawtab, &
 &                          rprimd,symrel,tnons,xred,&
 &                          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_onsite'
-!End of the abilint section
 
  implicit none
 
@@ -321,13 +314,6 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 
 subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_fc_paw'
-!End of the abilint section
 
  implicit none
 

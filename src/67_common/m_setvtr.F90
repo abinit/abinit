@@ -29,7 +29,7 @@ module m_setvtr
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abi2big
  use m_xmpi
@@ -195,25 +195,12 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &  istep,kxc,mgfft,moved_atm_inside,moved_rhor,mpi_enreg,&
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
 &  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
 &  electronpositron,taug,taur,vxc_hybcomp,vxctau,add_tfw) ! optionals arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setvtr'
-!End of the abilint section
 
  implicit none
 
@@ -667,7 +654,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
    call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
-&   energies%e_kinetic, energies%e_localpsp, energies%e_nonlocalpsp, energies%e_sicdc, &
+&   energies%e_kinetic, energies%e_localpsp, energies%e_nlpsp_vfock, energies%e_sicdc, &
 &   istep, 1, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft, mpi_enreg%nproc_wvl, dtset%nspden, &
 &   rpnrm, .true.,evxc, wvl,.true., xcart, strsxc,&
 &   vtrial, vxc)
@@ -822,13 +809,6 @@ end subroutine setvtr
 
 subroutine spatialchempot(e_chempot,chempot,grchempottn,natom,ntypat,nzchempot,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spatialchempot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -962,13 +942,6 @@ end subroutine spatialchempot
 
 subroutine ionion_realSpace(dtset, eew, grewtn, rprimd, xred, zion)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ionion_realSpace'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1072,13 +1045,6 @@ subroutine ionion_surface(dtset, eew, grewtn, me, nproc, rprimd, wvl, wvl_den, x
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: IonicEnergyandForces
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ionion_surface'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

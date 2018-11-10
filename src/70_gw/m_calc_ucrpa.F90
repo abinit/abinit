@@ -20,6 +20,7 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -32,7 +33,7 @@ MODULE m_calc_ucrpa
  use defs_basis
  implicit none
 
- private 
+ private
 
  public :: calc_ucrpa
 !!***
@@ -84,17 +85,11 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
  subroutine calc_ucrpa(itypatcor,cryst,Kmesh,lpawu,M1_q_m,Qmesh,npwe,&
 & npw,nsym,rhot1_q_m,nomega,omegamin,omegamax,bandinf,bandsup,optimisation,ucvol,Wfd,fname)
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
 
@@ -103,14 +98,6 @@ contains
  use m_io_screening,  only : read_screening, em1_ncname
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_crystal,       only : crystal_t
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ucrpa'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 !   _____            _
 !  |_   _|          | |
@@ -964,13 +951,6 @@ contains
 !
  integer FUNCTION fi(nkbz,k_coord,kprime_coord)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fi'
-!End of the abilint section
-
       implicit none
        integer,intent(in) :: nkbz
       real(dp),dimension(nkbz,3),intent(in) ::k_coord
@@ -984,13 +964,6 @@ contains
  END FUNCTION fi
 
  integer FUNCTION findkmq(ik_bz,k_coord,q_coord,nkbz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findkmq'
-!End of the abilint section
 
       implicit none
       integer,intent(in) :: ik_bz,nkbz
@@ -1031,14 +1004,6 @@ contains
  END FUNCTION findkmq
 
  SUBROUTINE checkk(Interaction,m_inf,m_sup,tol,prtopt,ifreq,uu,jj,utype)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'checkk'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
  integer, intent(in) :: m_inf,m_sup,ifreq
@@ -1106,14 +1071,6 @@ contains
  END SUBROUTINE checkk
 
  SUBROUTINE Affichage(Interaction,m_inf,m_sup,option,ifreq,uu,jj,utype)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Affichage'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
   integer, intent(in) :: m_inf,m_sup,option,ifreq
@@ -1258,13 +1215,6 @@ contains
  END SUBROUTINE Affichage
 
  SUBROUTINE Sauvegarde_M_q_m(M_q_m,normG,nqibz,npw,mbband)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Sauvegarde_M_q_m'
-!End of the abilint section
 
  implicit none
  integer, intent(in) :: nqibz,npw,mbband

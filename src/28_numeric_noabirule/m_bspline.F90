@@ -60,7 +60,7 @@
 
 module m_bspline
 
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use defs_basis,   only : sp, dp, std_out
@@ -96,13 +96,6 @@ contains
 !   xknot  - array of length ndata+korder containing the knot
 !            sequence.  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbsnak'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in) :: nx, kxord
@@ -173,13 +166,6 @@ contains
 !   bscoef - array of length ndata containing the B-spline
 !            coefficients.  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbsint'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                          :: nx, kx
@@ -264,13 +250,6 @@ contains
 !            coefficients.  (input)
 !   dbsval - value of the spline at x.  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbsval'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                          :: nx, kx
@@ -354,13 +333,6 @@ contains
 !   dbsder - value of the iderx-th derivative of the spline at x.
 !            (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbsder'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                          :: iderx, kx, nx
@@ -494,13 +466,6 @@ contains
 !            iderx-th derivative of the spline at the points in
 !            xvec.  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs1gd'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                           :: iderx, nxvec, kx, nx
@@ -678,13 +643,6 @@ contains
 !   dbsdca - value of the ideriv-th derivative of the spline at x.
 !            (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbsdca'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                          :: iderx, kx, nx
@@ -805,13 +763,6 @@ contains
 !             bscoef is treated internally as a matrix of size nxdata
 !             by nydata.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs2in'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                           :: nx, ny, kx, ky, ldf
@@ -838,13 +789,6 @@ contains
 
 
   subroutine spli2d(xyvec,ld,xydata,xyknot,n,k,m,work2,work3,bcoef)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spli2d'
-!End of the abilint section
 
     implicit none
 
@@ -954,13 +898,6 @@ contains
 !            by ny.
 !   dbs2vl - value of the spline at (x,y).  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs2vl'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                          :: nx, ny, kx, ky
@@ -1065,13 +1002,6 @@ contains
 !   dbs2dr  - value of the (iderx,idery) derivative of the spline at
 !            (x,y).  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs2dr'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                          :: iderx, idery
@@ -1180,13 +1110,6 @@ contains
 !   ldf     - leading dimension of value exactly as specified in the
 !             dimension statement of the calling program.  (input)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs2gd'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                           :: iderx, idery
@@ -1437,13 +1360,6 @@ contains
 !             bscoef is treated internally as a matrix of size nx
 !             by ny by nz.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs3in'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in) :: nx, ny, nz, kx, ky, kz
@@ -1480,13 +1396,6 @@ contains
 
   subroutine spli3d(xyzvec,ldf,mdf,xyzdata,xyzknot,n,k,m,l,work2,work3,       &
        & bcoef,nx,ny,nz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spli3d'
-!End of the abilint section
 
     implicit none
 
@@ -1606,13 +1515,6 @@ contains
 !            by ny by nz.
 !   dbs3vl - value of the spline at (x,y,z).  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs3vl'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                             :: nx, ny, nz, kx, ky, kz
@@ -1705,13 +1607,6 @@ contains
 !   dbs3dr - value of the (iderx,idery,iderz) derivative of the
 !            spline at (x,y,z).  (output)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs3dr'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                              :: iderx, idery, iderz
@@ -1819,13 +1714,6 @@ contains
 !   mdf    - middle dimension of value exactly as specified in the
 !            dimension statement of the calling program.  (input)
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbs3gd'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                               :: iderx, idery, iderz
@@ -2093,13 +1981,6 @@ contains
 
   subroutine bsplvb(t,n,jhigh,index,x,left,biatx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bsplvb'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in) :: n, jhigh, index, left
@@ -2144,13 +2025,6 @@ contains
 
 
   subroutine banfac(w,nroww,nrow,nbandl,nbandu,iflag)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'banfac'
-!End of the abilint section
 
     implicit none
 
@@ -2224,13 +2098,6 @@ contains
 
   subroutine banslv(w,nroww,nrow,nbandl,nbandu,b)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'banslv'
-!End of the abilint section
-
     implicit none
 
     integer, intent(in)                               :: nroww,nrow
@@ -2277,13 +2144,6 @@ contains
 
 
   subroutine huntn(xx,n,kord,x,jlo)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'huntn'
-!End of the abilint section
 
     implicit none
 

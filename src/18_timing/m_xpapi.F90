@@ -63,13 +63,6 @@ CONTAINS  !===========================================================
 
 subroutine xpapi_init()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_init'
-!End of the abilint section
-
  implicit none
 
 #ifdef HAVE_PAPI
@@ -132,14 +125,6 @@ end subroutine xpapi_init
 !! SOURCE
 
 subroutine xpapi_show_info(unit,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_show_info'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -229,13 +214,6 @@ end subroutine xpapi_show_info
 
 subroutine xpapi_flops(real_time,proc_time,flops,mflops,check)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_flops'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -271,13 +249,6 @@ end subroutine xpapi_flops
 
 subroutine xpapi_shutdown()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_shutdown'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -305,13 +276,6 @@ end subroutine xpapi_shutdown
 !! SOURCE
 
 subroutine xpapi_handle_error(check,err_msg,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xpapi_handle_error'
-!End of the abilint section
 
  implicit none
 

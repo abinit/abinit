@@ -43,7 +43,7 @@
 MODULE m_kxc
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_crystal
@@ -57,7 +57,7 @@ MODULE m_kxc
  use m_pptools,       only : printxsf
  use m_numeric_tools, only : hermitianize
  use m_fft_mesh,      only : g2ifft
- use m_fft,           only : fourdp_6d
+ use m_fft,           only : fourdp_6d, fourdp
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_spacepar,      only : hartre
  use m_rhotoxc,       only : rhotoxc
@@ -112,13 +112,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine kxc_rpa(gsq,krpa,npw,option,rcut_coulomb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_rpa'
-!End of the abilint section
 
  implicit none
 
@@ -211,13 +204,6 @@ end subroutine kxc_rpa
 !! SOURCE
 
 subroutine kxc_local(ispxc,kg_diel,kxc,kxcg,nfft,ngfft,npwdiel,nspden,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_local'
-!End of the abilint section
 
  implicit none
 
@@ -416,14 +402,6 @@ end subroutine kxc_local
 
 subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocut,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_alda'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------------------------------------
@@ -574,10 +552,10 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
    if (option == 1) then
      do ikxc = 1,nkxc
-       call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+       call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
      end do
    else
-     call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+     call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end if
 
  else if ((option == 2).and.(nspden == 1)) then
@@ -598,7 +576,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 
 !  Calculate the Fourier transform of the up-down channel of the AL(S)DA kernel.
 
-   call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+   call fourdp(1,kxcg(:,:,1),kxcr(:,2),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
 
  else
    write (message,'(4a,i0)')'  Invalid option = ',option
@@ -676,13 +654,6 @@ end subroutine kxc_alda
 !! SOURCE
 
 subroutine kxc_pgg(gmet,kg,khxcg,npw,rcut_coulomb,susmat,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_pgg'
-!End of the abilint section
 
  implicit none
 
@@ -906,14 +877,6 @@ end subroutine kxc_pgg
 
 subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_eok'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------------------------------------
@@ -1017,7 +980,7 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut
 !Calculate the Fourier transform of the energy optimized kernel.
  tim_fourdp=0
  do ikxc = 1,nkxc
-   call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+   call fourdp(1,kxcg(:,:,ikxc),kxcr(:,ikxc),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
  end do
 
 !Free memory.
@@ -1072,15 +1035,6 @@ end subroutine kxc_eok
 !! SOURCE
 
 subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kxcg,gvec,comm,dbg_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_driver'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -1204,7 +1158,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  ABI_MALLOC(my_kxcg,(2,nfft_tot))
 
  do ikxc=1,nkxc
-   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft_tot,ngfft,paral_kgb0,0)
+   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
    kxcg(:,ikxc)=CMPLX(my_kxcg(1,:),my_kxcg(2,:))
  end do
 
@@ -1263,7 +1217,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
 &       n3xccc,option,paral_kgb0,qphon(:),phas(:,igp,:),Cryst%rprimd,1,kxcpw_r,xccc3d)
 
 !      FFT the first index to --> to G space
-       call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,ngfft,paral_kgb0,0)
+       call fourdp(cplex,kxcpw_g(:,:),kxcpw_r(:,1),-1,MPI_enreg_seq,nfft_tot,1,ngfft,0)
 
 !      kxcg(:,igp,iq)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
 !      kxcg(:,igp)=CMPLX(kxcpw_g(1,igfft(:)),kxcpw_g(2,igfft(:)))
@@ -1334,15 +1288,6 @@ end subroutine kxc_driver
 
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
 &                  npw,nqibz,qibz,fxc_ADA,gvec,comm,kappa_init,dbg_mode)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kxc_ADA'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -1560,7 +1505,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  ABI_MALLOC(my_kxcg,(2,nfft))
 
  do ikxc=1,nkxc
-   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft,ngfft,paral_kgb0,0)
+   call fourdp(1,my_kxcg,kxcr(:,ikxc),-1,MPI_enreg_seq,nfft,1,ngfft,0)
 !  kxcg(:,ikxc)=CMPLX(my_kxcg(1,:),my_kxcg(2,:))
  end do
 !TODO Check symmetry of kxcg

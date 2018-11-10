@@ -126,6 +126,9 @@ ABI_UNITS = [
     'Rydbergs',
     'T',
     'Tesla',
+    'Second',
+    'S',
+    'Sec',
 ]
 
 # Operators supported by parser
@@ -170,7 +173,7 @@ ABI_TOPICS = [
     "Band2eps",
     "Berry",
     "BandOcc",
-    "BoundProcess",
+    "BoundingProcess",
     "BSE",
     "ConstrainedPol",
     "Control",
@@ -184,8 +187,8 @@ ABI_TOPICS = [
     "Dev",
     "DFPT",
     "DMFT",
-    "EffectiveMass",
     "DynamicsMultibinit",
+    "EffectiveMass",
     "EFG",
     "Elastic",
     "ElPhonInt",
@@ -235,6 +238,7 @@ ABI_TOPICS = [
     "SelfEnergy",
     "SmartSymm",
     "spinpolarisation",
+    "SpinDynamicsMultibinit",
     "STM",
     "Susceptibility",
     "TDDFT",
@@ -653,8 +657,8 @@ class Variable(object):
         #    if not isinstance(self.varset, str) or self.varset not in ref_varset:
         #        print('The field varset of %s should be one of the valid varsets' % str(self))
 
-        if len(self.name) > 20:
-            eapp("Lenght of `%s` is longer than 20 characters." % svar)
+        if len(self.name) > 25:
+            eapp("Lenght of `%s` is longer than 25 characters." % self.name)
 
         if errors:
             raise ValueError("\n".join(errors))

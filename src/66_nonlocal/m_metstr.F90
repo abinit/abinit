@@ -28,7 +28,7 @@ module m_metstr
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -126,13 +126,6 @@ contains
 !! SOURCE
 
 subroutine metstr(istr,rank,iterm,gmet,gprimd,aa,bb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'metstr'
-!End of the abilint section
 
  implicit none
 

@@ -27,7 +27,7 @@ module m_strain
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_symtk,         only : matr3inv
@@ -96,13 +96,6 @@ CONTAINS  !=====================================================================
 
 subroutine strain_init(strain,delta,direction,name)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strain_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -163,13 +156,6 @@ end subroutine strain_init
 
 subroutine strain_free(strain)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strain_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -216,13 +202,6 @@ end subroutine strain_free
 !! SOURCE
 
 subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strain_get'
-!End of the abilint section
 
  implicit none
 
@@ -323,13 +302,6 @@ end subroutine strain_get
 
 subroutine strain_apply(rprim,rprim_def,strain)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strain_apply'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -340,7 +312,7 @@ subroutine strain_apply(rprim,rprim_def,strain)
  type(strain_type),intent(in) :: strain
 !Local variables-------------------------------
 !scalar
- integer :: i
+ !integer :: i
 !arrays
 ! *************************************************************************
 
@@ -373,13 +345,6 @@ end subroutine strain_apply
 !! SOURCE
 
 subroutine strain_def2strain(mat_strain,strain)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strain_def2strain'
-!End of the abilint section
 
  implicit none
 
@@ -496,13 +461,6 @@ end subroutine strain_def2strain
 
 subroutine strain_strain2def(mat_strain,strain)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strain_strain2def'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -562,14 +520,6 @@ end subroutine strain_strain2def
 !! SOURCE
 
 subroutine strain_print(strain)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strain_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

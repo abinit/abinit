@@ -15,6 +15,7 @@ subsuites = [
 "fftgw",
 "fourdp",
 "fourwf",
+"transposer",
 ]
 
 #: List of input files
@@ -58,4 +59,6 @@ inp_files = [
 "tfourwf_11.in",
 "tfourwf_12.in",
 "tfourwf_13.in",
+#
+"ttransposer_01.in",
 ]

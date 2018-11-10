@@ -45,14 +45,6 @@
  use m_specialmsg,only : specialmsg_getcount, herald
  use m_io_tools,  only : get_unit, flush_unit
  use m_mpinfo,    only : destroy_mpi_enreg, nullify_mpi_enreg, initmpi_seq
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bsepostproc'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ----------------------------

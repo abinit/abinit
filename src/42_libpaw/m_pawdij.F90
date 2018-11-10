@@ -171,13 +171,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          atvshift,fatvshift,natvshift,nucdipmom,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1097,14 +1090,7 @@ end subroutine pawdij
 !!
 !! SOURCE
 
-subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijhartree'
-!End of the abilint section
+subroutine pawdijhartree(cplex_rf,dijhartree,nspden,pawrhoij,pawtab)
 
  implicit none
 
@@ -1474,13 +1460,6 @@ end subroutine pawdijfock
 subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
 &                   pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijxc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1732,6 +1711,296 @@ end subroutine pawdijxc
 
 !----------------------------------------------------------------------
 
+!!****f* m_pawdij/pawdijfock
+!! NAME
+!! pawdijfock
+!!
+!! FUNCTION
+!! Compute Fock exact-exchange contribution(s) to the PAW pseudopotential strength Dij
+!! (for one atom only)
+!!
+!! INPUTS
+!!  cplex_rf=(RF calculations only) - 1 if RF 1st-order quantities are REAL, 2 if COMPLEX
+!!  cplex_dij=1 if dij is REAL, 2 if complex (2 for spin-orbit)
+!!  [hyb_mixing, hyb_mixing_sr]= -- optional-- mixing factors for the global (resp. screened) XC hybrid functional
+!!  ndij= number of spin components
+!!  nspden=number of spin density components
+!!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies (and related data) for current atom
+!!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
+!!  cplex=(RF calculations only) - 1 if RF 1st-order quantities are REAL, 2 if COMPLEX
+!!
+!!  lmselect(lm_size)=select the non-zero LM-moments of on-site potentials
+!!  nspden=number of spin density components
+!!  nsppol=number of independent spin WF components
+!!  pawang <type(pawang_type)>=paw angular mesh and related data
+!!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
+!!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
+!!
+!! OUTPUT
+!!  dijfock_vv(cplex_dij*lmn2_size,ndij)=  D_ij^fock terms for valence-valence interactions
+!!  dijfock_cv(cplex_dij*lmn2_size,ndij)=  D_ij^fock terms for core-valence interactions
+!!
+!! PARENTS
+!!      m_pawdij,pawdenpot
+!!
+!! CHILDREN
+!!      xmpi_allgather,xmpi_allgatherv
+!!
+!! SOURCE
+
+subroutine pawdijfock(cplex_rf,cplex_dij,dijfock_vv,dijfock_cv,hyb_mixing,hyb_mixing_sr,ndij,nspden,nsppol,pawrhoij,pawtab)
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: cplex_rf,cplex_dij,ndij,nspden,nsppol
+ real(dp),intent(in) :: hyb_mixing,hyb_mixing_sr
+!arrays
+ real(dp),intent(out) :: dijfock_vv(:,:),dijfock_cv(:,:)
+ type(pawrhoij_type),intent(in) :: pawrhoij
+ type(pawtab_type),intent(in),target :: pawtab
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: cplex_rhoij,idij,idijend,ispden,irhoij,jrhoij,ilmn_i,jlmn_j,ilmn_k,jlmn_l
+ integer :: klmn_kl,klmn_ij,klmn_il,klmn_kj,klmn,klmn1,klmn2,nsploop,lmn2_size
+
+ character(len=500) :: msg
+!arrays
+ real(dp) :: ro(cplex_dij)
+ real(dp),allocatable :: dijfock_idij_vv(:),dijfock_idij_cv(:)
+ real(dp),pointer :: eijkl(:,:)
+
+! *************************************************************************
+
+!Useful data
+ lmn2_size=pawtab%lmn2_size
+ cplex_rhoij=pawrhoij%cplex
+
+!Check data consistency
+ if (cplex_rf==2) then
+   msg='pawdijfock not compatible with cplex_rf=2!'
+   MSG_BUG(msg)
+ end if
+ if (cplex_dij<cplex_rhoij) then
+   msg='cplex_dij must be >= cplex_rhoij!'
+   MSG_BUG(msg)
+ end if
+ if (size(dijfock_vv,1)/=cplex_dij*lmn2_size.or.size(dijfock_vv,2)/=ndij) then
+   msg='invalid sizes for Dijfock_vv!'
+   MSG_BUG(msg)
+ end if
+ if (size(dijfock_cv,1)/=cplex_dij*lmn2_size.or.size(dijfock_cv,2)/=ndij) then
+   msg='invalid sizes for Dijfock_cv!'
+   MSG_BUG(msg)
+ end if
+
+ if (abs(hyb_mixing)>tol8 .and. abs(hyb_mixing_sr)>tol8) then
+   msg='invalid hybrid functional'
+   MSG_BUG(msg)
+ else
+   if (abs(hyb_mixing)>tol8) then
+     eijkl => pawtab%eijkl
+   else if (abs(hyb_mixing_sr)>tol8) then
+     eijkl => pawtab%eijkl_sr
+   end if
+ end if
+
+!Init memory
+ dijfock_vv=zero ; dijfock_cv=zero
+ LIBPAW_ALLOCATE(dijfock_idij_vv,(cplex_dij*lmn2_size))
+ LIBPAW_ALLOCATE(dijfock_idij_cv,(cplex_dij*lmn2_size))
+
+!----------------------------------------------------------
+!Loop over spin components
+!----------------------------------------------------------
+ nsploop=nsppol;if (ndij==4) nsploop=4
+ do idij=1,nsploop
+   if (idij<=nsppol.or.(nspden==4.and.idij<=3).or.(cplex_dij==2.and.idij<=nspden)) then
+
+     idijend=idij+idij/3;if (cplex_dij==2) idijend=idij
+     do ispden=idij,idijend
+
+!!!! WARNING : What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
+       dijfock_idij_vv=zero
+       dijfock_idij_cv=zero
+!Real on-site quantities (ground-state calculation)
+       if (cplex_dij==1) then
+!* Loop on the non-zero elements rho_kl
+         do irhoij=1,pawrhoij%nrhoijsel
+           klmn_kl=pawrhoij%rhoijselect(irhoij)
+           ro(1)=pawrhoij%rhoijp(irhoij,ispden)*pawtab%dltij(klmn_kl)
+           ilmn_k=pawtab%indklmn(7,klmn_kl)
+           jlmn_l=pawtab%indklmn(8,klmn_kl)
+!* Fock contribution to the element (k,l) of dijfock
+           dijfock_idij_vv(klmn_kl)=dijfock_idij_vv(klmn_kl)-ro(1)*eijkl(klmn_kl,klmn_kl)
+!* Fock contribution to the element (i,j) of dijfock with (i,j) < (k,l)
+!* We remind that i<j and k<l by construction
+           do klmn_ij=1,klmn_kl-1
+             ilmn_i=pawtab%indklmn(7,klmn_ij)
+             jlmn_j=pawtab%indklmn(8,klmn_ij)
+!* In this case, i < l
+             klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
+!* If k >j, one must consider the index of the symmetric element (j,k) ; otherwise, the index of the element (k,j) is calculated.
+             if (ilmn_k>jlmn_j) then
+               klmn_kj=ilmn_k*(ilmn_k-1)/2+jlmn_j
+             else
+               klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
+             end if
+!* In this case, (i,l) >= (k,j)
+             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_il,klmn_kj)
+           end do
+!* Fock contribution to the element (i,j) of dijfock with (i,j) > (k,l)
+!* We remind that i<j and k<l by construction
+           do klmn_ij=klmn_kl+1,lmn2_size
+             ilmn_i=pawtab%indklmn(7,klmn_ij)
+             jlmn_j=pawtab%indklmn(8,klmn_ij)
+!* In this case, k < j
+             klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
+!* If i >l, one must consider the index of the symmetric element (l,i) ; otherwise, the index of the element (i,l) is calculated.
+             if (ilmn_i>jlmn_l) then
+               klmn_il=ilmn_i*(ilmn_i-1)/2+jlmn_l
+             else
+               klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
+             end if
+!* In this case, (k,j) >= (i,l)
+             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_kj,klmn_il)
+           end do
+         end do
+! Add the core-valence contribution
+         do klmn_ij=1,lmn2_size
+           dijfock_idij_cv(klmn_ij)=dijfock_idij_cv(klmn_ij)+pawtab%ex_cvij(klmn_ij)
+         end do
+
+!Complex on-site quantities
+       else !cplex_dij=2
+         jrhoij=1
+!* Loop on the non-zero elements rho_kl
+         do irhoij=1,pawrhoij%nrhoijsel
+           klmn_kl=pawrhoij%rhoijselect(irhoij)
+           ro(1)=pawrhoij%rhoijp(jrhoij,ispden)*pawtab%dltij(klmn_kl)
+           ro(2)=pawrhoij%rhoijp(jrhoij+1,ispden)*pawtab%dltij(klmn_kl)
+           ilmn_k=pawtab%indklmn(7,klmn_kl)
+           jlmn_l=pawtab%indklmn(8,klmn_kl)
+!* Fock contribution to the element (k,l) of dijfock
+           dijfock_idij_vv(klmn_kl)=dijfock_idij_vv(klmn_kl)-ro(1)*eijkl(klmn_kl,klmn_kl)
+           dijfock_idij_vv(klmn_kl+1)=dijfock_idij_vv(klmn_kl)-ro(2)*eijkl(klmn_kl,klmn_kl)
+!* Fock contribution to the element (i,j) of dijfock with (i,j) < (k,l)
+!* We remind that i<j and k<l by construction
+           do klmn_ij=1,klmn_kl-1
+             ilmn_i=pawtab%indklmn(7,klmn_ij)
+             jlmn_j=pawtab%indklmn(8,klmn_ij)
+!* In this case, i < l
+             klmn_il=jlmn_l*(jlmn_l-1)/2+ilmn_i
+!* If k >j, one must consider the index of the symmetric element (j,k) ; otherwise, the index of the element (k,j) is calculated.
+             if (ilmn_k>jlmn_j) then
+               klmn_kj=ilmn_k*(ilmn_k-1)/2+jlmn_j
+             else
+               klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
+             end if
+!* In this case, (i,l) >= (k,j)
+             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_il,klmn_kj)
+             dijfock_idij_vv(klmn_ij+1)=dijfock_idij_vv(klmn_ij)-ro(2)*eijkl(klmn_il,klmn_kj)
+           end do
+!* Fock contribution to the element (i,j) of dijfock with (i,j) > (k,l)
+!* We remind that i<j and k<l by construction
+           do klmn_ij=klmn_kl+1,lmn2_size
+             ilmn_i=pawtab%indklmn(7,klmn_ij)
+             jlmn_j=pawtab%indklmn(8,klmn_ij)
+!* In this case, k < j
+             klmn_kj=jlmn_j*(jlmn_j-1)/2+ilmn_k
+!* If i >l, one must consider the index of the symmetric element (l,i) ; otherwise, the index of the element (i,l) is calculated.
+             if (ilmn_i>jlmn_l) then
+               klmn_kj=ilmn_i*(ilmn_i-1)/2+jlmn_l
+             else
+               klmn_kj=jlmn_l*(jlmn_l-1)/2+ilmn_i
+             end if
+!* In this case, (k,j) >= (i,l)
+             dijfock_idij_vv(klmn_ij)=dijfock_idij_vv(klmn_ij)-ro(1)*eijkl(klmn_kj,klmn_il)
+             dijfock_idij_vv(klmn_ij+1)=dijfock_idij_vv(klmn_ij)-ro(2)*eijkl(klmn_kj,klmn_il)
+           end do
+
+           jrhoij=jrhoij+cplex_rhoij
+         end do
+! Add the core-valence contribution
+         do klmn_ij=1,lmn2_size,2
+           dijfock_idij_cv(klmn_ij)=dijfock_idij_cv(klmn_ij)+pawtab%ex_cvij(klmn_ij)
+         end do
+
+       end if
+
+!      ----------------------------------------------------------
+!      Deduce some part of Dij according to symmetries
+!      ----------------------------------------------------------
+
+       !if ispden=1 => real part of D^11_ij
+       !if ispden=2 => real part of D^22_ij
+       !if ispden=3 => real part of D^12_ij
+       !if ispden=4 => imaginary part of D^12_ij
+       klmn1=max(1,ispden-2);klmn2=1
+       do klmn=1,lmn2_size
+         dijfock_vv(klmn1,idij)=dijfock_idij_vv(klmn2)
+         dijfock_cv(klmn1,idij)=dijfock_idij_cv(klmn2)
+         klmn1=klmn1+cplex_dij
+         klmn2=klmn2+cplex_rf
+       end do
+       if (cplex_rf==2) then
+         !Same storage with exp^(-i.q.r) phase
+         klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
+         do klmn=1,lmn2_size
+           dijfock_vv(klmn1,idij)=dijfock_idij_vv(klmn2)
+           dijfock_cv(klmn1,idij)=dijfock_idij_cv(klmn2)
+           klmn1=klmn1+cplex_dij
+           klmn2=klmn2+cplex_rf
+         end do
+       endif
+
+     end do !ispden
+
+   !Non-collinear: D_ij(:,4)=Re[i.D^21_ij]=-Im[D^12_ij]
+   else if (nspden==4.and.idij==4) then
+     dijfock_vv(:,idij)=dijfock_vv(:,idij-1)
+     dijfock_cv(:,idij)=dijfock_cv(:,idij-1)
+     if (cplex_dij==2) then
+       do klmn=2,lmn2_size*cplex_dij,cplex_dij
+         dijfock_vv(klmn,idij)=-dijfock_vv(klmn,idij)
+         dijfock_cv(klmn,idij)=-dijfock_cv(klmn,idij)
+       end do
+       if (cplex_rf==2) then
+         do klmn=2+lmn2_size*cplex_dij,2*lmn2_size*cplex_dij,cplex_dij
+           dijfock_vv(klmn,idij)=-dijfock_vv(klmn,idij)
+           dijfock_cv(klmn,idij)=-dijfock_cv(klmn,idij)
+         end do
+       end if
+     end if
+
+   !Antiferro: D_ij(:,2)=D^down_ij=D^up_ij
+   else if (nsppol==1.and.idij==2) then
+     dijfock_vv(:,idij)=dijfock_vv(:,idij-1)
+     dijfock_cv(:,idij)=dijfock_cv(:,idij-1)
+   end if
+
+!----------------------------------------------------------
+!End loop on spin density components
+ end do
+
+ if (abs(hyb_mixing)>tol8) then
+   dijfock_vv(:,:) = hyb_mixing*dijfock_vv(:,:)
+ else if (abs(hyb_mixing_sr)>tol8) then
+   dijfock_vv(:,:) = hyb_mixing_sr*dijfock_vv(:,:)
+ end if
+ dijfock_cv(:,:) = (hyb_mixing+hyb_mixing_sr)*dijfock_cv(:,:)
+
+!Free temporary memory spaces
+ LIBPAW_DEALLOCATE(dijfock_idij_vv)
+ LIBPAW_DEALLOCATE(dijfock_idij_cv)
+
+end subroutine pawdijfock
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_pawdij/pawdijxcm
 !! NAME
 !! pawdijxcm
@@ -1780,13 +2049,6 @@ end subroutine pawdijxc
 
 subroutine pawdijxcm(dijxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 &                    pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijxcm'
-!End of the abilint section
 
  implicit none
 
@@ -2053,13 +2315,6 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 &                    natom,ndij,ngrid,ngridtot,nspden,nsppol,pawang,pawfgrtab,&
 &                    pawtab,Pot,qphon,ucvol,xred,&
 &                    mpi_comm_grid) ! Optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijhat'
-!End of the abilint section
 
  implicit none
 
@@ -2338,11 +2593,11 @@ end subroutine pawdijhat
 !!
 !! NOTES
 !!   On-site contribution of a nuclear magnetic dipole moment at $R$. Hamiltonian is
-!!   $H=(1/2m_e)(p - q_e A)^2 + V$, and vector potential $A$ is
+!!   $H=(1/2m_e)(p - q_e A)^2 + V$ in SI units, and vector potential $A$ is
 !!   $A=(\mu_0/4\pi) m\times (r-R)/|r-R|^3 = (\mu_0/4\pi) L_R\cdot m/|r-R|^3$ where
 !!   $L_R$ is the on-site orbital angular momentum and $m$ is the nuclear magnetic
-!!   dipole moment. For an electron (as usual), mass m_e = 1 and charge q_e = -1.
-!!   Second order term in A is ignored.
+!!   dipole moment. Second order term in A is ignored. In atomic units the on-site term
+!!   is \alpha^2 L_R\cdot m/|r-R|^3, where \alpha is the fine structure constant.
 !!
 !!
 !! PARENTS
@@ -2353,14 +2608,7 @@ end subroutine pawdijhat
 !!
 !! SOURCE
 
-subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijnd'
-!End of the abilint section
+subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
 
  implicit none
 
@@ -2376,7 +2624,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,j0lmn,klmn,kln,mesh_size
- real(dp) :: intgr3,permeability
+ real(dp) :: intgr3,RecipAlpha2
  complex(dpc) :: lms
  logical :: ndmom
 !arrays
@@ -2391,10 +2639,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
  mesh_size=pawtab%mesh_size
  LIBPAW_ALLOCATE(ff,(mesh_size))
 
-! magnetic permeability mu_0/four_pi in atomic units
-! this constant is also used in getghcnd.F90, if you change it here,
-! change it there also for consistency
- permeability=5.325135453D-5
+ 
+ RecipAlpha2 = 1.d0/(InvFineStruct*InvFineStruct)
+ ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2438,8 +2685,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 ! matrix element <S il im|L_idir|S jl jm>
          call slxyzs(il,im,idir,jl,jm,lms)
 
-         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*permeability
-         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*permeability
+         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*RecipAlpha2
+         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*RecipAlpha2
 
        end do
 
@@ -2511,13 +2758,6 @@ end subroutine pawdijnd
 
 subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 &                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijso'
-!End of the abilint section
 
  implicit none
 
@@ -2721,13 +2961,6 @@ end subroutine pawdijso
 
 subroutine pawdiju(dijpawu,cplex_dij,qphase,ndij,nsppol,pawtab,vpawu,&
 &                  natvshift,atvshift,fatvshift) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdiju'
-!End of the abilint section
 
  implicit none
 
@@ -2953,13 +3186,6 @@ end subroutine pawdiju
 
 subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdiju_euijkl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -3035,7 +3261,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 !            Im(D_kl) = sum_i<=j Im(rho_ij) ( eu_ijlk - (1-delta_ij) eu_jilk ) = -Im(D_lk)
              if (compute_im) then
                diju(klmn1+1,sig1)=diju(klmn1+1,sig1)+ro(2)*pawtab%euijkl(sig1,sig2,ilmn,jlmn,ilmnp,jlmnp)
-               if (ilmn/=jlmn) diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp)
+               if (ilmn/=jlmn) diju(klmn1+1,sig1)=diju(klmn1+1,sig1)-ro(2)*pawtab%euijkl(sig1,sig2,jlmn,ilmn,ilmnp,jlmnp
              end if
 
            end do ! k,l
@@ -3185,13 +3411,6 @@ end subroutine pawdiju_euijkl
 
 subroutine pawdijexxc(dijexxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
 &                     pawang,pawrad,pawtab,vpawx,vxc_ex)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijexxc'
-!End of the abilint section
 
  implicit none
 
@@ -3510,13 +3729,6 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
 &          option,paw_ij1,pawang,pawfgrtab,pawrad,pawtab,qphase,qphon,rprimd,ucvol,&
 &          vpsp1,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijfr'
-!End of the abilint section
 
  implicit none
 
@@ -4156,14 +4368,6 @@ end subroutine pawdijfr
  subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
 &                    pawprtvol,pawtab,vpawu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpupot'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -4307,7 +4511,11 @@ end subroutine pawdijfr
 !        Here we compute vpawu=vpawu-v_dc
          vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-pawtab%upawu*(n_tot-half)
          if (ndij/=4.or.option_interaction==2) then
-           vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+pawtab%jpawu*(n_sig-half)
+           if(pawtab%usepawu/=4) then
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+pawtab%jpawu*(n_sig-half)
+           else
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
+           endif
          else if (ndij==4.and.option_interaction==1) then
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
          else if (ndij==4.and.option_interaction==3) then
@@ -4445,14 +4653,6 @@ end subroutine pawdijfr
 !! SOURCE
 
  subroutine pawxpot(ndij,pawprtvol,pawrhoij,pawtab,vpawx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxpot'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -4615,14 +4815,6 @@ end subroutine pawdijfr
 subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 &                 paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec, &
 &                 mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -5300,13 +5492,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  contains
    function symdij_symcart(aprim,bprim,symred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij_symcart'
-!End of the abilint section
-
    implicit none
    real(dp) :: symdij_symcart(3,3)
    integer,intent(in) :: symred(3,3)
@@ -5381,13 +5566,6 @@ end subroutine symdij
 subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
 &                     paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij_all'
-!End of the abilint section
 
  implicit none
 
@@ -5534,13 +5712,6 @@ end subroutine symdij_all
 !! SOURCE
 
 subroutine pawdij_gather(dij_in,dij_out,comm_atom,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij_gather'
-!End of the abilint section
 
  implicit none
 
@@ -5707,14 +5878,6 @@ end subroutine pawdij_gather
 
 subroutine pawdij_print_dij(dij,cplex_dij,qphase,iatom,natom,nspden,nsppol,&
 &           test_value,title_msg,unit,Ha_or_eV,opt_prtvol,mode_paral) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij_print_dij'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

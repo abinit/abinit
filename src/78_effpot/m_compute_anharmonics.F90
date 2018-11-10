@@ -66,17 +66,11 @@ contains
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_io_tools, only : open_file
 
@@ -87,14 +81,6 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_strain
  use m_fstrings, only : itoa,int2char4,ftoa
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_anharmonics'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
  !Arguments ------------------------------------

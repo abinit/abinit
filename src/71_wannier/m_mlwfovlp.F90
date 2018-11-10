@@ -30,7 +30,7 @@ module m_mlwfovlp
  use defs_datatypes
  use defs_abitypes
  use defs_wannier90
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_atomdata
  use m_xmpi
@@ -52,7 +52,6 @@ module m_mlwfovlp
  use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_fftcore,  only : sphereboundary
  use m_crystal,  only : crystal_t
- use m_crystal_io, only : crystal_ncwrite
  use m_ebands,   only : ebands_ncwrite
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type, simp_gen
@@ -61,6 +60,7 @@ module m_mlwfovlp
  use m_paw_sphharm, only : ylm_cmplx, initylmr
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
+ use m_fft,            only : fourwf
 
  implicit none
 
@@ -139,15 +139,6 @@ contains
 & nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
 & pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -203,7 +194,7 @@ contains
 #endif
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
  character(len=fnlen) :: wfnname
- character(len=500) :: message
+ character(len=1000) :: message
  character(len=fnlen) :: seed_name(nsppol)
  character(len=fnlen) :: fname,filew90_win(nsppol),filew90_wout(nsppol),filew90_amn(nsppol),filew90_ramn(nsppol)
  character(len=fnlen) :: filew90_mmn(nsppol),filew90_eig(nsppol)
@@ -1060,7 +1051,7 @@ contains
              tim_fourwf=0
              call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
 &             gbound,gbound,dtset%istwfk(ikpt),kg_k,kg_k,mgfft,&
-&             mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,dtset%paral_kgb,&
+&             mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 !            do jj3=1,n3,spacing
 !            do jj2=1,n2,spacing
@@ -1204,7 +1195,7 @@ contains
 
      NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
      NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
      ncerr = nctk_def_dims(ncid, [ &
@@ -1391,13 +1382,6 @@ contains
 
  subroutine read_chkunit(seed_name,nkpt,ndimwin,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_chkunit'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1485,14 +1469,6 @@ end subroutine mlwfovlp
 subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 & filew90_ramn,filew90_mmn,filew90_eig,nsppol,seed_name)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_seedname'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1505,7 +1481,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
  integer::isppol
  character(len=fnlen) :: test_win1,test_win2,test_win3
  logical :: lfile
- character(len=500) :: message                   ! to be uncommented, if needed
+ character(len=2000) :: message
  character(len=10)::postfix
 ! *************************************************************************
 
@@ -1684,14 +1660,6 @@ end subroutine mlwfovlp_seedname
 & nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
 & proj_l,proj_m,proj_radial,proj_site,proj_s_loc,proj_s_qaxis_loc,proj_x,proj_z,proj_zona,&
 & real_lattice,recip_lattice,rprimd,seed_name,spin,spinors,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_setup'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1986,14 +1954,6 @@ end subroutine mlwfovlp_setup
 
 subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
 &  npwarr,nspinor,nsppol,ovikp,seed_name,spin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_pw'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2357,14 +2317,6 @@ subroutine mlwfovlp_pw(cg,cm1,g1,iwav,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nk
 &nkpt,npwarr,nspinor,&
 &nsppol,ntypat,num_bands,nwan,pawtab,proj_l,proj_m,proj_radial,&
 &proj_site,proj_x,proj_z,proj_zona,psps,spin,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_proj'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2885,14 +2837,6 @@ subroutine mlwfovlp_projpaw(A_paw,band_in,cprj,just_augmentation,max_num_bands,m
 &proj_l,proj_m,proj_radial,proj_site,proj_x,proj_z,proj_zona,psps,&
 &rprimd,spin,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_projpaw'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3263,13 +3207,6 @@ end subroutine mlwfovlp_projpaw
 
 subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_radial'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3413,13 +3350,6 @@ end subroutine mlwfovlp_radial
 
 
 subroutine mlwfovlp_ylmfac(ylmc_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_ylmfac'
-!End of the abilint section
 
  implicit none
 
@@ -3677,13 +3607,6 @@ end subroutine mlwfovlp_ylmfac
 !! SOURCE
 
 subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,proj_z)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_ylmfar'
-!End of the abilint section
 
  implicit none
 

@@ -72,7 +72,6 @@ t65o_DS2_WFK
 0      ! exit
 0      ! final exit
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = cut3d

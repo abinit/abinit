@@ -21,21 +21,20 @@
 !! CHILDREN
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 
 #include "abi_common.h"
 
 MODULE m_datafordmft
 
-
  use defs_basis
 
  implicit none
 
- private 
+ private
 
  public :: datafordmft
  public :: compute_levels
@@ -110,7 +109,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -125,14 +124,6 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
  use m_paw_dmft, only: paw_dmft_type
  use m_mpinfo,   only : proc_distrb_cycle
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'datafordmft'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -220,7 +211,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
  iorder_cprj=0
  ABI_CHECK(dtset%mkmem/=0,"mkmem==0 not supported anymore!")
 !todo_ab: extract cprj from file unpaw in the following..
-!call leave_new('COLL')
+!call abi_abort('COLL')
 
 !----------------------------------- MPI-------------------------------------
 
@@ -490,7 +481,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 !enddo
 !enddo
 !enddo
-!call leave_new('COLL')
+!call abi_abort('COLL')
  if(abs(dtset%pawprtvol)>=3) then
    write(message,*) "chinorm used here =",chinorm
    call wrtout(std_out,  message,'COLL')
@@ -759,16 +750,8 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
 subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 &nsppol,paw_dmft,pawtab,psps,t2g)
 
- use m_profiling_abi
+ use m_abicore
  use m_io_tools,  only : open_file
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psichi_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -854,7 +837,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 !                      &                         'BUG: jj1 is not correct in datafordmft psichi_print',ch10,&
 !                      &                         'Action: CONTACT Abinit group'
 !                      call wrtout(std_out,  message,'COLL')
-!                      call leave_new('COLL')
+!                      call abi_abort('COLL')
 !                      end if ! jj1
                        m1=psps%indlmn(2,ilmn,itypat)+psps%indlmn(1,ilmn,itypat)+1
 !                      ----- Print only when the sum over projectors is done
@@ -927,16 +910,9 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
 subroutine psichi_check(dtset,nattyp,nkpt,my_nspinor,&
 & nsppol,ntypat,paw_dmft,pawtab,psps,xocc_check,xnorm_check)
 
- use m_profiling_abi
+ use m_abicore
 
  use m_matlu, only: matlu_type,init_matlu,sym_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psichi_check'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1046,8 +1022,8 @@ end subroutine datafordmft
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  
-!! 
+!!
+!!
 !! OUTPUT
 !!
 !! NOTES
@@ -1060,32 +1036,19 @@ end subroutine datafordmft
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-
  subroutine compute_levels(cryst_struc,energy_level,hdc,pawang,paw_dmft,nondiag)
 
  use defs_basis
  use defs_datatypes
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawang, only : pawang_type
  use m_crystal, only : crystal_t
  use m_paw_dmft, only : paw_dmft_type
  use m_oper, only : oper_type,loc_oper
  use m_matlu, only : sym_matlu, print_matlu, checkdiag_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_levels'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1141,7 +1104,7 @@ end subroutine datafordmft
          do im1=1,2*lpawu+1
            energy_level%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)= &
 &           energy_level%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)&
-&           -hdc%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)-paw_dmft%fermie 
+&           -hdc%matlu(iatom)%mat(im1,im1,isppol,ispinor,ispinor)-paw_dmft%fermie
          end do
        end do
      end do
@@ -1199,21 +1162,13 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawang, only : pawang_type
  use m_paw_dmft, only: paw_dmft_type
  use m_crystal, only : crystal_t
  use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper,diff_oper
  use m_matlu, only : matlu_type,sym_matlu,print_matlu
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psichi_renormalization'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1301,7 +1256,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 !  ====================================
 !  == renormalize the sum over k-points
 !  ====================================
-!  allocate(temp_wtk(nkpt)) 
+!  allocate(temp_wtk(nkpt))
    temp_wtk=>paw_dmft%wtk
    write(message,'(6a)') ch10,'  ====================================== '&
 &   ,ch10,'  == Renormalization for all K-points == '&
@@ -1310,9 +1265,9 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
    call normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk)
 !  deallocate(temp_wtk)
 
- end if 
- 
-!== Change back repr for norm 
+ end if
+
+!== Change back repr for norm
 
 !===============================================
 !==  Compute norm with new psichi
@@ -1322,7 +1277,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
  call identity_oper(norm,1)
 
 !== Deduce norm%matlu from norm%ks with new psichi
- call loc_oper(norm,paw_dmft,1) 
+ call loc_oper(norm,paw_dmft,1)
 
 !== Print norm%matlu unsymetrized with new psichi
  if(pawprtvol>2) then
@@ -1384,7 +1339,7 @@ subroutine psichi_renormalization(cryst_struc,paw_dmft,pawang,opt)
 
 subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis
  use m_errors
@@ -1394,14 +1349,6 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
  use m_oper, only : init_oper,oper_type,identity_oper,loc_oper,destroy_oper
  use m_matlu, only : gather_matlu,sym_matlu,print_matlu,add_matlu
  use m_matrix, only : invsqrt_matrix
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normalizepsichi'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1440,12 +1387,12 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
 
 !  *********************************************************************
    call init_oper(paw_dmft,norm1,nkpt=nkpt,wtk=temp_wtk)
-   
+
 !  == Build identity for norm1%ks (option=1)
    call identity_oper(norm1,1)
-   
+
    if(nkpt==1.and.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt) 
+     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
    end if
    if(.not.present(jkpt)) then
      call loc_oper(norm1,paw_dmft,1)
@@ -1471,7 +1418,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
      end if
    end do
 !  ==-------------------------------------
-   
+
 !  built large overlap matrix
    write(message,'(2a)') ch10,'  - Overlap (before orthonormalization) -'
    call wrtout(std_out,message,'COLL')
@@ -1479,13 +1426,13 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    call destroy_oper(norm1)
 
 
-   
+
    do iatom=1,natom
      if(paw_dmft%lpawu(iatom).ne.-1) then
        ndim=2*paw_dmft%lpawu(iatom)+1
        tndim=nsppol*nspinor*ndim
        ABI_ALLOCATE(sqrtmatinv,(tndim,tndim))
-       
+
 !      == Compute Inverse Square root of overlap : O^{-0.5}
        !!write(message,'(a,1x,a,e21.14,a,e21.14,a)') "overlap", &
        !!"(",real(overlap(1)%value),",",aimag(overlap(1)%value),")"
@@ -1499,14 +1446,14 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
            sqrtmatinv(ib,ib)=cone/(sqrt(overlap(iatom)%value(ib,ib)))
          end do
        end if
-       
-!      == Apply O^{-0.5} on psichi 
+
+!      == Apply O^{-0.5} on psichi
        ABI_ALLOCATE(wan,(nsppol,nspinor,ndim))
 !      write(std_out,*) mbandc,nsppol,nspinor,ndim
 !      write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
        do ikpt=1,nkpt
          do ib=1,mbandc
-           if(present(jkpt)) then 
+           if(present(jkpt)) then
              ikpt1=jkpt
            else
              ikpt1=ikpt
@@ -1544,7 +1491,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
        ABI_DEALLOCATE(wan)
        ABI_DEALLOCATE(sqrtmatinv)
 !      write(std_out,*)  paw_dmft%psichi(1,1,1,1,1,1)
-       
+
 !      ==-------------------------------------
      end if ! lpawu.ne.-1
    end do ! iatom
@@ -1566,10 +1513,10 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    call identity_oper(norm1,1)
 
    if(nkpt==1.and.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt) 
+     call loc_oper(norm1,paw_dmft,1,jkpt=jkpt)
    end if
    if(.not.present(jkpt)) then
-     call loc_oper(norm1,paw_dmft,1) 
+     call loc_oper(norm1,paw_dmft,1)
    end if
 
    if (nkpt>1) then
@@ -1598,7 +1545,7 @@ subroutine normalizepsichi(cryst_struc,nkpt,paw_dmft,pawang,temp_wtk,jkpt)
    call destroy_oper(norm3)
 
    call destroy_oper(norm1)
-!  call flush(std_out)           ! debug debug  debug   debug 
+!  call flush(std_out)           ! debug debug  debug   debug
 !  MSG_ERROR("Stop for debugging")
 
  end subroutine normalizepsichi
@@ -1647,19 +1594,12 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_crystal, only : crystal_t
  use m_oper, only : oper_type,init_oper,upfold_oper,copy_oper,prod_oper,destroy_oper,loc_oper
  use m_matlu, only : matlu_type,init_matlu,add_matlu,destroy_matlu,print_matlu,sym_matlu
  use m_paw_dmft, only: paw_dmft_type
  use m_pawang, only : pawang_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hybridization_asymptotic_coefficient'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1706,8 +1646,8 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
        do isppol=1,paw_dmft%nsppol
          if(iband1==iband2) then
            ham_a%ks(isppol,ikpt,iband1,iband2) = cmplx(paw_dmft%eigen_lda(isppol,ikpt,iband1),0.d0,kind=dp)
-         else 
-           ham_a%ks(isppol,ikpt,iband1,iband2) = czero 
+         else
+           ham_a%ks(isppol,ikpt,iband1,iband2) = czero
          end if
        end do
      end do
@@ -1730,11 +1670,11 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
 !------------------------------------------------------------------
  call prod_oper(ham_a,ham_b,ham_squareks,1)
 
-! Compute ham_squareks%matlu 
+! Compute ham_squareks%matlu
 !---------------------------
  call loc_oper(ham_squareks,paw_dmft,1)
 
-! Symetrise ham_squareks%matlu 
+! Symetrise ham_squareks%matlu
 !------------------------------
  call sym_matlu(cryst_struc,ham_squareks%matlu,pawang)
 
@@ -1743,7 +1683,7 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
 !   call print_matlu(ham_squareks%matlu,paw_dmft%natom,1,opt_exp=1)
 
 
-! Compute ham_squarelocal%matlu  
+! Compute ham_squarelocal%matlu
 !-------------------------------
  call prod_oper(ham_a,ham_b,ham_squarelocal,2)
 
@@ -1764,7 +1704,7 @@ subroutine hybridization_asymptotic_coefficient(cryst_struc,paw_dmft,pawang,hybr
  !  call wrtout(std_out,message,'COLL')
  !  call print_matlu(hybri_coeff,paw_dmft%natom,1,opt_exp=1)
 
-! Symetrise the local quantity 
+! Symetrise the local quantity
 !------------------------------
  call sym_matlu(cryst_struc,hybri_coeff,pawang)
 

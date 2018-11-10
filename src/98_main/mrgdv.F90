@@ -21,8 +21,6 @@
 !!     Abinit header with info on the perturbation and the FFT mesh
 !!     potential on the FFT mesh
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -46,21 +44,13 @@ program mrgdv
  use m_xmpi
  use m_errors
  use m_build_info
- use m_profiling_abi
+ use m_abicore
  use m_dvdb
 
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrgdv'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -131,6 +121,7 @@ program mrgdv
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
        write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
        write(std_out,*)"test_ftinterp [n1,n2,n3]   Test Fourier interpolation of DFPT potentials."
+       write(std_out,*)"downsample in_DVDB out_DVDB [n1,n2,n3] Produce new DVDB with q-subsmesh"
        goto 100
      end if
    end do
@@ -188,6 +179,14 @@ program mrgdv
 
      write(std_out,"(a)")sjoin("Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(ngqpt))
      call dvdb_test_ftinterp(db_path, ngqpt, comm)
+
+   case ("downsample")
+     call get_command_argument(2, db_path)
+     call get_command_argument(3, dump_file)
+     !ngqpt = [2,2,2]
+     read(arg, *, iostat=ierr, iomsg=msg)ngqpt
+     ABI_CHECK(ierr == 0, msg)
+     call dvdb_qdownsample(db_path, dump_file, ngqpt, comm)
 
    case default
      MSG_ERROR(sjoin("Unknown command:", command))

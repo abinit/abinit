@@ -59,13 +59,6 @@ subroutine xorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram
 &                          x_cplx,timopt,tim_xortho) ! optional arguments
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xorthonormalize'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 !scalars
@@ -161,13 +154,6 @@ end subroutine xorthonormalize
 
 subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ortho_reim'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -243,13 +229,6 @@ end subroutine ortho_reim
 !!
 !! SOURCE
 subroutine zorthonormalize(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zorthonormalize'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

@@ -26,10 +26,14 @@ module m_efmas
  use defs_abitypes
  use m_errors
 #ifdef HAVE_NETCDF
- use netcdf, only : nf90_noerr, nf90_put_var, nf90_get_var
+ use netcdf
 #endif
  use m_efmas_defs
  use m_nctk
+ use m_cgtools
+
+ use m_gaussian_quadrature, only : cgqf
+ use m_io_tools, only : get_unit
 
  implicit none
 
@@ -45,7 +49,7 @@ module m_efmas
  public :: print_tr_efmas
  public :: print_efmas
  public :: efmas_main
- public :: efmas_analysis 
+ public :: efmas_analysis
 
 !private procedures.
  private :: MATMUL_ ! Workaround to make tests pass on ubu/buda slaves
@@ -78,13 +82,6 @@ CONTAINS
 !! SOURCE
 
  subroutine efmasval_free(efmasval)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasval_free'
-!End of the abilint section
 
    implicit none
 
@@ -124,13 +121,6 @@ CONTAINS
 !! SOURCE
 
  subroutine efmasval_free_array(efmasval)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasval_free_array'
-!End of the abilint section
 
    implicit none
 
@@ -180,13 +170,6 @@ CONTAINS
 
  subroutine efmasdeg_free(efmasdeg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasdeg_free'
-!End of the abilint section
-
    implicit none
 
    !Arguments ------------------------------------
@@ -223,13 +206,6 @@ CONTAINS
 !! SOURCE
 
  subroutine efmasdeg_free_array(efmasdeg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasdeg_free_array'
-!End of the abilint section
 
    implicit none
 
@@ -271,13 +247,6 @@ CONTAINS
 !! SOURCE
 
  subroutine check_degeneracies(efmasdeg,bands,nband,eigen,deg_tol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_degeneracies'
-!End of the abilint section
 
    implicit none
 
@@ -386,9 +355,9 @@ CONTAINS
 !! print_efmas
 !!
 !! FUNCTION
-!! This routine prints the information needed to compute rapidly the band effective masses, 
+!! This routine prints the information needed to compute rapidly the band effective masses,
 !! namely, the generalized second-order k-derivatives of the eigenenergies,
-!! see Eq.(66) of Laflamme2016. 
+!! see Eq.(66) of Laflamme2016.
 !!
 !! INPUTS
 !!
@@ -402,13 +371,6 @@ CONTAINS
 
  subroutine print_efmas(efmasdeg,efmasval,kpt,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_efmas'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -421,8 +383,8 @@ CONTAINS
 
 !Local variables-------------------------------
  integer :: deg_dim,eig2_diag_arr_dim
- integer :: iband,ideg,ideg_tot,ieig,ikpt 
- integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval 
+ integer :: iband,ideg,ideg_tot,ieig,ikpt
+ integer :: jband,mband,ndegs_tot,nkpt,nkptdeg,nkptval
  integer, allocatable :: nband_arr(:)
 integer, allocatable :: ndegs_arr(:)
  integer, allocatable :: degs_range_arr(:,:)
@@ -436,7 +398,7 @@ integer, allocatable :: ndegs_arr(:)
 #endif
 !----------------------------------------------------------------------
 
-!XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan). 
+!XG20180519 Here, suppose that dtset%nkpt=nkpt_rbz (as done by Jonathan).
 !To be reexamined/corrected at the time of parallelization.
 
 #ifdef HAVE_NETCDF
@@ -461,7 +423,7 @@ integer, allocatable :: ndegs_arr(:)
  do ikpt=1,nkpt
    do ideg=efmasdeg(ikpt)%deg_range(1),efmasdeg(ikpt)%deg_range(2)
      deg_dim = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
-     eig2_diag_arr_dim = eig2_diag_arr_dim + deg_dim**2 
+     eig2_diag_arr_dim = eig2_diag_arr_dim + deg_dim**2
    enddo
  enddo
 
@@ -521,7 +483,7 @@ integer, allocatable :: ndegs_arr(:)
 & nctkarr_t("degs_bounds_arr", "int", "two, total_number_of_degenerate_sets"), &
 & nctkarr_t("ch2c_arr", "dp", "real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim"),  &
 & nctkarr_t("eig2_diag_arr","dp","real_or_complex, number_of_reduced_dimensions, number_of_reduced_dimensions, eig2_diag_arr_dim")&
-  ]) 
+  ])
  NCF_CHECK(ncerr)
 
  ! Write data.
@@ -535,7 +497,7 @@ integer, allocatable :: ndegs_arr(:)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ch2c_arr"),                  ch2c_arr))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eig2_diag_arr"),             eig2_diag_arr))
 
-!Deallocate the arrays 
+!Deallocate the arrays
  ABI_FREE(nband_arr)
  ABI_FREE(ndegs_arr)
  ABI_FREE(degs_range_arr)
@@ -555,7 +517,7 @@ end subroutine print_efmas
 !! efmas_ncread
 !!
 !! FUNCTION
-!! This routine reads from an EFMAS NetCDF file the information needed 
+!! This routine reads from an EFMAS NetCDF file the information needed
 !! to compute rapidly the band effective masses,
 !! namely, the generalized second-order k-derivatives of the eigenenergies,
 !! see Eq.(66) of Laflamme2016.
@@ -571,13 +533,6 @@ end subroutine print_efmas
 !! SOURCE
 
  subroutine efmas_ncread(efmasdeg,efmasval,kpt,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmas_ncread'
-!End of the abilint section
 
  implicit none
 
@@ -640,11 +595,11 @@ end subroutine print_efmas
  ieig=1
  do ikpt=1,nkpt
    efmasdeg(ikpt)%deg_range(:)=degs_range_arr(:,ikpt)
-   nband=nband_arr(ikpt)   
+   nband=nband_arr(ikpt)
    efmasdeg(ikpt)%nband=nband
    ABI_MALLOC(efmasdeg(ikpt)%ideg, (nband))
    efmasdeg(ikpt)%ideg=ideg_arr(1:nband,ikpt)
-   ndegs=ndegs_arr(ikpt) 
+   ndegs=ndegs_arr(ikpt)
    efmasdeg(ikpt)%ndegs=ndegs
    ABI_MALLOC(efmasdeg(ikpt)%degs_bounds,(2,nband))
    do ideg=1,ndegs
@@ -660,7 +615,7 @@ end subroutine print_efmas
          do iband=1,deg_dim
            efmasval(ideg,ikpt)%ch2c(:,:,iband,jband)=&
 &           dcmplx(ch2c_arr(1,:,:,ieig+iband-1),ch2c_arr(2,:,:,ieig+iband-1))
-           efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)=& 
+           efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)=&
 &           dcmplx(eig2_diag_arr(1,:,:,ieig+iband-1),eig2_diag_arr(2,:,:,ieig+iband-1))
          enddo
          ieig=ieig+deg_dim
@@ -710,13 +665,6 @@ end subroutine print_efmas
  subroutine print_tr_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
 &                       m_avg,m_avg_frohlich,saddle_warn,efmas_eigval,efmas_eigvec,transport_tensor_scale)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_tr_efmas'
-!End of the abilint section
-
    implicit none
 
    !Arguments ------------------------------------
@@ -737,7 +685,7 @@ end subroutine print_efmas
    real(dp) :: vec(3)
 
    if(deg_dim>1) then
-     extras = present(efmas_eigval) .and. present(efmas_eigvec) 
+     extras = present(efmas_eigval) .and. present(efmas_eigvec)
      if(mdim==3 .and. .not. extras) then
        write(msg,'(a,l1,a,i1,a)') 'Subroutine print_tr_efmas called with degenerate=',deg_dim>1,&
 &            ' and mdim=',mdim,', but missing required arguments for this case.'
@@ -928,17 +876,6 @@ end subroutine print_efmas
 
  subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0,&
 &   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
-
-  use m_cgtools
-  use m_gaussian_quadrature, only : cgqf
-  use m_io_tools, only : get_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmas_main'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 
@@ -1203,7 +1140,7 @@ end subroutine print_efmas
 !! efmas_analysis
 !!
 !! FUNCTION
-!! This routine analyzes the generalized second-order k-derivatives of eigenenergies, 
+!! This routine analyzes the generalized second-order k-derivatives of eigenenergies,
 !! and compute the effective mass tensor
 !! (inverse of hessian of eigenvalues with respect to the wavevector)
 !! in cartesian coordinates along different directions in k-space, or also the transport equivalent effective mass.
@@ -1231,16 +1168,6 @@ end subroutine print_efmas
 !! SOURCE
 
  subroutine efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz,rprimd)
-
-  use m_cgtools
-  use m_gaussian_quadrature, only : cgqf
-  use m_io_tools, only : get_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmas_analysis'
-!End of the abilint section
 
   implicit none
 
@@ -1387,7 +1314,7 @@ end subroutine print_efmas
      deg_dim    = efmasdeg(ikpt)%degs_bounds(2,ideg) - efmasdeg(ikpt)%degs_bounds(1,ideg) + 1
      degenerate = (deg_dim>1) .and. (dtset%efmas_deg/=0)
      degl       = efmasdeg(ikpt)%degs_bounds(1,ideg)-1
- 
+
      !!! Allocations
      ABI_ALLOCATE(eigenvec,(deg_dim,deg_dim))
      ABI_ALLOCATE(eigenval,(deg_dim))
@@ -1400,7 +1327,7 @@ end subroutine print_efmas
 
           eff_mass=zero
 
-          eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)          
+          eig2_diag_cart(:,:,iband,jband)=efmasval(ideg,ikpt)%eig2_diag(:,:,iband,jband)
           eig2_diag_cart(:,:,iband,jband) = matmul(matmul(rprimd,eig2_diag_cart(:,:,iband,jband)),transpose(rprimd))/two_pi**2
 
 
@@ -1454,7 +1381,7 @@ end subroutine print_efmas
                   unit_r(2)=sinth*sinph
                   unit_r(3)=costh
 
-                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),unit_r(:))) 
+                  f3d_scal=dot_product(unit_r(:),matmul(real(eig2_diag_cart(:,:,iband,jband),dp),unit_r(:)))
                   m_avg = m_avg + weight*sinth*f3d_scal
                   m_avg_frohlich = m_avg_frohlich + weight*sinth/(abs(f3d_scal)**half)
 
@@ -1565,12 +1492,12 @@ end subroutine print_efmas
             cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
             weight=gq_weights_th(itheta)*gq_weights_ph(iphi)
 
-            unit_r(1)=sinth*cosph 
-            unit_r(2)=sinth*sinph 
+            unit_r(1)=sinth*cosph
+            unit_r(2)=sinth*sinph
             unit_r(3)=costh
 
             dr_dth(1)=costh*cosph
-            dr_dth(2)=costh*sinph 
+            dr_dth(2)=costh*sinph
             dr_dth(3)=-sinth
 
             dr_dph(1)=-sinph  !sin(theta)*
@@ -1832,11 +1759,11 @@ end subroutine print_efmas
           cosph=gq_points_cosph(iphi) ; sinph=gq_points_sinph(iphi)
           weight=gq_weights_ph(iphi)
 
-          unit_r(1)=cosph 
-          unit_r(2)=sinph 
+          unit_r(1)=cosph
+          unit_r(2)=sinph
 
-          dr_dph(1)=-sinph 
-          dr_dph(2)=cosph 
+          dr_dph(1)=-sinph
+          dr_dph(2)=cosph
 
           do iband=1,deg_dim
             do jband=1,deg_dim
@@ -2130,13 +2057,6 @@ end subroutine print_efmas
 
 function MATMUL_DP(aa,bb,mm,nn,transa,transb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MATMUL_DP'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2208,13 +2128,6 @@ end function MATMUL_DP
 !! SOURCE
 
 function MATMUL_DPC(aa,bb,mm,nn,transa,transb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MATMUL_DPC'
-!End of the abilint section
 
  implicit none
 

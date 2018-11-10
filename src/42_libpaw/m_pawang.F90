@@ -182,13 +182,6 @@ CONTAINS
 
 subroutine pawang_init(Pawang,gnt_option,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawang_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -302,13 +295,6 @@ end subroutine pawang_init
 
 subroutine pawang_free(Pawang)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawang_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -387,14 +373,6 @@ end subroutine pawang_free
 !! SOURCE
 
 subroutine pawang_lsylm(pawang)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawang_lsylm'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -589,13 +567,6 @@ subroutine pawang_lsylm(pawang)
 
  subroutine initang(pawang)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initang'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -689,13 +660,6 @@ end subroutine initang
 !! SOURCE
 
 subroutine realgaunt(l_max,ngnt,gntselect,realgnt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'realgaunt'
-!End of the abilint section
 
  implicit none
 
@@ -856,13 +820,6 @@ end subroutine realgaunt
 
 function gaunt(ll,mm,l1,m1,l2,m2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaunt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -983,13 +940,6 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 
  subroutine gauleg(xmin,xmax,x,weights,n)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gauleg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1014,14 +964,14 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 
  do ii=1,(n+1)/2
    z=cos(pi*(ii-0.25_dp)/(n+0.5_dp))
-   do 
+   do
      p1=1._dp
      p2=0._dp
      do jj=1,n
        p3=p2
        p2=p1
        p1=((2._dp*jj-1._dp)*z*p2-(jj-1._dp)*p3)/jj
-     end do  
+     end do
      pp=n*(p2-z*p1)/(1._dp-z**2)
      z1=z
      z=z1-p1/pp
@@ -1059,13 +1009,6 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 !! SOURCE
 
 elemental function rfactorial(nn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rfactorial'
-!End of the abilint section
 
  implicit none
 
@@ -1112,13 +1055,6 @@ end function rfactorial
 !! SOURCE
 
 function perms(nn,kk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'perms'
-!End of the abilint section
 
  implicit none
 

@@ -24,7 +24,7 @@
 
 module m_pred_lotf
 
- use m_profiling_abi
+ use m_abicore
  use defs_basis
  use m_abimover
  use m_abihist
@@ -88,14 +88,6 @@ CONTAINS !===========================================================
  subroutine pred_lotf(ab_mover,hist,itime,icycle,zDEBUG,iexit)
 
  use m_geometry,       only : xred2xcart
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_lotf'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------

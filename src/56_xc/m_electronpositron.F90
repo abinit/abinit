@@ -29,7 +29,7 @@ MODULE m_electronpositron
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_energies
  use m_xmpi
@@ -43,6 +43,7 @@ MODULE m_electronpositron
  use m_xcpositron, only : xcpositron
  use m_drivexc,    only : mkdenpos
  use m_xctk,       only : xcden
+ use m_fft,        only : fourdp
 
  implicit none
 
@@ -214,13 +215,6 @@ CONTAINS
 
 subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,pawrhoij,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_electronpositron'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -380,13 +374,6 @@ end subroutine init_electronpositron
 
 subroutine destroy_electronpositron(electronpositron)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_electronpositron'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -513,14 +500,6 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 &                                    mpi_enreg,my_natom,nfft,ngfft,nhat,npwarr,occ,paw_an,pawrhoij,&
 &                                    rhog,rhor,stress,usecprj,vhartr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exchange_electronpositron'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -593,7 +572,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
        end do
      end if
    end do
-   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
    if (dtset%usepaw==1.and.my_natom>0) then
     if (electronpositron%has_pawrhoij_ep==1) then
       ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
@@ -785,13 +764,6 @@ end subroutine exchange_electronpositron
 
 integer function electronpositron_calctype(electronpositron)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'electronpositron_calctype'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -858,13 +830,6 @@ end function electronpositron_calctype
 
 subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nhat,nkxc,nspden,n3xccc,&
 &                         paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxcapn,vxcavg,xccc3d,xc_denpos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rhohxcpositron'
-!End of the abilint section
 
  implicit none
 

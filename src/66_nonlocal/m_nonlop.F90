@@ -28,7 +28,7 @@ module m_nonlop
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_cgtools
  use m_gemm_nonlop
@@ -152,7 +152,7 @@ contains
 !!     | use_gpu_cuda=governs wheter we do the hamiltonian calculation on gpu or not
 !!     | useylm=how the NL operator is to be applied: 1=using Ylm, 0=using Legendre polynomials
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
-!!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
+!!          will be applied. (used to apply derivative of NL operator wrt an atomic displacement)
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
 !!                        - k point direction in the case (choice=5,51,or 52)
 !!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions
@@ -320,13 +320,6 @@ contains
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
 &                 enl,iatom_only,only_SO,select_k) !optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop'
-!End of the abilint section
 
  implicit none
 
@@ -936,13 +929,6 @@ end subroutine nonlop
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop_gpu'
-!End of the abilint section
 
  implicit none
 

@@ -87,23 +87,15 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_strain
  use m_abihist, only : abihist,var2hist,abihist_findIndex
  use m_ifc, only : ifc_type,ifc_init_fromFile,ifc_free
- use m_crystal,     only : crystal_t,crystal_free
+ use m_crystal,     only : crystal_t
  use m_supercell, only : supercell_type
  use m_geometry, only : xcart2xred
  use m_phonons ,only :thermal_supercell_make,thermal_supercell_free
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'generate_training_set'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -193,7 +185,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   hist%ihist = 1
 
   call ifc_free(ifc)
-  call crystal_free(crystal)
+  call crystal%free()
   call thermal_supercell_free(nconfig,thm_scells)
   ABI_DATATYPE_DEALLOCATE(thm_scells)
   ABI_DEALLOCATE(zeff)

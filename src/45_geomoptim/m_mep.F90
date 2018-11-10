@@ -33,7 +33,7 @@ MODULE m_mep
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -122,13 +122,6 @@ CONTAINS
 
 subroutine mep_init(dtset,mep_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -187,13 +180,6 @@ end subroutine mep_init
 !! SOURCE
 
 subroutine mep_destroy(mep_param)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -274,14 +260,6 @@ end subroutine mep_destroy
 !! SOURCE
 
 subroutine mep_steepest(fcart,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_steepest'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -382,14 +360,6 @@ end subroutine mep_steepest
 !! SOURCE
 
 subroutine mep_qmin(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_qmin'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -520,14 +490,6 @@ end subroutine mep_qmin
 
 subroutine mep_lbfgs(fcart,itime,list_dynimage,mep_param,natom,ndynimage,&
 &                    nimage,rprimd,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_lbfgs'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -714,14 +676,6 @@ end subroutine mep_lbfgs
 
 subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 &                    ndynimage,nimage,nimage_tot,rprimd,xcart,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_gbfgs'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1047,14 +1001,6 @@ end subroutine mep_gbfgs
 
 subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_rk4'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1215,13 +1161,6 @@ end subroutine mep_rk4
 
 function mep_img_dotp(vect1,vect2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_img_dotp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1271,13 +1210,6 @@ end function mep_img_dotp
 
 function mep_img_norm(vect)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_img_norm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1319,13 +1251,6 @@ end function mep_img_norm
 !! SOURCE
 
 function mep_img_dotp_red(rmet,vect1,vect2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_img_dotp_red'
-!End of the abilint section
 
  implicit none
 
@@ -1384,13 +1309,6 @@ end function mep_img_dotp_red
 !! SOURCE
 
 function mep_img_norm_red(rmet,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mep_img_norm_red'
-!End of the abilint section
 
  implicit none
 

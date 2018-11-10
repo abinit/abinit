@@ -46,7 +46,7 @@ use m_gwls_hamiltonian
 
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 use m_bandfft_kpt
 use m_cgtools
@@ -126,13 +126,6 @@ subroutine sqmr(b,x,lambda,project_on_what,omega,omega_imaginary,kill_Pc_x)
 ! NOTE: It is the developper's responsibility to apply (H-ev) on the input 
 !       if the frequency is not zero.
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmr'
-!End of the abilint section
-
 implicit none
 
 !External variables
@@ -664,13 +657,6 @@ subroutine qmr(b,x,lambda) !,project_on_what)
 !                2                projection out of subspace degenerate with lambda
 !                3                projection on states beyond all the states explicitly stored
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'qmr'
-!End of the abilint section
-
 implicit none
 
 !External variables

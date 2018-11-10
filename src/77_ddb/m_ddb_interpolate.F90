@@ -30,7 +30,7 @@ module m_ddb_interpolate
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_ddb
  use m_ddb_hdr
  use m_ifc
@@ -41,7 +41,6 @@ module m_ddb_interpolate
 
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_io_tools,       only : get_unit
  use m_fstrings,       only : strcat
  use m_dynmat,         only : gtdyn9, d2cart_to_red
@@ -83,14 +82,6 @@ contains
 !! SOURCE
 
 subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_interpolate'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -377,13 +368,6 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 
  !use defs_datatypes
  !use defs_abitypes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outddbnc'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -463,9 +447,7 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  ! ------------------------------
  ! Write crystal info
  ! ------------------------------
- ncerr = crystal_ncwrite(Crystal, ncid)
- NCF_CHECK(ncerr)
-
+ NCF_CHECK(crystal%ncwrite(ncid))
 
  ! ------------------------------
  ! Write DDB
@@ -477,29 +459,24 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
  cart_dir = 3
 
  ncerr = nctk_def_dims(ncid, [&
-& nctkdim_t('current_one_dim', one_dim), &
-& nctkdim_t('number_of_atoms', natom), &
-& nctkdim_t('number_of_cartesian_directions', cart_dir), &
-& nctkdim_t('number_of_perturbations', mpert), &
-& nctkdim_t('cplex',cplex)], defmode=.True.)
+  nctkdim_t('current_one_dim', one_dim), &
+  nctkdim_t('number_of_atoms', natom), &
+  nctkdim_t('number_of_cartesian_directions', cart_dir), &
+  nctkdim_t('number_of_perturbations', mpert), &
+  nctkdim_t('cplex',cplex)], defmode=.True.)
  NCF_CHECK(ncerr)
 
- ! Create the arrays
+! Create the arrays
  ncerr = nctk_def_arrays(ncid, [&
- nctkarr_t('atomic_masses_amu', "dp", 'number_of_atom_species'),&
+ &nctkarr_t('atomic_masses_amu', "dp", 'number_of_atom_species'),&
  nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
- nctkarr_t('second_derivative_of_energy', "dp", 'cplex, &
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions, number_of_atoms'), &
- nctkarr_t('second_derivative_of_energy_mask', "i", '&
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions, number_of_atoms'), &
- nctkarr_t('born_effective_charge_tensor', "dp", '&
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions'), &
- nctkarr_t('born_effective_charge_tensor_mask', "i", ' &
-& number_of_cartesian_directions, number_of_atoms, &
-& number_of_cartesian_directions')])
+ nctkarr_t('second_derivative_of_energy', "dp", &
+ &'cplex, number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
+ nctkarr_t('second_derivative_of_energy_mask', "i",&
+ &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
+ nctkarr_t('born_effective_charge_tensor', "dp",'number_of_cartesian_directions,number_of_atoms,number_of_cartesian_directions'),&
+ nctkarr_t('born_effective_charge_tensor_mask', "i",&
+ &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions')])
  NCF_CHECK(ncerr)
 
 ! Write data
@@ -526,14 +503,6 @@ subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
 
  contains
    integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid

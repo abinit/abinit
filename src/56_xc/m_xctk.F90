@@ -28,12 +28,13 @@ module m_xctk
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_time,     only : timab
  use m_mpinfo,   only : ptabs_fourdp
  use m_fft_mesh, only : phase
+ use m_fft,      only : fourdp
 
  implicit none
 
@@ -93,14 +94,6 @@ contains
 
 subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kgb,qphon,rhor,rhonow, & !Mandatory arguments
 &  lrhonow)              !Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcden'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -195,7 +188,7 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
      end do
 
      call timab(82,1,tsec)
-     call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
      call timab(82,2,tsec)
 
 !    If shift is required, multiply now rho(G) by phase, then generate rho(r+delta)
@@ -228,7 +221,7 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
          end do
        end do
        call timab(82,1,tsec)
-       call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
        call timab(82,2,tsec)
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,rhonow,work)
        do ifft=1,cplex*nfft
@@ -290,7 +283,7 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
            end do
          end do
          call timab(82,1,tsec)
-         call fourdp(cplex,workgr,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+         call fourdp(cplex,workgr,work,1,mpi_enreg,nfft,1,ngfft,0)
          call timab(82,2,tsec)
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(idir,ispden,cplex,nfft,rhonow,work)
          do ifft=1,cplex*nfft
@@ -298,7 +291,7 @@ subroutine xcden (cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden,paral_kg
          end do
 
          if (present(lrhonow)) then
-           call fourdp(cplex,worklp,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+           call fourdp(cplex,worklp,work,1,mpi_enreg,nfft,1,ngfft,0)
            do ifft=1,cplex*nfft
              lrhonow(ifft,ispden)=lrhonow(ifft,ispden)+work(ifft)
            end do
@@ -404,14 +397,6 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 & nspgrad,paral_kgb,qphon,rhonow,vxc,&
 & vxctau) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcpot'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -508,7 +493,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
          work(ifft)=depsxc(ifft,ispden)
        end do
        call timab(82,1,tsec)
-       call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
        call timab(82,2,tsec)
      end if
 
@@ -534,7 +519,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
          end do
 
          call timab(82,1,tsec)
-         call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+         call fourdp(cplex,workgr,work,-1,mpi_enreg,nfft,1,ngfft,0)
          call timab(82,2,tsec)
 
 !        IF Meta-GGA then take care of the laplacian term involved.
@@ -550,7 +535,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
            end do
 
            call timab(82,1,tsec)
-           call fourdp(cplex,worklp,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+           call fourdp(cplex,worklp,work,-1,mpi_enreg,nfft,1,ngfft,0)
            call timab(82,2,tsec)
          end if
 
@@ -561,7 +546,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
            end do
 
            call timab(82,1,tsec)
-           call fourdp(cplex,worktau,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+           call fourdp(cplex,worktau,work,-1,mpi_enreg,nfft,1,ngfft,0)
            call timab(82,2,tsec)
          end if ! present vxctau
 
@@ -611,7 +596,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
 
          if(present(vxctau))then
            call timab(82,1,tsec)
-           call fourdp(cplex,wkcmpxtau,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+           call fourdp(cplex,wkcmpxtau,work,1,mpi_enreg,nfft,1,ngfft,0)
            call timab(82,2,tsec)
 
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxctau,work)
@@ -667,7 +652,7 @@ subroutine xcpot (cplex,depsxc,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nsp
      end if
 
      call timab(82,1,tsec)
-     call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(cplex,wkcmpx,work,1,mpi_enreg,nfft,1,ngfft,0)
      call timab(82,2,tsec)
 
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(cplex,ispden,nfft,vxc,work)

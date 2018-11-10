@@ -27,7 +27,7 @@ MODULE m_exc_spectra
  use defs_basis
  use defs_datatypes
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use iso_c_binding
  use m_xmpi
  use m_errors
@@ -45,13 +45,13 @@ MODULE m_exc_spectra
  use m_hide_blas,       only : xdotu,xdotc
  use m_special_funcs,   only : dirac_delta
  use m_crystal,         only : crystal_t
- use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : kmesh_t
  use m_eprenorms,       only : eprenorms_t, renorm_bst
  use m_pawtab,          only : pawtab_type
  use m_paw_hr,          only : pawhur_t
  use m_wfd,             only : wfd_t
  !use m_bse_io,          only : exc_amplitude
+ use m_wfd_optic,       only : calc_optical_mels
 
  implicit none
 
@@ -104,15 +104,6 @@ contains
 !! SOURCE
 
 subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'build_spectra'
- use interfaces_14_hidewrite
- use interfaces_69_wfdesc
-!End of the abilint section
 
  implicit none
 
@@ -287,9 +278,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 #ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
-     ! Write structure
-     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
-     ! Write QP energies
+     NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(QP_BSt, ncid))
      ! Write dielectric functions.
      call mdfs_ncwrite(ncid, Bsp, eps_exc,eps_rpanlf,eps_gwnlf)
@@ -350,14 +339,6 @@ end subroutine build_spectra
 !! SOURCE
 
 subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_data'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -533,13 +514,6 @@ end subroutine exc_write_data
 
 subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,opt_cvk,ucvol,broad,nomega,omega,eps_rpa,dos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_rpa'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -672,14 +646,6 @@ end subroutine exc_eps_rpa
 
 subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
 &    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_resonant'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -933,14 +899,6 @@ end subroutine exc_eps_resonant
 
 subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_eps_coupling'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1132,13 +1090,6 @@ end subroutine exc_eps_coupling
 
 subroutine exc_write_tensor(BSp,BS_files,what,tensor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_tensor'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1287,13 +1238,6 @@ end subroutine exc_write_tensor
 
 subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mdfs_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1371,14 +1315,6 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1412,14 +1348,6 @@ end subroutine mdfs_ncwrite
 !! SOURCE
 
 subroutine check_kramerskronig(n,o,eps)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_kramerskronig'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1554,14 +1482,6 @@ end subroutine check_kramerskronig
 !! SOURCE
 
 subroutine check_fsumrule(n,o,e2,omegaplasma)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fsumrule'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

@@ -31,7 +31,7 @@ MODULE m_mpinfo
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -127,13 +127,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_mpi_enreg(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_mpi_enreg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -174,13 +167,6 @@ end subroutine init_mpi_enreg
 !! SOURCE
 
 subroutine nullify_mpi_enreg(MPI_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nullify_mpi_enreg'
-!End of the abilint section
 
  implicit none
 
@@ -224,13 +210,6 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !! SOURCE
 
 subroutine destroy_mpi_enreg(MPI_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_mpi_enreg'
-!End of the abilint section
 
  implicit none
 
@@ -313,13 +292,6 @@ end subroutine destroy_mpi_enreg
 !! SOURCE
 
 subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_mpi_enreg'
-!End of the abilint section
 
  implicit none
 
@@ -495,13 +467,6 @@ end subroutine copy_mpi_enreg
 
 subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_mpi_enreg_fft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -549,13 +514,6 @@ end subroutine set_mpi_enreg_fft
 !! SOURCE
 
 subroutine unset_mpi_enreg_fft(MPI_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unset_mpi_enreg_fft'
-!End of the abilint section
 
  implicit none
 
@@ -613,13 +571,6 @@ end subroutine unset_mpi_enreg_fft
 !! SOURCE
 
 subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptabs_fourdp'
-!End of the abilint section
 
  implicit none
 
@@ -702,13 +653,6 @@ end subroutine ptabs_fourdp
 
 subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptabs_fourwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -785,13 +729,6 @@ end subroutine ptabs_fourwf
 
 logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol,msg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpi_distrib_is_ok'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -849,13 +786,6 @@ end function mpi_distrib_is_ok
 
 function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'proc_distrb_cycle'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -898,13 +828,6 @@ end function proc_distrb_cycle
 !! SOURCE
 
 subroutine initmpi_world(mpi_enreg,nproc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_world'
-!End of the abilint section
 
  implicit none
 
@@ -970,13 +893,6 @@ end subroutine initmpi_world
 !! SOURCE
 
 subroutine initmpi_seq(mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_seq'
-!End of the abilint section
 
  implicit none
 
@@ -1082,13 +998,6 @@ end subroutine initmpi_seq
 !! SOURCE
 
 subroutine initmpi_atom(dtset,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_atom'
-!End of the abilint section
 
  implicit none
 
@@ -1199,13 +1108,6 @@ end subroutine initmpi_atom
 
 subroutine clnmpi_atom(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_atom'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1258,14 +1160,6 @@ end subroutine clnmpi_atom
 !! SOURCE
 
 subroutine initmpi_grid(mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_grid'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1551,13 +1445,6 @@ end subroutine initmpi_grid
 
 subroutine clnmpi_grid(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_grid'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1656,13 +1543,6 @@ end subroutine clnmpi_grid
 subroutine initmpi_img(dtset,mpi_enreg,option)
 
  !use m_io_tools,  only: flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_img'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1968,13 +1848,6 @@ end subroutine initmpi_img
 
 subroutine clnmpi_img(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_img'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2039,13 +1912,6 @@ end subroutine clnmpi_img
 !! SOURCE
 
 subroutine initmpi_pert(dtset,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_pert'
-!End of the abilint section
 
  implicit none
 
@@ -2157,13 +2023,6 @@ end subroutine initmpi_pert
 
 subroutine clnmpi_pert(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_pert'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2223,13 +2082,6 @@ end subroutine clnmpi_pert
 !! SOURCE
 
 subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_band'
-!End of the abilint section
 
  implicit none
 
@@ -2329,13 +2181,6 @@ end subroutine initmpi_band
 
 subroutine pre_gather(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pre_gather'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2382,13 +2227,6 @@ end subroutine pre_gather
 
 subroutine pre_scatter(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pre_scatter'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2424,13 +2262,6 @@ end subroutine pre_scatter
 !! SOURCE
 
 logical function iwrite_fftdatar(mpi_enreg) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iwrite_fftdatar'
-!End of the abilint section
 
  implicit none
 
@@ -2488,13 +2319,6 @@ end function iwrite_fftdatar
 
 subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'distrb2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2526,6 +2350,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
  if (nproc==0) return
 
 !Some checks
+ !if (mpi_enreg%paralbd==0 .and. any(dtset%optdriver == [RUNL_GSTATE, RUNL_RESPFN])) then
  if (mpi_enreg%paralbd==0) then
 !  Check if nkpt and nproc_kpt match
    if(nproc_kpt>nkpt*nsppol) then
@@ -2724,12 +2549,6 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
      nband_k=nband(iikpt+(iisppol-1)*nkpt)
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,iikpt,1,nband_k,iisppol,mpi_enreg%me_kpt)) cycle
      ikpt_this_proc=ikpt_this_proc+1
-!    This test should be done when dataset are read and slipt of work do between processor
-!    If this test is not good for one proc then other procs fall in deadlock->so PERS and MPI_ABORT
-!    if (ikpt_this_proc > mkmem) then
-!    message = ' this bandfft tab cannot be allocated !'
-!    MSG_BUG(message)
-!    end if
      mpi_enreg%my_kpttab(iikpt)=ikpt_this_proc
      mpi_enreg%my_isppoltab(iisppol)=1
    end do
@@ -2773,13 +2592,6 @@ end subroutine distrb2
 !! SOURCE
 
 subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'distrb2_hf'
-!End of the abilint section
 
  implicit none
 

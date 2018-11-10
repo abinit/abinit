@@ -26,7 +26,7 @@
 module m_pred_bfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_xfpack
@@ -98,13 +98,6 @@ contains
 !! SOURCE
 
 subroutine pred_bfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_bfgs'
-!End of the abilint section
 
 implicit none
 
@@ -602,13 +595,6 @@ end subroutine pred_bfgs
 !! SOURCE
 
 subroutine pred_lbfgs(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_lbfgs'
-!End of the abilint section
 
 implicit none
 

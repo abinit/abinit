@@ -69,7 +69,6 @@ nbdbuf 2
 diemac 6
 ecut 30               # Underconverged ecut. 
 nstep 100
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -77,7 +76,7 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t56.out, tolnlines = 5, tolabs = 1.1e-6, tolrel = 2.0e-4
+#%%   t56.out, tolnlines = 6, tolabs = 1.1e-6, tolrel = 2.0e-4
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1

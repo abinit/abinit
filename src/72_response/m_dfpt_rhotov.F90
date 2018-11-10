@@ -28,7 +28,7 @@ module m_dfpt_rhotov
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_cgtools
 
@@ -121,13 +121,6 @@ contains
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           optene,optres,paral_kgb,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
 &           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_rhotov'
-!End of the abilint section
 
  implicit none
 
@@ -428,13 +421,6 @@ end subroutine dfpt_rhotov
 !! SOURCE
 
 subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_v1zeeman'
-!End of the abilint section
 
  implicit none
 

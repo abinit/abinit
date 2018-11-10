@@ -28,7 +28,7 @@ MODULE m_double_grid
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_hide_blas
  use m_bz_mesh
  use m_kptrank
@@ -176,13 +176,6 @@ CONTAINS  !=====================================================================
 
 subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'double_grid_init'
-!End of the abilint section
-
  implicit none
 
 !Argument ------------------------------------
@@ -303,13 +296,6 @@ end subroutine double_grid_init
 
 subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_closed, indices, g0, iktoint, inttoik)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_indices_coarse'
-!End of the abilint section
-
  implicit none
 
 !Argument ------------------------------------
@@ -394,13 +380,6 @@ end subroutine create_indices_coarse
 
 subroutine get_kpt_from_indices_coarse(indices,maxcomp,inttoik,allg0,nkpt,ikpt,g0)
 !subroutine get_kpt_from_indices_coarse(double_grid,indices,ikpt,g0)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_kpt_from_indices_coarse'
-!End of the abilint section
-
  implicit none
 
 !Argument ------------------------------------
@@ -460,14 +439,6 @@ end subroutine get_kpt_from_indices_coarse
 
 subroutine create_indices_dense(klatt_coarse, maxcomp, &
 & bz_dense, nbz_dense, nshiftk, shiftk, kmult, indices, g0, inttoik, iktoint)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_indices_dense'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -566,13 +537,6 @@ end subroutine create_indices_dense
 
 subroutine get_kpt_from_indices_dense(indices,maxcomp,kmult,inttoik,allg0,nkpt,ikpt,g0)
 !subroutine get_kpt_from_indices_dense(double_grid,indices,ikpt,g0)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_kpt_from_indices_dense'
-!End of the abilint section
-
  implicit none
 
 !Argument ------------------------------------
@@ -630,13 +594,6 @@ end subroutine get_kpt_from_indices_dense
 
 subroutine compute_neighbours(nbz_dense, iktoint_dense, indices_dense, maxcomp_coarse, &
 &  inttoik_coarse, g0_coarse, nbz_closedcoarse, nbz_coarse, ndiv, dense_to_coarse, coarse_to_dense)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_neighbours'
-!End of the abilint section
 
  implicit none
 
@@ -717,13 +674,6 @@ end subroutine compute_neighbours
 
 subroutine compute_corresp(double_grid, div2kdense, kdense2div)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_corresp'
-!End of the abilint section
-
  implicit none
 
 !Argument ------------------------------------
@@ -789,13 +739,6 @@ end subroutine compute_corresp
 !! SOURCE
 
 subroutine double_grid_free(grid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'double_grid_free'
-!End of the abilint section
 
  implicit none
 
@@ -887,13 +830,6 @@ end subroutine double_grid_free
 !! SOURCE
 
 subroutine kptfine_av(center,qptrlatt,kpt_fine,nkpt_fine,kpt_fine_sub,nkpt_sub,wgt_sub)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kptfine_av'
-!End of the abilint section
 
  implicit none
 
@@ -1049,13 +985,6 @@ end subroutine kptfine_av
 !! SOURCE
 
 subroutine k_neighbors (kpt, kptrlatt,kptrank_t, rel_kpt, kpt_phon_indices)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'k_neighbors'
-!End of the abilint section
 
  implicit none
 

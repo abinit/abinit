@@ -107,12 +107,6 @@ contains
 !! SOURCE
 
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 &  vtrial,vhartr,vxc,Psps,Pawtab,Paw_an,Pawang,Pawfgrtab,Paw_ij,dijexc_core,&
 &  rhor,usexcnhat,nhat,nhatgr,nhatgrdim,kstab,&
@@ -121,7 +115,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xcdata
  use libxc_functionals
@@ -134,22 +128,13 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_denpot,  only : paw_mknewh0
  use m_hide_blas,   only : xdotc
- use m_wfd,         only : wfd_get_ur, wfd_t, wfd_distribute_bbp, wfd_get_cprj, wfd_change_ngfft
+ use m_wfd,         only : wfd_t
  use m_crystal,     only : crystal_t
  use m_melemts,     only : melements_init, melements_herm, melements_mpisum, melflags_t, melements_t
  use m_dtset,       only : dtset_copy, dtset_free
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
  use m_kg,          only : mkkin
  use m_rhotoxc,     only : rhotoxc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_vhxc_me'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -220,7 +205,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
  ! The later approach is used, more CPU demanding but more accurate.
  non_magnetic_xc=(Dtset%usepawu==4).or.(Dtset%usepawu==14)
 
- if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,ngfftf)
+ if ( ANY(ngfftf(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,ngfftf)
 
  ! Fake MPI_type for sequential part
  rank = Wfd%my_rank
@@ -388,7 +373,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
        bbp_mask(b_start:b_stop,b_start:b_stop)=.TRUE.
      end if
 
-     call wfd_distribute_bbp(Wfd,ik_ibz,is,"Upper",my_nbbp,bbp_ks_distrb(:,:,ikc,is),got,bbp_mask)
+     call wfd%distribute_bbp(ik_ibz,is,"Upper",my_nbbp,bbp_ks_distrb(:,:,ikc,is),got,bbp_mask)
      my_nmels = my_nmels + my_nbbp
    end do
  end do
@@ -437,7 +422,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
          if (nspinor==2) kinwf2(npw_k+1:)=cg2(npw_k+1:)*kinpw(:)
        end if
 
-       call wfd_get_ur(Wfd,jb,ik_ibz,is,ur2)
+       call wfd%get_ur(jb,ik_ibz,is,ur2)
 
        !do ib=b1,jb ! Upper triangle
        do ib=b_start,jb
@@ -445,7 +430,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
          ! Off-diagonal elements only for QPSCGW.
          if (Mflags%only_diago==1.and.ib/=jb) CYCLE
 
-         call wfd_get_ur(Wfd,ib,ik_ibz,is,ur1)
+         call wfd%get_ur(ib,ik_ibz,is,ur1)
          u1cjg_u2dpc(:) = CONJG(ur1) *ur2
 
          if (Mflags%has_vxc == 1) then
@@ -619,7 +604,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
 
          ! Load projected wavefunctions for this k-point, spin and band ===
          ! Cprj are unsorted, full correspondence with xred. See ctocprj.F90!!
-         call wfd_get_cprj(Wfd,jb,ik_ibz,is,Cryst,Cprj_b2ks,sorted=.FALSE.)
+         call wfd%get_cprj(jb,ik_ibz,is,Cryst,Cprj_b2ks,sorted=.FALSE.)
 
          !do ib=b1,jb ! Upper triangle
          do ib=b_start,jb
@@ -628,7 +613,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,nfftf,ngfftf,&
            ! * Off-diagonal elements only for QPSCGW.
            if (Mflags%only_diago==1.and.ib/=jb) CYCLE
 
-           call wfd_get_cprj(Wfd,ib,ik_ibz,is,Cryst,Cprj_b1ks,sorted=.FALSE.)
+           call wfd%get_cprj(ib,ik_ibz,is,Cryst,Cprj_b1ks,sorted=.FALSE.)
            !
            ! === Get onsite matrix elements summing over atoms and channels ===
            ! * Spin is external and fixed (1,2) if collinear.

@@ -40,7 +40,7 @@ program ioprof
  use m_errors
  use m_xmpi
  use m_wfk
- use m_profiling_abi
+ use m_abicore
  use m_hdr
 #ifdef HAVE_NETCDF
  use netcdf
@@ -50,14 +50,6 @@ program ioprof
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioprof'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

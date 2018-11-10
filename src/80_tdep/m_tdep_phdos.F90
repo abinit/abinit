@@ -10,11 +10,11 @@ module m_tdep_phdos
 !FB  use m_nctk
 !FB  use m_xmpi
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_phonons
   use m_ifc,              only : ifc_type,ifc_fourq
   use m_crystal,          only : crystal_t
-!FB  use m_crystal_io,       only : crystal_ncwrite
+  use m_ddb,              only : ddb_type
   use m_tdep_qpt,         only : Qpoints_type
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
@@ -35,19 +35,12 @@ module m_tdep_phdos
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_phdos'
-!End of the abilint section
+subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
 
   implicit none
 
-  integer :: prtdos,ii,iqpt,iatom
-  integer :: natom,natom_unitcell,iomega
+  integer :: prtdos,nqpt,ii,jj,iqpt,iatom
+  integer :: msym,natom,natom_unitcell,iomega
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
   character (len=25):: phdos_fname
@@ -64,6 +57,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   type(Symetries_Variables_type),intent(in) :: Sym
   type(crystal_t),intent(in) :: Crystal
   type(Qpoints_type),intent(in) :: Qpt
+  type(ddb_type),intent(in) :: ddb
   type(Shell_Variables_type),intent(in) :: Shell2at
 
   write(InVar%stdout,*)' '
@@ -116,7 +110,7 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
   wminmax = zero
   do
     call mkphdos(PHdos,Crystal,Ifc,prtdos,InVar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
-      wminmax, count_wminmax, XMPI_WORLD)
+      "freq_displ", wminmax, count_wminmax, XMPI_WORLD)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
@@ -162,22 +156,16 @@ subroutine tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_N
 end subroutine tdep_calc_phdos
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_thermo'
-!End of the abilint section
+subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
 
   implicit none
 
-  integer :: iomega,itemp
+  integer :: iomega,itemp,iatom,itypat
   double precision :: k_B,wovert,heatcapa,entropy,internalE,freeE,expm2x,ln2shx,cothx,xx
-  double precision :: Ftot,domega
+  double precision :: Ftot,domega,MSD,Omega_m2,mass_amu,vdos
   double precision, intent(in) :: U0,DeltaFree_AH2
   type(Input_Variables_type),intent(in) :: InVar
+  type(Lattice_Variables_type), intent(in) :: Lattice
   type(phonon_dos_type),intent(in) :: PHdos
 
   write(InVar%stdout,*)' '
@@ -188,12 +176,19 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
 
 ! The heat capacity, entropy, internal and free energies (direct calculation)
 ! ===========================================================================
+  mass_amu=zero
+  do iatom=1,InVar%natom_unitcell
+    itypat=InVar%typat_unitcell(iatom)
+    mass_amu=mass_amu+InVar%amu(itypat)
+  end do
+  mass_amu=mass_amu*amu_emass/real(InVar%natom_unitcell)
+
   open(unit=20,file=trim(InVar%output_prefix)//'thermo.dat')
 !FB  k_B=8.617343d-5 !in eV/K
   k_B=kb_HaK*Ha_eV
   domega=(InVar%dosdeltae*Ha_meV)
   wovert=1.d0/(2*InVar%temperature*k_B)
-  heatcapa=0.d0 ; entropy=0.d0 ; internalE=0.d0 ; freeE=0.d0
+  heatcapa=0.d0 ; entropy=0.d0 ; internalE=0.d0 ; freeE=0.d0 ; MSD=0.d0 ; Omega_m2=0.d0 ; vdos=0.d0
   do iomega=1,PHdos%nomega
     xx=PHdos%omega(iomega)*Ha_eV
     if (xx.lt.tol8) cycle
@@ -204,11 +199,16 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
     internalE=internalE + (wovert*xx)*cothx*PHdos%phdos(iomega)*domega
     entropy  =entropy   + ((wovert*xx)*cothx-ln2shx)*PHdos%phdos(iomega)*domega
     freeE    =freeE     + log(2*sinh(wovert*xx))*PHdos%phdos(iomega)*domega
+    MSD      =MSD       + (cothx/PHdos%omega(iomega))*PHdos%phdos(iomega)*domega
+    Omega_m2 =Omega_m2  + (1.d0/PHdos%omega(iomega))**2*PHdos%phdos(iomega)*domega
+    vdos     =vdos      + PHdos%phdos(iomega)*domega
   end do
   heatcapa=heatcapa*3
   entropy=entropy*3
   internalE=internalE*3*k_B*InVar%temperature
   freeE=freeE*3*k_B*InVar%temperature
+  MSD=MSD*3.d0/mass_amu/2.d0
+  Omega_m2=Omega_m2*3.d0
   write(20,'(a)')'============= Direct results (without any inter/extrapolation) =================='
   write(20,'(1x,a,f10.5)')'For present temperature (in Kelvin): T= ',InVar%temperature
   write(20,'(1x,a,f12.5)')'  The cold contribution (in eV/atom): U_0 =',U0*Ha_eV
@@ -221,6 +221,13 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
   write(20,'(1x,a)')'  So the free energy (in eV/atom) is equal to:'
   write(20,'(1x,a,f12.5)')'     Harmonic only -->  F_tot^HA = U_0 + F_vib =',U0*Ha_eV+freeE
   write(20,'(1x,a,f12.5)')'     With anharmonic contribution -->  F_tot^AH = U_0 + F_vib + DeltaF_AH =',Ftot
+  write(20,'(1x,a)')'  Useful quantities for melting :'
+  write(20,'(1x,a,f10.5)')'     The mean square displacement (in a.u.): sqrt(<u^2>) =',(MSD)**0.5
+  write(20,'(1x,a,f10.5)')'     The <Omega^(-2)> factor (in THz^(-2)) =',Omega_m2/(Ha_THz)**2
+  write(20,'(1x,a,f10.5)')'     The Wigner-Seitz radius (in a.u.) : d_at =',(6*Lattice%ucvol/pi)**(1./3.)
+  write(20,'(1x,a,f10.5)')'     The average mass / proton-electron mass ratio (in a.u.) =', mass_amu/amu_emass
+  write(20,'(1x,a,f10.5)')'     The Lindemann constant : sqrt(<u^2>)/d_at =',(MSD)**0.5/(6*Lattice%ucvol/pi)**(1./3.)
+  write(20,'(1x,a,f10.5)')'     The integral of vDOS =',vdos
   write(20,'(a)')' '
 
 ! The free energy (extrapolation)
@@ -231,19 +238,35 @@ subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,PHdos,U0)
   write(20,'(1x,a)')'    2/ F_tot^QHA(T) = F_vib^QHA(T) + U_0'
   write(20,'(1x,a)')'    3/ We assume that DeltaF_AH^QHA(T)=a(V)*T**2'
   write(20,'(1x,a)')'    4/ F_tot^QHA+AH(T) = U_0 + F_vib^QHA(T) + DeltaF_AH^QHA(T)'
-  write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)    DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)'
+  write(20,'(a)')'   T      F_vib^QHA(T)   F_tot^QHA(T)           C_v(T)  '&
+&   //'       S_vib(T)        U_vib(T)   DeltaF_AH^QHA(T)   F_tot^QHA+AH(T)   MSD(T)'
   do itemp=1,100
     wovert=1.d0/(2*real(itemp)*100*k_B)
     freeE=0.d0
+    heatcapa=0.d0
+    entropy=0.d0
+    internalE=0.d0
+    MSD=0.d0
     do iomega=1,PHdos%nomega
       xx=PHdos%omega(iomega)*Ha_eV
       if (xx.lt.tol8) cycle
-      freeE=freeE + log(2*sinh(wovert*xx))*PHdos%phdos(iomega)*domega
+      expm2x=exp(-2.d0*wovert*xx)
+      ln2shx=wovert*xx+log(1.d0-expm2x)
+      cothx=(1.d0+expm2x)/(1.d0-expm2x)
+      heatcapa =heatcapa  + (wovert*xx/sinh(wovert*xx))**2*PHdos%phdos(iomega)*domega
+      internalE=internalE + (wovert*xx)*cothx*PHdos%phdos(iomega)*domega
+      entropy  =entropy   + ((wovert*xx)*cothx-ln2shx)*PHdos%phdos(iomega)*domega
+      freeE    =freeE     + log(2*sinh(wovert*xx))*PHdos%phdos(iomega)*domega
+      MSD      =MSD       + (cothx/PHdos%omega(iomega))*PHdos%phdos(iomega)*domega
     end do
-    freeE=freeE*3*k_B
-    Ftot=U0*Ha_eV+freeE*itemp*100+DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature*100)**2
-    write(20,'(1x,i5,4(1x,f15.5))') itemp*100,freeE*itemp*100,U0*Ha_eV+freeE*itemp*100,&
-&                          DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature)**2,Ftot
+    heatcapa=heatcapa*3
+    entropy=entropy*3
+    internalE=internalE*3*k_B*itemp*100
+    freeE=freeE*3*k_B*itemp*100
+    MSD=MSD*3.d0/mass_amu/2.d0
+    Ftot=U0*Ha_eV+freeE+DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature*100)**2
+    write(20,'(1x,i5,8(1x,f15.5))') itemp*100,freeE,U0*Ha_eV+freeE,heatcapa,entropy,internalE,&
+&                          DeltaFree_AH2*Ha_eV*(itemp*100)**2/(InVar%temperature)**2,Ftot,(MSD)**0.5
   end do
   close(20)
 
@@ -251,13 +274,6 @@ end subroutine tdep_calc_thermo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_elastic'
-!End of the abilint section
 
   implicit none
 
@@ -355,14 +371,14 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
     end do
   end do
   write(InVar%stdout,'(a)') ' '
-  write(InVar%stdout,'(a)') '========== Using the formulation proposed by Wallace (using the IFC) ========='
-  write(InVar%stdout,'(a)') 'Cijkl='
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C11 C12 C13 C14 C15 C16 |   ',Cij(1,1),Cij(1,2),Cij(1,3),Cij(1,4),Cij(1,5),Cij(1,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C21 C22 C23 C24 C25 C26 |   ',Cij(2,1),Cij(2,2),Cij(2,3),Cij(2,4),Cij(2,5),Cij(2,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C31 C32 C33 C34 C35 C36 |   ',Cij(3,1),Cij(3,2),Cij(3,3),Cij(3,4),Cij(3,5),Cij(3,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C41 C42 C43 C44 C45 C46 | = ',Cij(4,1),Cij(4,2),Cij(4,3),Cij(4,4),Cij(4,5),Cij(4,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C51 C52 C53 C54 C55 C56 |   ',Cij(5,1),Cij(5,2),Cij(5,3),Cij(5,4),Cij(5,5),Cij(5,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| C61 C62 C63 C64 C65 C66 |   ',Cij(6,1),Cij(6,2),Cij(6,3),Cij(6,4),Cij(6,5),Cij(6,6)
+  write(InVar%stdout,'(a)') ' ========== Using the formulation proposed by Wallace (using the IFC) ========='
+  write(InVar%stdout,'(a)') ' Cijkl='
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C11 C12 C13 C14 C15 C16 |   ',Cij(1,1),Cij(1,2),Cij(1,3),Cij(1,4),Cij(1,5),Cij(1,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C21 C22 C23 C24 C25 C26 |   ',Cij(2,1),Cij(2,2),Cij(2,3),Cij(2,4),Cij(2,5),Cij(2,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C31 C32 C33 C34 C35 C36 |   ',Cij(3,1),Cij(3,2),Cij(3,3),Cij(3,4),Cij(3,5),Cij(3,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C41 C42 C43 C44 C45 C46 | = ',Cij(4,1),Cij(4,2),Cij(4,3),Cij(4,4),Cij(4,5),Cij(4,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C51 C52 C53 C54 C55 C56 |   ',Cij(5,1),Cij(5,2),Cij(5,3),Cij(5,4),Cij(5,5),Cij(5,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | C61 C62 C63 C64 C65 C66 |   ',Cij(6,1),Cij(6,2),Cij(6,3),Cij(6,4),Cij(6,5),Cij(6,6)
 
 ! Mean value of the off-diagonal elements
   Cij(1,2)=(Cij(1,2)+Cij(2,1))/2.d0 ; Cij(2,1)=Cij(1,2)
@@ -376,7 +392,7 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
 &   /(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
   E3=(Cij(1,1)*Cij(2,2)*Cij(3,3)+2.d0*Cij(2,3)*Cij(1,2)*Cij(1,3)-Cij(1,1)*Cij(2,3)**2-Cij(2,2)*Cij(1,3)**2-Cij(3,3)*Cij(1,2)**2)&
 &   /(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
-  write(InVar%stdout,'(a,3(f8.3,1x))') 'Young modulus E1, E2 and E3=',E1,E2,E3
+  write(InVar%stdout,'(a,3(f8.3,1x))') ' Young modulus E1, E2 and E3=',E1,E2,E3
 
 ! Poisson Ratio
   Nu21=(Cij(1,2)*Cij(3,3)-Cij(1,3)*Cij(2,3))/(Cij(1,1)*Cij(3,3)-Cij(1,3)**2)
@@ -385,11 +401,11 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
   Nu12=(Cij(1,2)*Cij(3,3)-Cij(1,3)*Cij(2,3))/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
   Nu13=(Cij(2,2)*Cij(1,3)-Cij(1,2)*Cij(2,3))/(Cij(2,2)*Cij(3,3)-Cij(2,3)**2)
   Nu32=(Cij(1,1)*Cij(2,3)-Cij(1,2)*Cij(1,3))/(Cij(1,1)*Cij(2,2)-Cij(1,2)**2)
-  write(InVar%stdout,'(a,6(f8.3,1x))') 'Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=',Nu21,Nu31,Nu23,Nu12,Nu13,Nu32
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=',Nu21,Nu31,Nu23,Nu12,Nu13,Nu32
 
 ! Shear modulus
   G23=Cij(4,4) ; G13=Cij(5,5) ; G12=Cij(6,6)
-  write(InVar%stdout,'(a,3(f8.3,1x))') 'Shear modulus G23, G13 and G12=',G23,G13,G12
+  write(InVar%stdout,'(a,3(f8.3,1x))') ' Shear modulus G23, G13 and G12=',G23,G13,G12
 
 ! Compliance matrix
   ABI_MALLOC(Sij,(6,6)) ; Sij(:,:)=0.d0
@@ -406,65 +422,65 @@ subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
     end do
   end do
   write(InVar%stdout,'(a)') ' '
-  write(InVar%stdout,'(a)') 'Sijkl='
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S11 S12 S13 S14 S15 S16 |   ',Sij(1,1),Sij(1,2),Sij(1,3),Sij(1,4),Sij(1,5),Sij(1,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S21 S22 S23 S24 S25 S26 |   ',Sij(2,2),Sij(2,2),Sij(2,3),Sij(2,4),Sij(2,5),Sij(2,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S31 S32 S33 S34 S35 S36 |   ',Sij(3,1),Sij(3,2),Sij(3,3),Sij(3,4),Sij(3,5),Sij(3,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S41 S42 S43 S44 S45 S46 | = ',Sij(4,1),Sij(4,2),Sij(4,3),Sij(4,4),Sij(4,5),Sij(4,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S51 S52 S53 S54 S55 S56 |   ',Sij(5,1),Sij(5,2),Sij(5,3),Sij(5,4),Sij(5,5),Sij(5,6)
-  write(InVar%stdout,'(a,6(f8.3,1x))') '| S61 S62 S63 S64 S65 S66 |   ',Sij(6,1),Sij(6,2),Sij(6,3),Sij(6,4),Sij(6,5),Sij(6,6)
+  write(InVar%stdout,'(a)') ' Sijkl='
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S11 S12 S13 S14 S15 S16 |   ',Sij(1,1),Sij(1,2),Sij(1,3),Sij(1,4),Sij(1,5),Sij(1,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S21 S22 S23 S24 S25 S26 |   ',Sij(2,2),Sij(2,2),Sij(2,3),Sij(2,4),Sij(2,5),Sij(2,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S31 S32 S33 S34 S35 S36 |   ',Sij(3,1),Sij(3,2),Sij(3,3),Sij(3,4),Sij(3,5),Sij(3,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S41 S42 S43 S44 S45 S46 | = ',Sij(4,1),Sij(4,2),Sij(4,3),Sij(4,4),Sij(4,5),Sij(4,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S51 S52 S53 S54 S55 S56 |   ',Sij(5,1),Sij(5,2),Sij(5,3),Sij(5,4),Sij(5,5),Sij(5,6)
+  write(InVar%stdout,'(a,6(f8.3,1x))') ' | S61 S62 S63 S64 S65 S66 |   ',Sij(6,1),Sij(6,2),Sij(6,3),Sij(6,4),Sij(6,5),Sij(6,6)
 
 !==========================================================================================
 !===================== Bulk and Shear modulus--Sound velocities ===========================
 !==========================================================================================
 ! Voigt notation
-  write(InVar%stdout,'(a,f9.3)')'For density rho=',rho
+  write(InVar%stdout,'(a,f9.3)')' For density rho=',rho
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '========================= Voigt average (constant strain) ==================='
+  write(InVar%stdout,*)' ========================= Voigt average (constant strain) ==================='
   BV=((Cij(1,1)+Cij(2,2)+Cij(3,3))+2.d0*(Cij(1,2)+Cij(1,3)+Cij(2,3)))/9.d0
   GV=((Cij(1,1)+Cij(2,2)+Cij(3,3))-     (Cij(1,2)+Cij(1,3)+Cij(2,3))+3.d0*(Cij(4,4)+Cij(5,5)+Cij(6,6)))/15.d0
-  write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BV,' and Shear G=',GV
+  write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BV,' and Shear G=',GV
   Eaverage=9.d0*BV*GV/(3*BV+GV)
   Nuaverage=0.5*(1.d0-(3.d0*GV)/(3.d0*BV+GV) )
   Laverage=(3.d0*BV-2.d0*GV)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+  write(InVar%stdout,'(3(a,f9.3))')' Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
 &   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BV+4.d0*GV/3.d0)/rho)
   Vs=dsqrt(1.d9*GV/rho)
   Vphi=dsqrt(1.d9*BV/rho)
-  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')' Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
 ! Reuss notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '========================= Reuss average (constant stress) ==================='
+  write(InVar%stdout,*)' ========================= Reuss average (constant stress) ==================='
   BR=1.d0/(Sij(1,1)+Sij(2,2)+Sij(3,3)+2.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3)))
   GR=15.d0/(4.d0*(Sij(1,1)+Sij(2,2)+Sij(3,3))-4.d0*(Sij(1,2)+Sij(1,3)+Sij(2,3))+3.d0*(Sij(4,4)+Sij(5,5)+Sij(6,6)))
-  write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BR,' and Shear G=',GR
+  write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BR,' and Shear G=',GR
   Eaverage=9.d0*BR*GR/(3*BR+GR)
   Nuaverage=0.5*(1.d0-(3.d0*GR)/(3.d0*BR+GR) )
   Laverage=(3.d0*BR-2.d0*GR)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+  write(InVar%stdout,'(3(a,f9.3))')' Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
 &   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BR+4.d0*GR/3.d0)/rho)
   Vs=dsqrt(1.d9*GR/rho)
   Vphi=dsqrt(1.d9*BR/rho)
-  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')' Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 
 ! Voigt-Reuss-Hill notation
   write(InVar%stdout,*)' '
-  write(InVar%stdout,*) '============================== Hill average ================================='
+  write(InVar%stdout,*)' ============================== Hill average ================================='
   BH=(BR+BV)/2.d0
   GH=(GR+GV)/2.d0
-  write(InVar%stdout,'(2(a,f9.3))')'ISOTHERMAL modulus: Bulk Kt=',BH,' and Shear G=',GH
+  write(InVar%stdout,'(2(a,f9.3))')' ISOTHERMAL modulus: Bulk Kt=',BH,' and Shear G=',GH
   Eaverage=9.d0*BH*GH/(3*BH+GH)
   Nuaverage=0.5*(1.d0-(3.d0*GH)/(3.d0*BH+GH) )
   Laverage=(3.d0*BH-2.d0*GH)/3.d0
-  write(InVar%stdout,'(3(a,f9.3))')'Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
+  write(InVar%stdout,'(3(a,f9.3))')' Average of Young modulus E=',Eaverage,' Lame modulus Lambda=',Laverage,&
 &   ' and Poisson ratio Nu=',Nuaverage
   Vp=dsqrt(1.d9*(BH+4.d0*GH/3.d0)/rho)
   Vs=dsqrt(1.d9*GH/rho)
   Vphi=dsqrt(1.d9*BH/rho)
-  write(InVar%stdout,'(3(a,f9.3,1x))')'Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
+  write(InVar%stdout,'(3(a,f9.3,1x))')' Velocities: compressional Vp=',Vp,' shear Vs=',Vs,' and bulk Vphi=',Vphi
 ! Store the RVH value of the bulk modulus (will be useful for the Gruneisen)
   Lattice%BulkModulus=BH
 

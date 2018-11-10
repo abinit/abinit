@@ -87,6 +87,8 @@ _ WF disk file :      0.767 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
         dmft_nwli2      10000
         dmft_nwlo1          0
         dmft_nwlo2        100
+  dmft_occnd_imag1          1
+  dmft_occnd_imag2          0
   dmft_read_occnd1          0
   dmft_read_occnd2          1
         dmft_rslf1          0
@@ -972,6 +974,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.375     288.353
         dmft_nwli2      10000
         dmft_nwlo1          0
         dmft_nwlo2        100
+  dmft_occnd_imag1          1
+  dmft_occnd_imag2          0
   dmft_read_occnd1          0
   dmft_read_occnd2          1
         dmft_rslf1          0

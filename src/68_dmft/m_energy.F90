@@ -32,7 +32,7 @@ MODULE m_energy
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_pawtab, only : pawtab_type
  use m_paw_correlations, only : pawuenergy
@@ -131,13 +131,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_energy(cryst_struc,energies_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_energy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -192,13 +185,6 @@ end subroutine init_energy
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_energy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -249,14 +235,6 @@ end subroutine destroy_energy
 !! SOURCE
 
 subroutine print_energy(cryst_struc,energies_dmft,pawprtvol,pawtab,idmftloop)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_energy'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -343,14 +321,6 @@ end subroutine print_energy
 !! SOURCE
 
 subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,pawtab,self,occ_type,part)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_energy'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -448,7 +418,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
    do iatom=1,natom
      lpawu=paw_dmft%lpawu(iatom)
      if(lpawu/=-1) then
-       if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5) then
+       if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
          energies_dmft%e_hu_qmc(iatom) = green%ecorr_qmc(iatom)
          energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_qmc_tot + green%ecorr_qmc(iatom)
        endif
@@ -470,9 +440,11 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
      energies_dmft%e_hu= energies_dmft%e_hu_mig
      energies_dmft%e_hu_tot= energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot
-   else if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5) then
-     write(message,'(2a)') ch10,"Warning, energy is recently computed, not checked"
-     call wrtout(std_out,message,'COLL')
+   else if(paw_dmft%dmft_solv==4.or.paw_dmft%dmft_solv==5.or.paw_dmft%dmft_solv==8) then
+     if(paw_dmft%dmft_solv==8) then
+       write(message,'(2a)') ch10,"Warning, energy is recently computed, not checked"
+       call wrtout(std_out,message,'COLL')
+     endif
      energies_dmft%e_hu= energies_dmft%e_hu_qmc
      energies_dmft%e_hu_tot= energies_dmft%e_hu_qmc_tot
    endif
@@ -524,14 +496,6 @@ end subroutine compute_energy
 !! SOURCE
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_lda,fcalc_lda,ecalc_dmft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_band_energy'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -680,14 +644,6 @@ subroutine compute_migdal_energy(cryst_struc,e_hu_migdal,e_hu_migdal_tot,green,p
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_migdal_energy'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -831,14 +787,6 @@ end subroutine compute_migdal_energy
 !! SOURCE
 
 subroutine compute_ldau_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_ldau_energy'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1008,14 +956,6 @@ end subroutine compute_ldau_energy
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_noninterentropy'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1120,13 +1060,6 @@ end subroutine compute_noninterentropy
 !! SOURCE
 
  function occup_fd(eig,fermie,temp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occup_fd'
-!End of the abilint section
 
  implicit none
 

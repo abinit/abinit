@@ -30,7 +30,7 @@ module m_outwant
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_hdr
 
  use m_io_tools,   only : open_file
@@ -99,14 +99,6 @@ contains
 !! SOURCE
 
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outwant'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

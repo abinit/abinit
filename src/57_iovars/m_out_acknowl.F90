@@ -29,7 +29,7 @@ module m_out_acknowl
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
 
  use m_fstrings,     only : prep_dash
 
@@ -72,14 +72,6 @@ contains
 !! SOURCE
 
 subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_acknowl'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

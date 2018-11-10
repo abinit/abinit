@@ -32,7 +32,7 @@ module m_cohsex
  use m_gwdefs !,        only : czero_gw, cone_gw, j_gw, sigparams_t, sigma_type_from_key, sigma_is_herm
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,          only : timab
  use m_fstrings,      only : sjoin, itoa
@@ -45,7 +45,7 @@ module m_cohsex
  use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
- use m_wfd,           only : wfd_get_ur, wfd_t, wfd_get_cprj, wfd_change_ngfft, wfd_get_many_ur, wfd_sym_ur
+ use m_wfd,           only : wfd_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
@@ -166,16 +166,6 @@ contains
 subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_c,Vcp,&
 & Kmesh,Qmesh,Ltg_k,Pawtab,Pawang,Paw_pwff,Psps,Wfd,allQP_sym,gwc_ngfft,iomode,prtvol,sigcme_tmp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cohsex_me'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,prtvol,iomode,nomega_sigc,minbnd,maxbnd
@@ -269,7 +259,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 &  ' bands n = from ',ib1,' to ',ib2,ch10
  call wrtout(std_out,msg,'COLL')
 
- if (ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd_change_ngfft(Wfd,Cryst,Psps,gwc_ngfft)
+ if (ANY(gwc_ngfft(1:3) /= Wfd%ngfft(1:3)) ) call wfd%change_ngfft(Cryst,Psps,gwc_ngfft)
  gwc_mgfft = MAXVAL(gwc_ngfft(1:3))
  gwc_fftalga = gwc_ngfft(7)/100 !; gwc_fftalgc=MOD(gwc_ngfft(7),10)
 
@@ -481,7 +471,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    if (ALL(proc_distrb(:,:,spin)/=Wfd%my_rank)) CYCLE
 
    ABI_MALLOC(wfr_bdgw,(gwc_nfftot*nspinor,ib1:ib2))
-   call wfd_get_many_ur(Wfd, [(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
+   call wfd%get_many_ur([(jb, jb=ib1,ib2)], jk_ibz, spin, wfr_bdgw)
 
    if (Wfd%usepaw==1) then
      ! Load cprj for GW states, note the indexing.
@@ -490,7 +480,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
      ibsp=ib1
      do jb=ib1,ib2
-       call wfd_get_cprj(Wfd,jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+       call wfd%get_cprj(jb,jk_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
        call paw_symcprj(jk_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        call pawcprj_copy(Cprj_ksum,Cprj_kgw(:,ibsp:ibsp+(nspinor-1)))
        ibsp=ibsp+nspinor
@@ -538,6 +528,10 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2))
      call gsph_fft_tabs(Gsph_c,g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
      if ( ANY(gwc_fftalga == [2, 4]) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
      if (use_padfft==0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2*use_padfft))
@@ -578,13 +572,13 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 
        theta_mu_minus_e0i=fact_sp*qp_occ(ib,ik_ibz,spin)
 
-       call wfd_get_ur(Wfd,ib,ik_ibz,spin,ur_sum)
+       call wfd%get_ur(ib,ik_ibz,spin,ur_sum)
 
        if (Psps%usepaw==1) then
          ! Load cprj for point ksum, this spin or spinor and *THIS* band.
          ! TODO MG I could avoid doing this but I have to exchange spin and bands ???
          ! For sure there is a better way to do this!
-         call wfd_get_cprj(Wfd,ib,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
+         call wfd%get_cprj(ib,ik_ibz,spin,Cryst,Cprj_ksum,sorted=.FALSE.)
          call paw_symcprj(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,Cprj_ksum)
        end if
 
@@ -896,16 +890,6 @@ end subroutine cohsex_me
 !! SOURCE
 
 subroutine calc_coh(nspinor,nsig_ab,nfftot,ngfft,npwc,gvec,wfg2_jk,epsm1q_o,vc_sqrt,i_sz,iqibz,same_band,sigcohme)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_coh'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

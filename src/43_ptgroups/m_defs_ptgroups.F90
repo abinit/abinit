@@ -33,7 +33,7 @@
 module m_defs_ptgroups
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 

@@ -26,7 +26,7 @@
 module m_berrytk
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_cgtools,   only : overlap_g
@@ -142,13 +142,6 @@ contains
 subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 &  mcg_k,mcg_q,mcg1_k,minbd,mpw,mband_occ,nband_occ,npw_k1,npw_k2,nspinor,&
 &  pwind_k,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smatrix'
-!End of the abilint section
 
  implicit none
 
@@ -666,11 +659,10 @@ end subroutine smatrix
 !!               in atomic units
 !!
 !! NOTES
-!! The sum of the electronic and ionic Berry phase is folded into
-!! [-1,1] before it is transformed to cartesian coordinates.
-!! This means that in some cases, ptot_cart /= pel_cart + pion_cart
+!! - The sum of the electronic and ionic Berry phase is folded into
+!!   [-1,1] before it is transformed to cartesian coordinates.
+!!   This means that in some cases, ptot_cart /= pel_cart + pion_cart
 !!
-!! NOTES
 !! - pel and pion do not take into account the factor 1/ucvol.
 !!   At the opposite, this factor is taken into account in
 !!   pel_cart and pion_cart
@@ -687,14 +679,6 @@ end subroutine smatrix
 
 subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 &  ptot_cart,rprimd,ucvol,unit_out,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polcart'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

@@ -48,13 +48,13 @@ MODULE m_pawtab
  type,public :: wvlpaw_rholoc_type
 
   integer :: msz
-! mesh size 
+! mesh size
 
   real(dp),allocatable :: d(:,:)
 ! local rho and derivatives
 
   real(dp),allocatable :: rad(:)
-! radial mesh 
+! radial mesh
 
  end type wvlpaw_rholoc_type
 
@@ -69,7 +69,7 @@ MODULE m_pawtab
 !! wvlpaw_type
 !!
 !! FUNCTION
-!! Objects for WVL+PAW 
+!! Objects for WVL+PAW
 !!
 !! SOURCE
 
@@ -84,12 +84,12 @@ MODULE m_pawtab
    ! This is for the PAW-WVL case, only for the initial guess
 
   integer :: ptotgau
-   ! total number of complex gaussians 
-   ! for tproj 
+   ! total number of complex gaussians
+   ! for tproj
 
   integer,allocatable :: pngau(:)
    ! number of complex gaussians per basis element
-   ! for tproj 
+   ! for tproj
 
 !Real pointers
 
@@ -112,7 +112,7 @@ MODULE m_pawtab
 
  public :: wvlpaw_allocate  ! Allocate memory
  public :: wvlpaw_free   ! Free memory
- public :: wvlpaw_nullify  
+ public :: wvlpaw_nullify
 !!***
 
 !----------------------------------------------------------------------
@@ -145,7 +145,7 @@ MODULE m_pawtab
    ! if 1, onsite matrix elements of the kinetic operator are allocated
    ! if 2, onsite matrix elements of the kinetic operator are computed and stored
 
- 
+
   integer :: has_shapefncg
    ! if 1, the spherical Fourier transforms of the radial shape functions are allocated
    ! if 2, the spherical Fourier transforms of the radial shape functions are computed and stored
@@ -179,7 +179,7 @@ MODULE m_pawtab
   integer :: has_wvl
    ! if 1, data for wavelets (pawwvl) are allocated
    ! if 2, data for wavelets (pawwvl) are computed and stored
-   
+
   integer :: ij_proj
    ! Number of (i,j) elements for the orbitals on which U acts (PAW+U only)
    ! on the considered atom type (ij_proj=1 (1 projector), 3 (2 projectors)...)
@@ -346,7 +346,7 @@ MODULE m_pawtab
    ! Array giving klm, kln, abs(il-jl), (il+jl), ilm and jlm, ilmn and jlmn for each klmn=(ilmn,jlmn)
    ! Note: ilmn=(il,im,in) and ilmn<=jlmn
 
-  integer, allocatable :: indlmn(:,:) 
+  integer, allocatable :: indlmn(:,:)
    ! indlmn(6,lmn_size)
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=lmn (if useylm=1)
@@ -501,7 +501,7 @@ MODULE m_pawtab
    ! tcoredens(core_mesh_size,1)
    ! Gives the pseudo core density of the atom
    ! In PAW+WVL:
-   !  tcoredens(core_mesh_size,2:6) 
+   !  tcoredens(core_mesh_size,2:6)
    !  are the first to the fifth derivatives of the pseudo core density.
 
   real(dp), allocatable :: tcorespl(:,:)
@@ -604,13 +604,6 @@ CONTAINS !===========================================================
 
 subroutine pawtab_nullify_0D(Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_nullify_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -685,13 +678,6 @@ end subroutine pawtab_nullify_0D
 
 subroutine pawtab_nullify_1D(Pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_nullify_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -735,13 +721,6 @@ end subroutine pawtab_nullify_1D
 !! SOURCE
 
 subroutine pawtab_free_0D(Pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_free_0D'
-!End of the abilint section
 
  implicit none
 
@@ -933,7 +912,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%vminus_mesh_size=0
  Pawtab%tnvale_mesh_size=0
  Pawtab%shape_type=-10
- 
+
 end subroutine pawtab_free_0D
 !!***
 
@@ -953,13 +932,6 @@ end subroutine pawtab_free_0D
 !! SOURCE
 
 subroutine pawtab_free_1D(Pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_free_1D'
-!End of the abilint section
 
  implicit none
 
@@ -1000,13 +972,6 @@ end subroutine pawtab_free_1D
 
 subroutine pawtab_set_flags_0D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_set_flags_0D'
-!End of the abilint section
 
  implicit none
 
@@ -1060,13 +1025,6 @@ end subroutine pawtab_set_flags_0D
 
 subroutine pawtab_set_flags_1D(Pawtab,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
 &                              has_vhtnzc,has_nabla,has_shapefncg,has_wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_set_flags_1D'
-!End of the abilint section
 
  implicit none
 
@@ -1132,14 +1090,6 @@ end subroutine pawtab_set_flags_1D
 !! SOURCE
 
 subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1344,13 +1294,6 @@ end subroutine pawtab_print
 subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 &                           mpi_atmtab) ! Optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_get_lsize'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1370,7 +1313,7 @@ subroutine pawtab_get_lsize(Pawtab,l_size_atm,natom,typat, &
 
  !@pawtab_type
 
- natom_typat=size(typat)
+ natom_typat=count(typat>0)
  if (size(pawtab)<maxval(typat)) then
    msg='error on pawtab size!'
    MSG_BUG(msg)
@@ -1437,13 +1380,6 @@ end subroutine pawtab_get_lsize
 
 subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawtab_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1477,7 +1413,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  full_broadcast=.true.;if (present(only_from_file)) full_broadcast=(.not.only_from_file)
 
  nn_int=0 ; nn_int_arr=0 ; nn_dpr=0 ; nn_dpr_arr=0
- 
+
 !=========================================================================
 !Compute the amount of data to communicate
 !=========================================================================
@@ -1551,7 +1487,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals arrays (read from psp file)
 !-------------------------------------------------------------------------
-   siz_coredens=0 ; siz_dij0=0     ; siz_kij=0  ; siz_fock=0  
+   siz_coredens=0 ; siz_dij0=0     ; siz_kij=0  ; siz_fock=0
    siz_phi=0      ; siz_rhoij0=0   ; siz_shape_alpha=0
    siz_shape_q=0  ; siz_shapefunc=0; siz_tcoredens=0
    siz_tcorespl=0 ; siz_tphi=0     ; siz_tproj=0
@@ -1820,7 +1756,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !  Are the sizes OK ?
    if (trim(msg)/='') then
      write(msg0,'(3a)') &
-&     'There is a problem with the size of the following array(s):',ch10,trim(msg) 
+&     'There is a problem with the size of the following array(s):',ch10,trim(msg)
      MSG_BUG(msg0)
    end if
 
@@ -2178,7 +2114,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
  end if ! me/=0
  LIBPAW_DEALLOCATE(list_int)
- 
+
 !Broadcast all the reals
 !=========================================================================
 
@@ -2400,7 +2336,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    end if
 
  end if ! me=0
- 
+
 !Perfom the communication
 !-------------------------------------------------------------------------
 
@@ -2828,13 +2764,6 @@ end subroutine pawtab_bcast
 
 subroutine wvlpaw_allocate(wvlpaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_allocate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2875,13 +2804,6 @@ end subroutine wvlpaw_allocate
 !! SOURCE
 
 subroutine wvlpaw_free(wvlpaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_free'
-!End of the abilint section
 
  implicit none
 
@@ -2935,13 +2857,6 @@ end subroutine wvlpaw_free
 
 subroutine wvlpaw_nullify(wvlpaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2954,9 +2869,9 @@ subroutine wvlpaw_nullify(wvlpaw)
 
  wvlpaw%npspcode_init_guess=0
  wvlpaw%ptotgau=0
- 
+
  call wvlpaw_rholoc_nullify(wvlpaw%rholoc)
- 
+
 end subroutine wvlpaw_nullify
 !!***
 
@@ -2981,13 +2896,6 @@ end subroutine wvlpaw_nullify
 !! SOURCE
 
 subroutine wvlpaw_rholoc_free(wvlpaw_rholoc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_rholoc_free'
-!End of the abilint section
 
  implicit none
 
@@ -3030,13 +2938,6 @@ end subroutine wvlpaw_rholoc_free
 !! SOURCE
 
 subroutine wvlpaw_rholoc_nullify(wvlpaw_rholoc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvlpaw_rholoc_nullify'
-!End of the abilint section
 
  implicit none
 

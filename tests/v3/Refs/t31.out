@@ -626,8 +626,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
        -0.000  -0.000   0.000   0.000   0.000  -0.787  -0.044  -0.044  -0.044
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =  13.3990
-  dielectric constant without local fields =  14.3022
+  dielectric constant =  13.3995
+  dielectric constant without local fields =  14.3029
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     16.29  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -635,10 +635,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.075   0.008  -0.025   0.025  -0.008  -0.008   0.025  -0.025   0.008
-      0.000   0.001  -0.004   0.004  -0.001   0.001  -0.004   0.004  -0.001
+     -0.000   0.001  -0.004   0.004  -0.001   0.001  -0.004   0.004  -0.001
        1       2       3       4       5       6       7       8       9
       0.075   0.008  -0.025   0.025  -0.008  -0.008   0.025  -0.025   0.008
-      0.000  -0.001   0.004  -0.004   0.001  -0.001   0.004  -0.004   0.001
+     -0.000  -0.001   0.004  -0.004   0.001  -0.001   0.004  -0.004   0.001
 
 
    Upper and lower wings at the    2 th omega   0.0000  13.6058 [eV]
@@ -825,9 +825,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
-   Fundamental gap     =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
-                                        Bottom of conduction at :  -0.2500  0.5000  0.0000
+   Minimum direct gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
+   Fundamental gap    =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
+                                       Bottom of conduction at :  -0.2500  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -935,9 +935,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
-   Fundamental gap     =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
-                                        Bottom of conduction at :  -0.2500  0.5000  0.0000
+   Minimum direct gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
+   Fundamental gap    =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
+                                       Bottom of conduction at :  -0.2500  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  2
  number of plane-waves for SigmaX                   27
@@ -1045,9 +1045,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
-   Fundamental gap     =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
-                                        Bottom of conduction at :  -0.2500  0.5000  0.0000
+   Minimum direct gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
+   Fundamental gap    =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
+                                       Bottom of conduction at :  -0.2500  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  3
  number of plane-waves for SigmaX                   27
@@ -1155,9 +1155,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
-   Fundamental gap     =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
-                                        Bottom of conduction at :  -0.2500  0.5000  0.0000
+   Minimum direct gap =   5.7646 [eV], located at k-point      :  -0.2500  0.5000  0.0000
+   Fundamental gap    =   3.4089 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
+                                       Bottom of conduction at :  -0.2500  0.5000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  4
  number of plane-waves for SigmaX                   27
@@ -1198,7 +1198,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.500      87.461
 
  E^0_gap          5.765
  E^GW_gap         6.697
- DeltaE^GW_gap    0.933
+ DeltaE^GW_gap    0.932
 
 
 == END DATASET(S) ==============================================================

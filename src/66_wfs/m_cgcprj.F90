@@ -116,13 +116,6 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 & ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf,mband,mcg1,mcg2,mcprj1,mcprj2,mkmem,&
 & mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotprod_set_cgcprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -140,7 +133,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ier,ig,ii,i1,i2
+ integer :: ia,iat,itypat,ibd1,ibd2,icgb1,icgb2,ier,ig,ii,i1,i2,iorder
  integer :: ilmn1,ilmn2,klmn,max_nbd2,nbd
  real(dp) :: dotr,doti
 !arrays
@@ -168,6 +161,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
  if(usepaw==1) then
    ABI_DATATYPE_ALLOCATE(cprj1_k,(natom,nspinor*nbd1))
    ABI_DATATYPE_ALLOCATE(cprj2_k,(natom,nspinor*nbd2))
+   iorder=0 ! There is no change of ordering of cprj when copying wavefunctions
  end if
  if(usepaw==1 .and. ibg1/=0) then
    call pawcprj_alloc(cprj1_k,cprj1(1,1)%ncpgr,dimcprj)
@@ -185,7 +179,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
      cwavef1(2,ig)=cg1(2,ig+icgb1)
    end do
    if(usepaw==1 .and. ibg1/=0) then
-     call pawcprj_get(atindx1,cprj1_k,cprj1,natom,1,ibg1,ikpt,1,isppol,mband,&
+     call pawcprj_get(atindx1,cprj1_k,cprj1,natom,1,ibg1,ikpt,iorder,isppol,mband,&
 &     mkmem,natom,nbd1,nbd1,nspinor,nsppol,0,&
 &     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
    end if
@@ -205,7 +199,7 @@ subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
      end do
 
      if(usepaw==1 .and. ibg2/=0) then
-       call pawcprj_get(atindx1,cprj2_k,cprj2,natom,1,ibg2,ikpt,1,isppol,mband,&
+       call pawcprj_get(atindx1,cprj2_k,cprj2,natom,1,ibg2,ikpt,iorder,isppol,mband,&
 &       mkmem,natom,nbd2,nbd2,nspinor,nsppol,0,&
 &       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
      end if
@@ -462,13 +456,6 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 & mpi_enreg,mset,natom,nattyp,nbd,npw,nset1,nset2,nspinor,nsppol,ntypat,&
 & shift_set1,shift_set2,pawtab,smn,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dotprodm_sumdiag_cgcprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -487,7 +474,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,iat,itypat,ibd,icgb,ig
+ integer :: ia,iat,itypat,ibd,icgb,ig,iorder
  integer :: ilmn1,ilmn2,ind_set1,ind_set2,iset1,iset2,klmn
  real(dp) :: dotr,doti
 !arrays
@@ -506,8 +493,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
  if(usepaw==1) then
    ABI_DATATYPE_ALLOCATE(cprj1_k,(natom,nspinor*nbd))
    ABI_DATATYPE_ALLOCATE(cprj2_k,(natom,nspinor*nbd))
- end if
- if(usepaw==1) then
+   iorder=0 ! There is no change of ordering in the copy of wavefunctions
    call pawcprj_alloc(cprj1_k,cprj_set(1,1,1)%ncpgr,dimcprj)
  end if
 
@@ -526,7 +512,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
        cwavef1(2,ig)=cg_set(2,ig+icgb,ind_set1)
      end do
      if(usepaw==1) then
-       call pawcprj_get(atindx1,cprj1_k,cprj_set(:,:,ind_set1),natom,1,ibg,ikpt,1,isppol,mband,&
+       call pawcprj_get(atindx1,cprj1_k,cprj_set(:,:,ind_set1),natom,1,ibg,ikpt,iorder,isppol,mband,&
 &       mkmem,natom,nbd,nbd,nspinor,nsppol,0,&
 &       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
      end if
@@ -546,7 +532,7 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
          end do
 
          if(usepaw==1) then
-           call pawcprj_get(atindx1,cprj2_k,cprj_set(:,:,ind_set2),natom,1,ibg,ikpt,1,isppol,mband,&
+           call pawcprj_get(atindx1,cprj2_k,cprj_set(:,:,ind_set2),natom,1,ibg,ikpt,iorder,isppol,mband,&
 &           mkmem,natom,nbd,nbd,nspinor,nsppol,0,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end if
@@ -705,13 +691,6 @@ end subroutine dotprodm_sumdiag_cgcprj
 & icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, &
 & cgout,cprjout,icgout) ! optional args
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lincom_cgcprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -841,13 +820,6 @@ end subroutine lincom_cgcprj
 
  subroutine cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
 &  mpi_enreg,natom,nattyp,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgcprj_cholesky'
-!End of the abilint section
 
  implicit none
 

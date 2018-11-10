@@ -330,13 +330,6 @@ CONTAINS
 SUBROUTINE Ctqmcoffdiag_init(op, ostream, istream, bFile, MY_COMM, iBuffer)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_init'
-!End of the abilint section
-
-
 #ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
@@ -496,13 +489,6 @@ END SUBROUTINE Ctqmcoffdiag_init
 SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setParameters'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                         :: op
   DOUBLE PRECISION, DIMENSION(1:10), INTENT(IN   ) :: buffer
 
@@ -573,13 +559,6 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 SUBROUTINE Ctqmcoffdiag_setSweeps(op,sweeps)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setSweeps'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)         , INTENT(INOUT) :: op
   DOUBLE PRECISION  , INTENT(IN   ) :: sweeps
 
@@ -641,13 +620,6 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 SUBROUTINE Ctqmcoffdiag_setSeed(op,iseed)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setSeed'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)           :: op
   INTEGER  , INTENT(IN   )           :: iseed
 !Local variables ------------------------------
@@ -702,13 +674,6 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 SUBROUTINE Ctqmcoffdiag_allocateAll(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_allocateAll'
-!End of the abilint section
-
   implicit none
 
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
@@ -774,13 +739,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 SUBROUTINE Ctqmcoffdiag_allocateOpt(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_allocateOpt'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
@@ -941,13 +899,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setG0wTab'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)                      :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN ) :: Gomega
   INTEGER                         , INTENT(IN ) :: opt_fk
@@ -1034,13 +985,6 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 SUBROUTINE Ctqmcoffdiag_setU(op,matU)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setU'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) ::op
 !Local variables ------------------------------
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: matU
@@ -1086,13 +1030,6 @@ END SUBROUTINE Ctqmcoffdiag_setU
 SUBROUTINE Ctqmcoffdiag_clear(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_clear'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER :: i
@@ -1179,13 +1116,6 @@ END SUBROUTINE Ctqmcoffdiag_clear
 SUBROUTINE Ctqmcoffdiag_reset(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_reset'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: iflavor
@@ -1253,13 +1183,6 @@ END SUBROUTINE Ctqmcoffdiag_reset
 SUBROUTINE Ctqmcoffdiag_setMu(op, levels)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_setMu'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:), INTENT(IN   ) :: levels
 
@@ -1307,13 +1230,6 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 SUBROUTINE Ctqmcoffdiag_sethybri_limit(op, hybri_limit)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_sethybri_limit'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   COMPLEX(KIND=8) , DIMENSION(:,:),  INTENT(IN ) :: hybri_limit
 
@@ -1361,13 +1277,6 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
 
  use m_hide_lapack,  only : xginv
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_computeF'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                       , INTENT(INOUT) :: op
   COMPLEX(KIND=8), DIMENSION(:,:,:), INTENT(IN   ) :: Gomega
   !INTEGER                         , INTENT(IN   ) :: Wmax
@@ -1872,13 +1781,6 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 SUBROUTINE Ctqmcoffdiag_run(op,opt_order,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_run'
-!End of the abilint section
-
-
 #ifdef HAVE_MPI1
 include 'mpif.h'
 #endif
@@ -2050,13 +1952,6 @@ END SUBROUTINE Ctqmcoffdiag_run
 SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_loop'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT)         :: op
   INTEGER    , INTENT(IN   )         :: itotal
   INTEGER    , INTENT(IN   )         :: ilatex
@@ -2308,13 +2203,6 @@ END SUBROUTINE Ctqmcoffdiag_loop
 SUBROUTINE Ctqmcoffdiag_tryAddRemove(op,updated)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_tryAddRemove'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
 !  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
@@ -2760,13 +2648,6 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_trySwap'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)           , INTENT(INOUT) :: op
 !  TYPE(BathOperatoroffdiag)    , INTENT(INOUT) :: Bath 
 !  TYPE(ImpurityOperator), INTENT(INOUT) :: Impurity 
@@ -2940,13 +2821,6 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measN'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
@@ -3014,13 +2888,6 @@ END SUBROUTINE Ctqmcoffdiag_measN
 SUBROUTINE Ctqmcoffdiag_measCorrelation(op, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measCorrelation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)       :: op
   !TYPE(ImpurityOperator), INTENT(IN   )       :: impurity
   INTEGER               , INTENT(IN   )       :: iflavor
@@ -3113,13 +2980,6 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 SUBROUTINE Ctqmcoffdiag_measPerturbation(op, iflavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_measPerturbation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)             , INTENT(INOUT)     :: op
   !TYPE(ImpurityOperator), INTENT(IN   )     :: impurity
   INTEGER               , INTENT(IN   )     :: iflavor
@@ -3175,13 +3035,6 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_getResult(op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getResult'
-!End of the abilint section
 
 
 #ifdef HAVE_MPI1
@@ -3698,13 +3551,6 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_symmetrizeGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)                     , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: syms
 !Local variables ------------------------------
@@ -3777,13 +3623,6 @@ SUBROUTINE Ctqmcoffdiag_getGreen(op, Gtau, Gw)
 
 !Arguments ------------------------------------
  USE m_GreenHyboffdiag
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(INOUT)    :: op
   DOUBLE PRECISION, DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gtau
   COMPLEX(KIND=8), DIMENSION(:,:,:), OPTIONAL, INTENT(INOUT) :: Gw
@@ -4060,13 +3899,6 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 SUBROUTINE Ctqmcoffdiag_getD(op, D)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getD'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: D
 !Local variables ------------------------------
@@ -4128,13 +3960,6 @@ END SUBROUTINE Ctqmcoffdiag_getD
 SUBROUTINE Ctqmcoffdiag_getE(op,E,noise)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_getE'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)       , INTENT(IN ) :: op
   DOUBLE PRECISION, INTENT(OUT) :: E
   DOUBLE PRECISION, INTENT(OUT) :: Noise
@@ -4177,13 +4002,6 @@ END SUBROUTINE Ctqmcoffdiag_getE
 SUBROUTINE Ctqmcoffdiag_printAll(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printAll'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 
   IF ( .NOT. op%done ) &
@@ -4242,13 +4060,6 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 SUBROUTINE Ctqmcoffdiag_printQMC(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printQMC'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: ostream
@@ -4412,13 +4223,6 @@ SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
 
 !Arguments ------------------------------------
   use m_io_tools, only : flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printGreen'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)        , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4543,13 +4347,6 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 SUBROUTINE Ctqmcoffdiag_printD(op,oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printD'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4612,13 +4409,6 @@ END SUBROUTINE Ctqmcoffdiag_printD
 SUBROUTINE Ctqmcoffdiag_printE(op,oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printE'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)    :: op
   INTEGER  , OPTIONAL, INTENT(IN)    :: oFileIn
 !Local variables ------------------------------
@@ -4681,13 +4471,6 @@ END SUBROUTINE Ctqmcoffdiag_printE
 SUBROUTINE Ctqmcoffdiag_printPerturbation(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printPerturbation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)           :: op
   INTEGER  , OPTIONAL,  INTENT(IN)          :: oFileIn
 !Local variables-------------------------------
@@ -4758,13 +4541,6 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 SUBROUTINE Ctqmcoffdiag_printCorrelation(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printCorrelation'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
@@ -4845,13 +4621,6 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_printSpectra'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag)          , INTENT(IN)             :: op
   INTEGER  , OPTIONAL, INTENT(IN)             :: oFileIn
 !Local variables ------------------------------
@@ -4926,13 +4695,6 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 SUBROUTINE Ctqmcoffdiag_destroy(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Ctqmcoffdiag_destroy'
-!End of the abilint section
-
   TYPE(Ctqmcoffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                  :: iflavor

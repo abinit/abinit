@@ -34,7 +34,7 @@ MODULE m_scf_history
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_pawcprj,  only : pawcprj_type, pawcprj_free
@@ -84,6 +84,9 @@ MODULE m_scf_history
 
   integer :: mcprj
    ! Size of cprj datsatructure array
+
+  integer :: meigen
+   ! Size of eigen array
 
   integer :: natom
    ! Number of atoms in cell
@@ -139,6 +142,10 @@ MODULE m_scf_history
     ! deltarhor(nfft,nspden,history_size)
     ! Difference between electronic density (in real space)
     ! and sum of atomic densities at the end of each SCF cycle of history
+
+   real(dp),allocatable :: eigen(:,:)
+    ! eigen(meigen,history_size)
+    ! eigenvalues for each SCF cycle of history
 
    real(dp),allocatable :: atmrho_last(:)
     ! atmrho_last(nfft)
@@ -197,14 +204,16 @@ CONTAINS !===========================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!  mpi_enreg=MPI-parallelisation information
-!!  usecg= if ==0 => no handling of wfs, if==1 => handling of density/potential AND wfs, if==2 => ONLY handling of wfs
+!!  usecg= if ==0 => no handling of wfs (and eigenvalues), 
+!!         if==1 => handling of density/potential AND wfs and eigen, 
+!!         if==2 => ONLY handling of wfs and eigen
 !!
 !! SIDE EFFECTS
 !!  scf_history=<type(scf_history_type)>=scf_history datastructure
 !!    hindex is always allocated
 !!    The density/potential arrays that are possibly allocated are : atmrho_last, deltarhor, 
 !!      pawrhoij, pawrhoij_last, rhor_last, taur_last, xreddiff, xred_last.
-!!    The wfs arrays that are possibly allocated are : cg and cprj
+!!    The wfs arrays that are possibly allocated are : cg, cprj and eigen
 !!
 !! PARENTS
 !!      gstate,scfcv
@@ -214,13 +223,6 @@ CONTAINS !===========================================================
 !! SOURCE
 
 subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_init'
-!End of the abilint section
 
  implicit none
 
@@ -272,10 +274,15 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
      scf_history%mcg=0
      scf_history%mcprj=0
+     scf_history%meigen=0
      if (usecg>0) then
        my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-       scf_history%mcg=dtset%mpw*my_nspinor*dtset%nbandhf*dtset%mkmem*dtset%nsppol ! This is for scf_history_wf
-       if(usecg==1)scf_history%mcg=dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol ! This is for scf_history (when extrapwf==1)
+       scf_history%meigen=dtset%nbandhf*dtset%mkmem*dtset%nsppol
+       scf_history%mcg=dtset%mpw*my_nspinor*scf_history%meigen ! This is for scf_history_wf
+       if(usecg==1)then
+         scf_history%meigen=dtset%mband*dtset%mkmem*dtset%nsppol
+         scf_history%mcg=dtset%mpw*my_nspinor*scf_history%meigen ! This is for scf_history (when extrapwf==1)
+       endif
        if (dtset%usepaw==1) then
          mband_cprj=dtset%nbandhf
          if(usecg==1)mband_cprj=dtset%mband
@@ -307,6 +314,7 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
 
      if (scf_history%usecg>0) then
        ABI_ALLOCATE(scf_history%cg,(2,scf_history%mcg,scf_history%history_size))
+       ABI_ALLOCATE(scf_history%eigen,(scf_history%meigen,scf_history%history_size))
 !      Note that the allocation is made even when usepaw==0. Still, scf_history%mcprj=0 ...
        ABI_DATATYPE_ALLOCATE(scf_history%cprj,(dtset%natom,scf_history%mcprj,scf_history%history_size))
      end if
@@ -342,13 +350,6 @@ end subroutine scf_history_init
 !! SOURCE
 
 subroutine scf_history_free(scf_history)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_free'
-!End of the abilint section
 
  implicit none
 
@@ -405,6 +406,9 @@ subroutine scf_history_free(scf_history)
  if (allocated(scf_history%cg))           then
    ABI_DEALLOCATE(scf_history%cg)
  end if
+ if (allocated(scf_history%eigen))           then
+   ABI_DEALLOCATE(scf_history%eigen)
+ end if
  if (allocated(scf_history%dotprod_sumdiag_cgcprj_ij))           then
    ABI_DEALLOCATE(scf_history%dotprod_sumdiag_cgcprj_ij)
  end if
@@ -414,6 +418,7 @@ subroutine scf_history_free(scf_history)
  scf_history%icall=0
  scf_history%mcprj=0
  scf_history%mcg=0
+ scf_history%meigen=0
 
 end subroutine scf_history_free
 !!***
@@ -439,13 +444,6 @@ end subroutine scf_history_free
 
 subroutine scf_history_nullify(scf_history)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scf_history_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -461,6 +459,7 @@ subroutine scf_history_nullify(scf_history)
  scf_history%icall=0
  scf_history%mcprj=0
  scf_history%mcg=0
+ scf_history%meigen=0
 
 end subroutine scf_history_nullify
 !!***

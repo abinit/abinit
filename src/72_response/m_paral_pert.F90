@@ -30,7 +30,7 @@ MODULE m_paral_pert
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -86,13 +86,6 @@ CONTAINS
 
 subroutine set_pert_comm(mpi_enreg,nppert)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_pert_comm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -139,13 +132,6 @@ end subroutine set_pert_comm
 !! SOURCE
 
 subroutine unset_pert_comm(mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unset_pert_comm'
-!End of the abilint section
 
  implicit none
 
@@ -220,13 +206,6 @@ end  subroutine unset_pert_comm
 subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &                       paw_an,paw_ij,pawfgrtab,pawrhoij,&
 &                       paw_an_out,paw_ij_out,pawfgrtab_out,pawrhoij_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_pert_paw'
-!End of the abilint section
 
  implicit none
 
@@ -479,13 +458,6 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &                       paw_an,paw_ij,pawfgrtab,pawrhoij,&
 &                       paw_an_out,paw_ij_out,pawfgrtab_out,pawrhoij_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unset_pert_paw'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -679,13 +651,6 @@ end  subroutine unset_pert_paw
  subroutine get_exchatom_list(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,natom, &
 &                             SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_exchatom_list'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -836,13 +801,6 @@ end subroutine get_exchatom_list
 
 subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,natom, &
 &                             SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_exchatom_list1'
-!End of the abilint section
 
  implicit none
 

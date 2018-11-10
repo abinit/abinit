@@ -28,7 +28,7 @@ MODULE m_paw_optics
  use m_xmpi
  use m_errors
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_hdr
 
  use m_time,         only : timab
@@ -110,13 +110,6 @@ CONTAINS  !=====================================================================
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
 &               pawrad,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optics_paw'
-!End of the abilint section
 
  implicit none
 
@@ -526,13 +519,6 @@ CONTAINS  !=====================================================================
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
 &               mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawrad,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optics_paw_core'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -854,13 +840,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine linear_optics_paw(filnam,filnam_out,mpi_enreg_seq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linear_optics_paw'
-!End of the abilint section
 
  implicit none
 

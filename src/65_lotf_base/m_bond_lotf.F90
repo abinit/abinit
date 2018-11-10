@@ -4,7 +4,7 @@
 !! bond_lotf
 !!
 !! FUNCTION
-!!  Define BOND variables and the procedure to 
+!!  Define BOND variables and the procedure to
 !!  set them.
 !!
 !! COPYRIGHT
@@ -14,6 +14,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -21,9 +22,10 @@
 #include "abi_common.h"
 
 module bond_lotf
+
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -32,12 +34,12 @@ module bond_lotf
  !--Fittedatoms variables
  integer :: nfit !--dimension needed for fits
  integer :: nfitmax  !--dimension of the fit arrays
- integer,allocatable :: ifit(:) 
- logical,allocatable :: tafit(:) 
+ integer,allocatable :: ifit(:)
+ logical,allocatable :: tafit(:)
 
  !--Fittedbonds variables
  integer :: nbondex
- integer :: ibn_tot,ibn_tot2,ibn_tots 
+ integer :: ibn_tot,ibn_tot2,ibn_tots
  integer,allocatable :: imat(:)
  integer,dimension(:,:),allocatable :: ibnd_mat,ibmat,ibmat_large
 
@@ -55,27 +57,21 @@ contains
  !!***
 
 
- !!****f* bond_lotf/bond_tafit_init
- !! NAME
- !! bond_tafit_init
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* bond_lotf/bond_tafit_init
+!! NAME
+!! bond_tafit_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine bond_tafit_init(nax)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_tafit_init'
-!End of the abilint section
 
   implicit none
 
@@ -85,7 +81,7 @@ contains
 ! *************************************************************************
 
    ABI_ALLOCATE(tafit,(nax))
-   
+
   !--MMANCINI strange!!!!!
   !  tafit(:nax) = tquant(:nax)
    tafit(:nax) = .true.
@@ -93,27 +89,21 @@ contains
  end subroutine bond_tafit_init
  !!***
 
- !!****f* bond_lotf/bond_atom_init
- !! NAME
- !! bond_atom_init
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* bond_lotf/bond_atom_init
+!! NAME
+!! bond_atom_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine bond_atom_init(nneigx,nneig,neighl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_atom_init'
-!End of the abilint section
 
   implicit none
 
@@ -123,12 +113,12 @@ contains
   integer,intent(in) :: neighl(:,:)
 
   ! nneigx : max number of neighbours
-  ! tau0(3,natom) : atomic positions 
-  ! neighl(nneigx,natom) : list of neighbours 
-  ! nneig(natom) : number of neighbours 
-  ! niter  : iteration number (itime) 
+  ! tau0(3,natom) : atomic positions
+  ! neighl(nneigx,natom) : list of neighbours
+  ! nneig(natom) : number of neighbours
+  ! niter  : iteration number (itime)
 
-  !Local --------------------------- 
+  !Local ---------------------------
   integer :: i,j,iat,jat, ibn
   integer,allocatable :: ibnd_dum(:,:)
   character(len=500) :: msg
@@ -145,8 +135,8 @@ contains
    ibnd_mat = 0
    ibnd_dum = 0
 
-   ibn_tot  = 0    !-- bonds between fitted atoms 
-   ibn_tot2 = 0    !--existing but non optimized bonds with border atoms 
+   ibn_tot  = 0    !-- bonds between fitted atoms
+   ibn_tot2 = 0    !--existing but non optimized bonds with border atoms
    ibn_tots = 0    !--total number of bonds in the fit + border zone
 
    do i =1,nfit
@@ -155,17 +145,17 @@ contains
        jat = neighl(j,iat)
        if(tafit(jat)) then
          if(jat > iat) then !--jat is a fitted atom
-           ibn_tot = ibn_tot + 1       
+           ibn_tot = ibn_tot + 1
            ibnd_mat(:,ibn_tot) = (/iat,jat/)
          end if
-       else    !--jat is a border atom 
-         ibn_tot2 = ibn_tot2 + 1       
+       else    !--jat is a border atom
+         ibn_tot2 = ibn_tot2 + 1
          ibnd_dum(:,ibn_tot2) = (/iat,jat/)
        end if
      end do
    end do
 
-   if(ibn_tot2 > (6*nfitmax)) then 
+   if(ibn_tot2 > (6*nfitmax)) then
      write(msg,'(3a,i8,2a)')&
 &     'ERROR: BOND_ATOM_INIT',ch10,&
 &     'IBN_TOT2 =  ',ibn_tot2,ch10,&
@@ -175,9 +165,9 @@ contains
    end if
 
   !--Reorder to keep 'variational' bonds first :
-   ibn_tots = ibn_tot + ibn_tot2 
+   ibn_tots = ibn_tot + ibn_tot2
    do ibn=ibn_tot+1,ibn_tots
-     ibnd_mat(:,ibn) = ibnd_dum(:,ibn-ibn_tot)   
+     ibnd_mat(:,ibn) = ibnd_dum(:,ibn-ibn_tot)
    end do
 
 
@@ -187,30 +177,22 @@ contains
 
 
 
- !!****f* bond_lotf/bond_matrix_alloc
- !! NAME
- !! bond_matrix_alloc
- !!
- !! FUNCTION
- !!  allocate imat,ibmat,ibmat_large
- !! INPUTS
- !!
- !! CHILDREN
- !!
+!!****f* bond_lotf/bond_matrix_alloc
+!! NAME
+!! bond_matrix_alloc
+!!
+!! FUNCTION
+!!  allocate imat,ibmat,ibmat_large
+!! INPUTS
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine bond_matrix_alloc(nax,nneigx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_matrix_alloc'
-!End of the abilint section
 
   implicit none
 
@@ -226,38 +208,30 @@ contains
  end subroutine bond_matrix_alloc
  !!***
 
- !!****f* bond_lotf/bond_matrix_set
- !! NAME
- !! bond_matrix_set
- !!
- !! FUNCTION
- !!  Set or update bond matrix imat,ibmat,ibmat_large
- !!  associates the bond to the atom neighlists
- !! INPUTS
- !! 
- !! CHILDREN
- !!
+!!****f* bond_lotf/bond_matrix_set
+!! NAME
+!! bond_matrix_set
+!!
+!! FUNCTION
+!!  Set or update bond matrix imat,ibmat,ibmat_large
+!!  associates the bond to the atom neighlists
+!! INPUTS
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine bond_matrix_set(nneig,neighl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_matrix_set'
-!End of the abilint section
 
   implicit none
 
   !Arguments ------------------------
   integer,intent(in) :: nneig(:)
   integer,intent(in) :: neighl(:,:)
-  !Local --------------------------- 
+  !Local ---------------------------
   integer :: ibn,ibn2,iat,jat,ii,jj,j2
 
 ! *************************************************************************
@@ -272,11 +246,11 @@ contains
      do jj = 1,nneig(iat)
        jat = neighl(jj,iat)
        if(jat > iat.AND.tafit(jat)) then
-         ibn  = ibn  + 1       
+         ibn  = ibn  + 1
          ibmat(jj,ii) = ibn
        end if
      end do
-     imat(iat) = ii 
+     imat(iat) = ii
    end do
 
   !--ibmat_large: useful for the glue potential
@@ -297,39 +271,32 @@ contains
  !!***
 
 
- !!****f* bond_lotf/bond_compute
- !! NAME
- !! bond_compute
- !!
- !! FUNCTION
- !!  Updates bond matrix, associates the bond to the atom neighlists
- !!
- !! INPUTS
- !!  nneig
- !!  neighl 
- !! CHILDREN
- !!
+!!****f* bond_lotf/bond_compute
+!! NAME
+!! bond_compute
+!!
+!! FUNCTION
+!!  Updates bond matrix, associates the bond to the atom neighlists
+!!
+!! INPUTS
+!!  nneig
+!!  neighl
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine bond_compute(nneig,neighl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_compute'
-!End of the abilint section
 
   implicit none
 
   !Arguments ------------------------
   integer,intent(in) :: nneig(:)
   integer,intent(in) :: neighl(:,:)
-  !Local --------------------------- 
+  !Local ---------------------------
   integer :: ii,jj,iat,jat
   integer, allocatable, dimension(:,:) :: ibnd_dum
   character(len=500) :: msg
@@ -338,8 +305,8 @@ contains
 
    ABI_ALLOCATE(ibnd_dum,(2,nfitmax*6))
    ibnd_dum(:,:) = 0
-   ibn_tot  = 0    ! bonds between the fitted atoms 
-   ibn_tot2 = 0    ! existing but non optimized bonds with border atoms 
+   ibn_tot  = 0    ! bonds between the fitted atoms
+   ibn_tot2 = 0    ! existing but non optimized bonds with border atoms
    ibn_tots = 0    ! total number of bonds
 
 
@@ -353,18 +320,18 @@ contains
      do jj = 1,nneig(iat)
        jat = neighl(jj,iat)
        if(tafit(jat))then
-         if(jat > iat) then  ! jat is a fitted atom   
-           ibn_tot = ibn_tot + 1       
+         if(jat > iat) then  ! jat is a fitted atom
+           ibn_tot = ibn_tot + 1
            ibnd_mat(:,ibn_tot) = (/ iat, jat /)
          end if
-       else  ! jat is a border atom 
-         ibn_tot2 = ibn_tot2 + 1       
-         ibnd_dum(:,ibn_tot2) = (/ iat, jat /)    
+       else  ! jat is a border atom
+         ibn_tot2 = ibn_tot2 + 1
+         ibnd_dum(:,ibn_tot2) = (/ iat, jat /)
        end if
      end do
    end do
 
-   if(ibn_tot2 > (6*nfitmax)) then 
+   if(ibn_tot2 > (6*nfitmax)) then
      write(msg,'(3a,i8,2a)')&
 &     'ERROR: BOND_ATOM_INIT',ch10,&
 &     'IBN_TOT2 =  ',ibn_tot2,ch10,&
@@ -373,37 +340,31 @@ contains
    end if
 
   !--reorder to keep 'variational' bonds first :
-   ibn_tots = ibn_tot + ibn_tot2 
-   do ii = ibn_tot+1,ibn_tots   
-     ibnd_mat(:,ii) = ibnd_dum(:,ii-ibn_tot)   
+   ibn_tots = ibn_tot + ibn_tot2
+   do ii = ibn_tot+1,ibn_tots
+     ibnd_mat(:,ii) = ibnd_dum(:,ii-ibn_tot)
    end do
 
-   ABI_DEALLOCATE (ibnd_dum) 
+   ABI_DEALLOCATE (ibnd_dum)
  end subroutine bond_compute
  !!***
 
 
- !!****f* bond_lotf/bond_fit_set
- !! NAME
- !! bond_fit_set
- !!
- !! FUNCTION
- !!  set nfitmax (or control it), ifit,nfit 
- !! INPUTS
- !! PARENTS
+!!****f* bond_lotf/bond_fit_set
+!! NAME
+!! bond_fit_set
+!!
+!! FUNCTION
+!!  set nfitmax (or control it), ifit,nfit
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine bond_fit_set(nax,nfitdum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_fit_set'
-!End of the abilint section
 
   implicit none
 
@@ -418,57 +379,49 @@ contains
 
    if(.not. allocated(ifit)) then
      nfitmax = nfitdum + 1000
-     ABI_ALLOCATE(ifit,(nfitmax)) 
-   elseif(nfitdum > nfitmax) then 
+     ABI_ALLOCATE(ifit,(nfitmax))
+   elseif(nfitdum > nfitmax) then
      write(msg,'(a)')' BOND_FIT_SET : PROBLEM OF dimensionS !! '
      MSG_ERROR(msg)
    end if
 
    ifit = 0
-   nfit = 0  
+   nfit = 0
    do i = 1, nax
-     if(tafit(i)) then 
-       nfit = nfit + 1              
-       ifit(nfit) = i 
+     if(tafit(i)) then
+       nfit = nfit + 1
+       ifit(nfit) = i
      end if
    end do
 
  end subroutine bond_fit_set
  !!***
 
- !!****f* bond_lotf/bond_dealloc
- !! NAME
- !! bond_dealloc
- !!
- !! FUNCTION
- !!  deallocate variables
- !!
- !! INPUTS
- !!
- !! CHILDREN
- !!
+!!****f* bond_lotf/bond_dealloc
+!! NAME
+!! bond_dealloc
+!!
+!! FUNCTION
+!!  deallocate variables
+!!
+!! INPUTS
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine  bond_dealloc()
 
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bond_dealloc'
-!End of the abilint section
-
    ABI_DEALLOCATE(ibnd_mat)
    ABI_DEALLOCATE(tafit)
    ABI_DEALLOCATE(ifit)
-   ABI_DEALLOCATE(ibmat) 
-   ABI_DEALLOCATE(ibmat_large) 
-   ABI_DEALLOCATE(imat) 
+   ABI_DEALLOCATE(ibmat)
+   ABI_DEALLOCATE(ibmat_large)
+   ABI_DEALLOCATE(imat)
  end subroutine bond_dealloc
 
 end module bond_lotf

@@ -27,7 +27,7 @@
 module m_pred_diisrelax
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
  use m_linalg_interfaces
@@ -87,13 +87,6 @@ contains
 !! SOURCE
 
 subroutine pred_diisrelax(ab_mover,hist,itime,ntime,zDEBUG,iexit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_diisrelax'
-!End of the abilint section
 
 implicit none
 

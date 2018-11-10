@@ -28,7 +28,7 @@ module m_pred_velverlet
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_abimover
  use m_abihist
 
@@ -90,13 +90,6 @@ contains
 !! SOURCE
 
 subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,hmcflag,icycle,ncycle)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_velverlet'
-!End of the abilint section
 
  implicit none
 

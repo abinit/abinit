@@ -171,13 +171,13 @@ MODULE m_paw_ij
   real(dp), allocatable :: dijexxc(:,:)
    ! dijexxc(cplex_dij*lmn2_size,ndij)
    ! On-site matrix elements of the Fock operator (Local Exact exchange implementation)
-   ! Same storage as Dij (see above); not available for RF (qphase=1)
+   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
 
   real(dp), allocatable :: dijfock(:,:)
    ! dijfock(cplex_dij*lmn2_size,ndij)
    ! Dij_fock term
    ! Contains all contributions to Dij from Fock exchange
-   ! Same storage as Dij (see above); not available for RF (qphase=1)
+   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
 
   real(dp), allocatable :: dijfr(:,:)
    ! dijhat(cplex_dij*qphase*lmn2_size,ndij)
@@ -199,19 +199,19 @@ MODULE m_paw_ij
 
   real(dp), allocatable :: dijnd(:,:)
    ! dijnd(cplex_dij*lmn2_size,ndij)
-   ! On-site matrix elements of -\frac{1}{c}\mu\cdot L/r^3 
-   ! Same storage as Dij (see above); not available for RF (qphase=1)
+   ! On-site matrix elements of -\frac{1}{c}\mu\cdot L/r^3
+   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
 
   real(dp), allocatable :: dijso(:,:)
    ! dijso(cplex_dij*qphase*lmn2_size,ndij)
    ! On-site matrix elements of L.S i.e <phi_i|L.S|phi_j>
    ! Same storage as Dij (see above)
-   ! Same storage as Dij (see above); not available for RF (qphase=1)
+   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
 
   real(dp), allocatable :: dijU(:,:)
    ! dijU(cplex_dij*qphase*lmn2_size,ndij)
    ! On-site matrix elements of the U part of the PAW Hamiltonian.
-   ! Same storage as Dij (see above); not available for RF (qphase=1)
+   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
 
   real(dp), allocatable :: dijxc(:,:)
    ! dijxc(cplex_dij*qphase*lmn2_size,ndij)
@@ -222,13 +222,13 @@ MODULE m_paw_ij
   real(dp), allocatable :: dijxc_hat(:,:)
    ! dijxc_hat(cplex_dij*lmn2_size,ndij)
    ! Dij_hat term i.e \sum_LM \int_FFT Q_{ij}^{LM} Vxc
-   ! Same storage as Dij (see above); not available for RF (qphase=1)
+   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
 
   real(dp), allocatable :: dijxc_val(:,:)
    ! dijxc_val(cplex_dij*lmn2_size,ndij)
    ! Onsite matrix elements of valence-only vxc i.e
    ! <phi_i|vxc[n1]|phi_j> - <tphi_i|vxc(tn1+nhat]|tphi_j>
-   ! Same storage as Dij (see above); not available for RF (qphase=1)
+   ! Same storage as Dij (see above); not available for RF (i.e. qphase=2)
 
   real(dp), allocatable :: noccmmp(:,:,:,:)
    ! noccmmp(cplex_dij,2*lpawu+1,2*lpawu+1,nocc_nspden)
@@ -331,13 +331,6 @@ subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat
 &                      has_dijxc,has_dijxc_hat,has_dijxc_val,has_dijnd,has_dijso,has_dijU,has_dijexxc,&  ! Optional
 &                      has_exexch_pot,has_pawu_occ,nucdipmom,& ! Optional
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_init'
-!End of the abilint section
 
  implicit none
 
@@ -582,13 +575,6 @@ end subroutine paw_ij_init
 
 subroutine paw_ij_free(Paw_ij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -699,13 +685,6 @@ end subroutine paw_ij_free
 
 subroutine paw_ij_nullify(Paw_ij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -719,7 +698,7 @@ subroutine paw_ij_nullify(Paw_ij)
 
  !@Paw_ij_type
 
- ! MGPAW: This one could be removed/renamed, 
+ ! MGPAW: This one could be removed/renamed,
  ! variables can be initialized in the datatype declaration
  ! Do we need to expose this in the public API?
 
@@ -779,13 +758,6 @@ end subroutine paw_ij_nullify
 
 subroutine paw_ij_copy(paw_ij_in,paw_ij_cpy, &
 &                      mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1022,14 +994,6 @@ end subroutine paw_ij_copy
 
 subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert, &
 &                       mpi_atmtab,comm_atom,natom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1334,13 +1298,6 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 !Real and imaginary parts of phase.
    subroutine get_dij_parts(my_cplex_dij,my_qphase,my_dij,always_img)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dij_parts'
-!End of the abilint section
-
      integer,intent(in) :: my_cplex_dij,my_qphase
      logical,intent(in),optional :: always_img
      real(dp),intent(in),target :: my_dij(:,:)
@@ -1408,13 +1365,6 @@ end subroutine paw_ij_print
 !! SOURCE
 
 subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_gather'
-!End of the abilint section
 
  implicit none
 
@@ -1496,7 +1446,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
          if (paw_ij_in(iat)%has_dij0==2) then
            paw_ij_gathered(iat)%dij0=paw_ij_in(iat)%dij0
          end if
-       end if   
+       end if
        if (paw_ij_gathered(iat)%has_dijexxc >=1) then
          LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijexxc,(cplxdij_lmn2_size,ndij))
          if (paw_ij_in(iat)%has_dijexxc==2) then
@@ -1504,11 +1454,11 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
          end if
        end if
        if (paw_ij_gathered(iat)%has_dijfock >=1) then
-         LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(cplxdij_lmn2_size,ndij)) 
+         LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(cplxdij_lmn2_size,ndij))
          if (paw_ij_in(iat)%has_dijfock==2) then
            paw_ij_gathered(iat)%dijfock(:,:)=paw_ij_in(iat)%dijfock(:,:)
          end if
-       end if   
+       end if
        if (paw_ij_gathered(iat)%has_dijfr >=1) then
          LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfr,(cplxdijq_lmn2_size,ndij))
          if (paw_ij_in(iat)%has_dijfr==2) then
@@ -1856,13 +1806,13 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
      paw_ij_gathered(iat)%ndij=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dij=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dij0=buf_int_all(indx_int) ;indx_int=indx_int+1
-     paw_ij_gathered(iat)%has_dijexxc=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijfock=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijfr=buf_int_all(indx_int) ;indx_int=indx_int+1 
-     paw_ij_gathered(iat)%has_dijhartree=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijhat=buf_int_all(indx_int) ;indx_int=indx_int+1  
-     paw_ij_gathered(iat)%has_dijnd=buf_int_all(indx_int) ;indx_int=indx_int+1    
-     paw_ij_gathered(iat)%has_dijso=buf_int_all(indx_int) ;indx_int=indx_int+1    
+     paw_ij_gathered(iat)%has_dijexxc=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijfock=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijfr=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijhartree=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijhat=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijnd=buf_int_all(indx_int) ;indx_int=indx_int+1
+     paw_ij_gathered(iat)%has_dijso=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dijU=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dijxc=buf_int_all(indx_int) ;indx_int=indx_int+1
      paw_ij_gathered(iat)%has_dijxc_hat=buf_int_all(indx_int) ;indx_int=indx_int+1
@@ -1911,7 +1861,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
      end if
      if (paw_ij_gathered(iat)%has_dijfock >=1) then
        ii=cplxdij_lmn2_size
-       LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(ii,ndij)) 
+       LIBPAW_ALLOCATE(paw_ij_gathered(iat)%dijfock,(ii,ndij))
        if (paw_ij_gathered(iat)%has_dijfock==2) then
          paw_ij_gathered(iat)%dijfock(:,:)= &
 &          reshape(buf_dp_all(indx_dp:indx_dp+ii*ndij-1),(/ii,ndij/))
@@ -2046,8 +1996,6 @@ end subroutine paw_ij_gather
 !! paw_ij_redistribute
 !!
 !! FUNCTION
-!!
-!! FUNCTION
 !!   Redistribute an array of paw_ij datastructures
 !!   Input paw_ij is given on a MPI communicator
 !!   Output paw_ij is redistributed on another MPI communicator
@@ -2087,13 +2035,6 @@ end subroutine paw_ij_gather
 subroutine paw_ij_redistribute(paw_ij,mpi_comm_in,mpi_comm_out,&
 &                 natom,mpi_atmtab_in,mpi_atmtab_out,paw_ij_out,&
 &                 SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_redistribute'
-!End of the abilint section
 
  implicit none
 
@@ -2257,7 +2198,7 @@ subroutine paw_ij_redistribute(paw_ij,mpi_comm_in,mpi_comm_out,&
 !  A send buffer in an asynchrone communication couldn't be deallocate before it has been receive
    nbsent=0 ; ireq=0 ; iisend=0 ; nbsendreq=0 ; nb_msg=0
    do iisend=1,nbsend
-     iproc_rcv=SendAtomProc(iisend) 
+     iproc_rcv=SendAtomProc(iisend)
      next=-1
      if (iisend < nbsend) next=SendAtomProc(iisend+1)
      if (iproc_rcv /= me_exch) then
@@ -2425,13 +2366,6 @@ end subroutine paw_ij_redistribute
 
 subroutine paw_ij_reset_flags(Paw_ij,all,dijhartree,self_consistent)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_reset_flags'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2528,13 +2462,6 @@ end subroutine paw_ij_reset_flags
 !! SOURCE
 
 subroutine paw_ij_isendreceive_getbuffer(paw_ij,npaw_ij_send,atm_indx_recv,buf_int,buf_dp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_isendreceive_getbuffer'
-!End of the abilint section
 
 implicit none
 
@@ -2784,13 +2711,6 @@ end subroutine paw_ij_isendreceive_getbuffer
 
 subroutine paw_ij_isendreceive_fillbuffer(paw_ij,atmtab_send,atm_indx_send,npaw_ij_send,&
 &                                         buf_int,buf_int_size,buf_dp,buf_dp_size)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_ij_isendreceive_fillbuffer'
-!End of the abilint section
 
 implicit none
 

@@ -28,7 +28,7 @@ module m_pimd_nosehoover
 
  use defs_basis
  use m_pimd
- use m_profiling_abi
+ use m_abicore
 
  use m_geometry,  only : xcart2xred, xred2xcart
 
@@ -98,13 +98,6 @@ contains
 subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &          rprimd,rprimd_next,rprimd_prev,stressin,trotter,vel,vel_cell,&
 &          volume,xred,xred_next,xred_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_nosehoover_npt'
-!End of the abilint section
 
  implicit none
 
@@ -294,14 +287,6 @@ end subroutine pimd_nosehoover_npt
 
 subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,&
 &                              rprimd,stressin,trotter,vel,volume,xred,xred_next,xred_prev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pimd_nosehoover_nvt'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

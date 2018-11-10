@@ -29,7 +29,7 @@ MODULE m_memeval
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
 
@@ -85,13 +85,6 @@ contains
 !! SOURCE
 
 subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memory_eval'
-!End of the abilint section
 
  implicit none
 
@@ -297,7 +290,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
        ! Don't perform memory tests if MBPT.
        mem_test = dtsets(idtset)%mem_test
-       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE])) mem_test = 0
+       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE, RUNL_EPH])) mem_test = 0
 
        call memory(n1xccc,extrapwf,getcell,idtset,dtsets(idtset)%icoulomb,&
 &       intxc,dtsets(idtset)%ionmov,iout,densfor_pred,&
@@ -452,7 +445,7 @@ end subroutine memory_eval
 !! arrays allocated in move.f, brdmin.f, gstate.f (xf array) or pspini.f
 !! In the case 3<=occopt<=8 this amount is increased by 760 Kbytes
 !! to take into account the arrays smdfun, occfun, entfun, workfun and xgrid,
-!! declared in getnel
+!! declared in getnel.
 !!
 !! The current version takes into account
 !! 1) and 2) the "main chain" in its two slightly different versions :
@@ -477,16 +470,14 @@ end subroutine memory_eval
 !! driver - gstate - (move or brdmin) - scfcv - vtorho - tddft
 !!
 !! It is valid for all values of iscf, but not for nstep=0 (when the chain
-!!     goes through energy instead of vtorho).
+!! goes through energy instead of vtorho).
 !!
 !! Also, it is assumed that the potentials are non-local, even if there
-!!     are local ! It would be necessary to update this routine
-!!     now that the beginning of psp files is read before
-!!     the present call (XG 980502)
+!! are local ! It would be necessary to update this routine
+!! now that the beginning of psp files is read before the present call (XG 980502)
 !!
-!! One might also estimate if there must be a chain arriving at :
-!!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro,
-!!  clnup1.
+!! One might also estimate if there must be a chain arriving at:
+!!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro, clnup1.
 !! This is because there are allocated arrays in these routines.
 !!
 !! PARENTS
@@ -504,14 +495,6 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
 & prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memory'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -582,7 +565,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
 
- call wrtout(std_out,'memory : analysis of memory needs ','COLL')
+ call wrtout(std_out,'memory: analysis of memory needs ','COLL')
 
  if(jdtset>=100)then
    write(message,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
@@ -994,7 +977,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !(6e) is for the arrays in dielmt, for the dielmt chain, see (11)
 !(6f) is for the arrays in pawmkrhoij
 
-!eknlk, enlnk, grnlnk
+!eknlk, enlxnk, grnlnk
  cadd(51)=(11+3*natom)*mband*nkpt*nsppol &
 & ; dttyp(51)=8
 !kg_k
@@ -1008,7 +991,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !  cg_disk
    cmpw(54)=2*nspinor*mband      ; dttyp(54)=8
  end if
-!eig_k, ek_k, enl_k, grnl_k, occ_k, resid_k
+!eig_k, ek_k, enlx_k, grnl_k, occ_k, resid_k
  cadd(56)=(14+3*natom)*mband   ; dttyp(56)=8
 !ylm_k
  cmpw(57)=mpsang*mpsang*useylm ; dttyp(57)=8
@@ -1087,7 +1070,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !evec
  cadd(71)=2*mband*mband        ; dttyp(71)=8
-!subham, subvnl(if not PAW)
+!subham, subvnlx(if not PAW or if usefock_ACE)
  cadd(72)=(1+usepaw)*mband*(mband+1)    ; dttyp(72)=8
 !gkpsq
  cmpw(73)=1                    ; dttyp(73)=8
@@ -1114,9 +1097,9 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !(8)                     in cgwf------------------------------------------
 
-!conjgr, cwavef, direc, gh_direc, gvnl_direc
+!conjgr, cwavef, direc, gh_direc, gvnlx_direc
  cmpw(81)=2*5*nspinor          ; dttyp(81)=8
-!ghc,gvnlc
+!ghc,gvnlxc
  cmpw(82)=2*2*nspinor          ; dttyp(82)=8
 !PAW: scwavef,direc_tmp,ghc_all
  cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
@@ -1397,14 +1380,6 @@ end subroutine memory
 subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 & marrays,mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm,mffmem,&
 & mpw,natom,nchain,nfft,nfftf,occopt,option,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memana'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1981,14 +1956,6 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & nkpt,nloalg,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optddk,optphon,option,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memorf'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2204,7 +2171,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  cmpw(51)=2                    ; dttyp(51)=8
 !ffnlk,ffnl1,ffnlkq
  cmpw(52)=2*(ntypat+2)*lmnmax  ; dttyp(52)=8
-!ghc,gvnlc,gvnl1
+!ghc,gvnlxc,gvnlx1
  cmpw(53)=6*nspinor            ; dttyp(53)=8
 !ph3d
  matblk=NLO_MINCAT
@@ -2218,7 +2185,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
 !(6)                     in dfpt_cgwf ----------------------------------------
 
-!gh1, gh_direc, gvnl_direc, conjgr, direc, vresid, cwaveq
+!gh1, gh_direc, gvnlx_direc, conjgr, direc, vresid, cwaveq
  cmpw(61)=14*nspinor            ; dttyp(61)=8
 
 !(9a)                    in getghc and fourwf----------------------------
@@ -2353,14 +2320,6 @@ end subroutine memorf
 
 subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
 & ntypat,ntypalch,pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getdim_nloc'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2509,13 +2468,6 @@ end subroutine getdim_nloc
 
 subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setmqgrid'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2630,20 +2582,12 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 
  use defs_wvltypes
  use m_abi2big, only : wvl_setBoxGeometry
+ use m_wvl_descr_psp,    only : wvl_descr_free, wvl_descr_atoms_set
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
       & atomic_info, memory_estimation
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_memory'
- use interfaces_14_hidewrite
- use interfaces_43_wvl_wrappers
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------

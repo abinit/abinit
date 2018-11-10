@@ -3,7 +3,7 @@
 !!  m_precpred_1geo
 !!
 !! FUNCTION
-!! Single geometry : apply force and stress preconditioner followed by geometry predictor. 
+!! Single geometry: apply force and stress preconditioner followed by geometry predictor.
 !! Choose among the whole set of geometry predictors defined by iomov.
 !!
 !! COPYRIGHT
@@ -43,8 +43,7 @@ module m_precpred_1geo
 
  use m_fstrings,           only : strcat
  use m_geometry,           only : chkdilatmx
- use m_crystal,            only : crystal_init, crystal_free, crystal_t
- use m_crystal_io,         only : crystal_ncwrite_path
+ use m_crystal,            only : crystal_init, crystal_t
  use m_pred_bfgs,          only : pred_bfgs, pred_lbfgs
  use m_pred_delocint,      only : pred_delocint
  use m_pred_fire,          only : pred_fire
@@ -108,9 +107,9 @@ contains
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
 !!
 !! NOTES
-!! This subroutine uses the arguments natom, xred, 
+!! This subroutine uses the arguments natom, xred,
 !! vis, and dtion (the last two contained in dtset) to make
-!! molecular dynamics updates.  
+!! molecular dynamics updates.
 !!
 !! PARENTS
 !!
@@ -120,13 +119,6 @@ contains
 
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
 & icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd_orig,skipcycle,usewvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'precpred_1geo'
-!End of the abilint section
 
 implicit none
 
@@ -168,8 +160,8 @@ real(dp), allocatable :: xred(:,:)
 !Precondition forces, stress and energy
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
- if (ab_mover%goprecon>0)then
-   call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
+ if (ab_mover%goprecon>0 .or. iexit==1)then
+   call prec_simple(ab_mover,preconforstr,hist,icycle,itime,iexit)
  end if
 
 !Call to each predictor
@@ -259,9 +251,9 @@ real(dp), allocatable :: xred(:,:)
 #ifdef HAVE_NETCDF
          ! Write netcdf file
          filename = strcat(filnam_ds4, "_DILATMX_STRUCT.nc")
-         NCF_CHECK(crystal_ncwrite_path(crystal, filename))
+         NCF_CHECK(crystal%ncwrite_path(filename))
 #endif
-         call crystal_free(crystal)
+         call crystal%free()
        end if
        call xmpi_barrier(comm_cell)
        write (dilatmx_errmsg, '(a,i0,3a)') &
@@ -276,11 +268,6 @@ real(dp), allocatable :: xred(:,:)
 
  call abiforstr_fin(preconforstr)
  ABI_FREE(xred)
-
-!DEBUG
-!write(std_out,*)' m_precpred_1geo : exit '
-!call flush(std_out)
-!ENDDEBUG
 
 end subroutine precpred_1geo
 !!***

@@ -32,7 +32,7 @@
 MODULE m_xc_noncoll
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  implicit none
@@ -98,13 +98,6 @@ CONTAINS
 
 subroutine rotate_mag(rho_in,rho_out,mag,vectsize,cplex,&
 &                     mag_norm_in,mag_norm_out,rho_out_format) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_mag'
-!End of the abilint section
 
  implicit none
 
@@ -246,13 +239,6 @@ end subroutine rotate_mag
 subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
 &                          mag_norm_in) ! optional argument
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_back_mag'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -344,13 +330,6 @@ end subroutine rotate_back_mag
 
 subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex,&
 &                               mag_norm_in,rot_method) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_back_mag_dfpt'
-!End of the abilint section
 
  implicit none
 
@@ -907,13 +886,6 @@ end subroutine rotate_back_mag_dfpt
 subroutine test_rotations(option,cplex)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_rotations'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

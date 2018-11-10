@@ -60,14 +60,7 @@ contains
 subroutine contistr03(istr,rank,gm,gprimd,eisnl,aa,bb)
 
  use defs_basis
- use m_profiling_abi
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'contistr03'
-!End of the abilint section
-
+ use m_abicore
  implicit none
 
 !Arguments ------------------------------------

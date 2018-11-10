@@ -26,6 +26,8 @@
 
 module m_newvtr
 
+ use m_fft,     only : fourdp
+
  implicit none
 
  private
@@ -191,7 +193,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abi2big
  use m_ab7_mixing
@@ -203,14 +205,6 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  use m_pawrhoij, only : pawrhoij_type,pawrhoij_filter
  use m_prcref,   only : prcref_PMA
  use m_wvl_rho,  only : wvl_prcref
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newvtr'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -341,7 +335,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !potential that are associated with NO density change.
 !In general, only the global mean of the potential has
 !such an anomalous feature. However, in the spin
-!polarized cas with fixed occupancies, also the
+!polarized case with fixed occupancies, also the
 !mean of each spin-potential (independently of the other)
 !has such a behaviour. The trick is to remove these
 !variables before going in the predictive routines,
@@ -372,16 +366,16 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    vtrial0=vtrial;vresid0=vresid
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
-     call fourdp(1,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+     call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+     call fourdp(1,vresid0(:,ispden),vresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
  else
    ABI_ALLOCATE(vtrialg,(2,nfft,dtset%nspden))
    ABI_ALLOCATE(vreswk,(2,nfft))
    do ispden=1,dtset%nspden
      fact=dielar(4);if (ispden>1) fact=dielar(7)
-     call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
-     call fourdp(1,vreswk,vresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+     call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
+     call fourdp(1,vreswk,vresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
      do ifft=1,nfft
        if (ffttomix(ifft)>0) then
          jfft=2*ffttomix(ifft)
@@ -582,7 +576,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    vtrial=vtrial0
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+     call fourdp(1,vtrial0(:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
  else
    do ispden=1,dtset%nspden
@@ -591,7 +585,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
        vtrialg(1,jfft,ispden)=vtrial0(2*ifft-1,ispden)
        vtrialg(2,jfft,ispden)=vtrial0(2*ifft  ,ispden)
      end do
-     call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp)
+     call fourdp(1,vtrialg(:,:,ispden),vtrial(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp)
    end do
    ABI_DEALLOCATE(vtrialg)
  end if

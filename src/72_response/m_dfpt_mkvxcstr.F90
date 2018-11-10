@@ -29,7 +29,7 @@ module m_dfpt_mkvxcstr
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,      only : timab
  use m_symtk,     only : matr3inv
@@ -96,13 +96,6 @@ contains
 
 subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,&
 & nkxc,nspden,n3xccc,option,paral_kgb,qphon,rhor,rhor1,rprimd,usepaw,usexcnhat,vxc1,xccc3d1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxcstr'
-!End of the abilint section
 
  implicit none
 
@@ -345,13 +338,6 @@ end subroutine dfpt_mkvxcstr
 
 subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
 & nkxc,nspden,paral_kgb,qphon,rhor1tmp,str_scale,vxc1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkvxcstrgga'
-!End of the abilint section
 
  implicit none
 

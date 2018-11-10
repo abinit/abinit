@@ -30,7 +30,7 @@ module m_rwwf
  use defs_abitypes
  use m_errors
  use m_wffile
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 #if defined HAVE_MPI2
  use mpi
@@ -139,13 +139,6 @@ contains
 subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &               nband,nband_disk,npw,nspinor,occ,option,optkg,tim_rwwf,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rwwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -235,13 +228,6 @@ end subroutine rwwf
 !! SOURCE
 
 subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WffReadSkipK'
-!End of the abilint section
 
  implicit none
 
@@ -334,13 +320,6 @@ end subroutine WffReadSkipK
 
 subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                 nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'readwf'
-!End of the abilint section
 
  implicit none
 
@@ -826,13 +805,6 @@ end subroutine readwf
 
 subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 &                  nband,nband_disk,npw,nspinor,occ,option,optkg,wff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'writewf'
-!End of the abilint section
 
  implicit none
 

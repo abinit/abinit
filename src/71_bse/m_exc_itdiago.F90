@@ -31,7 +31,7 @@ MODULE m_exc_itdiago
  use defs_abitypes
  use m_bs_defs
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_linalg_interfaces
  use m_xmpi
 #if defined HAVE_MPI2
@@ -114,14 +114,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_iterative_diago'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -669,14 +661,6 @@ CONTAINS  !===========================================================
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_init_phi_block'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -838,14 +822,6 @@ end subroutine exc_init_phi_block
 !! SOURCE
 
 subroutine exc_write_phi_block(oeig_fname,use_mpio)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_phi_block'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1010,13 +986,6 @@ end subroutine exc_write_phi_block
 
 subroutine exc_subspace_rotation()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_subspace_rotation'
-!End of the abilint section
-
  implicit none
 
 !Local variables ------------------------------
@@ -1122,13 +1091,6 @@ end subroutine exc_subspace_rotation
 
 subroutine exc_cholesky_ortho()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_cholesky_ortho'
-!End of the abilint section
-
  implicit none
 
 !Local variables ------------------------------
@@ -1229,13 +1191,6 @@ end subroutine exc_cholesky_ortho
 
 function convergence_degree(resid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'convergence_degree'
-!End of the abilint section
-
  implicit none
 
 !Arguments
@@ -1276,13 +1231,6 @@ end function convergence_degree
 !! SOURCE
 
 subroutine exc_check_phi_block(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_check_phi_block'
-!End of the abilint section
 
  implicit none
 

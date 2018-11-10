@@ -30,7 +30,7 @@
 module m_lbfgs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
 type,public :: lbfgs_internal
  integer              :: lbfgs_status
@@ -90,13 +90,6 @@ contains
 
 subroutine lbfgs_init(ndim,history_record,diag_guess)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_init'
-!End of the abilint section
-
 implicit none
 
 integer,intent(in)   :: ndim
@@ -147,13 +140,6 @@ end subroutine lbfgs_init
 
 subroutine lbfgs_destroy()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_destroy'
-!End of the abilint section
-
 implicit none
 
  if(allocated (lbfgs_plan%work)) then
@@ -191,13 +177,6 @@ end subroutine lbfgs_destroy
 !! SOURCE
 
 function lbfgs_execute(x,f,gradf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_execute'
-!End of the abilint section
 
 implicit none
 real(dp),intent(inout) :: x(lbfgs_plan%ndim)
@@ -252,13 +231,6 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
                  LINE_STY,LINE_FY,LINE_DGY,   &
                  LINE_STMIN,LINE_STMAX,       &
                  LINE_BRACKT,LINE_STAGE1,LINE_INFOC)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs'
-!End of the abilint section
 
  implicit none
 
@@ -427,13 +399,6 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
                   GTOL,STPMIN,STPMAX,DGINIT,FINIT, &
                   STX,FX,DGX,STY,FY,DGY,STMIN,STMAX, &
                   BRACKT,STAGE1,INFOC)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mcsrch'
-!End of the abilint section
 
  implicit none
 
@@ -652,13 +617,6 @@ end subroutine mcsrch
 !! SOURCE
 
 subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mcstep'
-!End of the abilint section
 
  implicit none
 

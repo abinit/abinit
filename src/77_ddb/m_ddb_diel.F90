@@ -28,7 +28,7 @@ module m_ddb_diel
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_ddb
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -107,14 +107,6 @@ contains
 
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
 & iout,lst,mpert,natom,nph2l,phfrq,comm,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddb_diel'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -565,13 +557,6 @@ end subroutine ddb_diel
 !! SOURCE
 
 subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alignph'
-!End of the abilint section
 
  implicit none
 

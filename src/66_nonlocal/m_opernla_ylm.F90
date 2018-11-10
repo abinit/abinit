@@ -27,7 +27,7 @@ module m_opernla_ylm
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 #if defined HAVE_OPENMP
@@ -146,13 +146,6 @@ contains
 subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gx,&
 &       ia3,idir,indlmn,istwf_k,kpg,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg,nlmn,&
 &       nloalg,npw,nspinor,ph3d,signs,ucvol,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernla_ylm'
-!End of the abilint section
 
  implicit none
 

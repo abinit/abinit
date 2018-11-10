@@ -31,7 +31,7 @@ module m_iogkk
  use defs_abitypes
  use defs_elphon
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_kptrank
  use m_hdr
@@ -97,14 +97,6 @@ contains
 !! SOURCE
 
 subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_prt_yambo,unitgkk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_gkk'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -738,14 +730,6 @@ end subroutine read_gkk
 
 subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phasecg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outgkk'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -862,13 +846,6 @@ end subroutine outgkk
 
 subroutine prt_gkk_yambo(displ_cart,displ_red,kpt_phon,h1_mat_el,iqpt,&
 &       natom,nFSband,nkpt_phon,phfrq,qptn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_gkk_yambo'
-!End of the abilint section
 
  implicit none
 
@@ -1063,13 +1040,6 @@ end subroutine prt_gkk_yambo
 
 subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_el_veloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -1223,14 +1193,6 @@ end subroutine read_el_veloc
 
 subroutine inpgkk(eigen1,filegkk,hdr1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inpgkk'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1352,13 +1314,6 @@ end subroutine inpgkk
 subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1_mat_el_sq,&
 &   qpt,symq,qtimrev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'completeperts'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1431,8 +1386,7 @@ subroutine completeperts(Cryst,nbranch,nFSband,nkpt,nsppol,gkk_flag,h1_mat_el,h1
 
        ! matrix is symmetrized like a dynamical matrix. No change of band or k
        !  in here. This should be checked (if we have to restrict further the symmetry operations)
-       call d2sym3(tmpflg,tmpval,Cryst%indsym,mpert,natom,Cryst%nsym,qpt,symq,Cryst%symrec,Cryst%symrel,qtimrev)
-
+       call d2sym3(tmpflg,tmpval,Cryst%indsym,mpert,natom,Cryst%nsym,qpt,symq,Cryst%symrec,Cryst%symrel,qtimrev,1)
        if (sum(tmpflg(:,1:natom,:,1:natom)) /= 3*natom*3*natom) then
          write(msg,'(3a,4i0)')&
 &         'A perturbation is missing after completion with d2sym3',ch10,&
@@ -1510,14 +1464,6 @@ end subroutine completeperts
 
 subroutine normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &    h1_mat_el_sq,iqptirred,phfrq_tmp,qpt_irred,qdata)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normsq_gkq'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1730,13 +1676,6 @@ end subroutine normsq_gkq
 subroutine nmsq_gam (accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &  h1_mat_el_sq,iqptirred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_gam'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1889,13 +1828,6 @@ end subroutine nmsq_gam
 
 subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_gam_sumFS'
-!End of the abilint section
 
  implicit none
 
@@ -2058,13 +1990,6 @@ end subroutine nmsq_gam_sumFS
 subroutine nmsq_pure_gkk(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,&
 &   h1_mat_el_sq,iqptirred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_pure_gkk'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2196,13 +2121,6 @@ end subroutine nmsq_pure_gkk
 !! SOURCE
 
 subroutine nmsq_pure_gkk_sumfs(accum_mat,accum_mat2,displ_red,elph_ds,FSfullpqtofull,h1_mat_el_sq,iqptirred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nmsq_pure_gkk_sumfs'
-!End of the abilint section
 
  implicit none
 

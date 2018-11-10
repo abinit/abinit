@@ -28,7 +28,7 @@
 module m_spacepar
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_sort
@@ -38,7 +38,7 @@ module m_spacepar
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
  use m_geometry,        only : metric, symredcart
  use m_mpinfo,          only : ptabs_fourdp
- use m_fft,             only : zerosym
+ use m_fft,             only : zerosym, fourdp
 
  implicit none
 
@@ -105,14 +105,6 @@ contains
 
 subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
 &  divgq0,qpt) ! Optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hartre'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -302,7 +294,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,
  end if
 
  ! Fourier Transform Vhartree. Vh in reciprocal space was stored in work1
- call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(cplex,work1,vhartr,1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(work1)
 
@@ -343,13 +335,6 @@ end subroutine hartre
 !! SOURCE
 
 subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'meanvalue_g'
-!End of the abilint section
 
  implicit none
 
@@ -406,16 +391,18 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end do
      end if
-     if(use_ndo==1 .and. nspinor==2)then
+     if(use_ndo==1)then
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
        end do
+       if(nspinor == 2) then
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
-       do ipw=1+npw,2*npw
-         jpw=ipw-npw
-         ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-       end do
+         do ipw=1+npw,2*npw
+           jpw=ipw-npw
+           ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
+         end do
+       end if
      end if
 
 !    !$OMP PARALLEL DO REDUCTION(+:ar,ar_im)
@@ -447,20 +434,25 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
          end if
        end do
      end if
-     if(use_ndo==1 .and. nspinor==2)then
+     if(use_ndo==1)then
+       if(.not.present(ar_im)) then
+         MSG_BUG("use_ndo true and ar_im not present")
+       end if
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
          if(diag(ipw)<huge(0.0d0)*1.d-11)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
+       if(nspinor == 2) then
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
-       do ipw=1+npw,2*npw
-         jpw=ipw-npw
-         if(diag(jpw)<huge(0.0d0)*1.d-11)then
-           ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
-         end if
-       end do
+         do ipw=1+npw,2*npw
+           jpw=ipw-npw
+           if(diag(jpw)<huge(0.0d0)*1.d-11)then
+             ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
+           end if
+         end do
+       end if
      end if
 
 
@@ -566,14 +558,6 @@ end subroutine meanvalue_g
 subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 &  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'laplacian'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -627,7 +611,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
    end if
    if(present(rdfuncr)) then
      do ifunc=1,nfunc
-       call fourdp(1,rdfuncg(:,:,ifunc),rdfuncr(:,ifunc),-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(1,rdfuncg(:,:,ifunc),rdfuncr(:,ifunc),-1,mpi_enreg,nfft,1,ngfft,0)
      end do
    end if
  else
@@ -702,7 +686,7 @@ subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 !get the result back into real space
  if(present(laplacerdfuncr)) then
    do ifunc=1,nfunc
-     call fourdp(1,laplacerdfuncg(:,:,ifunc),laplacerdfuncr(:,ifunc),1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,laplacerdfuncg(:,:,ifunc),laplacerdfuncr(:,ifunc),1,mpi_enreg,nfft,1,ngfft,0)
    end do
  end if
 
@@ -753,14 +737,6 @@ end subroutine laplacian
 
 subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'redgr'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -805,7 +781,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Obtain rho(G) in wkcmpx from input rho(r)
  work(:)=frin(:)
 
- call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(cplex_tmp,wkcmpx,work,-1,mpi_enreg,nfft,1,ngfft,0)
 
 !Gradient calculation for three reduced components in turn.
 !Code duplicated to remove logic from loops.
@@ -851,7 +827,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
      end do
    end if !idir
 
-   call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex_tmp,workgr,work,1,mpi_enreg,nfft,1,ngfft,0)
 
 !$OMP PARALLEL DO
    do ifft=1,nfft
@@ -913,14 +889,6 @@ end subroutine redgr
 
 subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 &  paral_kgb,rhog,rprimd,vhartr1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hartrestr'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -1060,7 +1028,7 @@ subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 
 !Fourier Transform Vhartree.
 !Vh in reciprocal space was stored in work1
- call fourdp(1,work1,vhartr1,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,work1,vhartr1,1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(work1)
 
@@ -1119,14 +1087,6 @@ end subroutine hartrestr
 
 subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,paral_kgb,&
 &                 phnons,rhog,rhor,rprimd,symafm,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrhg'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -1208,7 +1168,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !  If not using symmetry, still want total density in G space rho(G).
 !  Fourier transform (incl normalization) to get rho(G)
    work(:)=rhor(:,1)
-   call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,1,ngfft,0)
  else
 
 !  Treat either full density, spin-up density or magnetization
@@ -1240,17 +1200,17 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !    rhor -fft-> rhog    (rhog is used as work space)
 !    Note : it should be possible to reuse rhog in the antiferromagnetic case this would avoid one FFT
      work(:)=rhor(:,ispden)
-     call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,work,-1,mpi_enreg,nfft,1,ngfft,0)
      if (nspden==4) then
        ABI_ALLOCATE(magngx,(2,nfft))
        ABI_ALLOCATE(magngy,(2,nfft))
        ABI_ALLOCATE(magngz,(2,nfft))
        work(:)=rhor(:,2)
-       call fourdp(cplex,magngx,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngx,work,-1,mpi_enreg,nfft,1,ngfft,0)
        work(:)=rhor(:,3)
-       call fourdp(cplex,magngy,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngy,work,-1,mpi_enreg,nfft,1,ngfft,0)
        work(:)=rhor(:,4)
-       call fourdp(cplex,magngz,work,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngz,work,-1,mpi_enreg,nfft,1,ngfft,0)
      end if
 
 !    Begins the timing here only , to exclude FFTs
@@ -1479,14 +1439,14 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
      call timab(17,2,tsec)
 
 !    Pull out full or spin up density, now symmetrized
-     call fourdp(cplex,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(cplex,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
      if (nspden==4) then
-       call fourdp(cplex,magngx,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngx,work,1,mpi_enreg,nfft,1,ngfft,0)
        rhor(:,2)=work(:)
-       call fourdp(cplex,magngy,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngy,work,1,mpi_enreg,nfft,1,ngfft,0)
        rhor(:,3)=work(:)
-       call fourdp(cplex,magngz,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,magngz,work,1,mpi_enreg,nfft,1,ngfft,0)
        rhor(:,4)=work(:)
        ABI_DEALLOCATE(magngx)
        ABI_DEALLOCATE(magngy)
@@ -1502,13 +1462,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  contains
 
    function map_symrhg(j1,n1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'map_symrhg'
-!End of the abilint section
 
    integer :: map_symrhg
    integer,intent(in) :: j1,n1
@@ -1578,14 +1531,6 @@ end subroutine symrhg
 !! SOURCE
 
 subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'irrzg'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1985,14 +1930,6 @@ end subroutine irrzg
 subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 &   rhor1, rhog1_eq, rhor1_eq, symrel1, tnon)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_rho'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !args
@@ -2051,7 +1988,7 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
  do ispden = 1, nspden
 
 ! fft input rhor1 to reciprocal space: uses work* as a buffer
-   call fourdp(cplex,workg,rhor1(:,ispden),-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+   call fourdp(cplex,workg,rhor1(:,ispden),-1,mpi_enreg,nfft,1,ngfft,0)
 
 ! below taken from irrzg and setsym
 !  Loop over reciprocal space grid points:
@@ -2117,7 +2054,7 @@ subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 
 ! FFT back to real space to get rhor1_eq
 !    Pull out full or spin up density, now symmetrized
-   call fourdp(cplex,workg_eq,rhor1_eq(:,ispden),1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,0)
+   call fourdp(cplex,workg_eq,rhor1_eq(:,ispden),1,mpi_enreg,nfft,1,ngfft,0)
 
  end do !nspden
 
@@ -2174,13 +2111,6 @@ end subroutine rotate_rho
 
 subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,&
 & symafm,symrec,symrel,tnons,typat,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setsym'
-!End of the abilint section
 
  implicit none
 

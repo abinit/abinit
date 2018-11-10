@@ -56,7 +56,7 @@
 MODULE m_iterators
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  implicit none
@@ -208,13 +208,6 @@ CONTAINS  !===========================================================
 subroutine indices_free(Ids)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indices_free'
-!End of the abilint section
-
  type(indices_t),intent(inout) :: Ids
 
 ! *************************************************************************
@@ -249,13 +242,6 @@ end subroutine indices_free
 subroutine iter2_alloc(Iter2,sizes,starts)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_alloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -312,13 +298,6 @@ end subroutine iter2_alloc
 subroutine iter2_push(Iter2,i1,i2,list)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_push'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -369,13 +348,6 @@ end subroutine iter2_push
 subroutine iter2_free(Iter2)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -416,13 +388,6 @@ end subroutine iter2_free
 function iter2_len(Iter2,i1,i2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_len'
-!End of the abilint section
-
  integer,intent(in) :: i1,i2
  integer :: iter2_len
  type(iter2_t),intent(in) :: Iter2
@@ -451,13 +416,6 @@ end function iter2_len
 function iter2_lbound(Iter2,dim)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_lbound'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -490,13 +448,6 @@ end function iter2_lbound
 function iter2_ubound(Iter2,dim)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_ubound'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -529,13 +480,6 @@ end function iter2_ubound
 function iter2_size(Iter2,dim)
 
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_size'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -568,13 +512,6 @@ end function iter2_size
 function iter2_yield(Iter2,idx,i1,i2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_yield'
-!End of the abilint section
-
  integer,intent(in) :: idx,i1,i2
  integer :: iter2_yield
  type(iter2_t),intent(in) :: Iter2
@@ -606,14 +543,6 @@ end function iter2_yield
 !! SOURCE
 
 subroutine iter2_print(Iter2,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iter2_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

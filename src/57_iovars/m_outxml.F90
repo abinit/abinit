@@ -28,7 +28,7 @@ module m_outxml
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools,    only : open_file
@@ -68,13 +68,6 @@ contains
 !! SOURCE
 
 subroutine outxml_open(filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxml_open'
-!End of the abilint section
 
   implicit none
 
@@ -125,13 +118,6 @@ end subroutine outxml_open
 !! SOURCE
 
 subroutine outxml_finalise(tsec, values)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxml_finalise'
-!End of the abilint section
 
   implicit none
 
@@ -186,13 +172,6 @@ end subroutine outxml_finalise
 
 subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_resultsgs_XML'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -220,7 +199,7 @@ subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' kinetic="', trim(value) ,'"'
    write(value, "(es20.8)") results_gs%energies%e_localpsp
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' local="', trim(value) ,'"'
-   write(value, "(es20.8)") results_gs%energies%e_nonlocalpsp
+   write(value, "(es20.8)") results_gs%energies%e_nlpsp_vfock
    write(ab_xml_out, "(A,A,A)", advance = "NO") ' non-local="', trim(value) ,'"'
    if (usepaw == 1) then
      write(value, "(es20.8)") results_gs%energies%e_paw
@@ -308,13 +287,6 @@ end subroutine out_resultsgs_XML
 !! SOURCE
 
 subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_geometry_XML'
-!End of the abilint section
 
  implicit none
 

@@ -28,7 +28,7 @@ module m_opernl
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_mkffkg, only : mkffkg, dfpt_mkffkg
 
@@ -138,13 +138,6 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl2'
-!End of the abilint section
 
  implicit none
 
@@ -760,13 +753,6 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl3'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1365,13 +1351,6 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl4a'
-!End of the abilint section
 
  implicit none
 
@@ -2381,13 +2360,6 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 &  ia3,idir,indlmn,ispinor,itypat,jproj,kg_k,kpg_k,kpt,&
 &  lmnmax,matblk,mincat,mlang3,mlang4,mproj,ndgxdt,nffnl,nincat,&
 &  nkpg,nlang,nloalg,npw,ntypat,ph3d,vect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernl4b'
-!End of the abilint section
 
  implicit none
 

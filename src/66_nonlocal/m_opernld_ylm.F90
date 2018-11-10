@@ -28,7 +28,7 @@ module m_opernld_ylm
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -129,13 +129,6 @@ contains
 subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernld_ylm'
-!End of the abilint section
 
  implicit none
 

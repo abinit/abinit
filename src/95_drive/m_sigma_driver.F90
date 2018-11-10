@@ -34,7 +34,7 @@ module m_sigma_driver
  use m_xmpi
  use m_xomp
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_ab7_mixing
  use m_nctk
  use m_kxc
@@ -54,9 +54,9 @@ module m_sigma_driver
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : get_gftt, setmesh
+ use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
- use m_crystal,       only : crystal_free, crystal_t, crystal_print, idx_spatial_inversion
- use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
+ use m_crystal,       only : crystal_t, crystal_print
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
 &                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
                              enclose_degbands, get_gaps, gaps_free, gaps_t, gaps_print
@@ -109,7 +109,6 @@ module m_sigma_driver
  use m_pspini,        only : pspini
  use m_calc_ucrpa,    only : calc_ucrpa
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
-
  use m_paw_correlations,only : pawpuxinit
 
  implicit none
@@ -172,7 +171,7 @@ contains
 !!
 !! CHILDREN
 !!      calc_sigc_me,calc_sigx_me,calc_ucrpa,calc_vhxc_me,chkpawovlp
-!!      classify_bands,cohsex_me,crystal_free,denfgr,destroy_mpi_enreg
+!!      classify_bands,cohsex_me,denfgr,destroy_mpi_enreg
 !!      ebands_copy,ebands_free,ebands_interpolate_kpath,ebands_report_gap
 !!      ebands_update_occ,em1results_free,energies_init,esymm_free
 !!      fftdatar_write,fourdp,get_gftt,getph,gsph_free,hdr_free
@@ -198,17 +197,6 @@ contains
 !! SOURCE
 
 subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,converged)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma'
- use interfaces_14_hidewrite
- use interfaces_53_ffts
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -747,15 +735,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call timab(402,2,tsec) ! sigma(Init1)
  call timab(404,1,tsec) ! rdkss
 
- call wfd_read_wfk(Wfd,wfk_fname,iomode_from_fname(wfk_fname))
+ call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
 
  if (Dtset%pawcross==1) then
    call wfd_copy(Wfd,Wfdf)
-   call wfd_change_ngfft(Wfdf,Cryst,Psps,ngfftf)
+   call wfdf%change_ngfft(Cryst,Psps,ngfftf)
  end if
 
  ! This test has been disabled (too expensive!)
- if (.False.) call wfd_test_ortho(Wfd,Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
+ if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
  call timab(404,2,tsec) ! rdkss
  call timab(405,1,tsec) ! Init2
@@ -831,10 +819,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(ks_rhor,(nfftf,Dtset%nspden))
  ABI_MALLOC(ks_taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
- call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
+ call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
 
  if (Dtset%usekden==1) then
-   call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_taur,optcalc=1)
+   call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_taur,optcalc=1)
  end if
 
  !========================================
@@ -912,9 +900,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  ABI_MALLOC(ks_rhog,(2,nfftf))
  ABI_MALLOC(ks_taug,(2,nfftf*Dtset%usekden))
- call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
+ call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
  if(Dtset%usekden==1)then
-   call fourdp(1,ks_taug,ks_taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
+   call fourdp(1,ks_taug,ks_taur(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
  end if
 
  !The following steps have been gathered in the setvtr routine:
@@ -1162,7 +1150,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (nscf==0) prev_rhor=ks_rhor
    if (nscf==0 .and. Dtset%usekden==1) prev_taur=ks_taur
 
-   if (nscf>0.and.gwcalctyp>=20.and.wfd_iam_master(Wfd)) then
+   if (nscf>0.and.gwcalctyp>=20.and.wfd%iam_master()) then
      ! Print the unitary transformation on std_out.
      call show_QP(QP_BSt,Sr%m_lda_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    end if
@@ -1173,14 +1161,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
    !  TODO here we should use nbsc instead of nbnds
 
-   call wfd_rotate(Wfd,Cryst,Sr%m_lda_to_qp)
+   call wfd%rotate(Cryst,Sr%m_lda_to_qp)
 
    ! Reinit the storage mode of Wfd as ug have been changed ===
    ! Update also the wavefunctions for GW corrections on each processor
-   call wfd_reset_ur_cprj(Wfd)
+   call wfd%reset_ur_cprj()
 
    ! This test has been disabled (too expensive!)
-   if (.False.) call wfd_test_ortho(Wfd, Cryst, Pawtab, unit=std_out)
+   if (.False.) call wfd%test_ortho(Cryst, Pawtab, unit=std_out)
 
    ! Compute QP occupation numbers.
    call wrtout(std_out,'sigma: calculating QP occupation numbers:','COLL')
@@ -1212,9 +1200,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !  #endif
 
    ! Compute QP density using the updated wfg.
-   call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
+   call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
    if (Dtset%usekden==1) then
-     call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_taur,optcalc=1)
+     call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_taur,optcalc=1)
    end if
 
    ! ========================================
@@ -1269,13 +1257,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    ABI_MALLOC(qp_rhog,(2,nfftf))
    ABI_MALLOC(qp_taug,(2,nfftf*Dtset%usekden))
-   call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
-   if(Dtset%usekden==1)call fourdp(1,qp_taug,qp_taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp5)
+   call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
+   if(Dtset%usekden==1)call fourdp(1,qp_taug,qp_taur(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp5)
 
    ! ===========================================
    ! ==== Optional output of the QP density ====
    ! ===========================================
-   if (Dtset%prtden/=0.and.wfd_iam_master(Wfd)) then
+   if (Dtset%prtden/=0.and.wfd%iam_master()) then
      call fftdatar_write("qp_rhor",dtfil%fnameabo_qp_den,dtset%iomode,hdr_sigma,&
      cryst,ngfftf,cplex1,nfftf,dtset%nspden,qp_rhor,mpi_enreg_seq,ebands=qp_bst)
    end if
@@ -1415,7 +1403,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    do spin=1,Sigp%nsppol
      do ik_ibz=1,Kmesh%nibz
        ! Distribute bands in [b1gw, b2gw] range
-       call wfd_distribute_bands(wfd, ik_ibz, spin, my_nband, my_band_list, bmask=bmask)
+       call wfd%distribute_bands(ik_ibz, spin, my_nband, my_band_list, bmask=bmask)
        if (my_nband == 0) cycle
        npw_k = Wfd%npwarr(ik_ibz)
        do ii=1,my_nband  ! ib=b1gw,b2gw in sequential
@@ -1425,7 +1413,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          ovlp(1) = REAL(cdummy); ovlp(2) = AIMAG(cdummy)
 
          if (Psps%usepaw==1) then
-           call wfd_get_cprj(Wfd,ib,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
+           call wfd%get_cprj(ib,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
            ovlp = ovlp + paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab)
          end if
 !        write(std_out,*)ovlp(1),ovlp(2)
@@ -1993,7 +1981,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  call timab(409,2,tsec) ! getW
 
- if (wfd_iam_master(Wfd)) then
+ if (wfd%iam_master()) then
    ! Write info on the run on ab_out, then open files to store final results.
    call ebands_report_gap(KS_BSt,header='KS Band Gaps',unit=ab_out)
    if(dtset%ucrpa==0) then
@@ -2034,7 +2022,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !calculation by simply listing the same k-point twice in kptgw. Now this trick is not allowed anymore.
 !Everything, indeed, should be done in a clean and transparent way inside csigme.
 
- call wfd_print(Wfd,mode_paral='PERS')
+ call wfd%print(mode_paral='PERS')
 
  call wrtout(std_out,sigma_type_from_key(mod10),'COLL')
 
@@ -2251,7 +2239,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end if
      end do
 
-     if (wfd_iam_master(Wfd)) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
+     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
@@ -2292,7 +2280,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call wrtout(ab_out,msg,'COLL')
      end if
 
-     ! Report the QP gaps (Fundamental and Optical)
+     ! Report the QP gaps (Fundamental and direct)
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
 
      ! Band structure interpolation from QP energies computed on the k-mesh.
@@ -2308,7 +2296,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! Calculate the new m_lda_to_qp
      call updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,Sr%m_lda_to_qp)
 
-     if (wfd_iam_master(Wfd)) then
+     if (wfd%iam_master()) then
        call wrqps(Dtfil%fnameabo_qps,Sigp,Cryst,Kmesh,Psps,Pawtab,QP_Pawrhoij,&
 &       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,Sr%m_lda_to_qp,qp_rhor)
      end if
@@ -2335,10 +2323,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! ==== Save the GW results in NETCDF file ====
    ! ============================================
 #ifdef HAVE_NETCDF
-   if (wfd_iam_master(Wfd)) then
+   if (wfd%iam_master()) then
      NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), '_SIGRES.nc'), xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
-     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
+     NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(KS_Bst, ncid))
      NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid))
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
@@ -2355,7 +2343,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  !=====================
  !==== Close Files ====
  !=====================
- if (wfd_iam_master(Wfd)) then
+ if (wfd%iam_master()) then
    close(unt_gw )
    close(unt_gwdiag)
    close(unt_sig)
@@ -2415,7 +2403,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (Dtset%pawcross==1) then
      call paw_pwaves_lmn_free(Paw_onsite)
      Wfdf%bks_comm = xmpi_comm_null
-     call wfd_free(Wfdf)
+     call wfdf%free()
    end if
  end if
  ABI_DT_FREE(Paw_onsite)
@@ -2429,7 +2417,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_DT_FREE(QP_paw_ij)
  end if
 
- call wfd_free(Wfd)
+ call wfd%free()
  call destroy_mpi_enreg(MPI_enreg_seq)
  call littlegroup_free(Ltg_k)
  ABI_DT_FREE(Ltg_k)
@@ -2439,7 +2427,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call gsph_free(Gsph_x)
  call gsph_free(Gsph_c)
  call vcoul_free(Vcp)
- call crystal_free(Cryst)
+ call cryst%free()
  call sigma_free(Sr)
  call em1results_free(Er)
  call ppm_free(PPm)
@@ -2510,15 +2498,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 & gwx_ngfft,gwc_ngfft,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Gsph_Max,Gsph_x,Gsph_c,Vcp,Er,Sigp,comm)
 
  !use m_gwdefs,        only : GW_Q0_DEFAULT, SIG_GW_AC, sigparams_t, sigma_is_herm, sigma_needs_w
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_sigma'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2792,7 +2771,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  ! Create crystal_t data type
- call crystal_from_hdr(Cryst,Hdr_wfk,timrev,remove_inv)
+ cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
  call crystal_print(Cryst)
 
  if (Sigp%npwwfn>ng_kss) then ! cannot use more G"s for the wfs than those stored on file
@@ -2923,7 +2902,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  if (dtset%nkptgw==0) then
    ! Use qp_range to select the interesting k-points and the corresponing bands.
    !
-   !    0 --> Compute the QP corrections only for the fundamental and the optical gap.
+   !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
    ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
    !           bands above and below the Fermi level.
    ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
@@ -2931,7 +2910,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
    if (gap_err /=0 .and. dtset%gw_qprange==0) then
-     msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
+     msg = "Problem while computing the fundamental and direct gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      MSG_WARNING(msg)
      dtset%gw_qprange = 1
    end if
@@ -2981,9 +2960,9 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    else
      ! gw_qprange is not specified in the input.
-     ! Include the optical and the fundamental KS gap.
+     ! Include the direct and the fundamental KS gap.
      ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
-     ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
+     ! we have compute the union of the k-points where the fundamental and the direct gaps are located.
      !
      ! Find the list of `interesting` kpoints.
      ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
@@ -3438,7 +3417,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  ! FIXME
  if (Dtset%symsigma/=0 .and. Sigp%nomegasr/=0) then
-   if (idx_spatial_inversion(Cryst) == 0) then
+   if (cryst%idx_spatial_inversion() == 0) then
      write(msg,'(5a)')' setup_sigma : BUG :',ch10,&
 &      'It is not possible to use symsigma/=0 to calculate the spectral function ',ch10,&
 &      'when the system does not have the spatial inversion. Please use symsigma=0 '
@@ -3488,15 +3467,6 @@ end subroutine setup_sigma
 
 
 subroutine sigma_tables(Sigp,Kmesh,Bnd_sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_tables'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3681,15 +3651,6 @@ end subroutine sigma_tables
 
 subroutine sigma_bksmask(Dtset,Sigp,Kmesh,my_rank,nprocs,my_spins,bks_mask,keep_ur,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigma_bksmask'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_rank,nprocs
@@ -3843,16 +3804,6 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &  Pawang,Pawrad,Pawtab,Pawfgrtab,prev_Pawrhoij,&
 &  QP_pawrhoij,QP_paw_ij,QP_paw_an,QP_energies,qp_nhat,nhatgrdim,qp_nhatgr,qp_compch_sph,qp_compch_fft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_qpscgw'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf,nscf,nhatgrdim
@@ -3901,7 +3852,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,QP_BSt,&
 &                    pawtab=Pawtab,use_rhoij_=1,use_rhoijres=1)
 
  ! FIXME kptop should be passed via Kmesh, in GW time reversal is always assumed.
- call wfd_pawrhoij(Wfd,Cryst,QP_Bst,Dtset%kptopt,QP_pawrhoij,Dtset%pawprtvol)
+ call wfd%pawrhoij(Cryst,QP_Bst,Dtset%kptopt,QP_pawrhoij,Dtset%pawprtvol)
  !
  ! * Symmetrize QP $\rho_{ij}$.
  choice=1; optrhoij=1; ipert=0

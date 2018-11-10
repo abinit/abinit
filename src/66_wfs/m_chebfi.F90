@@ -30,7 +30,7 @@ module m_chebfi
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_abi_linalg
  use m_rayleigh_ritz
  use m_invovl
@@ -79,7 +79,7 @@ contains
 !!  If gs_hamk%usepaw==1:
 !!    gsc(2,*)=<g|s|c> matrix elements (s=overlap)
 !!  If gs_hamk%usepaw==0
-!!    enl(nband)=contribution from each band to nonlocal pseudopotential part of total energy, at this k-point
+!!    enlx(nband)=contribution from each band to nonlocal psp + potential Fock ACE part of total energy, at this k-point
 !!
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
@@ -112,15 +112,7 @@ contains
 !!
 !! SOURCE
 
-subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chebfi'
- use interfaces_14_hidewrite
-!End of the abilint section
+subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
 
  implicit none
 
@@ -132,20 +124,20 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  real(dp),intent(inout), target :: cg(2,npw*nspinor*nband),gsc(2,npw*nspinor*nband)
  real(dp),intent(in) :: kinpw(npw)
  real(dp),intent(out) :: resid(nband)
- real(dp),intent(out) :: enl(nband*(1-gs_hamk%usepaw))
+ real(dp),intent(out) :: enlx(nband)
  real(dp),intent(out) :: eig(nband)
 
 !Local variables-------------------------------
  real(dp) :: pcon(npw)
  real(dp) :: filter_low
  real(dp) :: filter_center, filter_radius
- real(dp), dimension(2, npw*nspinor*nband), target :: ghc, gvnlc
+ real(dp), dimension(2, npw*nspinor*nband), target :: ghc, gvnlxc
  real(dp), allocatable, dimension(:,:) :: cg_filter_next, cg_filter_prev, gsm1hc_filter, gsc_filter_prev, gsc_filter_next
- real(dp), allocatable, dimension(:,:), target :: cg_alltoall1,gsc_alltoall1,ghc_alltoall1,gvnlc_alltoall1
- real(dp), allocatable, dimension(:,:), target :: cg_alltoall2,gsc_alltoall2,ghc_alltoall2,gvnlc_alltoall2
- real(dp), pointer, dimension(:,:) :: cg_filter, gsc_filter, ghc_filter, gvnlc_filter
+ real(dp), allocatable, dimension(:,:), target :: cg_alltoall1,gsc_alltoall1,ghc_alltoall1,gvnlxc_alltoall1
+ real(dp), allocatable, dimension(:,:), target :: cg_alltoall2,gsc_alltoall2,ghc_alltoall2,gvnlxc_alltoall2
+ real(dp), pointer, dimension(:,:) :: cg_filter, gsc_filter, ghc_filter, gvnlxc_filter
  real(dp) :: resid_vec(2, npw*nspinor)
- logical :: paw
+ logical :: has_fock,paw
  integer :: shift, shift_cg_loadbalanced
  integer :: iband, iline, ispinor
  integer :: sij_opt, cpopt
@@ -183,12 +175,13 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 
  !Initializations
  paw = gs_hamk%usepaw == 1
+ has_fock=(associated(gs_hamk%fockcommon))
  mcg = npw*nspinor*nband
 
  ! Init pcon
  pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16*kinpw**4)
 
- ghc=zero; gvnlc=zero
+ ghc=zero; gvnlxc=zero
 
  ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
  if (dtset%paral_kgb == 1) then
@@ -199,11 +192,11 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    ABI_ALLOCATE(cg_alltoall1, (2, npw_filter*nspinor*nband_filter))
    ABI_ALLOCATE(gsc_alltoall1, (2, npw_filter*nspinor*nband_filter))
    ABI_ALLOCATE(ghc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gvnlc_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_ALLOCATE(gvnlxc_alltoall1, (2, npw_filter*nspinor*nband_filter))
    ABI_ALLOCATE(cg_alltoall2, (2, npw_filter*nspinor*nband_filter))
    ABI_ALLOCATE(gsc_alltoall2, (2, npw_filter*nspinor*nband_filter))
    ABI_ALLOCATE(ghc_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_ALLOCATE(gvnlc_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_ALLOCATE(gvnlxc_alltoall2, (2, npw_filter*nspinor*nband_filter))
 
    ! Init tranpose variables
    recvcountsloc=bandfft_kpt(ikpt_this_proc)%recvcounts*2*nspinor*mpi_enreg%bandpp
@@ -242,7 +235,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    cg_filter => cg_alltoall2
    gsc_filter => gsc_alltoall2
    ghc_filter => ghc_alltoall2
-   gvnlc_filter => gvnlc_alltoall2
+   gvnlxc_filter => gvnlxc_alltoall2
  else
    npw_filter = npw
    nband_filter = nband
@@ -250,7 +243,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    cg_filter => cg
    gsc_filter => gsc
    ghc_filter => ghc
-   gvnlc_filter => gvnlc
+   gvnlxc_filter => gvnlxc
  end if
  ! from here to the next alltoall, all computation is done on _filter variables, agnostic
  ! to whether it's nband x npw (paral_kgb == 0) or ndatarecv*bandpp (paral_kgb = 1)
@@ -289,10 +282,10 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  ! get_ghc on cg
  call timab(timer_getghc, 1, tsec)
  if (dtset%paral_kgb == 0) then
-   call getghc(cpopt,cg_filter,cwaveprj,ghc_filter,gsc_filter,gs_hamk,gvnlc_filter,&
+   call getghc(cpopt,cg_filter,cwaveprj,ghc_filter,gsc_filter,gs_hamk,gvnlxc_filter,&
 &   eval,mpi_enreg,nband,prtvol,sij_opt,tim_getghc,0)
  else
-   call prep_getghc(cg_filter,gs_hamk,gvnlc_filter,ghc_filter,gsc_filter,eval,nband,mpi_enreg,&
+   call prep_getghc(cg_filter,gs_hamk,gvnlxc_filter,ghc_filter,gsc_filter,eval,nband,mpi_enreg,&
 &   prtvol,sij_opt,cpopt,cwaveprj,already_transposed=.true.)
  end if
  call timab(timer_getghc, 2, tsec)
@@ -450,10 +443,10 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    call timab(timer_getghc, 1, tsec)
    if (dtset%paral_kgb == 0) then
      call getghc(cpopt,cg_filter(:,shift:),cwaveprj(:,iactive:),ghc_filter(:,shift:),&
-&     gsc_filter(:,shift:),gs_hamk,gvnlc_filter(:,shift:),eval,mpi_enreg,&
+&     gsc_filter(:,shift:),gs_hamk,gvnlxc_filter(:,shift:),eval,mpi_enreg,&
 &     nband,prtvol,sij_opt,tim_getghc,0)
    else
-     call prep_getghc(cg_filter(:,shift:),gs_hamk,gvnlc_filter(:,shift:),ghc_filter(:,shift:),&
+     call prep_getghc(cg_filter(:,shift:),gs_hamk,gvnlxc_filter(:,shift:),ghc_filter(:,shift:),&
 &     gsc_filter(:,shift:),eval,nband,mpi_enreg,prtvol,sij_opt,cpopt,&
 &     cwaveprj(:,iactive:),already_transposed=.true.)
    end if
@@ -473,8 +466,9 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    ghc_filter(:, shift+1:shift+npw_filter*nspinor) = ghc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
    if(paw) then
      gsc_filter(:, shift+1:shift+npw_filter*nspinor) = gsc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
-   else
-     gvnlc_filter(:, shift+1:shift+npw_filter*nspinor) = gvnlc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
+   endif
+   if(.not.paw .or. has_fock)then
+     gvnlxc_filter(:, shift+1:shift+npw_filter*nspinor) = gvnlxc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
    end if
  end do
 
@@ -508,7 +502,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    if(paw) then
      gsc_alltoall1(:,index_wavef_band) = gsc_alltoall2(:,:)
    else
-     gvnlc_alltoall1(:,index_wavef_band) = gvnlc_alltoall2(:,:)
+     gvnlxc_alltoall1(:,index_wavef_band) = gvnlxc_alltoall2(:,:)
    end if
 
    ABI_DEALLOCATE(index_wavef_band)
@@ -528,7 +522,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
      call xmpi_alltoallv(gsc_alltoall1,recvcountsloc,rdisplsloc,gsc,&
 &     sendcountsloc,sdisplsloc,mpi_enreg%comm_band,ierr)
    else
-     call xmpi_alltoallv(gvnlc_alltoall1,recvcountsloc,rdisplsloc,gvnlc,&
+     call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,mpi_enreg%comm_band,ierr)
    end if
    call timab(timer_alltoall, 2, tsec)
@@ -537,11 +531,11 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
      ABI_DEALLOCATE(cg_alltoall1)
      ABI_DEALLOCATE(gsc_alltoall1)
      ABI_DEALLOCATE(ghc_alltoall1)
-     ABI_DEALLOCATE(gvnlc_alltoall1)
+     ABI_DEALLOCATE(gvnlxc_alltoall1)
      ABI_DEALLOCATE(cg_alltoall2)
      ABI_DEALLOCATE(gsc_alltoall2)
      ABI_DEALLOCATE(ghc_alltoall2)
-     ABI_DEALLOCATE(gvnlc_alltoall2)
+     ABI_DEALLOCATE(gvnlxc_alltoall2)
    end if
  else
    ! nothing to do, the _filter variables already point to the right ones
@@ -556,9 +550,9 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  ! _subdiago might use less memory when using only one proc, should maybe call it, or just remove it
  ! and always call _distributed
 #if defined HAVE_LINALG_SCALAPACK
- call rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
+ call rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
 #else
- call rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
+ call rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
 #endif
 
  ! Build residuals
@@ -580,9 +574,9 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    call dotprod_g(resid(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,resid_vec,&
 &   resid_vec,mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 
-   if(.not. paw) then
-     call dotprod_g(enl(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
-&     gvnlc(:, shift+1:shift+npw_filter*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+   if(.not. paw .or. has_fock) then
+     call dotprod_g(enlx(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
+&     gvnlxc(:, shift+1:shift+npw_filter*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
  end do
  call timab(timer_residuals, 2, tsec)
@@ -626,13 +620,6 @@ end subroutine chebfi
 !! SOURCE
 
 function cheb_poly(x, n, a, b) result(y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cheb_poly'
-!End of the abilint section
 
  implicit none
 
@@ -684,13 +671,6 @@ end function cheb_poly
 !! SOURCE
 
 function cheb_oracle(x, a, b, tol, nmax) result(n)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cheb_oracle'
-!End of the abilint section
 
  implicit none
 

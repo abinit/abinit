@@ -31,7 +31,6 @@
  tolvrs 1.0d-16
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -46,7 +45,7 @@
 #%% keywords = NC
 #%% description = 
 #%%   O2 (spin-polarized, non-linear XC core correction, LDA)
-#%%   Fixed occupation numbers. The parameters have been atifically tuned
+#%%   Fixed occupation numbers. The parameters have been artifically tuned
 #%%   with the goal to find a small system that reproduces the typical 1D-configuration coordinate diagram,
 #%%   with a first total energy curve that shows a minimum, a second (different occupations) total energy curve
 #%%   that shows a slightly higher minimum, at a slightly larger interatomic distance, and then the two total energy curves

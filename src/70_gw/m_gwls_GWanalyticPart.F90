@@ -46,7 +46,7 @@ use m_gwls_TimingLog
 
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 
 implicit none
 save
@@ -95,13 +95,6 @@ subroutine get_projection_band_indices(omega,band_index_below, band_index_above)
 !                Pe : projection on states such that epsilon_n < omega
 !                Qe : projection on states such that epsilon_n > omega
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_projection_band_indices'
-!End of the abilint section
-
 implicit none
 
 real(dp),intent(in)  :: omega 

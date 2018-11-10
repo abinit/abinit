@@ -42,7 +42,7 @@ use m_gwls_DielectricArray
 use m_gwls_LanczosResolvents
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 
 implicit none
@@ -111,13 +111,6 @@ kmax_numeric, npt_gauss, dielectric_array, array_integrand )
 ! already contains the properly modified basis vectors.
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_projected_BT_shift_Lanczos'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in) :: nfreq
@@ -506,13 +499,6 @@ modified_Lbasis, kmax_numeric, npt_gauss, dielectric_array, array_integrand )
 ! takes into account that the MODEL dielectric array is distributed over the processors.
 !
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_projected_BT_shift_Lanczos_DISTRIBUTED'
-!End of the abilint section
-
 implicit none
 
 integer,      intent(in) :: nfreq

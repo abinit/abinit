@@ -24,7 +24,7 @@ MODULE m_cut3d
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
  use m_hdr
@@ -51,6 +51,7 @@ MODULE m_cut3d
  use m_kg,               only : kpgio, ph1d3d, getph
  use m_fftcore,          only : sphereboundary
  use m_initylmg,         only : initylmg
+ use m_fft,              only : fourwf
 
  implicit none
 
@@ -101,13 +102,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d_hirsh'
-!End of the abilint section
 
  implicit none
 
@@ -224,13 +218,6 @@ end subroutine cut3d_hirsh
 !! SOURCE
 
  subroutine cut3d_lineint(gridtt,gridux,griddy,gridmz,nr1,nr2,nr3,nspden,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d_lineint'
-!End of the abilint section
 
  implicit none
 
@@ -433,13 +420,6 @@ end subroutine cut3d_lineint
 
 subroutine normalize(v)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normalize'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------------------------------
@@ -502,13 +482,6 @@ end subroutine normalize
 !! SOURCE
 
 subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,rprimd,tau)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d_planeint'
-!End of the abilint section
 
  implicit none
 
@@ -876,13 +849,6 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 
 subroutine cut3d_pointint(gridt,gridu,gridd,gridm,nr1,nr2,nr3,nspden,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d_pointint'
-!End of the abilint section
-
  implicit none
 
 !Arguments--------------------------------------------------------------
@@ -998,13 +964,6 @@ end subroutine cut3d_pointint
 
 subroutine reduce(r,rcart,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'reduce'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------------------------------
@@ -1061,13 +1020,6 @@ end subroutine reduce
 !! SOURCE
 
 subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d_rrho'
-!End of the abilint section
 
  implicit none
 
@@ -1152,13 +1104,6 @@ end subroutine cut3d_rrho
 
 subroutine vdot(x1,x2,x3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdot'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------------------------------
@@ -1213,13 +1158,6 @@ end subroutine vdot
 !! SOURCE
 
 subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,rprimd,tau)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d_volumeint'
-!End of the abilint section
 
  implicit none
 
@@ -1809,14 +1747,6 @@ end subroutine cut3d_volumeint
 subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npwarr,&
 &  nr1,nr2,nr3,nspinor,nsppol,ntypat,paral_kgb,rprimd,xcart,typat,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cut3d_wffile'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -2149,7 +2079,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      call fourwf(cplex,denpot,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),fofgout,fofr,gbound,gbound,&
 &     istwfk(ckpt),kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,&
-&     npw_k,n4,n5,n6,0,paral_kgb,tim_fourwf0,weight,weight)
+&     npw_k,n4,n5,n6,0,tim_fourwf0,weight,weight)
 
 !    TODO
 !    call fft_ug_dp(npw_k,nfft,nspinor,ndat1,mgfft,ngfft,istwf_k(ckpt),kg_k,gbound,cgcband,fofr)

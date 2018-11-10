@@ -29,7 +29,7 @@ module m_psolver
  use defs_basis
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_abi2big
  use m_cgtools
@@ -103,14 +103,6 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
  use BigDFT_API, only : XC_potential,ELECTRONIC_DENSITY,coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_rhohxc'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -567,14 +559,6 @@ subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, 
  use BigDFT_API,     only : coulomb_operator
  use poisson_solver, only : H_potential
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_hartree'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -708,14 +692,6 @@ subroutine psolver_kernel(hgrid, iaction,  icoulomb, &
 #else
  use defs_wvltypes,  only : coulomb_operator
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psolver_kernel'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------

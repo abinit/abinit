@@ -33,7 +33,7 @@ use m_gwls_hamiltonian
 
 ! abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 use m_xmpi
 implicit none
 save
@@ -83,13 +83,6 @@ subroutine prepareValenceWavefunctions()
 !      Valence wavefunctions will be stored in Fourier space instead.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prepareValenceWavefunctions'
-!End of the abilint section
-
 implicit none
 
 !integer  :: v, kmin, kmax
@@ -157,13 +150,6 @@ subroutine cleanupValenceWavefunctions()
 ! This subroutine deallocates the array valence_wfr once it is no longer needed.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cleanupValenceWavefunctions'
-!End of the abilint section
-
 implicit none
 
 ! *************************************************************************
@@ -199,13 +185,6 @@ subroutine compute_Exchange_and_Correlation_energies(e_index, exchange_energy, V
 ! This subroutine computes the exchange and correlation energies.
 !
 !--------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_Exchange_and_Correlation_energies'
-!End of the abilint section
-
 implicit none
 
 integer, intent(in)    :: e_index

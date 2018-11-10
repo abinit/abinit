@@ -38,7 +38,7 @@ use m_gwls_GenerateEpsilon
 
 ! Abinit modules
 use defs_basis
-use m_profiling_abi
+use m_abicore
 
 implicit none
 save
@@ -103,13 +103,6 @@ subroutine setup_Lanczos_basis(lmax,lmax_model)
 !----------------------------------------------------------------------------------------------------
 ! Set up the lanczos basis
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_Lanczos_basis'
-!End of the abilint section
-
 implicit none
 
 integer, intent(in) :: lmax, lmax_model 
@@ -145,13 +138,6 @@ end subroutine setup_Lanczos_basis
 !! SOURCE
 
 subroutine cleanup_Lanczos_basis()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cleanup_Lanczos_basis'
-!End of the abilint section
 
 implicit none
 
@@ -194,13 +180,6 @@ subroutine modify_Lbasis_Coulomb(psie_k, lmax, lmax_model)
 !----------------------------------------------------------------------------------------------------
 ! This subroutine computes, once and for all, the vectors (V^1/2.L)^*.psie
 !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'modify_Lbasis_Coulomb'
-!End of the abilint section
-
 real(dp),intent(in)  :: psie_k(2,npw_k)
 integer ,intent(in)  :: lmax, lmax_model
 

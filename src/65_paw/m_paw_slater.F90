@@ -32,7 +32,7 @@
 MODULE m_paw_slater
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_splines
 
@@ -258,13 +258,6 @@ CONTAINS  !=====================================================================
 
 subroutine slatang_cshell_init(Slatang3l,l_max,lm2_size,lc_max,klm2lm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatang_cshell_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -424,13 +417,6 @@ end subroutine slatang_cshell_init
 
 subroutine slatang_cshell_free(Slatang3l)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatang_cshell_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -475,13 +461,6 @@ end subroutine slatang_cshell_free
 !! SOURCE
 
 subroutine slatrad_cshell_free(Slatrad3l)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_cshell_free'
-!End of the abilint section
 
  implicit none
 
@@ -535,13 +514,6 @@ end subroutine slatrad_cshell_free
 !! SOURCE
 
 subroutine slatrad_cshell_init(Slatrad3l,ln2_size,Pawrad,Pawtab,Atm,Atmrad,kln_mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_cshell_init'
-!End of the abilint section
 
  implicit none
 
@@ -750,14 +722,6 @@ end subroutine slatrad_cshell_init
 
 subroutine paw_sigxcore(cplex_dij,lmn2_size,ndij,Pawrad,Pawtab,Atm,Atmrad,dijexc_core)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_sigxcore'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -902,13 +866,6 @@ end subroutine paw_sigxcore
 
 subroutine paw_mkdijexc_core(ndij,cplex_dij,lmn2_size_max,Cryst,Pawtab,Pawrad,dijexc_core,pawprtvol,filpsp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_mkdijexc_core'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1016,13 +973,6 @@ end subroutine paw_mkdijexc_core
 
 subroutine slatrad_free_0D(Slatrad)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1059,13 +1009,6 @@ end subroutine slatrad_free_0D
 !! SOURCE
 
 subroutine slatrad_free_1D(Slatrad)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_free_1D'
-!End of the abilint section
 
  implicit none
 
@@ -1132,13 +1075,6 @@ end subroutine slatrad_free_1D
 !! SOURCE
 
 subroutine slatrad_init(Slatrad4,which_intg,ln2_size,Pawrad,Pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slatrad_init'
-!End of the abilint section
 
  implicit none
 
@@ -1395,14 +1331,6 @@ end subroutine slatrad_init
 subroutine paw_dijhf(ndij,cplex_dij,qphase,lmn2_size_max,my_natom,ntypat,Pawtab,Pawrad,Pawang,Pawrhoij,&
 &                    sigx_dij,pawprtvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_dijhf'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1570,13 +1498,6 @@ end subroutine paw_dijhf
 
 function summ_2gaunt(Pawang,ij_lm,kl_lm,ll_idx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'summ_2gaunt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1638,13 +1559,6 @@ end function summ_2gaunt
 !! SOURCE
 
 function slat_intg(Slatrad4,Pawtab,Pawang,i_lmn,j_lmn,k_lmn,l_lmn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slat_intg'
-!End of the abilint section
 
  implicit none
 

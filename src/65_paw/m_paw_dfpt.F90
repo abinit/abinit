@@ -26,7 +26,7 @@ MODULE m_paw_dfpt
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_time, only : timab
@@ -149,13 +149,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &                        paw_an0,paw_an1,paw_ij1,pawang,pawprtvol,pawrad,pawrhoij_a,pawrhoij_b,&
 &                        pawtab,pawxcdev,xclevel, &
 &                        mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdfptenergy'
-!End of the abilint section
 
  implicit none
 
@@ -514,13 +507,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 &          nattyp,nfft,ngfft,nhat,nlstr,nspden,nsym,ntypat,optgr,optgr2,optstr,optstr2,&
 &          pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,qphon,rprimd,symrec,typat,ucvol,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_grid,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawgrnl'
-!End of the abilint section
 
  implicit none
 
@@ -1974,13 +1960,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawgrnl_convert'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2071,13 +2050,6 @@ end subroutine pawgrnl
 !! SOURCE
 
  subroutine dsdr_k_paw(cprj_k,cprj_kb,dsdr,dtefield,kdir,kfor,mband,natom,ncpgr,typat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dsdr_k_paw'
-!End of the abilint section
 
  implicit none
 

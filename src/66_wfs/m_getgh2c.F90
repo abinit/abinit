@@ -28,7 +28,7 @@ module m_getgh2c
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
@@ -105,13 +105,6 @@ contains
 
 subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 &                  mpi_enreg,optlocal,optnl,opt_gvnl2,rf_hamkq,sij_opt,tim_getgh2c,usevnl,conj,enl,optkin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgh2c'
-!End of the abilint section
 
  implicit none
 

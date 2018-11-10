@@ -27,7 +27,7 @@
 module m_timana
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_xomp
 
@@ -138,14 +138,6 @@ contains
 !! SOURCE
 
 subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'timana'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -263,20 +255,20 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(51)='total timab                     '
  names(52)='scfcv-scprqt                    '; basic(52)=1
  names(53)='forces-mkcore                   '
- names(54)='scfcv   (1)                     '
+ names(54)='scfcv_core(1)                   '
  names(55)='stress-mkcore                   '
- names(56)='scfcv-read                      '
+ names(56)='scfcv_core-read                 '
  names(57)='rhotov                          '
  names(59)='energy                          '
- names(60)='scfcv(etotfor)                  '
- names(61)='scfcv :synchro                  '
+ names(60)='scfcv_core(etotfor)             '
+ names(61)='scfcv_core :synchro             '
  names(62)='kpgio :synchro                  '
  names(63)='mkrho :synchro                  '
  names(64)='strkin:synchro                  '
  names(65)='forstrnps:synchr                '
  names(66)='vtorho:synchro                  '; basic(66)=1
  names(67)='wfsinp:synchro                  '
- names(68)='scfcv(mix den - newrho)         '
+ names(68)='scfcv_core(mix den - newrho)     '
  names(69)='forces                          '; basic(69)=1 ! Actually, should not be basic !
  names(70)='vtorho(symrhg)                  '
  names(71)='mkrho :MPIrhor                  '
@@ -392,18 +384,18 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(233)='nonlop%appinvovl                '
  names(234)='nonlop%prep_nonl%energy         '
 
- names(238)='scfcv                           '
- names(239)='scfcv(Berry)                    '
- names(240)='scfcv(iniloop, setvtr  )        '
- names(241)='scfcv(loop, PAW)                '
- names(242)='scfcv(vtorho(f))                '
- names(243)='scfcv(rhotov)                   '
- names(244)='scfcv(qui loop)                 '
- names(245)='scfcv(mix pot)                  '
- names(246)='scfcv(just after scf)           '
- names(247)='scfcv(afterscfloop)             '
- names(248)='scfcv(outscfcv)                 '
- names(249)='scfcv(free)                     '
+ names(238)='scfcv_core                      '
+ names(239)='scfcv_core(Berry)               '
+ names(240)='scfcv_core(iniloop, setvtr  )   '
+ names(241)='scfcv_core(loop, PAW)           '
+ names(242)='scfcv_core(vtorho(f))           '
+ names(243)='scfcv_core(rhotov)              '
+ names(244)='scfcv_core(qui loop)            '
+ names(245)='scfcv_core(mix pot)             '
+ names(246)='scfcv_core(just after scf)      '
+ names(247)='scfcv_core(afterscfloop)        '
+ names(248)='scfcv_core(outscfcv)            '
+ names(249)='scfcv_core(free)                '
 
  names(250)='afterscfloop                    '
  names(251)='afterscfloop(wvl)               '
@@ -547,7 +539,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(555)='vtorho:pawmkrhoij               '; basic(555)=1
  names(556)='pawmkrho                        '; basic(556)=1
  names(557)='pawmkrho:symrhoij               '; basic(557)=1
- names(558)='scfcv:mknhat                    '
+ names(558)='scfcv_core:mknhat               '
  names(559)='nhatgrid                        '; basic(559)=1
  names(560)='pawdenpot                       '; basic(560)=1
  names(561)='pawdij/symdij                   '; basic(561)=1
@@ -741,7 +733,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(793)='mkrho%energy                    '
  names(794)='mkrho%respfn                    '
  names(795)='mkrho%afterscfloop              '
- names(796)='mkrho%scfcv                     '
+ names(796)='mkrho%scfcv_core                '
  names(798)='mkrho/=                         '; basic(798)=1
  names(799)='mkrho/=+fourwf                  '
 
@@ -904,6 +896,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1661) = 'lobpcg_RayleighRitz@hegv       '
 
  ! xg_t
+ names(1662) = 'xgTransposer_transpose@ColsRows'
+ names(1663) = 'xgTransposer_transpose@Linalg  '
+ names(1664) = 'xgTransposer_*@all2all         '
+ names(1665) = 'xgTransposer_*@gatherv         '
+ names(1666) = 'xgTransposer_@reorganize       '
+ names(1667) = 'xgTransposer_init              '
+ names(1668) = 'xgTransposer_free              '
+ names(1669) = 'xgTransposer_transpose         '
  names(1670) = 'xgBlock_potrf                  '
  names(1671) = 'xgBlock_trsm                   '
  names(1672) = 'xgBlock_gemm                   '
@@ -1212,7 +1212,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
    case(43)
-!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop + mkrho%scfcv
+!      mkrho = mkrho%gstate + mkrho%vtorho + mkrho%energy + mkrho%respfn + mkrho%afterscfloop + mkrho%scfcv_core
      tslots(:7)=(/790,791,792,793,794,795,796/)
    case(44)
 !      Estimate the complement of dmft (in vtorho, only)
@@ -1472,7 +1472,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(3)
          list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; message='gstateimg+gstate '
        case(4)
-         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); message='scfcv '
+         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); message='scfcv_core '
        case(5)
          list(:7)=(/940,941,942,943,944,945,TIMER_SIZE/)             ; message= 'rhotov '
        case(6)
@@ -1603,6 +1603,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/)
          message='low-level xgScalapack type '
+       case(78)
+         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
+         message='low-level xgTransposer type '
        case default
          cycle ! This allows to disable temporarily some partitionings
 

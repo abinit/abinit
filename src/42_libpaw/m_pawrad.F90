@@ -20,9 +20,8 @@
 !!    that all the strongly connected routines are changed accordingly to accommodate the modification of the data type
 !!    Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
-!! NOTES
-!!  FOR DEVELOPPERS: in order to preserve the portability of libPAW library,
-!!  please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
+!!  * FOR DEVELOPERS: in order to preserve the portability of libPAW library,
+!!    please consult ~abinit/src/??_libpaw/libpaw-coding-rules.txt
 !!
 !! SOURCE
 
@@ -198,13 +197,6 @@ CONTAINS
 
 subroutine pawrad_init(mesh,mesh_size,mesh_type,rstep,lstep,r_for_intg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -335,13 +327,6 @@ end subroutine pawrad_init
 
 subroutine pawrad_free_0D(Rmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -387,13 +372,6 @@ end subroutine pawrad_free_0D
 !! SOURCE
 
 subroutine pawrad_free_1D(Rmesh)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_free_1D'
-!End of the abilint section
 
  implicit none
 
@@ -445,14 +423,6 @@ end subroutine pawrad_free_1D
 !! SOURCE
 
 subroutine pawrad_print(Rmesh,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -551,13 +521,6 @@ end subroutine pawrad_print
 
 subroutine pawrad_isame(Rmesh1,Rmesh2,hasameq,whichdenser)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_isame'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -642,13 +605,6 @@ end subroutine pawrad_isame
 
 subroutine pawrad_copy(mesh1,mesh2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_copy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -711,13 +667,6 @@ end subroutine pawrad_copy
 
 subroutine pawrad_deducer0(func,funcsz,radmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_deducer0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -762,13 +711,6 @@ end subroutine pawrad_deducer0
 !! SOURCE
 
 subroutine pawrad_bcast(pawrad,comm_mpi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_bcast'
-!End of the abilint section
 
  implicit none
 
@@ -952,13 +894,6 @@ subroutine simp_gen(intg,func,radmesh,r_for_intg)
 #if defined HAVE_AVX_SAFE_MODE
 !DEC$ NOOPTIMIZE
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'simp_gen'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1080,13 +1015,6 @@ end subroutine simp_gen
 
 subroutine nderiv_gen(der,func,radmesh,der2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nderiv_gen'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1112,7 +1040,7 @@ subroutine nderiv_gen(der,func,radmesh,der2)
  end if
 
  compute_2der=(present(der2))
- 
+
  if (radmesh%mesh_type==1) then
 
    call nderiv_lin(radmesh%rstep,func,der,msz,1)
@@ -1190,13 +1118,6 @@ end subroutine nderiv_gen
 !! SOURCE
 
 subroutine nderiv_lin(hh,yy,zz,ndim,norder)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nderiv_lin'
-!End of the abilint section
 
  implicit none
 
@@ -1293,13 +1214,6 @@ end subroutine nderiv_lin
 
  subroutine bound_deriv(func,mesh,nn,yp1,ypn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bound_deriv'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------------
@@ -1357,13 +1271,6 @@ end subroutine bound_deriv
 !! SOURCE
 
 subroutine poisson(den,ll,radmesh,rv,screened_sr_separation,qq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'poisson'
-!End of the abilint section
 
  implicit none
 
@@ -1613,13 +1520,6 @@ end subroutine poisson
 
 function pawrad_ifromr(radmesh,rr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrad_ifromr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1682,13 +1582,6 @@ end function pawrad_ifromr
 !! SOURCE
 
 function screened_coul_kernel(order,r1,r2,formula)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screened_coul_kernel'
-!End of the abilint section
 
  implicit none
 
@@ -1936,13 +1829,6 @@ end function screened_coul_kernel
 !! SOURCE
 
 subroutine calc_slatradl(ll,mesh_size,ff1,ff2,Pawrad,integral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_slatradl'
-!End of the abilint section
 
  implicit none
 

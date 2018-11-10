@@ -28,7 +28,7 @@ module m_builtin_tests
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_io_tools,     only : open_file
 
@@ -75,13 +75,6 @@ contains
 
 subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testfi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -127,9 +120,7 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
 
  else
 
-!  Note : all processors have their own file, so no special
-!  attention must be paid to the parallel case.
-
+!  Note: all processors have their own file, so no special attention must be paid to the parallel case.
    write(temp_unit,*)
    write(temp_unit,*)'Status file, reporting on built-in test ',trim(testname(builtintest))
    write(temp_unit,*)
@@ -175,8 +166,7 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      fred_ref(1:3,1)=(/ -.140263620278D+00 , 0.0_dp , 0.0_dp /)
      fred_ref(1:3,2)=(/  .140013483725D+00 , 0.0_dp , 0.0_dp /)
      fred_mxdev=1.0d-3
-     strten_ref(1:6)=(/  1.3949d-3 ,  1.3643d-3 , 1.3643d-3 ,&
-&     .0_dp ,  .0_dp  ,  .0_dp    /)
+     strten_ref(1:6)=(/  1.3949d-3 ,  1.3643d-3 , 1.3643d-3 ,.0_dp ,  .0_dp  ,  .0_dp    /)
      strten_mxdev=1.0d-5
 
 !    Bigdft
@@ -258,10 +248,8 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
    if(abs(etot_ref-etotal)>etot_mxdev)then
      problem=1
      write(temp_unit,'(a)')' Error for total energy : '
-     write(temp_unit,format01000)'        expected ',etot_ref,&
-&     '  with maximum   deviation',etot_mxdev
-     write(temp_unit,format01000)'        computed ',etotal,&
-&     '  with effective deviation',abs(etotal-etot_ref)
+     write(temp_unit,format01000)'        expected ',etot_ref,'  with maximum   deviation',etot_mxdev
+     write(temp_unit,format01000)'        computed ',etotal,'  with effective deviation',abs(etotal-etot_ref)
    end if
 
 !  Take care of nuclei positions
@@ -270,12 +258,9 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      do ii=1,3
        if(abs(xred_ref(ii,iatom)-xred(ii,iatom))>xred_mxdev)then
          tok=0
-         write(temp_unit, '(a,i1,a,i1,a)' )&
-&         ' Error for nuclei position xred(',ii,',',iatom,')'
-         write(temp_unit,format01000)'        expected ',xred_ref(ii,iatom),&
-&         '  with maximum   deviation',xred_mxdev
-         write(temp_unit,format01000)'        computed ',xred(ii,iatom),&
-&         '  with effective deviation',&
+         write(temp_unit, '(a,i1,a,i1,a)' )' Error for nuclei position xred(',ii,',',iatom,')'
+         write(temp_unit,format01000)'        expected ',xred_ref(ii,iatom),'  with maximum   deviation',xred_mxdev
+         write(temp_unit,format01000)'        computed ',xred(ii,iatom),'  with effective deviation',&
 &         abs( xred(ii,iatom)-xred_ref(ii,iatom) )
        end if
      end do
@@ -289,12 +274,9 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
        if(abs(fred_ref(ii,iatom)-fred(ii,iatom))&
 &       >fred_mxdev)then
          tok=0
-         write(temp_unit, '(a,i1,a,i1,a)' )&
-&         ' Error for force fred(',ii,',',iatom,')'
-         write(temp_unit,format01000)'        expected ',fred_ref(ii,iatom),&
-&         '  with maximum   deviation',fred_mxdev
-         write(temp_unit,format01000)'        computed ',fred(ii,iatom),&
-&         '  with effective deviation',&
+         write(temp_unit, '(a,i1,a,i1,a)' )' Error for force fred(',ii,',',iatom,')'
+         write(temp_unit,format01000)'        expected ',fred_ref(ii,iatom),'  with maximum   deviation',fred_mxdev
+         write(temp_unit,format01000)'        computed ',fred(ii,iatom),'  with effective deviation',&
 &         abs( fred(ii,iatom)-fred_ref(ii,iatom) )
        end if
      end do
@@ -307,10 +289,8 @@ subroutine testfi(builtintest,etotal,filstat,fred,natom,strten,xred)
      if(abs(strten_ref(ii)-strten(ii))>strten_mxdev)then
        tok=0
        write(temp_unit,'(a,i1,a)')' Error for stress strten(',ii,')'
-       write(temp_unit,format01000)'        expected ',strten_ref(ii),&
-&       '  with maximum   deviation',strten_mxdev
-       write(temp_unit,format01000)'        computed ',strten(ii),&
-&       '  with effective deviation',&
+       write(temp_unit,format01000)'        expected ',strten_ref(ii),'  with maximum   deviation',strten_mxdev
+       write(temp_unit,format01000)'        computed ',strten(ii),'  with effective deviation',&
 &       abs( strten(ii)-strten_ref(ii) )
      end if
    end do

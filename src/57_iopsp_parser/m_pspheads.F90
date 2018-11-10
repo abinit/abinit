@@ -28,7 +28,7 @@ MODULE m_pspheads
 
  use defs_basis
  use defs_datatypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_hash_md5
  use m_psxml2ab
@@ -48,8 +48,7 @@ MODULE m_pspheads
  use m_fstrings, only : basename, lstrip, sjoin, startswith
  use m_read_upf_pwscf,  only : read_pseudo
  use m_pawpsp,   only : pawpsp_read_header_xml,pawpsp_read_pawheader
- use m_pawxmlps, only : paw_setup, paw_setuploc, npsp_pawxml, ipsp2xml, rdpawpsxml, &
-&                       paw_setup_copy, paw_setup_free, getecutfromxml, paw_setup_t
+ use m_pawxmlps, only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
 
  implicit none
 
@@ -58,6 +57,7 @@ MODULE m_pspheads
 
  public :: inpspheads      ! Initialize pspheads(1:npsp).
  public :: pspheads_comm   ! Communicate pspheads to all processors
+ public  ::  pawpsxml2ab
  public :: upfxc2abi       ! UPF XcC to Abinit pspxc
 
 contains
@@ -82,20 +82,12 @@ contains
 !!      m_ab7_invars_f90
 !!
 !! CHILDREN
-!!      atomic_info,getecutfromxml,paw_setup_copy,paw_setup_free,pawpsxml2ab
-!!      psp_from_data,psxml2abheader,rdpawpsxml,upfheader2abi,wrtout
+!!      atomic_info,pawpsxml2ab
+!!      psp_from_data,psxml2abheader,upfheader2abi,wrtout
 !!
 !! SOURCE
 
 subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inpspheads'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -113,7 +105,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 !scalars
  integer,parameter :: n1xccc_default=2501
  integer :: extension_switch
- integer :: idum,ii,ilmax,ipsp,ipsp_pawxml,lang,lmax,mmax,mpsang,n1xccc,nmesh,npsp_pawxml0
+ integer :: idum,ii,ilmax,ipsp,lang,lmax,mmax,mpsang,n1xccc,nmesh
  integer :: pspcod,pspso,test_paw,usexml,unt,useupf !,pspxc
  real(dp) :: al,e990,e999,fchrg,qchrg,r1,rchrg,rr ! ,rp,rs
  character(len=3) :: testxc
@@ -140,27 +132,6 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 !*************************************************************************
 
  test_paw=0
- npsp_pawxml0=0
- ipsp_pawxml=0
-
- do ipsp=1,npsp
-   if (open_file(filnam(ipsp),message,newunit=unt,form="formatted",status="old") /= 0) then
-     MSG_ERROR(message)
-   end if
-
-   rewind(unit=unt, err=10, iomsg=errmsg)
-   read(unt,*, err=10, iomsg=errmsg) testxml
-   if (testxml(1:5)=='<?xml') then
-     read(unt,*, err=10, iomsg=errmsg) testxml
-     if(testxml(1:4)=='<paw')npsp_pawxml0 =npsp_pawxml0+ 1
-   end if
-   close(unt, err=10, iomsg=errmsg)
- end do
-
- npsp_pawxml=npsp_pawxml0
- ABI_DATATYPE_ALLOCATE(paw_setup,(npsp_pawxml))
- ABI_ALLOCATE(ipsp2xml,(npsp))
- ipsp2xml=0
 
  do ipsp=1,npsp
 
@@ -251,18 +222,12 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
    else if(usexml==1.and.test_paw==1)then
 
-     ipsp_pawxml=ipsp_pawxml+1
-     ipsp2xml(ipsp)=ipsp_pawxml
      write(message,'(a,a)')  &
 &     '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,  message,'COLL')
-     call getecutfromxml(filnam(ipsp),ecut_tmp(:,:,ipsp),unt)
-     call rdpawpsxml(filnam(ipsp),paw_setuploc,unt)
-     call pawpsxml2ab( paw_setuploc, pspheads(ipsp),1 )
-     call paw_setup_copy(paw_setuploc,paw_setup(ipsp_pawxml))
-     pspcod=17
-     call paw_setup_free(paw_setuploc)
+     call pawpsxml2ab(filnam(ipsp),ecut_tmp(:,:,ipsp), pspheads(ipsp),1)
+     pspcod=17; pspheads(ipsp)%pspcod=pspcod
 
    else if (useupf == 1) then
      pspheads(ipsp)%pspcod = 11
@@ -592,13 +557,6 @@ end subroutine inpspheads
 
 subroutine pspheads_comm(npsp,pspheads,test_paw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pspheads_comm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -756,9 +714,10 @@ end subroutine pspheads_comm
 !!  convert to abinit internal datastructures.
 !!
 !! INPUTS
-!! psxml  = pseudopotential data structure
-!! option = 1 for inpsphead call
-!!          2 for pspatm call
+!!  ecut_tmp(3,2)= possible ecut values as read in psp files
+!!  filenam= input file name (atomicdata XML)
+!!  option= 1 if header only is read; 0 if the whole data are read
+!!
 !! OUTPUT
 !! pspheads data structure is filled
 !!
@@ -770,146 +729,63 @@ end subroutine pspheads_comm
 !!
 !! SOURCE
 
-subroutine pawpsxml2ab( psxml, pspheads,option )
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpsxml2ab'
-!End of the abilint section
+subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(paw_setup_t),intent(in) :: psxml
+ integer, intent(in) :: option
+ character(len=fnlen), intent(in) :: filnam
  type(pspheader_type),intent(inout) :: pspheads !vz_i
- integer ,intent(in) ::option
+!arrays
+ real(dp),intent(inout) :: ecut_tmp(3,2)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,il,lloc,mesh_size_ae,mesh_size_proj
- real(dp) :: r2well
+ integer :: ii,il,lloc,lmax,pspcod,pspxc,unt
+ real(dp) :: r2well,zionpsp,znuclpsp
 ! character(len=100) :: xclibxc
 ! character(len=500) :: message
 !arrays
 
 ! *********************************************************************
-
- if(option==1.or.option==2) then
-   call pawpsp_read_header_xml(lloc,pspheads%lmax,pspheads%pspcod,&
-&   pspheads%pspxc,psxml,r2well,pspheads%zionpsp,pspheads%znuclpsp)
-
-   call pawpsp_read_pawheader(pspheads%pawheader%basis_size,&
-&   pspheads%lmax,pspheads%pawheader%lmn_size,&
-&   pspheads%pawheader%l_size,pspheads%pawheader%mesh_size,&
-&   pspheads%pawheader%pawver,psxml,pspheads%pawheader%rpaw,&
-&   pspheads%pawheader%rshp,pspheads%pawheader%shape_type)
-
-   pspheads%nproj=0
-   do il=0,pspheads%lmax
-     do ii=1,pspheads%pawheader%basis_size
-       if(psxml%valence_states%state(ii)%ll==il) pspheads%nproj(il)=pspheads%nproj(il)+1
-     end do
-   end do
-   pspheads%nprojso=0
-   pspheads%pspdat=27061961
-   pspheads%pspso=1
-   pspheads%xccc=1
-   pspheads%title=psxml%atom%symbol
-!
+ 
+ if (option==1) then
+   call rdpawpsxml_header(ecut_tmp,filnam,paw_setuploc)
+   paw_setuploc%idgrid= paw_setuploc%radial_grid(1)%id
+ else
+   call rdpawpsxml(filnam,paw_setuploc)
  end if
 
- if (option==2) then
-   write(std_out,*) "paw_setup version= ",psxml%version
-   write(std_out,*)"atom symbol= ",psxml%atom%symbol,"Z= ",psxml%atom%znucl,&
-&   "core= ",psxml%atom%zion,"valence= ",psxml%atom%zval
-   write(std_out,*) "xc_functional  xc_type=",psxml%xc_functional%functionaltype,&
-&   "xc_name= ",psxml%xc_functional%name
-   write(std_out,*)"generator  type=",psxml%generator%gen,"name= ",psxml%generator%name
-   write(std_out,*)"PAW_radius rpaw=",psxml%rpaw
-   write(std_out,*)"valence_states"
-   do ii=1,psxml%valence_states%nval
-     write(std_out,*)"state n=",psxml%valence_states%state(ii)%nn,&
-&     "l= ",psxml%valence_states%state(ii)%ll,&
-&     "f= ",psxml%valence_states%state(ii)%ff,&
-&     "rc= ",psxml%valence_states%state(ii)%rc,&
-&     "e= ",psxml%valence_states%state(ii)%ee,&
-&     "id= ",psxml%valence_states%state(ii)%id
+ call pawpsp_read_header_xml(lloc,lmax,pspcod,&
+&   pspxc,paw_setuploc,r2well,zionpsp,znuclpsp)
+
+ pspheads%lmax=lmax
+ pspheads%pspxc=pspxc
+ pspheads%zionpsp=zionpsp
+ pspheads%znuclpsp=znuclpsp
+
+ call pawpsp_read_pawheader(pspheads%pawheader%basis_size,&
+&   pspheads%lmax,pspheads%pawheader%lmn_size,&
+&   pspheads%pawheader%l_size,pspheads%pawheader%mesh_size,&
+&   pspheads%pawheader%pawver,paw_setuploc,pspheads%pawheader%rpaw,&
+&   pspheads%pawheader%rshp,pspheads%pawheader%shape_type)
+
+ pspheads%nproj=0
+ do il=0,pspheads%lmax
+   do ii=1,pspheads%pawheader%basis_size
+     if(paw_setuploc%valence_states%state(ii)%ll==il) pspheads%nproj(il)=pspheads%nproj(il)+1
    end do
-   do ii=1,psxml%ngrid
-     write(std_out,*)"radial_grid  eq= ",psxml%radial_grid(ii)%eq,&
-&     "a= ",psxml%radial_grid(ii)%aa,&
-&     "n= ",psxml%radial_grid(ii)%nn,&
-&     "d= ",psxml%radial_grid(ii)%dd,&
-&     "b= ",psxml%radial_grid(ii)%bb,&
-&     "istart= ",psxml%radial_grid(ii)%istart,&
-&     "iend= ",psxml%radial_grid(ii)%iend,&
-&     "id= ",psxml%radial_grid(ii)%id
-   end do
-   write(std_out,*)"shape_function  type= ",psxml%shape_function%gtype,&
-&   "rc= ",psxml%shape_function%rc,&
-&   "lamb",psxml%shape_function%lamb
-   if(psxml%ae_core_density%tread) then
-     write(std_out,*)"ae_core_density grid=  ",psxml%ae_core_density%grid
-     write(std_out,*)psxml%ae_core_density%data
-   end if
-   if(psxml%pseudo_core_density%tread) then
-     write(std_out,*)"pseudo_core_density grid= ",psxml%pseudo_core_density%grid
-     write(std_out,*)psxml%pseudo_core_density%data
-   end if
-   if(psxml%pseudo_valence_density%tread) then
-     write(std_out,*)"pseudo_valence_densit grid= ",psxml%pseudo_valence_density%grid
-     write(std_out,*)psxml%pseudo_valence_density%data
-   end if
-   if(psxml%zero_potential%tread) then
-     write(std_out,*)"zero_potential grid= ",psxml%zero_potential%grid
-     write(std_out,*)psxml%zero_potential%data
-   end if
-   if(psxml%LDA_minus_half_potential%tread) then
-     write(std_out,*)"LDA_minus_half_potential grid= ",psxml%LDA_minus_half_potential%grid
-     write(std_out,*)psxml%LDA_minus_half_potential%data
-   end if
-   if(psxml%ae_core_kinetic_energy_density%tread) then
-     write(std_out,*)"ae_core_kinetic_energy_density grid= ",psxml%ae_core_kinetic_energy_density%grid
-     write(std_out,*)psxml%ae_core_kinetic_energy_density%data
-   end if
-   if(psxml%pseudo_core_kinetic_energy_density%tread) then
-     write(std_out,*)"pseudo_core_kinetic_energy_density grid= ",psxml%pseudo_core_kinetic_energy_density%grid
-     write(std_out,*)psxml%pseudo_core_kinetic_energy_density%data
-   end if
-   if(psxml%kresse_joubert_local_ionic_potential%tread) then
-     write(std_out,*)"kresse_joubert_local_ionic_potential grid =",psxml%kresse_joubert_local_ionic_potential%grid
-     write(std_out,*)psxml%kresse_joubert_local_ionic_potential%data
-   end if
-   if(psxml%blochl_local_ionic_potential%tread) then
-     write(std_out,*)"blochl_local_ionic_potential grid= ",psxml%blochl_local_ionic_potential%grid
-     write(std_out,*)psxml%blochl_local_ionic_potential%data
-   end if
-   do ii=1,psxml%ngrid
-     if(trim(psxml%ae_partial_wave(1)%grid)==trim(psxml%radial_grid(ii)%id)) then
-       mesh_size_ae=psxml%radial_grid(ii)%iend-psxml%radial_grid(ii)%istart+1
-     end if
-   end do
-   do ii=1,psxml%ngrid
-     if(trim(psxml%projector_function(1)%grid)==trim(psxml%radial_grid(ii)%id)) then
-       mesh_size_proj=psxml%radial_grid(ii)%iend-psxml%radial_grid(ii)%istart+1
-     end if
-   end do
-   do ii=1,psxml%valence_states%nval
-     write(std_out,*)"ae_partial_wave state= ",psxml%ae_partial_wave(ii)%state,&
-&     "grid= ",psxml%ae_partial_wave(ii)%grid
-     write(std_out,*)psxml%ae_partial_wave(ii)%data(1:mesh_size_ae)
-     write(std_out,*)"pseudo_partial_wave state= ",psxml%pseudo_partial_wave(ii)%state,&
-&     "grid= ",psxml%pseudo_partial_wave(ii)%grid
-     write(std_out,*)psxml%pseudo_partial_wave(ii)%data(1:mesh_size_ae)
-     write(std_out,*)"projector_function state= ",psxml%projector_function(ii)%state,&
-&     "grid= ",psxml%projector_function(ii)%grid
-     write(std_out,*)psxml%projector_function(ii)%data(1:mesh_size_proj)
-   end do
-   write(std_out,*)"kinetic_energy_differences"
-   write(std_out,*)psxml%kinetic_energy_differences%data
+ end do
+ pspheads%nprojso=0
+ pspheads%pspdat=27061961
+ pspheads%pspso=1
+ pspheads%xccc=1
+ pspheads%title=paw_setuploc%atom%symbol
+
+ if (option==1) then
+   call paw_setup_free(paw_setuploc)
  end if
 
 end subroutine pawpsxml2ab
@@ -945,13 +821,6 @@ end subroutine pawpsxml2ab
 !! SOURCE
 
 subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfheader2abi'
-!End of the abilint section
 
   implicit none
 
@@ -1032,13 +901,6 @@ end subroutine upfheader2abi
 !! SOURCE
 
 subroutine upfxc2abi(dft, pspxc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'upfxc2abi'
-!End of the abilint section
 
   implicit none
 

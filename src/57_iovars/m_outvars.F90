@@ -29,7 +29,7 @@ module m_outvars
  use defs_basis
  use defs_abitypes
  use m_results_out
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xomp
  use m_xmpi
@@ -114,14 +114,6 @@ contains
 
 subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 &  mxvals,ndtset,ndtset_alloc,npsp,results_out,timopt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvars'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

@@ -23,7 +23,7 @@ MODULE m_FFT_prof
  use defs_abitypes
  use m_xomp
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_fftw3
  use m_fft
 
@@ -38,15 +38,6 @@ MODULE m_FFT_prof
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
  use m_oscillators,    only : rho_tw_g
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
- use interfaces_12_hide_mpi
- use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_51_manage_mpi
- use interfaces_53_ffts
- use interfaces_56_recipspace
-!End of the abilint section
 
  implicit none
 
@@ -185,13 +176,6 @@ CONTAINS  !====================================================================
 
 subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_test_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -284,13 +268,6 @@ end subroutine fft_test_init
 
 subroutine fft_test_nullify(Ftest)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_test_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -328,13 +305,6 @@ end subroutine fft_test_nullify
 !! SOURCE
 
 subroutine fft_test_free_0D(Ftest)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_test_free_0D'
-!End of the abilint section
 
  implicit none
 
@@ -403,13 +373,6 @@ end subroutine fft_test_free_0D
 
 subroutine fft_test_free_1D(Ftest)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_test_free_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -452,14 +415,6 @@ end subroutine fft_test_free_1D
 !! SOURCE
 
 subroutine fft_test_print(Ftest,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_test_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -513,13 +468,6 @@ end subroutine fft_test_print
 
 function name_of(Ftest)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'name_of'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -566,13 +514,6 @@ end function name_of
 !! SOURCE
 
 subroutine fftprof_init(Ftprof,test_name,nthreads,ncalls,ndat,cpu_time,wall_time,gflops,results)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftprof_init'
-!End of the abilint section
 
  implicit none
 
@@ -631,13 +572,6 @@ end subroutine fftprof_init
 
 subroutine fftprof_free_0D(Ftprof)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftprof_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -683,13 +617,6 @@ end subroutine fftprof_free_0D
 
 subroutine fftprof_free_1D(Ftprof)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftprof_free_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -732,14 +659,6 @@ end subroutine fftprof_free_1D
 !! SOURCE
 
 subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftprof_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -856,14 +775,6 @@ end subroutine fftprof_print
 
 subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_fourdp'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -950,7 +861,7 @@ subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
  do icall=1,NCALLS_FOR_TEST
    !
    ifft = empty_cache(CACHE_KBSIZE)
-   call fourdp(cplex,fofg,fofr,isign,Ftest%MPI_enreg,Ftest%nfft,Ftest%ngfft,Ftest%paral_kgb,0)
+   call fourdp(cplex,fofg,fofr,isign,Ftest%MPI_enreg,Ftest%nfft,1,Ftest%ngfft,0)
    !
    ! Store results at the first call.
    if (icall==1) then
@@ -1002,13 +913,6 @@ end subroutine time_fourdp
 !! SOURCE
 
 subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_fftbox'
-!End of the abilint section
 
  implicit none
 
@@ -1146,14 +1050,6 @@ end subroutine time_fftbox
 !! SOURCE
 
 subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_fourwf'
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -1329,7 +1225,7 @@ subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
 
    call fourwf(cplex,denpot,fofg_in,fofg_out,fofr_4,gbound_in,gbound_out,Ftest%istwf_k,&
 &    Ftest%kg_k,Ftest%kg_kout,Ftest%mgfft,Ftest%MPI_enreg,ndat,Ftest%ngfft,Ftest%npw_k,npw_out,n4,n5,n6,option_fourwf,&
-&    Ftest%paral_kgb,tim0,weight_r,weight_i)
+&    tim0,weight_r,weight_i)
    !
    ! Store results at the first call.
    if (icall==1) then
@@ -1448,13 +1344,6 @@ end subroutine time_fourwf
 
 subroutine fftprof_ncalls_per_test(ncalls)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftprof_ncalls_per_test'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -1491,13 +1380,6 @@ end subroutine fftprof_ncalls_per_test
 !! SOURCE
 
 subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftprof)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_rhotwg'
-!End of the abilint section
 
  implicit none
 
@@ -1652,13 +1534,6 @@ end subroutine time_rhotwg
 !! SOURCE
 
 subroutine time_fftu(Ftest,isign,header,Ftprof)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_fftu'
-!End of the abilint section
 
  implicit none
 
@@ -1830,13 +1705,6 @@ end subroutine time_fftu
 
 subroutine prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prof_fourdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments -----------------------------------
@@ -1943,13 +1811,6 @@ end subroutine prof_fourdp
 !! SOURCE
 
 subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prof_fourwf'
-!End of the abilint section
 
  implicit none
 
@@ -2058,13 +1919,6 @@ end subroutine prof_fourwf
 
 subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin,&
 &  rprimd,nsym,symrel,gmet,MPI_enreg_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prof_rhotwg'
-!End of the abilint section
 
  implicit none
 
@@ -2176,13 +2030,6 @@ end subroutine prof_rhotwg
 !! SOURCE
 
 function empty_cache(kbsize) result(fake)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'empty_cache'
-!End of the abilint section
 
  implicit none
 

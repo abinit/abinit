@@ -27,7 +27,7 @@ module m_berryphase
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_hdr
 
  use m_geometry,     only : xred2xcart
@@ -161,14 +161,6 @@ subroutine berryphase(atindx1,bdberry,cg,gprimd,istwfk,kberry,kg,kpt_,&
 &  kptopt,kptrlatt,mband,mcg,&
 &  mkmem,mpw,natom,nattyp,nband,nberry,npwarr,nspinor,nsppol,ntypat,&
 &  nkpt_,rprimd,ucvol,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'berryphase'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

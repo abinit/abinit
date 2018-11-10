@@ -92,13 +92,6 @@ CONTAINS
 
 function ylmc(il,im,kcart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -132,7 +125,7 @@ function ylmc(il,im,kcart)
  rxy=SQRT(kcart(1)**2+kcart(2)**2)
  if (rxy<PPAD)rxy=r+PPAD
 !
-! Determine theta and phi 
+! Determine theta and phi
  costh= kcart(3)/r
 
 #if 1
@@ -177,7 +170,7 @@ function ylmc(il,im,kcart)
    ylmc = -SQRT(15.d0/(8.d0*pi))*sinth*costh*cmplx(cosphi,sinphi)
   else if (ABS(im)==2) then
    ylmc = SQRT(15.d0/(32.d0*pi))*(sinth)**2*CMPLX(costwophi,sintwophi)
-  else 
+  else
    msg='wrong im'
    MSG_ERROR(msg)
   end if
@@ -191,7 +184,7 @@ function ylmc(il,im,kcart)
    ylmc= SQRT(105.d0/(32.d0*pi))*sinth**2*costh*CMPLX(costwophi,sintwophi)
   else if (ABS(im)==3) then
    ylmc=-SQRT(35.d0/(64.d0*pi))*sinth**3*CMPLX(costhreephi,sinthreephi)
-  else 
+  else
    msg='wrong im'
    MSG_ERROR(msg)
   end if
@@ -205,8 +198,8 @@ function ylmc(il,im,kcart)
  if (im < 0) ylmc=(-one)**(im)*CONJG(ylmc)
 
  ! FIXME: Use the piece of code below as it works for arbitrary (l,m)
- ! the implementation above is buggy when the vector is along z! 
- ! 
+ ! the implementation above is buggy when the vector is along z!
+ !
 #if 0
 ! Remember the expression of complex spherical harmonics:
 ! $Y_{lm}(\theta,\phi)=sqrt{{(2l+1) over (4\pi)} {fact(l-m)/fact(l+m)} } P_l^m(cos(\theta)) e^{i m\phi}$
@@ -218,7 +211,7 @@ function ylmc(il,im,kcart)
     !MSG_WARNING("Check new_ylmc")
     !write(std_out,*)"il,im,new_ylmc, ylmc",il,im,new_ylmc,ylmc
     !write(std_out,*)"fact",SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi))
-    !write(std_out,*)"costh,sinth,ass_leg_pol",costh,sinth,ass_leg_pol(il,ABS(im),costh) 
+    !write(std_out,*)"costh,sinth,ass_leg_pol",costh,sinth,ass_leg_pol(il,ABS(im),costh)
     !write(std_out,*)"cosphi,sinphi,e^{imphi}",cosphi,sinphi,CMPLX(cosphi,sinphi)**ABS(im)
   end if
   ylmc = new_ylmc
@@ -234,7 +227,7 @@ end function ylmc
 !! ylmcd
 !!
 !! FUNCTION
-!!  Computes dth and dphi, the first derivatives of complex Ylm as a function of 
+!!  Computes dth and dphi, the first derivatives of complex Ylm as a function of
 !!  th and phi (the angles of the spherical coordinates)
 !!  It works for all spherical harmonics with l <= 3
 !!
@@ -261,13 +254,6 @@ end function ylmc
 
 subroutine ylmcd(il,im,kcart,dth,dphi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmcd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -281,7 +267,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 !scalars
  integer,parameter :: LMAX=3
  real(dp),parameter :: PPAD=tol8
- real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi
+ real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi,c
  character(len=500) :: msg
 
 ! *************************************************************************
@@ -300,7 +286,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  rxy=SQRT(kcart(1)**2+kcart(2)**2)
  if (rxy<PPAD) rxy=r+PPAD
 
-! Determine theta and phi 
+! Determine theta and phi
  costh= kcart(3)/r
 #if 1
  ! old buggy coding
@@ -325,7 +311,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  select case (il)
 
  case (0)
-   dth  = czero 
+   dth  = czero
    dphi = czero
 
  case (1)
@@ -354,11 +340,13 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
      dth = SQRT(7.d0/(16*pi))*(-15.d0*costh**2*sinth + 3.d0**sinth)
      dphi= czero
    else if (ABS(im)==1) then
-     dth= -SQRT(21.d0/(64.d0*pi))*CMPLX(cosphi,sinphi)*(5.d0*costh**3-costh-10.d0*sinth**2*costh)
-     dphi=-SQRT(21.d0/(64.d0*pi))*sinth*(5.d0*costh**2-1)*(0.d0,1.d0)*CMPLX(cosphi,sinphi)
+     c = SQRT(21.d0/(64.d0*pi))
+     dth= -c*      (15.d0*costh**3-11.d0*costh)*            CMPLX(cosphi,sinphi)
+     dphi=-c*sinth*( 5.d0*costh**2-1          )*(0.d0,1.d0)*CMPLX(cosphi,sinphi)
    else if (ABS(im)==2) then
-     dth =SQRT(105.d0/(32.d0*pi))*(2.d0*sinth*costh**2-sinth**3)*CMPLX(costwophi,sintwophi)
-     dphi=SQRT(105.d0/(32*pi))*sinth**2*costh*(0.d0,2.d0)*CMPLX(costwophi,sintwophi)
+     c = SQRT(105.d0/(32.d0*pi))
+     dth =c*(2.d0*sinth*costh**2-sinth**3)   *CMPLX(costwophi,sintwophi)
+     dphi=c*(2.d0*sinth**2*costh)*(0.d0,1.d0)*CMPLX(costwophi,sintwophi)
    else if (abs(im)==3) then
      dth =-SQRT(35.d0/(64.d0*pi))*3.d0*sinth**2*costh*CMPLX(costhreephi,sinthreephi)
      dphi=-SQRT(35.d0/(64.d0*pi))*sinth**3*(0.d0,3.d0)*CMPLX(costhreephi,sinthreephi)
@@ -411,13 +399,6 @@ end subroutine ylmcd
 
 subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylm_cmplx'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -436,7 +417,7 @@ subroutine ylm_cmplx(lx,ylm,xx,yy,zz)
  real(dp) :: sina(lx+1)
 
 ! *************************************************************************
- 
+
 !normalization coefficients
  sq2=sqrt(2.0d0)
  fact(1)=1.0d0
@@ -569,13 +550,6 @@ end subroutine ylm_cmplx
 !! SOURCE
 
 subroutine initylmr(mpsang,normchoice,npts,nrm,option,rr,ylmr,ylmr_gr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initylmr'
-!End of the abilint section
 
  implicit none
 
@@ -770,8 +744,8 @@ end subroutine initylmr
 !!  integer :: l',m',l,m
 !!
 !! OUTPUT
-!!  complex(dpc) :: ys_val 
-!! 
+!!  complex(dpc) :: ys_val
+!!
 !! NOTES
 !! Ylm is the standard complex-valued spherical harmonic, Slm is the real spherical harmonic
 !! used througout abinit. <Yl'm'|Slm> is their overlap.
@@ -786,13 +760,6 @@ end subroutine initylmr
 
 subroutine ys(lp,mp,ll,mm,ys_val)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ys'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -806,16 +773,16 @@ subroutine ys(lp,mp,ll,mm,ys_val)
 
 ! *********************************************************************
 
- 
+
  ys_val = czero
 
  if(lp==ll .AND. (mp==mm .OR. mp==-mm) ) then
   ! (-1)**mm
    m1mm=cone; if(abs(mod(mm,2))==1) m1mm=-m1mm
-  
+
   ! delta(mp,mm)
    dmpmm=czero; if(mp==mm) dmpmm=cone
-  
+
   ! delta(mp,-mm)
    dmpmmm=czero; if(mp==-mm) dmpmmm=cone
 
@@ -829,7 +796,7 @@ subroutine ys(lp,mp,ll,mm,ys_val)
    end select
 
  end if
- 
+
 end subroutine ys
 !!***
 
@@ -847,7 +814,7 @@ end subroutine ys
 !!
 !! OUTPUT
 !!   complex(dpc) :: lidir
-!! 
+!!
 !! NOTES
 !!  Ylm is the standard complex-valued spherical harmonic,
 !!  idir is the direction in space of L
@@ -861,13 +828,6 @@ end subroutine ys
 !! SOURCE
 
 subroutine lxyz(lp,mp,idir,ll,mm,lidir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lxyz'
-!End of the abilint section
 
  implicit none
 
@@ -887,9 +847,9 @@ subroutine lxyz(lp,mp,idir,ll,mm,lidir)
    if (mp==mm+1) jpme=cone*sqrt((ll-mm)*(ll+mm+one))
    if (mp==mm-1) jmme=cone*sqrt((ll-mm+one)*(ll+mm))
  end if
- 
+
  lidir = czero
- if (lp == ll) then 
+ if (lp == ll) then
    select case (idir)
      case (1) ! Lx
        lidir = cone*half*(jpme+jmme)
@@ -917,7 +877,7 @@ end subroutine lxyz
 !!
 !! OUTPUT
 !!   complex(dpc) :: sls_val
-!! 
+!!
 !! NOTES
 !! Slm is the real spherical harmonic used througout abinit,
 !! L_idir is a component of the angular momentum operator.
@@ -932,13 +892,6 @@ end subroutine lxyz
 !! SOURCE
 
 subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'slxyzs'
-!End of the abilint section
 
  implicit none
 
@@ -955,7 +908,7 @@ subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
 ! *********************************************************************
 
  sls_val = czero
- 
+
  if (lp == ll) then
    lpp  = ll
    lppp = ll
@@ -968,7 +921,7 @@ subroutine slxyzs(lp,mp,idir,ll,mm,sls_val)
      end do
    end do
  end if
- 
+
 end subroutine slxyzs
 !!***
 
@@ -998,13 +951,6 @@ end subroutine slxyzs
 !! SOURCE
 
 subroutine plm_coeff(blm,mpsang,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_coeff'
-!End of the abilint section
 
  implicit none
 
@@ -1113,13 +1059,6 @@ end subroutine plm_coeff
 
 function ass_leg_pol(l,m,xarg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ass_leg_pol'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1197,13 +1136,6 @@ end function ass_leg_pol
 !! SOURCE
 
 subroutine plm_d2theta(mpsang,plm_d2t,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_d2theta'
-!End of the abilint section
 
  implicit none
 
@@ -1289,13 +1221,6 @@ end subroutine plm_d2theta
 !! SOURCE
 
 function plm_dphi(ll,mm,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dphi'
-!End of the abilint section
 
  implicit none
 
@@ -1384,13 +1309,6 @@ end function plm_dphi
 !! SOURCE
 
 function plm_dtheta(ll,mm,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'plm_dtheta'
-!End of the abilint section
 
  implicit none
 
@@ -1483,13 +1401,6 @@ end function plm_dtheta
 
 subroutine pl_deriv(mpsang,pl_d2,xx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pl_deriv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1563,13 +1474,6 @@ end subroutine pl_deriv
 !! SOURCE
 
 subroutine mkeuler(rot,cosbeta,cosalp,sinalp,cosgam,singam,isn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkeuler'
-!End of the abilint section
 
  implicit none
 
@@ -1663,13 +1567,6 @@ end subroutine mkeuler
 
 elemental function dble_factorial(nn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dble_factorial'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1725,13 +1622,6 @@ end function dble_factorial
 !! SOURCE
 
 function dbeta(cosbeta,ll,mp,mm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbeta'
-!End of the abilint section
 
  implicit none
 
@@ -1819,13 +1709,6 @@ end function dbeta
 
 pure function phim(costheta,sintheta,mm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1889,14 +1772,6 @@ pure function phim(costheta,sintheta,mm)
 
 subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,wrt_mode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_mlms2jmj'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1934,7 +1809,7 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
    msg=' optspin=/1 and =/2 !'
    MSG_BUG(msg)
  end if
- 
+
  if (unitfi/=-1) then
    if(option==1) then
      write(msg,'(3a)') ch10,&
@@ -1946,7 +1821,7 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
      call wrtout(unitfi,msg,wrt_mode)
    end if
  end if
- 
+
  if(option==1) then
    if(optspin==2) then
      if(abs(prtvol)>2.and.unitfi/=-1)&
@@ -2165,14 +2040,6 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 
 subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitfi,wrt_mode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mat_slm2ylm'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2210,7 +2077,7 @@ subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitf
    write(msg,'(3a)') ch10, "   mat_slm2ylm"
    call wrtout(unitfi,msg,wrt_mode)
  end if
- 
+
  if(abs(prtvol)>2.and.unitfi/=-1) then
    if(option==1.or.option==3) then
      write(msg,'(3a)') ch10,"matrix in Slm basis is changed into Ylm basis"
@@ -2331,13 +2198,6 @@ end subroutine mat_slm2ylm
 
 subroutine create_slm2ylm(lcor,slmtwoylm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_slm2ylm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2399,13 +2259,6 @@ end subroutine create_slm2ylm
 !! SOURCE
 
 subroutine create_mlms2jmj(lcor,mlmstwojmj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'create_mlms2jmj'
-!End of the abilint section
 
  implicit none
 
@@ -2525,14 +2378,6 @@ end subroutine create_mlms2jmj
 !! SOURCE
 
 subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setsym_ylm'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2686,13 +2531,6 @@ end subroutine setsym_ylm
 !! SOURCE
 
  subroutine setnabla_ylm(ang_phipphj,mpsang)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setnabla_ylm'
-!End of the abilint section
 
  implicit none
 

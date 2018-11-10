@@ -5,8 +5,8 @@
 !!****m* ABINIT/m_global
 !! NAME
 !!  m_global
-!! 
-!! FUNCTION 
+!!
+!! FUNCTION
 !!  Manage error and warnings for the ctqmc
 !!
 !! COPYRIGHT
@@ -26,7 +26,9 @@
 !! SOURCE
 
 #include "defs.h"
+
 MODULE m_Global
+
 #if defined HAVE_CONFIG_H
 ! we are in abinit
 USE defs_basis
@@ -80,13 +82,6 @@ CONTAINS
 !! SOURCE
 
 SUBROUTINE ERROR(message)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ERROR'
-!End of the abilint section
 
 !Arguments ------------------------------------
 #ifdef HAVE_MPI1
@@ -143,13 +138,6 @@ END SUBROUTINE ERROR
 
 SUBROUTINE WARN(message)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WARN'
-!End of the abilint section
-
 !Arguments ------------------------------------
 #ifdef HAVE_MPI1
 include 'mpif.h'
@@ -203,13 +191,6 @@ END SUBROUTINE WARN
 
 SUBROUTINE WARNALL(message)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WARNALL'
-!End of the abilint section
-
 !Arguments ------------------------------------
 #ifdef HAVE_MPI1
 include 'mpif.h'
@@ -233,5 +214,5 @@ include 'mpif.h'
 END SUBROUTINE WARNALL
 !!***
 
-END MODULE
+END MODULE m_global
 !!***

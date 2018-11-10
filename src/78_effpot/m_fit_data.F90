@@ -26,7 +26,7 @@ module m_fit_data
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_geometry,     only : metric
  
@@ -166,13 +166,6 @@ subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_init'
-!End of the abilint section
-
  integer,intent(in) :: natom,ntime
 !arrays
  real(dp),intent(in) :: energy_diff(ntime),fcart_diff(3,natom,ntime)
@@ -241,13 +234,6 @@ end subroutine fit_data_init
 
 subroutine fit_data_free(fit_data)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_free'
-!End of the abilint section
-
  implicit none
   
 !Arguments ------------------------------------
@@ -313,13 +299,6 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
  use m_effective_potential,only : effective_potential_getDisp
  use m_abihist, only : abihist
  use m_strain,only : strain_type,strain_get
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fit_data_compute'
-!End of the abilint section
-
  implicit none
   
 !Arguments ------------------------------------
@@ -478,13 +457,6 @@ subroutine training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'training_set_init'
-!End of the abilint section
-
  integer,intent(in) :: natom,ntime
 !arrays
  real(dp),intent(in) :: displacement(3,natom,ntime),du_delta(6,3,natom,ntime)
@@ -541,13 +513,6 @@ end subroutine training_set_init
 !! SOURCE
 
 subroutine training_set_free(ts)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'training_set_free'
-!End of the abilint section
 
  implicit none
   

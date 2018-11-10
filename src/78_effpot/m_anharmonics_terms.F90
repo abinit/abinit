@@ -27,7 +27,7 @@ module m_anharmonics_terms
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_polynomial_coeff
  use m_ifc, only : ifc_type,ifc_free
 
@@ -86,12 +86,12 @@ module m_anharmonics_terms
 !    elastic_constant(6,6,6)
 !    Elastic tensor Hartree
 
-   real(dp), allocatable :: elastic_displacement(:,:,:,:)    
+   real(dp), allocatable :: elastic_displacement(:,:,:,:)
 !    elastic_displacement(6,6,3,natom)
-!    internal strain tensor 
+!    internal strain tensor
 
    type(ifc_type),dimension(:),allocatable :: phonon_strain
-!   Array of ifc with phonon_strain coupling for each strain 
+!   Array of ifc with phonon_strain coupling for each strain
 
  end type anharmonics_terms_type
 !!***
@@ -109,7 +109,7 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !! natom  = number of atoms in primitive cell
-!! ncoeff = number of coefficient for the fited polynome 
+!! ncoeff = number of coefficient for the fited polynome
 !! bounded = optional, flag to now if the model in bounded
 !! elastic3rd(6,6,6) = optional,3rd order of the elastic constants
 !! elastic4th(6,6,6,6) = optional,4st order of the elastic constants
@@ -131,13 +131,6 @@ CONTAINS  !=====================================================================
 subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
 &                                 bounded,elastic3rd,elastic4th,elastic_displacement,&
 &                                 phonon_strain,coeffs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_init'
-!End of the abilint section
 
  implicit none
 
@@ -209,7 +202,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
    anharmonics_terms%bounded = .FALSE.
  end if
 
-end subroutine anharmonics_terms_init 
+end subroutine anharmonics_terms_init
 !!***
 
 !****f* m_anharmonics_terms/anharmonics_terms_free
@@ -233,15 +226,8 @@ end subroutine anharmonics_terms_init
 !!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
- 
+
 subroutine anharmonics_terms_free(anharmonics_terms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_free'
-!End of the abilint section
 
   implicit none
 
@@ -288,7 +274,7 @@ end subroutine anharmonics_terms_free
 !! anharmonics_terms_freeCoeffs
 !!
 !! FUNCTION
-!! deallocate all dynamic memory for the coefficients 
+!! deallocate all dynamic memory for the coefficients
 !! of this  anharmonics_terms datatype
 !!
 !! INPUTS
@@ -305,15 +291,8 @@ end subroutine anharmonics_terms_free
 !!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
- 
+
 subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_freeCoeffs'
-!End of the abilint section
 
   implicit none
 
@@ -363,17 +342,10 @@ end subroutine anharmonics_terms_freeCoeffs
 !!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
- 
+
 subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
 
  use m_polynomial_coeff
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setCoeffs'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -404,7 +376,7 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
   end if
 
 ! Allocation of the new array
-  anharmonics_terms%ncoeff = ncoeff  
+  anharmonics_terms%ncoeff = ncoeff
   ABI_DATATYPE_ALLOCATE(anharmonics_terms%coefficients,(ncoeff))
   do ii=1,anharmonics_terms%ncoeff
     call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%nterm,&
@@ -436,15 +408,8 @@ end subroutine anharmonics_terms_setCoeffs
 !!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
- 
+
 subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setElastic3rd'
-!End of the abilint section
 
   implicit none
 
@@ -460,14 +425,14 @@ subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
 
 ! 1-reinitialise the previous value
   anharmonics_terms%elastic3rd(:,:,:) = zero
-  anharmonics_terms%has_elastic3rd = .FALSE. 
+  anharmonics_terms%has_elastic3rd = .FALSE.
 
 ! 2-Allocation of the new array
   anharmonics_terms%elastic3rd(:,:,:) = elastics(:,:,:)
 
 ! 3-Set the flag
   if(any(abs(anharmonics_terms%elastic3rd)> tol15)) then
-    anharmonics_terms%has_elastic3rd = .TRUE. 
+    anharmonics_terms%has_elastic3rd = .TRUE.
   end if
 
 end subroutine anharmonics_terms_setElastic3rd
@@ -495,15 +460,8 @@ end subroutine anharmonics_terms_setElastic3rd
 !!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
- 
+
 subroutine anharmonics_terms_setElastic4th(anharmonics_terms,elastics)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setElastic4th'
-!End of the abilint section
 
   implicit none
 
@@ -519,14 +477,14 @@ subroutine anharmonics_terms_setElastic4th(anharmonics_terms,elastics)
 
 ! 1-reinitialise the previous value
   anharmonics_terms%elastic4th(:,:,:,:) = zero
-  anharmonics_terms%has_elastic4th = .FALSE. 
+  anharmonics_terms%has_elastic4th = .FALSE.
 
 ! 2-Allocation of the new array
   anharmonics_terms%elastic4th(:,:,:,:) = elastics(:,:,:,:)
 
 ! 3-Set the flag
   if(any(abs(anharmonics_terms%elastic4th)> tol15)) then
-    anharmonics_terms%has_elastic4th = .TRUE. 
+    anharmonics_terms%has_elastic4th = .TRUE.
   end if
 
 end subroutine anharmonics_terms_setElastic4th
@@ -542,7 +500,7 @@ end subroutine anharmonics_terms_setElastic4th
 !! Set the strain-phonon coupling
 !!
 !! INPUTS
-!! strain_phonon(6)<type(ifc_type) = strain-phonon coupling 
+!! strain_phonon(6)<type(ifc_type) = strain-phonon coupling
 !! natom = number of atoms
 !!
 !! OUTPUT
@@ -555,15 +513,8 @@ end subroutine anharmonics_terms_setElastic4th
 !!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
- 
+
 subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,phonon_strain)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setStrainPhononCoupling'
-!End of the abilint section
 
   implicit none
 
@@ -633,7 +584,7 @@ end subroutine anharmonics_terms_setStrainPhononCoupling
 !! Set the Elastic displacement coupling
 !!
 !! INPUTS
-!! elastic_displacement(6,6,3,natom) = elastic displacement coupling 
+!! elastic_displacement(6,6,3,natom) = elastic displacement coupling
 !! natom = number of atom
 !!
 !! OUTPUT
@@ -647,15 +598,8 @@ end subroutine anharmonics_terms_setStrainPhononCoupling
 !!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
- 
+
 subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_setElasticDispCoupling'
-!End of the abilint section
 
   implicit none
 
@@ -733,13 +677,6 @@ end subroutine anharmonics_terms_setElasticDispCoupling
 subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,ncell,strten,strain,&
 &                                            elastic3rd,elastic4th,elastic_displacement)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_evaluateElastic'
-!End of the abilint section
-
  real(dp),intent(out):: energy
  integer, intent(in) :: natom,natom_uc,ncell
 ! array
@@ -766,7 +703,7 @@ subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,nc
  has_elastic4th    = .FALSE.
  has_elastic_displ = .FALSE.
  d1=0;d2=0
- 
+
 !Set the flags
  if(present(elastic3rd)) has_elastic3rd = .TRUE.
  if(present(elastic4th)) then
@@ -774,7 +711,7 @@ subroutine anharmonics_terms_evaluateElastic(disp,energy,fcart,natom,natom_uc,nc
    d1=1;d2=6
  end if
  if(present(elastic_displacement)) has_elastic_displ = .TRUE.
- 
+
 !1-Treat 3rd order elastic constants
  if (has_elastic3rd.or.has_elastic4th) then
    do alpha=1,6
@@ -831,7 +768,7 @@ end subroutine anharmonics_terms_evaluateElastic
 !!  This fonction compute the harmonic part of the energy
 !!  of the supercell in the eff_pot
 !! INPUTS
-!!  strain_phonon(6)<type(ifc_type) = strain-phonon coupling 
+!!  strain_phonon(6)<type(ifc_type) = strain-phonon coupling
 !!  disp(3,natom_sc) = atomics displacement between configuration and the reference
 !!  natom = number of atoms in the supercell
 !!  natom_uc = number of atoms in the unit cell
@@ -849,8 +786,6 @@ end subroutine anharmonics_terms_evaluateElastic
 !! PARENT
 !!   effective_potential_evaluate
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!      m_effective_potential
 !!
@@ -862,13 +797,6 @@ end subroutine anharmonics_terms_evaluateElastic
 subroutine anharmonics_terms_evaluateIFCStrainCoupling(phonon_strain,disp,energy,fcart,natom,natom_uc,&
 &                                                      sc_size,strain,strten,cells,ncell,&
 &                                                      index_cells,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anharmonics_terms_evaluateIFCStrainCoupling'
-!End of the abilint section
 
  implicit none
 

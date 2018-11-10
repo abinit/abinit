@@ -26,7 +26,7 @@ MODULE m_paw_correlations
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use m_linalg_interfaces
@@ -120,14 +120,6 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,jpawu,llexexch,llpawu,&
 &           ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
 &           ucrpa) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpuxinit'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -887,14 +879,6 @@ CONTAINS  !=====================================================================
  subroutine pawuenergy(iatom,eldaumdc,eldaumdcdc,noccmmp,nocctot,pawprtvol,pawtab,&
  &                     dmft_dc,e_ee,e_dc,e_dcdc,u_dmft,j_dmft) ! optional arguments (DMFT)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuenergy'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1123,10 +1107,10 @@ CONTAINS  !=====================================================================
    edcdctemp=edcdctemp-half*upawu*n_tot**2
    edctemp  =edctemp  +half*upawu*(n_tot*(n_tot-one))
    if (nspden/=4.or.option_interaction==2) then
-     if(dmftdc/=5) then
+     if(dmftdc/=5.and.pawtab%usepawu/=4) then
        edcdctemp=edcdctemp+half*jpawu_dc*(n_upup**2+n_dndn**2)
        edctemp  =edctemp  -half*jpawu_dc*(n_upup*(n_upup-one)+n_dndn*(n_dndn-one))
-     else if(dmftdc==5)  then
+     else if(dmftdc==5.or.pawtab%usepawu==4)  then
        edcdctemp=edcdctemp+quarter*jpawu_dc*n_tot**2
        edctemp  =edctemp  -quarter*jpawu_dc*(n_tot*(n_tot-two))
      end if
@@ -1247,14 +1231,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawxenergy(eexex,pawprtvol,pawrhoij,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxenergy'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1417,14 +1393,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawprtvol,pawrhoij,pawtab,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setnoccmmp'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1670,6 +1638,9 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
          ABI_ALLOCATE(noccmmp2,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
        end if
        if(ndij==4)  then
+         if(allocated(nocctot2)) then
+           ABI_DEALLOCATE(nocctot2)
+         end if
          ABI_ALLOCATE(nocctot2,(ndij))
        end if
        do ispden=1,ndij
@@ -2302,14 +2273,6 @@ subroutine setrhoijpbe0(dtset,initialized,istep,istep_mix,&
 &                       mpi_comm_read,my_natom,natom,ntypat,pawrhoij,pawtab,typat,&
 &                       mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setrhoijpbe0'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2656,14 +2619,6 @@ end subroutine setrhoijpbe0
 !! SOURCE
 
  subroutine calc_ubare(itypatcor,lpawu,pawang,pawrad,pawtab,rmax)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ubare'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------

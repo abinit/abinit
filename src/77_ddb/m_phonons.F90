@@ -28,11 +28,10 @@ module m_phonons
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_tetrahedron
  use m_nctk
  use iso_c_binding
- use m_crystal_io
  use m_atprj
  use m_sortph
  use m_ddb
@@ -61,7 +60,6 @@ module m_phonons
 
  private
 
-! TODO Write object to store the bands
  public :: mkphbs                        ! Compute phonon band structure
  public :: phonons_write_xmgrace         ! Write phonons bands in Xmgrace format.
  public :: phonons_write_gnuplot         ! Write phonons bands in gnuplot format.
@@ -198,16 +196,6 @@ CONTAINS  !=====================================================================
 
 subroutine phdos_print(PHdos,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
  type(phonon_dos_type),intent(in) :: PHdos
@@ -236,9 +224,7 @@ subroutine phdos_print(PHdos,fname)
    MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
  end select
 
-! === Open external file and write results ===
-! TODO Here I have to rationalize how to write all this stuff!!
-!
+ ! Open external file and write results
  if (open_file(fname,msg,newunit=unt,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -339,16 +325,6 @@ end subroutine phdos_print
 
 subroutine phdos_print_debye(PHdos, ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_debye'
- use interfaces_14_hidewrite
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
  real(dp), intent(in) :: ucvol
  type(phonon_dos_type),intent(in) :: PHdos
@@ -437,12 +413,12 @@ end subroutine phdos_print_debye
 !----------------------------------------------------------------------
 
 !****f* m_phonons/phdos_print_thermo
-!!
 !! NAME
 !! phdos_print_thermo
 !!
 !! FUNCTION
 !! Print out global thermodynamic quantities based on DOS
+!! Only master node should call this routine.
 !!
 !! INPUTS
 !! phonon_dos= container object for phonon DOS
@@ -462,16 +438,6 @@ end subroutine phdos_print_debye
 
 subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_thermo'
- use interfaces_14_hidewrite
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: ntemper
  real(dp), intent(in) :: tempermin, temperinc
@@ -479,7 +445,7 @@ implicit none
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
- integer :: iomega, itemper, thermal_unit
+ integer :: iomega, itemper, tunt
  character(len=500) :: msg
  real(dp) :: wover2t, ln2shx, cothx, invsinh2
  real(dp) :: tmp, domega
@@ -488,37 +454,28 @@ implicit none
 
 ! *********************************************************************
 
- ABI_ALLOCATE(free,    (ntemper))
- ABI_ALLOCATE(energy,  (ntemper))
- ABI_ALLOCATE(entropy, (ntemper))
- ABI_ALLOCATE(spheat,  (ntemper))
- ABI_ALLOCATE(wme,     (ntemper))
+ ! Allocate and put zeroes for F, E, S, Cv
+ ABI_CALLOC(free,    (ntemper))
+ ABI_CALLOC(energy,  (ntemper))
+ ABI_CALLOC(entropy, (ntemper))
+ ABI_CALLOC(spheat,  (ntemper))
+ ABI_CALLOC(wme,     (ntemper))
 
-!Put zeroes for F, E, S, Cv
- free(:)=zero
- energy(:)=zero
- entropy(:)=zero
- spheat(:)=zero
- wme(:)=zero
-
-!open THERMO file
- if (open_file(fname,msg,newunit=thermal_unit,form="formatted",action="write") /= 0) then
+ ! open THERMO file
+ if (open_file(fname, msg, newunit=tunt, form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
-! print header
- write(msg,'(a,a)') ch10,&
-&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
- call wrtout(thermal_unit,msg,'COLL')
- msg = ' # (A mol-c is the abbreviation of a mole-cell, that is, the'
- call wrtout(thermal_unit,msg,'COLL')
- msg = ' #  number of Avogadro times the atoms in a unit cell)'
- call wrtout(thermal_unit,msg,'COLL')
-
  write(msg, '(a,a,a)' )&
-&  ' phdos_print_thermo : thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
+&  ' phdos_print_thermo: thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
 &  '     see THERMO output file ...'
  call wrtout(std_out,msg,'COLL')
+
+ ! print header
+ write(tunt,'(a,a)') ch10,&
+&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
+ write(tunt, "(a)")' # (A mol-c is the abbreviation of a mole-cell, that is, the'
+ write(tunt, "(a)")' #  number of Avogadro times the atoms in a unit cell)'
 
  domega = phdos%omega_step
 
@@ -554,22 +511,21 @@ implicit none
    if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
 
    ! do the printing to file
-   write(msg,'(es11.3,5es15.7)') tmp/kb_HaK,&
+   write(tunt,'(es11.3,5es15.7)') tmp/kb_HaK,&
 &    Ha_J*Avogadro*free(itemper),&
 &    Ha_J*Avogadro*energy(itemper),&
 &    Ha_J*Avogadro*kb_HaK*entropy(itemper),&
 &    Ha_J*Avogadro*kb_HaK*spheat(itemper),&
 &    wme(itemper)*Ha_cmm1
-   call wrtout(thermal_unit,msg,'COLL')
  end do ! itemper
 
- ABI_DEALLOCATE(free)
- ABI_DEALLOCATE(energy)
- ABI_DEALLOCATE(entropy)
- ABI_DEALLOCATE(spheat)
- ABI_DEALLOCATE(wme)
+ close(tunt)
 
- close(thermal_unit)
+ ABI_FREE(free)
+ ABI_FREE(energy)
+ ABI_FREE(entropy)
+ ABI_FREE(spheat)
+ ABI_FREE(wme)
 
 end subroutine phdos_print_thermo
 !!***
@@ -599,51 +555,22 @@ end subroutine phdos_print_thermo
 
 subroutine phdos_free(PHdos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  type(phonon_dos_type),intent(inout) ::PHdos
 
 ! *************************************************************************
 
  !@phonon_dos_type
- if (allocated(PHdos%atom_mass)) then
-   ABI_FREE(PHdos%atom_mass)
- end if
- if (allocated(PHdos%omega)) then
-   ABI_FREE(PHdos%omega)
- end if
- if (allocated(PHdos%phdos)) then
-   ABI_FREE(PHdos%phdos)
- end if
- if (allocated(PHdos%phdos_int)) then
-   ABI_FREE(PHdos%phdos_int)
- end if
- if (allocated(PHdos%pjdos)) then
-   ABI_FREE(PHdos%pjdos)
- end if
- if (allocated(PHdos%pjdos_int)) then
-   ABI_FREE(PHdos%pjdos_int)
- end if
- if (allocated(PHdos%pjdos_type)) then
-   ABI_FREE(PHdos%pjdos_type)
- end if
- if (allocated(PHdos%pjdos_type_int)) then
-   ABI_FREE(PHdos%pjdos_type_int)
- end if
- if (allocated(PHdos%pjdos_rc_type)) then
-   ABI_FREE(PHdos%pjdos_rc_type)
- end if
- if (allocated(PHdos%msqd_dos_atom)) then
-   ABI_FREE(PHdos%msqd_dos_atom)
- end if
+ ABI_SFREE(PHdos%atom_mass)
+ ABI_SFREE(PHdos%omega)
+ ABI_SFREE(PHdos%phdos)
+ ABI_SFREE(PHdos%phdos_int)
+ ABI_SFREE(PHdos%pjdos)
+ ABI_SFREE(PHdos%pjdos_int)
+ ABI_SFREE(PHdos%pjdos_type)
+ ABI_SFREE(PHdos%pjdos_type_int)
+ ABI_SFREE(PHdos%pjdos_rc_type)
+ ABI_SFREE(PHdos%msqd_dos_atom)
 
 end subroutine phdos_free
 !!***
@@ -669,6 +596,7 @@ end subroutine phdos_free
 !! dos_ngqpt(3)=Divisions of the q-mesh used for computing the DOS
 !! nqshift=Number of shifts in Q-mesh
 !! dos_qshift(3, nqshift)=Shift of the q-mesh.
+!! prefix=Prefix for output files.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -693,23 +621,14 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, &
+subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
                    wminmax, count_wminmax, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphdos'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: prtdos,nqshft,comm
  real(dp),intent(in) :: dosdeltae,dossmear
+ character(len=*),intent(in) ::  prefix
  type(crystal_t),intent(in) :: crystal
  type(ifc_type),intent(in) :: ifc
  type(phonon_dos_type),intent(out) :: phdos
@@ -729,7 +648,6 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=80) :: errstr
- character(len=80) ::  prefix = "freq_displ" ! FIXME
  type(t_tetrahedron) :: tetraq
 !arrays
  integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
@@ -1092,9 +1010,9 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
    if (my_rank == master) then
 #ifdef HAVE_NETCDF
-     ! TODO: should pass prefix as arg and make it optional
+     ! TODO: make it optional?
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
      NCF_CHECK(nf90_close(ncid))
 #endif
@@ -1190,7 +1108,7 @@ end subroutine mkphdos
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
-!! PRB 94 075125 (2016) [[cite:Zacharias2016]]
+!!  PRB 94 075125 (2016) [[cite:Zacharias2016]]
 !!
 !! INPUTS
 !!
@@ -1207,17 +1125,7 @@ end subroutine mkphdos
 !!
 !! SOURCE
 
-subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
-&    rlatt, tempermin, temperinc, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zacharias_supercell_make'
-!End of the abilint section
-
- implicit none
+subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
 
 !Arguments ------------------------------------
 !scalars
@@ -1245,7 +1153,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
 ! *************************************************************************
 
  ! check inputs
-! TODO: add check that all rlatt are the same on input
+ ! TODO: add check that all rlatt are the same on input
 
  if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
@@ -1355,6 +1263,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, &
 
 end subroutine zacharias_supercell_make
 !!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_phonons/thermal_supercell_make
@@ -1377,7 +1286,7 @@ end subroutine zacharias_supercell_make
 !!   nconfig = numer of requested configurations
 !!   rlatt = matrix of conversion for supercell (3 0 0   0 3 0   0 0 3 for example)
 !!   temperature_K =  temperature in Kelvin
-!!   nqpt = number of q-point 
+!!   nqpt = number of q-point
 !!   namplitude = number of amplitude provided by the user
 !!   amplitudes(namplitude) = list of the amplitudes of the unstable phonons
 !!                            amplitudes(1:3,iamplitude) = qpt
@@ -1399,15 +1308,6 @@ end subroutine zacharias_supercell_make
 
 subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
 &                                 rlatt, temperature_K, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_make'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1527,7 +1427,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
            !Default amplitude for all the frequencies
            sigma = 100._dp
          case(3)
-           !Absolute value of the frequencie 
+           !Absolute value of the frequencies
            sigma=sqrt((bose_einstein(abs(phfrq_allq(imode,iq)),temperature)+half)/&
 &                abs(phfrq_allq(imode,iq)))
          case(4)
@@ -1568,7 +1468,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 
        freeze_displ =  rand * sigma
 
-       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))       
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))
      end do !iconfig
    end do !imode
  end do !iq
@@ -1608,15 +1508,6 @@ end subroutine thermal_supercell_make
 !! SOURCE
 
 subroutine thermal_supercell_free(nscells, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1659,15 +1550,6 @@ end subroutine thermal_supercell_free
 !! SOURCE
 
 subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zacharias_supercell_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1719,15 +1601,6 @@ end subroutine zacharias_supercell_print
 !! SOURCE
 
 subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1783,15 +1656,6 @@ end subroutine thermal_supercell_print
 
 subroutine phdos_ncwrite(phdos,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_ncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(phonon_dos_type),intent(in) :: phdos
@@ -1828,33 +1692,19 @@ subroutine phdos_ncwrite(phdos,ncid)
 
  ! Write variables. Note unit conversion.
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), phdos%prtdos))
- NCF_CHECK(nf90_put_var(ncid, vid('dossmear'), phdos%dossmear*Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('wmesh'), phdos%omega*Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('phdos'), phdos%phdos/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos'), phdos%pjdos/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos_type'), phdos%pjdos_type/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "prtdos"), phdos%prtdos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'dossmear'), phdos%dossmear*Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wmesh'), phdos%omega*Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdos'), phdos%phdos/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos'), phdos%pjdos/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_type'), phdos%pjdos_type/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
 
 #else
  MSG_ERROR("netcdf support not enabled")
  ABI_UNUSED((/ncid, phdos%nomega/))
 #endif
-
-contains
- integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
 
 end subroutine phdos_ncwrite
 !!***
@@ -1892,16 +1742,6 @@ end subroutine phdos_ncwrite
 
 subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphbs'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -1922,7 +1762,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  real(dp) :: cfact
  character(500) :: msg
  character(len=8) :: unitname
-
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer :: nomega, imode, iomega
@@ -2104,7 +1943,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
@@ -2213,15 +2052,6 @@ end subroutine mkphbs
 
 subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_calc_vsound'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalras
  integer, intent(in) :: natom
@@ -2292,16 +2122,6 @@ end subroutine phdos_calc_vsound
 
 subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_vsound'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalras
  integer, intent(in) :: iunit
@@ -2350,6 +2170,7 @@ end subroutine phdos_print_vsound
 !! FUNCTION
 !!  Print out mean square displacement and velocity for each atom (trace and full matrix) as a function of T
 !!  see for example https://atztogo.github.io/phonopy/thermal-displacement.html#thermal-displacement
+!!  Only master node should call this routine.
 !!
 !! INPUTS
 !!   PHdos structure
@@ -2367,15 +2188,6 @@ end subroutine phdos_print_vsound
 !! SOURCE
 
 subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_msqd'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2405,31 +2217,21 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    MSG_ERROR(msg)
  end if
 
-! write a header
-   write (msg, '(2a)') '# mean square displacement for each atom as a function of T (bohr^2)'
+ ! write the header
+ write (iunit, '(a)') '# mean square displacement for each atom as a function of T (bohr^2)'
+ write (junit, '(a)') "# mean square velocity for each atom as a function of T (bohr^2/atomic time unit^2)"
 
-! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master.
-!  Do not change this to wrtout without checking extensively.
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
+ write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
+ write (iunit, '(a)') trim(msg)
+ write (junit, '(a)') trim(msg)
 
-   write (msg, '(2a)') '# mean square velocity for each atom as a function of T (bohr^2/atomic time unit^2)'
-   write (junit, '(a)') trim(msg)
-
-   write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
-   write (junit, '(a)') trim(msg)
-
-   write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
-&                                              '                u_yz                u_xz                u_xy in bohr^2'
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
-   write (msg, '(3a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
-&                                              '                v_yz                v_xz                v_xy',&
-&                                              ' in bohr^2/atomic time unit^2'
-   !call wrtout(iunit, msg, 'COLL')
-   write (junit, '(a)') trim(msg)
+ write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
+&                                            '                u_yz                u_xz                u_xy in bohr^2'
+ write (iunit, '(a)') trim(msg)
+ write (msg, '(3a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
+&                                            '                v_yz                v_xz                v_xy',&
+&                                            ' in bohr^2/atomic time unit^2'
+ write (junit, '(a)') trim(msg)
 
  ABI_ALLOCATE (tmp_msqd, (PHdos%nomega,9))
  ABI_ALLOCATE (tmp_msqv, (PHdos%nomega,9))
@@ -2439,7 +2241,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_ALLOCATE (bose_msqv, (PHdos%nomega, ntemper))
 
  do io=1, PHdos%nomega
-     if ( PHdos%omega(io) >= 2._dp * 4.56d-6 ) exit ! 2 cm-1 TODO: make this an input parameter
+   if ( PHdos%omega(io) >= 2._dp * 4.56d-6 ) exit ! 2 cm-1 TODO: make this an input parameter
  end do
  iomin = io
 
@@ -2450,9 +2252,9 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    temper = tempermin + (itemp-1) * temperinc
    if (temper < 1.e-3) cycle ! millikelvin at least to avoid exploding Bose factor(TM)
    do io = iomin, PHdos%nomega
-! NB: factors follow convention in phonopy documentation
-!   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
-!   bose() is dimensionless
+     ! NB: factors follow convention in phonopy documentation
+     ! the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
+     ! bose() is dimensionless
      !bose_msqd(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) / PHdos%omega(io)
      !bose_msqv(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) * PHdos%omega(io)
      bose_msqd(io, itemp) =  (half + bose_einstein(PHdos%omega(io),kb_HaK*temper)) / PHdos%omega(io)
@@ -2462,35 +2264,32 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 
  do iatom=1,PHdos%natom
    write (msg, '(a,I8)') '# atom number ', iatom
-   !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
    write (junit, '(a)') trim(msg)
 
-! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
+   ! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
    integ_msqd = zero
    tmp_msqd = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
-! perform all integrations as matrix multiplication: integ_msqd (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose_msqd(io,itemp)
-   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega,&
-&      bose_msqd, PHdos%nomega, zero, integ_msqd, 9)
-! NB: this presumes an equidistant omega grid
+
+   ! perform all integrations as matrix multiplication: integ_msqd (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose_msqd(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega, bose_msqd, PHdos%nomega, zero, integ_msqd, 9)
+   ! NB: this presumes an equidistant omega grid
    integ_msqd = integ_msqd * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
    integ_msqv = zero
    tmp_msqv = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
-! perform all integrations as matrix multiplication: integ_msqv (idir, itemp) = [tmp_msqv(io,idir)]^T  * bose_msqv(io,itemp)
-   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqv,PHdos%nomega,&
-&      bose_msqv, PHdos%nomega, zero, integ_msqv, 9)
-! NB: this presumes an equidistant omega grid
+
+   ! perform all integrations as matrix multiplication: integ_msqv (idir, itemp) = [tmp_msqv(io,idir)]^T  * bose_msqv(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqv,PHdos%nomega, bose_msqv, PHdos%nomega, zero, integ_msqv, 9)
+   ! NB: this presumes an equidistant omega grid
    integ_msqv = integ_msqv * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
-
-! print out stuff
+   ! print out stuff
    do itemp = 1, ntemper
      temper = tempermin + (itemp-1) * temperinc
      write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqd(1,itemp)+integ_msqd(5,itemp)+integ_msqd(9,itemp)), &
 &                      integ_msqd(1,itemp),integ_msqd(5,itemp),integ_msqd(9,itemp), &
 &                      integ_msqd(6,itemp),integ_msqd(3,itemp),integ_msqd(2,itemp)
-     !call wrtout(iunit, msg, 'COLL')
      write (iunit, '(a)') trim(msg)
      write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqv(1,itemp)+integ_msqv(5,itemp)+integ_msqv(9,itemp)), &
 &                      integ_msqv(1,itemp),integ_msqv(5,itemp),integ_msqv(9,itemp), &
@@ -2498,7 +2297,6 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
      write (junit, '(a)') trim(msg)
    end do ! itemp
 
-   !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') ''
    write (junit, '(a)') ''
  enddo ! iatom
@@ -2509,6 +2307,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_DEALLOCATE (bose_msqv)
  ABI_DEALLOCATE (integ_msqd)
  ABI_DEALLOCATE (integ_msqv)
+
  close(iunit)
  close(junit)
 
@@ -2551,15 +2350,6 @@ end subroutine phdos_print_msqd
 
 subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_ncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,nqpts
@@ -2601,13 +2391,6 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 contains
  integer function vid(vname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -2648,15 +2431,6 @@ end subroutine phonons_ncwrite
 !! SOURCE
 
  subroutine phonons_write_phfrq(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_phfrq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2751,15 +2525,6 @@ end subroutine phonons_write_phfrq
 !! SOURCE
 
 subroutine phonons_writeEPS(natom,nqpts,ntypat,typat,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_writeEPS'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3176,15 +2941,6 @@ end subroutine phonons_writeEPS
 
 subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbounds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_xmgrace'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nqpts
@@ -3313,15 +3069,6 @@ end subroutine phonons_write_xmgrace
 !! SOURCE
 
 subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_gnuplot'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3453,15 +3200,6 @@ end subroutine phonons_write_gnuplot
 
 subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_mkphbs'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -3473,10 +3211,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr
- !character(500) :: msg
+ integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr,nph2l
  type(kpath_t) :: qpath
 !arrays
+ real(dp),allocatable :: qph2l(:,:), qnrml2(:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),weights(:)
 
 ! *********************************************************************
@@ -3484,7 +3222,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_WARNING("ph_nqpath <=0 or ph_ndivsm <= 0, phonon bands won't be produced. returning")
+   MSG_WARNING("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. returning")
    return
  end if
 
@@ -3511,15 +3249,48 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    ABI_MALLOC(weights, (nqpts))
    weights = one
 
+   ! Compute directions for non-analytical behaviour.
+   ! TODO: The same approach should be used in anaddb.
+   ABI_MALLOC(qph2l, (3, 2*dtset%ph_nqpath))
+   ABI_MALLOC(qnrml2, (2*dtset%ph_nqpath))
+   nph2l = 0
+   if (any(ifc%zeff /= zero)) then
+     do iqpt=1,dtset%ph_nqpath
+       if (sum(dtset%ph_qpath(:, iqpt)**2) < tol14) then
+         nph2l = nph2l + 1
+         if (iqpt == 1) then
+           qph2l(:, nph2l) = dtset%ph_qpath(:, 2) - dtset%ph_qpath(:, 1)
+         else if (iqpt == dtset%ph_nqpath) then
+           qph2l(:, nph2l) = dtset%ph_qpath(:, dtset%ph_nqpath - 1) - dtset%ph_qpath(:, dtset%ph_nqpath)
+         else
+           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt - 1) - dtset%ph_qpath(:, iqpt)
+           nph2l = nph2l + 1
+           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt + 1) - dtset%ph_qpath(:, iqpt)
+         end if
+       end if
+     end do
+     ! Convert to Cartesian coordinates.
+     do iqpt=1,nph2l
+       qph2l(:, iqpt) = matmul(cryst%gprimd, qph2l(:, iqpt))
+     end do
+     qnrml2 = zero
+   end if
+
 #ifdef HAVE_NETCDF
+   ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
+   ! Should centralize everything in a single routine
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   call phonons_ncwrite(ncid,natom,nqpts, qpath%points, weights, phfrqs, phdispl_cart)
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
+   NCF_CHECK(cryst%ncwrite(ncid))
+   call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
+   if (nph2l /= 0) call ifc_calcnwrite_nana_terms(ifc, cryst, nph2l, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 #endif
+
+   ABI_FREE(qph2l)
+   ABI_FREE(qnrml2)
 
    select case (dtset%prtphbands)
    case (1)
@@ -3577,16 +3348,6 @@ end subroutine ifc_mkphbs
 !! SOURCE
 
 subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_symph'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3737,9 +3498,7 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
    if(sum(integer_characters(:))==3*natom)exit
  end do !itol
 
-!DEBUG
 !write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
-!ENDDEBUG
 
  write(message,'(a,a,es8.2,a)')ch10,&
 & ' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)'
@@ -3753,7 +3512,7 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
      call wrtout(std_out,message,'COLL')
      if(degeneracy(imode)>=2)then
        if(degeneracy(imode)==2) write(message,'(a,i4)') &
-&       '        degenerate with vibration mode #',imode+1
+'        degenerate with vibration mode #',imode+1
        if(degeneracy(imode)>=3) write(message,'(a,i4,a,i4)') &
 &       '       degenerate with vibration modes #',imode+1,' to ',imode+degeneracy(imode)-1
        call wrtout(iout,message,'COLL')
@@ -3823,28 +3582,13 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 &         qphon, rprimd, typat, xcart, znucl)
 
 
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'freeze_displ_allmodes'
-!End of the abilint section
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'freeze_displ_allmodes'
-!End of the abilint section
-
- implicit none
-
-! arguments
-! scalar
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: natom
  character(len=*),intent(in) :: outfile_radix
  real(dp), intent(in) :: freeze_displ
-
 !arrays
  integer,intent(in) :: typat(natom)
-
  real(dp),intent(in) :: displ(2,3*natom,3*natom)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: phfreq(3*natom)

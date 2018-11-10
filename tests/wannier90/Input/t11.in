@@ -48,7 +48,6 @@ vdw_nfrag -1     # Just one fragment in unit cell, in this case one Ar atom with
 vdw_typfrag 1  
 vdw_supercell2 2 2 2  # Supercell composed of 64 unit cells 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

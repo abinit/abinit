@@ -34,10 +34,12 @@ module m_hidecudarec
 
  use defs_basis
  use defs_rectypes
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_GPU_CUDA
  use m_initcuda
 #endif
+
+ use m_fft,        only : fourdp
 
  implicit none
 
@@ -78,14 +80,6 @@ CONTAINS !===========================================================
 !! SOURCE
 #if defined HAVE_GPU_CUDA
 subroutine prt_mem_usage(nptrec,nfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prt_mem_usage'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 !Arguments ------------------------------------
@@ -151,13 +145,6 @@ end subroutine prt_mem_usage
 
 subroutine InitRecGPU_0(recgpu,mpi_ab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'InitRecGPU_0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -202,14 +189,6 @@ end subroutine InitRecGPU_0
 #if defined HAVE_GPU_CUDA
 
 subroutine InitRecGPU(rset,nfft,gratio,gpudevice,calc_type)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'InitRecGPU'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -310,14 +289,6 @@ end subroutine InitRecGPU
 
 subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cudarec'
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -340,7 +311,7 @@ subroutine cudarec(rset,exppot,an,bn2,beta,trotter,tolrec,gratio,ngfft,max_rec)
 ! write (std_out,*) ' m_hidecudarec/cudarec : enter'
 !ENDDEBUG
 
- call fourdp(1,rset%ZT_p,T_p,1,rset%mpi,rset%nfftrec,rset%ngfftrec,1,0)
+ call fourdp(1,rset%ZT_p,T_p,1,rset%mpi,rset%nfftrec,1,rset%ngfftrec,0)
  T_p = (one/rset%nfftrec)*T_p
 
  if(.not.(rset%tronc)) then
@@ -415,13 +386,6 @@ end subroutine cudarec
 !! SOURCE
 
 subroutine CleanRecGPU(recgpu,load)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'CleanRecGPU'
-!End of the abilint section
 
  implicit none
 

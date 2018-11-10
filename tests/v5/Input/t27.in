@@ -5,7 +5,6 @@ t26o_DS2_EIGR2D
 t26o_DS3_EIGR2D
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb

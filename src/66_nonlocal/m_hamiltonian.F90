@@ -34,7 +34,7 @@ module m_hamiltonian
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -527,13 +527,6 @@ subroutine destroy_hamiltonian(Ham)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_hamiltonian'
-!End of the abilint section
-
  type(gs_hamiltonian_type),intent(inout),target :: Ham
 
 ! *************************************************************************
@@ -692,13 +685,6 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
 &                           electronpositron,fock,nucdipmom,use_gpu_cuda)           ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_hamiltonian'
-!End of the abilint section
 
  implicit none
 
@@ -962,13 +948,6 @@ subroutine load_k_hamiltonian(ham,ffnl_k,fockACE_k,gbound_k,istwf_k,kinpw_k,&
 &                             kg_k,kpg_k,kpt_k,nucdipmom_k,npw_k,npw_fft_k,ph3d_k,&
 &                             compute_gbound,compute_ph3d)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'load_k_hamiltonian'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1155,13 +1134,6 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 &                                  kg_kp,kpg_kp,kpt_kp,npw_kp,npw_fft_kp,&
 &                                  ph3d_kp,compute_gbound,compute_ph3d)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'load_kprime_hamiltonian'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1295,13 +1267,6 @@ end subroutine load_kprime_hamiltonian
 !! SOURCE
 
 subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_hamiltonian'
-!End of the abilint section
 
 implicit none
 
@@ -1483,13 +1448,6 @@ end subroutine copy_hamiltonian
 
 subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'load_spin_hamiltonian'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1564,13 +1522,6 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_rf_hamiltonian'
-!End of the abilint section
-
  type(rf_hamiltonian_type),intent(inout) :: rf_Ham
 
 ! *************************************************************************
@@ -1642,13 +1593,6 @@ end subroutine destroy_rf_hamiltonian
 
 subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 &          comm_atom,mpi_atmtab,mpi_spintab,paw_ij1,has_e1kbsc) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_rf_hamiltonian'
-!End of the abilint section
 
  implicit none
 
@@ -1801,13 +1745,6 @@ end subroutine init_rf_hamiltonian
 
 subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vlocal1,with_nonlocal)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'load_spin_rf_hamiltonian'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1880,13 +1817,6 @@ end subroutine load_spin_rf_hamiltonian
 
 subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'load_k_rf_hamiltonian'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1948,13 +1878,6 @@ end subroutine load_k_rf_hamiltonian
 !! SOURCE
 
 subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij2ekb'
-!End of the abilint section
 
  implicit none
 
@@ -2041,13 +1964,6 @@ end subroutine pawdij2ekb
 !! SOURCE
 
 subroutine pawdij2e1kb(paw_ij1,isppol,comm_atom,mpi_atmtab,e1kbfr,e1kbsc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij2e1kb'
-!End of the abilint section
 
  implicit none
 
