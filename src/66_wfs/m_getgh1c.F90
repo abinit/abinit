@@ -75,7 +75,7 @@ contains
 !!  berryopt=option for Berry phase
 !!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
-!!     if not allocated or size=0, they are locally computed (and not sotred)
+!!     if not allocated or size=0, they are locally computed (and not sorted)
 !!  dkinpw(npw)=derivative of the (modified) kinetic energy for each plane wave at k (Hartree)
 !!  grad_berry(2,npw1*nspinor*(berryopt/4))= the gradient of the Berry phase term
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
@@ -937,11 +937,9 @@ end subroutine rf_transgrid_and_pack
 
 subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&           ! In
 &                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,&                          ! In
-&                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,dkinpw,nkpg,&               ! In
-&                nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                     ! Out
+&                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                           ! In
+&                dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&         ! Out
 &                ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                               ! Optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
