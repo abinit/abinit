@@ -196,9 +196,9 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
  rhjg(:,:)=rhjg(:,:)/zcellength
  if(option==1) vjelg(:,:)=vjelg(:,:)/zcellength
 
- call fourdp(1,rhjg,rhjr,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,rhjg,rhjr,1,mpi_enreg,nfft,1,ngfft,0)
  if(option==1) then
-   call fourdp(1,vjelg,vjell,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(1,vjelg,vjell,1,mpi_enreg,nfft,1,ngfft,0)
    rhog(:,:)=rhjg(:,:)
    rhor(:,1)=rhjr(:)
  else

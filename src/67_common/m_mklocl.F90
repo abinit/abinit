@@ -584,7 +584,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    end if
 
 !  Transform back to real space
-   call fourdp(1,work1,vpsp,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(1,work1,vpsp,1,mpi_enreg,nfft,1,ngfft,0)
 
 !  Divide by unit cell volume
    xnorm=1.0_dp/ucvol
@@ -881,7 +881,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    end do
 
 !  Transform back to real space
-   call fourdp(cplex,work1,vpsp1,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex,work1,vpsp1,1,mpi_enreg,nfft,1,ngfft,0)
 
    xnorm=1.0_dp/ucvol
    vpsp1(1:cplex*nfft)=vpsp1(1:cplex*nfft)*xnorm
@@ -1193,7 +1193,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 
 
 !Transform back to real space
- call fourdp(1,work1,vpsp1,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,work1,vpsp1,1,mpi_enreg,nfft,1,ngfft,0)
 
 !Divide by unit cell volume
  xnorm=1.0_dp/ucvol

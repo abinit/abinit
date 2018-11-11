@@ -41,7 +41,6 @@ MODULE m_qparticles
  use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d, rhophi
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : kmesh_t
  use m_ebands,         only : get_valence_idx
  use m_sigma,          only : sigma_t

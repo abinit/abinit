@@ -47,6 +47,7 @@ module m_spin_model
   use m_abicore
   use m_errors
   use m_xmpi
+  use m_io_tools, only : get_unit, open_file, close_unit
 
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_terms, only: spin_terms_t, spin_terms_t_set_params,  spin_terms_t_finalize, &
@@ -63,10 +64,10 @@ module m_spin_model
        & spin_mover_t_run_time, spin_mover_t_run_one_step
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
-       & spin_ncfile_t_write_one_step
-   use m_spin_observables, only: spin_observable_t, ob_initialize, ob_finalize, ob_calc_observables
+       & spin_ncfile_t_write_one_step, spin_ncfile_t_def_ob
+  use m_spin_observables, only: spin_observable_t, ob_reset, ob_initialize, ob_finalize, ob_calc_observables
   implicit none
-!!***
+  !!***
 
 
   !!****t* m_spin_model/spin_model_t
@@ -201,7 +202,7 @@ contains
          &   mxhist=3, has_latt=.False.)
 
     call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
-            &     spin_temperature=self%params%spin_temperature)
+         &     spin_temperature=self%params%spin_temperature)
 
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self)
@@ -210,7 +211,7 @@ contains
     !    & total_time=params%dtspin*params%ntime_spin, temperature=self%params%self)
     call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
          &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature, &
-         & pre_time=self%params%spin_dt*self%params%spin_ntime_pre)
+         & pre_time=self%params%spin_dt*self%params%spin_ntime_pre, method=self%params%spin_dynamics)
 
     call ob_initialize(self%spin_ob, self%spin_calculator, self%params)
 
@@ -293,13 +294,13 @@ contains
     end if
 
     do i=1, self%nspins
-      mfield(:, i)=self%params%spin_mag_field(:)
+       mfield(:, i)=self%params%spin_mag_field(:)
     end do
     call spin_terms_t_set_external_hfield(self%spin_calculator, mfield)
 
     if (self%params%spin_sia_add /= 0 ) then
        call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
-          &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
+            &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
     end if
 
     ! params -> hist
@@ -341,7 +342,7 @@ contains
     if(self%params%spin_sia_add == 1) use_sia=.False.
 
     call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname, &
-            & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
+         & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
   end subroutine spin_model_t_read_xml
   !!***
 
@@ -373,7 +374,7 @@ contains
     call spin_model_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
   end subroutine spin_model_t_make_supercell
   !!***
-  
+
   !!****f* m_spin_model/spin_model_t_prepare_ncfile
   !!
   !! FUNCTION
@@ -395,14 +396,15 @@ contains
     class(spin_model_t), intent(inout) :: self
     type(spin_ncfile_t), intent(out) :: spin_ncfile
     character(len=*) :: fname
-    call spin_ncfile_t_init(spin_ncfile, trim(fname))
+    call spin_ncfile_t_init(spin_ncfile, trim(fname), self%params%spin_write_traj)
     call spin_ncfile_t_def_sd(spin_ncfile, self%spin_hist )
+    call spin_ncfile_t_def_ob(spin_ncfile, self%spin_ob)
     !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
     call spin_ncfile_t_write_supercell(spin_ncfile, self%spin_calculator)
     call spin_ncfile_t_write_parameters(spin_ncfile, self%params)
   end subroutine spin_model_t_prepare_ncfile
   !!***
-  
+
 
   !!****f* m_spin_model/spin_model_t_set_initial_spin
   !!
@@ -439,23 +441,23 @@ contains
     else if (mode==1) then
        ! randomize S using uniform random number
        ! print *, "Initial spin set to random value"
-   write(msg,*) "Initial spin set to random value."
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+       write(msg,*) "Initial spin set to random value."
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
        call random_number(S)
        S=S-0.5
        do i=1, self%nspins
           S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
        end do
     else
-      write(msg,*) "Error: Set initial spin: mode should be 2(FM) or 1 (random). Others are not yet implemented."
-      call wrtout(ab_out,msg,'COLL')
-      call wrtout(std_out,msg,'COLL')
+       write(msg,*) "Error: Set initial spin: mode should be 2(FM) or 1 (random). Others are not yet implemented."
+       call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
 
     end if
 
     call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%ms, &
-          &  time=0.0_dp, ihist_latt=0, inc=.True.)
+         &  time=0.0_dp, ihist_latt=0, inc=.True.)
   end subroutine spin_model_t_set_initial_spin
   !!***
 
@@ -523,19 +525,34 @@ contains
     type(spin_ncfile_t) :: spin_ncfile
     character(len=4) :: post_fname
     real(dp) :: T, T_step
-    integer :: i
+    integer :: i, ii, Tfile, iostat, sublatt(self%spin_ob%nsublatt)
     character(len=90) :: msg
+    character(len=4200) :: Tmsg ! to write to var T file
+    character(len=150) :: iomsg
+    character(fnlen) :: Tfname ! file name for output various T calculation
 
+
+    real(dp) :: Tlist(T_nstep), chi_list(T_nstep), Cv_list(T_nstep), binderU4_list(T_nstep)
+    real(dp) :: Mst_sub_list(3, self%spin_ob%nsublatt, T_nstep), Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
+    real(dp) ::  Mst_norm_total_list(T_nstep)
+
+    Tfile=get_unit()
+    Tfname = trim(self%out_fname)//'.varT'
+    iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
+
+    !do i=1, self%spin_ob%nsublatt
+    !   sublatt(i)=i
+    !end do
     T_step=(T_end-T_start)/(T_nstep-1)
 
     write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
-            & "Starting temperature dependent calculations. T from ", &
-            & T_start, "K to ", T_end, " K."
+         & "Starting temperature dependent calculations. T from ", &
+         & T_start, "K to ", T_end, " K."
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out, msg, "COLL")
 
-    do i=0, T_nstep-1
-       T=T_start+i*T_step
+    do i=1, T_nstep
+       T=T_start+(i-1)*T_step
 
        msg=repeat("=", 79)
        call wrtout(std_out, msg, "COLL")
@@ -546,9 +563,14 @@ contains
        call wrtout(ab_out,  msg, "COLL")
 
        call spin_hist_t_reset(self%spin_hist, array_to_zero=.False.)
+       ! set temperature
+       ! TODO make this into a subroutine set_params
        self%params%spin_temperature=T
+       call spin_terms_t_set_params(self%spin_calculator, temperature=T)
+       self%spin_mover%temperature=T
        call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=T)
+       call ob_reset(self%spin_ob, self%params)
        ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
        if(i==0) then
           call spin_model_t_set_initial_spin(self)
@@ -556,45 +578,65 @@ contains
           call spin_hist_t_inc(self%spin_hist)
        endif
 
-       self%spin_mover%temperature=T
        write(post_fname, "(I4.4)") i+1
        call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
-               & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
+            & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
        call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
        call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, & 
-               & self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
-       call spin_ncfile_t_close(spin_ncfile)
+            & self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
 
- end do
+       call spin_ncfile_t_close(spin_ncfile)
+       ! save observables
+       Tlist(i)=T
+       chi_list(i)=self%spin_ob%chi
+       Cv_list(i)=self%spin_ob%Cv
+       binderU4_list(i)=self%spin_ob%binderU4
+       !Mst_sub_list(:,:,i)=self%spin_ob%Mst_sub(:,:)  ! not useful
+       Mst_sub_norm_list(:,i)=self%spin_ob%Avg_Mst_sub_norm(:)
+       Mst_norm_total_list(i)=self%spin_ob%Avg_Mst_norm_total
+    end do
+
+
+    ! write summary of MvT run
+    msg=repeat("=", 79)
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+
+    write(msg, *) "Summary of various T run: "
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+
+    write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13)" ) &
+         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out,  msg, "COLL")
+
+    do i = 1, T_nstep
+       write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5 )" ) &
+            Tlist(i), Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+    end do
+
+    msg=repeat("=", 79)
+    call wrtout(std_out, msg, "COLL")
+    call wrtout(ab_out, msg, "COLL")
+ 
+
+    ! write to .varT file
+    write(Tmsg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13, 3X, *(I13, 3X) )" ) &
+         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst", (ii, ii=1, self%spin_ob%nsublatt)
+    call wrtout(Tfile, Tmsg, "COLL")
+
+    do i = 1, T_nstep
+       write(Tmsg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X, *(ES13.5, 3X) )" ) &
+            Tlist(i), Cv_list(i), chi_list(i),  binderU4_list(i), Mst_norm_total_list(i)/self%spin_ob%snorm_total,&
+            & (Mst_sub_norm_list(ii,i)/mu_B_SI, ii=1, self%spin_ob%nsublatt)
+       call wrtout(Tfile, Tmsg, "COLL")
+    end do
+    iostat= close_unit(unit=Tfile, iomsg=iomsg)
 
   end subroutine spin_model_t_run_various_T
-
-  !!****f* m_spin_model/spin_model_t_run_MvT
-  !!
-  !! NAME
-  !!  spin_model_t_run_MvT
-  !!
-  !! FUNCTION
-  !!  run spin vs temperature
-  !!
-  !! INPUTS
-  !!
-  !! OUTPUT
-  !!
-  !! NOTES
-  !!  Not yet implemented.
-  !! PARENTS
-  !!
-  !! CHILDREN
-  !!
-  !! SOURCE
-  subroutine spin_model_t_run_MvT(self)
-
-    class(spin_model_t), intent(inout) :: self
-    !TODO
-    write(std_err, *) "MvH is not yet implemented. "
-  end subroutine spin_model_t_run_MvT
-  !!***
 
   !!****f* m_spin_model/spin_model_t_run_MvH
   !!

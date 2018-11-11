@@ -492,7 +492,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  if (stress_needed==1.and.dtset%usewvl==0) then
 !   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
    if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
-     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-energies%e_fock/ucvol
+     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-(two*energies%e_fock-energies%e_fock0)/ucvol
      if (n3xccc>0.and.psps%usepaw==0 .and. &
 &     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
        ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))
@@ -1327,7 +1327,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    ABI_ALLOCATE(nresg,(2,nfft))
    ABI_ALLOCATE(dummy,(nfft))
    dummy(:)=nresid(:,1)
-   call fourdp(1,nresg,dummy,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,nresg,dummy,-1,mpi_enreg,nfft,1,ngfft,0)
    ABI_DEALLOCATE(dummy)
  end if
 

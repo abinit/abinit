@@ -34,7 +34,6 @@ module m_epjdos
  use m_cgtools
  use m_atomdata
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -1312,7 +1311,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  ABI_ALLOCATE(fofr,(2,n4,n5,n6))
  call fourwf(cplex,denpot,cg,fofgout,fofr,gbound,gbound, &
 & istwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft_here,npw_k,&
-& npw_k,n4,n5,n6,1,paral_kgb,tim_fourwf,weight,weight)
+& npw_k,n4,n5,n6,1,tim_fourwf,weight,weight)
  ABI_DEALLOCATE(fofgout)
  ABI_DEALLOCATE(fofr)
  ABI_DEALLOCATE(gbound)
@@ -1331,7 +1330,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  call fftpac(1,mpi_enreg,1,n1,n2,n3,n4,n5,n6,ngfft,rhor,denpot,1)
 
  ABI_ALLOCATE(rhog,(2,nfft))
- call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(rhor)
  ABI_DEALLOCATE(denpot)
@@ -1784,7 +1783,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
- NCF_CHECK(crystal_ncwrite(crystal, ncid))
+ NCF_CHECK(crystal%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
  ! Add fatband-specific quantities

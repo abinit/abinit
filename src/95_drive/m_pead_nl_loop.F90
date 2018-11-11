@@ -419,7 +419,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfft))
                      work(:)=rho2r1(:,1)
-                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,0)
+                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfft,1,dtset%ngfft,0)
                      ABI_DEALLOCATE(work)
 
                    end if
@@ -884,7 +884,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
        tim_fourwf = 0 ; weight = one
        call fourwf(cplex,vlocal1,cwavef3,gh1,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
-&       dtset%paral_kgb,tim_fourwf,weight,weight,&
+&       tim_fourwf,weight,weight,&
 &       use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      In case i2pert = phonon-type perturbation
@@ -903,7 +903,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
        tim_fourwf = 0 ; weight = one
        call fourwf(cplex,vlocal1,cwave0,gh0,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
-&       dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&       tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !      In case i2pert = phonon-type perturbation
 !      add first-order change in the nonlocal potential

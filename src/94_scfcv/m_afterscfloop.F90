@@ -130,6 +130,8 @@ contains
 !!                       under symmetry operations (computed in symatm)
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  istep=number of the SCF iteration
+!!  istep_fock_outer=number of outer SCF iteration in the double loop approach
+!!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kg(3,mpw*mkmem)=reduced (integer) coordinates of G vecs in basis sphere
 !!  kxc(nfftf,nkxc)=XC kernel
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
@@ -284,7 +286,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,irrzon,istep,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& grxc,gsqcut,hdr,indsym,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
@@ -297,7 +299,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istep,mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
+ integer,intent(in) :: istep,istep_fock_outer,istep_mix
+ integer,intent(in) :: mcg,mcprj,mgfftf,moved_atm_inside,my_natom,n3xccc,nfftf,ngrvdw,nkxc
  integer,intent(in) :: optres,prtfor,prtxml,pwind_alloc,stress_needed,usecprj
  integer,intent(inout) :: computed_forces
  real(dp),intent(in) :: cpus,deltae,gsqcut,res2,residm
@@ -537,7 +540,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
  if(dtset%orbmag==1 .OR. dtset%orbmag==3) then
     call chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
-         &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,pwind,pwind_alloc,&
+         &            mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
          &            symrec,usecprj,psps%usepaw,xred)
  end if
  if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
@@ -940,7 +943,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  choice=3
  call scprqt(choice,cpus,deltae,diffor,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
-& 1,dtset%iscf,istep,dtset%kptns,maxfor,&
+& 1,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,maxfor,&
 & moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&

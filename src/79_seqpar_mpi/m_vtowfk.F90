@@ -127,7 +127,7 @@ contains
 !!  ==== if optforces>0 ====
 !!    grnl_k(3*natom,nband_k)=nonlocal gradients, at this k-point
 !!  ==== if (gs_hamk%usepaw==0) ====
-!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential + potential Fock ACE part of total energy, at this k-point
+!!    enlx_k(nband_k)=contribution from each band to nonlocal pseudopotential + potential Fock-type part of total energy, at this k-point
 !!  ==== if (gs_hamk%usepaw==1) ====
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
@@ -180,20 +180,22 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),pwnsfacq(2,mkgq)
  real(dp), intent(in) :: zshift(nband_k)
  real(dp), intent(out) :: eig_k(nband_k),ek_k(nband_k),dphase_k(3),ek_k_nd(2,nband_k,nband_k*paw_dmft%use_dmft)
- real(dp), intent(out) :: enlx_k(nband_k*(1-gs_hamk%usepaw))
+ real(dp), intent(out) :: enlx_k(nband_k)
  real(dp), intent(out) :: grnl_k(3*natom,nband_k*optforces)
  real(dp), intent(out) :: resid_k(nband_k)
  real(dp), intent(inout) :: cg(2,mcg),rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
- logical :: newlobpcg
+ logical :: has_fock,newlobpcg
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
 !     subovl should be Identity (in that case we should use use_subovl=0)
 !     But this is true only if conjugate gradient algo. converges
  integer :: use_subovl=0
+ integer :: use_subvnlx=0
+ integer :: use_totvnlx=0
  integer :: bandpp_cprj,blocksize,choice,cpopt,iband,iband1
  integer :: iblock,iblocksize,ibs,idir,ierr,igs,igsc,ii,pidx,inonsc
  integer :: iorder_cprj,ipw,ispinor,ispinor_index,istwf_k,iwavef,jj,mgsc,my_nspinor,n1,n2,n3 !kk
@@ -231,6 +233,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
  istwf_k=gs_hamk%istwf_k
+ has_fock=(associated(gs_hamk%fockcommon))
  quit=0
 
 !Parallelization over spinors management
@@ -271,7 +274,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_CHECK(ierr==0, "out of memory in gsc")
    gsc=zero
  end if
-
+ 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then
    !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
@@ -279,17 +282,22 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    ABI_ALLOCATE(subvnlx,(0))
    ABI_ALLOCATE(totvnlx,(0,0))
-   if (gs_hamk%usepaw==0) then
-     if (wfopta10==4) then
+   if (wfopta10==4) then
+!    Later, will have to generalize to Fock case, like when wfopta10/=4
+     if (gs_hamk%usepaw==0) then
        ABI_DEALLOCATE(totvnlx)
        if (istwf_k==1) then
          ABI_ALLOCATE(totvnlx,(2*nband_k,nband_k))
        else if (istwf_k==2) then
          ABI_ALLOCATE(totvnlx,(nband_k,nband_k))
        end if
-     else
+       use_totvnlx=1
+     endif
+   else
+     if (gs_hamk%usepaw==0 .or. has_fock) then
        ABI_DEALLOCATE(subvnlx)
        ABI_ALLOCATE(subvnlx,(nband_k*(nband_k+1)))
+       use_subvnlx=1
      end if
    end if
 
@@ -368,7 +376,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        if (wfopta10==4) then
          if ( .not. newlobpcg ) then
            call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx)
+&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
 !          In case of FFT parallelism, exchange subspace arrays
            spaceComm=mpi_enreg%comm_bandspinorfft
            call xmpi_sum(subham,spaceComm,ierr)
@@ -398,11 +406,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
 !      =========================================================================
      else
+!      use_subvnlx=0; if (gs_hamk%usepaw==0 .or. associated(gs_hamk%fockcommon)) use_subvnlx=1
+!      use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
        call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &       gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
 &       mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
 &       dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,wfoptalg,zshift)
+&       subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
      end if
    end if
 
@@ -639,7 +649,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          call fourwf(1,rhoaug(:,:,:,1),cwavef,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &         istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
 &         gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&         dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&         tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
          if(dtset%nspinor==2)then
            ABI_ALLOCATE(cwavef1,(2,npw_k))
@@ -651,34 +661,34 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &             gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
 &             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-&             dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
            else if(dtset%nspden==4) then
-!            Build the four components of rho. We use only norm quantities and, so fourwf.
-!$\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
-!$\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
-!$\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+             ! Build the four components of rho. We use only norm quantities and, so fourwf.
+             ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+             ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+             ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
              ABI_ALLOCATE(cwavef_x,(2,npw_k))
              ABI_ALLOCATE(cwavef_y,(2,npw_k))
-!$(\Psi^{1}+\Psi^{2})$
+             !$(\Psi^{1}+\Psi^{2})$
              cwavef_x(:,:)=cwavef(:,1:npw_k)+cwavef1(:,1:npw_k)
-!$(\Psi^{1}-i \Psi^{2})$
+             !$(\Psi^{1}-i \Psi^{2})$
              cwavef_y(1,:)=cwavef(1,1:npw_k)+cwavef1(2,1:npw_k)
              cwavef_y(2,:)=cwavef(2,1:npw_k)-cwavef1(1,1:npw_k)
-! z component
+             ! z component
              call fourwf(1,rhoaug(:,:,:,4),cwavef1,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,dtset%paral_kgb,&
+&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
-! x component
+             ! x component
              call fourwf(1,rhoaug(:,:,:,2),cwavef_x,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,dtset%paral_kgb,&
+&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
-! y component
+             ! y component
              call fourwf(1,rhoaug(:,:,:,3),cwavef_y,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
-&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,dtset%paral_kgb,&
+&             gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
 &             tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
              ABI_DEALLOCATE(cwavef_x)
@@ -931,7 +941,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if (gs_hamk%usepaw==0) then
      write(message, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
-&     ' mean non-local energy (hartree) for ',nband_k,' bands',ch10,&
+&     ' mean NL+Fock-type energy (hartree) for ',nband_k,' bands',ch10,&
 &     '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
      call wrtout(std_out,message,'PERS')
 
@@ -950,13 +960,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if(wfopta10 /= 1 .and. .not. newlobpcg) then
    ABI_DEALLOCATE(evec)
    ABI_DEALLOCATE(subham)
-   !if (gs_hamk%usepaw==0) then
-   !if (wfopta10==4) then
    ABI_DEALLOCATE(totvnlx)
-   !else
    ABI_DEALLOCATE(subvnlx)
-   !end if
-   !end if
    ABI_DEALLOCATE(subovl)
  end if
  if ( .not. newlobpcg ) then

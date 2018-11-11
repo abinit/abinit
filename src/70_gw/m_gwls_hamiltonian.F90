@@ -51,7 +51,7 @@ use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian, destroy_ha
 use m_paw_dmft,         only : paw_dmft_type
 use m_pawcprj,          only : pawcprj_type
 use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
-use m_crystal,          only : crystal_t, crystal_init, crystal_free, crystal_print
+use m_crystal,          only : crystal_t, crystal_init, crystal_print
 use m_io_kss,           only : make_gvec_kss
 use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
 use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
@@ -815,7 +815,7 @@ call wf_block_distribute(psik_e,  psik_e_alltoall,1) ! LA -> FFT
 !  psir3 is a dummy, not used here.
 
 call fourwf(cplex,vxc(:,:,:,ispden),psik_e_alltoall,psik_out,psir3,gbound,gbound,istwfk(ckpt),kg_k_gather,kg_k_gather,mgfft,&
-&             mpi_enreg,1,ngfft,npw_g,npw_g,n4,n5,n6,option,dtset%paral_kgb,tim_fourwf,weight,weight)
+&             mpi_enreg,1,ngfft,npw_g,npw_g,n4,n5,n6,option,tim_fourwf,weight,weight)
 
 
 tmpc = cg_zdotc(npw_g, psik_e_alltoall,psik_out)
@@ -1365,7 +1365,7 @@ cplex  = 2 ! complex potential
 psig4 = psi_in
 psi_out = zero
 call fourwf(cplex,dummy3,psig4,dummy2,psi_out,gbound,gbound,istwfk(ckpt),kg_k_gather,kg_k_gather,mgfft,mpi_enreg, &
-1,ngfft,npw_g,npw_g,n4,n5,n6,option,dtset%paral_kgb,tim_fourwf,weight,weight)
+1,ngfft,npw_g,npw_g,n4,n5,n6,option,tim_fourwf,weight,weight)
 psi_out = psi_out/sqrt(ucvol)
 
 !! This comes from prep_fourwf
@@ -1457,7 +1457,7 @@ denpot, & ! real space wavefunction, in denpot format
 psig4, & ! fourier space wavefunction
 psig_out, & ! result, in FFT configuration
 psir3,gbound,gbound,istwfk(ckpt),kg_k_gather,kg_k_gather,mgfft,mpi_enreg,1, & ! Various other arguments
-ngfft,npw_g,npw_g,n4,n5,n6,option,dtset%paral_kgb,tim_fourwf,weight,weight)
+ngfft,npw_g,npw_g,n4,n5,n6,option,tim_fourwf,weight,weight)
 
 end subroutine gr_to_g
 !!***
@@ -1590,7 +1590,7 @@ implicit none
 call dtset_free(dtset)
 call destroy_hamiltonian(gs_hamk)
 
-call crystal_free(Cryst)
+call cryst%free()
 call kmesh_free(Kmesh)
 call kmesh_free(Qmesh)
 call gsph_free(Gsphere)

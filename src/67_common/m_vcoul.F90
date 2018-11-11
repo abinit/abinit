@@ -207,8 +207,6 @@ CONTAINS  !=====================================================================
 
 subroutine vcoul_init(Vcp,Gsph,Cryst,Qmesh,Kmesh,rcut,icutcoul,vcutgeo,ecut,ng,nqlwl,qlwl,ngfft,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ng,nqlwl,icutcoul,comm
@@ -967,8 +965,6 @@ contains !===============================================================
 
  real(dp) function integratefaux()
 
- implicit none
-
 !Local variables-------------------------------
   integer,parameter :: nref=3
   integer,parameter :: nq=50
@@ -1130,8 +1126,6 @@ end subroutine vcoul_init
 !! SOURCE
 
 subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1302,8 +1296,6 @@ end subroutine vcoul_plot
 
 subroutine vcoul_print(Vcp,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: prtvol,unit
@@ -1443,33 +1435,17 @@ end subroutine vcoul_print
 
 subroutine vcoul_free(Vcp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(vcoul_t),intent(inout) :: Vcp
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- if (allocated(Vcp%qibz)) then
-   ABI_FREE(Vcp%qibz)
- end if
- if (allocated(Vcp%qlwl)) then
-   ABI_FREE(Vcp%qlwl)
- end if
- if (allocated(Vcp%vc_sqrt))   then
-   ABI_FREE(Vcp%vc_sqrt)
- end if
- if (allocated(Vcp%vc_sqrt_resid))   then
-   ABI_FREE(Vcp%vc_sqrt_resid)
- end if
- if (allocated(Vcp%vcqlwl_sqrt)) then
-   ABI_FREE(Vcp%vcqlwl_sqrt)
- end if
-
- DBG_EXIT("COLL")
+ ABI_SFREE(Vcp%qibz)
+ ABI_SFREE(Vcp%qlwl)
+ ABI_SFREE(Vcp%vc_sqrt)
+ ABI_SFREE(Vcp%vc_sqrt_resid)
+ ABI_SFREE(Vcp%vcqlwl_sqrt)
 
 end subroutine vcoul_free
 !!***
@@ -1507,8 +1483,6 @@ end subroutine vcoul_free
 !! SOURCE
 
 subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1603,8 +1577,6 @@ end subroutine cutoff_sphere
 !! SOURCE
 
 subroutine cutoff_cylinder(nq,qpt,ng,gvec,rcut,hcyl,pdir,boxcenter,rprimd,vccut,method,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1920,8 +1892,6 @@ end subroutine cutoff_cylinder
 
 subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut,method)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: method,ng,nq
@@ -2050,8 +2020,6 @@ end subroutine cutoff_surface
 !! SOURCE
 
 subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

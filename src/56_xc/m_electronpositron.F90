@@ -571,7 +571,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
        end do
      end if
    end do
-   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
    if (dtset%usepaw==1.and.my_natom>0) then
     if (electronpositron%has_pawrhoij_ep==1) then
       ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))

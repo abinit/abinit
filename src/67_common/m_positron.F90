@@ -421,7 +421,7 @@ type(fock_type),pointer, intent(inout) :: fock
        call read_rhor(trim(fname), cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
        hdr_den, electronpositron%pawrhoij_ep, comm_cell, check_hdr=hdr)
        etotal_read = hdr_den%etot; call hdr_free(hdr_den)
-       call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+       call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
        if (dtset%usepaw==1.and.allocated(electronpositron%nhat_ep)) then
          call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&
 &         dtset%nspden,dtset%ntypat,pawang,pawfgrtab,nhatgr,electronpositron%nhat_ep,&
@@ -559,7 +559,7 @@ type(fock_type),pointer, intent(inout) :: fock
        end do
      end do
      rhog_ep(:,:)=rhog
-     call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
 !    If PAW, exchange "positronic" and "electronic" rhoij
      if (dtset%usepaw==1) then
        if (size(pawrhoij)>0.and.size(electronpositron%pawrhoij_ep)>0) then
@@ -589,7 +589,7 @@ type(fock_type),pointer, intent(inout) :: fock
 
 !  ===== COMPUTE HARTREE POTENTIAL ASSOCIATED TO RHOR_EP
    if (history_level==4) then
-     call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    end if
    if (history_level/=-1) then
      call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
@@ -2508,7 +2508,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
          call fourwf(1,denpot_dum,cwaveg_pos,fofgout_dum,cwaveaug_pos,&
 &         gbound_pos,gbound_pos,istwf_k_pos,kg_k_pos,kg_k_pos,&
 &         dtset%mgfft,mpi_enreg,1,ngfft,npw_k_pos,npw_k_pos,&
-&         n4,n5,n6,option,mpi_enreg%paral_kgb,tim_fourwf,weight_pos,weight_pos,&
+&         n4,n5,n6,option,tim_fourwf,weight_pos,weight_pos,&
 &         use_gpu_cuda=dtset%use_gpu_cuda)
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
@@ -2736,7 +2736,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                        call fourwf(1,denpot_dum,cwaveg,fofgout_dum,cwaveaug,&
 &                       gbound,gbound,istwf_k,kg_k,kg_k,&
 &                       dtset%mgfft,mpi_enreg,1,ngfft,npw_k,npw_k,&
-&                       n4,n5,n6,option,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&                       n4,n5,n6,option,tim_fourwf,weight,weight,&
 &                       use_gpu_cuda=dtset%use_gpu_cuda)
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&
@@ -2834,8 +2834,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                          end if
 
 !                        FFT of (Psi+.Psi-.gamma) to get Intg[(Psi+.Psi-.gamma).exp(-igr)]
-                         call fourdp(cplex,rho_contrib_g,rho_contrib,-1,mpi_enreg,nfft,ngfft,&
-&                         mpi_enreg%paral_kgb,tim_fourdp)
+                         call fourdp(cplex,rho_contrib_g,rho_contrib,-1,mpi_enreg,nfft,1,ngfft,&
+&                         tim_fourdp)
 
                          rho_pw(1:nfft,jkpt)=rho_pw(1:nfft,jkpt) +gammastate*occ_el*occ_pos &
 &                         *(rho_contrib_g(1,1:nfft)**2+rho_contrib_g(2,1:nfft)**2)

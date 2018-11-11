@@ -529,7 +529,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfftf))
                      work(:)=rho2r1(:,1)
-                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
                      ABI_DEALLOCATE(work)
 
                    end if

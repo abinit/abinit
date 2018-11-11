@@ -2320,7 +2320,7 @@ subroutine chkvars (string)
 !<ABINIT_VARS>
 !A
  list_vars=                 ' accuracy acell adpimd adpimd_gamma'
- list_vars=trim(list_vars)//' algalch amu angdeg asr atvshift autoparal'
+ list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atvshift autoparal'
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
@@ -2460,7 +2460,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_model prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
+ list_vars=trim(list_vars)//' prt_model prt_names prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
@@ -2489,7 +2489,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' spin_n1l spin_n2l spin_qpoint'
  list_vars=trim(list_vars)//' spin_sia_add spin_sia_k1amp spin_sia_k1dir'
  list_vars=trim(list_vars)//' spin_temperature spin_temperature_start spin_temperature_end'
- list_vars=trim(list_vars)//'  spin_temperature_nstep spin_tolavg spin_tolvar spin_var_temperature spinat spinmagntarget spmeth'
+ list_vars=trim(list_vars)//' spin_temperature_nstep spin_tolavg spin_tolvar spin_var_temperature spin_write_traj'
+ list_vars=trim(list_vars)//' spinat spinmagntarget spmeth'
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma'
 !T

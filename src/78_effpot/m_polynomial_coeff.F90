@@ -924,6 +924,8 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename,unit,newfile,replace
   end if
 
 end subroutine polynomial_coeff_writeXML
+
+
 !!***
 
 !!****f* m_polynomial_coeff/polynomial_coeff_evaluate
@@ -949,6 +951,7 @@ end subroutine polynomial_coeff_writeXML
 !!
 !! OUTPUT
 !!  energy = contribution to the energy
+!!  energy_coeff(ncoeff) = energy contribution of each anharmonic term 
 !!  fcart(3,natom) = contribution  to the forces
 !!  strten(6) = contribution to the stress tensor
 !!
@@ -961,7 +964,7 @@ end subroutine polynomial_coeff_writeXML
 !!
 !! SOURCE
 !!
-subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,natom_uc,ncoeff,sc_size,&
+subroutine polynomial_coeff_evaluate(coefficients,disp,energy,energy_coeff,fcart,natom_sc,natom_uc,ncoeff,sc_size,&
 &                                    strain,strten,ncell,index_cells,comm)
 
 !Arguments ------------------------------------
@@ -974,6 +977,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
   real(dp),intent(in) :: strain(6)
   real(dp),intent(out):: fcart(3,natom_sc)
   real(dp),intent(in) :: disp(3,natom_sc)
+  real(dp),optional,intent(out):: energy_coeff(ncoeff)
   integer,intent(in) :: index_cells(4,ncell)
   integer,intent(in) :: sc_size(3)
   type(polynomial_coeff_type),intent(in) :: coefficients(ncoeff)
@@ -981,8 +985,9 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
 ! scalar
   integer :: i1,i2,i3,ia1,ib1,ia2,ib2,idir1,idir2,ierr,ii
   integer :: icoeff,iterm,idisp1,idisp2,idisp1_strain,idisp2_strain,icell,ndisp
-  integer :: nstrain,ndisp_tot,power_disp,power_strain
-  real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3,weight
+  integer :: nstrain,ndisp_tot,power_disp,power_strain,unit_out
+  real(dp):: coeff,disp1,disp2,tmp1,tmp2,tmp3,weight,energy_term
+  logical :: file_opened 
 ! array
   integer :: cell_atoma1(3),cell_atoma2(3)
   integer :: cell_atomb1(3),cell_atomb2(3)
@@ -999,7 +1004,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
   energy     = zero
   fcart(:,:) = zero
   strten(:)  = zero
-
+  energy_coeff(:) = zero
   do icell = 1,ncell
     ii = index_cells(4,icell);
     i1=index_cells(1,icell); i2=index_cells(2,icell); i3=index_cells(3,icell)
@@ -1175,6 +1180,7 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
           end if
         end do
 
+        energy_coeff(icoeff) = energy_coeff(icoeff) + coeff * weight * tmp1
 !       accumule energy
         energy = energy +  coeff * weight * tmp1
 
@@ -1182,11 +1188,29 @@ subroutine polynomial_coeff_evaluate(coefficients,disp,energy,fcart,natom_sc,nat
     end do
   end do
 
+
 ! MPI_SUM
   call xmpi_sum(energy, comm, ierr)
   call xmpi_sum(fcart , comm, ierr)
   call xmpi_sum(strten , comm, ierr)
 
+
+!Write to anharmonic_energy_terms.out ORIGINAL  
+  INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
+  if(file_opened .eqv. .TRUE.)then
+    do icoeff=1,ncoeff
+      call xmpi_sum(energy_coeff(icoeff), comm, ierr)
+     !write(*,*) 'term ',icoeff,' :', energy_coeff(icoeff)
+     ! Marcus write energy contributions of anharmonic terms to file 
+      if(icoeff <ncoeff)then      
+        write(unit_out,'(A,1ES24.16)',advance='no')  '    ',energy_coeff(icoeff)
+      else if(icoeff==ncoeff)then  
+        write(unit_out,'(A,1ES24.16)',advance='yes') '    ',energy_coeff(icoeff)
+      end if     
+    enddo 
+  end if
+
+  
 end subroutine polynomial_coeff_evaluate
 !!***
 
@@ -2140,7 +2164,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    call generateTermsFromList(cell,list_combination(:,ii),list_symcoeff,list_symstr,ncoeff_sym,&
 &                             ndisp_max,nrpt,nstr_sym,nsym,nterm,terms)
    call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm),check=.true.)
-!  Free the terms array
+   !  Free the terms array
    do iterm=1,nterm
      call polynomial_term_free(terms(iterm))
    end do
@@ -2168,6 +2192,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  ncoeff_tot = ncoeff!set the output
  call xmpi_sum(ncoeff_tot,comm,ierr)
  call xmpi_sum(ncoeff_max,comm,ierr)
+
 
 !Need to redistribute the coefficients over the CPU
 !Get the list with the number of coeff on each CPU
@@ -2286,6 +2311,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      end if
    end if
 
+
    if (need_distributed)then
      if(my_rank==rank_to_send)then
        if(any(my_newcoeffindexes(:)==icoeff3))then
@@ -2331,6 +2357,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
+ 
 
 !Final deallocation
  ABI_DEALLOCATE(symbols)

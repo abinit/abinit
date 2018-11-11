@@ -49,8 +49,7 @@ MODULE m_ddk
  use defs_abitypes,   only : hdr_type, dataset_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use m_geometry,      only : mkradim
- use m_crystal,       only : crystal_t, crystal_free
- use m_crystal_io,    only : crystal_from_hdr, crystal_ncwrite
+ use m_crystal,       only : crystal_t
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
 
@@ -173,8 +172,6 @@ CONTAINS
 
 subroutine ddk_init(ddk, paths, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: paths(3)
@@ -210,7 +207,7 @@ subroutine ddk_init(ddk, paths, comm)
  ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
 
  ! Init crystal_t
- call crystal_from_hdr(ddk%cryst, hdrs(1), timrev2)
+ ddk%cryst = hdr_get_crystal(hdrs(1), timrev2)
 
  ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
  call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
@@ -244,8 +241,6 @@ end subroutine ddk_init
 
 subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk_path,prefix
@@ -258,7 +253,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
 !scalars
  integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb0=0, master=0
  logical,parameter :: force_istwfk1=.True.
- integer :: iomode, mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
+ integer :: mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: in_iomode, ii, ik, bandmin, bandmax, istwf_k
  integer :: my_rank, nproc, ierr
@@ -309,7 +304,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  call wfk_open_read(in_wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
 
  !read crystal
- call crystal_from_hdr(cryst, in_wfk%hdr, 2)
+ cryst = hdr_get_crystal(in_wfk%hdr, 2)
 
  !read ebands
  ebands = wfk_read_ebands(wfk_path,comm)
@@ -379,11 +374,10 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_FREE(keep_ur)
  ABI_FREE(nband)
 
- call wfd_print(in_wfd,header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call in_wfd%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
 
- !Read Wavefunctions
- iomode = iomode_from_fname(wfk_path)
- call wfd_read_wfk(in_wfd,wfk_path,iomode)
+ ! Read Wavefunctions
+ call in_wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
 
  do spin=1,nsppol ! Loop over spins
    do ik=1,nkpt ! Loop over kpoints
@@ -478,7 +472,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
        hdr_tmp%pertcase = (cryst%natom*3)+ii
        NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-       NCF_CHECK(crystal_ncwrite(cryst, ncid))
+       NCF_CHECK(cryst%ncwrite(ncid))
        NCF_CHECK(ebands_ncwrite(ebands, ncid))
        ncerr = nctk_def_arrays(ncid, [ &
          nctkarr_t('h1_matrix_elements', "dp", &
@@ -500,9 +494,9 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_FREE(dipoles)
 
  call wfk_close(in_wfk)
- call wfd_free(in_wfd)
+ call in_wfd%free()
  call ebands_free(ebands)
- call crystal_free(cryst)
+ call cryst%free()
 
 end subroutine eph_ddk
 !!***
@@ -531,8 +525,6 @@ end subroutine eph_ddk
 
 subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -552,15 +544,14 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
  type(fstab_t), pointer :: fs
  character(len=500) :: msg
 !arrays
- real(dp), allocatable :: eigen1(:)
- real(dp), allocatable :: velocityp(:,:)
+ real(dp), allocatable :: eigen1(:), velocityp(:,:)
 
 !************************************************************************
 
- if (ddk%rw_mode /= ddk_NOMODE) then
+ if (ddk%rw_mode /= DDK_NOMODE) then
    MSG_ERROR("ddk should be in ddk_NOMODE before open_read is called.")
  end if
- ddk%rw_mode = ddk_READMODE
+ ddk%rw_mode = DDK_READMODE
 
  ddk%maxnb = maxval(fstab(:)%maxnb)
  ddk%nkfs = maxval(fstab(:)%nkfs)
@@ -666,8 +657,6 @@ end subroutine ddk_read_fsvelocities
 
 subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !integer,intent(in) :: comm  ! could distribute this over k in the future
@@ -679,9 +668,7 @@ subroutine ddk_fs_average_veloc(ddk, ebands, fstab, sigmas)
 !Local variables-------------------------------
 !scalars
  integer :: idir, ikfs, isppol, ik_ibz, iene
- integer :: iband
- integer :: mnb, nband_k
- integer :: nsig
+ integer :: iband, mnb, nband_k, nsig
  type(fstab_t), pointer :: fs
 !arrays
  real(dp), allocatable :: wtk(:,:)
@@ -745,8 +732,6 @@ end subroutine ddk_fs_average_veloc
 
 subroutine ddk_free(ddk)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ddk_t),intent(inout) :: ddk
@@ -756,15 +741,11 @@ subroutine ddk_free(ddk)
  ! integer arrays
 
  ! real arrays
- if (allocated(ddk%velocity)) then
-   ABI_DEALLOCATE(ddk%velocity)
- end if
- if (allocated(ddk%velocity_fsavg)) then
-   ABI_DEALLOCATE(ddk%velocity_fsavg)
- end if
+ ABI_SFREE(ddk%velocity)
+ ABI_SFREE(ddk%velocity_fsavg)
 
  ! types
- call crystal_free(ddk%cryst)
+ call ddk%cryst%free()
 
 end subroutine ddk_free
 !!***
@@ -794,8 +775,6 @@ end subroutine ddk_free
 !! SOURCE
 
 subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

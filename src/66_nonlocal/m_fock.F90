@@ -150,6 +150,9 @@ module m_fock
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution
 
+  real(dp) :: e_fock0
+    ! contribution of the Fock term to energy (computed and stored here in case of ACE)
+
   integer, allocatable :: atindx(:)
     !  atindx(natom)=index table for atoms (see gstate.f)
 
@@ -1895,7 +1898,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
                ABI_ALLOCATE(dummytab2,(2,npwj))
                call fourwf(1,dummytab3,cgocc(:,1:npwj),dummytab2,fockbz%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol), &
 &               gbound_k,gbound_k,jstwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,&
-&               npwj,npwj,n4,n5,n6,tim_fourwf0,dtset%paral_kgb,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
+&               npwj,npwj,n4,n5,n6,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
                ABI_DEALLOCATE(dummytab2)
 
              else

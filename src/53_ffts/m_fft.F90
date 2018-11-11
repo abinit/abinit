@@ -1177,7 +1177,6 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
  integer,intent(in) :: fftalg,ndat,nthreads
  integer,optional,intent(in) :: unit
  integer :: nfailed
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -1339,12 +1338,10 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    ABI_FREE(gg)
 
    do cplex=1,2
-     !
      !if (fftalga == FFT_FFTW3 .and. ndat > 1 .and. cplex==1) then
      !  call wrtout(ount,"Warning: fourdp with FFTW3-wrappers, cplex=2 and ndat>1, might crash if MKL is used","COLL")
      !  !CYCLE
      !end if
-
      ABI_MALLOC(fofg,     (2*ldxyz*ndat))
      ABI_MALLOC(fofr_ref, (cplex*ldxyz*ndat))
      ABI_MALLOC(fofr,     (cplex*ldxyz*ndat))
@@ -1373,6 +1370,7 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
      nfailed = nfailed + ierr
 
      write(info,"(a,i1,a)")sjoin(library,"fourdp (cplex "),cplex,") :"
+     !write(info,"(2a,i1,a,i0,a)")trim(library), "fourdp (cplex ", cplex,"), ndata = ",ndat," :"
      if (ierr /= 0) then
        max_abserr = MAXVAL(ABS(fofr - fofr_ref))
        write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
@@ -1388,9 +1386,7 @@ function fftbox_utests(fftalg,ndat,nthreads,unit) result(nfailed)
    !
  end do
 
- if (nthreads > 0) then
-   call xomp_set_num_threads(old_nthreads)
- end if
+ if (nthreads > 0) call xomp_set_num_threads(old_nthreads)
 
 end function fftbox_utests
 !!***
@@ -2291,9 +2287,6 @@ end function fftu_mpi_utests
 !!                fofgout(2,npwout*ndat) contains its output Fourier transform;
 !!                no use of fofgin and npwin.
 !!
-!! TODO
-!!  Remove paral_kgb, we are already passing mpi_enreg
-!!
 !! NOTES
 !!   DO NOT CHANGE THE API OF THIS FUNCTION.
 !!   If you need a specialized routine for the FFT of the wavefunctions, create
@@ -2316,14 +2309,14 @@ end function fftu_mpi_utests
 
 subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-&  paral_kgb,tim_fourwf,weight_r,weight_i, &
+&  tim_fourwf,weight_r,weight_i, &
 &  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,npwin,npwout,option,paral_kgb
+ integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,npwin,npwout,option
  integer,intent(in) :: tim_fourwf
  integer,intent(in),optional :: use_gpu_cuda,use_ndo
  real(dp),intent(in) :: weight_r,weight_i
@@ -2340,10 +2333,10 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !scalars
  integer :: fftalg,fftalga,fftalgc,fftcache,i1,i2,i2_local,i3,i3_local,i3_glob,idat,ier
  integer :: iflag,ig,comm_fft,me_g0,me_fft,n1,n2,n3,nd2proc,nd3proc
- integer :: nfftot,nproc_fft,option_ccfft
+ integer :: nfftot,nproc_fft,option_ccfft,paral_kgb
  real(dp) :: fim,fre,xnorm
  character(len=500) :: message
- logical ::  luse_gpu_cuda,luse_ndo
+ logical :: luse_gpu_cuda,luse_ndo
 !arrays
  integer,parameter :: shiftg0(3)=0
  integer,parameter :: symmE(3,3)=reshape([1,0,0,0,1,0,0,0,1],[3,3])
@@ -2365,6 +2358,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  nproc_fft=ngfft(10)
 
  comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0
+ paral_kgb = mpi_enreg%paral_kgb
 
  !if (ndat/=1) then
  !  write(std_out,*)fftalg
@@ -2394,40 +2388,40 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
    call timab(840+tim_fourwf,2,tsec); return
  end if
 
- if ((fftalgc<0 .or. fftalgc>2)) then
-   write(message, '(a,i4,a,a,a,a,a)' )&
-&   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
+ if ((fftalgc < 0 .or. fftalgc > 2)) then
+   write(message, '(a,i0,5a)' )&
+&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
 &   'The third digit, fftalg(C), must be 0, 1, or 2',ch10,&
 &   'Action: change fftalg in your input file.'
    MSG_ERROR(message)
  end if
 
- if (fftalgc/=0 .and. ALL(fftalga/=(/1,3,4,5/)) ) then
-   write(message, '(a,i4,5a)' )&
-&   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
+ if (fftalgc /= 0 .and. ALL(fftalga /= [1,3,4,5])) then
+   write(message, '(a,i0,5a)' )&
+&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
 &   'The first digit must be 1,3,4 when the last digit is not 0.',ch10,&
 &   'Action: change fftalg in your input file.'
    MSG_ERROR(message)
  end if
 
- if (option<0 .or. option>3)then
-   write(message, '(a,i4,a,a,a)' )&
-&   'The option number',option,' is not allowed.',ch10,&
+ if (option < 0 .or. option > 3)then
+   write(message, '(a,i0,3a)' )&
+&   'The option number ',option,' is not allowed.',ch10,&
 &   'Only option=0, 1, 2 or 3 are allowed presently.'
    MSG_ERROR(message)
  end if
 
- if (option==1 .and. cplex/=1) then
-   write(message, '(a,a,a,i4,a)' )&
+ if (option == 1 .and. cplex /= 1) then
+   write(message, '(3a,i0,a)' )&
 &   'With the option number 1, cplex must be 1,',ch10,&
-&   'but it is cplex=',cplex,'.'
+&   'but it is cplex= ',cplex,'.'
    MSG_ERROR(message)
  end if
 
  if (option==2 .and. (cplex/=1 .and. cplex/=2)) then
-   write(message, '(a,a,a,i4,a)' )&
+   write(message, '(3a,i0,a)' )&
 &   'With the option number 2, cplex must be 1 or 2,',ch10,&
-&   'but it is cplex=',cplex,'.'
+&   'but it is cplex= ',cplex,'.'
    MSG_ERROR(message)
  end if
 
@@ -2930,11 +2924,9 @@ end subroutine fourwf
 !! REAL case when cplex=1, COMPLEX case when cplex=2
 !! Usually used for density and potentials.
 !!
-!! There are two different possibilities :
-!!  fftalgb=0 means using the complex-to-complex FFT routine,
-!!   irrespective of the value of cplex
-!!  fftalgb=1 means using a real-to-complex FFT or a complex-to-complex FFT,
-!!   depending on the value of cplex.
+!! There are two different possibilities:
+!!  fftalgb=0 means using the complex-to-complex FFT routine, irrespective of the value of cplex
+!!  fftalgb=1 means using a real-to-complex FFT or a complex-to-complex FFT, depending on the value of cplex.
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
@@ -2951,12 +2943,9 @@ end subroutine fourwf
 !!  -1 for transforming from r to G.
 !! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
+!! ndat=Number of functions to transform
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!! paral_kgb=Flag related to the kpoint-band-fft parallelism
 !! tim_fourdp=timing code of the calling routine (can be set to 0 if not attributed)
-!!
-!! TODO
-!!  Remove paral_kgb
 !!
 !! SIDE EFFECTS
 !! Input/Output
@@ -2981,22 +2970,21 @@ end subroutine fourwf
 !!
 !! SOURCE
 
-subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,isign,nfft,paral_kgb,tim_fourdp
+ integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(inout) :: fofg(2,nfft),fofr(cplex*nfft)
+ real(dp),intent(inout) :: fofg(2,nfft,ndat),fofr(cplex*nfft,ndat)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: ndat1=1
- integer :: fftalg,fftalga,fftalgb,fftcache,i1,i2,i3,base
+ integer :: fftalg,fftalga,fftalgb,fftcache,i1,i2,i3,base,idat
  integer :: n1,n1half1,n1halfm,n2,n2half1,n3,n4
  integer :: n4half1,n5,n5half1,n6 !nd2proc,nd3proc,i3_local,i2_local,
  integer :: comm_fft,nproc_fft,me_fft
@@ -3006,12 +2994,11 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: tsec(2)
- real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:)
- real(dp),allocatable :: workf(:,:,:,:),workr(:,:,:,:)
+ real(dp),allocatable :: work1(:,:,:,:,:),work2(:,:,:,:,:)
+ real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
 
 ! *************************************************************************
-
- ABI_UNUSED(paral_kgb)
+ ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing
  call timab(260+tim_fourdp,1,tsec)
@@ -3028,24 +3015,24 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  xnorm=one/dble(n1*n2*n3)
  !write(std_out,*)' fourdp :me_fft',me_fft,'nproc_fft',nproc_fft,'nfft',nfft
 
- if (fftalgb/=0 .and. fftalgb/=1) then
-   write(message, '(a,i4,a,a,a,a,a)' )&
-&   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
+ if (fftalgb /= 0 .and. fftalgb /= 1) then
+   write(message, '(a,i0,5a)' )&
+&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
 &   'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
-&   'Action : change fftalg in your input file.'
+&   'Action: change fftalg in your input file.'
    MSG_BUG(message)
  end if
 
- if (fftalgb==1 .and. ALL(fftalga/=(/1,3,4,5/)) )then
-   write(message,'(a,i4,5a)')&
-&   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
+ if (fftalgb == 1 .and. ALL(fftalga /= [1,3,4,5])) then
+   write(message,'(a,i0,5a)')&
+&   'The input algorithm number fftalg= ',fftalg,' is not allowed.',ch10,&
 &   'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
 &   'Action: change fftalg in your input file.'
    MSG_BUG(message)
  end if
 
  if (n4<n1.or.n5<n2.or.n6<n3) then
-   write(message,'(a,3i8,a,3i8)')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
+   write(message,'(a,3(i0,1x),a,3(i0,1x))')'  Each of n4,n5,n6=',n4,n5,n6,'must be >= n1, n2, n3 =',n1,n2,n3
    MSG_BUG(message)
  end if
 
@@ -3054,18 +3041,18 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 
  ! Branch immediately depending on nproc_fft
  if (nproc_fft > 1) then
-   call fourdp_mpi(cplex,nfft,ngfft,ndat1,isign,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+   call fourdp_mpi(cplex,nfft,ngfft,ndat,isign,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    goto 100
  end if
 
  if (fftalga == FFT_FFTW3) then
    ! Call sequential or MPI FFTW3 version.
    if (nproc_fft == 1) then
-     !call wrtout(std_out,"FFTW3 SEQFOURDP","COLL")
-     call fftw3_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat1,isign,fofg,fofr)
+     !call wrtout(std_out,"FFTW3 SEQFOURDP")
+     call fftw3_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat,isign,fofg,fofr)
    else
-     !call wrtout(std_out,"FFTW3 MPIFOURDP","COLL")
-     call fftw3_mpifourdp(cplex,nfft,ngfft,ndat1,isign,&
+     !call wrtout(std_out,"FFTW3 MPIFOURDP")
+     call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    end if
    ! Accumulate timing and return
@@ -3075,7 +3062,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  if (fftalga==FFT_DFTI) then
    ! Call sequential or MPI MKL.
    if (nproc_fft == 1) then
-     call dfti_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat1,isign,fofg,fofr)
+     call dfti_seqfourdp(cplex,n1,n2,n3,n1,n2,n3,ndat,isign,fofg,fofr)
    else
      MSG_ERROR("MPI fourdp with MKL cluster DFT not implemented")
    end if
@@ -3083,31 +3070,34 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
    call timab(260+tim_fourdp,2,tsec); return
  end if
 
- ! Here, deal  with the new SG FFT, complex-to-complex case
+ ! Here, deal with the new SG FFT, complex-to-complex case
  if (fftalga==FFT_SG2002 .and. (fftalgb==0 .or. cplex==2)) then
-   call sg2002_mpifourdp(cplex,nfft,ngfft,ndat1,isign,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
-   !call sg2002_seqfourdp(cplex,nfft,ngfft,ndat1,isign,fftn2_fofg,fofr)
+   call sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+   !call sg2002_seqfourdp(cplex,nfft,ngfft,ndat,isign,fftn2_fofg,fofr)
  end if
 
  ! Here, deal with the new SG FFT, with real-to-complex
  if (fftalga==FFT_SG2002 .and. fftalgb==1 .and. cplex==1) then
    ABI_CHECK(nproc_fft == 1,"fftalg 41x does not support nproc_fft > 1")
+   ABI_CHECK(ndat == 1, "ndat must be 1")
 
    n1half1=n1/2+1; n1halfm=(n1+1)/2
    n2half1=n2/2+1
    ! n4half1 or n5half1 are the odd integers >= n1half1 or n2half1
    n4half1=(n1half1/2)*2+1
    n5half1=(n2half1/2)*2+1
-   ABI_ALLOCATE(workr,(2,n4half1,n5,n6))
-   ABI_ALLOCATE(workf,(2,n4,n6,n5half1))
+   ABI_ALLOCATE(workr, (2,n4half1,n5,n6,ndat))
+   ABI_ALLOCATE(workf, (2,n4,n6,n5half1,ndat))
 
    if (isign==1) then
-     do i3=1,n3
-       do i2=1,n2half1
-         base=n1*(i2-1+n2*(i3-1))
-         do i1=1,n1
-           workf(1,i1,i3,i2)=fofg(1,i1+base)
-           workf(2,i1,i3,i2)=fofg(2,i1+base)
+     do idat=1,ndat
+       do i3=1,n3
+         do i2=1,n2half1
+           base=n1*(i2-1+n2*(i3-1))
+           do i1=1,n1
+             workf(1,i1,i3,i2,idat) = fofg(1,i1+base,idat)
+             workf(2,i1,i3,i2,idat) = fofg(2,i1+base,idat)
+           end do
          end do
        end do
      end do
@@ -3116,65 +3106,73 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
      !nd3proc=((n6-1)/nproc_fft) +1
 
      ! change the call? n5half1 et n6 ?
-     call sg2002_back(cplex,ndat1,n1,n2,n3,n4,n5,n6,n4half1,n5half1,n6,2,workf,workr,comm_fft)
+     call sg2002_back(cplex,ndat,n1,n2,n3,n4,n5,n6,n4half1,n5half1,n6,2,workf,workr,comm_fft)
 
-     do i3=1,n3
-       do i2=1,n2
-         base=n1*(i2-1+n2*(i3-1))
-         do i1=1,n1half1-1
-           ! copy data
-           fofr(2*i1-1+base)=workr(1,i1,i2,i3)
-           fofr(2*i1  +base)=workr(2,i1,i2,i3)
+     do idat=1,ndat
+       do i3=1,n3
+         do i2=1,n2
+           base=n1*(i2-1+n2*(i3-1))
+           do i1=1,n1half1-1
+             ! copy data
+             fofr(2*i1-1+base, idat) = workr(1,i1,i2,i3,idat)
+             fofr(2*i1  +base, idat) = workr(2,i1,i2,i3,idat)
+           end do
+           ! If n1 odd, must add last data
+           if((2*n1half1-2)/=n1)then
+             fofr(n1+base, idat) = workr(1,n1half1,i2,i3,idat)
+           end if
          end do
-         ! If n1 odd, must add last data
-         if((2*n1half1-2)/=n1)then
-           fofr(n1+base)=workr(1,n1half1,i2,i3)
-         end if
        end do
      end do
 
    else if (isign==-1) then
-     do i3=1,n3
-       do i2=1,n2
-         base=n1*(i2-1+n2*(i3-1))
-         do i1=1,n1half1-1
-           workr(1,i1,i2,i3)=fofr(2*i1-1+base)
-           workr(2,i1,i2,i3)=fofr(2*i1  +base)
+     do idat=1,ndat
+       do i3=1,n3
+         do i2=1,n2
+           base=n1*(i2-1+n2*(i3-1))
+           do i1=1,n1half1-1
+             workr(1,i1,i2,i3,idat)=fofr(2*i1-1+base,idat)
+             workr(2,i1,i2,i3,idat)=fofr(2*i1  +base,idat)
+           end do
+           ! If n1 odd, must add last data
+           if((2*n1half1-2)/=n1)then
+             workr(1,n1half1,i2,i3,idat)=fofr(n1+base,idat)
+             workr(2,n1half1,i2,i3,idat)=zero
+           end if
          end do
-         ! If n1 odd, must add last data
-         if((2*n1half1-2)/=n1)then
-           workr(1,n1half1,i2,i3)=fofr(n1+base)
-           workr(2,n1half1,i2,i3)=zero
-         end if
        end do
      end do
 
-     call sg2002_forw(cplex,ndat1,n1,n2,n3,n4,n5,n6,n4half1,n5half1,n6,2,workr,workf,comm_fft)
+     call sg2002_forw(cplex,ndat,n1,n2,n3,n4,n5,n6,n4half1,n5half1,n6,2,workr,workf,comm_fft)
 
      ! Transfer fft output to the original fft box
-     do i3=1,n3
-       do i2=1,n2half1
-         base=n1*(i2-1+n2*(i3-1))
-         do i1=1,n1
-           fofg(1,i1+base)=workf(1,i1,i3,i2)*xnorm
-           fofg(2,i1+base)=workf(2,i1,i3,i2)*xnorm
-         end do
-       end do
+     do idat=1,ndat
+       do i3=1,n3
 
-       ! Complete missing values with complex conjugate
-       ! Inverse of ix is located at nx+2-ix , except for ix=1, for which it is 1.
-       if(n2half1>2)then
-         do i2=2,n2+1-n2half1
-           base=n1*((n2+2-i2)-1)
-           if(i3/=1)base=base+n1*n2*((n3+2-i3)-1)
-           fofg(1,1+base)= workf(1,1,i3,i2)*xnorm
-           fofg(2,1+base)=-workf(2,1,i3,i2)*xnorm
-           do i1=2,n1
-             fofg(1,n1+2-i1+base)= workf(1,i1,i3,i2)*xnorm
-             fofg(2,n1+2-i1+base)=-workf(2,i1,i3,i2)*xnorm
+         do i2=1,n2half1
+           base=n1*(i2-1+n2*(i3-1))
+           do i1=1,n1
+             fofg(1,i1+base,idat) = workf(1,i1,i3,i2,idat)*xnorm
+             fofg(2,i1+base,idat) = workf(2,i1,i3,i2,idat)*xnorm
            end do
          end do
-       end if
+
+         ! Complete missing values with complex conjugate
+         ! Inverse of ix is located at nx+2-ix , except for ix=1, for which it is 1.
+         if(n2half1>2)then
+           do i2=2,n2+1-n2half1
+             base=n1*((n2+2-i2)-1)
+             if(i3/=1)base=base+n1*n2*((n3+2-i3)-1)
+             fofg(1,1+base,idat)= workf(1,1,i3,i2,idat)*xnorm
+             fofg(2,1+base,idat)=-workf(2,1,i3,i2,idat)*xnorm
+             do i1=2,n1
+               fofg(1,n1+2-i1+base,idat)= workf(1,i1,i3,i2,idat)*xnorm
+               fofg(2,n1+2-i1+base,idat)=-workf(2,i1,i3,i2,idat)*xnorm
+             end do
+           end do
+         end if
+
+       end do
      end do
 
    end if ! isign
@@ -3184,50 +3182,57 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 
  ! Here, one calls the complex-to-complex FFT subroutine
  if( (fftalgb==0 .or. cplex==2) .and. fftalga/=4 )then
+   ABI_CHECK(ndat == 1, "ndat must be 1")
 
-   ABI_ALLOCATE(work1,(2,n4,n5,n6))
-   ABI_ALLOCATE(work2,(2,n4,n5,n6))
+   ABI_ALLOCATE(work1, (2,n4,n5,n6,ndat))
+   ABI_ALLOCATE(work2, (2,n4,n5,n6,ndat))
 
    if (isign==1) then
 
      ! Transfer fofg to the expanded fft box
-!$OMP PARALLEL DO PRIVATE(base)
-     do i3=1,n3
-       do i2=1,n2
-         base=n1*(i2-1+n2*(i3-1))
-         do i1=1,n1
-           work1(1,i1,i2,i3)=fofg(1,i1+base)
-           work1(2,i1,i2,i3)=fofg(2,i1+base)
-         end do
-       end do
-     end do
-
-     ! Call Stefan Goedecker C2C FFT
-     !call sg_fft_cc(fftcache,n1,n2,n3,n4,n5,n6,ndat1,isign,work1,work2)
-     call ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat1,2,work1,work2,comm_fft)
-
-     ! Take data from expanded box and put it in the original box.
-     if (cplex==1) then
-       ! REAL case
-!$OMP PARALLEL DO PRIVATE(base)
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(base)
+     do idat=1,ndat
        do i3=1,n3
          do i2=1,n2
            base=n1*(i2-1+n2*(i3-1))
            do i1=1,n1
-             fofr(i1+base)=work2(1,i1,i2,i3)
+             work1(1,i1,i2,i3,idat) = fofg(1,i1+base,idat)
+             work1(2,i1,i2,i3,idat) = fofg(2,i1+base,idat)
+           end do
+         end do
+       end do
+     end do
+
+     ! Call Goedecker C2C FFT
+     !call sg_fft_cc(fftcache,n1,n2,n3,n4,n5,n6,ndat,isign,work1,work2)
+     call ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,2,work1,work2,comm_fft)
+
+     ! Take data from expanded box and put it in the original box.
+     if (cplex==1) then
+       ! REAL case
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(base)
+       do idat=1,ndat
+         do i3=1,n3
+           do i2=1,n2
+             base=n1*(i2-1+n2*(i3-1))
+             do i1=1,n1
+               fofr(i1+base,idat) = work2(1,i1,i2,i3,idat)
+             end do
            end do
          end do
        end do
 
      else
        ! COMPLEX case
-!$OMP PARALLEL DO PRIVATE(base)
-       do i3=1,n3
-         do i2=1,n2
-           base=2*n1*(i2-1+n2*(i3-1))
-           do i1=1,n1
-             fofr(2*i1-1+base)=work2(1,i1,i2,i3)
-             fofr(2*i1  +base)=work2(2,i1,i2,i3)
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(base)
+       do idat=1,ndat
+         do i3=1,n3
+           do i2=1,n2
+             base=2*n1*(i2-1+n2*(i3-1))
+             do i1=1,n1
+               fofr(2*i1-1+base, idat) = work2(1,i1,i2,i3,idat)
+               fofr(2*i1  +base, idat) = work2(2,i1,i2,i3,idat)
+             end do
            end do
          end do
        end do
@@ -3237,45 +3242,49 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
 
      ! Insert fofr into the augmented fft box
      if (cplex==1) then
-       ! REAL case
-!$OMP PARALLEL DO PRIVATE(base)
-       do i3=1,n3
-         do i2=1,n2
-           base=n1*(i2-1+n2*(i3-1))
-           do i1=1,n1
-             ! copy data
-             work1(1,i1,i2,i3)=fofr(i1+base)
-             work1(2,i1,i2,i3)=zero
+       ! REAL case copy data
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(base)
+       do idat=1,ndat
+         do i3=1,n3
+           do i2=1,n2
+             base=n1*(i2-1+n2*(i3-1))
+             do i1=1,n1
+               work1(1,i1,i2,i3,idat) = fofr(i1+base,idat)
+               work1(2,i1,i2,i3,idat) = zero
+             end do
            end do
          end do
        end do
      else
-       ! COMPLEX case
-!$OMP PARALLEL DO PRIVATE(base)
-       do i3=1,n3
-         do i2=1,n2
-           base=2*n1*(i2-1+n2*(i3-1))
-           do i1=1,n1
-             ! copy data
-             work1(1,i1,i2,i3)=fofr(2*i1-1+base)
-             work1(2,i1,i2,i3)=fofr(2*i1  +base)
+       ! COMPLEX case copy data
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(base)
+       do idat=1,ndat
+         do i3=1,n3
+           do i2=1,n2
+             base=2*n1*(i2-1+n2*(i3-1))
+             do i1=1,n1
+               work1(1,i1,i2,i3, idat) = fofr(2*i1-1+base, idat)
+               work1(2,i1,i2,i3, idat) = fofr(2*i1  +base, idat)
+             end do
            end do
          end do
        end do
      end if ! cplex
 
      ! Call Stefan Goedecker C2C FFT
-     !call sg_fft_cc(fftcache,n1,n2,n3,n4,n5,n6,ndat1,isign,work1,work2)
-     call ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat1,2,work1,work2,comm_fft)
+     !call sg_fft_cc(fftcache,n1,n2,n3,n4,n5,n6,ndat,isign,work1,work2)
+     call ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,2,work1,work2,comm_fft)
 
      ! Transfer fft output to the original fft box
-!$OMP PARALLEL DO PRIVATE(base)
-     do i3=1,n3
-       do i2=1,n2
-         base=n1*(i2-1+n2*(i3-1))
-         do i1=1,n1
-           fofg(1,i1+base)=work2(1,i1,i2,i3)*xnorm
-           fofg(2,i1+base)=work2(2,i1,i2,i3)*xnorm
+!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(base)
+     do idat=1,ndat
+       do i3=1,n3
+         do i2=1,n2
+           base=n1*(i2-1+n2*(i3-1))
+           do i1=1,n1
+             fofg(1,i1+base,idat) = work2(1,i1,i2,i3,idat)*xnorm
+             fofg(2,i1+base,idat) = work2(2,i1,i2,i3,idat)*xnorm
+           end do
          end do
        end do
      end do
@@ -3289,9 +3298,10 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourd
  ! Here sophisticated algorithm based on S. Goedecker routines, only for the REAL case.
  ! Take advantage of the fact that fofr is real, and that fofg has corresponding symmetry properties.
  if( (fftalgb==1 .and. cplex==1) .and. fftalga/=4 )then
-   ABI_CHECK(nproc_fft==1,"nproc > 1 not supported")
-   ABI_CHECK(ndat1==1,"ndat > 1 not supported")
-   call sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
+   ABI_CHECK(nproc_fft == 1,"nproc > 1 not supported")
+   do idat=1,ndat
+     call sg_fft_rc(cplex,fofg(1,1,idat),fofr(1,idat),isign,nfft,ngfft)
+   end do
  end if
 
  100 call timab(260+tim_fourdp,2,tsec)
@@ -3405,7 +3415,7 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
    write(message, '(a,a,a,i5,a,a)' )&
 &   'The allowed values of fftalg(A) are 1, 2, 3, and 4 .',ch10,&
 &   'The actual value of fftalg(A) is',fftalga,ch10,&
-&   'Action : check the value of fftalg in your input file.'
+&   'Action: check the value of fftalg in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -3509,6 +3519,7 @@ subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
    call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
 &    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
 
+ ! TODO
  !case (FFT_DFTI)
  !   call dfti_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
  !&    fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
@@ -4377,7 +4388,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourd
          MSG_ERROR("Wrong isign")
        end if
 
-       call fourdp(cplex,fofg,fofr,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+       call fourdp(cplex,fofg,fofr,isign,MPI_enreg,nfft,1,ngfft,tim_fourdp)
 
        if (isign==1) then ! Save A(r1,G2)
          matrix(:,ifft)=CMPLX(fofr(1:nfft),fofr(nfft+1:2*nfft))
@@ -4404,7 +4415,7 @@ subroutine fourdp_6d(cplex,matrix,isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourd
          fofg(2,:)=AIMAG(matrix(ifft,:))
        end if
 
-       call fourdp(2,fofg,fofr,-isign,MPI_enreg,nfft,ngfft,paral_kgb,tim_fourdp)
+       call fourdp(2,fofg,fofr,-isign,MPI_enreg,nfft,1,ngfft,tim_fourdp)
 
        if (isign==1) then
          matrix(ifft,:)=CMPLX(fofg(1,:),fofg(2,:))

@@ -2347,11 +2347,11 @@ end subroutine pawdijhat
 !!
 !! NOTES
 !!   On-site contribution of a nuclear magnetic dipole moment at $R$. Hamiltonian is
-!!   $H=(1/2m_e)(p - q_e A)^2 + V$, and vector potential $A$ is
+!!   $H=(1/2m_e)(p - q_e A)^2 + V$ in SI units, and vector potential $A$
 !!   $A=(\mu_0/4\pi) m\times (r-R)/|r-R|^3 = (\mu_0/4\pi) L_R\cdot m/|r-R|^3$ where
 !!   $L_R$ is the on-site orbital angular momentum and $m$ is the nuclear magnetic
-!!   dipole moment. For an electron (as usual), mass m_e = 1 and charge q_e = -1.
-!!   Second order term in A is ignored.
+!!   dipole moment. Second order term in A is ignored. In atomic units the on-site term
+!!   is \alpha^2 L_R\cdot m/|r-R|^3, where \alpha is the fine structure constant.
 !!
 !! PARENTS
 !!      m_pawdij,pawdenpot
@@ -2377,7 +2377,7 @@ subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,j0lmn,klmn,kln,mesh_size
- real(dp) :: intgr3,permeability
+ real(dp) :: intgr3,RecipAlpha2
  complex(dpc) :: lms
  logical :: ndmom
 !arrays
@@ -2392,10 +2392,9 @@ subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
  mesh_size=pawtab%mesh_size
  LIBPAW_ALLOCATE(ff,(mesh_size))
 
-! magnetic permeability mu_0/four_pi in atomic units
-! this constant is also used in getghcnd.F90, if you change it here,
-! change it there also for consistency
- permeability=5.325135453D-5
+ 
+ RecipAlpha2 = 1.d0/(InvFineStruct*InvFineStruct)
+ ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2439,8 +2438,8 @@ subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
 ! matrix element <S il im|L_idir|S jl jm>
          call slxyzs(il,im,idir,jl,jm,lms)
 
-         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*permeability
-         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*permeability
+         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*RecipAlpha2
+         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*RecipAlpha2
 
        end do
 

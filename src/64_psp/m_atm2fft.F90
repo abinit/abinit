@@ -761,13 +761,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      xnorm=one/ucvol
      if (optv==1) then
        call zerosym(workv,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
-       call fourdp(1,workv,atmvloc,1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+       call fourdp(1,workv,atmvloc,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmvloc(:)=atmvloc(:)*xnorm
        ABI_DEALLOCATE(workv)
      end if
      if (optn==1) then
        call zerosym(workn,2,n1,n2,n3,comm_fft=my_comm_fft,distribfft=my_distribfft)
-       call fourdp(1,workn,atmrho,1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+       call fourdp(1,workn,atmrho,1,mpi_enreg_fft,nfft,1,ngfft,0)
        atmrho(:)=atmrho(:)*xnorm
        ABI_DEALLOCATE(workn)
      end if
@@ -1487,7 +1487,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
          else if (qeq05) then !q=1/2; this doesn't work in parallel
            call zerosym(workv(:,:,id),2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
          end if
-         call fourdp(cplex,workv(:,:,id),atmvlocr1(:,id),1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+         call fourdp(cplex,workv(:,:,id),atmvlocr1(:,id),1,mpi_enreg_fft,nfft,1,ngfft,0)
          atmvlocr1(:,id)=atmvlocr1(:,id)*xnorm
        end do
 
@@ -1503,7 +1503,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
          else if (qeq05) then !q=1/2; this doesn't work in parallel
            call zerosym(workn(:,:,id),2,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
          end if
-         call fourdp(cplex,workn(:,:,id),atmrhor1(:,id),1,mpi_enreg_fft,nfft,ngfft,paral_kgb_fft,0)
+         call fourdp(cplex,workn(:,:,id),atmrhor1(:,id),1,mpi_enreg_fft,nfft,1,ngfft,0)
          atmrhor1(:,id)=atmrhor1(:,id)*xnorm
        end do
        !if (present(atmrhog1)) atmrhog1 = workn

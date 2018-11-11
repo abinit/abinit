@@ -402,7 +402,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                  call fourwf(1,rhoaug,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
 &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                 npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
 &                 use_gpu_cuda=dtset%use_gpu_cuda)
 
@@ -418,22 +418,22 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                      call fourwf(1,rhoaug,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
 
 
                    else if(dtset%nspden==4) then
-!                    Build the four components of rho. We use only norm quantities and, so fourwf.
-!$\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
-!$\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
-!$\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+                     ! Build the four components of rho. We use only norm quantities and, so fourwf.
+                     ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+                     ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+                     ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
                      ABI_ALLOCATE(cwavef_x,(2,npw_k))
                      ABI_ALLOCATE(cwavef_y,(2,npw_k))
                      ABI_ALLOCATE(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
                      ABI_ALLOCATE(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
-!$(\Psi^{1}+\Psi^{2})$
+                     ! $(\Psi^{1}+\Psi^{2})$
                      cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
-!$(\Psi^{1}-i \Psi^{2})$
+                     ! $(\Psi^{1}-i \Psi^{2})$
                      cwavef_y(1,:)=cwavef(1,1:npw_k,1)+cwavef(2,1:npw_k,2)
                      cwavef_y(2,:)=cwavef(2,1:npw_k,1)-cwavef(1,1:npw_k,2)
                      if(use_nondiag_occup_dmft==1) then
@@ -445,17 +445,17 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
                      call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),use_gpu_cuda=dtset%use_gpu_cuda)
 
                      call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,use_gpu_cuda=dtset%use_gpu_cuda)
 
                      call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
 &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-&                     npw_k,1,n4,n5,n6,1,dtset%paral_kgb,tim_fourwf,weight,weight_i,&
+&                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
 &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,use_gpu_cuda=dtset%use_gpu_cuda)
 
                      ABI_DEALLOCATE(cwavef_x)
@@ -1045,7 +1045,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
 !    Note, we end with ispden=1, so that rhog contains the total density
-     call fourdp(1,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
    end do ! End loop on spins
 
@@ -1150,7 +1150,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
 !    Note, we end with ispden=1, so that rhog contains the total density
-     call fourdp(1,rhog,work,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
 
    end do ! End loop on spins

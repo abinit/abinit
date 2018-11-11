@@ -463,7 +463,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
   paw_dmft%mbandc = 0
  endif
   
- if(mpi_enreg%paral_kgb/=0) then
+ if(paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb/=0) then
    call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
  end if
 

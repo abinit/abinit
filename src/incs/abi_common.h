@@ -338,7 +338,6 @@
 #ifdef FC_IBM
 #define HAVE_IBM6
 #endif
-#undef HAVE_IBM6
 
 #ifdef HAVE_IBM6
 #define _IBM6(message) call wrtout(std_out,message,"COLL",do_flush=.True.)
