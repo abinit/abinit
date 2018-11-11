@@ -536,7 +536,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  end do
 
  if (ierr>0) then
-   write(message, '(a,a,a,2i4,a,a,es14.4,a,a,i4)' )&
+   write(message, '(a,a,a,es14.4,a,a,i4)' )&
 &   'The sum of the weight is not equal to nqpt.',ch10,&
 &   'The sum of the weights is : ',sum(ifc_tmp%wghatm),ch10,&
 &   'The number of q points is : ',nqbz
