@@ -40,6 +40,7 @@ MODULE m_ddk
  use m_mpinfo
  use m_cgtools
  use m_hamiltonian
+ use m_initylmg
  use m_ebands
  use m_pawcprj
  use m_getgh1c
@@ -177,20 +178,26 @@ MODULE m_ddk
   ! Option for calculating the matrix elements of [Vnl,r].
   ! 0 to exclude commutator, 2 to include it
 
+  integer :: mpw
+
   real(dp) :: kpoint(3)
   ! K-point (set in setup_spin_kpoint)
 
-  type(gs_hamiltonian_type) :: gs_hamkq
+  type(gs_hamiltonian_type) :: gs_hamkq(3)
 
   type(rf_hamiltonian_type) :: rf_hamkq(3)
 
   type(ham_targets_t) :: htg(3)
+
+  real(dp),allocatable :: gh1c(:,:,:)
+  real(dp),allocatable :: gs1c(:,:,:)
 
  contains
 
    !public :: ddkop_init             ! Initialize the object.
    procedure :: setup_spin_kpoint => ddkop_setup_spin_kpoint
    procedure :: apply => ddkop_apply
+   procedure :: get_velocity => ddkop_get_velocity
    procedure :: free => ddkop_free   ! Free memory.
 
  end type ddkop_t
@@ -329,13 +336,13 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  character(len=500) :: msg
  character(len=fnlen) :: fname
  real(dp) :: kbz(3)
- real(dp) :: dotarr(2)
+ real(dp) :: dotarr(2), vv(2, 3)
  real(dp) :: cpu_all, wall_all, gflops_all
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
  complex(gwpc),allocatable :: ihrc(:,:)
  complex(dp)               :: vg(3), vr(3)
  complex(gwpc),allocatable :: ug_c(:),ug_v(:)
- real(dp),allocatable :: cg_c(:,:), cg_v(:,:), gh1cg_v(:,:,:), gs1cg_v(:,:,:)
+ real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !************************************************************************
@@ -383,13 +390,10 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  if (dtset%useria == 666) then
    ABI_MALLOC(cg_c,   (2,mpw*nspinor))
    ABI_MALLOC(cg_v,   (2,mpw*nspinor))
-   ABI_MALLOC(gh1cg_v,   (2,mpw*nspinor,3))
-   ABI_MALLOC(gs1cg_v,   (2,mpw*nspinor,3*psps%usepaw))
  end if
  ABI_MALLOC(kg_k,    (3,mpw))
  ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
  ABI_MALLOC(ihrc,    (3, nspinor**2))
-
  ABI_MALLOC(nband,   (nkpt, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
  ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
@@ -442,7 +446,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
 
  if (dtset%useria == 666) then
-   ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, wfd%ngfft)
+   ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  end if
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -478,7 +482,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
        if (dtset%useria == 666) then
          call wfd%copy_cg(ib_v, ik, spin, cg_v)
          eshift = ebands%eig(ib_v, ik, spin) - dtset%dfpt_sciss
-         call ddkop%apply(eshift, mpw, npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg, gh1cg_v, gs1cg_v)
+         call ddkop%apply(eshift, mpw, npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg)
        else
          ug_v(1:npw_k*nspinor) = wfd%wave(ib_v,ik,spin)%ug
        end if
@@ -498,34 +502,34 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
            !    end if
            !  end do
            !end do
+
+           vv = ddkop%get_velocity(istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_c)
+
            do idir=1,3
-             dotarr = cg_zdotc(npw_k * nspinor, cg_c, gh1cg_v(:,:,idir))
-             if (istwf_k > 1) then
-               !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
-               doti = two * dotarr(2)
-               if (istwf_k == 2 .and. wfd%mpi_enreg%me_g0 == 1) then
-                 doti = doti - (cg_c(1,1) * gh1cg_v(2,1,idir) - cg_c(2,1) * gh1cg_v(1,1,idir))
-               end if
-               dotarr(2) = doti
-               dotarr(1) = zero
-             end if
-             !if (ib_v == ib_c) doti = zero
-             dipoles(idir,:,ib_c,ib_v,ik,spin) = dotarr
+             dipoles(idir,:,ib_c,ib_v,ik,spin) = vv(:, idir)
              ! Hermitian conjugate
              if (ib_v /= ib_c) then
-               dipoles(idir,:,ib_v,ib_c,ik,spin) = [dotarr(1), -dotarr(2)]
+               dipoles(idir,:,ib_v,ib_c,ik,spin) = [vv(1, idir), -vv(2, idir)]
              end if
+
+             !dotarr = cg_zdotc(npw_k * nspinor, cg_c, ddkop%gh1c(:,:,idir))
+             !if (istwf_k > 1) then
+             !  !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
+             !  doti = two * dotarr(2)
+             !  if (istwf_k == 2 .and. wfd%mpi_enreg%me_g0 == 1) then
+             !    doti = doti - (cg_c(1,1) * ddkop%gh1c(2,1,idir) - cg_c(2,1) * ddkop%gh1c(1,1,idir))
+             !  end if
+             !  dotarr(2) = doti
+             !  dotarr(1) = zero
+             !end if
+             !!if (ib_v == ib_c) doti = zero
+             !dipoles(idir,:,ib_c,ib_v,ik,spin) = dotarr
+             !! Hermitian conjugate
+             !if (ib_v /= ib_c) then
+             !  dipoles(idir,:,ib_v,ib_c,ik,spin) = [dotarr(1), -dotarr(2)]
+             !end if
            end do
 
-           !do idir=1,3
-           ! do iab=1,nspinor**2
-           !   ia = spinor_pad(1,iab); ib = spinor_pad(2,iab)
-           !   !call dotprod_g(dotr,doti,istwf_k,npw_k,2,cg_c(:,ia:), gh1cg_v(:,ib,idir), &
-           !   !               wfd%mpi_enreg%me_g0,wfd%mpi_enreg%comm_spinorfft)
-           !   !ihrc(idir, iab) = cplx(dotr, doti)
-           ! end do
-           !end do
-           !vr = sum(ihrc(:,:),dim=2)
          else
            ug_c(1:npw_k*nspinor) = wfd%wave(ib_c,ik,spin)%ug
 
@@ -584,8 +588,6 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  if (dtset%useria == 666) then
    ABI_FREE(cg_c)
    ABI_FREE(cg_v)
-   ABI_FREE(gh1cg_v)
-   ABI_FREE(gs1cg_v)
    call ddkop%free()
  end if
 
@@ -964,7 +966,7 @@ end subroutine ddk_print
 !! SOURCE
 
 
-type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, ngfft) result(new)
+type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -972,6 +974,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, ngfft) r
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
  type(MPI_type),intent(in) :: mpi_enreg
+ integer,intent(in) :: mpw
 !arrays
  integer,intent(in) :: ngfft(18)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
@@ -984,24 +987,28 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, ngfft) r
 ! *************************************************************************
 
  new%inclvkb = dtset%inclvkb
+ new%ipert = cryst%natom + 1
+ new%mpw = mpw
 
  nfft = product(ngfft(1:3))
  mgfft = maxval(ngfft(1:3))
 
- ! ==== Initialize most of the Hamiltonian (and derivative) ====
- ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
- ! 2) Perform the setup needed for the non-local factors:
- ! * Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
- ! * PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
- call init_hamiltonian(new%gs_hamkq, psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
-   cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg)
-   !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-   !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+ ABI_MALLOC(new%gh1c, (2, new%mpw*dtset%nspinor, 3))
+ ABI_MALLOC(new%gs1c, (2, new%mpw*dtset%nspinor, 3*psps%usepaw))
 
- ! Prepare application of the NL part.
- new%ipert = cryst%natom + 1
  do idir=1,3
-   call init_rf_hamiltonian(cplex1, new%gs_hamkq, new%ipert, new%rf_hamkq(idir), has_e1kbsc=.true.)
+   ! ==== Initialize most of the Hamiltonian (and derivative) ====
+   ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
+   ! 2) Perform the setup needed for the non-local factors:
+   ! * Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
+   ! * PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
+   call init_hamiltonian(new%gs_hamkq(idir), psps, pawtab, dtset%nspinor, dtset%nsppol, dtset%nspden, cryst%natom,&
+     cryst%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg)
+     !paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
+     !usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+
+   ! Prepare application of the NL part.
+   call init_rf_hamiltonian(cplex1, new%gs_hamkq(idir), new%ipert, new%rf_hamkq(idir), has_e1kbsc=.true.)
      !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
      !&mpi_spintab=mpi_enreg%my_isppoltab)
  end do
@@ -1044,52 +1051,54 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  type(mpi_type) :: mpienreg_seq
 !arrays
  integer :: npwarr(nkpt1), dummy_nband(nkpt1*nsppol1)
- integer :: idir, nkpg, nkpg1, useylmgr1, option, nylmgr1
+ integer :: idir, nkpg, nkpg1, useylmgr1, optder, nylmgr1
  real(dp),allocatable :: ylm_k(:,:),ylmgr1_k(:,:,:)
 
 !************************************************************************
 
+ ABI_CHECK(npw_k <= self%mpw, "npw_k > mpw!")
+
  self%kpoint = kpoint
 
- ! Continue to initialize the Hamiltonian
- call load_spin_hamiltonian(self%gs_hamkq, spin, with_nonlocal=.true.)
-
  ! Set up the spherical harmonics (Ylm) at k+q
- useylmgr1 = 0; option = 0; nylmgr1 = 0
+ useylmgr1 = 0; optder = 0
  if (psps%useylm == 1) then
-   useylmgr1 = 1; option = 1; nylmgr1 = 3
+   useylmgr1 = 1; optder = 1
  end if
 
- !ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
- !ABI_MALLOC(ylmgr1_k, (npw1_k,3+6*((ipert-natom)/10),psps%mpsang**2*psps%useylm*useylmgr1))
- !ABI_MALLOC(ylmgr1, (npw_k, nylmgr1, psps%mpsang**2 * psps%useylm * useylmgr1))
+ ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
+ ABI_MALLOC(ylmgr1_k, (npw_k,3+6*(optder/2),psps%mpsang**2*psps%useylm*useylmgr1))
 
  if (psps%useylm == 1) then
-   npwarr = npw_k
-   ! Fake MPI_type for sequential part.
+   ! Fake MPI_type for sequential part. dummy_nband and nsppol1 are not used in sequential mode.
    call initmpi_seq(mpienreg_seq)
-   ! dummy_nband and nsppol1 are not used in sequential mode.
    dummy_nband = 0
-   !call initylmg(cryst%gprimd,kg_k,kpoint,nkpt1,mpienreg_seq,psps%mpsang,npw_k,dummy_nband,nkpt1,&
-   !   npwarr,nsppol1,option,cryst%rprimd,ylm,ylmgr)
+   npwarr = npw_k
+   call initylmg(cryst%gprimd,kg_k,kpoint,nkpt1,mpienreg_seq,psps%mpsang,npw_k,dummy_nband,nkpt1,&
+      npwarr,nsppol1,optder,cryst%rprimd,ylm_k,ylmgr1_k)
    call destroy_mpi_enreg(mpienreg_seq)
  end if
 
  do idir=1,3
    call self%htg(idir)%free()
+
+   ! Continue to initialize the Hamiltonian
+   call load_spin_hamiltonian(self%gs_hamkq(idir), spin, with_nonlocal=.true.)
    call load_spin_rf_hamiltonian(self%rf_hamkq(idir), spin, with_nonlocal=.true.)
-   ! I need ffnl1 and dkinpw for 3 dirs
-   call getgh1c_setup(self%gs_hamkq,self%rf_hamkq(idir),dtset,psps,kpoint,kpoint,idir,self%ipert, & ! In
-     cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,npw_k,npw_k, &                          ! In
-     useylmgr1,kg_k,ylm_k,kg_k,ylm_k,ylmgr1_k, &                                                    ! In
-     self%htg(idir)%dkinpw,nkpg,nkpg1,self%htg(idir)%kpg_k,self%htg(idir)%kpg1_k, &                 ! Out
-     self%htg(idir)%kinpw1,self%htg(idir)%ffnlk,self%htg(idir)%ffnl1, &                             ! Out
-     self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                                     ! Out
-     !ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                                                      ! Optional
+
+   ! We need ffnl1 and dkinpw for 3 dirs. Note that the Hamiltonian objects use pointes to keep a reference
+   ! to the output results. This is the reason why we need to store the targets in self%htg
+   call getgh1c_setup(self%gs_hamkq(idir),self%rf_hamkq(idir),dtset,psps,kpoint,kpoint,idir,self%ipert, & ! In
+     cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,npw_k,npw_k, &             ! In
+     useylmgr1,kg_k,ylm_k,kg_k,ylm_k,ylmgr1_k, &                                       ! In
+     self%htg(idir)%dkinpw,nkpg,nkpg1,self%htg(idir)%kpg_k,self%htg(idir)%kpg1_k, &    ! Out
+     self%htg(idir)%kinpw1,self%htg(idir)%ffnlk,self%htg(idir)%ffnl1, &                ! Out
+     self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                        ! Out
+     !ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                                         ! Optional
  end do
 
- !ABI_FREE(ylm_k)
- !ABI_FREE(ylmgr1_k)
+ ABI_FREE(ylm_k)
+ ABI_FREE(ylmgr1_k)
 
 end subroutine ddkop_setup_spin_kpoint
 !!***
@@ -1116,7 +1125,7 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SOURCE
 
-subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_enreg, gh1c, gs1c)
+subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
 
 !Arguments ------------------------------------
 !scalars
@@ -1129,8 +1138,6 @@ subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
 !scalars
 !arrays
  real(dp),intent(inout) :: cwave(2,npw_k*nspinor)
- real(dp),intent(out) :: gh1c(2,mpw*nspinor,3)
- real(dp),intent(out) :: gs1c(2,mpw*nspinor,3)
  type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
 
 !Local variables-------------------------------
@@ -1153,20 +1160,69 @@ subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
  !  end do
  !end do
 
- sij_opt = self%gs_hamkq%usepaw
-
  ! optlocal0 = 0: local part of H^(1) is not computed in gh1c=<G|H^(1)|C>
  ! optnl = 2: non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
  ! opt_gvnlx1 = option controlling the use of gvnlx1 array:
  optnl = 2 !; if (self%inclvkb == 0) optnl = 0
 
  do idir=1,3
-   call getgh1c(berryopt0,cwave,cwaveprj,gh1c(:,:,idir),&
-     grad_berry,gs1c(:,:,idir),self%gs_hamkq,gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
+   sij_opt = self%gs_hamkq(idir)%usepaw
+   call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
+     grad_berry,self%gs1c(:,:,idir),self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
      optnl,opt_gvnlx1,self%rf_hamkq(idir),sij_opt,tim_getgh1c,usevnl0)
  end do
 
 end subroutine ddkop_apply
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddkop_get_velocity
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function ddkop_get_velocity(self, istwf_k, npw_k, nspinor, me_g0, brag) result(vv)
+
+!Arguments ------------------------------------
+!scalars
+ class(ddkop_t),intent(in) :: self
+ integer,intent(in) :: istwf_k, npw_k, nspinor, me_g0
+ real(dp),intent(in) :: brag(npw_k*nspinor)
+ real(dp) :: vv(2, 3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: idir
+ real(dp) :: doti
+!arrays
+ real(dp) :: dotarr(2)
+
+!************************************************************************
+
+ do idir=1,3
+   dotarr = cg_zdotc(npw_k * nspinor, brag, self%gh1c(:,:,idir))
+   if (istwf_k > 1) then
+     !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
+     doti = two * dotarr(2)
+     if (istwf_k == 2 .and. me_g0 == 1) then
+       ! nspinor always 1
+       doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
+     end if
+     dotarr(2) = doti; dotarr(1) = zero
+   end if
+   vv(:, idir) = dotarr
+  end do
+
+end function ddkop_get_velocity
 !!***
 
 !----------------------------------------------------------------------
@@ -1196,8 +1252,11 @@ subroutine ddkop_free(self)
 
 !************************************************************************
 
- call destroy_hamiltonian(self%gs_hamkq)
+ ABI_SFREE(self%gh1c)
+ ABI_SFREE(self%gs1c)
+
  do idir=1,3
+   call destroy_hamiltonian(self%gs_hamkq(idir))
    call self%htg(idir)%free()
    call destroy_rf_hamiltonian(self%rf_hamkq(idir))
  end do
