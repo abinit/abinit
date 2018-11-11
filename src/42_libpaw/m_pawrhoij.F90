@@ -3212,10 +3212,9 @@ subroutine pawrhoij_filter(rhoij,rhoijselect,nselect,cplex,qphase,lmn2_size,nspd
  else ! cplex=2
  
    if (qphase==1) then
-
      do klmn=1,lmn2_size
        klmn1=2*klmn
-         if (any(abs(rhoij_in(klmn1-1:klmn1,:))>tol_rhoij)) then
+       if (any(abs(rhoij_in(klmn1-1:klmn1,:))>tol_rhoij)) then
          nselect=nselect+1 ; nsel1=2*nselect
          rhoijselect(nselect)=klmn
          do isp=1,nspden
@@ -4138,7 +4137,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                klmn1q=klmn1+(iq-1)*lmn2_size
                pawrhoij(iatm)%rhoijp(klmn1q,ispden)=rotrho(1,1,iq)/nsym_used(1)
                if (cplex_rhoij==2) then
-                 if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q,ispden)
+                 if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,ispden)
                  if (cplex_eff==2) ro=rotrho(2,1,iq)/nsym_used(1)
                  pawrhoij(iatm)%rhoijp(klmn1q+1,ispden)=ro
                end if
@@ -4152,7 +4151,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  klmn1q=klmn1+(iq-1)*lmn2_size
                  pawrhoij(iatm)%rhoijp(klmn1q,mu)=rotmag(1,mu-1,iq)/nsym_used(1)
                  if (cplex_rhoij==2) then
-                   if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q,mu)
+                   if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,mu)
                    if (cplex_eff==2) ro=rotmag(2,mu-1,iq)/nsym_used(1)
                    pawrhoij(iatm)%rhoijp(klmn1q+1,mu)=ro
                  end if
@@ -4167,7 +4166,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  klmn1q=klmn1+(iq-1)*lmn2_size
                  pawrhoij(iatm)%rhoijp(klmn1q,2)=rotrho(1,2,iq)/nsym_used(2)
                  if (cplex_rhoij==2) then
-                   if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q,2)
+                   if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,2)
                    if (cplex_eff==2) ro=rotrho(2,2,iq)/nsym_used(2)
                    pawrhoij(iatm)%rhoijp(klmn1q+1,2)=ro
                  end if
