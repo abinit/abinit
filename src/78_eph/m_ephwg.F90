@@ -188,8 +188,6 @@ contains
 type(ephwg_t) function ephwg_new( &
 &  cryst, ifc, bstart, nbcount, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, nsppol, eig_ibz, comm) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt, nshiftk, nkibz, bstart, nbcount, nsppol, comm
@@ -263,8 +261,6 @@ end function ephwg_new
 
 type(ephwg_t) function ephwg_from_ebands(cryst, ifc, ebands, bstart, nbcount, comm) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::  bstart, nbcount, comm
@@ -315,8 +311,6 @@ end function ephwg_from_ebands
 !! SOURCE
 
 subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -433,8 +427,6 @@ end subroutine ephwg_setup_kpoint
 subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_pm, comm, &
                             broad)  ! optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band, spin, nu, nene, bcorr, comm
@@ -523,8 +515,6 @@ end subroutine ephwg_get_deltas
 
 subroutine ephwg_get_dweights(self, iqlk, nw, wvals, band, spin, bcorr, deltaw_pm, comm, use_bzsum)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqlk, band, spin, nw, bcorr, comm
@@ -599,8 +589,6 @@ end subroutine ephwg_get_dweights
 !! SOURCE
 
 subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -726,8 +714,6 @@ end subroutine ephwg_zinv_weights
 !! SOURCE
 
 subroutine ephwg_free(self)
-
- implicit none
 
 !Arguments ------------------------------------
  type(ephwg_t),intent(inout) :: self

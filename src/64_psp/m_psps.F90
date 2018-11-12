@@ -97,8 +97,6 @@ contains
 
 subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -175,8 +173,6 @@ end subroutine test_xml_xmlpaw_upf
 !! SOURCE
 
 subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -264,8 +260,6 @@ end subroutine psps_init_global
 !! SOURCE
 
 subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -532,8 +526,6 @@ end subroutine psps_init_from_dtset
 
 subroutine psps_free(psps)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pseudopotential_type),intent(inout) :: psps
@@ -647,8 +639,6 @@ end subroutine psps_free
 !! SOURCE
 
 subroutine psps_copy(pspsin, pspsout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -799,8 +789,6 @@ end subroutine psps_copy
 !! SOURCE
 
 subroutine psps_print(psps,unit,prtvol,mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1009,8 +997,6 @@ end subroutine psps_print
 
 subroutine psps_ncwrite(psps, path)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -1159,8 +1145,6 @@ end subroutine psps_ncwrite
 
 subroutine psp2params_init(gth_params, npsp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npsp
@@ -1212,8 +1196,6 @@ end subroutine psp2params_init
 
 subroutine psp2params_copy(gth_paramsin, gth_paramsout)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pseudopotential_gth_type),intent(in) :: gth_paramsin
@@ -1263,8 +1245,6 @@ end subroutine psp2params_copy
 !! SOURCE
 
 subroutine psp2params_free(gth_params)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1320,8 +1300,6 @@ end subroutine psp2params_free
 
 subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mqgrid_vl
@@ -1366,8 +1344,6 @@ end subroutine nctab_init
 
 subroutine nctab_free(nctab)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(nctab_t),intent(inout) :: nctab
@@ -1404,8 +1380,6 @@ end subroutine nctab_free
 !! SOURCE
 
 subroutine nctab_copy(nctabin, nctabout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1458,8 +1432,6 @@ end subroutine nctab_copy
 !! SOURCE
 
 subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1531,8 +1503,6 @@ end subroutine nctab_eval_tvalespl
 !! SOURCE
 
 subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_vl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1606,8 +1576,6 @@ end subroutine nctab_eval_tcorespl
 !! SOURCE
 
 subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

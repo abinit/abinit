@@ -78,7 +78,6 @@ CONTAINS  !===========================================================
 
 subroutine prmat (mat, ni, nj, mi, unitm)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -157,7 +156,6 @@ end subroutine prmat
 
 subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znucl,nunit,realrecip)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -288,7 +286,6 @@ end subroutine printxsf
 
 subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
 
- implicit none
 
 !Arguments -----------------------------------------------
 !scalars
@@ -376,7 +373,6 @@ end subroutine print_fofr_ri
 
 subroutine print_fofr_xyzri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,conv_fact,unit)
 
- implicit none
 
 !Arguments -----------------------------------------------
 !scalars
@@ -471,7 +467,6 @@ end subroutine print_fofr_xyzri
 
 subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xcart,unit)
 
- implicit none
 
 !Arguments -----------------------------------------------
 !scalars
@@ -578,7 +573,6 @@ end subroutine print_fofr_cube
 subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 & nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -825,7 +819,6 @@ end subroutine printbxsf
 subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
 & nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -6543,7 +6543,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  else where
    bks_mask=.FALSE.
  end where
- got=zero
+ got = 0
 
  call wfd%bks_distrb(bks_distrb,got,bks_mask)
 

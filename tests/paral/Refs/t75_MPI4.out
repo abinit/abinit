@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h14 )
+.Starting date : Mon 12 Nov 2018.
+- ( at 02h34 )
   
 - input  file    -> t75.in
 - output file    -> t75_MPI4.out
@@ -129,7 +129,7 @@ _ WF disk file :      0.853 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -391,7 +391,7 @@ P           mkmem           1
     2   0.991   2.977    0   2.9359409        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.09488187080490    1.31996662950249   10.58981932283911   rchrg,fchrg,qchrg
- pspatm : epsatm=   10.64390676
+  pspatm : epsatm=   10.64390676
          --- l  ekb(1:nproj) -->
              0    1.300581
              1    0.590411
@@ -432,7 +432,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3512E-11; max=  2.0105E-11
+ Mean square residual over all n,k,spin=   13.512E-12; max=  20.105E-12
  reduced coordinates (array xred) for    2 atoms
       -0.100000000000      0.100000000000      0.100000000000
        0.100000000000     -0.100000000000     -0.100000000000
@@ -530,7 +530,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.9605E-11; max=  7.8826E-11
+ Mean square residual over all n,k,spin=   39.605E-12; max=  78.826E-12
  reduced coordinates (array xred) for    2 atoms
       -0.100000000000      0.100000000000      0.100000000000
        0.100000000000     -0.100000000000     -0.100000000000
@@ -603,7 +603,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
     2   0.991   2.977    0   2.9359409        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.09488187080490    1.31996662950249   10.58981932283911   rchrg,fchrg,qchrg
- pspatm : epsatm=   10.64390676
+  pspatm : epsatm=   10.64390676
          --- l  ekb(1:nproj) -->
              0    1.300581
              1    0.590411
@@ -788,7 +788,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
   Number of electrons    =    2.0000
 
   QP Band energy    [Ha] = -2.28902457564267E-01
-  QP Hartree energy [Ha] =  1.24911138342467E-01
+  QP Hartree energy [Ha] =  1.24911137807878E-01
 
 --------------------------------------------------------------------------------
 
@@ -1068,8 +1068,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
   Number of electrons    =    2.0000
 
-  QP Band energy    [Ha] = -3.46252308365124E-01
-  QP Hartree energy [Ha] =  1.12220300771551E-01
+  QP Band energy    [Ha] = -3.46252310101857E-01
+  QP Hartree energy [Ha] =  1.12220298081862E-01
 
 --------------------------------------------------------------------------------
 
@@ -1142,7 +1142,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.636   0.000) for band index:  8
+.  kptgw no:  1; Maximum DeltaE = (   0.636  -0.000) for band index:  8
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1409,47 +1409,61 @@ P           mkmem           1
 - [1] Accurate GW self-energies in a plane-wave basis using only a few empty states:
 - towards large systems. F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008).
 - Comment : to be cited for non-vanishing gwcomp. Strong suggestion to cite this paper in your publications.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#bruneval2008
 -
 - [2] Effect of self-consistency on quasiparticles in solids
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
 - Comment : in case gwcalctyp >= 10.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#bruneval2006
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [4] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          6.2  wall=          6.3
+- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.9  wall=         25.1
++Overall time at end (sec) : cpu=         26.1  wall=         26.4
