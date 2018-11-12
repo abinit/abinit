@@ -22,8 +22,7 @@ module m_tdep_abitypes
   use m_tdep_phij,        only : tdep_build_phij33
   use m_tdep_sym,         only : Symetries_Variables_type
   use m_tdep_shell,       only : Shell_Variables_type
-  use m_ifc,              only : ifc_type, ifc_init, ifc_print
-  use m_crystal_io,       only : crystal_ncwrite
+  use m_ifc,              only : ifc_type, ifc_init, ifc_print, ifc_write
   use m_crystal,          only : crystal_t, crystal_init
   use m_ddb,              only : ddb_type
   use m_kpts,             only : smpbz
@@ -41,13 +40,6 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_init_crystal(Crystal,InVar,Lattice,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_crystal'
-!End of the abilint section
 
   implicit none
   type(crystal_t),intent(out) :: Crystal
@@ -81,13 +73,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
  subroutine tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,Phij_NN,Rlatt_cart,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_ifc'
-!End of the abilint section
 
   implicit none
   type(crystal_t),intent(in) :: Crystal
@@ -183,13 +168,6 @@ contains
  subroutine tdep_init_ddb(DDB,InVar,Lattice)
 
   use m_copy,             only : alloc_copy
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_init_ddb'
-!End of the abilint section
-
   implicit none
   type(ddb_type),intent(out) :: DDB
   type(Input_Variables_type),intent(in) :: InVar
@@ -254,13 +232,6 @@ contains
 
 subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_read_ifc'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in) :: natom_unitcell
@@ -285,6 +256,7 @@ subroutine tdep_read_ifc(Ifc,InVar,natom_unitcell)
     open(unit=40,file='ifc.tdep')
   end if
   Ifc%atmfrc(:,:,:,:,:)=zero
+  read(40,*) string
   read(40,*) string
   read(40,*) string
   read(40,*) string
@@ -350,18 +322,11 @@ end subroutine tdep_read_ifc
 
 subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_write_ifc'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in) :: natom_unitcell,unitfile
   type(Input_Variables_type),intent(in) :: InVar
-  type(ifc_type),intent(in) :: Ifc
+  type(ifc_type),intent(inout) :: Ifc
   type(crystal_t),intent(in) :: Crystal
 
   integer :: ifcana,ifcout,ncid,prt_ifc
@@ -382,8 +347,9 @@ subroutine tdep_write_ifc(Crystal,Ifc,InVar,natom_unitcell,unitfile)
   NCF_CHECK_MSG(nctk_open_create(ncid, trim(InVar%output_prefix)//"anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
   NCF_CHECK(nctk_def_basedims(ncid))
   NCF_CHECK(nctk_defnwrite_ivars(ncid, ["anaddb_version"], [1]))
-  NCF_CHECK(crystal_ncwrite(Crystal,ncid))
+  NCF_CHECK(crystal%ncwrite(ncid))
 !JB  call ifc_print(Ifc,Ifc%dielt,Ifc%zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+  call ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
   write(InVar%stdout,'(a)') ' ------- achieved'
 #else
   if (unitfile.eq.0) then
@@ -405,13 +371,6 @@ end subroutine tdep_write_ifc
 
 subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,Rlatt4abi,Shell2at,Sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_ifc2phij'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in) :: dipdip,natom_unitcell,option
@@ -423,7 +382,7 @@ subroutine tdep_ifc2phij(dipdip,Ifc,InVar,Lattice,natom_unitcell,option,Phij_NN,
   double precision, intent(inout) :: Phij_NN(3*InVar%natom,3*InVar%natom)
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,InVar%natom)
 
-  integer :: eatom,fatom,iatcell,ii,irpt,jatcell,jatom,jj,isym,kk
+  integer :: eatom,fatom,iatcell,iatom,ii,irpt,jatcell,jatom,jj,isym,kk
   integer :: ishell,iatref,jatref,iatshell,trans
   double precision :: tol,dist
   double precision :: tmp(3)

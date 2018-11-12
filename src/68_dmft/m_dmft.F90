@@ -110,13 +110,6 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  use m_energy, only : energy_type,init_energy,destroy_energy,compute_energy,print_energy,compute_ldau_energy
  use m_matlu, only : print_matlu,sym_matlu
  use m_datafordmft, only : psichi_renormalization
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dmft_solve'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -156,9 +149,9 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  my_rank = xmpi_comm_rank(paw_dmft%spacecomm)
 
  check=paw_dmft%dmftcheck ! checks enabled
- paw_dmft%dmft_fepr=tol5
- paw_dmft%dmft_chpr=tol6
-!paw_dmft%dmft_chpr=20_dp ! total number of electron.
+ !paw_dmft%dmft_fermi_prec=tol5
+ paw_dmft%dmft_fermi_prec=paw_dmft%dmft_charge_prec*ten
+!paw_dmft%dmft_charge_prec=20_dp ! total number of electron.
  paw_dmft%dmft_prgn=1
  paw_dmft%dmft_prgn=0
  etot_var=.true.
@@ -611,13 +604,6 @@ subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
  use m_hubbard_one, only : hubbard_one
  use m_ldau_self, only : ldau_self
  use m_forctqmc, only : qmc_prep_ctqmc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'impurity_solve'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -901,13 +887,6 @@ subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
  use m_oper, only : oper_type,inverse_oper
  use m_matlu, only : matlu_type,add_matlu,print_matlu
  use m_self, only : self_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dyson'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1055,13 +1034,6 @@ subroutine spectral_function(cryst_struc,green,hu,paw_dmft,&
  use m_pawtab, only : pawtab_type
  use m_hubbard_one, only : hubbard_one
  use m_ldau_self, only : ldau_self
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectral_function'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

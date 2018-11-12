@@ -4,10 +4,10 @@
 !! m_spectra
 !!
 !! FUNCTION
-!! This module contains the definition of the specta_type data type 
-!! used to store results related to optical spectra with or without 
+!! This module contains the definition of the specta_type data type
+!! used to store results related to optical spectra with or without
 !! nonlocal field effects as well as the electron energy loss function
-!! for a given q. These quantities are obtained from the dielectric 
+!! for a given q. These quantities are obtained from the dielectric
 !! matrix as calculated in the GW part of ABINIT (screening.F90)
 !!
 !! COPYRIGHT
@@ -58,7 +58,7 @@ MODULE m_spectra
  !scalars
   integer :: nomega
   ! number of frequencies
-  
+
   integer :: nqpts
   ! number of q-points
 
@@ -67,7 +67,7 @@ MODULE m_spectra
   ! omega(nomega)
   ! Real frequency mesh for optical spectra.
 
-  real(dp),allocatable :: qpts(:,:) 
+  real(dp),allocatable :: qpts(:,:)
   ! qpts(3,nqpoints)
   ! The list of q-points used for the spectra
 
@@ -75,7 +75,7 @@ MODULE m_spectra
   ! eelf(nomega,nqpoints)
   ! contains the Electron Energy Loss Function i.e. -\Im{ e^{-1}_{G1=0,G2=0}(q-->0,nomega)}
 
-  complex(dpc),allocatable :: emacro_lf(:,:) 
+  complex(dpc),allocatable :: emacro_lf(:,:)
   ! emacro_lf(nomega,nqpoints)
   ! contains 1/e^{-1}_{G1=0,G2=0}(q-->0,nomega) (with Local field effects)
 
@@ -90,7 +90,7 @@ MODULE m_spectra
  public :: spectra_free       ! Free memory.
  public :: spectra_write      ! Write results on file.
  public :: spectra_repr       ! Return info on Macroscopic diel. constant in form of a string.
-                                                                                               
+
  integer,public,parameter :: W_EM_LF  = 1
  integer,public,parameter :: W_EM_NLF = 2
  integer,public,parameter :: W_EELF   = 4
@@ -118,20 +118,7 @@ CONTAINS  !=====================================================================
 
 subroutine spectra_init(Spectra,nomega,omega,nqpts,qpts)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_init'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_init'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -180,20 +167,7 @@ end subroutine spectra_init
 
 subroutine spectra_free(Spectra)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_free'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_free'
-!End of the abilint section
 
 !Arguments ------------------------------------
  type(spectra_t),intent(inout) :: spectra
@@ -216,7 +190,7 @@ subroutine spectra_free(Spectra)
    ABI_FREE(Spectra%eelf)
  end if
 
-end subroutine spectra_free 
+end subroutine spectra_free
 !!***
 
 !----------------------------------------------------------------------
@@ -243,13 +217,6 @@ end subroutine spectra_free
 !! SOURCE
 
 subroutine spectra_write(Spectra,write_bits,fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_write'
-!End of the abilint section
 
  implicit none
 
@@ -291,7 +258,7 @@ subroutine spectra_write(Spectra,write_bits,fname)
    end do
  end if
  !
- if ( IAND(write_bits,W_EM_LF ) == W_EM_LF ) then 
+ if ( IAND(write_bits,W_EM_LF ) == W_EM_LF ) then
    write(unt,'(a)')'#'
    write(unt,'(a)')'# Macroscopic Dielectric Function with local fields included'
    call dump_qlist()
@@ -340,13 +307,6 @@ CONTAINS
 
  subroutine dump_Qlist()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dump_Qlist'
-!End of the abilint section
-
   integer :: iqpt
   write(unt,'(a,i3)')'# Q-point list, No. ',Spectra%nqpts
   do iqpt=1,Spectra%nqpts
@@ -354,7 +314,7 @@ CONTAINS
   end do
  end subroutine dump_Qlist
 
-end subroutine spectra_write 
+end subroutine spectra_write
 !!***
 
 !----------------------------------------------------------------------
@@ -380,20 +340,7 @@ end subroutine spectra_write
 
 subroutine spectra_repr(Spectra,str)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_repr'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spectra_repr'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -409,9 +356,9 @@ subroutine spectra_repr(Spectra,str)
 ! *********************************************************************
 
  !istatic = -1
- !do io = Spectra%nomega 
+ !do io = Spectra%nomega
  ! if (ABS(REAL(Spectra%omega(io)))<1.e-3.and.ABS(AIMAG(Spectra%omega(io)))<1.e-3) then
- !  istatic = io 
+ !  istatic = io
  !  EXIT
  ! end if
  !end do

@@ -18,7 +18,7 @@ module m_tdep_readwrite
 
   type Input_Variables_type
 
-    integer :: Impose_Symetry
+    integer :: Impose_Symetry=0
     integer :: natom
     integer :: natom_unitcell
     integer :: nstep_max
@@ -33,7 +33,6 @@ module m_tdep_readwrite
     integer :: Slice
     integer :: Enunit
     integer :: ReadIFC
-    integer :: RotationalInv
     integer :: firstqptseg
     integer :: ngqpt1(3)
     integer :: ngqpt2(3)
@@ -111,13 +110,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_print_Aknowledgments(InVar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_print_Aknowledgments'
-!End of the abilint section
-
   implicit none 
 
   type(Input_Variables_type) :: InVar
@@ -141,7 +133,7 @@ contains
   write(stdout,'(a)') ' of the ABINIT implementation.'
   write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [1] Thermal evolution of vibrational properties of $\alpha$-U' 
+  write(stdout,'(a)') '.[1] Thermal evolution of vibrational properties of $\\alpha$-U' 
   write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' This paper is also available at http://www.arxiv.org/abs/xxxx'
@@ -162,19 +154,12 @@ contains
 #if defined HAVE_NETCDF
  use netcdf
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_ReadEcho'
-!End of the abilint section
-
   implicit none 
 
   integer :: ii,jj,tmp,istep,iatom,this_istep
   character (len=30):: string,NormalMode,DebugMode,Impose_Symetry,Use_ideal_positions
   character (len=30):: Born_charge,Dielec_constant,tolmotifinboxmatch,TheEnd,BZpath
-  character (len=30):: Order,Slice,Enunit,ReadIFC,RotationalInv,firstqptseg,Ngqpt1,Ngqpt2,DosDeltae
+  character (len=30):: Order,Slice,Enunit,ReadIFC,firstqptseg,Ngqpt1,Ngqpt2,DosDeltae
   double precision :: version_value,tmp1,tmp2,tmp3,nstep_int,nstep_float
   character (len=8) :: date
   character (len=10) :: time
@@ -213,7 +198,6 @@ contains
   Slice='Slice'
   Enunit='Enunit'
   ReadIFC='ReadIFC'
-  RotationalInv='RotationalInv'
   Ngqpt1='Ngqpt1'
   Ngqpt2='Ngqpt2'
   TolMotifInboxMatch='TolMotifInboxMatch'
@@ -225,7 +209,6 @@ contains
   InVar%Slice=1
   InVar%Enunit=0
   InVar%ReadIFC=0
-  InVar%RotationalInv=0
   InVar%firstqptseg=100
   InVar%tolread=1.d-8
   InVar%tolmotif=5.d-2
@@ -235,6 +218,7 @@ contains
   InVar%debug=.false.
   InVar%loto=.false.
   InVar%netcdf=.false.
+  InVar%Use_ideal_positions=0
   version_value=2.d0
 ! In order to have an accuracy better than 1meV  
   InVar%ngqpt1(:)=8
@@ -277,8 +261,8 @@ contains
     call get_dims_hist(ncid,InVar%natom,InVar%ntypat,nimage,mdtime,&
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
     ABI_MALLOC(InVar%amu,(InVar%ntypat)); InVar%amu(:)=zero
-    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=0
-    ABI_MALLOC(znucl,(InVar%ntypat))
+    ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=zero
+    ABI_MALLOC(znucl,(InVar%ntypat)) ; znucl(:)=zero
     call read_csts_hist(ncid,dtion,InVar%typat,znucl,InVar%amu)
     ABI_FREE(znucl)
 
@@ -330,7 +314,7 @@ contains
   write(InVar%stdout,'(a)') ' ======================= Define the unitcell =================================' 
   read(40,*) string,InVar%bravais(1),InVar%bravais(2)
   write(InVar%stdout,'(1x,a20,1x,i4,1x,i4)') string,InVar%bravais(1),InVar%bravais(2)
-  if (InVar%bravais(1).eq.2) then
+  if ((InVar%bravais(1).eq.2).or.(InVar%bravais(1).eq.5)) then
     read(40,*) string,InVar%angle_alpha
     write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%angle_alpha
   else
@@ -452,6 +436,9 @@ contains
     else if (string.eq.Order) then  
       read(40,*) string,InVar%Order,InVar%Rcut3
       write(InVar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,InVar%Order,InVar%Rcut3
+      if (InVar%Rcut3.gt.InVar%Rcut) then
+        MSG_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
+      end if  
     else if (string.eq.Slice) then  
       read(40,*) string,InVar%Slice
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Slice
@@ -475,9 +462,6 @@ contains
       else  
         write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ReadIFC
       end if  
-    else if (string.eq.RotationalInv) then  
-      read(40,*) string,InVar%RotationalInv
-      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%RotationalInv
     else if (string.eq.Firstqptseg) then  
       read(40,*) string,InVar%firstqptseg
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%firstqptseg
@@ -495,7 +479,8 @@ contains
     else if (string.eq.TheEnd) then
       exit
     else 
-      MSG_ERROR('ONE KEYWORD IS NOT ALLOWED')
+      write(InVar%stdout,'(a,1x,a)') 'This keyword is not allowed',string
+      MSG_ERROR('A keyword is not allowed. See the log file.')
     end if  
   end do
 ! Output very important informations 

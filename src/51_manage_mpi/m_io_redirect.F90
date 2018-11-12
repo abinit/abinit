@@ -70,13 +70,6 @@ contains
 !!
  subroutine localfilnam(commspace,commspace1,commworld,filnam,nam,nfil)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localfilnam'
-!End of the abilint section
-
  implicit none
  
 !Arguments ------------------------------------
@@ -145,13 +138,6 @@ contains
 !! SOURCE
 !!
  subroutine localwrfile(commspace,ii,nfil,paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localwrfile'
-!End of the abilint section
 
  implicit none
 
@@ -226,13 +212,6 @@ contains
 !! SOURCE
 !!
  subroutine localrdfile(commspace,commworld,compute_all,nfil,paral,prtvol,dyn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localrdfile'
-!End of the abilint section
 
  implicit none
  
@@ -339,13 +318,6 @@ contains
 !! SOURCE
 !!
  subroutine localredirect(commspace,commworld,nfil,paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'localredirect'
-!End of the abilint section
 
  implicit none
  

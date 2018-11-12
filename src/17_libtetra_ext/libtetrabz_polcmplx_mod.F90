@@ -41,13 +41,6 @@ SUBROUTINE libtetrabz_polcmplx(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_zv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3), ne
@@ -107,13 +100,6 @@ SUBROUTINE libtetrabz_polcmplx_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx_main'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, ne, &
@@ -272,13 +258,6 @@ SUBROUTINE libtetrabz_polcmplx2(nb,ne,e0,ei1,ej1,w1)
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx2'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb, ne
@@ -396,13 +375,6 @@ END SUBROUTINE libtetrabz_polcmplx2
 SUBROUTINE libtetrabz_polcmplx3(ne,e0,de,w1)
   !
   USE libtetrabz_common, ONLY : libtetrabz_sort
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx3'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: ne
@@ -574,13 +546,6 @@ END SUBROUTINE libtetrabz_polcmplx3
 !
 FUNCTION libtetrabz_polcmplx_1234(g1,g2,g3,g4)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx_1234'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, g3, g4
@@ -634,13 +599,6 @@ END FUNCTION libtetrabz_polcmplx_1234
 !
 FUNCTION libtetrabz_polcmplx_1231(g1,g2,g3) 
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx_1231'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, g3
@@ -686,13 +644,6 @@ END FUNCTION libtetrabz_polcmplx_1231
 !
 FUNCTION libtetrabz_polcmplx_1233(g1, g2, g3)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx_1233'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, g3
@@ -747,13 +698,6 @@ END FUNCTION libtetrabz_polcmplx_1233
 !
 FUNCTION libtetrabz_polcmplx_1221(g1,g2)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx_1221'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2
@@ -786,13 +730,6 @@ END FUNCTION libtetrabz_polcmplx_1221
 !
 FUNCTION libtetrabz_polcmplx_1222(g1,g2)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx_1222'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2
@@ -823,13 +760,6 @@ END FUNCTION libtetrabz_polcmplx_1222
 !
 FUNCTION libtetrabz_polcmplx_1211(g1,g2)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polcmplx_1211'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2

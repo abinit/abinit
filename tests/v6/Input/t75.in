@@ -3,7 +3,6 @@ finegrid_GKK    # Name of output file
 t72o_DS7_WFK   # GS wavefunction file
 0   0   0       # number of 1WF files, of GKK files, and of perturbations in the GKK files
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrggkk

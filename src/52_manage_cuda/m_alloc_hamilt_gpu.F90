@@ -79,13 +79,6 @@ contains
 
 subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,psps,use_gpu_cuda)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'alloc_hamilt_gpu'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -186,13 +179,6 @@ end subroutine alloc_hamilt_gpu
 !! SOURCE
 
 subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dealloc_hamilt_gpu'
-!End of the abilint section
 
  implicit none
 

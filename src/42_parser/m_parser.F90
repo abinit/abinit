@@ -87,13 +87,6 @@ CONTAINS  !===========================================================
 
 subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'parsefile'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -139,9 +132,9 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    if (tread==1) ndtset=intarr(1)
    ! Check that ndtset is not negative
    if (ndtset<0 .or. ndtset>9999) then
-     write(message, '(a,i0,a,a,a,a)' )&
+     write(message, '(a,i0,4a)' )&
 &     'Input ndtset must be non-negative and < 10000, but was ',ndtset,ch10,&
-&     'This is not allowed.  ',ch10,&
+&     'This is not allowed.',ch10,&
 &     'Action: modify ndtset in the input file.'
      MSG_ERROR(message)
    end if
@@ -194,13 +187,6 @@ end subroutine parsefile
 
 subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inread'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -231,14 +217,15 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    if(errcod/=0)then
 !    integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     ' inread : ERROR -',&
+&     ' inread: ERROR -',&
 &     '  Attempted to read ndig=',ndig,' integer digits,'
      write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),&
 &     ', to initialize an integer variable'
      errcod=1
    end if
 
- else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI') then
+ else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
 !  real(dp) input section
 
@@ -317,7 +304,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    if(errcod/=0)then
 !    integer reading error
      write(std_out,'(/,a,/,a,i0,a)' ) &
-&     'inread : ERROR -',&
+&     'inread: ERROR -',&
 &     'Attempted to read ndig=',ndig,' integer digits,'
      write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize a logical variable.'
      errcod=3
@@ -327,7 +314,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
 
  else
    write(msg,'(4a)' ) &
-&   'Argument typevarphys must be INT,DPR,LEN,ENE,BFI or LOG ',ch10,&
+&   'Argument typevarphys must be INT,DPR,LEN,ENE,BFI,TIM or LOG ',ch10,&
 &   'but input value was: ',trim(typevarphys)
    MSG_ERROR(msg)
  end if
@@ -336,7 +323,7 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    do idig=1,ndig
      if( string(idig:idig) == 'O' )then
        write(std_out,'(/,a,/,a,a,a)' ) &
-&       'inread : WARNING -',&
+&       'inread: WARNING -',&
 &       'Note that this string contains the letter O. ',ch10,&
 &       'It is likely that this letter should be replaced by the number 0.'
        exit
@@ -380,13 +367,6 @@ end subroutine inread
 !! SOURCE
 
 recursive subroutine instrng(filnam,lenstr,option,strln,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'instrng'
-!End of the abilint section
 
  implicit none
 
@@ -668,13 +648,6 @@ end subroutine instrng
 
 subroutine inreplsp(string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inreplsp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -749,13 +722,6 @@ end subroutine inreplsp
 !! SOURCE
 
 subroutine incomprs(string,length)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'incomprs'
-!End of the abilint section
 
  implicit none
 
@@ -955,13 +921,6 @@ end subroutine incomprs
 !! SOURCE
 
 subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,ds_input,key_value)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'intagm'
-!End of the abilint section
 
  implicit none
 
@@ -1402,7 +1361,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  tread = 0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  if(typevarphys=='KEY')then
    if(opttoken>=2)then
      write(message, '(9a)' )&
@@ -1540,6 +1500,7 @@ end subroutine intagm
 !!       and return in au -atomic units=bohr- )
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
 !!   'BFI'=>real(dp) (expect a "magnetic field", identify T, Tesla)
+!!   'TIM'=>real(dp) (expect a "time", identify S, Second)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in token cs
 !!
@@ -1564,13 +1525,6 @@ end subroutine intagm
 !! SOURCE
 
 subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inarray'
-!End of the abilint section
 
  implicit none
 
@@ -1604,7 +1558,8 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  ii=0
  typevar='INT'
  if(typevarphys=='LOG')typevar='INT'
- if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')typevar='DPR'
+ if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE'  &
+&     .or. typevarphys=='BFI' .or. typevarphys=='TIM')typevar='DPR'
  strln=len_trim(string)
 
  do while (ii<narr)
@@ -1688,8 +1643,9 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    MSG_ERROR(message)
  end if
 
-!In case of 'LEN', 'ENE', or 'BFI', try to identify the unit
- if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI')then
+!In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
+if(typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' &
+&    .or. typevarphys=='TIM')then
    do
 
 !    Relative location of next blank after data
@@ -1699,8 +1655,10 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      if(b2==0) b2=strln-b1+1
 
 !    DEBUG
-!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+!    write(std_out,*)' inarray : strln=',strln
+!    write(std_out,*)' inarray : b1=',b1
 !    write(std_out,*)' inarray : b2=',b2
+!    write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
 !    write(std_out,*)' typevarphys==',typevarphys
 !    ENDDEBUG
 
@@ -1726,7 +1684,11 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
          if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE')then
            factor=BField_Tesla
          end if
-       end if
+       else if (typevarphys=='TIM' .and. b2>=2) then
+         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
+           factor=one/Time_Sec
+         end if
+       endif
        dprarr(1:narr)=dprarr(1:narr)*factor
        exit
      else
@@ -1778,13 +1740,6 @@ end subroutine inarray
 !! SOURCE
 
 subroutine importxyz(lenstr,string_raw,string_upper,strln)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'importxyz'
-!End of the abilint section
 
  implicit none
 
@@ -1910,13 +1865,6 @@ end subroutine importxyz
 !! SOURCE
 
 subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'append_xyz'
-!End of the abilint section
 
  implicit none
 
@@ -2099,13 +2047,6 @@ end subroutine append_xyz
 subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minimal_flag,reference_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkdpr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2264,13 +2205,6 @@ subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2359,13 +2293,6 @@ end subroutine chkint
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,list_number,list_values,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_eq'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2452,13 +2379,6 @@ end subroutine chkint_eq
 
 subroutine chkint_ge(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,minmax_value,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_ge'
-!End of the abilint section
 
  implicit none
 
@@ -2548,13 +2468,6 @@ end subroutine chkint_ge
 subroutine chkint_le(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  minmax_value,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_le'
-!End of the abilint section
 
  implicit none
 
@@ -2647,13 +2560,6 @@ end subroutine chkint_le
 subroutine chkint_ne(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_ne'
-!End of the abilint section
 
  implicit none
 
@@ -2769,13 +2675,6 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
 &  ierr,input_name,input_value,&
 &  list_number,list_values,minmax_flag,minmax_value,unit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkint_prt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2876,7 +2775,7 @@ end subroutine chkint_prt
 !! prttagm
 !!
 !! FUNCTION
-!! Eventually print the content of dprarr (if typevarphys='DPR','LEN', 'ENE' and 'BFI'),
+!! Eventually print the content of dprarr (if typevarphys='DPR','LEN', 'ENE', 'TIM' and 'BFI'),
 !! or intarr (if typevarphys='INT'), arrays of effective dimensions narr and 0:ndtset_alloc
 !! For the second dimension, the 0 index relates to a default.
 !! Print the array only if the content for at least one value of the second
@@ -2923,6 +2822,7 @@ end subroutine chkint_prt
 !!   'LEN'=>real(dp) (output in bohr and angstrom)
 !!   'ENE'=>real(dp) (output in hartree and eV)
 !!   'BFI'=>real(dp) (output in Tesla)
+!!   'TIM'=>real(dp) (output in second)
 !!  use_narrm= if 0, use of scalar 'narr' instead of array 'narrm'
 !!  [firstchar]= (optional) first character of the line (default=' ')
 !!  [forceprint]= (optional) control if output is forced even if a variable is equal to its default value:
@@ -2945,13 +2845,6 @@ end subroutine chkint_prt
 subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
 & marr,narr,narrm,ncid,ndtset_alloc,token,typevarphys,use_narrm,&
   firstchar,forceprint)  ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prttagm'
-!End of the abilint section
 
  implicit none
 
@@ -3119,9 +3012,9 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
      end if !(print==1)
 
 !    ###########################################################
-!    ### 03. Treatment of real 'DPR', 'LEN', 'ENE', 'BFI'
+!    ### 03. Treatment of real 'DPR', 'LEN', 'ENE', 'BFI', 'TIM'
 
-   else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI') then
+   else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
      if((ndtset_alloc>1).and.(use_narrm==0))then
        do idtset=1,ndtset_alloc
@@ -3195,7 +3088,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(abs(length)==1)format_dp=digit//short_dpr
            if(abs(length)==2)format_dp=digit//long_dpr
            if(abs(length)==6)format_dp=digit//veryshort_dpr
-         else if(typevarphys=='ENE' .or. typevarphys=='LEN' .or. typevarphys=='BFI')then
+   else if(typevarphys=='ENE' .or. typevarphys=='LEN' .or. typevarphys=='BFI' .or. typevarphys=='TIM')then
            if (narr<10) write(digit,'(i1)')narr_eff
            if (narr> 9) write(digit,'(i2)')narr_eff
            if(abs(length)==1)format_dp=digit//short_dim
@@ -3228,6 +3121,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
            if(typevarphys=='ENE')out_unit=' Hartree'
            if(typevarphys=='LEN')out_unit=' Bohr   '
            if(typevarphys=='BFI')out_unit='   ' !EB remove Tesla unit
+           if(typevarphys=='TIM')out_unit=' Second' !EB remove Tesla unit
 !          Format, according to the length of the dataset string
            if((multi==0).or.(ncid<0))then
              appen=' '
@@ -3260,7 +3154,7 @@ subroutine prttagm(dprarr,intarr,iout,jdtset_,length,&
      end if
 
 !    ###########################################################
-!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI'
+!    ### 04. The type is neither 'INT' nor 'DPR','ENE','LEN','BFI','TIM'
    else
      MSG_BUG('Disallowed typevarphys = '//TRIM(typevarphys))
    end if
@@ -3300,13 +3194,6 @@ end subroutine prttagm
 subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
 & marr,narrm,ncid,ndtset_alloc,token,typevarphys,&
 & mxnimage,nimagem,ndtset,prtimg,strimg,firstchar,forceprint)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prttagm_images'
-!End of the abilint section
 
  implicit none
 
@@ -3495,13 +3382,6 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 
  use defs_basis
  use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chkvars_in_string'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

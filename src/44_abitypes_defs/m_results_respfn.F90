@@ -99,13 +99,6 @@ CONTAINS
 
 subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_respfn'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -174,13 +167,6 @@ end subroutine init_results_respfn
 !! SOURCE
 
 subroutine destroy_results_respfn(results_respfn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_respfn'
-!End of the abilint section
 
  implicit none
 

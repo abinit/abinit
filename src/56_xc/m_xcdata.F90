@@ -149,13 +149,6 @@ contains
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,usekden,vdw_xc,xc_tb09_c,xc_denpos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcdata_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -245,13 +238,6 @@ end subroutine xcdata_init
 
 subroutine get_xclevel(ixc,xclevel,usefock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_xclevel'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -334,13 +320,6 @@ end subroutine get_xclevel
 !! SOURCE
 
 subroutine get_auxc_ixc(auxc_ixc,ixc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_auxc_ixc'
-!End of the abilint section
 
  implicit none
 

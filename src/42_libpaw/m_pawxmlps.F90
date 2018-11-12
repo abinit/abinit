@@ -347,13 +347,6 @@ CONTAINS
 !! SOURCE
 subroutine paw_begin_element1(namespaceURI,localName,name,attributes)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_begin_element1'
-!End of the abilint section
-
 character(len=*),intent(in)   :: namespaceURI,localName,name
 type(dictionary_t),intent(in) :: attributes
 
@@ -925,13 +918,6 @@ end subroutine paw_begin_element1
 !! SOURCE
 subroutine paw_end_element1(namespaceURI,localName,name)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_end_element1'
-!End of the abilint section
-
 character(len=*),intent(in) :: namespaceURI,localName,name
 character(len=100) :: msg,value
 
@@ -1069,13 +1055,6 @@ end subroutine paw_end_element1
 !! SOURCE
 subroutine pawdata_chunk(chunk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdata_chunk'
-!End of the abilint section
-
 character(len=*),intent(in) :: chunk
 
 integer :: ii,ntokens,status,last_pos
@@ -1159,13 +1138,6 @@ end subroutine pawdata_chunk
 !! SOURCE
 
 subroutine paw_setup_free(paw_setupin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_setup_free'
-!End of the abilint section
 
  implicit none
 
@@ -1294,13 +1266,6 @@ end subroutine paw_setup_free
 !! SOURCE
 
 subroutine paw_setup_copy(paw_setupin,paw_setupout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_setup_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1540,13 +1505,6 @@ end subroutine paw_setup_copy
 
  subroutine paw_rdfromline(keyword,line,output,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_rdfromline'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1598,13 +1556,6 @@ end subroutine paw_setup_copy
 !! SOURCE
 
  subroutine rdpawpsxml_header(ecut_tmp,filename,paw_setup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdpawpsxml_header'
-!End of the abilint section
 
  implicit none
 
@@ -1994,13 +1945,6 @@ end subroutine paw_setup_copy
 !! SOURCE
 
  subroutine rdpawpsxml(filename,paw_setup)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdpawpsxml'
-!End of the abilint section
 
  implicit none
 
@@ -2745,13 +2689,6 @@ end subroutine paw_setup_copy
 
  subroutine rdpawpsxml_core(energy_cor,filename,lcor,ncor,nphicor,pawrad,phi_cor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rdpawpsxml_core'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -3006,7 +2943,7 @@ end subroutine paw_setup_copy
  endfile=.false.
  LIBPAW_DATATYPE_ALLOCATE(gridwf,(nphicor))
  LIBPAW_DATATYPE_ALLOCATE(statewf,(nphicor))
- maxmeshz=maxval(radmesh(:)%mesh_size)
+ maxmeshz=pawrad%mesh_size
  LIBPAW_ALLOCATE(phitmp,(nphicor,maxmeshz))
 
  do while (.not.endfile)
@@ -3068,11 +3005,14 @@ end subroutine paw_setup_copy
        LIBPAW_DEALLOCATE(work)
        call pawrad_free(tmpmesh)
      else
+       call pawrad_init(tmpmesh,mesh_size=maxmeshz,mesh_type=radmesh(imeshae)%mesh_type,&
+&                 rstep=radmesh(imeshae)%rstep,lstep=radmesh(imeshae)%lstep)
        shft=mesh_shift(imeshae)
        phi_cor(1+shft:radmesh(imeshae)%mesh_size,ii)=phitmp(ii,1:radmesh(imeshae)%mesh_size-shft)
-       phi_cor(1+shft:maxmeshz,ii)=phi_cor(1+shft:maxmeshz,ii)*radmesh(imeshae)%rad(1+shft:maxmeshz)
+       phi_cor(1+shft:maxmeshz,ii)=phi_cor(1+shft:maxmeshz,ii)*tmpmesh%rad(1+shft:maxmeshz)
        if (radmesh(imeshae)%mesh_size<maxmeshz) phi_cor(radmesh(imeshae)%mesh_size+1:maxmeshz,ii)=zero
        if (shft==1) phi_cor(1,ii)=zero
+       call pawrad_free(tmpmesh)
      end if
    end do
  end if

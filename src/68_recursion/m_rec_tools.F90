@@ -76,13 +76,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_pt0_pt1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -143,13 +136,6 @@ end subroutine get_pt0_pt1
 !! SOURCE
 
 subroutine reshape_pot(trasl,nfft,nfftrec,ngfft,ngfftrec,pot,potloc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'reshape_pot'
-!End of the abilint section
 
  implicit none
 
@@ -217,13 +203,6 @@ subroutine trottersum(dim_trott,error,&
      &                facrec0,coeef_mu,exp1,&
      &                an,bn2,&
      &                N,D,Nold,Dold)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trottersum'
-!End of the abilint section
 
  implicit none
 

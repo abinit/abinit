@@ -200,13 +200,6 @@ subroutine prcref(atindx,dielar,dielinv,&
 &  optreal,optres,pawrhoij,pawtab,ph1d,psps,rhog,rhoijrespc,rhor,rprimd,&
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,wvl,wvl_den,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcref'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -311,7 +304,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
-       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work)
      if (dtset%iprcel<=78) then
@@ -329,7 +322,7 @@ subroutine prcref(atindx,dielar,dielinv,&
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(work,(nfftprc))
-       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
        ABI_DEALLOCATE(work)
@@ -338,7 +331,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
      end if
      do ispden=1,dtset%nspden
-       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work3)
@@ -386,7 +379,7 @@ subroutine prcref(atindx,dielar,dielinv,&
        work2(:)=vresid(:,1)
 !      Must average over spins in the case of a potential residual
        if(dtset%nspden/=1.and.optres==0)work2(:)=(work2(:)+vresid(:,2))*half
-       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work1(:,:)=reshape(vresid(:,1),(/2,nfftprc/))
        if(dtset%nspden/=1.and.optres==0)work1(:,:)=(work1(:,:)+reshape(vresid(:,2),(/2,nfftprc/)))*half
@@ -447,7 +440,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_DEALLOCATE(mask)
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work2(:)=reshape(work1(:,:),(/nfftprc*2/))
      end if
@@ -568,7 +561,7 @@ subroutine prcref(atindx,dielar,dielinv,&
      ABI_ALLOCATE(work,(nfft))
      ABI_ALLOCATE(rhog_wk,(2,nfft))
      work(:)=rhor_wk(:,1)
-     call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
      ABI_DEALLOCATE(work)
 
 !    Compute structure factor phases for new atomic pos:
@@ -850,13 +843,6 @@ end subroutine prcref
 &  susmat,vhartr,vpsp,vresid,vrespc,vxc,xred,&
 &  etotal,pawtab,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcref_PMA'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -968,7 +954,7 @@ end subroutine prcref
      ABI_ALLOCATE(work,(2*nfftprc))
      do ispden=1,dtset%nspden
        work(:)=vresid(:,ispden)
-       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work,work1(:,ispden),+1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work)
      if (dtset%iprcel<=78) then
@@ -986,7 +972,7 @@ end subroutine prcref
        call zerosym(rhog_wk,2,ngfftprc(1),ngfftprc(2),ngfftprc(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_ALLOCATE(work,(nfftprc))
-       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,rhog_wk,work,+1,mpi_enreg,nfftprc,1,ngfftprc,0)
        call prcrskerker1(dtset,mpi_enreg,nfftprc,dtset%nspden,ngfftprc,dielar,etotal, &
 &       gprimd,work1,work3,work)
        ABI_DEALLOCATE(work)
@@ -995,7 +981,7 @@ end subroutine prcref
 &       work1,work3,dtset%natom,xred,mpi_enreg,ucvol)
      end if
      do ispden=1,dtset%nspden
-       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,vrespc(:,ispden),work3(:,ispden),-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      end do
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work3)
@@ -1043,7 +1029,7 @@ end subroutine prcref
        work2(:)=vresid(:,1)
 !      Must average over spins if needed.
        if(dtset%nspden/=1)work2(:)=(work2(:)+vresid(:,2))*half
-       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,-1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work1(:,:)=reshape(vresid(:,1),(/2,nfftprc/))
        if (dtset%nspden/=1) work1(:,:)=(work1(:,:)+reshape(vresid(:,2),(/2,nfftprc/)))*half
@@ -1093,7 +1079,7 @@ end subroutine prcref
 
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,ngfftprc,dtset%paral_kgb,0)
+       call fourdp(1,work1,work2,1,mpi_enreg,nfftprc,1,ngfftprc,0)
      else
        work2(:)=reshape(work1(:,:),(/nfftprc*2/))
      end if
@@ -1210,7 +1196,7 @@ end subroutine prcref
    ABI_ALLOCATE(work,(nfft))
    ABI_ALLOCATE(rhog_wk,(2,nfft))
    work(:)=rhor_wk(:,1)
-   call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,rhog_wk,work,-1,mpi_enreg,nfft,1,ngfft,0)
    ABI_DEALLOCATE(work)
 
 !  Compute structure factor phases for new atomic pos:
@@ -1378,13 +1364,6 @@ end subroutine prcref_PMA
 
 subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral_kgb,qphon,rprimd,vresid,vrespc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'moddiel'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -1497,7 +1476,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 !    Do fft from real space (work2) to G space (work1)
      if (optreal==1) then
        work2(:)=vresid(:,ispden)
-       call fourdp(cplex,work1,work2,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,work1,work2,-1,mpi_enreg,nfft,1,ngfft,0)
      else
 !      work1(:,:)=reshape(vresid(:,ispden),(/2,nfft/))
 !      Reshape function does not work with big arrays for some compilers
@@ -1559,7 +1538,7 @@ subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,paral
 
 !    Fourier transform
      if (optreal==1) then
-       call fourdp(cplex,work1,work2,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call fourdp(cplex,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
        vrespc(:,ispden)=work2(:)
      else
 !      vrespc(:,ispden)=reshape(work1(:,:),(/nfft*2/))
@@ -1624,13 +1603,6 @@ end subroutine moddiel
 !! SOURCE
 
 subroutine dielmt(dielinv,gmet,kg_diel,npwdiel,nspden,occopt,prtvol,susmat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dielmt'
-!End of the abilint section
 
  implicit none
 
@@ -1997,13 +1969,6 @@ end subroutine dielmt
 subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 &  nfft,ngfft,nkxc,npwdiel,nspden,occopt,option,paral_kgb,prtvol,susmat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dieltcel'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2219,7 +2184,7 @@ subroutine dieltcel(dielinv,gmet,kg_diel,kxc,&
 !  ENDDEBUG
    call initmpi_seq(mpi_enreg_seq)
    call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft(2),ngfft(3),'all')
-   call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,ngfft,paral_kgb,0) ! trsfrm R to G
+   call fourdp(1,kxcg,wkxc,-1,mpi_enreg_seq,nfft,1,ngfft,0) ! trsfrm R to G
    call destroy_mpi_enreg(mpi_enreg_seq)
 
 !  Compute difference in G vectors
@@ -2479,13 +2444,6 @@ end subroutine dieltcel
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcrskerker1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2703,13 +2661,6 @@ end subroutine prcrskerker1
 !! SOURCE
 
 subroutine prcrskerker2(dtset,nfft,nspden,ngfft,dielar,gprimd,rprimd,vresid,vrespc,natom,xred,mpi_enreg,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prcrskerker2'
-!End of the abilint section
 
  implicit none
 
@@ -3020,13 +2971,6 @@ end subroutine prcrskerker2
 
 subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgpr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3119,13 +3063,6 @@ end subroutine cgpr
 
 subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linmin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3184,13 +3121,6 @@ end subroutine linmin
 !! SOURCE
 
 subroutine bracketing (nv1,nv2,dp_dum_v2dp,v,grad,a,x,b,fa,fx,fb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bracketing'
-!End of the abilint section
 
  implicit none
 
@@ -3302,13 +3232,6 @@ end subroutine bracketing
 !! SOURCE
 
 function brent(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,itmax,v,grad,ax,xx,bx,tol,xmin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'brent'
-!End of the abilint section
 
  implicit none
 

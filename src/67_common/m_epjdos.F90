@@ -34,7 +34,6 @@ module m_epjdos
  use m_cgtools
  use m_atomdata
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -170,13 +169,6 @@ contains  !============================================================
 
 type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'epjdos_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -290,13 +282,6 @@ end function epjdos_new
 
 subroutine epjdos_free(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'epjdos_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -368,13 +353,6 @@ end subroutine epjdos_free
 !! SOURCE
 
 subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dos_calcnwrite'
-!End of the abilint section
 
  implicit none
 
@@ -759,13 +737,6 @@ contains
 
 subroutine write_extra_headers()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_extra_headers'
-!End of the abilint section
-
  if (nsppol==2) then
    if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
    if(isppol==2) write(msg,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
@@ -934,13 +905,6 @@ end subroutine dos_calcnwrite
 subroutine recip_ylm (bess_fit, cg_1band, istwfk, mpi_enreg, nradint, nradintmax, mlang,&
 &  mpw, natsph, typat_extra, mlang_type, npw_k, nspinor, ph3d, prtsphere, rint, rmax,&
 &  rc_ylm, sum_1ll_1atom, sum_1lm_1atom, ucvol, ylm_k, znucl_sph)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'recip_ylm'
-!End of the abilint section
 
  implicit none
 
@@ -1232,13 +1196,6 @@ contains
  function sy(ll, mm, mp)
    use  m_paw_sphharm, only : ys
    ! Computes the matrix element <Slm|Ylm'>
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sy'
-!End of the abilint section
-
    integer,intent(in) :: ll,mm, mp
 
    real(dp) :: sy(2)
@@ -1290,13 +1247,6 @@ end subroutine recip_ylm
 
 subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 &                       paral_kgb,ph1d,rmax,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dens_in_sph'
-!End of the abilint section
 
  implicit none
 
@@ -1361,7 +1311,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  ABI_ALLOCATE(fofr,(2,n4,n5,n6))
  call fourwf(cplex,denpot,cg,fofgout,fofr,gbound,gbound, &
 & istwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft_here,npw_k,&
-& npw_k,n4,n5,n6,1,paral_kgb,tim_fourwf,weight,weight)
+& npw_k,n4,n5,n6,1,tim_fourwf,weight,weight)
  ABI_DEALLOCATE(fofgout)
  ABI_DEALLOCATE(fofr)
  ABI_DEALLOCATE(gbound)
@@ -1380,7 +1330,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
  call fftpac(1,mpi_enreg,1,n1,n2,n3,n4,n5,n6,ngfft,rhor,denpot,1)
 
  ABI_ALLOCATE(rhog,(2,nfft))
- call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(rhor)
  ABI_DEALLOCATE(denpot)
@@ -1494,13 +1444,6 @@ end subroutine dens_in_sph
 
 subroutine sphericaldens(fofg,gnorm,nfft,rmax,sphfofg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sphericaldens'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1570,13 +1513,6 @@ end subroutine sphericaldens
 !! SOURCE
 
 subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtfatbands'
-!End of the abilint section
 
  implicit none
 
@@ -1814,13 +1750,6 @@ end subroutine prtfatbands
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fatbands_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1854,7 +1783,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
- NCF_CHECK(crystal_ncwrite(crystal, ncid))
+ NCF_CHECK(crystal%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
  ! Add fatband-specific quantities
@@ -1951,13 +1880,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -2021,13 +1943,6 @@ end subroutine fatbands_ncwrite
 !! SOURCE
 
 subroutine partial_dos_fractions(dos,crystal,dtset,eigen,occ,npwarr,kg,cg,mcg,collect,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'partial_dos_fractions'
-!End of the abilint section
 
  implicit none
 
@@ -2506,13 +2421,6 @@ end subroutine partial_dos_fractions
 !! SOURCE
 
 subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'partial_dos_fractions_paw'
-!End of the abilint section
 
  implicit none
 

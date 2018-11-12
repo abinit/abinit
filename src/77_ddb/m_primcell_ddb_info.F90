@@ -100,13 +100,6 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 &    acell,amu,dielt,dyewq0,gmet,gprim,rcan,rmet,rprim,rpt,trans,wghatm,xred,zeff)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -230,13 +223,6 @@ subroutine init_primcell_ddb_info (pcell,brav,dipdip,mpert,msym,natom,nrpt,nsym,
 subroutine read_primcell_ddb_info (filename,pcell)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -367,13 +353,6 @@ subroutine read_primcell_ddb_info (filename,pcell)
 subroutine write_primcell_ddb_info (filename,pcell)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -478,13 +457,6 @@ subroutine write_primcell_ddb_info (filename,pcell)
 subroutine destroy_primcell_ddb_info (pcell)
  
  use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_primcell_ddb_info'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

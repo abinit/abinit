@@ -96,6 +96,8 @@ module m_pawcprj
  public :: pawcprj_mpi_sum        ! Perform MPI_SUM on a pawcprj_type inside a MPI communicator.
  public :: pawcprj_getdim         ! Returns the number of lmn components in the <p_{lmn}^i|\psi> for the i-th atom.
  public :: paw_overlap            ! Compute the onsite contribution to the overlap between two states.
+ public :: pawcprj_pack           ! Copy data from a cprj to a simple real buffer
+ public :: pawcprj_unpack         ! Copy data from a simple real buffer to a cprj
 !!***
 
 CONTAINS
@@ -138,13 +140,6 @@ CONTAINS
 !! SOURCE
 
  subroutine pawcprj_alloc(cprj,ncpgr,nlmn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_alloc'
-!End of the abilint section
 
  implicit none
 
@@ -226,13 +221,6 @@ end subroutine pawcprj_alloc
 
  subroutine pawcprj_free(cprj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -284,13 +272,6 @@ end subroutine pawcprj_free
 !! SOURCE
 
  subroutine pawcprj_set_zero(cprj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_set_zero'
-!End of the abilint section
 
  implicit none
 
@@ -353,13 +334,6 @@ end subroutine pawcprj_set_zero
 
  subroutine pawcprj_copy(cprj_in,cprj_out,&
 &                    icpgr) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_copy'
-!End of the abilint section
 
  implicit none
 
@@ -468,13 +442,6 @@ end subroutine pawcprj_copy
 !! SOURCE
 
  subroutine pawcprj_axpby(alpha,beta,cprjx,cprjy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_axpby'
-!End of the abilint section
 
  implicit none
 
@@ -599,13 +566,6 @@ end subroutine pawcprj_axpby
 !! SOURCE
 
  subroutine pawcprj_zaxpby(alpha,beta,cprjx,cprjy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_zaxpby'
-!End of the abilint section
 
  implicit none
 
@@ -780,13 +740,6 @@ end subroutine pawcprj_zaxpby
 &                       isym,itim,kpt,lmax,lmnmax,mband,natom,nband,nspinor,nsym,ntypat,&
 &                       typat,zarot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_symkn'
-!End of the abilint section
-
  implicit none
 
 !Arguments---------------------------
@@ -917,13 +870,6 @@ end subroutine pawcprj_zaxpby
 
  subroutine pawcprj_conjg(cprj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_conjg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -994,13 +940,6 @@ end subroutine pawcprj_conjg
 !! SOURCE
 
  subroutine pawcprj_lincom(alpha,cprj_in,cprj_out,nn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_lincom'
-!End of the abilint section
 
  implicit none
 
@@ -1103,13 +1042,6 @@ end subroutine pawcprj_lincom
 
  subroutine pawcprj_output(cprj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_output'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1148,19 +1080,19 @@ end subroutine pawcprj_output
 !! pawcprj_get
 !!
 !! FUNCTION
-!! Read the cprj for a given k-point from memory or from a temporary file
+!! Read the cprj_k for a given k-point from memory in cprj or from a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=input cprj (used if mkmem/=0)
 !!  dimcp=first dimension of cprj_k,cprj arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
 !!  [icpgr]= (optional argument) if present, only component icpgr of
 !!           input cprj gradient is copied into output cprj
 !!           Not used if cprj(:,:)%ncpgr<icpgr (mkmem>0)
 !!                    or ncpgr(optional)<icpgr (mkmem=0)
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during reading, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted=>unsorted)
@@ -1201,13 +1133,6 @@ end subroutine pawcprj_output
  subroutine pawcprj_get(atind,cprj_k,cprj,dimcp,iband1,ibg,ikpt,iorder,isppol,mband,&
 &                    mkmem,natom,nband,nband_k,nspinor,nsppol,uncp,&
 &                    icpgr,ncpgr,mpicomm,proc_distrb) ! optionals arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_get'
-!End of the abilint section
 
  implicit none
 
@@ -1388,15 +1313,15 @@ end subroutine pawcprj_get
 !! pawcprj_put
 !!
 !! FUNCTION
-!! Write the cprj for a given set of (n,k) into memory or into a temporary file
+!! Write cprj_k for a given set of (n,k) into memory in cprj, or into a temporary file
 !!
 !! INPUTS
 !!  atind(natom)=index table for atoms (see iorder below)
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= input cprj datastructure
 !!  dimcp=first dimension of cprj_k,cprjnk arrays (1 or natom)
-!!  iband1=index of first band
+!!  iband1=index of first band in cprj
 !!  ibg=shift in cprj array to locate current k-point
-!!  ikpt=index of current k-point
+!!  ikpt=index of current k-point (only needed for the parallel distribution)
 !!  iorder=0 if cprj ordering does not change during reading
 !!         1 if cprj ordering changes during writing, depending on content of atind array:
 !!              - if atind=atindx  (type-sorted->unsorted)
@@ -1435,13 +1360,6 @@ end subroutine pawcprj_get
  subroutine pawcprj_put(atind,cprj_k,cprj,dimcp,iband1,ibg,ikpt,iorder,isppol,mband,&
 &           mkmem,natom,nband,nband_k,nlmn,nspinor,nsppol,uncp,&
 &           mpicomm,mpi_comm_band,proc_distrb,to_be_gathered) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_put'
-!End of the abilint section
 
  implicit none
 
@@ -1645,13 +1563,6 @@ end subroutine pawcprj_put
 
  subroutine pawcprj_reorder(cprj,atm_indx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_reorder'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1753,13 +1664,6 @@ end subroutine pawcprj_reorder
 !! SOURCE
 
 subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,receiver,spaceComm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_exch'
-!End of the abilint section
 
  implicit none
 
@@ -1893,13 +1797,6 @@ end subroutine pawcprj_mpi_exch
 
 subroutine pawcprj_mpi_send(natom,n2dim,nlmn,ncpgr,cprj_out,receiver,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_send'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2014,13 +1911,6 @@ end subroutine pawcprj_mpi_send
 
 subroutine pawcprj_mpi_recv(natom,n2dim,nlmn,ncpgr,cprj_in,sender,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_recv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2126,13 +2016,6 @@ end subroutine pawcprj_mpi_recv
 
 subroutine pawcprj_mpi_sum(cprj,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_sum'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2235,13 +2118,6 @@ end subroutine pawcprj_mpi_sum
 
 subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,nlmn,ncpgr,nproc,spaceComm,ierr,&
 &                                rank_ordered)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_mpi_allgather'
-!End of the abilint section
 
  implicit none
 
@@ -2374,13 +2250,6 @@ end subroutine pawcprj_mpi_allgather
 
 subroutine pawcprj_bcast(Cprj,natom,n2dim,nlmn,ncpgr,master,spaceComm,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2501,13 +2370,6 @@ end subroutine pawcprj_bcast
 !! SOURCE
 
  subroutine pawcprj_transpose(cprjin,cprjout,cprj_bandpp,natom,nband,nspinor,spaceComm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_transpose'
-!End of the abilint section
 
  implicit none
 
@@ -2760,13 +2622,6 @@ end subroutine pawcprj_bcast
  subroutine pawcprj_gather_spin(cprj,cprj_gat,natom,n2size,nspinor,nspinortot,&
 &                            spaceComm_spin,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_gather_spin'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2889,13 +2744,6 @@ end subroutine pawcprj_bcast
 
 subroutine pawcprj_getdim(dimcprj,natom,nattyp,ntypat,typat,Pawtab,sort_mode)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_getdim'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2964,13 +2812,6 @@ end subroutine pawcprj_getdim
 
 function paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_overlap'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3038,6 +2879,179 @@ end function paw_overlap
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_pawcprj/pawcprj_pack
+!! NAME
+!! pawcprj_pack
+!!
+!! FUNCTION
+!! Pack structured data into a simple buffer
+!!
+!! INPUTS
+!!  nlmn(natom)=Number of nlm partial waves for each atom.
+!!  ncpgr = number of gradients in cprj_out
+!!  cprj= The datatype to be packed.
+!!
+!! OUTPUT
+!!  buffer = the data packed, dim : (2, n2dim*sum(nlmn))
+!!  [buffer_gr] = if present the gradient data packed, dim : (2, ncpgr, n2dim*sum(nlmn))
+!!
+!! PARENTS
+!!  pawmkrhoij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawcprj_pack'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ integer,intent(in) :: nlmn(:)
+ type(pawcprj_type),intent(in) :: cprj(:,:)
+ real(dp),intent(out) :: buffer(:,:)
+ real(dp),intent(out),optional :: buffer_gr(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: natom,n2buffer,ncpgr,n2dim
+ integer :: iat,jj,n1dim,nn
+ integer :: ipck
+ character(len=100) :: msg
+!arrays
+
+! *************************************************************************
+
+ natom=size(nlmn,dim=1)
+ n2buffer=size(buffer,dim=2)
+ n1dim=size(cprj,dim=1)
+ n2dim=size(cprj,dim=2)
+
+ if (natom/=n1dim) then
+   msg='size mismatch in natom (pawcprj_pack)!'
+   MSG_BUG(msg)
+ end if
+ if (n2dim*SUM(nlmn)/=n2buffer) then
+   msg='size mismatch in dim=2 (pawcprj_pack)!'
+   MSG_BUG(msg)
+ end if
+ ncpgr=0
+ if (present(buffer_gr)) then
+   ncpgr=size(buffer_gr,dim=2)
+ end if
+
+!=== Pack cprj ====
+ ipck=0
+ do jj=1,n2dim
+   do iat=1,natom
+     nn=nlmn(iat)
+     buffer(:,ipck+1:ipck+nn)=cprj(iat,jj)%cp(:,1:nn)
+     if (ncpgr/=0) then
+       buffer_gr(:,:,ipck+1:ipck+nn)=cprj(iat,jj)%dcp(:,:,1:nn)
+     end if
+     ipck=ipck+nn
+   end do
+ end do
+
+end subroutine pawcprj_pack
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawcprj/pawcprj_unpack
+!! NAME
+!! pawcprj_unpack
+!!
+!! FUNCTION
+!! Unpack structured data from a simple buffer
+!!
+!! INPUTS
+!!  nlmn(natom)=Number of nlm partial waves for each atom.
+!!  ncpgr = number of gradients in cprj_in
+!!  buffer = the data to be unpacked, dim : (2, n2dim*sum(nlmn))
+!!  [buffer_gr] = if present the gradient data to be unpacked, dim : (2, ncpgr, n2dim*sum(nlmn))
+!!
+!! OUTPUT
+!!  cprj=The datatype unpacked
+!!
+!! PARENTS
+!!  pawmkrhoij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'pawcprj_unpack'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ integer,intent(in) :: nlmn(:)
+ real(dp),intent(in) :: buffer(:,:)
+ real(dp),intent(in),optional :: buffer_gr(:,:,:)
+ type(pawcprj_type),intent(inout) :: cprj(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: natom,n2buffer,ncpgr,n2dim
+ integer :: iat,jj,n1dim,nn
+ integer :: ipck
+ character(len=100) :: msg
+!arrays
+
+! *************************************************************************
+
+ natom=size(nlmn,dim=1)
+ n2buffer=size(buffer,dim=2)
+ n1dim=size(cprj,dim=1)
+ n2dim=size(cprj,dim=2)
+
+ if (natom/=n1dim) then
+   msg='size mismatch in natom (pawcprj_unpack)!'
+   MSG_BUG(msg)
+ end if
+ if (n2dim*SUM(nlmn)/=n2buffer) then
+   msg='size mismatch in dim=2 (pawcprj_unpack)!'
+   MSG_BUG(msg)
+ end if
+ ncpgr=0
+ if (present(buffer_gr)) then
+   ncpgr=size(buffer_gr,dim=2)
+ end if
+ 
+!=== Unpack buffers into cprj ===
+ ipck=0
+ do jj=1,n2dim
+   do iat=1,natom
+     nn=nlmn(iat)
+     cprj(iat,jj)%cp(:,1:nn)=buffer(:,ipck+1:ipck+nn)
+     if (ncpgr/=0) then
+       cprj(iat,jj)%dcp(:,:,1:nn)=buffer_gr(:,:,ipck+1:ipck+nn)
+     end if
+     ipck=ipck+nn
+   end do
+ end do
+
+end subroutine pawcprj_unpack
 
 end module m_pawcprj
 !!***

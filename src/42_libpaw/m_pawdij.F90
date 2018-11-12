@@ -171,13 +171,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 &          atvshift,fatvshift,natvshift,nucdipmom,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid,hyb_mixing,hyb_mixing_sr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1094,13 +1087,6 @@ end subroutine pawdij
 
 subroutine pawdijhartree(cplex_rf,dijhartree,nspden,pawrhoij,pawtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijhartree'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -1218,13 +1204,6 @@ end subroutine pawdijhartree
 
 subroutine pawdijxc(cplex_rf,cplex_dij,dijxc,ndij,nspden,nsppol,&
 &                   pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijxc'
-!End of the abilint section
 
  implicit none
 
@@ -1515,13 +1494,6 @@ end subroutine pawdijxc
 !! SOURCE
 
 subroutine pawdijfock(cplex_rf,cplex_dij,dijfock_vv,dijfock_cv,hyb_mixing,hyb_mixing_sr,ndij,nspden,nsppol,pawrhoij,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijfock'
-!End of the abilint section
 
  implicit none
 
@@ -1819,13 +1791,6 @@ end subroutine pawdijfock
 subroutine pawdijxcm(cplex_rf,cplex_dij,dijxc,lmselect,ndij,nspden,nsppol,&
 &                    pawang,pawrad,pawtab,vxc1,vxct1,usexcnhat)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijxcm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2088,13 +2053,6 @@ subroutine pawdijhat(cplex_rf,cplex_dij,dijhat,gprimd,iatom,ipert,&
 &                    natom,ndij,ngrid,ngridtot,nspden,nsppol,pawang,pawfgrtab,&
 &                    pawtab,Pot,qphon,ucvol,xred,&
 &                    mpi_comm_grid) ! Optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijhat'
-!End of the abilint section
 
  implicit none
 
@@ -2389,11 +2347,11 @@ end subroutine pawdijhat
 !!
 !! NOTES
 !!   On-site contribution of a nuclear magnetic dipole moment at $R$. Hamiltonian is
-!!   $H=(1/2m_e)(p - q_e A)^2 + V$, and vector potential $A$ is
+!!   $H=(1/2m_e)(p - q_e A)^2 + V$ in SI units, and vector potential $A$
 !!   $A=(\mu_0/4\pi) m\times (r-R)/|r-R|^3 = (\mu_0/4\pi) L_R\cdot m/|r-R|^3$ where
 !!   $L_R$ is the on-site orbital angular momentum and $m$ is the nuclear magnetic
-!!   dipole moment. For an electron (as usual), mass m_e = 1 and charge q_e = -1.
-!!   Second order term in A is ignored.
+!!   dipole moment. Second order term in A is ignored. In atomic units the on-site term
+!!   is \alpha^2 L_R\cdot m/|r-R|^3, where \alpha is the fine structure constant.
 !!
 !! PARENTS
 !!      m_pawdij,pawdenpot
@@ -2404,13 +2362,6 @@ end subroutine pawdijhat
 !! SOURCE
 
 subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijnd'
-!End of the abilint section
 
  implicit none
 
@@ -2426,7 +2377,7 @@ subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
 !Local variables ---------------------------------------
 !scalars
  integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,j0lmn,klmn,kln,mesh_size
- real(dp) :: intgr3,permeability
+ real(dp) :: intgr3,RecipAlpha2
  complex(dpc) :: lms
  logical :: ndmom
 !arrays
@@ -2441,10 +2392,9 @@ subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
  mesh_size=pawtab%mesh_size
  LIBPAW_ALLOCATE(ff,(mesh_size))
 
-! magnetic permeability mu_0/four_pi in atomic units
-! this constant is also used in getghcnd.F90, if you change it here,
-! change it there also for consistency
- permeability=5.325135453D-5
+ 
+ RecipAlpha2 = 1.d0/(InvFineStruct*InvFineStruct)
+ ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
 
 !Check data consistency
  if (cplex_dij/=2) then
@@ -2488,8 +2438,8 @@ subroutine pawdijnd(cplex_dij,dijnd,ndij,nucdipmom,pawrad,pawtab)
 ! matrix element <S il im|L_idir|S jl jm>
          call slxyzs(il,im,idir,jl,jm,lms)
 
-         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*permeability
-         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*permeability
+         dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + intgr3*dreal(lms)*nucdipmom(idir)*RecipAlpha2
+         dijnd(2*klmn,1) = dijnd(2*klmn,1) + intgr3*dimag(lms)*nucdipmom(idir)*RecipAlpha2
 
        end do
 
@@ -2556,13 +2506,6 @@ end subroutine pawdijnd
 
 subroutine pawdijso(cplex_rf,cplex_dij,dijso,ndij,nspden,&
 &                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijso'
-!End of the abilint section
 
  implicit none
 
@@ -2763,13 +2706,6 @@ end subroutine pawdijso
 
 subroutine pawdiju(cplex_rf,cplex_dij,dijpawu,ndij,nsppol,pawtab,vpawu,&
 &                  natvshift,atvshift,fatvshift) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdiju'
-!End of the abilint section
 
  implicit none
 
@@ -2991,13 +2927,6 @@ end subroutine pawdiju
 
 subroutine pawdiju_euijkl(cplex_rf,cplex_dij,diju,ndij,pawrhoij,pawtab,diju_im)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdiju_euijkl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -3164,13 +3093,6 @@ end subroutine pawdiju_euijkl
 
 subroutine pawdijexxc(cplex_rf,cplex_dij,dijexxc,lmselect,ndij,nspden,nsppol,&
 &                      pawang,pawrad,pawtab,vpawx,vxc_ex)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijexxc'
-!End of the abilint section
 
  implicit none
 
@@ -3481,13 +3403,6 @@ end subroutine pawdijexxc
 subroutine pawdijfr(cplex_rf,gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,ntypat,&
 &          option,paw_ij1,pawang,pawfgrtab,pawrad,pawtab,qphon,rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,mpi_comm_grid) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdijfr'
-!End of the abilint section
 
  implicit none
 
@@ -4120,13 +4035,6 @@ end subroutine pawdijfr
  subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
 &                    pawprtvol,pawtab,vpawu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawpupot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -4413,13 +4321,6 @@ end subroutine pawdijfr
 
  subroutine pawxpot(ndij,pawprtvol,pawrhoij,pawtab,vpawx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawxpot'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -4576,13 +4477,6 @@ end subroutine pawdijfr
 subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
 &                 paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec, &
 &                 mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij'
-!End of the abilint section
 
  implicit none
 
@@ -5240,13 +5134,6 @@ subroutine symdij(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,option_dij,&
  contains
    function symdij_symcart(aprim,bprim,symred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij_symcart'
-!End of the abilint section
-
    implicit none
    real(dp) :: symdij_symcart(3,3)
    integer,intent(in) :: symred(3,3)
@@ -5321,13 +5208,6 @@ end subroutine symdij
 subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
 &                     paw_ij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,&
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symdij_all'
-!End of the abilint section
 
  implicit none
 
@@ -5474,13 +5354,6 @@ end subroutine symdij_all
 !! SOURCE
 
 subroutine pawdij_gather(dij_in,dij_out,comm_atom,mpi_atmtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij_gather'
-!End of the abilint section
 
  implicit none
 
@@ -5647,13 +5520,6 @@ end subroutine pawdij_gather
 
 subroutine pawdij_print_dij(dij,cplex_dij,cplex_rf,iatom,natom,nspden,nsppol,&
 &           test_value,title_msg,unit,Ha_or_eV,opt_prtvol,mode_paral) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawdij_print_dij'
-!End of the abilint section
 
  implicit none
 

@@ -38,12 +38,6 @@
   subroutine abi_dhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info, &
 &       x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhegv'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
  integer :: itype
@@ -194,13 +188,6 @@ end subroutine abi_dhegv
  subroutine abi_dhegv_alloc(itype,jobz,uplo,n,a,b,w, &
 &       x_cplx,istwf_k,timopt,tim_xeigen,use_slk,use_gpu)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhegv_alloc'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -237,12 +224,6 @@ end subroutine abi_dhegv_alloc
 !! SOURCE
 !!
 subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chegv'
-!End of the abilint section
 
  implicit none
 
@@ -306,12 +287,6 @@ end subroutine abi_chegv
 
  subroutine abi_chegv_alloc(itype,jobz,uplo,n,a,b,w)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chegv_alloc'
-
-!End of the abilint section
 
  implicit none
 
@@ -346,12 +321,6 @@ end subroutine abi_chegv_alloc
 !! SOURCE
 
 subroutine abi_zhegv(itype,jobz,uplo,n,a,lda,b,ldb,w,work,lwork,rwork,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhegv'
-!End of the abilint section
 
  implicit none
 
@@ -415,13 +384,6 @@ end subroutine abi_zhegv
 !! SOURCE
 
 subroutine abi_zhegv_alloc(itype,jobz,uplo,n,a,b,w)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhegv_alloc'
-
-!End of the abilint section
 
  implicit none
 

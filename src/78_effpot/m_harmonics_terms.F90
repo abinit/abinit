@@ -131,13 +131,6 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 &                               dynmat,epsilon_inf,elastic_constants,strain_coupling,&
 &                               nqpt,phfrq,qpoints,zeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -279,13 +272,6 @@ end subroutine harmonics_terms_init
 
 subroutine harmonics_terms_free(harmonics_terms)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_free'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -357,13 +343,6 @@ end subroutine harmonics_terms_free
 
 subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setInternalStrain'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -423,13 +402,6 @@ end subroutine harmonics_terms_setInternalStrain
 !! SOURCE
 
 subroutine harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setEffectiveCharges'
-!End of the abilint section
 
   implicit none
 
@@ -492,13 +464,6 @@ end subroutine harmonics_terms_setEffectiveCharges
 !! SOURCE
 
 subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpoints)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setDynmat'
-!End of the abilint section
 
   implicit none
 
@@ -607,13 +572,6 @@ end subroutine harmonics_terms_setDynmat
 
 subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,ncell,nrpt,&
 &                                      atmrpt_index,index_cells,sc_size,rpt,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_evaluateIFC'
-!End of the abilint section
 
  implicit none
 
@@ -724,13 +682,6 @@ end subroutine harmonics_terms_evaluateIFC
 subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,natom,natom_uc,ncell,&
 &                                          strain_coupling,strten,strain)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_evaluateElastic'
-!End of the abilint section
-
  real(dp),intent(out):: energy
  integer, intent(in) :: natom,natom_uc,ncell
 ! array
@@ -808,13 +759,6 @@ end subroutine  harmonics_terms_evaluateElastic
 !! SOURCE
 
 subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_applySumRule'
-!End of the abilint section
 
   implicit none
 

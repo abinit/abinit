@@ -239,13 +239,6 @@ CONTAINS
 SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondiag)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_init'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER           , INTENT(IN   ) :: flavors
   INTEGER           , INTENT(IN   ) :: samples
@@ -329,13 +322,6 @@ END SUBROUTINE BathOperatoroffdiag_init
 SUBROUTINE BathOperatoroffdiag_reset(op)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_reset'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER                           :: iflavor
@@ -400,13 +386,6 @@ END SUBROUTINE BathOperatoroffdiag_reset
 SUBROUTINE BathOperatoroffdiag_activateParticle(op,flavor)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_activateParticle'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 !Local variables ------------------------------
   INTEGER           , INTENT(IN   ) :: flavor
@@ -460,13 +439,6 @@ END SUBROUTINE BathOperatoroffdiag_activateParticle
 DOUBLE PRECISION  FUNCTION BathOperatoroffdiag_getDetAdd(op,CdagC_1, position, particle)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getDetAdd'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag)      , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
   INTEGER                 , INTENT(IN   ) :: position  
@@ -728,13 +700,6 @@ END FUNCTION BathOperatoroffdiag_getDetAdd
 DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetRemove(op,position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getDetRemove'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 !Local arguments-------------------------------
   INTEGER           , INTENT(IN   ) :: position  
@@ -825,13 +790,6 @@ END FUNCTION BathOperatoroffdiag_getDetRemove
 DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getDetF(op,particle,option)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getDetF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag)       , INTENT(INOUT)      :: op
   TYPE(ListCdagC), OPTIONAL, INTENT(IN   )  :: particle(:)
   INTEGER , optional :: option
@@ -937,13 +895,6 @@ END FUNCTION BathOperatoroffdiag_getDetF
 SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_setMAdd'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   TYPE(ListCdagC)   , INTENT(IN   ) :: particle(:)
 !Local variables ------------------------------
@@ -1358,13 +1309,6 @@ END SUBROUTINE BathOperatoroffdiag_setMAdd
 SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle) 
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_setMRemove'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT)  :: op
   TYPE(ListCdagC)   , INTENT(IN   )  :: particle(:)
 !Local variables ------------------------------
@@ -1575,13 +1519,6 @@ END SUBROUTINE BathOperatoroffdiag_setMRemove
 SUBROUTINE BathOperatoroffdiag_swap(op, flavor1, flavor2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_swap'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER           , INTENT(IN   ) :: flavor1
   INTEGER           , INTENT(IN   ) :: flavor2
@@ -1707,13 +1644,6 @@ END SUBROUTINE BathOperatoroffdiag_swap
 SUBROUTINE BathOperatoroffdiag_initF(op,ifstream)
 
 !Arguments ----------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_initF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER           , INTENT(IN   ) :: ifstream
 !Local variables ----------------
@@ -1768,13 +1698,6 @@ END SUBROUTINE BathOperatoroffdiag_initF
 SUBROUTINE BathOperatoroffdiag_setF(op,F)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_setF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag)               , INTENT(INOUT) :: op
   DOUBLE PRECISION, DIMENSION(:,:,:) , INTENT(IN   ) :: F
 !Arguments ------------------------------------
@@ -1834,13 +1757,6 @@ END SUBROUTINE BathOperatoroffdiag_setF
 SUBROUTINE BathOperatoroffdiag_printF(op,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_printF'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
   INTEGER,OPTIONAL  , INTENT(IN   ) :: ostream
 !Local variables ------------------------------
@@ -1907,13 +1823,6 @@ END SUBROUTINE BathOperatoroffdiag_printF
 SUBROUTINE BathOperatoroffdiag_printM(op,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_printM'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(IN) :: op
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -1962,13 +1871,6 @@ END SUBROUTINE BathOperatoroffdiag_printM
 SUBROUTINE BathOperatoroffdiag_printM_matrix(op,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_printM_matrix'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag), INTENT(IN) :: op
   INTEGER, OPTIONAL , INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -2028,13 +1930,6 @@ END SUBROUTINE BathOperatoroffdiag_printM_matrix
 !! SOURCE
 
 SUBROUTINE  BathOperatoroffdiag_destroy(op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_destroy'
-!End of the abilint section
 
   TYPE(BathOperatoroffdiag), INTENT(INOUT) :: op
 
@@ -2098,13 +1993,6 @@ END SUBROUTINE BathOperatoroffdiag_destroy
 SUBROUTINE BathOperatoroffdiag_doCheck(op,opt_check)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_doCheck'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
   INTEGER            , INTENT(IN   ) :: opt_check
   
@@ -2148,13 +2036,6 @@ END SUBROUTINE BathOperatoroffdiag_doCheck
 SUBROUTINE BathOperatoroffdiag_checkM(op,particle)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_checkM'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
   TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
 !Local variables ------------------------------
@@ -2315,13 +2196,6 @@ END SUBROUTINE BathOperatoroffdiag_checkM
 SUBROUTINE BathOperatoroffdiag_recomputeM(op,particle,flav_i,flav_j)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_recomputeM'
-!End of the abilint section
-
   TYPE(BathOperatoroffdiag) , INTENT(INOUT) :: op
   TYPE(ListCdagC)    , INTENT(IN   ) :: particle(:)
   INTEGER :: flav_i,flav_j
@@ -2452,13 +2326,6 @@ END SUBROUTINE BathOperatoroffdiag_recomputeM
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION BathOperatoroffdiag_getError(op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'BathOperatoroffdiag_getError'
-!End of the abilint section
 
   TYPE(BathOperatoroffdiag), INTENT(IN) :: op
 

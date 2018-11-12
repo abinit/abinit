@@ -137,13 +137,6 @@ subroutine paw_pwaves_lmn_init(Paw_onsite,my_natom,natom,ntypat,rprimd,xcart,Paw
 &                              Pawrad,local_pawfgrtab,optgrad,&
 &                              mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_pwaves_lmn_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -450,13 +443,6 @@ end subroutine paw_pwaves_lmn_init
 !! SOURCE
 
 subroutine paw_pwaves_lmn_free(Paw_onsite)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_pwaves_lmn_free'
-!End of the abilint section
 
  implicit none
 

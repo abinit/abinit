@@ -32,7 +32,8 @@ MODULE m_paw_occupancies
  use m_pawrhoij,   only : pawrhoij_type,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked, &
 &                         pawrhoij_alloc,pawrhoij_free,pawrhoij_get_nspden
  use m_pawcprj,    only : pawcprj_type,pawcprj_alloc,pawcprj_get, &
-&                         pawcprj_gather_spin, pawcprj_free
+&                         pawcprj_gather_spin, pawcprj_free, pawcprj_mpi_send, &
+&                         pawcprj_mpi_recv, pawcprj_copy, pawcprj_unpack, pawcprj_pack
  use m_paw_io,     only : pawio_print_ij
  use m_paral_atom, only : get_my_atmtab,free_my_atmtab
  use m_paw_dmft,   only : paw_dmft_type
@@ -111,13 +112,6 @@ CONTAINS  !=====================================================================
 &                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,&
 &                      pawprtvol,pawrhoij,unpaw,usewvl,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmkrhoij'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -137,18 +131,21 @@ CONTAINS  !=====================================================================
 !scalars
  integer,parameter :: max_nband_cprj=100
  integer :: bdtot_index,cplex
- integer :: iatom,iatom_tot,ib,ib1,iband,iband1,ibc1,ibg,ib_this_proc,ierr
+ integer :: iatom,iatom_tot,ib,ib1,iband,ibc1,ibg,ib_this_proc,ierr
  integer :: ikpt,iorder_cprj,isppol,jb_this_proc,jbg,me,my_nspinor,nband_k,nband_k_cprj
  integer :: nbandc1,nband_k_cprj_read,nband_k_cprj_used,nprocband,nrhoij,nsp2
  integer :: option,spaceComm,use_nondiag_occup_dmft
  logical :: locc_test,paral_atom,usetimerev
+ integer :: ib1_this_proc, ib_loop, proc_sender, proc_recver
  real(dp) :: wtk_k
  character(len=4) :: wrt_mode
  character(len=500) :: msg
 
 !arrays
- integer :: idum(0)
+ integer :: idum(0), n2buff
+ integer, allocatable :: req_correl(:,:,:)
  real(dp) :: occup(2)
+ real(dp) ABI_ASYNC, allocatable :: buffer_cprj_correl(:,:,:)
  character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:),cwaveprj(:,:),cwaveprjb(:,:)
  type(pawcprj_type),pointer :: cprj_ptr(:,:)
@@ -179,12 +176,12 @@ CONTAINS  !=====================================================================
    msg=' mband/mband_cprj must be equal to nproc_band!'
    MSG_BUG(msg)
  end if
- if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then
-   write(msg,'(4a,e14.3,a)') ch10,&
-&   ' Parallelization over bands is not yet compatible with self-consistency in DMFT !',ch10,&
-&   ' Calculation is thus restricted to nstep =1.'
-   MSG_WARNING(msg)
- end if
+! if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then
+!   write(msg,'(4a,e14.3,a)') ch10,&
+!&   ' Parallelization over bands is not yet compatible with self-consistency in DMFT !',ch10,&
+!&   ' Calculation is thus restricted to nstep =1.'
+!   MSG_WARNING(msg)
+! end if
 
  if( usewvl==1 .and. (nprocband/=1)) then
    write(msg,'(2a)') ch10,&
@@ -194,7 +191,7 @@ CONTAINS  !=====================================================================
 
 !Initialise and check dmft variables
  if(paw_dmft%use_sc_dmft/=0) then
-   nbandc1=(paw_dmft%mbandc-1)*paw_dmft%use_sc_dmft+1
+   nbandc1=paw_dmft%mbandc
  else
    nbandc1=1
  end if
@@ -215,6 +212,15 @@ CONTAINS  !=====================================================================
  if(paw_dmft%use_sc_dmft/=0) then
    ABI_DATATYPE_ALLOCATE(cwaveprjb,(natom,nspinor))
    call pawcprj_alloc(cwaveprjb,0,dimcprj)
+ end if
+
+ if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
+   if(paw_dmft%use_bandc(mpi_enreg%me_band+1)) then
+     n2buff = nspinor*sum(dimcprj)
+     ABI_ALLOCATE(buffer_cprj_correl,(2,n2buff,nbandc1))
+     ABI_ALLOCATE(req_correl,(nbandc1, nkpt, nsppol))
+     req_correl(:,:,:) = 0
+   end if
  end if
 
 !Initialize temporary file (if used)
@@ -261,6 +267,77 @@ CONTAINS  !=====================================================================
        cprj_ptr => cprj
      end if
 
+!    In case of band parallelism combined with self consistent DMFT, need to
+!    exchange bands cprj
+     if (paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb /= 0) then
+       if (paw_dmft%use_bandc(mpi_enreg%me_band+1)) then
+! only proc using correlated band have to do this
+         do ibc1=1,nbandc1
+           proc_sender = paw_dmft%bandc_proc(ibc1)
+           if(proc_sender == mpi_enreg%me_band) then
+
+!            get the index of band local to this proc
+             ib1 = paw_dmft%include_bands(ibc1)
+             ib1_this_proc = 0
+             do ib_loop=1,ib1-1
+               if (mod((ib_loop-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band) == mpi_enreg%me_band) then
+                 ib1_this_proc = ib1_this_proc+1
+               end if
+             end do
+             ib1_this_proc = ib1_this_proc+1
+
+!            extract the band
+             call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1_this_proc,ibg,ikpt,&
+&                             iorder_cprj,isppol,mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,&
+&                             unpaw,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+
+             call pawcprj_pack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
+             do proc_recver=0,mpi_enreg%nproc_band-1
+               if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
+!                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd 
+                 locc_test = .false.
+                 do ib_loop=1,nbandc1
+                   if(proc_recver == paw_dmft%bandc_proc(ib_loop)) then
+                     ib = paw_dmft%include_bands(ib_loop)
+                     locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
+&                                                abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8)
+                   end if
+                 end do
+                 if(locc_test) then
+                   ! send to proc_recver
+                   ierr = 0
+                   call xmpi_isend(buffer_cprj_correl(:,:,ibc1),proc_recver,&
+&                                  10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,&
+&                                  req_correl(ibc1,ikpt,isppol),ierr)
+!                  force sending or buffering
+                   call xmpi_wait(req_correl(ibc1,ikpt,isppol), ierr)
+                 end if
+               end if
+             end do
+           else
+!            locc_test = At least one of the bands used by this proc have a non neglectable occnd 
+             locc_test = .false.
+             do ib_loop=1,nbandc1
+               if(mpi_enreg%me_band == paw_dmft%bandc_proc(ib_loop)) then
+                 ib = paw_dmft%include_bands(ib_loop)
+                 ib1 = paw_dmft%include_bands(ibc1)
+                 locc_test = locc_test .or. (abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+&
+&                                            abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8)
+               end if
+             end do
+             if(locc_test) then
+               ! recv from proc_sender
+               ierr = 0
+               call xmpi_irecv(buffer_cprj_correl(:,:,ibc1),proc_sender,&
+&                              10000+ibc1+nbandc1*(ikpt+nsppol*isppol),mpi_enreg%comm_band,&
+&                              req_correl(ibc1,ikpt,isppol),ierr)
+             end if
+           end if
+         end do
+       end if
+     end if
+
+     ierr = 0
 !    LOOP OVER BANDS
      ib_this_proc=0;jb_this_proc=0
      do ib=1,nband_k
@@ -297,30 +374,51 @@ CONTAINS  !=====================================================================
 !        check if dmft and occupations
 !        write(std_out,*) 'ib,ibc1          ',ib,ibc1
 
+!        if ib is not part a band correlated in dmft do not repeat the following
+         if(ibc1 /= 1) then
+           if (paw_dmft%use_sc_dmft == 0) then
+             cycle
+           else
+             if (.not.(paw_dmft%band_in(ib))) cycle
+           end if
+         end if
+
 !        DMFT stuff: extract cprj and occupations for additional band
          if(paw_dmft%use_sc_dmft /= 0) then
-           ib1 = paw_dmft%include_bands(ibc1)
-!          write(std_out,*) 'use_sc_dmft=1 ib,ib1',ib,ib1
-           iband1 = bdtot_index+ib1
-!          write(std_out,*) 'ib, ib1          ',paw_dmft%band_in(ib),paw_dmft%band_in(ib1)
            if(paw_dmft%band_in(ib)) then
-             if(.not.paw_dmft%band_in(ib1))  stop
+!            write(std_out,*) 'use_sc_dmft=1 ib,ib1',ib,ib1
+!            write(std_out,*) 'ib, ib1          ',paw_dmft%band_in(ib),paw_dmft%band_in(ib1)
+
+             ib1 = paw_dmft%include_bands(ibc1) ! indice reel de la bande
+
              use_nondiag_occup_dmft = 1
-             occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
-             if(nspinor==2) occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
-             if(nspinor==1) occup(2) = zero
              locc_test = abs(paw_dmft%occnd(1,ib,ib1,ikpt,isppol))+abs(paw_dmft%occnd(2,ib,ib1,ikpt,isppol))>tol8
+
+             occup(1) = paw_dmft%occnd(1,ib,ib1,ikpt,isppol)
+             occup(2) = paw_dmft%occnd(2,ib,ib1,ikpt,isppol)
+
 !            write(std_out,*) 'use_sc_dmft=1,band_in(ib)=1, ib,ibc1',ib,ib1,locc_test
+!
              if (locc_test .or. mkmem == 0) then
-               call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1,ibg,ikpt,iorder_cprj,isppol,&
-&               mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
-&               mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+
+               if (paral_kgb==1) then
+!                cprj have already been extracted
+                 if (paw_dmft%bandc_proc(ibc1) /= mpi_enreg%me_band) then
+!                  if the band is not on this proc, wait for the recv to complete
+                   ierr = 0
+                   call xmpi_wait(req_correl(ibc1,ikpt,isppol), ierr)
+                 end if
+                 call pawcprj_unpack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
+               else ! paral_kgb /= 0
+                 call pawcprj_get(atindx1,cwaveprjb,cprj_ptr,natom,ib1,ibg,ikpt,iorder_cprj,isppol,&
+&                                 mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
+&                                 mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+               end if
              end if
-           else
-             use_nondiag_occup_dmft = 0
+           else  ! nbandc1=1
+             use_nondiag_occup_dmft=0
              locc_test = (abs(occ(iband))>tol8)
              occup(1) = occ(iband)
-             if(ibc1 /= 1 .and. .not.(paw_dmft%band_in(ib))) cycle
            end if
          else  ! nbandc1=1
            use_nondiag_occup_dmft=0
@@ -332,19 +430,19 @@ CONTAINS  !=====================================================================
 !        Must read cprj when mkmem=0 (even if unused) to have right pointer inside _PAW file
          if (locc_test.or.mkmem==0) then
            call pawcprj_get(atindx1,cwaveprj,cprj_ptr,natom,ib_this_proc,ibg,ikpt,iorder_cprj,isppol,&
-&           mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
-&           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
+&                           mband_cprj,mkmem,natom,1,nband_k_cprj,nspinor,nsppol,unpaw,&
+&                           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
          end if
 
 !        Accumulate contribution from (occupied) current band
          if (locc_test) then
            if(use_nondiag_occup_dmft == 1) then
              call pawaccrhoij(atindx,cplex,cwaveprj,cwaveprjb,0,isppol,nrhoij,natom,&
-&             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k,&
-&             occ_k_2=occup(2))
+&                             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k,&
+&                             occ_k_2=occup(2))
            else
              call pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj ,0,isppol,nrhoij,natom,&
-&             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
+&                             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
            end if
          end if
        end do ! ib1c
@@ -371,12 +469,20 @@ CONTAINS  !=====================================================================
    end do ! ikpt
  end do ! isppol
 
+!call xmpi_barrier(mpi_enreg%comm_band)
+
 !deallocate temporary cwaveprj/cprj storage
  call pawcprj_free(cwaveprj)
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ 
  if(paw_dmft%use_sc_dmft/=0) then
    call pawcprj_free(cwaveprjb)
    ABI_DATATYPE_DEALLOCATE(cwaveprjb)
+ end if
+
+ if (allocated(buffer_cprj_correl)) then
+   ABI_DEALLOCATE(buffer_cprj_correl)
+   ABI_DEALLOCATE(req_correl)
  end if
 
 !MPI: need to exchange rhoij_ between procs
@@ -494,13 +600,6 @@ end subroutine pawmkrhoij
 &                       nspinor,occ_k,option,pawrhoij,usetimerev,wtk_k,occ_k_2, &
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawaccrhoij'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -560,7 +659,14 @@ end subroutine pawmkrhoij
 & my_natom_ref=my_natom)
 
  weight=wtk_k*occ_k
- weight_2=zero;if(present(occ_k_2).and.nspinor==2) weight_2=wtk_k*occ_k_2
+ weight_2=zero
+ if(present(occ_k_2)) then
+   if (cplex /= 2) then
+     ! DMFT need complex cprj
+     MSG_ERROR('DMFT computation must be done with complex cprj. Check that istwfk = 1.')
+   end if
+   weight_2=wtk_k*occ_k_2
+ end if
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1) weight=half*weight
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1.and.present(occ_k_2)) weight_2=half*weight_2
 
@@ -588,6 +694,10 @@ end subroutine pawmkrhoij
                ro11_re=ro11_re+cpi0(iplex,1)*cpj0(iplex,1)
              end do
              pawrhoij(iatom)%rhoij_(klmn,isppol)=pawrhoij(iatom)%rhoij_(klmn,isppol)+weight*ro11_re
+             if (present(occ_k_2)) then
+               ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
+               pawrhoij(iatom)%rhoij_(klmn,isppol)=pawrhoij(iatom)%rhoij_(klmn,isppol)-weight_2*ro11_im
+             end if
            end do
          end do
        end do
@@ -607,10 +717,17 @@ end subroutine pawmkrhoij
                ro11_re=ro11_re+cpi0(iplex,1)*cpj0(iplex,1)
              end do
              pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)+weight*ro11_re
+             if (present(occ_k_2)) then
+               ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
+               pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)-weight_2*ro11_im
+             end if
              if (compute_impart_cplex) then
                klmn_im=klmn_re+1
                ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
                pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
+               if (present(occ_k_2)) then
+                 pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight_2*ro11_re
+               end if
              end if
            end do
          end do
@@ -652,6 +769,14 @@ end subroutine pawmkrhoij
                pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
              end if
            end if
+           if (present(occ_k_2)) then
+             ro11_im=cpi0(1,1)*cpj0(2,1)-cpi0(2,1)*cpj0(1,1)
+             ro22_im=cpi0(1,2)*cpj0(2,2)-cpi0(2,2)*cpj0(1,2)
+             pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight_2*(-ro11_im-ro22_im)
+             pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight_2*(-ro21_im-ro12_im)
+             pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight_2*(-ro12_re+ro21_re)
+             pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight_2*(-ro11_im+ro22_im)
+           end if
            if (compute_impart) then
              klmn_im=klmn_re+1
              if (nspden_rhoij>1) pawrhoij(iatom)%rhoij_(klmn_im,3)=pawrhoij(iatom)%rhoij_(klmn_im,3)+weight*(ro12_re-ro21_re)
@@ -663,14 +788,10 @@ end subroutine pawmkrhoij
                  pawrhoij(iatom)%rhoij_(klmn_im,4)=pawrhoij(iatom)%rhoij_(klmn_im,4)+weight*(ro11_im-ro22_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,2)=pawrhoij(iatom)%rhoij_(klmn_im,2)+weight*(ro12_im+ro21_im)
                end if
-               if (present(occ_k_2).and.nspinor==2) then
-                 pawrhoij(iatom)%rhoij_(klmn_re,1)=pawrhoij(iatom)%rhoij_(klmn_re,1)+weight_2*(-ro11_im-ro22_im)
+               if (present(occ_k_2)) then
                  pawrhoij(iatom)%rhoij_(klmn_im,1)=pawrhoij(iatom)%rhoij_(klmn_im,1)+weight_2*( ro11_re+ro22_re)
-                 pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight_2*(-ro21_im-ro12_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,2)=pawrhoij(iatom)%rhoij_(klmn_im,2)+weight_2*( ro21_re+ro12_re)
-                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight_2*(-ro12_re+ro21_re)
                  pawrhoij(iatom)%rhoij_(klmn_im,3)=pawrhoij(iatom)%rhoij_(klmn_im,3)+weight_2*(-ro12_im+ro21_im)
-                 pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight_2*(-ro11_im+ro22_im)
                  pawrhoij(iatom)%rhoij_(klmn_im,4)=pawrhoij(iatom)%rhoij_(klmn_im,4)+weight_2*( ro11_re-ro22_re)
                end if
              end if
@@ -1067,13 +1188,6 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 &                    nspden,nspinor,nsppol,ntypat,pawrhoij,pawspnorb,pawtab,spinat,typat,&
 &                    ngrhoij,nlmnmix,use_rhoij_,use_rhoijres,& ! optional arguments
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initrhoij'
-!End of the abilint section
 
  implicit none
 
