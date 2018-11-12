@@ -210,6 +210,12 @@ MODULE m_ddk
    procedure :: free => ddkop_free   ! Free memory.
 
  end type ddkop_t
+
+ public :: ddkop_new
+
+ !interface ddkop_t
+ !  procedure ddkop_new
+ !end interface ddkop_t
 !!***
 
 CONTAINS
@@ -348,9 +354,12 @@ subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
 !************************************************************************
 
- write(msg, '(2a)') "Computation of velocity matrix elements (ddk)", ch10
- call wrtout(ab_out, msg, "COLL", do_flush=.True.)
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+
+ if (my_rank == master) then
+   write(msg, '(2a)') "Computation of velocity matrix elements (ddk)", ch10
+   call wrtout(ab_out, msg); call wrtout(std_out, msg)
+ end if
 
  if (psps%usepaw == 1) then
    MSG_ERROR("PAW not implemented")
@@ -359,8 +368,6 @@ subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 #ifndef HAVE_NETCDF
   MSG_ERROR("The matrix elements are only written if NETCDF is activated")
 #endif
-
- my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
  ! Get ebands and hdr from WFK file.
  ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
@@ -380,11 +387,13 @@ subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  if (my_rank == master) then
    call wrtout(ab_out, "Parameters extracted from Abinit header:")
    write(ab_out, "(a, f5.1)") 'ecut:    ', hdr%ecut
-   write(ab_out, "(a, i0)") 'nkpoints:', nkpt
-   write(ab_out, "(a, i0)") 'mband:  ', mband
-   write(ab_out, "(a, i0)") 'nsppol:    ', nsppol
-   write(ab_out, "(a, i0)") 'nspinor:  ', nspinor
-   write(ab_out, "(a, i0)") 'inclvkb: ', dtset%inclvkb
+   write(ab_out, "(a, i0)")   'nkpt:    ', nkpt
+   write(ab_out, "(a, i0)")   'mband:   ', mband
+   write(ab_out, "(a, i0)")   'nsppol:  ', nsppol
+   write(ab_out, "(a, i0)")   'nspinor: ', nspinor
+   write(ab_out, "(a, i0)")   'useylm:  ', dtset%useylm
+   write(ab_out, "(a, i0)")   'inclvkb: ', dtset%inclvkb
+   write(ab_out, "(a)")""
  end if
 
  ! Create distribution of the wavefunctions mask
@@ -435,8 +444,8 @@ subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_MALLOC(ug_c, (mpw*nspinor))
  ABI_MALLOC(ug_v, (mpw*nspinor))
  if (dtset%useria /= 666) then
-   ABI_MALLOC(cg_c,   (2,mpw*nspinor))
-   ABI_MALLOC(cg_v,   (2,mpw*nspinor))
+   ABI_MALLOC(cg_c, (2,mpw*nspinor))
+   ABI_MALLOC(cg_v, (2,mpw*nspinor))
  end if
 
  ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
@@ -569,6 +578,7 @@ subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
    do ii=1,3
      fname = strcat(prefix, '_', itoa(ii), "_EVK.nc")
+     !call wrtout(ab_out, sjoin("- Writing file: ", fname))
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
      hdr_tmp%pertcase = 3 * cryst%natom + ii
      NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
@@ -586,21 +596,21 @@ subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  end if
 #endif
 
- !if (my_rank == master .and. dtset%prtvol > 0) then
- !  write(ab_out, "(a)")"Writing velocity matrix elements (only diagonal terms) for testing purpose:"
- !  do spin=1,nsppol
- !    do ik=1,min(nkpt, 4)
- !      write(ab_out, "(2(a,1x,i0),2x,2a)")"For spin: ", spin, "ikbz: ", ik, "kpt: ", trim(ktoa(wfd%kibz(:,ik)))
- !      do ib_c=bandmin,min(bandmin+8, bandmax)
- !        write(ab_out, "(6(es16.6,2x))") dipoles(:,:,ib_c,ib_c,ik,spin)
- !      end do
- !      write(ab_out,*)""
- !      do ib_c=bandmin,min(bandmin+8, bandmax)
- !        write(ab_out, "(a, 6(es16.6,2x))")"Sum_k: ", sum(dipoles(:,:,ib_c,ib_c,:,spin), dim=3) / nkpt
- !      end do
- !    end do
- !  end do
- !end if
+ if (my_rank == master .and. dtset%prtvol > 0) then
+   write(ab_out, "(2a)")ch10,"Writing velocity matrix elements (only diagonal terms, real part) for testing purpose:"
+   do spin=1,nsppol
+     do ik=1,min(nkpt, 4)
+       write(ab_out, "(2(a,1x,i0),2x,2a)")"For spin: ", spin, ", ikbz: ", ik, ", kpt: ", trim(ktoa(wfd%kibz(:,ik)))
+       do ib_c=bandmin,min(bandmin+8, bandmax)
+         write(ab_out, "(3(es16.6,2x))") dipoles(:,1,ib_c,ib_c,ik,spin)
+       end do
+       write(ab_out,*)""
+       !do ib_c=bandmin,min(bandmin+8, bandmax)
+       !  write(ab_out, "(a, 6(es16.6,2x))")"Sum_k: ", sum(dipoles(:,:,ib_c,ib_c,:,spin), dim=3) / nkpt
+       !end do
+     end do
+   end do
+ end if
 
  ! Free memory
  ABI_FREE(dipoles)

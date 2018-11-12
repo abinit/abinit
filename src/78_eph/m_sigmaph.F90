@@ -35,6 +35,7 @@ module m_sigmaph
  use m_ebands
  use m_wfk
  use m_ddb
+ use m_ddk
  use m_dvdb
  use m_fft
  use m_hamiltonian
@@ -259,7 +260,7 @@ module m_sigmaph
   ! KS energies where QP corrections are wantend
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  !real(dp),allocatable :: v_calc(:,:,:)
+  !real(dp),allocatable :: vred_calc(:,:,:)
   ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
   ! Diagonal elements of velocity operator for all states in Sigma_nk.
 
@@ -454,7 +455,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: mpw,ierr,it
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop,iatom
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
@@ -467,6 +468,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  type(sigmaph_t) :: sigma
+ type(ddkop_t) :: ddkop
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
@@ -474,11 +476,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
+ real(dp) :: vdiag(2, 3)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gdw2_mn(:,:),gkq0_atm(:,:,:,:),gkq2_lr(:,:)
+ real(dp),allocatable :: vred_calc(:,:,:,:)
  complex(dpc),allocatable :: tpp_red(:,:) !,zvals(:,:)
  complex(dpc) :: cdd(3)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
@@ -620,14 +624,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  usecprj = 0
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
-#if 0
+ !if (sigma%calc_velocity == 1) then
  call wrtout(std_out, "Computing diagonal elements of velocity operator for all states in Sigma_nk.")
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
- ABI_MALLOC(cg_work,   (2, mpw*wfd%nspinor))
- ABI_CALLOC(sigma%v_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+ ABI_MALLOC(cgwork,   (2, mpw*wfd%nspinor))
+ ABI_CALLOC(vred_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  !if (my_rank == master) call ddkop%print(ab_out)
+ ! All sigma_nk states are available on each node so parallelization is easy.
  cnt = 0
  do spin=1,nsppol
    do ikcalc=1,sigma%nkcalc
@@ -640,31 +645,35 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
        band_ks = ib_k + bstart_ks - 1
-       call wfd%copy_cg(band_ks, ik_ibz, spin, cg_work)
-       eig0nk = ebands%eig(band_ks, ik_bz, spin)
-       call ddkop%apply(eig0nk, mpw, npw_k, wfd%nspinor, cg_work, cwaveprj0, wfd%mpi_enreg)
-       vdiag = ddkop%get_velocity(eig0nk, istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_work)
-       sigma%v_calc(:, ib_k, ikcalc, spin) = vdiag(1, :)
-     end if
+       call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
+       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+       call ddkop%apply(eig0nk, mpw, npw_k, wfd%nspinor, cgwork, cwaveprj0, wfd%mpi_enreg)
+       vdiag = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
+       vred_calc(:, ib_k, ikcalc, spin) = vdiag(1, :)
+     end do
 
    end do
  end do
 
- call xmpi_sum(sigma%v_calc, comm, ierr)
+ call xmpi_sum(vred_calc, comm, ierr)
  call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
  call wrtout(std_out, sjoin("Velocities completed. cpu-time:", sec2str(cpu_ks), ",wall-time:", sec2str(wall_ks)), &
    do_flush=.True.)
 
+ ! Write results to disk.
 #ifdef HAVE_NETCDF
- if (my_rank == master) then
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v_calc"), sigma%v_calc))
- end if
+   if (my_rank == master) then
+     NCF_CHECK(nctk_set_defmode(sigma%ncid))
+     NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vred_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
+     NCF_CHECK(nctk_set_datamode(sigma%ncid))
+     NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vred_calc"), vred_calc))
+   end if
 #endif
 
- ABI_FREE(cg_work)
- ABI_SFREE(sigma%v_calc)
+ ABI_FREE(cgwork)
+ ABI_FREE(vred_calc)
  call ddkop%free()
-#endif
+ !end if ! calc_velocity
 
  ! Prepare call to getgh1c
  usevnl = 0
@@ -2314,8 +2323,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    !  nctkarr_t("gkq_frohl", "dp", "two, max_nbcalc, nbsum, natom3, nqbz, nkcalc, nsppol") &
    !])
    !NCF_CHECK(ncerr)
-
-   !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("v_calc", "dp", "max_nbcalc, nkcalc, nsppol")]))
 
    if (new%frohl_model == 1) then
      ! Arrays storing the Frohlich self-energy.
