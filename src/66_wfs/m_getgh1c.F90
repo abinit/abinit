@@ -1327,6 +1327,7 @@ subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 end subroutine getdc1
 !!***
 
+#ifdef MR_DEV
 !!****f* ABINIT/getgh1dqc
 !! NAME
 !!  getgh1dqc
@@ -1780,6 +1781,7 @@ ABI_ALLOCATE(dqdqkinpw,(npw_k))
 
 end subroutine getgh1dqc_setup
 !!***
+#endif
 
 end module m_getgh1c
 !!***
