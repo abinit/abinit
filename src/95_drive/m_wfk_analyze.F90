@@ -46,7 +46,7 @@ module m_wfk_analyze
  use m_kpts,            only : tetra_from_kptrlatt
  use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
- use m_esymm,           only : esymm_t, esymm_free, esymm_failed
+ use m_esymm,           only : esymm_t, esymm_free
  use m_ddk,             only : eph_ddk
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -55,15 +55,12 @@ module m_wfk_analyze
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init, pawfgrtab_print
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
- use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_sphharm,     only : setsym_ylm
- use m_paw_init,        only : pawinit,paw_gencond
+ use m_paw_init,        only : pawinit, paw_gencond
  use m_paw_nhat,        only : nhatgrid
  use m_paw_tools,       only : chkpawovlp
  use m_paw_correlations,only : pawpuxinit
- !use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
- !use m_paw_dmft,       only : paw_dmft_type
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_classify_bands,  only : classify_bands
  use m_pspini,          only : pspini
@@ -398,7 +395,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  case (WFK_TASK_FULLBZ)
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
-
      wfkfull_path = dtfil%fnameabo_wfk
      if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
@@ -416,11 +412,12 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
    call xmpi_barrier(comm)
 
- !case ("pjdos")
+ !case (WFK_TASK_PJDOS)
+ !case (WFK_TASK_LDOS)
 
  case (WFK_TASK_DDK)
-    ! calculate the DDK matrix elements using a WFK file
-    call eph_ddk(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, dtset%inclvkb, ngfftc, comm)
+   ! Calculate the DDK matrix elements from the WFK file
+   call eph_ddk(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
@@ -469,15 +466,12 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ABI_DT_FREE(paw_onsite)
 
  !case ("paw_aeden")
- !case ("outqmc")
 
  case default
-   MSG_ERROR(sjoin("Wrong task:",itoa(dtset%wfk_task)))
+   MSG_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select
 
- !=====================
- !==== Free memory ====
- !=====================
+ ! Free memory
  call cryst%free()
  call ebands_free(ebands)
  call wfd%free()

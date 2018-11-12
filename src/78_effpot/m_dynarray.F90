@@ -28,9 +28,11 @@
 #include "abi_common.h"
 
 module m_dynmaic_array
+
   use defs_basis
   use m_abicore
   use m_errors
+
   implicit none
 !!***
 

@@ -118,8 +118,6 @@ CONTAINS  !=====================================================================
 
 subroutine spectra_init(Spectra,nomega,omega,nqpts,qpts)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nomega,nqpts
@@ -166,8 +164,6 @@ end subroutine spectra_init
 !! SOURCE
 
 subroutine spectra_free(Spectra)
-
- implicit none
 
 !Arguments ------------------------------------
  type(spectra_t),intent(inout) :: spectra
@@ -217,8 +213,6 @@ end subroutine spectra_free
 !! SOURCE
 
 subroutine spectra_write(Spectra,write_bits,fname)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -339,8 +333,6 @@ end subroutine spectra_write
 !! SOURCE
 
 subroutine spectra_repr(Spectra,str)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

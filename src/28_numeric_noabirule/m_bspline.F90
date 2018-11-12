@@ -96,8 +96,6 @@ contains
 !   xknot  - array of length ndata+korder containing the knot
 !            sequence.  (output)
 !
-    implicit none
-
     integer, intent(in) :: nx, kxord
 
     real(kind=dbl), dimension(nx), intent(in)        :: xvec
@@ -166,8 +164,6 @@ contains
 !   bscoef - array of length ndata containing the B-spline
 !            coefficients.  (output)
 !
-    implicit none
-
     integer, intent(in)                          :: nx, kx
     real(kind=dbl), dimension(nx), intent(in)    :: xdata, xvec
     real(kind=dbl), dimension(nx+kx), intent(in) :: xknot
@@ -250,8 +246,6 @@ contains
 !            coefficients.  (input)
 !   dbsval - value of the spline at x.  (output)
 !
-    implicit none
-
     integer, intent(in)                          :: nx, kx
     real(kind=dbl)                               :: dbsval
     real(kind=dbl)                               :: x
@@ -333,8 +327,6 @@ contains
 !   dbsder - value of the iderx-th derivative of the spline at x.
 !            (output)
 !
-    implicit none
-
     integer, intent(in)                          :: iderx, kx, nx
     real(kind=dbl)                               :: dbsder
     real(kind=dbl), intent(in)                   :: x
@@ -466,8 +458,6 @@ contains
 !            iderx-th derivative of the spline at the points in
 !            xvec.  (output)
 !
-    implicit none
-
     integer, intent(in)                           :: iderx, nxvec, kx, nx
     real(kind=dbl), dimension(nxvec), intent(in)  :: xvec
     real(kind=dbl), dimension(nx), intent(in)     :: bcoef
@@ -643,8 +633,6 @@ contains
 !   dbsdca - value of the ideriv-th derivative of the spline at x.
 !            (output)
 !
-    implicit none
-
     integer, intent(in)                          :: iderx, kx, nx
     real(kind=dbl)                               :: dbsdca
     real(kind=dbl), intent(in)                   :: x
@@ -763,8 +751,6 @@ contains
 !             bscoef is treated internally as a matrix of size nxdata
 !             by nydata.
 !
-    implicit none
-
     integer, intent(in)                           :: nx, ny, kx, ky, ldf
 
     real(kind=dbl), dimension(nx), intent(in)     :: xvec
@@ -789,9 +775,6 @@ contains
 
 
   subroutine spli2d(xyvec,ld,xydata,xyknot,n,k,m,work2,work3,bcoef)
-
-    implicit none
-
 
     integer, intent(in)                         :: ld, n, k, m
     real(kind=dbl), dimension(n), intent(in)    :: xyvec
@@ -898,8 +881,6 @@ contains
 !            by ny.
 !   dbs2vl - value of the spline at (x,y).  (output)
 !
-    implicit none
-
     integer, intent(in)                          :: nx, ny, kx, ky
     real(kind=dbl), intent(in)                   :: x, y
     real(kind=dbl), dimension(nx+kx), intent(in) :: xknot
@@ -1002,8 +983,6 @@ contains
 !   dbs2dr  - value of the (iderx,idery) derivative of the spline at
 !            (x,y).  (output)
 !
-    implicit none
-
     integer, intent(in)                          :: iderx, idery
     integer, intent(in)                          :: kx, nx, ky, ny
     real(kind=dbl)                               :: dbs2dr
@@ -1110,8 +1089,6 @@ contains
 !   ldf     - leading dimension of value exactly as specified in the
 !             dimension statement of the calling program.  (input)
 !
-    implicit none
-
     integer, intent(in)                           :: iderx, idery
     integer, intent(in)                           :: nxvec, nyvec
     integer, intent(in)                           :: kx, nx, ky, ny
@@ -1360,8 +1337,6 @@ contains
 !             bscoef is treated internally as a matrix of size nx
 !             by ny by nz.
 !
-    implicit none
-
     integer, intent(in) :: nx, ny, nz, kx, ky, kz
     integer, intent(in) :: ldf, mdf
 
@@ -1396,8 +1371,6 @@ contains
 
   subroutine spli3d(xyzvec,ldf,mdf,xyzdata,xyzknot,n,k,m,l,work2,work3,       &
        & bcoef,nx,ny,nz)
-
-    implicit none
 
     integer, intent(in)                               :: ldf, mdf, n, k, m, l
     integer, intent(in)                               :: nx, ny, nz
@@ -1515,8 +1488,6 @@ contains
 !            by ny by nz.
 !   dbs3vl - value of the spline at (x,y,z).  (output)
 !
-    implicit none
-
     integer, intent(in)                             :: nx, ny, nz, kx, ky, kz
     real(kind=dbl), intent(in)                      :: x, y, z
     real(kind=dbl), dimension(nx+kx), intent(in)    :: xknot
@@ -1607,8 +1578,6 @@ contains
 !   dbs3dr - value of the (iderx,idery,iderz) derivative of the
 !            spline at (x,y,z).  (output)
 !
-    implicit none
-
     integer, intent(in)                              :: iderx, idery, iderz
     integer, intent(in)                              :: nx, ny, nz, kx, ky, kz
     real(kind=dbl), intent(in)                       :: x, y, z
@@ -1714,8 +1683,6 @@ contains
 !   mdf    - middle dimension of value exactly as specified in the
 !            dimension statement of the calling program.  (input)
 !
-    implicit none
-
     integer, intent(in)                               :: iderx, idery, iderz
     integer, intent(in)                               :: nxvec, nyvec, nzvec
     integer, intent(in)                               :: kx, nx, ky, ny, kz, nz
@@ -1981,8 +1948,6 @@ contains
 
   subroutine bsplvb(t,n,jhigh,index,x,left,biatx)
 
-    implicit none
-
     integer, intent(in) :: n, jhigh, index, left
 
     real(kind=dbl), intent(in)                    :: x
@@ -2025,8 +1990,6 @@ contains
 
 
   subroutine banfac(w,nroww,nrow,nbandl,nbandu,iflag)
-
-    implicit none
 
     integer, intent(in)                                  :: nroww,nrow
     integer, intent(in)                                  :: nbandl,nbandu
@@ -2098,8 +2061,6 @@ contains
 
   subroutine banslv(w,nroww,nrow,nbandl,nbandu,b)
 
-    implicit none
-
     integer, intent(in)                               :: nroww,nrow
     integer, intent(in)                               :: nbandl,nbandu
     real(kind=dbl), dimension(nroww,nrow), intent(in) :: w
@@ -2144,8 +2105,6 @@ contains
 
 
   subroutine huntn(xx,n,kord,x,jlo)
-
-    implicit none
 
     integer, intent(in)                      :: n, kord
     real(kind=dbl), intent(in)               :: x

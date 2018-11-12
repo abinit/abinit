@@ -143,8 +143,6 @@ contains
 
 subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=6),intent(in) :: codvsn

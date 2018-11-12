@@ -627,6 +627,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_CALLOC(sigma%v_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ !if (my_rank == master) call ddkop%print(ab_out)
  cnt = 0
  do spin=1,nsppol
    do ikcalc=1,sigma%nkcalc
@@ -640,9 +641,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
        band_ks = ib_k + bstart_ks - 1
        call wfd%copy_cg(band_ks, ik_ibz, spin, cg_work)
-       eshift = ebands%eig(band_ks, ik_bz, spin) - dtset%dfpt_sciss
-       call ddkop%apply(eshift, mpw, npw_k, wfd%nspinor, cg_work, cwaveprj0, wfd%mpi_enreg)
-       vdiag = ddkop%get_velocity(istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_work)
+       eig0nk = ebands%eig(band_ks, ik_bz, spin)
+       call ddkop%apply(eig0nk, mpw, npw_k, wfd%nspinor, cg_work, cwaveprj0, wfd%mpi_enreg)
+       vdiag = ddkop%get_velocity(eig0nk, istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_work)
        sigma%v_calc(:, ib_k, ikcalc, spin) = vdiag(1, :)
      end if
 

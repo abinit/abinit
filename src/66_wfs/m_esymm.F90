@@ -256,8 +256,6 @@ CONTAINS  !=====================================================================
 
 subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF_TOL,ene_k,tolsym)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nbnds,nspinor,first_ib
@@ -847,8 +845,6 @@ end subroutine esymm_init
 
 subroutine esymm_print(esymm,unit,mode_paral,prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol,unit
@@ -963,8 +959,6 @@ end subroutine esymm_print
 
 subroutine esymm_free_0D(esymm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(esymm_t),intent(inout) :: esymm
@@ -1043,8 +1037,6 @@ end subroutine esymm_free_0D
 
 subroutine esymm_free_2D(esymm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(esymm_t),intent(inout) :: esymm(:,:)
@@ -1083,8 +1075,6 @@ end subroutine esymm_free_2D
 !! SOURCE
 
 subroutine esymm_finalize(esymm,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1340,8 +1330,6 @@ end subroutine esymm_finalize
 
 function which_irrep(esymm,trace,tolerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: which_irrep
@@ -1389,8 +1377,6 @@ end function which_irrep
 !! SOURCE
 
 subroutine esymm_symmetrize_mels(esymm,lbnd,ubnd,in_me,out_me)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1487,8 +1473,6 @@ end subroutine esymm_symmetrize_mels
 
 function esymm_failed(esymm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical :: esymm_failed
@@ -1520,8 +1504,6 @@ end function esymm_failed
 !! SOURCE
 
 subroutine polish_irreps(Irreps)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -163,8 +163,6 @@ CONTAINS  !=====================================================================
 
 type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, comm) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nband,nkpt,nsppol,comm
@@ -418,8 +416,6 @@ end function skw_new
 
 subroutine skw_print(skw, unt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(skw_t),intent(in) :: skw
@@ -468,8 +464,6 @@ end subroutine skw_print
 !! SOURCE
 
 subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -560,8 +554,6 @@ end subroutine skw_eval_bks
 !! SOURCE
 
 subroutine skw_eval_fft(skw, ngfft, nfft, band, spin, oeig_mesh, oder1_mesh, oder2_mesh)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -677,8 +669,6 @@ end subroutine skw_eval_fft
 
 subroutine skw_free(skw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(skw_t),intent(inout) :: skw
@@ -724,8 +714,6 @@ end subroutine skw_free
 !! SOURCE
 
 subroutine mkstar(skw, kpt, srk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -778,8 +766,6 @@ end subroutine mkstar
 !! SOURCE
 
 subroutine mkstar_dk1(skw, kpt, srk_dk1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -835,8 +821,6 @@ end subroutine mkstar_dk1
 !! SOURCE
 
 subroutine mkstar_dk2(skw, kpt, srk_dk2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -909,8 +893,6 @@ end subroutine mkstar_dk2
 !! SOURCE
 
 subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

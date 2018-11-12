@@ -135,8 +135,6 @@ contains
 
 subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: asr,mpert,natom
@@ -303,8 +301,6 @@ end subroutine asria_calc
 
 subroutine asria_corr(asr,d2asr,d2cart,mpert,natom)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: asr,mpert,natom
@@ -375,8 +371,6 @@ end subroutine asria_corr
 !! SOURCE
 
 subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,natom,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -732,8 +726,6 @@ end subroutine asrprs
 subroutine cart29(blkflg,blkval,carflg,d2cart,&
 & gprimd,iblok,mpert,natom,nblok,ntypat,rprimd,typat,ucvol,zion)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,natom,nblok,ntypat
@@ -880,8 +872,6 @@ end subroutine cart29
 
 subroutine cart39(flg1,flg2,gprimd,ipert,natom,rprimd,vec1,vec2)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ipert,natom
@@ -981,8 +971,6 @@ end subroutine cart39
 
 subroutine d2cart_to_red(d2cart, d2red, gprimd, rprimd, mpert, natom, &
 &                        ntypat,typat,ucvol,zion)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1130,8 +1118,6 @@ end subroutine d2cart_to_red
 
 subroutine chkph3(carflg,idir,mpert,natom)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: idir,mpert,natom
@@ -1225,8 +1211,6 @@ end subroutine chkph3
 !! SOURCE
 
 subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1489,8 +1473,6 @@ end subroutine chneu9
 !! SOURCE
 
 subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1954,8 +1936,6 @@ end subroutine d2sym3
 
 subroutine q0dy3_apply(natom,dyewq0,dyew)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom
@@ -2030,8 +2010,6 @@ end subroutine q0dy3_apply
 !! SOURCE
 
 subroutine q0dy3_calc(natom,dyewq0,dyew,option)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2121,8 +2099,6 @@ end subroutine q0dy3_calc
 !! SOURCE
 
 subroutine symdyma(dmati,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2329,8 +2305,6 @@ end subroutine symdyma
 
 subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: ipert,natom,nsym
@@ -2462,8 +2436,6 @@ end subroutine dfpt_sygra
 !! SOURCE
 
 subroutine dfpt_sydy(cplex,dyfrow,indsym,natom,nondiag,nsym,qphon,sdyfro,symq,symrec)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2617,8 +2589,6 @@ end subroutine dfpt_sydy
 
 subroutine wings3(carflg,d2cart,mpert)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert
@@ -2688,8 +2658,6 @@ end subroutine wings3
 !! SOURCE
 
 subroutine asrif9(asr,atmfrc,natom,nrpt,rpt,wghatm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2799,8 +2767,6 @@ end subroutine asrif9
 
 subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: brav,nqshft
@@ -2873,8 +2839,6 @@ end subroutine make_bigbox
 !! SOURCE
 
 subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3054,8 +3018,6 @@ end subroutine bigbx9
 
 
 subroutine canat9(brav,natom,rcan,rprim,trans,xred)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3285,8 +3247,6 @@ end subroutine canat9
 
 subroutine canct9(acell,gprim,ib,index,irpt,natom,nrpt,rcan,rcart,rprim,rpt)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: index,natom,nrpt
@@ -3351,8 +3311,6 @@ end subroutine canct9
 !! SOURCE
 
 subroutine chkrp9(brav,rprim)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3471,8 +3429,6 @@ end subroutine chkrp9
 
 subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nrpt
@@ -3569,8 +3525,6 @@ end subroutine dist9
 !! SOURCE
 
 subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,comm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3679,8 +3633,6 @@ end subroutine ftifc_q2r
 
 subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nqpt,nrpt
@@ -3779,8 +3731,6 @@ end subroutine ftifc_r2q
 
 subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nrpt
@@ -3867,8 +3817,6 @@ end subroutine dynmat_dq
 
 subroutine ifclo9(ifccar,ifcloc,vect1,vect2,vect3)
 
- implicit none
-
 !Arguments -------------------------------
 !arrays
  real(dp),intent(in) :: ifccar(3,3),vect1(3),vect2(3),vect3(3)
@@ -3949,8 +3897,6 @@ end subroutine ifclo9
 !! SOURCE
 
 subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,r_inscribed_sphere,wghatm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -4385,8 +4331,6 @@ end subroutine wght9
 
 subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,nsym
@@ -4594,10 +4538,6 @@ end subroutine d3sym
 !! SOURCE
 
 subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
-
- use defs_basis
- use m_abicore
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -4862,8 +4802,6 @@ end subroutine sytens
 subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 & dynmat,gprim,indsym,mpert,natom,nblok,nqpt,nsym,rfmeth,&
 & rprim,spqpt,symrec,symrel,comm,qmissing)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -5159,8 +5097,6 @@ end subroutine symdm9
 
 subroutine axial9(ifccar,vect1,vect2,vect3)
 
- implicit none
-
 !Arguments -------------------------------
 !arrays
  real(dp),intent(in) :: ifccar(3,3),vect1(3)
@@ -5259,8 +5195,6 @@ end subroutine axial9
 
 subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,nqpt,option
@@ -5345,8 +5279,6 @@ end subroutine dymfz9
 !! SOURCE
 
 subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -5448,8 +5380,6 @@ end subroutine nanal9
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
 & nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -5594,8 +5524,6 @@ end subroutine gtdyn9
 subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 & mpert,msym,natom,nsym,ntypat,phfrq,qphnrm,qphon,rprimd,&
 & symdynmat,symrel,symafm,typat,ucvol)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -5865,8 +5793,6 @@ end subroutine dfpt_phfrq
 
 subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: eivec,enunit,iout,natom
@@ -6075,8 +6001,6 @@ end subroutine dfpt_prtph
 
 subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
@@ -6182,8 +6106,6 @@ end subroutine massmult_and_breaksym
 !! SOURCE
 
 subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -6299,8 +6221,6 @@ end subroutine ftgam
 !! SOURCE
 
 subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

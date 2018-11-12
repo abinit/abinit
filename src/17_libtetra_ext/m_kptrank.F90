@@ -93,8 +93,6 @@ contains
 
 subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt
@@ -220,8 +218,6 @@ end subroutine mkkptrank
 
 subroutine get_rank_1kpt(kpt,rank,krank)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: rank
@@ -300,8 +296,6 @@ end subroutine get_rank_1kpt
 
 integer function kptrank_index(krank, kpt) result(ikpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kptrank_type), intent(in) :: krank
@@ -344,8 +338,6 @@ end function kptrank_index
 !! SOURCE
 
 subroutine copy_kptrank (krank_in, krank_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -393,8 +385,6 @@ end subroutine copy_kptrank
 
 subroutine destroy_kptrank (krank)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(kptrank_type), intent(inout) :: krank
@@ -435,8 +425,6 @@ end subroutine destroy_kptrank
 !! SOURCE
 
 subroutine dump_kptrank (krank, unout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
