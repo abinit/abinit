@@ -1,8 +1,9 @@
-4
-t09o
-0.073119 0.0000001 5.00 1000 1
+4                              # flag for PAW run conducti + corespectra + emissionspectra
+outAl                          # filename radix for input to be used
+0.073119 0.0000001 5.00 1000 1 # delta_freq, min_freq, max_freq(in atomic units), nfreq, iatom 
 
 
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = conducti

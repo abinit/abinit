@@ -1978,8 +1978,11 @@ end subroutine msig
  if (open_file(trim(filnam_out)//'_emisX',msg,newunit=ems_unt,form='formatted', action="write") /= 0) then
    MSG_ERROR(msg)
  end if
+ write(ems_unt,*) '# conducti: Xray emission spectrum, all in atomic units by default '
+ write(ems_unt,*) '# One block of 3 columns per core wavefunction'
+ write(ems_unt,*) '# energy, sigx_av, sigx, etc... '
  do iom=1,mom
-   write(ems_unt,'(9(1x,e15.8))') &
+   write(ems_unt,'( 3(3(1x,e15.8),2x) )') &
 &   ((-energy_cor(icor)+oml1(iom)),sigx_av(iom,icor),sigx(atnbr,iom,icor),icor=1,nphicor)
  end do
  close(ems_unt)
