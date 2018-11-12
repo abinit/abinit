@@ -166,6 +166,8 @@ MODULE m_ddk
 !!  ddkop_t
 !!
 !! FUNCTION
+!!  This object provides a simplified interface to compute matrix elements of the
+!!  velocity operator with the DFPT routines.
 !!
 !! SOURCE
 
@@ -179,6 +181,7 @@ MODULE m_ddk
   ! 0 to exclude commutator, 2 to include it
 
   integer :: mpw
+  ! Maximum number of plane-waves over k-points (used to dimension arrays)
 
   real(dp) :: kpoint(3)
   ! K-point (set in setup_spin_kpoint)
@@ -187,10 +190,14 @@ MODULE m_ddk
 
   type(rf_hamiltonian_type) :: rf_hamkq(3)
 
-  type(ham_targets_t) :: htg(3)
+  type(ham_targets_t), private :: htg(3)
+  ! Store arrays that are targetted by the hamiltonians.
 
-  real(dp),allocatable :: gh1c(:,:,:)
-  real(dp),allocatable :: gs1c(:,:,:)
+  real(dp), private, allocatable :: gh1c(:,:,:)
+   !gh1c, (2, mpw*nspinor, 3))
+
+  real(dp), private, allocatable :: gs1c(:,:,:)
+   ! gs1c, (2, mpw*nspinor, 3*psps%usepaw))
 
  contains
 
@@ -332,17 +339,15 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  integer,intent(in) :: ngfftc(18)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  integer,allocatable :: task_distrib(:,:,:,:), nband(:,:), kg_k(:,:)
- integer :: spinor_pad(2,4)
  character(len=500) :: msg
  character(len=fnlen) :: fname
  real(dp) :: kbz(3)
  real(dp) :: dotarr(2), vv(2, 3)
  real(dp) :: cpu_all, wall_all, gflops_all
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
- complex(gwpc),allocatable :: ihrc(:,:)
- complex(dp)               :: vg(3), vr(3)
- complex(gwpc),allocatable :: ug_c(:),ug_v(:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
+ complex(dpc)               :: vg(3), vr(3)
+ complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !************************************************************************
@@ -462,7 +467,6 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
      istwf_k  = wfk%hdr%istwfk(ik)
      kbz      = wfk%hdr%kptns(:,ik)
      npw_k    = wfk%hdr%npwarr(ik)
-     spinor_pad = reshape([0, 0, npw_k, npw_k, 0, npw_k, npw_k, 0], [2, 4])
 
      ! Read WF
      kg_k(:,1:npw_k) = wfd%kdata(ik)%kg_k
@@ -493,11 +497,12 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
 
          if (dtset%useria == 666) then
            call wfd%copy_cg(ib_c, ik, spin, cg_c)
+
            ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
            !do ispinor=1,nspinor
            !  ipws=(ispinor-1)*npw_k
            !  do ipw=1+ipws,npw_k+ipws
-           !    if (ddkop%gs_hamkq%kinpw_kp(ipw-ipws)>huge(zero)*1.d-11) then
+           !    if (ddkop%gs_hamkq(1)%kinpw_kp(ipw-ipws)>huge(zero)*1.d-11) then
            !      cg_c(1:2,ipw)=zero
            !    end if
            !  end do
@@ -508,26 +513,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
            do idir=1,3
              dipoles(idir,:,ib_c,ib_v,ik,spin) = vv(:, idir)
              ! Hermitian conjugate
-             if (ib_v /= ib_c) then
-               dipoles(idir,:,ib_v,ib_c,ik,spin) = [vv(1, idir), -vv(2, idir)]
-             end if
-
-             !dotarr = cg_zdotc(npw_k * nspinor, cg_c, ddkop%gh1c(:,:,idir))
-             !if (istwf_k > 1) then
-             !  !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
-             !  doti = two * dotarr(2)
-             !  if (istwf_k == 2 .and. wfd%mpi_enreg%me_g0 == 1) then
-             !    doti = doti - (cg_c(1,1) * ddkop%gh1c(2,1,idir) - cg_c(2,1) * ddkop%gh1c(1,1,idir))
-             !  end if
-             !  dotarr(2) = doti
-             !  dotarr(1) = zero
-             !end if
-             !!if (ib_v == ib_c) doti = zero
-             !dipoles(idir,:,ib_c,ib_v,ik,spin) = dotarr
-             !! Hermitian conjugate
-             !if (ib_v /= ib_c) then
-             !  dipoles(idir,:,ib_v,ib_c,ik,spin) = [dotarr(1), -dotarr(2)]
-             !end if
+             if (ib_v /= ib_c) dipoles(idir,:,ib_v,ib_c,ik,spin) = [vv(1, idir), -vv(2, idir)]
            end do
 
          else
@@ -550,8 +536,8 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
            vg(3) = dot_product(Cryst%gmet(3,:),vr)
 
            ! Save matrix elements of i*r in the IBZ
-           dipoles(:,1,ib_c,ib_v,ik,spin) = real(vg)
-           dipoles(:,1,ib_v,ib_c,ik,spin) = real(vg) ! Hermitian conjugate
+           dipoles(:,1,ib_c,ib_v,ik,spin) = real(vg, kind=dp)
+           dipoles(:,1,ib_v,ib_c,ik,spin) = real(vg, kind=dp) ! Hermitian conjugate
            if (ib_v == ib_c) then
               dipoles(:,2,ib_c,ib_v,ik,spin) = zero
               dipoles(:,2,ib_v,ib_c,ik,spin) = zero
@@ -951,11 +937,16 @@ end subroutine ddk_print
 !!  ddkop_new
 !!
 !! FUNCTION
+!!  Build new object. Use dtset%inclvkb to determine whether non-local part should be included.
 !!
 !! INPUTS
-!! ngfft(18)
+!! dtset<dataset_type>=All input variables for this dataset.
+!! cryst<crystal_t>=Crystal structure.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
+!! mpi_enreg=information about MPI parallelization
+!! mpw=Maximum number of plane-waves over k-points.
+!! ngfft(18)=contain all needed information about 3D FFT
 !!
 !! OUTPUT
 !!
@@ -964,7 +955,6 @@ end subroutine ddk_print
 !! CHILDREN
 !!
 !! SOURCE
-
 
 type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngfft) result(new)
 
@@ -990,6 +980,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
  new%ipert = cryst%natom + 1
  new%mpw = mpw
 
+ ! Not used because vlocal1 is not applied.
  nfft = product(ngfft(1:3))
  mgfft = maxval(ngfft(1:3))
 
@@ -1057,10 +1048,9 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
 !************************************************************************
 
  ABI_CHECK(npw_k <= self%mpw, "npw_k > mpw!")
-
  self%kpoint = kpoint
 
- ! Set up the spherical harmonics (Ylm) at k+q
+ ! Set up the spherical harmonics (Ylm) at k+q if useylm = 1
  useylmgr1 = 0; optder = 0
  if (psps%useylm == 1) then
    useylmgr1 = 1; optder = 1
@@ -1069,7 +1059,7 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylmgr1_k, (npw_k,3+6*(optder/2),psps%mpsang**2*psps%useylm*useylmgr1))
 
- if (psps%useylm == 1) then
+ if (psps%useylm == 1) then ! .and. self%inclvkb /= 0
    ! Fake MPI_type for sequential part. dummy_nband and nsppol1 are not used in sequential mode.
    call initmpi_seq(mpienreg_seq)
    dummy_nband = 0
@@ -1086,15 +1076,17 @@ subroutine ddkop_setup_spin_kpoint(self, dtset, cryst, psps, spin, kpoint, istwf
    call load_spin_hamiltonian(self%gs_hamkq(idir), spin, with_nonlocal=.true.)
    call load_spin_rf_hamiltonian(self%rf_hamkq(idir), spin, with_nonlocal=.true.)
 
-   ! We need ffnl1 and dkinpw for 3 dirs. Note that the Hamiltonian objects use pointes to keep a reference
-   ! to the output results. This is the reason why we need to store the targets in self%htg
+   !if (self%inclvkb /= 0) then
+
+   ! We need ffnl1 and dkinpw for 3 dirs. Note that the Hamiltonian objects use pointers to keep a reference
+   ! to the output results of this routine.
+   ! This is the reason why we need to store the targets in self%htg
    call getgh1c_setup(self%gs_hamkq(idir),self%rf_hamkq(idir),dtset,psps,kpoint,kpoint,idir,self%ipert, & ! In
      cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,npw_k,npw_k, &             ! In
      useylmgr1,kg_k,ylm_k,kg_k,ylm_k,ylmgr1_k, &                                       ! In
      self%htg(idir)%dkinpw,nkpg,nkpg1,self%htg(idir)%kpg_k,self%htg(idir)%kpg1_k, &    ! Out
      self%htg(idir)%kinpw1,self%htg(idir)%ffnlk,self%htg(idir)%ffnl1, &                ! Out
      self%htg(idir)%ph3d, self%htg(idir)%ph3d1)                                        ! Out
-     !ddkinpw,dkinpw2,rf_hamk_dir2,ffnl1_test)                                         ! Optional
  end do
 
  ABI_FREE(ylm_k)
@@ -1145,32 +1137,42 @@ subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
  integer,parameter :: berryopt0 = 0, optlocal0 = 0, tim_getgh1c = 1, usevnl0 = 0, opt_gvnlx1 = 0
  integer :: idir, sij_opt, ispinor, ipws, ipw, optnl
 !arrays
- real(dp) :: grad_berry(2,(berryopt0/4))
- real(dp) :: gvnlx1(2,usevnl0)
+ real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
+ real(dp),pointer :: dkinpw(:),kinpw1(:)
 
 !************************************************************************
 
- ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
- !do ispinor=1,nspinor
- !  ipws=(ispinor-1)*npw_k
- !  do ipw=1+ipws,npw_k+ipws
- !    if (self%gs_hamkq%kinpw_kp(ipw-ipws)>huge(zero)*1.d-11) then
- !      cwave(1:2,ipw)=zero
- !    end if
- !  end do
- !end do
+ if (self%inclvkb /= 0) then
+   ! optlocal0 = 0: local part of H^(1) is not computed in gh1c=<G|H^(1)|C>
+   ! optnl = 2: non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
+   ! opt_gvnlx1 = option controlling the use of gvnlx1 array:
+   optnl = 2 !; if (self%inclvkb == 0) optnl = 0
 
- ! optlocal0 = 0: local part of H^(1) is not computed in gh1c=<G|H^(1)|C>
- ! optnl = 2: non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- ! opt_gvnlx1 = option controlling the use of gvnlx1 array:
- optnl = 2 !; if (self%inclvkb == 0) optnl = 0
+   do idir=1,3
+     sij_opt = self%gs_hamkq(idir)%usepaw
+     call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
+       grad_berry,self%gs1c(:,:,idir),self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
+       optnl,opt_gvnlx1,self%rf_hamkq(idir),sij_opt,tim_getgh1c,usevnl0)
+   end do
 
- do idir=1,3
-   sij_opt = self%gs_hamkq(idir)%usepaw
-   call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
-     grad_berry,self%gs1c(:,:,idir),self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
-     optnl,opt_gvnlx1,self%rf_hamkq(idir),sij_opt,tim_getgh1c,usevnl0)
- end do
+ else
+   ! optnl 0 with DDK does not work as expected. So I treat the kinetic term explicitly
+   ! without calling getgh1c.
+   do idir=1,3
+     kinpw1 => self%gs_hamkq(idir)%kinpw_kp
+     dkinpw => self%rf_hamkq(idir)%dkinpw_k
+     do ispinor=1,nspinor
+       do ipw=1,npw_k
+         ipws = ipw + npw_k*(ispinor-1)
+         if (kinpw1(ipw) < huge(zero)*1.d-11) then
+           self%gh1c(:,ipws,idir) = dkinpw(ipw) * cwave(:,ipws)
+         else
+           self%gh1c(:,ipws,idir) = zero
+         end if
+       end do
+     end do
+   end do
+ end if
 
 end subroutine ddkop_apply
 !!***
@@ -1215,12 +1217,13 @@ function ddkop_get_velocity(self, istwf_k, npw_k, nspinor, me_g0, brag) result(v
      doti = two * dotarr(2)
      if (istwf_k == 2 .and. me_g0 == 1) then
        ! nspinor always 1
+       ! TODO: Recheck this part but it should be ok.
        doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
      end if
      dotarr(2) = doti; dotarr(1) = zero
    end if
    vv(:, idir) = dotarr
-  end do
+ end do
 
 end function ddkop_get_velocity
 !!***
@@ -1231,6 +1234,7 @@ end function ddkop_get_velocity
 !! NAME
 !!
 !! FUNCTION
+!!  Free memory
 !!
 !! INPUTS
 !!

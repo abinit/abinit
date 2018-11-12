@@ -223,12 +223,8 @@ subroutine vkbr_free_0D(vkbr)
 !************************************************************************
 
 !complex
- if (allocated(vkbr%fnl)) then
-   ABI_FREE(vkbr%fnl)
- end if
- if (allocated(vkbr%fnld)) then
-   ABI_FREE(vkbr%fnld)
- end if
+ ABI_SFREE(vkbr%fnl)
+ ABI_SFREE(vkbr%fnld)
 
 end subroutine vkbr_free_0D
 !!***
@@ -612,7 +608,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
    do iab=1,nspinor
      spad1 = spinorwf_pad(1,iab); spad2 = spinorwf_pad(2,iab)
      do ig=1,npw
-       c_tmp = CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
+       c_tmp = GWPC_CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
        ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp * (kpoint + gvec(:,ig))
      end do
    end do
@@ -620,7 +616,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
    ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0,G0) term is null.
    ABI_CHECK(nspinor == 1, "nspinor != 1")
    do ig=1,npw
-     c_tmp = CONJG(ug1(ig)) * ug2(ig)
+     c_tmp = GWPC_CONJG(ug1(ig)) * ug2(ig)
      ihr_comm(:,1) = ihr_comm(:,1) + two*j_dpc * AIMAG(c_tmp) * (kpoint + gvec(:,ig))
    end do
  end if
@@ -753,7 +749,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
      xdotg = gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
      ! Remember that in the GW code the reciprocal vectors
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
-     sfac=CMPLX(COS(xdotg), SIN(xdotg))
+     sfac=CMPLX(COS(xdotg), SIN(xdotg), kind=dpc)
 
      iln0 = 0
      nlmn = count(psps%indlmn(3,:,itypat) > 0)
