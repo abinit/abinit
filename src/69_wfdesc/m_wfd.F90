@@ -460,7 +460,6 @@ MODULE m_wfd
    procedure :: iam_master => wfd_iam_master
    procedure :: test_ortho => wfd_test_ortho
    ! Test the orthonormalization of the wavefunctions.
-   !procedure :: barrier => wfd_barrier
    procedure :: sym_ur => wfd_sym_ur
    ! Symmetrize a wave function in real space
    procedure :: paw_get_aeur => wfd_paw_get_aeur
@@ -4756,41 +4755,6 @@ end subroutine wfd_test_ortho
 
 !----------------------------------------------------------------------
 
-!!****f* m_wfd/wfd_barrier
-!! NAME
-!!  wfd_barrier
-!!
-!! FUNCTION
-!!  Synch all nodes in Wfd%comm.
-!!
-!! INPUTS
-!!  Wfd<wfd_t>
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      nhatgrid,paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawfgrtab_free
-!!      pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize,printxsf
-!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_ur,wfd_paw_get_aeur
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine wfd_barrier(Wfd)
-
-!Arguments ------------------------------------
-!scalars
- class(wfd_t),intent(in) :: Wfd
-
-!************************************************************************
-
- call xmpi_barrier(Wfd%comm)
-
-end subroutine wfd_barrier
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_wfd/wfd_sym_ur
 !! NAME
 !!  wfd_sym_ur
@@ -6579,7 +6543,7 @@ subroutine wfd_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
  else where
    bks_mask=.FALSE.
  end where
- got=zero
+ got = 0
 
  call wfd%bks_distrb(bks_distrb,got,bks_mask)
 

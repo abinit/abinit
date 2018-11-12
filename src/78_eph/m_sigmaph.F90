@@ -259,6 +259,10 @@ module m_sigmaph
   ! KS energies where QP corrections are wantend
   ! This array is initialized inside the (ikcalc, spin) loop
 
+  !real(dp),allocatable :: v_calc(:,:,:)
+  ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+  ! Diagonal elements of velocity operator for all states in Sigma_nk.
+
   complex(dpc),allocatable :: cweights(:,:,:,:,:,:)
   ! (nz, 2, nbcalc_ks, natom3, nbsum, nq_k))
   ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
@@ -615,6 +619,51 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! TODO FOR PAW
  usecprj = 0
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
+
+#if 0
+ call wrtout(std_out, "Computing diagonal elements of velocity operator for all states in Sigma_nk.")
+ call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
+ ABI_MALLOC(cg_work,   (2, mpw*wfd%nspinor))
+ ABI_CALLOC(sigma%v_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+
+ ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ cnt = 0
+ do spin=1,nsppol
+   do ikcalc=1,sigma%nkcalc
+     kk = sigma%kcalc(:, ikcalc)
+     bstart_ks = sigma%bstart_ks(ikcalc, spin)
+     ik_ibz = sigma%kcalc2ibz(ikcalc,1)
+     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+     call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+
+     do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
+       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+       band_ks = ib_k + bstart_ks - 1
+       call wfd%copy_cg(band_ks, ik_ibz, spin, cg_work)
+       eshift = ebands%eig(band_ks, ik_bz, spin) - dtset%dfpt_sciss
+       call ddkop%apply(eshift, mpw, npw_k, wfd%nspinor, cg_work, cwaveprj0, wfd%mpi_enreg)
+       vdiag = ddkop%get_velocity(istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_work)
+       sigma%v_calc(:, ib_k, ikcalc, spin) = vdiag(1, :)
+     end if
+
+   end do
+ end do
+
+ call xmpi_sum(sigma%v_calc, comm, ierr)
+ call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
+ call wrtout(std_out, sjoin("Velocities completed. cpu-time:", sec2str(cpu_ks), ",wall-time:", sec2str(wall_ks)), &
+   do_flush=.True.)
+
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v_calc"), sigma%v_calc))
+ end if
+#endif
+
+ ABI_FREE(cg_work)
+ ABI_SFREE(sigma%v_calc)
+ call ddkop%free()
+#endif
 
  ! Prepare call to getgh1c
  usevnl = 0
@@ -2264,6 +2313,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    !  nctkarr_t("gkq_frohl", "dp", "two, max_nbcalc, nbsum, natom3, nqbz, nkcalc, nsppol") &
    !])
    !NCF_CHECK(ncerr)
+
+   !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("v_calc", "dp", "max_nbcalc, nkcalc, nsppol")]))
 
    if (new%frohl_model == 1) then
      ! Arrays storing the Frohlich self-energy.

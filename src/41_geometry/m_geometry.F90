@@ -115,7 +115,6 @@ CONTAINS  !===========================================================
 
 function normv_rdp_vector(xv,met,space) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -160,7 +159,6 @@ end function normv_rdp_vector
 
 function normv_int_vector(xv,met,space) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -206,7 +204,6 @@ end function normv_int_vector
 
 function normv_int_vector_array(xv,met,space) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -254,7 +251,6 @@ end function normv_int_vector_array
 
 function normv_rdp_vector_array(xv,met,space) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -310,7 +306,6 @@ end function normv_rdp_vector_array
 
 function vdotw_rr_vector(xv,xw,met,space) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -368,7 +363,6 @@ end function vdotw_rr_vector
 
 function vdotw_rc_vector(xv,xw,met,space) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -424,7 +418,6 @@ end function vdotw_rc_vector
 
 subroutine acrossb(a,b,c)
 
- implicit none
 
 !Arguments ---------------------------------------------
 !arrays
@@ -492,7 +485,6 @@ end subroutine acrossb
 
 subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvol)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -645,7 +637,6 @@ end subroutine wigner_seitz
 
 subroutine phdispl_cart2red(natom,gprimd,displ_cart,displ_red)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -732,7 +723,6 @@ end subroutine phdispl_cart2red
 
 subroutine getspinrot(rprimd,spinrot,symrel_conv)
 
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -910,7 +900,6 @@ end subroutine getspinrot
 
 pure function spinrot_cmat(spinrot)
 
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: spinrot(4)
@@ -968,7 +957,6 @@ end function spinrot_cmat
 
 subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1072,7 +1060,6 @@ end subroutine rotmat
 
 subroutine fixsym(iatfix,indsym,natom,nsym)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1160,7 +1147,6 @@ end subroutine fixsym
 
 subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1271,7 +1257,6 @@ end subroutine metric
 
 subroutine mkradim(acell,rprim,rprimd)
 
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1316,7 +1301,6 @@ end subroutine mkradim
 
 subroutine chkrprimd(acell,rprim,rprimd,iout)
 
-implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1406,7 +1390,6 @@ end subroutine chkrprimd
 
 subroutine chkdilatmx(chkdilatmx_,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1516,7 +1499,6 @@ end subroutine chkdilatmx
 
 subroutine mkrdim(acell,rprim,rprimd)
 
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -1576,7 +1558,6 @@ end subroutine mkrdim
 
 subroutine xcart2xred(natom,rprimd,xcart,xred)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1647,7 +1628,6 @@ end subroutine xcart2xred
 
 subroutine xred2xcart(natom,rprimd,xcart,xred)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1702,7 +1682,6 @@ end subroutine xred2xcart
 
 subroutine fred2fcart(favg,Favgz_null,fcart,fred,gprimd,natom)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1774,7 +1753,6 @@ end subroutine fred2fcart
 
 subroutine fcart2fred(fcart,fred,rprimd,natom)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1846,7 +1824,6 @@ end subroutine fcart2fred
 
 subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,xred,znucl)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2189,7 +2166,6 @@ end subroutine bonds_lgth_angles
 
 subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat,xred,znucl,acell)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2409,7 +2385,6 @@ end subroutine randomcellpos
 
 subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2550,7 +2525,6 @@ end subroutine shellstruct
 
 subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2681,7 +2655,6 @@ end subroutine ioniondist
 
 function dist2(v1,v2,rprimd,option)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2797,7 +2770,6 @@ end function dist2
 
 subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2922,7 +2894,6 @@ end subroutine remove_inversion
 
 subroutine symredcart(aprim,bprim,symcart,symred)
 
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -2990,7 +2961,6 @@ end subroutine symredcart
 subroutine strainsym(nsym,rprimd0,rprimd,rprimd_symm,symrel)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3076,7 +3046,6 @@ end subroutine strainsym
 
 subroutine stresssym(gprimd,nsym,stress,sym)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3184,7 +3153,6 @@ end subroutine stresssym
 
 subroutine strconv(frac,gprimd,cart)
 
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -3289,7 +3257,6 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 &    rfmeth,symafm,symaf1,symq,symrec,symrel,symrl1,syuse,tnons,tnons1, &
 &    unit) ! Optional
 
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3472,7 +3439,6 @@ end subroutine littlegroup_pert
 
 subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq,symrec,symrel)
 
- implicit none
 
 !Arguments -------------------------------
 !scalars

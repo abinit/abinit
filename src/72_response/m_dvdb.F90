@@ -315,8 +315,6 @@ CONTAINS
 
 subroutine dvdb_init(db, path, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -518,8 +516,6 @@ end subroutine dvdb_init
 
 subroutine dvdb_open_read(db, ngfft, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -589,8 +585,6 @@ end subroutine dvdb_open_read
 
 subroutine dvdb_close(db)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dvdb_t),intent(inout) :: db
@@ -626,8 +620,6 @@ end subroutine dvdb_close
 !! SOURCE
 
 subroutine dvdb_free(db)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -700,8 +692,6 @@ end subroutine dvdb_free
 !! SOURCE
 
 subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -806,8 +796,6 @@ end subroutine dvdb_print
 
 integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dvdb_t),intent(in) :: db
@@ -870,8 +858,6 @@ end function dvdb_get_pinfo
 !! SOURCE
 
 integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1scf, msg) result(ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1015,8 +1001,6 @@ end function dvdb_read_onev1
 
 subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqpt,nfft,comm
@@ -1118,8 +1102,6 @@ end subroutine dvdb_readsym_allv1
 !! SOURCE
 
 subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1251,8 +1233,6 @@ end subroutine dvdb_readsym_qbz
 
 subroutine dvdb_set_qcache_mb(db, mbsize)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: mbsize
@@ -1305,8 +1285,6 @@ end subroutine dvdb_set_qcache_mb
 !! SOURCE
 
 subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1392,8 +1370,6 @@ end subroutine dvdb_qcache_read
 !! SOURCE
 
 subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,symv1,pflag,v1scf)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1625,8 +1601,6 @@ end subroutine v1phq_complete
 
 subroutine find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,ipert
@@ -1710,8 +1684,6 @@ end subroutine find_symeq
 !! SOURCE
 
 subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r_qibz,v1r_qbz)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1836,8 +1808,6 @@ end subroutine v1phq_rotate
 
 subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,ipert,cplex,nfft,nspden,nsppol
@@ -1915,8 +1885,6 @@ end subroutine v1phq_symmetrize
 !! SOURCE
 
 subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2031,8 +1999,6 @@ end subroutine rotate_fqg
 !! SOURCE
 
 subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2390,8 +2356,6 @@ end subroutine dvdb_ftinterp_setup
 
 subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,comm
@@ -2510,8 +2474,6 @@ end subroutine dvdb_ftinterp_qpt
 
 subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 &                             nrpt, nspden, ipert, v1scf_rpt, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2861,8 +2823,6 @@ end subroutine dvdb_get_v1scf_rpt
 subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 &                             ipert, v1scf_rpt, v1scf_qpt, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nrpt,nspden,ipert,comm
@@ -2977,8 +2937,6 @@ end subroutine dvdb_get_v1scf_qpt
 subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
 &                                 nfft, ngfft, nfftf, ngfftf, v1scf, comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift,nfft,nfftf,comm
@@ -3055,8 +3013,6 @@ end subroutine dvdb_interpolate_v1scf
 
 integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),optional,intent(in) :: qtol
@@ -3107,8 +3063,6 @@ end function dvdb_findq
 !! SOURCE
 
 subroutine dvdb_seek(db, idir, ipert, iqpt)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)  :: idir, ipert, iqpt
@@ -3203,8 +3157,6 @@ end subroutine dvdb_seek
 
 integer function dvdb_rewind(db, msg) result(ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(dvdb_t),intent(inout) :: db
  character(len=*),intent(out) :: msg
@@ -3252,8 +3204,6 @@ end function dvdb_rewind
 !! SOURCE
 
 integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3311,8 +3261,6 @@ end function my_hdr_skip
 !! SOURCE
 
 subroutine dvdb_list_perts(db, ngqpt, unit)
-
- implicit none
 
 !Arguments ------------------------------------
  type(dvdb_t),target,intent(in) :: db
@@ -3485,8 +3433,6 @@ end subroutine dvdb_list_perts
 !! SOURCE
 
 subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3667,8 +3613,6 @@ end subroutine dvdb_merge_files
 
 pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nrpt
@@ -3715,8 +3659,6 @@ end subroutine calc_eiqr
 !! SOURCE
 
 integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: fform
@@ -3782,8 +3724,6 @@ end function dvdb_check_fform
 !! SOURCE
 
 subroutine dvdb_test_v1rsym(db_path, comm)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: db_path
@@ -3919,8 +3859,6 @@ end subroutine dvdb_test_v1rsym
 !! SOURCE
 
 subroutine dvdb_test_v1complete(db_path, dump_path, comm)
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: db_path,dump_path
@@ -4085,8 +4023,6 @@ end subroutine dvdb_test_v1complete
 
 subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: db_path
  integer,intent(in) :: comm
@@ -4191,8 +4127,6 @@ end subroutine dvdb_test_ftinterp
 !! SOURCE
 
 subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4321,8 +4255,6 @@ end subroutine dvdb_v1r_long_range
 
 subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf, cryst, &
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4713,8 +4645,6 @@ end subroutine dvdb_interpolate_and_write
 !! SOURCE
 
 subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
