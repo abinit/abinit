@@ -789,8 +789,11 @@ end subroutine conducti_paw
  if (open_file(trim(filnam_out)//'_sigX', msg, newunit=sigx_unt, form='formatted', action="write") /= 0) then
    MSG_ERROR(msg)
  end if
+ write(sigx_unt,*) '# conducti: Xray core level conductivity, all in atomic units by default '
+ write(sigx_unt,*) '# One block of 3 columns per core wavefunction'
+ write(sigx_unt,*) '# energy, sigx_av, sigx, etc... '
  do iom=1,mom
-   write(sigx_unt,'(9(1x,e14.8))') &
+   write(sigx_unt,'( 3(3(1x,e14.8),2x) )') &
 &   ((-energy_cor(icor)+oml1(iom)+omin),sigx_av(iom,icor),sigx(atnbr,iom,icor),icor=1,nphicor)
  end do
  close(sigx_unt)

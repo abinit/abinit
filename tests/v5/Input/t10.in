@@ -1,5 +1,5 @@
 4                              # flag for PAW run conducti + corespectra + emissionspectra
-outAl                          # filename radix for input to be used
+t09o
 0.073119 0.0000001 5.00 1000 1 # delta_freq, min_freq, max_freq(in atomic units), nfreq, iatom 
 
 
