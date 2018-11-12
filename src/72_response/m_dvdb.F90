@@ -53,8 +53,7 @@ module m_dvdb
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp
- use m_crystal,       only : crystal_t, crystal_free, crystal_print
- use m_crystal_io,    only : crystal_from_hdr
+ use m_crystal,       only : crystal_t, crystal_print
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
@@ -316,15 +315,6 @@ CONTAINS
 
 subroutine dvdb_init(db, path, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: path
@@ -478,7 +468,7 @@ subroutine dvdb_init(db, path, comm)
  end if
 
  ! Init crystal_t from the hdr read from file.
- call crystal_from_hdr(db%cryst, db%hdr_ref, timrev2)
+ db%cryst = hdr_get_crystal(db%hdr_ref, timrev2)
 
  ! Init Born effective charges
  ABI_CALLOC(db%zeff, (3, 3, db%natom))
@@ -525,15 +515,6 @@ end subroutine dvdb_init
 !! SOURCE
 
 subroutine dvdb_open_read(db, ngfft, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_open_read'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -604,15 +585,6 @@ end subroutine dvdb_open_read
 
 subroutine dvdb_close(db)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_close'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dvdb_t),intent(inout) :: db
@@ -649,15 +621,6 @@ end subroutine dvdb_close
 
 subroutine dvdb_free(db)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dvdb_t),intent(inout) :: db
@@ -684,7 +647,7 @@ subroutine dvdb_free(db)
 
  ! types
  call hdr_free(db%hdr_ref)
- call crystal_free(db%cryst)
+ call db%cryst%free()
  call destroy_mpi_enreg(db%mpi_enreg)
 
  ! Clean cache
@@ -729,15 +692,6 @@ end subroutine dvdb_free
 !! SOURCE
 
 subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -842,15 +796,6 @@ end subroutine dvdb_print
 
 integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_get_pinfo'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dvdb_t),intent(in) :: db
@@ -914,15 +859,6 @@ end function dvdb_get_pinfo
 
 integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1scf, msg) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_read_onev1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,ipert,iqpt,cplex,nfft
@@ -935,6 +871,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Local variables-------------------------------
 !scalars
  integer,parameter :: paral_kgb0=0
+ integer,save :: enough=0
  integer :: iv1,ispden,nfftot_file,nfftot_out,ifft
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -975,7 +912,8 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
  else
    ! The FFT mesh used in the caller differ from the one found in the DBDB --> Fourier interpolation
    ! TODO: Add linear interpolation as well.
-   MSG_WARNING("FFT interpolation of DFPT potentials must be tested.")
+   if (enough == 0) MSG_WARNING("FFT interpolation of DFPT potentials must be tested.")
+   enough = enough + 1
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
    do ispden=1,db%nspden
      read(db%fh, err=10, iomsg=msg) (v1r_file(ifft, ispden), ifft=1,cplex*nfftot_file)
@@ -1063,15 +1001,6 @@ end function dvdb_read_onev1
 
 subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_readsym_allv1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqpt,nfft,comm
@@ -1121,7 +1050,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
          db%nspden,db%nsppol,db%mpi_enreg,v1scf(:,:,:,mu))
      end do
    end if
-   if (db%debug) write(std_out,*)ABI_FUNC,": All perts available. Returning"
+   if (db%debug) write(std_out,*)"All perts available. Returning"
    return
  end if
 
@@ -1173,15 +1102,6 @@ end subroutine dvdb_readsym_allv1
 !! SOURCE
 
 subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_readsym_qbz'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1313,15 +1233,6 @@ end subroutine dvdb_readsym_qbz
 
 subroutine dvdb_set_qcache_mb(db, mbsize)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_set_qcache_mb'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: mbsize
@@ -1375,15 +1286,6 @@ end subroutine dvdb_set_qcache_mb
 
 subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_qcache_read'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,comm
@@ -1416,7 +1318,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    ! Print progress.
    if (db_iqpt < 20) then
      call cwtime(cpu, wall, gflops, "stop")
-     write(msg,'(2(a,i0),2(a,f8.2))') "Reding q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
+     write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
    else if (db_iqpt == 20) then
      call wrtout(std_out, "...")
@@ -1468,15 +1370,6 @@ end subroutine dvdb_qcache_read
 !! SOURCE
 
 subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,symv1,pflag,v1scf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'v1phq_complete'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1565,7 +1458,7 @@ pcase_loop: &
 
      do ispden=1,nspden
        ! Get symmetric perturbation in G-space in workg_eq array.
-       call fourdp(cplex,workg_eq,v1scf(:,ispden,pcase_eq),-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+       call fourdp(cplex,workg_eq,v1scf(:,ispden,pcase_eq),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
 
        !call rotate_fqg(itirev_eq,symrec_eq,qpt,tnon,ngfft,nfft,nspden,workg_eq,workg)
        ind1=0
@@ -1636,7 +1529,7 @@ pcase_loop: &
 
    ! Get potential in real space (results in v1scf)
    do ispden=1,nspden
-     call fourdp(cplex,v1g(:,:,ispden),v1scf(:,ispden,pcase),+1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+     call fourdp(cplex,v1g(:,:,ispden),v1scf(:,ispden,pcase),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
 
      ! IS(q) = q + G0
      ! we want q so we have to multiply by exp(iG0r) in real space.
@@ -1707,15 +1600,6 @@ end subroutine v1phq_complete
 !! SOURCE
 
 subroutine find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_symeq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1801,15 +1685,6 @@ end subroutine find_symeq
 
 subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r_qibz,v1r_qbz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'v1phq_rotate'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isym,itimrev,cplex,nfft,nspden,nsppol
@@ -1842,7 +1717,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  ABI_MALLOC(v1g_qibz, (2*nfft,nspden,natom3))
  do mu=1,natom3
    do ispden=1,nspden
-     call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+     call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
    end do
  end do
 
@@ -1884,7 +1759,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    ! Transform to real space and take into account a possible shift.
    ! (results are stored in v1r_qbz)
    do ispden=1,nspden
-     call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,ngfft,mpi_enreg%paral_kgb,tim_fourdp0)
+     call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
      !call times_eigr(tsign * g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
    end do
@@ -1932,15 +1807,6 @@ end subroutine v1phq_rotate
 !! SOURCE
 
 subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'v1phq_symmetrize'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2019,15 +1885,6 @@ end subroutine v1phq_symmetrize
 !! SOURCE
 
 subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_fqg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2142,15 +1999,6 @@ end subroutine rotate_fqg
 !! SOURCE
 
 subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_ftinterp_setup'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2457,7 +2305,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
  !    do ifft=1,nfft
  !      !cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
  !      !call fourdp(1,all_v1qr(:,:,ifft,ispden,mu),db%v1scf_rpt(:,ifft,ispden,mu),+1,&
- !      ! mpi_enreg_seq,nqbz,ngfft_qspace,paral_kgb0,tim_fourdp0)
+ !      ! mpi_enreg_seq,nqbz,1,ngfft_qspace,tim_fourdp0)
  !    end do
  !  end do
  !end do
@@ -2507,15 +2355,6 @@ end subroutine dvdb_ftinterp_setup
 !! SOURCE
 
 subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_ftinterp_qpt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2635,15 +2474,6 @@ end subroutine dvdb_ftinterp_qpt
 
 subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 &                             nrpt, nspden, ipert, v1scf_rpt, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_get_v1scf_rpt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2936,7 +2766,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  !    do ifft=1,nfft
  !      !cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
  !      !call fourdp(1,all_v1qr(:,:,ifft,ispden,mu),db%v1scf_rpt(:,ifft,ispden,mu),+1,&
- !      ! mpi_enreg_seq,nqbz,ngfft_qspace,paral_kgb0,tim_fourdp0)
+ !      ! mpi_enreg_seq,nqbz,1,ngfft_qspace,tim_fourdp0)
  !    end do
  !  end do
  !end do
@@ -2992,15 +2822,6 @@ end subroutine dvdb_get_v1scf_rpt
 
 subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 &                             ipert, v1scf_rpt, v1scf_qpt, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_get_v1scf_qpt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3116,15 +2937,6 @@ end subroutine dvdb_get_v1scf_qpt
 subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
 &                                 nfft, ngfft, nfftf, ngfftf, v1scf, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_interpolate_v1scf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift,nfft,nfftf,comm
@@ -3201,15 +3013,6 @@ end subroutine dvdb_interpolate_v1scf
 
 integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_findq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),optional,intent(in) :: qtol
@@ -3260,15 +3063,6 @@ end function dvdb_findq
 !! SOURCE
 
 subroutine dvdb_seek(db, idir, ipert, iqpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_seek'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)  :: idir, ipert, iqpt
@@ -3363,15 +3157,6 @@ end subroutine dvdb_seek
 
 integer function dvdb_rewind(db, msg) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_rewind'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(dvdb_t),intent(inout) :: db
  character(len=*),intent(out) :: msg
@@ -3419,15 +3204,6 @@ end function dvdb_rewind
 !! SOURCE
 
 integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_hdr_skip'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3485,15 +3261,6 @@ end function my_hdr_skip
 !! SOURCE
 
 subroutine dvdb_list_perts(db, ngqpt, unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_list_perts'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(dvdb_t),target,intent(in) :: db
@@ -3666,15 +3433,6 @@ end subroutine dvdb_list_perts
 !! SOURCE
 
 subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_merge_files'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3855,15 +3613,6 @@ end subroutine dvdb_merge_files
 
 pure subroutine calc_eiqr(qpt, nrpt, rpt, eiqr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_eiqr'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nrpt
@@ -3910,15 +3659,6 @@ end subroutine calc_eiqr
 !! SOURCE
 
 integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_check_fform'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: fform
@@ -3984,15 +3724,6 @@ end function dvdb_check_fform
 !! SOURCE
 
 subroutine dvdb_test_v1rsym(db_path, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_v1rsym'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: db_path
@@ -4128,15 +3859,6 @@ end subroutine dvdb_test_v1rsym
 !! SOURCE
 
 subroutine dvdb_test_v1complete(db_path, dump_path, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_v1complete'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: db_path,dump_path
@@ -4301,15 +4023,6 @@ end subroutine dvdb_test_v1complete
 
 subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_ftinterp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: db_path
  integer,intent(in) :: comm
@@ -4415,15 +4128,6 @@ end subroutine dvdb_test_ftinterp
 
 subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_v1r_long_range'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dvdb_t),intent(in) :: db
@@ -4515,7 +4219,7 @@ subroutine dvdb_v1r_long_range(db,qpt,iatom,idir,nfft,ngfft,v1r_lr)
 
  ! FFT to get the long-range potential in r space
  v1r_lr = zero
- call fourdp(2,v1G_lr,v1r_lr,1,MPI_enreg_seq,nfft,ngfft,1,0)
+ call fourdp(2,v1G_lr,v1r_lr,1,MPI_enreg_seq,nfft,1,ngfft,0)
 
  ! Multiply by  exp(i q . r)
  call times_eikr(qpt,ngfft,nfft,1,v1r_lr)
@@ -4552,15 +4256,6 @@ end subroutine dvdb_v1r_long_range
 subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf, cryst, &
 &          ngqpt_coarse, nqshift_coarse, qshift_coarse, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_interpolate_and_write'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift_coarse, comm
@@ -4587,6 +4282,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
  type(hdr_type) :: hdr_ref
+ !type(kpath_t) :: qpath
 !arrays
  integer :: qptrlatt(3,3), rfdir(3)
  integer :: symq(4,2,cryst%nsym)
@@ -4599,22 +4295,42 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
- write(msg, '(2a)') "Interpolation of the electron-phonon coupling potential", ch10
+ write(msg, '(2a)') " Interpolation of the electron-phonon coupling potential", ch10
  call wrtout(ab_out, msg, do_flush=.True.); call wrtout(std_out, msg, do_flush=.True.)
- msg = sjoin(" From coarse q-mesh:", ltoa(ngqpt_coarse), "to:", ltoa(dtset%eph_ngqpt_fine))
- call wrtout(ab_out, msg); call wrtout(std_out, msg)
+
+ if (dtset%eph_task == 5) then
+   msg = sjoin(" From coarse q-mesh:", ltoa(ngqpt_coarse), "to:", ltoa(dtset%eph_ngqpt_fine))
+   call wrtout(ab_out, msg); call wrtout(std_out, msg)
+   ! Setup fine q-point grid
+   ! Generate the list of irreducible q-points in the grid
+   qptrlatt = 0
+   qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+
+ else if (dtset%eph_task == -5) then
+   msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
+   call wrtout(ab_out, msg); call wrtout(std_out, msg)
+   ABI_CHECK(dtset%ph_nqpath > 0, "ph_nqpath must be specified when eph_task == -5")
+   !qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+   !nqpts = qpath%npts
+   !call kpath_free(qpath)
+   nqibz = dtset%ph_nqpath
+   ABI_MALLOC(qibz, (3, nqibz))
+   qibz = dtset%ph_qpath(:, 1:nqibz)
+   ABI_CALLOC(wtq, (nqibz))
+   nqbz = nqibz
+   ABI_MALLOC(qbz, (3, nqbz))
+   qbz = qibz
+
+ else
+   MSG_ERROR(sjoin("Invalid eph_task", itoa(dtset%eph_task)))
+ end if
 
  ! =======================
  ! Setup fine q-point grid
  ! =======================
  nfftf = product(ngfftf(1:3))
  nfft = product(ngfft(1:3))
-
- ! Generate the list of irreducible q-points in the grid
- qptrlatt = 0
- !qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 
  ! check that ngqpt_coarse is in DVDB.
  nqbz_coarse = product(ngqpt_coarse) * nqshift_coarse
@@ -4740,9 +4456,9 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    end if
  end do
 
- msg = sjoin("Number of q-points found in initial DVDB", itoa(nqpt_read))
+ msg = sjoin(" Number of q-points found in input DVDB", itoa(nqpt_read))
  call wrtout(ab_out, msg); call wrtout(std_out, msg)
- msg = sjoin("Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate))
+ msg = sjoin(" Number of q-points requiring Fourier interpolation", itoa(nqpt_interpolate))
  call wrtout(ab_out, msg); call wrtout(std_out, msg)
 
  ! =================================================
@@ -4929,15 +4645,6 @@ end subroutine dvdb_interpolate_and_write
 !! SOURCE
 
 subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dvdb_qdownsample'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

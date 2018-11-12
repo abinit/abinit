@@ -77,13 +77,6 @@ contains
 
 subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtspgroup'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -401,13 +394,6 @@ end subroutine prtspgroup
 
 
 subroutine spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'spgdata'
-!End of the abilint section
 
  implicit none
 
@@ -2158,13 +2144,6 @@ end subroutine spgdata
 
 subroutine ptgmadata(ptgroupma,ptgrpmasb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptgmadata'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2328,13 +2307,6 @@ end subroutine ptgmadata
 
 subroutine getptgroupma(ptgroup,ptgroupha,ptgroupma)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getptgroupma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2474,13 +2446,6 @@ end subroutine getptgroupma
 !! SOURCE
 
 subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symptgroup'
-!End of the abilint section
 
  implicit none
 

@@ -85,13 +85,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  use m_geometry,  only : xred2xcart
  use m_numeric_tools,  only : uniformrandom
  use m_pred_velverlet,     only : pred_velverlet
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_hmc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

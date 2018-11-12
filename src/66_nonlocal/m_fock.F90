@@ -150,6 +150,9 @@ module m_fock
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution
 
+  real(dp) :: e_fock0
+    ! contribution of the Fock term to energy (computed and stored here in case of ACE)
+
   integer, allocatable :: atindx(:)
     !  atindx(natom)=index table for atoms (see gstate.f)
 
@@ -349,13 +352,6 @@ contains
 
 subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fockbz_create'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -483,13 +479,6 @@ end subroutine fockbz_create
 !! SOURCE
 
 subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_init'
-!End of the abilint section
 
  implicit none
 
@@ -1174,13 +1163,6 @@ end subroutine fock_init
 
 subroutine fock_updateikpt(fock,ikpt,isppol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_updateikpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1232,13 +1214,6 @@ end subroutine fock_updateikpt
 
 subroutine fock_set_ieigen(fock,iband)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_set_ieigen'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1281,13 +1256,6 @@ end subroutine fock_set_ieigen
 !! SOURCE
 subroutine fock_destroy(fock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1307,13 +1275,6 @@ subroutine fock_destroy(fock)
 end subroutine fock_destroy
 
 subroutine fock_common_destroy(fock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_common_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -1374,13 +1335,6 @@ end subroutine fock_common_destroy
 
 
 subroutine fock_BZ_destroy(fock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_BZ_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -1491,13 +1445,6 @@ end subroutine fock_BZ_destroy
 
 subroutine fock_ACE_destroy(fockACE)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_ACE_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1553,13 +1500,6 @@ end subroutine fock_ACE_destroy
 !! SOURCE
 
 subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_calc_ene'
-!End of the abilint section
 
  implicit none
 
@@ -1622,13 +1562,6 @@ end subroutine fock_calc_ene
 !! SOURCE
 
 subroutine fock_update_exc(fock_energy,xc_energy,xcdc_energy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_update_exc'
-!End of the abilint section
 
  implicit none
 
@@ -1696,13 +1629,6 @@ end subroutine fock_update_exc
 
 subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_updatecwaveocc'
-!End of the abilint section
 
  implicit none
 
@@ -1972,7 +1898,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
                ABI_ALLOCATE(dummytab2,(2,npwj))
                call fourwf(1,dummytab3,cgocc(:,1:npwj),dummytab2,fockbz%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol), &
 &               gbound_k,gbound_k,jstwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,&
-&               npwj,npwj,n4,n5,n6,tim_fourwf0,dtset%paral_kgb,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
+&               npwj,npwj,n4,n5,n6,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
                ABI_DEALLOCATE(dummytab2)
 
              else
@@ -2073,13 +1999,6 @@ end subroutine fock_updatecwaveocc
 
 integer function fock_set_getghc_call(fock, new) result(old)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_set_getghc_call'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2109,13 +2028,6 @@ end function fock_set_getghc_call
 !! SOURCE
 
 pure integer function fock_get_getghc_call(fock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_get_getghc_call'
-!End of the abilint section
 
  implicit none
 
@@ -2158,13 +2070,6 @@ end function fock_get_getghc_call
 !! SOURCE
 
 subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_print'
-!End of the abilint section
 
  implicit none
 
@@ -2251,13 +2156,6 @@ end subroutine fock_print
 !! SOURCE
 
 subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bare_vqg'
-!End of the abilint section
 
  implicit none
 
@@ -2464,13 +2362,6 @@ end subroutine bare_vqg
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strfock'
-!End of the abilint section
 
  implicit none
 

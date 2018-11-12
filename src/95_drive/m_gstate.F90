@@ -35,7 +35,6 @@ module m_gstate
  use libxc_functionals
  use m_exit
  use m_crystal
- use m_crystal_io
  use m_scf_history
  use m_abimover
  use m_wffile
@@ -82,7 +81,7 @@ module m_gstate
  use m_electronpositron, only : electronpositron_type,init_electronpositron,destroy_electronpositron, &
                                 electronpositron_calctype
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
- use m_dtfil,            only : dtfil_init_time, status
+ use m_dtfil,            only : dtfil_init_time
  use m_jellium,          only : jellium
  use m_iowf,             only : outwf
  use m_outqmc,           only : outqmc
@@ -235,13 +234,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                 mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,&
 &                 psps,results_gs,rprim,scf_history,vel,vel_cell,wvl,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gstate'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -331,8 +323,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  call timab(32,1,tsec)
  call timab(33,3,tsec)
-
- call status(0,dtfil%filstat,iexit,level,'enter')
 
 !###########################################################
 !### 01. Initializations XML, MPI, WVL, etc
@@ -522,7 +512,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call psolver_kernel( wvl%den%denspot%dpbox%hgrids, 1, icoulomb, mpi_enreg%me_wvl, wvl%den%denspot%pkernel , &
 &   mpi_enreg%comm_wvl, wvl%den%denspot%dpbox%ndims, mpi_enreg%nproc_wvl, dtset%nscforder)
    nullify(wvl%den%denspot%pkernelseq%kernel)
-   !call copy_coulomb_operator(wvl%den%denspot%pkernel,wvl%den%denspot%pkernelseq,ABI_FUNC)
+   !call copy_coulomb_operator(wvl%den%denspot%pkernel,wvl%den%denspot%pkernelseq, "gstate")
 !  Associate the denspot distribution into mpi_enreg.
    mpi_enreg%nscatterarr  => wvl%den%denspot%dpbox%nscatterarr
    mpi_enreg%ngatherarr   => wvl%den%denspot%dpbox%ngatherarr
@@ -1110,10 +1100,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !      Compute up+down rho(G) by fft
        ABI_ALLOCATE(work,(nfftf))
        work(:)=rhor(:,1)
-       call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
        if(dtset%usekden==1)then
          work(:)=taur(:,1)
-         call fourdp(1,taug,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+         call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
        ABI_DEALLOCATE(work)
 
@@ -1189,7 +1179,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    else if ((dtset%iscf==-1.or.dtset%iscf==-2.or.dtset%iscf==-3).and.dtset%positron<=0) then
 
-     call status(0,dtfil%filstat,iexit,level,'call ioarr    ')
 !    Read rho(r) from a disk file
      rdwrpaw=psps%usepaw
 !    Note : results_gs%etotal is read here,
@@ -1213,10 +1202,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Compute up+down rho(G) by fft
      ABI_ALLOCATE(work,(nfftf))
      work(:)=rhor(:,1)
-     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
      if(dtset%usekden==1)then
        work(:)=taur(:,1)
-       call fourdp(1,taug,work,-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+       call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
      ABI_DEALLOCATE(work)
 
@@ -1325,13 +1314,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Should merge this call with the call for dtset%ionmov==4 and 5
 
      if (dtset%macro_uj==0) then
-
-       call status(0,dtfil%filstat,iexit,level,'call scfcv_run')
        call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-
      else
 !      Conduct determination of U
-
        call pawuj_drive(scfcv_args,dtset,electronpositron,rhog,rhor,rprimd,xred,xred_old)
      end if
 
@@ -1457,7 +1442,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
 
    ! Write tetrahedron tables.
-   call crystal_from_hdr(cryst, hdr, 2)
+   cryst = hdr_get_crystal(hdr, 2)
    tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
    dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
    if (ierr == 0) then
@@ -1467,7 +1452,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
 
    call destroy_tetra(tetra)
-   call crystal_free(cryst)
+   call cryst%free()
  end if
 
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&
@@ -1762,8 +1747,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
- call status(0,dtfil%filstat,iexit,level,'exit')
-
  call timab(36,2,tsec)
  call timab(32,2,tsec)
 
@@ -1801,13 +1784,6 @@ end subroutine gstate
 !! SOURCE
 
 subroutine setup2(dtset,npwtot,start,wfs,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup2'
-!End of the abilint section
 
  implicit none
 
@@ -1947,13 +1923,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
   & fnameabo_dos,fnameabo_eig,fred,&
   & mpi_enreg,nfft,ngfft,occ,prtfor,&
   & resid,rhor,rprimd,vxcavg,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnup1'
-!End of the abilint section
 
  implicit none
 
@@ -2146,13 +2115,6 @@ end subroutine clnup1
 
 subroutine prtxf(fred,iatfix,iout,iwfrc,natom,rprimd,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtxf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2321,13 +2283,6 @@ end subroutine prtxf
 
 subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ngrvdw,&
 &                 prtfor,prtstr,prtvol,start,strten,synlgr,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnup2'
-!End of the abilint section
 
  implicit none
 
@@ -2589,13 +2544,6 @@ end subroutine clnup2
 
 subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawuj_drive'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2737,13 +2685,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 #if defined HAVE_NETCDF
  use netcdf
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outxfhist'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

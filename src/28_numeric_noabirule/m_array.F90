@@ -98,13 +98,6 @@ CONTAINS
 
 subroutine array2_gwpc_free(Array)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'array2_gwpc_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

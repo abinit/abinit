@@ -15,7 +15,6 @@ module m_tdep_phdos
   use m_ifc,              only : ifc_type,ifc_fourq
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
-!FB  use m_crystal_io,       only : crystal_ncwrite
   use m_tdep_qpt,         only : Qpoints_type
   use m_tdep_readwrite,   only : Input_Variables_type
   use m_tdep_latt,        only : Lattice_Variables_type
@@ -37,13 +36,6 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4abi,Shell2at,Sym)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_phdos'
-!End of the abilint section
 
   implicit none
 
@@ -166,13 +158,6 @@ end subroutine tdep_calc_phdos
 
 subroutine tdep_calc_thermo(DeltaFree_AH2,InVar,Lattice,PHdos,U0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_thermo'
-!End of the abilint section
-
   implicit none
 
   integer :: iomega,itemp,iatom,itypat
@@ -289,13 +274,6 @@ end subroutine tdep_calc_thermo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 subroutine tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_calc_elastic'
-!End of the abilint section
 
   implicit none
 

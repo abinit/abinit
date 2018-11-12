@@ -74,13 +74,6 @@ CONTAINS  !===========================================================
 
 subroutine etsf_dims_nullify(Dims,dimlen)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'etsf_dims_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -176,13 +169,6 @@ end subroutine etsf_dims_nullify
 #ifdef HAVE_ETSF_IO
 
 subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_etsf_dims_init'
-!End of the abilint section
 
  implicit none
 
@@ -313,13 +299,6 @@ end subroutine abi_etsf_dims_init
 
 subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_etsf_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -350,7 +329,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 #ifdef HAVE_ETSF_IO
 !Initialize the filename
  filetsf = nctk_ncify(filapp)
- call wrtout(std_out,ABI_FUNC//': about to create file '//TRIM(filetsf),'COLL')
+ call wrtout(std_out,"about to create file "//TRIM(filetsf),'COLL')
 
  usewvl = dtset%usewvl
 
@@ -464,13 +443,6 @@ end subroutine abi_etsf_init
 !! SOURCE
 
 subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ini_wf_etsf'
-!End of the abilint section
 
  implicit none
 

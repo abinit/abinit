@@ -90,13 +90,6 @@ contains  !============================================================
 
 integer pure function kpts_timrev_from_kptopt(kptopt) result(timrev)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpts_timrev_from_kptopt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -147,13 +140,6 @@ end function kpts_timrev_from_kptopt
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
   new_kptrlatt, new_shiftk)  ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpts_ibz_from_kptrlatt'
-!End of the abilint section
 
  implicit none
 
@@ -252,13 +238,6 @@ end subroutine kpts_ibz_from_kptrlatt
 
 type(t_tetrahedron) function tetra_from_kptrlatt( &
 &  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, msg, ierr) result (tetra)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetra_from_kptrlatt'
-!End of the abilint section
 
  implicit none
 
@@ -393,13 +372,6 @@ end function tetra_from_kptrlatt
 !! SOURCE
 
 integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symkchk'
-!End of the abilint section
 
  implicit none
 
@@ -579,13 +551,6 @@ end function symkchk
 
 subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
                   use_symrec) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'listkk'
-!End of the abilint section
 
  implicit none
 
@@ -952,13 +917,6 @@ end subroutine listkk
 subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 & msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk,&
 & fullbz,nkpthf,kpthf,downsampling) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getkgrid'
-!End of the abilint section
 
  implicit none
 
@@ -1419,13 +1377,6 @@ end subroutine getkgrid
 subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
 & nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_full_kgrid'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1516,13 +1467,6 @@ end subroutine get_full_kgrid
 !! SOURCE
 
 subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_kpt_fullbz'
-!End of the abilint section
 
  implicit none
 
@@ -1696,13 +1640,6 @@ end subroutine get_kpt_fullbz
 !! SOURCE
 
 subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smpbz'
-!End of the abilint section
 
  implicit none
 
@@ -2267,13 +2204,6 @@ end subroutine smpbz
 
 subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 & msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'testkgrid'
-!End of the abilint section
 
  implicit none
 
@@ -2955,13 +2885,6 @@ end subroutine testkgrid
 
 
 subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mknormpath'
-!End of the abilint section
 
  implicit none
 

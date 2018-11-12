@@ -105,15 +105,6 @@ CONTAINS
 
 function asctime()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'asctime'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  character(len=24) :: asctime
 
@@ -180,15 +171,6 @@ end function asctime
 
 pure function sec2str(time_s) result(str)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sec2str'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: time_s
@@ -242,13 +224,6 @@ real(dp) pure function str2sec(str) result(time)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2sec'
-!End of the abilint section
-
  character(len=*),intent(in) :: str
 
 !Local variables-------------------------------
@@ -338,15 +313,6 @@ end function str2sec
 
 function abi_cpu_time() result(cpu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_cpu_time'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  real(dp) :: cpu
 
@@ -420,15 +386,6 @@ end function abi_cpu_time
 !! SOURCE
 
 function abi_wtime() result(wall)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_wtime'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -542,15 +499,6 @@ end function abi_wtime
 
 subroutine cwtime(cpu, wall, gflops, start_or_stop, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cwtime'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(inout) :: cpu,wall
@@ -634,15 +582,6 @@ end subroutine cwtime
 
 subroutine timein(cpu,wall)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'timein'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: cpu,wall
@@ -681,15 +620,6 @@ end subroutine timein
 !! SOURCE
 
 subroutine time_accu(nn,return_ncount,tottim,totflops,totftimes)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_accu'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -742,15 +672,6 @@ end subroutine time_accu
 
 subroutine time_set_papiopt(opt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_set_papiopt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: opt
@@ -778,15 +699,6 @@ end subroutine time_set_papiopt
 !! SOURCE
 
 function time_get_papiopt()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'time_get_papiopt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -870,15 +782,6 @@ end function time_get_papiopt
 !!
 
 subroutine timab(nn,option,tottim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'timab'
-!End of the abilint section
-
- implicit none
 
 #ifdef HAVE_PAPI
 #include "f90papi.h"

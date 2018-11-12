@@ -127,15 +127,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_mpi_enreg(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_mpi_enreg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(MPI_type),intent(inout) :: MPI_enreg
@@ -174,15 +165,6 @@ end subroutine init_mpi_enreg
 !! SOURCE
 
 subroutine nullify_mpi_enreg(MPI_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nullify_mpi_enreg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -225,15 +207,6 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 
 subroutine destroy_mpi_enreg(MPI_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_mpi_enreg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(MPI_type),intent(inout) :: MPI_enreg
@@ -246,46 +219,23 @@ subroutine destroy_mpi_enreg(MPI_enreg)
    nullify(mpi_enreg%distribfft)
  end if
 
- if (allocated(mpi_enreg%proc_distrb)) then
-   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
- end if
- if (allocated(mpi_enreg%kptdstrb)) then
-   ABI_DEALLOCATE(mpi_enreg%kptdstrb)
- end if
- if (allocated(mpi_enreg%kpt_loc2fbz_sp)) then
-   ABI_DEALLOCATE(mpi_enreg%kpt_loc2fbz_sp)
- end if
- if (allocated(mpi_enreg%kpt_loc2ibz_sp)) then
-   ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
- end if
- if (allocated(mpi_enreg%mkmem)) then
-   ABI_DEALLOCATE(mpi_enreg%mkmem)
- end if
- if (allocated(mpi_enreg%my_kpttab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_kpttab)
- end if
+ ABI_SFREE(mpi_enreg%proc_distrb)
+ ABI_SFREE(mpi_enreg%kptdstrb)
+ ABI_SFREE(mpi_enreg%kpt_loc2fbz_sp)
+ ABI_SFREE(mpi_enreg%kpt_loc2ibz_sp)
+ ABI_SFREE(mpi_enreg%mkmem)
+ ABI_SFREE(mpi_enreg%my_kpttab)
  if (associated(mpi_enreg%my_atmtab)) then
    ABI_DEALLOCATE(mpi_enreg%my_atmtab)
    nullify(mpi_enreg%my_atmtab)
  end if
- if (allocated(mpi_enreg%distrb_pert)) then
-   ABI_DEALLOCATE(mpi_enreg%distrb_pert)
- end if
- if (allocated(mpi_enreg%distrb_img)) then
-   ABI_DEALLOCATE(mpi_enreg%distrb_img)
- end if
- if (allocated(mpi_enreg%my_imgtab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_imgtab)
- end if
- if (allocated(mpi_enreg%my_kgtab)) then
-   ABI_DEALLOCATE(mpi_enreg%my_kgtab)
- end if
- if (allocated(mpi_enreg%distrb_hf)) then
-   ABI_DEALLOCATE(mpi_enreg%distrb_hf)
- end if
+ ABI_SFREE(mpi_enreg%distrb_pert)
+ ABI_SFREE(mpi_enreg%distrb_img)
+ ABI_SFREE(mpi_enreg%my_imgtab)
+ ABI_SFREE(mpi_enreg%my_kgtab)
+ ABI_SFREE(mpi_enreg%distrb_hf)
 
-!Do not deallocate wavelet denspot distribution arrays,
-!they are handled by BigDFT.
+!Do not deallocate wavelet denspot distribution arrays, they are handled by BigDFT.
 
 end subroutine destroy_mpi_enreg
 !!***
@@ -313,15 +263,6 @@ end subroutine destroy_mpi_enreg
 !! SOURCE
 
 subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_mpi_enreg'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -495,15 +436,6 @@ end subroutine copy_mpi_enreg
 
 subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'set_mpi_enreg_fft'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: me_g0,comm_fft,paral_kgb
@@ -549,15 +481,6 @@ end subroutine set_mpi_enreg_fft
 !! SOURCE
 
 subroutine unset_mpi_enreg_fft(MPI_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'unset_mpi_enreg_fft'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -613,15 +536,6 @@ end subroutine unset_mpi_enreg_fft
 !! SOURCE
 
 subroutine ptabs_fourdp(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptabs_fourdp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -702,15 +616,6 @@ end subroutine ptabs_fourdp
 
 subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ptabs_fourwf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n2,n3
@@ -785,15 +690,6 @@ end subroutine ptabs_fourwf
 
 logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol,msg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpi_distrib_is_ok'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband,nkpt,nkpt_current_proc,nsppol
@@ -849,15 +745,6 @@ end function mpi_distrib_is_ok
 
 function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'proc_distrb_cycle'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,iband1,iband2,isppol,me
@@ -898,15 +785,6 @@ end function proc_distrb_cycle
 !! SOURCE
 
 subroutine initmpi_world(mpi_enreg,nproc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_world'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in)::nproc
@@ -970,15 +848,6 @@ end subroutine initmpi_world
 !! SOURCE
 
 subroutine initmpi_seq(mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_seq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(MPI_type),intent(out) :: mpi_enreg
@@ -1082,15 +951,6 @@ end subroutine initmpi_seq
 !! SOURCE
 
 subroutine initmpi_atom(dtset,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_atom'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1199,15 +1059,6 @@ end subroutine initmpi_atom
 
 subroutine clnmpi_atom(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_atom'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(MPI_type), intent(inout) :: mpi_enreg
 
@@ -1258,15 +1109,6 @@ end subroutine clnmpi_atom
 !! SOURCE
 
 subroutine initmpi_grid(mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_grid'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1550,15 +1392,6 @@ end subroutine initmpi_grid
 
 subroutine clnmpi_grid(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_grid'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(MPI_type), intent(inout) :: mpi_enreg
 
@@ -1653,16 +1486,6 @@ end subroutine clnmpi_grid
 !! SOURCE
 
 subroutine initmpi_img(dtset,mpi_enreg,option)
-
- !use m_io_tools,  only: flush_unit
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_img'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: option
@@ -1967,15 +1790,6 @@ end subroutine initmpi_img
 
 subroutine clnmpi_img(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_img'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(MPI_type), intent(inout) :: mpi_enreg
 
@@ -2038,15 +1852,6 @@ end subroutine clnmpi_img
 !! SOURCE
 
 subroutine initmpi_pert(dtset,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_pert'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2156,15 +1961,6 @@ end subroutine initmpi_pert
 
 subroutine clnmpi_pert(mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'clnmpi_pert'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(MPI_type),intent(inout) :: mpi_enreg
 
@@ -2222,15 +2018,6 @@ end subroutine clnmpi_pert
 !! SOURCE
 
 subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initmpi_band'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2328,15 +2115,6 @@ end subroutine initmpi_band
 
 subroutine pre_gather(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pre_gather'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,n3,n4
  real(dp),intent(in) :: array(n1,n2,n4,1)
@@ -2381,15 +2159,6 @@ end subroutine pre_gather
 
 subroutine pre_scatter(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pre_scatter'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: n1,n2,n3,n4
  real(dp),intent(out) :: array(n1,n2,n4,1)
@@ -2423,15 +2192,6 @@ end subroutine pre_scatter
 !! SOURCE
 
 logical function iwrite_fftdatar(mpi_enreg) result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iwrite_fftdatar'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2486,15 +2246,6 @@ end function iwrite_fftdatar
 !! SOURCE
 
 subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'distrb2'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mband,nkpt,nproc,nsppol
@@ -2767,15 +2518,6 @@ end subroutine distrb2
 !! SOURCE
 
 subroutine distrb2_hf(nbandhf,nkpthf, nproc, nsppol, mpi_enreg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'distrb2_hf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbandhf,nkpthf,nproc,nsppol

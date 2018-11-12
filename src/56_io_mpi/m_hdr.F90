@@ -42,6 +42,7 @@ MODULE m_hdr
  use m_xmpi
  use m_abicore
  use m_errors
+ use m_crystal
  use m_wffile
  use m_sort
 #ifdef HAVE_MPI2
@@ -54,7 +55,7 @@ MODULE m_hdr
 
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
- use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust
+ use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust, strcat
  use m_symtk,         only : print_symmetries
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
@@ -97,6 +98,7 @@ MODULE m_hdr
  public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
  public :: hdr_check               ! Compare two headers.
  public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
+ public :: hdr_get_crystal
 
 ! Generic interface of the routines hdr_skip
  interface hdr_skip
@@ -276,15 +278,6 @@ CONTAINS  !===========================================================
 
 integer function fform_from_ext(abiext) result(fform)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fform_from_ext'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
  character(len=*),intent(in) :: abiext
 
@@ -347,15 +340,6 @@ end function fform_from_ext
 !! SOURCE
 
 character(len=nctk_slen) function varname_from_fname(filename) result(varname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'varname_from_fname'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
  character(len=*),intent(in) :: filename
@@ -496,15 +480,6 @@ end function varname_from_fname
 
 type(abifile_t) function abifile_from_varname(varname) result(afile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abifile_from_varname'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
  character(len=*),intent(in) :: varname
 
@@ -541,15 +516,6 @@ end function abifile_from_varname
 
 type(abifile_t) function abifile_from_fform(fform) result(afile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abifile_from_fform'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
  integer,intent(in) :: fform
 
@@ -583,30 +549,8 @@ end function abifile_from_fform
 
 subroutine check_fform(fform)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
-
 !Local variables-------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
-
  integer,intent(in) :: fform
 #ifdef DEBUG_MODE
  type(abifile_t) :: abifile
@@ -650,15 +594,6 @@ end subroutine check_fform
 !! SOURCE
 
 subroutine test_abifiles()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_abifiles'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 
@@ -709,15 +644,6 @@ end subroutine test_abifiles
 !! SOURCE
 
 subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshiftk_orig, nshiftk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_malloc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -792,15 +718,6 @@ end subroutine hdr_malloc
 
 subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
 &                   mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -903,15 +820,6 @@ end subroutine hdr_init
 
 subroutine hdr_free(hdr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(hdr_type),intent(inout) :: hdr
@@ -989,15 +897,6 @@ end subroutine hdr_free
 !! SOURCE
 
 subroutine hdr_copy(Hdr_in,Hdr_cp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_copy'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1134,15 +1033,6 @@ end subroutine hdr_copy
 
 real(dp) pure function hdr_nelect_fromocc(Hdr) result(nelect)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_nelect_fromocc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  type(hdr_type),intent(in) :: Hdr
@@ -1206,15 +1096,6 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 &  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
 &  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
 &  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_init_lowlvl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1419,15 +1300,6 @@ end subroutine hdr_init_lowlvl
 
 subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_read_from_fname'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  integer,intent(out) :: fform
@@ -1509,15 +1381,6 @@ end subroutine hdr_read_from_fname
 
 subroutine hdr_write_to_fname(Hdr,fname,fform)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_write_to_fname'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: fform
  character(len=*),intent(in) :: fname
@@ -1586,15 +1449,6 @@ end subroutine hdr_write_to_fname
 !! SOURCE
 
 subroutine hdr_mpio_skip(mpio_fh,fform,offset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_mpio_skip'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpio_fh
@@ -1703,15 +1557,6 @@ end subroutine hdr_mpio_skip
 !! SOURCE
 
 subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_bsize_frecords'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1842,15 +1687,6 @@ end subroutine hdr_bsize_frecords
 
 subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_io_wfftype'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(inout) :: fform
  integer,intent(in) :: rdwr
@@ -1961,15 +1797,6 @@ end subroutine hdr_io_wfftype
 
 subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_io_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(inout) :: fform
  integer,intent(in) :: rdwr,unitfi
@@ -2032,15 +1859,6 @@ end subroutine hdr_io_int
 !! SOURCE
 
 subroutine hdr_echo(Hdr,fform,rdwr,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_echo'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(inout) :: fform
@@ -2210,15 +2028,6 @@ end subroutine hdr_echo
 
 subroutine hdr_skip_int(unitfi,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_skip_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: unitfi
  integer,intent(out) :: ierr
@@ -2268,15 +2077,6 @@ end subroutine hdr_skip_int
 !! SOURCE
 
 subroutine hdr_skip_wfftype(wff,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_skip_wfftype'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2439,15 +2239,6 @@ end subroutine hdr_skip_wfftype
 subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu, &
 &                     comm_atom,mpi_atmtab) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_update'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot
@@ -2522,15 +2313,6 @@ end subroutine hdr_update
 !! SOURCE
 
 subroutine hdr_bcast(hdr,master,me,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_bcast'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: master,me,comm
@@ -2852,15 +2634,6 @@ end subroutine hdr_bcast
 
 subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_fort_read'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: fform
  integer,intent(in) :: unit
@@ -2982,15 +2755,6 @@ end subroutine hdr_fort_read
 !! SOURCE
 
 subroutine hdr_ncread(Hdr,ncid,fform)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_ncread'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3155,12 +2919,6 @@ subroutine hdr_ncread(Hdr,ncid,fform)
 contains
  integer function vid(vname)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -3197,15 +2955,6 @@ end subroutine hdr_ncread
 !! SOURCE
 
 subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_fort_write'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
@@ -3295,15 +3044,6 @@ end subroutine hdr_fort_write
 
 integer function hdr_backspace(hdr, unit, msg) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_backspace'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(hdr_type),intent(in) :: hdr
  integer,intent(in) :: unit
@@ -3359,15 +3099,6 @@ end function hdr_backspace
 !! SOURCE
 
 integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_ncwrite'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3667,19 +3398,11 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("amu"), hdr%amu))
 
 #else
- MSG_ERROR("netcdf support support not activated")
+ MSG_ERROR("netcdf support not activated")
 #endif
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -3702,15 +3425,6 @@ end function hdr_ncwrite
 !! SOURCE
 
 subroutine hdr_set_occ(hdr, occ3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_set_occ'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(hdr_type),intent(inout) :: hdr
@@ -3750,15 +3464,6 @@ end subroutine hdr_set_occ
 !! SOURCE
 
 subroutine hdr_get_occ3d(hdr, occ3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_get_occ3d'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(hdr_type),intent(in) :: hdr
@@ -3870,15 +3575,6 @@ end subroutine hdr_get_occ3d
 
 subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_check'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fform,fform0
@@ -3887,11 +3583,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  type(hdr_type),intent(in) :: hdr,hdr0
 
 !Local variables-------------------------------
- character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
- character(len=24), save :: bndfmt='(2x, i4,t41,   a,2x, i4)'
- character(len=28), save :: occfmt='(2x, f4.1,t41,   a,2x, f4.1)'
- character(len=28), save :: wtkfmt='(2x, f7.3,t41,   a,2x, f7.3)'
- character(len=28), save :: zatfmt='(2x, f6.2,t41,   a,2x, f6.2)'
+ character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt, typfmt
 !scalars
  integer,parameter :: mwarning=5,nkpt_max=5
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
@@ -3900,7 +3592,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  integer :: twvl,txred,enough
  real(dp) :: rms
  logical :: tfform2,tfform52
- character(len=26) :: typfmt
  character(len=500) :: msg
  type(abifile_t) :: abifile,abifile0
 
@@ -4120,9 +3811,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsppol*nkpt,9
      istop = min(istart + 8,nsppol*nkpt)
      mu = istop - istart + 1
-!    generate a format specifier
-     bndfmt(5:5) = number(mu)
-     bndfmt(21:21) = number(mu)
+     ! generate a format specifier
+     bndfmt = strcat('(2x,',itoa(mu),'i4,t41,a,2x,',itoa(mu),'i4)')
      if (istart<=100) then
        write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
        call wrtout(std_out,msg,mode_paral)
@@ -4171,7 +3861,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsym,12
      istop=min(istart+11,nsym)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%symafm(istart:istop),'|',hdr0%symafm(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4214,7 +3904,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,natom,12
      istop=min(istart+11,natom)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%typat(istart:istop),'|',hdr0%typat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4236,7 +3926,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,npsp  ,12
      istop=min(istart+11,npsp  )
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%so_psp  (istart:istop),'|',hdr0%so_psp  (istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4257,7 +3947,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nkpt,12
      istop=min(istart+11,nkpt)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      if (istart<=100) then
        write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
        call wrtout(std_out,msg,mode_paral)
@@ -4347,8 +4037,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    istop = min(nkpt,nkpt_max)
    do ii = 1, istop, 5
      mu = min(5, istop - ii + 1)
-     wtkfmt(5:5) = number(mu)
-     wtkfmt(23:23) = number(mu)
+     wtkfmt = strcat('(2x,',itoa(mu),'f7.3,t41,a,2x,',itoa(mu),'f7.3)')
      write(msg, wtkfmt)hdr%wtk(ii:min(istop, ii + 5 - 1)),'|',hdr0%wtk(ii:min(istop, ii + 5 - 1))
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4381,8 +4070,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,bantot_eff,9
      istop = min(istart+8,bantot_eff)
      mu = istop - istart + 1
-     occfmt(5:5) = number(mu)
-     occfmt(23:23) = number(mu)
+     occfmt = strcat('(2x,',itoa(mu),'f4.1,t41,a,2x,',itoa(mu),'f4.1)')
      write(msg,fmt=occfmt)hdr%occ(istart:istop),'|', hdr0%occ(istart:istop)
      call wrtout(std_out,msg,mode_paral)
      if(istart>9*nkpt_max)then
@@ -4436,8 +4124,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,ntypat,6
      istop = min(istart+5,ntypat)
      mu = istop-istart+1
-     zatfmt(5:5) = number(mu)
-     zatfmt(23:23) = number(mu)
+     zatfmt = strcat('(2x,',itoa(mu),'f6.2,t41,a,2x,',itoa(mu),'f6.2)')
      write(msg,fmt=zatfmt) hdr%znucltypat(istart:istop),'|',hdr0%znucltypat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4661,70 +4348,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  write(msg,'(80a)') ('=',ii=1,80)
  call wrtout(std_out,msg,mode_paral)
 
- CONTAINS
-!!***
-
-!!****f* hdr_check/mk_hdr_check_fmt
-!! NAME
-!! mk_hdr_check_fmt
-!!
-!! FUNCTION
-!! make a format needed in hdr_check, for arrays of nint integers each of format i3
-!!
-!! INPUTS
-!!  nelm=number of elements to be printed
-!!
-!! OUTPUT
-!!  character(len=26), typfmt= format needed
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine mk_hdr_check_fmt(nelm,typfmt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mk_hdr_check_fmt'
-!End of the abilint section
-
-   implicit none
-
-!  Arguments ------------------------------------
-!  scalars
-   integer,intent(in) :: nelm
-   character(len=26),intent(out) :: typfmt
-
-!  Local variables-------------------------------
-!  scalars
-   integer :: ii
-   character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
-   character(len=26), parameter :: templatefmt='(2x,  i3,t41   ,a,2x,  i3)'
-!  *************************************************************************
-
-!  Initialize the format
-   typfmt=templatefmt
-
-!  Generate the type format specifier
-   ii=nelm/10
-   if ( ii /= 0 ) then
-     typfmt(5:5) = number(ii)
-     typfmt(22:22) = number(ii)
-   else
-     typfmt(5:5) = ' '
-     typfmt(22:22) = ' '
-   end if
-   ii = nelm - 10 * (nelm/10)
-   typfmt(6:6) = number(ii)
-   typfmt(23:23) = number(ii)
-
- end subroutine mk_hdr_check_fmt
-
 end subroutine hdr_check
 !!***
 
@@ -4752,15 +4375,6 @@ end subroutine hdr_check
 !! SOURCE
 
 subroutine hdr_vs_dtset(Hdr,Dtset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_vs_dtset'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(Hdr_type),intent(in) :: Hdr
@@ -4971,15 +4585,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 
  subroutine compare_int(name,iexp,ifound,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compare_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: iexp,ifound
  integer,intent(inout) :: ierr
@@ -5005,6 +4610,65 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!***
 
 end subroutine hdr_vs_dtset
+!!***
+
+!!****f* m_hdr/hdr_get_crystal
+!! NAME
+!!  hdr_get_crystal
+!!
+!! FUNCTION
+!!  Initializes a crystal_t data type starting from the abinit header.
+!!
+!! INPUTS
+!!  hdr<hdr_type>=the abinit header
+!!  timrev ==2 => take advantage of time-reversal symmetry
+!!         ==1 ==> do not use time-reversal symmetry
+!!  remove_inv [optional]= if .TRUE. the inversion symmetry is removed from the set of operations
+!!  even if it is present in the header
+!!
+!! OUTPUT
+!!  cryst<crystal_t>= the data type filled with data reported in the abinit header
+!!
+!! TODO
+!!  Add information on the use of time-reversal in the Abinit header.
+!!
+!! PARENTS
+!!      cut3d,eph,fold2Bloch,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mrgscr,setup_bse,setup_screening,setup_sigma,wfk_analyze
+!!
+!! CHILDREN
+!!      atomdata_from_znucl,crystal_init
+!!
+!! SOURCE
+
+type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
+
+!Arguments ------------------------------------
+ type(hdr_type),intent(in) :: hdr
+ integer,intent(in) :: timrev
+ logical,optional,intent(in) :: remove_inv
+
+!Local variables-------------------------------
+ integer :: space_group
+ logical :: rinv,use_antiferro
+! *********************************************************************
+
+ rinv=.FALSE.; if (PRESENT(remove_inv)) rinv=remove_inv
+ use_antiferro = (hdr%nspden==2.and.hdr%nsppol==1)
+
+ ! Consistency check
+ ABI_CHECK(any(timrev == [1, 2]),"timrev should be in (1|2)")
+ if (use_antiferro) then
+   ABI_CHECK(ANY(hdr%symafm==-1),"Wrong nspden, nsppol, symafm.")
+ end if
+
+ space_group=0 !FIXME not known at this level.
+
+ call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
+& hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
+& symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
+
+end function hdr_get_crystal
 !!***
 
 end module m_hdr

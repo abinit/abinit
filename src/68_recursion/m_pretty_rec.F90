@@ -71,13 +71,6 @@ CONTAINS  !===========================================================
 
 subroutine prtworksim(work_now)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworksim'
-!End of the abilint section
-
  implicit none
 !Arguments ------------------------------------
 ! scalars
@@ -118,13 +111,6 @@ end subroutine prtworksim
 !! SOURCE
 
 subroutine prtworksiRe(work_now)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworksiRe'
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------
@@ -167,13 +153,6 @@ end subroutine prtworksiRe
 !! SOURCE
 
 subroutine prtworkadv(work_now,adv)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworkadv'
-!End of the abilint section
 
  implicit none
 

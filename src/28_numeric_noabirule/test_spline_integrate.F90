@@ -6,13 +6,6 @@ program test_spline_integrate
 
 use defs_basis
 use m_splines
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_spline_integrate'
-!End of the abilint section
-
 implicit none
 
 real(dp), parameter :: int_tol = 5.0e-3_dp

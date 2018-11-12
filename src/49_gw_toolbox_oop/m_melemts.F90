@@ -215,13 +215,6 @@ CONTAINS  !=====================================================================
 
 subroutine melflags_reset(Mflags)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melflags_reset'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -267,13 +260,6 @@ end subroutine melflags_reset
 !! SOURCE
 
 subroutine melflags_copy(Mflags_in, Mflags_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melflags_copy'
-!End of the abilint section
 
  implicit none
 
@@ -323,13 +309,6 @@ end subroutine melflags_copy
 !! SOURCE
 
 subroutine melements_free(Mels)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_free'
-!End of the abilint section
 
  implicit none
 
@@ -416,13 +395,6 @@ end subroutine melements_free
 
 subroutine my_select_melements(Mels,aname,flag_p,arr_p)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'my_select_melements'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -495,13 +467,6 @@ end subroutine my_select_melements
 !! SOURCE
 
 subroutine melements_init(Mels,Mflags_in,nsppol,nspden,nspinor,nkibz,kibz,bands_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_init'
-!End of the abilint section
 
  implicit none
 
@@ -632,13 +597,6 @@ end subroutine melements_init
 
 subroutine melements_herm(Mels,aname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_herm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -730,13 +688,6 @@ end subroutine melements_herm
 
 subroutine melements_mpisum(Mels,comm,aname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_mpisum'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -805,13 +756,6 @@ end subroutine melements_mpisum
 !! SOURCE
 
 subroutine melements_print(Mels,names_list,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_print'
-!End of the abilint section
 
  implicit none
 
@@ -978,13 +922,6 @@ end subroutine melements_print
 
 subroutine melements_zero(Mels,irrep_tab,aname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'melements_zero'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1061,12 +998,6 @@ end subroutine melements_zero
 !! SOURCE
 
 !pure function mels_get_exene_core(mels,kmesh,bands) result(ex_energy)
-!
-!!This section has been created automatically by the script Abilint (TD).
-!!Do not modify the following lines by hand.
-!#undef ABI_FUNC
-!#define ABI_FUNC 'mels_get_exene_core'
-!!End of the abilint section
 !
 ! implicit none
 !

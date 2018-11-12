@@ -135,6 +135,9 @@ import io
 import fnmatch
 #stderr and stdout
 import sys
+# Handle py2, py3k differences.
+py2 = sys.version_info[0] <= 2
+
 #Options
 import getopt
 #Regular expressions
@@ -152,6 +155,12 @@ if  version_info < [2,3,0]:
     sys.stderr.write("Detected version %d.%d.%d\n" % tuple(version_info))
     sys.stderr.write("Minimal required version is python 2.3.0")
     sys.exit(1)
+
+def my_unicode(s):
+    if py2:
+        return unicode(s)
+    else:
+        return s
 
 #If the class 'set' does not exist use instead Set
 if 'set' not in dir(__builtins__):
@@ -545,7 +554,7 @@ class Project:
                     break
         self.files[fullname] = File_Class(file,dir=dir,read_only=read_only,message=self.message)
         if not create:
-            print("fullname", fullname)
+            #print("fullname", fullname)
             self.files[fullname].read()
         #Return the File instance
         return self.files[fullname]
@@ -1311,7 +1320,7 @@ class Structure:
                 #Do nothing
                 return
         #The code is inserted before the child codes
-        fd.write(self.code)
+        fd.write(my_unicode(self.code))
         for child in self.children:
             child.write(fd,only_if_changed)
 
@@ -1340,7 +1349,7 @@ class File(Structure):
     #
     def read(self,fd=None):
         "Read the file."
-        if fd == None:
+        if fd is None:
             #fd = open("%s/%s" % (self.dir,self.name), "rt")
             fd = io.open("%s/%s" % (self.dir,self.name), 'rt', encoding="utf8")
 
@@ -1361,10 +1370,11 @@ class File(Structure):
                 #Do nothing
                 return
         self.message.write("[%s/%s]" % (dir,file))
-        if fd == None:
-            fd = open("%s/%s" % (dir,file),"w")
+        if fd is None:
+            #fd = open("%s/%s" % (dir,file),"w")
+            fd = io.open("%s/%s" % (dir,file), "wt", encoding="utf8")
         #The code is inserted before the child codes
-        fd.write(self.code)
+        fd.write(my_unicode(self.code))
         for child in self.children:
             child.write(fd,only_if_changed=False)
         fd.close()
@@ -2539,7 +2549,9 @@ class Use(Code):
               #Add text_use inside use statements
               #self.code += text_use
           text_use += use_after + "\n"
-          self.code += text_use
+
+          # Comment this line to insert empty abilint section
+          #self.code += text_use
 
         #Remove multiple \n
         self.code = self.re_multi_n.sub('\n\n',self.code)

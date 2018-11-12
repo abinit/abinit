@@ -67,7 +67,6 @@ paral_atom 0
 prtvol 10
 istwfk 4*1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

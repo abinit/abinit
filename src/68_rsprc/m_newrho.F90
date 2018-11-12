@@ -182,13 +182,6 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  use m_pawtab,   only : pawtab_type
  use m_pawrhoij, only : pawrhoij_type
  use m_prcref,   only : prcref
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newrho'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------
@@ -315,22 +308,22 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  ! recip space and all fft points are here
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(1,nresid0(:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     call fourdp(1,nresid0(:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
    rhomag(:,1)=reshape(rhog,(/2*nfft/))
    if (dtset%nspden>1) then
      do ispden=2,dtset%nspden
-       call fourdp(1,rhomag(:,ispden),rhor(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,rhomag(:,ispden),rhor(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
    end if
    if (dtset%usekden>0) then
      do ispden=1,dtset%nspden
-       call fourdp(1,tauresid0(:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,tauresid0(:,ispden),tauresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
      taumag(:,1)=reshape(taug,(/2*nfft/))
      if (dtset%nspden>1) then
        do ispden=2,dtset%nspden
-         call fourdp(1,taumag(:,ispden),taur(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+         call fourdp(1,taumag(:,ispden),taur(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
        end do
      end if
    end if
@@ -344,7 +337,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    fact=dielar(4)-1._dp
    ABI_ALLOCATE(nreswk,(2,nfft,dtset%nspden))
    do ispden=1,dtset%nspden
-     call fourdp(1,nreswk(:,:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     call fourdp(1,nreswk(:,:,ispden),nresid(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
    do ifft=1,nfft
      if (ffttomix(ifft)>0) then
@@ -358,7 +351,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
    if (dtset%nspden>1) then
      ABI_ALLOCATE(magng,(2,nfft,dtset%nspden-1))
      do ispden=2,dtset%nspden
-       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
        do ifft=1,nfft
          if (ffttomix(ifft)>0) then
            jfft=2*ffttomix(ifft)
@@ -638,22 +631,22 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if (ispmix==1.and.nfft==nfftmix) then
    rhor(:,1:dtset%nspden)=rhomag(:,1:dtset%nspden)
    if(dtset%usewvl==0) then
-     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end if
    if (dtset%usekden>0) then
      taur(:,1:dtset%nspden*dtset%usekden)=taumag(:,1:dtset%nspden*dtset%usekden)
      if(dtset%usewvl==0) then
-       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end if
    end if
  else if (nfft==nfftmix) then
    do ispden=1,dtset%nspden
-     call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+     call fourdp(1,rhomag(:,ispden),rhor(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    end do
    rhog(:,:)=reshape(rhomag(:,1),(/2,nfft/))
    if (dtset%usekden>0) then
      do ispden=1,dtset%nspden
-       call fourdp(1,taumag(:,ispden),taur(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,taumag(:,ispden),taur(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
      taug(:,:)=reshape(taumag(:,1),(/2,nfft/))
    end if
@@ -667,14 +660,14 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
      jfft=mixtofft(ifft)
      rhog(1:2,jfft)=rhomag(2*ifft-1:2*ifft,1)
    end do
-   call fourdp(1,rhog,rhor(:,1),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+   call fourdp(1,rhog,rhor(:,1),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
    if (dtset%nspden>1) then
      do ispden=2,dtset%nspden
        do ifft=1,nfftmix
          jfft=mixtofft(ifft)
          magng(1:2,jfft,ispden-1)=rhomag(2*ifft-1:2*ifft,ispden)
        end do
-       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),+1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,tim_fourdp9)
+       call fourdp(1,magng(:,:,ispden-1),rhor(:,ispden),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp9)
      end do
      ABI_DEALLOCATE(magng)
    end if

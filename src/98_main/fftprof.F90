@@ -93,13 +93,6 @@ program fftprof
  use m_fft,        only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
  use m_fftw3,      only : fftw3_init_threads
  use m_mpinfo,     only : destroy_mpi_enreg, initmpi_seq
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftprof'
-!End of the abilint section
-
  implicit none
 
 
@@ -267,10 +260,8 @@ program fftprof
      end do
    end do
 
-!1  continue
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
    call wrtout(std_out,msg,"COLL")
-
    goto 100 ! Jump to xmpi_end
  end if
 
@@ -510,10 +501,9 @@ program fftprof
  ABI_DT_FREE(Ftest)
  call fftprof_free(Ftprof)
  ABI_DT_FREE(Ftprof)
+ call destroy_mpi_enreg(MPI_enreg)
 
  call flush_unit(std_out)
-
- call destroy_mpi_enreg(MPI_enreg)
 
  call abinit_doctor("__fftprof")
 

@@ -51,13 +51,6 @@ program mrgdv
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrgdv'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------

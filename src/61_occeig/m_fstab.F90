@@ -163,15 +163,6 @@ contains  !============================================================
 
 subroutine fstab_free(fstab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(fstab_t),intent(inout) :: fstab
 
@@ -230,15 +221,6 @@ end subroutine fstab_free
 !! SOURCE
 
 subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshiftk, shiftk, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -533,15 +515,6 @@ end subroutine fstab_init
 
 integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_findkg0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(fstab_t),intent(in) :: fstab
@@ -589,15 +562,6 @@ end function fstab_findkg0
 !! SOURCE
 
 subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_weights_ibz'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -676,15 +640,6 @@ end subroutine fstab_weights_ibz
 !! SOURCE
 
 subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -765,15 +720,6 @@ end subroutine fstab_print
 !! SOURCE
 
 subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkqptequiv'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

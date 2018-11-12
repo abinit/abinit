@@ -121,13 +121,6 @@ contains
 subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 &  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getnel'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -409,13 +402,6 @@ end subroutine getnel
 
 subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newocc'
-!End of the abilint section
 
  implicit none
 
@@ -760,13 +746,6 @@ end subroutine newocc
 !! SOURCE
 
 subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphysel,tsmear,tsmearinv,xgrid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_occ_ent'
-!End of the abilint section
 
  implicit none
 
@@ -1313,13 +1292,6 @@ end subroutine init_occ_ent
 
 subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,rocceig)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occeig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1417,13 +1389,6 @@ end subroutine occeig
 
 elemental real(dp) function occ_fd(ee, kT, mu)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occ_fd'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1481,13 +1446,6 @@ end function occ_fd
 !! SOURCE
 
 elemental real(dp) function occ_be(ee, kT, mu)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occ_be'
-!End of the abilint section
 
  implicit none
 
@@ -1555,13 +1513,6 @@ end function occ_be
 
 subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
 &  nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dos_hdr_write'
-!End of the abilint section
 
  implicit none
 
@@ -1703,13 +1654,6 @@ end subroutine dos_hdr_write
 !! SOURCE
 
 subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,occ,transmit_occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pareigocc'
-!End of the abilint section
 
  implicit none
 

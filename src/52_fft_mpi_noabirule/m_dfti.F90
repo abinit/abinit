@@ -209,13 +209,6 @@ CONTAINS  !===========================================================
 
 subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_seqfourdp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -369,13 +362,6 @@ end subroutine dfti_seqfourdp
 subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_seqfourwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -419,7 +405,7 @@ subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,is
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
  if (use_fftrisc) then
-   !call wrtout(std_out,strcat(ABI_FUNC," calls dfti_fftrisc"),"COLL")
+   !call wrtout(std_out, " calls dfti_fftrisc")
    if (ndat == 1) then
      if (fftcore_mixprec == 0) then
        call dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
@@ -611,13 +597,6 @@ end subroutine dfti_seqfourwf
 subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftrisc_sp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -742,13 +721,6 @@ end subroutine dfti_fftrisc_sp
 subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftrisc_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -814,13 +786,6 @@ end subroutine dfti_fftrisc_dp
 
 subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftrisc_mixprec'
-!End of the abilint section
 
  implicit none
 
@@ -905,13 +870,6 @@ end subroutine dfti_fftrisc_mixprec
 
 subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftug_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -983,13 +941,6 @@ end subroutine dfti_fftug_dp
 
 subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftug_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1060,13 +1011,6 @@ end subroutine dfti_fftug_spc
 !! SOURCE
 
 subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftug_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1141,13 +1085,6 @@ end subroutine dfti_fftug_dpc
 !! SOURCE
 
 subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftur_dp'
-!End of the abilint section
 
  implicit none
 
@@ -1225,13 +1162,6 @@ end subroutine dfti_fftur_dp
 
 subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftur_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1307,13 +1237,6 @@ end subroutine dfti_fftur_spc
 
 subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftur_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1380,13 +1303,6 @@ end subroutine dfti_fftur_dpc
 
 subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_ip_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1434,13 +1350,6 @@ end subroutine dfti_c2c_ip_spc
 !! SOURCE
 
 subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_ip_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1490,13 +1399,6 @@ end subroutine dfti_c2c_ip_dpc
 
 subroutine dfti_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_op_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1545,13 +1447,6 @@ end subroutine dfti_c2c_op_spc
 !! SOURCE
 
 subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2c_op_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1603,13 +1498,6 @@ end subroutine dfti_c2c_op_dpc
 !! SOURCE
 
 subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_many_dft_op'
-!End of the abilint section
 
  implicit none
 
@@ -1680,13 +1568,6 @@ end subroutine dfti_many_dft_op
 
 subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_many_dft_ip'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1754,13 +1635,6 @@ end subroutine dfti_many_dft_ip
 !! SOURCE
 
 subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftpad_dp'
-!End of the abilint section
 
  implicit none
 
@@ -1832,13 +1706,6 @@ end subroutine dfti_fftpad_dp
 
 subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftpad_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1904,13 +1771,6 @@ end subroutine dfti_fftpad_dpc
 
 subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_fftpad_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1966,13 +1826,6 @@ end subroutine dfti_fftpad_spc
 !! SOURCE
 
 subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_r2c_op_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -2104,13 +1957,6 @@ end subroutine dfti_r2c_op_dpc
 
 subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_r2c_op_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2171,13 +2017,6 @@ end subroutine dfti_r2c_op_dp
 !! SOURCE
 
 subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2r_op_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -2283,13 +2122,6 @@ end subroutine dfti_c2r_op_dpc
 
 subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_c2r_op_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2346,13 +2178,6 @@ end subroutine dfti_c2r_op_dp
 #ifdef HAVE_FFT_DFTI
 
 subroutine dfti_check_status(status,file,line)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_check_status'
-!End of the abilint section
 
  implicit none
 
@@ -2418,13 +2243,6 @@ end subroutine dfti_check_status
 
 function dfti_spawn_threads_here(ndat,nthreads) result(ans)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_spawn_threads_here'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2465,13 +2283,6 @@ end function dfti_spawn_threads_here
 
 subroutine dfti_use_lib_threads(logvar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_use_lib_threads'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2507,13 +2318,6 @@ end subroutine dfti_use_lib_threads
 #ifdef HAVE_FFT_DFTI
 
 subroutine dfti_alloc_real_dp(size,cptr,fptr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_alloc_real_dp'
-!End of the abilint section
 
  implicit none
 
@@ -2561,13 +2365,6 @@ end subroutine dfti_alloc_real_dp
 
 subroutine dfti_alloc_complex_spc(size,cptr,fptr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_alloc_complex_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2613,13 +2410,6 @@ end subroutine dfti_alloc_complex_spc
 #ifdef HAVE_FFT_DFTI
 
 subroutine dfti_alloc_complex_dpc(size,cptr,fptr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfti_alloc_complex_dpc'
-!End of the abilint section
 
  implicit none
 

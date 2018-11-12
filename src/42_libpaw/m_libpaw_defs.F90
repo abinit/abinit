@@ -109,25 +109,11 @@ module m_libpaw_defs
 
  function to_array1(i1) result(arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array1'
-!End of the abilint section
-
   integer :: i1,arr(1)
   arr=(/i1/)
  end function to_array1
 
  function to_array2(i1,i2) result(arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array2'
-!End of the abilint section
 
   integer :: i1,i2,arr(2)
   arr=(/i1,i2/)
@@ -135,38 +121,17 @@ module m_libpaw_defs
 
  function to_array3(i1,i2,i3) result(arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array3'
-!End of the abilint section
-
   integer :: i1,i2,i3,arr(3)
   arr=(/i1,i2,i3/)
  end function to_array3
 
  function to_array4(i1,i2,i3,i4) result(arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array4'
-!End of the abilint section
-
   integer :: i1,i2,i3,i4,arr(4)
   arr=(/i1,i2,i3,i4/)
  end function to_array4
 
  function to_array5(i1,i2,i3,i4,i5) result(arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'to_array5'
-!End of the abilint section
 
   integer :: i1,i2,i3,i4,i5,arr(5)
   arr=(/i1,i2,i3,i4,i5/)

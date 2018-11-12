@@ -94,13 +94,6 @@ CONTAINS  !=====================================================================
 
 subroutine paw_symcprj(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,Cprj_bz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_symcprj'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -280,13 +273,6 @@ end subroutine paw_symcprj
 !! SOURCE
 
 subroutine paw_symcprj_op(ik_bz,nspinor,nband_k,Cryst,Kmesh,Pawtab,Pawang,in_Cprj,out_Cprj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'paw_symcprj_op'
-!End of the abilint section
 
  implicit none
 

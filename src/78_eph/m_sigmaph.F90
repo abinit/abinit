@@ -60,7 +60,6 @@ module m_sigmaph
  use m_cgtools,        only : dotprod_g
  use m_cgtk,           only : cgtk_rotate
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
  use m_occ,            only : occ_fd, occ_be
  use m_double_grid,    only : double_grid_t
@@ -265,6 +264,10 @@ module m_sigmaph
   ! KS energies where QP corrections are wantend
   ! This array is initialized inside the (ikcalc, spin) loop
 
+  !real(dp),allocatable :: v_calc(:,:,:)
+  ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+  ! Diagonal elements of velocity operator for all states in Sigma_nk.
+
   complex(dpc),allocatable :: cweights(:,:,:,:,:,:)
   ! (nz, 2, nbcalc_ks, natom3, nbsum, nq_k))
   ! Weights for the q-integration of 1 / (e1 - e2 \pm w_{q, nu} + i.eta)
@@ -419,17 +422,8 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph'
-!End of the abilint section
-
- implicit none
+subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc,&
+                   pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -464,7 +458,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it,ndiv,thisproc_nq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop,iatom
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
@@ -497,7 +491,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
@@ -626,26 +620,71 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
- call wfd_print(wfd,header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
+ call wfd%print(header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
  ABI_FREE(wfd_istwfk)
 
- call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
- if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
+ call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+ if (.False.) call wfd%test_ortho(cryst, pawtab, unit=std_out, mode_paral="PERS")
 
  ! TODO FOR PAW
  usecprj = 0
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
+#if 0
+ call wrtout(std_out, "Computing diagonal elements of velocity operator for all states in Sigma_nk.")
+ call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
+ ABI_MALLOC(cg_work,   (2, mpw*wfd%nspinor))
+ ABI_CALLOC(sigma%v_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+
+ ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+ cnt = 0
+ do spin=1,nsppol
+   do ikcalc=1,sigma%nkcalc
+     kk = sigma%kcalc(:, ikcalc)
+     bstart_ks = sigma%bstart_ks(ikcalc, spin)
+     ik_ibz = sigma%kcalc2ibz(ikcalc,1)
+     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+     call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+
+     do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
+       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+       band_ks = ib_k + bstart_ks - 1
+       call wfd%copy_cg(band_ks, ik_ibz, spin, cg_work)
+       eshift = ebands%eig(band_ks, ik_bz, spin) - dtset%dfpt_sciss
+       call ddkop%apply(eshift, mpw, npw_k, wfd%nspinor, cg_work, cwaveprj0, wfd%mpi_enreg)
+       vdiag = ddkop%get_velocity(istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_work)
+       sigma%v_calc(:, ib_k, ikcalc, spin) = vdiag(1, :)
+     end if
+
+   end do
+ end do
+
+ call xmpi_sum(sigma%v_calc, comm, ierr)
+ call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
+ call wrtout(std_out, sjoin("Velocities completed. cpu-time:", sec2str(cpu_ks), ",wall-time:", sec2str(wall_ks)), &
+   do_flush=.True.)
+
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v_calc"), sigma%v_calc))
+ end if
+#endif
+
+ ABI_FREE(cg_work)
+ ABI_SFREE(sigma%v_calc)
+ call ddkop%free()
+#endif
+
  ! Prepare call to getgh1c
  usevnl = 0
  optlocal = 1  ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2     ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- opt_gvnl1 = 0 ! gvnl1 is output
- ABI_MALLOC(gvnl1, (2,usevnl))
+ opt_gvnlx1 = 0 ! gvnlx1 is output
+ ABI_MALLOC(gvnlx1, (2,usevnl))
  ABI_MALLOC(grad_berry, (2,nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -816,7 +855,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
      do ib_k=1,nbcalc_ks
        band_ks = ib_k + bstart_ks - 1
-       call wfd_copy_cg(wfd, band_ks, ik_ibz, spin, kets_k(1,1,ib_k))
+       call wfd%copy_cg(band_ks, ik_ibz, spin, kets_k(1,1,ib_k))
        sigma%e0vals(ib_k) = ebands%eig(band_ks, ik_ibz, spin)
      end do
 
@@ -1026,8 +1065,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,ipc),&
-             grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
-             optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+             grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
+             optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
 
          call destroy_rf_hamiltonian(rf_hamkq)
@@ -1063,12 +1102,12 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! Be careful with time-reversal symmetry.
          if (isirr_kq) then
            ! Copy u_kq(G)
-           call wfd_copy_cg(wfd, ibsum_kq, ikq_ibz, spin, bra_kq)
+           call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
          else
            ! Reconstruct u_kq(G) from the IBZ image.
            ! Use cgwork as workspace array, results stored in bra_kq
            !g0_kq =  g0ibz_kq + g0bz_kq
-           call wfd_copy_cg(wfd, ibsum_kq, ikq_ibz, spin, cgwork)
+           call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
            call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
                             npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
@@ -1519,7 +1558,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call wrtout(std_out, sjoin("Total cpu-time:", sec2str(cpu_all), ", Total wall-time:", sec2str(wall_all), ch10))
 
  ! Free memory
- ABI_FREE(gvnl1)
+ ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(work)
@@ -1534,7 +1573,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  call destroy_hamiltonian(gs_hamkq)
  call sigmaph_free(sigma)
- call wfd_free(wfd)
+ call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
 
@@ -1571,15 +1610,6 @@ end subroutine sigmaph
 !! SOURCE
 
 subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gkknu_from_atm'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1646,15 +1676,6 @@ end subroutine gkknu_from_atm
 !! SOURCE
 
 type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_new'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -1830,7 +1851,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
            new%bstart_ks(ik,spin) = max(val_indeces(ik,spin) - gw_qprange, 1)
-           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) + gw_qprange, dtset%mband)
+           bstop = min(val_indeces(ik,spin) + gw_qprange, dtset%mband)
+           new%nbcalc_ks(ik,spin) = bstop - new%bstart_ks(ik,spin) + 1
          end do
        end do
 
@@ -2251,7 +2273,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
    ncid = new%ncid
 
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    NCF_CHECK(edos_ncwrite(edos, ncid))
 
@@ -2309,6 +2331,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    !  nctkarr_t("gkq_frohl", "dp", "two, max_nbcalc, nbsum, natom3, nqbz, nkcalc, nsppol") &
    !])
    !NCF_CHECK(ncerr)
+
+   !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t("v_calc", "dp", "max_nbcalc, nkcalc, nsppol")]))
 
    if (new%frohl_model == 1) then
      ! Arrays storing the Frohlich self-energy.
@@ -2408,15 +2432,6 @@ end function sigmaph_new
 
 subroutine sigmaph_free(self)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(sigmaph_t),intent(inout) :: self
 
@@ -2509,15 +2524,6 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_setup_kcalc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc, prtvol, comm
  type(crystal_t),intent(in) :: cryst
@@ -2604,15 +2610,6 @@ end subroutine sigmaph_setup_kcalc
 !! SOURCE
 
 subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_gather_and_write'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc, spin, prtvol, comm
@@ -2984,15 +2981,6 @@ end subroutine sigmaph_gather_and_write
 
 subroutine sigmaph_print(self, dtset, unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: unt
  type(dataset_type),intent(in) :: dtset
@@ -3072,15 +3060,6 @@ end subroutine sigmaph_print
 !! SOURCE
 
 subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,distrib_bq,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_get_all_qweights'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3211,15 +3190,6 @@ end subroutine sigmaph_get_all_qweights
 !! SOURCE
 
 subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eval_sigfrohl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  type(sigmaph_t),intent(inout) :: sigma

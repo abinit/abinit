@@ -96,20 +96,13 @@ contains
 
 subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mpi_setup'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lenstr,ndtset,ndtset_alloc
  type(MPI_type),intent(inout) :: mpi_enregs(0:ndtset_alloc)
- character(len=*),intent(inout) :: string
+ character(len=*),intent(in) :: string
 !arrays
  character(len=fnlen),intent(in) :: filnam(5)
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
@@ -243,7 +236,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'autoparal',tread0,'INT')
    if(tread0==1) dtsets(idtset)%autoparal=intarr(1)
-
 
    ! Dump the list of irreducible perturbations and exit.
    if (dtsets(idtset)%paral_rf==-1.and.optdriver/=RUNL_NONLINEAR) then
@@ -1011,13 +1003,6 @@ end subroutine mpi_setup
 
  subroutine finddistrproc(dtsets,filnam,idtset,iexit,mband,mpi_enreg,ndtset_alloc,tread)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'finddistrproc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1075,7 +1060,6 @@ end subroutine mpi_setup
 !Is automatic parallelization activated?
  autoparal = dtset%autoparal
  if (autoparal==0) return
-
 
  ! Handy local variables
  iam_master = (mpi_enreg%me==0)
@@ -1835,13 +1819,6 @@ end subroutine mpi_setup
 
    function speedup_fdp(nn,mm)
    !Expected linear speedup for a nn-sized problem and mm processes
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'speedup_fdp'
-!End of the abilint section
-
    real(dp) :: speedup_fdp
    integer,intent(in) :: nn,mm
    speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
@@ -1891,13 +1868,6 @@ end subroutine finddistrproc
 subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,npslk,uselinalggpu)
 
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_kgb_indicator'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

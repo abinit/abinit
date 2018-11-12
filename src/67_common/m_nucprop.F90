@@ -126,13 +126,6 @@ contains
        &                    ptcharge,prtefg,quadmom,rhor,rprimd,symrel,tnons,typat,ucvol,usepaw,xred,zion,&
        &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_efg'
-!End of the abilint section
-
     implicit none
 
     !Arguments ------------------------------------
@@ -399,13 +392,6 @@ contains
   subroutine calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,typat,usepaw,&
        &                  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_fc'
-!End of the abilint section
-
     implicit none
 
     !Arguments ------------------------------------
@@ -537,13 +523,6 @@ contains
 !! SOURCE
 
 subroutine make_efg_ion(efg,natom,nsym,ntypat,rprimd,symrel,tnons,typat,ucvol,xred,zion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_ion'
-!End of the abilint section
 
   implicit none
 
@@ -781,13 +760,6 @@ end subroutine make_efg_ion
 
 subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor,rprimd,symrel,tnons,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_efg_el'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
@@ -843,7 +815,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
   nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
   call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-  call fourdp(cplex,fofg,fofr,fftdir,mpi_enreg,nfft,ngfft,paral_kgb,tim_fourdp) ! construct charge density in G space
+  call fourdp(cplex,fofg,fofr,fftdir,mpi_enreg,nfft,1,ngfft,tim_fourdp) ! construct charge density in G space
 
   ! the following loops over G vectors has been copied from hartre.F90 in order to be compatible with
   ! possible FFT parallelism

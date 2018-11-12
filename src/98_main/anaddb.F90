@@ -72,8 +72,7 @@ program anaddb
  use m_dtfil,          only : isfile
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_ddb_interpolate, only : ddb_interpolate
- use m_crystal,        only : crystal_t, crystal_free
- use m_crystal_io,     only : crystal_ncwrite
+ use m_crystal,        only : crystal_t
  use m_dynmat,         only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_elphon,         only : elphon
  use m_harmonic_thermo,only : harmonic_thermo
@@ -84,13 +83,6 @@ program anaddb
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -293,7 +285,7 @@ program anaddb
    !NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
    NCF_CHECK(nctk_set_datamode(ana_ncid))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "anaddb_input_string"), string(:lenstr)))
-   NCF_CHECK(crystal_ncwrite(crystal, ana_ncid))
+   NCF_CHECK(crystal%ncwrite(ana_ncid))
 #endif
  end if
 
@@ -554,7 +546,7 @@ program anaddb
 #ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(2), "_PHDOS.nc"), xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
-     NCF_CHECK(crystal_ncwrite(Crystal, phdos_ncid))
+     NCF_CHECK(Crystal%ncwrite(phdos_ncid))
      call phdos_ncwrite(Phdos, phdos_ncid)
      NCF_CHECK(nf90_close(phdos_ncid))
 #endif
@@ -600,12 +592,9 @@ program anaddb
  ! Interpolate the DDB onto the first list of vectors and write the file.
 
  if (inp%prtddb==1 .and. inp%ifcflag==1) then
-
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
    close(ddbun)
-
    call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
-
    call ddb_hdr_free(ddb_hdr)
  end if
 
@@ -908,7 +897,7 @@ program anaddb
 
  call asrq0_free(asrq0)
  call ifc_free(Ifc)
- call crystal_free(Crystal)
+ call crystal%free()
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)

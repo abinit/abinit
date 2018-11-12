@@ -33,20 +33,19 @@ module m_mlwfovlp_qp
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_hdr
 
  use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type, paw_overlap, pawcprj_getdim, pawcprj_alloc, pawcprj_free
  use m_numeric_tools,  only : isordered
  use m_geometry,       only : metric
- use m_crystal,        only : crystal_t, crystal_free
- use m_crystal_io,     only : crystal_from_hdr
+ use m_crystal,        only : crystal_t
  use m_kpts,           only : listkk
  use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
  use m_ebands,         only : ebands_init, ebands_free
  use m_qparticles,     only : rdqps, rdgw
  use m_sort,           only : sort_dp
-
 
  implicit none
 
@@ -115,14 +114,6 @@ contains
 subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,natom,&
 & nkpt,npwarr,nspden,nsppol,ntypat,Hdr,Pawtab,rprimd,MPI_enreg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mlwfovlp_qp'
-!End of the abilint section
-
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mkmem,mpw,nkpt,nspden,natom,ntypat
@@ -231,10 +222,10 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  gw_timrev=1; if (timrev==1) gw_timrev=2 !different conventions are used in GW and abinit!!
 
- call crystal_from_hdr(Cryst,Hdr,gw_timrev)
+ cryst = hdr_get_crystal(Hdr, gw_timrev)
  call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
- call crystal_free(Cryst)
+ call cryst%free()
  call kmesh_free(Kibz_mesh)
 
  ABI_MALLOC(ibz2bz,(nkibz,6))
@@ -565,15 +556,6 @@ end subroutine mlwfovlp_qp
 !!
 
 subroutine update_cprj(natom,nkibz,nbnds,nsppol,nspinor,m_lda_to_qp,dimlmn,Cprj_ibz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'update_cprj'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -73,13 +73,6 @@ contains
   subroutine kpoints_get_irreductible_zone(irrzon, phnons, &
        & n1, n2, n3, nsppol, nspden, symid, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_get_irreductible_zone'
-!End of the abilint section
-
     integer, intent(in)   :: symid
     integer, intent(in)   :: n1, n2, n3, nsppol, nspden
     integer, intent(out)  :: irrzon(n1*n2*n3,2,(nspden/nsppol)-3*(nspden/4))
@@ -129,13 +122,6 @@ contains
 
   subroutine kpoints_binding_mp_k_1(symid, nkpt, ngkpt, &
        & kptrlatt, kptrlen, nshiftk, shiftk, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_mp_k_1'
-!End of the abilint section
 
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
@@ -194,13 +180,6 @@ contains
   subroutine kpoints_binding_mp_k_2(symid, nkpt, kpt, wkpt, &
        & kptrlatt, kptrlen, nshiftk, shiftk, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_mp_k_2'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(inout) :: nshiftk
@@ -250,13 +229,6 @@ contains
 !! SOURCE
   subroutine kpoints_get_mp_k_grid(symid, nkpt, kpt, wkpt, &
        & ngkpt, nshiftk, shiftk, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_get_mp_k_grid'
-!End of the abilint section
 
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
@@ -310,13 +282,6 @@ contains
 !! SOURCE
   subroutine kpoints_binding_auto_k_1(symid, nkpt, kptrlatt, kptrlen, &
        & nshiftk, shiftk, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_auto_k_1'
-!End of the abilint section
 
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
@@ -383,13 +348,6 @@ contains
   subroutine kpoints_binding_auto_k_2(symid, nkpt, kpt, wkpt, kptrlatt, kptrlen, &
        & nshiftk, shiftk, errno)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_binding_auto_k_2'
-!End of the abilint section
-
     integer, intent(in)  :: symid
     integer, intent(out) :: errno
     integer, intent(in) :: nkpt
@@ -439,13 +397,6 @@ contains
 !! SOURCE
   subroutine kpoints_get_auto_k_grid(symid, nkpt, kpt, wkpt, &
        & kptrlen, errno)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpoints_get_auto_k_grid'
-!End of the abilint section
 
     integer, intent(in)  :: symid
     integer, intent(out) :: errno

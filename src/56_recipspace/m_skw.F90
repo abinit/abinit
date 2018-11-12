@@ -38,6 +38,7 @@ module m_skw
  use m_time,           only : cwtime
  use m_numeric_tools,  only : imax_loc, vdiff_t, vdiff_eval, vdiff_print
  use m_bz_mesh,        only : isamek
+ use m_gsphere,        only : get_irredg
 
  implicit none
 
@@ -162,13 +163,6 @@ CONTAINS  !=====================================================================
 
 type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, comm) result(new)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -211,7 +205,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol; new%bcount = bcount
 
  ! Get point group operations.
- call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, include_timrev=cplex==1)
+ call cryst%get_point_group(new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, include_timrev=cplex==1)
 
  ! -----------------------
  ! Find nrwant star points
@@ -424,13 +418,6 @@ end function skw_new
 
 subroutine skw_print(skw, unt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_print'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -481,13 +468,6 @@ end subroutine skw_print
 !! SOURCE
 
 subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_eval_bks'
-!End of the abilint section
 
  implicit none
 
@@ -580,13 +560,6 @@ end subroutine skw_eval_bks
 !! SOURCE
 
 subroutine skw_eval_fft(skw, ngfft, nfft, band, spin, oeig_mesh, oder1_mesh, oder2_mesh)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_eval_fft'
-!End of the abilint section
 
  implicit none
 
@@ -704,13 +677,6 @@ end subroutine skw_eval_fft
 
 subroutine skw_free(skw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -719,33 +685,16 @@ subroutine skw_free(skw)
 
 ! *********************************************************************
 
- if (allocated(skw%rpts)) then
-   ABI_FREE(skw%rpts)
- end if
- if (allocated(skw%ptg_symrel)) then
-   ABI_FREE(skw%ptg_symrel)
- end if
- if (allocated(skw%ptg_symrec)) then
-   ABI_FREE(skw%ptg_symrec)
- end if
+ ABI_SFREE(skw%rpts)
+ ABI_SFREE(skw%ptg_symrel)
+ ABI_SFREE(skw%ptg_symrec)
+ ABI_SFREE(skw%coefs)
 
- if (allocated(skw%coefs)) then
-   ABI_FREE(skw%coefs)
- end if
-
- if (allocated(skw%cached_srk)) then
-   ABI_FREE(skw%cached_srk)
- end if
+ ABI_SFREE(skw%cached_srk)
  skw%cached_kpt = huge(one)
-
- if (allocated(skw%cached_srk_dk1)) then
-   ABI_FREE(skw%cached_srk_dk1)
- end if
+ ABI_SFREE(skw%cached_srk_dk1)
  skw%cached_kpt_dk1 = huge(one)
-
- if (allocated(skw%cached_srk_dk2)) then
-   ABI_FREE(skw%cached_srk_dk2)
- end if
+ ABI_SFREE(skw%cached_srk_dk2)
  skw%cached_kpt_dk2 = huge(one)
 
 end subroutine skw_free
@@ -775,13 +724,6 @@ end subroutine skw_free
 !! SOURCE
 
 subroutine mkstar(skw, kpt, srk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar'
-!End of the abilint section
 
  implicit none
 
@@ -836,13 +778,6 @@ end subroutine mkstar
 !! SOURCE
 
 subroutine mkstar_dk1(skw, kpt, srk_dk1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar_dk1'
-!End of the abilint section
 
  implicit none
 
@@ -900,13 +835,6 @@ end subroutine mkstar_dk1
 !! SOURCE
 
 subroutine mkstar_dk2(skw, kpt, srk_dk2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkstar_dk2'
-!End of the abilint section
 
  implicit none
 
@@ -981,14 +909,6 @@ end subroutine mkstar_dk2
 !! SOURCE
 
 subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
-
- use m_gsphere,  only : get_irredg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_rstar_gen'
-!End of the abilint section
 
  implicit none
 

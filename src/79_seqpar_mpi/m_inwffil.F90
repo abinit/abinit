@@ -183,13 +183,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
 &           wffnow,unwff1,wffnm,wvl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'inwffil'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -318,7 +311,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      MSG_ERROR(message)
    end if
 
-   call wrtout(std_out,'inwffil: examining the header of disk file '//TRIM(wff1%fname),'COLL')
+   call wrtout(std_out,' inwffil: examining the header of disk file: '//trim(wff1%fname),'COLL')
 
 !  Check hdr0 versus hdr (and from now on ignore header consistency and write new info to header for each file)
    if (dtset%usewvl == 0) then
@@ -1133,13 +1126,6 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 &                  nspinor0,nsppol,nsppol0,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,squeeze,symrel,tnons,wff1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfsinp'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1598,7 +1584,7 @@ subroutine wfsinp(cg,cg_disk,ecut,ecut0,ecut_eff,eigen,exchn2n3d,&
 #endif
 
        else if(formeig==1)then
-         call wrtout(std_out,ABI_FUNC//': transfer of first-order eigs not yet coded!',"COLL")
+         call wrtout(std_out,'wfsinp: transfer of first-order eigs not yet coded!',"COLL")
        end if
 
 !      DEBUG
@@ -1863,13 +1849,6 @@ end subroutine wfsinp
 subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
 &  spin,mcg,mpi_enreg,nband_k,nkpt,npw,nspinor,occ_k,wff1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2109,13 +2088,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &                  nsppol1,nsppol2,nsym,occ,optorth,prtvol,randalg,restart,rprimd,&
 &                  sppoldbl,symrel,tnons,unkg2,wffinp,wffout)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newkpt'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2341,7 +2313,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
            call wrtout(iout,message,'PERS')
          end if
        else if(ikpt2==nkpt_eff+1)then
-         call wrtout(std_out, '- newkpt : prtvol=0 or 1, do not print more k-points.', 'PERS')
+         call wrtout(std_out, '- newkpt: prtvol=0 or 1, do not print more k-points.', 'PERS')
          if(iout/=6 .and. me2==0 .and. prtvol>0)then
            call wrtout(iout,message,'PERS')
          end if
@@ -2369,7 +2341,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
        if(debug>0)then
          write(message, '(a,a,a,a,i5,a,i5,a,a,i5,a,i5)' ) ch10,&
-         ' newkpt : about to call randac',ch10,&
+         ' newkpt: about to call randac',ch10,&
          '  for ikpt1=',ikpt1,', ikpt2=',ikpt2,ch10,&
          '  and isppol1=',isppol1,', isppol2=',isppol2
          call wrtout(std_out,message,'PERS')
@@ -2432,7 +2404,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
        if (debug>0 .and. restart==2) then
          write(message,'(a,i5,a,a,i5,a,i5,a)' ) &
-&         ' newkpt : about to call rwwf with ikpt1=',ikpt1,ch10,&
+&         ' newkpt: about to call rwwf with ikpt1=',ikpt1,ch10,&
 &         ' and nband(ikpt1)=',nband1(ikpt1),' nbd2=',nbd2,'.'
          call wrtout(std_out,message,'PERS')
        end if
@@ -2712,13 +2684,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 & mpw1,mpw2,nbd1,nbd2,ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,&
 & nsym,occ_k1,occ_k2,optorth,randalg,restart,rprimd2,sppoldbl,symrel,tnons)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfconv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2869,9 +2834,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  identity(:,:)=0
  identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
  isym=indkk(ikpt2+(sppoldbl-1)*(isppol2-1)*nkpt2,2)
-!DEBUG
-!write(std_out,*)' wfconv : isym=',isym
-!ENDDEBUG
+ !write(std_out,*)' wfconv : isym=',isym
  itimrev=indkk(ikpt2+(sppoldbl-1)*(isppol2-1)*nkpt2,6)
  if(isym/=0)then
    symrel_conv(:,:)=symrel(:,:,isym)
@@ -3288,7 +3251,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 
      if(ikpt2<=nkpt_max)then
        nbremn=nbd2-nbd1
-       write(message,'(a,i6,a,i7,a,i4)')' wfconv :',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
+       write(message,'(a,i6,a,i7,a,i4)')' wfconv:',nbremn,' bands set=0 with npw=',npw2,', for ikpt=',ikpt2
        call wrtout(std_out,message,'PERS')
      end if
 

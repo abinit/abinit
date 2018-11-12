@@ -32,7 +32,6 @@ module m_phonons
  use m_tetrahedron
  use m_nctk
  use iso_c_binding
- use m_crystal_io
  use m_atprj
  use m_sortph
  use m_ddb
@@ -197,15 +196,6 @@ CONTAINS  !=====================================================================
 
 subroutine phdos_print(PHdos,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
  type(phonon_dos_type),intent(in) :: PHdos
@@ -335,15 +325,6 @@ end subroutine phdos_print
 
 subroutine phdos_print_debye(PHdos, ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_debye'
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
  real(dp), intent(in) :: ucvol
  type(phonon_dos_type),intent(in) :: PHdos
@@ -456,15 +437,6 @@ end subroutine phdos_print_debye
 !! SOURCE
 
 subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_thermo'
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: ntemper
@@ -583,15 +555,6 @@ end subroutine phdos_print_thermo
 
 subroutine phdos_free(PHdos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  type(phonon_dos_type),intent(inout) ::PHdos
 
@@ -660,15 +623,6 @@ end subroutine phdos_free
 
 subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
                    wminmax, count_wminmax, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphdos'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1058,7 +1012,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 #ifdef HAVE_NETCDF
      ! TODO: make it optional?
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
      NCF_CHECK(nf90_close(ncid))
 #endif
@@ -1154,7 +1108,7 @@ end subroutine mkphdos
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
-!! PRB 94 075125 (2016) [[cite:Zacharias2016]]
+!!  PRB 94 075125 (2016) [[cite:Zacharias2016]]
 !!
 !! INPUTS
 !!
@@ -1172,15 +1126,6 @@ end subroutine mkphdos
 !! SOURCE
 
 subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zacharias_supercell_make'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1363,15 +1308,6 @@ end subroutine zacharias_supercell_make
 
 subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
 &                                 rlatt, temperature_K, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_make'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1573,15 +1509,6 @@ end subroutine thermal_supercell_make
 
 subroutine thermal_supercell_free(nscells, thm_scells)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: nscells
@@ -1623,15 +1550,6 @@ end subroutine thermal_supercell_free
 !! SOURCE
 
 subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zacharias_supercell_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1683,15 +1601,6 @@ end subroutine zacharias_supercell_print
 !! SOURCE
 
 subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1746,15 +1655,6 @@ end subroutine thermal_supercell_print
 !! SOURCE
 
 subroutine phdos_ncwrite(phdos,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_ncwrite'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1841,15 +1741,6 @@ end subroutine phdos_ncwrite
 !! SOURCE
 
 subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphbs'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2052,7 +1943,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
@@ -2161,15 +2052,6 @@ end subroutine mkphbs
 
 subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_calc_vsound'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalras
  integer, intent(in) :: natom
@@ -2240,15 +2122,6 @@ end subroutine phdos_calc_vsound
 
 subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_vsound'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalras
  integer, intent(in) :: iunit
@@ -2315,15 +2188,6 @@ end subroutine phdos_print_vsound
 !! SOURCE
 
 subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_msqd'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2486,15 +2350,6 @@ end subroutine phdos_print_msqd
 
 subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_ncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,nqpts
@@ -2536,13 +2391,6 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 contains
  integer function vid(vname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -2583,15 +2431,6 @@ end subroutine phonons_ncwrite
 !! SOURCE
 
  subroutine phonons_write_phfrq(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_phfrq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2686,15 +2525,6 @@ end subroutine phonons_write_phfrq
 !! SOURCE
 
 subroutine phonons_writeEPS(natom,nqpts,ntypat,typat,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_writeEPS'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3111,15 +2941,6 @@ end subroutine phonons_writeEPS
 
 subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbounds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_xmgrace'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nqpts
@@ -3248,15 +3069,6 @@ end subroutine phonons_write_xmgrace
 !! SOURCE
 
 subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_gnuplot'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3388,15 +3200,6 @@ end subroutine phonons_write_gnuplot
 
 subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_mkphbs'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -3477,7 +3280,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
    ! Should centralize everything in a single routine
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   NCF_CHECK(cryst%ncwrite(ncid))
    call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
    NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
@@ -3545,15 +3348,6 @@ end subroutine ifc_mkphbs
 !! SOURCE
 
 subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_symph'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3788,28 +3582,13 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 &         qphon, rprimd, typat, xcart, znucl)
 
 
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'freeze_displ_allmodes'
-!End of the abilint section
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'freeze_displ_allmodes'
-!End of the abilint section
-
- implicit none
-
-! arguments
-! scalar
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: natom
  character(len=*),intent(in) :: outfile_radix
  real(dp), intent(in) :: freeze_displ
-
 !arrays
  integer,intent(in) :: typat(natom)
-
  real(dp),intent(in) :: displ(2,3*natom,3*natom)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in) :: phfreq(3*natom)

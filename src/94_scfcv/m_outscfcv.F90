@@ -182,8 +182,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_geometry,         only : bonds_lgth_angles
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
  use m_oper,             only : oper_type,init_oper,destroy_oper
- use m_crystal,          only : crystal_init, crystal_free, crystal_t, prt_cif
- use m_crystal_io,       only : crystal_ncwrite
+ use m_crystal,          only : crystal_init, crystal_t, prt_cif
  use m_results_gs,       only : results_gs_type, results_gs_ncwrite
  use m_ioarr,            only : ioarr, fftdatar_write
  use m_nucprop,          only : calc_efg,calc_fc
@@ -215,13 +214,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
  use m_optics_vloc,      only : optics_vloc
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outscfcv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -607,7 +599,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ! Write density, crystal, band structure energies.
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
    NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_den, nc_define=.True.))
-   NCF_CHECK(crystal_ncwrite(crystal, ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
    ! Add energy, forces, stresses
    NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
@@ -1206,7 +1198,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0,0], dtfil%filnam_ds(4), spacecomm)
  end if
 
- call crystal_free(crystal)
+ call crystal%free()
  call ebands_free(ebands)
 
 !Destroy atom table used for parallelism

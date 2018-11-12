@@ -45,14 +45,6 @@
 
 subroutine xmpi_allgather_int(xval,recvbuf,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -105,13 +97,6 @@ end subroutine xmpi_allgather_int
 !! SOURCE
 
 subroutine xmpi_allgather_char(charval,recvbuf,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_char'
-!End of the abilint section
 
  implicit none
 
@@ -166,14 +151,6 @@ end subroutine xmpi_allgather_char
 
 subroutine xmpi_allgather_int1d(xval,nelem,recvbuf,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -224,14 +201,6 @@ end subroutine xmpi_allgather_int1d
 !! SOURCE
 
 subroutine xmpi_allgather_int2d(xval,nelem,recvbuf,spaceComm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_int2d'
-!End of the abilint section
 
  implicit none
 
@@ -285,14 +254,6 @@ end subroutine xmpi_allgather_int2d
 
 subroutine xmpi_allgather_dp1d(xval,nelem,recvbuf,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -344,14 +305,6 @@ end subroutine xmpi_allgather_dp1d
 
 subroutine xmpi_allgather_dp2d(xval,nelem,recvbuf,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_dp2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -402,14 +355,6 @@ end subroutine xmpi_allgather_dp2d
 !! SOURCE
 
 subroutine xmpi_allgather_dp3d(xval,nelem,recvbuf,spaceComm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_dp3d'
-!End of the abilint section
 
  implicit none
 
@@ -463,13 +408,6 @@ end subroutine xmpi_allgather_dp3d
 
 subroutine xmpi_allgather_dp4d(xval,nelem,recvbuf,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_allgather_dp4d'
-!End of the abilint section
 
  implicit none
 

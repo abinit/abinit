@@ -94,6 +94,7 @@ contains
 !! enl=nonlocal pseudopotential energy
 !! Also, compute new density from provided wfs, after the evaluation
 !! of ehart, enxc, and eei.
+!! WARNING XG180913 : At present, Fock energy not computed !
 !!
 !! INPUTS
 !!  [add_tfw]=flag controling the addition of Weiszacker gradient correction to Thomas-Fermi kin energy
@@ -176,7 +177,7 @@ contains
 !!   | e_eigenvalues(OUT)=Sum of the eigenvalues - Band energy (Hartree)
 !!   | e_hartree(OUT)=Hartree part of total energy (hartree units)
 !!   | e_kinetic(OUT)=kinetic energy part of total energy.
-!!   | e_nonlocalpsp(OUT)=nonlocal pseudopotential part of total energy.
+!!   | e_nlpsp_vfock(OUT)=nonlocal psp + potential Fock ACE part of total energy.
 !!   | e_xc(OUT)=exchange-correlation energy (hartree)
 !!  ==== if optene==0, 2 or 3
 !!   | e_localpsp(OUT)=local psp energy (hartree)
@@ -224,13 +225,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
 & add_tfw) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'energy'
-!End of the abilint section
 
  implicit none
 
@@ -498,7 +492,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
  energies%e_eigenvalues=zero
  energies%e_kinetic=zero
- energies%e_nonlocalpsp=zero
+ energies%e_nlpsp_vfock=zero
+ energies%e_fock0=zero
  bdtot_index=0
  icg=0
 
@@ -589,7 +584,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      ABI_DEALLOCATE(vlocal_tmp)
    end if
 
-!  Continue Hamlitonian initializaton
+!  Continue Hamiltonian initialization
    call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
    if (with_vxctau) then
      call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
@@ -732,7 +727,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
          do iblocksize=1,blocksize
            iband=(iblock-1)*blocksize+iblocksize
            energies%e_eigenvalues=energies%e_eigenvalues+dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
-           energies%e_nonlocalpsp=energies%e_nonlocalpsp+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
+!          WARNING : the Fock contribution is NOT computed !!!
+           energies%e_nlpsp_vfock=energies%e_nlpsp_vfock+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
          end do
 
 !        PAW: accumulate rhoij
@@ -795,14 +791,14 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  if(xmpi_paral==1)then
 !  Accumulate enl eeig and ek on all proc.
    ABI_ALLOCATE(buffer,(3+dtset%mband*dtset%nkpt*dtset%nsppol))
-   buffer(1)=energies%e_nonlocalpsp ; buffer(2)=energies%e_kinetic ; buffer(3)=energies%e_eigenvalues
+   buffer(1)=energies%e_nlpsp_vfock ; buffer(2)=energies%e_kinetic ; buffer(3)=energies%e_eigenvalues
    do iresid=1,dtset%mband*dtset%nkpt*dtset%nsppol
      buffer(iresid+3)=resid(iresid)
    end do
    call timab(48,1,tsec)
    call xmpi_sum(buffer,spaceComm,ierr)
    call timab(48,2,tsec)
-   energies%e_nonlocalpsp=buffer(1) ; energies%e_kinetic=buffer(2) ; energies%e_eigenvalues=buffer(3)
+   energies%e_nlpsp_vfock=buffer(1) ; energies%e_kinetic=buffer(2) ; energies%e_eigenvalues=buffer(3)
    do iresid=1,dtset%mband*dtset%nkpt*dtset%nsppol
      resid(iresid)=buffer(iresid+3)
    end do
@@ -816,8 +812,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
    etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&   energies%e_localpsp + energies%e_corepsp
-   if (psps%usepaw==0) etotal=etotal + energies%e_nonlocalpsp
+!&   energies%e_nlpsp_vfock - energies%e_fock0 +
+!   Should compute the e_fock0 energy !! Also, the Fock contribution to e_nlpsp_vfock 
+&   energies%e_nlpsp_vfock + energies%e_localpsp + energies%e_corepsp
    if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
    etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
@@ -890,7 +887,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    ABI_DEALLOCATE(rhowfr)
    ABI_DEALLOCATE(rhowfg)
    rhor(:,:)=rhor(:,:)+nhat(:,:)
-   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,ngfftf,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
 
  end if
 
@@ -954,13 +951,6 @@ end subroutine energy
 
 subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,resid_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkresi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -980,7 +970,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  real(dp) :: doti,dotr
 !arrays
  real(dp) :: tsec(2)
- real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: cwavef_ptr(:,:),ghc_ptr(:,:),gsc_ptr(:,:)
  type(pawcprj_type) :: cwaveprj(0,0)
 
@@ -1002,7 +992,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  npw_k=gs_hamk%npw_k
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
  ABI_ALLOCATE(ghc,(2,npw_k*my_nspinor))
- ABI_ALLOCATE(gvnlc,(2,npw_k*my_nspinor))
+ ABI_ALLOCATE(gvnlxc,(2,npw_k*my_nspinor))
  if (gs_hamk%usepaw==1)  then
    ABI_ALLOCATE(gsc,(2,npw_k*my_nspinor))
  else
@@ -1025,10 +1015,10 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 !  Compute H|Cn>
    cpopt=-1
    if (mpi_enreg%paral_kgb==0) then
-     call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlc,zero,mpi_enreg,1,&
+     call getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_hamk,gvnlxc,zero,mpi_enreg,1,&
 &     prtvol,gs_hamk%usepaw,tim_getghc,0)
    else
-     call prep_getghc(cwavef,gs_hamk,gvnlc,ghc,gsc,zero,nband,mpi_enreg,&
+     call prep_getghc(cwavef,gs_hamk,gvnlxc,ghc,gsc,zero,nband,mpi_enreg,&
 &     prtvol,gs_hamk%usepaw,cpopt,cwaveprj,&
 &     already_transposed=.false.)
    end if
@@ -1072,7 +1062,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
 
  ABI_DEALLOCATE(cwavef)
  ABI_DEALLOCATE(ghc)
- ABI_DEALLOCATE(gvnlc)
+ ABI_DEALLOCATE(gvnlxc)
  ABI_DEALLOCATE(gsc)
 
  call timab(13,2,tsec)

@@ -143,13 +143,6 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 &  mcg_k,mcg_q,mcg1_k,minbd,mpw,mband_occ,nband_occ,npw_k1,npw_k2,nspinor,&
 &  pwind_k,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smatrix'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -686,13 +679,6 @@ end subroutine smatrix
 
 subroutine polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 &  ptot_cart,rprimd,ucvol,unit_out,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polcart'
-!End of the abilint section
 
  implicit none
 

@@ -50,9 +50,8 @@ module m_phpi
  use m_kg,              only : getph
  use m_fftcore,         only : get_kg
  use m_crystal,         only : crystal_t
- use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : findqg0
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg, wfd_read_wfk
+ use m_wfd,             only : wfd_init, wfd_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type
@@ -105,15 +104,6 @@ contains  !=====================================================================
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'eph_phpi'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk0_path, wfq_path
@@ -144,7 +134,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw,my_mpw,ierr,my_kstart,my_kstop,cnt
  integer :: n1,n2,n3,n4,n5,n6,nspden
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
  real(dp) :: cpu,wall,gflops
  real(dp) :: ecut,eshift,eig0nk,eig0mkq,dotr,doti
@@ -166,7 +156,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:)
  real(dp),allocatable ::  gs1c(:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
@@ -249,7 +239,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
  ABI_FREE(wfd_istwfk)
 
- call wfd_print(wfd_k,header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call wfd_k%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
 
  ABI_MALLOC(wfd_istwfk, (nkpt_kq))
  wfd_istwfk = 1
@@ -260,7 +250,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ABI_FREE(wfd_istwfk)
 
- call wfd_print(wfd_kq,header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
+ call wfd_kq%print(header="Wavefunctions on the q-shifted k-points grid",mode_paral='PERS')
 
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
@@ -271,12 +261,12 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ! Read wafefunctions on the k-points grid and q-shifted k-points grid.
  iomode = iomode_from_fname(wfk0_path)
- call wfd_read_wfk(wfd_k,wfk0_path,iomode)
- if (.False.) call wfd_test_ortho(wfd_k,cryst,pawtab,unit=std_out,mode_paral="PERS")
+ call wfd_k%read_wfk(wfk0_path,iomode)
+ if (.False.) call wfd_k%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  iomode = iomode_from_fname(wfq_path)
- call wfd_read_wfk(wfd_kq,wfq_path,iomode)
- if (.False.) call wfd_test_ortho(wfd_kq,cryst,pawtab,unit=std_out,mode_paral="PERS")
+ call wfd_kq%read_wfk(wfq_path,iomode)
+ if (.False.) call wfd_kq%test_ortho(cryst,pawtab,unit=std_out,mode_paral="PERS")
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
@@ -323,8 +313,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  usevnl = 0
  optlocal = 1  ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
  optnl = 2     ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- opt_gvnl1 = 0 ! gvnl1 is output
- ABI_MALLOC(gvnl1, (2,usevnl))
+ opt_gvnlx1 = 0 ! gvnlx1 is output
+ ABI_MALLOC(gvnlx1, (2,usevnl))
  ABI_MALLOC(grad_berry, (2,nspinor*(berryopt0/4)))
 
  ! This part is taken from dfpt_vtorho
@@ -431,7 +421,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
      kg_k(:,1:npw_k) = wfd_k%kdata(ik)%kg_k
      do ib2=1,mband
-       call wfd_copy_cg(wfd_k, ib2, ik, spin, kets_k(1,1,ib2))
+       call wfd_k%copy_cg(ib2, ik, spin, kets_k(1,1,ib2))
      end do
 
      ! Copy u_kq(G)
@@ -439,7 +429,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
      kg_kq(:,1:npw_kq) = wfd_kq%kdata(ikq)%kg_k
      do ib1=1,mband_kq
-       call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras_kq(1,1,ib1))
+       call wfd_kq%copy_cg(ib1, ikq, spin, bras_kq(1,1,ib1))
      end do
 
      ! if PAW, one has to solve a generalized eigenproblem
@@ -478,8 +468,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
          eshift = eig0nk - dtset%dfpt_sciss
 
          call getgh1c(berryopt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
-&                     grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
-&                     optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+&                     grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
+&                     optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
        ABI_FREE(kinpw1)
@@ -567,16 +557,13 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_FREE(bras_kq)
      ABI_FREE(kets_k)
      ABI_FREE(h1kets_kq)
-
    end do ! ikfs
 
    call destroy_rf_hamiltonian(rf_hamkq)
-
  end do ! spin
 
  ! Gather the k-points computed by all processes
  call xmpi_sum_master(Pi_ph,master,comm,ierr)
-
 
  ! Output the results
  if (i_am_master) then
@@ -585,9 +572,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  end if
 
 #ifdef HAVE_NETCDF
- if (i_am_master) then
-   call out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
- end if
+ if (i_am_master) call out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 #endif
 
  ! Free memory
@@ -599,12 +584,11 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
  ! Free memory
-
  ABI_FREE(gkk)
  ABI_FREE(gkk_m)
  ABI_FREE(v1scf)
  ABI_FREE(vlocal1)
- ABI_FREE(gvnl1)
+ ABI_FREE(gvnlx1)
  ABI_FREE(grad_berry)
  ABI_FREE(dummy_vtrial)
  ABI_FREE(ph1d)
@@ -617,8 +601,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_FREE(blkflg)
 
  call destroy_hamiltonian(gs_hamkq)
- call wfd_free(wfd_k)
- call wfd_free(wfd_kq)
+ call wfd_k%free()
+ call wfd_kq%free()
 
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
@@ -652,13 +636,6 @@ subroutine out_phpi(iout, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_phpi'
-!End of the abilint section
-
  integer,intent(in) :: iout
  integer,intent(in) :: natom3
 !arrays
@@ -717,13 +694,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'out_phpi_nc'
-!End of the abilint section
-
  integer,intent(in) :: natom3
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
@@ -743,8 +713,7 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
 
  ! Write information of the crystal
- ncerr = crystal_ncwrite(cryst, ncid)
- NCF_CHECK(ncerr)
+ NCF_CHECK(cryst%ncwrite(ncid))
 
  ! Write the dimensions specified by ETSF
  one_dim = 1
@@ -754,18 +723,18 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
  natom = natom3 / 3
 
  ncerr = nctk_def_dims(ncid, [&
-& nctkdim_t('current_one_dim', one_dim), &
-& nctkdim_t('number_of_atoms', natom), &
-& nctkdim_t('number_of_cartesian_directions', cart_dir), &
-& nctkdim_t('number_of_perturbations', natom3), &
-& nctkdim_t('cplex',cplex)], defmode=.True.)
+   nctkdim_t('current_one_dim', one_dim), &
+   nctkdim_t('number_of_atoms', natom), &
+   nctkdim_t('number_of_cartesian_directions', cart_dir), &
+   nctkdim_t('number_of_perturbations', natom3), &
+   nctkdim_t('cplex',cplex)], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ! Create the arrays
  ncerr = nctk_def_arrays(ncid, [&
- nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
- nctkarr_t('phonon_frequencies', "dp", 'number_of_perturbations'), &
- nctkarr_t('phonon_self_energy_realpart', "dp", 'number_of_perturbations')])
+   nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
+   nctkarr_t('phonon_frequencies', "dp", 'number_of_perturbations'), &
+   nctkarr_t('phonon_self_energy_realpart', "dp", 'number_of_perturbations')])
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_atomic_units(ncid, 'phonon_frequencies'))
@@ -779,7 +748,6 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
  ! Close file
  NCF_CHECK(nf90_close(ncid))
-
 
 #else
  MSG_ERROR("NETCDF support required to write Pi.nc file.")

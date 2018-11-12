@@ -33,7 +33,6 @@ module m_frohlichmodel
  use m_abicore
  use m_errors
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_efmas_defs
  use m_ifc
@@ -74,13 +73,6 @@ contains
 !! SOURCE
 
 subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'frohlichmodel'
-!End of the abilint section
 
  implicit none
 

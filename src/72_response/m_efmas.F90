@@ -83,13 +83,6 @@ CONTAINS
 
  subroutine efmasval_free(efmasval)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasval_free'
-!End of the abilint section
-
    implicit none
 
    !Arguments ------------------------------------
@@ -128,13 +121,6 @@ CONTAINS
 !! SOURCE
 
  subroutine efmasval_free_array(efmasval)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasval_free_array'
-!End of the abilint section
 
    implicit none
 
@@ -184,13 +170,6 @@ CONTAINS
 
  subroutine efmasdeg_free(efmasdeg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasdeg_free'
-!End of the abilint section
-
    implicit none
 
    !Arguments ------------------------------------
@@ -227,13 +206,6 @@ CONTAINS
 !! SOURCE
 
  subroutine efmasdeg_free_array(efmasdeg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmasdeg_free_array'
-!End of the abilint section
 
    implicit none
 
@@ -275,13 +247,6 @@ CONTAINS
 !! SOURCE
 
  subroutine check_degeneracies(efmasdeg,bands,nband,eigen,deg_tol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_degeneracies'
-!End of the abilint section
 
    implicit none
 
@@ -405,13 +370,6 @@ CONTAINS
 !! SOURCE
 
  subroutine print_efmas(efmasdeg,efmasval,kpt,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_efmas'
-!End of the abilint section
 
  implicit none
 
@@ -576,13 +534,6 @@ end subroutine print_efmas
 
  subroutine efmas_ncread(efmasdeg,efmasval,kpt,ncid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmas_ncread'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -713,13 +664,6 @@ end subroutine print_efmas
 
  subroutine print_tr_efmas(io_unit,kpt,band,deg_dim,mdim,ndirs,dirs,m_cart,rprimd,efmas_tensor,ntheta, &
 &                       m_avg,m_avg_frohlich,saddle_warn,efmas_eigval,efmas_eigvec,transport_tensor_scale)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_tr_efmas'
-!End of the abilint section
 
    implicit none
 
@@ -932,13 +876,6 @@ end subroutine print_efmas
 
  subroutine efmas_main(cg,cg1_pert,dim_eig2rf,dtset,efmasdeg,efmasval,eigen0,&
 &   eigen1,gh0c1_pert,gh1c_pert,istwfk_pert,mpert,mpi_enreg,nkpt_rbz,npwarr,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmas_main'
-!End of the abilint section
 
   implicit none
 
@@ -1231,13 +1168,6 @@ end subroutine print_efmas
 !! SOURCE
 
  subroutine efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz,mpi_enreg,nkpt_rbz,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'efmas_analysis'
-!End of the abilint section
 
   implicit none
 
@@ -2127,13 +2057,6 @@ end subroutine print_efmas
 
 function MATMUL_DP(aa,bb,mm,nn,transa,transb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MATMUL_DP'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2205,13 +2128,6 @@ end function MATMUL_DP
 !! SOURCE
 
 function MATMUL_DPC(aa,bb,mm,nn,transa,transb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MATMUL_DPC'
-!End of the abilint section
 
  implicit none
 

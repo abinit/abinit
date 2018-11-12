@@ -141,7 +141,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
  use m_dtset,        only : dtset_copy, dtset_free, find_getdtset
  use m_mpinfo,       only : mpi_distrib_is_ok
- use m_dtfil,        only : dtfil_init, dtfil_init_img, status
+ use m_dtfil,        only : dtfil_init, dtfil_init_img
  use m_respfn_driver,    only : respfn
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma
@@ -157,14 +157,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'driver'
-!End of the abilint section
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -221,7 +213,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  call timab(640,1,tsec)
  call timab(641,3,tsec)
- call status(0,filstat,iexit,level,'enter         ')
 
 !Structured debugging if prtvol==-level
  prtvol=dtsets(1)%prtvol
@@ -273,8 +264,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    else
      jdtset_status=0
    end if
-
-   call status(jdtset_status,filstat,iexit,level,'loop jdtset   ')
 
 !  Copy input variables into a local dtset.
    call dtset_copy(dtset, dtsets(idtset))
@@ -556,7 +545,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  ****************************************************************************
 !  Treat the pseudopotentials : initialize the psps/PAW variable
 
-   call status(jdtset_status,filstat,iexit,level,'init psps     ')
    call psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
 !  The correct dimension of pawrad/tab is ntypat. In case of alchemical psps
@@ -698,7 +686,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
-     call status(jdtset_status,filstat,iexit,level,'call gstateimg')
      call gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
 &     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
 &     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
@@ -706,23 +693,19 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(RUNL_RESPFN)
 
-     call status(jdtset_status,filstat,iexit,level,'call respfn')
      call respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,mkmems,mpi_enregs(idtset),&
 &     npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
    case(RUNL_SCREENING)
 
-     call status(jdtset_status,filstat,iexit,level,'call screening')
      call screening(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
    case(RUNL_SIGMA)
 
-     call status(jdtset_status,filstat,iexit,level,'call sigma')
      call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
 
    case(RUNL_NONLINEAR)
 
-     call status(jdtset_status,filstat,iexit,level,'call nonlinear')
      call nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enregs(idtset),npwtot,occ,&
 &     pawang,pawrad,pawtab,psps,xred)
 
@@ -735,7 +718,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case (RUNL_BSE)
 
-     call status(jdtset_status,filstat,iexit,level,'call bethe_salpeter')
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case(RUNL_GWLS)
@@ -746,7 +728,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
-     call status(jdtset_status,filstat,iexit,level,'call gwls_sternheimer')
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
 &     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
 &     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
@@ -758,11 +739,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_DEALLOCATE(strten_img)
 
    case (RUNL_WFK)
-     call status(jdtset_status,filstat,iexit,level,'call wfk_analyze')
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case (RUNL_EPH)
-     call status(jdtset_status,filstat,iexit,level,'call eph      ')
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    case default
@@ -909,8 +888,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !call wvl_timing(mpi_enregs(1)%me_wvl,'              ','RE')
 !end if
 #endif
-
- call status(0,filstat,iexit,level,'exit')
 
  call timab(644,2,tsec)
  call timab(640,2,tsec)

@@ -112,13 +112,6 @@ CONTAINS
 SUBROUTINE MapHyb_init(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_init'
-!End of the abilint section
-
   TYPE(MapHyb)     , INTENT(INOUT) :: this
   INTEGER, OPTIONAL, INTENT(IN   ) :: size
 !Local variables ------------------------------
@@ -169,13 +162,6 @@ END SUBROUTINE MapHyb_init
 SUBROUTINE MapHyb_setSize(this,new_tail)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_setSize'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: new_tail
 !Local variables ------------------------------
@@ -226,13 +212,6 @@ END SUBROUTINE MapHyb_setSize
 SUBROUTINE MapHyb_enlarge(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_enlarge'
-!End of the abilint section
-
   TYPE(MapHyb)     , INTENT(INOUT)       :: this
   INTEGER, OPTIONAL, INTENT(IN   )       :: size
 !Local variables ------------------------------
@@ -303,13 +282,6 @@ END SUBROUTINE MapHyb_enlarge
 SUBROUTINE MapHyb_assign(this, map)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_assign'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   TYPE(MapHyb), INTENT(IN   ) :: map
 !Local variables ------------------------------
@@ -356,13 +328,6 @@ END SUBROUTINE MapHyb_assign
 SUBROUTINE MapHyb_sort(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_sort'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
  
   IF ( this%tail .EQ. 1 ) RETURN
@@ -406,13 +371,6 @@ END SUBROUTINE MapHyb_sort
 RECURSIVE SUBROUTINE MapHyb_quickSort(this, begin, end)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_quickSort'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   INTEGER     , INTENT(IN   ) :: begin
   INTEGER     , INTENT(IN   ) :: end
@@ -489,13 +447,6 @@ END SUBROUTINE MapHyb_quickSort
 SUBROUTINE MapHyb_print(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_print'
-!End of the abilint section
-
   TYPE(MapHyb)     , INTENT(IN) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -544,13 +495,6 @@ END SUBROUTINE MapHyb_print
 SUBROUTINE MapHyb_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_clear'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
   this%tail = 0 
 END SUBROUTINE MapHyb_clear
@@ -589,13 +533,6 @@ END SUBROUTINE MapHyb_clear
 SUBROUTINE MapHyb_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MapHyb_destroy'
-!End of the abilint section
-
   TYPE(MapHyb), INTENT(INOUT) :: this
 
   FREEIF(this%listINT)

@@ -321,13 +321,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
 &                 enl,iatom_only,only_SO,select_k) !optional arguments
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -936,13 +929,6 @@ end subroutine nonlop
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlop_gpu'
-!End of the abilint section
 
  implicit none
 

@@ -101,13 +101,6 @@ contains
 subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
 &  Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_driver'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -237,13 +230,6 @@ end subroutine exc_diago_driver
 !! SOURCE
 
 subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst,elph_lifetime)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_resonant'
-!End of the abilint section
 
  implicit none
 
@@ -734,13 +720,6 @@ end subroutine exc_diago_resonant
 
 subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_print_eig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -897,13 +876,6 @@ end subroutine exc_print_eig
 !! SOURCE
 
 subroutine exc_diago_coupling(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_coupling'
-!End of the abilint section
 
  implicit none
 
@@ -1181,13 +1153,6 @@ end subroutine exc_diago_coupling
 !! SOURCE
 
 subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_diago_coupling_hegv'
-!End of the abilint section
 
  implicit none
 

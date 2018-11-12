@@ -209,6 +209,7 @@ module defs_basis
  real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree, in J
  real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge, in Coulomb
  real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
+ real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value. )
  real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
  real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit, in electronic mass
  real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3, in GPa
@@ -224,6 +225,8 @@ module defs_basis
  real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
+ real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
+ real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
 
 !Complex constants
  complex(dpc), parameter :: czero=(0._dp,0._dp)
@@ -386,13 +389,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_log_status_state'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -436,13 +432,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_io_redirect'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -484,13 +473,6 @@ CONTAINS  !=====================================================================
 
 !Arguments-------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_kinds'
-!End of the abilint section
-
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
@@ -543,13 +525,6 @@ end subroutine print_kinds
 !! SOURCE
 
  integer pure function str2wfktask(str) result(wfk_task)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'str2wfktask'
-!End of the abilint section
 
  implicit none
 
