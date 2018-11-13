@@ -164,19 +164,19 @@ The following observables are printed, which are:
 
 * Cv: volume specific heat, which is
 
-  $C_v=(<E^2>-<E>^2)/(k_B T^2)$ . 
+  $C_v=(<E^2>-<E>^2)/(k_B^2 T^2)$ . 
 
-  At zero temperature $C_v=0$
+  The $<E>$ means average of energy of the unitcell over the observation time. At zero temperature $C_v=0$. 
 
 * chi ($\chi$): the isothermal suceptibility, which is:
 
-  $\chi=\frac{\partial <m>}{\partial E}= (<m^2>-<m>^2)/(k_B T)$ .
+  $\chi=\frac{\partial <m>}{\partial H}= (<m^2>-<m>^2)/(k_B T)$ .
 
-  At zero temperature, $\chi$ is not well defined <!--TODO: check this-->. 
+ The $<m>$ is the average of total staggered magnetic moment.  At zero temperature, $\chi$ is not well defined. <!--TODO: check this-->. 
 
 * BinderU4: The Binder cumulant, which is 
 
-  $U_4=1-\frac{<m^4>}{3<m^2>^2}$  .
+  $U_4=1-\frac{<m^4>}{3<m^2>^2}$.
 
   In a 3D Heisenberg system, $U_4$ goes to 2/3 when $T<T_C$ and goes to 4/9 when $T >T_C$ . 
 
@@ -192,7 +192,7 @@ We are now coming back to the values chosen for the input variables in the tmult
 
 * time step ([[multibinit: spin_dt]]):
 
-    Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.   (<!--TODO: there must be a better way.-->)
+    Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.  (<!--TODO: there must be a better way.-->)
 
 * supercell size ([[multibinit:ncell]])
 
@@ -262,13 +262,54 @@ If the input parameters are well tuned you will obtain the curves for the differ
 
 <!--NH: What is the experimental value for T_c for this material?-->
 
-<!-- TODO: add something about SIA -->
+
+
+### Example with DMI: 1D canted AFM-chain 
+
+This example shows how to get the spin canting angle. (~abinit/tests/tutomultibinit/Input/tmulti5_3.*)
+
+ The system is a simple 1D chain with first nearest neighbor exchange and Dzyaloshinskii-Moriya interaction (DMI). The unitcell consists of two sites A and B, as shown below. The exchange between A and B is $J=$ 5 meV, and the DMI $\vec{D}= (0, 0, 2)$ meV. The arrow from A to B means $D_{AB}$, where $D_{AB}=-D_{BA}$. 
+
+
+
+![canting_DMI](spin_model_assets/canting_DMI.png)
+
+In this system, the exchange favors a collinear spin alignment, while the DMI favors the spins to be perpendicular to their neighbors. Usually, the DMI is much smaller than the exchange interaction, thus the system has a canted AFM spin alignment. We can run spin dynamics at zero temperature to get the ground state and see how the spins are canted.
 
 ```
-spin_sia_add = 1                ! Add a single ion anistropy (SIA) to all                                       ! ions.
-spin_sia_k1amp = 1e-22          ! Amplitude of SIA (Is this an appropriate                                     ! value?)
-spin_sia_k1dir = 0.0 0.0 1.0    ! Direction of SIA.
+prt_model = 0
+dynamics =  0                   ! disable molecular dynamics
+
+ncell =   4 1 1                 ! size of supercell.
+spin_dynamics= 2                ! enable spin dynamics. Depondt-Mertens algorithm.
+spin_ntime_pre =100000          ! warming up steps.
+spin_ntime =100000              ! number of steps.
+spin_nctime=1000                ! number of  time steps between two nc file write
+spin_dt=1e-16 s                 ! time step.
+spin_init_state = 1             ! start from random
+spin_temperature = 1e-9         ! spin temperature. It is usually better to avoid 0.
+
+spin_sia_add = 1                ! add a single ion anistropy (SIA) term.
+spin_sia_k1amp = 1e-4 eV        ! amplitude of SIA, 0.1 meV. +: easy axis, -: hard axis
+spin_sia_k1dir = 1.0 0.0 0.0    ! direction of SIA, easy axis along x.
 ```
+
+Here we add a relatively small (0.1 meV) single ion anisotropy term so that the easy axis is along x. Note that the DMI $\vec{D}$ is along z axis, therefor it can lower the energy if the spins have x and y components, while in the xy plane, the energy is isotropic. That is the reason why a SIA along x can be useful. We can try to rotate the SIA direction in the xy plane to see if the result changes, and try SIA along z to see what happens.
+
+
+
+At the end of spin dynamics, we can find the following output, which is the last snapshot of the spins.
+
+It shows that the the spins are anti-paralytically aligned along the easy axis (x), with a canting towards the y-axis. The canting angle is about arctan(0.187/0.982). 
+
+```
+    At the end of the run, the average spin at each sublattice is
+      Sublattice       <M_i>(x)  <M_i>(y)  <M_i>(z)  ||<M_i>||
+-        0001           0.98228   0.18740  -0.00000   1.00000
+-        0002          -0.98227   0.18746  -0.00000   1.00000
+```
+
+
 
 ## 5. Postprocessing
 
@@ -276,7 +317,7 @@ spin_sia_k1dir = 0.0 0.0 1.0    ! Direction of SIA.
 
 ### Tips:
 
-* Antiferromanetic/ spin spiral structure.
+* Anti-ferromagnetic/ spin spiral structure.
 
   In the example above, the magnetic structure is anti-ferromagnetic,  where the unit cell is a multiple of the spin period. Sometimes the unit cell used does not contain the full period of spin, e.g. in a simple cubic AFM lattice with only one atom in the primitive cell.  We can use the magnetic wave vector to calculate the staggered magnetic moment. This is also useful for spin spiral structures, etc. 
 

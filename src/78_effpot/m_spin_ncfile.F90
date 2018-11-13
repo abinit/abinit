@@ -89,7 +89,7 @@ contains
     self%filename=trim(filename)
 
 #if defined HAVE_NETCDF
-    write(std_out,*) 'Write iteration in spin HIST netCDF file'
+    write(std_out,*) "Write iteration in spin history file "//trim(self%filename)//"."
     !  Create netCDF file
     ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=self%ncid)
     !NCF_CHECK_MSG(ncerr, "create netcdf history file")
@@ -103,7 +103,7 @@ contains
     integer :: ncerr
     ! define dimensions
 #if defined HAVE_NETCDF
-    write(std_out,*) "Defining variables in spin hist netcdf file."
+    !write(std_out,*) "Defining variables in spinhist.nc file."
     ncerr=nf90_def_dim(self%ncid, "three", 3, self%three)
     ncerr=nf90_def_dim(self%ncid, "nspins", hist%nspins, self%nspins )
     ncerr=nf90_def_dim(self%ncid, "ntime", nf90_unlimited, self%ntime)
@@ -352,7 +352,7 @@ end subroutine spin_ncfile_t_def_ob
     class(spin_ncfile_t), intent(inout) :: self
     integer :: ncerr
 #if defined HAVE_NETCDF
-    write(std_out, *) "Closing spin hist file"//trim(self%filename)//"."
+    write(std_out, *) "Closing spin history file "//trim(self%filename)//"."
     ncerr=nf90_close(self%ncid)
     !NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
 #endif

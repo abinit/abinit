@@ -27,7 +27,7 @@ spin_temperature_end=500      ! ending point of temperature. smaller than Neel T
 spin_temperature_nstep=6      ! number of temperature steps. Enough?
 
 spin_sia_add = 1              ! add a single ion anistropy (SIA) term?
-spin_sia_k1amp = 1e-22        ! amplitude of SIA, how large should be used?
+spin_sia_k1amp = 1e-6         ! amplitude of SIA (in Ha), how large should be used?
 spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA
 
 spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables

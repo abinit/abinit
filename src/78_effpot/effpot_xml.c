@@ -164,6 +164,8 @@ void effpot_xml_checkXML(char *filename,char *name_xml){
      return;
   }
   xmlFreeDoc(doc);
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, int *loc_nrpt,\
@@ -228,6 +230,8 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
   *loc_nrpt   = irpt1;
   *tot_nrpt   = irpt2;
   *ntypat = itypat;
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *nqpt,
@@ -599,6 +603,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   //          irpt1,irpt2);
   //  exit(0);
   //}
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
@@ -648,6 +654,8 @@ void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
     cur = cur->next;
   }
   xmlFreeDoc(doc);  
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voigt,
@@ -772,6 +780,8 @@ void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voig
     cur = cur->next;
   }
   xmlFreeDoc(doc);
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
@@ -939,6 +949,8 @@ void effpot_xml_readCoeff(char *filename,int*ncoeff,int*ndisp,int*nterm,
     cur = cur->next;
   }
   xmlFreeDoc(doc);
+  fflush(stdout);
+  fflush(stderr);
 }
   
 void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_max){
@@ -992,6 +1004,8 @@ void effpot_xml_getDimCoeff(char *filename,int*ncoeff,char *nterm_max,int*ndisp_
   *ncoeff = icoeff;
   *nterm_max = iterm;
   *ndisp_max = idisp;
+  fflush(stdout);
+  fflush(stderr);
 }
 
 
@@ -1017,6 +1031,8 @@ void effpot_xml_getNumberKey(char *filename,char*name_key,int*result){
   }
   xmlFreeDoc(doc);
   *result = i;
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getValue(char *filename,char*name_key,char*result){
@@ -1044,6 +1060,8 @@ void effpot_xml_getValue(char *filename,char*name_key,char*result){
     cur = cur->next;
   }
   xmlFreeDoc(doc);
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,char*result){  
@@ -1070,6 +1088,8 @@ void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,c
     cur = cur->next;
   }
   xmlFreeDoc(doc);
+  fflush(stdout);
+  fflush(stderr);
 }
 
 /****************************************************/
@@ -1132,7 +1152,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
     if (!xmlStrcmp(cur->name, (const xmlChar *)("unit_cell"))) {
       //printf("%s\n", cur->name);
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      printf("unit_cell: %s\n", key);
+      //printf("  unit_cell: %s\n", key);
       string2Array((char *)key, unitcell, &size);
       xmlFree(key);
       key = xmlGetProp(cur, BAD_CAST "units");
@@ -1263,6 +1283,8 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   freeArray(&damping_factor_array);
   freeArray(&position_array);
   freeArray(&spinat_array);
+  fflush(stdout);
+  fflush(stderr);
   return 0;
 }
 
@@ -1622,26 +1644,29 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
                    int *bi_nnz, int *bi_ilist[],
                    int *bi_jlist[], int *bi_Rlist[],
                    double *bi_vallist[]){
-  printf("reading xml: system.\n");
+  printf("Reading xml file\n");
+  printf(" System:");
   xml_read_spin_system(fname, ref_energy, unitcell, natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat);
 
-  printf("reading xml: exchange.\n");
+  printf(" Exchange:    ");
   xml_read_spin_exchange(fname, exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist);
-  printf(" %d terms readed\n", *exc_nnz);
+  printf(" %d terms read\n", *exc_nnz);
 
-  printf("reading xml: DMI.\n");
+  printf(" DMI:         ");
   xml_read_spin_dmi(fname, dmi_nnz, dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist);
-  printf(" %d terms readed.\n", *dmi_nnz);
+  printf(" %d terms read\n", *dmi_nnz);
 
-  printf("reading xml: uniaxial single ion anisotropy.\n");
+  printf(" Uniaxial SIA:");
   xml_read_spin_uni(fname, uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list);
-  printf(" %d terms readed.\n", *uni_nnz);
+  printf(" %d terms read\n", *uni_nnz);
 
-  printf("reading xml: bilinear.\n");
+  printf(" Bilinear:    ");
   xml_read_spin_bilinear(fname, bi_nnz, bi_ilist, bi_jlist, bi_Rlist, bi_vallist);
-  printf(" %d terms readed.\n", *bi_nnz);
+  printf(" %d terms read\n", *bi_nnz);
 
-  printf("Reading xml finished!");
+  printf("Reading xml done!\n");
+  fflush(stdout);
+  fflush(stderr);
 }
 
 void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
@@ -1788,10 +1813,12 @@ int test_read_xml() {
   }
 
 
+  fflush(stdout);
+  fflush(stderr);
   return 0;
 }
 
-#else
+#else    // If abinit is not installed with libxml
 int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
                          int *natoms, double *masses[], int *nspins,
                          int *index_spin[], double *gyroratios[],

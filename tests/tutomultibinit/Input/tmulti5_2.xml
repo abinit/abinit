@@ -1,83 +1,83 @@
 <?xml version="1.0" ?>
 <System_definition>
 	<unit_cell units="bohrradius">7.34938e+00	7.34938e+00	0.00000e+00	-7.41732e+00	7.41732e+00	0.00000e+00	0.00000e+00	0.00000e+00	1.47169e+01</unit_cell>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000e+0" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
 		<position units="bohrradius">-3.40873e+00	1.08723e+01	1.10377e+01</position>
 		<spinat>0.00000e+00	0.00000e+00	0.00000e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
 		<position units="bohrradius">-3.92837e+00	4.04257e+00	3.67923e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	0.00000e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
 		<position units="bohrradius">3.86042e+00	1.07241e+01	1.10377e+01</position>
 		<spinat>0.00000e+00	0.00000e+00	0.00000e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.38905e+02" massunits="atomicmassunit">
 		<position units="bohrradius">3.34078e+00	3.89440e+00	3.67923e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	0.00000e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="1" mass="5.58450e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="1" mass="5.58450e+01" massunits="atomicmassunit">
 		<position units="bohrradius">0.00000e+00	0.00000e+00	7.35845e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	4.00142e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="2" mass="5.58450e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="2" mass="5.58450e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-3.39733e-02	7.38335e+00	7.35845e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	-4.00131e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="3" mass="5.58450e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="3" mass="5.58450e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-3.39733e-02	7.38335e+00	0.00000e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	4.00140e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="4" mass="5.58450e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="4" mass="5.58450e+01" massunits="atomicmassunit">
 		<position units="bohrradius">0.00000e+00	0.00000e+00	0.00000e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	-4.00131e+00</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-5.57506e-01	3.69936e+00	6.75328e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	-6.10303e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">3.66539e+00	6.82584e+00	7.96363e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	6.11860e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-3.73334e+00	7.94085e+00	6.05172e-01</position>
 		<spinat>0.00000e+00	0.00000e+00	-6.10218e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">4.89559e-01	1.10673e+01	1.41117e+01</position>
 		<spinat>0.00000e+00	0.00000e+00	6.08749e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">4.89559e-01	1.10673e+01	7.96363e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	-6.10201e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-3.73334e+00	7.94085e+00	6.75328e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	6.12065e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">3.66539e+00	6.82584e+00	1.41117e+01</position>
 		<spinat>0.00000e+00	0.00000e+00	-6.08820e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-5.57506e-01	3.69936e+00	6.05172e-01</position>
 		<spinat>0.00000e+00	0.00000e+00	6.10403e-03</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">6.57308e-01	7.82433e+00	3.67923e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	-6.65374e-05</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">4.40983e-01	6.91281e-01	1.10377e+01</position>
 		<spinat>0.00000e+00	0.00000e+00	-7.13634e-05</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-5.08929e-01	1.40754e+01	3.67923e+00</position>
 		<spinat>0.00000e+00	0.00000e+00	-7.34469e-05</spinat>
 	</atom>
-	<atom damping_factor="1.00000" gyroratio="1.76000e+11" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
+	<atom damping_factor="1.00000" gyroratio="1.00000" index_spin="0" mass="1.59990e+01" massunits="atomicmassunit">
 		<position units="bohrradius">-7.25254e-01	6.94237e+00	1.10377e+01</position>
 		<spinat>0.00000e+00	0.00000e+00	-6.96858e-05</spinat>
 	</atom>

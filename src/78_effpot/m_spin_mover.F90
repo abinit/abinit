@@ -174,7 +174,7 @@ contains
     w=Bnorm*dt
     !print *, w
     cosw=cos(w)
-    sinw=1.0d0-cosw*cosw
+    sinw=sin(w)
     u=1.0d0-cosw
     R(1,1)=B(1)*B(1)*u+cosw
     R(2,1)=B(1)*B(2)*u+B(3)*sinw
@@ -206,9 +206,12 @@ contains
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 
     call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
+
+!$OMP PARALLEL DO 
     do i=1, self%nspins
      call rotate_S_DM(S_in(:,i), Htmp(:,i), self%dt, S_out(:,i))
     end do
+!$OMP END PARALLEL DO
 
     ! correction
     call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
@@ -270,23 +273,27 @@ contains
     !real(dp) ::  S(3, self%nspins)
     real(dp):: t
     integer :: counter, i, ii
-    character(len=80) :: msg
+    character(len=80) :: msg, msg_empty
     t=0.0
     counter=0
-    write(msg, *) " Beginning spin dynamic steps :"
 
+    msg_empty=ch10
+
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    msg=repeat("=", 65)
-
+    write(msg, '(A20)') "Spin dynamic steps:"
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    write(msg, "(A13, 4X, A13, 4X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
+    write(msg, "(A13, 4X, A13, 6X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-    msg=repeat("-", 65)
+    msg=repeat("-", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
@@ -332,14 +339,14 @@ contains
           call spin_ncfile_t_write_one_step(ncfile, hist)
           write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                & ob%Mst_norm_total/ob%Snorm_total, &
-               & hist%etot(hist%ihist_prev)
+               & hist%etot(hist%ihist_prev)/ob%nscell
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
        endif
        t=t+self%dt
     enddo
 
-    msg=repeat("-", 65)
+    msg=repeat("-", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
@@ -351,22 +358,19 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
-
     write(msg, "(6X, A10, 5X, 3A10, A11)")  'Sublattice', '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 
     do i =1, ob%nsublatt
-       print *, mu_B
        write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B , ii=1, 3), &
             sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B)**2))
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
     end do
-    msg=repeat("-", 65)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
 
+    call wrtout(std_out,msg_empty,'COLL')
+    call wrtout(ab_out, msg_empty, 'COLL')
 
     write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13 )" ) &
          "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
@@ -377,7 +381,7 @@ contains
     call wrtout(std_out, msg, "COLL")
     call wrtout(ab_out,  msg, "COLL")
 
-    msg=repeat("=", 65)
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
 

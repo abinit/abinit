@@ -1273,7 +1273,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ABI_ALLOCATE(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'spin_qpoint',tread,'DPR')
- if(tread==1) multibinit_dtset%spin_mag_field(1:3)= dprarr(1:3)
+ if(tread==1) multibinit_dtset%spin_qpoint(1:3)= dprarr(1:3)
 
 
  multibinit_dtset%spin_sia_add=0
@@ -1308,10 +1308,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%spin_temperature=325
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_temperature',tread,'DPR')
  if(tread==1) multibinit_dtset%spin_temperature=dprarr(1)
- if(multibinit_dtset%spin_temperature<=0)then
+ if(multibinit_dtset%spin_temperature<0)then
    write(message, '(a,f10.1,a,a,a,a,a)' )&
 &   'spin_temperature is ',multibinit_dtset%spin_temperature,'. The only allowed values',ch10,&
-&   'are positives values.',ch10,&
+&   'are non-negative values.',ch10,&
 &   'Action: correct spin_temperature in your input file.'
    MSG_ERROR(message)
  end if
