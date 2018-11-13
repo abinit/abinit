@@ -182,7 +182,6 @@ contains
 
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ! Defautl gyro_ratio
-    ! TODO remove this, use gyroration from xml
     self%gyro_ratio(:)=1.0_dp !gyromagnetic_ratio
 
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
@@ -411,7 +410,7 @@ contains
     !print *, "ms", self%ms
     !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
-       Heff(:, i)=Heff(:,i)/self%ms(i)
+       Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
     end do
     !$OMP END PARALLEL DO
     !print *, "Heff", Heff

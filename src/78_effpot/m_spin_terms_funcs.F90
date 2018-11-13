@@ -103,7 +103,7 @@ CONTAINS
     do i = 1, Nij, 1
        iatom=ilist(i)
        jatom=jlist(i)
-       Heff(:,iatom) = Heff(:,iatom)+vallist(i)*S(:,jatom)/ms(iatom)
+       Heff(:,iatom) = Heff(:,iatom)+2.0*vallist(i)*S(:,jatom)/ms(iatom)
     end do
   end subroutine exchange_Heff
 
@@ -118,7 +118,7 @@ CONTAINS
     do i = 1, Nint, 1
        iatom=ilist(i)
        jatom=jlist(i)
-       Heff(:,iatom) = Heff(:,iatom)+ cross(vallist(:,i),S(:,jatom))/ms(iatom)
+       Heff(:,iatom) = Heff(:,iatom)+ 2.0*cross(vallist(:,i),S(:,jatom))/ms(iatom)
     end do
   end subroutine DMI_Heff
 
