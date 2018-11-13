@@ -48,8 +48,8 @@ module m_dfpt_lwwf
  private
 !!***
 
- public :: dfpt_qdrpwf.F90
- public :: dfpt_flexowf.F90
+ public :: dfpt_qdrpwf
+ public :: dfpt_flexowf
 
 ! *************************************************************************
 
