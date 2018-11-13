@@ -925,6 +925,21 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
 &     ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
+
+#ifdef MR_DEV
+!MR modi:
+     !To agree with quadrupole and flexoelectrics routines
+     if(dtset%useria==1.or.dtset%userib==1) then
+       if (dtset%kptopt==2) timrev_pert=1
+       if (dtset%kptopt==3) timrev_pert=0
+!MR tmp: this has to be removed if perturbation-dependent spatial symmetries are 
+!        implemented in the quadrupole and flexoelectrics routines
+       nsym1=1
+!.......
+     end if
+!.......
+#endif
+
 !    The time reversal symmetry is not used for the BZ sampling when kptopt=3 or 4
      if (dtset%kptopt==3.or.dtset%kptopt==4) timrev_kpt = 0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&

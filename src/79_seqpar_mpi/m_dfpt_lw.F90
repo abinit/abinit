@@ -68,7 +68,7 @@ module m_dfpt_lw
 !***
 
  public :: dfpt_qdrpole.F90
- public :: dfpt_flexoelectrics.F90
+ public :: dfpt_flexo.F90
 
 ! *************************************************************************
 
@@ -1462,9 +1462,9 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 end subroutine dfpt_qdrpout
 !!***
 
-!!****f* ABINIT/dfpt_flexoelectrics
+!!****f* ABINIT/dfpt_flexo
 !! NAME
-!!  dfpt_flexoelectrics
+!!  dfpt_flexo
 !!
 !! FUNCTION
 !! This routine computes the elements of the flexoelectric tensor as: 
@@ -1472,7 +1472,7 @@ end subroutine dfpt_qdrpout
 !!         of the energy w.r.t an electric field and a metric perturbation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (MR)
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1530,7 +1530,7 @@ end subroutine dfpt_qdrpout
 !!
 !! SOURCE
 
-subroutine dfpt_flexoelectrics(atindx,codvsn,doccde,dtfil,dtset,&
+subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 &          gmet,gprimd,kxc,mkmem,mk1mem,&
 &          mpert,mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
@@ -1539,7 +1539,7 @@ subroutine dfpt_flexoelectrics(atindx,codvsn,doccde,dtfil,dtset,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_flexoelectrics'
+#define ABI_FUNC 'dfpt_flexo'
 !End of the abilint section
 
  implicit none
@@ -2438,7 +2438,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  DBG_EXIT("COLL")
 
-end subroutine dfpt_flexoelectrics
+end subroutine dfpt_flexo
 !!***
 
 !!****f* ABINIT/dfpt_flexoout
@@ -2451,7 +2451,7 @@ end subroutine dfpt_flexoelectrics
 !!  writes out the tensor in external files
 !!  
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -99,6 +99,10 @@ module m_respfn_driver
  use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
  use m_d2frnl,     only : d2frnl
 
+#ifdef MR_DEV
+ use m_dfpt_lw,    only : dfpt_qdrpole, dfpt_flexo
+#endif
+
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
 #endif
@@ -1173,6 +1177,19 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Determine the symmetrical perturbations
  ABI_ALLOCATE(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
+
+#ifdef MR_DEV
+!MR modi:
+!Desactivate perturbation symmetries temporarily
+!Remember that the same has been done in 51_manage_mpi/get_npert_rbz.F90
+ do ipert=1,natom+6
+   do idir=1,3
+     if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+   end do
+ end do
+!........
+#endif
+
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -1627,7 +1644,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(eigen0_pert)
    ABI_DEALLOCATE(eigen1_pert)
  end if
+
+#ifndef MR_DEV
+!MR: Caution!! this is if NOT defined
  ABI_DEALLOCATE(doccde)
+#endif
 
 
  if(me==0)then
@@ -1764,6 +1785,31 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      ABI_DEALLOCATE(d2matr)
    end if ! End condition on if.not.
  end if ! master node
+
+#ifdef MR_DEV
+!MR modi:
+!Calculate the quadrupole tensor
+ if (dtset%useria==1) then
+   call dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
+&   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
+&   mpert,mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+&   timrev,ucvol,xred)
+ end if 
+
+!Calculate the flexoelectric tensor
+ if (dtset%userib==1) then
+   call dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
+&   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
+&   mpert,mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+&   timrev,ucvol,xred)
+ end if 
+
+ ABI_DEALLOCATE(doccde)
+!........
+#endif
+
 
 !Deallocate arrays
  if (allocated(displ)) then
