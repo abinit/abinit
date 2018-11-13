@@ -291,9 +291,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
      &                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
      &                     rprimd,symrec,xred)
 
-
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(out) :: pwind_alloc
@@ -1051,9 +1048,6 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
      &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
      &            symrec,usecprj,usepaw,xred)
 
-
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mcg,mcprj,pwind_alloc,usecprj,usepaw
@@ -1526,9 +1520,6 @@ end subroutine chern_number
 subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
-
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -2389,9 +2380,6 @@ end subroutine orbmag
 
 subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
      & istwf_k,kg,mcg,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
-
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars

@@ -468,7 +468,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ABI_DATATYPE_ALLOCATE(pawrhoij_all,(natom))
        call pawrhoij_nullify(pawrhoij_all)
        call pawrhoij_copy(pawrhoij,pawrhoij_all,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&       keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&       keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
      else
        my_natom_tmp=my_natom
        pawrhoij_all => pawrhoij

@@ -54,7 +54,9 @@ module m_wfk_analyze
  use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init, pawfgrtab_print
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_get_nspden, symrhoij
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
+                               pawrhoij_inquire_dim
+ use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_sphharm,     only : setsym_ylm
  use m_paw_init,        only : pawinit, paw_gencond
@@ -133,6 +135,8 @@ contains
 
 subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
+ implicit none
+
 !Arguments ------------------------------------
 !scalars
  character(len=6),intent(in) :: codvsn
@@ -153,7 +157,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
  integer :: ierr,usexcnhat !,edos_intmeth
- integer :: cplex_dij,cplex,ndij,nspden_rhoij,gnt_option
+ integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
  !real(dp) :: edos_step,edos_broad
@@ -311,8 +315,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    cplex_dij=dtset%nspinor; cplex=1; ndij=1
 
    ABI_DT_MALLOC(pawrhoij,(cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-   call pawrhoij_alloc(pawrhoij,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
 
    ! Initialize values for several basic arrays
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -516,6 +521,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 !! SOURCE
 
 subroutine read_wfd()
+
+ implicit none
 
 ! *************************************************************************
 
