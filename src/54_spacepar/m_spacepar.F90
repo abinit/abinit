@@ -36,7 +36,7 @@ module m_spacepar
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
- use m_geometry,        only : metric, symredcart
+ use m_geometry,        only : metric, symredcart, normv
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -54,7 +54,7 @@ public :: symrhg            ! Symmetrize rhor(r)
 public :: irrzg             ! Find the irreducible zone in reciprocal space (used by symrhg)
 public :: setsym            ! Set up irreducible zone in  G space by direct calculation.
 #ifdef MR_DEV
-public :: hartredq.F90      ! Compute the q-gradient of the Hartree potential (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 )
+public :: hartredq          ! Compute the q-gradient of the Hartree potential (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 )
 #endif
 
 ! MG FIXME This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
@@ -2281,15 +2281,16 @@ end subroutine setsym
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_qdrpole
+!!      dfpt_flexo,dfpt_qdrpole
 !!
 !! CHILDREN
 !!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
-subroutine hartredq(cplex,gmet,gprimd,gsqcut,mpi_enreg,nfft,ngfft,paral_kgb,qdir,rhog,vqgradhart)
-    
+subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,paral_kgb,qdir,rhog,vqgradhart)
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2305,15 +2306,15 @@ subroutine hartredq(cplex,gmet,gprimd,gsqcut,mpi_enreg,nfft,ngfft,paral_kgb,qdir
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),rhog(2,nfft)
+ real(dp),intent(in) :: gmet(3,3),rhog(2,nfft)
  real(dp),intent(out) :: vqgradhart(cplex*nfft)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i23,i2_local,i3
- integer :: id1,id2,id3,ig1,ig2,ig3,ii,ii1,jj,me_fft,n1,n2,n3,nproc_fft
- real(dp) :: cutoff,dnrm2,gfact,gnorm,num
+ integer :: id1,id2,id3,ig1,ig2,ig3,ii,ii1,me_fft,n1,n2,n3,nproc_fft
+ real(dp) :: cutoff,gfact,gnorm,num
  real(dp), parameter :: piinv2= piinv*two
  real(dp),parameter :: tolfix=1.000000001e0_dp
  character(len=500) :: msg                   

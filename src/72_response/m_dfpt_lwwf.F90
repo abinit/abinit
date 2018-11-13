@@ -158,7 +158,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
 &               qdrpwf_t1_k,qdrpwf_t2_k,qdrpwf_t3_k,qdrpwf_t4_k,qdrpwf_t5_k,q1grad,q2grad,q1q2grad,&
 &               rmet,ucvol,useylmgr,vhxc1_atdis,vhxc1_efield,wfk_t_atdis,wfk_t_efield,wfk_t_ddk,   &
 &               wfk_t_dkdk,wtk_k,xred,ylm_k,ylmgr_k)
-    
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1054,7 +1054,8 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
      &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
      &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
      &  wfk_t_dkdk,wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
-    
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

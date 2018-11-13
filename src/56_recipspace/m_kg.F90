@@ -54,7 +54,7 @@ MODULE m_kg
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
  public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
 #ifdef MR_DEV
- public :: mkkin_metdqdq.F90 ! Compute the second q-gradient of the derivative of the kinetic energy operator w.r.t a metric
+ public :: mkkin_metdqdq ! Compute the second q-gradient of the derivative of the kinetic energy operator w.r.t a metric
                              ! perturbation
 #endif
 
@@ -1473,6 +1473,7 @@ end subroutine mknucdipmom_k
 !! SOURCE
 
 subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -1391,7 +1391,8 @@ end subroutine getdc1
 
 subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 &          idir,ipert,mpi_enreg,optlocal,optnl,qdir,rf_hamkq)
-    
+
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1499,7 +1500,7 @@ ABI_ALLOCATE(gvnl1dqc_,(2,npw1*my_nspinor))
 !-------------------------------------------
  if (ipert<=natom.and.optnl>0) then
    cpopt=-1 ; choice=22 ; signs=2 ; paw_opt=0
-   call nonlopdq(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
+   call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &  paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1dqc_,iatom_only=ipert,qdir=qdir)
 
 !$OMP PARALLEL DO 
@@ -1512,7 +1513,7 @@ ABI_ALLOCATE(gvnl1dqc_,(2,npw1*my_nspinor))
 !-------------------------------------------
  else if ((ipert==natom+3.or.ipert==natom+4).and.optnl>0) then
    cpopt=-1 ; choice=33 ; signs=2 ; paw_opt=0
-   call nonlopdq(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
+   call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &  paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1dqc_,qdir=qdir)
 
 !$OMP PARALLEL DO 
@@ -1616,6 +1617,7 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
 &                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&                   ! In
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                           ! In
 &                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)       ! Out
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1743,12 +1745,12 @@ end if
 !Compute (1/2) (2 Pi)**2 (k+q+G)**2:
  ABI_ALLOCATE(kinpw1,(npw1_k))
  kinpw1(:)=zero
- call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
+ call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
 
 ABI_ALLOCATE(dqdqkinpw,(npw_k)) 
  !-- Metric (strain) perturbation
  if (ipert==natom+3.or.ipert==natom+4) then
-   call mkkin_metdqdq(dqdqkinpw,dtset%effmass,gprimd,idir,kg_k,kpoint,npw_k,qdir)
+   call mkkin_metdqdq(dqdqkinpw,dtset%effmass_free,gprimd,idir,kg_k,kpoint,npw_k,qdir)
  else
    dqdqkinpw(:)=zero
  end if

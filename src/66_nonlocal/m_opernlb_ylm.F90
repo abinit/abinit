@@ -189,7 +189,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !Local variables-------------------------------
 !Arrays
 !scalars
- integer :: fdb,fdf,ia,iaph3d,ic,idelta,idelgam,igamma
+ integer :: fdb,fdf,ia,iaph3d,ibeta,ic,idelta,idelgam,igamma
  integer :: ii,il,ilmn,ipw,ipwshft,ispinor,jc,nthreads,ffnl_dir1,ffnl_dir(3)
  real(dp) :: scale,two_piinv,wt
  logical :: parity
