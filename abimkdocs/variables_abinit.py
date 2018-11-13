@@ -11848,24 +11848,20 @@ Variable(
     defaultval=0,
     mnemonics="OPTions for the DRIVER",
     text=r"""
-For each dataset, choose the task to be done, at the level of the "driver"
-routine.
+For each dataset, choose the task to be done, at the level of the "driver" routine.
 
 The choice is among:
 
-  * [[optdriver]] = 0: ground-state calculation (GS), routine "gstate"
-  * [[optdriver]] = 1: response-function calculation (RF), routine "respfn"
-  * [[optdriver]] = 2: susceptibility calculation (SUS), routine "suscep"
-  * [[optdriver]] = 3: susceptibility and dielectric matrix calculation (SCR), routine "screening"
-    (see the input variables [[ecutwfn]], [[ecuteps]], [[ppmfrq]], [[getwfk]], as
-    well as [[nbandkss]] and [[nband]])
-  * [[optdriver]] = 4: self-energy calculation (SIG), routine "sigma"
-  * [[optdriver]] = 5: non-linear response functions (NONLINEAR), using the 2n+1
-    theorem, routine "nonlinear"
-  * [[optdriver]] =7: electron-phonon coupling (EPH)
-  * [[optdriver]] =66: GW using Lanczos-Sternheimer, see input variables whose
-    name start with gwls_*.
-  * [[optdriver]] = 99: Bethe-Salpeter calculation (BSE), routine "bethe_salpeter"
+  * 0 --> ground-state calculation (GS), routine *gstate*
+  * 1 --> response-function calculation (RF), routine *respfn*
+  * 2 --> susceptibility calculation (SUS), routine *suscep*
+  * 3 --> susceptibility and dielectric matrix calculation (SCR), routine *screening*
+  * 4 --> self-energy calculation (SIG), routine *sigma*.
+  * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
+  * 7 --> electron-phonon coupling (EPH)
+  * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
+  * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
 If one of [[rfphon]], [[rfddk]], [[rfelfd]], or [[rfstrs]] is non-zero, while
 [[optdriver]] is not defined in the input file, ABINIT will set [[optdriver]]
@@ -19480,6 +19476,31 @@ Variable(
     text=r"""
 The shifts in the k-mesh used for the electron self-energy $\Sigma_{n\kk}$
 See also [[sigma_nshiftk]].
+""",
+),
+
+Variable(
+    abivarname="wfk_task",
+    varset="gstate",
+    topics=['ElecBandStructure_useful'],
+    vartype="string",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] == 8",
+    mnemonics="WFK TASK",
+    text=r"""
+
+This variable defines the quantity to compute starting from a previously generated WFK file.
+Allowed values:
+
+  * "wfk_full" --> Read WFK and produce new WFK file with k-points in the full BZ.
+        Wavefunctions with [[istwfk]] > 2 are automatically converted into the full-gsphere
+        representation. Useful to interface Abinit with external tools requiring k-points in the full BZ.
+
+  * "wfk_ddk" --> Compute DDK matrix elements for all bands and k-points in the WFK file.
+     The contribution due to the non-local part of the pseudopotential can be ignored
+     with [[inclvkb]] = 0 (not recommended unless you know what you are doing).
+
 """,
 ),
 

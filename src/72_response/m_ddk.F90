@@ -148,7 +148,7 @@ MODULE m_ddk
  public :: ddk_fs_average_veloc  ! find FS average of velocity squared
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
- public :: eph_ddk               ! calculate eph ddk
+ public :: ddk_compute           ! Calculate ddk matrix elements. Save result on disk.
 !!***
 
  type, private :: ham_targets_t
@@ -203,15 +203,18 @@ MODULE m_ddk
 
  contains
 
-   !public :: ddkop_init             ! Initialize the object.
    procedure :: setup_spin_kpoint => ddkop_setup_spin_kpoint
+    ! Prepare application of dH/dk for given spin, k-point.
    procedure :: apply => ddkop_apply
+    ! Apply dH/dk to input wavefunction.
    procedure :: get_velocity => ddkop_get_velocity
-   procedure :: free => ddkop_free   ! Free memory.
+    ! Compute matrix element.
+   procedure :: free => ddkop_free
+    ! Free memory.
 
  end type ddkop_t
 
- public :: ddkop_new
+ public :: ddkop_new   ! Build object
 
  !interface ddkop_t
  !  procedure ddkop_new
@@ -294,9 +297,9 @@ end subroutine ddk_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/eph_ddk
+!!****f* m_ddk/ddk_compute
 !! NAME
-!!  eph_ddk
+!!  ddk_compute
 !!
 !! FUNCTION
 !!  Calculate the DDK matrix elements using the commutator formulation.
@@ -311,7 +314,7 @@ end subroutine ddk_init
 !!
 !! SOURCE
 
-subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
+subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -623,7 +626,7 @@ subroutine eph_ddk(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ! Block all procs here so that we know output files are available when code returns.
  call xmpi_barrier(comm)
 
-end subroutine eph_ddk
+end subroutine ddk_compute
 !!***
 
 !----------------------------------------------------------------------
@@ -981,6 +984,8 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
 
 ! *************************************************************************
 
+ ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
+
  new%inclvkb = dtset%inclvkb
  new%ipert = cryst%natom + 1
  new%dfpt_sciss = dtset%dfpt_sciss
@@ -1127,7 +1132,7 @@ subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),intent(inout) :: self
+ class(ddkop_t),target,intent(inout) :: self
  integer,intent(in) :: mpw, npw_k, nspinor
  type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(in) :: eig0nk
@@ -1146,6 +1151,7 @@ subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
 !arrays
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
+ real(dp), ABI_CONTIGUOUS pointer :: gs1c(:,:)
 
 !************************************************************************
  self%eig0nk = eig0nk
@@ -1159,8 +1165,10 @@ subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
    eshift = self%eig0nk - self%dfpt_sciss
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
+     gs1c => null()
+     if (self%gs_hamkq(idir)%usepaw == 1) gs1c => self%gs1c(:,:,idir) ! Else NAG complains if zero-sized
      call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
-       grad_berry,self%gs1c(:,:,idir),self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
+       grad_berry,gs1c,self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
        optnl,opt_gvnlx1,self%rf_hamkq(idir),sij_opt,tim_getgh1c,usevnl0)
    end do
 
