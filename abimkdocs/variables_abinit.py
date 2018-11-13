@@ -3447,8 +3447,7 @@ entries. The first element specificies the interpolation method.
   * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]
   * 2 --> B-spline interpolation.
 
-The meaning of the other entries depend on the interpolation technique
-selected.
+The meaning of the other entries depend on the interpolation technique selected.
 In the case of star-function interpolation:
 
   * einterp(2): Number of star-functions per ab-initio k-point
@@ -19497,10 +19496,11 @@ Allowed values:
         Wavefunctions with [[istwfk]] > 2 are automatically converted into the full-gsphere
         representation. Useful to interface Abinit with external tools requiring k-points in the full BZ.
 
+  * "wfk_einterp" --> Read WFK and interpolate energies using parameters specified by [[einterp]]
+
   * "wfk_ddk" --> Compute DDK matrix elements for all bands and k-points in the WFK file.
      The contribution due to the non-local part of the pseudopotential can be ignored
      with [[inclvkb]] = 0 (not recommended unless you know what you are doing).
-
 """,
 ),
 

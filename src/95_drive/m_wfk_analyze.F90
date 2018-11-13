@@ -419,6 +419,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ! Calculate the DDK matrix elements from the WFK file
    call ddk_compute(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
 
+ case (WFK_TASK_EINTERP)
+   ! Band structure interpolation from eigenvalues computed on the k-mesh.
+   call ebands_interpolate_kpath(ebands, dtset, cryst, [0, 0], dtfil%filnam_ds(4), comm)
+
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
    call read_wfd()
