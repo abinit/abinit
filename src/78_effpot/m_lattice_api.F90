@@ -11,10 +11,11 @@ module m_lattice_api
   use m_xmpi
 
   use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_effpot_api, only : effpot_t
 
   implicit none
   private
-  type ,public :: lattice_api_t
+  type ,public, extends(effpot_t) :: lattice_api_t
    contains
      procedure :: set_params
      procedure :: get_force

@@ -63,10 +63,10 @@ module m_spin_mover
   type spin_mover_t
      integer :: nspins, method
      real(dp) :: dt, total_time, temperature, pre_time
-     !CONTAINS
-     !   procedure :: initialize => spin_mover_t_initialize
-     !   procedure :: run_one_step => spin_mover_t_run_one_step
-     !   procedure :: run_time => spin_mover_t_run_time
+     CONTAINS
+        procedure :: initialize => spin_mover_t_initialize
+        procedure :: run_one_step => spin_mover_t_run_one_step
+        procedure :: run_time => spin_mover_t_run_time
   end type spin_mover_t
   !!***
 
@@ -92,8 +92,7 @@ contains
   !!
   !! SOURCE
   subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature, pre_time, method)
-    !class (spin_mover_t):: self
-    type(spin_mover_t), intent(inout) :: self
+    class(spin_mover_t), intent(inout) :: self
     real(dp), intent(in) :: dt, total_time, pre_time,temperature
     integer, intent(in) :: nspins, method
     self%nspins=nspins
@@ -228,8 +227,7 @@ contains
 
 
   subroutine spin_mover_t_run_one_step(self, calculator, hist)
-
-    type(spin_mover_t), intent(inout) :: self
+    class(spin_mover_t), intent(inout) :: self
     type(spin_terms_t), intent(inout) :: calculator
     type(spin_hist_t),intent(inout) :: hist
     real(dp) :: S_out(3,self%nspins), etot
