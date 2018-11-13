@@ -1,0 +1,2929 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_dfpt_lw
+!! NAME
+!!  m_dfpt_lw
+!!
+!! FUNCTION
+!!  Calculation of spatial dispertion magnitudes (quadrupole and
+!!  flexoelectric tensor) from the DFPT long-wave approach.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_dfpt_lw
+    
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use defs_wvltypes
+ use m_profiling_abi
+ use m_xmpi
+ use m_errors
+ use m_wfk
+ use m_nctk
+ use m_hamiltonian
+ use m_ebands
+ use m_pawrhoij
+ use m_pawtab
+ use m_wffile
+
+ use m_hdr
+ use m_io_tools,   only : file_exists
+ use m_ioarr,      only : read_rhor, fftdatar_write_from_hdr
+ use m_wfk
+ use m_rf2,        only : rf2_getidirs
+ use m_kg,         only : getcut, getph, getmpw, kpgio
+ use m_abicore,    only : appdig
+ use m_fft,        only : fourdp
+ use m_dfpt_rhotov, only : dfpt_rhotov
+ use m_spacepar,   only : hartredq, setsym
+ use m_cgtools,    only : dotprod_vn
+ use m_symkpt,     only : symkpt
+ use m_mpinfo,     only : distrb2, initmpi_band
+ use m_initylmg,   only : initylmg
+ use m_inwffil,    only : inwffil
+ use m_dfpt_lwwf
+ use m_dynmat,         only : cart39
+
+ implicit none
+
+ private
+!***
+
+ public :: dfpt_qdrpole.F90
+ public :: dfpt_flexoelectrics.F90
+
+! *************************************************************************
+
+contains 
+
+!!****f* ABINIT/dfpt_qdrpole
+!! NAME
+!!  dfpt_qdrpole
+!!
+!! FUNCTION
+!!  This routine computes the elements of the quadrupole tensor as the 
+!!  second order q-gradient (d2/dq1dq2) of the charge response to an atomic 
+!!  displacement (see, e.g., M.Royo and M. Stengel to be published).
+!!  The atoms and atomic displacements directions that are evaluated 
+!!  are fixed by the rfatpol and rfdir variables in the input, rfdir also
+!!  fixes the directions for the dq2 derivative, whereas dq1 is evaluated
+!!  in all three directions.
+!!
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2017 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  codvsn=code version
+!!  doccde(mband*nkpt*nsppol)=derivative of occupancies wrt the energy
+!!  dtfil <type(datafiles_type)>=variables related to files
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
+!!  mkmem =number of k points treated by this node (GS data)
+!!  mk1mem =number of k points treated by this node (RF data)
+!!  mpert =maximum number of ipert
+!!  mpi_enreg=information about MPI parallelization
+!!  nattyp(ntypat)= # atoms of each type.
+!!  nfft=(effective) number of FFT grid points (for this proc)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other
+!!  nkpt=number of k points in the full BZ
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  nspden=number of spin-density components
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  occ(mband*nkpt*nsppol)=occup number for each band (often 2) at each k point
+!!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data for the GS (DUMMY)
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data (DUMMY)
+!!  pertsy(3,mpert)=set of perturbations that form a basis for all other perturbations
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  rmet(3,3)=real space metric (bohr**2)
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  rhog(2,nfftf)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
+!!  timrev=1 if time-reversal preserves the q wavevector; 0 otherwise.
+!!  ucvol=unit cell volume in bohr**3.
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!   
+!!  respfn
+!!
+!! CHILDREN
+!!
+!!  appdig, distrb2, dfpt_qdrpout, dfpt_qdrpwf, dfpt_rhotov, distrb2, dotprod_vn, ebands_init, 
+!!  ebands_free, fftdatar_write_from_hdr, 
+!!  fourdp, getcut, getmpw, getph, hdr_init, hdr_update, init_hamiltonian, 
+!!  initmpi_band, initylmg, inwffil, kpgio, load_spin_hamiltonian,
+!!  hartredq, read_rhor, rf2_getidirs, setsym, symkpt, WffClose, wfk_close, 
+!!  wfk_open_read, wrtout, xmpi_sum
+!!
+!! SOURCE
+
+subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
+&          gmet,gprimd,kxc,mkmem,mk1mem,&
+&          mpert,mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
+&          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+&          timrev,ucvol,xred)
+    
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_qdrpole'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mk1mem,mkmem,mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ real(dp),intent(in) :: ucvol
+ character(len=6), intent(in) :: codvsn
+ type(MPI_type),intent(inout) :: mpi_enreg
+ type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(in) :: dtset
+ type(hdr_type) :: hdr_den
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawrhoij_type),intent(inout) :: pawrhoij(:)
+!arrays
+ integer,intent(in) :: atindx(dtset%natom)
+ integer,intent(in) :: nattyp(dtset%ntypat),ngfft(18)
+ integer,intent(in) :: pertsy(3,dtset%natom+6)
+ real(dp),intent(in) :: doccde(dtset%mband*nkpt*dtset%nsppol)
+ real(dp),intent(in) :: gmet(3,3), gprimd(3,3)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
+ real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden)
+ real(dp),intent(in) :: xred(3,dtset%natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ask_accurate,bdtot_index,bdtot1_index,bantot_rbz
+ integer :: cplex,formeig,forunit,gscase,iatpert,iatpert_cnt,iatpol
+ integer :: iatdir,icg,icg1,ierr,ii,ikg,ikpt,ikpt1,ilm,iq1dir,iiq1grad,iq1grad,iq1grad_cnt
+ integer :: iq1q2grad,iq1q2grad_var,iq2dir,iiq2grad,iq2grad,iq2grad_cnt,ireadwf0,isppol,istwf_k,i1,i2,i3
+ integer :: jj,master,matom,matpert,mcg,me,mgfft
+ integer :: mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
+ integer :: natpert,nband_k,nfftot,nhat1grdim,nkpt_rbz,npw_k,npw1_k
+ integer :: nq1grad,nq1q2grad,nq2grad,nsym1,nylmgr,n3xccc
+ integer :: optorth,optene,option,optres
+ integer :: pawread,pertcase,qdir,spaceworld
+ integer :: usexcnhat,useylmgr
+ integer,parameter :: formeig1=1
+ integer,parameter :: re=1,im=2
+ real(dp) :: boxcut,doti,dotr,dnrm2,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
+ real(dp) :: tmpre,tmpim,vres2, wtk_k
+ logical :: t_exist 
+ character(len=500) :: msg                   
+ character(len=fnlen) :: filnam,fi1o,fiwfatdis,fiwfefield,fiwfddk,fiwfdkdk
+ type(ebands_t) :: bs_rbz
+ type(hdr_type) :: hdr0
+ type(wvl_data) :: wvl 
+ type(wffile_type) :: wffgs,wfftgs
+ type(gs_hamiltonian_type) :: gs_hamkq
+
+!arrays
+ integer,allocatable :: indkpt1(:), indkpt1_tmp(:),indsy1(:,:,:),irrzon1(:,:,:)
+ integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
+ integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
+ integer,allocatable :: pert_atdis(:,:), pert_atdis_tmp(:,:)
+ integer,allocatable :: q1grad(:,:),q1q2grad(:,:),q2grad(:,:),q2grad_tmp(:,:)
+ integer,allocatable :: qdrflg(:,:,:,:)
+ integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
+ real(dp) :: kpoint(3)
+ real(dp),allocatable :: cg(:,:),doccde_rbz(:)
+ real(dp),allocatable :: eigen0(:),eqgradhart(:,:,:,:)
+ real(dp),allocatable :: kpq(:,:),kpt_rbz(:,:)
+ real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
+ real(dp),allocatable :: occ_k(:),occ_rbz(:)
+ real(dp),allocatable :: ph1d(:,:),phnons1(:,:,:) 
+ real(dp),allocatable :: qdrpwf(:,:,:,:),qdrpwf_k(:,:,:,:)
+ real(dp),allocatable :: qdrpwf_t1(:,:,:,:),qdrpwf_t1_k(:,:,:,:)
+ real(dp),allocatable :: qdrpwf_t2(:,:,:,:),qdrpwf_t2_k(:,:,:,:)
+ real(dp),allocatable :: qdrpwf_t3(:,:,:,:),qdrpwf_t3_k(:,:,:,:)
+ real(dp),allocatable :: qdrpwf_t4(:,:,:,:),qdrpwf_t4_k(:,:,:,:)
+ real(dp),allocatable :: qdrpwf_t5(:,:,:,:),qdrpwf_t5_k(:,:,:,:)
+ real(dp),allocatable :: rhog1_atdis(:,:,:)
+ real(dp),allocatable :: rhog1_tmp(:,:)
+ real(dp),allocatable :: rhor1_efield(:,:,:),rhor1_tmp(:,:),rhor1_real(:,:)
+ real(dp),allocatable :: tnons1(:,:)
+ real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:)
+ real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
+ real(dp),allocatable :: wtk_folded(:), wtk_rbz(:)
+ real(dp),allocatable,target :: vtrial1(:,:)
+ real(dp),allocatable :: xccc3d1(:)
+ real(dp),allocatable :: ylm(:,:),ylm_k(:,:),ylmgr(:,:,:),ylmgr_k(:,:,:)
+ type(pawrhoij_type),allocatable :: pawrhoij_read(:)
+ type(wfk_t),allocatable :: wfk_t_atdis(:),wfk_t_efield(:),wfk_t_ddk(:),wfk_t_dkdk(:)
+ 
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Anounce start of quadrupole tensor calculation
+ write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+&   ' ==> Compute Quadrupole Tensor <== ',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+!Not valid for PAW
+ if (psps%usepaw==1) then
+   msg='This routine cannot be used for PAW (use pawnst3 instead) !'
+   MSG_BUG(msg)
+ end if
+
+!Not valid for finite wave-vector perturbations
+ if (dnrm2(dtset%qptn)/=0_dp) then
+   msg='This routine cannot be used for q=/0.d0'
+   MSG_BUG(msg)
+ end if
+
+!Only usable with spherical harmonics
+ if (dtset%useylm/=1) then
+   msg='This routine cannot be used for uselim/=1'
+   MSG_BUG(msg)
+ end if 
+
+!Not valid for spin-dependent calculations
+ if (dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1) then
+   msg='This routine cannot be used for spin-dependent calculations'
+   MSG_BUG(msg)
+ end if 
+
+
+!Keep track of total time spent in dfpt_qdrpole
+!!To be implemented if required
+
+!Init parallelism
+ spaceworld=mpi_enreg%comm_cell
+ me=mpi_enreg%me_kpt
+ master=0
+
+!Get FFT grid(s) sizes (be careful !) See NOTES in the comments at the beginning of respfn.F90
+ mgfft=dtset%mgfft
+ ecut=dtset%ecut
+ ecut_eff=ecut*(dtset%dilatmx)**2
+
+!Compute large sphere cut-off gsqcut
+ call getcut(boxcut,ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,ngfft)
+
+!Various initializations
+ cplex=2-timrev
+ matom=dtset%natom
+ usexcnhat=0
+ n3xccc=0
+ nfftot=ngfft(1)*ngfft(2)*ngfft(3)
+
+!Generate the 1-dimensional phases
+ ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
+
+!################# PERTURBATIONS AND q-GRADIENTS LABELLING ############################
+
+!Determine which atomic displacements and q-gradient directions have to be evaluated
+!taking into account the perturbation symmetries
+ matpert=dtset%natom*3
+ ABI_ALLOCATE(pert_atdis_tmp,(3,matpert))
+ pert_atdis_tmp=0
+ iatpert_cnt=0
+ do iatpol=1,matom 
+   do iatdir=1,3
+     if (pertsy(iatdir,iatpol)==1) then
+       iatpert_cnt=iatpert_cnt+1
+       pert_atdis_tmp(1,iatpert_cnt)=iatpol                !atom displaced
+       pert_atdis_tmp(2,iatpert_cnt)=iatdir                !direction of displacement
+       pert_atdis_tmp(3,iatpert_cnt)=(iatpol-1)*3+iatdir   !like pertcase in dfpt_loopert.f90
+     end if
+   end do
+ end do
+ natpert=iatpert_cnt
+ ABI_ALLOCATE(pert_atdis,(3,natpert))
+ do iatpert=1,natpert
+   pert_atdis(:,iatpert)=pert_atdis_tmp(:,iatpert)
+ end do
+ ABI_DEALLOCATE(pert_atdis_tmp)
+ 
+ !The q2grad is related with the response to the electric field
+ ABI_ALLOCATE(q2grad_tmp,(3,3))
+ q2grad_tmp=0
+ iq2grad_cnt=0
+ do iq2grad=1,3
+   if (pertsy(iq2grad,dtset%natom+2)==1) then
+     iq2grad_cnt=iq2grad_cnt+1
+     q2grad_tmp(1,iq2grad_cnt)=dtset%natom+2               !electric field pert
+     q2grad_tmp(2,iq2grad_cnt)=iq2grad                     !electric field direction
+     q2grad_tmp(3,iq2grad_cnt)=matpert+3+iq2grad           !like pertcase in dfpt_loopert.f90
+   end if
+ end do
+ nq2grad=iq2grad_cnt
+ ABI_ALLOCATE(q2grad,(3,nq2grad))
+ do iq2grad=1,nq2grad
+   q2grad(:,iq2grad)=q2grad_tmp(:,iq2grad)
+ end do
+ ABI_DEALLOCATE(q2grad_tmp)
+
+ !For the evaluation of the  first q-gradient, the three directios are activated because 
+ !currently the program calculates by defect all the components of the d2_dkdk perturbation.
+ !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
+ !components of the d2_dkdk
+ !The q1grad is related with the response to the ddk
+ nq1grad=3
+ ABI_ALLOCATE(q1grad,(3,nq1grad))
+ do iq1grad=1,nq1grad
+   q1grad(1,iq1grad)=dtset%natom+1                         !ddk perturbation
+   q1grad(2,iq1grad)=iq1grad                               !ddk direction
+   q1grad(3,iq1grad)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
+ end do
+
+ !For the evaluation of the 2nd order q-gradient, the 9 directios are activated because 
+ !currently the program calculates by defect all the components of the d2_dkdk perturbation.
+ !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
+ !components of the d2_dkdk
+ nq1q2grad=9
+ ABI_ALLOCATE(q1q2grad,(4,nq1q2grad))
+ do iq1q2grad=1,nq1q2grad
+   call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
+   if (iq1dir==iq2dir) then
+     q1q2grad(1,iq1q2grad)=dtset%natom+10                    !dkdk perturbation diagonal elements
+   else
+     q1q2grad(1,iq1q2grad)=dtset%natom+11                    !dkdk perturbation off-diagonal elements
+   end if
+   q1q2grad(2,iq1q2grad)=iq1dir                              !dq1 direction 
+   q1q2grad(3,iq1q2grad)=iq2dir                              !dq2 direction 
+   iq1q2grad_var=iq1q2grad
+   if (iq1q2grad>6) iq1q2grad_var=iq1q2grad-3                !Lower=Upper diagonal triangle matrix
+   q1q2grad(4,iq1q2grad)=iq1q2grad_var+(dtset%natom+6)*3     !like pertcase in dfpt_loopert.f90
+ end do
+
+!################# ELECTROSTATIC CONTRIBUTIONS  #######################################
+
+!This is necessary to deactivate paw options in the dfpt_rhotov routine
+ ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
+ pawread=0
+ nhat1grdim=0
+ ABI_ALLOCATE(nhat1gr,(0,0,0))
+ ABI_ALLOCATE(nhat,(nfft,nspden))
+ nhat=zero
+ ABI_ALLOCATE(nhat1,(cplex*nfft,nspden))
+ nhat1=zero
+
+!Read the electric field density response from a disk file(rhor1_efield), calculates the FFT 
+!(rhog1_tmp) and the first order Hartree and xc potentials(vhxc1_efield). 
+!TODO: In the call to read_rhor there is a security option that compares with the header
+!hdr. Not activated at this moment.
+ ABI_ALLOCATE(rhog1_tmp,(2,nfft))
+ ABI_ALLOCATE(rhor1_efield,(nq2grad,cplex*nfft,nspden))
+ ABI_ALLOCATE(rhor1_tmp,(cplex*nfft,nspden))
+ ABI_ALLOCATE(rhor1_real,(1*nfft,nspden))
+ ABI_ALLOCATE(vhartr1,(cplex*nfft))
+ ABI_ALLOCATE(vhxc1_efield,(nq2grad,cplex*nfft))
+ ABI_ALLOCATE(vpsp1,(cplex*nfft))
+ ABI_ALLOCATE(vtrial1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(vresid1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
+ vpsp1=zero; vtrial1=zero
+ optene=0; optres=1 
+ do iq2grad=1,nq2grad
+   pertcase=q2grad(3,iq2grad)
+   
+   !Reads a real first order density
+   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
+    & hdr_den, pawrhoij_read, spaceworld)
+
+   !Perform FFT rhor1 to rhog1
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+
+   !Accumulate density in meaningful complex arrays
+   if (timrev==0) then
+     do ii=1,nfft
+       jj=ii*2
+       rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+     end do
+   else if (timrev==1) then
+     rhor1_tmp(:,:)=rhor1_real(:,:)
+   end if
+   rhor1_efield(iq2grad,:,:)=rhor1_tmp(:,:)
+
+   !Calculate first order Hartree and xc potentials
+   call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+    & gmet,gprimd,gsqcut,q2grad(2,iq2grad),dtset%natom+2,&
+    & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+
+   !Accumulate the potential in meaningful arrays
+   vhxc1_efield(iq2grad,:)=vtrial1(:,nspden)
+
+ end do
+
+!Read the atomic displacement density response from a disk file, calculate the FFT 
+!(rhog1_atdis) and the first order Hartree and xc potentials(vhxc1_atdis). 
+ ABI_ALLOCATE(rhog1_atdis,(natpert,2,nfft))
+ ABI_ALLOCATE(vhxc1_atdis,(natpert,cplex*nfft))
+ vtrial1=zero
+ do iatpert= 1, natpert
+   iatpol=pert_atdis(1,iatpert)
+   iatdir=pert_atdis(2,iatpert)
+   pertcase=pert_atdis(3,iatpert)
+
+   !Reads a real first order density
+   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
+    & hdr_den, pawrhoij_read, spaceworld)
+
+   !Perform FFT rhor1 to rhog1
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+
+   !Accumulate density in meaningful complex arrays
+   if (timrev==0) then
+     do ii=1,nfft
+       jj=ii*2
+       rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+     end do
+   else if (timrev==1) then
+     rhor1_tmp(:,:)=rhor1_real(:,:)
+   end if
+   rhog1_atdis(iatpert,:,:)=rhog1_tmp(:,:)
+
+   !Calculate first order Hartree and xc potentials
+   call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+    & gmet,gprimd,gsqcut,iatdir,iatpol,&
+    & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+
+   !Accumulate the potential in meaningful arrays
+   vhxc1_atdis(iatpert,:)=vtrial1(:,nspden)
+
+ end do
+
+ !These arrays will not be used anymore (for the moment)
+ ABI_DEALLOCATE(rhor1_real)
+ ABI_DEALLOCATE(rhor1_tmp)
+ ABI_DEALLOCATE(vhartr1)
+ ABI_DEALLOCATE(vpsp1)
+ ABI_DEALLOCATE(vtrial1)
+ ABI_DEALLOCATE(vresid1)
+ ABI_DEALLOCATE(vxc1)
+ ABI_DEALLOCATE(xccc3d1)
+
+ ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
+ ABI_DEALLOCATE(nhat1gr)
+ ABI_DEALLOCATE(nhat)
+ ABI_DEALLOCATE(nhat1)
+
+!Calculate the electrostatic contribution from the q-gradient of the Hartree potential
+ ABI_ALLOCATE(vqgradhart,(2*nfft))
+ ABI_ALLOCATE(rhor1_tmp,(2*nfft,nspden))
+ ABI_ALLOCATE(eqgradhart,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrflg,(matom,3,3,3))
+ qdrflg=0
+ rhor1_tmp=zero
+ do iq1grad=1,nq1grad
+   qdir=q1grad(2,iq1grad)
+   do iatpert=1,natpert
+
+     !Calculate the gradient of the potential generated by the first order atomic displacement density
+     rhog1_tmp(:,:)=rhog1_atdis(iatpert,:,:)
+     call hartredq(2,gmet,gprimd,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
+
+     !To ckeck
+     !call appdig(q2grad(3,iq2grad)+q1grad(3,iq1grad),"Gradient_Hartree_potential",fi1o)
+     !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
+     ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
+
+     do iq2grad=1,nq2grad
+
+       !Calculate the electrostatic energy term with the first order electric field density 
+       if (timrev==1) then
+         do ii=1,nfft
+           jj=ii*2
+           rhor1_tmp(jj-1,:)=rhor1_efield(iq2grad,ii,:)
+         end do
+       else if (timrev==0) then
+         rhor1_tmp(:,:)=rhor1_efield(iq2grad,:,:)
+       end if
+       
+       call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+       eqgradhart(re,iatpert,iq2grad,iq1grad)=dotr*half
+       eqgradhart(im,iatpert,iq2grad,iq1grad)=doti*half
+       qdrflg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),q2grad(2,iq2grad),q1grad(2,iq1grad))=1
+
+     end do
+   end do
+ end do 
+
+ ABI_DEALLOCATE(rhor1_tmp)
+ ABI_DEALLOCATE(rhog1_tmp)
+ ABI_DEALLOCATE(rhog1_atdis)
+ ABI_DEALLOCATE(rhor1_efield)
+
+
+!################# WAVE FUNCTION CONTRIBUTIONS  #######################################
+
+!Determine the subset of symmetry operations (nsym1 operations)
+!that leaves the perturbation invariant, and initialize corresponding arrays
+!symaf1, symrl1, tnons1 (and pawang1%zarot, if PAW)..
+!MR TODO: For the moment only the identiy symmetry is activated (nsym1=1) 
+!         In a future I will try to activate perturbation dependent symmetries
+!         with littlegroup_pert.F90. 
+ nsym1 = 1
+ ABI_ALLOCATE(indsy1,(4,nsym1,dtset%natom))
+ ABI_ALLOCATE(symrc1,(3,3,nsym1))
+ ABI_ALLOCATE(symaf1,(nsym1))
+ ABI_ALLOCATE(symrl1,(3,3,nsym1))
+ ABI_ALLOCATE(tnons1,(3,nsym1))
+ symaf1(1:nsym1)= 1
+ symrl1(:,:,nsym1)= dtset%symrel(:,:,1)
+ tnons1(:,nsym1)= 0_dp
+
+!Set up corresponding symmetry data
+ ABI_ALLOCATE(irrzon1,(dtset%nfft**(1-1/nsym1),2,(nspden/dtset%nsppol)-3*(nspden/4)))
+ ABI_ALLOCATE(phnons1,(2,dtset%nfft**(1-1/nsym1),(nspden/dtset%nsppol)-3*(nspden/4)))
+ call setsym(indsy1,irrzon1,1,dtset%natom,dtset%nfft,dtset%ngfft,nspden,dtset%nsppol,&
+&nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
+
+ ABI_DEALLOCATE(indsy1)
+ ABI_DEALLOCATE(symaf1)
+ ABI_DEALLOCATE(symrl1)
+ ABI_DEALLOCATE(tnons1)
+
+!Determine the subset of k-points needed in the "reduced Brillouin zone",
+!and initialize other quantities
+ ABI_ALLOCATE(indkpt1_tmp,(nkpt))
+ ABI_ALLOCATE(wtk_folded,(nkpt))
+ indkpt1_tmp(:)=0 
+
+ if (dtset%kptopt==2) then
+   call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
+  & nsym1,symrc1,timrev,dtset%wtk,wtk_folded)
+ else if (dtset%kptopt==3) then
+   call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
+  & nsym1,symrc1,0,dtset%wtk,wtk_folded)
+ else
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
+   MSG_BUG(msg)
+ end if
+
+ ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(indkpt1,(nkpt_rbz))
+ ABI_ALLOCATE(istwfk_rbz,(nkpt_rbz))
+ ABI_ALLOCATE(kpt_rbz,(3,nkpt_rbz))
+ ABI_ALLOCATE(nband_rbz,(nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(occ_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(wtk_rbz,(nkpt_rbz))
+ indkpt1(:)=indkpt1_tmp(1:nkpt_rbz)
+ do ikpt=1,nkpt_rbz
+     istwfk_rbz(ikpt)=dtset%istwfk(indkpt1(ikpt))
+     kpt_rbz(:,ikpt)=dtset%kptns(:,indkpt1(ikpt))
+     wtk_rbz(ikpt)=wtk_folded(indkpt1(ikpt))
+ end do
+ ABI_DEALLOCATE(indkpt1_tmp)
+ ABI_DEALLOCATE(wtk_folded)
+
+!Transfer occ to occ_rbz 
+!NOTE : this takes into account that indkpt1 is ordered
+!MG: What about using occ(band,kpt,spin) ???
+ bdtot_index=0;bdtot1_index=0
+ do isppol=1,dtset%nsppol
+   ikpt1=1
+   do ikpt=1,nkpt
+     nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
+!    Must test against ikpt1/=nkpt_rbz+1, before evaluate indkpt1(ikpt1)
+     if(ikpt1/=nkpt_rbz+1)then
+       if(ikpt==indkpt1(ikpt1))then
+         nband_rbz(ikpt1+(isppol-1)*nkpt_rbz)=nband_k
+         occ_rbz(1+bdtot1_index:nband_k+bdtot1_index)=occ(1+bdtot_index:nband_k+bdtot_index)
+         doccde_rbz(1+bdtot1_index:nband_k+bdtot1_index)=doccde(1+bdtot_index:nband_k+bdtot_index)
+         ikpt1=ikpt1+1
+         bdtot1_index=bdtot1_index+nband_k
+       end if
+     end if
+     bdtot_index=bdtot_index+nband_k
+   end do
+ end do
+
+!Compute maximum number of planewaves at k
+call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_rbz)
+
+!Allocate some k-dependent arrays at k
+ ABI_ALLOCATE(kg,(3,mpw*nkpt_rbz))
+ ABI_ALLOCATE(kg_k,(3,mpw))
+ ABI_ALLOCATE(npwarr,(nkpt_rbz))
+ ABI_ALLOCATE(npwtot,(nkpt_rbz))
+
+!Determine distribution of k-points/bands over MPI processes
+ if (allocated(mpi_enreg%my_kpttab)) then
+   ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+ end if
+ ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
+ if(xmpi_paral==1) then
+   ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
+   call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
+ else
+   mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
+ end if
+ my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
+ call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
+ mkmem_rbz =my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
+ ABI_UNUSED((/mkmem,mk1mem/))
+ 
+!Set up the basis sphere of planewaves at k
+ call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
+& kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
+ ABI_DEALLOCATE(npwtot)
+
+!Set up the spherical harmonics (Ylm) and 1st gradients at k
+ useylmgr=1; option=1 ; nylmgr=3
+ ABI_ALLOCATE(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_ALLOCATE(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ if (psps%useylm==1) then
+   call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
+&   npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
+ end if
+
+!Initialize band structure datatype at k
+ bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(eigen0,(bantot_rbz))
+ eigen0(:)=zero
+ call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
+& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ ABI_DEALLOCATE(eigen0)
+
+ ABI_DEALLOCATE(doccde_rbz)
+
+!Initialize header, update it with evolving variables
+ gscase=0 ! A GS WF file is read
+ call hdr_init(bs_rbz,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+ call hdr_update(hdr0,bantot_rbz,etotal,fermie,&
+& residm,rprimd,occ_rbz,pawrhoij,xred,dtset%amu_orig(:,1),&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+!Clean band structure datatype (should use it more in the future !)
+ call ebands_free(bs_rbz)
+
+
+!!Initialize GS wavefunctions at k
+ ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
+ mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+ if (one*mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol > huge(1)) then
+   write (msg,'(4a, 5(a,i0), 2a)')&
+&   "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
+&   "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&   "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
+&   mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&   'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+   MSG_ERROR(msg)
+ end if
+ ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+ ABI_CHECK(ierr==0, "out-of-memory in cg")
+
+ ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+& formeig,gmet,hdr0,ireadwf0,istwfk_rbz,kg,&
+& kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
+& mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
+& dtset%nsppol,dtset%nsym,occ_rbz,optorth,rprimd,dtset%symafm,&
+& dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
+& dtfil%unwffgs,dtfil%fnamewffk,wvl)
+ ABI_DEALLOCATE(eigen0)
+!Close wffgs%unwff, if it was ever opened (in inwffil)
+ if (ireadwf0==1) then
+   call WffClose(wffgs,ierr)
+ end if
+
+!==== Initialize most of the Hamiltonian ====
+!1) Allocate all arrays and initialize quantities that do not depend on k and spin.
+!2) Perform the setup needed for the non-local factors:
+!3) Constant kleimann-Bylander energies are copied from psps to gs_hamkq.
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
+& dtset%typat,xred,nfft,dtset%mgfft,ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+& use_gpu_cuda=dtset%use_gpu_cuda)
+
+
+!==== Initialize response functions files and handlers ====
+ !Atomic displacement files
+ ABI_ALLOCATE(wfk_t_atdis,(natpert))
+ do iatpert=1,natpert
+
+   pertcase=pert_atdis(3,iatpert)
+   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfatdis)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfatdis)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfatdis)," does not exist."
+     MSG_BUG(msg)
+   else
+     write(msg, '(a,a)') '-open atomic displacement wf1 file :',trim(fiwfatdis)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wfk_open_read(wfk_t_atdis(iatpert),fiwfatdis,formeig1,dtset%iomode,forunit,spaceworld)
+   end if
+
+ end do 
+
+
+ !ddk files
+ ABI_ALLOCATE(wfk_t_ddk,(nq1grad))
+ do iq1grad=1,nq1grad
+
+   pertcase=q1grad(3,iq1grad)
+   call appdig(pertcase,dtfil%fnamewffddk,fiwfddk)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfddk)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfddk)," does not exist."
+     MSG_BUG(msg)
+   else
+     write(msg, '(a,a)') '-open ddk wf1 file :',trim(fiwfddk)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wfk_open_read(wfk_t_ddk(iq1grad),fiwfddk,formeig1,dtset%iomode,forunit,spaceworld)
+   end if
+
+ end do 
+
+ !Electric field files
+ ABI_ALLOCATE(wfk_t_efield,(nq2grad))
+ do iq2grad=1,nq2grad
+
+   pertcase=q2grad(3,iq2grad)
+   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfefield)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfefield)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfefield)," does not exist."
+     MSG_BUG(msg)
+   else
+     write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wfk_open_read(wfk_t_efield(iq2grad),fiwfefield,formeig1,dtset%iomode,forunit,spaceworld)
+   end if
+
+ end do
+
+ !dkdk
+ ABI_ALLOCATE(wfk_t_dkdk,(nq1q2grad))
+ do iq1q2grad=1,nq1q2grad
+
+   pertcase=q1q2grad(4,iq1q2grad)
+   call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfdkdk)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfdkdk)," does not exist."
+     MSG_BUG(msg)
+   else
+     if (iq1q2grad <= 6) then
+       write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+     else
+       wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+     end if
+   end if
+
+ end do
+ 
+!Allocate the quadrupole tensor part depending on the wave functions
+ABI_ALLOCATE(qdrpwf,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_k,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t1,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t1_k,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t2,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t2_k,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t3,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t3_k,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t4,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t4_k,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t5,(2,natpert,nq2grad,nq1grad))
+ABI_ALLOCATE(qdrpwf_t5_k,(2,natpert,nq2grad,nq1grad))
+qdrpwf=zero
+qdrpwf_t1=zero
+qdrpwf_t2=zero
+qdrpwf_t3=zero
+qdrpwf_t4=zero
+qdrpwf_t5=zero
+
+!LOOP OVER SPINS
+ bdtot_index=0
+ icg=0;icg1=0
+ do isppol=1,nsppol
+   ikg=0
+
+!  Continue to initialize the Hamiltonian
+   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+
+!  BIG FAT k POINT LOOP
+   do ikpt=1,nkpt_rbz
+
+     nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
+     istwf_k=istwfk_rbz(ikpt)
+     npw_k=npwarr(ikpt)
+     npw1_k=npw_k
+
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
+       bdtot_index=bdtot_index+nband_k
+
+       cycle ! Skip the rest of the k-point loop
+     end if
+
+     ABI_ALLOCATE(occ_k,(nband_k))
+     ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_ALLOCATE(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
+     kpoint(:)=kpt_rbz(:,ikpt)
+     wtk_k=wtk_rbz(ikpt)
+
+!    Get plane-wave vectors and related data at k
+     kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+     if (psps%useylm==1) then
+       do ilm=1,psps%mpsang*psps%mpsang
+         ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
+       end do
+       if (useylmgr==1) then
+         do ilm=1,psps%mpsang*psps%mpsang
+           do ii=1,nylmgr
+             ylmgr_k(1:npw_k,ii,ilm)=ylmgr(1+ikg:npw_k+ikg,ii,ilm)
+           end do
+         end do
+       end if
+     end if
+
+     call dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut, &
+     &  icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
+     &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
+     &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
+     &  npw_k,nq1grad, &
+     &  nq2grad,nq1q2grad,nspden,nsppol,nylmgr,occ_k, &
+     &  pert_atdis,ph1d,psps,qdrpwf_k,qdrpwf_t1_k,qdrpwf_t2_k,qdrpwf_t3_k,    &
+     &  qdrpwf_t4_k,qdrpwf_t5_k,q1grad,q2grad,q1q2grad,rmet,ucvol,useylmgr, &
+     &  vhxc1_atdis,vhxc1_efield,wfk_t_atdis,wfk_t_efield,wfk_t_ddk, &
+     &  wfk_t_dkdk,wtk_k,xred,ylm_k,ylmgr_k)
+
+
+!    Add the contribution from each k-point
+     qdrpwf=qdrpwf + qdrpwf_k
+     qdrpwf_t1=qdrpwf_t1 + qdrpwf_t1_k
+     qdrpwf_t2=qdrpwf_t2 + qdrpwf_t2_k
+     qdrpwf_t3=qdrpwf_t3 + qdrpwf_t3_k
+     qdrpwf_t4=qdrpwf_t4 + qdrpwf_t4_k
+     qdrpwf_t5=qdrpwf_t5 + qdrpwf_t5_k
+
+!    Keep track of total number of bands
+     bdtot_index=bdtot_index+nband_k
+
+!    Shift arrays memory
+     if (mkmem_rbz/=0) then
+       icg=icg+npw_k*dtset%nspinor*nband_k
+       ikg=ikg+npw_k
+     end if
+     if (mk1mem_rbz/=0) then
+       icg1=icg1+npw1_k*dtset%nspinor*nband_k
+     end if
+
+     ABI_DEALLOCATE(occ_k)
+     ABI_DEALLOCATE(ylm_k)
+     ABI_DEALLOCATE(ylmgr_k)
+
+   end do
+!  END BIG FAT k POINT LOOP
+ end do
+!END LOOP OVER SPINS
+
+
+!Close response function files
+ do iatpert=1,natpert
+   call wfk_close(wfk_t_atdis(iatpert))
+ end do
+ do iq1grad=1,nq1grad
+   call wfk_close(wfk_t_ddk(iq1grad))
+ end do
+ do iq2grad=1,nq2grad
+   call wfk_close(wfk_t_efield(iq2grad))
+ end do
+ do iq1q2grad=1,nq1q2grad
+   call wfk_close(wfk_t_dkdk(iq1q2grad))
+ end do
+
+!=== MPI communications ==================
+ if (xmpi_paral==1) then
+
+   call xmpi_sum(qdrpwf,spaceworld,ierr)
+   call xmpi_sum(qdrpwf_t1,spaceworld,ierr)
+   call xmpi_sum(qdrpwf_t2,spaceworld,ierr)
+   call xmpi_sum(qdrpwf_t3,spaceworld,ierr)
+   call xmpi_sum(qdrpwf_t4,spaceworld,ierr)
+   call xmpi_sum(qdrpwf_t5,spaceworld,ierr)
+
+ end if
+
+!Anounce finalization of quadrupole tensor calculation
+ write(msg, '(a,a,a)' ) ch10, &
+' Quadrupole tensor calculation completed ',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+!Gather the different terms in the quadrupole tensor and print them out
+ if (me==0) then
+ filnam=dtfil%filnam_ds(4)
+ call dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,dtset%kptopt,matom,natpert,& 
+    & nq1grad,nq2grad,pert_atdis, dtset%prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, &
+    & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
+ end if
+
+ !Deallocations
+ ABI_DEALLOCATE(eqgradhart)
+ ABI_DEALLOCATE(indkpt1)
+ ABI_DEALLOCATE(istwfk_rbz)
+ ABI_DEALLOCATE(kg)
+ ABI_DEALLOCATE(kg_k)
+ ABI_DEALLOCATE(kpt_rbz)
+ ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+ ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+ ABI_DEALLOCATE(nband_rbz)
+ ABI_DEALLOCATE(npwarr)
+ ABI_DEALLOCATE(occ_rbz)
+ ABI_DEALLOCATE(ph1d)
+ ABI_DEALLOCATE(pert_atdis)
+ ABI_DEALLOCATE(qdrflg)
+ ABI_DEALLOCATE(qdrpwf)
+ ABI_DEALLOCATE(qdrpwf_k)
+ ABI_DEALLOCATE(qdrpwf_t1)
+ ABI_DEALLOCATE(qdrpwf_t2)
+ ABI_DEALLOCATE(qdrpwf_t3)
+ ABI_DEALLOCATE(qdrpwf_t4)
+ ABI_DEALLOCATE(qdrpwf_t5)
+ ABI_DEALLOCATE(qdrpwf_t1_k)
+ ABI_DEALLOCATE(qdrpwf_t2_k)
+ ABI_DEALLOCATE(qdrpwf_t3_k)
+ ABI_DEALLOCATE(qdrpwf_t4_k)
+ ABI_DEALLOCATE(qdrpwf_t5_k)
+ ABI_DEALLOCATE(q1grad)
+ ABI_DEALLOCATE(q1q2grad)
+ ABI_DEALLOCATE(q2grad)
+ ABI_DEALLOCATE(vhxc1_atdis)
+ ABI_DEALLOCATE(vhxc1_efield)
+ ABI_DEALLOCATE(vqgradhart)
+ ABI_DEALLOCATE(wfk_t_atdis)
+ ABI_DEALLOCATE(wfk_t_ddk)
+ ABI_DEALLOCATE(wfk_t_dkdk)
+ ABI_DEALLOCATE(wfk_t_efield)
+ ABI_DEALLOCATE(wtk_rbz)
+ ABI_DEALLOCATE(ylm)
+ ABI_DEALLOCATE(ylmgr)
+
+ DBG_EXIT("COLL")
+
+end subroutine dfpt_qdrpole
+!!***
+
+!!****f* ABINIT/dfpt_qdrpout
+!! NAME
+!!  dfpt_qdrpout
+!!
+!! FUNCTION
+!!  This subroutine gathers the different terms entering the quadrupole tensor,
+!!  perfofms the transformation from reduced to cartesian coordinates and 
+!!  writes out the quadrupole tensor in external files
+!!  
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
+!!  eqgradhart(2,natpert,nq2grad,nq1grad)=electrostatic contribution from the 
+!!                                             q-gradient of the Hartree potential
+!!  filnam=name of the root for the output file
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
+!!  matom=maximum number of atoms to displace
+!!  natpert=number of atomic displacement perturbations
+!!  nq1grad=number of q1 (q_{\gamma}) gradients
+!!  nq2grad=number of q2 (q_{\delta}) gradients
+!!  pert_atdis(3,natpert)=array with the info for the atomic displacement perturbations
+!!  prtvol=volume of information to be printed. 1-> The different contributions to the quadrupole are printed.
+!!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
+!!  q2grad(3,nq2grad)=array with the info for the q2 (q_{\gamma}) gradients
+!!  qdrflg(matom,3,3,3)=array that indicates which quadrupole tensor elements have been calculated
+!!  qdrpwf_k(2,natpert,nq2grad,nq1grad)= wave function dependent part of the quadrupole tensor
+!!                                       for the k-point kpt
+!!  qdrpwf_t1_k(2,natpert,nq2grad,nq1grad)= t1 term (see notes) of qdrpwf_k
+!!  qdrpwf_t2_k(2,natpert,nq2grad,nq1grad)= t2 term (see notes) of qdrpwf_k
+!!  qdrpwf_t3_k(2,natpert,nq2grad,nq1grad)= t3 term (see notes) of qdrpwf_k
+!!  qdrpwf_t4_k(2,natpert,nq2grad,nq1grad)= t4 term (see notes) of qdrpwf_k
+!!  qdrpwf_t5_k(2,natpert,nq2grad,nq1grad)= t5 term (see notes) of qdrpwf_k
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  ucvol=unit cell volume in bohr**3.
+!!  
+!! OUTPUT
+!!  argout(sizeout)=description
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!!  dfpt_qdrpole
+!!
+!! CHILDREN
+!!
+!!  cart39
+!!
+!! SOURCE
+
+subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, & 
+         & nq1grad,nq2grad,pert_atdis,prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, & 
+         & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
+    
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_qdrpout'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,kptopt,matom,natpert,nq1grad,nq2grad,prtvol
+ real(dp),intent(in) :: ucvol
+
+!arrays
+ integer,intent(in) :: pert_atdis(3,natpert)
+ integer,intent(in) :: qdrflg(matom,3,3,3)
+ integer,intent(in) :: q1grad(3,nq1grad),q2grad(3,nq2grad)
+ real(dp),intent(in) :: eqgradhart(2,natpert,nq2grad,nq1grad)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: qdrpwf(2,natpert,nq2grad,nq1grad)
+ real(dp),intent(in) :: qdrpwf_t1(2,natpert,nq2grad,nq1grad)
+ real(dp),intent(in) :: qdrpwf_t2(2,natpert,nq2grad,nq1grad)
+ real(dp),intent(in) :: qdrpwf_t3(2,natpert,nq2grad,nq1grad)
+ real(dp),intent(in) :: qdrpwf_t4(2,natpert,nq2grad,nq1grad)
+ real(dp),intent(in) :: qdrpwf_t5(2,natpert,nq2grad,nq1grad)
+ real(dp),intent(in) :: rprimd(3,3)
+ character(len=fnlen), intent(in) :: filnam
+ 
+
+!Local variables-------------------------------
+!scalars
+ integer :: alpha,beta,gamma
+ integer :: iatpert,iatdir,iatom,ii,iiq1grad,iiq2grad
+ integer :: iq1dir,iq1grad,iq2dir,iq2grad 
+ integer, parameter :: re=1,im=2
+ real(dp) :: piezore,piezoim,tmpre, tmpim
+ character(len=500) :: msg
+ character(len=fnlen) :: fiqdrpl
+!arrays
+ integer,allocatable :: cartflg(:,:,:,:)
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
+ real(dp),allocatable :: qdrptens_cart(:,:,:,:,:),qdrptens_red(:,:,:,:,:)
+ 
+ 
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Open output files
+ if (prtvol==1) then
+   open(unit=71,file='qdrpl_wf_t1.out',status='unknown',form='formatted',action='write')
+   open(unit=72,file='qdrpl_wf_t2.out',status='unknown',form='formatted',action='write')
+   open(unit=73,file='qdrpl_wf_t3.out',status='unknown',form='formatted',action='write')
+   open(unit=74,file='qdrpl_wf_t4.out',status='unknown',form='formatted',action='write')
+   open(unit=75,file='qdrpl_wf_t5.out',status='unknown',form='formatted',action='write')
+   open(unit=76,file='qdrpl_elecstic.out',status='unknown',form='formatted',action='write')
+ end if
+
+ fiqdrpl=trim(filnam)//'_QDRPOLE'
+ open(unit=77,file=fiqdrpl,status='unknown',form='formatted',action='write')
+ write(77,*)' Quadrupole tensor, in reduced coordinates,'
+ write(77,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
+
+!Gather the different terms in the quadrupole tensor and print the result
+ ABI_ALLOCATE(qdrptens_red,(2,matom,3,3,3))
+ qdrptens_red=zero
+
+ if (kptopt==3) then
+
+   !Write real and 'true' imaginary parts of quadrupole tensor and terms
+   do iq1grad=1,nq1grad
+     iq1dir=q1grad(2,iq1grad)
+     do iq2grad=1,nq2grad
+       iq2dir=q2grad(2,iq2grad)
+       do iatpert=1,natpert
+         iatom=pert_atdis(1,iatpert)
+         iatdir=pert_atdis(2,iatpert)
+
+         if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
+
+           !Avoid double counting when summing up unsymmetrized contributions
+           do iiq1grad=1,3
+             if (q2grad(2,iq2grad)==q1grad(2,iiq1grad)) exit
+           end do
+
+           do iiq2grad=1,3
+             if (q1grad(2,iq1grad)==q2grad(2,iiq2grad)) exit
+           end do
+
+           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=-two* &
+         & ( eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad) &
+         & + qdrpwf(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iiq2grad,iiq1grad) ) 
+           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-two* &
+         & ( eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad) &
+         & + qdrpwf(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iiq2grad,iiq1grad) ) 
+
+           !Divide by the imaginary unit to get a real magnitude (see M. Stengel paper)
+           tmpre=qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)
+           tmpim=qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
+           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-tmpre
+
+           !Write the whole Quadrupole tensor
+           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
+         & qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+
+           if (prtvol==1) then
+             !Write individual contributions 
+             write(71,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
+           & -(qdrpwf_t1(re,iatpert,iq2grad,iq1grad)+qdrpwf_t1(re,iatpert,iiq2grad,iiq1grad))
+
+             write(72,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
+           & -(qdrpwf_t2(re,iatpert,iq2grad,iq1grad)+qdrpwf_t2(re,iatpert,iiq2grad,iiq1grad))
+
+             write(73,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
+           & -(qdrpwf_t3(re,iatpert,iq2grad,iq1grad)+qdrpwf_t3(re,iatpert,iiq2grad,iiq1grad))
+
+             write(74,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
+           & -(qdrpwf_t4(re,iatpert,iq2grad,iq1grad)+qdrpwf_t4(re,iatpert,iiq2grad,iiq1grad))
+
+             write(75,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
+           & -(qdrpwf_t5(re,iatpert,iq2grad,iq1grad)+qdrpwf_t5(re,iatpert,iiq2grad,iiq1grad))
+
+             write(76,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
+           & -(eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad))
+           end if
+
+         end if
+       end do
+     end do
+   end do
+
+ else if (kptopt==2) then
+
+   !Write real and zero imaginary parts of quadrupole tensor and terms
+   do iq1grad=1,nq1grad
+     iq1dir=q1grad(2,iq1grad)
+     do iq2grad=1,nq2grad
+       iq2dir=q2grad(2,iq2grad)
+       do iatpert=1,natpert
+         iatom=pert_atdis(1,iatpert)
+         iatdir=pert_atdis(2,iatpert)
+
+         if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
+
+           do iiq1grad=1,3
+             if (q2grad(2,iq2grad)==q1grad(2,iiq1grad)) exit
+           end do
+
+           do iiq2grad=1,3
+             if (q1grad(2,iq1grad)==q2grad(2,iiq2grad)) exit
+           end do
+
+           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=-two* &
+         & ( eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad) &
+         & + qdrpwf(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iiq2grad,iiq1grad) )
+           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-two* &
+         & ( eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad) &
+         & + qdrpwf(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iiq2grad,iiq1grad) )
+
+           !Divide by the imaginary unit to get a real magnitude (see M. Stengel paper)
+           tmpre=qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)
+           tmpim=qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
+           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
+
+           !Write the whole Quadrupole tensor
+           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
+         & qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+
+           if (prtvol==1) then
+             !Write individual contributions 
+             write(71,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
+           & 0.0_dp
+
+             write(72,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
+           & 0.0_dp
+
+             write(73,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
+           & 0.0_dp
+
+             write(74,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
+           & 0.0_dp
+
+             write(75,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
+           & 0.0_dp
+
+             write(76,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+           & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
+           & 0.0_dp
+           end if
+
+         end if
+       end do
+     end do
+   end do
+
+
+ else
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
+   MSG_BUG(msg)
+ end if
+
+ if (prtvol==1) then
+   close(71)
+   close(72)
+   close(73)
+   close(74)
+   close(75)
+   close(76)
+ end if
+ close(77)
+
+!Transformation to cartesian coordinates of the quadrupole tensor
+ ABI_ALLOCATE(qdrptens_cart,(2,matom,3,3,3))
+ ABI_ALLOCATE(cartflg,(matom,3,3,3))
+ qdrptens_cart(:,:,:,:,:)=qdrptens_red(:,:,:,:,:)
+ cartflg=0
+
+ ABI_DEALLOCATE(qdrptens_red)
+
+!1st transform coordenates of the atomic displacement derivative
+ do iq1dir=1,3
+   do iq2dir=1,3
+     do ii=1,2
+       do iatom=1,matom
+         do iatdir=1,3
+           vec1(iatdir)=qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)
+           flg1(iatdir)=qdrflg(iatom,iatdir,iq2dir,iq1dir)
+         end do 
+         call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+         do iatdir=1,3
+           qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iatdir)
+           cartflg(iatom,iatdir,iq2dir,iq1dir)=flg2(iatdir)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!2nd transform coordinates of the electric field derivative
+ do iq1dir=1,3
+   do iatdir=1,3
+     do iatom=1,matom
+       do ii=1,2
+         do iq2dir=1,3
+           vec1(iq2dir)=qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)
+           flg1(iq2dir)=qdrflg(iatom,iatdir,iq2dir,iq1dir)
+         end do 
+         call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+         do iq2dir=1,3
+           qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iq2dir)
+           cartflg(iatom,iatdir,iq2dir,iq1dir)=flg2(iq2dir)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!3rd transform coordinates of the q-gradient (treat it as electric field)
+ do iq2dir=1,3
+   do iatdir=1,3
+     do iatom=1,matom
+       do ii=1,2
+         do iq1dir=1,3
+           vec1(iq1dir)=qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)
+           flg1(iq1dir)=qdrflg(iatom,iatdir,iq2dir,iq1dir)
+         end do
+         call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+         do iq1dir=1,3
+           qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iq1dir)
+           cartflg(iatom,iatdir,iq2dir,iq1dir)=flg2(iq1dir)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+
+!Write the Quadrupole tensor in cartesian coordinates
+
+! open(unit=78,file='Quadrupole_tensor.cart',status='unknown',form='formatted',action='write')
+
+ write(ab_out,*)' '
+ write(ab_out,*)' Quadrupole tensor, in cartesian coordinates,'
+ write(ab_out,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
+ do iq1dir=1,3
+   do iq2dir=1,3
+     do iatdir=1,3
+       do iatom=1,matom
+        
+         if (cartflg(iatom,iatdir,iq2dir,iq1dir)==1) then
+
+!           write(78,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                   &
+!         & qdrptens_cart(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_cart(im,iatom,iatdir,iq2dir,iq1dir)
+
+           write(ab_out,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
+         & qdrptens_cart(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_cart(im,iatom,iatdir,iq2dir,iq1dir)
+
+         end if
+
+       end do
+     end do
+   end do
+   write(ab_out,*)' '
+ end do
+! close(78)
+
+!Write the electronic (frozen-ion) contribution to the piezoelectric tensor
+!(R.M. Martin, PRB 5, 1607 (1972))
+ write(ab_out,*)' '
+ write(ab_out,*)' Electronic (frozen-ion) contribution to the piezoelectric tensor,'
+ write(ab_out,*)' in cartesian coordinates, (from quadrupole calculation)'
+ write(ab_out,*)' atddir   qgrdir   efidir        real part           imaginary part'
+ do iq1dir=1,3
+   gamma=iq1dir
+   do iq2dir=1,3
+     alpha=iq2dir
+     do iatdir=1,3
+       beta=iatdir
+
+       piezore=zero
+       piezoim=zero
+       do iatom=1,matom
+
+         if (cartflg(iatom,iatdir,iq2dir,iq1dir)==1) then
+
+           piezore=piezore+( qdrptens_cart(re,iatom,beta,alpha,gamma)-qdrptens_cart(re,iatom,alpha,gamma,beta) &
+         &                +  qdrptens_cart(re,iatom,gamma,beta,alpha) )
+
+           piezoim=piezoim+( qdrptens_cart(im,iatom,beta,alpha,gamma)-qdrptens_cart(im,iatom,alpha,gamma,beta) &
+         &                +  qdrptens_cart(im,iatom,gamma,beta,alpha) )
+         end if
+
+       end do
+
+       piezore=-piezore*half/ucvol
+       piezoim=-piezoim*half/ucvol
+
+       write(ab_out,'(3(i5,3x),2(1x,f20.10))') beta,gamma,alpha,piezore,piezoim
+
+     end do
+   end do
+   write(ab_out,*)' '
+ end do
+ write(ab_out,'(80a)')('=',ii=1,80)
+
+ ABI_DEALLOCATE(qdrptens_cart)
+ ABI_DEALLOCATE(cartflg)
+ 
+ DBG_EXIT("COLL")
+
+end subroutine dfpt_qdrpout
+!!***
+
+!!****f* ABINIT/dfpt_flexoelectrics
+!! NAME
+!!  dfpt_flexoelectrics
+!!
+!! FUNCTION
+!! This routine computes the elements of the flexoelectric tensor as: 
+!!     --> Electronic contribution: second q-gradient of the second mixed derivative 
+!!         of the energy w.r.t an electric field and a metric perturbation.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  codvsn=code version
+!!  doccde(mband*nkpt*nsppol)=derivative of occupancies wrt the energy
+!!  dtfil <type(datafiles_type)>=variables related to files
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  kxc(nfft,nkxc)=exchange and correlation kernel
+!!  mkmem =number of k points treated by this node (GS data)
+!!  mk1mem =number of k points treated by this node (RF data)
+!!  mpert =maximum number of ipert
+!!  mpi_enreg=information about MPI parallelization
+!!  nattyp(ntypat)= # atoms of each type.
+!!  nfft=(effective) number of FFT grid points (for this proc)
+!!  ngfft(1:18)=integer array with FFT box dimensions and other
+!!  nkpt=number of k points in the full BZ
+!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
+!!  nspden=number of spin-density components
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  occ(mband*nkpt*nsppol)=occup number for each band (often 2) at each k point
+!!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data for the GS (DUMMY)
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data (DUMMY)
+!!  pertsy(3,mpert)=set of perturbations that form a basis for all other perturbations
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  rmet(3,3)=real space metric (bohr**2)
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  rhog(2,nfftf)=array for Fourier transform of GS electron density
+!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
+!!  timrev=1 if time-reversal preserves the q wavevector; 0 otherwise.
+!!  ucvol=unit cell volume in bohr**3.
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!!  respfn
+!!
+!! CHILDREN
+!!  appdig,dfpt_flexoout,dfpt_flexowf,dfpt_rhotov,distrb2,dotprod_vn,
+!!  ebands_free,ebands_init,fourdp,
+!!  getcut,getmpw,getph,hdr_init,hdr_update,
+!!  initmpi_band,init_hamiltonian,initylmg,inwffil,kpgio
+!!  load_spin_hamiltonian,hartredq,rf2_getidirs,read_rhor,
+!!  setsym,symkpt,WffClose,wfk_close,wfk_open_read,wrtout,xmpi_sum
+!!
+!! SOURCE
+
+subroutine dfpt_flexoelectrics(atindx,codvsn,doccde,dtfil,dtset,&
+&          gmet,gprimd,kxc,mkmem,mk1mem,&
+&          mpert,mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
+&          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+&          timrev,ucvol,xred)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_flexoelectrics'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mk1mem,mkmem,mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ real(dp),intent(in) :: ucvol
+ character(len=6), intent(in) :: codvsn
+ type(MPI_type),intent(inout) :: mpi_enreg
+ type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(in) :: dtset
+ type(hdr_type) :: hdr_den
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawrhoij_type),intent(inout) :: pawrhoij(:)
+!arrays
+ integer,intent(in) :: atindx(dtset%natom)
+ integer,intent(in) :: nattyp(dtset%ntypat),ngfft(18)
+ integer,intent(in) :: pertsy(3,dtset%natom+6)
+ real(dp),intent(in) :: doccde(dtset%mband*nkpt*dtset%nsppol)
+ real(dp),intent(in) :: gmet(3,3), gprimd(3,3)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
+ real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden)
+ real(dp),intent(in) :: xred(3,dtset%natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ask_accurate,bantot_rbz,bdtot_index,bdtot1_index
+ integer :: cplex,formeig,forunit,gscase,icg,icg1
+ integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
+ integer :: iq1dir,iq2dir,iq1grad,iq1q2grad,iq1q2grad_var
+ integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jj,ka,kb
+ integer :: master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
+ integer :: nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
+ integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
+ integer :: nylmgr,optene,option,optorth,optres
+ integer :: pawread,pertcase,qdir,spaceworld
+ integer :: usexcnhat,useylmgr
+ integer,parameter :: formeig1=1
+ integer,parameter :: re=1,im=2
+ real(dp) :: boxcut,dnrm2,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
+ real(dp) :: vres2,wtk_k
+ logical :: t_exist 
+ character(len=500) :: msg                   
+ character(len=fnlen) :: filnam,fi1o,fiwfstrain,fiwfefield,fiwfddk,fiwfdkdk
+ type(ebands_t) :: bs_rbz
+ type(hdr_type) :: hdr0
+ type(wvl_data) :: wvl 
+ type(wffile_type) :: wffgs,wfftgs
+ type(gs_hamiltonian_type) :: gs_hamkq
+
+!arrays
+ integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
+ integer,allocatable :: elflexoflg(:,:,:,:)
+ integer,allocatable :: indkpt1(:), indkpt1_tmp(:)
+ integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:)
+ integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
+ integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
+ integer,allocatable :: pert_efield(:,:),pert_efield_tmp(:,:)
+ integer,allocatable :: pert_strain(:,:),pert_strain_tmp(:,:)
+ integer,allocatable :: q1grad(:,:),q1q2grad(:,:)
+ integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
+ real(dp) :: kpoint(3)
+ real(dp),allocatable :: cg(:,:),doccde_rbz(:)
+ real(dp),allocatable :: eigen0(:)
+ real(dp),allocatable :: elflexowf(:,:,:,:,:),elflexowf_k(:,:,:,:,:)
+ real(dp),allocatable :: elflexowf_t1(:,:,:,:,:),elflexowf_t1_k(:,:,:,:,:)
+ real(dp),allocatable :: elflexowf_t2(:,:,:,:,:),elflexowf_t2_k(:,:,:,:,:)
+ real(dp),allocatable :: elflexowf_t3(:,:,:,:,:),elflexowf_t3_k(:,:,:,:,:)
+ real(dp),allocatable :: elflexowf_t4(:,:,:,:,:),elflexowf_t4_k(:,:,:,:,:)
+ real(dp),allocatable :: elflexowf_t5(:,:,:,:,:),elflexowf_t5_k(:,:,:,:,:)
+ real(dp),allocatable :: elqgradhart(:,:,:,:,:)
+ real(dp),allocatable :: kpq(:,:),kpt_rbz(:,:)
+ real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
+ real(dp),allocatable :: occ_k(:),occ_rbz(:)
+ real(dp),allocatable :: ph1d(:,:),phnons1(:,:,:) 
+ real(dp),allocatable :: rhog1_tmp(:,:)
+ real(dp),allocatable :: rhog1_efield(:,:,:),rhor1_tmp(:,:),rhor1_real(:,:)
+ real(dp),allocatable :: rhor1_strain(:,:,:)
+ real(dp),allocatable :: vhartr1(:),vhxc1_efield(:,:),vhxc1_strain(:,:)
+ real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
+ real(dp),allocatable :: wtk_folded(:), wtk_rbz(:)
+ real(dp),allocatable,target :: vtrial1(:,:)
+ real(dp),allocatable :: tnons1(:,:)
+ real(dp),allocatable :: xccc3d1(:)
+ real(dp),allocatable :: ylm(:,:),ylm_k(:,:),ylmgr(:,:,:),ylmgr_k(:,:,:)
+ type(pawrhoij_type),allocatable :: pawrhoij_read(:)
+ type(wfk_t),allocatable :: wfk_t_efield(:),wfk_t_ddk(:),wfk_t_dkdk(:),wfk_t_strain(:,:)
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+ 
+!Anounce start of flexoelectric tensor calculation
+ write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+&   ' ==> Compute Flexoelectric Tensor <== ',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+!Not valid for PAW
+ if (psps%usepaw==1) then
+   msg='This routine cannot be used for PAW (use pawnst3 instead) !'
+   MSG_BUG(msg)
+ end if
+
+!Not valid for finite wave-vector perturbations
+ if (dnrm2(dtset%qptn)/=0_dp) then
+   msg='This routine cannot be used for q=/0.d0'
+   MSG_BUG(msg)
+ end if
+
+!Only usable with spherical harmonics
+ if (dtset%useylm/=1) then
+   msg='This routine cannot be used for uselim/=1'
+   MSG_BUG(msg)
+ end if 
+
+!Not valid for spin-dependent calculations
+ if (dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1) then
+   msg='This routine cannot be used for spin-dependent calculations'
+   MSG_BUG(msg)
+ end if 
+
+!Init parallelism
+ spaceworld=mpi_enreg%comm_cell
+ me=mpi_enreg%me_kpt
+ master=0
+
+!Get FFT grid(s) sizes (be careful !) See NOTES in the comments at the beginning of respfn.F90
+ mgfft=dtset%mgfft
+ ecut=dtset%ecut
+ ecut_eff=ecut*(dtset%dilatmx)**2
+
+!Compute large sphere cut-off gsqcut
+ call getcut(boxcut,ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,ngfft)
+
+!Various initializations
+ cplex=2-timrev
+ matom=dtset%natom
+ usexcnhat=0
+ n3xccc=0
+ nfftot=ngfft(1)*ngfft(2)*ngfft(3)
+
+!Generate the 1-dimensional phases
+ ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
+
+!################# PERTURBATIONS AND q-GRADIENTS LABELLING ############################
+
+!Determine which electric field, strain and q-gradient directions have to be evaluated
+!taking into account the perturbation symmetries
+ matpert=dtset%natom*3
+
+!Electric field
+ ABI_ALLOCATE(pert_efield_tmp,(3,3))
+ pert_efield_tmp=0
+ iefipert_cnt=0
+ do iefipert=1,3
+   if (pertsy(iefipert,dtset%natom+2)==1) then
+     iefipert_cnt=iefipert_cnt+1
+     pert_efield_tmp(1,iefipert_cnt)=dtset%natom+2              !electric field pert
+     pert_efield_tmp(2,iefipert_cnt)=iefipert                     !electric field direction
+     pert_efield_tmp(3,iefipert_cnt)=matpert+3+iefipert           !like pertcase in dfpt_loopert.f90
+   end if
+ end do
+ nefipert=iefipert_cnt
+ ABI_ALLOCATE(pert_efield,(3,nefipert))
+ do iefipert=1,nefipert
+   pert_efield(:,iefipert)=pert_efield_tmp(:,iefipert)
+ end do
+ ABI_DEALLOCATE(pert_efield_tmp)
+
+!ddk
+ !For the evaluation of the  first q-gradient, the three directios are activated because 
+ !currently the program calculates by defect all the components of the d2_dkdk perturbation.
+ !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
+ !components of the d2_dkdk
+ !The q1grad is related with the response to the ddk
+ nq1grad=3
+ ABI_ALLOCATE(q1grad,(3,nq1grad))
+ do iq1grad=1,nq1grad
+   q1grad(1,iq1grad)=dtset%natom+1                         !ddk perturbation
+   q1grad(2,iq1grad)=iq1grad                               !ddk direction
+   q1grad(3,iq1grad)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
+ end do
+
+!d2_dkdk
+ !For the evaluation of the 2nd order q-gradient, the 9 directios are activated because 
+ !currently the program calculates by defect all the components of the d2_dkdk perturbation.
+ !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
+ !components of the d2_dkdk
+ nq1q2grad=9
+ ABI_ALLOCATE(q1q2grad,(4,nq1q2grad))
+ do iq1q2grad=1,nq1q2grad
+   call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
+   if (iq1dir==iq2dir) then
+     q1q2grad(1,iq1q2grad)=dtset%natom+10                    !dkdk perturbation diagonal elements
+   else
+     q1q2grad(1,iq1q2grad)=dtset%natom+11                    !dkdk perturbation off-diagonal elements
+   end if
+   q1q2grad(2,iq1q2grad)=iq1dir                              !dq1 direction 
+   q1q2grad(3,iq1q2grad)=iq2dir                              !dq2 direction 
+   iq1q2grad_var=iq1q2grad
+   if (iq1q2grad>6) iq1q2grad_var=iq1q2grad-3                !Lower=Upper diagonal triangle matrix
+   q1q2grad(4,iq1q2grad)=iq1q2grad_var+(dtset%natom+6)*3     !like pertcase in dfpt_loopert.f90
+ end do
+
+!Strain perturbation
+ ABI_ALLOCATE(pert_strain_tmp,(6,9))
+ pert_strain_tmp=0
+ !tmp uniaxial components
+ istrpert_cnt=0
+ do istrdir=1,3
+   if (pertsy(istrdir,dtset%natom+3)==1) then 
+     istrpert_cnt=istrpert_cnt+1
+     ka=idx(2*istrdir-1);kb=idx(2*istrdir)
+     pert_strain_tmp(1,istrpert_cnt)=dtset%natom+3        !Uniaxial strain perturbation
+     pert_strain_tmp(2,istrpert_cnt)=istrdir              !Uniaxial strain case 
+     pert_strain_tmp(3,istrpert_cnt)=ka                   !Strain direction 1
+     pert_strain_tmp(4,istrpert_cnt)=kb                   !Strain direction 2
+     pert_strain_tmp(5,istrpert_cnt)=matpert+6+istrdir    !like pertcase in dfpt_loopert.f90
+     pert_strain_tmp(6,istrpert_cnt)=istrdir              !Indexing for the second q-gradient of the metric Hamiltonian
+   end if
+ end do
+ !tmp shear components
+ do istrdir=1,3
+   if (pertsy(istrdir,dtset%natom+4)==1) then 
+     istrpert_cnt=istrpert_cnt+1
+     ka=idx(2*(istrdir+3)-1);kb=idx(2*(istrdir+3))
+     pert_strain_tmp(1,istrpert_cnt)=dtset%natom+4        !Shear strain perturbation
+     pert_strain_tmp(2,istrpert_cnt)=istrdir              !Shear strain case
+     pert_strain_tmp(3,istrpert_cnt)=ka                   !Strain direction 1
+     pert_strain_tmp(4,istrpert_cnt)=kb                   !Strain direction 2
+     pert_strain_tmp(5,istrpert_cnt)=matpert+9+istrdir    !like pertcase in dfpt_loopert.f90
+     pert_strain_tmp(6,istrpert_cnt)=3+istrdir            !Indexing for the second q-gradient of the metric Hamiltonian
+   end if
+ end do
+ do istrdir=1,3
+   if (pertsy(istrdir,dtset%natom+4)==1) then 
+     istrpert_cnt=istrpert_cnt+1
+     ka=idx(2*(istrdir+3)-1);kb=idx(2*(istrdir+3))
+     pert_strain_tmp(1,istrpert_cnt)=dtset%natom+4        !Shear strain perturbation
+     pert_strain_tmp(2,istrpert_cnt)=istrdir              !Shear strain case
+     pert_strain_tmp(3,istrpert_cnt)=kb                   !Strain direction 1
+     pert_strain_tmp(4,istrpert_cnt)=ka                   !Strain direction 2
+     pert_strain_tmp(5,istrpert_cnt)=matpert+9+istrdir    !like pertcase in dfpt_loopert.f90
+     pert_strain_tmp(6,istrpert_cnt)=6+istrdir            !Indexing for the second q-gradient of the metric Hamiltonian
+   end if
+ end do
+ nstrpert=istrpert_cnt
+ ABI_ALLOCATE(pert_strain,(6,nstrpert))
+ do istrpert=1,nstrpert
+   pert_strain(:,istrpert)=pert_strain_tmp(:,istrpert)
+ end do
+ ABI_DEALLOCATE(pert_strain_tmp)
+
+!################# ELECTROSTATIC CONTRIBUTIONS  #######################################
+
+!This is necessary to deactivate paw options in the dfpt_rhotov routine
+ ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
+ pawread=0
+ nhat1grdim=0
+ ABI_ALLOCATE(nhat1gr,(0,0,0))
+ ABI_ALLOCATE(nhat,(nfft,nspden))
+ nhat=zero
+ ABI_ALLOCATE(nhat1,(cplex*nfft,nspden))
+ nhat1=zero
+
+!Read the electric field density response from a disk file, calculates the FFT 
+!(rhog1_tmp) and the first order Hartree and xc potentials(vhxc1_efield). 
+!TODO: In the call to read_rhor there is a security option that compares with the header
+!hdr. Not activated at this moment.
+ ABI_ALLOCATE(rhog1_tmp,(2,nfft))
+ ABI_ALLOCATE(rhog1_efield,(nefipert,2,nfft))
+ ABI_ALLOCATE(rhor1_tmp,(cplex*nfft,nspden))
+ ABI_ALLOCATE(rhor1_real,(1*nfft,nspden))
+ ABI_ALLOCATE(vhartr1,(cplex*nfft))
+ ABI_ALLOCATE(vhxc1_efield,(nefipert,cplex*nfft))
+ ABI_ALLOCATE(vpsp1,(cplex*nfft))
+ ABI_ALLOCATE(vtrial1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(vresid1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
+ vpsp1=zero; vtrial1=zero
+ optene=0; optres=1 
+ do iefipert=1,nefipert
+   pertcase=pert_efield(3,iefipert)
+   
+   !Reads a real first order density
+   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
+    & hdr_den, pawrhoij_read, spaceworld)
+
+   !Perform FFT rhor1 to rhog1
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+
+   !Accumulate density in meaningful complex arrays
+   if (timrev==0) then
+     do ii=1,nfft
+       jj=ii*2
+       rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+     end do
+   else if (timrev==1) then
+     rhor1_tmp(:,:)=rhor1_real(:,:)
+   end if
+   rhog1_efield(iefipert,:,:)=rhog1_tmp(:,:)
+
+   !Calculate first order Hartree and xc potentials
+   call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+    & gmet,gprimd,gsqcut,pert_efield(2,iefipert),dtset%natom+2,&
+    & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+
+   !Accumulate the potential in meaningful arrays
+   vhxc1_efield(iefipert,:)=vtrial1(:,nspden)
+
+ end do
+
+!Read the strain density response from a disk file(rhor1_strain), calculate the FFT 
+!and the first order Hartree and xc potentials (vhxc1_strain). 
+ ABI_ALLOCATE(rhor1_strain,(nstrpert,cplex*nfft,nspden))
+ ABI_ALLOCATE(vhxc1_strain,(nstrpert,cplex*nfft))
+ vtrial1=zero
+ do istrpert= 1, nstrpert
+   istrtype=pert_strain(1,istrpert)
+   istrdir=pert_strain(2,istrpert)
+   pertcase=pert_strain(5,istrpert)
+
+   !Reads a real first order density
+   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
+    & hdr_den, pawrhoij_read, spaceworld)
+
+   !Perform FFT rhor1 to rhog1
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+
+   !Accumulate density in meaningful complex arrays
+   if (timrev==0) then
+     do ii=1,nfft
+       jj=ii*2
+       rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+     end do
+   else if (timrev==1) then
+     rhor1_tmp(:,:)=rhor1_real(:,:)
+   end if
+   rhor1_strain(istrpert,:,:)=rhor1_tmp(:,:)
+
+   !Calculate first order Hartree and xc potentials
+   call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+    & gmet,gprimd,gsqcut,istrdir,istrtype,&
+    & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+
+   !Accumulate the potential in meaningful arrays
+   vhxc1_strain(istrpert,:)=vtrial1(:,nspden)
+
+ end do
+
+ !These arrays will not be used anymore (for the moment)
+ ABI_DEALLOCATE(rhor1_real)
+ ABI_DEALLOCATE(rhor1_tmp)
+ ABI_DEALLOCATE(vhartr1)
+ ABI_DEALLOCATE(vpsp1)
+ ABI_DEALLOCATE(vtrial1)
+ ABI_DEALLOCATE(vresid1)
+ ABI_DEALLOCATE(vxc1)
+ ABI_DEALLOCATE(xccc3d1)
+
+ ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
+ ABI_DEALLOCATE(nhat1gr)
+ ABI_DEALLOCATE(nhat)
+ ABI_DEALLOCATE(nhat1)
+
+!Calculate the electrostatic contribution from the q-gradient of the Hartree potential
+ ABI_ALLOCATE(vqgradhart,(2*nfft))
+ ABI_ALLOCATE(rhor1_tmp,(2*nfft,nspden))
+ ABI_ALLOCATE(elqgradhart,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexoflg,(3,3,3,3))
+ elflexoflg=0
+ rhor1_tmp=zero
+ do iq1grad=1,nq1grad
+   qdir=q1grad(2,iq1grad)
+   do iefipert=1,nefipert
+
+     !Calculate the gradient of the potential generated by the first order electric field density
+     rhog1_tmp(:,:)=rhog1_efield(iefipert,:,:)
+     call hartredq(2,gmet,gprimd,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
+
+     !To ckeck
+     !call appdig(pert_efield(3,iefipert)+q1grad(3,iq1grad),"Gradient_Hartree_potential",fi1o)
+     !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
+     ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
+
+     do istrpert=1,nstrpert
+
+       !Calculate the electrostatic energy term with the first order strain density 
+       if (timrev==1) then
+         do ii=1,nfft
+           jj=ii*2
+           rhor1_tmp(jj-1,:)=rhor1_strain(istrpert,ii,:)
+         end do
+       else if (timrev==0) then
+         rhor1_tmp(:,:)=rhor1_strain(istrpert,:,:)
+       end if
+       
+       call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+       elqgradhart(re,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
+       elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
+       elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
+
+     end do
+   end do
+ end do 
+
+ ABI_DEALLOCATE(rhor1_tmp)
+ ABI_DEALLOCATE(rhog1_tmp)
+ ABI_DEALLOCATE(rhor1_strain)
+ ABI_DEALLOCATE(rhog1_efield)
+
+!################# WAVE FUNCTION CONTRIBUTIONS  #######################################
+
+!Determine the subset of symmetry operations (nsym1 operations)
+!that leaves the perturbation invariant, and initialize corresponding arrays
+!symaf1, symrl1, tnons1 (and pawang1%zarot, if PAW)..
+!MR TODO: For the moment only the identiy symmetry is activated (nsym1=1) 
+!         In a future I will try to activate perturbation dependent symmetries
+!         with littlegroup_pert.F90. 
+ nsym1 = 1
+ ABI_ALLOCATE(indsy1,(4,nsym1,dtset%natom))
+ ABI_ALLOCATE(symrc1,(3,3,nsym1))
+ ABI_ALLOCATE(symaf1,(nsym1))
+ ABI_ALLOCATE(symrl1,(3,3,nsym1))
+ ABI_ALLOCATE(tnons1,(3,nsym1))
+ symaf1(1:nsym1)= 1
+ symrl1(:,:,nsym1)= dtset%symrel(:,:,1)
+ tnons1(:,nsym1)= 0_dp
+
+!Set up corresponding symmetry data
+ ABI_ALLOCATE(irrzon1,(dtset%nfft**(1-1/nsym1),2,(nspden/dtset%nsppol)-3*(nspden/4)))
+ ABI_ALLOCATE(phnons1,(2,dtset%nfft**(1-1/nsym1),(nspden/dtset%nsppol)-3*(nspden/4)))
+ call setsym(indsy1,irrzon1,1,dtset%natom,dtset%nfft,dtset%ngfft,nspden,dtset%nsppol,&
+&nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
+
+ ABI_DEALLOCATE(indsy1)
+ ABI_DEALLOCATE(symaf1)
+ ABI_DEALLOCATE(symrl1)
+ ABI_DEALLOCATE(tnons1)
+
+!Determine the subset of k-points needed in the "reduced Brillouin zone",
+!and initialize other quantities
+ ABI_ALLOCATE(indkpt1_tmp,(nkpt))
+ ABI_ALLOCATE(wtk_folded,(nkpt))
+ indkpt1_tmp(:)=0 
+
+ if (dtset%kptopt==2) then
+   call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
+  & nsym1,symrc1,timrev,dtset%wtk,wtk_folded)
+ else if (dtset%kptopt==3) then
+   call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
+  & nsym1,symrc1,0,dtset%wtk,wtk_folded)
+ else
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
+   MSG_BUG(msg)
+ end if
+
+ ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(indkpt1,(nkpt_rbz))
+ ABI_ALLOCATE(istwfk_rbz,(nkpt_rbz))
+ ABI_ALLOCATE(kpt_rbz,(3,nkpt_rbz))
+ ABI_ALLOCATE(nband_rbz,(nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(occ_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(wtk_rbz,(nkpt_rbz))
+ indkpt1(:)=indkpt1_tmp(1:nkpt_rbz)
+ do ikpt=1,nkpt_rbz
+     istwfk_rbz(ikpt)=dtset%istwfk(indkpt1(ikpt))
+     kpt_rbz(:,ikpt)=dtset%kptns(:,indkpt1(ikpt))
+     wtk_rbz(ikpt)=wtk_folded(indkpt1(ikpt))
+ end do
+ ABI_DEALLOCATE(indkpt1_tmp)
+ ABI_DEALLOCATE(wtk_folded)
+
+!Transfer occ to occ_rbz 
+!NOTE : this takes into account that indkpt1 is ordered
+!MG: What about using occ(band,kpt,spin) ???
+ bdtot_index=0;bdtot1_index=0
+ do isppol=1,dtset%nsppol
+   ikpt1=1
+   do ikpt=1,nkpt
+     nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
+!    Must test against ikpt1/=nkpt_rbz+1, before evaluate indkpt1(ikpt1)
+     if(ikpt1/=nkpt_rbz+1)then
+       if(ikpt==indkpt1(ikpt1))then
+         nband_rbz(ikpt1+(isppol-1)*nkpt_rbz)=nband_k
+         occ_rbz(1+bdtot1_index:nband_k+bdtot1_index)=occ(1+bdtot_index:nband_k+bdtot_index)
+         doccde_rbz(1+bdtot1_index:nband_k+bdtot1_index)=doccde(1+bdtot_index:nband_k+bdtot_index)
+         ikpt1=ikpt1+1
+         bdtot1_index=bdtot1_index+nband_k
+       end if
+     end if
+     bdtot_index=bdtot_index+nband_k
+   end do
+ end do
+
+!Compute maximum number of planewaves at k
+call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_rbz)
+
+!Allocate some k-dependent arrays at k
+ ABI_ALLOCATE(kg,(3,mpw*nkpt_rbz))
+ ABI_ALLOCATE(kg_k,(3,mpw))
+ ABI_ALLOCATE(npwarr,(nkpt_rbz))
+ ABI_ALLOCATE(npwtot,(nkpt_rbz))
+
+!Determine distribution of k-points/bands over MPI processes
+ if (allocated(mpi_enreg%my_kpttab)) then
+   ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+ end if
+ ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
+ if(xmpi_paral==1) then
+   ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
+   call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
+ else
+   mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
+ end if
+ my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
+ call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
+ mkmem_rbz =my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
+ ABI_UNUSED((/mkmem,mk1mem/))
+ 
+!Set up the basis sphere of planewaves at k
+ call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
+& kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
+ ABI_DEALLOCATE(npwtot)
+
+!Set up the spherical harmonics (Ylm) and 1st gradients at k
+ useylmgr=1; option=2 ; nylmgr=9
+ ABI_ALLOCATE(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_ALLOCATE(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+ if (psps%useylm==1) then
+   call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
+&   npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
+ end if
+
+!Initialize band structure datatype at k
+ bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
+ ABI_ALLOCATE(eigen0,(bantot_rbz))
+ eigen0(:)=zero
+ call ebands_init(bantot_rbz,bs_rbz,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
+& nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+& dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+& dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+ ABI_DEALLOCATE(eigen0)
+ ABI_DEALLOCATE(doccde_rbz)
+
+!Initialize header, update it with evolving variables
+ gscase=0 ! A GS WF file is read
+ call hdr_init(bs_rbz,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+ call hdr_update(hdr0,bantot_rbz,etotal,fermie,&
+& residm,rprimd,occ_rbz,pawrhoij,xred,dtset%amu_orig(:,1),&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+!Clean band structure datatype (should use it more in the future !)
+ call ebands_free(bs_rbz)
+
+!Initialize GS wavefunctions at k
+ ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
+ mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+ if (one*mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol > huge(1)) then
+   write (msg,'(4a, 5(a,i0), 2a)')&
+&   "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
+&   "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
+&   "nspinor: ",dtset%nspinor, "mpw: ",mpw, "mband: ",dtset%mband, "mkmem_rbz: ",&
+&   mkmem_rbz, "nsppol: ",dtset%nsppol,ch10,&
+&   'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS/LAPACK...) compiled in int64 mode'
+   MSG_ERROR(msg)
+ end if
+ ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+ ABI_CHECK(ierr==0, "out-of-memory in cg")
+
+ ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
+ call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+& formeig,gmet,hdr0,ireadwf0,istwfk_rbz,kg,&
+& kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
+& mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
+& dtset%nsppol,dtset%nsym,occ_rbz,optorth,rprimd,dtset%symafm,&
+& dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
+& dtfil%unwffgs,dtfil%fnamewffk,wvl)
+ ABI_DEALLOCATE(eigen0)
+!Close wffgs%unwff, if it was ever opened (in inwffil)
+ if (ireadwf0==1) then
+   call WffClose(wffgs,ierr)
+ end if
+
+!==== Initialize most of the Hamiltonian ====
+!1) Allocate all arrays and initialize quantities that do not depend on k and spin.
+!2) Perform the setup needed for the non-local factors:
+!3) Constant kleimann-Bylander energies are copied from psps to gs_hamkq.
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
+& dtset%typat,xred,nfft,dtset%mgfft,ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+& use_gpu_cuda=dtset%use_gpu_cuda)
+
+
+!==== Initialize response functions files and handlers ====
+ !ddk files
+ ABI_ALLOCATE(wfk_t_ddk,(nq1grad))
+ do iq1grad=1,nq1grad
+   pertcase=q1grad(3,iq1grad)
+   call appdig(pertcase,dtfil%fnamewffddk,fiwfddk)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfddk)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfddk)," does not exist."
+     MSG_BUG(msg)
+   else
+     write(msg, '(a,a)') '-open ddk wf1 file :',trim(fiwfddk)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wfk_open_read(wfk_t_ddk(iq1grad),fiwfddk,formeig1,dtset%iomode,forunit,spaceworld)
+   end if
+ end do 
+
+ !Electric field files
+ ABI_ALLOCATE(wfk_t_efield,(nefipert))
+ do iefipert=1,nefipert
+   pertcase=pert_efield(3,iefipert)
+   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfefield)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfefield)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfefield)," does not exist."
+     MSG_BUG(msg)
+   else
+     write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wfk_open_read(wfk_t_efield(iefipert),fiwfefield,formeig1,dtset%iomode,forunit,spaceworld)
+   end if
+ end do
+
+ !Strain files
+ ABI_ALLOCATE(wfk_t_strain,(3,3))
+ do istrpert=1,nstrpert
+   pertcase=pert_strain(5,istrpert)
+   ka=pert_strain(3,istrpert)
+   kb=pert_strain(4,istrpert)
+   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfstrain)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfstrain)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfstrain)," does not exist."
+     MSG_BUG(msg)
+   else
+     if (ka>=kb) then
+       write(msg, '(a,a)') '-open strain wf1 file :',trim(fiwfstrain)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wfk_open_read(wfk_t_strain(ka,kb),fiwfstrain,formeig1,dtset%iomode,forunit,spaceworld)
+     else 
+       wfk_t_strain(ka,kb)=wfk_t_strain(kb,ka)
+     end if
+   end if
+ end do
+
+ !dkdk
+ ABI_ALLOCATE(wfk_t_dkdk,(nq1q2grad))
+ do iq1q2grad=1,nq1q2grad
+
+   pertcase=q1q2grad(4,iq1q2grad)
+   call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
+
+   !The value 20 is taken arbitrarily I would say
+   forunit=20+pertcase
+
+   !Check that ddk file exists and open it
+   t_exist=file_exists(fiwfdkdk)
+   if (.not. t_exist) then
+     write(msg,"(3a)")"- File: ",trim(fiwfdkdk)," does not exist."
+     MSG_BUG(msg)
+   else
+     if (iq1q2grad <= 6) then
+       write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+     else
+       wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+     end if
+   end if
+ end do
+
+!Allocate the flexoelectric tensor part depending on the wave functions
+ ABI_ALLOCATE(elflexowf,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_k,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t1,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t1_k,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t2,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t2_k,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t3,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t3_k,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t4,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t4_k,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t5,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t5_k,(2,3,3,3,3))
+ elflexowf=zero
+ elflexowf_t1=zero
+ elflexowf_t2=zero
+ elflexowf_t3=zero
+ elflexowf_t4=zero
+ elflexowf_t5=zero
+
+!LOOP OVER SPINS
+ bdtot_index=0
+ icg=0;icg1=0
+ do isppol=1,nsppol
+   ikg=0
+
+!  Continue to initialize the Hamiltonian
+   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+
+!  BIG FAT k POINT LOOP
+   do ikpt=1,nkpt_rbz
+
+     nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
+     istwf_k=istwfk_rbz(ikpt)
+     npw_k=npwarr(ikpt)
+     npw1_k=npw_k
+
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
+       bdtot_index=bdtot_index+nband_k
+
+       cycle ! Skip the rest of the k-point loop
+     end if
+
+     ABI_ALLOCATE(occ_k,(nband_k))
+     ABI_ALLOCATE(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
+     ABI_ALLOCATE(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     occ_k(:)=occ_rbz(1+bdtot_index:nband_k+bdtot_index)
+     kpoint(:)=kpt_rbz(:,ikpt)
+     wtk_k=wtk_rbz(ikpt)
+
+!    Get plane-wave vectors and related data at k
+     kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+     if (psps%useylm==1) then
+       do ilm=1,psps%mpsang*psps%mpsang
+         ylm_k(1:npw_k,ilm)=ylm(1+ikg:npw_k+ikg,ilm)
+       end do
+       if (useylmgr==1) then
+         do ilm=1,psps%mpsang*psps%mpsang
+           do ii=1,nylmgr
+             ylmgr_k(1:npw_k,ii,ilm)=ylmgr(1+ikg:npw_k+ikg,ii,ilm)
+           end do
+         end do
+       end if
+     end if
+
+     call dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
+     &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
+     &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
+     &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
+     &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz, &
+     &  npw_k,nq1grad, &
+     &  nq1q2grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
+     &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
+     &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
+     &  wfk_t_dkdk,wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
+
+!    Add the contribution from each k-point
+     elflexowf=elflexowf + elflexowf_k
+     elflexowf_t1=elflexowf_t1 + elflexowf_t1_k
+     elflexowf_t2=elflexowf_t2 + elflexowf_t2_k
+     elflexowf_t3=elflexowf_t3 + elflexowf_t3_k
+     elflexowf_t4=elflexowf_t4 + elflexowf_t4_k
+     elflexowf_t5=elflexowf_t5 + elflexowf_t5_k
+
+!    Keep track of total number of bands
+     bdtot_index=bdtot_index+nband_k
+
+!    Shift arrays memory
+     if (mkmem_rbz/=0) then
+       icg=icg+npw_k*dtset%nspinor*nband_k
+       ikg=ikg+npw_k
+     end if
+     if (mk1mem_rbz/=0) then
+       icg1=icg1+npw1_k*dtset%nspinor*nband_k
+     end if
+
+     ABI_DEALLOCATE(occ_k)
+     ABI_DEALLOCATE(ylm_k)
+     ABI_DEALLOCATE(ylmgr_k)
+
+   end do
+!  END BIG FAT k POINT LOOP
+ end do
+!END LOOP OVER SPINS
+
+!Close response function files
+ do istrpert=1,nstrpert
+   ka=pert_strain(3,istrpert)
+   kb=pert_strain(4,istrpert)
+   call wfk_close(wfk_t_strain(ka,kb))
+ end do
+ do iq1grad=1,nq1grad
+   call wfk_close(wfk_t_ddk(iq1grad))
+ end do
+ do iefipert=1,nefipert
+   call wfk_close(wfk_t_efield(iefipert))
+ end do
+ do iq1q2grad=1,nq1q2grad
+   call wfk_close(wfk_t_dkdk(iq1q2grad))
+ end do
+
+!=== MPI communications ==================
+ if (xmpi_paral==1) then
+
+   call xmpi_sum(elflexowf,spaceworld,ierr)
+   call xmpi_sum(elflexowf_t1,spaceworld,ierr)
+   call xmpi_sum(elflexowf_t2,spaceworld,ierr)
+   call xmpi_sum(elflexowf_t3,spaceworld,ierr)
+   call xmpi_sum(elflexowf_t4,spaceworld,ierr)
+   call xmpi_sum(elflexowf_t5,spaceworld,ierr)
+
+ end if
+
+!Anounce finalization of Flexoelectric tensor calculation
+ write(msg, '(a,a,a)' ) ch10, &
+' Electronic flexoelectric tensor calculation completed ',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+!Gather the different terms in the flexoelectric tensor and print them out
+ if (me==0) then
+ filnam=dtfil%filnam_ds(4)
+ call dfpt_flexoout(cplex,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+    & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
+    & elqgradhart,filnam,gprimd,dtset%kptopt,matom,nefipert, &
+    & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
+ end if
+
+!Deallocattions
+ ABI_DEALLOCATE(pert_efield)
+ ABI_DEALLOCATE(pert_strain)
+ ABI_DEALLOCATE(q1grad)
+ ABI_DEALLOCATE(q1q2grad)
+ ABI_DEALLOCATE(ph1d)
+ ABI_DEALLOCATE(vhxc1_efield)
+ ABI_DEALLOCATE(vhxc1_strain)
+ ABI_DEALLOCATE(vqgradhart)
+ ABI_DEALLOCATE(elqgradhart)
+ ABI_DEALLOCATE(elflexoflg)
+ ABI_DEALLOCATE(indkpt1)
+ ABI_DEALLOCATE(istwfk_rbz)
+ ABI_DEALLOCATE(kpt_rbz)
+ ABI_DEALLOCATE(nband_rbz)
+ ABI_DEALLOCATE(occ_rbz)
+ ABI_DEALLOCATE(wtk_rbz)
+ ABI_DEALLOCATE(kg)
+ ABI_DEALLOCATE(kg_k)
+ ABI_DEALLOCATE(npwarr)
+ ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+ ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+ ABI_DEALLOCATE(ylm)
+ ABI_DEALLOCATE(ylmgr)
+ ABI_DEALLOCATE(wfk_t_ddk)
+ ABI_DEALLOCATE(wfk_t_efield)
+ ABI_DEALLOCATE(wfk_t_strain)
+ ABI_DEALLOCATE(wfk_t_dkdk)
+ ABI_DEALLOCATE(elflexowf)
+ ABI_DEALLOCATE(elflexowf_k)
+ ABI_DEALLOCATE(elflexowf_t1)
+ ABI_DEALLOCATE(elflexowf_t1_k)
+ ABI_DEALLOCATE(elflexowf_t2)
+ ABI_DEALLOCATE(elflexowf_t2_k)
+ ABI_DEALLOCATE(elflexowf_t3)
+ ABI_DEALLOCATE(elflexowf_t3_k)
+ ABI_DEALLOCATE(elflexowf_t4)
+ ABI_DEALLOCATE(elflexowf_t4_k)
+ ABI_DEALLOCATE(elflexowf_t5)
+ ABI_DEALLOCATE(elflexowf_t5_k)
+
+ DBG_EXIT("COLL")
+
+end subroutine dfpt_flexoelectrics
+!!***
+
+!!****f* ABINIT/dfpt_flexoout
+!! NAME
+!!  dfpt_flexoout
+!!
+!! FUNCTION
+!!  This subroutine gathers the different terms entering the flexoelectric tensor,
+!!  perfofms the transformation from reduced to cartesian coordinates and 
+!!  writes out the tensor in external files
+!!  
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
+!!  elqgradhart(2,3,3,3,3)=electronic electrostatic contribution from the 
+!!                                             q-gradient of the Hartree potential
+!!  elflexoflg(3,3,3,3)=array that indicates which elements of the electronic contribution to the
+!!                                             flexoelectric tensor have been calculated
+!!  elflexowf(2,3,3,3,3)=total wave function contribution to the electronic flexoelectric tensor 
+!!  elflexowf_t1(2,3,3,3,3)=term 1 of the wave function contribution 
+!!  elflexowf_t2(2,3,3,3,3)=term 2 of the wave function contribution 
+!!  elflexowf_t3(2,3,3,3,3)=term 3 of the wave function contribution 
+!!  elflexowf_t4(2,3,3,3,3)=term 3 of the wave function contribution 
+!!  elflexowf_t5(2,3,3,3,3)=term 5 of the wave function contribution 
+!!  filnam=name of the root for the output file
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
+!!  matom=number of atoms 
+!!  nefipert=number of electric field perturbations
+!!  nstrpert=number of strain perturbations
+!!  nq1grad=number of q1 (q_{\gamma}) gradients
+!!  pert_efield(3,natpert)=array with the info for the electric field perturbations
+!!  pert_strain(6,natpert)=array with the info for the strain perturbations
+!!  prtvol=volume of information to be printed. 1-> The different contributions to the quadrupole are printed.
+!!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  ucvol=unit cell volume in bohr**3.
+!!  
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!!  dfpt_flexoelectrics
+!!
+!! CHILDREN
+!!
+!!  cart39 
+!!
+!! SOURCE
+
+ subroutine dfpt_flexoout(cplex,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+    & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
+    & elqgradhart,filnam,gprimd,kptopt,matom,nefipert,&
+    & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
+    
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_flexoout'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,kptopt,matom,nefipert,nstrpert,nq1grad,prtvol
+ real(dp),intent(in) :: ucvol
+
+!arrays
+ integer,intent(in) :: elflexoflg(3,3,3,3)
+ integer,intent(in) :: pert_efield(3,nefipert)
+ integer,intent(in) :: pert_strain(6,nstrpert)
+ integer,intent(in) :: q1grad(3,nq1grad)
+ real(dp),intent(in) :: elflexowf(2,3,3,3,3)
+ real(dp),intent(inout) :: elflexowf_t1(2,3,3,3,3)
+ real(dp),intent(inout) :: elflexowf_t2(2,3,3,3,3)
+ real(dp),intent(inout) :: elflexowf_t3(2,3,3,3,3)
+ real(dp),intent(inout) :: elflexowf_t4(2,3,3,3,3)
+ real(dp),intent(inout) :: elflexowf_t5(2,3,3,3,3)
+ real(dp),intent(inout) :: elqgradhart(2,3,3,3,3)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: rprimd(3,3)
+ character(len=fnlen), intent(in) :: filnam
+ 
+!Local variables-------------------------------
+!scalars
+ integer :: alpha,beta,delta,gamma
+ integer :: ibuf,iefidir,iefipert,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
+ integer, parameter :: re=1,im=2
+ real(dp) :: tmpim,tmpre,ucvolinv
+ character(len=500) :: msg
+
+!arrays
+ integer,allocatable :: cartflg(:,:,:,:)
+ integer :: flg1(3),flg2(3)
+ real(dp) :: vec1(3),vec2(3)
+ real(dp),allocatable :: elec_flexotens_cart(:,:,:,:,:),elec_flexotens_red(:,:,:,:,:)
+ real(dp),allocatable :: elflexowf_buffer_cart(:,:,:,:,:,:),elflexowf_t4_cart(:,:,:,:,:)
+
+ DBG_ENTER("COLL")
+
+!Gather the different terms in the electronic contribution to the flexoelectric tensor
+ ABI_ALLOCATE(elec_flexotens_red,(2,3,3,3,3))
+ elec_flexotens_red=zero
+ ucvolinv= 1.0_dp/ucvol
+
+ if (kptopt==3) then
+
+   !Compute real and 'true' imaginary parts of flexoelectric tensor and independent terms
+   !T4 term needs further treatment and it will be lately added to the cartesian coordinates
+   !version of the flexoelectric tensor
+   do istrpert=1,nstrpert
+     istr1dir=pert_strain(3,istrpert)
+     istr2dir=pert_strain(4,istrpert)
+     do iq1grad=1,nq1grad
+       iq1dir=q1grad(2,iq1grad)
+       do iefipert=1,nefipert
+         iefidir=pert_efield(2,iefipert)
+
+         if (elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)==1) then  
+
+           elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)=2.0_dp*ucvolinv* &
+         & ( elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir) +               &
+         &   elflexowf(re,iefidir,iq1dir,istr1dir,istr2dir) ) 
+           elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)=2.0_dp*ucvolinv* &
+         & ( elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir) +               &
+         &   elflexowf(im,iefidir,iq1dir,istr1dir,istr2dir) ) 
+
+           !Multiply by the imaginary unit to get a real magnitude (see M. Stengel paper)
+           tmpre=elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)
+           tmpim=elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)
+           elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim
+           elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)=tmpre
+
+           !Divide by the imaginary unit the T4 term 
+           !(this is because a -i factor has been factorized out in all the individual contributions to this therm)
+           tmpre=elflexowf_t4(re,iefidir,istr1dir,istr2dir,iq1dir)
+           tmpim=elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)
+           elflexowf_t4(re,iefidir,istr1dir,istr2dir,iq1dir)=tmpim*2.0_dp*ucvolinv
+           elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)=-tmpre*2.0_dp*ucvolinv
+          
+           !Write out individual terms in mixed coordinates
+           if (prtvol==1) then
+
+             tmpre=elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir)
+             tmpim=elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir)=tmpre*2.0_dp*ucvolinv
+
+             tmpre=elflexowf_t1(re,iefidir,iq1dir,istr1dir,istr2dir)
+             tmpim=elflexowf_t1(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t1(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t1(im,iefidir,iq1dir,istr1dir,istr2dir)=tmpre*2.0_dp*ucvolinv
+
+             tmpre=elflexowf_t2(re,iefidir,iq1dir,istr1dir,istr2dir)
+             tmpim=elflexowf_t2(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t2(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t2(im,iefidir,iq1dir,istr1dir,istr2dir)=tmpre*2.0_dp*ucvolinv
+
+             tmpre=elflexowf_t3(re,iefidir,iq1dir,istr1dir,istr2dir)
+             tmpim=elflexowf_t3(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t3(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t3(im,iefidir,iq1dir,istr1dir,istr2dir)=tmpre*2.0_dp*ucvolinv
+
+             tmpre=elflexowf_t5(re,iefidir,iq1dir,istr1dir,istr2dir)
+             tmpim=elflexowf_t5(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t5(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t5(im,iefidir,iq1dir,istr1dir,istr2dir)=tmpre*2.0_dp*ucvolinv
+
+           end if
+
+         end if
+
+       end do
+     end do
+   end do
+
+ else if (kptopt==2) then
+   
+   !Compute real part of flexoelectric tensor and independent terms
+   !T4 term needs further treatment and it will be lately added to the cartesian coordinates
+   !version of the flexoelectric tensor
+   do istrpert=1,nstrpert
+     istr1dir=pert_strain(3,istrpert)
+     istr2dir=pert_strain(4,istrpert)
+     do iq1grad=1,nq1grad
+       iq1dir=q1grad(2,iq1grad)
+       do iefipert=1,nefipert
+         iefidir=pert_efield(2,iefipert)
+
+         if (elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)==1) then
+
+           elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)=2.0_dp*ucvolinv* &
+         & ( elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir) +               &
+         &   elflexowf(re,iefidir,iq1dir,istr1dir,istr2dir) ) 
+           elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)=2.0_dp*ucvolinv* &
+         & ( elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir) +               &
+         &   elflexowf(im,iefidir,iq1dir,istr1dir,istr2dir) ) 
+
+
+           !Multiply by the imaginary unit to get a real magnitude (see M. Stengel paper)
+           tmpim=elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)
+           elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim
+           elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)=0.0_dp
+
+           !Divide by the imaginary unit the T4 term 
+           !(this is because a -i factor has been factorized out in all the individual contributions to this therm)
+           tmpim=elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)
+           elflexowf_t4(re,iefidir,istr1dir,istr2dir,iq1dir)=2.0_dp*tmpim*ucvolinv
+           elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)=0.0_dp
+
+           if (prtvol==1) then
+
+             tmpim=elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir)=0.0_dp
+
+             tmpim=elflexowf_t1(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t1(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t1(im,iefidir,iq1dir,istr1dir,istr2dir)=0.0_dp
+
+             tmpim=elflexowf_t2(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t2(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t2(im,iefidir,iq1dir,istr1dir,istr2dir)=0.0_dp
+
+             tmpim=elflexowf_t3(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t3(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t3(im,iefidir,iq1dir,istr1dir,istr2dir)=0.0_dp
+
+             tmpim=elflexowf_t5(im,iefidir,iq1dir,istr1dir,istr2dir)
+             elflexowf_t5(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
+             elflexowf_t5(im,iefidir,iq1dir,istr1dir,istr2dir)=0.0_dp
+
+           end if
+
+         end if
+
+       end do
+     end do
+   end do
+
+ else
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
+   MSG_BUG(msg)
+ end if
+
+!Transormation to complete cartesian coordinates the flexoelectric tensor
+!and separately the T4 term 
+ ABI_ALLOCATE(elec_flexotens_cart,(2,3,3,3,3))
+ ABI_ALLOCATE(elflexowf_t4_cart,(2,3,3,3,3))
+ ABI_ALLOCATE(cartflg,(3,3,3,3))
+ elec_flexotens_cart=elec_flexotens_red
+ elflexowf_t4_cart=elflexowf_t4
+ cartflg=0
+
+ ABI_DEALLOCATE(elec_flexotens_red)
+
+ if (prtvol==1) then
+   ABI_ALLOCATE(elflexowf_buffer_cart,(5,2,3,3,3,3))
+   elflexowf_buffer_cart(1,:,:,:,:,:)=elflexowf_t1(:,:,:,:,:)
+   elflexowf_buffer_cart(2,:,:,:,:,:)=elflexowf_t2(:,:,:,:,:)
+   elflexowf_buffer_cart(3,:,:,:,:,:)=elflexowf_t3(:,:,:,:,:)
+   elflexowf_buffer_cart(4,:,:,:,:,:)=elqgradhart(:,:,:,:,:)
+   elflexowf_buffer_cart(5,:,:,:,:,:)=elflexowf_t5(:,:,:,:,:)
+ end if
+
+!1st transform coordinates of the electric field derivative of the flexoelectric tensor
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iq1dir=1,3
+       do ii=1,2
+         do iefidir=1,3
+           vec1(iefidir)=elec_flexotens_cart(ii,iefidir,iq1dir,istr1dir,istr2dir)
+           flg1(iefidir)=elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)
+         end do
+         call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+         do iefidir=1,3
+           elec_flexotens_cart(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iefidir)
+           cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iefidir)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Do now the transformation of the electric field derivative for the T4 term
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iq1dir=1,3
+       do ii=1,2
+         do iefidir=1,3
+           vec1(iefidir)=elflexowf_t4_cart(ii,iefidir,istr1dir,istr2dir,iq1dir)
+           flg1(iefidir)=elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)
+         end do
+         call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+         do iefidir=1,3
+           elflexowf_t4_cart(ii,iefidir,istr1dir,istr2dir,iq1dir)=vec2(iefidir)
+           cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iefidir)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Do now the transformation of the electric field derivative for the other therms
+ if (prtvol==1) then
+   do ibuf=1,5
+     do istr2dir=1,3
+       do istr1dir=1,3
+         do iq1dir=1,3
+           do ii=1,2
+             do iefidir=1,3
+               vec1(iefidir)=elflexowf_buffer_cart(ibuf,ii,iefidir,iq1dir,istr1dir,istr2dir)
+               flg1(iefidir)=elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)
+             end do
+             call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+             do iefidir=1,3
+               elflexowf_buffer_cart(ibuf,ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iefidir)
+               cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iefidir)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end if
+
+!2nd transform coordinates of the q-gradient (treat it as electric field)
+!of the flexoelectric tensor
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iefidir=1,3
+       do ii=1,2
+         do iq1dir=1,3
+           vec1(iq1dir)=elec_flexotens_cart(ii,iefidir,iq1dir,istr1dir,istr2dir)
+           flg1(iq1dir)=elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)
+         end do
+         call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+         do iq1dir=1,3
+           elec_flexotens_cart(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)
+           cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iq1dir)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!2nd transform coordinates of the q-gradient (treat it as electric field)
+!of the individual terms
+ if (prtvol==1) then
+   do ibuf=1,5
+     do istr2dir=1,3
+       do istr1dir=1,3
+         do iefidir=1,3
+           do ii=1,2
+             do iq1dir=1,3
+               vec1(iq1dir)=elflexowf_buffer_cart(ibuf,ii,iefidir,iq1dir,istr1dir,istr2dir)
+               flg1(iq1dir)=elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)
+             end do
+             call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+             do iq1dir=1,3
+               elflexowf_buffer_cart(ibuf,ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)
+               cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iq1dir)
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end if
+
+!Write the flexoelectric tensor in cartesian coordinates
+!Open output files
+ if (prtvol==1) then
+   open(unit=71,file='elec_flexo_wf_t1.out',status='unknown',form='formatted',action='write')
+   open(unit=72,file='elec_flexo_wf_t2.out',status='unknown',form='formatted',action='write')
+   open(unit=73,file='elec_flexo_wf_t3.out',status='unknown',form='formatted',action='write')
+   open(unit=74,file='elec_flexo_wf_t4.out',status='unknown',form='formatted',action='write')
+   open(unit=75,file='elec_flexo_wf_t5.out',status='unknown',form='formatted',action='write')
+   open(unit=76,file='elec_flexo_elecstic.out',status='unknown',form='formatted',action='write')
+ end if
+
+ write(ab_out,*)' '
+ write(ab_out,*)' Electronic flexoelectric tensor, in cartesian coordinates,'
+ write(ab_out,*)' efidir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ do istr2dir=1,3
+   delta=istr2dir
+   do istr1dir=1,3
+     beta=istr1dir
+     do iq1dir=1,3
+       gamma=iq1dir
+       do iefidir=1,3
+         alpha=iefidir
+
+         if (cartflg(alpha,beta,delta,gamma)==1 .and. cartflg(alpha,delta,gamma,beta)==1 &
+         & .and. cartflg(alpha,gamma,beta,delta)==1) then
+
+           !Converts the T4 term to type-II form
+           tmpre= elflexowf_t4_cart(re,alpha,beta,delta,gamma) + &
+                & elflexowf_t4_cart(re,alpha,delta,gamma,beta) - &
+                & elflexowf_t4_cart(re,alpha,gamma,beta,delta)
+           
+           tmpim= elflexowf_t4_cart(im,alpha,beta,delta,gamma) + &
+                & elflexowf_t4_cart(im,alpha,delta,gamma,beta) - &
+                & elflexowf_t4_cart(im,alpha,gamma,beta,delta)
+
+           !Add the T4 term after conversion to type-II form
+           elec_flexotens_cart(re,alpha,gamma,beta,delta)= &
+         & elec_flexotens_cart(re,alpha,gamma,beta,delta) + tmpre
+           elec_flexotens_cart(im,alpha,gamma,beta,delta)= &
+         & elec_flexotens_cart(im,alpha,gamma,beta,delta) + tmpim
+         
+           !Writes the complete flexoelectric tensor
+           write(ab_out,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
+         & elec_flexotens_cart(re,alpha,gamma,beta,delta), &
+         & elec_flexotens_cart(im,alpha,gamma,beta,delta)
+
+           if (prtvol==1) then
+             write(71,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
+           & elflexowf_buffer_cart(1,re,alpha,gamma,beta,delta), &
+           & elflexowf_buffer_cart(1,im,alpha,gamma,beta,delta)
+ 
+             write(72,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
+           & elflexowf_buffer_cart(2,re,alpha,gamma,beta,delta), &
+           & elflexowf_buffer_cart(2,im,alpha,gamma,beta,delta)
+ 
+             write(73,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
+           & elflexowf_buffer_cart(3,re,alpha,gamma,beta,delta), &
+           & elflexowf_buffer_cart(3,im,alpha,gamma,beta,delta)
+ 
+             write(74,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
+           & tmpre, tmpim
+
+             write(75,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
+           & elflexowf_buffer_cart(5,re,alpha,gamma,beta,delta), &
+           & elflexowf_buffer_cart(5,im,alpha,gamma,beta,delta)
+ 
+             write(76,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
+           & elflexowf_buffer_cart(4,re,alpha,gamma,beta,delta), &
+           & elflexowf_buffer_cart(4,im,alpha,gamma,beta,delta)
+           end if
+
+         end if
+          
+       end do
+     end do
+     write(ab_out,*)' '
+     if (prtvol==1) then
+       write(71,*)' ' 
+       write(72,*)' ' 
+       write(73,*)' ' 
+       write(74,*)' ' 
+       write(75,*)' ' 
+       write(76,*)' ' 
+     end if
+   end do
+ end do
+
+ if (prtvol==1) then
+   close(71)
+   close(72)
+   close(73)
+   close(74)
+   close(75)
+   close(76)
+   ABI_DEALLOCATE(elflexowf_buffer_cart)
+ end if
+
+ ABI_DEALLOCATE(elec_flexotens_cart)
+ ABI_DEALLOCATE(elflexowf_t4_cart)
+ ABI_DEALLOCATE(cartflg)
+
+ DBG_EXIT("COLL")
+
+end subroutine dfpt_flexoout
+!!***
+
+end module m_dfpt_lw
+!!***

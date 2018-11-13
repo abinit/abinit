@@ -4,7 +4,7 @@
 !!  m_dfpt_lwwf
 !!
 !! FUNCTION
-!!  FIXME: add description.
+!!  First-order response function contributions to the quadrupole and flexoelectric tensors
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2018 ABINIT group (MR,MS)
