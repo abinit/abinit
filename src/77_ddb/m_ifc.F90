@@ -342,7 +342,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new
- integer :: nprocs,my_rank,ierr
+ integer :: nprocs,my_rank,my_ierr,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
  real(dp) :: r_inscribed_sphere,tolsym
@@ -530,7 +530,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  do while (tolsym <= tol6)
    ! MG FIXME: Why ngqpt is intent(inout)?
    call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,&
-&             ifc_tmp%rpt,rprimd,tolsym,r_inscribed_sphere,ifc_tmp%wghatm,ierr)
+&             ifc_tmp%rpt,rprimd,tolsym,r_inscribed_sphere,ifc_tmp%wghatm,my_ierr)
+   call xmpi_max(my_ierr, ierr, comm, ii)
    if (ierr>0) tolsym = tolsym * 10
    if (ierr==0) exit
  end do
