@@ -1966,7 +1966,13 @@ class BaseTest(object):
         """
         if not hasattr(self.build_env, "buildbot_builder"): return False
         for builder in self.exclude_builders:
-            if builder == self.build_env.buildbot_builder: return True
+            #if builder == self.build_env.buildbot_builder: return True
+            if any(c in builder for c in "*?![]{}"):
+                # Interpret builder as regex.
+                m = re.compile(builder)
+                if m.match(self.build_env.buildbot_builder): return True
+            else:
+                if builder == self.build_env.buildbot_builder: return True
         return False
 
     def run(self, build_env, runner, workdir, nprocs=1, runmode="static", **kwargs):
