@@ -171,8 +171,8 @@ contains
     B(:)=Heff(:)/Bnorm
     w=Bnorm*dt
     !print *, w
-    cosw=cos(w)
     sinw=sin(w)
+    cosw=sqrt(1.0_dp- sinw*sinw)
     u=1.0d0-cosw
     R(1,1)=B(1)*B(1)*u+cosw
     R(2,1)=B(1)*B(2)*u+B(3)*sinw
