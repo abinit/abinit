@@ -211,7 +211,6 @@ contains
   end subroutine spin_model_primitive_t_set_bilinear
 
   subroutine spin_model_primitive_t_set_exchange(self, n, ilist, jlist, Rlist, vallist)
-
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
@@ -236,7 +235,6 @@ contains
     integer :: idx
     real(dp) :: bivallist(3,3, n), D(3)
     bivallist(:,:,:)=0.0d0
-    ! -2.0 * self.Ku[i]) * np.outer(self.e[i], self.e[i]
     do idx=1,n, 1
        D(:)=vallist(:, idx)
        ! 0 Dz -Dy
@@ -260,9 +258,9 @@ contains
     bivallist(:,:,:)=0.0d0
     Rlist(:, :)=0.0d0
     ! at
-    ! -2.0 * self.Ku[i]) * np.outer(self.e[i], self.e[i]
+    ! - self.Ku[i] * np.outer(self.e[i], self.e[i]
     do idx=1,n, 1
-       bivallist(:,:, idx)= (-2.0d0* k1list(idx))*  &
+       bivallist(:,:, idx)= (- k1list(idx))*  &
             outer_product(k1dirlist(:,idx), k1dirlist(:, idx))
     end do
     !call self%set_bilinear(n,ilist,ilist,Rlist,bivallist)
@@ -784,7 +782,7 @@ contains
             'i =', self%total_ilist%data(i), 'j =', self%total_jlist%data(i), 'R =', R
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
-       write(msg, "(2X, A12)") 'Hessian (Ha)'
+       write(msg, "(2X, A16)") 'Matrix Form (Ha)'
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
        do ii=1, 3
