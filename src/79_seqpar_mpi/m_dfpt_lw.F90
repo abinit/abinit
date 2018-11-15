@@ -56,7 +56,7 @@ module m_dfpt_lw
  use m_spacepar,   only : hartredq, setsym
  use m_cgtools,    only : dotprod_vn
  use m_symkpt,     only : symkpt
- use m_mpinfo,     only : distrb2, initmpi_band
+ use m_mpinfo,     only : distrb2, initmpi_band, proc_distrb_cycle
  use m_initylmg,   only : initylmg
  use m_inwffil,    only : inwffil
  use m_dfpt_lwwf
@@ -67,8 +67,8 @@ module m_dfpt_lw
  private
 !***
 
- public :: dfpt_qdrpole.F90
- public :: dfpt_flexo.F90
+ public :: dfpt_qdrpole
+ public :: dfpt_flexo
 
 ! *************************************************************************
 
@@ -240,6 +240,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp),allocatable :: tnons1(:,:)
  real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:)
  real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
+ real(dp),allocatable :: dum_vxc(:,:)
  real(dp),allocatable :: wtk_folded(:), wtk_rbz(:)
  real(dp),allocatable,target :: vtrial1(:,:)
  real(dp),allocatable :: xccc3d1(:)
@@ -412,8 +413,9 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_ALLOCATE(vtrial1,(cplex*nfft,nspden))
  ABI_ALLOCATE(vresid1,(cplex*nfft,nspden))
  ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(dum_vxc,(nfft,nspden))
  ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
- vpsp1=zero; vtrial1=zero
+ vpsp1=zero; vtrial1=zero; dum_vxc=zero
  optene=0; optres=1 
  do iq2grad=1,nq2grad
    pertcase=q2grad(3,iq2grad)
@@ -439,10 +441,11 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 
    !Calculate first order Hartree and xc potentials
    call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
-    & gmet,gprimd,gsqcut,q2grad(2,iq2grad),dtset%natom+2,&
+    & gsqcut,q2grad(2,iq2grad),dtset%natom+2,&
     & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
     & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
-    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
+    & xccc3d1,dtset%ixcrot)
 
    !Accumulate the potential in meaningful arrays
    vhxc1_efield(iq2grad,:)=vtrial1(:,nspden)
@@ -480,10 +483,11 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 
    !Calculate first order Hartree and xc potentials
    call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
-    & gmet,gprimd,gsqcut,iatdir,iatpol,&
+    & gsqcut,iatdir,iatpol,&
     & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
     & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
-    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
+    & xccc3d1,dtset%ixcrot)
 
    !Accumulate the potential in meaningful arrays
    vhxc1_atdis(iatpert,:)=vtrial1(:,nspden)
@@ -498,6 +502,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_DEALLOCATE(vtrial1)
  ABI_DEALLOCATE(vresid1)
  ABI_DEALLOCATE(vxc1)
+ ABI_DEALLOCATE(dum_vxc)
  ABI_DEALLOCATE(xccc3d1)
 
  ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
@@ -717,10 +722,10 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,gmet,hdr0,ireadwf0,istwfk_rbz,kg,&
+& formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 & kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
 & mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
-& dtset%nsppol,dtset%nsym,occ_rbz,optorth,rprimd,dtset%symafm,&
+& dtset%nsppol,dtset%nsym,occ_rbz,optorth,dtset%symafm,&
 & dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 & dtfil%unwffgs,dtfil%fnamewffk,wvl)
  ABI_DEALLOCATE(eigen0)
@@ -1626,6 +1631,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp),allocatable :: rhor1_strain(:,:,:)
  real(dp),allocatable :: vhartr1(:),vhxc1_efield(:,:),vhxc1_strain(:,:)
  real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
+ real(dp),allocatable :: dum_vxc(:,:)
  real(dp),allocatable :: wtk_folded(:), wtk_rbz(:)
  real(dp),allocatable,target :: vtrial1(:,:)
  real(dp),allocatable :: tnons1(:,:)
@@ -1826,8 +1832,9 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_ALLOCATE(vtrial1,(cplex*nfft,nspden))
  ABI_ALLOCATE(vresid1,(cplex*nfft,nspden))
  ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
+ ABI_ALLOCATE(dum_vxc,(nfft,nspden))
  ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
- vpsp1=zero; vtrial1=zero
+ vpsp1=zero; vtrial1=zero; dum_vxc=zero
  optene=0; optres=1 
  do iefipert=1,nefipert
    pertcase=pert_efield(3,iefipert)
@@ -1853,10 +1860,11 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
    !Calculate first order Hartree and xc potentials
    call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
-    & gmet,gprimd,gsqcut,pert_efield(2,iefipert),dtset%natom+2,&
+    & gsqcut,pert_efield(2,iefipert),dtset%natom+2,&
     & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
     & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
-    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
+    & xccc3d1,dtset%ixcrot)
 
    !Accumulate the potential in meaningful arrays
    vhxc1_efield(iefipert,:)=vtrial1(:,nspden)
@@ -1894,10 +1902,11 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
    !Calculate first order Hartree and xc potentials
    call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
-    & gmet,gprimd,gsqcut,istrdir,istrtype,&
+    & gsqcut,istrdir,istrtype,&
     & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
     & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
-    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc1,xccc3d1)
+    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
+    & xccc3d1,dtset%ixcrot)
 
    !Accumulate the potential in meaningful arrays
    vhxc1_strain(istrpert,:)=vtrial1(:,nspden)
@@ -1912,6 +1921,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_DEALLOCATE(vtrial1)
  ABI_DEALLOCATE(vresid1)
  ABI_DEALLOCATE(vxc1)
+ ABI_DEALLOCATE(dum_vxc)
  ABI_DEALLOCATE(xccc3d1)
 
  ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
@@ -2128,10 +2138,10 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,gmet,hdr0,ireadwf0,istwfk_rbz,kg,&
+& formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 & kpt_rbz,dtset%localrdwf,dtset%mband,mcg,&
 & mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
-& dtset%nsppol,dtset%nsym,occ_rbz,optorth,rprimd,dtset%symafm,&
+& dtset%nsppol,dtset%nsym,occ_rbz,optorth,dtset%symafm,&
 & dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 & dtfil%unwffgs,dtfil%fnamewffk,wvl)
  ABI_DEALLOCATE(eigen0)

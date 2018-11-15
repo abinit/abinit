@@ -1509,7 +1509,7 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
    end do
 
 !  Transform back to real space
-   call fourdp(cplex,work1,vpsp1dq,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex,work1,vpsp1dq,1,mpi_enreg,nfft,1,ngfft,0)
 
    xnorm=1.0_dp/ucvol
    vpsp1dq(1:cplex*nfft)=vpsp1dq(1:cplex*nfft)*xnorm
@@ -1895,7 +1895,7 @@ subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
    work1(im,1)=0.0_dp
 
 !  Transform back to real space
-   call fourdp(cplex,work1,vpsp1dqdq,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+   call fourdp(cplex,work1,vpsp1dqdq,1,mpi_enreg,nfft,1,ngfft,0)
 
    xnorm=1.0_dp/ucvol/two_pi
    vpsp1dqdq(1:cplex*nfft)=vpsp1dqdq(1:cplex*nfft)*xnorm
@@ -1964,7 +1964,7 @@ subroutine dfpt_vlocaldqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
      work1(im,1)=0.0_dp
 
 !    Transform back to real space
-     call fourdp(cplex,work1,vhart1dqdq,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+     call fourdp(cplex,work1,vhart1dqdq,1,mpi_enreg,nfft,1,ngfft,0)
 
 !  End the calculation of the Hartree contribution 
    end if

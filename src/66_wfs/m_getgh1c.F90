@@ -34,7 +34,7 @@ module m_getgh1c
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby
- use m_kg,          only : kpgstr, mkkin, mkkpg
+ use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
  use m_fft,         only : fftpac, fourwf
@@ -1431,7 +1431,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
    weight=one ; tim_fourwf=4
    call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gvloc1dqc,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
  & gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
- & npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+ & npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
  & use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 
    ABI_DEALLOCATE(work)

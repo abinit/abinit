@@ -289,7 +289,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.false.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.false.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -380,7 +380,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -549,7 +549,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -778,7 +778,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
+     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
@@ -1186,7 +1186,7 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.false.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.false.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -1277,7 +1277,7 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
    !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
    & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -1445,7 +1445,7 @@ c0_VefielddQ_c1strain_bks=zero
    !Initializes rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
    call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
  & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
 
    !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
@@ -1699,7 +1699,7 @@ c0_VefielddQ_c1strain_bks=zero
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
      call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
-     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
+     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
 
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
