@@ -1606,12 +1606,12 @@ subroutine wfd_copy_cg(wfd,band,ik_ibz,spin,cg)
  character(len=500) :: msg
 !************************************************************************
 
- if (wfd%debug_level > 0) then
-   if (.not. wfd%ihave_ug(band,ik_ibz,spin,"Stored")) then
-     write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
-     MSG_ERROR(msg)
-   end if
+ !if (wfd%debug_level > 0) then
+ if (.not. wfd%ihave_ug(band,ik_ibz,spin,"Stored")) then
+   write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
+   MSG_ERROR(msg)
  end if
+ !end if
 
  siz = wfd%npwarr(ik_ibz) * wfd%nspinor
 #ifdef HAVE_GW_DPC

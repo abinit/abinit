@@ -162,20 +162,23 @@ MODULE m_ebands
    ! gef(0:nsppol)
    ! DOS at the Fermi level. Total, spin up, spin down
 
-   !contains
+ contains
 
-   !  procedure free => edos_free         ! Free memory
-   !  procedure write => edos_write       ! Write results to file (formatted mode)
-   !  procedure print => edos_print       ! Print eDOS info to Fortran unit.
-   !  procedure ncwrite => edos_ncwrite   ! Write eDOS to netcdf file.
+   procedure :: free => edos_free
+   ! Free memory
+
+   procedure :: write => edos_write
+   ! Write results to file (formatted mode)
+
+   procedure :: print => edos_print
+   ! Print eDOS info to Fortran unit.
+
+   procedure :: ncwrite => edos_ncwrite
+   ! Write eDOS to netcdf file.
 
  end type edos_t
 
  public :: ebands_get_edos   ! Compute electron DOS from band structure.
- public :: edos_free         ! Free memory
- public :: edos_write        ! Write results to file (formatted mode)
- public :: edos_print        ! Print eDOS info to Fortran unit.
- public :: edos_ncwrite      ! Write eDOS to netcdf file.
 !!***
 
 !----------------------------------------------------------------------
@@ -216,11 +219,17 @@ MODULE m_ebands
      ! errmsg_spin(nsppol)
      ! String with human-readable error messages if ierr(spin) != 0.
 
+ contains
+
+   procedure :: free => gaps_free
+   ! Free memory
+
+   procedure :: print => gaps_print
+   ! Print info on the gaps
+
  end type gaps_t
 
  public :: get_gaps      ! Build the object from a bandstructure.
- public :: gaps_free     ! Free the structure.
- public :: gaps_print    ! Print info on the gaps
 !!***
 
 !----------------------------------------------------------------------
@@ -396,7 +405,7 @@ end function get_gaps
 subroutine gaps_free(gaps)
 
 !Arguments ------------------------------------
- type(gaps_t),intent(inout) :: gaps
+ class(gaps_t),intent(inout) :: gaps
 
 ! *********************************************************************
 
@@ -451,7 +460,7 @@ subroutine gaps_print(gaps,header,unit,mode_paral)
  integer,intent(in),optional :: unit
  character(len=4),intent(in),optional :: mode_paral
  character(len=*),intent(in),optional :: header
- type(gaps_t),intent(in)  :: gaps
+ class(gaps_t),intent(in)  :: gaps
 
 !Local variables-------------------------------
 !scalars
@@ -616,7 +625,6 @@ subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
  ABI_MALLOC(ebands%wtk,(nkpt))
  ebands%wtk(1:nkpt)=wtk(1:nkpt)
 
-!EBANDS_NEW
  ebands%kptopt = kptopt
  ebands%nshiftk_orig = nshiftk_orig
  ebands%nshiftk = nshiftk
@@ -875,9 +883,7 @@ subroutine ebands_copy(ibands,obands)
  call alloc_copy(ibands%shiftk_orig, obands%shiftk_orig)
  call alloc_copy(ibands%shiftk, obands%shiftk)
 
- if(allocated(ibands%lifetime)) then
-   call alloc_copy(ibands%lifetime, obands%lifetime)
- end if
+ if (allocated(ibands%lifetime)) call alloc_copy(ibands%lifetime, obands%lifetime)
 
 end subroutine ebands_copy
 !!***
@@ -1436,7 +1442,7 @@ subroutine apply_scissor(ebands,scissor_energy)
    end if
  end do
 
- ! === Apply the scissor ===
+ ! Apply the scissor
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
      nband_k=ebands%nband(ikpt+(spin-1)*ebands%nkpt)
@@ -1454,8 +1460,8 @@ subroutine apply_scissor(ebands,scissor_energy)
    end do
  end do
 
- ! === Recalculate the fermi level and occ. factors ===
- ! * For Semiconductors only the Fermi level is changed (in the middle of the new gap)
+ ! Recalculate the fermi level and occ. factors.
+ ! For Semiconductors only the Fermi level is changed (in the middle of the new gap)
  spinmagntarget_=-99.99_dp !?; if (PRESENT(spinmagntarget)) spinmagntarget_=spinmagntarget
  call ebands_update_occ(ebands,spinmagntarget_)
 
@@ -1503,7 +1509,7 @@ pure function get_occupied(ebands,tol_occ) result(occ_idx)
 
 ! *************************************************************************
 
- tol_=tol8 ; if (PRESENT(tol_occ)) tol_=tol_occ
+ tol_=tol8; if (PRESENT(tol_occ)) tol_=tol_occ
 
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
@@ -1593,7 +1599,7 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,deg
    end if
  end do
 
- emax =  ebands%eig(ibmax,ikibz,spin)
+ emax = ebands%eig(ibmax,ikibz,spin)
  do ib=ibmax+1,ebands%nband(ikibz+(spin-1)*ebands%nkpt)
    if ( ABS(ebands%eig(ib,ikibz,spin) - emax) > tol_enedif) then
      ibmax = ib - 1
@@ -1613,9 +1619,7 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,deg
      if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) ndeg = ndeg + 1
    end do
    ! Build degblock table.
-   if (allocated(degblock)) then
-      ABI_FREE(degblock)
-   end if
+   ABI_SFREE(degblock)
    ABI_MALLOC(degblock, (2, ndeg))
    ndeg = 1; degblock(1, 1) = ibmin
    do ib=ibmin+1,ibmax
@@ -2064,8 +2068,7 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    !
    ! occupation factors MUST be initialized
    if (ALL(ABS(ebands%occ) < tol6)) then
-     msg = "occupation factors are not initialized, likely due to the use of iscf=-2"
-     MSG_ERROR(msg)
+     MSG_ERROR("occupation factors are not initialized, likely due to the use of iscf=-2")
    end if
 
    maxocc=two/(ebands%nsppol*ebands%nspinor)
@@ -2977,7 +2980,7 @@ end function ebands_get_edos
 subroutine edos_free(edos)
 
 !Arguments ------------------------------------
- type(edos_t),intent(inout) :: edos
+ class(edos_t),intent(inout) :: edos
 
 ! *********************************************************************
 
@@ -3018,7 +3021,7 @@ subroutine edos_write(edos, path)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: path
- type(edos_t),intent(in) :: edos
+ class(edos_t),intent(in) :: edos
 
 !Local variables-------------------------------
  integer :: iw,spin,unt
@@ -3101,7 +3104,7 @@ integer function edos_ncwrite(edos, ncid, prefix) result(ncerr)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncid
- type(edos_t),intent(in) :: edos
+ class(edos_t),intent(in) :: edos
  character(len=*),optional,intent(in) :: prefix
 
 !Local variables-------------------------------
@@ -3179,7 +3182,7 @@ end function edos_ncwrite
 subroutine edos_print(edos, unit)
 
 !Arguments ------------------------------------
- type(edos_t),intent(in) :: edos
+ class(edos_t),intent(in) :: edos
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
@@ -5033,9 +5036,7 @@ subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
 
  close(unt)
 
- if (allocated(bounds2kpt)) then
-   ABI_FREE(bounds2kpt)
- end if
+ ABI_SFREE(bounds2kpt)
 
 end subroutine ebands_write_xmgrace
 !!***
@@ -5187,9 +5188,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
  close(unt)
  close(gpl_unt)
 
- if (allocated(bounds2kpt)) then
-   ABI_FREE(bounds2kpt)
- end if
+ ABI_SFREE(bounds2kpt)
 
 end subroutine ebands_write_gnuplot
 !!***

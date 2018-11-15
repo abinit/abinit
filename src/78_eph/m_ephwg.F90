@@ -350,9 +350,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
     "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
- if (allocated(self%lgk2ibz)) then
-   ABI_FREE(self%lgk2ibz)
- end if
+ ABI_SFREE(self%lgk2ibz)
  call alloc_copy(indkk(:, 1), self%lgk2ibz)
  ABI_FREE(indkk)
 
@@ -371,9 +369,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
    MSG_ERROR(msg)
  end if
 
- if (allocated(self%kq2ibz)) then
-   ABI_FREE(self%kq2ibz)
- end if
+ ABI_SFREE(self%kq2ibz)
  call alloc_copy(indkk(:, 1), self%kq2ibz)
  ABI_FREE(indkk)
  do ii=1,self%nq_k
@@ -443,7 +439,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
  real(dp),parameter :: max_occ1 = one
  real(dp) :: omega_step
 !arrays
- real(dp)  :: thetaw(nene, self%nq_k), wme0(nene), pme_k(self%nq_k, 2)
+ real(dp) :: thetaw(nene, self%nq_k), wme0(nene), pme_k(self%nq_k, 2)
 
 !----------------------------------------------------------------------
 
