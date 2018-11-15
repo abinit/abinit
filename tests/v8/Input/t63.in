@@ -8,7 +8,7 @@ t61o_DS5_POT1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% exclude_builders = atlas_intel_18.0_openmpi
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t61.in, t62.in, t63.in, t64.in, t65.in
 #%% [shell]
 #%% post_commands = ww_cp t63o_DVDB t65i_DVDB

@@ -182,13 +182,13 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
    if (present(enl)) then
      enl_ptr => enl
    else if (associated(rf_hamkq%e1kbfr).and.associated(rf_hamkq%e1kbsc).and.optnl==2) then
-     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
-     ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: cplex_rf>1!')
+     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: qphase>1!')
+     ABI_CHECK(size(rf_hamkq%e1kbsc,4)==1,'BUG in getgh2c: qphase>1!')
      ABI_ALLOCATE(enl_temp,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,gs_hamkq%nspinor**2,gs_hamkq%dimekbq))
      enl_temp(:,:,:,:) = rf_hamkq%e1kbfr(:,:,:,:) + rf_hamkq%e1kbsc(:,:,:,:)
      enl_ptr => enl_temp
    else if (associated(rf_hamkq%e1kbfr)) then
-     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: cplex_rf>1!')
+     ABI_CHECK(size(rf_hamkq%e1kbfr,4)==1,'BUG in getgh2c: qphase>1!')
      enl_ptr => rf_hamkq%e1kbfr
    else
      msg='For ipert=natom+11/pert_phon_elfd : e1kbfr and/or e1kbsc must be associated or enl optional input must be present.'

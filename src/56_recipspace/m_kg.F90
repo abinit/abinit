@@ -1085,13 +1085,6 @@ end subroutine mkkpg
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & kg,kgindex,mpi_enreg,npwarr,pwind_k1,symrec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkpwind_k'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------------------
