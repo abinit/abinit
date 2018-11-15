@@ -2867,7 +2867,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
  ! Compute long-range part of the coupling potential
  v1r_lr = zero; cnt = 0
- if (db%has_dielt_zeff) then
+ if (db%has_dielt_zeff.and.db%add_lr_part) then
    call dvdb_v1r_long_range(db,qpt,iat,idir,nfft,ngfft,v1r_lr)
  end if
 
@@ -2886,8 +2886,10 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
      end do
 
      ! Add the long-range part of the potential
-     v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
-     v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+     if (db%add_lr_part) then
+       v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
+       v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+     end if
    end do
 
    ! Remove the phase.
