@@ -538,17 +538,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
 
- ! Initialize the wave function descriptor (read up to mband states where mband is defined by dtset%nband)
- ! For the time being, no memory distribution, each node has the full set of states.
- ! TODO: Distribute memory
+ ! Initialize the wave function descriptor.
+ ! Each node has all k-points and spins and bands between my_bstart and my_bstop
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(bks_mask,(dtset%mband, nkpt, nsppol))
  ABI_MALLOC(keep_ur,(dtset%mband, nkpt ,nsppol))
- nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
 
+ nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
  bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
- ! TODO Remove
- !if (sigma%imag_only) bks_mask = .True.
 
  ! Each node needs the wavefunctions for Sigma_{nk}
  do spin=1,sigma%nsppol
@@ -670,8 +667,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !   end if
  ! end if
 
- ! Allocate work space arrays.
- ! Note nvloc in vlocal.
+ ! Allocate work space arrays. Note nvloc in vlocal.
  ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
@@ -831,10 +827,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
          end do
        else
-         ! Distribute over bands.
-         ! TODO upgrade
+         ! Distribute over bands
          do it=1,nbsum*sigma%nqibz_k
            ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
+           ! all procs have the bands in the energy window.
+           ibsum_kq = ibsum_kq - 1 + sigma%bsum_start
            distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
          end do
        end if
@@ -1777,9 +1774,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
         ! Get %kcalc from sigma_ngkpt
         kptrlatt = 0
         kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
-        !write(std_out,*)"kptrlatt", kptrlatt
-        !write(std_out,*)"sigma_nshiftk", dtset%sigma_nshiftk
-        !write(std_out,*)"sigma_shiftk", dtset%sigma_shiftk
         call kpts_ibz_from_kptrlatt(cryst, kptrlatt, dtset%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
           new%nkcalc, new%kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
         ABI_FREE(sigma_kbz)
@@ -2003,12 +1997,17 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_CHECK(new%bsum_start <= new%bsum_stop, "bsum_start > bsum_bstop")
    new%nbsum = new%bsum_stop - new%bsum_start + 1
    new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
-   call wrtout(std_out, sjoin("Allocating bands for imaginary part between my_bstart: ", itoa(new%my_bstart), &
-     " and my_bstop:", itoa(new%my_bstop)))
 
-   ! Uncomment this line to debug.
-   new%nbsum = dtset%mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
-   new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+   !if (all(dtset%sigma_bsum_range /= 0)) then
+   !    call wrtout(ab_out, "Setting bstart to 1 and bstop to nband for debuggin purpose")
+   !    new%bsum_start = max(dtset%sigma_bsum_range(1), 1)
+   !    new%bsum_stop = min(dtset%sigma_bsum_range(2), dtset%mband)
+   !    new%nbsum = new%bsum_stop - new%bsum_start + 1
+   !    new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+
+   ! FIXME: Uncomment this line to debug.
+   !new%nbsum = dtset%mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
+   !new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
 
  else
    ! Re + Im
@@ -2020,9 +2019,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
    new%my_bstart = new%bsum_start + new%my_bstart - 1
    new%my_bstop = new%bsum_start + new%my_bstop - 1
-   call wrtout(std_out, sjoin("Allocating and treating bands from bstart: ", itoa(new%my_bstart), &
-     " up to my_bstop:", itoa(new%my_bstop)))
  end if
+
+ call wrtout(std_out, sjoin("Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
+   " bsum_bstop:", itoa(new%bsum_stop)))
+ call wrtout(std_out, sjoin("Allocating and treating bands from my_bstart: ", itoa(new%my_bstart), &
+   " up to my_bstop:", itoa(new%my_bstop)))
 
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
@@ -2178,7 +2180,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Prepare computation of Frohlich self-energy
  new%frohl_model = 0
- new%frohl_model = dtset%useria
+ if (dtset%useric == 123) new%frohl_model = dtset%useric
  if (new%frohl_model /= 0) then
    ! Init parameters for numerical integration inside sphere.
    ! Set sphere radius to a fraction of the smallest reciprocal lattice vector.
@@ -3087,13 +3089,15 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 
  call cwtime(cpu,wall,gflops,"start")
  ABI_MALLOC(tmp_deltaw_pm,(3,sigma%ephwg%nq_k, 2))
- ! loop over bands to sum
+ ! loop over all bands to sum
+ this_calc = 0
  do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
   ! loop over phonon modes
   do nu=1,natom3
     ! loop over bands in the self-energy
     do ib_k=1,nbcalc_ks
-      this_calc = (ibsum_kq-1)*natom3*nbcalc_ks + (nu-1)*nbcalc_ks + ib_k
+      this_calc = this_calc + 1
+      !this_calc = (ibsum_kq-1)*natom3*nbcalc_ks + (nu-1)*nbcalc_ks + ib_k
       if (mod(this_calc,nprocs) /= my_rank) cycle
       band_ks = ib_k + bstart_ks - 1
       eig0nk = ebands%eig(band_ks, ik_ibz, spin)

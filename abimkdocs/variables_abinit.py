@@ -19504,4 +19504,24 @@ Allowed values:
 """,
 ),
 
+Variable(
+    abivarname="sigma_bsum_range",
+    varset="gw",
+    topics=['SelfEnergy_useful'],
+    vartype="integer",
+    defaultval=0,
+    dimensions=[2],
+    requires="[[optdriver]] in [4, 7]",
+    mnemonics="SIGMA: Number of Grid points for K PoinTs generation",
+    text=r"""
+This variable allows the user to specify the list of k-points in the self-energy $\Sigma_{n\kk}$
+in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
+of [[nkptgw]], [[kptgw]], [[bdgw]].
+
+The specification in terms of sigma_ngkpt is easier to use in particular when
+the self-energy is needed on a sub-mesh.
+The use of this variables requires a band range specified via [[gw_qprange]].
+""",
+),
+
 ]

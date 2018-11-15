@@ -945,6 +945,8 @@ type dataset_type
 
  integer :: mixprec = 0
 
+ integer :: sigma_bsum_range(3) = 0
+
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
 

@@ -3211,6 +3211,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%plowan_projcalc(1:sumnbl)=intarr(1:sumnbl)
  end if
 
+ ! band range for self-energy sum
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_bsum_range', tread, 'INT')
+ if (tread == 1) then
+    dtset%sigma_bsum_range = intarr(1:2)
+    ABI_CHECK(all(dtset%sigma_bsum_range > 0), "sigma_bsum_range cannot be negative")
+    ABI_CHECK(dtset%sigma_bsum_range(2) >= dtset%sigma_bsum_range(1), "sigma_bsum_range(2) must be >= (1)")
+ end if
+
  ! IBZ k-points for electron self-energy given in terms of sigma_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'sigma_ngkpt', tread, 'INT')
 

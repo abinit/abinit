@@ -335,9 +335,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  cryst => self%cryst
 
  ! Get little group of the kpoint.
- call lgroup_free(self%lgk)
+ call self%lgk%free()
  self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
- if (prtvol > 0) call lgroup_print(self%lgk)
+ if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
  ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
@@ -728,7 +728,7 @@ subroutine ephwg_free(self)
 
  ! types
  call destroy_tetra(self%tetra_k)
- call lgroup_free(self%lgk)
+ call self%lgk%free()
 
  ! nullify pointers
  self%cryst => null()

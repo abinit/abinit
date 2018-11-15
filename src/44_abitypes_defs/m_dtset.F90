@@ -103,8 +103,6 @@ CONTAINS  !=====================================================================
 
 subroutine dtset_chkneu(charge,dtset,occopt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: occopt
@@ -367,8 +365,6 @@ end subroutine dtset_chkneu
 
 subroutine dtset_copy(dtout, dtin)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(in) :: dtin
@@ -502,6 +498,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
 
+ dtout%sigma_bsum_range = dtin%sigma_bsum_range
  dtout%sigma_ngkpt = dtin%sigma_ngkpt
  dtout%sigma_nshiftk = dtin%sigma_nshiftk
  if (allocated(dtin%sigma_shiftk)) call alloc_copy(dtin%sigma_shiftk, dtout%sigma_shiftk)
@@ -1250,8 +1247,6 @@ end subroutine dtset_copy
 
 subroutine dtset_free(dtset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),intent(inout) :: dtset
@@ -1514,8 +1509,6 @@ end subroutine dtset_free
 
 subroutine find_getdtset(dtsets,getvalue,getname,idtset,iget,miximage,mxnimage,ndtset_alloc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: getvalue,idtset,mxnimage,ndtset_alloc
@@ -1603,7 +1596,6 @@ end subroutine find_getdtset
 subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 
  use m_symkpt,     only : symkpt
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1916,8 +1908,6 @@ end subroutine get_npert_rbz
 
 subroutine testsusmat(compute,dielop,dielstrt,dtset,istep)
 
- implicit none
-
 !Arguments-------------------------------
 !scalars
  integer,intent(in) :: dielop,dielstrt,istep
@@ -2000,8 +1990,6 @@ end subroutine testsusmat
 !! SOURCE
 
 subroutine macroin(dtsets,ecut_tmp,lenstr,ndtset_alloc,string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2242,8 +2230,6 @@ end subroutine macroin
 
 subroutine macroin2(dtsets,ndtset_alloc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndtset_alloc
@@ -2299,8 +2285,6 @@ end subroutine macroin2
 !! SOURCE
 
 subroutine chkvars (string)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2479,7 +2463,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
- list_vars=trim(list_vars)//' sigma_ngkpt sigma_nshiftk sigma_shiftk'
+ list_vars=trim(list_vars)//' sigma_bsum_range sigma_ngkpt sigma_nshiftk sigma_shiftk'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'
