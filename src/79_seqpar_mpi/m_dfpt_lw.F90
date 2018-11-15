@@ -424,7 +424,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
     & hdr_den, pawrhoij_read, spaceworld)
 
    !Perform FFT rhor1 to rhog1
-   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
 
    !Accumulate density in meaningful complex arrays
    if (timrev==0) then
@@ -465,7 +465,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
     & hdr_den, pawrhoij_read, spaceworld)
 
    !Perform FFT rhor1 to rhog1
-   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
 
    !Accumulate density in meaningful complex arrays
    if (timrev==0) then
@@ -1838,7 +1838,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
     & hdr_den, pawrhoij_read, spaceworld)
 
    !Perform FFT rhor1 to rhog1
-   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
 
    !Accumulate density in meaningful complex arrays
    if (timrev==0) then
@@ -1879,7 +1879,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
     & hdr_den, pawrhoij_read, spaceworld)
 
    !Perform FFT rhor1 to rhog1
-   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
 
    !Accumulate density in meaningful complex arrays
    if (timrev==0) then

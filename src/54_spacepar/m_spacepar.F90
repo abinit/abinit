@@ -2312,7 +2312,7 @@ subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,paral_kgb,qdir,rhog,v
  end do ! End loop on i3
 
  ! Fourier Transform the q-gradient of the hartree potential, in reciprocal space it was stored in work1
- call fourdp(cplex,work1,vqgradhart,1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+ call fourdp(cplex,work1,vqgradhart,1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_DEALLOCATE(work1)
 
