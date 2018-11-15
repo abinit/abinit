@@ -705,7 +705,7 @@ with_mpi_prefix="${MPIHOME}"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
