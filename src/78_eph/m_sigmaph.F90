@@ -161,7 +161,7 @@ module m_sigmaph
   ! 1 to include Blochl correction in tetrahedron method else 0.
 
   integer :: ntheta, nphi
-  !integer :: ndvis(3)=3
+  ! Numner of division for spherical integration of Frohlich term.
 
   integer :: nqr = 0
    ! Number of points on the radial mesh for spherical integration of the Frohlich self-energy
@@ -177,11 +177,11 @@ module m_sigmaph
   real(dp) :: wr_step
    ! Step of the linear mesh along the real axis (Ha units).
 
-  real(dp) :: qrad
+  real(dp) :: qrad = zero
    ! Radius of the sphere for the numerical integration of the Frohlich self-energy
 
-  !real(dp) :: qdamp
-   ! Exponential damping added to Frohlich model.
+  real(dp) :: qdamp = one
+   ! Exponential damping e-(qmod**2/qdamp**2) added to the Frohlich matrix elements in q-space.
 
   integer :: qint_method
    ! Defines the method used to integrate in q-space
@@ -189,7 +189,7 @@ module m_sigmaph
    ! 1 --> Use tetrahedron method
 
   integer :: frohl_model
-   ! 1 to activate the computation of the Frohlich self-energy
+   ! > 0 to activate the computation of the Frohlich self-energy
    ! to treat the q-->0 divergence and accelerate convergence in polar semiconductors.
 
   logical :: use_doublegrid
@@ -460,7 +460,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk
- real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq
+ real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp
  real(dp) :: elow,ehigh,wmax
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
@@ -841,9 +841,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Compute self-energy with Frohlich model for the gkq to handle divergence for q-->0
      ! and improve convergence with respect to nqpt.
      ABI_CALLOC(gkq2_lr, (nbcalc_ks, natom3))
-     if (sigma%frohl_model /= 0) then
-       call eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
-     end if
+     if (sigma%frohl_model /= 0) call eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! and save KS energies in sigma%e0vals
@@ -932,21 +930,25 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (sigma%frohl_model /= 0) then
          ! TODO: Recheck this part
          qpt_cart = matmul(cryst%rprimd, qpt)
+         qmod = sqrt(sum(qpt_cart ** 2))
          inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+         fqdamp = (two / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
 
-         ! Compute gkq_{LR} without (i 4pi/ucvol)
+         ! Compute gkq_{LR} without
+         gkq2_lr = zero
          do nu=1,natom3
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
            cnum = zero
            do iatom=1,cryst%natom
-             cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu)) * exp(-j_dpc * two_pi * cryst%xred(:, iatom))
-             !cdd = cdd * exp(-(q/sigma%qdamp)**2)
+             cdd = cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc) * &
+                 exp(-j_dpc * two_pi * dot_product(qpt, cryst%xred(:, iatom)))
              cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
            end do
            do ib_k=1,nbcalc_ks
-             gkq2_lr(ib_k, nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu) * inv_qepsq
+             gkq2_lr(ib_k, nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
            end do
-         end do
+         end do ! nu
+         gkq2_lr = gkq2_lr * fqdamp
        end if
 
        ! Find k+q in the extended zone and extract symmetry info.
@@ -2170,14 +2172,16 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! Init parameters for numerical integration inside sphere.
    ! Set sphere radius to a fraction of the smallest reciprocal lattice vector.
    !ABI_MALLOC(new%frohl_gkq2, (new%max_nbcalc, natom3))
-   new%ntheta = 10
-   !new%ntheta = dtser%efmas_ntheta
-   new%nphi = 2 * new%ntheta
-   new%qrad = tol6
-   !new%qrad = half * min(norm2(cryst%gprimd(:, 1)), norm2(cryst%gprimd(:, 2)), norm2(cryst%gprimd(:, 3)))
-   new%qrad = new%qrad / 2.0_dp
-   !new%qdamp = one
+   ! Use sphere whose radius is a fraction of the smallest rec lattice vector.
+   new%qrad = huge(one)
+   do ii=1,3
+     new%qrad = min(new%qrad, sqrt(dot_product(cryst%gprimd(:, ii), cryst%gprimd(:, ii))))
+   end do
+   new%qrad = new%qrad !/ 2.0_dp
+   new%qdamp = new%qrad !/ four
    new%nqr = 10
+   ! Set angular mesh.
+   new%ntheta = 10; new%nphi = 2 * new%ntheta
    write(std_out,"(a)")"Activating computation of Frohlich self-energy:"
    write(std_out,"(2(a,i0,1x))")"ntheta:", new%ntheta, "nphi:", new%nphi
    write(std_out,"((a,i0,1x,a,f6.3,1x,a))")"nqr points:", new%nqr, "qrad:", new%qrad, "[Bohr^-1]"
@@ -2642,7 +2646,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  ! Add Frohlich results to final results (frohl arrays are not symmetrized if symsigma == 1)
  if (self%frohl_model == 1) then
    self%vals_e0ks = self%vals_e0ks + self%frohl_vals_e0ks
-   self%dvals_de0ks = self%dvals_de0ks + self%frohl_dvals_de0ks
+   if (.not. self%imag_only) then
+     self%dvals_de0ks = self%dvals_de0ks + self%frohl_dvals_de0ks
+   end if
    if (self%nwr > 0) self%vals_wr = self%vals_wr + self%frohl_vals_wr
  end if
 
@@ -3138,11 +3144,12 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  integer :: my_rank, nprocs, nbcalc_ks, iq_ibz, i1, i2, i3, nu, it, natom3, iatom, bstart_ks
  integer :: ib_k, band_ks, ik_ibz, iang, iqr, ierr, iw
  real(dp) :: wqnu, nqnu, eig0nk, eig0mkq, f_mkq ,gkq2, qrad2, weigth_q, vol_fact
- real(dp) :: inv_qepsq, qstep, gmod2, hmod2, rfact
+ real(dp) :: inv_qepsq, qstep, gmod2, hmod2, rfact, qmod, fqdamp
+ real(dp) :: cpu_fr,wall_fr,gflops_fr
  complex(dpc) :: cfact, cnum
 !arrays
  integer :: ndivs(3)
- real(dp) :: q0(3), qpt(3), qpt_cart(3), kq(3), kk(3) !, qvers_cart(3)
+ real(dp) :: q0(3), qpt(3), qpt_cart(3), kq(3), kk(3)
  real(dp) :: qrmesh(sigma%nqr), gmod2r(sigma%nqr), hmod2r(sigma%nqr), rfactr(sigma%nqr), nqr(sigma%nqr)
  real(dp) :: phfrq(cryst%natom*3)
  !real(dp) :: oder1(3),oder2(3,3)
@@ -3155,13 +3162,14 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ call cwtime(cpu_fr, wall_fr, gflops_fr, "start")
+
  natom3 = 3 * cryst%natom
  nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
  bstart_ks = sigma%bstart_ks(ikcalc, spin)
  ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
  kk = sigma%kcalc(:, ikcalc)
 
- ndivs = 1
  qrad2 = sigma%qrad ** 2
 
  ! Allocate workspace arrays.
@@ -3178,7 +3186,11 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  sigma%frohl_vals_e0ks = zero
  sigma%frohl_dvals_de0ks = zero
  if (sigma%nwr > 0) sigma%frohl_vals_wr = zero
+ !return
 
+ !if (sigma%frohl_model /= 2) then
+#if 0
+ ndivs = 1
  do iq_ibz=1,sigma%nqibz_k
     if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
     !write(std_out,*)"iq_ibz:", iq_ibz
@@ -3195,6 +3207,8 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
           qpt(3) = q0(3) + real(i2) / (ndivs(3) * sigma%ngqpt(3))
 
           qpt_cart = two * pi * matmul(cryst%gprimd, qpt)
+          qmod = sqrt(sum(qpt_cart ** 2))
+          fqdamp = exp((-qmod/sigma%qdamp) ** 2)
           ! TODO: In principle one should introduce weigths for points that are close to the border
           ! Should write routine to compute weights given kptrlatt, kibz and radius.
           if (dot_product(qpt_cart, qpt_cart) <= qrad2) cycle
@@ -3216,11 +3230,11 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
             ! note that at this level it does not dependend on ib_k.
             cnum = zero
             do iatom=1,cryst%natom
-              cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu)) * exp(-j_dpc * two_pi * cryst%xred(:, iatom))
-              !cdd = cdd * exp(-q/self%qdamp**2)
+              cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
+                    exp(-j_dpc * two_pi * dot_product(qpt, cryst%xred(:, iatom)))
               cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
             end do
-            gkq2 = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu) * inv_qepsq * weigth_q * vol_fact
+            gkq2 = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu) * inv_qepsq * weigth_q * vol_fact !* fqdamp ** 2
 
             ! For each band in Sigma_{bk}
             do ib_k=1,nbcalc_ks
@@ -3265,8 +3279,8 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
       end do ! i2
     end do ! i1
  end do ! iq_ibz
-
  !write(std_out,*)"IBZ(k) done"
+#endif
 
  ! Now integrate inside sphere of radius qcut using spherical coordinates.
  ABI_MALLOC(eigs_kqr, (sigma%nqr, nbcalc_ks))
@@ -3281,37 +3295,41 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  ! Weighted summation over angles
  do iang=1, sigma%angl_size
     if (mod(iang, nprocs) /= my_rank) cycle
-    !write(std_out, *)"iang=", iang
-    !qvers_cart = matmul(cryst%rprimd, sigma%qvers_cart(:, iang))
     ! Precompute denominator
     inv_qepsq = one / dot_product(sigma%qvers_cart(:, iang), matmul(ifc%dielt, sigma%qvers_cart(:, iang)))
 
     ! Get all omega_{q nu} and e_{n k+q} along the q-line for this (theta, phi)
     do iqr=1,sigma%nqr
-      ! TODO: Decide how to treat the first point
       qpt_cart = sigma%qvers_cart(:, iang) * qrmesh(iqr)
-      !qpt = matmul(..., qpt_cart)
-      qpt = zero
+      qmod = sqrt(sum(qpt_cart ** 2))
+      qpt = matmul(cryst%gprimd, qpt_cart)
+      !if (iqr == 1) cycle
+
       if (iqr == 1) then
-        ! Include non-analytical part even for q==0.
+        ! Include non-analytical part for the first point
         call ifc_fourq(ifc, cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
       else
         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
       end if
       wqr(iqr, :) = phfrq
 
+      !inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+      fqdamp = (two / cryst%ucvol) ** 2 * inv_qepsq ** 2 !* exp(-(qmod/sigma%qdamp) ** 2)
+
       ! Compute gkq_{LR}. Note that in our approx it does not dependend on ib_k.
+      gkqr2(iqr, :) = zero
       do nu=1,natom3
         wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
         cnum = zero
         do iatom=1,cryst%natom
           ! This is complex
-          cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu))
-          !cdd = cdd * exp(-q**2)
+          cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
+                exp(-j_dpc * two_pi * dot_product(qpt, cryst%xred(:, iatom)))
           cnum = cnum + dot_product(qpt_cart, matmul(ifc%zeff(:, :, iatom), cdd))
         end do
-        gkqr2(iqr, nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu) * inv_qepsq
+        gkqr2(iqr, nu) = (real(cnum) ** 2 + aimag(cnum) ** 2) / (two * wqnu)
       end do
+      gkqr2 = gkqr2 * fqdamp
 
       ! Interpolate e_{n k+q} and store results.
       kq = kk + qpt
@@ -3342,7 +3360,9 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
                (nqr(iqr) + f_mkqr(iqr)      ) / (eig0nk - eig0mkqr(iqr) + wqr(iqr, nu) + sigma%ieta) + &
                (nqr(iqr) - f_mkqr(iqr) + one) / (eig0nk - eig0mkqr(iqr) - wqr(iqr, nu) + sigma%ieta) )
           end do
-          cfact = simpson_cplx(sigma%nqr, qstep, cfqr) * sigma%angwgth(iang)
+          write(666, *)"#iang, nu, ib_k, it, cfqr(1:nqr)"
+          write(666, *)iang, nu, ib_k, it, cfqr
+          cfact = two_pi * simpson_cplx(sigma%nqr, qstep, cfqr) * sigma%angwgth(iang)
 
           if (sigma%imag_only) then
             ! NB: Here we are not completely consistent if the integration is done with tetrahedra.
@@ -3360,7 +3380,8 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
               (nqr(:) + f_mkqr(:)      ) * (-gmod2r(:) + aimag(sigma%ieta)**2) / (gmod2r(:) + aimag(sigma%ieta)**2) ** 2 + &
               (nqr(:) - f_mkqr(:) + one) * (-hmod2r(:) + aimag(sigma%ieta)**2) / (hmod2r(:) + aimag(sigma%ieta)**2) ** 2
 
-            sigma%frohl_dvals_de0ks(it, ib_k) = sigma%frohl_dvals_de0ks(it, ib_k) + simpson(qstep, rfactr) * sigma%angwgth(iang)
+            sigma%frohl_dvals_de0ks(it, ib_k) = sigma%frohl_dvals_de0ks(it, ib_k) + &
+                two_pi * simpson(qstep, rfactr) * sigma%angwgth(iang)
 
             ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
             ! This is gonna be costly ...
@@ -3370,17 +3391,17 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
                 cfqr(:) = gkqr2(:, nu) * ( &
                   (nqr(:) + f_mkqr(:)      ) / (sigma%wrmesh_b(iw, ib_k) - eig0mkqr(:) + wqr(:, nu) + sigma%ieta) + &
                   (nqr(:) - f_mkqr(:) + one) / (sigma%wrmesh_b(iw, ib_k) - eig0mkqr(:) - wqr(:, nu) + sigma%ieta) )
-                cfact = simpson_cplx(sigma%nqr, qstep, cfqr)
+                cfact = two_pi * simpson_cplx(sigma%nqr, qstep, cfqr)
                 sigma%frohl_vals_wr(iw, it, ib_k) = sigma%frohl_vals_wr(iw, it, ib_k) * cfact * sigma%angwgth(iang)
               end do
             end if
           end if
 
-        end do
-      end do
-    end do
+        end do ! it
+      end do ! ib_k
 
- end do ! idir
+    end do ! iqr
+ end do ! iang
 
  ABI_FREE(displ_cart)
  ABI_FREE(eigs_kq)
@@ -3398,6 +3419,9 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  call xmpi_sum(sigma%frohl_vals_e0ks, comm, ierr)
  call xmpi_sum(sigma%frohl_dvals_de0ks, comm, ierr)
  if (sigma%nwr > 0) call xmpi_sum(sigma%frohl_vals_wr, comm, ierr)
+
+ call cwtime(cpu_fr, wall_fr, gflops_fr, "stop")
+ call wrtout(std_out, sjoin("Frohlich self-energy completed: cpu-time:", sec2str(cpu_fr), ", wall-time:", sec2str(wall_fr)))
 
 end subroutine eval_sigfrohl
 !!***
