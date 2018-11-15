@@ -94,13 +94,6 @@ CONTAINS !===========================================================
 
 subroutine ga_init(dtset,ga_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -149,13 +142,6 @@ end subroutine ga_init
 
 subroutine ga_destroy(ga_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -197,13 +183,6 @@ end subroutine ga_destroy
 !! SOURCE
 
 subroutine ga_nullify(ga_param)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_nullify'
-!End of the abilint section
 
  implicit none
 

@@ -128,13 +128,6 @@ CONTAINS  !=====================================================================
 subroutine polynomial_term_init(atindx,cell,direction,ndisp,nstrain,polynomial_term,power_disp,&
 &                               power_strain,strain,weight,check)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_term_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -316,13 +309,6 @@ end subroutine polynomial_term_init
 
 subroutine polynomial_term_free(polynomial_term)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'polynomial_term_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -391,13 +377,6 @@ end subroutine polynomial_term_free
 
 pure function terms_compare(t1,t2) result (res)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'terms_compare'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

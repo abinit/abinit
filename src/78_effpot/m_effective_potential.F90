@@ -56,11 +56,10 @@ module m_effective_potential
  use m_special_funcs,  only : factorial
  use m_copy,           only : alloc_copy
  use m_geometry,       only : fred2fcart,fcart2fred, xcart2xred, xred2xcart, metric
- use m_crystal,        only : crystal_t, crystal_init, crystal_free,crystal_print
+ use m_crystal,        only : crystal_t, crystal_init, crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc, dfpt_phfrq
-
  implicit none
 
  public :: effective_potential_distributeResidualForces
@@ -205,13 +204,6 @@ subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm
 &                                   fcart,strain_coupling,strten,name,phonon_strain,&
 &                                   polynomial_conf,phfrq,qpoints,has_anharmonicsTerms,&
 &                                   supercell,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_init'
-!End of the abilint section
 
  implicit none
 
@@ -402,13 +394,6 @@ end subroutine effective_potential_init
 
 subroutine effective_potential_initmpi(eff_pot,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_initmpi'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -479,13 +464,6 @@ end subroutine effective_potential_initmpi
 
 subroutine effective_potential_free(eff_pot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_free'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -513,7 +491,7 @@ subroutine effective_potential_free(eff_pot)
    call anharmonics_terms_free(eff_pot%anharmonics_terms)
    call harmonics_terms_free(eff_pot%harmonics_terms)
    call destroy_supercell(eff_pot%supercell)
-   call crystal_free(eff_pot%crystal)
+   call eff_pot%crystal%free()
    call effective_potential_freempi(eff_pot)
    call polynomial_conf_free(eff_pot%confinement)
 
@@ -544,13 +522,6 @@ end subroutine effective_potential_free
 !! SOURCE
 
 subroutine effective_potential_freeCoeffs(eff_pot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_freeCoeffs'
-!End of the abilint section
 
   implicit none
 
@@ -591,13 +562,6 @@ end subroutine effective_potential_freeCoeffs
 !! SOURCE
 
 subroutine effective_potential_freempi(eff_pot)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_freempi'
-!End of the abilint section
 
   implicit none
 
@@ -646,13 +610,6 @@ end subroutine effective_potential_freempi
 !! SOURCE
 
 subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_generateDipDip'
-!End of the abilint section
 
  implicit none
 
@@ -1063,13 +1020,6 @@ end subroutine effective_potential_generateDipDip
 
 subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_setCoeffs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1144,13 +1094,6 @@ end subroutine effective_potential_setCoeffs
 
 subroutine effective_potential_setElastic3rd(eff_pot,elastics)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_setElastic3rd'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -1195,13 +1138,6 @@ end subroutine effective_potential_setElastic3rd
 !! SOURCE
 
 subroutine effective_potential_setElastic4th(eff_pot,elastics)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_setElastic4th'
-!End of the abilint section
 
   implicit none
 
@@ -1248,13 +1184,6 @@ end subroutine effective_potential_setElastic4th
 !! SOURCE
 
 subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,phonon_strain)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_setStrainPhononCoupling'
-!End of the abilint section
 
   implicit none
 
@@ -1304,13 +1233,6 @@ end subroutine effective_potential_setStrainPhononCoupling
 !! SOURCE
 
 subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_setElasticDispCoupling'
-!End of the abilint section
 
   implicit none
 
@@ -1365,13 +1287,6 @@ end subroutine effective_potential_setElasticDispCoupling
 subroutine effective_potential_setConfinement(cutoff_disp,cutoff_strain,eff_pot,factor_disp,&
 &                                             factor_strain,ndisp,power_disp,power_strain,&
 &                                             need_confinement)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_setConfinement'
-!End of the abilint section
 
  implicit none
 
@@ -1437,13 +1352,6 @@ end subroutine effective_potential_setConfinement
 
 subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_setSupercell'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1507,13 +1415,6 @@ end subroutine effective_potential_setSupercell
 !! SOURCE
 
 subroutine effective_potential_print(eff_pot,option,filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_print'
-!End of the abilint section
 
   implicit none
 
@@ -1635,13 +1536,6 @@ end subroutine effective_potential_print
 !! SOURCE
 
 subroutine effective_potential_printSupercell(eff_pot,supercell)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_printSupercell'
-!End of the abilint section
 
  implicit none
 
@@ -1802,13 +1696,6 @@ end subroutine effective_potential_printSupercell
 !! SOURCE
 
 subroutine effective_potential_writeXML(eff_pot,option,filename,prt_dipdip)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_writeXML'
-!End of the abilint section
 
   implicit none
 
@@ -2143,13 +2030,6 @@ end subroutine effective_potential_writeXML
 
 subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_writeAbiInput'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2334,13 +2214,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 &                                       displacement,du_delta,strain,xred,&
 &                                       compute_anharmonic,verbose)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_evaluate'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2373,6 +2246,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp) :: fcart_part(3,natom)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: strain_tmp(6),strten_part(6)
+  real(dp) :: energy_coeff_part(eff_pot%anharmonics_terms%ncoeff) 
   real(dp),allocatable :: xcart(:,:)
   character(len=500) :: msg
 
@@ -2469,7 +2343,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       strain_tmp(:) = zero
     end if
   end if
-
 ! Get displacement and the variation of the displacmeent wr to strain
   ABI_ALLOCATE(xcart,(3,natom))
   disp_tmp(:,:) = zero
@@ -2491,7 +2364,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   energy         = zero
   fcart(:,:)     = zero
   strten(:)      = zero
-
 
   if(need_verbose)then
     write(msg, '(80a,2a)' ) ('-',mu=1,80),&
@@ -2532,7 +2404,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !   ii = ii + 1
 !   if(ii > eff_pot%crystal%natom) ii = 1
 ! end do
-
+ 
 !------------------------------------
 ! 3 - Computation of the IFC part :
 !------------------------------------
@@ -2657,7 +2529,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     fcart_part(:,:)  = zero
     strten_part(:) = zero
     call polynomial_coeff_evaluate(eff_pot%anharmonics_terms%coefficients,disp_tmp,&
-&                                  energy_part,fcart_part,eff_pot%supercell%natom,&
+&                                  energy_part,energy_coeff_part,fcart_part,eff_pot%supercell%natom,&
 &                                  eff_pot%crystal%natom,eff_pot%anharmonics_terms%ncoeff,&
 &                                  sc_size,strain_tmp,strten_part,eff_pot%mpi_coeff%my_ncell,&
 &                                  eff_pot%mpi_coeff%my_index_cells,eff_pot%mpi_coeff%comm)
@@ -2791,6 +2663,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call wrtout(std_out,msg,'COLL')
   end if
 
+
+
   ABI_DEALLOCATE(xcart)
 
 end subroutine effective_potential_evaluate
@@ -2838,13 +2712,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
 &                                      xcart_hist,xred_hist,xred_ref,xcart_ref,compute_displacement,&
 &                                      compute_duDelta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_getDisp'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -2869,7 +2736,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   type(strain_type) :: strain
   real(dp) :: xcart_hist_tmp(3,natom),xcart_ref_tmp(3,natom)
   real(dp) :: xred_ref_tmp(3,natom)
-
 ! *************************************************************************
 
   if (.not.(present(xred_ref).or.present(xcart_ref))) then
@@ -2925,7 +2791,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   else
     call xred2xcart(natom, rprimd_hist, xcart_hist_tmp, xred_hist)
   end if
-
+  
 ! Fill the reference position and change the cartesian coordinates
 ! if the rprimd is different
   if(has_strain) then
@@ -2947,7 +2813,7 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if(need_displacement)then
     displacement(:,:) = zero
     do ii = 1, natom
-      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
+      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii) 
     end do
   end if
 
@@ -3004,13 +2870,6 @@ end subroutine effective_potential_getDisp
 
 subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_distributeResidualForces'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -3064,13 +2923,6 @@ end subroutine effective_potential_distributeResidualForces
 
 pure function effective_potential_compare(e1,e2) result (res)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_compare'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3283,13 +3135,6 @@ end function effective_potential_compare
 
 ! subroutine effective_potential_printPDOS(eff_pot,filename,ncell,nph1l,option,qph1l)
 
-
-! !This section has been created automatically by the script Abilint (TD).
-! !Do not modify the following lines by hand.
-! #undef ABI_FUNC
-! #define ABI_FUNC 'effective_potential_printPDOS'
-! !End of the abilint section
-
 !   implicit none
 
 ! !Arguments ------------------------------------
@@ -3366,13 +3211,6 @@ end function effective_potential_compare
 !! SOURCE
 
 subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,ncell,option,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_computeGradient'
-!End of the abilint section
 
  implicit none
 
@@ -3518,13 +3356,6 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 
  subroutine effective_potential_checkDEV(eff_pot,hist,natom,ntime)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_checkDEV'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3573,7 +3404,7 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  istep = 4
  xred = hist%xred(:,:,istep)
  rprimd =  hist%rprimd(:,:,istep)
-
+ 
  rprimd_ref =  eff_pot%supercell%rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -3581,20 +3412,20 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
  delta = 0.001
  deltalist = (/-2*delta,-delta,real(0.0,dp),delta,2*delta/)
  strain = zero
-
+ 
    do ia=1,natom
      do mu=1,3
        write(std_out,*) "atm: ",ia," dir: ",mu
        do ii=1,npt
          delt = deltalist(ii)
 
-!        Get the initial displacement
+!        Get the initial displacement        
          call effective_potential_getDisp(disp,du_delta,natom,rprimd,&
 &                                         eff_pot%supercell%rprimd,1,xred_hist=xred,&
 &                                         xcart_ref=eff_pot%supercell%xcart,&
 &                                         compute_displacement = .true.,compute_duDelta = .true.)
 
-!        Add the delta
+!        Add the delta         
          call xcart2xred(natom, rprimd, disp, disp_red)
          disp_red(mu,ia) = disp_red(mu,ia) + delt
          call xred2xcart(natom, rprimd, disp, disp_red)
@@ -3683,7 +3514,7 @@ forall(ii=1:3)identity(ii,ii)=1
 !  Option 2 => compute the disps within evaluate
    call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.true.,verbose=.false.)
-
+   
  write(std_out,*) "Analyti:",strten(jj)
  write(std_out,*) "FD     :",(-diff(5)+8*diff(4)-8*diff(2)+diff(1)) / (12*delta) / ucvol
  write(std_out,*) "Diff(%):",abs(100*(strten(jj)-((-diff(5)+8*diff(4)-8*diff(2)+diff(1))&
@@ -3726,13 +3557,6 @@ end subroutine effective_potential_checkDEV
 !! SOURCE
 
 subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_writeNETCDF'
-!End of the abilint section
 
   implicit none
 

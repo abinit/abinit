@@ -148,13 +148,6 @@ subroutine ingeo (acell,amu,dtset,bravais,&
 & ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
 & symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ingeo'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -278,8 +271,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
        rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
        rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
        rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-!      write(std_out,*)' ingeo : angdeg=',angdeg(1:3)
-!      write(std_out,*)' ingeo : aa,cc=',aa,cc
+!      write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
      else
 !      Treat all the other cases
        rprim(:,:)=0.0_dp
@@ -1002,7 +994,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
  angdeg(1)=180.0_dp/pi * acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))
  angdeg(2)=180.0_dp/pi * acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))
  angdeg(3)=180.0_dp/pi * acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))
- write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
+ !write(std_out,'(a,3f14.8)') ' ingeo: angdeg(1:3)=',angdeg(1:3)
 
 !--------------------------------------------------------------------------------------
 
@@ -1023,9 +1015,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
    nsym=jsym
  end if
 
-!DEBUG
-!call symmultsg(nsym,symafm,symrel,tnons)
-!ENDDEBUG
+ !call symmultsg(nsym,symafm,symrel,tnons)
 
 !9) initialize the list of fixed atoms, and initial velocities -----------------
 !Note: these inputs do not influence the previous generation of
@@ -1212,13 +1202,6 @@ end subroutine ingeo
 
 subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ingeobld'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1285,8 +1268,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
 
- write(message, '(a,a)' )&
-& '--ingeobld: echo values of variables connected to objects --------',ch10
+ write(message, '(a,a)' )'--ingeobld: echo values of variables connected to objects --------',ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(iout,message,'COLL')
 
@@ -1873,13 +1855,6 @@ end subroutine ingeobld
 
 subroutine fillcell(natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fillcell'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2029,13 +2004,6 @@ end subroutine fillcell
 !! SOURCE
 
 subroutine invacuum(jdtset,lenstr,natom,rprimd,string,vacuum,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invacuum'
-!End of the abilint section
 
  implicit none
 

@@ -74,13 +74,6 @@ subroutine iorho( task, fname, cell, mesh, nsm, maxp, nspin, f, found )
 ! those required to copy the array f from the file, then the required
 ! values of maxp and nspin are returned on output, but f is not read.
 ! *********************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'iorho'
-!End of the abilint section
-
       implicit          none
 
 ! Arguments
@@ -157,13 +150,6 @@ SUBROUTINE FOUR1(DATA,NN,ISIGN)
 ! Output:
 !   real*8  DATA(2*NN) : Fourier transformed function
 !**********************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'FOUR1'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER          :: NN, ISIGN
       real(kind=kind(0.0d0)) :: DATA(2*NN)
@@ -236,13 +222,6 @@ SUBROUTINE POLINT(XA,YA,N,X,Y,DY)
 !   real*8  Y     : interpolated value of y(x) at X
 !   real*8  DY    : accuracy estimate
 !*****************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'POLINT'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER          :: N
       real(kind=kind(0.0d0)) :: XA(N),YA(N), X, Y, DY
@@ -302,13 +281,6 @@ SUBROUTINE MACROAV_SPLINE(DX,Y,N,YP1,YPN,Y2)
 ! - If YP1 or YPN are larger than 1E30, the natural spline
 !   condition (d2y/dx2=0) at the corresponding edge point.
 !************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MACROAV_SPLINE'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER          :: N
       real(kind=kind(0.0d0)) :: DX, Y(N), YP1, YPN, Y2(N)
@@ -360,13 +332,6 @@ SUBROUTINE MACROAV_SPLINT(DX,YA,Y2A,N,X,Y,DYDX)
 !   real*8  Y     : interpolated value of y(x) at point X
 !   real*8  DYDX  : interpolated value of dy/dx at point X
 !***************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'MACROAV_SPLINT'
-!End of the abilint section
-
       IMPLICIT NONE
       INTEGER          :: N
       real(kind=kind(0.0d0)) :: DX, YA(N), Y2A(N), X, Y, DYDX
@@ -397,13 +362,6 @@ END SUBROUTINE MACROAV_SPLINT
 real(kind=kind(0.0d0)) FUNCTION SURPLA( C )
 
 !  CALCULATES THE SRFACE OF THE UNIT CELL NORMAL TO THE INTERFACE
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'SURPLA'
-!End of the abilint section
-
       IMPLICIT NONE
 
       real(kind=kind(0.0d0)) C(3,3)
@@ -431,13 +389,6 @@ subroutine thetaft(n,L,lav,ft)
 !       |__________|_____________________|_________|___
 !       0         lav/2               L-lav/2     L
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thetaft'
-!End of the abilint section
-
         implicit none
 
         integer n,j
@@ -484,13 +435,6 @@ DOUBLE PRECISION FUNCTION VOLCEL( C )
 ! or http://www.gnu.org/copyleft/gpl.txt .
 
 !  CALCULATES THE VOLUME OF THE UNIT CELL
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'VOLCEL'
-!End of the abilint section
-
       IMPLICIT NONE
 
       DOUBLE PRECISION C(3,3)

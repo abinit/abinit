@@ -65,13 +65,6 @@ contains
 !! SOURCE
 subroutine end_sortph()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'end_sortph'
-!End of the abilint section
-
  if (allocated(eigvecLast))  then
    ABI_DEALLOCATE(eigvecLast)
  end if
@@ -124,13 +117,6 @@ end subroutine end_sortph
 !! SOURCE
 
 subroutine sortph(eigvec,displ,filnam, natom,phfrq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sortph'
-!End of the abilint section
 
 implicit none
 

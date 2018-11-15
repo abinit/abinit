@@ -40,13 +40,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_specialqpt(InVar,Lattice,Qpt,QptBound)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_specialqpt'
-!End of the abilint section
-
   implicit none
   integer :: qpt_tot,qptbound_tot
   double precision :: zeta,eta,nu,angle_alpha
@@ -351,13 +344,6 @@ contains
  end subroutine tdep_make_specialqpt
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_make_qptpath(InVar,Lattice,Qpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_make_qptpath'
-!End of the abilint section
 
   implicit none
   integer :: ii,jj,kk,nqpt,iqpt,qpt_tot,tmp_int

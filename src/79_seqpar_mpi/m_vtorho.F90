@@ -47,7 +47,7 @@ module m_vtorho
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
  use m_pawfgrtab,          only : pawfgrtab_type
- use m_pawrhoij,           only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
+ use m_pawrhoij,           only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_inquire_dim
  use m_pawcprj,            only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawfgr,             only : pawfgr_type
  use m_energies,           only : energies_type
@@ -60,7 +60,7 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,   only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_crystal,            only : crystal_init, crystal_free, crystal_t
+ use m_crystal,            only : crystal_init, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
@@ -231,7 +231,7 @@ contains
 !!  energies <type(energies_type)>=storage for energies computed here :
 !!   | e_eigenvalues=Sum of the eigenvalues - Band energy (Hartree)
 !!   | e_kinetic=kinetic energy part of total energy
-!!   | e_nonlocalpsp=nonlocal pseudopotential part of total energy
+!!   | e_nlpsp_vfock=nonlocal psp + potential Fock ACE part of total energy
 !!   | e_fermie=fermi energy (Hartree)
 !!  occ(mband*nkpt*nsppol)=occupation number for each band for each k.
 !!      (input if insulator - occopt<3 - ; output if metallic)
@@ -282,13 +282,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,wffnew,vtrial,vxctau,wvl,xred,ylm,ylmgr,ylmdiel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vtorho'
-!End of the abilint section
 
  implicit none
 
@@ -350,7 +343,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !scalars
  integer,parameter :: level=111,tim_mkrho=2
  integer,save :: nwarning=0
- integer :: bdtot_index,counter,cplex,dimffnl,enunit,iband,iband1,ibdkpt
+ integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert,iplex
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
@@ -374,7 +367,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
- real(dp),allocatable :: enl_k(:),enlnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
+ real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
  real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
@@ -450,7 +443,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  if(.not. wvlbigdft) then
    energies%e_eigenvalues = zero
    energies%e_kinetic     = zero
-   energies%e_nonlocalpsp = zero
+   energies%e_nlpsp_vfock = zero
    if (usefock) then
      energies%e_fock=zero
      energies%e_fockdc=zero
@@ -466,7 +459,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  if(dtset%usewvl==0) then
    ABI_ALLOCATE(eknk,(mbdkpsp))
-   ABI_ALLOCATE(enlnk,(mbdkpsp))
+   ABI_ALLOCATE(enlxnk,(mbdkpsp))
    ABI_ALLOCATE(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
    ABI_ALLOCATE(EigMin,(2,dtset%mband))
    ABI_ALLOCATE(grnlnk,(3*natom,mbdkpsp*optforces))
@@ -478,7 +471,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        fockfornk=zero
      end if
    end if
-   eknk(:)=zero;enlnk(:)=zero
+   eknk(:)=zero;enlxnk(:)=zero
    if (optforces>0) grnlnk(:,:)=zero
    if(paw_dmft%use_dmft==1) eknk_nd=zero
  end if !usewvl==0
@@ -509,6 +502,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(dtset%nnsclo>0) then
    ! ===== Self-consistent + imposed =====
      nnsclo_now=dtset%nnsclo
+   else if (dtset%nnsclo<0) then
+   ! ===== Self-consistent + imposed during abs(nnsclo) steps =====
+     nnsclo_now=1
+     if (istep<=abs(dtset%nnsclo)) nnsclo_now=merge(5,dtset%useria,dtset%useria==0)
    else
    ! ===== Self-consistent + default =====
      nnsclo_now=1
@@ -533,7 +530,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  end if
  if(dtset%wfoptalg==2)nnsclo_now=40  ! UNDER DEVELOPMENT
 
- write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho : nnsclo_now=',nnsclo_now,&
+ write(message, '(a,i0,a,3(i0,1x))' ) ' vtorho: nnsclo_now=',nnsclo_now,&
 & ', note that nnsclo,dbl_nnsclo,istep=',dtset%nnsclo,dbl_nnsclo,istep
  call wrtout(std_out,message,'COLL')
 
@@ -622,7 +619,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nsppol,occ,dtset%wtk)
    else
      energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
-&     + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
+&     + energies%e_xcdc  + two*energies%e_hartree +energies%e_nlpsp_vfock
    end if
 
    if (optforces == 1) then ! not compatible with iscf=0 and wvlbigdftcomp=1 + PAW
@@ -799,7 +796,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ABI_ALLOCATE(eig_k,(nband_k))
        ABI_ALLOCATE(ek_k,(nband_k))
-       ABI_ALLOCATE(enl_k,(nband_k))
+       ABI_ALLOCATE(enlx_k,(nband_k))
        ABI_ALLOCATE(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_ALLOCATE(occ_k,(nband_k))
        ABI_ALLOCATE(resid_k,(nband_k))
@@ -808,7 +805,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        eig_k(:)=zero
        ek_k(:)=zero
-       enl_k(:)=zero
+       enlx_k(:)=zero
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
@@ -936,7 +933,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      contributions to kinetic energy, nonlocal energy, forces,
 !      and update of rhor to this k-point and this spin polarization.
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
-&       dtset,eig_k,ek_k,ek_k_nd,enl_k,fixed_occ,grnl_k,gs_hamk,&
+&       dtset,eig_k,ek_k,ek_k_nd,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
@@ -986,7 +983,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(paw_dmft%use_dmft==1) eknk_nd(isppol,ikpt,:,:,:) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
-       enlnk(1+bdtot_index : nband_k+bdtot_index) = enl_k(:)
+       enlxnk(1+bdtot_index : nband_k+bdtot_index) = enlx_k(:)
 
        if(iscf>0 .or. iscf==-3)then
 !        Accumulate sum over k points for band, nonlocal and kinetic energies,
@@ -995,9 +992,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            if (abs(occ_k(iband))>tol8) then
              energies%e_kinetic     = energies%e_kinetic     + dtset%wtk(ikpt)*occ_k(iband)*ek_k(iband)
              energies%e_eigenvalues = energies%e_eigenvalues + dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
-             energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enl_k(iband)
+             energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + dtset%wtk(ikpt)*occ_k(iband)*enlx_k(iband)
              if (optforces>0) grnl(:)=grnl(:)+dtset%wtk(ikpt)*occ_k(iband)*grnl_k(:,iband)
-             if (usefock) energies%e_fock=energies%e_fock + half*fock%fock_common%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
+             if (usefock) then
+               energies%e_fock=energies%e_fock + half*fock%fock_common%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
+               if (usefock_ACE==0)then
+                 energies%e_fock0=energies%e_fock
+               endif
+             endif
            end if
          end do
 
@@ -1019,7 +1021,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_DEALLOCATE(occ_k)
        ABI_DEALLOCATE(resid_k)
        ABI_DEALLOCATE(zshift)
-       ABI_DEALLOCATE(enl_k)
+       ABI_DEALLOCATE(enlx_k)
 
 !      Keep track of total number of bands (all k points so far, even for k points not treated by me)
        bdtot_index=bdtot_index+nband_k
@@ -1098,16 +1100,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        call timab(989,1,tsec)
 
-!      If needed, exchange the values of eigen,resid,eknk,enlnk,grnlnk
+!      If needed, exchange the values of eigen,resid,eknk,enlxnk,grnlnk
        ABI_ALLOCATE(buffer1,((4+3*natom*optforces+dtset%usefock+3*natom*dtset%usefock*optforces)*mbdkpsp))
        if(paw_dmft%use_dmft==1) then
          ABI_ALLOCATE(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
        end if
-!      Pack eigen,resid,eknk,enlnk,grnlnk in buffer1
+!      Pack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        buffer1(1          :  mbdkpsp)=eigen(:)
        buffer1(1+  mbdkpsp:2*mbdkpsp)=resid(:)
        buffer1(1+2*mbdkpsp:3*mbdkpsp)=eknk(:)
-       buffer1(1+3*mbdkpsp:4*mbdkpsp)=enlnk(:)
+       buffer1(1+3*mbdkpsp:4*mbdkpsp)=enlxnk(:)
        index1=4*mbdkpsp
        if (optforces>0) then
          buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(grnlnk,(/(3*natom)*mbdkpsp/) )
@@ -1148,11 +1150,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
        call timab(48,2,tsec)
 
-!      Unpack eigen,resid,eknk,enlnk,grnlnk in buffer1
+!      Unpack eigen,resid,eknk,enlxnk,grnlnk in buffer1
        eigen(:) =buffer1(1          :  mbdkpsp)
        resid(:) =buffer1(1+  mbdkpsp:2*mbdkpsp)
        eknk(:)  =buffer1(1+2*mbdkpsp:3*mbdkpsp)
-       enlnk(:) =buffer1(1+3*mbdkpsp:4*mbdkpsp)
+       enlxnk(:) =buffer1(1+3*mbdkpsp:4*mbdkpsp)
        index1=4*mbdkpsp
        if (optforces>0) then
          grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3*natom,mbdkpsp/) )
@@ -1208,7 +1210,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !      ==  initialise occnd
        paw_dmft%occnd=zero
-      
+
        bdtot_index = 1
        do isppol=1,dtset%nsppol
          do ikpt=1,dtset%nkpt
@@ -1329,7 +1331,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call destroy_dmft(paw_dmft)
 
 !        ==  destroy crystal_t cryst_struc
-         call crystal_free(cryst_struc)
+         call cryst_struc%free()
          call destroy_oper(lda_occup)
        end if ! dmft_ldaocc
        call timab(991,2,tsec)
@@ -1348,10 +1350,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(992,1,tsec)
 
-!    Compute eeig, ek,enl and grnl from the new occ, and the shared eknk,enlnk,grnlnk
+!    Compute eeig, ek,enl and grnl from the new occ, and the shared eknk,enlxnk,grnlnk
      energies%e_eigenvalues = zero
      energies%e_kinetic     = zero
-     energies%e_nonlocalpsp = zero
+     energies%e_nlpsp_vfock = zero
      if (usefock) then
        energies%e_fock     = zero
        if (optforces>0) fock%fock_common%forces=zero
@@ -1402,8 +1404,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &             dtset%wtk(ikpt)*occ(bdtot_index)*eigen(bdtot_index)
              energies%e_kinetic = energies%e_kinetic + &
 &             dtset%wtk(ikpt)*occ(bdtot_index)*eknk(bdtot_index)
-             energies%e_nonlocalpsp = energies%e_nonlocalpsp + &
-&             dtset%wtk(ikpt)*occ(bdtot_index)*enlnk(bdtot_index)
+             energies%e_nlpsp_vfock = energies%e_nlpsp_vfock + &
+&             dtset%wtk(ikpt)*occ(bdtot_index)*enlxnk(bdtot_index)
              if (usefock) then
                energies%e_fock=energies%e_fock + half*focknk(bdtot_index)*occ(bdtot_index)*dtset%wtk(ikpt)
                if (optforces>0) fock%fock_common%forces(:,:)=fock%fock_common%forces(:,:)+&
@@ -1484,7 +1486,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          buffer1(index1+1) = energies%e_kinetic
          buffer1(index1+2) = energies%e_eigenvalues
-         buffer1(index1+3) = energies%e_nonlocalpsp
+         buffer1(index1+3) = energies%e_nlpsp_vfock
          index1=index1+3
 !        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
@@ -1528,7 +1530,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          index1=index1+dtset%nfft*dtset%nspden
          energies%e_kinetic = buffer1(index1+1)
          energies%e_eigenvalues = buffer1(index1+2)
-         energies%e_nonlocalpsp = buffer1(index1+3)
+         energies%e_nlpsp_vfock = buffer1(index1+3)
          index1=index1+3
 !        * If Hartree-Fock calculation, save e_fock in buffer1
          if (dtset%usefock==1) then
@@ -1605,7 +1607,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
    ABI_DEALLOCATE(eknk_nd)
    ABI_DEALLOCATE(grnlnk)
-   ABI_DEALLOCATE(enlnk)
+   ABI_DEALLOCATE(enlxnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
    if(iscf<=0 .and. me_distrb==0)then
@@ -1677,8 +1679,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(555,1,tsec)
      if (paral_atom) then
        ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(natom))
-       nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-       call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
+       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+       call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0)
      else
        pawrhoij_unsym => pawrhoij
@@ -1686,8 +1689,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if (usecprj_local==1) then
        call pawmkrhoij(atindx,atindx1,cprj,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
 &       mcprj_local,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij_unsym,dtfil%unpaw,&
-&       dtset%usewvl,dtset%wtk)
+&       occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
      else
        mcprj_tmp=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
        ABI_DATATYPE_ALLOCATE(cprj_tmp,(natom,mcprj_tmp))
@@ -1699,8 +1701,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij_unsym,&
-&       dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,&
+&       dtset%usewvl,dtset%wtk)
        call pawcprj_free(cprj_tmp)
        ABI_DATATYPE_DEALLOCATE(cprj_tmp)
      end if
@@ -1854,13 +1856,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 subroutine wvl_nscf_loop()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nscf_loop'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1912,7 +1907,7 @@ subroutine wvl_nscf_loop()
 
 !  Update energies depending on new WF
    energies%e_kinetic=ekin
-   energies%e_nonlocalpsp=enl
+   energies%e_nlpsp_vfock=enl
    energies%e_exactX=eexctx
    energies%e_sicdc=esicdc
 
@@ -1965,13 +1960,6 @@ subroutine wvl_nscf_loop()
 
 subroutine wvl_nscf_loop_bigdft()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_nscf_loop_bigdft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2005,7 +1993,7 @@ subroutine wvl_nscf_loop_bigdft()
      do inonsc = 2, nnsclo_now-1
        call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
 &       energies%e_hartree, energies%e_kinetic, energies%e_localpsp, &
-&       energies%e_nonlocalpsp, energies%e_sicdc, istep, inonsc, iscf_, &
+&       energies%e_nlpsp_vfock, energies%e_sicdc, istep, inonsc, iscf_, &
 &       mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
 &       dtset%nspden, nres2, do_scf,energies%e_xcdc, &
 &       wvl, wvlbigdft, xcart, strsxc)
@@ -2025,7 +2013,7 @@ subroutine wvl_nscf_loop_bigdft()
 !    !Update energies and potential (nscf cycles are not finished)
      call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
 &     energies%e_hartree,energies%e_kinetic, energies%e_localpsp, &
-&     energies%e_nonlocalpsp, energies%e_sicdc, istep, nnsclo_now, iscf_, &
+&     energies%e_nlpsp_vfock, energies%e_sicdc, istep, nnsclo_now, iscf_, &
 &     mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
 &     dtset%nspden, nres2, do_scf,energies%e_xcdc, &
 &     wvl, wvlbigdft, xcart, strsxc)
@@ -2064,13 +2052,6 @@ subroutine wvl_nscf_loop_bigdft()
 !! SOURCE
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'e_eigen'
-!End of the abilint section
 
  implicit none
 
@@ -2132,13 +2113,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 
 subroutine wvl_occ()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_occ'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -2193,13 +2167,6 @@ subroutine wvl_occ()
 
 subroutine wvl_occ_bigdft()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_occ_bigdft'
-!End of the abilint section
-
  implicit none
 
 ! *************************************************************************
@@ -2253,13 +2220,6 @@ subroutine wvl_occ_bigdft()
 !! SOURCE
 
 subroutine wvl_comm_eigen()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_comm_eigen'
-!End of the abilint section
 
  implicit none
 
@@ -2359,13 +2319,6 @@ end subroutine vtorho
 subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,mcgq,&
 &                      me_distrb,mkgq,mpi_enreg,my_nspinor,nband_k,nproc_distrb,&
 &                      npwarr,pwnsfac,pwnsfacq,pwind_alloc,spaceComm_distrb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgq_builder'
-!End of the abilint section
 
  implicit none
 

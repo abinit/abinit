@@ -30,13 +30,6 @@
 
 subroutine xmpi_exch_intn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_intn'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------
@@ -98,12 +91,6 @@ end subroutine xmpi_exch_intn
 subroutine xmpi_exch_int2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_int2d'
-!End of the abilint section
-
  implicit none
 
 !Arguments----------------
@@ -163,13 +150,6 @@ end subroutine xmpi_exch_int2d
 !!
 !! SOURCE
 subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_dpn'
-!End of the abilint section
 
  implicit none
 
@@ -231,13 +211,6 @@ end subroutine xmpi_exch_dpn
 
 subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_dp2d'
-!End of the abilint section
-
  implicit none
 
 
@@ -298,13 +271,6 @@ end subroutine xmpi_exch_dp2d
 
 subroutine xmpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_dp3d'
-!End of the abilint section
-
  implicit none
 
 
@@ -364,13 +330,6 @@ end subroutine xmpi_exch_dp3d
 !!
 !! SOURCE
 subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_dp4d_tag'
-!End of the abilint section
 
  implicit none
 
@@ -436,13 +395,6 @@ end subroutine xmpi_exch_dp4d_tag
 
 subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_dp5d_tag'
-!End of the abilint section
-
  implicit none
 
 
@@ -497,12 +449,6 @@ end subroutine xmpi_exch_dp5d_tag
 subroutine xmpi_exch_spc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_spc_1d'
-!End of the abilint section
-
  implicit none
 
 
@@ -550,13 +496,6 @@ end subroutine xmpi_exch_spc_1d
 !! SOURCE
 
 subroutine xmpi_exch_dpc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_dpc_1d'
-!End of the abilint section
 
  implicit none
 
@@ -606,12 +545,6 @@ end subroutine xmpi_exch_dpc_1d
 
 subroutine xmpi_exch_dpc_2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_exch_dpc_2d'
-!End of the abilint section
 
  implicit none
 

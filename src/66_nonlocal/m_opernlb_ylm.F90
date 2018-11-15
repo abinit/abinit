@@ -160,13 +160,6 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                      ia3,idir,indlmn,kpg,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpg,nlmn,nloalg,npw,&
 &                      nspinor,paw_opt,ph3d,svect,ucvol,vect,qdir)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'opernlb_ylm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

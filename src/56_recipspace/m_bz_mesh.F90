@@ -393,13 +393,6 @@ CONTAINS  !=====================================================================
 
 subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symmetry)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kmesh_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -566,13 +559,6 @@ end subroutine kmesh_init
 
 subroutine kmesh_free(Kmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kmesh_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -652,13 +638,6 @@ end subroutine kmesh_free
 !! SOURCE
 
 subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kmesh_print'
-!End of the abilint section
 
  implicit none
 
@@ -774,13 +753,6 @@ end subroutine kmesh_print
 !! SOURCE
 
 subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_k_rotation'
-!End of the abilint section
 
  implicit none
 
@@ -940,13 +912,6 @@ end subroutine setup_k_rotation
 
 subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_bz_item'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1013,13 +978,6 @@ end subroutine get_bz_item
 
 subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_IBZ_item'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1070,13 +1028,6 @@ end subroutine get_IBZ_item
 !! SOURCE
 
 subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_BZ_diff'
-!End of the abilint section
 
  implicit none
 
@@ -1161,13 +1112,6 @@ end subroutine get_BZ_diff
 
 logical function isamek(k1,k2,g0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isamek'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1209,13 +1153,6 @@ end function isamek
 !! SOURCE
 
 logical function isequalk(q1,q2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'isequalk'
-!End of the abilint section
 
  implicit none
 
@@ -1262,13 +1199,6 @@ end function isequalk
 !! SOURCE
 
 logical function has_BZ_item(Kmesh,item,ikbz,g0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'has_BZ_item'
-!End of the abilint section
 
  implicit none
 
@@ -1332,13 +1262,6 @@ end function has_BZ_item
 
 logical function has_IBZ_item(Kmesh,item,ikibz,g0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'has_IBZ_item'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1399,13 +1322,6 @@ end function has_IBZ_item
 
 pure logical function bz_mesh_isirred(Kmesh,ik_bz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bz_mesh_isirred'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1460,13 +1376,6 @@ end function bz_mesh_isirred
 subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
 &  vacuum,break_symmetry)  ! Optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_mesh'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1509,8 +1418,8 @@ subroutine make_mesh(Kmesh,Cryst,kptopt,kptrlatt,nshiftk,shiftk,&
  my_vacuum = (/0,0,0/); if (PRESENT(vacuum)) my_vacuum=vacuum
 
  my_nshiftk = nshiftk
- ABI_CHECK(my_nshiftk>0.and.my_nshiftk<=210,"Wrong nshiftk")
- ABI_MALLOC(my_shiftk,(3,210))
+ ABI_CHECK(my_nshiftk>0.and.my_nshiftk<=MAX_NSHIFTK, sjoin("Wrong nshiftk must be between 1 and ", itoa(MAX_NSHIFTK)))
+ ABI_MALLOC(my_shiftk, (3, MAX_NSHIFTK))
  my_shiftk=zero; my_shiftk(:,1:nshiftk) = shiftk(:,:)
 
  !write(std_out,*)" In make_mesh"
@@ -1613,13 +1522,6 @@ end subroutine make_mesh
 !! SOURCE
 
 subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,ktabo,nkbz,wtk,ref_bz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'identk'
-!End of the abilint section
 
  implicit none
 
@@ -1813,13 +1715,6 @@ end subroutine identk
 
 subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_ng0sh'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1957,13 +1852,6 @@ subroutine getkptnorm_bycomponent(vect,factor,norm)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getkptnorm_bycomponent'
-!End of the abilint section
-
  integer,intent(in) :: factor
  real(dp),intent(out):: norm
 !arrays
@@ -2021,13 +1909,6 @@ end subroutine getkptnorm_bycomponent
 !! SOURCE
 
 subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_path'
-!End of the abilint section
 
  implicit none
 
@@ -2141,13 +2022,6 @@ end subroutine make_path
 
 subroutine find_qmesh(Qmesh,Cryst,Kmesh)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'find_qmesh'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2210,13 +2084,6 @@ end subroutine find_qmesh
 !! SOURCE
 
 subroutine findnq(nkbz,kbz,nsym,symrec,symafm,nqibz,timrev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findnq'
-!End of the abilint section
 
  implicit none
 
@@ -2317,13 +2184,6 @@ end subroutine findnq
 
 
 subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findq'
-!End of the abilint section
 
  implicit none
 
@@ -2426,13 +2286,6 @@ end subroutine findq
 
 subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'findqg0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2458,7 +2311,8 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
  iq=0
 
- if (ALL(ABS(kmkp(:))<EPSILON(one))) then ! Find q close to 0 ===
+ if (ALL(ABS(kmkp(:))<EPSILON(one))) then
+   ! Find q close to 0
    do iqbz=1,nqbz
      if (ALL(ABS(qbz(:,iqbz))<tolq0)) then
        iq=iqbz
@@ -2470,7 +2324,8 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    end if
    g0(:)=0; RETURN
 
- else ! q is not zero, find q such as k-kp=q+G0.
+ else
+   ! q is not zero, find q such as k-kp=q+G0.
 
    ! Try with G0=0 first.
    !do iqbz=1,nqbz
@@ -2612,13 +2467,6 @@ end subroutine findqg0
 !! SOURCE
 
 subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_init'
-!End of the abilint section
 
  implicit none
 
@@ -2946,13 +2794,6 @@ end subroutine littlegroup_init
 
 subroutine littlegroup_free_0D(Ltg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_free_0D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3021,13 +2862,6 @@ end subroutine littlegroup_free_0D
 
 subroutine littlegroup_free_1D(Ltg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_free_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3072,13 +2906,6 @@ end subroutine littlegroup_free_1D
 !! SOURCE
 
 subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'littlegroup_print'
-!End of the abilint section
 
  implicit none
 
@@ -3154,13 +2981,6 @@ end subroutine littlegroup_print
 !! SOURCE
 
 function box_len(qpt,gprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'box_len'
-!End of the abilint section
 
  implicit none
 
@@ -3254,13 +3074,6 @@ end function box_len
 
 type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpath_new'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3330,13 +3143,6 @@ end function kpath_new
 
 subroutine kpath_free(Kpath)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpath_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3394,13 +3200,6 @@ end subroutine kpath_free
 !! SOURCE
 
 subroutine kpath_print(kpath, header, unit, prtvol, pre)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpath_print'
-!End of the abilint section
 
  implicit none
 

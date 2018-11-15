@@ -296,13 +296,6 @@ CONTAINS  !=====================================================================
 
 subroutine bs_parameters_free(BSp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bs_parameters_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -388,13 +381,6 @@ end subroutine bs_parameters_free
 !! SOURCE
 
 subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_bs_parameters'
-!End of the abilint section
 
  implicit none
 
@@ -571,13 +557,6 @@ end subroutine print_bs_parameters
 
 subroutine bsp_calctype2str(BSp,str)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bsp_calctype2str'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -642,13 +621,6 @@ end subroutine bsp_calctype2str
 
 subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,nkibz,nsppol,nspinor,gw_energy,occ,ktab,&
 &  minmax_tene,nreh) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_transitions'
-!End of the abilint section
 
  implicit none
 
@@ -757,13 +729,6 @@ end subroutine init_transitions
 
 pure function repr_1trans(Trans,prtvol) result(str)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'repr_1trans'
-!End of the abilint section
-
  implicit none 
 
 !Arguments ------------------------------------
@@ -810,13 +775,6 @@ end function repr_1trans
 !! SOURCE
 
 pure function repr_2trans(Trans1,Trans2,prtvol) result(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'repr_2trans'
-!End of the abilint section
 
  implicit none 
 
@@ -866,13 +824,6 @@ end function repr_2trans
 !! SOURCE
 
 subroutine print_bs_files(BS_files,header,unit,mode_paral,prtvol)                                   
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_bs_files'
-!End of the abilint section
 
  implicit none 
 

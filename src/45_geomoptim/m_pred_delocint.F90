@@ -102,13 +102,6 @@ contains
 
 subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_delocint'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -704,13 +697,6 @@ end subroutine pred_delocint
 
 subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'deloc2xcart'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -887,13 +873,6 @@ end subroutine deloc2xcart
 
 subroutine fred2fdeloc(btinv,deloc_force,fred,natom,gprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fred2fdeloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -972,13 +951,6 @@ end subroutine fred2fdeloc
 !! SOURCE
 
 subroutine calc_b_matrix(deloc,natom,rprimd,xcart,b_matrix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_b_matrix'
-!End of the abilint section
 
  implicit none
 
@@ -1121,13 +1093,6 @@ end subroutine calc_b_matrix
 
 subroutine dbond_length_d1(r1,r2,bb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dbond_length_d1'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1163,13 +1128,6 @@ end subroutine dbond_length_d1
 !!
 
 subroutine dang_d1(r1,r2,r3,bb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dang_d1'
-!End of the abilint section
 
  implicit none
 
@@ -1237,13 +1195,6 @@ end subroutine dang_d1
 
 subroutine dang_d2(r1,r2,r3,bb)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dang_d2'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1309,13 +1260,6 @@ end subroutine dang_d2
 !!
 
 subroutine ddihedral_d1(r1,r2,r3,r4,bb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddihedral_d1'
-!End of the abilint section
 
  implicit none
 
@@ -1423,13 +1367,6 @@ end subroutine ddihedral_d1
 !!
 
 subroutine ddihedral_d2(r1,r2,r3,r4,bb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ddihedral_d2'
-!End of the abilint section
 
  implicit none
 
@@ -1584,13 +1521,6 @@ end subroutine ddihedral_d2
 
 subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xcart2deloc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1669,13 +1599,6 @@ end subroutine xcart2deloc
 !! SOURCE
 
  subroutine calc_btinv_matrix(b_matrix,natom,ninternal,bt_inv_matrix,u_matrix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_btinv_matrix'
-!End of the abilint section
 
  implicit none
 
@@ -1773,13 +1696,6 @@ end subroutine calc_btinv_matrix
 
  subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'align_u_matrices'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1869,13 +1785,6 @@ subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
 & fred,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 & vout,vout_prev,xred,deloc,deloc_int,deloc_force,btinv,gprimd,prim_int,&
 & u_matrix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xfh_recover_deloc'
-!End of the abilint section
 
 implicit none
 

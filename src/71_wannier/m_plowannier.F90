@@ -303,13 +303,6 @@ subroutine init_plowannier(dtset,wan)
   use m_abicore
   use m_errors
   use m_xmpi
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_plowannier'
-!End of the abilint section
-
  implicit none
 
 
@@ -485,13 +478,6 @@ end subroutine init_plowannier
 
 subroutine copy_orbital(orbital1,orbital2,n1,n2,n3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_orbital'
-!End of the abilint section
-
  implicit none
 
  !Arguments----------------
@@ -550,13 +536,6 @@ end subroutine copy_orbital
 
 subroutine allocate_orbital(orbital1,orbital2,n1,n2,n3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'allocate_orbital'
-!End of the abilint section
-
  implicit none
 
  !Arguments----------------
@@ -610,13 +589,6 @@ end subroutine allocate_orbital
 
 
 subroutine destroy_orbital(orbital2,n1,n2,n3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_orbital'
-!End of the abilint section
 
  implicit none
 
@@ -714,13 +686,6 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  use m_pawtab, only : pawtab_type
  use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
  use m_pawrad, only : pawrad_type, simp_gen
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_coeff_plowannier'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2195,13 +2160,6 @@ end subroutine compute_coeff_plowannier
 
  subroutine destroy_plowannier(wan)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_plowannier'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -2294,13 +2252,6 @@ end subroutine compute_coeff_plowannier
 
  subroutine initialize_operwan(wan,operwan)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'initialize_operwan'
-!End of the abilint section
-
    implicit none
 
    !Arguments----------------------------------
@@ -2351,13 +2302,6 @@ end subroutine compute_coeff_plowannier
 !! SOURCE
 
  subroutine destroy_operwan(wan,operwan)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_operwan'
-!End of the abilint section
 
    implicit none
 
@@ -2410,13 +2354,6 @@ end subroutine compute_coeff_plowannier
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compute_oper_ks2wan'
-!End of the abilint section
-
    implicit none
 
    !Arguments--------------------------
@@ -2490,24 +2427,11 @@ end subroutine compute_oper_ks2wan
 
 subroutine normalization_plowannier(wan)
 
-
   use m_matrix, only : invsqrt_matrix
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normalization_plowannier'
-!End of the abilint section
-
   implicit none
+
 !Arguments------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'normalization_plowannier'
-!End of the abilint section
-
   type(plowannier_type), intent(inout) :: wan
 
 !Local----------------------
@@ -2809,13 +2733,6 @@ end subroutine normalization_plowannier
 subroutine print_operwan(wan,operwan,name,convert)
 
 !Arguments----------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_operwan'
-!End of the abilint section
-
   type(operwan_type),intent(in) :: operwan(:,:,:)
   type(plowannier_type), intent(in) :: wan
   character(len=*), intent(in) :: name

@@ -117,13 +117,6 @@ CONTAINS  !=====================================================================
 
 subroutine assemblychi0_sym(ik_bz,nspinor,Ep,Ltg_q,green_w,npwepG0,rhotwg,Gsph_epsG0,chi0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assemblychi0_sym'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -279,13 +272,6 @@ end subroutine assemblychi0_sym
 
 subroutine mkrhotwg_sigma(ii,nspinor,npw,rhotwg,rhotwg_I)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkrhotwg_sigma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -383,13 +369,6 @@ end subroutine mkrhotwg_sigma
 !! SOURCE
 
 subroutine symmetrize_afm_chi0(Cryst,Gsph,Ltg_q,npwe,nomega,chi0,chi0_head,chi0_lwing,chi0_uwing)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symmetrize_afm_chi0'
-!End of the abilint section
 
  implicit none
 
@@ -674,13 +653,6 @@ end subroutine symmetrize_afm_chi0
 subroutine accumulate_chi0_q0(ik_bz,isym_kbz,itim_kbz,gwcomp,nspinor,npwepG0,Ep,Cryst,Ltg_q,Gsph_epsG0,&
 & chi0,rhotwx,rhotwg,green_w,green_enhigh_w,deltaf_b1b2,chi0_head,chi0_lwing,chi0_uwing)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'accumulate_chi0_q0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -914,13 +886,6 @@ end subroutine accumulate_chi0_q0
 
 subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,npwe,Cryst,Ltg_q,Gsph_epsG0,&
 & factocc,my_wl,iomegal,wl,my_wr,iomegar,wr,rhotwx,rhotwg,nomegasf,sf_chi0,sf_head,sf_lwing,sf_uwing)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'accumulate_sfchi0_q0'
-!End of the abilint section
 
  implicit none
 
@@ -1162,13 +1127,6 @@ end subroutine accumulate_sfchi0_q0
 subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 & factocc,my_wl,iomegal,wl,my_wr,iomegar,wr,nomegasf,chi0sf)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'assemblychi0sf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1363,13 +1321,6 @@ end subroutine assemblychi0sf
 
 subroutine approxdelta(nomegasf,omegasf,egwdiff_re,smear,iomegal,iomegar,wl,wr,spmeth)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'approxdelta'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1456,13 +1407,6 @@ end subroutine approxdelta
 !!
 
 subroutine calc_kkweight(ne,omegae,nsp,omegasp,delta,omegamax,kkw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_kkweight'
-!End of the abilint section
 
  implicit none
 
@@ -1566,13 +1510,6 @@ end subroutine calc_kkweight
 
 subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max_rest,my_min_rest,&
 &  method,zcut,omegaplasma,my_wl,my_wr,kkweight)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_spectral'
-!End of the abilint section
 
  implicit none
 
@@ -1718,13 +1655,6 @@ end subroutine setup_spectral
 
 subroutine hilbert_transform(npwe,nomega,nomegasf,my_wl,my_wr,kkweight,sf_chi0,chi0,spmeth)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hilbert_transform'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1803,13 +1733,6 @@ end subroutine hilbert_transform
 
 subroutine hilbert_transform_headwings(npwe,nomega,nomegasf,my_wl,my_wr,kkweight, &
 & sf_lwing,sf_uwing,sf_head,chi0_lwing,chi0_uwing,chi0_head,spmeth)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hilbert_transform_headwings'
-!End of the abilint section
 
  implicit none
 
@@ -1911,13 +1834,6 @@ end subroutine hilbert_transform_headwings
 
 subroutine completechi0_deltapart(ik_bz,qzero,symchi,npwe,npwvec,nomega,nspinor,&
 & nfftot,ngfft,igfft0,Gsph_FFT,Ltg_q,green_enhigh_w,wfwfg,chi0)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'completechi0_deltapart'
-!End of the abilint section
 
  implicit none
 
@@ -2038,13 +1954,6 @@ end subroutine completechi0_deltapart
 
 subroutine output_chi0sumrule(qeq0,iq,npwe,omegaplasma,chi0sumrule,epsm1_w0,vc_sqrt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'output_chi0sumrule'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2131,13 +2040,6 @@ end subroutine output_chi0sumrule
 
 subroutine accumulate_chi0sumrule(ik_bz,symchi,npwe,factor,delta_ene,&
 & Ltg_q,Gsph_epsG0,npwepG0,rhotwg,chi0sumrule)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'accumulate_chi0sumrule'
-!End of the abilint section
 
  implicit none
 
@@ -2235,13 +2137,6 @@ end subroutine accumulate_chi0sumrule
 
 subroutine make_transitions(Wfd,chi0alg,nbnds,nbvw,nsppol,symchi,timrev,TOL_DELTA_OCC,&
 & max_rest,min_rest,my_max_rest,my_min_rest,Kmesh,Ltg_q,gw_energy,occ,qpoint,bbp_ks_distrb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_transitions'
-!End of the abilint section
 
  implicit none
 
@@ -2392,13 +2287,6 @@ end subroutine make_transitions
 !! SOURCE
 
 subroutine chi0_bbp_mask(Ep,use_tr,QP_BSt,mband,ikmq_ibz,ik_ibz,spin,spin_fact,bbp_mask)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi0_bbp_mask'
-!End of the abilint section
 
  implicit none
 

@@ -55,7 +55,7 @@ module m_exc_build
  use m_pawtab,       only : pawtab_type
  use m_pawcprj,      only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_paw_sym,      only : paw_symcprj_op
- use m_wfd,          only : wfd_t, wfd_get_ur, wfd_get_cprj, wfd_change_ngfft, wfd_ihave_ur, wfd_ihave_cprj
+ use m_wfd,          only : wfd_t
  use m_oscillators,  only : rho_tw_g, sym_rhotwgq0
 
  implicit none
@@ -162,15 +162,6 @@ contains
 
 subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,Hdr_bse,&
 &  nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,rhxtwg_q0,is_resonant,fname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_build_block'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -294,7 +285,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
  mgfft_osc = MAXVAL(ngfft_osc(1:3))
  fftalga_osc = ngfft_osc(7)/100
  if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_osc)
+   call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
  end if
 
  ABI_MALLOC(igfftg0,(npweps))
@@ -675,6 +666,10 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          !
          ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
          call gsph_fft_tabs(Gsph_c,g0,mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
          if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
          if (use_padfft==0) then
            ABI_FREE(gbound)
@@ -714,20 +709,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          !
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
-           if (wfd_ihave_ur(Wfd,ic,ik_ibz,spin1,how="Stored")) then
+           if (wfd%ihave_ur(ic,ik_ibz,spin1,how="Stored")) then
              ptur_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%ur
            else
-             call wfd_get_ur(Wfd,ic,ik_ibz,spin1,ur_ck)
+             call wfd%get_ur(ic,ik_ibz,spin1,ur_ck)
              ptur_ck => ur_ck
            end if
            !
            ! Get cprj for this (c,kbz,s1) in the BZ.
            ! * phase due to the umklapp G0 in k-q is already included.
            if (Wfd%usepaw==1) then
-             if (wfd_ihave_cprj(Wfd,ic,ik_ibz,spin1,how="Stored")) then
+             if (wfd%ihave_cprj(ic,ik_ibz,spin1,how="Stored")) then
                ptcp_ck =>  Wfd%Wave(ic,ik_ibz,spin1)%cprj
              else
-               call wfd_get_cprj(Wfd,ic,ik_ibz,spin1,Cryst,Cp_tmp1,sorted=.FALSE.)
+               call wfd%get_cprj(ic,ik_ibz,spin1,Cryst,Cp_tmp1,sorted=.FALSE.)
                ptcp_ck =>  Cp_tmp1
              end if
              call paw_symcprj_op(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_ck,Cp_ck)
@@ -742,20 +737,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
              else ! Calculate matrix element from wfr.
                ! TODO: change the order of the loops.
 
-               if (wfd_ihave_ur(Wfd,icp,ikp_ibz,spin2,how="Stored")) then
+               if (wfd%ihave_ur(icp,ikp_ibz,spin2,how="Stored")) then
                  ptur_ckp => Wfd%Wave(icp,ikp_ibz,spin2)%ur
                else
-                 call wfd_get_ur(Wfd,icp,ikp_ibz,spin2,ur_ckp)
+                 call wfd%get_ur(icp,ikp_ibz,spin2,ur_ckp)
                  ptur_ckp => ur_ckp
                end if
 
                ! Load cprj for this (c,k,s2) in the BZ.
                ! * Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
-                 if (wfd_ihave_cprj(Wfd,icp,ikp_ibz,spin2,how="Stored")) then
+                 if (wfd%ihave_cprj(icp,ikp_ibz,spin2,how="Stored")) then
                    ptcp_ckp =>  Wfd%Wave(icp,ikp_ibz,spin2)%cprj
                  else
-                   call wfd_get_cprj(Wfd,icp,ikp_ibz,spin2,Cryst,Cp_tmp2,sorted=.FALSE.)
+                   call wfd%get_cprj(icp,ikp_ibz,spin2,Cryst,Cp_tmp2,sorted=.FALSE.)
                    ptcp_ckp =>  Cp_tmp2
                  end if
                  call paw_symcprj_op(ikp_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_ckp,Cp_ckp)
@@ -812,20 +807,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                ene_t = BSp%Trans(it,spin1)%en
 
                ! TODO: use this but change the order of the loops.
-               if (wfd_ihave_ur(Wfd,iv,ik_ibz,spin1,how="Stored")) then
+               if (wfd%ihave_ur(iv,ik_ibz,spin1,how="Stored")) then
                  ptur_vk => Wfd%Wave(iv,ik_ibz,spin1)%ur
                else
-                 call wfd_get_ur(Wfd,iv,ik_ibz,spin1,ur_vk)
+                 call wfd%get_ur(iv,ik_ibz,spin1,ur_vk)
                  ptur_vk => ur_vk
                end if
                !
                ! Load cprj for this (v,k,s1) in the BZ.
                ! * Do not care about umklapp G0 in k-q as the phase is already included.
                if (Wfd%usepaw==1) then
-                 if (wfd_ihave_cprj(Wfd,iv,ik_ibz,spin1,how="Stored")) then
-                   ptcp_vk =>  Wfd%Wave(iv,ik_ibz,spin1)%cprj
+                 if (wfd%ihave_cprj(iv,ik_ibz,spin1,how="Stored")) then
+                   ptcp_vk => Wfd%Wave(iv,ik_ibz,spin1)%cprj
                  else
-                   call wfd_get_cprj(Wfd,iv,ik_ibz,spin1,Cryst,Cp_tmp3,sorted=.FALSE.)
+                   call wfd%get_cprj(iv,ik_ibz,spin1,Cryst,Cp_tmp3,sorted=.FALSE.)
                    ptcp_vk => Cp_tmp3
                  end if
                  call paw_symcprj_op(ik_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_vk,Cp_vk)
@@ -859,20 +854,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
                  else
                    ! Calculate matrix element from wfr.
-                   if (wfd_ihave_ur(Wfd,ivp,ikp_ibz,spin2,how="Stored")) then
+                   if (wfd%ihave_ur(ivp,ikp_ibz,spin2,how="Stored")) then
                      ptur_vkp => Wfd%Wave(ivp,ikp_ibz,spin2)%ur
                    else
-                     call wfd_get_ur(Wfd,ivp,ikp_ibz,spin2,ur_vkp)
+                     call wfd%get_ur(ivp,ikp_ibz,spin2,ur_vkp)
                      ptur_vkp => ur_vkp
                    end if
                    !
                    ! Load cprj for this (vp,kp,s2) in the BZ.
                    ! * Do not care about umklapp G0 in k-q as the phase is already included.
                    if (Wfd%usepaw==1) then
-                     if (wfd_ihave_cprj(Wfd,ivp,ikp_ibz,spin2,how="Stored")) then
+                     if (wfd%ihave_cprj(ivp,ikp_ibz,spin2,how="Stored")) then
                        ptcp_vkp =>  Wfd%Wave(ivp,ikp_ibz,spin2)%cprj
                      else
-                       call wfd_get_cprj(Wfd,ivp,ikp_ibz,spin2,Cryst,Cp_tmp4,sorted=.FALSE.)
+                       call wfd%get_cprj(ivp,ikp_ibz,spin2,Cryst,Cp_tmp4,sorted=.FALSE.)
                        ptcp_vkp => Cp_tmp4
                      end if
                      call paw_symcprj_op(ikp_bz,nspinor,1,Cryst,Kmesh,Pawtab,Pawang,ptcp_vkp,Cp_vkp)
@@ -1771,15 +1766,6 @@ end subroutine exc_build_block
 subroutine exc_build_v(spin1,spin2,nsppol,npweps,Bsp,Cryst,Kmesh,Qmesh,Gsph_x,Gsph_c,Vcp,&
 &  is_resonant,rhxtwg_q0,nproc,my_rank,t_start,t_stop,my_bsham)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_build_v'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spin1,spin2,nsppol,npweps,nproc,my_rank
@@ -2165,15 +2151,6 @@ end subroutine exc_build_v
 subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
 & Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_build_ham'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftot_osc
@@ -2303,15 +2280,6 @@ end subroutine exc_build_ham
 subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 & Psps,Pawtab,Paw_pwff,lomo_spin,homo_spin,humo_spin,nfftot_osc,ngfft_osc,npweps,mgq0)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wfd_all_mgq0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftot_osc,npweps
@@ -2357,7 +2325,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  lomo_min = MINVAL(lomo_spin); humo_max = MAXVAL(humo_spin)
 
  if ( ANY(ngfft_osc(1:3) /= Wfd%ngfft(1:3)) ) then
-   call wfd_change_ngfft(Wfd,Cryst,Psps,ngfft_osc)
+   call wfd%change_ngfft(Cryst,Psps,ngfft_osc)
  end if
 
  mgfft_osc   = MAXVAL(ngfft_osc(1:3))
@@ -2416,6 +2384,10 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
  ABI_MALLOC(gbound,(2*mgfft_osc+8,2))
  call gsph_fft_tabs(Gsph_x,(/0,0,0/),mgfft_osc,ngfft_osc,use_padfft,gbound,igfftg0)
  if ( ANY(fftalga_osc == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
+#ifdef FC_IBM
+ ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
+ use_padfft = 0
+#endif
  if (use_padfft==0) then
    ABI_FREE(gbound)
    ABI_MALLOC(gbound,(2*mgfft_osc+8,2*use_padfft))
@@ -2446,30 +2418,30 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
      do iv=lomo_spin(spin),humo_spin(spin) ! Loop over band V
        if ( ALL(task_distrib(:,iv,ik_ibz,1)/=Wfd%my_rank) ) CYCLE
 
-       if (wfd_ihave_ur(Wfd,iv,ik_ibz,spin,how="Stored")) then
+       if (wfd%ihave_ur(iv,ik_ibz,spin,how="Stored")) then
          ptr_ur1 =>  Wfd%Wave(iv,ik_ibz,spin)%ur
        else
-         call wfd_get_ur(Wfd,iv,ik_ibz,spin,ur1)
+         call wfd%get_ur(iv,ik_ibz,spin,ur1)
          ptr_ur1 =>  ur1
        end if
 
        if (Wfd%usepaw==1) then
-         call wfd_get_cprj(Wfd,iv,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
+         call wfd%get_cprj(iv,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
        end if
 
        ! Loop over band C
        do ic=lomo_spin(spin),humo_spin(spin)
          if ( task_distrib(ic,iv,ik_ibz,1)/=Wfd%my_rank ) CYCLE
 
-         if (wfd_ihave_ur(Wfd,ic,ik_ibz,spin,how="Stored")) then
+         if (wfd%ihave_ur(ic,ik_ibz,spin,how="Stored")) then
            ptr_ur2 =>  Wfd%Wave(ic,ik_ibz,spin)%ur
          else
-           call wfd_get_ur(Wfd,ic,ik_ibz,spin,ur2)
+           call wfd%get_ur(ic,ik_ibz,spin,ur2)
            ptr_ur2 =>  ur2
          end if
 
          if (Wfd%usepaw==1) then
-           call wfd_get_cprj(Wfd,ic,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
+           call wfd%get_cprj(ic,ik_ibz,spin,Cryst,Cp2,sorted=.FALSE.)
          end if
 
          call rho_tw_g(Wfd%nspinor,npweps,nfftot_osc,ndat1,ngfft_osc,map2sphere1,use_padfft,igfftg0,gbound,&

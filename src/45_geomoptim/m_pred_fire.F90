@@ -98,13 +98,6 @@ subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pred_fire'
-!End of the abilint section
-
  type(abimover),intent(in) :: ab_mover
  type(ab_xfh_type),intent(inout)    :: ab_xfh
  type(abiforstr),intent(in) :: forstr

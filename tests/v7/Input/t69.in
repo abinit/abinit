@@ -3,7 +3,7 @@
 # and some over relaxation in a simple mixing scheme..
 # Norm-conserving
 
- nstep 61          # Maximal number of SCF cycles
+ nstep 40          # Maximal number of SCF cycles
  fockoptmix 201
  nnsclohf2 4       
  ixc2 40           # Calculation with Hartree-Fock functional
@@ -14,7 +14,7 @@ iscf 7
 diemac 1.0
 diemix 1.0
 
-ndtset 2         # Two datasets : 1) LDA 2) PBE0
+ndtset 2         # Two datasets : 1) LDA 2) HF 
 
 #Definition of the unit cell
 acell 3*10.217         # Data from PRB 48, 5058
@@ -70,7 +70,6 @@ nbandhf2 4         # number of occupied states
 
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

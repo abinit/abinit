@@ -100,13 +100,6 @@ contains  !=============================================================
 
  subroutine m1geo_init(dtfil,dtset,m1geo_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'm1geo_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -223,13 +216,6 @@ contains  !=============================================================
 !! SOURCE
 
  subroutine m1geo_destroy(m1geo_param)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'm1geo_destroy'
-!End of the abilint section
 
  implicit none
 
