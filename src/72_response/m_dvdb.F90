@@ -172,6 +172,10 @@ module m_dvdb
   logical :: has_dielt_zeff=.False.
    ! Does the dvdb have the dielectric tensor and Born effective charges
 
+  logical :: add_lr_part=.True.
+   ! Logical flag to not add the long range part after the interpolation.
+   ! This is mainly used for debugging
+
   logical :: symv1=.False.
    ! Activate symmetrization of v1 potentials.
 
@@ -2389,7 +2393,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
  ! Compute long-range part of the coupling potential
  v1r_lr = zero; cnt = 0
- if (db%has_dielt_zeff) then
+ if (db%has_dielt_zeff.and.db%add_lr_part) then
    do mu=1,db%natom3
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
      idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
@@ -2416,8 +2420,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
        end do
 
        ! Add the long-range part of the potential
-       ov1r(1,ifft,ispden,mu) = ov1r(1,ifft,ispden,mu) + v1r_lr(1,ifft,mu)
-       ov1r(2,ifft,ispden,mu) = ov1r(2,ifft,ispden,mu) + v1r_lr(2,ifft,mu)
+       if (db%add_lr_part) then
+         ov1r(1,ifft,ispden,mu) = ov1r(1,ifft,ispden,mu) + v1r_lr(1,ifft,mu)
+         ov1r(2,ifft,ispden,mu) = ov1r(2,ifft,ispden,mu) + v1r_lr(2,ifft,mu)
+       end if
      end do
 
      ! Remove the phase.
