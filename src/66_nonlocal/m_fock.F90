@@ -150,6 +150,9 @@ module m_fock
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution
 
+  real(dp) :: e_fock0
+    ! contribution of the Fock term to energy (computed and stored here in case of ACE)
+
   integer, allocatable :: atindx(:)
     !  atindx(natom)=index table for atoms (see gstate.f)
 

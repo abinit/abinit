@@ -538,6 +538,19 @@ contains
     end if
   end subroutine spin_terms_t_get_Langevin_Heff
 
+  subroutine spin_terms_t_Hrotate(self, Heff, S, Hrotate)
+    class(spin_terms_t), intent(inout) :: self
+    real(dp), intent(in) :: Heff(3,self%nspins), S(3,self%nspins)
+    real(dp), intent(out) :: Hrotate(3, self%nspins)
+    integer :: i
+    !$OMP PARALLEL DO private(i)
+    do i=1,self%nspins
+       ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
+       Hrotate(:,i) = self%gamma_L(i) * ( Heff(:,i) + self%gilbert_damping(i)* cross(S(:,i), Heff(:,i)))
+    end do
+    !$OMP END PARALLEL DO
+  end subroutine spin_terms_t_Hrotate
+
   ! ds/dt = f(Heff, S)
   subroutine spin_terms_t_Heff_to_dsdt(self, Heff, S, dSdt)
 

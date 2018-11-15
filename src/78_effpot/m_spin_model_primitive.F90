@@ -20,7 +20,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -297,6 +297,8 @@ contains
          uni_amplitude_list(:)=>null(), uni_direction_list(:)=>null(), &
          bi_vallist(:)=>null()
 
+    real(dp) :: uc(3,3)
+
     call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
          natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
@@ -328,7 +330,8 @@ contains
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
 
     print *, "Spin model: setting structure."
-    call spin_model_primitive_t_set_atoms(self,natoms,transpose(reshape(unitcell, [3,3])), & 
+    uc(:,:)=transpose(reshape(unitcell, [3,3]))
+    call spin_model_primitive_t_set_atoms(self,natoms,uc, & 
             & reshape(positions, [3, natoms]), &
             & nspins, &
             & index_spin, &

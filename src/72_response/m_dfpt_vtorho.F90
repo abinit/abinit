@@ -45,7 +45,7 @@ module m_dfpt_vtorho
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, &
 &                       pawrhoij_init_unpacked, pawrhoij_free_unpacked, &
-&                       pawrhoij_mpisum_unpacked
+&                       pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get
  use m_pawfgr,   only : pawfgr_type
  use m_paw_mkrho,only : pawmkrho
@@ -296,7 +296,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
- integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,spaceworld,test_dot,use_rhoijim
+ integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  logical :: paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -430,11 +430,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  if (psps%usepaw==1.and.iscf_mod>0) then
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
-     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
-     use_rhoijim = 1
-!    use_rhoijim = 0 ; if (sum(dtset%qptn(1:3)**2)>1.d-14) use_rhoijim = 1
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1,use_rhoijim=use_rhoijim)
+&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&     use_rhoijp=0,use_rhoij_=1)
    else
      pawrhoij1_unsym => pawrhoij1
      call pawrhoij_init_unpacked(pawrhoij1_unsym)

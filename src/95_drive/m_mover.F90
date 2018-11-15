@@ -132,7 +132,6 @@ contains
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
 !!  initialized= if 0 the initialisation of the gstate run is not yet finished
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
-!!  pawrhoij(natom*usepaw) <type(pawrhoij_type)>= -PAW only- atomic occupancies
 !!  occ(mband*nkpt*nsppol=occupation number for each band (usually 2) at each k point.
 !!  rhog(2,nfftf)=array for Fourier transform of electron density
 !!  rhor(nfftf,nspden)=array for electron density in electrons/bohr**3.

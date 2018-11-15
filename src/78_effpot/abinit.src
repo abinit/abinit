@@ -40,6 +40,7 @@ sources = [
     "m_spin_model.F90",
     "m_spin_model_primitive.F90",
     "m_spin_mover.F90",
+    "m_spin_mpi.F90",
     "m_spin_ncfile.F90",
     "m_spin_observables.F90",
     "m_spin_reciprocal.F90",

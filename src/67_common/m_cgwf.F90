@@ -109,6 +109,7 @@ contains
 !!  tolrde=tolerance on the ratio of differences of energies (for the line minimisation)
 !!  tolwfr=tolerance on largest wf residual
 !!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
+!!  use_subvnlx=1 if subvnlx has to be computed
 !!  wfoptalg=govern the choice of algorithm for wf optimisation
 !!   (0, 1, 10 and 11 : in the present routine, usual CG algorithm ;
 !!   (2 and 3 : use shifted square Hamiltonian)
@@ -117,9 +118,9 @@ contains
 !! OUTPUT
 !!  dphase_k(3) = change in Zak phase for the current k-point in case berryopt = 4/14,6/16,7/17 (electric (displacement) field)
 !!  resid(nband)=wf residual for new states=|(H-e)|C>|^2 (hartree^2)
-!!  subham(nband*(nband+1))=Hamiltonian expressed in sthe WFs subspace
+!!  subham(nband*(nband+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband*(nband+1)*use_subovl)=overlap matrix expressed in sthe WFs subspace
-!!  subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
+!!  subvnlx(nband*(nband+1)*use_subvnlx))=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
 !!
 !! SIDE EFFECTS
@@ -157,7 +158,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                mpw,nband,nbdblock,nkpt,nline,npw,npwarr,&
 &                nspinor,nsppol,ortalg,prtvol,pwind,&
 &                pwind_alloc,pwnsfac,pwnsfacq,quit,resid,subham,subovl,&
-&                subvnlx,tolrde,tolwfr,use_subovl,wfoptalg,zshift)
+&                subvnlx,tolrde,tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
 
  implicit none
 
@@ -165,7 +166,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer,intent(in) :: berryopt,chkexit,icg,igsc,ikpt,inonsc,isppol
  integer,intent(in) :: mband,mcg,mcgq,mgsc,mkgq,mpw,nband,nbdblock,nkpt,nline
  integer,intent(in) :: npw,nspinor,nsppol,ortalg,prtvol,pwind_alloc
- integer,intent(in) :: use_subovl,wfoptalg
+ integer,intent(in) :: use_subovl,use_subvnlx,wfoptalg
  integer,intent(in) :: quit
  real(dp),intent(in) :: cpus,tolrde,tolwfr
  character(len=*),intent(in) :: filnam_ds1
@@ -179,7 +180,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
  real(dp),intent(inout) :: dphase_k(3)
  real(dp),intent(out) :: subham(nband*(nband+1)),subovl(nband*(nband+1)*use_subovl)
- real(dp),intent(out) :: subvnlx(nband*(nband+1)*(1-gs_hamk%usepaw))
+ real(dp),intent(out) :: subvnlx(nband*(nband+1)*use_subvnlx)
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
@@ -191,7 +192,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer :: ikpt2,ikpt2f,ikptf,iline,iproc,ipw,ispinor,istwf_k,isubh,isubo,itrs
  integer :: job,mcg_q,me_distrb,natom,ncpgr,nblock,nproc_distrb,npw_k2
  integer :: optekin,paw_opt,signs,shiftbd,sij_opt,spaceComm_distrb
- integer :: use_vnl,useoverlap,wfopta10
+ integer :: useoverlap,wfopta10
  real(dp) :: chc,costh,deltae,deold,dhc,dhd,diff,dotgg,dotgp,doti,dotr
  real(dp) :: dphase_aux2,e0,e0_old,e1,e1_old,eval,gamma
  real(dp) :: lam0,lamold,root,sinth,sintn,swap,tan2th,theta,thetam
@@ -246,12 +247,6 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 !else,   one has to solve a classical eigenproblem   (H|Psi>=Lambda.|Psi>)
  gen_eigenpb=(gs_hamk%usepaw==1)
  useoverlap=0;if (gen_eigenpb) useoverlap=1
-
-!if PAW, no need to compute Vnl contributions
- use_vnl=0; if (gs_hamk%usepaw==0) use_vnl=1
- if (gen_eigenpb.and.(use_vnl==1)) then
-   MSG_BUG("Error in cgwf: contact Abinit group")
- end if
 
 !Initializations and allocations
  isubh=1;isubo=1
@@ -1074,7 +1069,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          end do
 
 
-         if (use_vnl==1) then
+         if (use_subvnlx==1) then
 !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              gvnlxc(1,ipw)=gvnlxc(1,ipw)*costh + gvnlx_direc(1,ipw)*sintn
@@ -1214,7 +1209,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    !  ======================================================================
    call mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &   isubh,isubo,mcg,mgsc,nband,nbdblock,npw,&
-&   nspinor,subham,subovl,subvnlx,use_subovl,use_vnl,me_g0)
+&   nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
 
  end do ! iblock End loop over block of bands
 
@@ -1244,11 +1239,11 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  ! Debugging ouputs
  if(prtvol==-level)then
    isubh=1
-   if (use_vnl==1) write(message,'(a)') ' cgwf: isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
-   if (use_vnl==0) write(message,'(a)') ' cgwf: isubh  subham(isubh:isubh+1)'
+   if (use_subvnlx==1) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)  subvnlx(isubh:isubh+1)'
+   if (use_subvnlx==0) write(message,'(a)') ' cgwf : isubh  subham(isubh:isubh+1)'
    do iband=1,nband
      do ii=1,iband
-       if (use_vnl==1) then
+       if (use_subvnlx==1) then
          write(message,'(i5,4es16.6)')isubh,subham(isubh:isubh+1),subvnlx(isubh:isubh+1)
        else
          write(message,'(i5,2es16.6)')isubh,subham(isubh:isubh+1)
@@ -1814,7 +1809,7 @@ end subroutine etheta
 !!  npw_k=number of plane waves at this k point
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  use_subovl=1 if the overlap matrix is not identity in WFs subspace
-!!  use_vnl= 1 if <C band,k|H|C band_prime,k> has to be computed
+!!  use_subvnlx= 1 if <C band,k|H|C band_prime,k> has to be computed
 !!  me_g0=1 if this processors has G=0, 0 otherwise
 !!
 !! OUTPUT
@@ -1830,7 +1825,7 @@ end subroutine etheta
 !!  isubo=index of current state in array subovl
 !!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
-!!  subvnlx(nband_k*(nband_k+1)*use_vnl)=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
+!!  subvnlx(nband_k*(nband_k+1)*use_subvnlx)=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
 !!
 !! PARENTS
@@ -1842,14 +1837,14 @@ end subroutine etheta
 
 subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 &                    isubh,isubo,mcg,mgsc,nband_k,nbdblock,npw_k,&
-&                    nspinor,subham,subovl,subvnlx,use_subovl,use_vnl,me_g0)
+&                    nspinor,subham,subovl,subvnlx,use_subovl,use_subvnlx,me_g0)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iblock,icg,igsc,istwf_k,mcg,mgsc,nband_k
- integer,intent(in) :: nbdblock,npw_k,nspinor,use_subovl,use_vnl,me_g0
+ integer,intent(in) :: nbdblock,npw_k,nspinor,use_subovl,use_subvnlx,me_g0
  integer,intent(inout) :: isubh,isubo
 !arrays
  real(dp),intent(in) :: cg(2,mcg)
@@ -1857,7 +1852,7 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
  real(dp),intent(inout) :: ghc(2,npw_k*nspinor),gvnlxc(2,npw_k*nspinor)
  real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
  real(dp),intent(inout) :: subovl(nband_k*(nband_k+1)*use_subovl)
- real(dp),intent(inout) :: subvnlx(nband_k*(nband_k+1)*use_vnl)
+ real(dp),intent(inout) :: subvnlx(nband_k*(nband_k+1)*use_subvnlx)
 
 !Local variables-------------------------------
 !scalars
@@ -1877,7 +1872,7 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
      do ii=1,iband
        iwavef=(ii-1)*npw_k*nspinor+icg
        chcre=zero ; chcim=zero
-       if (use_vnl==0) then
+       if (use_subvnlx==0) then
          do ipw=1,npw_k*nspinor
            cgreipw=cg(1,ipw+iwavef)
            cgimipw=cg(2,ipw+iwavef)
@@ -1926,13 +1921,13 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 !      Use the time-reversal symmetry, but should not double-count G=0
        if(istwf_k==2 .and. me_g0==1) then
          chcre = half*cg(1,1+iwavef)*ghc(1,1)
-         if (use_vnl==1) cvcre=half*cg(1,1+iwavef)*gvnlxc(1,1)
+         if (use_subvnlx==1) cvcre=half*cg(1,1+iwavef)*gvnlxc(1,1)
          ipw1=2
        else
          chcre=zero; ipw1=1
-         if (use_vnl==1) cvcre=zero
+         if (use_subvnlx==1) cvcre=zero
        end if
-       if (use_vnl==0) then
+       if (use_subvnlx==0) then
          do isp=1,nspinor
            do ipw=ipw1+(isp-1)*npw_k,npw_k*isp
              cgreipw=cg(1,ipw+iwavef)

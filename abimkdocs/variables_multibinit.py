@@ -747,11 +747,12 @@ Variable(
     vartype="integer",
     topics=['SpinDynamicsMultibinit_basic'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="SPIN CALCulate THERMO dynamics OBServables",
     text=r"""
 Flag to calculate spin thermo dynamics observables,
 including the specific heat, magnetic susceptibility, Binder U4 value.
+It's recommend to always calculate these observables.
 
 * 0 --> do not calculate.
 
@@ -822,7 +823,14 @@ Flag to run spin dynamics.
 
 * 0 --> Do not run spin dynamics.
 
-* 1 --> Run spin dynamics.
+* 1 --> Run spin dynamics with HeunP integration method.
+
+* 2 --> Run spin dynamics with Depondt-Mertens method [[cite:Depondt2009]].
+
+The HeunP method does less computation for each step,
+whereas the Depondt-Mertens method allow larger time step.
+For system with very simple interaction terms, HeunP could be faster.
+Otherwise, use Depondt-Mertens method can be more efficient.
 """,
 ),
 
@@ -1004,6 +1012,21 @@ If switched on, a series of spin dynamics calculation with temperatures from
 [[multibinit:spin_temperature_start]] to [[multibinit:spin_temperature_end]],
 with number of steps [[multibinit:spin_temperature_nstep]] will be done.
 The corresponding _spinhist.nc  file has the corresponding temperature in the filename.
+""",
+),
+
+
+Variable(
+    abivarname="spin_write_traj@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="SPIN WRITE TRAJectory to spinhist.nc file",
+    text="""
+Switch for writting of spin trajectory file. 0: off. 1 on.
+The trajectory is needed for postprocessing of correlation functions.
 """,
 ),
 

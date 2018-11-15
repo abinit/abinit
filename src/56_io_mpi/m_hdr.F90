@@ -61,7 +61,8 @@ MODULE m_hdr
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use defs_abitypes,   only : hdr_type, dataset_type
  use m_pawtab,        only : pawtab_type
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
+&                            pawrhoij_io, pawrhoij_inquire_dim
 
  implicit none
 
@@ -925,7 +926,8 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex
+ integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij
+
 ! *************************************************************************
 
  !@hdr_type
@@ -1019,10 +1021,12 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
 ! For PAW have to copy Pawrhoij ====
 ! NOTE alchemy requires a different treatment but for the moment it is not available within PAW.
  if (Hdr_in%usepaw==1) then
-   cplex = Hdr_in%Pawrhoij(1)%cplex
+   cplex_rhoij  = Hdr_in%Pawrhoij(1)%cplex_rhoij
+   qphase_rhoij = Hdr_in%Pawrhoij(1)%qphase
+   nspden_rhoij = Hdr_in%Pawrhoij(1)%nspden
    ABI_DT_MALLOC(Hdr_cp%Pawrhoij,(Hdr_in%natom))
-   call pawrhoij_alloc(Hdr_cp%Pawrhoij,cplex,Hdr_in%nspden,Hdr_in%nspinor,Hdr_in%nsppol,Hdr_in%typat,&
-&    lmnsize=Hdr_in%lmn_size(1:Hdr_in%ntypat))
+   call pawrhoij_alloc(Hdr_cp%Pawrhoij,cplex_rhoij,nspden_rhoij,Hdr_in%nspinor,Hdr_in%nsppol,Hdr_in%typat,&
+&                      lmnsize=Hdr_in%lmn_size(1:Hdr_in%ntypat),qphase=qphase_rhoij)
    call pawrhoij_copy(Hdr_in%Pawrhoij,Hdr_cp%Pawrhoij)
  end if
 
@@ -1146,7 +1150,8 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor,nspden_rhoij
+ integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor
+ integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij
  integer :: idx,isppol,ikpt,iband,ipsp
  character(len=8) :: date_time
 
@@ -1242,19 +1247,21 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  hdr%amu = amu
 
  if (psps%usepaw==1)then
-   nspden_rhoij=pawrhoij_get_nspden(nspden,nspinor,pawspnorb)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+                             nspden=nspden,spnorb=pawspnorb,cpxocc=pawcpxocc,qpt=qptn)
    ABI_DT_MALLOC(hdr%pawrhoij,(natom))
    !Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
    if (present(comm_atom)) then
      if (present(mpi_atmtab)) then
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
-&                       pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
+       call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
+&                          pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      else
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
-&                       pawtab=pawtab,comm_atom=comm_atom)
+       call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
+&                          pawtab=pawtab,comm_atom=comm_atom)
      end if
    else
-     call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat,pawtab=pawtab)
+     call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
+&                        pawtab=pawtab)
    end if
  end if
 
@@ -2366,8 +2373,8 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,cplex,iatom,ierr,index,index2,ipsp,ispden,list_size,list_size2,natom,nkpt
- integer :: npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat
+ integer :: bantot,cplex_rhoij,iatom,ierr,index,index2,ipsp,iq,iq0,ispden,list_size,list_size2
+ integer :: lmn2_size,natom,nkpt,npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat,qphase
  character(len=fnlen) :: list_tmp
 !arrays
  integer,allocatable :: list_int(:)
@@ -2591,7 +2598,8 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
    nrhoij=0
    if (master==me)then
-     cplex=hdr%pawrhoij(1)%cplex
+     cplex_rhoij=hdr%pawrhoij(1)%cplex_rhoij
+     qphase=hdr%pawrhoij(1)%qphase
      nspden=hdr%pawrhoij(1)%nspden
      do iatom=1,natom
        nrhoij=nrhoij+hdr%pawrhoij(iatom)%nrhoijsel
@@ -2599,22 +2607,27 @@ subroutine hdr_bcast(hdr,master,me,comm)
    end if
 
    call xmpi_bcast(nrhoij,master,comm,ierr)
-   call xmpi_bcast(cplex ,master,comm,ierr)
+   call xmpi_bcast(cplex_rhoij,master,comm,ierr)
+   call xmpi_bcast(qphase,master,comm,ierr)
    call xmpi_bcast(nspden,master,comm,ierr)
 
-   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex
+   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex_rhoij*qphase
    ABI_MALLOC(list_int,(list_size))
    ABI_MALLOC(list_dpr,(list_size2))
    if (master==me)then
      index=0;index2=0
      do iatom=1,natom
        nsel=hdr%pawrhoij(iatom)%nrhoijsel
+       lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
        list_int(1+index)=nsel
        list_int(2+index:1+nsel+index)=hdr%pawrhoij(iatom)%rhoijselect(1:nsel)
        index=index+1+nsel
        do ispden=1,nspden
-         list_dpr(1+index2:nsel*cplex+index2)=hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex,ispden)
-         index2=index2+nsel*cplex
+         do iq=1,qphase
+           iq0=merge(0,lmn2_size*cplex_rhoij,iq==1)
+           list_dpr(1+index2:nsel*cplex_rhoij+index2)=hdr%pawrhoij(iatom)%rhoijp(iq0+1:iq0+nsel*cplex_rhoij,ispden)
+           index2=index2+nsel*cplex_rhoij
+         end do
        end do
      end do
    end if
@@ -2625,15 +2638,20 @@ subroutine hdr_bcast(hdr,master,me,comm)
    if(master/=me)then
      index=0;index2=0
      ABI_DT_MALLOC(hdr%pawrhoij,(natom))
-     call pawrhoij_alloc(hdr%pawrhoij,cplex,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,lmnsize=hdr%lmn_size)
+     call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,&
+&                        lmnsize=hdr%lmn_size,qphase=qphase)
      do iatom=1,natom
        nsel=list_int(1+index)
+       lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
        hdr%pawrhoij(iatom)%nrhoijsel=nsel
        hdr%pawrhoij(iatom)%rhoijselect(1:nsel)=list_int(2+index:1+nsel+index)
        index=index+1+nsel
        do ispden=1,nspden
-         hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex,ispden)=list_dpr(1+index2:nsel*cplex+index2)
-         index2=index2+nsel*cplex
+         do iq=1,qphase
+           iq0=merge(0,lmn2_size*cplex_rhoij,iq==1)
+           hdr%pawrhoij(iatom)%rhoijp(iq0+1:iq0+nsel*cplex_rhoij,ispden)=list_dpr(1+index2:nsel*cplex_rhoij+index2)
+           index2=index2+nsel*cplex_rhoij
+         end do
        end do
      end do
    end if
@@ -3454,12 +3472,11 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("amu"), hdr%amu))
 
 #else
- MSG_ERROR("netcdf support support not activated")
+ MSG_ERROR("netcdf support not activated")
 #endif
 
 contains
  integer function vid(vname)
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
