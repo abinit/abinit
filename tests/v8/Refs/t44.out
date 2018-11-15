@@ -345,7 +345,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t44o_DS1_EDOS
-Number of bands in e-ph self-energy: 54
+Number of bands in e-ph self-energy sum: 54
+From bmin: 1 to bmax: 54
 Symsigma: 0 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -524,7 +525,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t44o_DS2_EDOS
-Number of bands in e-ph self-energy: 54
+Number of bands in e-ph self-energy sum: 54
+From bmin: 1 to bmax: 54
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -833,7 +835,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t44o_DS4_EDOS
-Number of bands in e-ph self-energy: 54
+Number of bands in e-ph self-energy sum: 54
+From bmin: 1 to bmax: 54
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature

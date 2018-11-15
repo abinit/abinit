@@ -162,6 +162,13 @@ MODULE m_ebands
    ! gef(0:nsppol)
    ! DOS at the Fermi level. Total, spin up, spin down
 
+   !contains
+
+   !  procedure free => edos_free         ! Free memory
+   !  procedure write => edos_write       ! Write results to file (formatted mode)
+   !  procedure print => edos_print       ! Print eDOS info to Fortran unit.
+   !  procedure ncwrite => edos_ncwrite   ! Write eDOS to netcdf file.
+
  end type edos_t
 
  public :: ebands_get_edos   ! Compute electron DOS from band structure.

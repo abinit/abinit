@@ -134,13 +134,17 @@ module m_sigmaph
   integer :: nbsum
    ! Total number of bands used in sum over states without taking into account MPI distribution.
 
+  integer :: bsum_start, bsum_stop
+   ! Fist and last band included in self-energy sum without taking into account MPI distribution.
+   ! nbsum = bsum_stop - bsum_start + 1
+
   !integer :: my_nbsum
    ! Number of bands sum over states treated by this MPI rank
 
-  !integer :: my_bstart, my_bstop
+  integer :: my_bstart, my_bstop
    ! Initial KS band index included in self-energy sum
    ! 1 if Re-Im
-   ! computed at runtime on the basis of the nk states in Sigma_{nk} if imag_only
+   ! Computed at runtime on the basis of the nk states in Sigma_{nk} if imag_only
 
   integer :: nqbz
   ! Number of q-points in the BZ.
@@ -445,7 +449,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer,parameter :: sppoldbl1=1,timrev1=1
- integer :: my_rank,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
+ integer :: my_rank,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,num_smallw,ibsum,ii,jj,im,in
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
@@ -456,7 +460,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt
- integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc,bstart,bstop,my_bstart,my_bstop,iatom
+ integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk
@@ -538,12 +542,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Initialize the wave function descriptor (read up to mband states where mband is defined by dtset%nband)
  ! For the time being, no memory distribution, each node has the full set of states.
  ! TODO: Distribute memory
- mband = dtset%mband
- my_minb = 1; my_maxb = mband
  ABI_MALLOC(nband, (nkpt, nsppol))
- ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
- ABI_MALLOC(keep_ur,(mband, nkpt ,nsppol))
- nband=mband; bks_mask=.True.; keep_ur=.False.
+ ABI_MALLOC(bks_mask,(dtset%mband, nkpt, nsppol))
+ ABI_MALLOC(keep_ur,(dtset%mband, nkpt ,nsppol))
+ nband=dtset%mband; bks_mask=.True.; keep_ur=.False.
 
  ! Notes about MPI version.
  ! If eph_task == -4:
@@ -551,8 +553,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !
  ! If eph_task == -4:
  !    Loops are MPI parallelized over q-points
- !    wavefunctions are not distributed but only states between my_bstart
- !    and my_bstop are allocated and read from file
+ !    wavefunctions are not distributed but only states between my_bstart and my_bstop
+ !    are allocated and read from file
 
  if (sigma%imag_only) then
    ! Compute the min/max KS energy to be included in the imaginary part.
@@ -571,23 +573,27 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end do
 
    ! Select indices for energy window.
-   call get_bands_from_erange(ebands, elow, ehigh, my_bstart, my_bstop)
-   call wrtout(std_out, sjoin("Allocating bands for imag part between bstart: ", itoa(my_bstart), &
-     " and my_bstop:", itoa(my_bstop)))
+   call get_bands_from_erange(ebands, elow, ehigh, sigma%my_bstart, sigma%my_bstop)
+   call wrtout(std_out, sjoin("Allocating bands for imaginary part between my_bstart: ", itoa(sigma%my_bstart), &
+     " and my_bstop:", itoa(sigma%my_bstop)))
    call wrtout(std_out, sjoin("elow:", ftoa(elow), "ehigh:", ftoa(ehigh), "[Ha]"))
-   ABI_CHECK(my_bstart <= my_bstop, "my_bstart > my_bstop")
-   bks_mask = .False.; bks_mask(my_bstart:my_bstop, : ,:) = .True.
-   bks_mask = .True. ! TODO: Have to redefine nbsum and reshift band index in sum
-   !sigma%nbsum
+   ABI_CHECK(sigma%my_bstart <= sigma%my_bstop, "my_bstart > my_bstop")
+   bks_mask = .False.; bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+   bks_mask = .True.
+   ! TODO: Have to redefine nbsum and reshift band index in sum
+   !sigma%bsum_start = sigma%my_bstart; sigma%bsum_stop = sigma%my_bstop
+   !sigma%nbsum = sigma%bsum_stop - sigma%bsum_start + 1
  else
    ! eph_task == 4 (Re + Im)
-   call xmpi_split_work(sigma%nbsum, comm, my_bstart, my_bstop, msg, ierr)
-   call wrtout(std_out, sjoin("Allocating and treating bands from bstart: ", itoa(my_bstart), &
-     " up to my_bstop:", itoa(my_bstop)))
-   if (my_bstart == sigma%nbsum + 1) then
+   call xmpi_split_work(sigma%nbsum, comm, sigma%my_bstart, sigma%my_bstop, msg, ierr)
+   if (sigma%my_bstart == sigma%nbsum + 1) then
      MSG_ERROR("sigmaph with idle processes should be tested! Decrease ncpus or increase nband")
    end if
-   bks_mask = .False.; bks_mask(my_bstart:my_bstop, : ,:) = .True.
+   sigma%my_bstart = sigma%bsum_start + sigma%my_bstart - 1
+   sigma%my_bstop = sigma%bsum_start + sigma%my_bstop - 1
+   call wrtout(std_out, sjoin("Allocating and treating bands from bstart: ", itoa(sigma%my_bstart), &
+     " up to my_bstop:", itoa(sigma%my_bstop)))
+   bks_mask = .False.; bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  end if
 
  ! Each node needs the wavefunctions for Sigma_{nk}
@@ -606,7 +612,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(wfd_istwfk, (nkpt))
  wfd_istwfk = 1
 
- call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
+ call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,dtset%mband,nband,nkpt,nsppol,bks_mask,&
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
@@ -803,7 +809,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
-     nbsum = sigma%nbsum
+     nbsum = sigma%nbsum; bsum_start = sigma%bsum_start; bsum_stop = sigma%bsum_stop
 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
@@ -821,9 +827,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Prepare Eliasberg function.
      if (sigma%gfw_nomega > 0) then
-       if (allocated(sigma%gf_nnuq)) then
-         ABI_FREE(sigma%gf_nnuq)
-       end if
+       ABI_SFREE(sigma%gf_nnuq)
        ABI_CALLOC(sigma%gf_nnuq, (nbcalc_ks, natom3, sigma%nqibz_k, 3))
      end if
 
@@ -833,7 +837,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Arrays for Debye-Waller
      if (.not. sigma%imag_only) then
-       ABI_STAT_ALLOCATE(gkq0_atm, (2, nbcalc_ks, nbsum, natom3), ierr)
+       ABI_STAT_ALLOCATE(gkq0_atm, (2, nbcalc_ks, bsum_start:bsum_stop, natom3), ierr)
        ABI_CHECK(ierr == 0, "oom in gkq0_atm")
        gkq0_atm = zero
      end if
@@ -859,17 +863,21 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Distribute q-points and bands.
      ! The distribution must be consistent with the WF distribution done with bks_mask
-     ABI_MALLOC(distrib_bq, (nbsum, sigma%nqibz_k))
+     ABI_MALLOC(distrib_bq, (bsum_start:bsum_stop, sigma%nqibz_k))
      distrib_bq = -1
 
      if (dtset%eph_task == 4) then
-       distrib_bq(my_bstart:my_bstop, :) = my_rank
+       ! Distribute over bands
+       distrib_bq(sigma%my_bstart:sigma%my_bstop, :) = my_rank
      else if (dtset%eph_task == -4) then
        if (sigma%nqibz_k >= nprocs) then
+         ! Distribute over q-points
          do iq_ibz=1,sigma%nqibz_k
            distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
          end do
        else
+         ! Distribute over bands.
+         ! TODO upgrade
          do it=1,nbsum*sigma%nqibz_k
            ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
            distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
@@ -884,9 +892,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%qint_method > 0) then
        ! Weights for Re-Im with i.eta shift.
        ! FIXME: This part is broken now. Lot of memory allocated here!
-       ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+       ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, bsum_start:bsum_stop, sigma%ephwg%nq_k))
        ! Weights for Im (tethraedron, eta --> 0)
-       ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+       ABI_MALLOC(sigma%deltaw_pm, (2 ,nbcalc_ks, natom3, bsum_start:bsum_stop, sigma%ephwg%nq_k))
 
        ! Map sigma%eph_doublegrid%dense -> ephwg%lgk%ibz
        if (sigma%use_doublegrid) then
@@ -902,7 +910,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
        ! Quick-parallelization over q-points
-       if (all(distrib_bq(1:nbsum, iq_ibz) /= my_rank)) cycle
+       if (all(distrib_bq(:, iq_ibz) /= my_rank)) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = (sum(qpt**2) < tol14) !; if (isqzero) cycle
@@ -1074,9 +1082,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(ffnlk)
          ABI_FREE(ffnl1)
          ABI_FREE(ph3d)
-         if (allocated(ph3d1)) then
-           ABI_FREE(ph3d1)
-         end if
+         ABI_SFREE(ph3d1)
        end do ! ipc (loop over 3*natom atomic perturbations)
 
        ABI_FREE(gs1c)
@@ -1088,9 +1094,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
-       do ibsum_kq=1,nbsum
+       do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
          if (distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
-         !band_sum =
          ! This is to check whether the gkk elements in the degenerate subspace break symmetry
          !if (ibsum_kq >= bstart_ks .and. ibsum_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
@@ -1109,8 +1114,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
          end if
 
-         ! h1kets_kq is the main responsible for the symmetry breaking
-         !h1kets_kq = one
          do ipc=1,natom3
            ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
            !The array eig1_k contains:
@@ -1137,7 +1140,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          !NCF_CHECK(ii)
 
          ! Save data for Debye-Waller computation (performed outside the q-loop)
-         ! gkq_nu(2, nbcalc_ks, nbsum, natom3)
+         ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (isqzero .and. .not. sigma%imag_only) then
            gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
          end if
@@ -1372,7 +1375,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start")
        call xmpi_sum(gkq0_atm, comm, ierr)
 
-       ABI_MALLOC(gdw2_mn, (nbsum, nbcalc_ks))
+       ABI_MALLOC(gdw2_mn, (bsum_start:bsum_stop, nbcalc_ks))
        ABI_MALLOC(tpp_red, (natom3, natom3))
 
        ! Integral over IBZ(k).
@@ -1421,10 +1424,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
            ! Sum over bands and add (static) DW contribution for the different temperatures.
-           do ibsum=1,nbsum
+           do ibsum=bsum_start, bsum_stop
              do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
-               ! gkq0_atm(2, nbcalc_ks, nbsum, natom3)
+               ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
                ! previous version
                gdw2_mn(ibsum, ib_k) = zero
                do ip2=1,natom3
@@ -1444,7 +1447,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end do ! ibsum
            end do ! ib_k
 
-           do ibsum=1,nbsum
+           do ibsum=bsum_start,bsum_stop
              eig0mk = ebands%eig(ibsum, ik_ibz, spin)
 
              do ib_k=1,nbcalc_ks
@@ -1730,6 +1733,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! This value depends on the kind of calculation as imag_only can use
  ! an energy window aroud the Fermi level.
  new%nbsum = dtset%mband
+ new%bsum_start = 1
+ new%bsum_stop = new%bsum_start + new%nbsum - 1
 
  gap_err = get_gaps(ebands, gaps)
  call gaps_print(gaps, unit=std_out)
@@ -2091,8 +2096,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%use_doublegrid = .True.
  end if
 
+ ! TODO: Should recheck the case bstart > 1 as I got weird results.
  ! bstart and new%bsum select the band range.
- bstart = 1
+ bstart = new%bsum_start
  if (new%qint_method > 0) then
    if (new%use_doublegrid) then
      ! Double-grid technique from ab-initio energies or star-function interpolation.
@@ -2531,12 +2537,8 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
 
 ! *************************************************************************
 
- if (allocated(self%qibz_k)) then
-   ABI_FREE(self%qibz_k)
- end if
- if (allocated(self%wtq_k)) then
-   ABI_FREE(self%wtq_k)
- end if
+ ABI_SFREE(self%qibz_k)
+ ABI_SFREE(self%wtq_k)
 
  ! Prepare weights for BZ(k) integration
  if (self%qint_method > 0) call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol, comm)
@@ -2986,8 +2988,8 @@ subroutine sigmaph_print(self, dtset, unt)
  if (unt == dev_null) return
 
  ! Write dimensions
- write(unt,"(a)")sjoin("Number of bands in e-ph self-energy:", itoa(self%nbsum))
- !if (self%imag_only) then write(unt,"(a)")sjoin("From bmin:", itoa(), "to bmax:", itoa())
+ write(unt,"(a)")sjoin("Number of bands in e-ph self-energy sum:", itoa(self%nbsum))
+ write(unt,"(a)")sjoin("From bmin:", itoa(self%bsum_start), "to bmax:", itoa(self%bsum_stop))
  write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:", itoa(self%timrev))
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"
@@ -3081,7 +3083,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  call cwtime(cpu,wall,gflops,"start")
  ABI_MALLOC(tmp_deltaw_pm,(3,sigma%ephwg%nq_k, 2))
  ! loop over bands to sum
- do ibsum_kq=1,sigma%nbsum
+ do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
   ! loop over phonon modes
   do nu=1,natom3
     ! loop over bands in the self-energy
