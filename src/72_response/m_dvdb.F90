@@ -1316,13 +1316,11 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
    ABI_FREE(v1scf)
    ! Print progress.
-   if (db_iqpt < 20) then
+   if (mod(db_iqpt,10)==1) then
      call cwtime(cpu, wall, gflops, "stop")
      write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
-   else if (db_iqpt == 20) then
-     call wrtout(std_out, "...")
-  end if
+   end if
  end do
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
