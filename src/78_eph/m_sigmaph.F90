@@ -2726,7 +2726,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    write(ab_out,"(a)")" "
  end if
 
- do it=1,min(self%ntemp, max_ntemp)
+ do it=1,self%ntemp
    ! Write header.
    if (self%nsppol == 1) then
      write(ab_out,"(3a,f4.1,a)") &
@@ -2775,33 +2775,35 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
        kse_cond = kse; qpe_cond = qpe; qpe_oms_cond = qpe_oms
      end if
      ! FIXME
-     if (self%imag_only) then
-       invsig2fmts = Time_Sec * 1e+15 / two
-       tau = 999999.0_dp
-       if (abs(aimag(sig0c)) > tol16) tau = invsig2fmts / abs(aimag(sig0c))
-       tau = min(tau, 999999.0_dp)
-       if (self%frohl_model == 0) then
-         ! B    eKS     SE2(eKS)  TAU(eKS)  DeKS
-         write(ab_out, "(i4,2(f8.3,1x),f8.1,1x,f8.3)") &
-           band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
+     if (it <= max_ntemp) then
+       if (self%imag_only) then
+         invsig2fmts = Time_Sec * 1e+15 / two
+         tau = 999999.0_dp
+         if (abs(aimag(sig0c)) > tol16) tau = invsig2fmts / abs(aimag(sig0c))
+         tau = min(tau, 999999.0_dp)
+         if (self%frohl_model == 0) then
+           ! B    eKS     SE2(eKS)  TAU(eKS)  DeKS
+           write(ab_out, "(i4,2(f8.3,1x),f8.1,1x,f8.3)") &
+             band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
+         else
+           ! B    eKS     SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS
+           write(ab_out, "(i4,2(f8.3,1x),2(f8.1,1x),f8.3)") &
+             band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, aimag(sig0fr) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
+         end if
        else
-         ! B    eKS     SE2(eKS)  SF2(eKS)  TAU(eKS)  DeKS
-         write(ab_out, "(i4,2(f8.3,1x),2(f8.1,1x),f8.3)") &
-           band_ks, kse * Ha_eV, aimag(sig0c) * Ha_eV, aimag(sig0fr) * Ha_eV, tau, (kse - kse_prev) * Ha_eV
-       end if
-     else
-       if (self%frohl_model == 0) then
-         ! B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-         write(ab_out, "(i4, 10(f8.3,1x))") &
-           band_ks, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
-           real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
-           fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
-       else
-         ! B    eKS     eQP    eQP-eKS   SE1(eKS)  SF1(eKS) SE2(eKS) SF2(eKS) Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-         write(ab_out, "(i4, 12(f8.3,1x))") &
-           band_ks, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
-           real(sig0c) * Ha_eV, real(sig0fr) * Ha_eV, aimag(sig0c) * Ha_eV, aimag(sig0fr) * Ha_eV, real(zc), &
-           fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+         if (self%frohl_model == 0) then
+           ! B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+           write(ab_out, "(i4, 10(f8.3,1x))") &
+             band_ks, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
+             real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
+             fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+         else
+           ! B    eKS     eQP    eQP-eKS   SE1(eKS)  SF1(eKS) SE2(eKS) SF2(eKS) Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+           write(ab_out, "(i4, 12(f8.3,1x))") &
+             band_ks, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
+             real(sig0c) * Ha_eV, real(sig0fr) * Ha_eV, aimag(sig0c) * Ha_eV, aimag(sig0fr) * Ha_eV, real(zc), &
+             fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+         end if
        end if
      end if
      if (ibc > 1) then
@@ -2818,21 +2820,23 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    end do ! ibc
 
    ! Print KS and QP gaps.
-   if (.not. self%imag_only) then
-     if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
-       write(ab_out, "(a)")" "
-       write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
-         "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-       write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (OTMS: ",qpoms_gaps(it) * Ha_eV, ")"
-       write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
-           " (OTMS: ",(qpoms_gaps(it) - ks_gap) * Ha_eV, ")"
-       write(ab_out, "(a)")" "
-     end if
-   else
-     if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
-       write(ab_out, "(a)")" "
-       write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-       write(ab_out, "(a)")" "
+   if (it <= max_ntemp) then
+     if (.not. self%imag_only) then
+       if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+         write(ab_out, "(a)")" "
+         write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
+           "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+         write(ab_out, "(2(a,f8.3),a)")" QP gap: ",qp_gaps(it) * Ha_eV," (OTMS: ",qpoms_gaps(it) * Ha_eV, ")"
+         write(ab_out, "(2(a,f8.3),a)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV,&
+             " (OTMS: ",(qpoms_gaps(it) - ks_gap) * Ha_eV, ")"
+         write(ab_out, "(a)")" "
+       end if
+     else
+       if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+         write(ab_out, "(a)")" "
+         write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+         write(ab_out, "(a)")" "
+       end if
      end if
    end if
 
