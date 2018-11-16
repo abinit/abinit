@@ -85,8 +85,10 @@ module libxc_functionals
 !Private functions
  private :: libxc_functionals_constants_load    ! Load libXC constants from C headers
  private :: libxc_functionals_set_tb09          ! Compute c parameter for Tran-Blaha 2009 functional
+#ifdef HAVE_FC_ISO_C_BINDING
  private :: xc_char_to_c                        ! Convert a string from Fortran to C
  private :: xc_char_to_f                        ! Convert a string from C to Fortran
+#endif
 
 !Public constants (use libxc_functionals_constants_load to init them)
  integer,public,save :: XC_FAMILY_UNKNOWN       = -1
@@ -657,12 +659,12 @@ end subroutine libxc_functionals_init
    xc_func%hyb_mixing=zero
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
-   if (associated(xc_func%conf)) then
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+   if (associated(xc_func%conf)) then
      call xc_func_end(xc_func%conf)
      call xc_func_type_free(c_loc(xc_func%conf))
-#endif
    end if
+#endif
 
  end do
 

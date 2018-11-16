@@ -69,8 +69,10 @@ module m_libpaw_libxc_funcs
 !Private functions
  private :: libpaw_libxc_constants_load    ! Load libXC constants from C headers
  private :: libpaw_libxc_set_tb09          ! Compute c parameter for Tran-Blaha 2009 functional
+#ifdef LIBPAW_ISO_C_BINDING
  private :: char_f_to_c                    ! Convert a string from Fortran to C
  private :: char_c_to_f                    ! Convert a string from C to Fortran
+#endif
 
 !Public constants (use libpaw_libxc_constants_load to init them)
  integer,public,save :: LIBPAW_XC_FAMILY_UNKNOWN       = -1
@@ -639,12 +641,12 @@ end subroutine libpaw_libxc_init
    xc_func%hyb_mixing=zero
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
-   if (associated(xc_func%conf)) then
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
+   if (associated(xc_func%conf)) then
      call xc_func_end(xc_func%conf)
      call libpaw_xc_func_type_free(c_loc(xc_func%conf))
-#endif
    end if
+#endif
 
  end do
 
@@ -748,7 +750,7 @@ subroutine libpaw_libxc_getrefs(xcrefs,xc_functional)
  character(len=*),intent(out) :: xcrefs(:)
  type(libpaw_libxc_type),intent(in) :: xc_functional
 !Local variables-------------------------------
-#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined LIBPAW_HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer(C_INT) :: iref_c
  character(kind=C_CHAR,len=1),pointer :: strg_c
 #endif
@@ -757,7 +759,7 @@ subroutine libpaw_libxc_getrefs(xcrefs,xc_functional)
 
  xcrefs(:)=''
 
-#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined LIBPAW_HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  iref_c=0
  do while (iref_c>=0.and.iref_c<size(xcrefs))
    call c_f_pointer(libpaw_xc_get_info_refs(xc_functional%conf,iref_c),strg_c)
