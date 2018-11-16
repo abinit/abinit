@@ -1636,7 +1636,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop
  integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz
- integer :: isym_k, trev_k
+ integer :: isym_k, trev_k, mband
  integer :: ip,npoints,skw_cplex, edos_intmeth
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
@@ -1670,6 +1670,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
+ mband = dtset%mband
 
  ! Broadening parameter from zcut
  new%ieta = + j_dpc * dtset%zcut
@@ -1731,14 +1732,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      new%nbcalc_ks(:,spin) = dtset%bdgw(2,1:new%nkcalc,spin) - dtset%bdgw(1,1:new%nkcalc,spin) + 1
    end do
 
-   ! Consistency check on bdgw and dtset%mband
+   ! Consistency check on bdgw and mband
    ierr = 0
    do spin=1,new%nsppol
      do ikcalc=1,new%nkcalc
-       if (dtset%bdgw(2,ikcalc,spin) > dtset%mband) then
+       if (dtset%bdgw(2,ikcalc,spin) > mband) then
          ierr = ierr + 1
          write(msg,'(a,2i0,2(a,i0))')&
-          "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband = ",dtset%mband
+          "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband = ",mband
          MSG_WARNING(msg)
        end if
      end do
@@ -1790,7 +1791,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
            new%bstart_ks(ik,spin) = max(val_indeces(ik,spin) - gw_qprange, 1)
-           bstop = min(val_indeces(ik,spin) + gw_qprange, dtset%mband)
+           bstop = min(val_indeces(ik,spin) + gw_qprange, mband)
            new%nbcalc_ks(ik,spin) = bstop - new%bstart_ks(ik,spin) + 1
          end do
        end do
@@ -1800,7 +1801,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        new%bstart_ks = 1
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
-           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) - gw_qprange, dtset%mband)
+           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) - gw_qprange, mband)
          end do
        end do
      end if
@@ -1972,7 +1973,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    if (all(dtset%sigma_bsum_range /= 0)) then
      new%bsum_start = max(dtset%sigma_bsum_range(1), 1)
-     new%bsum_stop = min(dtset%sigma_bsum_range(2), dtset%mband)
+     new%bsum_stop = min(dtset%sigma_bsum_range(2), mband)
      new%nbsum = new%bsum_stop - new%bsum_start + 1
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    else
@@ -1994,26 +1995,26 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! Select indices for energy window.
      call wrtout(std_out, sjoin("elow:", ftoa(elow), "ehigh:", ftoa(ehigh), "[Ha]"))
      call get_bands_from_erange(ebands, elow, ehigh, new%bsum_start, new%bsum_stop)
-     !new%bsum_stop = new%bsum_stop + 3
+     !new%bsum_stop = new%bsum_stop + 11
      ABI_CHECK(new%bsum_start <= new%bsum_stop, "bsum_start > bsum_bstop")
      new%nbsum = new%bsum_stop - new%bsum_start + 1
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    end if
 
-   ! FIXME: Uncomment this line to debug.
+   ! Uncomment this part to use all states to debug.
    !if (dtset%useria == 567) then
-   !call wrtout(ab_out, "Setting bstart to 1 and bstop to nband for debuggin purpose")
-   call wrtout(std_out, "Setting bstart to 1 and bstop to nband for debuggin purpose")
-   new%nbsum = dtset%mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
-   new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+   !call wrtout(ab_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+   !call wrtout(std_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+   !new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
+   !new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    !end if
 
  else
    ! Re + Im
-   new%bsum_start = 1; new%bsum_stop = dtset%mband
+   new%bsum_start = 1; new%bsum_stop = mband
    if (all(dtset%sigma_bsum_range /= 0)) then
      new%bsum_start = max(dtset%sigma_bsum_range(1), 1)
-     new%bsum_stop = min(dtset%sigma_bsum_range(2), dtset%mband)
+     new%bsum_stop = min(dtset%sigma_bsum_range(2), mband)
    end if
    new%nbsum = new%bsum_stop - new%bsum_start + 1
    ! Split bands among procs.
@@ -2097,7 +2098,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    !TODO: mband should be min of nband
    band_block = [1, ebands%mband]
-   !band_block = [new%bsum_start, new%%bsum_stop]
+   ! TODO: Now we should use this one. Note that we start from 1 because we need to compute eF.
+   !band_block = [1, new%bsum_stop]
    intp_kptrlatt(:,1) = [ebands%kptrlatt(1,1)*dtset%bs_interp_kmult(1), 0, 0]
    intp_kptrlatt(:,2) = [0, ebands%kptrlatt(2,2)*dtset%bs_interp_kmult(2), 0]
    intp_kptrlatt(:,3) = [0, 0, ebands%kptrlatt(3,3)*dtset%bs_interp_kmult(3)]

@@ -996,7 +996,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
  mgfft = maxval(ngfft(1:3))
 
  ABI_MALLOC(new%gh1c, (2, new%mpw*dtset%nspinor, 3))
- ABI_MALLOC(new%gs1c, (2, new%mpw*dtset%nspinor, 3*psps%usepaw))
+ ABI_MALLOC(new%gs1c, (2, new%mpw*dtset%nspinor, 3))
 
  do idir=1,3
    ! ==== Initialize most of the Hamiltonian (and derivative) ====
@@ -1132,7 +1132,7 @@ subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
 
 !Arguments ------------------------------------
 !scalars
- class(ddkop_t),target,intent(inout) :: self
+ class(ddkop_t),intent(inout) :: self
  integer,intent(in) :: mpw, npw_k, nspinor
  type(MPI_type),intent(in) :: mpi_enreg
  real(dp),intent(in) :: eig0nk
@@ -1151,7 +1151,6 @@ subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
 !arrays
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
- real(dp), ABI_CONTIGUOUS pointer :: gs1c(:,:)
 
 !************************************************************************
  self%eig0nk = eig0nk
@@ -1165,10 +1164,8 @@ subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
    eshift = self%eig0nk - self%dfpt_sciss
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
-     gs1c => null()
-     if (self%gs_hamkq(idir)%usepaw == 1) gs1c => self%gs1c(:,:,idir) ! Else NAG complains if zero-sized
      call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
-       grad_berry,gs1c,self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
+       grad_berry,self%gs1c(:,:,idir),self%gs_hamkq(idir),gvnlx1,idir,self%ipert,eshift,mpi_enreg,optlocal0, &
        optnl,opt_gvnlx1,self%rf_hamkq(idir),sij_opt,tim_getgh1c,usevnl0)
    end do
 
