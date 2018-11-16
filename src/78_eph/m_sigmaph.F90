@@ -1980,8 +1980,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! Compute the min/max KS energy to be included in the imaginary part.
      ! ifc%omega_minmax(2) comes froms the coarse Q-mesh of the DDB so increase it by 10%.
      ! Also take into account Lorentzian shape if zcut is used.
+     ! In principle this should be large enough but it seems that the linewidths in v8[160] are slightly affected.
      elow = huge(one); ehigh = - huge(one)
      wmax = 1.1_dp * ifc%omega_minmax(2) + five * dtset%zcut
+     !wmax = 1.1_dp * ifc%omega_minmax(2) + 20 * dtset%zcut
      do ikcalc=1,new%nkcalc
        ik_ibz = new%kcalc2ibz(ikcalc, 1)
        do spin=1,new%nsppol
@@ -2001,12 +2003,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    end if
 
-   ! Uncomment this part to use all states to debug.
    !if (dtset%useria == 567) then
+   ! TODO Uncomment this part to use all states to debug.
    !call wrtout(ab_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
-   !call wrtout(std_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
-   !new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
-   !new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+   call wrtout(std_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+   new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
+   new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    !end if
 
  else
@@ -2098,7 +2100,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    !TODO: mband should be min of nband
    band_block = [1, ebands%mband]
-   ! TODO: Now we should use this one. Note that we start from 1 because we need to compute eF.
+   ! TODO: Now we should use this band range.
+   ! Note that we start from 1 because we are gonna use ebands_dense to compute the Fermi level.
    !band_block = [1, new%bsum_stop]
    intp_kptrlatt(:,1) = [ebands%kptrlatt(1,1)*dtset%bs_interp_kmult(1), 0, 0]
    intp_kptrlatt(:,2) = [0, ebands%kptrlatt(2,2)*dtset%bs_interp_kmult(2), 0]
@@ -2113,6 +2116,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! TODO: Should recheck the case bstart > 1 as I got weird results.
  ! bstart and new%bsum select the band range.
+ ! Here we compute the weights only for the states included in the sum
  bstart = new%bsum_start
  if (new%qint_method > 0) then
    if (new%use_doublegrid) then
