@@ -32,7 +32,6 @@
  use_gemm_nonlop 1 # test nonlop with BLAS
  fftalg 402
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

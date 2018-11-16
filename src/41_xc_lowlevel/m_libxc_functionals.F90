@@ -52,7 +52,7 @@
 module libxc_functionals
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
 !ISO C bindings are mandatory
@@ -330,13 +330,6 @@ contains
 
  subroutine libxc_functionals_constants_load()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_constants_load'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -394,13 +387,6 @@ contains
 !! SOURCE
 
  function libxc_functionals_check(stop_if_error)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_check'
-!End of the abilint section
 
  implicit none
 
@@ -473,14 +459,6 @@ contains
 !! SOURCE
 
  subroutine libxc_functionals_init(ixc,nspden,xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_init'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -646,13 +624,6 @@ end subroutine libxc_functionals_init
 
  subroutine libxc_functionals_end(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_end'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -719,13 +690,6 @@ end subroutine libxc_functionals_init
 !! SOURCE
 
  function libxc_functionals_fullname(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_fullname'
-!End of the abilint section
 
  implicit none
 
@@ -802,13 +766,6 @@ end subroutine libxc_functionals_init
 
  function libxc_functionals_family_from_id(xcid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_family_from_id'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -852,13 +809,6 @@ end function libxc_functionals_family_from_id
 !! SOURCE
 
  function libxc_functionals_getid(xcname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_getid'
-!End of the abilint section
 
  implicit none
 
@@ -914,13 +864,6 @@ end function libxc_functionals_getid
 
  function libxc_functionals_ixc(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_ixc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -959,13 +902,6 @@ end function libxc_functionals_ixc
 !! SOURCE
 
  function libxc_functionals_isgga(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_isgga'
-!End of the abilint section
 
  implicit none
 
@@ -1010,13 +946,6 @@ end function libxc_functionals_isgga
 !! SOURCE
 
 function libxc_functionals_ismgga(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_ismgga'
-!End of the abilint section
 
  implicit none
 
@@ -1066,13 +995,6 @@ end function libxc_functionals_ismgga
 
  function libxc_functionals_is_hybrid(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_is_hybrid'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1117,13 +1039,6 @@ end function libxc_functionals_is_hybrid
 
 function libxc_functionals_has_kxc(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_has_kxc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1167,13 +1082,6 @@ end function libxc_functionals_has_kxc
 !! SOURCE
 
 function libxc_functionals_nspin(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_nspin'
-!End of the abilint section
 
  implicit none
 
@@ -1239,13 +1147,6 @@ end function libxc_functionals_nspin
 
  subroutine libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho,exc,vxc,&
 &           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_tb09_c,xc_functionals) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_getvxc'
-!End of the abilint section
 
  implicit none
 
@@ -1557,13 +1458,6 @@ end subroutine libxc_functionals_getvxc
 
 subroutine libxc_functionals_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_get_hybridparams'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1656,13 +1550,6 @@ end subroutine libxc_functionals_get_hybridparams
 !! SOURCE
 
 subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_set_hybridparams'
-!End of the abilint section
 
  implicit none
 
@@ -1779,13 +1666,6 @@ end subroutine libxc_functionals_set_hybridparams
 !! SOURCE
 
 function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_gga_from_hybrid'
-!End of the abilint section
 
  implicit none
 
@@ -1920,14 +1800,6 @@ end function libxc_functionals_gga_from_hybrid
 
  subroutine libxc_functionals_set_tb09(npts,nspden,rho,grho2,xc_tb09_c,xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libxc_functionals_set_tb09'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2027,13 +1899,6 @@ end subroutine libxc_functionals_set_tb09
 function xc_char_to_c(f_string) result(c_string)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_char_to_c'
-!End of the abilint section
-
  character(len=*),intent(in) :: f_string
  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
 !Local variables -------------------------------
@@ -2077,13 +1942,6 @@ end function xc_char_to_c
 subroutine xc_char_to_f(c_string,f_string)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xc_char_to_f'
-!End of the abilint section
-
  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
  character(len=*),intent(out) :: f_string
 !Local variables -------------------------------
@@ -2102,6 +1960,5 @@ end subroutine xc_char_to_f
 
 !----------------------------------------------------------------------
 
-
-end module
+end module libxc_functionals
 !!***

@@ -31,22 +31,15 @@
 !! abi_zgemm_2d
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
-!!   
+!!
 !!
 !! PARENTS
 !!
 !! SOURCE
 
  subroutine abi_zgemm_2d(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zgemm_2d'
-
-!End of the abilint section
 
  implicit none
 
@@ -101,12 +94,12 @@ end subroutine abi_zgemm_2d
 !! abi_d2zgemm
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
-!!   
+!!
 !!
 !! PARENTS
-!!      
+!!
 !!
 !! CHILDREN
 !!
@@ -114,12 +107,6 @@ end subroutine abi_zgemm_2d
 !!
 subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 &       x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2zgemm'
-!End of the abilint section
 
  implicit none
 
@@ -177,7 +164,7 @@ subroutine abi_d2zgemm(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC,&
 #ifdef DEV_LINALG_TIMING
  call timab(TIMAB_XGEMM,2,tsec)
 #endif
-    
+
 end subroutine abi_d2zgemm
 !!***
 

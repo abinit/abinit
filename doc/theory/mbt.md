@@ -5,8 +5,8 @@ authors: MG, MS
 # Many-Body Theory in ABINIT  
 
 The aim of this section is to introduce the Green's function formalism, the
-concept of self-energy and the set of coupled equations proposed by Hedin
-whose self-consistent solution, in principle, gives the exact Green's function
+concept of self-energy and the set of coupled equations proposed by Hedin. 
+The self-consistent solution of these Hedin equations, in principle, gives the exact Green's function
 of the interacting system.
 
 We mainly focus on the aspects of the theory that
@@ -20,27 +20,24 @@ theory, see for example [[cite:Abrikosov1975]], [[cite:Fetter1971]], [[cite:Matt
   
 The time-ordered Green's function $G(12)$, also called the propagator, defines
 the probability amplitude for the propagation of an added or removed electron
-in a many-body system. Since the probability amplitude is simply given by the
-overlap between the final and the initial state, $G(12)$ can be expressed as
+in a many-body system. 
+Since the probability amplitude is simply given by the overlap between the final and the initial state, $G(12)$ can be expressed as
 
 \begin{equation} 
 G(1,2) = -i\left\langle \Theta_0^N \left| \hat{T} \left[
 \hat{\psi}(1)\hat{\psi}^{\dagger}(2) \right] \right| \Theta_0^N \right\rangle,
 \end{equation} 
 
-where the matrix element is taken in the Heisenberg representation, $\hat{T}$ is the time-ordering 
-operator and the creation and annihilation field operators act on the ground state of the $N$-electron many-
-body Hamiltonian (the conventions used in the equations are explained in the section on [notation](#notations). 
-The propagator contains only part of the full
-information carried by the many-body wave function, but it includes the
-relevant part for the study of charged excitations. Also, any single-particle
-operator acting on the system can be evaluated once the Green's function is known.
+where the matrix element is taken in the Heisenberg representation. 
+$\hat{T}$ is the time-ordering operator and the creation and annihilation field operators act on the ground state of the $N$-electron many-body Hamiltonian. 
+The conventions used in the equations are explained in the section on [notation](#notations). 
+The Green's function contains only a part of the full information carried by the many-body wave function, but it includes the
+relevant part for the study of charged excitations. 
+In addition, any single-particle operator acting on the system can be evaluated once the Green's function is known.
 
-Useful physical information about the charged excitation energies of the many-
-body system can be obtained by expressing the propagator in the so-called
+Useful physical information about the charged excitation energies of the many-body system can be obtained by expressing the propagator in the so-called
 Lehmann representation. [[cite:Abrikosov1975]], [[cite:Fetter1971]], [[cite:Mattuck1976]]. 
-To this purpose it is useful to introduce the following notation to denote the
-charged excitation energies of the $N$-electron system [[cite:Onida2002]]:
+To this purpose it is useful to introduce the following notation to denote the charged excitation energies of the $N$-electron system [[cite:Onida2002]]:
 
 \begin{equation} 
 \varepsilon_i = 
@@ -52,8 +49,9 @@ E_i^{(N+1)} - E_0^N & \text{if}\,\varepsilon_i > \mu \\\ E_0^N-E_i^{(N-1)} & \te
 where $E_0^N$  is the ground state energy of
 the electron system with $N$ electrons, and $i$ is the set of quantum numbers
 labeling the excited states with $N \pm 1$ electrons. Finally, $\mu$ is the
-chemical potential of the system. Other important quantities that will be used
-in the following are the so-called Lehmann amplitudes defined, in the Schrodinger representation, by 
+chemical potential of the system. 
+Other important quantities that will be used in the following are the so-called Lehmann amplitudes. 
+In the Schrodinger representation, they are defined by 
 
 \begin{equation} \label{eq:Lehmann_amplitudes}
 \Psi_i (\rr) \equiv \begin{cases} \langle\Theta_0^N|\hat\psi(\rr)
@@ -68,7 +66,7 @@ G (\rr_1,\rr_2;\ww) = \sum_i \frac{\Psi_i(\rr_1)\Psi_i^\*(\rr_2)} {\ww-\ee_i
 +i\eta\,\sign(\ee_i-\mu)} \qquad\eta \rightarrow 0^+, 
 \end{equation} 
 
-makes it clear that, in the frequency domain, the time-ordered Green's function
+makes clear that, in the frequency domain, the time-ordered Green's function
 contains the complete excitation spectrum corresponding to excitations of an 
 $(N-1)$-particle and an $(N+1)$-particle system. Hence, locating the poles
 of the Green's function in the complex plane provides the information needed
@@ -78,7 +76,7 @@ schematic representation of the location of the poles of the time-ordered Green'
 
 ![](mbt_assets/poles_G.svg)
 
-Where the ionisation potential is the energy required to remove an electron
+The ionization potential is the energy required to remove an electron
 from the system, the electron affinity to add an electron, and the chemical
 potential is typically taken to be in the middle of the gap. For a metallic
 system these energies are all equal to each other, and there is no gap.
@@ -89,13 +87,14 @@ The Dyson equation
 G(12) = \Go(12) + \int \Go(13)\,\Sigma(34)\,G(42)\dd34. 
 \end{equation} 
 
-establishes a connection between the fully interacting $G$ and the propagator, $\Go$, of an approximate
+establishes the connection between the fully interacting $G$ and $\Go$, the Green's  of an approximate
 non-interacting system through a (non-local, non-Hermitian and time dependent)
 potential called the self-energy, $\Sigma$. Since $\Go$ is supposed to be known
 exactly, the problem of calculating $G (12)$ has now been reduced to the calculation of the self-energy.
 
+
 The self-energy is not a mere mathematical device used in a roundabout way to
-obtain $G$ but is has a direct physical meaning. The knowledge of the self-energy operator, 
+obtain $G$, but it has a direct physical meaning. The knowledge of the self-energy operator, 
 allows one to describe the quantum-mechanical state of a
 renormalized electron in the many-body system by solving the quasiparticle
 (QP) equation [[cite:Onida2002]]:
@@ -105,9 +104,9 @@ renormalized electron in the many-body system by solving the quasiparticle
 \Bigr] \Psi(\rr_1) + \int\,\Sigma(\rr_1,\rr_2;\ee^\QP)\Psi(\rr_2)\dd\rr_2 = \ee^\QP \Psi(\rr_1) 
 \end{equation}  
 
-The QP eigenstates so obtained can be used
+The QP eigenstates obtained in this way can be used
 to construct $G$ according to the Lehmann representation. Note that the QP
-equation departs from the Kohn Sham equation since the QP eigenvectors and
+equation differs from the Kohn Sham equation since the QP eigenvectors and
 eigenvalues do have a direct physical meaning: they can be used to obtain both
 the charge density of the interacting system and to describe the properties of charged excitations.
 
@@ -144,7 +143,7 @@ The pentagon sketched in the figure below shows how the various physical quantit
 
 ![](mbt_assets/hedin_pentagon.svg)
 
-The polarization function renormalises the bare interaction resulting in the
+The polarization function renormalizes the bare interaction resulting in the
 screened interaction $W (12)$. The screened interaction, $W (12)$, the many-
 body propagator $G (12)$, and the vertex function, $\Gamma(12;3)$, which describe the
 interactions between virtual hole and electron excitations [[cite:Onida2002]], are
@@ -258,7 +257,7 @@ is the so-called renormalization factor.
 This corresponds to making a Taylor
 expansion of the self-energy matrix element around the KS energy, as depicted below.
 
-![](mbt_assets/self_energy_taylor.svg)
+![](mbt_assets/self_energy_taylor.png)
 
 <a id="RPA_Fourier_space"></a>
 ## The RPA polarizability in Fourier space
@@ -290,7 +289,8 @@ elements) is determined by [[ecuteps]].
 
 The oscillators are ubiquitous in the Many-Body part of ABINIT and their calculation 
 represents one of the most CPU intensive part of the execution. For this reason we 
-devote [[#6|section 6]] to the discussion of some important technical details concerning their computation.
+devote a separate [section](#notes-on-the-calculation-of-the-oscillator-matrix-elements)
+ to the discussion of some important technical details concerning their computation.
 
 In principle, the set of $\qq$-points in the screening matrix is given by all
 the possible differences between two crystalline momenta of the wavefunctions
@@ -392,13 +392,13 @@ The computational effort for the evaluation of the RPA polarizability with the
 Adler-Wiser expression scales linearly with the number of frequencies computed
 ([[nfreqre]] and [[nfreqim]]), albeit with a large prefactor which increases
 with the fourth power of the number of atoms. The main reason for the linear
-scaling is that the frequency dependence cannot be factorised out of the sum
+scaling is that the frequency dependence cannot be factorized out of the sum
 over transitions, hence a distinct and expensive summation over transitions
 has to be performed separately for each frequency.
 
 This linear scaling represents a serious problem, especially when many
 frequencies are wanted, for example when computing QP corrections within the
-contour deformation technique described in the [[lesson:gw2|second lesson]] of the GW tutorial.
+contour deformation technique described in the [[tutorial:gw2|GW2 tutorial]].
 
 This computational bottleneck can be removed, under certain circumstances, by
 employing an efficient algorithm proposed in [[cite:Miyake2000]] and subsequently
@@ -525,7 +525,10 @@ numerically (see [[nomegasrd]] and [[omegasrdmax]]).
 
 Note that here, in contrast to the exchange term, the sum over the band index
 $n$ should extend up to infinity although in practice only a finite number of
-states can be used (specified by [[nband]]).
+states can be used (specified by [[nband]]). 
+It is also advised to take special care of the convergence with respect to [[nband]] and [[ecuteps]]. 
+In a GW calculation these two parameters tend not to be independent. 
+Converging one at a low value of the other and vice versa can easily lead to under converged results [[cite:Setten2017]].
 
 ## Plasmon-pole models
   
@@ -582,7 +585,7 @@ over the contour depicted in red in the figure below. The integral over real
 frequency is traded with an integration along the imaginary axis plus
 contributions coming from the poles of the integrand lying inside the contour:
 
-![](mbt_assets/contour.svg)
+![](mbt_assets/contour.png)
 
 \begin{equation}
 \label{eq:GW_CD}

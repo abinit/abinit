@@ -2,6 +2,7 @@
 description: How to set parameters related to the exchange and correlation functionals
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters related to the exchange and correlation functionals with the ABINIT package.
 
@@ -72,5 +73,5 @@ D3(Becke-Johnson)), Silvestrelli.
 
 ## Tutorials
 
-* The [[lesson:base2]] deals with the H2 molecule: convergence studies, LDA versus GGA 
+* The [[tutorial:base2]] deals with the H2 molecule: convergence studies, LDA versus GGA 
 

@@ -1,0 +1,23 @@
+!!****d* ABINIT/wannier
+!! NAME
+!! 71_wannier
+!!
+!! DESCRIPTION
+!! This directory contains several routines related to the computation
+!!  of Wannier function, using the Wannier90 library.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! defs_wannier90.F90
+!! interfaces_71_wannier.F90
+!! m_mlwfovlp.F90
+!! m_mlwfovlp_qp.F90
+!! m_plowannier.F90
+!!
+!!***

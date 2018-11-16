@@ -41,7 +41,7 @@
 
 module m_random_zbq
 
- use m_profiling_abi
+ use m_abicore
 
  use defs_basis,   only : sp, dp, std_out
 
@@ -92,13 +92,6 @@ contains
 !       the output was identical up to the 16th decimal place
 !       after 10^10 calls, so we're probably OK ...
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ZBQLU01'
-!End of the abilint section
-
       REAL(DP) :: DUMMY
 
       INTEGER,SAVE :: CURPOS=1,ID22=22,ID43=43
@@ -141,7 +134,7 @@ contains
       ENDIF
 
       ZBQLU01 = X/B2
-      
+
       RETURN;X=DUMMY
 
       END FUNCTION ZBQLU01
@@ -162,13 +155,6 @@ contains
 !		the array is seeded using the system clock if the
 !		FORTRAN implementation allows it.
 !*********************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ZBQLINI'
-!End of the abilint section
-
       INTEGER :: SEED
 !*********************************************************************
 !	PARAMETERS

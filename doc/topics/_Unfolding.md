@@ -2,6 +2,7 @@
 description: How to unfold supercell band structures
 authors: OR
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to unfold supercell band structures with the ABINIT package.
 
@@ -81,5 +82,5 @@ file ab_out.out.
 
 ## Tutorials
 
-* [[lesson:fold2bloch|The lesson on unfolding supercell band structures]]
+* [[tutorial:fold2bloch|The tutorial on unfolding supercell band structures]]
 

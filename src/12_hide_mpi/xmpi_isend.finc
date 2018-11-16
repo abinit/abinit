@@ -43,13 +43,6 @@
 
 subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_isend_int1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -101,13 +94,6 @@ subroutine xmpi_isend_int1d(xval,dest,tag,spaceComm,request,ierr)
 subroutine xmpi_isend_dp1d(xval,dest,tag,spaceComm,request,ierr)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_isend_dp1d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -158,13 +144,6 @@ end subroutine xmpi_isend_dp1d
 !! SOURCE
 subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_isend_dp2d'
-!End of the abilint section
 
  implicit none
 

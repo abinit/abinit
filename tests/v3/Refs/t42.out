@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -154,13 +154,13 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.014 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      5.8000000000E+00  5.8000000000E+00  9.4000000000E+00 Bohr
               amu      2.43050000E+01
-      chksymbreak1          1
-      chksymbreak2          1
-      chksymbreak3          1
-      chksymbreak4          1
-      chksymbreak5          1
-      chksymbreak6          0
-      chksymbreak7          1
+       chkdilatmx1          1
+       chkdilatmx2          1
+       chkdilatmx3          1
+       chkdilatmx4          1
+       chkdilatmx5          1
+       chkdilatmx6          0
+       chkdilatmx7          1
           dilatmx1     1.10000000E+00
           dilatmx2     1.10000000E+00
           dilatmx3     1.10000000E+00
@@ -3466,13 +3466,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.813      69.761
             acell6     5.9083830543E+00  5.9083830543E+00  9.7329379843E+00 Bohr
             acell7     5.9105914486E+00  5.9105914486E+00  9.7266983544E+00 Bohr
               amu      2.43050000E+01
-      chksymbreak1          1
-      chksymbreak2          1
-      chksymbreak3          1
-      chksymbreak4          1
-      chksymbreak5          1
-      chksymbreak6          0
-      chksymbreak7          1
+       chkdilatmx1          1
+       chkdilatmx2          1
+       chkdilatmx3          1
+       chkdilatmx4          1
+       chkdilatmx5          1
+       chkdilatmx6          0
+       chkdilatmx7          1
           dilatmx1     1.10000000E+00
           dilatmx2     1.10000000E+00
           dilatmx3     1.10000000E+00
@@ -3669,7 +3669,7 @@ P           mkmem           4
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).

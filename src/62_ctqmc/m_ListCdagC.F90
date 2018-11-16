@@ -52,11 +52,17 @@ PRIVATE
 
 TYPE, PUBLIC :: ListCdagC
   INTEGER _PRIVATE :: size = 0
+!  max size of matrix list
+
   INTEGER          :: tail = 0 
+!  the size of matrix list that contains physical data (ie number of
+!  segment)
   !DOUBLE PRECISION :: inv_dt = 0.d0
 !  TYPE(CdagC), ALLOCATABLE, DIMENSION(:) :: list => NULL()
   !INTEGER         , ALLOCATABLE, DIMENSION(:,:) :: ind
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)         :: list
+!  for all elements i below itail, list(i,1:2) are times for creation
+!  and destruction of particles.
 END TYPE ListcdagC
 !!***
 
@@ -126,13 +132,6 @@ CONTAINS
 SUBROUTINE ListCdagC_init(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_init'
-!End of the abilint section
-
   TYPE(ListCdagC)  , INTENT(INOUT) :: this
   !DOUBLE PRECISION , INTENT(IN   ) :: inv_dt
   INTEGER, OPTIONAL, INTENT(IN   ) :: size
@@ -185,13 +184,6 @@ END SUBROUTINE ListCdagC_init
 SUBROUTINE ListCdagC_setSize(this,new_tail)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_setSize'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   INTEGER        , INTENT(IN   ) :: new_tail
 !Local variables ------------------------------
@@ -245,13 +237,6 @@ END SUBROUTINE ListCdagC_setSize
 SUBROUTINE ListCdagC_enlarge(this, size)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_enlarge'
-!End of the abilint section
-
   TYPE(ListCdagC),   INTENT(INOUT)       :: this
   INTEGER, OPTIONAL, INTENT(IN   )       :: size
 !Local variables ------------------------------
@@ -321,13 +306,6 @@ END SUBROUTINE ListCdagC_enlarge
 SUBROUTINE listCdagC_assign(this, list_2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'listCdagC_assign'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   TYPE(ListCdagC), INTENT(IN   ) :: list_2
 !Local variables ------------------------------
@@ -375,13 +353,6 @@ END SUBROUTINE ListCdagC_assign
 SUBROUTINE ListCdagC_swap(this,list_2)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_swap'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   TYPE(ListCdagC), INTENT(INOUT) :: list_2
 !Local variables ------------------------------
@@ -450,13 +421,6 @@ END SUBROUTINE ListCdagC_swap
 SUBROUTINE ListCdagC_pushBack(this, CdagC_1)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_pushBack'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT)       :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1
 !Local variables ------------------------------
@@ -515,13 +479,6 @@ END SUBROUTINE ListCdagC_pushBack
 SUBROUTINE ListCdagC_insert(this, CdagC_1, position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_insert'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   DOUBLE PRECISION, DIMENSION(1:2), INTENT(IN   ) :: CdagC_1 
   INTEGER        , INTENT(IN   ) :: position
@@ -583,13 +540,6 @@ END SUBROUTINE ListCdagC_insert
 SUBROUTINE ListCdagC_popBack(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_popBack'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
 !Local variables ------------------------------
   INTEGER                        :: tail
@@ -634,13 +584,6 @@ END SUBROUTINE ListCdagC_popBack
 SUBROUTINE ListCdagC_erase(this,position)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_erase'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   INTEGER,         INTENT(IN   ) :: position
 !Local variables ------------------------------
@@ -693,13 +636,6 @@ END SUBROUTINE ListCdagC_erase
 INTEGER FUNCTION ListCdagC_firstHigherThanReal(this, time)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_firstHigherThanReal'
-!End of the abilint section
-
   TYPE(ListCdagC),  INTENT(IN) :: this
   DOUBLE PRECISION, INTENT(IN) :: time
 #include "ListCdagC_firstHigher.h"
@@ -751,13 +687,6 @@ END FUNCTION ListCdagC_firstHigherThanReal
 SUBROUTINE ListCdagC_sort(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_sort'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
  
   IF ( this%tail .EQ. 1 ) RETURN
@@ -800,13 +729,6 @@ END SUBROUTINE ListCdagC_sort
 RECURSIVE SUBROUTINE ListCdagC_quickSort(this, begin, end)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_quickSort'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   INTEGER,         INTENT(IN   ) :: begin
   INTEGER,         INTENT(IN   ) :: end
@@ -883,13 +805,6 @@ END SUBROUTINE ListCdagC_quickSort
 SUBROUTINE ListCdagC_print(this,ostream)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_print'
-!End of the abilint section
-
   TYPE(ListCdagC)  , INTENT(IN) :: this
   INTEGER, OPTIONAL, INTENT(IN) :: ostream
 !Local variables ------------------------------
@@ -938,13 +853,6 @@ END SUBROUTINE ListCdagC_print
 SUBROUTINE ListCdagC_clear(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_clear'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
   this%tail = 0 
 END SUBROUTINE ListCdagC_clear
@@ -983,13 +891,6 @@ END SUBROUTINE ListCdagC_clear
 SUBROUTINE ListCdagC_destroy(this)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ListCdagC_destroy'
-!End of the abilint section
-
   TYPE(ListCdagC), INTENT(INOUT) :: this
 
   FREEIF(this%list)

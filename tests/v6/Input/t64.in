@@ -107,7 +107,6 @@ optdriver5    5
 nbdbuf 0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -119,7 +118,7 @@ nbdbuf 0
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Da Pieve
-#%% keywords = NC, DFPT
+#%% keywords = NC, DFPT, NONLINEAR
 #%% description = 
 #%%   Si diatomic molecule
 #%%   Test of linear and non-linear response in the non-spin-polarized case.

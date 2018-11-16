@@ -28,7 +28,7 @@
 MODULE m_results_gs
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_energies
  use m_errors
@@ -223,13 +223,6 @@ CONTAINS
 
 subroutine init_results_gs(natom,nsppol,results_gs,only_part)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_gs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -317,13 +310,6 @@ end subroutine init_results_gs
 !! SOURCE
 
 subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_gs_array'
-!End of the abilint section
 
  implicit none
 
@@ -421,13 +407,6 @@ end subroutine init_results_gs_array
 
 subroutine destroy_results_gs(results_gs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_gs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -497,13 +476,6 @@ end subroutine destroy_results_gs
 !! SOURCE
 
 subroutine destroy_results_gs_array(results_gs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_gs_array'
-!End of the abilint section
 
  implicit none
 
@@ -586,13 +558,6 @@ end subroutine destroy_results_gs_array
 
 subroutine copy_results_gs(results_gs_in,results_gs_out)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_results_gs'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -668,11 +633,11 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
 
  if (nsppol_in>nsppol_out) then
    if (allocated(results_gs_out%gaps))   then
-     ABI_DEALLOCATE(results_gs_out%gaps)  
+     ABI_DEALLOCATE(results_gs_out%gaps)
    end if
    if (allocated(results_gs_in%gaps))    then
      ABI_ALLOCATE(results_gs_out%gaps,(3,nsppol_in))
-   end if 
+   end if
  endif
 
 
@@ -733,13 +698,6 @@ end subroutine copy_results_gs
 
 integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'results_gs_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -781,9 +739,9 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 ! Write data.
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'residm', 'res2'],& 
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'residm', 'res2'],&
 &  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
-&  datamode=.True.) 
+&  datamode=.True.)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -793,19 +751,12 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 ! Add energies
  call energies_ncwrite(res%energies, ncid)
 
-#else 
+#else
  MSG_ERROR("netcdf support is not activated.")
 #endif
 
 contains
- integer function vid(vname) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
+ integer function vid(vname)
 
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)

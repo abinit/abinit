@@ -30,10 +30,11 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_intel_1[89].0_.*
 #%% test_chain = t61.in, t62.in, t63.in, t64.in, t65.in
 #%% [shell]
 #%% pre_commands = 
-#%%   ww_cp t62o_DDB t65i_DDB
+#%%   ww_cp t62o_DDB t65i_DDB;
 #%%   ww_cp t63o_DVDB t65i_DVDB
 #%% [files]
 #%% files_to_test = 

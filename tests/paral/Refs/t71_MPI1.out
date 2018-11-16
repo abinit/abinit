@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -1227,9 +1227,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     122.688     122.646
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5433 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6179 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :  -0.3750 -0.3750  0.0000
+   Minimum direct gap =   2.5433 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6179 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :  -0.3750 -0.3750  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -1563,7 +1563,7 @@ P           mkmem4         19
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] ABINIT : First-principles approach of materials and nanosystem properties.
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,

@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -794,9 +794,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   1.4178 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.4178 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   1.4178 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.4178 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                 4693
@@ -853,9 +853,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.4740 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   4.4740 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   4.4740 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.4740 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
  writing QP data on file : t75_MPI1o_DS4_QPS
 
@@ -1075,9 +1075,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   1.4178 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.4178 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   1.4178 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.4178 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                 4693
@@ -1134,9 +1134,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.3077 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   4.3077 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   4.3077 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   4.3077 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
 
  writing QP data on file : t75_MPI1o_DS6_QPS
 
@@ -1404,7 +1404,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Accurate GW self-energies in a plane-wave basis using only a few empty states:
 - towards large systems. F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008).

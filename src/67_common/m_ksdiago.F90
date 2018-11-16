@@ -29,24 +29,29 @@ module m_ksdiago
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_hamiltonian
 
  use m_fstrings,          only : toupper
  use m_geometry,          only : metric
- use m_abilasi,           only : xheev, xhegv, xheevx, xhegvx
+ use m_hide_lapack,       only : xheev, xhegv, xheevx, xhegvx
  use m_kg,                only : mkkin, mkkpg
  use m_fftcore,           only : kpgsph
+ use m_fft,               only : fftpac
  use m_cgtools,           only : set_istwfk
  use m_electronpositron,  only : electronpositron_type
- use m_mpinfo,            only : destroy_mpi_enreg
+ use m_mpinfo,            only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,            only : pawtab_type
  use m_paw_ij,            only : paw_ij_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder
  use m_pawfgr,            only : pawfgr_type
-
+ use m_initylmg,          only : initylmg
+ use m_mkffnl,            only : mkffnl
+ use m_getghc,            only : getghc
+ use m_fourier_interpol,  only : transgrid
+ use m_cgprj,             only : getcprj
 
  implicit none
 
@@ -227,12 +232,11 @@ contains
 !! * The routine RE-compute all Hamiltonian terms. So it is equivalent to an additional electronic SC cycle.
 !!   (This has no effect is convergence was reach. If not, eigenvalues/vectors may differs from the conjugate gradient ones)
 !!
-!! NOTES
-!!  Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
-!!  or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
-!!  ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
-!!  or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
-!!  the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
+!! * Please, do NOT pass Dtset% to this routine. Either use a local variable properly initialized
+!!   or add the additional variable to ddiago_ctl_type and change the creation method accordingly.
+!!   ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
+!!   or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
+!!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
 !!
 !! PARENTS
 !!      m_shirley,outkss
@@ -250,20 +254,6 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 & typat,nfftf,nspinor,nspden,nsppol,Pawtab,Pawfgr,Paw_ij,&
 & Psps,rprimd,vtrial,xred,onband_diago,eig_ene,eig_vec,Cprj_k,comm,ierr,&
 & Electronpositron) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ksdiago'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
- use interfaces_53_ffts
- use interfaces_56_recipspace
- use interfaces_65_paw
- use interfaces_66_nonlocal
- use interfaces_66_wfs
-!End of the abilint section
 
  implicit none
 
@@ -313,7 +303,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  real(dp),allocatable :: ph3d(:,:,:),pwave(:,:)
  real(dp),allocatable :: ffnl(:,:,:,:),kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),ylm_k(:,:),dum_ylm_gr_k(:,:,:),vlocal_tmp(:,:,:)
- real(dp),allocatable :: ghc(:,:),gvnlc(:,:),gsc(:,:)
+ real(dp),allocatable :: ghc(:,:),gvnlxc(:,:),gsc(:,:)
  real(dp),allocatable :: ghg_mat(:,:,:),gtg_mat(:,:,:)
  real(dp),allocatable :: cgrvtrial(:,:)
  real(dp),pointer :: cwavef(:,:)
@@ -367,7 +357,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
    write(msg,'(7a)')&
 &   ' istwfk/=1 not allowed:',ch10,&
 &   ' States output not programmed for time-reversal symmetry.',ch10,&
-&   ' Action : change istwfk in input file (put it to 1 for all kpt).',ch10,&
+&   ' Action: change istwfk in input file (put it to 1 for all kpt).',ch10,&
 &   ' Program does not stop but _KSS file will not be created...'
    MSG_WARNING(msg)
    ierr=ierr+1
@@ -526,7 +516,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  end if
 
  ABI_MALLOC(ghc  ,(2,npw_k*nspinor*ndat))
- ABI_MALLOC(gvnlc,(2,npw_k*nspinor*ndat))
+ ABI_MALLOC(gvnlxc,(2,npw_k*nspinor*ndat))
  ABI_MALLOC(gsc  ,(2,npw_k*nspinor*ndat*(sij_opt+1)/2))
 
  cplex_ghg=2
@@ -559,7 +549,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 
    pwave(1,igsp2)=one      ! Get <:|H|beta,G''> and <:|T_{PAW}|beta,G''>
 
-   call getghc(cpopt,pwave,Cwaveprj,ghc,gsc,gs_hamk,gvnlc,lambda,MPI_enreg_seq,ndat,&
+   call getghc(cpopt,pwave,Cwaveprj,ghc,gsc,gs_hamk,gvnlxc,lambda,MPI_enreg_seq,ndat,&
 &   prtvol,sij_opt,tim_getghc,type_calc)
 
 !  Fill the upper triangle.
@@ -574,7 +564,7 @@ subroutine ksdiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  ABI_FREE(kinpw)
  ABI_FREE(vlocal)
  ABI_FREE(ghc)
- ABI_FREE(gvnlc)
+ ABI_FREE(gvnlxc)
  ABI_FREE(gsc)
 
  if (Psps%usepaw==1.and.cpopt==0) then
@@ -713,15 +703,6 @@ end subroutine ksdiago
 
 subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 & nband_k,istwf_k,ecutsm,effmass_free,abstol,range,ilu,vlu,use_scalapack,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_ddiago_ctl'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
-!End of the abilint section
 
  implicit none
 

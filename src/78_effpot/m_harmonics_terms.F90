@@ -27,7 +27,7 @@ module m_harmonics_terms
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_supercell,only: getPBCIndexes_supercell
  use m_xmpi,only : xmpi_sum
  use m_ifc
@@ -58,7 +58,7 @@ module m_harmonics_terms
    integer :: nqpt
 !   Number of qpoints
 
-   real(dp) :: epsilon_inf(3,3)                     
+   real(dp) :: epsilon_inf(3,3)
 !   epsilon_inf(3,3)
 !   Dielectric tensor
 
@@ -66,23 +66,23 @@ module m_harmonics_terms
 !   elastic_constant(6,6)
 !   Elastic tensor Hartree
 
-   real(dp), allocatable :: strain_coupling(:,:,:)    
+   real(dp), allocatable :: strain_coupling(:,:,:)
 !   strain_coupling(6,3,natom)
-!   internal strain tensor 
+!   internal strain tensor
 
-   real(dp), allocatable :: zeff(:,:,:)             
+   real(dp), allocatable :: zeff(:,:,:)
 !   zeff(3,3,natom) Effective charges
 
    type(ifc_type) :: ifcs
-!   type with ifcs constants (short + ewald) 
+!   type with ifcs constants (short + ewald)
 !   also contains the number of cell and the indexes
- 
-   real(dp), allocatable :: qpoints(:,:) 
+
+   real(dp), allocatable :: qpoints(:,:)
 !   qph1l(3,nqpt)
 !   List of qpoints wavevectors
 
    real(dp), allocatable :: dynmat(:,:,:,:,:,:)
-!   dynmat(2,3,natom,3,natom,nqpt) 
+!   dynmat(2,3,natom,3,natom,nqpt)
 !   dynamical matrix for each q points
 
    real(dp), allocatable :: phfrq(:,:)
@@ -106,7 +106,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! ifc<type(ifc_type)> = interatomic forces constants
 !! natom = number of atoms in primitive cell
-!! nrpt = number rpt (cell) in the ifc 
+!! nrpt = number rpt (cell) in the ifc
 !! dynmat(2,3,natom,3,natom,3,nqpt) = optional, dynamical matricies for each q-point
 !! epsilon_inf(3,3) = optional, dielectric tensor
 !! elastic_constant(6,6) = optional, elastic constant
@@ -130,13 +130,6 @@ CONTAINS  !=====================================================================
 subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 &                               dynmat,epsilon_inf,elastic_constants,strain_coupling,&
 &                               nqpt,phfrq,qpoints,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_init'
-!End of the abilint section
 
  implicit none
 
@@ -203,7 +196,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 
 !Allocation of total ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%atmfrc(:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:) 
+ harmonics_terms%ifcs%atmfrc(:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:)
 
 !Allocation of ewald part of ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(3,natom,3,natom,nrpt))
@@ -236,22 +229,22 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
    harmonics_terms%epsilon_inf = epsilon_inf
  end if
 
-!Allocation of Effective charges array 
+!Allocation of Effective charges array
  ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
- harmonics_terms%zeff = zero 
+ harmonics_terms%zeff = zero
  if (present(zeff)) then
    call harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
    harmonics_terms%zeff = zeff
  end if
 
-!Allocation of internal strain tensor 
+!Allocation of internal strain tensor
  ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
  harmonics_terms%strain_coupling = zero
  if (present(strain_coupling)) then
    call harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
  end if
 
-end subroutine harmonics_terms_init 
+end subroutine harmonics_terms_init
 !!***
 
 
@@ -276,15 +269,8 @@ end subroutine harmonics_terms_init
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine harmonics_terms_free(harmonics_terms)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_free'
-!End of the abilint section
 
   implicit none
 
@@ -326,9 +312,9 @@ subroutine harmonics_terms_free(harmonics_terms)
     harmonics_terms%qpoints=zero
     ABI_DEALLOCATE(harmonics_terms%qpoints)
   end if
-  
+
   call ifc_free(harmonics_terms%ifcs)
-  
+
 end subroutine harmonics_terms_free
 !!***
 
@@ -354,15 +340,8 @@ end subroutine harmonics_terms_free
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupling)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setInternalStrain'
-!End of the abilint section
 
   implicit none
 
@@ -390,7 +369,7 @@ subroutine harmonics_terms_setInternalStrain(harmonics_terms,natom,strain_coupli
   if(allocated(harmonics_terms%strain_coupling))then
     ABI_DEALLOCATE(harmonics_terms%strain_coupling)
   end if
-   
+
 ! 2-allocate and copy the new array
   ABI_ALLOCATE(harmonics_terms%strain_coupling,(6,3,natom))
   harmonics_terms%strain_coupling(:,:,:) = strain_coupling(:,:,:)
@@ -421,15 +400,8 @@ end subroutine harmonics_terms_setInternalStrain
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setEffectiveCharges'
-!End of the abilint section
 
   implicit none
 
@@ -456,7 +428,7 @@ subroutine harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
   if(allocated(harmonics_terms%zeff))then
     ABI_DEALLOCATE(harmonics_terms%zeff)
   end if
-   
+
 ! 2-allocate and copy the new array
   ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
   harmonics_terms%zeff(:,:,:) = zeff(:,:,:)
@@ -477,7 +449,7 @@ end subroutine harmonics_terms_setEffectiveCharges
 !! natom = number of atoms
 !! nqpt  = number of qpoints
 !! dynmat(2,3,natom,3,natom,nqpt) = dynamical matrix in cartesian coordinates
-!! phfrq(3*natom,nqpt) = frequency in hartree 
+!! phfrq(3*natom,nqpt) = frequency in hartree
 !! qpoints(3,nqpt) = list of qpoints
 !!
 !! OUTPUT
@@ -490,15 +462,8 @@ end subroutine harmonics_terms_setEffectiveCharges
 !!      wrtout
 !!
 !! SOURCE
- 
+
 subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpoints)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_setDynmat'
-!End of the abilint section
 
   implicit none
 
@@ -553,7 +518,7 @@ subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpo
   if(allocated(harmonics_terms%qpoints))then
     ABI_DEALLOCATE(harmonics_terms%qpoints)
   end if
-   
+
 ! 2-allocate and copy the new array
   harmonics_terms%nqpt = nqpt
 
@@ -573,7 +538,7 @@ end subroutine harmonics_terms_setDynmat
 !!  harmonics_terms_evaluateIFC
 !!
 !! FUNCTION
-!!  This fonction compute the contribution of the ifc harmonic part of 
+!!  This fonction compute the contribution of the ifc harmonic part of
 !!  the energy and forces.
 !!
 !! INPUTS
@@ -597,8 +562,6 @@ end subroutine harmonics_terms_setDynmat
 !! PARENT
 !!   effective_potential_evaluate
 !!
-!! CHILDREN
-!!
 !! PARENTS
 !!      m_effective_potential
 !!
@@ -609,13 +572,6 @@ end subroutine harmonics_terms_setDynmat
 
 subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,ncell,nrpt,&
 &                                      atmrpt_index,index_cells,sc_size,rpt,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_evaluateIFC'
-!End of the abilint section
 
  implicit none
 
@@ -660,7 +616,7 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
       irpt = rpt(irpt_tmp)
 !     index of the first atom in the irpt cell
       jj = atmrpt_index(irpt_tmp,icell)
-!     Loop over the atom in the cell      
+!     Loop over the atom in the cell
       do ib = 1, natom_uc
         ll = jj + ib
         do nu=1,3
@@ -707,8 +663,8 @@ end subroutine harmonics_terms_evaluateIFC
 !!  natom = number of atoms in the supercell
 !!  natom_uc = number of atoms in the unit cell
 !!  ncell = total number of cell
-!!  strain_coupling(6,3,natom) = internal strain coupling parameters 
-!!  strain(6) = strain between configuration and the reference 
+!!  strain_coupling(6,3,natom) = internal strain coupling parameters
+!!  strain(6) = strain between configuration and the reference
 !!
 !! OUTPUT
 !!   energy = contribution to the energy
@@ -725,13 +681,6 @@ end subroutine harmonics_terms_evaluateIFC
 !!
 subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,natom,natom_uc,ncell,&
 &                                          strain_coupling,strten,strain)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_evaluateElastic'
-!End of the abilint section
 
  real(dp),intent(out):: energy
  integer, intent(in) :: natom,natom_uc,ncell
@@ -761,7 +710,7 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
      strten(alpha) = strten(alpha) + cij*strain(beta)
    end do
  end do
- 
+
 !2-Part due to the internal strain coupling parameters
  ii = 1
  do ia = 1,natom
@@ -770,8 +719,8 @@ subroutine harmonics_terms_evaluateElastic(elastic_constants,disp,energy,fcart,n
        cij = strain_coupling(alpha,mu,ii)
 !      Accumulte for this atom
        energy = energy + half*cij*strain(alpha)*disp(mu,ia)
-       fcart(mu,ia)  = fcart(mu,ia)  + cij*strain(alpha)
-       strten(alpha) = strten(alpha) + cij*disp(mu,ia)
+       fcart(mu,ia)  = fcart(mu,ia)  + half*cij*strain(alpha)
+       strten(alpha) = strten(alpha) + half*cij*disp(mu,ia)
      end do
    end do
    ii = ii +1
@@ -810,14 +759,6 @@ end subroutine  harmonics_terms_evaluateElastic
 !! SOURCE
 
 subroutine harmonics_terms_applySumRule(asr,ifc,natom,option)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'harmonics_terms_applySumRule'
- use interfaces_14_hidewrite
-!End of the abilint section
 
   implicit none
 

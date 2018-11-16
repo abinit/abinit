@@ -22,12 +22,6 @@
 subroutine xmpi_max_int0d_i4b(xval,xmax,comm,ier)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_max_int0d_i4b'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -71,12 +65,6 @@ end subroutine xmpi_max_int0d_i4b
 subroutine xmpi_max_int0d_i8b(xval,xmax,comm,ier)
 
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_max_int0d_i8b'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -112,13 +100,6 @@ end subroutine xmpi_max_int0d_i8b
 !! SOURCE
 
 subroutine xmpi_max_int(xval,xmax,comm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_max_int'
-!End of the abilint section
 
  implicit none
 
@@ -171,12 +152,6 @@ end subroutine xmpi_max_int
 
 subroutine xmpi_max_dpv(xval,xmax,comm,ier)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_max_dpv'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -224,12 +199,6 @@ end subroutine xmpi_max_dpv
 !! SOURCE
 
 subroutine xmpi_max_dp0d_ip(ioval,comm,ier)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_max_dpv'
-!End of the abilint section
 
  implicit none
 

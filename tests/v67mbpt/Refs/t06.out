@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -1080,6 +1080,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -1121,6 +1122,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -1364,6 +1366,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -1405,6 +1408,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -1493,9 +1497,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.4097 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   4.4097 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   4.4097 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   4.4097 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  563
@@ -1543,9 +1547,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   9.4324 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   9.4324 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   9.4324 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   9.4324 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -1926,6 +1930,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -1967,6 +1972,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -2200,6 +2206,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -2241,6 +2248,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -2319,9 +2327,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.4097 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   4.4097 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   4.4097 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   4.4097 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  563
@@ -2369,9 +2377,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   9.4324 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   9.4324 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   9.4324 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   9.4324 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
 
 ================================================================================
 == DATASET 31 ==================================================================
@@ -2752,6 +2760,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -2793,6 +2802,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -3026,6 +3036,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -3067,6 +3078,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use LDA+U ......................................    0
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
@@ -3145,9 +3157,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   4.4097 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   4.4097 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   4.4097 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   4.4097 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  563
@@ -3195,9 +3207,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   9.4328 [eV], located at k-point      :   0.0000  0.0000  0.2500
-   Fundamental gap     =   9.4328 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
-                                        Bottom of conduction at :   0.0000  0.0000  0.2500
+   Minimum direct gap =   9.4328 [eV], located at k-point      :   0.0000  0.0000  0.2500
+   Fundamental gap    =   9.4328 [eV], Top of valence bands at :   0.0000  0.0000  0.2500
+                                       Bottom of conduction at :   0.0000  0.0000  0.2500
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -3797,7 +3809,7 @@ P           mkmem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).

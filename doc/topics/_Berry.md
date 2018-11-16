@@ -2,6 +2,7 @@
 description: How to compute the polarisation and take into account a finite homogeneous electric field
 authors: JZ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute the polarisation and take into account a finite homogeneous electric
 field with the ABINIT package.
@@ -53,4 +54,4 @@ field) can be computed as well.
 
 ## Tutorials
 
-* The [[lesson:ffield]|lesson on polarization and finite electric field deals with the computation of the polarization of an insulator (e.g. ferroelectric, or dielectric material) thanks to the Berry phase approach, and also presents the computation of materials properties in the presence of a finite electric field (also thanks to the Berry phase approach).
+* The [[tutorial:ffield]|tutorial on polarization and finite electric field deals with the computation of the polarization of an insulator (e.g. ferroelectric, or dielectric material) thanks to the Berry phase approach, and also presents the computation of materials properties in the presence of a finite electric field (also thanks to the Berry phase approach).

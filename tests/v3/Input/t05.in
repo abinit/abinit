@@ -69,7 +69,6 @@
  ngkpt 4 4 4
  shiftk 0.5 0.5 0.5
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

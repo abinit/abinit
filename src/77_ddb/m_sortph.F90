@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MVer, FDortu,MVeithen)
+!!  Copyright (C) 2008-2018 ABINIT group (MVer, FDortu, MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 module m_sortph
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools,   only : open_file
@@ -65,13 +65,6 @@ contains
 !! SOURCE
 subroutine end_sortph()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'end_sortph'
-!End of the abilint section
-
  if (allocated(eigvecLast))  then
    ABI_DEALLOCATE(eigvecLast)
  end if
@@ -91,8 +84,7 @@ end subroutine end_sortph
 !! sortph
 !!
 !! FUNCTION
-!! Sort the energies in order to have fine phonon
-!! dispersion curves
+!! Sort the energies in order to have fine phonon dispersion curves
 !! It is best not to include the gamma point in the list
 !!
 !! MODIFIED
@@ -125,13 +117,6 @@ end subroutine end_sortph
 !! SOURCE
 
 subroutine sortph(eigvec,displ,filnam, natom,phfrq)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sortph'
-!End of the abilint section
 
 implicit none
 

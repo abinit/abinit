@@ -16,10 +16,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -38,9 +34,14 @@ MODULE m_invovl
  use defs_abitypes
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
 
- use m_time,              only : timab
+ use m_time,        only : timab
+ use m_hamiltonian, only : gs_hamiltonian_type
+ use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
+ use m_nonlop,      only : nonlop
+ use m_prep_kgb,    only : prep_nonlop
 
  implicit none
 
@@ -62,6 +63,7 @@ MODULE m_invovl
 !! Contains information needed to invert the overlap matrix S
 !!
 !! SOURCE
+
  type, public :: invovl_kpt_type
 
    integer :: nprojs
@@ -105,14 +107,8 @@ CONTAINS
 !!      dsymm,zhemm
 !!
 !! SOURCE
- subroutine init_invovl(nkpt)
-  use m_profiling_abi
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_invovl'
-!End of the abilint section
+ subroutine init_invovl(nkpt)
 
   integer, intent(in) :: nkpt
   integer :: ikpt
@@ -127,7 +123,6 @@ CONTAINS
 
  end subroutine init_invovl
 !!***
-
 
 !!****f* m_invovl/destroy_invovl
 !! NAME
@@ -147,13 +142,6 @@ CONTAINS
 !!
 !! SOURCE
  subroutine destroy_invovl(nkpt)
-  use m_profiling_abi
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_invovl'
-!End of the abilint section
 
   integer, intent(in) :: nkpt
   integer :: ikpt
@@ -178,7 +166,6 @@ CONTAINS
  end subroutine destroy_invovl
 !!***
 
-
 !!****f* m_invovl/make_invovl
 !! NAME
 !! make_invovl
@@ -195,22 +182,10 @@ CONTAINS
 !!      dsymm,zhemm
 !!
 !! SOURCE
+
 subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
- use defs_basis
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_profiling_abi
- use defs_abitypes
- use m_xmpi
+
  use m_abi_linalg
- use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_invovl'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
  type(gs_hamiltonian_type),intent(in) :: ham
@@ -449,8 +424,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 end subroutine make_invovl
 !!***
 
-
-
 !!****f* m_invovl/apply_invovl
 !! NAME
 !! apply_invovl
@@ -467,23 +440,8 @@ end subroutine make_invovl
 !!      dsymm,zhemm
 !!
 !! SOURCE
- subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor)
- use defs_basis
- use defs_abitypes
- use m_hamiltonian, only : gs_hamiltonian_type
- use m_profiling_abi
- use defs_abitypes
- use m_xmpi
- use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
- use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'apply_invovl'
- use interfaces_66_nonlocal
- use interfaces_66_wfs
-!End of the abilint section
+ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor)
 
  implicit none
 
@@ -507,7 +465,7 @@ end subroutine make_invovl
  integer :: ikpt_this_proc
  integer, parameter :: tim_nonlop = 13
  ! dummies
- real(dp) :: enlout(ndat), lambda_block(1), gvnlc(1,1)
+ real(dp) :: enlout(ndat), lambda_block(1), gvnlxc(1,1)
  integer, parameter :: nnlout = 0, idir = 0, signs = 2
 
  type(invovl_kpt_type), pointer :: invovl
@@ -544,10 +502,10 @@ end subroutine make_invovl
  paw_opt = 3 ! S nonlocal operator
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
-&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc,already_transposed=.true.)
+&                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
  else
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
-&              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
+&              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
 
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
@@ -586,10 +544,10 @@ end subroutine make_invovl
  paw_opt = 3
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
-&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc,already_transposed=.true.)
+&                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.)
  else
    call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
-&              signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
+&              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
  end if
 
  call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
@@ -615,8 +573,6 @@ end subroutine make_invovl
 end subroutine apply_invovl
 !!***
 
-
-
 !!****f* m_invovl/solve_inner
 !! NAME
 !! solve_inner
@@ -634,20 +590,8 @@ end subroutine apply_invovl
 !!
 !! SOURCE
 subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1proj)
- use defs_basis
- use defs_abitypes
- use m_profiling_abi
- use defs_abitypes
- use m_xmpi
- use m_hamiltonian, only : gs_hamiltonian_type
+
  use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_inner'
-!End of the abilint section
-
  implicit none
 
  integer,intent(in) :: ndat,cplx
@@ -718,7 +662,7 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
      convergence_rate = -LOG(1e-10) / i
      additional_steps_to_take = CEILING(-LOG(precision/1e-10)/convergence_rate) + 1
    else if(additional_steps_to_take > 0) then
-     if(previous_maxerr<maxerr)exit 
+     if(previous_maxerr<maxerr)exit
      additional_steps_to_take = additional_steps_to_take - 1
    end if
    previous_maxerr=maxerr
@@ -741,7 +685,6 @@ subroutine solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj, PtPsm1
 end subroutine solve_inner
 !!***
 
-
 !!****f* m_invovl/apply_block
 !! NAME
 !! apply_block
@@ -759,17 +702,8 @@ end subroutine solve_inner
 !!
 !! SOURCE
 subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y)
-  use defs_basis
-  use defs_abitypes
-  use m_hamiltonian, only : gs_hamiltonian_type
+
   use m_abi_linalg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'apply_block'
-!End of the abilint section
-
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx

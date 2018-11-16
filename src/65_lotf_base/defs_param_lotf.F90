@@ -30,7 +30,7 @@ module defs_param_lotf
 
    !--Control variables
    integer :: n0
-   integer :: classic, version, me, nproc 
+   integer :: classic, version, me, nproc
 
    integer :: nitex  !--number of LOTF iterations
 
@@ -46,43 +46,36 @@ module defs_param_lotf
  public ::             &
    lotfvar,            &
    lotfparam_init
- 
+
 CONTAINS !===========================================================
 !!***
 
 
- !!****f* defs_param_lotf/lotfparam_init
- !! NAME
- !! lotfparam_init
- !!
- !! FUNCTION
- !!  set some internal variable of lotf
- !! INPUTS
- !!  natom=number of atoms
- !!  version=set type of MD algo   
- !!  nstart=initial step
- !!  nitex=number of LOTF steps
- !!  nneigx=roughly decide the number of neighbours
- !!  upd=....
- !!  me,nproc =disabled parallel LOTF 
- !!  classic=stick with the adaptable Glue model (rough version)
- !! CHILDREN
- !!
+!!****f* defs_param_lotf/lotfparam_init
+!! NAME
+!! lotfparam_init
+!!
+!! FUNCTION
+!!  set some internal variable of lotf
+!! INPUTS
+!!  natom=number of atoms
+!!  version=set type of MD algo
+!!  nstart=initial step
+!!  nitex=number of LOTF steps
+!!  nneigx=roughly decide the number of neighbours
+!!  upd=....
+!!  me,nproc =disabled parallel LOTF
+!!  classic=stick with the adaptable Glue model (rough version)
+!!
 !! PARENTS
 !!      gstate
 !!
 !! CHILDREN
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine lotfparam_init(natom,version,nstart,nitex,neeigx,&
    &                    classic,me,nproc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lotfparam_init'
-!End of the abilint section
 
   implicit none
 
@@ -94,30 +87,26 @@ CONTAINS !===========================================================
   !--switch number of atom, LOTF notation
   lotfvar%natom = natom
 
-  !--set type of MD algo  
+  !--set type of MD algo
   lotfvar%version = version
 
-  !--probably useful in upd_lis0 
+  !--probably useful in upd_lis0
   lotfvar%n0 = nstart
 
-  !--number of LOTF steps : 
+  !--number of LOTF steps :
   lotfvar%nitex = nitex
 
-  !--roughly decide the number of neighbours : 
+  !--roughly decide the number of neighbours :
   lotfvar%nneigx = neeigx
 
   !--disable LOTF parallel version :
   lotfvar%me  = me
-  lotfvar%nproc = nproc 
+  lotfvar%nproc = nproc
 
-  !--stick with the adaptable Glue model (rough version): 
-  lotfvar%classic = classic 
+  !--stick with the adaptable Glue model (rough version):
+  lotfvar%classic = classic
 
  end subroutine lotfparam_init
 
 end module defs_param_lotf
 !!***
-
-
-
-

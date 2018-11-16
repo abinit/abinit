@@ -30,10 +30,11 @@ module m_outwant
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_hdr
 
- use m_io_tools, only : open_file
+ use m_io_tools,   only : open_file
+ use m_symtk,      only : matr3inv
 
  implicit none
 
@@ -52,7 +53,7 @@ contains
 !! information needed to run WanT as a post-processing program
 !! The resulting file is 'launch.dat'.
 !!
-!! The routine writes to the disk (unformatted file unitwnt) the following informations:
+!! The routine writes to the disk (unformatted file unitwnt) the following information:
 !!
 !!     alat - lattice parameter
 !!     rprim - primitive translation vectors
@@ -98,15 +99,6 @@ contains
 !! SOURCE
 
 subroutine outwant(dtset,eig,cg,kg,npwarr,mband,mcg,nkpt,nsppol,mkmem,mpw,prtwant)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outwant'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
 
  implicit none
 

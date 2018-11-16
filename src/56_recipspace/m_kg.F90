@@ -26,14 +26,17 @@
 
 MODULE m_kg
 
+ use defs_abitypes, only : dataset_type
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
  use m_fftcore,     only : kpgsph, bound
  use defs_abitypes, only : MPI_type
+ use m_mpinfo,      only : proc_distrb_cycle
+
 
  implicit none
 
@@ -43,11 +46,13 @@ MODULE m_kg
  public :: getcut       ! Compute cutoff G^2
  public :: getmpw       ! Compute recommended npw from ecut, ucvol and gmet
  public :: mkkin        ! Compute elements of kinetic energy operator in reciprocal space at a given k point
+ public :: mknucdipmom_k ! Compute elements of magnetic nuclear dipole moment array in reciprocal space at a given k point
  public :: kpgio        ! Do initialization of kg data.
  public :: ph1d3d       ! Compute the three-dimensional phase factor $e^{i 2 \pi (k+G) cdot xred}$
  public :: getph        ! Compute three factors of one-dimensional structure factor phase
  public :: kpgstr       ! Derivative of kinetic energy operator in reciprocal space.
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
+ public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
 
 contains
 !!***
@@ -103,14 +108,6 @@ contains
 
 subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getcut'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -153,9 +150,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
    write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,a,a)' ) ch10,&
 &   ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
 &   '         ecut(hartree)=',ecut_pw+tol8,ch10,'=> whole FFT box selected'
-   if(iout/=std_out) then
-     call wrtout(iout,message,'COLL')
-   end if
+   if(iout/=std_out) call wrtout(iout,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
  else
@@ -174,9 +169,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
      write(message, '(a,a,3f8.4,a,3i4,a,a,f11.3,3x,a,f10.5)' ) ch10,&
 &     ' getcut: wavevector=',kpt,'  ngfft=',ngfft(1:3),ch10,&
 &     '         ecut(hartree)=',ecut+tol8,'=> boxcut(ratio)=',boxcut+tol8
-     if(iout/=std_out) then
-       call wrtout(iout,message,'COLL')
-     end if
+     if(iout/=std_out) call wrtout(iout,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
      if (boxcut<1.0_dp) then
@@ -184,11 +177,9 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Choice of acell, ngfft, and ecut',ch10,&
 &       '  ===> basis sphere extends BEYOND fft box !',ch10,&
 &       '  Recall that boxcut=Gcut(box)/Gcut(sphere)  must be > 1.',ch10,&
-&       '  Action : try larger ngfft or smaller ecut.',ch10,&
+&       '  Actio: try larger ngfft or smaller ecut.',ch10,&
 &       '  Note that ecut=effcut/boxcut**2 and effcut=',effcut+tol8
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        MSG_ERROR(message)
      end if
 
@@ -199,9 +190,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  is sufficient for exact treatment of convolution.',ch10,&
 &       '  Such a large boxcut is a waste : you could raise ecut',ch10,&
 &       '  e.g. ecut=',effcut*0.25_dp+tol8,' Hartrees makes boxcut=2',ch10
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
 
@@ -211,9 +200,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 &       '  Note that boxcut < 1.5; this usually means',ch10,&
 &       '  that the forces are being fairly strongly affected by','  the smallness of the fft box.',ch10,&
 &       '  Be sure to test with larger ngfft(1:3) values.',ch10
-       if(iout/=std_out) then
-         call wrtout(iout,message,'COLL')
-       end if
+       if(iout/=std_out) call wrtout(iout,message,'COLL')
        call wrtout(std_out,message,'COLL')
      end if
 
@@ -255,14 +242,6 @@ end subroutine getcut
 !! SOURCE
 
 subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getmpw'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -367,13 +346,6 @@ end subroutine getmpw
 !! SOURCE
 
 subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkkin'
-!End of the abilint section
 
  implicit none
 
@@ -505,7 +477,7 @@ end subroutine mkkin
 !!  character(len=4) : mode_paral=either 'COLL' or 'PERS', tells whether
 !!   the loop over k points must be done by all processors or not,
 !!   in case of parallel execution.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!  nband(nkpt*nsppol)=number of bands at each k point
 !!  nkpt=number of k points
@@ -533,15 +505,6 @@ end subroutine mkkin
 subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 & mode_paral,mpi_enreg,mpw,npwarr,npwtot,nsppol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpgio'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -565,10 +528,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)' kpgio : enter '
-!ENDDEBUG
-
 !Define me
  me=mpi_enreg%me_kpt
 
@@ -584,7 +543,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 &         '  of spin up and spin down bands, but input is :',ch10,&
 &         '  nband(up)=',nband_k,', nband(down)=',nband_down,',',ch10,&
 &         '  for ikpt=',ikpt,'.',ch10,&
-&         '  Action : correct nband in your input file.'
+&         '  Action: correct nband in your input file.'
 !        MG: Tests v3(10,11,17) and v6(67) fail if this test is enabled
 !        call wrtout(std_out,message,mode_paral)
        end if
@@ -626,7 +585,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !  &   '  At k point number',ikpt,' k=',(kptns(mu,ikpt),mu=1,3),ch10,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
-!  &   '  Action : change either ecut or nband in input file.'
+!  &   '  Action: change either ecut or nband in input file.'
 !  MSG_ERROR(message)
 !  end if
 
@@ -639,9 +598,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if
 
- if (mpi_enreg%nproc>1) then
-   call wrtout(std_out,' kpgio: loop on k-points done in parallel','COLL')
- end if
+ !if (mpi_enreg%nproc>1) call wrtout(std_out,' kpgio: loop on k-points done in parallel','COLL')
 
 !XG030513 MPIWF : now, one should sum npwarr over all processors
 !of the WF group, to get npwtot (to be spread on all procs of the WF group
@@ -657,10 +614,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
      end if
    end if
  end do
-
-!DEBUG
-!write(std_out,*)' kpgio : exit '
-!ENDDEBUG
 
 end subroutine kpgio
 !!***
@@ -699,13 +652,6 @@ end subroutine kpgio
 !! SOURCE
 
 subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ph1d3d'
-!End of the abilint section
 
  implicit none
 
@@ -819,13 +765,6 @@ end subroutine ph1d3d
 
 subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -919,13 +858,6 @@ end subroutine getph
 !! SOURCE
 
 subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kpgstr'
-!End of the abilint section
 
  implicit none
 
@@ -1043,13 +975,6 @@ end subroutine kpgstr
 
 subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkkpg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1105,6 +1030,315 @@ subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
  DBG_EXIT("COLL")
 
 end subroutine mkkpg
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mkpwind_k
+!! NAME
+!! mkpwind_k
+!!
+!! FUNCTION
+!! Make plane wave index at k point for basis at second k point,
+!! needed to compute overlaps $\langle u_{k,n}|u_{k+b,n}\rangle$
+!! as appear in Berry phase derived quantities
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!! dk(3)=real vector difference of ket kpt - bra kpt
+!! dtset <type(dataset_type)>=all input variables in this dataset
+!! fnkpt=number of kpts in full BZ
+!! fkptns=kpts in full BZ
+!! gmet(3,3)=metric in reciprocal space
+!! indkk_f2ibz(fnkpt,6)=information on folding from FBZ to IBZ (see initberry or initorbmag)
+!! ikpt=index of bra k pt in FBZ
+!! ikpt1=index of neighbour ket k pt in FBZ
+!! kg(3,dtset%mpw*dtset%mkmem)=planewave basis data
+!! kgindex(dtset%nkpt)= index of kg per kpt
+!! mpi_enreg=information about MPI parallelization
+!! npwarr(dtset%nkpt)=npw at each kpt
+!! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
+!!   reciprocal space primitive translations
+!!
+!! OUTPUT
+!! pwind_k1(dtset%mpw)=output index of ikpt1 basis states refered to ikpt
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      chern_number
+!!
+!! CHILDREN
+!!      kpgsph
+!!
+!! SOURCE
+
+subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
+& kg,kgindex,mpi_enreg,npwarr,pwind_k1,symrec)
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: fnkpt,ikpt,ikpt1
+  type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: indkk_f2ibz(fnkpt,6),kg(3,dtset%mpw*dtset%mkmem),kgindex(dtset%nkpt)
+  integer,intent(in) :: npwarr(dtset%nkpt)
+  integer,intent(in) :: symrec(3,3,dtset%nsym)
+  integer,intent(out) :: pwind_k1(dtset%mpw)
+  real(dp),intent(in) :: dk(3),fkptns(3,fnkpt),gmet(3,3)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: exchn2n3d,idum1,ikg1,ikpti,ikpt1i,ipw,istwf_k,isym,isym1,jpw,npw_k,npw_k1
+  real(dp) :: ecut_eff
+
+  !arrays
+  integer,allocatable :: kg1_k(:,:)
+  real(dp) :: dg(3),dum33(3,3),kpt1(3),iadum(3),iadum1(3)
+
+  ! ***********************************************************************
+
+  ikpti = indkk_f2ibz(ikpt,1)
+  ikpt1i = indkk_f2ibz(ikpt1,1)
+
+  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
+
+  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
+  exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
+
+  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
+
+  kg1_k(:,:) = 0
+  kpt1(:) = dtset%kptns(:,ikpt1i)
+  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
+
+  !
+  !        Deal with symmetry transformations
+  !
+
+  !        bra k-point k(b) and IBZ k-point kIBZ(b) related by
+  !        k(b) = alpha(b) S(b)^t kIBZ(b) + G(b)
+  !        where alpha(b), S(b) and G(b) are given by indkk_f2ibz
+  !
+  !        For the ket k-point:
+  !        k(k) = alpha(k) S(k)^t kIBZ(k) + G(k) - GBZ(k)
+  !        where GBZ(k) takes k(k) to the BZ
+  !
+
+  isym  = indkk_f2ibz(ikpt,2)
+  isym1 = indkk_f2ibz(ikpt1,2)
+
+  !        Construct transformed G vector that enters the matching condition:
+  !        alpha(k) S(k)^{t,-1} ( -G(b) - GBZ(k) + G(k) )
+
+  dg(:) = -indkk_f2ibz(ikpt,3:5) &
+       & - nint(-fkptns(:,ikpt) - dk(:) - tol10 + fkptns(:,ikpt1)) &
+       & + indkk_f2ibz(ikpt1,3:5)
+
+  iadum(:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),dg(:))
+
+  dg(:) = iadum(:)
+
+  !        Construct S(k)^{t,-1} S(b)^{t}
+
+  dum33(:,:) = MATMUL(TRANSPOSE(dtset%symrel(:,:,isym1)),symrec(:,:,isym))
+
+  !        Construct alpha(k) alpha(b)
+
+  pwind_k1(:) = 0
+  npw_k = npwarr(ikpti)
+  do ipw = 1, npw_k
+
+     !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
+     !          not for the FBZ k point
+     iadum(:) = kg(:,kgindex(ikpti) + ipw)
+
+     !          to determine r.l.v. matchings, we transformed the bra vector
+     !          Rotation
+     iadum1(:)=0
+     do idum1=1,3
+        iadum1(:)=iadum1(:)+dum33(:,idum1)*iadum(idum1)
+     end do
+     iadum(:)=iadum1(:)
+     iadum(:) = iadum(:) + dg(:)
+
+     do jpw = 1, npw_k1
+        iadum1(1:3) = kg1_k(1:3,jpw)
+        if ( (iadum(1) == iadum1(1)).and. &
+             &     (iadum(2) == iadum1(2)).and. &
+             &     (iadum(3) == iadum1(3)) ) then
+           pwind_k1(ipw) = jpw
+           ! write(std_out,'(a,2i4)')'JWZ debug : bg ipw == jpw ',ipw,jpw
+           exit
+        end if
+     end do
+  end do
+
+  ABI_DEALLOCATE(kg1_k)
+
+end subroutine mkpwind_k
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/mknucdipmom_k
+!! NAME
+!! mknucdipmom_k
+!!
+!! FUNCTION
+!! compute Hamiltonian in reciprocal space due to array of nuclear
+!! dipole moments, at a given k point
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2018 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! gmet(3,3)=metric for reciprocal space vectors
+!! gprimd(3,3)=recip space translation vectors
+!! kg(3,npw)=reduced planewave coordinates at current k point
+!! kpt(3)=current k point, reduced coordinates
+!! natom=number of atoms in cell
+!! nucdipmom(3,natom)=nuclear dipole moment vectors, at each atom (cartesian coords, atomic units)
+!! npw=number of planewaves
+!! rprimd(3,3)=real space translation vectors
+!! ucvol=unit cell volume
+!! xred(3,natom)=location of atoms in unit cell, in reduced coordinates
+!!
+!! OUTPUT
+!!  nucdipmom_k(npw*(npw+1)/2) = nuclear dipole moment Hamiltonian matrix, in
+!!                                 lower diagonal Hermitian packed storage, at current k point
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!! Given nuclear magnetic dipoles on the atomic sites, the first-order Hamiltonian term
+!! is $(-q/m)(\mu_0/4\pi)\sum\frac{m_I\times(r-I)}{|r-I|^3}\cdot p$, where the sum is over
+!! atomic positions I and m_I is the nuclear magnetic dipole moment vector on site I
+!! (may be zero). This is in SI units. In atomic units, the formula for electrons is
+!! $\alpha^2 \sum \frac{m_I\times(r-I)}{|r-I|^3}\cdot p$ where \alpha is the fine structure
+!! constant.
+!! In reciprocal space, the <G'+k|H|G+k> matrix element is
+!! 4\pi i \alpha^2/\Omega \exp(2\pi i (G-G')) m\cdot (G-G')\times (k+G) / |(G-G')|^2
+!! below we handle the scalar triple product m\cdot (G-G')\times (k+G) fully in reduced coords
+!
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: natom,npw
+  real(dp),intent(in) :: ucvol
+
+  !arrays
+  integer,intent(in) :: kg(3,npw)
+  real(dp),intent(in) :: gmet(3,3),kpt(3),nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
+  complex(dpc),intent(out) :: nucdipmom_k(npw*(npw+1)/2)
+
+  !Local variables-------------------------------
+  !scalars
+  integer :: atom_nd_tot,col,iatom,ndp_index,row
+  real(dp) :: dg2,phasefac,scale_conversion
+  complex(dpc) :: cphasefac,cscale_conversion
+  !arrays
+  integer :: atom_nd(natom)
+  real(dp) :: crpr(3), crpr_cart(3), dgp_red(3), gpk_red(3)
+
+  ! *************************************************************************
+  !
+
+  ! scale conversion from SI to atomic units,
+  ! here \alpha^2 where \alpha is the fine structure constant
+  scale_conversion = 1.d0/(InvFineStruct*InvFineStruct)
+  ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
+  ! 4\pi i comes from series expansion of plane waves, and ucvol comes from integration over space
+  cscale_conversion = CMPLX(zero,four_pi*scale_conversion/ucvol)
+  
+  ! make list of atoms with non-zero nuclear magnetic dipoles
+  atom_nd_tot = 0
+  do iatom = 1, natom
+     if(any(abs(nucdipmom(:,iatom))>tol12)) then
+        atom_nd_tot = atom_nd_tot + 1
+        atom_nd(atom_nd_tot) = iatom
+     end if
+  end do
+
+  ndp_index = 0
+  do col=1,npw ! enumerate plane waves G
+     ! form k + G at this k point for current plane wave (this is the ket |k+G> )
+     ! in reduced coordinates
+     gpk_red(1)=dble(kg(1,col))+kpt(1)
+     gpk_red(2)=dble(kg(2,col))+kpt(2)
+     gpk_red(3)=dble(kg(3,col))+kpt(3)
+
+     do row=col,npw ! enumerate lower diagonal from 1 to G
+        ! index of the current matrix element, in lower triangular packed storage
+        ! "packed sequentially, column by column"
+        ndp_index = ndp_index + 1
+        nucdipmom_k(ndp_index) = czero
+
+        ! form G-G' = \Delta G at this k pt (this is the bra <k+G'| )
+        ! in reduced coordinates
+        dgp_red(1)=dble(kg(1,col)-kg(1,row))
+        dgp_red(2)=dble(kg(2,col)-kg(2,row))
+        dgp_red(3)=dble(kg(3,col)-kg(3,row))
+
+        ! compute |\Delta G|^2
+        ! must use gmet metric because G's are in reduced coords in reciprocal space
+        dg2 = DOT_PRODUCT(dgp_red,MATMUL(gmet,dgp_red))
+        ! if \Delta G = 0, Hamiltonian term is zero and move on to next one
+        if (abs(dg2)<tol8) then
+           nucdipmom_k(ndp_index)=czero
+           cycle
+        end if
+
+        ! form \Delta G x (k+G) ; note that both are in reduced coords at this point
+        crpr(1) =  dgp_red(2)*gpk_red(3) - dgp_red(3)*gpk_red(2)
+        crpr(2) = -dgp_red(1)*gpk_red(3) + dgp_red(3)*gpk_red(1)
+        crpr(3) =  dgp_red(1)*gpk_red(2) - dgp_red(2)*gpk_red(1)
+
+        ! convert to cart coords using gprimd(\Delta G) x gprimd(k+G) =
+        ! det(gprimd)*(gprimd^{-1,T})(\Delta G x (k+G)) =
+        ! 1/ucvol * rprimd * (\Delta G x (k+G))
+        crpr_cart(1:3) = MATMUL(rprimd(1:3,1:3),crpr(1:3))/ucvol
+
+        ! loop over the atoms with non-zero nuclear dipoles
+        ! phase factors exp(i*\Delta G*I) where I is ion position,
+        ! might be retrievable from ph1d, need to check
+        do iatom = 1, atom_nd_tot
+           phasefac = two_pi*DOT_PRODUCT(dgp_red,xred(:,atom_nd(iatom)))
+           cphasefac = CMPLX(cos(phasefac),sin(phasefac))
+           nucdipmom_k(ndp_index) = nucdipmom_k(ndp_index) + &
+                & cscale_conversion*cphasefac*DOT_PRODUCT(nucdipmom(1:3,atom_nd(iatom)),crpr_cart(1:3))/dg2
+        end do ! end loop over atoms with nonzero dipoles
+
+     end do ! end loop over G' = G to npw
+
+  end do ! end loop over G = 1 to npw
+
+end subroutine mknucdipmom_k
 !!***
 
 end module m_kg

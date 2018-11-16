@@ -2,6 +2,7 @@
 description: How to define frequency meshes (on the imaginary and real axes) for MBPT calculations
 authors: MG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to define frequency meshes (on the imaginary and real axes) 
 for MBPT calculations with the ABINIT package.
@@ -26,5 +27,5 @@ are gathered.
 
 ## Tutorials
 
-* [[lesson:gw2|The second lesson on GW]] deals with the computation of the quasi-particle band structure of Aluminum, in the GW approximation (so, much better than the Kohn-Sham LDA band structure) without using the plasmon-pole model. 
+* [[tutorial:gw2|The second tutorial on GW]] deals with the computation of the quasi-particle band structure of Aluminum, in the GW approximation (so, much better than the Kohn-Sham LDA band structure) without using the plasmon-pole model. 
 

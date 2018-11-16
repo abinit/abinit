@@ -26,7 +26,7 @@
 MODULE m_cplxtools
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
 
@@ -116,13 +116,6 @@ CONTAINS  !=====================================================================
 
 subroutine cplx_fromreal(n,ireal,ocplx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_fromreal'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -170,13 +163,6 @@ end subroutine cplx_fromreal
 
 subroutine cplx_filter(n, x, mask)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_filter'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -218,13 +204,6 @@ end subroutine cplx_filter
 !! SOURCE
 
 function cplx_real_zdotc(n,x,y) result(res)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_real_zdotc'
-!End of the abilint section
 
  implicit none
 
@@ -273,13 +252,6 @@ end function cplx_real_zdotc
 !! SOURCE
 
 subroutine cplx_zaxpby(n,a,x,b,y)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_zaxpby'
-!End of the abilint section
 
  implicit none
 
@@ -331,13 +303,6 @@ end subroutine cplx_zaxpby
 !! SOURCE
 
 subroutine cplx_zgemv(trans,nrows,ncols,mat,vec,matvec,alpha,beta)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_zgemv'
-!End of the abilint section
 
  implicit none
 
@@ -412,13 +377,6 @@ end subroutine cplx_zgemv
 
 subroutine cplx_zgemm(transa,transb,npws,ncola,ncolb,amat,bmat,cmat,alpha,beta)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_zgemm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -489,13 +447,6 @@ end subroutine cplx_zgemm
 !! SOURCE
 
 subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_box2gsph_spc'
-!End of the abilint section
 
  implicit none
 
@@ -600,13 +551,6 @@ end subroutine cplx_box2gsph_spc
 !! SOURCE
 
 subroutine cplx_box2gsph_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_box2gsph_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -717,13 +661,6 @@ end subroutine cplx_box2gsph_dpc
 !! SOURCE
 
 subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,oarrbox)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_gsph2box_spc'
-!End of the abilint section
 
  implicit none
 
@@ -895,13 +832,6 @@ end subroutine cplx_gsph2box_spc
 
 subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,oarrbox)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_gsph2box_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1061,13 +991,6 @@ end subroutine cplx_gsph2box_dpc
 
 subroutine cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_setaug_zero_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1132,13 +1055,6 @@ end subroutine cplx_setaug_zero_spc
 !! SOURCE
 
 subroutine cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_setaug_zero_dpc'
-!End of the abilint section
 
  implicit none
 
@@ -1207,13 +1123,6 @@ end subroutine cplx_setaug_zero_dpc
 !! SOURCE
 
 subroutine cplx_addtorho_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,ur,rho)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cplx_addtorho_dpc'
-!End of the abilint section
 
  implicit none
 

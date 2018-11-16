@@ -85,7 +85,7 @@ program optic
  use m_errors
  use m_xmpi
  use m_xomp
- use m_profiling_abi
+ use m_abicore
  use m_build_info
  use m_optic_tools
  use m_wfk
@@ -98,21 +98,13 @@ program optic
  use netcdf
 #endif
 
+ use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein
+ use m_symtk,          only : mati3inv, matr3inv
  use m_geometry,       only : metric
  use m_io_tools,       only : flush_unit, open_file, file_exists, get_unit
  use m_numeric_tools,  only : c2r
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, endswith
- use m_crystal_io,     only : crystal_ncwrite
- !use m_specialmsg,only : specialmsg_getcount
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'optic'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
 
  implicit none
 
@@ -146,22 +138,17 @@ program optic
  type(crystal_t) :: cryst
  type(eprenorms_t) :: Epren
 !arrays
- integer,allocatable :: istwfk(:), npwarr(:)
- integer,allocatable :: nband(:), symrel(:,:,:), symrec(:,:,:)
- real(dp) :: tsec(2)
- real(dp) :: gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
- real(dp),allocatable :: symcart(:,:,:)
- real(dp),allocatable :: kpt(:,:),wmesh(:)
- real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:)
- real(dp),allocatable :: eig0tmp(:), eigen0(:)
+ integer,allocatable :: istwfk(:), npwarr(:), nband(:), symrel(:,:,:), symrec(:,:,:)
+ real(dp) :: tsec(2), gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
+ real(dp),allocatable :: symcart(:,:,:), kpt(:,:),wmesh(:)
+ real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:), eig0tmp(:), eigen0(:)
  real(dp),target,allocatable :: eigen11(:),eigen12(:),eigen13(:)
- real(dp),pointer :: outeig(:)
  real(dp),allocatable :: occ(:),wtk(:),eigtmp(:)
+ real(dp), ABI_CONTIGUOUS pointer :: outeig(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
  logical :: use_ncddk(0:3)
  character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
  character(len=fnlen) :: infiles(0:3)
-
 ! for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: prefix,tmp_radix
  character(len=10) :: s1,s2,s3,stemp
@@ -259,7 +246,7 @@ program optic
    ! this info is not reported in the header and the offsets in wfk_compute_offsets
    ! are always computed assuming the presence of the cg
 
-   ! TODO: one should perform basic consistency tests for the GS WFK and the DDK files, e.g.
+   ! TODO: one should perform basic consistency tests for the GS WFK and the EVK files, e.g.
    ! k-points and their order, spins, number of bands could differ in the four files.
    ! Note indeed that we are assuming the same numer of bands in all the files.
    call nctk_fort_or_ncfile(wfkfile, iomode, msg)
@@ -269,10 +256,10 @@ program optic
    ! Get header from the gs file
    call hdr_copy(wfk0%hdr, hdr)
 
-   ! Read ddk here from WFK files or afterwards from DDK.nc
+   ! Read ddk here from WFK files or afterwards from EVK.nc
    use_ncddk = .False.
    do ii=1,3
-     use_ncddk(ii) = endswith(infiles(ii), "_DDK.nc")
+     use_ncddk(ii) = endswith(infiles(ii), "_EVK.nc")
      if (.not. use_ncddk(ii)) then
        call nctk_fort_or_ncfile(infiles(ii), iomode, msg)
        if (len_trim(msg) /= 0) MSG_ERROR(msg)
@@ -285,7 +272,7 @@ program optic
    do ii=1,2
      if (.not. use_ncddk(ii) .and. .not. use_ncddk(ii+1)) then
        if (wfk_compare(wfks(ii), wfks(ii+1)) /= 0) then
-         write(msg, "(2(a,i0,a))")"ddkfile", ii," and ddkfile ",ii+1, ", are not consistent. see above messages"
+         write(msg, "(2(a,i0,a))")"evkfile", ii," and evkfile ",ii+1, ", are not consistent. see above messages"
          MSG_ERROR(msg)
        end if
      end if
@@ -539,7 +526,7 @@ program optic
    ! Add header, crystal, and ks_ebands
    ! Note that we write the KS bands without EPH interaction (if any).
    NCF_CHECK(hdr_ncwrite(hdr, optic_ncid, 666, nc_define=.True.))
-   NCF_CHECK(crystal_ncwrite(cryst, optic_ncid))
+   NCF_CHECK(cryst%ncwrite(optic_ncid))
    NCF_CHECK(ebands_ncwrite(ks_ebands, optic_ncid))
 
    ! Add optic input variables.
@@ -548,21 +535,19 @@ program optic
    ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: "do_antiresonant", "do_ep_renorm"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-   "broadening", "domega", "maxomega", "scissor", "tolerance"])
+    "broadening", "domega", "maxomega", "scissor", "tolerance"])
    NCF_CHECK(ncerr)
 
    ! Define arrays containing output results
-   ncerr = nctk_def_arrays(optic_ncid, [ &
-   nctkarr_t('wmesh', "dp", "nomega") &
-   ])
+   ncerr = nctk_def_arrays(optic_ncid, [nctkarr_t('wmesh', "dp", "nomega")])
    NCF_CHECK(ncerr)
 
    if (num_lin_comp > 0) then
      ! Linear optic results.
      NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("linopt_ncomp", num_lin_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-     nctkarr_t('linopt_components', "int", "linopt_ncomp"), &
-     nctkarr_t('linopt_epsilon', "dp", "two, nomega, linopt_ncomp, ntemp") &
+      nctkarr_t('linopt_components', "int", "linopt_ncomp"), &
+      nctkarr_t('linopt_epsilon', "dp", "two, nomega, linopt_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
@@ -571,13 +556,13 @@ program optic
      ! Second harmonic generation.
      NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("shg_ncomp", num_nonlin_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-     nctkarr_t('shg_components', "int", "shg_ncomp"), &
-     nctkarr_t('shg_inter2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
-     nctkarr_t('shg_inter1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
-     nctkarr_t('shg_intra2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
-     nctkarr_t('shg_intra1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
-     nctkarr_t('shg_intra1wS', "dp", "two, nomega, shg_ncomp, ntemp"), &
-     nctkarr_t('shg_chi2tot', "dp", "two, nomega, shg_ncomp, ntemp") &
+       nctkarr_t('shg_components', "int", "shg_ncomp"), &
+       nctkarr_t('shg_inter2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_inter1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1wS', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_chi2tot', "dp", "two, nomega, shg_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
@@ -586,11 +571,11 @@ program optic
      ! linear electro-optic (LEO) susceptibility
      NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("leo_ncomp", num_linel_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-     nctkarr_t('leo_components', "int", "leo_ncomp"), &
-     nctkarr_t('leo_chi', "dp", "two, nomega, leo_ncomp, ntemp"), &
-     nctkarr_t('leo_eta', "dp", "two, nomega, leo_ncomp, ntemp"), &
-     nctkarr_t('leo_sigma', "dp", "two, nomega, leo_ncomp, ntemp"), &
-     nctkarr_t('leo_chi2tot', "dp", "two, nomega, leo_ncomp, ntemp") &
+       nctkarr_t('leo_components', "int", "leo_ncomp"), &
+       nctkarr_t('leo_chi', "dp", "two, nomega, leo_ncomp, ntemp"), &
+       nctkarr_t('leo_eta', "dp", "two, nomega, leo_ncomp, ntemp"), &
+       nctkarr_t('leo_sigma', "dp", "two, nomega, leo_ncomp, ntemp"), &
+       nctkarr_t('leo_chi2tot', "dp", "two, nomega, leo_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
@@ -599,13 +584,13 @@ program optic
      ! non-linear electro-optic susceptibility
      NCF_CHECK(nctk_def_dims(optic_ncid, nctkdim_t("leo2_ncomp", num_nonlin2_comp)))
      ncerr = nctk_def_arrays(optic_ncid, [ &
-     nctkarr_t('leo2_components', "int", "leo2_ncomp"), &
-     nctkarr_t('leo2_chiw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
-     nctkarr_t('leo2_etaw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
-     nctkarr_t('leo2_chi2w', "dp", "two, nomega, leo2_ncomp, ntemp"), &
-     nctkarr_t('leo2_eta2w', "dp", "two, nomega, leo2_ncomp, ntemp"), &
-     nctkarr_t('leo2_sigmaw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
-     nctkarr_t('leo2_chi2tot', "dp", "two, nomega, leo2_ncomp, ntemp") &
+       nctkarr_t('leo2_components', "int", "leo2_ncomp"), &
+       nctkarr_t('leo2_chiw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_etaw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_chi2w', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_eta2w', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_sigmaw', "dp", "two, nomega, leo2_ncomp, ntemp"), &
+       nctkarr_t('leo2_chi2tot', "dp", "two, nomega, leo2_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if
@@ -645,14 +630,14 @@ program optic
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-   "broadening", "domega", "maxomega", "scissor", "tolerance"], &
+    "broadening", "domega", "maxomega", "scissor", "tolerance"], &
    [broadening, domega, maxomega, scissor, tolerance])
    NCF_CHECK(ncerr)
 #endif
  end if
 
  ABI_ALLOCATE(symcart,(3,3,nsym))
- !YG : we need to transpose gprimd since matrinv give the transpose of the inverse !
+ !YG: we need to transpose gprimd since matrinv give the transpose of the inverse!
  gprimd_trans = transpose(gprimd)
  call sym2cart(gprimd_trans,nsym,rprimd,symrel,symcart)
 
@@ -769,7 +754,7 @@ program optic
 
  call hdr_free(hdr)
  call ebands_free(ks_ebands)
- call crystal_free(cryst)
+ call cryst%free()
 
  call timein(tcpu,twall)
 

@@ -2,6 +2,7 @@
 description: How to perform a DMFT calculation
 authors: BAmadon
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a DMFT calculation with the ABINIT package.
 
@@ -104,5 +105,5 @@ quantities.
 
 ## Tutorials
 
-* [[lesson:dmft|The lesson on DFT+DMFT]] shows how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite: DFT+U.
+* [[tutorial:dmft|The tutorial on DFT+DMFT]] shows how to perform a DFT+DMFT calculation on SrVO3 using projected Wannier functions. Prerequisite: DFT+U.
 

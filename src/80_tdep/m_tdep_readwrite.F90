@@ -8,7 +8,7 @@ module m_tdep_readwrite
   
   use defs_basis
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_xmpi
   use m_abihist
   use m_abimover, only : abimover
@@ -18,7 +18,7 @@ module m_tdep_readwrite
 
   type Input_Variables_type
 
-    integer :: Impose_Symetry
+    integer :: Impose_Symetry=0
     integer :: natom
     integer :: natom_unitcell
     integer :: nstep_max
@@ -33,7 +33,6 @@ module m_tdep_readwrite
     integer :: Slice
     integer :: Enunit
     integer :: ReadIFC
-    integer :: RotationalInv
     integer :: firstqptseg
     integer :: ngqpt1(3)
     integer :: ngqpt2(3)
@@ -65,6 +64,7 @@ module m_tdep_readwrite
     double precision, allocatable :: etot(:)
 !FB    double precision, allocatable :: sigma(:,:)
     character (len=2), allocatable :: special_qpt(:)
+    character (len=200) :: output_prefix
     
   end type Input_Variables_type
 
@@ -110,13 +110,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  subroutine tdep_print_Aknowledgments(InVar)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_print_Aknowledgments'
-!End of the abilint section
-
   implicit none 
 
   type(Input_Variables_type) :: InVar
@@ -138,19 +131,19 @@ contains
   write(stdout,'(a)') ' Note also that it will be of great value to readers of publications presenting these results,'
   write(stdout,'(a)') ' to read papers enabling them to understand the theoretical formalism and details'
   write(stdout,'(a)') ' of the ABINIT implementation.'
-  write(stdout,'(a)') ' For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.'
+  write(stdout,'(a)') ' For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.'
   write(stdout,'(a)') ' '
-  write(stdout,'(a)') ' [1] Thermal evolution of vibrational properties of $\alpha$-U' 
-  write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).'
+  write(stdout,'(a)') '.[1] Thermal evolution of vibrational properties of $\\alpha$-U' 
+  write(stdout,'(a)') ' J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).' ! [[cite:Bouchet2015]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' This paper is also available at http://www.arxiv.org/abs/xxxx'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [2] Lattice dynamics of anharmonic solids from first principles'
-  write(stdout,'(a)') ' O. Hellman and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).'
+  write(stdout,'(a)') ' O. Hellman and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).' ! [[cite:Hellman2011]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
   write(stdout,'(a)') ' '
   write(stdout,'(a)') ' [3] Temperature dependent effective potential method for accurate free energy calculations of solids'
-  write(stdout,'(a)') ' O. Hellman and P. Steneteg and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).'
+  write(stdout,'(a)') ' O. Hellman and P. Steneteg and I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).' ! [[cite:Hellman2013]]
   write(stdout,'(a)') ' Strong suggestion to cite this paper in your publications.'
 
  end subroutine tdep_print_Aknowledgments 
@@ -161,24 +154,20 @@ contains
 #if defined HAVE_NETCDF
  use netcdf
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tdep_ReadEcho'
-!End of the abilint section
-
   implicit none 
 
   integer :: ii,jj,tmp,istep,iatom,this_istep
   character (len=30):: string,NormalMode,DebugMode,Impose_Symetry,Use_ideal_positions
   character (len=30):: Born_charge,Dielec_constant,tolmotifinboxmatch,TheEnd,BZpath
-  character (len=30):: Order,Slice,Enunit,ReadIFC,RotationalInv,firstqptseg,Ngqpt1,Ngqpt2,DosDeltae
+  character (len=30):: Order,Slice,Enunit,ReadIFC,firstqptseg,Ngqpt1,Ngqpt2,DosDeltae
   double precision :: version_value,tmp1,tmp2,tmp3,nstep_int,nstep_float
   character (len=8) :: date
   character (len=10) :: time
   character (len=5) :: zone
-  character(len=7) :: filename
+  character(len=3),parameter :: month_names(12)=(/'Jan','Feb','Mar','Apr','May','Jun',&
+&                                                 'Jul','Aug','Sep','Oct','Nov','Dec'/)
+  character(len=500) :: filename
+  character(len=500) :: inputfilename
   integer :: values(8)  
   type(Input_Variables_type),intent(out) :: InVar
   type(abihist) :: Hist
@@ -191,10 +180,9 @@ contains
   real(dp), allocatable :: znucl(:)
 
 ! Define output files  
-  InVar%stdout=8
+  InVar%stdout=7
   InVar%stdlog=6
-  open(unit=InVar%stdout,file='data.out')
-  open(unit=InVar%stdlog,file='data.log')
+  !open(unit=InVar%stdlog,file='data.log')
 
 ! Define Keywords
   NormalMode='NormalMode'
@@ -210,7 +198,6 @@ contains
   Slice='Slice'
   Enunit='Enunit'
   ReadIFC='ReadIFC'
-  RotationalInv='RotationalInv'
   Ngqpt1='Ngqpt1'
   Ngqpt2='Ngqpt2'
   TolMotifInboxMatch='TolMotifInboxMatch'
@@ -222,7 +209,6 @@ contains
   InVar%Slice=1
   InVar%Enunit=0
   InVar%ReadIFC=0
-  InVar%RotationalInv=0
   InVar%firstqptseg=100
   InVar%tolread=1.d-8
   InVar%tolmotif=5.d-2
@@ -232,6 +218,7 @@ contains
   InVar%debug=.false.
   InVar%loto=.false.
   InVar%netcdf=.false.
+  InVar%Use_ideal_positions=0
   version_value=2.d0
 ! In order to have an accuracy better than 1meV  
   InVar%ngqpt1(:)=8
@@ -239,16 +226,34 @@ contains
 
 ! Check if a NetCDF file is available
   filename='HIST.nc'
+  inputfilename='input.in'
+  write(InVar%stdlog,'(a)',err=10) ' Give name for input file '
+  read(*, '(a)',err=10) inputfilename
+  write(InVar%stdlog, '(a)',err=10) '.'//trim(inputfilename)
+10 continue
+  write(InVar%stdlog,'(a)',err=11) ' Give name for HIST file '
+  read(*, '(a)',err=11) filename
+  write(InVar%stdlog, '(a)',err=11) '.'//trim(filename)
+11 continue
+  write(InVar%stdlog,'(a)', err=12)' Give root name for generic output files:'
+  read (*, '(a)', err=12) InVar%output_prefix
+  write (InVar%stdlog, '(a)', err=12 ) InVar%output_prefix 
+12 continue
+  if ( inputfilename == "" ) inputfilename='input.in'
+  if ( filename == "" ) filename='HIST.nc'
+
+  open(unit=InVar%stdout,file=trim(InVar%output_prefix)//'.out')
+
 
 #if defined HAVE_NETCDF
  !Open netCDF file
   ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
   if(ncerr /= NF90_NOERR) then
-    write(InVar%stdout,'(3a)') 'Could no open ',trim(filename),', starting from scratch'
+    write(InVar%stdout,'(3a)') '-'//'Could no open ',trim(filename),', starting from scratch'
     InVar%netcdf=.false.
   else
-    write(InVar%stdout,'(3a)') 'Succesfully open ',trim(filename),' for reading'
-    write(InVar%stdout,'(a)') 'Extracting information from NetCDF file...'
+    write(InVar%stdout,'(3a)') '-'//'Succesfully open ',trim(filename),' for reading'
+    write(InVar%stdout,'(a)') ' Extracting information from NetCDF file...'
     InVar%netcdf=.true.
   end if
 
@@ -257,7 +262,7 @@ contains
 &       natom_id,ntypat_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
     ABI_MALLOC(InVar%amu,(InVar%ntypat)); InVar%amu(:)=zero
     ABI_MALLOC(InVar%typat,(InVar%natom)); InVar%typat(:)=zero
-    ABI_MALLOC(znucl,(InVar%ntypat))
+    ABI_MALLOC(znucl,(InVar%ntypat)) ; znucl(:)=zero
     call read_csts_hist(ncid,dtion,InVar%typat,znucl,InVar%amu)
     ABI_FREE(znucl)
 
@@ -273,7 +278,7 @@ contains
 
 ! Write version, copyright, date...
   write(InVar%stdout,*) ' '
-  open(unit=40,file='input.in')
+  open(unit=40,file=inputfilename)
   read(40,*) string
   if (string.eq.NormalMode) then
     write(InVar%stdout,'(a,f6.1,a)') '.Version ', version_value,' of PHONONS'
@@ -292,13 +297,12 @@ contains
   write(InVar%stdout,'(a)') ' ABINIT is a project of the Universite Catholique de Louvain,'
   write(InVar%stdout,'(a)') ' Corning Inc. and other collaborators, see'
   write(InVar%stdout,'(a)') ' ~abinit/doc/developers/contributors.txt .'
-  write(InVar%stdout,'(a)') ' Please read ~abinit/doc/users/acknowledgments.html for suggested'
+  write(InVar%stdout,'(a)') ' Please read https://docs.abinit.org/theory/acknowledgments for suggested'
   write(InVar%stdout,'(a)') ' acknowledgments of the ABINIT effort.'
   write(InVar%stdout,'(a)') ' For more information, see http://www.abinit.org .'
 
   call date_and_time(date,time,zone,values)
-  write(InVar%stdout,'(a)') ' '
-  write(InVar%stdout,'(a,i2,a,i2,a,i4)') '.Starting date : ',values(3),'/',values(2),'/',values(1)
+  write(InVar%stdout,'(/,a,i2,1x,a,1x,i4,a)') '.Starting date : ',values(3),month_names(values(2)),values(1),'.'
 
 ! Read (and echo) of input variables from the input.in input file
   write(InVar%stdout,*) ' '
@@ -310,10 +314,11 @@ contains
   write(InVar%stdout,'(a)') ' ======================= Define the unitcell =================================' 
   read(40,*) string,InVar%bravais(1),InVar%bravais(2)
   write(InVar%stdout,'(1x,a20,1x,i4,1x,i4)') string,InVar%bravais(1),InVar%bravais(2)
-  if (InVar%bravais(1).eq.2) then
+  if ((InVar%bravais(1).eq.2).or.(InVar%bravais(1).eq.5)) then
     read(40,*) string,InVar%angle_alpha
     write(InVar%stdout,'(1x,a20,1x,f15.10)') string,InVar%angle_alpha
   else
+    !read(40,*)
     InVar%angle_alpha=90.d0
   end if
   read(40,*) string,InVar%natom_unitcell
@@ -431,6 +436,9 @@ contains
     else if (string.eq.Order) then  
       read(40,*) string,InVar%Order,InVar%Rcut3
       write(InVar%stdout,'(1x,a20,1x,i4,1x,f15.10)') string,InVar%Order,InVar%Rcut3
+      if (InVar%Rcut3.gt.InVar%Rcut) then
+        MSG_ERROR('The cutoff radius of the third order cannot be greater than the second order one.')
+      end if  
     else if (string.eq.Slice) then  
       read(40,*) string,InVar%Slice
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%Slice
@@ -454,9 +462,6 @@ contains
       else  
         write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ReadIFC
       end if  
-    else if (string.eq.RotationalInv) then  
-      read(40,*) string,InVar%RotationalInv
-      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%RotationalInv
     else if (string.eq.Firstqptseg) then  
       read(40,*) string,InVar%firstqptseg
       write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%firstqptseg
@@ -465,7 +470,7 @@ contains
       write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt1(:)
     else if (string.eq.Ngqpt2) then  
       read(40,*) string,InVar%ngqpt2(:)
-      write(InVar%stdout,'(1x,a20,1x,i4)') string,InVar%ngqpt2(:)
+      write(InVar%stdout,'(1x,a20,1x,3(i4,1x))') string,InVar%ngqpt2(:)
     else if (string.eq.tolmotifinboxmatch) then  
       read(40,*) string,InVar%tolmotif,InVar%tolinbox,InVar%tolmatch
       write(InVar%stdout,'(1x,a20,f10.5)') 'tolmotif            ',InVar%tolmotif
@@ -474,7 +479,8 @@ contains
     else if (string.eq.TheEnd) then
       exit
     else 
-      MSG_ERROR('ONE KEYWORD IS NOT ALLOWED')
+      write(InVar%stdout,'(a,1x,a)') 'This keyword is not allowed',string
+      MSG_ERROR('A keyword is not allowed. See the log file.')
     end if  
   end do
 ! Output very important informations 

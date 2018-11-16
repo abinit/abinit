@@ -29,13 +29,12 @@
 MODULE m_ioarr
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_wffile
  use m_errors
  use m_nctk
  use m_crystal
- use m_crystal_io
  use m_ebands
  use m_hdr
  use m_pawrhoij
@@ -54,8 +53,9 @@ MODULE m_ioarr
  use m_fstrings,      only : sjoin, itoa, endswith
  use m_numeric_tools, only : interpolate_denpot
  use m_geometry,      only : metric
- use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
+ use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
  use m_distribfft,    only : init_distribfft_seq
+ use m_fourier_interpol,only : fourier_interpol
 
  implicit none
 
@@ -137,16 +137,6 @@ CONTAINS  !=====================================================================
 subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 &                ngfft,cplex,nfft,pawrhoij,rdwr,rdwrpaw,wvl_den,single_proc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ioarr'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
- use interfaces_65_paw
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -223,7 +213,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  end if
  call wrtout(std_out,message,'COLL')
 
- call wrtout(std_out,ABI_FUNC//': file name is '//TRIM(fildata),'COLL')
+ call wrtout(std_out, 'ioarr: file name is: '//TRIM(fildata),'COLL')
 
 #ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.
@@ -709,14 +699,6 @@ end subroutine ioarr
 
 subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftdatar_write'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -867,7 +849,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
      NCF_CHECK(nctk_open_modify(ncid, file_etsf, xmpi_comm_self))
      NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
      ! Add information on the crystalline structure.
-     NCF_CHECK(crystal_ncwrite(crystal, ncid))
+     NCF_CHECK(crystal%ncwrite(ncid))
      if (present(ebands)) then
        NCF_CHECK(ebands_ncwrite(ebands, ncid))
      end if
@@ -927,13 +909,6 @@ end subroutine fftdatar_write
 
 subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspden,datar,mpi_enreg,eigen)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftdatar_write_from_hdr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -958,7 +933,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
 ! *************************************************************************
 
  timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
- call crystal_from_hdr(crystal, hdr, timrev)
+ crystal = hdr_get_crystal(hdr, timrev)
 
  if (present(eigen)) then
      mband = maxval(hdr%nband)
@@ -974,7 +949,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
     call fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg)
  end if
 
- call crystal_free(crystal)
+ call crystal%free()
 
 end subroutine fftdatar_write_from_hdr
 !!***
@@ -1036,15 +1011,6 @@ end subroutine fftdatar_write_from_hdr
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
   check_hdr, allow_interp) ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_rhor'
- use interfaces_14_hidewrite
- use interfaces_65_paw
-!End of the abilint section
 
  implicit none
 
@@ -1217,8 +1183,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    if (ohdr%usepaw == 1) then
      ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
      call pawrhoij_nullify(pawrhoij_file)
-     call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
-         ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
+     call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+         ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
      call pawrhoij_copy(ohdr%pawrhoij, pawrhoij_file)
    end if
 
@@ -1250,8 +1216,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      if (my_rank /= master) then
        ABI_DT_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
-       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
-&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size)
+       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+&           ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
      end if
      if (size(ohdr%pawrhoij) /= size(pawrhoij)) then
        call pawrhoij_copy(ohdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
@@ -1358,13 +1324,6 @@ end subroutine read_rhor
 
 integer function fort_denpot_skip(unit, msg) result(ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fort_denpot_skip'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1432,13 +1391,6 @@ end function fort_denpot_skip
 
 subroutine denpot_spin_convert(denpot_in,nspden_in,denpot_out,nspden_out,fform,&
 &                              istart_in,istart_out,nelem) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'denpot_spin_convert'
-!End of the abilint section
 
  implicit none
 

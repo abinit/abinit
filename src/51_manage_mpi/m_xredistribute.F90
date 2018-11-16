@@ -34,7 +34,7 @@ module m_xredistribute
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -45,7 +45,7 @@ module m_xredistribute
  include 'mpif.h'
 #endif
 
- private 
+ private
 
  public :: xredistribute         ! Redistribute the work
 
@@ -74,7 +74,7 @@ CONTAINS  !===========================================================
 !!  rec_counts= number of received elements (final distribution)
 !!  rec_displs= positions of values received by the processors (final position)
 !!  nproc=number of processor
-!!  me=proc me 
+!!  me=proc me
 !!  spaceComm= MPI communicator
 !!
 !! OUTPUT
@@ -91,13 +91,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
   &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xredistribute_mpi_dp'
-!End of the abilint section
 
  implicit none
 
@@ -119,7 +112,7 @@ subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
  ier=0
 #if defined HAVE_MPI
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
- size = sum(send_counts) 
+ size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
    MSG_ERROR(msg)
@@ -134,7 +127,7 @@ subroutine xredistribute_mpi_dp(xval,send_counts,send_displs,recvbuf,&
    !--now distribute the total vector on the procs
    call MPI_SCATTERV(totbuff,rec_counts,rec_displs,MPI_DOUBLE_PRECISION,&
 &                    recvbuf,rec_counts(me),MPI_DOUBLE_PRECISION,&
-&                    0,spaceComm,ier)  
+&                    0,spaceComm,ier)
 
    ABI_DEALLOCATE(totbuff)
  end if
@@ -156,7 +149,7 @@ end subroutine xredistribute_mpi_dp
 !!  rec_counts= number of received elements (final distribution)
 !!  rec_displs= positions of values received by the processors (final position)
 !!  nproc=number of processor
-!!  me=proc me 
+!!  me=proc me
 !!  spaceComm= MPI communicator
 !!
 !! OUTPUT
@@ -173,13 +166,6 @@ end subroutine xredistribute_mpi_dp
 !! SOURCE
 subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
   &                              rec_counts,rec_displs,me,nproc,spaceComm,ier)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xredistribute_mpi_2d_dp'
-!End of the abilint section
 
  implicit none
 
@@ -202,7 +188,7 @@ subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
  ier=0
 #if defined HAVE_MPI
  if (spaceComm /= MPI_COMM_SELF .and. spaceComm /= MPI_COMM_NULL) then
- size = sum(send_counts) 
+ size = sum(send_counts)
  if(size /=sum(rec_counts))then
    msg = 'the total sizes of sent and receved msg are not equal'
    MSG_ERROR(msg)
@@ -217,7 +203,7 @@ subroutine xredistribute_mpi_2d_dp(xval,send_counts,send_displs,recvbuf,&
    !--now distribute the total vector on the procs
    call MPI_SCATTERV(totbuff,rec_counts,rec_displs,MPI_DOUBLE_PRECISION,&
 &                    recvbuf,rec_counts(me),MPI_DOUBLE_PRECISION,&
-&                    0,spaceComm,ier)  
+&                    0,spaceComm,ier)
    ABI_DEALLOCATE(totbuff)
  end if
 #endif

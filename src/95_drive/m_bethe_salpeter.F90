@@ -33,7 +33,7 @@ module m_bethe_salpeter
  use defs_abitypes
  use defs_wvltypes
  use m_bs_defs
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_screen
@@ -48,12 +48,12 @@ module m_bethe_salpeter
  use m_fstrings,        only : strcat, sjoin, endswith
  use m_io_tools,        only : file_exists, iomode_from_fname
  use m_geometry,        only : mkrdim, metric, normv
- use m_abilasi,         only : matrginv
- use m_mpinfo,          only : destroy_mpi_enreg
+ use m_hide_lapack,     only : matrginv
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
  use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
- use m_crystal,         only : crystal_t, crystal_free, crystal_print, idx_spatial_inversion
- use m_crystal_io,      only : crystal_ncwrite, crystal_from_hdr
+ use m_fft,             only : fourdp
+ use m_crystal,         only : crystal_t, crystal_print
  use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
@@ -62,13 +62,13 @@ module m_bethe_salpeter
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
  use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj
+ use m_wfd,             only : wfd_init, wfd_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
  use m_io_screening,    only : hscr_t, hscr_free, hscr_io, hscr_bcast, hscr_from_file, hscr_print
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
+ use m_exc_analyze,     only : exc_den
  use m_eprenorms,       only : eprenorms_t, eprenorms_free, eprenorms_from_epnc, eprenorms_bcast
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -76,13 +76,26 @@ module m_bethe_salpeter
  use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                              pawrhoij_free, pawrhoij_get_nspden, symrhoij
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free,&
+&                              pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
- use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init
+ use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
+ use m_paw_sphharm,     only : setsym_ylm
+ use m_paw_denpot,      only : pawdenpot
+ use m_paw_init,        only : pawinit,paw_gencond
+ use m_paw_onsite,      only : pawnabla_init
  use m_paw_dmft,        only : paw_dmft_type
+ use m_paw_mkrho,       only : denfgr
+ use m_paw_nhat,        only : nhatgrid,pawmknhat
+ use m_paw_tools,       only : chkpawovlp,pawprt
+ use m_paw_correlations,only : pawpuxinit
+ use m_exc_build,       only : exc_build_ham
+ use m_setvtr,          only : setvtr
+ use m_mkrho,           only : prtrhomxmn
+ use m_pspini,          only : pspini
+ use m_drivexc,         only : mkdenpos
 
  implicit none
 
@@ -166,7 +179,7 @@ contains
 !!      pawnabla_init,pawprt,pawpuxinit,pawpwff_free,pawpwff_init
 !!      pawrhoij_alloc,pawrhoij_copy,pawrhoij_free,pawtab_get_lsize
 !!      pawtab_print,print_ngfft,prtrhomxmn,pspini,rdqps,rotate_fft_mesh
-!!      screen_free,screen_init,screen_nullify,setsymrhoij,setup_bse
+!!      screen_free,screen_init,screen_nullify,setsym_ylm,setup_bse
 !!      setup_bse_interp,setvtr,symdij,test_charge,timab,vcoul_free,wfd_free
 !!      wfd_init,wfd_mkrho,wfd_print,wfd_read_wfk,wfd_reset_ur_cprj,wfd_rotate
 !!      wfd_test_ortho,wfd_wave_free,wrtout,xmpi_bcast
@@ -174,24 +187,6 @@ contains
 !! SOURCE
 
 subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bethe_salpeter'
- use interfaces_14_hidewrite
- use interfaces_41_xc_lowlevel
- use interfaces_51_manage_mpi
- use interfaces_53_ffts
- use interfaces_64_psp
- use interfaces_65_paw
- use interfaces_67_common
- use interfaces_69_wfdesc
- use interfaces_71_bse
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -208,11 +203,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_fourdp0=0,level=40,ipert0=0,idir0=0,cplex1=1,master=0,option1=1
- integer :: band,spin,ik_ibz,mqmem,iwarn !ii,
+ integer :: band,cplex_rhoij,spin,ik_ibz,mqmem,iwarn
  integer :: has_dijU,has_dijso,gnt_option,iomode
  integer :: ik_bz,mband
  integer :: choice
- integer :: ider !,ierr
+ integer :: ider
  integer :: usexcnhat,nfft_osc,mgfft_osc
  integer :: isym,izero
  integer :: optcut,optgr0,optgr1,optgr2,option,optrad,optrhoij,psp_gencond
@@ -236,20 +231,17 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(MPI_type) :: MPI_enreg_seq
  type(crystal_t) :: Cryst
  type(kmesh_t) :: Kmesh,Qmesh
- type(gsphere_t) :: Gsph_x,Gsph_c
- type(gsphere_t) :: Gsph_x_dense,Gsph_c_dense
+ type(gsphere_t) :: Gsph_x,Gsph_c,Gsph_x_dense,Gsph_c_dense
  type(Hdr_type) :: Hdr_wfk,Hdr_bse
- type(ebands_t) :: KS_BSt,QP_BSt
+ type(ebands_t) :: KS_BSt,QP_BSt,KS_BSt_dense,QP_BSt_dense
  type(Energies_type) :: KS_energies
  type(vcoul_t) :: Vcp
- type(wfd_t) :: Wfd
+ type(wfd_t) :: Wfd,Wfd_dense
  type(screen_t) :: W
  type(screen_info_t) :: W_info
  type(wvl_data) :: wvl
  type(kmesh_t) :: Kmesh_dense,Qmesh_dense
  type(Hdr_type) :: Hdr_wfk_dense
- type(ebands_t) :: KS_BSt_dense,QP_BSt_dense
- type(wfd_t) :: Wfd_dense
  type(double_grid_t) :: grid
  type(vcoul_t) :: Vcp_dense
  type(eprenorms_t) :: Epren
@@ -375,8 +367,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,xred)
 
    ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-   call pawrhoij_alloc(KS_Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays ===
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -409,7 +402,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! TODO solve problem with memory leak and clean this part as well as the associated flag
    call pawnabla_init(Psps%mpsang,Cryst%ntypat,Pawrad,Pawtab)
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,Cryst%rprimd,Cryst%symrec,Pawang%zarot)
 
    ! Initialize and compute data for LDA+U
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
@@ -424,12 +417,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%pawrhoij,KS_Pawrhoij)
 
-   ! Re-symmetrize symrhoij ===
+   ! Re-symmetrize rhoij ===
    ! this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1
-!  call symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
-!  &  Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
-!  &  Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
+!  call pawrhoij_symrhoij(KS_Pawrhoij,KS_Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert0,&
+!  &             Cryst%natom,Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
+!  &             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 
    ! Evaluate form factor of radial part of phi.phj-tphi.tphj ===
    rhoxsp_method=1 ! Arnaud-Alouani
@@ -522,15 +515,15 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
 
- call wfd_print(Wfd,header="Wavefunctions used to construct the e-h basis set",mode_paral='PERS')
+ call wfd%print(header="Wavefunctions used to construct the e-h basis set",mode_paral='PERS')
 
  call timab(651,2,tsec) ! bse(Init1)
  call timab(653,1,tsec) ! bse(rdkss)
 
- call wfd_read_wfk(Wfd,wfk_fname,iomode_from_fname(wfk_fname))
+ call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
 
  ! This test has been disabled (too expensive!)
- if (.False.) call wfd_test_ortho(Wfd,Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
+ if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
  call timab(653,2,tsec) ! bse(rdkss)
  call timab(655,1,tsec) ! bse(mkrho)
@@ -566,13 +559,13 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ABI_FREE(nband)
    ABI_FREE(keep_ur)
 
-   call wfd_print(Wfd_dense,header="Wavefunctions on the dense K-mesh used for interpolation",mode_paral='PERS')
+   call wfd_dense%print(header="Wavefunctions on the dense K-mesh used for interpolation",mode_paral='PERS')
 
    iomode = iomode_from_fname(dtfil%fnameabi_wfkfine)
-   call wfd_read_wfk(Wfd_dense,Dtfil%fnameabi_wfkfine,iomode)
+   call wfd_dense%read_wfk(Dtfil%fnameabi_wfkfine,iomode)
 
    ! This test has been disabled (too expensive!)
-   if (.False.) call wfd_test_ortho(Wfd_dense,Cryst,Pawtab,unit=std_out,mode_paral="COLL")
+   if (.False.) call wfd_dense%test_ortho(Cryst,Pawtab,unit=std_out,mode_paral="COLL")
  end if
 
  !=== Calculate the FFT index of $(R^{-1}(r-\tau))$ ===
@@ -596,7 +589,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  !* Evaluate Planewave part (complete charge in case of NC pseudos).
  !
  ABI_MALLOC(ks_rhor,(nfftf,Wfd%nspden))
- call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
+ call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
  !
  !=== Additional computation for PAW ===
  nhatgrdim=0
@@ -634,7 +627,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call paw_an_nullify(KS_paw_an)
 
    nkxc1=0
-   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
+   call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
 &   cplex1,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    ! Calculate onsite vxc with and without core charge ===
@@ -660,7 +653,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  ABI_MALLOC(ks_rhog,(2,nfftf))
 
- call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp0)
+ call fourdp(1,ks_rhog,ks_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp0)
 
  call timab(655,2,tsec) ! bse(mkrho)
  !
@@ -837,15 +830,15 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    !  * WARNING the first dimension of MPI_enreg MUST be Kmesh%nibz
    !  TODO here we should use nbsc instead of nbnds
 
-   call wfd_rotate(Wfd,Cryst,m_lda_to_qp)
+   call wfd%rotate(Cryst,m_lda_to_qp)
 
    ABI_FREE(m_lda_to_qp)
    !
    !  === Reinit the storage mode of Wfd as ug have been changed ===
    !  * Update also the wavefunctions for GW corrections on each processor
-   call wfd_reset_ur_cprj(Wfd)
+   call wfd%reset_ur_cprj()
 
-   call wfd_test_ortho(Wfd,Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
+   call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
    ! Compute QP occupation numbers.
    call wrtout(std_out,'bethe_salpeter: calculating QP occupation numbers','COLL')
@@ -855,11 +848,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    qp_vbik(:,:) = get_valence_idx(QP_BSt)
    ABI_FREE(qp_vbik)
 
-   call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
+   call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
  end if
 
  ABI_MALLOC(qp_rhog,(2,nfftf))
- call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Wfd%paral_kgb,0)
+ call fourdp(1,qp_rhog,qp_rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,0)
 
  ! States up to lomo-1 are useless now since only the states close to the gap are
  ! needed to construct the EXC Hamiltonian. Here we deallocate the wavefunctions
@@ -873,7 +866,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    if (Bsp%lomo_spin(spin)>1) bks_mask(1:Bsp%lomo_spin(spin)-1,:,spin)=.TRUE.
    if (Bsp%humo_spin(spin)+1<=Wfd%mband) bks_mask(Bsp%humo_spin(spin)+1:,:,spin)=.TRUE.
  end do
- call wfd_wave_free(Wfd,"All",bks_mask)
+ call wfd%wave_free("All",bks_mask)
  ABI_FREE(bks_mask)
  !
  ! ================================================================
@@ -933,7 +926,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(658,1,tsec) ! bse(wfd_wave_free)
  ABI_MALLOC(bks_mask,(Wfd%mband,Wfd%nkibz,Wfd%nsppol))
  bks_mask=.TRUE.
- call wfd_wave_free(Wfd,"Real_space",bks_mask)
+ call wfd%wave_free("Real_space",bks_mask)
  ABI_FREE(bks_mask)
  call timab(658,2,tsec) ! bse(wfd_wave_free)
 
@@ -1006,7 +999,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  !
  !* Destroy local data structures.
  call destroy_mpi_enreg(MPI_enreg_seq)
- call crystal_free(Cryst)
+ call cryst%free()
  call gsph_free(Gsph_x)
  call gsph_free(Gsph_c)
  call kmesh_free(Kmesh)
@@ -1019,14 +1012,14 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call pawhur_free(Hur)
  ABI_DT_FREE(Hur)
  call bs_parameters_free(BSp)
- call wfd_free(Wfd)
+ call wfd%free()
  call pawfgr_destroy(Pawfgr)
  call eprenorms_free(Epren)
 
  ! Free memory used for interpolation.
  if (BSp%use_interp) then
    call double_grid_free(grid)
-   call wfd_free(Wfd_dense)
+   call wfd_dense%free()
    call gsph_free(Gsph_x_dense)
    call gsph_free(Gsph_c_dense)
    call kmesh_free(Kmesh_dense)
@@ -1112,14 +1105,6 @@ end subroutine bethe_salpeter
 
 subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
 & Cryst,Kmesh,Qmesh,KS_BSt,QP_bst,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_bse'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1217,7 +1202,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
             ! 1 => do not use time-reversal symmetry
             ! 2 => take advantage of time-reversal symmetry
 
- call crystal_from_hdr(Cryst,Hdr_wfk,timrev,remove_inv)
+ cryst = hdr_get_crystal(Hdr_wfk,timrev,remove_inv)
  call crystal_print(Cryst)
  !
  ! Setup of the k-point list and symmetry tables in the  BZ -----------------------------------
@@ -1594,7 +1579,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
          jj=jj+1
          eigen  (jj)=energies_p(ib,ik_ibz,isppol)
          if (occ_from_dtset) then
-           occfact(jj)=Dtset%occ_orig(ibtot)
+           !Not occupations must be the same for different images
+           occfact(jj)=Dtset%occ_orig(ibtot,1)
          else
            occfact(jj)=Hdr_wfk%occ(ibtot)
          end if
@@ -2072,14 +2058,6 @@ end subroutine setup_bse
 
 subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 & Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_bse_interp'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

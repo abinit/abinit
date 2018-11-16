@@ -28,15 +28,14 @@ toldfe1  1.0d-6    # Will stop when this tolerance is achieved on total energy
 # Definition of the SCF procedure
 iscf2    -2             # Non self-consistent calculation
 getden2  -1             # Read previous density file
-tolwfr2  1.0d-18        # Still get it converged
+tolwfr2  1.0d-16        # Still get it converged
 nband2   260
-nbdbuf2   10
+nbdbuf2   40
 
 # Dataset3: Calculation of the screening (epsilon^-1 matrix)
 optdriver3  3
 getwfk3     -1
 nband3      25
-ecutwfn3    3.6
 ecuteps3    6.0
 ppmfrq3    16.7 eV
 
@@ -72,29 +71,28 @@ diemac  12.0      # Although this is not mandatory, it is worth to
                   # is described in the "dielng" input variable section.
                   # Here, we follow the prescription for bulk silicon.
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tgw1_2.in, tgw1_3.in, tgw1_4.in, tgw1_5.in, tgw1_6.in, tgw1_7.in, tgw1_8.in
+#%% test_chain = tgw1_2.in, tgw1_3.in, tgw1_4.in, tgw1_5.in
 #%% [files]
 #%% files_to_test = 
 #%%   tgw1_2.out, tolnlines= 70, tolabs=  1.010e-03, tolrel=  1.000e+00
 #%% psp_files = 14si.pspnc
 #%% [shell] 
 #%% post_commands = 
-#%%   ww_cp tgw1_2o_DS2_WFK tgw1_3o_DS1_WFK;
-#%%   ww_cp tgw1_2o_DS3_SCR tgw1_3o_DS1_SCR;
-#%%   ww_cp tgw1_2o_DS2_WFK tgw1_4o_DS1_WFK;
-#%%   ww_cp tgw1_2o_DS3_SCR tgw1_4o_DS1_SCR;
-#%%   ww_cp tgw1_2o_DS2_WFK tgw1_5o_DS1_WFK;
-#%%   ww_cp tgw1_2o_DS3_SCR tgw1_5o_DS1_SCR;
-#%%   ww_cp tgw1_2o_DS2_WFK tgw1_6o_DS1_WFK;
-#%%   ww_cp tgw1_2o_DS3_SCR tgw1_6o_DS1_SCR;
-#%%   ww_cp tgw1_2o_DS2_WFK tgw1_7o_DS1_WFK;
-#%%   ww_cp tgw1_2o_DS3_SCR tgw1_7o_DS1_SCR;
-#%%   ww_cp tgw1_2o_DS2_WFK tgw1_8o_DS1_WFK;
-#%%   ww_cp tgw1_2o_DS3_SCR tgw1_8o_DS1_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_3o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_3o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_4o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_4o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_5o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_5o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_6o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_6o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_7o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_7o_DS3_SCR;
+#%%   ww_cp tgw1_2o_DS2_WFK tgw1_8o_DS2_WFK;
+#%%   ww_cp tgw1_2o_DS3_SCR tgw1_8o_DS3_SCR;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

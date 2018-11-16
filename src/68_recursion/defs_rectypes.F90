@@ -5,16 +5,12 @@
 !!
 !! FUNCTION
 !! This module contains definitions of all structured datatype for recursion
+!!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (XG)
+!! Copyright (C) 2001-2018 ABINIT group (MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!!
-!! NOTES
-!!
-!! TODO
 !!
 !! SOURCE
 
@@ -29,14 +25,11 @@
 module defs_rectypes
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use defs_abitypes,  only : MPI_type
  use m_pawfgr, only : pawfgr_type
 
  implicit none
-
-
-!Structures
 !!***
 
 !!****t* defs_rectypes/vec_int
@@ -44,7 +37,7 @@ module defs_rectypes
 !! vec_int
 !!
 !! FUNCTION
-!! This structured datatype contains 3d vector of indexes 
+!! This structured datatype contains 3d vector of indexes
 !!
 !! SOURCE
 
@@ -60,7 +53,7 @@ module defs_rectypes
 !!
 !! FUNCTION
 !! This structured datatype used in recursion_type containing
-!! information concerning the infenitesimal metrics 
+!! information concerning the infenitesimal metrics
 !!
 !! SOURCE
 
@@ -72,7 +65,7 @@ module defs_rectypes
   integer,allocatable  :: gcart(:,:)
 ! Real (real(dp)) arrays
   real(dp)  :: tr(3)     !--Trace of the metrics: (grid step)
-  real(dp)  :: rmet(3,3) !--Infinitesimal metrics in recursion 
+  real(dp)  :: rmet(3,3) !--Infinitesimal metrics in recursion
 
  end type metricrec_type
 !!***
@@ -136,7 +129,7 @@ module defs_rectypes
 !! recparall_type
 !!
 !! FUNCTION
-!! This structured datatype for distribution of work in recursion  
+!! This structured datatype for distribution of work in recursion
 !!
 !!
 !! SOURCE
@@ -144,16 +137,16 @@ module defs_rectypes
  type,public :: recparall_type
 
   !--Variables for parallelization in recursion
-  integer :: min_pt             
-  integer :: max_pt             
-  integer :: ntranche           
-  integer :: npt !--Number of points to calculate for a proc 
+  integer :: min_pt
+  integer :: max_pt
+  integer :: ntranche
+  integer :: npt !--Number of points to calculate for a proc
 
 ! Integer arrays
   integer,allocatable ::  displs(:) !--For mpi
   integer,allocatable ::  vcount(:)
 
-! Structured datatypes 
+! Structured datatypes
   type(vec_int)        :: pt0    !--Initial point to calculate
   type(vec_int)        :: pt1    !--Final point to calculate
 
@@ -167,7 +160,7 @@ module defs_rectypes
 !! recGPU_type
 !!
 !! FUNCTION
-!! This structured datatype for recursion with GPU 
+!! This structured datatype for recursion with GPU
 !!
 !!
 !! SOURCE
@@ -180,9 +173,9 @@ module defs_rectypes
   integer,pointer :: map(:)  !--The map of devices GPU with respect to
   !                       cpu (-1 if there are not gpu)
 
-  ! Structured datatypes 
+  ! Structured datatypes
   type(recparall_type) :: par    !--For distribution of work on procs
-  
+
  end type recGPU_type
 
 !Structures
@@ -205,42 +198,42 @@ module defs_rectypes
 
 ! Integer scalar
 
-  
+
   integer :: quitrec !--To quit by recursion
-  
+
   integer :: min_nrec !--Minimal number of recursions
 
-  integer :: nfftrec !--Recursion nfft 
+  integer :: nfftrec !--Recursion nfft
 
   integer :: ngpu !--total number of GPUs
 
   integer :: gpudevice !--it corresponds to the GPU-device setted for this proc
   !if negative: no GPU-device is associated
 
-  integer :: load      !--if egual to 0 (default), load on proc-gpu is 
+  integer :: load      !--if egual to 0 (default), load on proc-gpu is
   !homogeneous and %par is egual to %GPU%par (or %GPU is not affected)
   !otherwise load=1
   integer :: tp        !--topology of the machine:
-  !0: 1 cpu;       
+  !0: 1 cpu;
   !1: n cpu;
-  !2: 1 cpu 1 gpu;  
+  !2: 1 cpu 1 gpu;
   !3: n cpu n gpu
-  !4: n cpu > m gpu; 
+  !4: n cpu > m gpu;
   !5: n cpu < m gpu (not implemented)
 
   logical :: debug     !--Debugging variable
-  logical :: tronc     !--True if troncation (ngfftrec/=ngfft) is used 
+  logical :: tronc     !--True if troncation (ngfftrec/=ngfft) is used
 
 
 ! Integer arrays
   integer :: ngfftrec(18) !--Recursion ngfft
 ! Real (real(dp)) scalar
-  real(dp) :: efermi 
+  real(dp) :: efermi
 
   real(dp),allocatable :: ZT_p(:,:)  !--Is the Fourier transform of the
                                       !  green kernel
 
-! Structured datatypes 
+! Structured datatypes
   type(recparall_type)   :: par    !--For distribution of work on procs
   type(pawfgr_type)      :: pawfgr !--For double grid system
   type(MPI_type),pointer :: mpi    !--For recursion mpi

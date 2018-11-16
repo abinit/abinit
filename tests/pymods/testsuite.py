@@ -1966,7 +1966,13 @@ class BaseTest(object):
         """
         if not hasattr(self.build_env, "buildbot_builder"): return False
         for builder in self.exclude_builders:
-            if builder == self.build_env.buildbot_builder: return True
+            #if builder == self.build_env.buildbot_builder: return True
+            if any(c in builder for c in "*?![]{}"):
+                # Interpret builder as regex.
+                m = re.compile(builder)
+                if m.match(self.build_env.buildbot_builder): return True
+            else:
+                if builder == self.build_env.buildbot_builder: return True
         return False
 
     def run(self, build_env, runner, workdir, nprocs=1, runmode="static", **kwargs):
@@ -2738,6 +2744,27 @@ class MultibinitTest(BaseTest):
 
         return t_stdin.getvalue()
 
+class TdepTest(BaseTest):
+    """
+    Class for TDEP tests. Redefine the make_stdin method of BaseTest
+    """
+    def make_stdin(self):
+        t_stdin = StringIO()
+
+        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
+        inp_fname = os.path.basename(inp_fname)
+        t_stdin.write( inp_fname + "\n")              # 1) formatted input file
+
+        md_hist_fname =  os.path.join(self.inp_dir,self.md_hist)
+        if not os.path.isfile(md_hist_fname):
+            self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
+
+        md_hist_fname = self.cygwin_path(md_hist_fname)
+        t_stdin.write(md_hist_fname + "\n") 
+        t_stdin.write( self.id + "\n")       # 2) formatted output file e.g. t13.out
+
+        return t_stdin.getvalue()
+
 
 class AimTest(BaseTest):
     """
@@ -2841,6 +2868,7 @@ def exec2class(exec_name):
         "band2eps": Band2epsTest,
         "optic": OpticTest,
         "multibinit": MultibinitTest,
+        "tdep": TdepTest,
     }.get(exec_name, BaseTest)
 
 

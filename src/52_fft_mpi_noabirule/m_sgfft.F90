@@ -24,7 +24,7 @@
 MODULE m_sgfft
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_fftcore
 
@@ -94,13 +94,6 @@ CONTAINS  !====================================================================
 !! SOURCE
 
 subroutine sg_fft_cc(fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign,arr,ftarr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fft_cc'
-!End of the abilint section
 
  implicit none
 
@@ -174,13 +167,6 @@ end subroutine sg_fft_cc
 !! SOURCE
 
 subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_cc_one_nothreadsafe'
-!End of the abilint section
 
  implicit none
 
@@ -290,13 +276,6 @@ end subroutine fft_cc_one_nothreadsafe
 
 subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fft_rc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -339,7 +318,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
    write(msg, '(a,i4,a,a,a,a,a)' )&
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'The second digit (fftalg(B)) must be 0 or 1.',ch10,&
-&   'Action : change fftalg in your input file.'
+&   'Action: change fftalg in your input file.'
    MSG_BUG(msg)
  end if
 
@@ -347,7 +326,7 @@ subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
    write(msg,'(a,i4,5a)')&
 &   'The input algorithm number fftalg=',fftalg,' is not allowed.',ch10,&
 &   'When fftalg(B) is 1, the allowed values for fftalg(A) are 1 and 4.',ch10,&
-&   'Action : change fftalg in your input file.'
+&   'Action: change fftalg in your input file.'
    MSG_BUG(msg)
  end if
 
@@ -636,13 +615,6 @@ end subroutine sg_fft_rc
 
 subroutine sg_fftpad(fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,gbound,isign,arr,ftarr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftpad'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -709,13 +681,6 @@ end subroutine sg_fftpad
 !! SOURCE
 
 subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftpad_one_nothreadsafe'
-!End of the abilint section
 
  implicit none
 
@@ -917,13 +882,6 @@ end subroutine fftpad_one_nothreadsafe
 
 subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 &    z,zbr,trig,aft,now,bef,ris,ind,ic,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftpx'
-!End of the abilint section
 
  implicit none
 
@@ -1669,13 +1627,6 @@ end subroutine sg_fftpx
 subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 & trig,aft,now,bef,ris,ind,ic)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftx'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2377,8 +2328,6 @@ end subroutine sg_fftx
 !! OUTPUT
 !!  zbr(2,nd1,nd2,nd3)=OUTPUT transformed array; no scaling applied
 !!
-!! SIDE EFFECTS
-!!
 !! TODO
 !! Use latex for the equation above
 !!
@@ -2392,13 +2341,6 @@ end subroutine sg_fftx
 
 subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 &          z,zbr,trig,aft,now,bef,ris,ind,ic)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_ffty'
-!End of the abilint section
 
  implicit none
 
@@ -3075,13 +3017,6 @@ end subroutine sg_ffty
 !! SOURCE
 
 subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,ic)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftz'
-!End of the abilint section
 
  implicit none
 
@@ -3830,13 +3765,6 @@ end subroutine sg_fftz
 
 subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_ctrig'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3997,13 +3925,6 @@ end subroutine sg_ctrig
 subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r, weight_i)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftrisc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4084,6 +4005,9 @@ end subroutine sg_fftrisc
 !! Note however that no blocking is used, in both 1D z-transform
 !! or subsequent 2D transform. This should be improved.
 !!
+!! * This routine is not thread-safe due to the presence of variables with the save attribute!
+!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
+!!
 !! INPUTS
 !!  cplex= if 1 , denpot is real, if 2 , denpot is complex
 !!     (cplex=2 only allowed for option=2 when istwf_k=1)
@@ -4134,10 +4058,6 @@ end subroutine sg_fftrisc
 !!                 fofgout(2,npwout) contains its Fourier transform;
 !!                 no use of fofgin and npwin.
 !!
-!! NOTES
-!! * This routine is not thread-safe due to the presence of variables with the save attribute!
-!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
-!!
 !! PARENTS
 !!      m_sgfft
 !!
@@ -4148,13 +4068,6 @@ end subroutine sg_fftrisc
 
 subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftrisc_one_nothreadsafe'
-!End of the abilint section
 
  implicit none
 
@@ -4998,13 +4911,16 @@ end subroutine fftrisc_one_nothreadsafe
 !! non-diagonal occupations.
 !!
 !! NOTES
-!! Specifically uses rather sophisticated algorithms, based on S Goedecker
-!! routines, specialized for superscalar RISC architecture.
-!! Zero padding : saves 7/12 execution time
-!! Bi-dimensional data locality in most of the routine : cache reuse
-!! For k-point (0 0 0) : takes advantage of symmetry of data.
-!! Note however that no blocking is used, in both 1D z-transform
-!! or subsequent 2D transform. This should be improved.
+!! * Specifically uses rather sophisticated algorithms, based on S Goedecker
+!!   routines, specialized for superscalar RISC architecture.
+!!   Zero padding : saves 7/12 execution time
+!!   Bi-dimensional data locality in most of the routine : cache reuse
+!!   For k-point (0 0 0) : takes advantage of symmetry of data.
+!!   Note however that no blocking is used, in both 1D z-transform
+!!   or subsequent 2D transform. This should be improved.
+!!
+!! * This routine is not thread-safe due to the presence of variables with the save attribute!
+!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
 !!
 !! INPUTS
 !!  cplex= if 1 , denpot is real, if 2 , denpot is complex
@@ -5067,10 +4983,6 @@ end subroutine fftrisc_one_nothreadsafe
 !! TODO
 !! Complete input and output list.
 !!
-!! NOTES
-!! * This routine is not thread-safe due to the presence of variables with the save attribute!
-!!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
-!!
 !! PARENTS
 !!      fourwf
 !!
@@ -5083,13 +4995,6 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 & istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2,&
 & luse_ndo,fofgin_p) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_fftrisc_2'
-!End of the abilint section
 
  implicit none
 
@@ -5176,7 +5081,7 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
    if((size(fofgin_p,2)==0).and.(luse_ndo)) then
      write(message, '(a,a,a,i4,i5)' )&
 &     'fofgin_p has a dimension equal to zero and luse_ndo true',ch10,&
-&     'Action : check dimension of fofgin_p',size(fofgin_p,2),luse_ndo
+&     'Action: check dimension of fofgin_p',size(fofgin_p,2),luse_ndo
      MSG_BUG(message)
    end if
  end if
@@ -6116,13 +6021,6 @@ end subroutine sg_fftrisc_2
 !! SOURCE
 
 subroutine sg_poisson(fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sg_poisson'
-!End of the abilint section
 
  implicit none
 

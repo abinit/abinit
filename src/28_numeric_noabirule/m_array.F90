@@ -28,7 +28,7 @@
 MODULE m_array
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -39,11 +39,11 @@ MODULE m_array
 
  implicit none
 
- private 
+ private
 !!***
 
  public :: farray_ncwrite  ! Write the values to a netcdf file with id ncid (debugging tool)
-                           ! Ex: call farray_ncwrite("array_name", array, "ncid). 
+                           ! Ex: call farray_ncwrite("array_name", array, "ncid).
 
  !public :: array_print     ! Print the values of the array (formatted form)
 
@@ -52,26 +52,26 @@ MODULE m_array
  !end interface array_print
 
  !interface array_allgatherv
- !  module procedure 
+ !  module procedure
  !end interface array_allgatherv
 
  interface farray_ncwrite
    module procedure farr_real_dp1
    module procedure farr_complex_dpc1
- end interface farray_ncwrite                                    
+ end interface farray_ncwrite
 
 
 !!****t* m_array/array2_gwpc_type
 !! NAME
 !! array2_gwpc_type
-!! 
+!!
 !! FUNCTION
 !!  A datatype used to construct ragged 2D-arrays with KIND=gwpc
-!! 
+!!
 !! SOURCE
 
  type,public :: array2_gwpc_t
-   complex(gwpc),allocatable :: vals(:,:) 
+   complex(gwpc),allocatable :: vals(:,:)
  end type array2_gwpc_t
 
  interface array_free
@@ -98,13 +98,6 @@ CONTAINS
 
 subroutine array2_gwpc_free(Array)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'array2_gwpc_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -126,7 +119,7 @@ end subroutine array2_gwpc_free
 ! then add the new routines to the generic interface *farray_ncwrite*
 !
 ! API Example
-! Open the netcdf file and get the NC id 
+! Open the netcdf file and get the NC id
 ! ...
 ! Write data values. Use "array_name" as keyword
 ! call farray_ncwrite(array, "array_name", ncid)

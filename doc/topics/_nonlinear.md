@@ -2,6 +2,7 @@
 description: How to compute Raman intensity, and the related electro-optic coefficients
 authors: RC, XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute Raman intensity, and the related electro-optic 
 coefficients with the ABINIT package.
@@ -34,8 +35,9 @@ energy with respect (twice) to an homogeneous electric field and (once) with
 respect to atomic displacements. Thus, DFPT can be used, see below. For the
 case in which the incident light frequency is not negligible with respect to
 the gap, the DFPT cannot be used, but, if the adiabatic approximation can be
-used (the phonon frequency much smaller than the gap, and also features
-smaller than the largest phonon frequency cannot be resolved in the Raman
+used (valid when the phonon frequency is much smaller than the gap, and 
+also, as a consequence, features
+smaller than the largest phonon frequency are not resolved in the Raman
 spectrum), one can compute the Raman intensities thanks to finite differences
 of dielectric function, see [[cite:Gillet2013]]. For the two-phonon Raman
 spectrum, see [[cite:Gillet2017]].
@@ -43,12 +45,21 @@ spectrum, see [[cite:Gillet2017]].
 Both the derivatives of the linear electronic dielectric susceptibilities with
 respect to atomic displacements and the non-linear electronic dielectric
 susceptibilities required to evaluate the Raman intensities are thus non-
-linear responses. In the ABINIT implementation, they are computed within the
-density functional perturbation theory, as described in [[cite:Veithen2005]].
-Thanks to the 2n+1 theorem, their formulation only requires the knowledge of
-the ground-state and first-order changes in the wavefunctions.
+linear responses. 
 
-This non-linear response formalism has been successfully applied to a large
+In the ABINIT implementation, they are computed within the
+density functional perturbation theory.
+A first formalism (PEAD) is described in [[cite:Veithen2005]].
+Thanks to the 2n+1 theorem, this formulation only requires the knowledge of
+the ground-state and first-order changes in the wavefunctions,
+but some quantity is evaluated thanks to a finite-difference in k-space. 
+It is implemented only for NC pseudopotentials, within LDA.
+There is another formalism, based on 2nd-order Sternheimer equation, 
+recently made available (L. Baguet, to be published).
+The latter is implemented both for NC pseudopotentials and for PAW, again only for LDA.
+Both work for [[nsppol]]=1 or 2.
+
+The PEAD non-linear response formalism has been successfully applied to a large
 variety of systems. We have so far studied the Raman spectra of ferroelectric
 oxides ( BaTiO3 and PbTiO3 [[cite:Hermet2009]]), different minerals under
 pressure conditions characteristic to the interior of the Earth
@@ -70,10 +81,6 @@ separately from the knowledge of the elasto-optic and piezoelectric strain
 coefficients. This formalism was for instance applied to different
 ferroelectric ABO3 compounds [[cite:Veithen2005a]].
 
-The implementation is available for norm-conserving pseudopotentials, in the
-LDA approximation. The extension to the PAW framework is in progress.
-
-
 
 ## Related Input Variables
 
@@ -85,7 +92,7 @@ LDA approximation. The extension to the PAW framework is in progress.
 
 ## Tutorials
 
-[[lesson:nlo|The lesson on static non-linear properties]] presents the
+[[tutorial:nlo|The tutorial on static non-linear properties]] presents the
 computation of responses beyond the linear order, within Density-Functional
 Perturbation Theory (beyond the simple Sum-Over-State approximation): Raman
 scattering efficiencies (non-resonant case), non-linear electronic

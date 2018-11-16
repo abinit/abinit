@@ -2,6 +2,7 @@
 description: How to control the SCF cycle
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to control the SCF cycle with the ABINIT package.
 
@@ -40,6 +41,6 @@ setting automatically up to seventeen variables.
 
 ## Tutorials
 
-* [[lesson:base2|The lesson 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
-* [[lesson:base3|The lesson 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
+* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [[tutorial:base3|The tutorial 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
 

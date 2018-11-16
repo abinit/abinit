@@ -6,9 +6,7 @@ energy_reference = -1.7145176622E+01
 
 dipdip = 1
 dipdip_prt = 1
-ifcout = 20000
 
-brav  =  1         ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
 ngqpt =  1  1  1   ! Monkhorst-Pack indices
 
 nph1l  =       8 
@@ -21,20 +19,19 @@ qph1l  =      0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
               0.50000000E+00  0.50000000E+00  0.00000000E+00    1.000E+00
               0.50000000E+00  0.50000000E+00  0.50000000E+00    1.000E+00
 
-n_cell =   2 2 2
+ncell =   2 2 2
 dynamics =  12
 temperature = 1000
 ntime  = 50
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = graphene_gnu_6.4_macports
+#%% exclude_builders = graphene_gnu_6.5_macports
 #%% input_ddb = t09.ddb.in
 #%% [files]
 #%% files_to_test = 
-#%%   t09.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   t09.out, tolnlines = 2, tolabs = 1.150e-05, tolrel = 2.4e-05, fld_options = -easy;
 #%%   t09_model.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -43,4 +40,5 @@ ntime  = 50
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and generate effective potential in XML file
+#%% topics = LatticeModel,DynamicsMultibinit
 #%%<END TEST_INFO>

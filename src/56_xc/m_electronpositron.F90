@@ -9,14 +9,10 @@
 !!  as methods to operate on it.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MT)
+!! Copyright (C) 2008-2018 ABINIT group (MT, GJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! PARENTS
 !!
@@ -33,14 +29,21 @@ MODULE m_electronpositron
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
+ use m_errors
  use m_energies
  use m_xmpi
+ use m_cgtools
 
  use m_pawtab,   only : pawtab_type
  use m_paw_an,   only : paw_an_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
+ use m_mpinfo,   only : proc_distrb_cycle
+ use m_xcpositron, only : xcpositron
+ use m_drivexc,    only : mkdenpos
+ use m_xctk,       only : xcden
+ use m_fft,        only : fourdp
 
  implicit none
 
@@ -176,6 +179,7 @@ MODULE m_electronpositron
  public :: destroy_electronpositron
  public :: exchange_electronpositron
  public :: electronpositron_calctype
+ public :: rhohxcpositron
 
 CONTAINS
 
@@ -210,13 +214,6 @@ CONTAINS
 !! SOURCE
 
 subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,pawrhoij,pawtab)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_electronpositron'
-!End of the abilint section
 
  implicit none
 
@@ -284,11 +281,12 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
   if (dtset%usepaw==1) then
    electronpositron%has_pawrhoij_ep=1
    if (mpi_enreg%my_natom>0) then
-    call pawrhoij_alloc(electronpositron%pawrhoij_ep,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+    call pawrhoij_alloc(electronpositron%pawrhoij_ep,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &                    pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
 &                    mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
 &                    pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                    use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                    qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
+&                    use_rhoijres=pawrhoij(1)%use_rhoijres)
    end if
    electronpositron%lmmax=0
    do ii=1,dtset%ntypat
@@ -375,13 +373,6 @@ end subroutine init_electronpositron
 !! SOURCE
 
 subroutine destroy_electronpositron(electronpositron)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_electronpositron'
-!End of the abilint section
 
  implicit none
 
@@ -509,15 +500,6 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
 &                                    mpi_enreg,my_natom,nfft,ngfft,nhat,npwarr,occ,paw_an,pawrhoij,&
 &                                    rhog,rhor,stress,usecprj,vhartr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exchange_electronpositron'
- use interfaces_32_util
- use interfaces_53_ffts
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -590,7 +572,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
        end do
      end if
    end do
-   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+   call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
    if (dtset%usepaw==1.and.my_natom>0) then
     if (electronpositron%has_pawrhoij_ep==1) then
       ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
@@ -601,10 +583,11 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
         nlmn(iatom)=pawrhoij(iatom)%lmn_size
       end do
 !     Be careful: parallelism over atoms is ignored...
-      call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+      call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &                      pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,typ, &
 &                      lmnsize=nlmn,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                      use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                      qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
+&                      use_rhoijres=pawrhoij(1)%use_rhoijres)
       ABI_DEALLOCATE(typ)
       ABI_DEALLOCATE(nlmn)
       call pawrhoij_copy(pawrhoij,pawrhoij_tmp)
@@ -613,7 +596,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       if (pawrhoij_tmp(1)%ngrhoij>0.and.pawrhoij(1)%ngrhoij==0) then
         do iatom=1,my_natom
           sz1=pawrhoij_tmp(iatom)%ngrhoij
-          sz2=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz2=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz3=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%grhoij,(sz1,sz2,sz3))
           pawrhoij(iatom)%grhoij(:,:,:)=pawrhoij_tmp(iatom)%grhoij(:,:,:)
@@ -621,7 +604,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       end if
       if (pawrhoij_tmp(1)%use_rhoijres>0.and.pawrhoij(1)%use_rhoijres==0) then
         do iatom=1,my_natom
-          sz1=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%rhoijres,(sz1,sz2))
           pawrhoij(iatom)%rhoijres(:,:)=pawrhoij_tmp(iatom)%rhoijres(:,:)
@@ -629,7 +612,7 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       end if
       if (pawrhoij_tmp(1)%use_rhoij_>0.and.pawrhoij(1)%use_rhoij_==0) then
         do iatom=1,my_natom
-          sz1=pawrhoij_tmp(iatom)%cplex*pawrhoij_tmp(iatom)%lmn2_size
+          sz1=pawrhoij_tmp(iatom)%cplex_rhoij*pawrhoij_tmp(iatom)%qphase*pawrhoij_tmp(iatom)%lmn2_size
           sz2=pawrhoij_tmp(iatom)%nspden
           ABI_ALLOCATE(pawrhoij(iatom)%rhoij_,(sz1,sz2))
           pawrhoij(iatom)%rhoij_(:,:)=pawrhoij_tmp(iatom)%rhoij_(:,:)
@@ -781,13 +764,6 @@ end subroutine exchange_electronpositron
 
 integer function electronpositron_calctype(electronpositron)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'electronpositron_calctype'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -807,6 +783,189 @@ end function electronpositron_calctype
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* ABINIT/rhohxcpositron
+!! NAME
+!! rhohxcpositron
+!!
+!! FUNCTION
+!! Calculate the electrons/positron correlation term for the positron
+!!
+!! INPUTS
+!!  gprimd(3,3)=dimensional reciprocal space primitive translations
+!!  mpi_enreg=information about MPI parallelization
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nhat(nfft,nspden*usepaw)= -PAW only- compensation density
+!!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
+!!  nspden=number of spin density components
+!!  n3xccc=dimension of the xccc3d array (0 or nfft).
+!!  paral_kgb=flag for (k,band,FFT) parallelism
+!!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
+!!  ucvol = unit cell volume (Bohr**3)
+!!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
+!!  usepaw=flag for PAW
+!!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
+!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!
+!! OUTPUT
+!!  electronpositron%e_xc=electron-positron XC energy
+!!  electronpositron%e_xcdc=Double-counting electron-positron XC energy
+!!  strsxc(6)= contribution of xc to stress tensor (hartree/bohr^3),
+!!  vhartr(nfft)=Hartree potential (returned if option/=0 and option/=10)
+!!  vxcapn=XC electron-positron XC potential for the positron
+!!  vxcavg=unit cell average of Vxc = (1/ucvol) Int [Vxc(r) d^3 r].
+!!  kxcapn(nfft,nkxc)=electron-positron XC kernel (returned only if nkxc/=0)
+!!
+!! SIDE EFFECTS
+!!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
+!!
+!! PARENTS
+!!      energy,rhotov,setvtr
+!!
+!! CHILDREN
+!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
+!!
+!! SOURCE
+
+subroutine rhohxcpositron(electronpositron,gprimd,kxcapn,mpi_enreg,nfft,ngfft,nhat,nkxc,nspden,n3xccc,&
+&                         paral_kgb,rhor,strsxc,ucvol,usexcnhat,usepaw,vhartr,vxcapn,vxcavg,xccc3d,xc_denpos)
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,nkxc,nspden,n3xccc,paral_kgb,usexcnhat,usepaw
+ real(dp),intent(in) :: ucvol,xc_denpos
+ real(dp),intent(out) :: vxcavg
+ type(electronpositron_type),pointer :: electronpositron
+!arrays
+ integer,intent(in) :: ngfft(18)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: nhat(nfft,nspden*usepaw),rhor(nfft,nspden),xccc3d(n3xccc)
+ real(dp),intent(out) :: kxcapn(nfft,nkxc),strsxc(6),vhartr(nfft),vxcapn(nfft,nspden)
+ type(MPI_type),intent(in) :: mpi_enreg
+
+!Local variables-------------------------------
+!scalars
+ integer :: cplex,ierr,ifft,ishift,iwarn,iwarnp,nfftot,ngr,ngrad,nspden_ep
+ real(dp) :: exc,excdc,strdiag
+ character(len=500) :: message
+!arrays
+ real(dp),parameter :: qphon(3)=(/0._dp,0._dp,0._dp/)
+ real(dp) :: vxcavg_tmp(1)
+ real(dp),allocatable :: fxcapn(:),grho2apn(:),rhoe(:,:,:),rhop(:,:),rhotote(:),vxc_ep(:),vxcgr_ep(:)
+
+! *************************************************************************
+
+ if (electronpositron_calctype(electronpositron)/=1) then
+   message = 'Only electronpositron%calctype=1 allowed !'
+   MSG_BUG(message)
+ end if
+
+ if (nkxc>3) then
+   message = 'nkxc>3 (Kxc for GGA) not yet implemented !'
+   MSG_ERROR(message)
+ end if
+
+!Hartree potential of the positron is zero
+ vhartr=zero
+
+!Some allocations/inits
+ ngrad=1;if (electronpositron%ixcpositron==3.or.electronpositron%ixcpositron==31) ngrad=2
+ ngr=0;if (ngrad==2) ngr=nfft
+ ABI_ALLOCATE(fxcapn,(nfft))
+ ABI_ALLOCATE(grho2apn,(ngr))
+ nspden_ep=1;cplex=1;ishift=0
+ iwarn=0;iwarnp=1
+
+!Compute total electronic density
+ ABI_ALLOCATE(rhotote,(nfft))
+ rhotote(:)=electronpositron%rhor_ep(:,1)
+ if (n3xccc>0) rhotote(:)=rhotote(:)+xccc3d(:)
+ if (usepaw==1.and.usexcnhat==0) rhotote(:)=rhotote(:)-electronpositron%nhat_ep(:,1)
+
+!Extra total electron/positron densities; compute gradients for GGA
+ ABI_ALLOCATE(rhoe,(nfft,nspden_ep,ngrad**2))
+ ABI_ALLOCATE(rhop,(nfft,nspden_ep))
+ call xcden(cplex,gprimd,ishift,mpi_enreg,nfft,ngfft,ngrad,nspden_ep,paral_kgb,qphon,rhotote,rhoe)
+ if (ngrad==2) grho2apn(:)=rhoe(:,1,2)**2+rhoe(:,1,3)**2+rhoe(:,1,4)**2
+ rhop(:,1)=rhor(:,1);if (usepaw==1.and.usexcnhat==0) rhop(:,1)=rhop(:,1)-nhat(:,1)
+ ABI_DEALLOCATE(rhotote)
+
+!Make the densities positive
+ call mkdenpos(iwarn ,nfft,nspden_ep,1,rhoe(:,1,1),xc_denpos)
+ if (.not.electronpositron%posdensity0_limit) then
+   call mkdenpos(iwarnp,nfft,nspden_ep,1,rhop,xc_denpos)
+ end if
+
+!Compute electron-positron Vxc_pos, Vxc_el, Fxc, Kxc, ...
+ ABI_ALLOCATE(vxc_ep,(nfft))
+ ABI_ALLOCATE(vxcgr_ep,(ngr))
+ if (nkxc==0) then
+   call xcpositron(fxcapn,grho2apn,electronpositron%ixcpositron,ngr,nfft,electronpositron%posdensity0_limit,&
+&   rhoe(:,1,1),rhop(:,1),vxc_ep,vxcgr_ep,vxcapn)
+ else
+   call xcpositron(fxcapn,grho2apn,electronpositron%ixcpositron,ngr,nfft,electronpositron%posdensity0_limit,&
+&   rhoe(:,1,1),rhop(:,1),vxc_ep,vxcgr_ep,vxcapn,dvxce=kxcapn)
+ end if
+ ABI_DEALLOCATE(rhoe)
+ ABI_DEALLOCATE(vxc_ep)
+ ABI_DEALLOCATE(vxcgr_ep)
+ ABI_DEALLOCATE(grho2apn)
+
+!Store Vxc and Kxc according to spin components
+ if (nspden>=2) vxcapn(:,2)=vxcapn(:,1)
+ if (nspden==4) vxcapn(:,3:4)=zero
+ if (nkxc==3) then
+   kxcapn(:,1)=two*kxcapn(:,1)
+   kxcapn(:,2)=kxcapn(:,1)
+   kxcapn(:,3)=kxcapn(:,1)
+ end if
+
+!Compute XC energies and contribution to stress tensor
+ electronpositron%e_xc  =zero
+ electronpositron%e_xcdc=zero
+ strdiag=zero
+ nfftot=PRODUCT(ngfft(1:3))
+ do ifft=1,nfft
+   electronpositron%e_xc  =electronpositron%e_xc  +fxcapn(ifft)
+   electronpositron%e_xcdc=electronpositron%e_xcdc+vxcapn(ifft,1)*rhor(ifft,1)
+!  strdiag=strdiag+fxcapn(ifft)   ! Already stored in rhotoxc !
+   strdiag=strdiag-vxcapn(ifft,1)*rhop(ifft,1)
+ end do
+ if (usepaw==1.and.usexcnhat==0) then
+   do ifft=1,nfft
+     electronpositron%e_xcdc=electronpositron%e_xcdc-vxcapn(ifft,1)*nhat(ifft,1)
+   end do
+ end if
+ electronpositron%e_xc  =electronpositron%e_xc  *ucvol/dble(nfftot)
+ electronpositron%e_xcdc=electronpositron%e_xcdc*ucvol/dble(nfftot)
+ strdiag=strdiag/dble(nfftot)
+ ABI_DEALLOCATE(fxcapn)
+ ABI_DEALLOCATE(rhop)
+
+!Reduction in case of parallelism
+ if(mpi_enreg%paral_kgb==1)then
+   if(paral_kgb/=0)then
+     exc=electronpositron%e_xc;excdc=electronpositron%e_xcdc
+     call xmpi_sum(exc  ,mpi_enreg%comm_fft,ierr)
+     call xmpi_sum(excdc,mpi_enreg%comm_fft,ierr)
+     electronpositron%e_xc=exc;electronpositron%e_xcdc=excdc
+     call xmpi_sum(strsxc,mpi_enreg%comm_fft,ierr)
+   end if
+ end if
+
+!Store stress tensor
+ strsxc(1:3)=strdiag
+ strsxc(4:6)=zero
+
+!Compute vxcavg
+ call mean_fftr(vxcapn(:,1),vxcavg_tmp,nfft,nfftot,1)
+ vxcavg=vxcavg_tmp(1)
+
+end subroutine rhohxcpositron
+!!***
 
 END MODULE m_electronpositron
 !!***

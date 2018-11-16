@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !!  This module  provides some minor functions applied in the
-!!  recursion 
+!!  recursion
 !!
 !! COPYRIGHT
 !! Copyright (C) 2002-2018 ABINIT group (XG)
@@ -17,7 +17,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!     
+!!
 !!
 !! CHILDREN
 !!
@@ -32,16 +32,14 @@
 
 MODULE m_pretty_rec
 
- use m_profiling_abi
-
  use defs_basis
+ use m_abicore
 
  implicit none
 
- private  
+ private
 
- public ::           &
-&         prtwork                ! calculate the work done during recursion
+ public ::  prtwork                ! calculate the work done during recursion
 
  interface prtwork
   module procedure prtworksim
@@ -72,14 +70,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 subroutine prtworksim(work_now)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworksim'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------
@@ -121,14 +111,6 @@ end subroutine prtworksim
 !! SOURCE
 
 subroutine prtworksiRe(work_now)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworksiRe'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 !Arguments ------------------------------------
@@ -172,13 +154,6 @@ end subroutine prtworksiRe
 
 subroutine prtworkadv(work_now,adv)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtworkadv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -208,10 +183,8 @@ subroutine prtworkadv(work_now,adv)
   end if
  endif
 
- 
 end subroutine prtworkadv
 !!***
-
 
 END MODULE m_pretty_rec
 !!***

@@ -5,9 +5,10 @@ authors: XG
 
 # How to contribute to ABINIT
 
-WARNING : this file is obsolete, and should be reexamined/rewritten.
-By contrast, the documentation for developers on the [ABINIT Wiki](https://wiki.abinit.org/doku.php?id=developers:overview) 
-is up-to-date.
+!!! Warning
+    This file is obsolete, and should be reexamined/rewritten.
+    By contrast, the documentation for developers on the [ABINIT Wiki](https://wiki.abinit.org/doku.php?id=developers:overview) 
+    is up-to-date.
 
 This page provides a description of the procedures followed for development of
 the ABINIT package through collaboration of different groups of persons, based
@@ -152,7 +153,7 @@ working despite modifications.
 
 **a.** The developer proposes a modification or addition to the code to the coordinator. In most cases, such a proposal will be warmly welcome! There might be some discussions possibly involving other scientists to improve the original proposal. The developers mailing list has been set-up for that purpose (see the "Community section" on the ABINIT web site). 
 
-**b.** With respect to the latest official version, the developers define their task and make a list of routines they wish to heavily modify (and those they would like to add, but this is not really needed at that time). Following the current coding practice, adding new input variables would need rather small modifications of a very large number of routines (invars, abinit, gstate, brdmin, move, scfcv, vtorho ...). In order to avoid the allocation of too large an area of development within the source code, which would make other development efforts impossible, it is assumed that the developer will make appropriate use of the different 'user' input variables. This appropriate use means that none of the aforementioned routines will be modified for that purpose. The easiest case to handle is when a routine or a set of routines are added to the package, and the interface to the rest of the code involves only a set of called subroutines the interface (list of arguments) should not change, and just one (modified) calling routine. Many development projects of this type can coexist. By contrast, if one of the development efforts involves major changes to major routines, it will prohibit the execution of another development project of the same type, taking into account the current structure of the code. 
+**b.** With respect to the latest official version, the developers define their task and make a list of routines they wish to heavily modify (and those they would like to add, but this is not really needed at that time). Following the current coding practice, adding new input variables would need rather small modifications of a very large number of routines (invars, abinit, gstate, brdmin, mover, scfcv_core, vtorho ...). In order to avoid the allocation of too large an area of development within the source code, which would make other development efforts impossible, it is assumed that the developer will make appropriate use of the different 'user' input variables. This appropriate use means that none of the aforementioned routines will be modified for that purpose. The easiest case to handle is when a routine or a set of routines are added to the package, and the interface to the rest of the code involves only a set of called subroutines the interface (list of arguments) should not change, and just one (modified) calling routine. Many development projects of this type can coexist. By contrast, if one of the development efforts involves major changes to major routines, it will prohibit the execution of another development project of the same type, taking into account the current structure of the code. 
 
 **c.** Having gathered the different suggestions made on the basis of the current official version, the coordinator releases the next version, adequately prepared to allow the proposed developments by different developer groups, with a list of routines allocated to each group, the number of the test cases allocated, and, for information, the tasks that will be done. 
 

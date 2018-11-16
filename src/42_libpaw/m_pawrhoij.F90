@@ -55,11 +55,12 @@ MODULE m_pawrhoij
  public :: pawrhoij_unpack
  public :: pawrhoij_init_unpacked
  public :: pawrhoij_free_unpacked
- public :: pawrhoij_get_nspden
- public :: symrhoij
+ public :: pawrhoij_filter
+ public :: pawrhoij_inquire_dim
+ public :: pawrhoij_print_rhoij
+ public :: pawrhoij_symrhoij
 
  public :: pawrhoij_mpisum_unpacked
-
  interface pawrhoij_mpisum_unpacked
    module procedure pawrhoij_mpisum_unpacked_1D
    module procedure pawrhoij_mpisum_unpacked_2D
@@ -84,9 +85,9 @@ MODULE m_pawrhoij
 
 !Integer scalars
 
-  integer :: cplex
-   ! cplex=1 if rhoij are real, 2 if rhoij are complex
-   ! For GS calculations: rhoij are real provided that time-reversal can be used.
+  integer :: cplex_rhoij
+   ! cplex_rhoij=1 if rhoij are real
+   ! cplex_rhoij=2 if rhoij are complex (spin-orbit, pawcpxocc=2, ...)
 
   integer :: itypat
    ! itypat=type of the atom
@@ -108,7 +109,7 @@ MODULE m_pawrhoij
 
   integer :: nrhoijsel=0
    ! nrhoijsel
-   ! Number of non-zero value of rhoij
+   ! Number of non-zero values of rhoij
    ! This is the size of rhoijp(:,:) (see below in this datastructure)
 
   integer :: nspden
@@ -119,6 +120,10 @@ MODULE m_pawrhoij
 
   integer :: nsppol
    ! Number of independent spin-components
+
+  integer :: qphase
+   ! qphase=2 if rhoij contain a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
+   ! (this may change the ij symmetry)
 
   integer :: use_rhoij_=0
    ! 1 if pawrhoij%rhoij_ is allocated
@@ -144,20 +149,42 @@ MODULE m_pawrhoij
 !Real (real(dp)) arrays
 
   real(dp), allocatable :: grhoij (:,:,:)
-   ! grhoij(ngrhoij,cplex*lmn2_size,nspden)
+   ! grhoij(ngrhoij,cplex_rhoij*qphase*lmn2_size,nspden)
    ! Gradients of Rho_ij wrt xred, strains, ... (non-packed storage)
 
   real(dp), allocatable :: rhoij_ (:,:)
-   ! rhoij_(cplex*lmn2_size,nspden)
+   ! rhoij_(cplex_rhoij*qphase*lmn2_size,nspden)
    ! Array used to (temporary) store Rho_ij in a non-packed storage mode
 
   real(dp), allocatable :: rhoijp (:,:)
-   ! rhoijp(cplex*lmn2_size,nspden)
+   ! rhoijp(cplex_rhoij*qphase*lmn2_size,nspden)
    ! Augmentation waves occupancies Rho_ij in PACKED STORAGE (only non-zero elements are stored)
 
   real(dp), allocatable :: rhoijres (:,:)
-   ! rhoijres(cplex*lmn2_size,nspden)
+   ! rhoijres(cplex_rhoij*qphase*lmn2_size,nspden)
    ! Rho_ij residuals during SCF cycle (non-packed storage)
+
+   ! ==== Storage for the 1st dimension ====
+   ! For each klmn=ij:
+   !   When RHOij is complex (cplex=2):
+   !     rhoij(2*ij-1,:) contains the real part
+   !     rhoij(2*ij  ,:) contains the imaginary part
+   !   When a exp(-i.q.r) phase is included (qphase=2):
+   !     rhoij(1:cplex_dij*lmn2_size,:)
+   !         contains the real part of the phase, i.e. RHO_ij*cos(q.r)
+   !     rhoij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
+   !         contains the imaginary part of the phase, i.e. RHO_ij*sin(q.r)
+   ! ==== Storage for the 2nd dimension ====
+   !   No magnetism
+   !     rhoij(:,1) contains rhoij
+   !   Collinear magnetism
+   !     rhoij(:,1) contains rhoij^up
+   !     rhoij(:,2) contains rhoij^dowm
+   !   Non-collinear magnetism
+   !     rhoij(:,1) contains rhoij
+   !     rhoij(:,2) contains rhoij magnetization along x
+   !     rhoij(:,3) contains rhoij magnetization along y
+   !     rhoij(:,4) contains rhoij magnetization along z
 
  end type pawrhoij_type
 !!***
@@ -178,7 +205,7 @@ CONTAINS
 !!
 !! INPUTS
 !! [comm_atom] = communicator over atoms  (OPTIONAL)
-!! cplex=1 if rhoij is REAL,2 if COMPLEX
+!! cplex_rhoij=1 if rhoij are real, 2 if rhoij are complex (spin-orbit, pawcpxocc=2, ...)
 !! [my_atmtab(:)] = Index of atoms treated by current proc (OPTIONAL)
 !! nspden=number of spin-components for rhoij
 !! nsppol=number of spinorial components for rhoij
@@ -190,6 +217,8 @@ CONTAINS
 !! [nlmnmix]=number of rhoij elements to be mixed during SCF cycle (OPTIONAL, default=0)
 !! [pawtab(:)] <type(pawtab_type)>=paw tabulated starting data (OPTIONAL)
 !!             must be present if [lmnsize(:)] argument is not passed
+!! [qphase]=2 if the rhoij contain a exp(iqR) phase, 1 otherwise (OPTIONAL, default=1)
+!!          Typical use: 1st-order rhoij at q<>0
 !! [use_rhoij_]=1 if pawrhoij(:)%rhoij_ has to be allocated (OPTIONAL, default=0)
 !! [use_rhoijp]=1 if pawrhoij(:)%rhoijp has to be allocated (OPTIONAL, default=1)
 !!              (in that case, pawrhoij%rhoijselect is also allocated)
@@ -213,23 +242,17 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&  
-&  lmnsize,ngrhoij,nlmnmix,pawtab,use_rhoij_,use_rhoijp,& ! Optional 
-&  use_rhoijres,comm_atom,mpi_atmtab)                     ! Optional 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_alloc'
-!End of the abilint section
+subroutine pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden,nspinor,nsppol,typat,&
+&  lmnsize,ngrhoij,nlmnmix,pawtab,qphase,use_rhoij_,use_rhoijp,& ! Optional
+&  use_rhoijres,comm_atom,mpi_atmtab) ! Optional
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,nspden,nspinor,nsppol
- integer,optional,intent(in):: comm_atom,ngrhoij,nlmnmix,use_rhoij_,use_rhoijp,use_rhoijres
+ integer,intent(in) :: cplex_rhoij,nspden,nspinor,nsppol
+ integer,optional,intent(in):: comm_atom,ngrhoij,nlmnmix,qphase
+ integer,optional,intent(in):: use_rhoij_,use_rhoijp,use_rhoijres
  integer,optional,target,intent(in)  :: mpi_atmtab(:)
 !arrays
  integer,intent(in) :: typat(:)
@@ -239,7 +262,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: irhoij,irhoij_,itypat,lmn2_size,my_comm_atom,nn1,natom,nrhoij
+ integer :: irhoij,irhoij_,itypat,lmn2_size,my_comm_atom,my_qphase, nn1,natom,nrhoij
  logical :: has_rhoijp,my_atmtab_allocated,paral_atom
  character(len=500) :: msg
 !array
@@ -282,6 +305,8 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom)
 
+ my_qphase=1;if (present(qphase)) my_qphase=qphase
+
  if (nrhoij>0) then
    do irhoij=1,nrhoij
      irhoij_=irhoij;if (paral_atom) irhoij_=my_atmtab(irhoij)
@@ -290,7 +315,8 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
      lmn2_size=lmn_size(itypat)*(lmn_size(itypat)+1)/2
 
 !    Scalars initializations
-     pawrhoij(irhoij)%cplex=cplex
+     pawrhoij(irhoij)%cplex_rhoij=cplex_rhoij
+     pawrhoij(irhoij)%qphase=my_qphase
      pawrhoij(irhoij)%itypat=itypat
      pawrhoij(irhoij)%lmn_size=lmn_size(itypat)
      pawrhoij(irhoij)%lmn2_size=lmn2_size
@@ -308,7 +334,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
      if (has_rhoijp) then
        pawrhoij(irhoij)%use_rhoijp=1
        LIBPAW_ALLOCATE(pawrhoij(irhoij)%rhoijselect,(lmn2_size))
-       LIBPAW_ALLOCATE(pawrhoij(irhoij)%rhoijp,(cplex*lmn2_size,nspden))
+       LIBPAW_ALLOCATE(pawrhoij(irhoij)%rhoijp,(cplex_rhoij*my_qphase*lmn2_size,nspden))
        pawrhoij(irhoij)%rhoijselect(:)=0
        pawrhoij(irhoij)%rhoijp(:,:)=zero
      end if
@@ -316,7 +342,7 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
      if (present(ngrhoij)) then
        if (ngrhoij>0) then
          pawrhoij(irhoij)%ngrhoij=ngrhoij
-         LIBPAW_ALLOCATE(pawrhoij(irhoij)%grhoij,(ngrhoij,cplex*lmn2_size,nspden))
+         LIBPAW_ALLOCATE(pawrhoij(irhoij)%grhoij,(ngrhoij,cplex_rhoij*my_qphase*lmn2_size,nspden))
          pawrhoij(irhoij)%grhoij=zero
        end if
      end if
@@ -330,14 +356,14 @@ subroutine pawrhoij_alloc(pawrhoij,cplex,nspden,nspinor,nsppol,typat,&
      if (present(use_rhoij_)) then
        if (use_rhoij_>0) then
          pawrhoij(irhoij)%use_rhoij_=use_rhoij_
-         LIBPAW_ALLOCATE(pawrhoij(irhoij)%rhoij_,(cplex*lmn2_size,nspden))
+         LIBPAW_ALLOCATE(pawrhoij(irhoij)%rhoij_,(cplex_rhoij*my_qphase*lmn2_size,nspden))
          pawrhoij(irhoij)%rhoij_=zero
        end if
      end if
      if (present(use_rhoijres)) then
        if (use_rhoijres>0) then
          pawrhoij(irhoij)%use_rhoijres=use_rhoijres
-         LIBPAW_ALLOCATE(pawrhoij(irhoij)%rhoijres,(cplex*lmn2_size,nspden))
+         LIBPAW_ALLOCATE(pawrhoij(irhoij)%rhoijres,(cplex_rhoij*my_qphase*lmn2_size,nspden))
          pawrhoij(irhoij)%rhoijres=zero
        end if
      end if
@@ -380,13 +406,6 @@ end subroutine pawrhoij_alloc
 
 subroutine pawrhoij_free(pawrhoij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -403,6 +422,8 @@ subroutine pawrhoij_free(pawrhoij)
 
  if (nrhoij>0) then
    do irhoij=1,nrhoij
+     pawrhoij(irhoij)%cplex_rhoij=1
+     pawrhoij(irhoij)%qphase=1
      pawrhoij(irhoij)%nrhoijsel=0
      pawrhoij(irhoij)%ngrhoij=0
      pawrhoij(irhoij)%lmnmix_sz=0
@@ -455,13 +476,6 @@ end subroutine pawrhoij_free
 
 subroutine pawrhoij_nullify(pawrhoij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -474,7 +488,7 @@ subroutine pawrhoij_nullify(pawrhoij)
 
 ! *************************************************************************
 
- ! MGPAW: This one could be removed/renamed, 
+ ! MGPAW: This one could be removed/renamed,
  ! variables can be initialized in the datatype declaration
  ! Do we need to expose this in the public API?
 
@@ -482,6 +496,8 @@ subroutine pawrhoij_nullify(pawrhoij)
 
  if (nrhoij>0) then
    do irhoij=1,nrhoij
+     pawrhoij(irhoij)%cplex_rhoij=1
+     pawrhoij(irhoij)%qphase=1
      pawrhoij(irhoij)%nrhoijsel=0
      pawrhoij(irhoij)%ngrhoij=0
      pawrhoij(irhoij)%lmnmix_sz=0
@@ -507,8 +523,11 @@ end subroutine pawrhoij_nullify
 !!
 !! INPUTS
 !!  keep_cplex= optional argument (logical, default=.TRUE.)
-!!              if .TRUE. pawrhoij_out(:)%cplex is NOT MODIFIED,
-!!              even if different from pawrhoij_in(:)%cplex
+!!              if .TRUE. pawrhoij_out(:)%cplex_rhoij is NOT MODIFIED,
+!!              even if different from pawrhoij_in(:)%cplex_rhoij
+!!  keep_qphase= optional argument (logical, default=.TRUE.)
+!!              if .TRUE. pawrhoij_out(:)%cplex_rhoij is NOT MODIFIED,
+!!              even if different from pawrhoij_in(:)%qphase
 !!  keep_itypat= optional argument (logical, default=.FALSE.)
 !!               if .TRUE. pawrhoij_out(:)%ityp is NOT MODIFIED,
 !!               even if different from pawrhoij_in(:)%ityp
@@ -535,22 +554,15 @@ end subroutine pawrhoij_nullify
 !! SOURCE
 
 subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
-&          keep_cplex,keep_itypat,keep_nspden,& ! optional arguments
-&          mpi_atmtab,comm_atom)            ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_copy'
-!End of the abilint section
+&          keep_cplex,keep_qphase,keep_itypat,keep_nspden,& ! optional arguments
+&          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: comm_atom
- logical,intent(in),optional :: keep_cplex,keep_itypat,keep_nspden
+ logical,intent(in),optional :: keep_cplex,keep_qphase,keep_itypat,keep_nspden
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  type(pawrhoij_type),intent(in) :: pawrhoij_in(:)
@@ -558,11 +570,12 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_in,cplex_out,dplex,dplex_in,dplex_out,i_in,i_out,ilmn
- integer :: irhoij,ispden,jrhoij,lmn2_size_out,lmnmix,my_comm_atom,my_nrhoij
+ integer :: cplex,cplex_in,cplex_out,i_in,i_out,ilmn,iphase
+ integer :: irhoij,ispden,jrhoij,lmn2_size_in,lmn2_size_out,lmnmix,my_comm_atom,my_nrhoij
  integer :: ngrhoij,nrhoij_in,nrhoij_max,nrhoij_out,nselect,nselect_out
- integer :: nspden_in,nspden_out,paral_case,use_rhoij_,use_rhoijp,use_rhoijres
- logical :: change_dim,keep_cplex_,keep_itypat_,keep_nspden_,my_atmtab_allocated,paral_atom
+ integer :: nspden_in,nspden_out,paral_case,qphase,qphase_in,qphase_out
+ integer :: use_rhoij_,use_rhoijp,use_rhoijres
+ logical :: change_dim,keep_cplex_,keep_qphase_,keep_itypat_,keep_nspden_,my_atmtab_allocated,paral_atom
  character(len=500) :: msg
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -577,6 +590,8 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
 !Init flags
  keep_cplex_=.true.
  if (present(keep_cplex)) keep_cplex_=keep_cplex
+ keep_qphase_=.true.
+ if (present(keep_qphase)) keep_qphase_=keep_qphase
  keep_itypat_=.false.
  if (present(keep_itypat)) keep_itypat_=keep_itypat
  keep_nspden_=.true.
@@ -615,9 +630,10 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          do irhoij=1,nrhoij_in
            typat(irhoij)=irhoij;nlmn(irhoij)=pawrhoij_in(irhoij)%lmn_size
          end do
-         call pawrhoij_alloc(pawrhoij_out,pawrhoij_cpy(1)%cplex,pawrhoij_cpy(1)%nspden,&
-&         pawrhoij_cpy(1)%nspinor,pawrhoij_cpy(1)%nsppol,typat,&
+         call pawrhoij_alloc(pawrhoij_out,pawrhoij_cpy(1)%cplex_rhoij,&
+&         pawrhoij_cpy(1)%nspden,pawrhoij_cpy(1)%nspinor,pawrhoij_cpy(1)%nsppol,typat,&
 &         lmnsize=nlmn,ngrhoij=pawrhoij_cpy(1)%ngrhoij,nlmnmix=pawrhoij_cpy(1)%lmnmix_sz,&
+&         qphase=pawrhoij_cpy(1)%qphase,&
 &         use_rhoij_=pawrhoij_cpy(1)%use_rhoij_,&
 &         use_rhoijp=pawrhoij_cpy(1)%use_rhoijp,&
 &         use_rhoijres=pawrhoij_cpy(1)%use_rhoijres)
@@ -625,7 +641,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          LIBPAW_DEALLOCATE(nlmn)
        end if
      else
-       msg=' nrhoij_in should be equal to my_natom !'
+       msg=' nrhoij_in should be equal to my_natom!'
        MSG_BUG(msg)
      end if
    end if
@@ -636,23 +652,28 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
    do irhoij=1,nrhoij_max
      jrhoij=irhoij;if (paral_case==1) jrhoij=my_atmtab(irhoij)
 
-     lmn2_size_out=pawrhoij_in(jrhoij)%lmn2_size
-     cplex_in=pawrhoij_in(jrhoij)%cplex
-     cplex_out=cplex_in;if(keep_cplex_)cplex_out=pawrhoij_out(irhoij)%cplex
+     lmn2_size_in=pawrhoij_in(jrhoij)%lmn2_size
+     lmn2_size_out=lmn2_size_in
+     cplex_in=pawrhoij_in(jrhoij)%cplex_rhoij
+     cplex_out=cplex_in;if(keep_cplex_)cplex_out=pawrhoij_out(irhoij)%cplex_rhoij
+     qphase_in=pawrhoij_in(jrhoij)%qphase
+     qphase_out=qphase_in;if(keep_qphase_)qphase_out=pawrhoij_out(irhoij)%qphase
      nspden_in=pawrhoij_in(jrhoij)%nspden
      nselect=pawrhoij_in(jrhoij)%nrhoijsel
      nselect_out=pawrhoij_out(irhoij)%nrhoijsel
      nspden_out=nspden_in;if(keep_nspden_)nspden_out=pawrhoij_out(irhoij)%nspden
 
-     change_dim=(pawrhoij_out(irhoij)%cplex/=cplex_out.or. &
+     change_dim=(pawrhoij_out(irhoij)%cplex_rhoij/=cplex_out.or. &
+&     pawrhoij_out(irhoij)%qphase/=qphase_out.or. &
 &     pawrhoij_out(irhoij)%lmn2_size/=lmn2_size_out.or. &
 &     pawrhoij_out(irhoij)%nspden/=nspden_out.or. &
 &     nselect/=nselect_out)
-     dplex_in=cplex_in-1;dplex_out=cplex_out-1
-     dplex=min(dplex_in,dplex_out)
+     cplex=min(cplex_in,cplex_out)
+     qphase=min(qphase_in,qphase_out)
 
 !    Scalars
-     pawrhoij_out(irhoij)%cplex=cplex_out+0
+     pawrhoij_out(irhoij)%cplex_rhoij=cplex_out+0
+     pawrhoij_out(irhoij)%qphase=qphase_out+0
      pawrhoij_out(irhoij)%nspden=nspden_out+0
      pawrhoij_out(irhoij)%lmn2_size=lmn2_size_out+0
      pawrhoij_out(irhoij)%lmn_size=pawrhoij_in(jrhoij)%lmn_size+0
@@ -673,84 +694,114 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%rhoijselect)
        end if
        if (use_rhoijp>0)  then
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex_out*qphase_out*lmn2_size_out,nspden_out))
          LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijselect,(lmn2_size_out))
+         pawrhoij_out(irhoij)%rhoijselect=0
        end if
-       pawrhoij_out(irhoij)%use_rhoijp=use_rhoijp
      end if
+     pawrhoij_out(irhoij)%use_rhoijp=use_rhoijp
      if (use_rhoijp>0) then
        if (change_dim) then
          if(allocated(pawrhoij_out(irhoij)%rhoijp)) then
            LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%rhoijp)
          end if
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex_out*qphase_out*lmn2_size_out,nspden_out))
        end if
-       if (cplex_out==cplex_in.and.nspden_out==nspden_in) then
-         do ispden=1,nspden_out
-           pawrhoij_out(irhoij)%rhoijp(1:cplex_out*nselect,ispden)=pawrhoij_in(jrhoij)%rhoijp(1:cplex_out*nselect,ispden)+zero
-           if ( (nselect<lmn2_size_out) .and. &
-&               (size(pawrhoij_out(irhoij)%rhoijp(:,ispden))==cplex_out*lmn2_size_out) ) then
-             pawrhoij_out(irhoij)%rhoijp(cplex_out*nselect+1:cplex_out*lmn2_size_out,ispden)=zero
-           end if
-         end do
-       else
-         pawrhoij_out(irhoij)%rhoijp(:,:)=zero
-         if (nspden_out==1) then
-           if (nspden_in==2) then
+       pawrhoij_out(irhoij)%rhoijp(:,:)=zero
+       if (nspden_out==1) then
+         if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
-&                                                              +pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,2)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==1 or nspden_in=4
+           end do
+         else ! nspden_in==1 or 4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==2) then
-           if (nspden_in==1) then
+           end do
+         end if
+       else if (nspden_out==2) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=half*pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2)=half*pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,1)= &
+&                 half*pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,2)= &
+&                 half*pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else if (nspden_in==2) then
+           end do
+         else if (nspden_in==2) then
+           do ispden=1,nspden_out
+             do iphase=1,qphase
+               i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,nselect
+                 pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
+             end do
+           end do
+         else ! nspden_in==4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1:2)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1:2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,1)= &
+&                 half*(pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1) &
+&                      +pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,4))+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,2)= &
+&                    half*(pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1) &
+&                      -pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,4))+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==4
+           end do
+         end if
+       else if (nspden_out==4) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=half*(pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
-&                                                                    +pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,4))+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2)=half*(pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
-&                                                                    -pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,4))+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,2:4)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==4) then
-           if (nspden_in==1) then
+           end do
+         else if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2:4)=zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,4)= &
+&                 pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,1) &
+&                -pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,2:3)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else if (nspden_in==2) then
-             do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
-&                                                              +pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,4)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1) &
-&                                                              -pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,2:3)=zero
+           end do
+         else ! nspden_in==4
+           do ispden=1,nspden_out
+               do iphase=1,qphase
+                 i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,nselect
+                 pawrhoij_out(irhoij)%rhoijp(i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%rhoijp(i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
              end do
-           else ! nspden_in==4
-             do ilmn=1,nselect
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijp(i_out:i_out+dplex,1:4)=pawrhoij_in(jrhoij)%rhoijp(i_in:i_in+dplex,1:4)+zero
-             end do
-           end if
+           end do
          end if
        end if
      end if
@@ -763,11 +814,8 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          end if
          LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijselect,(lmn2_size_out))
        end if
+       pawrhoij_out(irhoij)%rhoijselect=0
        pawrhoij_out(irhoij)%rhoijselect(1:nselect)=pawrhoij_in(jrhoij)%rhoijselect(1:nselect)+0
-       if ( (nselect<lmn2_size_out) .and. &
-&           (size(pawrhoij_out(irhoij)%rhoijselect(:))==lmn2_size_out) ) then
-         pawrhoij_out(irhoij)%rhoijselect(nselect+1:lmn2_size_out)=0
-       end if
      end if
 
 !    Optional pointer: indexes of rhoij to be mixed
@@ -778,6 +826,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
        end if
        if (lmnmix>0)  then
          LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%kpawmix,(lmnmix))
+         pawrhoij_out(irhoij)%kpawmix=0
        end if
        pawrhoij_out(irhoij)%lmnmix_sz=lmnmix
      end if
@@ -790,91 +839,110 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%grhoij)
        end if
        if (ngrhoij>0)  then
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%grhoij,(ngrhoij,cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%grhoij,(ngrhoij,cplex_out*qphase_out*lmn2_size_out,nspden_out))
        end if
        pawrhoij_out(irhoij)%ngrhoij=ngrhoij
      end if
      if (ngrhoij>0) then
        if (change_dim) then
          LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%grhoij)
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%grhoij,(ngrhoij,cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%grhoij,(ngrhoij,cplex_out*qphase_out*lmn2_size_out,nspden_out))
        end if
-       if (cplex_out==cplex_in.and.nspden_out==nspden_in) then
-         do ispden=1,nspden_out
-           do ilmn=1,cplex_out*lmn2_size_out
-             pawrhoij_out(irhoij)%grhoij(1:ngrhoij,ilmn,ispden)= &
-&               pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,ilmn,ispden)+zero
+       pawrhoij_out(irhoij)%grhoij(:,:,:)=zero
+       if (nspden_out==1) then
+         if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+             do ilmn=1,lmn2_size_out
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,2)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
+             end do
            end do
-         end do
-       else
-         pawrhoij_out(irhoij)%grhoij(:,:,:)=zero
-         if (nspden_out==1) then
-           if (nspden_in==2) then
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
-&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
-&                +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,2)+zero
+         else ! nspden_in==1 or 4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,lmn2_size_out
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==4
+           end do
+         end if
+       else if (nspden_out==2) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
-&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,1)= &
+&                 half*pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,2)= &
+&                 half*pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==2) then
-           if (nspden_in==1) then
+           end do
+         else if (nspden_in==2) then
+           do ispden=1,nspden_out
+             do iphase=1,qphase
+               i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,lmn2_size_out
+                 pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
+             end do
+           end do
+         else ! nspden_in==4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
-&                 half*pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2)= &
-&                 half*pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,1)= &
+&                 half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1) &
+&                      +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,4))+zero
+                 pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,2)= &
+&                 half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1) &
+&                      -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,4))+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else if (nspden_in==2) then
+           end do
+         end if
+       else if (nspden_out==4) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1:2)= &
-&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1:2)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,1)= &
+&                  pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,2:4)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==4
+           end do
+         else if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
-&                 half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
-&                      +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,4))+zero
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2)= &
-&                 half*(pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
-&                      -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,4))+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,4)= &
+&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,1) &
+&                -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,2:3)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==4) then
-           if (nspden_in==1) then
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
-&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2:4)=zero
+           end do
+         else ! nspden_in==4
+           do ispden=1,nspden_out
+             do iphase=1,qphase
+               i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,lmn2_size_out
+                 pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
              end do
-           else if (nspden_in==2) then
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1)= &
-&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
-&                +pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,4)= &
-&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1) &
-&                -pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,2:3)=zero
-             end do
-           else ! nspden_in==4
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%grhoij(1:ngrhoij,i_out:i_out+dplex,1:4)= &
-&                 pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,i_in:i_in+dplex,1:4)+zero
-             end do
-           end if
+           end do
          end if
        end if
      end if
@@ -886,79 +954,110 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%rhoijres)
        end if
        if (use_rhoijres>0)  then
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijres,(cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijres,(cplex_out*qphase_out*lmn2_size_out,nspden_out))
        end if
        pawrhoij_out(irhoij)%use_rhoijres=use_rhoijres
      end if
      if (use_rhoijres>0) then
        if (change_dim) then
          LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%rhoijres)
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijres,(cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijres,(cplex_out*qphase_out*lmn2_size_out,nspden_out))
        end if
-       if (cplex_out==cplex_in.and.nspden_out==nspden_in) then
-         do ispden=1,nspden_out
-           do ilmn=1,cplex_out*lmn2_size_out
-             pawrhoij_out(irhoij)%rhoijres(ilmn,ispden)=pawrhoij_in(jrhoij)%rhoijres(ilmn,ispden)+zero
+       pawrhoij_out(irhoij)%rhoijres(:,:)=zero
+       if (nspden_out==1) then
+         if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+             do ilmn=1,lmn2_size_out
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,2)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
+             end do
            end do
-         end do
-       else
-         pawrhoij_out(irhoij)%rhoijres(:,:)=zero
-         if (nspden_out==1) then
-           if (nspden_in==2) then
+         else ! nspden_in==1 or 4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
-&                                                                +pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==4
+           end do
+         end if
+       else if (nspden_out==2) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,1)= &
+&                 half*pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,2)= &
+&                 half*pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==2) then
-           if (nspden_in==1) then
+           end do
+         else if (nspden_in==2) then
+           do ispden=1,nspden_out
+             do iphase=1,qphase
+               i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,lmn2_size_out
+                 pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
+             end do
+           end do
+         else ! nspden_in==4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=half*pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2)=half*pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,1)= &
+&                 half*(pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1) &
+&                      +pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,4))+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,2)= &
+&                 half*(pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1) &
+&                      -pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,4))+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else if (nspden_in==2) then
+           end do
+         end if
+       else if (nspden_out==4) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1:2)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1:2)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,2:4)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==4
+           end do
+         else if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
-&                                                                      +pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,4))+zero
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2)=half*(pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
-&                                                                      -pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,4))+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,4)= &
+&                 pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,1) &
+&                -pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,2:3)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==4) then
-           if (nspden_in==1) then
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2:4)=zero
+           end do
+         else ! nspden_in==4
+           do ispden=1,nspden_out
+             do iphase=1,qphase
+               i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,lmn2_size_out
+                 pawrhoij_out(irhoij)%rhoijres(i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%rhoijres(i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
              end do
-           else if (nspden_in==2) then
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
-&                                                                +pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,4)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1) &
-&                                                                -pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,2:3)=zero
-             end do
-           else ! nspden_in==4
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoijres(i_out:i_out+dplex,1:4)=pawrhoij_in(jrhoij)%rhoijres(i_in:i_in+dplex,1:4)+zero
-             end do
-           end if
+           end do
          end if
        end if
      end if
@@ -970,7 +1069,7 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%rhoij_)
        end if
        if (use_rhoij_>0)  then
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoij_,(cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoij_,(cplex_out*qphase_out*lmn2_size_out,nspden_out))
        end if
        pawrhoij_out(irhoij)%use_rhoij_=use_rhoij_
      end if
@@ -979,72 +1078,103 @@ subroutine pawrhoij_copy(pawrhoij_in,pawrhoij_cpy, &
          if(allocated(pawrhoij_out(irhoij)%rhoij_)) then
            LIBPAW_DEALLOCATE(pawrhoij_out(irhoij)%rhoij_)
          end if
-         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoij_,(cplex_out*lmn2_size_out,nspden_out))
+         LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoij_,(cplex_out*qphase_out*lmn2_size_out,nspden_out))
        end if
-       if (cplex_out==cplex_in.and.nspden_out==nspden_in) then
-         do ispden=1,nspden_out
-           do ilmn=1,cplex_out*lmn2_size_out
-             pawrhoij_out(irhoij)%rhoij_(ilmn,ispden)=pawrhoij_in(jrhoij)%rhoij_(ilmn,ispden)+zero
+       pawrhoij_out(irhoij)%rhoij_(:,:)=zero
+       if (nspden_out==1) then
+         if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+             do ilmn=1,lmn2_size_out
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,2)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
+             end do
            end do
-         end do
-       else
-         pawrhoij_out(irhoij)%rhoij_(:,:)=zero
-         if (nspden_out==1) then
-           if (nspden_in==2) then
+         else ! nspden_in==1 or 4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
-&                                                              +pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,2)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==1 or nspden_in==4
+           end do
+         end if
+       else if (nspden_out==2) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,1)= &
+&                 half*pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,2)= &
+&                 half*pawrhoij_in(irhoij)%rhoij_(i_in+1:i_in+cplex,1)+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==2) then
-           if (nspden_in==1) then
+           end do
+         else if (nspden_in==2) then
+           do ispden=1,nspden_out
+             do iphase=1,qphase
+               i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,lmn2_size_out
+                 pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
+             end do
+           end do
+         else ! nspden_in==4
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=half*pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2)=half*pawrhoij_in(irhoij)%rhoij_(i_in:i_in+dplex,1)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,1)= &
+&                 half*(pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1) &
+&                      +pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,4))+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,2)= &
+&                 half*(pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1) &
+&                      -pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,4))+zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else if (nspden_in==2) then
+           end do
+         end if
+       else if (nspden_out==4) then
+         if (nspden_in==1) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1:2)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1:2)+zero
+                pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,2:4)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           else ! nspden_in==4
+           end do
+         else if (nspden_in==2) then
+           do iphase=1,qphase
+             i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
              do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
-&                                                                    +pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,4))+zero
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2)=half*(pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
-&                                                                    -pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,4))+zero
+                 pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,1)= &
+&                 pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1) &
+&                +pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,4)= &
+&                 pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,1) &
+&                -pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,2)+zero
+               pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,2:3)=zero
+               i_in=i_in+cplex_in;i_out=i_out+cplex_out
              end do
-           end if
-         else if (nspden_out==4) then
-           if (nspden_in==1) then
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1)+zero
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2:4)=zero
+           end do
+         else ! nspden_in==4
+           do ispden=1,nspden_out
+             do iphase=1,qphase
+               i_in=(iphase-1)*lmn2_size_in;i_out=(iphase-1)*lmn2_size_out
+               do ilmn=1,lmn2_size_out
+                 pawrhoij_out(irhoij)%rhoij_(i_out+1:i_out+cplex,ispden)= &
+&                   pawrhoij_in(jrhoij)%rhoij_(i_in+1:i_in+cplex,ispden)+zero
+                 i_in=i_in+cplex_in;i_out=i_out+cplex_out
+               end do
              end do
-           else if (nspden_in==2) then
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
-&                                                              +pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,4)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1) &
-&                                                              -pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,2)+zero
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,2:3)=zero
-             end do
-           else ! nspden_in==4
-             do ilmn=1,lmn2_size_out
-               i_in=cplex_in*ilmn-dplex_in;i_out=cplex_out*ilmn-dplex_out
-               pawrhoij_out(irhoij)%rhoij_(i_out:i_out+dplex,1:4)=pawrhoij_in(jrhoij)%rhoij_(i_in:i_in+dplex,1:4)+zero
-             end do
-           end if
+           end do
          end if
        end if
      end if
@@ -1122,14 +1252,7 @@ end subroutine pawrhoij_copy
 
 
  subroutine pawrhoij_gather(pawrhoij_in,pawrhoij_gathered,master,comm_atom, &
-&          with_grhoij,with_lmnmix,with_rhoijp,with_rhoijres,with_rhoij_) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_gather'
-!End of the abilint section
+&    with_grhoij,with_lmnmix,with_rhoijp,with_rhoijres,with_rhoij_) ! optional arguments
 
  implicit none
 
@@ -1143,9 +1266,9 @@ end subroutine pawrhoij_copy
 !Local variables-------------------------------
 !scalars
  integer :: buf_dp_size,buf_dp_size_all,buf_int_size,buf_int_size_all
- integer :: cplex,ierr,ii,indx_dp,indx_int,irhoij,isp,jrhoij,lmn2_size,lmnmix,me_atom
+ integer :: cplex,ierr,ii,indx_dp,indx_int,irhoij,isp,jj,jrhoij,lmn2_size,lmnmix,me_atom
  integer :: ngrhoij,nproc_atom,nrhoij_in,nrhoij_in_sum,nrhoij_out,nselect,nspden
- integer :: rhoij_size2,use_rhoijp,use_rhoijres,use_rhoij_
+ integer :: qphase,rhoij_size2,use_rhoijp,use_rhoijres,use_rhoij_
  logical :: my_atmtab_allocated,paral_atom
  logical :: with_grhoij_,with_lmnmix_,with_rhoijp_,with_rhoijres_,with_rhoij__
  character(len=500) :: msg
@@ -1195,14 +1318,15 @@ end subroutine pawrhoij_copy
 !Retrieve table of atoms
  paral_atom=.true.;nullify(my_atmtab)
  call get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,nrhoij_in_sum, &
-& my_natom_ref=nrhoij_in)
+&                   my_natom_ref=nrhoij_in)
 
 !Compute sizes of buffers
  buf_int_size=0;buf_dp_size=0
  nselect=0;lmnmix=0;ngrhoij=0;rhoij_size2=0
  use_rhoijp=0;use_rhoijres=0;use_rhoij_=0
  do irhoij=1,nrhoij_in
-   cplex    =pawrhoij_in(irhoij)%cplex
+   cplex    =pawrhoij_in(irhoij)%cplex_rhoij
+   qphase   =pawrhoij_in(irhoij)%qphase
    lmn2_size=pawrhoij_in(irhoij)%lmn2_size
    nspden   =pawrhoij_in(irhoij)%nspden
    if (with_lmnmix_) lmnmix=pawrhoij_in(irhoij)%lmnmix_sz
@@ -1210,18 +1334,18 @@ end subroutine pawrhoij_copy
    if (with_rhoijp_) use_rhoijp=pawrhoij_in(irhoij)%use_rhoijp
    if (with_rhoijres_)use_rhoijres=pawrhoij_in(irhoij)%use_rhoijres
    if (with_rhoij__) use_rhoij_=pawrhoij_in(irhoij)%use_rhoij_
-   buf_int_size=buf_int_size+15
+   buf_int_size=buf_int_size+16
    if (use_rhoijp>0) then
      nselect=pawrhoij_in(irhoij)%nrhoijsel
      buf_int_size=buf_int_size+nselect
-     buf_dp_size=buf_dp_size + cplex*nselect*nspden
+     buf_dp_size=buf_dp_size + cplex*qphase*nselect*nspden
    end if
    if (lmnmix>0)       buf_int_size=buf_int_size+lmnmix
-   if (ngrhoij>0)      buf_dp_size=buf_dp_size + cplex*lmn2_size*nspden*ngrhoij
-   if (use_rhoijres>0) buf_dp_size=buf_dp_size + cplex*lmn2_size*nspden
+   if (ngrhoij>0)      buf_dp_size=buf_dp_size + cplex*qphase*lmn2_size*nspden*ngrhoij
+   if (use_rhoijres>0) buf_dp_size=buf_dp_size + cplex*qphase*lmn2_size*nspden
    if (use_rhoij_>0) then
      rhoij_size2=size(pawrhoij_in(irhoij)%rhoij_,dim=2)
-     buf_dp_size=buf_dp_size + cplex*lmn2_size*rhoij_size2
+     buf_dp_size=buf_dp_size + cplex*qphase*lmn2_size*rhoij_size2
    end if
  end do
 
@@ -1232,7 +1356,8 @@ end subroutine pawrhoij_copy
  lmnmix=0;ngrhoij=0;nselect=0;rhoij_size2=0
  use_rhoijp=0;use_rhoijres=0;use_rhoij_=0
  do irhoij=1,nrhoij_in
-   cplex    =pawrhoij_in(irhoij)%cplex
+   cplex    =pawrhoij_in(irhoij)%cplex_rhoij
+   qphase   =pawrhoij_in(irhoij)%qphase
    lmn2_size=pawrhoij_in(irhoij)%lmn2_size
    nspden   =pawrhoij_in(irhoij)%nspden
    if (with_lmnmix_) lmnmix=pawrhoij_in(irhoij)%lmnmix_sz
@@ -1244,6 +1369,7 @@ end subroutine pawrhoij_copy
    if (use_rhoij_> 0) rhoij_size2 =size(pawrhoij_in(irhoij)%rhoij_,dim=2)
    buf_int(indx_int)=my_atmtab(irhoij)               ;indx_int=indx_int+1
    buf_int(indx_int)=cplex                           ;indx_int=indx_int+1
+   buf_int(indx_int)=qphase                          ;indx_int=indx_int+1
    buf_int(indx_int)=lmn2_size                       ;indx_int=indx_int+1
    buf_int(indx_int)=nspden                          ;indx_int=indx_int+1
    buf_int(indx_int)=nselect                         ;indx_int=indx_int+1
@@ -1261,8 +1387,12 @@ end subroutine pawrhoij_copy
      buf_int(indx_int:indx_int+nselect-1)=pawrhoij_in(irhoij)%rhoijselect(1:nselect)
      indx_int=indx_int+nselect
      do isp=1,nspden
-       buf_dp(indx_dp:indx_dp+cplex*nselect-1)=pawrhoij_in(irhoij)%rhoijp(1:cplex*nselect,isp)
-       indx_dp=indx_dp+cplex*nselect
+       do ii=1,qphase
+         jj=(ii-1)*cplex*lmn2_size
+         buf_dp(indx_dp:indx_dp+cplex*nselect-1)= &
+&          pawrhoij_in(irhoij)%rhoijp(jj+1:jj+cplex*nselect,isp)
+         indx_dp=indx_dp+cplex*nselect
+       end do
      end do
    end if
    if (lmnmix>0) then
@@ -1271,7 +1401,7 @@ end subroutine pawrhoij_copy
    end if
    if (ngrhoij>0) then
      do isp=1,nspden
-       do ii=1,cplex*lmn2_size
+       do ii=1,cplex*qphase*lmn2_size
          buf_dp(indx_dp:indx_dp+ngrhoij-1)=pawrhoij_in(irhoij)%grhoij(1:ngrhoij,ii,isp)
          indx_dp=indx_dp+ngrhoij
        end do
@@ -1279,14 +1409,16 @@ end subroutine pawrhoij_copy
    end if
    if (use_rhoijres>0) then
      do isp=1,nspden
-       buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)=pawrhoij_in(irhoij)%rhoijres(1:cplex*lmn2_size,isp)
-       indx_dp=indx_dp+cplex*lmn2_size
+       buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)= &
+           pawrhoij_in(irhoij)%rhoijres(1:cplex*qphase*lmn2_size,isp)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
    if (use_rhoij_>0) then
      do isp=1,rhoij_size2
-       buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)=pawrhoij_in(irhoij)%rhoij_(1:cplex*lmn2_size,isp)
-       indx_dp=indx_dp+cplex*lmn2_size
+       buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)= &
+&          pawrhoij_in(irhoij)%rhoij_(1:cplex*qphase*lmn2_size,isp)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
  end do
@@ -1343,6 +1475,7 @@ end subroutine pawrhoij_copy
    do irhoij=1,nrhoij_out
      jrhoij      =buf_int_all(indx_int)    ;indx_int=indx_int+1
      cplex       =buf_int_all(indx_int)    ;indx_int=indx_int+1
+     qphase      =buf_int_all(indx_int)    ;indx_int=indx_int+1
      lmn2_size   =buf_int_all(indx_int)    ;indx_int=indx_int+1
      nspden      =buf_int_all(indx_int)    ;indx_int=indx_int+1
      nselect     =buf_int_all(indx_int)    ;indx_int=indx_int+1
@@ -1356,7 +1489,8 @@ end subroutine pawrhoij_copy
      pawrhoij_gathered(jrhoij)%lmn_size=buf_int_all(indx_int) ;indx_int=indx_int+1
      pawrhoij_gathered(jrhoij)%nsppol=buf_int_all(indx_int)   ;indx_int=indx_int+1
      pawrhoij_gathered(jrhoij)%nspinor=buf_int_all(indx_int)  ;indx_int=indx_int+1
-     pawrhoij_gathered(jrhoij)%cplex=cplex
+     pawrhoij_gathered(jrhoij)%cplex_rhoij=cplex
+     pawrhoij_gathered(jrhoij)%qphase=qphase
      pawrhoij_gathered(jrhoij)%lmn2_size=lmn2_size
      pawrhoij_gathered(jrhoij)%nspden=nspden
      pawrhoij_gathered(jrhoij)%nrhoijsel=nselect
@@ -1368,13 +1502,18 @@ end subroutine pawrhoij_copy
      if (use_rhoijp>0) then
        LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijselect,(lmn2_size))
        pawrhoij_gathered(jrhoij)%rhoijselect(1:nselect)=buf_int_all(indx_int:indx_int+nselect-1)
-       if (nselect < lmn2_size )pawrhoij_gathered(jrhoij)%rhoijselect(nselect+1:lmn2_size)=zero
+       if (nselect < lmn2_size )pawrhoij_gathered(jrhoij)%rhoijselect(nselect+1:lmn2_size)=0
        indx_int=indx_int+nselect
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijp,(cplex*lmn2_size,nspden))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijp,(qphase*cplex*lmn2_size,nspden))
        do isp=1,nspden
-         pawrhoij_gathered(jrhoij)%rhoijp(1:cplex*nselect,isp)=buf_dp_all(indx_dp:indx_dp+cplex*nselect-1)
-         if (nselect < lmn2_size )pawrhoij_gathered(jrhoij)%rhoijp(cplex*nselect+1:cplex*lmn2_size,isp)=zero
-         indx_dp=indx_dp+cplex*nselect
+         do ii=1,qphase
+           jj=(ii-1)*cplex*lmn2_size
+           pawrhoij_gathered(jrhoij)%rhoijp(jj+1:jj+cplex*nselect,isp)= &
+&                                  buf_dp_all(indx_dp:indx_dp+cplex*nselect-1)
+           if (nselect<lmn2_size) &
+&            pawrhoij_gathered(jrhoij)%rhoijp(jj+cplex*nselect+1:jj+cplex*lmn2_size,isp)=zero
+           indx_dp=indx_dp+cplex*nselect
+         end do
        end do
      end if
      if (lmnmix>0) then
@@ -1383,26 +1522,28 @@ end subroutine pawrhoij_copy
        indx_int=indx_int+lmnmix
      end if
      if (ngrhoij>0) then
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%grhoij,(ngrhoij,cplex*lmn2_size,nspden))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%grhoij,(ngrhoij,qphase*cplex*lmn2_size,nspden))
        do isp=1,nspden
-         do ii=1,cplex*lmn2_size
+         do ii=1,cplex*qphase*lmn2_size
            pawrhoij_gathered(jrhoij)%grhoij(1:ngrhoij,ii,isp)=buf_dp_all(indx_dp:indx_dp+ngrhoij-1)
            indx_dp=indx_dp+ngrhoij
          end do
        end do
      end if
      if (use_rhoijres>0) then
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijres,(cplex*lmn2_size,nspden))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoijres,(qphase*cplex*lmn2_size,nspden))
        do isp=1,nspden
-         pawrhoij_gathered(jrhoij)%rhoijres(1:cplex*lmn2_size,isp)=buf_dp_all(indx_dp:indx_dp+cplex*lmn2_size-1)
-         indx_dp=indx_dp+cplex*lmn2_size
+         pawrhoij_gathered(jrhoij)%rhoijres(1:cplex*qphase*lmn2_size,isp)= &
+&                                buf_dp_all(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
+         indx_dp=indx_dp+cplex*qphase*lmn2_size
        end do
      end if
      if (use_rhoij_>0) then
-       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoij_,(cplex*lmn2_size,rhoij_size2))
+       LIBPAW_ALLOCATE(pawrhoij_gathered(jrhoij)%rhoij_,(qphase*cplex*lmn2_size,rhoij_size2))
        do isp=1,rhoij_size2
-         pawrhoij_gathered(jrhoij)%rhoij_(1:cplex*lmn2_size,isp)=buf_dp_all(indx_dp:indx_dp+cplex*lmn2_size-1)
-         indx_dp=indx_dp+cplex*lmn2_size
+         pawrhoij_gathered(jrhoij)%rhoij_(1:cplex*qphase*lmn2_size,isp)= &
+&                                buf_dp_all(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
+         indx_dp=indx_dp+cplex*qphase*lmn2_size
        end do
      end if
    end do
@@ -1451,13 +1592,6 @@ end subroutine pawrhoij_gather
 
  subroutine pawrhoij_bcast(pawrhoij_in,pawrhoij_out,master,mpicomm,comm_atom)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1470,9 +1604,9 @@ end subroutine pawrhoij_gather
 !Local variables-------------------------------
 !scalars
  integer :: buf_dp_size,buf_dp_size_all,buf_int_size,buf_int_size_all
- integer :: cplex,ierr,ii,indx_dp,indx_int,iproc,irhoij,isp,jrhoij,lmn2_size,lmnmix,me,me_atom
+ integer :: cplex,ierr,ii,indx_dp,indx_int,iproc,irhoij,isp,jj,jrhoij,lmn2_size,lmnmix,me,me_atom
  integer :: my_comm_atom,ngrhoij,nproc,nproc_atom,nrhoij_in,nrhoij_out,nrhoij_out_all
- integer :: nselect,nspden,rhoij_size2,use_rhoijp,use_rhoijres,use_rhoij_
+ integer :: nselect,nspden,qphase,rhoij_size2,use_rhoijp,use_rhoijres,use_rhoij_
  logical :: my_atmtab_allocated,paral_atom
  character(len=500) :: msg
 !arrays
@@ -1546,7 +1680,8 @@ end subroutine pawrhoij_gather
    buf_int_size_i(:)=0;buf_dp_size_i(:)=0
    do irhoij=1,nrhoij_in
      jrhoij=irhoij;if (paral_atom) jrhoij=atmtab(irhoij)
-     cplex       =pawrhoij_in(jrhoij)%cplex
+     cplex       =pawrhoij_in(jrhoij)%cplex_rhoij
+     qphase      =pawrhoij_in(jrhoij)%qphase
      lmn2_size   =pawrhoij_in(jrhoij)%lmn2_size
      nspden      =pawrhoij_in(jrhoij)%nspden
      lmnmix      =pawrhoij_in(jrhoij)%lmnmix_sz
@@ -1554,17 +1689,17 @@ end subroutine pawrhoij_gather
      use_rhoijp  =pawrhoij_in(jrhoij)%use_rhoijp
      use_rhoijres=pawrhoij_in(jrhoij)%use_rhoijres
      use_rhoij_  =pawrhoij_in(jrhoij)%use_rhoij_
-     buf_int_size_i(irhoij)=buf_int_size_i(irhoij)+15
-     if (ngrhoij>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*lmn2_size*nspden*ngrhoij
-     if (use_rhoijres>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*lmn2_size*nspden
+     buf_int_size_i(irhoij)=buf_int_size_i(irhoij)+16
+     if (ngrhoij>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*qphase*lmn2_size*nspden*ngrhoij
+     if (use_rhoijres>0) buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*qphase*lmn2_size*nspden
      if (use_rhoijp>0) then
        nselect=pawrhoij_in(jrhoij)%nrhoijsel
        buf_int_size_i(irhoij)=buf_int_size_i(irhoij)+nselect
-       buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*nselect*nspden
+       buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*qphase*nselect*nspden
      end if
      if (use_rhoij_>0) then
        rhoij_size2=size(pawrhoij_in(jrhoij)%rhoij_,dim=2)
-       buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*lmn2_size*rhoij_size2
+       buf_dp_size_i(irhoij)=buf_dp_size_i(irhoij)+cplex*qphase*lmn2_size*rhoij_size2
      end if
    end do
  end if
@@ -1622,7 +1757,8 @@ end subroutine pawrhoij_gather
    indx_int=1;indx_dp =1
    do irhoij=1,nrhoij_in
      jrhoij=irhoij;if (paral_atom) jrhoij=atmtab(irhoij)
-     cplex       =pawrhoij_in(jrhoij)%cplex
+     cplex       =pawrhoij_in(jrhoij)%cplex_rhoij
+     qphase      =pawrhoij_in(jrhoij)%qphase
      lmn2_size   =pawrhoij_in(jrhoij)%lmn2_size
      nspden      =pawrhoij_in(jrhoij)%nspden
      lmnmix      =pawrhoij_in(jrhoij)%lmnmix_sz
@@ -1634,6 +1770,7 @@ end subroutine pawrhoij_gather
      rhoij_size2 =size(pawrhoij_in(jrhoij)%rhoij_,dim=2)
      buf_int_all(indx_int)=jrhoij                      ;indx_int=indx_int+1 ! Not used !
      buf_int_all(indx_int)=cplex                       ;indx_int=indx_int+1
+     buf_int_all(indx_int)=qphase                      ;indx_int=indx_int+1
      buf_int_all(indx_int)=lmn2_size                   ;indx_int=indx_int+1
      buf_int_all(indx_int)=nspden                      ;indx_int=indx_int+1
      buf_int_all(indx_int)=nselect                     ;indx_int=indx_int+1
@@ -1651,8 +1788,12 @@ end subroutine pawrhoij_gather
        buf_int_all(indx_int:indx_int+nselect-1)=pawrhoij_in(jrhoij)%rhoijselect(1:nselect)
        indx_int=indx_int+nselect
        do isp=1,nspden
-         buf_dp_all(indx_dp:indx_dp+cplex*nselect-1)=pawrhoij_in(jrhoij)%rhoijp(1:cplex*nselect,isp)
-         indx_dp=indx_dp+cplex*nselect
+         do ii=1,qphase
+           jj=(ii-1)*cplex*lmn2_size
+           buf_dp_all(indx_dp:indx_dp+cplex*nselect-1)= &
+&              pawrhoij_in(jrhoij)%rhoijp(jj+1:jj+cplex*nselect,isp)
+           indx_dp=indx_dp+cplex*nselect
+         end do
        end do
      end if
      if (lmnmix>0) then
@@ -1661,7 +1802,7 @@ end subroutine pawrhoij_gather
      end if
      if (ngrhoij>0) then
        do isp=1,nspden
-         do ii=1,cplex*lmn2_size
+         do ii=1,cplex*qphase*lmn2_size
            buf_dp_all(indx_dp:indx_dp+ngrhoij-1)=pawrhoij_in(jrhoij)%grhoij(1:ngrhoij,ii,isp)
            indx_dp=indx_dp+ngrhoij
          end do
@@ -1669,14 +1810,16 @@ end subroutine pawrhoij_gather
      end if
      if (use_rhoijres>0) then
        do isp=1,nspden
-         buf_dp_all(indx_dp:indx_dp+cplex*lmn2_size-1)=pawrhoij_in(jrhoij)%rhoijres(1:cplex*lmn2_size,isp)
-         indx_dp=indx_dp+cplex*lmn2_size
+         buf_dp_all(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)= &
+&            pawrhoij_in(jrhoij)%rhoijres(1:cplex*qphase*lmn2_size,isp)
+         indx_dp=indx_dp+cplex*qphase*lmn2_size
        end do
      end if
      if (use_rhoij_>0) then
        do isp=1,rhoij_size2
-         buf_dp_all(indx_dp:indx_dp+cplex*lmn2_size-1)=pawrhoij_in(jrhoij)%rhoij_(1:cplex*lmn2_size,isp)
-         indx_dp=indx_dp+cplex*lmn2_size
+         buf_dp_all(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)= &
+&            pawrhoij_in(jrhoij)%rhoij_(1:cplex*qphase*lmn2_size,isp)
+         indx_dp=indx_dp+cplex*qphase*lmn2_size
        end do
      end if
    end do
@@ -1702,6 +1845,7 @@ end subroutine pawrhoij_gather
  do irhoij=1,nrhoij_out
    jrhoij      =buf_int(indx_int);indx_int=indx_int+1 ! Not used !
    cplex       =buf_int(indx_int);indx_int=indx_int+1
+   qphase      =buf_int(indx_int);indx_int=indx_int+1
    lmn2_size   =buf_int(indx_int);indx_int=indx_int+1
    nspden      =buf_int(indx_int);indx_int=indx_int+1
    nselect     =buf_int(indx_int);indx_int=indx_int+1
@@ -1715,7 +1859,8 @@ end subroutine pawrhoij_gather
    pawrhoij_out(irhoij)%lmn_size=buf_int(indx_int);indx_int=indx_int+1
    pawrhoij_out(irhoij)%nsppol=buf_int(indx_int)  ;indx_int=indx_int+1
    pawrhoij_out(irhoij)%nspinor=buf_int(indx_int) ;indx_int=indx_int+1
-   pawrhoij_out(irhoij)%cplex=cplex
+   pawrhoij_out(irhoij)%cplex_rhoij=cplex
+   pawrhoij_out(irhoij)%qphase=qphase
    pawrhoij_out(irhoij)%lmn2_size=lmn2_size
    pawrhoij_out(irhoij)%nspden=nspden
    pawrhoij_out(irhoij)%nrhoijsel=nselect
@@ -1726,12 +1871,17 @@ end subroutine pawrhoij_gather
    pawrhoij_out(irhoij)%use_rhoij_=use_rhoij_
    if (use_rhoijp>0) then
      LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijselect,(nselect))
+     pawrhoij_out(irhoij)%rhoijselect=0
      pawrhoij_out(irhoij)%rhoijselect(1:nselect)=buf_int(indx_int:indx_int+nselect-1)
      indx_int=indx_int+nselect
      LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijp,(cplex*nselect,nspden))
      do isp=1,nspden
-       pawrhoij_out(irhoij)%rhoijp(1:cplex*nselect,isp)=buf_dp(indx_dp:indx_dp+cplex*nselect-1)
-       indx_dp=indx_dp+cplex*nselect
+       do ii=1,qphase
+         jj=(ii-1)*cplex*lmn2_size
+         pawrhoij_out(irhoij)%rhoijp(jj+1:jj+cplex*nselect,isp)= &
+&                 buf_dp(indx_dp:indx_dp+cplex*nselect-1)
+         indx_dp=indx_dp+cplex*nselect
+       end do
      end do
    end if
    if (lmnmix>0) then
@@ -1742,7 +1892,7 @@ end subroutine pawrhoij_gather
    if (ngrhoij>0) then
      LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%grhoij,(ngrhoij,cplex*lmn2_size,nspden))
      do isp=1,nspden
-       do ii=1,cplex*lmn2_size
+       do ii=1,cplex*qphase*lmn2_size
          pawrhoij_out(irhoij)%grhoij(1:ngrhoij,ii,isp)=buf_dp(indx_dp:indx_dp+ngrhoij-1)
          indx_dp=indx_dp+ngrhoij
        end do
@@ -1751,15 +1901,17 @@ end subroutine pawrhoij_gather
    if (use_rhoijres>0) then
      LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoijres,(cplex*lmn2_size,nspden))
      do isp=1,nspden
-       pawrhoij_out(irhoij)%rhoijres(1:cplex*lmn2_size,isp)=buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)
-       indx_dp=indx_dp+cplex*lmn2_size
+       pawrhoij_out(irhoij)%rhoijres(1:cplex*qphase*lmn2_size,isp)= &
+&               buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
    if (use_rhoij_>0) then
      LIBPAW_ALLOCATE(pawrhoij_out(irhoij)%rhoij_,(cplex*lmn2_size,rhoij_size2))
      do isp=1,rhoij_size2
-       pawrhoij_out(irhoij)%rhoij_(1:cplex*lmn2_size,isp)=buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)
-       indx_dp=indx_dp+cplex*lmn2_size
+       pawrhoij_out(irhoij)%rhoij_(1:cplex*qphase*lmn2_size,isp)= &
+&               buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
  end do
@@ -1833,13 +1985,6 @@ end subroutine pawrhoij_bcast
 &           natom,mpi_atmtab_in,mpi_atmtab_out,pawrhoij_out,&
 &           SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_redistribute'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1895,7 +2040,7 @@ end subroutine pawrhoij_bcast
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij_out,(my_natom_in))
      call pawrhoij_nullify(pawrhoij_out)
      call pawrhoij_copy(pawrhoij,pawrhoij_out,&
-&                    keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    end if
    return
  end if
@@ -1940,19 +2085,19 @@ end subroutine pawrhoij_bcast
    LIBPAW_DATATYPE_ALLOCATE(pawrhoij_all,(natom_tot))
    call pawrhoij_nullify(pawrhoij_all)
    call pawrhoij_copy(pawrhoij,pawrhoij_all,comm_atom=mpi_comm_in,mpi_atmtab=my_atmtab_in,&
-&                  keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&       keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    if (in_place) then
      call pawrhoij_free(pawrhoij)
      LIBPAW_DATATYPE_DEALLOCATE(pawrhoij)
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij,(my_natom_out))
      call pawrhoij_nullify(pawrhoij)
      call pawrhoij_copy(pawrhoij_all,pawrhoij,comm_atom=mpi_comm_out,mpi_atmtab=my_atmtab_out,&
-&                       keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    else
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij_out,(my_natom_out))
      call pawrhoij_nullify(pawrhoij_out)
      call pawrhoij_copy(pawrhoij_all,pawrhoij_out,comm_atom=mpi_comm_out,mpi_atmtab=my_atmtab_out,&
-&                       keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
    end if
    call pawrhoij_free(pawrhoij_all)
    LIBPAW_DATATYPE_DEALLOCATE(pawrhoij_all)
@@ -2004,7 +2149,7 @@ end subroutine pawrhoij_bcast
 !  A send buffer in an asynchrone communication couldn't be deallocate before it has been receive
    nbsent=0 ; ireq=0 ; iisend=0 ; nbsendreq=0 ; nb_msg=0
    do iisend=1,nbsend
-     iproc_rcv=SendAtomProc(iisend) 
+     iproc_rcv=SendAtomProc(iisend)
      next=-1
      if (iisend < nbsend) next=SendAtomProc(iisend+1)
      if (iproc_rcv /= me_exch) then
@@ -2063,7 +2208,7 @@ end subroutine pawrhoij_bcast
        iat_in=atm_indx_in(SendAtomList(iisend))
        iat_out=atm_indx_out(my_atmtab_in(iat_in))
        call pawrhoij_copy(pawrhoij(iat_in:iat_in),pawrhoij_out1(iat_out:iat_out), &
-&                         keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&           keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
        nbsent=0
      end if
    end do
@@ -2120,7 +2265,7 @@ end subroutine pawrhoij_bcast
      LIBPAW_DATATYPE_ALLOCATE(pawrhoij,(my_natom_out))
      call pawrhoij_nullify(pawrhoij)
      call pawrhoij_copy(pawrhoij_out1,pawrhoij, &
-&         keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)
+&         keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
      call pawrhoij_free(pawrhoij_out1)
      LIBPAW_DATATYPE_DEALLOCATE(pawrhoij_out1)
    end if
@@ -2201,13 +2346,6 @@ end subroutine pawrhoij_redistribute
 subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,typat,&
 &                   headform,rdwr_mode,form,natinc,mpi_atmtab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_io'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2219,21 +2357,22 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
  integer, intent(in), optional, pointer :: mpi_atmtab(:)
 !arrays
  integer,intent(in) :: typat(:),nlmn_type(:)
- type(pawrhoij_type),intent(inout) :: pawrhoij(:)
+ type(pawrhoij_type),intent(inout),target :: pawrhoij(:)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: fort_formatted=1,fort_binary=2,netcdf_io=3
- integer :: cplex,i1,i2,iatom,iatom_tot,natom,ispden,bsize,ii,jj,lmn2_size
- integer :: nselect,my_cplex,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
- integer :: iomode,ncid,natom_id,cplex_id,nspden_id,nsel56_id,buffer_id,ibuffer_id,ncerr
- integer :: bsize_id,bufsize_id
+ integer :: cplex,qphase,i1,i2,iatom,iatom_tot,natom,ispden,bsize,ii,jj,lmn2_size
+ integer :: nselect,my_cplex,my_qphase,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
+ integer :: iomode,ncid,natom_id,cplex_id,qphase_id,nspden_id,nsel56_id
+ integer :: buffer_id,ibuffer_id,ncerr,bsize_id,bufsize_id
  logical :: paral_atom
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ibuffer(:),nsel44(:,:),nsel56(:)
  integer,pointer :: my_atmtab(:)
  real(dp), allocatable :: buffer(:)
+ real(dp),pointer :: rhoij_tmp(:)
 
 ! *************************************************************************
 
@@ -2255,7 +2394,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
  iomode = fort_binary
  if (PRESENT(form)) then
    select case (libpaw_to_upper(form))
-   case ("FORMATTED") 
+   case ("FORMATTED")
      iomode = fort_formatted
    case ("NETCDF")
      iomode = netcdf_io
@@ -2301,6 +2440,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        ii=0
        do iatom=1,natom
          nselect=nsel44(1,iatom)
+         pawrhoij(iatom)%rhoijselect(:)=0
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          do ispden=1,nspden_in
            pawrhoij(iatom)%rhoijp(1:nselect,ispden)=buffer(ii+1:ii+nselect)
@@ -2312,11 +2452,12 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        LIBPAW_DEALLOCATE(nsel44)
      else if (headform>=56) then
        LIBPAW_ALLOCATE(nsel56,(natom))
+       my_cplex=1;my_nspden=1;my_qphase=1
        if (headform==56) then
          if (iomode == fort_binary) then
-           read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex
+          read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex
          else if (iomode == fort_formatted) then
-           read(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex
+          read(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex
 #ifdef LIBPAW_HAVE_NETCDF
        else if (iomode == netcdf_io) then
           NCF_CHECK(nf90_inq_dimid(ncid, "pawrhoij_cplex", cplex_id))
@@ -2328,9 +2469,11 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          end if
        else
          if (iomode == fort_binary) then
-           read(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+           read(unitfi,err=10,end=10) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
+   10      continue
          else if (iomode == fort_formatted) then
-           read(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+           read(unitfi,fmt=*,err=11,end=11) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
+   11      continue
 #ifdef LIBPAW_HAVE_NETCDF
        else if (iomode == netcdf_io) then
            NCF_CHECK(nf90_inq_dimid(ncid, "pawrhoij_cplex", cplex_id))
@@ -2339,16 +2482,22 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
            NCF_CHECK(nf90_inquire_dimension(ncid, nspden_id, len=my_nspden))
            NCF_CHECK(nf90_inq_varid(ncid, "nrhoijsel_atoms", nsel56_id))
            NCF_CHECK(nf90_get_var(ncid, nsel56_id, nsel56))
+           if (nf90_inq_dimid(ncid, "pawrhoij_qphase", qphase_id)==NF90_NOERR) then
+             NCF_CHECK(nf90_inquire_dimension(ncid, qphase_id, len=my_qphase))
+           else
+             my_qphase=1
+           end if
 #endif
          end if
        end if
-       call pawrhoij_alloc(pawrhoij,my_cplex,my_nspden,nspinor_in,nsppol_in,typat,lmnsize=nlmn_type)
+       call pawrhoij_alloc(pawrhoij,my_cplex,my_nspden,nspinor_in,nsppol_in,typat,&
+&                          lmnsize=nlmn_type,qphase=my_qphase)
        do iatom=1,natom
          pawrhoij(iatom)%nrhoijsel=nsel56(iatom)
        end do
        bsize=sum(nsel56)
        LIBPAW_ALLOCATE(ibuffer,(bsize))
-       LIBPAW_ALLOCATE(buffer,(bsize*my_nspden*my_cplex))
+       LIBPAW_ALLOCATE(buffer,(bsize*my_nspden*my_cplex*my_qphase))
        if (iomode == fort_binary) then
          read(unitfi  ) ibuffer(:),buffer(:)
        else if (iomode == fort_formatted) then
@@ -2366,11 +2515,13 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        ii=0;jj=0
        do iatom=1,natom
          nselect=nsel56(iatom)
+         pawrhoij(iatom)%rhoijselect(:)=0
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          ii=ii+nselect
          do ispden=1,my_nspden
-           pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)=buffer(jj+1:jj+my_cplex*nselect)
-           jj=jj+my_cplex*nselect
+           pawrhoij(iatom)%rhoijp(1:my_cplex*my_qphase*nselect,ispden)= &
+&                          buffer(jj+1:jj+my_cplex*my_qphase*nselect)
+           jj=jj+my_cplex*my_qphase*nselect
          end do
        end do
        LIBPAW_DEALLOCATE(ibuffer)
@@ -2381,17 +2532,18 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
    case ("W","w") ! Writing the Rhoij tab (latest format is used)
 
      LIBPAW_ALLOCATE(nsel56,(natom))
-     my_cplex =pawrhoij(1)%cplex
+     my_cplex =pawrhoij(1)%cplex_rhoij
      my_nspden=pawrhoij(1)%nspden
+     my_qphase=pawrhoij(1)%qphase
      do iatom=1,natom
        nsel56(iatom)=pawrhoij(iatom)%nrhoijsel
      end do
      bsize=sum(nsel56)
 
      if (iomode == fort_binary) then
-       write(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+       write(unitfi  ) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
      else if (iomode == fort_formatted) then
-       write(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden
+       write(unitfi,*) (nsel56(iatom),iatom=1,natom),my_cplex,my_nspden,my_qphase
 #ifdef LIBPAW_HAVE_NETCDF
      else if (iomode == netcdf_io) then
        ncerr = nf90_redef(ncid)
@@ -2405,10 +2557,10 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
 
        NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_cplex", my_cplex, cplex_id))
        NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_nspden", my_nspden, nspden_id))
-       !write(std_out,*)"bsize,my_nspden,my_cplex",bsize, my_nspden, my_cplex
+       NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
        if (bsize > 0) then
          NCF_CHECK(nf90_def_dim(ncid, "rhoijselect_atoms_dim", bsize, bsize_id))
-         NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_cplex, bufsize_id))
+         NCF_CHECK(nf90_def_dim(ncid, "rhoijp_atoms_dim", bsize*my_nspden*my_qphase*my_cplex, bufsize_id))
          ! Define variables.
          NCF_CHECK(nf90_def_var(ncid, "rhoijselect_atoms", NF90_INT, bsize_id, ibuffer_id))
          NCF_CHECK(nf90_def_var(ncid, "rhoijp_atoms", NF90_DOUBLE, bufsize_id, buffer_id))
@@ -2424,15 +2576,16 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      end if
 
      LIBPAW_ALLOCATE(ibuffer,(bsize))
-     LIBPAW_ALLOCATE(buffer,(bsize*my_nspden*my_cplex))
+     LIBPAW_ALLOCATE(buffer,(bsize*my_nspden*my_cplex*my_qphase))
      ii=0;jj=0
      do iatom=1,natom
        nselect=nsel56(iatom)
        ibuffer(ii+1:ii+nselect)=pawrhoij(iatom)%rhoijselect(1:nselect)
        ii=ii+nselect
        do ispden=1,my_nspden
-         buffer(jj+1:jj+my_cplex*nselect)=pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)
-         jj=jj+my_cplex*nselect
+         buffer(jj+1:jj+my_cplex*my_qphase*nselect)= &
+&                      pawrhoij(iatom)%rhoijp(1:my_cplex*my_qphase*nselect,ispden)
+         jj=jj+my_cplex*my_qphase*nselect
        end do
      end do
      if (iomode == fort_binary) then
@@ -2456,18 +2609,47 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      my_natinc=1; if(natom>1) my_natinc=natom-1
      if (PRESENT(natinc)) my_natinc = natinc ! user-defined increment.
      LIBPAW_ALLOCATE(ibuffer,(0))
+     if (my_qphase==2) then
+       LIBPAW_ALLOCATE(rhoij_tmp,(2*nselect))
+     end if
      do iatom=1,my_natom,my_natinc
        iatom_tot=iatom;if(paral_atom)iatom_tot=my_atmtab(iatom)
+       my_cplex =pawrhoij(iatom)%cplex_rhoij
+       my_nspden=pawrhoij(iatom)%nspden
+       my_qphase=pawrhoij(iatom)%qphase
+       nselect=pawrhoij(iatom)%nrhoijsel
        do ispden=1,pawrhoij(iatom)%nspden
+         if (my_qphase==1) then
+           rhoij_tmp => pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)
+         else
+           rhoij_tmp=zero
+           jj=my_cplex*pawrhoij(iatom)%lmn2_size
+           if (my_cplex==1) then
+             do ii=1,nselect
+               rhoij_tmp(2*ii-1)=pawrhoij(iatom)%rhoijp(ii,ispden)
+               rhoij_tmp(2*ii  )=pawrhoij(iatom)%rhoijp(jj+ii,ispden)
+             end do
+           else
+             do ii=1,nselect
+               rhoij_tmp(2*ii-1)=pawrhoij(iatom)%rhoijp(2*ii-1,ispden) &
+  &                             -pawrhoij(iatom)%rhoijp(jj+2*ii  ,ispden)
+               rhoij_tmp(2*ii  )=pawrhoij(iatom)%rhoijp(2*ii  ,ispden) &
+  &                             +pawrhoij(iatom)%rhoijp(jj+2*ii-1,ispden)
+             end do
+           end if
+           my_cplex=2
+         end if
          write(unitfi, '(a,i4,a,i1,a)' ) ' rhoij(',iatom_tot,',',ispden,')=  (max 12 non-zero components will be written)'
-         call pawio_print_ij(unitfi,pawrhoij(iatom)%rhoijp(:,ispden),&
-&         pawrhoij(iatom)%nrhoijsel,&
-&         pawrhoij(iatom)%cplex,&
+         call pawio_print_ij(unitfi,rhoij_tmp,nselect,my_cplex,&
 &         pawrhoij(iatom)%lmn_size,-1,ibuffer,1,0,&
-&         pawrhoij(iatom)%rhoijselect(:),-1.d0,1,mode_paral='PERS')
+&         pawrhoij(iatom)%rhoijselect,-1.d0,1,&
+&         opt_sym=2,mode_paral='PERS')
        end do
      end do
      LIBPAW_DEALLOCATE(ibuffer)
+     if (my_qphase==2) then
+       LIBPAW_DEALLOCATE(rhoij_tmp)
+     end if
 
   case ("D","d") ! Debug
 
@@ -2479,14 +2661,16 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        iatom_tot=iatom;if(paral_atom) iatom_tot=my_atmtab(iatom)
        if (iatom_tot/=1) cycle
        write(unitfi,'(a,i4,a)' ) ' *******  rhoij (Atom # ',iatom_tot,' ********)'
-       write(unitfi,'(a,i4,a,i4)' ) 'cplx=',pawrhoij(iatom)%cplex, ' nselect=', pawrhoij(iatom)%nrhoijsel
+       write(unitfi,'(a,i4,a,i4)' ) 'cplex_rhoij=',pawrhoij(iatom)%cplex_rhoij, ' nselect=', pawrhoij(iatom)%nrhoijsel
        write(unitfi,'(a,i4,a,i4)' ) 'nspden=',pawrhoij(iatom)%nspden, ' lmn2size=',pawrhoij(iatom)%lmn2_size
        write(unitfi,'(a,i4,a,i4)' ) 'lmnmix=',pawrhoij(iatom)%lmnmix_sz, ' ngrhoij=',pawrhoij(iatom)%ngrhoij
        write(unitfi,'(a,i4,a,i4)' ) 'use_rhoijres=',pawrhoij(iatom)%use_rhoijres, &
 &                                   'use_rhoij_=',pawrhoij(iatom)%use_rhoij_
        write(unitfi,'(a,i4,a,i4)' ) 'itypat=',pawrhoij(iatom)%itypat, ' lmn_size=',pawrhoij(iatom)%lmn_size
        write(unitfi,'(a,i4,a,i4)' ) 'nsppol=',pawrhoij(iatom)%nsppol, ' nspinor=',pawrhoij(iatom)%nspinor
-       cplex=pawrhoij(iatom)%cplex
+       write(unitfi,'(a,i4)' )      'qphase=',pawrhoij(iatom)%qphase
+       cplex=pawrhoij(iatom)%cplex_rhoij
+       qphase=pawrhoij(iatom)%qphase
        lmn2_size=pawrhoij(iatom)%lmn2_size
        do i2=1,pawrhoij(iatom)%nrhoijsel
          write(unitfi,'(a,i4,a,i4,a,i4,a,f9.5)') 'rhoijselect(,',i2,')=',&
@@ -2496,9 +2680,11 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          ngrhoijmx=2; if (pawrhoij(iatom)%ngrhoij<ngrhoijmx) ngrhoijmx=pawrhoij(iatom)%ngrhoij
          do ispden=1,pawrhoij(iatom)%nspden
            do i1=ngrhoijmx,ngrhoijmx
-             do i2=cplex*lmn2_size,cplex*lmn2_size
-               write(unitfi,'(a,i4,a,i4,a,i4,a,f9.5)') ' grhoij(,',i1,',',i2,',',ispden,')=',&
-&                pawrhoij(iatom)%grhoij(i1,i2,ispden)
+             do ii=1,qphase
+               do i2=(ii-1)*cplex*lmn2_size+cplex*lmn2_size,(ii-1)*cplex*lmn2_size+cplex*lmn2_size
+                 write(unitfi,'(a,i4,a,i4,a,i4,a,f9.5)') ' grhoij(,',i1,',',i2,',',ispden,')=',&
+&                 pawrhoij(iatom)%grhoij(i1,i2,ispden)
+               end do
              end do
            end do
          end do
@@ -2506,18 +2692,23 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        end if
        if (pawrhoij(iatom)%use_rhoijres>0) then
          do ispden=1,pawrhoij(iatom)%nspden
-           do i2=cplex*lmn2_size,cplex*lmn2_size
-             write(unitfi,'(a,i4,a,i4,a,f9.5)') ' rhoijres(,',i2,',ispden=',ispden,')=',&
-&              pawrhoij(iatom)%rhoijres(i2,ispden)
+           do ii=1,qphase
+             do i2=(ii-1)*cplex*lmn2_size+cplex*lmn2_size,(ii-1)*cplex*lmn2_size+cplex*lmn2_size
+               write(unitfi,'(a,i4,a,i4,a,f9.5)') ' rhoijres(,',i2,',ispden=',ispden,')=',&
+&               pawrhoij(iatom)%rhoijres(i2,ispden)
+             end do
            end do
          end do
          call libpaw_flush(unitfi)
        end if
        if (pawrhoij(iatom)%nrhoijsel>0) then
          do ispden=1,pawrhoij(iatom)%nspden
-           do i2=cplex*pawrhoij(iatom)%nrhoijsel ,cplex*pawrhoij(iatom)%nrhoijsel
-             write(unitfi,'(a,i4,a,i4,a,f9.5)') ' rhoijp!(nrhoijselec=,',i2,',ispden=',ispden,')=',&
-&              pawrhoij(iatom)%rhoijp(i2,ispden)
+           do ii=1,qphase
+             do i2=(ii-1)*cplex*lmn2_size+cplex*pawrhoij(iatom)%nrhoijsel, &
+&                  (ii-1)*cplex*lmn2_size+cplex*pawrhoij(iatom)%nrhoijsel
+               write(unitfi,'(a,i4,a,i4,a,f9.5)') ' rhoijp!(nrhoijselec=,',i2,',ispden=',ispden,')=',&
+&               pawrhoij(iatom)%rhoijp(i2,ispden)
+             end do
            end do
          end do
          call libpaw_flush(unitfi)
@@ -2525,9 +2716,11 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        if (pawrhoij(iatom)%use_rhoij_>0) then
          size_rhoij2=size(pawrhoij(iatom)%rhoij_,2)
          do ispden=1,size_rhoij2
-           do i2=cplex*lmn2_size,cplex*lmn2_size
-             write(unitfi,'(a,i4,a,i4,a,f9.5)') ' rhoij_(,',i2,',ispden=',ispden,')=',&
-&              pawrhoij(iatom)%rhoij_(i2,ispden)
+           do ii=1,qphase
+             do i2=(ii-1)*cplex*lmn2_size+cplex*lmn2_size,(ii-1)*cplex*lmn2_size+cplex*lmn2_size
+               write(unitfi,'(a,i4,a,i4,a,f9.5)') ' rhoij_(,',i2,',ispden=',ispden,')=',&
+&               pawrhoij(iatom)%rhoij_(i2,ispden)
+             end do
            end do
          end do
        end if
@@ -2571,13 +2764,6 @@ end subroutine pawrhoij_io
 
 subroutine pawrhoij_unpack(rhoij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_unpack'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2586,27 +2772,42 @@ subroutine pawrhoij_unpack(rhoij)
  type(pawrhoij_type),intent(inout) :: rhoij(:)
 
 !Local variables-------------------------------
- integer :: natom,iat,lmn2_size,isel,klmn,nspden,cplex
+ integer :: cplex_rhoij,natom,lmn2_size,nsp2,qphase
+ integer :: i0,iat,iphase,isel,isppol,klmn
 
 ! *************************************************************************
 
- natom  = SIZE(rhoij) ; if (natom==0) return
- nspden = rhoij(1)%nspden    ! MT jan-2010: this should not be nspden but nsppol or 4 if nspden=4
- cplex  = rhoij(1)%cplex
+ natom = SIZE(rhoij) ; if (natom==0) return
 
  do iat=1,natom
 
    lmn2_size =rhoij(iat)%lmn2_size
+   cplex_rhoij = rhoij(iat)%cplex_rhoij
+   qphase = rhoij(iat)%qphase
+   nsp2 = rhoij(iat)%nsppol;if (rhoij(iat)%nspden==4) nsp2=4
 
    if (rhoij(iat)%use_rhoij_/=1) then ! Have to allocate rhoij
-     LIBPAW_ALLOCATE(rhoij(iat)%rhoij_,(cplex*lmn2_size,nspden))
+     LIBPAW_ALLOCATE(rhoij(iat)%rhoij_,(cplex_rhoij*qphase*lmn2_size,nsp2))
      rhoij(iat)%use_rhoij_=1
    end if
    rhoij(iat)%rhoij_ = zero
 
-   do isel=1,rhoij(iat)%nrhoijsel ! Looping over non-zero ij elements.
-     klmn = rhoij(iat)%rhoijselect(isel)
-     rhoij(iat)%rhoij_(klmn,:) = rhoij(iat)%rhoijp(isel,:)
+   do isppol=1,nsp2
+     do iphase=1,qphase
+       i0=(iphase-1)*lmn2_size*cplex_rhoij
+       if (cplex_rhoij==1) then
+         do isel=1,rhoij(iat)%nrhoijsel ! Looping over non-zero ij elements.
+           klmn = rhoij(iat)%rhoijselect(isel)
+           rhoij(iat)%rhoij_(i0+klmn,isppol) = rhoij(iat)%rhoijp(i0+isel,isppol)
+         end do
+       else
+         do isel=1,rhoij(iat)%nrhoijsel ! Looping over non-zero ij elements.
+           klmn = rhoij(iat)%rhoijselect(isel)
+           rhoij(iat)%rhoij_(i0+2*klmn-1:i0+2*klmn,isppol) = &
+&                      rhoij(iat)%rhoijp(i0+2*isel-1:i0+2*isel,isppol)
+         end do
+       end if
+     end do
    end do
 
  end do ! natom
@@ -2636,13 +2837,6 @@ end subroutine pawrhoij_unpack
 
 subroutine pawrhoij_init_unpacked(rhoij)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_init_unpacked'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2651,19 +2845,23 @@ subroutine pawrhoij_init_unpacked(rhoij)
  type(pawrhoij_type),intent(inout) :: rhoij(:)
 
 !Local variables-------------------------------
- integer :: iat,nrhoij,nsp2
+ integer :: cplex_rhoij,iat,lmn2_size,nrhoij,nsp2,qphase
 
 ! *************************************************************************
 
  nrhoij=SIZE(rhoij);if (nrhoij==0) return
- nsp2=rhoij(1)%nsppol;if (rhoij(1)%nspden==4) nsp2=4
 
  do iat=1,nrhoij
+
+   lmn2_size =rhoij(iat)%lmn2_size
+   cplex_rhoij = rhoij(iat)%cplex_rhoij
+   qphase = rhoij(iat)%qphase
+   nsp2 = rhoij(iat)%nsppol;if (rhoij(iat)%nspden==4) nsp2=4
 
    if (allocated(rhoij(iat)%rhoij_))  then
      LIBPAW_DEALLOCATE(rhoij(iat)%rhoij_)
    end if
-   LIBPAW_ALLOCATE(rhoij(iat)%rhoij_,(rhoij(iat)%cplex*rhoij(iat)%lmn2_size,nsp2))
+   LIBPAW_ALLOCATE(rhoij(iat)%rhoij_,(cplex_rhoij*qphase*lmn2_size,nsp2))
    rhoij(iat)%use_rhoij_=1
    rhoij(iat)%rhoij_=zero
 
@@ -2693,13 +2891,6 @@ end subroutine pawrhoij_init_unpacked
 !! SOURCE
 
 subroutine pawrhoij_free_unpacked(rhoij)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_free_unpacked'
-!End of the abilint section
 
  implicit none
 
@@ -2756,13 +2947,6 @@ end subroutine pawrhoij_free_unpacked
 
 subroutine pawrhoij_mpisum_unpacked_1D(pawrhoij,comm1,comm2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_mpisum_unpacked_1D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2791,7 +2975,9 @@ subroutine pawrhoij_mpisum_unpacked_1D(pawrhoij,comm1,comm2)
 
 !Fill the MPI buffer from the local rhoij_
  LIBPAW_ALLOCATE(dimlmn,(natom))
- dimlmn(1:natom)=pawrhoij(1:natom)%cplex*pawrhoij(1:natom)%lmn2_size
+ dimlmn(1:natom)=pawrhoij(1:natom)%cplex_rhoij &
+&               *pawrhoij(1:natom)%qphase &
+&               *pawrhoij(1:natom)%lmn2_size
  nsp2=pawrhoij(1)%nsppol; if (pawrhoij(1)%nspden==4) nsp2=4
  bufdim=sum(dimlmn)*nsp2
  LIBPAW_ALLOCATE(buffer,(bufdim))
@@ -2853,13 +3039,6 @@ end subroutine pawrhoij_mpisum_unpacked_1D
 
 subroutine pawrhoij_mpisum_unpacked_2D(pawrhoij,comm1,comm2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_mpisum_unpacked_2D'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -2889,7 +3068,9 @@ subroutine pawrhoij_mpisum_unpacked_2D(pawrhoij,comm1,comm2)
 
 !Fill the MPI buffer from the local rhoij_
  LIBPAW_ALLOCATE(dimlmn,(natom,nrhoij))
- dimlmn(1:natom,1:nrhoij)=pawrhoij(1:natom,1:nrhoij)%cplex*pawrhoij(1:natom,1:nrhoij)%lmn2_size
+ dimlmn(1:natom,1:nrhoij)=pawrhoij(1:natom,1:nrhoij)%cplex_rhoij &
+&                        *pawrhoij(1:natom,1:nrhoij)%qphase &
+&                        *pawrhoij(1:natom,1:nrhoij)%lmn2_size
  nsp2=pawrhoij(1,1)%nsppol; if (pawrhoij(1,1)%nspden==4) nsp2=4
  bufdim=sum(dimlmn)*nsp2
  LIBPAW_ALLOCATE(buffer,(bufdim))
@@ -2928,22 +3109,165 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawrhoij/pawrhoij_get_nspden
+!!****f* m_pawrhoij/pawrhoij_filter
 !! NAME
-!! pawrhoij_get_nspden
+!! pawrhoij_filter
 !!
 !! FUNCTION
-!! Compute the value of nspden (number of spin component) for a pawrhoij datastructure.
-!! This one depends on the number of spinorial components, the number of components
-!! of the density and use of the spin-orbit coupling.
+!!  Filter a "rhoij" array (PAW on-site occupancies),
+!!   i.e. select only the non-zero elements.
 !!
-!! INPUTS
-!!  nspden= number of spin-density components
-!!  nspinor= number of spinorial components
-!!  spnorb= flag: 1 if spin-orbit coupling is activated
+!! INPUT
+!!  cplex=1 if Rhoij is real, 2 if Rhoij is complex
+!!  qphase=2 if rhoij has a exp(iqR) phase, 1 if not
+!!  lmn2_size=dimension of rhoij=number of (i,j) pairs with i<=j
+!!  nspden=number of rhoij spin components
+!!  [rhoij_input(cplex*qphase*lmn2_size,nspden)]= -- optional argument--
+!!      input values for rhoij (including zero values)
+!!      If this argument is not provided, that the input values from rhoij()
 !!
 !! OUTPUT
-!!  pawrhoij_get_nspden= value of nspden associated to pawrhoij
+!!  nselect=number of non-zero values of rhoij
+!!  rhoijselect(lmn2_size)=contains the indices of the selected (i,j) pairs
+!!                         rhoijselect(nselect+1:lmn2_size)=0
+!!
+!! SIDE EFFECTS   
+!!  rhoij(cplex*qphase*lmn2_size,nspden)=
+!!     * Input: the array is filled with all rhoij values (only if rhoij_input is not present)
+!!     * Output: the nselect first elements contain the non-zero rhoij values,
+!!               next value are irrelevant
+!!
+!! PARENTS
+!!      m_pawrhoij, newrho, newvtr
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawrhoij_filter(rhoij,rhoijselect,nselect,cplex,qphase,lmn2_size,nspden, &
+&                          rhoij_input) ! optional argument
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: lmn2_size,cplex,qphase,nspden
+ integer,intent(out) :: nselect
+!arrays
+ integer,intent(out) :: rhoijselect(lmn2_size)
+ real(dp),intent(inout),target :: rhoij(cplex*qphase*lmn2_size,nspden)
+ real(dp),intent(in),optional,target :: rhoij_input(cplex*qphase*lmn2_size,nspden)
+
+!Local variables-------------------------------
+!scalars
+ real(dp),parameter :: tol_rhoij=tol10
+ integer :: isp,klmn,klmn1,klmn2,nsel1,nsel2
+!arrays
+ real(dp),pointer :: rhoij_in(:,:)
+
+! *************************************************************************
+
+ nselect=0
+ rhoijselect(:)=0
+
+ if (present(rhoij_input)) then
+   rhoij_in => rhoij_input
+ else
+   rhoij_in => rhoij
+ end if
+
+!Treat each cplex/qphase case separately
+
+ if (cplex==1) then
+
+   if (qphase==1) then
+
+     do klmn=1,lmn2_size
+       if (any(abs(rhoij_in(klmn,:))>tol_rhoij)) then
+         nselect=nselect+1
+         rhoijselect(nselect)=klmn
+         do isp=1,nspden
+           rhoij(nselect,isp)=rhoij_in(klmn,isp)
+         end do
+       end if
+     end do
+
+   else if (qphase==2) then
+
+     do klmn=1,lmn2_size
+       klmn2=klmn+lmn2_size
+       if (any(abs(rhoij_in(klmn,:))>tol_rhoij).or. &
+&          any(abs(rhoij_in(klmn2,:))>tol_rhoij)) then
+         nselect=nselect+1 ; nsel2=nselect+lmn2_size
+         rhoijselect(nselect)=klmn
+         do isp=1,nspden
+           rhoij(nselect,isp)=rhoij_in(klmn ,isp)
+           rhoij(nsel2  ,isp)=rhoij_in(klmn2,isp)
+         end do
+       end if
+     end do
+
+   end if
+
+ else ! cplex=2
+ 
+   if (qphase==1) then
+     do klmn=1,lmn2_size
+       klmn1=2*klmn
+       if (any(abs(rhoij_in(klmn1-1:klmn1,:))>tol_rhoij)) then
+         nselect=nselect+1 ; nsel1=2*nselect
+         rhoijselect(nselect)=klmn
+         do isp=1,nspden
+           rhoij(nsel1-1,isp)=rhoij_in(klmn1-1,isp)
+           rhoij(nsel1  ,isp)=rhoij_in(klmn1  ,isp)
+         end do
+       end if
+     end do
+
+   else if (qphase==2) then
+
+     do klmn=1,lmn2_size
+       klmn1=2*klmn ; klmn2=klmn1+lmn2_size
+       if (any(abs(rhoij_in(klmn1-1:klmn1,:))>tol_rhoij).or. &
+&          any(abs(rhoij_in(klmn2-1:klmn2,:))>tol_rhoij)) then
+         nselect=nselect+1 ; nsel1=2*nselect ; nsel2=nsel1+lmn2_size
+         rhoijselect(nselect)=klmn
+         do isp=1,nspden
+           rhoij(nsel1-1,isp)=rhoij_in(klmn1-1,isp)
+           rhoij(nsel1  ,isp)=rhoij_in(klmn1  ,isp)
+           rhoij(nsel2-1,isp)=rhoij_in(klmn2-1,isp)
+           rhoij(nsel2  ,isp)=rhoij_in(klmn2  ,isp)
+         end do
+       end if
+     end do
+
+   end if
+ endif
+
+end subroutine pawrhoij_filter
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawrhoij/pawrhoij_inquire_dim
+!! NAME
+!! pawrhoij_inquire_dim
+!!
+!! FUNCTION
+!! Compute the values f the dimensions (cplex_rhoij, qphase, nspden) for a pawrhoij datastructure.
+!! These ones depend on the parameters of the calculation
+!!
+!! INPUTS
+!!  [cplex]= flag controlling the use of a exp(iqR) phase. 1=no phase, 2=phase
+!!  [cpxocc]= 2 if rhoij is required to be imaginary
+!!  [nspden]= number of spin-density components
+!!  [qpt(3)]= q-vector, if any
+!!  [spnorb]= flag: 1 if spin-orbit coupling is activated
+!!
+!! OUTPUT
+!!  [cplex_rhoij] = value of cplex_rhoij associated to pawrhoij
+!!  [qphase_rhoij]= value of qphase associated to pawrhoij
+!!  [nspden_rhoij]= value of nspden associated to pawrhoij
 !!
 !! PARENTS
 !!
@@ -2951,38 +3275,239 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!
 !! SOURCE
 
-function pawrhoij_get_nspden(nspden,nspinor,spnorb)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_get_nspden'
-!End of the abilint section
+subroutine pawrhoij_inquire_dim(cplex,cpxocc,nspden,qpt,spnorb, &
+&                               cplex_rhoij,qphase_rhoij,nspden_rhoij)
 
  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: nspden,nspinor,spnorb
- integer :: pawrhoij_get_nspden
+ integer,optional,intent(in) :: cplex,cpxocc,nspden,spnorb
+ integer,optional,intent(out) :: cplex_rhoij,qphase_rhoij,nspden_rhoij
 !arrays
+ real(dp),optional,intent(in) :: qpt(3)
 
 !Local variables ---------------------------------------
+ character(len=100) :: msg
 
 !************************************************************************
 
- pawrhoij_get_nspden=nspden
- if (nspinor==2.and.spnorb>0) pawrhoij_get_nspden=4
+!cplex_rhoij
+ if (present(cplex_rhoij)) then
+   cplex_rhoij=1
+   if (present(cpxocc)) cplex_rhoij=max(cplex_rhoij,cpxocc)
+ end if
 
-end function pawrhoij_get_nspden
+!qphase_rhoij
+ if (present(qphase_rhoij)) then
+   qphase_rhoij=1
+   if (present(cplex).and.present(qpt)) then
+     msg='only one argument cplex or qpt should be passed!'
+     MSG_BUG(msg)
+   end if
+   if (present(cplex)) qphase_rhoij=merge(1,2,cplex==1)
+   if (present(qpt)) then
+     if (any(abs(qpt(:))>tol8)) qphase_rhoij=2
+   end if
+ end if
+
+!nspden_rhoij
+ if (present(nspden_rhoij)) then
+   nspden_rhoij=1
+   if (present(nspden)) nspden_rhoij=nspden
+   if (present(spnorb)) nspden_rhoij=merge(nspden_rhoij,4,spnorb<=0)
+ end if
+
+end subroutine pawrhoij_inquire_dim
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawrhoij/symrhoij
+!!****f* m_pawdij/pawrhoij_print_rhoij
 !! NAME
-!! symrhoij
+!! pawrhoij_print_rhoij
+!!
+!! FUNCTION
+!!  Print out the content of a Rho_ij matrix (occupation matrix) in a suitable format
+!!
+!! INPUTS
+!!  rhoij(cplex*lmn2_size,nspden)= input matrix to be printed
+!!  cplex=1 if Rhoij is real, 2 if Rhoij is complex
+!!  qphase=2 if rhoij has a exp(iqR) phase, 1 if not
+!!  iatom=current atom
+!!  natom=total number of atoms in the system
+!!  [opt_prtvol]= >=0 if up to 12 components of _ij matrix have to be printed
+!!                 <0 if all components of ij_ matrix have to be printed (optional)
+!!  [mode_paral]= parallel printing mode (optional, default='COLL')
+!   [rhoijselect(lmn2_size)]=Indirect array selecting the non-zero elements of rhoij
+!!  [test_value]=(real number) if positive, print a warning when the magnitude of Dij is greater (optional)
+!!  [l_only]=if >=0 only parts of rhoij corresponding to li=l_only are printed (optional);
+!!           Needs indlmn(:,:) optional argument.
+!!  [title_msg]=message to print as title (optional)
+!!  [unit]=the unit number for output (optional)
+!!  [indlmn(6,lmn_size)]= array giving l,m,n,lm,ln,s
+!!
+!! OUTPUT
+!! (Only writing)
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_pawrhoij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
+&          rhoijselect,test_value,title_msg,unit,opt_prtvol,&
+&          l_only,indlmn,mode_paral) ! Optional arguments
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,qphase,iatom,natom
+ integer,optional,intent(in) :: opt_prtvol,l_only,unit
+ real(dp),intent(in),optional :: test_value
+ character(len=4),optional,intent(in) :: mode_paral
+ character(len=100),optional,intent(in) :: title_msg
+!arrays
+ integer,optional,intent(in) :: indlmn(:,:)
+ integer,optional,intent(in),target :: rhoijselect(:)
+ real(dp),intent(in),target :: rhoij(:,:)
+
+!Local variables-------------------------------
+!scalars
+ character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
+ integer :: irhoij,kk,my_cplex,my_lmn_size,my_lmn2_size,my_l_only,my_nspden
+ integer :: my_opt_pack,my_opt_sym,my_prtvol,my_unt,nrhoijsel,rhoij_size
+ real(dp) :: my_test_value,test_value_eff
+ character(len=4) :: my_mode
+ character(len=2000) :: msg
+!arrays
+ integer,target :: idum(0)
+ integer,pointer :: l_index(:),my_rhoijselect(:)
+ real(dp),pointer :: rhoij_(:)
+
+! *************************************************************************
+
+!Optional arguments
+ my_unt   =std_out ; if (PRESENT(unit      )) my_unt   =unit
+ my_mode  ='COLL'  ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_prtvol=1       ; if (PRESENT(opt_prtvol)) my_prtvol=opt_prtvol
+ my_test_value=-one; if (PRESENT(test_value)) my_test_value=test_value
+ my_l_only=-1      ; if (PRESENT(l_only))     my_l_only=l_only
+
+ if (my_l_only>=0.and.(.not.present(indlmn))) then
+   msg='pawrhoij_print_rhoij: l_only>=0 and indlmn not present!'
+   MSG_BUG(msg)
+ end if
+
+!Title
+ if (present(title_msg)) then
+   if (trim(title_msg)/='') then
+     write(msg, '(2a)') ch10,trim(title_msg)
+     call wrtout(my_unt,msg,my_mode)
+   end if
+ end if
+
+!Inits
+ my_nspden=size(rhoij,2)
+ my_lmn2_size=size(rhoij,1)/cplex/qphase
+ my_lmn_size=int(dsqrt(two*dble(my_lmn2_size)))
+ my_cplex=merge(cplex,2,qphase==1)
+ my_opt_sym=2
+
+!Packed storage
+ my_opt_pack=0
+ rhoij_size=my_lmn2_size
+ my_rhoijselect => idum
+ if (PRESENT(rhoijselect)) then
+   nrhoijsel=count(rhoijselect(:)>0)
+   if (nrhoijsel>0) then
+     my_opt_pack=1
+     rhoij_size=nrhoijsel
+     my_rhoijselect => rhoijselect(1:nrhoijsel)
+   end if
+ end if
+
+ if (my_l_only<0) then
+   l_index => idum
+ else
+   LIBPAW_ALLOCATE(l_index,(my_lmn_size))
+   do kk=1,my_lmn_size
+     l_index(kk)=indlmn(1,kk)
+   end do
+ end if
+
+ if (qphase==2) then
+   LIBPAW_ALLOCATE(rhoij_,(2*rhoij_size))
+ end if
+
+! === Loop over Rho_ij components ===
+ do irhoij=1,my_nspden
+
+   !Rebuild rhoij according to qphase
+   if (qphase==1) then
+     rhoij_ => rhoij(1:cplex*rhoij_size,irhoij)
+   else
+     if (cplex==1) then
+       do kk=1,rhoij_size
+         rhoij_(2*kk-1)=rhoij(kk,irhoij)
+         rhoij_(2*kk  )=rhoij(kk+my_lmn2_size,irhoij)
+       end do
+     else
+       do kk=1,rhoij_size
+         rhoij_(2*kk-1)=rhoij(2*kk-1,irhoij)-rhoij(2*kk  +2*my_lmn2_size,irhoij)
+         rhoij_(2*kk  )=rhoij(2*kk  ,irhoij)+rhoij(2*kk-1+2*my_lmn2_size,irhoij)
+       end do
+     end if
+   end if
+
+   !Subtitle
+   if (natom>1.or.my_nspden>1) then
+     if (my_l_only<0) then
+       if (my_nspden==1) write(msg,'(a,i3)') ' Atom #',iatom
+       if (my_nspden==2) write(msg,'(a,i3,a,i1)')' Atom #',iatom,' - Spin component ',irhoij
+       if (my_nspden==4) write(msg,'(a,i3,2a)') ' Atom #',iatom,' - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
+     else
+       if (my_nspden==1) write(msg,'(a,i3,a,i1,a)')   ' Atom #',iatom,&
+&                        ' - L=',my_l_only,' ONLY'
+       if (my_nspden==2) write(msg,'(a,i3,a,i1,a,i1)')' Atom #',iatom,&
+&                        ' - L=',my_l_only,' ONLY - Spin component ',irhoij
+       if (my_nspden==4) write(msg,'(a,i3,a,i1,3a)')  ' Atom #',iatom,&
+&                        ' - L=',my_l_only,' ONLY - Component ',trim(dspin(irhoij+2*(my_nspden/4)))
+     end if
+     call wrtout(my_unt,msg,my_mode)
+   else if (my_l_only>=0) then
+     write(msg,'(a,i1,a)') ' L=',my_l_only,' ONLY'
+     call wrtout(my_unt,msg,my_mode)
+   end if
+
+   !Printing
+   test_value_eff=-one;if(my_test_value>zero.and.irhoij==1) test_value_eff=my_test_value
+   call pawio_print_ij(my_unt,rhoij_,rhoij_size,my_cplex,my_lmn_size,my_l_only,l_index,my_opt_pack,&
+&                      my_prtvol,my_rhoijselect,test_value_eff,1,opt_sym=my_opt_sym,&
+&                      mode_paral=my_mode)
+
+  end do !irhoij
+
+ if (qphase==2) then
+   LIBPAW_DEALLOCATE(rhoij_)
+ end if
+ if (my_l_only>=0) then
+   LIBPAW_DEALLOCATE(l_index)
+ end if
+
+end subroutine pawrhoij_print_rhoij
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawrhoij/pawrhoij_symrhoij
+!! NAME
+!! pawrhoij_symrhoij
 !!
 !! FUNCTION
 !! Symmetrize rhoij quantities (augmentation occupancies) and/or gradients
@@ -3027,11 +3552,11 @@ end function pawrhoij_get_nspden
 !!    (and related data) SYMMETRIZED in a packed storage (pawrhoij%rhoijp).
 !!    if (optrhoij==1)
 !!      pawrhoij(natom)%nrhoijsel=number of non-zero values of rhoij
-!!      pawrhoij(natom)%rhoijp(cplex*lmn2_size,nspden)=symetrized paw rhoij quantities in PACKED STORAGE (only non-zero values)
-!!      pawrhoij(natom)%rhoijres(cplex*lmn2_size,nspden)=paw rhoij quantities residuals (new values - old values)
-!!      pawrhoij(natom)%rhoijselect(lmn2_size)=select the non-zero values of rhoij!!
+!!      pawrhoij(natom)%rhoijp(:,:)=symetrized paw rhoij quantities in PACKED STORAGE (only non-zero values)
+!!      pawrhoij(natom)%rhoijres(:,:)=paw rhoij quantities residuals (new values - old values)
+!!      pawrhoij(natom)%rhoijselect(:)=select the non-zero values of rhoij!!
 !!    if (pawrhoij(:)%ngrhoij>0) (equivalent to choice>1)
-!!      pawrhoij(natom)%grhoij(ngrhoij,cplex*lmn2_size,nspden)=symetrized gradients of rhoij
+!!      pawrhoij(natom)%grhoij(:,:)=symetrized gradients of rhoij
 !!
 !! NOTES
 !!  pawrhoij and pawrhoij_unsym can be identical (refer to the same pawrhoij datastructure).
@@ -3045,17 +3570,9 @@ end function pawrhoij_get_nspden
 !!
 !! SOURCE
 
-subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
-&                   ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
-&                   mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrhoij'
- use interfaces_14_hidewrite
-!End of the abilint section
+subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
+&                            ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
+&                            mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
 
  implicit none
 
@@ -3075,16 +3592,18 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
  type(pawtab_type),target,intent(in) :: pawtab(ntypat)
 
 !Local variables ---------------------------------------
- character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
 !scalars
- integer :: at_indx,cplex,cplex_eff,iafm,iatm,iatom,idum1,il,il0,ilmn,iln,iln0,ilpm,indexi
- integer :: indexii,indexj,indexjj,indexjj0,indexk,indexk1,iplex,irhoij,irot,ishift2,ishift3
- integer :: ishift4,ispden,itypat,j0lmn,jj,jl,jl0,jlmn,jln,jln0,jlpm,jrhoij,jspden,klmn,klmn1,kspden
- integer :: lmn_size,mi,mj,my_comm_atom,mu,mua,mub,mushift,natinc,ngrhoij,nrhoij,nrhoij1,nrhoij_unsym
- integer :: nselect,nselect1,nspinor,nu,nushift,sz1,sz2
+ integer :: at_indx,cplex_eff,cplex_rhoij,iafm,iatm,iatom,il,il0,ilmn,iln,iln0,ilpm,indexi
+ integer :: indexii,indexj,indexjj,indexjj0,indexk,indexkc,indexkc_q,iplex,iq,iq0
+ integer :: irhoij,irot,ishift2,ishift3,ishift4,ispden,itypat
+ integer :: j0lmn,jj,jl,jl0,jlmn,jln,jln0,jlpm,jrhoij,jspden,klmn,klmn1,klmn1q,kspden
+ integer :: lmn_size,lmn2_size,mi,mj,my_comm_atom,mu,mua,mub,mushift
+ integer :: natinc,ngrhoij,nrhoij,nrhoij1,nrhoij_unsym
+ integer :: nselect,nselect1,nu,nushift,qphase,sz1,sz2
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
- real(dp) :: arg,factafm,syma,zarot2
- logical :: antiferro,have_phase,my_atmtab_allocated,noncoll,paral_atom,paral_atom_unsym,use_afm,use_res
+ real(dp) :: arg,factafm,ro,syma,zarot2
+ logical :: antiferro,has_qphase,my_atmtab_allocated,noncoll
+ logical :: paral_atom,paral_atom_unsym,use_afm,use_res
  character(len=8) :: pertstrg,wrt_mode
  character(len=500) :: msg
 !arrays
@@ -3093,9 +3612,10 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
  integer, pointer :: indlmn(:,:)
  integer,pointer :: my_atmtab(:)
  integer :: idum(0)
- real(dp) :: factsym(2),phase(2),rhoijc(2),ro(2),sumrho(2,2),sum1(2),rotrho(2,2),xsym(3)
- real(dp),allocatable :: rotgr(:,:,:),rotmag(:,:),rotmaggr(:,:,:)
- real(dp),allocatable :: sumgr(:,:),summag(:,:),summaggr(:,:,:),symrec_cart(:,:,:),work1(:,:,:)
+ real(dp) :: fact(2),factsym(2),phase(2),rhoijc(2),rotmag(2,3,2),rotrho(2,2,2)
+ real(dp) :: summag(2,3,2),sumrho(2,2,2),sum1(2),work1(2,3,3),xsym(3)
+ real(dp),allocatable :: rotgr(:,:,:,:),rotmaggr(:,:,:,:),sumgr(:,:,:),summaggr(:,:,:,:)
+ real(dp),allocatable :: symrec_cart(:,:,:)
  real(dp),pointer :: grad(:,:,:)
  type(coeff3_type),target,allocatable :: tmp_grhoij(:)
  type(pawrhoij_type),pointer :: pawrhoij_unsym_all(:)
@@ -3113,23 +3633,64 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom)
 
-!Symetrization occurs only when nsym>1
- if (nsym>1) then
+!Test: consistency between choice and ngrhoij
+ ngrhoij=0
+ if (nrhoij>0) then
+   ngrhoij=pawrhoij(1)%ngrhoij
+   if(choice==2) ngrhoij=min(3,pawrhoij(1)%ngrhoij)
+   if(choice==3.or.choice==4)   ngrhoij=min(6,pawrhoij(1)%ngrhoij)
+   if(choice==23.or.choice==24) ngrhoij=min(9,pawrhoij(1)%ngrhoij)
+   if ((choice==1.and.ngrhoij/=0).or.(choice==2.and.ngrhoij/=3).or. &
+&      (choice==3.and.ngrhoij/=6).or.(choice==23.and.ngrhoij/=9).or. &
+&      (choice==4.and.ngrhoij/=6).or.(choice==24.and.ngrhoij/=9) ) then
+     msg='Inconsistency between variables choice and ngrhoij !'
+     MSG_BUG(msg)
+   end if
+ end if
 
-!  Test: consistency between choice and ngrhoij
-   ngrhoij=0
-   if (nrhoij>0) then
-     ngrhoij=pawrhoij(1)%ngrhoij
-     if(choice==2) ngrhoij=min(3,pawrhoij(1)%ngrhoij)
-     if(choice==3.or.choice==4)   ngrhoij=min(6,pawrhoij(1)%ngrhoij)
-     if(choice==23.or.choice==24) ngrhoij=min(9,pawrhoij(1)%ngrhoij)
-     if ((choice==1.and.ngrhoij/=0).or.(choice==2.and.ngrhoij/=3).or. &
-&     (choice==3.and.ngrhoij/=6).or.(choice==23.and.ngrhoij/=9).or. &
-&     (choice==4.and.ngrhoij/=6).or.(choice==24.and.ngrhoij/=9) ) then
-       msg='Inconsistency between variables choice and ngrhoij !'
+!Antiferro case ?
+ antiferro=.false.;if (nrhoij>0) antiferro=(pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1)
+!Non-collinear case
+ noncoll=.false.;if (nrhoij>0) noncoll=(pawrhoij(1)%nspden==4)
+!Do we use antiferro symmetries ?
+ use_afm=((antiferro).or.(noncoll.and.afm_noncoll))
+
+! Does not symmetrize imaginary part for GS calculations
+ cplex_eff=1
+ if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex_rhoij
+
+!Do we have a phase due to q-vector?
+ has_qphase=.false.
+ if (nrhoij>0) then
+   has_qphase=(pawrhoij(1)%qphase==2)
+   if (present(qphon)) then
+     if (any(abs(qphon(1:3))>tol8).and.(.not.has_qphase)) then
+       msg='Should have qphase=2 for a non-zero q!'
        MSG_BUG(msg)
      end if
    end if
+ end if
+
+!Printing of unsymetrized Rhoij
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
+   wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
+   pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
+   natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,&
+&     ' ========= Values of ',trim(pertstrg),' before symetrization =========',ch10
+   call wrtout(std_out,msg,wrt_mode)
+   do iatm=1,nrhoij,natinc
+     iatom=iatm; if (paral_atom) iatom=my_atmtab(iatm)
+     if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
+     call pawrhoij_print_rhoij(pawrhoij_unsym(iatm)%rhoij_,pawrhoij_unsym(iatm)%cplex_rhoij,&
+&                  pawrhoij_unsym(iatm)%qphase,iatom,natom,&
+&                  unit=std_out,opt_prtvol=pawprtvol,mode_paral=wrt_mode)
+   end do
+   call wrtout(std_out,"",wrt_mode)
+ end if
+
+!Symetrization occurs only when nsym>1
+ if (nsym>1) then
 
 !  Symetrization of gradients not compatible with nspden=4
    if (nrhoij>0) then
@@ -3145,35 +3706,12 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
      MSG_BUG(msg)
    end if
 
-!  Antiferro case ?
-   antiferro=.false.;if (nrhoij>0) antiferro=(pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1)
-!  Non-collinear case
-   noncoll=.false.;if (nrhoij>0) noncoll=(pawrhoij(1)%nspden==4)
-!  Do we use antiferro symmetries ?
-   use_afm=((antiferro).or.(noncoll.and.afm_noncoll))
-
-   cplex_eff=1
-   if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex ! Does not symmetrize imaginary part for GS calculations
-
-!  Do we have a phase due to q-vector (phonons only) ?
-   have_phase=.false.
-   if (ipert>0.and.present(qphon).and.nrhoij>0) then
-     have_phase=(abs(qphon(1))>tol8.or.abs(qphon(2))>tol8.or.abs(qphon(3))>tol8)
-     if (choice>1) then
-       msg='choice>1 not compatible with q-phase !'
-       MSG_BUG(msg)
-     end if
-     if (have_phase.and.cplex_eff==1) then
-       msg='Should have cplex_dij=2 for a non-zero q!'
-       MSG_BUG(msg)
-     end if
+   if (has_qphase.and.choice>1) then
+     msg='choice>1 not compatible with q-phase !'
+     MSG_BUG(msg)
    end if
 
 !  Several inits/allocations
-   if (noncoll.and.optrhoij==1)  then
-     LIBPAW_ALLOCATE(summag,(cplex_eff,3))
-     LIBPAW_ALLOCATE(rotmag,(cplex_eff,3))
-   end if
    if (noncoll) then
      LIBPAW_ALLOCATE(symrec_cart,(3,3,nsym))
      do irot=1,nsym
@@ -3182,18 +3720,13 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
    end if
    ishift2=0;ishift3=0;ishift4=0
    if (choice>1) then
-     LIBPAW_ALLOCATE(sumgr,(cplex_eff,ngrhoij))
-     if (choice>2)  then
-       LIBPAW_ALLOCATE(work1,(cplex_eff,3,3))
-     end if
-     if (antiferro) then
-       LIBPAW_ALLOCATE(rotgr,(cplex_eff,ngrhoij,2))
-     else
-       LIBPAW_ALLOCATE(rotgr,(cplex_eff,ngrhoij,1))
-     end if
+     iafm=merge(2,1,antiferro)
+     qphase=merge(2,1,has_qphase)
+     LIBPAW_ALLOCATE(sumgr,(cplex_eff,ngrhoij,qphase))
+     LIBPAW_ALLOCATE(rotgr,(cplex_eff,ngrhoij,iafm,qphase))
      if (noncoll) then
-       LIBPAW_ALLOCATE(summaggr,(cplex_eff,ngrhoij,3))
-       LIBPAW_ALLOCATE(rotmaggr,(cplex_eff,ngrhoij,3))
+       LIBPAW_ALLOCATE(summaggr,(cplex_eff,ngrhoij,3,qphase))
+       LIBPAW_ALLOCATE(rotmaggr,(cplex_eff,ngrhoij,3,qphase))
      end if
      if (choice==23) ishift2=6
      if (choice==24) ishift4=3
@@ -3201,10 +3734,12 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 !      Have to make a temporary copy of grhoij
        LIBPAW_DATATYPE_ALLOCATE(tmp_grhoij,(nrhoij))
        do iatm=1,nrhoij
-         sz1=pawrhoij_unsym(iatm)%cplex*pawrhoij_unsym(iatm)%lmn2_size
+         sz1=pawrhoij_unsym(iatm)%cplex_rhoij*pawrhoij_unsym(iatm)%qphase &
+&           *pawrhoij_unsym(iatm)%lmn2_size
          sz2=pawrhoij_unsym(iatm)%nspden
          LIBPAW_ALLOCATE(tmp_grhoij(iatm)%value,(ngrhoij,sz1,sz2))
-         tmp_grhoij(iatm)%value(1:ngrhoij,1:sz1,1:sz2)=pawrhoij_unsym(iatm)%grhoij(1:ngrhoij,1:sz1,1:sz2)
+         tmp_grhoij(iatm)%value(1:ngrhoij,1:sz1,1:sz2)= &
+&                     pawrhoij_unsym(iatm)%grhoij(1:ngrhoij,1:sz1,1:sz2)
        end do
      end if
    end if
@@ -3222,6 +3757,7 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
      nrhoij1=nrhoij_unsym
    end if
 
+
 !  Loops over atoms and spin components
 !  ------------------------------------
    do iatm=1,nrhoij
@@ -3229,9 +3765,10 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
      if (nrhoij==1.and.ipert>0.and.ipert<=natom.and.(.not.paral_atom)) iatom=ipert
      itypat=typat(iatom)
      lmn_size=pawrhoij(iatm)%lmn_size
-     nspinor=pawrhoij(iatm)%nspinor
-     cplex=pawrhoij(iatm)%cplex
-     cplex_eff=1;if (ipert>0.or.antiferro.or.noncoll) cplex_eff=cplex
+     lmn2_size=pawrhoij(iatm)%lmn2_size
+     qphase=pawrhoij(iatm)%qphase
+     cplex_rhoij=pawrhoij(iatm)%cplex_rhoij
+     cplex_eff=1;if (ipert>0.or.antiferro.or.noncoll) cplex_eff=cplex_rhoij
      use_res=(pawrhoij(iatm)%use_rhoijres>0)
      indlmn => pawtab(itypat)%indlmn
 
@@ -3242,50 +3779,54 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 !      Store old -rhoij in residual
        if (optrhoij==1.and.use_res) then
          pawrhoij(iatm)%rhoijres(:,ispden)=zero
-         if (cplex==1) then
-           do irhoij=1,pawrhoij(iatm)%nrhoijsel
-             klmn=pawrhoij(iatm)%rhoijselect(irhoij)
-             pawrhoij(iatm)%rhoijres(klmn,ispden)=-pawrhoij(iatm)%rhoijp(irhoij,ispden)
-           end do
-         else
-           do irhoij=1,pawrhoij(iatm)%nrhoijsel
-             klmn1=2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=2*irhoij
-             pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,ispden)
-           end do
-         end if
-         if (noncoll) then
-           pawrhoij(iatm)%rhoijres(:,2:4)=zero
-           if (cplex==1) then
-             do mu=2,4
-               do irhoij=1,pawrhoij(iatm)%nrhoijsel
-                 klmn=pawrhoij(iatm)%rhoijselect(irhoij)
-                 pawrhoij(iatm)%rhoijres(klmn,mu)=-pawrhoij(iatm)%rhoijp(irhoij,mu)
-               end do
-             end do
-           else
-             do mu=2,4
-               do irhoij=1,pawrhoij(iatm)%nrhoijsel
-                 klmn1=2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=2*irhoij
-                 pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,mu)=-pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,mu)
-               end do
-             end do
-           end if
-         end if
-         if (antiferro) then
-           pawrhoij(iatm)%rhoijres(:,2)=zero
-           if (cplex==1) then
+         if (noncoll) pawrhoij(iatm)%rhoijres(:,2:4)=zero
+         if (antiferro) pawrhoij(iatm)%rhoijres(:,2)=zero
+         do iq=1,qphase
+           iq0=(iq-1)*cplex_rhoij*lmn2_size
+           if (cplex_rhoij==1) then
              do irhoij=1,pawrhoij(iatm)%nrhoijsel
-               klmn=pawrhoij(iatm)%rhoijselect(irhoij)
-               pawrhoij(iatm)%rhoijres(klmn,2)=-pawrhoij(iatm)%rhoijp(irhoij,2)
+               klmn1=iq0+pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+irhoij
+               pawrhoij(iatm)%rhoijres(klmn1,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij,ispden)
              end do
            else
              do irhoij=1,pawrhoij(iatm)%nrhoijsel
-               klmn1=2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=2*irhoij
-               pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,2)=-pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,2)
+               klmn1=iq0+2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+2*irhoij
+               pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,ispden)
              end do
            end if
-         end if
+           if (noncoll) then
+             if (cplex_rhoij==1) then
+               do mu=2,4
+                 do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                   klmn1=iq0+pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+irhoij
+                   pawrhoij(iatm)%rhoijres(klmn1,mu)=-pawrhoij(iatm)%rhoijp(jrhoij,mu)
+                 end do
+               end do
+             else
+               do mu=2,4
+                 do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                   klmn1=iq0+2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+2*irhoij
+                   pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,mu)=-pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,mu)
+                 end do
+               end do
+             end if
+           end if
+           if (antiferro) then
+             if (cplex_rhoij==1) then
+               do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                klmn1=iq0+pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+irhoij
+                pawrhoij(iatm)%rhoijres(klmn1,2)=-pawrhoij(iatm)%rhoijp(jrhoij,2)
+               end do
+             else
+               do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                 klmn1=iq0+2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+2*irhoij
+                 pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,2)=-pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,2)
+               end do
+             end if
+           end if
+         end do
        end if
+
 
 !      Loops over (il,im) and (jl,jm)
 !      ------------------------------
@@ -3302,13 +3843,15 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
            ilpm=1+il+indlmn(2,ilmn)
            iln=indlmn(5,ilmn)
            if (iln/=iln0) indexi=indexi+2*il0+1
-           klmn=j0lmn+ilmn;klmn1=cplex*klmn
+           klmn=j0lmn+ilmn
+           klmn1=merge(klmn,2*klmn-1,cplex_rhoij==1)
 
            nsym_used(:)=0
-           if (optrhoij==1) rotrho(:,:)=zero
-           if (optrhoij==1.and.noncoll) rotmag(:,:)=zero
-           if (choice>1) rotgr(:,:,:)=zero
-           if (choice>1.and.noncoll) rotmaggr(:,:,:)=zero
+           if (optrhoij==1) rotrho=zero
+           if (optrhoij==1.and.noncoll) rotmag=zero
+           if (choice>1) rotgr=zero
+           if (choice>1.and.noncoll) rotmaggr=zero
+
 
 !          Loop over symmetries
 !          --------------------
@@ -3322,18 +3865,28 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
              nsym_used(iafm)=nsym_used(iafm)+1
              at_indx=min(indsym(4,irot,iatom),nrhoij1)
 
-             if (have_phase) then
+             if (has_qphase) then
                arg=two_pi*(qphon(1)*indsym(1,irot,iatom)+qphon(2)*indsym(2,irot,iatom) &
 &                         +qphon(3)*indsym(3,irot,iatom))
                phase(1)=cos(arg);phase(2)=sin(arg)
              end if
 
+             if (optrhoij==1) sumrho=zero
+             if (optrhoij==1.and.noncoll) summag=zero
+             if (choice>1) sumgr=zero
+             if (choice>1.and.noncoll) summaggr=zero
+
+             if (choice>1) then
+               if (paral_atom_unsym) then
+                 grad => pawrhoij_unsym_all(at_indx)%grhoij
+               else
+                 grad => tmp_grhoij(at_indx)%value
+               end if
+             end if
+
+
 !            Accumulate values over (mi,mj)
 !            ------------------------------
-             if (optrhoij==1) sumrho(:,:)=zero
-             if (optrhoij==1.and.noncoll) summag(:,:)=zero
-             if (choice>1) sumgr(:,:)=zero
-             if (choice>1.and.noncoll) summaggr(:,:,:)=zero
              do mj=1,2*jl+1
                indexjj=indexj+mj;indexjj0=indexjj*(indexjj-1)/2
                do mi=1,2*il+1
@@ -3341,11 +3894,14 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
                  indexii=indexi+mi
                  if (indexii<=indexjj) then
                    indexk=indexjj0+indexii
-                   if(cplex_eff==2.and.nspinor==2) factsym(2)=one
+                   factsym(2)=one
                  else
                    indexk=indexii*(indexii-1)/2+indexjj
-                   if(cplex_eff==2.and.nspinor==2) factsym(2)=-one
+                   factsym(2)=-one
                  end if
+                 indexkc=cplex_rhoij*(indexk-1)
+                 indexkc_q=indexkc+cplex_rhoij*lmn2_size
+
 !                Be careful: use here R_rel^-1 in term of spherical harmonics
 !                which is tR_rec in term of spherical harmonics
 !                so, use transpose[zarot]
@@ -3354,97 +3910,111 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 
 !                Rotate rhoij
                  if (optrhoij==1) then
-                   if (cplex==1) then
-                     sumrho(1,iafm)=sumrho(1,iafm)+zarot2*pawrhoij_unsym_all(at_indx)%rhoij_(indexk,kspden)
-                   else
-                     indexk1=2*(indexk-1)
-                     sumrho(1,iafm)=sumrho(1,iafm)+factsym(1)*zarot2*pawrhoij_unsym_all(at_indx)%rhoij_(indexk1+1,kspden)
-                     if(cplex_eff==2) sumrho(2,iafm)= &
-&                           sumrho(2,iafm)+factsym(2)*factafm*zarot2*pawrhoij_unsym_all(at_indx)%rhoij_(indexk1+2,kspden)
-                   end if
+                   fact(1)=factsym(1);fact(2)=factsym(2)*factafm   !????? What?  MT
+                   sumrho(1:cplex_eff,iafm,1)=sumrho(1:cplex_eff,iafm,1) &
+&                     +fact(1:cplex_eff)*zarot2 &
+&                     *pawrhoij_unsym_all(at_indx)%rhoij_(indexkc+1:indexkc+cplex_eff,kspden)
+                   if (qphase==2) &
+&                    sumrho(1:cplex_eff,iafm,2)=sumrho(1:cplex_eff,iafm,2) &
+&                       +fact(1:cplex_eff)*zarot2 &
+&                       *pawrhoij_unsym_all(at_indx)%rhoij_(indexkc_q+1:indexkc_q+cplex_eff,kspden)
                  end if
 
-!                If non-collinear case, rotate rhoij magnetization
+!                Rotate rhoij magnetization
                  if (optrhoij==1.and.noncoll) then
-                   if (cplex==1) then
+                   fact(1)=factsym(1)*factafm;fact(2)=factsym(2)
+                   do mu=1,3
+                     summag(1:cplex_eff,mu,1)=summag(1:cplex_eff,mu,1) &
+&                       +fact(1:cplex_eff)*zarot2 &
+&                       *pawrhoij_unsym_all(at_indx)%rhoij_(indexkc+1:indexkc+cplex_eff,1+mu)
+                   end do
+                   if (qphase==2) then
                      do mu=1,3
-                       summag(1,mu)=summag(1,mu)+zarot2*factafm*pawrhoij_unsym_all(at_indx)%rhoij_(indexk,1+mu)
-                     end do
-                   else
-                     indexk1=2*(indexk-1)
-                     do mu=1,3
-                       summag(1,mu)=summag(1,mu) &
-&                       +zarot2*factsym(1)*factafm*pawrhoij_unsym_all(at_indx)%rhoij_(indexk1+1,1+mu)
-                       if(cplex_eff==2) summag(2,mu)=summag(2,mu)&
-&                       +zarot2*factsym(2)*pawrhoij_unsym_all(at_indx)%rhoij_(indexk1+2,1+mu)
+                       summag(1:cplex_eff,mu,2)=summag(1:cplex_eff,mu,2) &
+&                         +fact(1:cplex_eff)*zarot2 &
+&                         *pawrhoij_unsym_all(at_indx)%rhoij_(indexkc_q+1:indexkc_q+cplex_eff,1+mu)
                      end do
                    end if
                  end if
 
 !                Rotate gradients of rhoij
                  if (choice>1) then
-                   if (paral_atom_unsym) then
-                     grad => pawrhoij_unsym_all(at_indx)%grhoij
-                   else
-                     grad => tmp_grhoij(at_indx)%value
-                   end if
-                   if (cplex==1) then
+                   fact(1)=factsym(1);fact(2)=factsym(2)*factafm   !????? What?  MT
+                   do mu=1,ngrhoij
+                     sumgr(1:cplex_eff,mu,1)=sumgr(1:cplex_eff,mu,1) &
+&                       +fact(1:cplex_eff)*zarot2*grad(mu,indexkc+1:indexkc+cplex_eff,kspden)
+                   end do
+                   if (qphase==2) then
                      do mu=1,ngrhoij
-                       sumgr(1,mu)=sumgr(1,mu)+zarot2*grad(mu,indexk,kspden)
+                       sumgr(1:cplex_eff,mu,2)=sumgr(1:cplex_eff,mu,2) &
+&                         +fact(1:cplex_eff)*zarot2*grad(mu,indexkc_q+1:indexkc_q+cplex_eff,kspden)
                      end do
-                     if (noncoll) then
-                       do mu=1,3
-                         do nu=1,ngrhoij
-                           summaggr(1,nu,mu)=summaggr(1,nu,mu)+zarot2*factafm*grad(nu,indexk,1+mu)
-                         end do
-                       end do
-                     end if
-                   else
-                     indexk1=2*(indexk-1)
-                     do mu=1,ngrhoij
-                       sumgr(1:cplex_eff,mu)=sumgr(1:cplex_eff,mu) &
-&                       +zarot2*factsym(1:cplex_eff)*grad(mu,indexk1+1:indexk1+cplex_eff,kspden)
-                     end do
-                     if (noncoll) then
-                       do mu=1,3
-                         do nu=1,ngrhoij
-                           summaggr(1:cplex_eff,nu,mu)=summaggr(1:cplex_eff,nu,mu) &
-&                           +zarot2*factsym(1:cplex_eff)*factafm*grad(nu,indexk1+1:indexk1+cplex_eff,1+mu)
-                         end do
-                       end do
-                     end if
                    end if
                  end if
 
-               end do
-             end do
-
-!            Apply phase for phonons
-             if (have_phase) then
-               if(optrhoij==1) then
-                 rhoijc(1:2)=sumrho(1:2,iafm)
-                 sumrho(1,iafm)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
-                 sumrho(2,iafm)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
-               end if
-               if (noncoll) then
-                 do mu=1,3
-                   rhoijc(1:2)=summag(1:2,mu)
-                   summag(1,mu)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
-                   summag(2,mu)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
-                 end do
-               end if
-               if (choice>1) then
-                 do mu=1,ngrhoij
-                   rhoijc(1:2)=sumgr(1:2,mu)
-                   sumgr(1,mu)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
-                   sumgr(2,mu)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
-                 end do
-                 if (noncoll) then
+!                Rotate gradients of rhoij magnetization
+                 if (choice>1.and.noncoll) then
+                   fact(1)=factsym(1)*factafm;fact(2)=factsym(2)
                    do mu=1,3
                      do nu=1,ngrhoij
-                       rhoijc(1:2)=summaggr(1:2,nu,mu)
-                       summaggr(1,nu,mu)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
-                       summaggr(2,nu,mu)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
+                       summaggr(1:cplex_eff,nu,mu,1)=summaggr(1:cplex_eff,nu,mu,1) &
+&                         +fact(1:cplex_eff)*zarot2*grad(nu,indexkc+1:indexkc+cplex_eff,1+mu)
+                     end do
+                   end do 
+                   if (qphase==2) then
+                     do mu=1,3
+                       do nu=1,ngrhoij
+                         summaggr(1:cplex_eff,nu,mu,2)=summaggr(1:cplex_eff,nu,mu,2) &
+  &                         +fact(1:cplex_eff)*zarot2*grad(nu,indexkc_q+1:indexkc_q+cplex_eff,1+mu)
+                       end do
+                     end do
+                   end if
+                 end if
+
+               end do ! mi
+             end do ! mj
+
+!            Apply phase for phonons
+             if (has_qphase) then
+               !Remember, RHOij is stored as follows:
+               ! RHOij=  [rhoij(2klmn-1)+i.rhoij(2klmn)]
+               !      +i.[rhoij(lnm2_size+2klmn-1)+i.rhoij(lmn2_size+2klmn)]
+               if (optrhoij==1) then
+                 do iplex=1,cplex_rhoij
+                   rhoijc(1)=sumrho(iplex,iafm,1)
+                   rhoijc(2)=sumrho(iplex,iafm,2)
+                   sumrho(iplex,iafm,1)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
+                   sumrho(iplex,iafm,2)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
+                 end do
+                 if (noncoll) then
+                   do iplex=1,cplex_rhoij
+                     do mu=1,3
+                       rhoijc(1)=summag(iplex,mu,1)
+                       rhoijc(2)=summag(iplex,mu,2)
+                       summag(iplex,mu,1)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
+                       summag(iplex,mu,2)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
+                     end do
+                   end do
+                 end if
+               end if
+               if (choice>1) then
+                 do iplex=1,cplex_rhoij
+                   do mu=1,3
+                     rhoijc(1)=sumgr(iplex,mu,1)
+                     rhoijc(2)=sumgr(iplex,mu,2)
+                     sumgr(iplex,mu,1)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
+                     sumgr(iplex,mu,2)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
+                   end do
+                 end do
+                 if (noncoll) then
+                   do iplex=1,cplex_rhoij
+                     do mu=1,3
+                       do nu=1,ngrhoij             
+                         rhoijc(1)=summaggr(iplex,nu,mu,1)
+                         rhoijc(2)=summaggr(iplex,nu,mu,2)
+                         summaggr(iplex,nu,mu,1)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
+                         summaggr(iplex,nu,mu,2)=phase(1)*rhoijc(2)+phase(2)*rhoijc(1)
+                       end do
                      end do
                    end do
                  end if
@@ -3453,233 +4023,181 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 
 !            Add contribution of this rotation
              if (optrhoij==1) then
-               rotrho(1:cplex_eff,iafm)=rotrho(1:cplex_eff,iafm)+sumrho(1:cplex_eff,iafm)
+               do iq=1,qphase
+                 rotrho(1:cplex_eff,iafm,iq)=rotrho(1:cplex_eff,iafm,iq) &
+&                                           +sumrho(1:cplex_eff,iafm,iq)
+               end do  
              end if
+
 
 !            Rotate vector fields in real space (forces, magnetization, etc...)
 !            Should use symrel^-1 but use transpose[symrec] instead
-!            ---------------------------------
 !            ===== Rhoij magnetization ====
              if (noncoll.and.optrhoij==1) then
-               do nu=1,3
-                 do mu=1,3
-                   rotmag(1:cplex_eff,mu)=rotmag(1:cplex_eff,mu)+symrec_cart(mu,nu,irot)*summag(1:cplex_eff,nu)
+               do iq=1,qphase
+                 do nu=1,3
+                   do mu=1,3
+                     rotmag(1:cplex_eff,mu,iq)=rotmag(1:cplex_eff,mu,iq) &
+&                      +symrec_cart(mu,nu,irot)*summag(1:cplex_eff,nu,iq)
+                   end do
                  end do
                end do
              end if
 !            ===== Derivatives vs atomic positions ====
              if (choice==2.or.choice==23.or.choice==24) then
-               do nu=1,3
-                 nushift=nu+ishift2
-                 do mu=1,3
-                   mushift=mu+ishift2
-                   rotgr(1:cplex_eff,mushift,iafm)=&
-&                   rotgr(1:cplex_eff,mushift,iafm)+dble(symrec(mu,nu,irot))*sumgr(1:cplex_eff,nushift)
+               do iq=1,qphase
+                 do nu=1,3
+                   nushift=nu+ishift2
+                   do mu=1,3
+                     mushift=mu+ishift2
+                     rotgr(1:cplex_eff,mushift,iafm,iq)=rotgr(1:cplex_eff,mushift,iafm,iq) &
+&                      +dble(symrec(mu,nu,irot))*sumgr(1:cplex_eff,nushift,iq)
+                   end do
                  end do
                end do
                if (noncoll) then
-                 do mub=1,3 ! Loop on magnetization components
-                   do mua=1,3 ! Loop on gradients
-                     mushift=mua+ishift2
-                     sum1(:)=zero;xsym(1:3)=dble(symrec(mua,1:3,irot))
-                     do nu=1,3
-                       syma=symrec_cart(mub,nu,irot)
-                       sum1(1:cplex_eff)=sum1(1:cplex_eff)+syma*(summaggr(1:cplex_eff,ishift2+1,nu)*xsym(1) &
-&                       +summaggr(1:cplex_eff,ishift2+2,nu)*xsym(2) &
-&                       +summaggr(1:cplex_eff,ishift2+3,nu)*xsym(3))
+                 do iq=1,qphase
+                   do mub=1,3 ! Loop on magnetization components
+                     do mua=1,3 ! Loop on gradients
+                       mushift=mua+ishift2
+                       sum1(:)=zero;xsym(1:3)=dble(symrec(mua,1:3,irot))
+                       do nu=1,3
+                         syma=symrec_cart(mub,nu,irot)
+                         sum1(1:cplex_eff)=sum1(1:cplex_eff)+syma &
+&                         *(summaggr(1:cplex_eff,ishift2+1,nu,iq)*xsym(1) &
+&                          +summaggr(1:cplex_eff,ishift2+2,nu,iq)*xsym(2) &
+&                          +summaggr(1:cplex_eff,ishift2+3,nu,iq)*xsym(3))
+                       end do
+                       rotmaggr(1:cplex_eff,mushift,mub,iq)= &
+&                        rotmaggr(1:cplex_eff,mushift,mub,iq)+sum1(1:cplex_eff)
                      end do
-                     rotmaggr(1:cplex_eff,mushift,mub)=rotmaggr(1:cplex_eff,mushift,mub)+sum1(1:cplex_eff)
                    end do
                  end do
                end if
              end if
 !            ===== Derivatives vs strain ====
              if (choice==3.or.choice==23) then
-               work1(1:cplex_eff,1,1)=sumgr(1:cplex_eff,1+ishift3);work1(1:cplex_eff,2,2)=sumgr(1:cplex_eff,2+ishift3)
-               work1(1:cplex_eff,3,3)=sumgr(1:cplex_eff,3+ishift3);work1(1:cplex_eff,2,3)=sumgr(1:cplex_eff,4+ishift3)
-               work1(1:cplex_eff,1,3)=sumgr(1:cplex_eff,5+ishift3);work1(1:cplex_eff,1,2)=sumgr(1:cplex_eff,6+ishift3)
-               work1(1:cplex_eff,3,1)=work1(1:cplex_eff,1,3);work1(1:cplex_eff,3,2)=work1(1:cplex_eff,2,3)
-               work1(1:cplex_eff,2,1)=work1(1:cplex_eff,1,2)
-               do mu=1,6
-                 mushift=mu+ishift3
-                 mua=alpha(mu);mub=beta(mu)
-                 sum1(:)=zero;xsym(1:3)=dble(symrec(mub,1:3,irot))
-                 do nu=1,3
-                   syma=dble(symrec(mua,nu,irot))
-                   sum1(1:cplex_eff)=sum1(1:cplex_eff)+syma*(work1(1:cplex_eff,nu,1)*xsym(1) &
-&                   +work1(1:cplex_eff,nu,2)*xsym(2) &
-&                   +work1(1:cplex_eff,nu,3)*xsym(3))
+               do iq=1,qphase
+                 work1(1:cplex_eff,1,1)=sumgr(1:cplex_eff,1+ishift3,iq);work1(1:cplex_eff,2,2)=sumgr(1:cplex_eff,2+ishift3,iq)
+                 work1(1:cplex_eff,3,3)=sumgr(1:cplex_eff,3+ishift3,iq);work1(1:cplex_eff,2,3)=sumgr(1:cplex_eff,4+ishift3,iq)
+                 work1(1:cplex_eff,1,3)=sumgr(1:cplex_eff,5+ishift3,iq);work1(1:cplex_eff,1,2)=sumgr(1:cplex_eff,6+ishift3,iq)
+                 work1(1:cplex_eff,3,1)=work1(1:cplex_eff,1,3);work1(1:cplex_eff,3,2)=work1(1:cplex_eff,2,3)
+                 work1(1:cplex_eff,2,1)=work1(1:cplex_eff,1,2)
+                 do mu=1,6
+                   mushift=mu+ishift3
+                   mua=alpha(mu);mub=beta(mu)
+                   sum1(:)=zero;xsym(1:3)=dble(symrec(mub,1:3,irot))
+                   do nu=1,3
+                     syma=dble(symrec(mua,nu,irot))
+                     sum1(1:cplex_eff)=sum1(1:cplex_eff) &
+&                      +syma*(work1(1:cplex_eff,nu,1)*xsym(1) &
+&                            +work1(1:cplex_eff,nu,2)*xsym(2) &
+&                            +work1(1:cplex_eff,nu,3)*xsym(3))
+                   end do
+                   rotgr(1:cplex_eff,mushift,iafm,iq)= &
+&                    rotgr(1:cplex_eff,mushift,iafm,iq)+sum1(1:cplex_eff)
                  end do
-                 rotgr(1:cplex_eff,mushift,iafm)=rotgr(1:cplex_eff,mushift,iafm)+sum1(1:cplex_eff)
                end do
              end if
 !            ===== Second derivatives vs atomic positions ====
              if (choice==4.or.choice==24) then
-               work1(1:cplex_eff,1,1)=sumgr(1:cplex_eff,1+ishift4);work1(1:cplex_eff,2,2)=sumgr(1:cplex_eff,2+ishift4)
-               work1(1:cplex_eff,3,3)=sumgr(1:cplex_eff,3+ishift4);work1(1:cplex_eff,2,3)=sumgr(1:cplex_eff,4+ishift4)
-               work1(1:cplex_eff,1,3)=sumgr(1:cplex_eff,5+ishift4);work1(1:cplex_eff,1,2)=sumgr(1:cplex_eff,6+ishift4)
-               work1(1:cplex_eff,3,1)=work1(1:cplex_eff,1,3);work1(1:cplex_eff,3,2)=work1(1:cplex_eff,2,3)
-               work1(1:cplex_eff,2,1)=work1(1:cplex_eff,1,2)
-               do mu=1,6
-                 mushift=mu+ishift4
-                 mua=alpha(mu);mub=beta(mu)
-                 sum1(:)=zero
-                 xsym(1:3)=dble(symrec(mub,1:3,irot))
-                 do nu=1,3
-                   syma=dble(symrec(mua,nu,irot))
-                   sum1(1:cplex_eff)=sum1(1:cplex_eff)+syma*(work1(1:cplex_eff,nu,1)*xsym(1) &
-&                   +work1(1:cplex_eff,nu,2)*xsym(2) &
-&                   +work1(1:cplex_eff,nu,3)*xsym(3))
+               do iq=1,qphase
+                 work1(1:cplex_eff,1,1)=sumgr(1:cplex_eff,1+ishift4,iq);work1(1:cplex_eff,2,2)=sumgr(1:cplex_eff,2+ishift4,iq)
+                 work1(1:cplex_eff,3,3)=sumgr(1:cplex_eff,3+ishift4,iq);work1(1:cplex_eff,2,3)=sumgr(1:cplex_eff,4+ishift4,iq)
+                 work1(1:cplex_eff,1,3)=sumgr(1:cplex_eff,5+ishift4,iq);work1(1:cplex_eff,1,2)=sumgr(1:cplex_eff,6+ishift4,iq)
+                 work1(1:cplex_eff,3,1)=work1(1:cplex_eff,1,3);work1(1:cplex_eff,3,2)=work1(1:cplex_eff,2,3)
+                 work1(1:cplex_eff,2,1)=work1(1:cplex_eff,1,2)
+                 do mu=1,6
+                   mushift=mu+ishift4
+                   mua=alpha(mu);mub=beta(mu)
+                   sum1(:)=zero
+                   xsym(1:3)=dble(symrec(mub,1:3,irot))
+                   do nu=1,3
+                     syma=dble(symrec(mua,nu,irot))
+                     sum1(1:cplex_eff)=sum1(1:cplex_eff) &
+&                         +syma*(work1(1:cplex_eff,nu,1)*xsym(1) &
+&                               +work1(1:cplex_eff,nu,2)*xsym(2) &
+&                               +work1(1:cplex_eff,nu,3)*xsym(3))
+                   end do
+                   rotgr(1:cplex_eff,mushift,iafm,iq)= &
+&                    rotgr(1:cplex_eff,mushift,iafm,iq)+sum1(1:cplex_eff)
                  end do
-                 rotgr(1:cplex_eff,mushift,iafm)=rotgr(1:cplex_eff,mushift,iafm)+sum1(1:cplex_eff)
                end do
              end if
 
            end do ! End loop over symmetries
 
+
 !          Store average result (over symmetries)
 !          --------------------------------------
+
+!          Rhoij
            if (optrhoij==1) then
+             do iq=1,qphase
+               klmn1q=klmn1+(iq-1)*lmn2_size
+               pawrhoij(iatm)%rhoijp(klmn1q,ispden)=rotrho(1,1,iq)/nsym_used(1)
+               if (cplex_rhoij==2) then
+                 if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,ispden)
+                 if (cplex_eff==2) ro=rotrho(2,1,iq)/nsym_used(1)
+                 pawrhoij(iatm)%rhoijp(klmn1q+1,ispden)=ro
+               end if
+             end do
+           end if
 
-!            Mean value for rhoij
-             if (cplex==1) then
-               ro(1)=rotrho(1,1)/nsym_used(1)
-               if (abs(ro(1))>tol10) then
-                 pawrhoij(iatm)%rhoijp(klmn,ispden)=ro(1)
-                 if (use_res) pawrhoij(iatm)%rhoijres(klmn,ispden)=pawrhoij(iatm)%rhoijres(klmn,ispden)+ro(1)
-               else
-                 pawrhoij(iatm)%rhoijp(klmn,ispden)=zero
-               end if
-             else
-               ro(1)=rotrho(1,1)/nsym_used(1)
-               if (cplex_eff==2) then
-                 ro(2)=rotrho(2,1)/nsym_used(1)
-               else
-                 ro(2)=pawrhoij_unsym_all(iatom)%rhoij_(klmn1,ispden)
-               end if
-               if (any(abs(ro(1:2))>tol10)) then
-                 pawrhoij(iatm)%rhoijp(klmn1-1,ispden)=ro(1)
-                 pawrhoij(iatm)%rhoijp(klmn1  ,ispden)=ro(2)
-                 if (use_res) then
-                   pawrhoij(iatm)%rhoijres(klmn1-1,ispden)=pawrhoij(iatm)%rhoijres(klmn1-1,ispden)+ro(1)
-                   pawrhoij(iatm)%rhoijres(klmn1  ,ispden)=pawrhoij(iatm)%rhoijres(klmn1  ,ispden)+ro(2)
+!          Rhoij magnetization
+           if (noncoll.and.optrhoij==1) then
+             do mu=2,4
+               do iq=1,qphase
+                 klmn1q=klmn1+(iq-1)*lmn2_size
+                 pawrhoij(iatm)%rhoijp(klmn1q,mu)=rotmag(1,mu-1,iq)/nsym_used(1)
+                 if (cplex_rhoij==2) then
+                   if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,mu)
+                   if (cplex_eff==2) ro=rotmag(2,mu-1,iq)/nsym_used(1)
+                   pawrhoij(iatm)%rhoijp(klmn1q+1,mu)=ro
                  end if
-               else
-                 pawrhoij(iatm)%rhoijp(klmn1-1,ispden)=zero
-                 pawrhoij(iatm)%rhoijp(klmn1  ,ispden)=zero
-               end if
-             end if
-
-!            Non-collinear case: mean value for rhoij magnetization
-             if (noncoll) then
-!              Select on-zero elements
-               if (cplex==1) then
-                 do mu=2,4
-                   ro(1)=rotmag(1,mu-1)/nsym_used(1)
-                   if (abs(ro(1))>tol10) then
-                     pawrhoij(iatm)%rhoijp(klmn,mu)=ro(1)
-                     if (use_res) pawrhoij(iatm)%rhoijres(klmn,mu)=pawrhoij(iatm)%rhoijres(klmn,mu)+ro(1)
-                   else
-                     pawrhoij(iatm)%rhoijp(klmn,mu)=zero
-                   end if
-                 end do
-               else
-                 do mu=2,4
-                   ro(1)=rotmag(1,mu-1)/nsym_used(1)
-                   if (cplex_eff==2) then
-                     ro(2)=rotmag(2,mu-1)/nsym_used(1)
-                   else
-                     ro(2)=pawrhoij_unsym_all(iatom)%rhoij_(klmn1,mu)
-                   end if
-                   if (any(abs(ro(1:2))>tol10)) then
-                     pawrhoij(iatm)%rhoijp(klmn1-1,mu)=ro(1)
-                     pawrhoij(iatm)%rhoijp(klmn1  ,mu)=ro(2)
-                     if (use_res) then
-                       pawrhoij(iatm)%rhoijres(klmn1-1,mu)=pawrhoij(iatm)%rhoijres(klmn1-1,mu)+ro(1)
-                       pawrhoij(iatm)%rhoijres(klmn1  ,mu)=pawrhoij(iatm)%rhoijres(klmn1  ,mu)+ro(2)
-                     end if
-                   else
-                     pawrhoij(iatm)%rhoijp(klmn1-1,mu)=zero
-                     pawrhoij(iatm)%rhoijp(klmn1  ,mu)=zero
-                   end if
-                 end do
-               end if
-             end if
-
-!            Antiferro case: mean value for down component
-             if (antiferro.and.nsym_used(2)>0) then
-               if (cplex==1) then
-                 ro(1)=rotrho(1,2)/nsym_used(2)
-                 if (abs(ro(1))>tol10) then
-                   pawrhoij(iatm)%rhoijp(klmn,2)=ro(1)
-                   if (use_res) pawrhoij(iatm)%rhoijres(klmn,2)=pawrhoij(iatm)%rhoijres(klmn,2)+ro(1)
-                 else
-                   pawrhoij(iatm)%rhoijp(klmn,2)=zero
-                 end if
-               else
-                 ro(1:cplex_eff)=rotrho(1:cplex_eff,2)/nsym_used(2)
-                 if (any(abs(ro(1:2))>tol10)) then
-                   pawrhoij(iatm)%rhoijp(klmn1-1,2)=ro(1)
-                   pawrhoij(iatm)%rhoijp(klmn1  ,2)=ro(2)
-                   if (use_res) then
-                     pawrhoij(iatm)%rhoijres(klmn1-1,2)=pawrhoij(iatm)%rhoijres(klmn1-1,2)+ro(1)
-                     pawrhoij(iatm)%rhoijres(klmn1  ,2)=pawrhoij(iatm)%rhoijres(klmn1  ,2)+ro(2)
-                   end if
-                 else
-                   pawrhoij(iatm)%rhoijp(klmn1-1,2)=zero
-                   pawrhoij(iatm)%rhoijp(klmn1  ,2)=zero
-                 end if
-               end if
-             end if
-
-!            Select non-zero elements of rhoij
-             if (ispden==pawrhoij(iatm)%nsppol) then
-               if (cplex==1) then
-                 if (any(abs(pawrhoij(iatm)%rhoijp(klmn,:))>tol10)) then
-                   nselect=nselect+1
-                   pawrhoij(iatm)%rhoijselect(nselect)=klmn
-                   do jj=1,pawrhoij(iatm)%nspden
-                     pawrhoij(iatm)%rhoijp(nselect,jj)=pawrhoij(iatm)%rhoijp(klmn,jj)
-                   end do
-                 end if
-               else
-                 if (any(abs(pawrhoij(iatm)%rhoijp(klmn1-1:klmn1,:))>tol10)) then
-                   nselect=nselect+1;nselect1=2*nselect
-                   pawrhoij(iatm)%rhoijselect(nselect)=klmn
-                   do jj=1,pawrhoij(iatm)%nspden
-                     pawrhoij(iatm)%rhoijp(nselect1-1,jj)=pawrhoij(iatm)%rhoijp(klmn1-1,jj)
-                     pawrhoij(iatm)%rhoijp(nselect1  ,jj)=pawrhoij(iatm)%rhoijp(klmn1  ,jj)
-                   end do
-                 end if
-               end if
-             end if
-
-           end if ! optrhoij==1
-
-!          Store average result (over symmetries) for gradients
-           if (choice>1) then
-             do iplex=1,cplex_eff
-               do mu=1,ngrhoij
-                 pawrhoij(iatm)%grhoij(mu,klmn1+iplex-cplex,ispden)=rotgr(iplex,mu,1)/nsym_used(1)
                end do
              end do
-             if (antiferro.and.nsym_used(2)>0) then
-               do iplex=1,cplex_eff
-                 do mu=1,ngrhoij
-                   pawrhoij(iatm)%grhoij(mu,klmn1+iplex-cplex,2)=rotgr(iplex,mu,2)/nsym_used(2)
-                 end do
-               end do
-             end if
-             if (noncoll) then
-               do nu=1,3
-                 do iplex=1,cplex_eff
-                   do mu=1,ngrhoij
-                     pawrhoij(iatm)%grhoij(mu,klmn1+iplex-cplex,1+nu)=rotmaggr(iplex,mu,nu)/nsym_used(1)
-                   end do
-                 end do
+           end if
+
+!          Rhoij^down when antiferro
+           if (antiferro.and.optrhoij==1) then
+             if (nsym_used(2)>0) then
+               do iq=1,qphase
+                 klmn1q=klmn1+(iq-1)*lmn2_size
+                 pawrhoij(iatm)%rhoijp(klmn1q,2)=rotrho(1,2,iq)/nsym_used(2)
+                 if (cplex_rhoij==2) then
+                   if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,2)
+                   if (cplex_eff==2) ro=rotrho(2,2,iq)/nsym_used(2)
+                   pawrhoij(iatm)%rhoijp(klmn1q+1,2)=ro
+                 end if
                end do
              end if
            end if
+
+!          Gradients of rhoij
+           if (choice>1) then
+             do iq=1,qphase
+               klmn1q=klmn1+(iq-1)*lmn2_size
+               do iplex=1,cplex_eff
+                 do mu=1,ngrhoij
+                   pawrhoij(iatm)%grhoij(mu,klmn1q,ispden)=rotgr(iplex,mu,1,iq)/nsym_used(1)
+                 end do
+                 if (noncoll) then
+                   do nu=1,3
+                     pawrhoij(iatm)%grhoij(mu,klmn1q,1+nu)=rotmaggr(iplex,mu,nu,iq)/nsym_used(1)
+                   end do
+                 end if
+                 if (antiferro.and.nsym_used(2)>0) then
+                   do mu=1,ngrhoij
+                     pawrhoij(iatm)%grhoij(mu,klmn1q,ispden)=rotgr(iplex,mu,2,iq)/nsym_used(2)
+                   end do
+                 end if
+                 klmn1q=klmn1q+1
+               end do
+               !if cplex_eff<cplex_rhoij, imaginary part of grhoij is unchanged
+             end do
+           end if
+
 
            il0=il;iln0=iln  ! End loops over (il,im) and (jl,jm)
          end do
@@ -3688,15 +4206,39 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 
      end do  ! End loop over ispden
 
-!    Store number of non-zero values of rhoij
-     if (optrhoij==1) pawrhoij(iatm)%nrhoijsel=nselect
+!    Select non-zero elements of rhoij
+     if (optrhoij==1) then
+       call pawrhoij_filter(pawrhoij(iatm)%rhoijp,pawrhoij(iatm)%rhoijselect,&
+&                           pawrhoij(iatm)%nrhoijsel,cplex_rhoij,qphase,lmn2_size,&
+&                           pawrhoij(iatm)%nspden)
+     end if
 
-   end do ! End loop over iatm
+!    Add new rhoij to rhoij residual
+     if (optrhoij==1.and.use_res) then
+       do ispden=1,pawrhoij(iatm)%nspden
+         do iq=1,qphase
+           iq0=(iq-1)*lmn2_size
+           if (cplex_rhoij==1) then
+             do irhoij=1,pawrhoij(iatm)%nrhoijsel
+               klmn1=iq0+pawrhoij(iatm)%rhoijselect(irhoij) ; jrhoij=iq0+irhoij
+               pawrhoij(iatm)%rhoijres(klmn1,ispden)= &
+&                            pawrhoij(iatm)%rhoijres(klmn1,ispden) &
+&                           +pawrhoij(iatm)%rhoijp(jrhoij,ispden)
+             end do
+           else
+             do irhoij=1,pawrhoij(iatm)%nrhoijsel
+               klmn1=iq0+2*pawrhoij(iatm)%rhoijselect(irhoij) ; jrhoij=iq0+2*irhoij
+               pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,ispden)= &
+&                            pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,ispden) &
+&                           +pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,ispden)
+             end do
+           end if
+         end do
+       end do
+     end if
 
-   if (noncoll.and.optrhoij==1)  then
-     LIBPAW_DEALLOCATE(summag)
-     LIBPAW_DEALLOCATE(rotmag)
-   end if
+   end do ! End loop over atoms
+
    if (noncoll)  then
      LIBPAW_DEALLOCATE(symrec_cart)
    end if
@@ -3709,9 +4251,6 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
      end if
      LIBPAW_DEALLOCATE(sumgr)
      LIBPAW_DEALLOCATE(rotgr)
-     if (choice>2)  then
-       LIBPAW_DEALLOCATE(work1)
-     end if
      if (noncoll)  then
        LIBPAW_DEALLOCATE(summaggr)
        LIBPAW_DEALLOCATE(rotmaggr)
@@ -3729,114 +4268,96 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 !  If nsym==1, only copy rhoij_ into rhoij
 !  also has to fill rhoijselect array
 
-   if (nrhoij>0) then
-     if(pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1) then
-       msg=' In the antiferromagnetic case, nsym cannot be 1'
-       MSG_BUG(msg)
-     end if
+   if (antiferro) then
+     msg=' In the antiferromagnetic case, nsym cannot be 1'
+     MSG_BUG(msg)
    end if
+   
    if (optrhoij==1) then
+
      do iatm=1,nrhoij
        iatom=iatm;if ((paral_atom).and.(.not.paral_atom_unsym)) iatom=my_atmtab(iatm)
-       cplex=pawrhoij(iatm)%cplex
+       cplex_rhoij=pawrhoij(iatm)%cplex_rhoij
+       qphase=pawrhoij(iatm)%qphase
+       lmn2_size=pawrhoij(iatm)%lmn2_size
        use_res=(pawrhoij(iatm)%use_rhoijres>0)
+
+!      Store -rhoij_input in rhoij residual
        if (use_res) then
          pawrhoij(iatm)%rhoijres(:,:)=zero
-         if (cplex==1) then
-           do ispden=1,pawrhoij(iatm)%nspden
-             do irhoij=1,pawrhoij(iatm)%nrhoijsel
-               klmn=pawrhoij(iatm)%rhoijselect(irhoij)
-               pawrhoij(iatm)%rhoijres(klmn,ispden)=-pawrhoij(iatm)%rhoijp(irhoij,ispden)
+         do iq=1,qphase
+           iq0=(iq-1)*lmn2_size
+           if (cplex_rhoij==1) then
+             do ispden=1,pawrhoij(iatm)%nspden
+               do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                 klmn=iq0+pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+irhoij
+                 pawrhoij(iatm)%rhoijres(klmn,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij,ispden)
+               end do
              end do
-           end do
-         else
-           do ispden=1,pawrhoij(iatm)%nspden
-             do irhoij=1,pawrhoij(iatm)%nrhoijsel
-               klmn1=2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=2*irhoij
-               pawrhoij(iatm)%rhoijres(klmn1-1,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij-1,ispden)
-               pawrhoij(iatm)%rhoijres(klmn1  ,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij  ,ispden)
-             end do
-           end do
-         end if
-       end if
-       nselect=0
-       if (cplex==1) then
-         do klmn=1,pawrhoij(iatm)%lmn2_size
-           if (any(abs(pawrhoij_unsym(iatom)%rhoij_(klmn,:))>tol10)) then
-             nselect=nselect+1
-             pawrhoij(iatm)%rhoijselect(nselect)=klmn
-             do jj=1,pawrhoij(iatm)%nspden
-               ro(1)=pawrhoij_unsym(iatom)%rhoij_(klmn,jj)
-               pawrhoij(iatm)%rhoijp(nselect,jj)=ro(1)
-               if (use_res) pawrhoij(iatm)%rhoijres(klmn,jj)=pawrhoij(iatm)%rhoijres(klmn,jj)+ro(1)
-             end do
-           end if
-         end do
-       else
-         do klmn=1,pawrhoij(iatm)%lmn2_size
-           klmn1=2*klmn
-           if (any(abs(pawrhoij_unsym(iatom)%rhoij_(klmn1-1:klmn1,:))>tol10)) then
-             nselect=nselect+1;nselect1=2*nselect
-             pawrhoij(iatm)%rhoijselect(nselect)=klmn
-             do jj=1,pawrhoij(iatm)%nspden
-               ro(1)=pawrhoij_unsym(iatom)%rhoij_(klmn1-1,jj)
-               ro(2)=pawrhoij_unsym(iatom)%rhoij_(klmn1  ,jj)
-               pawrhoij(iatm)%rhoijp(nselect1-1,jj)=ro(1)
-               pawrhoij(iatm)%rhoijp(nselect1  ,jj)=ro(2)
-               if (use_res) then
-                 pawrhoij(iatm)%rhoijres(klmn1-1,jj)=pawrhoij(iatm)%rhoijres(klmn1-1,jj)+ro(1)
-                 pawrhoij(iatm)%rhoijres(klmn1  ,jj)=pawrhoij(iatm)%rhoijres(klmn1  ,jj)+ro(2)
-               end if
+           else
+             do ispden=1,pawrhoij(iatm)%nspden
+               do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                 klmn1=iq0+2*pawrhoij(iatm)%rhoijselect(irhoij);jrhoij=iq0+2*irhoij
+                 pawrhoij(iatm)%rhoijres(klmn1-1,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij-1,ispden)
+                 pawrhoij(iatm)%rhoijres(klmn1  ,ispden)=-pawrhoij(iatm)%rhoijp(jrhoij  ,ispden)
+               end do
              end do
            end if
          end do
        end if
-       pawrhoij(iatm)%nrhoijsel=nselect
-     end do
-   end if
+
+!      Select non-zero elements of input rhoij
+       call pawrhoij_filter(pawrhoij(iatm)%rhoijp,pawrhoij(iatm)%rhoijselect,&
+&                           pawrhoij(iatm)%nrhoijsel,cplex_rhoij,qphase,lmn2_size,&
+&                           pawrhoij(iatm)%nspden,rhoij_input=pawrhoij_unsym(iatom)%rhoij_)
+
+!      Add new rhoij to rhoij residual
+       if (use_res) then
+         do ispden=1,pawrhoij(iatm)%nspden
+           do iq=1,qphase
+             iq0=(iq-1)*lmn2_size
+             if (cplex_rhoij==1) then
+               do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                 klmn1=iq0+pawrhoij(iatm)%rhoijselect(irhoij) ; jrhoij=iq0+irhoij
+                 pawrhoij(iatm)%rhoijres(klmn1,ispden)= &
+&                              pawrhoij(iatm)%rhoijres(klmn1,ispden) &
+&                             +pawrhoij(iatm)%rhoijp(jrhoij,ispden)
+               end do
+             else
+               do irhoij=1,pawrhoij(iatm)%nrhoijsel
+                 klmn1=iq0+2*pawrhoij(iatm)%rhoijselect(irhoij) ; jrhoij=iq0+2*irhoij
+                 pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,ispden)= &
+&                              pawrhoij(iatm)%rhoijres(klmn1-1:klmn1,ispden) &
+&                             +pawrhoij(iatm)%rhoijp(jrhoij-1:jrhoij,ispden)
+               end do
+             end if
+           end do
+         end do
+       end if
+
+     end do ! iatm
+   end if ! optrhoij
 
  end if
 
 !*********************************************************************
-!Printing of Rhoij
- if (optrhoij==1.and.pawprtvol/=-10001) then
+!Printing of symetrized Rhoij
+ if (nrhoij>0.and.optrhoij==1.and.pawprtvol/=-10001) then
    wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
    pertstrg="RHOIJ";if (ipert>0) pertstrg="RHOIJ(1)"
    natinc=1;if(nrhoij>1.and.pawprtvol>=0) natinc=nrhoij-1
-   do iatm=1,nrhoij,natinc
-     iatom=iatm;if (paral_atom) iatom=my_atmtab(iatm)
-     if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
-     idum1=2;if (pawrhoij(iatm)%cplex==2.and.pawrhoij(iatm)%nspinor==1) idum1=1
-     if (abs(pawprtvol)>=1) then
-       write(msg, '(6a,i3,a)') ch10," PAW TEST:",ch10,&
-&       ' ====== Values of ',trim(pertstrg),' in symrhoij (iatom=',iatom,') ======'
-       call wrtout(std_out,msg,wrt_mode)
-     end if
-     do ispden=1,pawrhoij(iatm)%nspden
-       if (abs(pawprtvol)>=1.and.pawrhoij(iatm)%nspden/=1) then
-         write(msg, '(3a)') '   Component ',trim(dspin(ispden+2*(pawrhoij(iatm)%nspden/4))),':'
-       else if (pawrhoij(iatm)%nspden/=1) then
-         if (pawrhoij(iatm)%nspden/=4) write(msg, '(4a,i3,a,i1,a)') ch10,&
-&         ' *********** ',trim(pertstrg),' (atom ',iatom,', ispden=',ispden,') **********'
-         if (pawrhoij(iatm)%nspden==4) write(msg, '(4a,i3,3a)') ch10,&
-&         ' *********** ',trim(pertstrg),' (atom ',iatom,' - ',&
-&         trim(dspin(ispden+2*(pawrhoij(iatm)%nspden/4))),') **********'
-       else
-         write(msg, '(4a,i3,a)') ch10,&
-&         ' *********** ',trim(pertstrg),' (atom ',iatom,') **********'
-       end if
-       call wrtout(std_out,msg,wrt_mode)
-       call pawio_print_ij(std_out,pawrhoij(iatm)%rhoijp(:,ispden),&
-&       pawrhoij(iatm)%nrhoijsel,&
-&       pawrhoij(iatm)%cplex,&
-&       pawrhoij(iatm)%lmn_size,-1,idum,1,pawprtvol,&
-&       pawrhoij(iatm)%rhoijselect(:),&
-&       10.d0*dble(3-2*(ispden+ipert)),1,&
-&       opt_sym=idum1,mode_paral=wrt_mode)
-     end do
-   end do
-   msg=''
+   write(msg, '(7a)') ch10," PAW TEST:",ch10,&
+&     ' ========= Values of ',trim(pertstrg),' after symetrization =========',ch10
    call wrtout(std_out,msg,wrt_mode)
+   do iatm=1,nrhoij,natinc
+     iatom=iatm; if (paral_atom) iatom=my_atmtab(iatm)
+     if (nrhoij==1.and.ipert>0.and.ipert<=natom) iatom=ipert
+     call pawrhoij_print_rhoij(pawrhoij(iatm)%rhoijp,pawrhoij(iatm)%cplex_rhoij,&
+&                  pawrhoij(iatm)%qphase,iatom,natom,&
+&                  rhoijselect=pawrhoij(iatm)%rhoijselect,unit=std_out,&
+&                  opt_prtvol=pawprtvol,mode_paral=wrt_mode)
+   end do
+   call wrtout(std_out,"",wrt_mode)
  end if
 
 !Destroy atom table used for parallelism
@@ -3847,13 +4368,6 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
 !from reduced coordinates (integers) to cartesian coordinates (reals)
  contains
    function symrhoij_symcart(aprim,bprim,symred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symrhoij_symcart'
-!End of the abilint section
 
    implicit none
    real(dp) :: symrhoij_symcart(3,3)
@@ -3878,7 +4392,7 @@ subroutine symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsy
    end do
    end function symrhoij_symcart
 
-end subroutine symrhoij
+end subroutine pawrhoij_symrhoij
 !!***
 
 !----------------------------------------------------------------------
@@ -3912,13 +4426,6 @@ end subroutine symrhoij
 
 subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,buf_int,buf_dp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_isendreceive_getbuffer'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3932,8 +4439,8 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
 !Local variables-------------------------------
 !scalars
  integer :: buf_dp_size,buf_int_size,cplex,ii,indx_int,indx_dp,iatom_tot,irhoij_send
- integer :: isp,jrhoij,lmn2_size,lmnmix,ngrhoij,nselect,nspden,rhoij_size2,use_rhoijp
- integer :: use_rhoijres,use_rhoij_
+ integer :: isp,jj,jrhoij,lmn2_size,lmnmix,ngrhoij,nselect,nspden,qphase,rhoij_size2
+ integer :: use_rhoijp,use_rhoijres,use_rhoij_
  character(len=500) :: msg
  type(pawrhoij_type),pointer :: pawrhoij1
 !arrays
@@ -3955,6 +4462,7 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
    pawrhoij1=>pawrhoij(jrhoij)
 
    cplex       =buf_int(indx_int)    ;indx_int=indx_int+1
+   qphase      =buf_int(indx_int)    ;indx_int=indx_int+1
    lmn2_size   =buf_int(indx_int)    ;indx_int=indx_int+1
    nspden      =buf_int(indx_int)    ;indx_int=indx_int+1
    nselect     =buf_int(indx_int)    ;indx_int=indx_int+1
@@ -3968,7 +4476,8 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
    pawrhoij1%lmn_size=buf_int(indx_int) ;indx_int=indx_int+1
    pawrhoij1%nsppol=buf_int(indx_int)   ;indx_int=indx_int+1
    pawrhoij1%nspinor=buf_int(indx_int)  ;indx_int=indx_int+1
-   pawrhoij1%cplex=cplex
+   pawrhoij1%cplex_rhoij=cplex
+   pawrhoij1%qphase=qphase
    pawrhoij1%lmn2_size=lmn2_size
    pawrhoij1%nspden=nspden
    pawrhoij1%nrhoijsel=nselect
@@ -3982,11 +4491,14 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
      pawrhoij1%rhoijselect(1:nselect)=buf_int(indx_int:indx_int+nselect-1)
      if (nselect < lmn2_size )pawrhoij1%rhoijselect(nselect+1:lmn2_size)=zero
      indx_int=indx_int+nselect
-     LIBPAW_ALLOCATE(pawrhoij1%rhoijp,(cplex*lmn2_size,nspden))
+     LIBPAW_ALLOCATE(pawrhoij1%rhoijp,(cplex*qphase*lmn2_size,nspden))
      do isp=1,nspden
-       pawrhoij1%rhoijp(1:cplex*nselect,isp)=buf_dp(indx_dp:indx_dp+cplex*nselect-1)
-       if (nselect < lmn2_size )pawrhoij1%rhoijp(cplex*nselect+1:cplex*lmn2_size,isp)=zero
-       indx_dp=indx_dp+cplex*nselect
+       do ii=1,qphase
+         jj=(ii-1)*cplex*lmn2_size
+         pawrhoij1%rhoijp(jj+1:jj+cplex*nselect,isp)=buf_dp(indx_dp:indx_dp+cplex*nselect-1)
+         if (nselect<lmn2_size)pawrhoij1%rhoijp(jj+cplex*nselect+1:jj+cplex*lmn2_size,isp)=zero
+         indx_dp=indx_dp+cplex*nselect
+       end do
      end do
    end if
    if (lmnmix>0) then
@@ -3995,26 +4507,26 @@ subroutine pawrhoij_isendreceive_getbuffer(pawrhoij,nrhoij_send,atm_indx_recv,bu
      indx_int=indx_int+lmnmix
    end if
    if (ngrhoij>0) then
-     LIBPAW_ALLOCATE(pawrhoij1%grhoij,(ngrhoij,cplex*lmn2_size,nspden))
+     LIBPAW_ALLOCATE(pawrhoij1%grhoij,(ngrhoij,cplex*qphase*lmn2_size,nspden))
      do isp=1,nspden
-       do ii=1,cplex*lmn2_size
+       do ii=1,cplex*qphase*lmn2_size
          pawrhoij1%grhoij(1:ngrhoij,ii,isp)=buf_dp(indx_dp:indx_dp+ngrhoij-1)
          indx_dp=indx_dp+ngrhoij
        end do
      end do
    end if
    if (use_rhoijres>0) then
-     LIBPAW_ALLOCATE(pawrhoij1%rhoijres,(cplex*lmn2_size,nspden))
+     LIBPAW_ALLOCATE(pawrhoij1%rhoijres,(cplex*qphase*lmn2_size,nspden))
      do isp=1,nspden
-       pawrhoij1%rhoijres(1:cplex*lmn2_size,isp)=buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)
-       indx_dp=indx_dp+cplex*lmn2_size
+       pawrhoij1%rhoijres(1:cplex*qphase*lmn2_size,isp)=buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
    if (use_rhoij_>0) then
-     LIBPAW_ALLOCATE(pawrhoij1%rhoij_,(cplex*lmn2_size,rhoij_size2))
+     LIBPAW_ALLOCATE(pawrhoij1%rhoij_,(cplex*qphase*lmn2_size,rhoij_size2))
      do isp=1,rhoij_size2
-       pawrhoij1%rhoij_(1:cplex*lmn2_size,isp)=buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)
-       indx_dp=indx_dp+cplex*lmn2_size
+       pawrhoij1%rhoij_(1:cplex*qphase*lmn2_size,isp)=buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
  end do !irhoij_send
@@ -4061,13 +4573,6 @@ end subroutine pawrhoij_isendreceive_getbuffer
 subroutine pawrhoij_isendreceive_fillbuffer(pawrhoij,atmtab_send, atm_indx_send,nrhoij_send,&
 &                                           buf_int,buf_int_size,buf_dp,buf_dp_size)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawrhoij_isendreceive_fillbuffer'
-!End of the abilint section
-
 implicit none
 
 !Arguments ------------------------------------
@@ -4082,8 +4587,9 @@ implicit none
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,ii,indx_int,indx_dp, iatom_tot,irhoij,irhoij_send,isp,lmn2_size,lmnmix
- integer :: ngrhoij,nselect,nspden,rhoij_size2,use_rhoijp,use_rhoijres,use_rhoij_
+ integer :: cplex,ii,indx_int,indx_dp, iatom_tot,irhoij,irhoij_send,isp,jj,lmn2_size,lmnmix
+ integer :: ngrhoij,nselect,nspden,qphase,rhoij_size2
+ integer :: use_rhoijp,use_rhoijres,use_rhoij_
  character(len=500) :: msg
  type(pawrhoij_type),pointer :: pawrhoij1
 !arrays
@@ -4102,7 +4608,8 @@ implicit none
      MSG_BUG(msg)
    end if
    pawrhoij1=>pawrhoij(irhoij)
-   cplex    =pawrhoij1%cplex
+   cplex    =pawrhoij1%cplex_rhoij
+   qphase   =pawrhoij1%qphase
    lmn2_size=pawrhoij1%lmn2_size
    nspden   =pawrhoij1%nspden
    lmnmix=pawrhoij1%lmnmix_sz
@@ -4110,18 +4617,18 @@ implicit none
    use_rhoijp=pawrhoij1%use_rhoijp
    use_rhoijres=pawrhoij1%use_rhoijres
    use_rhoij_=pawrhoij1%use_rhoij_
-   buf_int_size=buf_int_size+15
+   buf_int_size=buf_int_size+16
    if (use_rhoijp>0) then
      nselect=pawrhoij1%nrhoijsel
      buf_int_size=buf_int_size+nselect
-     buf_dp_size=buf_dp_size + cplex*nselect*nspden
+     buf_dp_size=buf_dp_size + cplex*qphase*nselect*nspden
    end if
    if (lmnmix>0)       buf_int_size=buf_int_size+lmnmix
-   if (ngrhoij>0)      buf_dp_size=buf_dp_size + cplex*lmn2_size*nspden*ngrhoij
-   if (use_rhoijres>0) buf_dp_size=buf_dp_size + cplex*lmn2_size*nspden
+   if (ngrhoij>0)      buf_dp_size=buf_dp_size + cplex*qphase*lmn2_size*nspden*ngrhoij
+   if (use_rhoijres>0) buf_dp_size=buf_dp_size + cplex*qphase*lmn2_size*nspden
    if (use_rhoij_>0) then
      rhoij_size2=size(pawrhoij1%rhoij_,dim=2)
-     buf_dp_size=buf_dp_size + cplex*lmn2_size*rhoij_size2
+     buf_dp_size=buf_dp_size + cplex*qphase*lmn2_size*rhoij_size2
    end if
  end do
 
@@ -4135,7 +4642,8 @@ implicit none
    iatom_tot=atmtab_send(irhoij_send)
    irhoij=atm_indx_send(iatom_tot)
    pawrhoij1=>pawrhoij(irhoij)
-   cplex    =pawrhoij1%cplex
+   cplex    =pawrhoij1%cplex_rhoij
+   qphase   =pawrhoij1%qphase
    lmn2_size=pawrhoij1%lmn2_size
    nspden   =pawrhoij1%nspden
    lmnmix=pawrhoij1%lmnmix_sz
@@ -4147,6 +4655,7 @@ implicit none
    rhoij_size2 =size(pawrhoij1%rhoij_,dim=2)
    buf_int(indx_int)=atmtab_send(irhoij_send)        ;indx_int=indx_int+1
    buf_int(indx_int)=cplex                           ;indx_int=indx_int+1
+   buf_int(indx_int)=qphase                          ;indx_int=indx_int+1
    buf_int(indx_int)=lmn2_size                       ;indx_int=indx_int+1
    buf_int(indx_int)=nspden                          ;indx_int=indx_int+1
    buf_int(indx_int)=nselect                         ;indx_int=indx_int+1
@@ -4164,8 +4673,11 @@ implicit none
      buf_int(indx_int:indx_int+nselect-1)=pawrhoij1%rhoijselect(1:nselect)
      indx_int=indx_int+nselect
      do isp=1,nspden
-       buf_dp(indx_dp:indx_dp+cplex*nselect-1)=pawrhoij1%rhoijp(1:cplex*nselect,isp)
-       indx_dp=indx_dp+cplex*nselect
+       do ii=1,qphase
+         jj=(ii-1)*cplex*lmn2_size
+         buf_dp(indx_dp:indx_dp+cplex*nselect-1)=pawrhoij1%rhoijp(jj+1:jj+cplex*nselect,isp)
+         indx_dp=indx_dp+cplex*nselect
+       end do
      end do
    end if
    if (lmnmix>0) then
@@ -4174,7 +4686,7 @@ implicit none
    end if
    if (ngrhoij>0) then
      do isp=1,nspden
-       do ii=1,cplex*lmn2_size
+       do ii=1,cplex*qphase*lmn2_size
          buf_dp(indx_dp:indx_dp+ngrhoij-1)=pawrhoij1%grhoij(1:ngrhoij,ii,isp)
          indx_dp=indx_dp+ngrhoij
        end do
@@ -4182,14 +4694,14 @@ implicit none
    end if
    if (use_rhoijres>0) then
      do isp=1,nspden
-       buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)=pawrhoij1%rhoijres(1:cplex*lmn2_size,isp)
-       indx_dp=indx_dp+cplex*lmn2_size
+       buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)=pawrhoij1%rhoijres(1:cplex*qphase*lmn2_size,isp)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
    if (use_rhoij_>0) then
      do isp=1,rhoij_size2
-       buf_dp(indx_dp:indx_dp+cplex*lmn2_size-1)=pawrhoij1%rhoij_(1:cplex*lmn2_size,isp)
-       indx_dp=indx_dp+cplex*lmn2_size
+       buf_dp(indx_dp:indx_dp+cplex*qphase*lmn2_size-1)=pawrhoij1%rhoij_(1:cplex*qphase*lmn2_size,isp)
+       indx_dp=indx_dp+cplex*qphase*lmn2_size
      end do
    end if
  end do !irhoij_send

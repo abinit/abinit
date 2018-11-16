@@ -36,7 +36,7 @@ module m_gaussian_quadrature
 !
 !----------------------------------------------------------------------------------------------------
 
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use defs_basis, only : dp, tol20, std_out
@@ -80,32 +80,25 @@ contains
  ! This subroutine performs a gaussian quadrature of given order of the input function integrand
  ! and stores the result in the variable integral.
  !
- ! The integrand function is assumed to be defined on the range from 0 to infinity, and it is 
+ ! The integrand function is assumed to be defined on the range from 0 to infinity, and it is
  ! assumed to to behave as x^2 near x=0, and 1/x^4 as x-> infinity.
  !
  ! The Gegenbauer integration method is of the form:
  !
- ! int_{-1}^{1} dt (1-t)^2(1+t)^2 f(t) =  sum_{i} w_i f(t_i) 
+ ! int_{-1}^{1} dt (1-t)^2(1+t)^2 f(t) =  sum_{i} w_i f(t_i)
  !
  !
  ! In order to perform such an integral, make a change of variable x = (1-t)/(1+t); this implies
- !                      
+ !
  !              int_0^infty dx I(x) = int_{-1}^{1} dt g(t),     g(t) = 2/(1+t)^2 I((1-t)/(1+t))
  !
- ! It is easy to show that g(1-delta) ~ delta^2 and g(-1+delta) ~ delta^2 for delta small. 
+ ! It is easy to show that g(1-delta) ~ delta^2 and g(-1+delta) ~ delta^2 for delta small.
  ! Thus, we can define
- !                      
+ !
  !              int_{-1}^{1} dt g(t) = int_{-1}^{1} dt (1+t)^2(1-t)^2 f(t), f(t) = g(t)/(1-t^2)^2
  !
  !
  !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussian_quadrature_gegenbauer'
-!End of the abilint section
-
   implicit none
 
 
@@ -114,7 +107,7 @@ contains
 
   interface
         function integrand(x)
-        integer, parameter :: dp=kind(1.0d0) 
+        integer, parameter :: dp=kind(1.0d0)
         real(dp) integrand
         real(dp),intent(in) :: x
         end function integrand
@@ -187,28 +180,21 @@ contains
  ! This subroutine performs a gaussian quadrature of given order of the input function integrand
  ! and stores the result in the variable integral.
  !
- ! The integrand function is assumed to be defined on the range from 0 to infinity, and it is 
+ ! The integrand function is assumed to be defined on the range from 0 to infinity, and it is
  ! assumed to to behave as x^2 near x=0, and 1/x^4 as x-> infinity.
  !
  ! The Legendre integration method is of the form:
  !
- ! int_{-1}^{1} dt f(t) =  sum_{i} w_i f(t_i) 
+ ! int_{-1}^{1} dt f(t) =  sum_{i} w_i f(t_i)
  !
  !
  ! In order to perform such an integral, make a change of variable x = (1-t)/(1+t); this implies
- !                      
+ !
  !              int_0^infty dx I(x) = int_{-1}^{1} dt f(t),     f(t) = 2/(1+t)^2 I((1-t)/(1+t))
  !
  !
  !
  !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gaussian_quadrature_legendre'
-!End of the abilint section
-
   implicit none
 
 
@@ -217,7 +203,7 @@ contains
 
   interface
         function integrand(x)
-        integer, parameter :: dp=kind(1.0d0) 
+        integer, parameter :: dp=kind(1.0d0)
         real(dp) integrand
         real(dp),intent(in) :: x
         end function integrand
@@ -290,19 +276,19 @@ contains
  !----------------------------------------------------------------------------------------------------
  !
  ! This subroutine generates the frequencies and weights to integrate using legendre Gaussian
- ! quadrature for a given order. 
+ ! quadrature for a given order.
  !
- ! The integrand function is assumed to be defined on the range from 0 to infinity, and it is 
+ ! The integrand function is assumed to be defined on the range from 0 to infinity, and it is
  ! assumed to to behave as x^2 near x=0, and 1/x^4 as x-> infinity.
  !
  ! The Legendre integration method is of the form:
  !
- ! int_{-1}^{1} dt f(t) =  sum_{i} w_i f(t_i) 
+ ! int_{-1}^{1} dt f(t) =  sum_{i} w_i f(t_i)
  !
- ! In order to perform such an integral, make a change of variable 
+ ! In order to perform such an integral, make a change of variable
  !
  !              omega = (1-t)/(1+t)
- !                      
+ !
  ! and thus
  !       int_0^infty domega I(omega) = int_{-1}^{1} dt f(t),    f(t) = 2/(1+t)^2 I((1-t)/(1+t))
  !
@@ -310,13 +296,6 @@ contains
  !
  !
  !----------------------------------------------------------------------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_frequencies_and_weights_legendre'
-!End of the abilint section
-
   implicit none
   ! input and output variables
   integer,   intent(in)   :: order
@@ -361,9 +340,9 @@ contains
  end subroutine get_frequencies_and_weights_legendre
 !!***
 
-!!****f* m_hamiltonian/cdgqf 
+!!****f* m_hamiltonian/cdgqf
 !! NAME
-!!  cdgqf 
+!!  cdgqf
 !!
 !! FUNCTION
 !!  .
@@ -398,7 +377,7 @@ subroutine cdgqf ( nt, gaussian_kind, alpha, beta, t, wts )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -412,7 +391,7 @@ subroutine cdgqf ( nt, gaussian_kind, alpha, beta, t, wts )
 !  Reference:
 !
 !    Sylvan Elhay, Jaroslav Kautsky,
-!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
+!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of
 !    Interpolatory Quadrature,
 !    ACM Transactions on Mathematical Software,
 !    Volume 13, Number 4, December 1987, pages 399-415.
@@ -439,13 +418,6 @@ subroutine cdgqf ( nt, gaussian_kind, alpha, beta, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cdgqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
@@ -472,12 +444,12 @@ subroutine cdgqf ( nt, gaussian_kind, alpha, beta, t, wts )
   call sgqf ( nt, aj, bj, zemu, t, wts )
 
   return
-end subroutine cdgqf 
+end subroutine cdgqf
 !!***
 
-!!****f* m_hamiltonian/cgqf 
+!!****f* m_hamiltonian/cgqf
 !! NAME
-!!  cgqf 
+!!  cgqf
 !!
 !! FUNCTION
 !!  .
@@ -510,7 +482,7 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -524,7 +496,7 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 !  Reference:
 !
 !    Sylvan Elhay, Jaroslav Kautsky,
-!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
+!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of
 !    Interpolatory Quadrature,
 !    ACM Transactions on Mathematical Software,
 !    Volume 13, Number 4, December 1987, pages 399-415.
@@ -555,13 +527,6 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cgqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
@@ -584,7 +549,7 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 !
   call cdgqf ( nt, gaussian_kind, alpha, beta, t, wts )
 !
-!  Prepare to scale the quadrature formula to other weight function with 
+!  Prepare to scale the quadrature formula to other weight function with
 !  valid A and B.
 !
   ABI_ALLOCATE ( mlt, (1:nt) )
@@ -593,7 +558,7 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 
   ABI_ALLOCATE ( ndx, (1:nt) )
 
-  do i = 1, nt 
+  do i = 1, nt
     ndx(i) = i
   end do
 
@@ -603,12 +568,12 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
   ABI_DEALLOCATE ( ndx )
 
   return
-end subroutine cgqf 
+end subroutine cgqf
 !!***
 
-!!****f* m_hamiltonian/ch_cap 
+!!****f* m_hamiltonian/ch_cap
 !! NAME
-!!  ch_cap 
+!!  ch_cap
 !!
 !! FUNCTION
 !!  .
@@ -633,7 +598,7 @@ subroutine ch_cap ( c )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -647,13 +612,6 @@ subroutine ch_cap ( c )
 !
 !    Input/output, character C, the character to capitalize.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ch_cap'
-!End of the abilint section
-
   implicit none
 
   character              c
@@ -668,12 +626,12 @@ subroutine ch_cap ( c )
   end if
 
   return
-end subroutine ch_cap 
+end subroutine ch_cap
 !!***
 
-!!****f* m_hamiltonian/ch_eqi 
+!!****f* m_hamiltonian/ch_eqi
 !! NAME
-!!  ch_eqi 
+!!  ch_eqi
 !!
 !! FUNCTION
 !!  .
@@ -683,10 +641,10 @@ end subroutine ch_cap
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
@@ -702,7 +660,7 @@ function ch_eqi ( c1, c2 )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -718,13 +676,6 @@ function ch_eqi ( c1, c2 )
 !
 !    Output, logical CH_EQI, the result of the comparison.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ch_eqi'
-!End of the abilint section
-
   implicit none
 
   logical ch_eqi
@@ -748,12 +699,12 @@ function ch_eqi ( c1, c2 )
   end if
 
   return
-end function ch_eqi 
+end function ch_eqi
 !!***
 
-!!****f* m_hamiltonian/ch_to_digit 
+!!****f* m_hamiltonian/ch_to_digit
 !! NAME
-!!  ch_to_digit 
+!!  ch_to_digit
 !!
 !! FUNCTION
 !!  .
@@ -789,7 +740,7 @@ subroutine ch_to_digit ( c, digit )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -804,16 +755,9 @@ subroutine ch_to_digit ( c, digit )
 !    Input, character C, the decimal digit, '0' through '9' or blank
 !    are legal.
 !
-!    Output, integer ( kind = 4 ) DIGIT, the corresponding integer value.  
+!    Output, integer ( kind = 4 ) DIGIT, the corresponding integer value.
 !    If C was 'illegal', then DIGIT is -1.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ch_to_digit'
-!End of the abilint section
-
   implicit none
 
   character c
@@ -836,12 +780,12 @@ subroutine ch_to_digit ( c, digit )
   end if
 
   return
-end subroutine ch_to_digit 
+end subroutine ch_to_digit
 !!***
 
-!!****f* m_hamiltonian/class_matrix 
+!!****f* m_hamiltonian/class_matrix
 !! NAME
-!!  class_matrix 
+!!  class_matrix
 !!
 !! FUNCTION
 !!  .
@@ -879,7 +823,7 @@ subroutine class_matrix ( gaussian_kind, m, alpha, beta, aj, bj, zemu )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -893,7 +837,7 @@ subroutine class_matrix ( gaussian_kind, m, alpha, beta, aj, bj, zemu )
 !  Reference:
 !
 !    Sylvan Elhay, Jaroslav Kautsky,
-!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
+!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of
 !    Interpolatory Quadrature,
 !    ACM Transactions on Mathematical Software,
 !    Volume 13, Number 4, December 1987, pages 399-415.
@@ -921,13 +865,6 @@ subroutine class_matrix ( gaussian_kind, m, alpha, beta, aj, bj, zemu )
 !
 !    Output, real ( dp ) ZEMU, the zero-th moment.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'class_matrix'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) m
@@ -1081,12 +1018,12 @@ subroutine class_matrix ( gaussian_kind, m, alpha, beta, aj, bj, zemu )
   end if
 
   return
-end subroutine class_matrix 
+end subroutine class_matrix
 !!***
 
-!!****f* m_hamiltonian/imtqlx 
+!!****f* m_hamiltonian/imtqlx
 !! NAME
-!!  imtqlx 
+!!  imtqlx
 !!
 !! FUNCTION
 !!  .
@@ -1111,20 +1048,20 @@ subroutine imtqlx ( n, d, e, z )
 !
 !  Discussion:
 !
-!    This routine is a slightly modified version of the EISPACK routine to 
-!    perform the implicit QL algorithm on a symmetric tridiagonal matrix. 
+!    This routine is a slightly modified version of the EISPACK routine to
+!    perform the implicit QL algorithm on a symmetric tridiagonal matrix.
 !
 !    The authors thank the authors of EISPACK for permission to use this
-!    routine. 
+!    routine.
 !
-!    It has been modified to produce the product Q' * Z, where Z is an input 
-!    vector and Q is the orthogonal matrix diagonalizing the input matrix.  
-!    The changes consist (essentially) of applying the orthogonal 
+!    It has been modified to produce the product Q' * Z, where Z is an input
+!    vector and Q is the orthogonal matrix diagonalizing the input matrix.
+!    The changes consist (essentially) of applying the orthogonal
 !    transformations directly to Z as they are generated.
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -1138,7 +1075,7 @@ subroutine imtqlx ( n, d, e, z )
 !  Reference:
 !
 !    Sylvan Elhay, Jaroslav Kautsky,
-!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
+!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of
 !    Interpolatory Quadrature,
 !    ACM Transactions on Mathematical Software,
 !    Volume 13, Number 4, December 1987, pages 399-415.
@@ -1155,7 +1092,7 @@ subroutine imtqlx ( n, d, e, z )
 !    Input/output, real ( dp ) D(N), the diagonal entries of the matrix.
 !    On output, the information in D has been overwritten.
 !
-!    Input/output, real ( dp ) E(N), the subdiagonal entries of the 
+!    Input/output, real ( dp ) E(N), the subdiagonal entries of the
 !    matrix, in entries E(1) through E(N-1).  On output, the information in
 !    E has been overwritten.
 !
@@ -1163,13 +1100,6 @@ subroutine imtqlx ( n, d, e, z )
 !    the value of Q' * Z, where Q is the matrix that diagonalizes the
 !    input symmetric tridiagonal matrix.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'imtqlx'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) n
@@ -1313,12 +1243,12 @@ subroutine imtqlx ( n, d, e, z )
   end do
 
   return
-end subroutine imtqlx 
+end subroutine imtqlx
 !!***
 
-!!****f* m_hamiltonian/parchk 
+!!****f* m_hamiltonian/parchk
 !! NAME
-!!  parchk 
+!!  parchk
 !!
 !! FUNCTION
 !!  .
@@ -1339,11 +1269,11 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
 
 !*****************************************************************************80
 !
-!! PARCHK checks parameters ALPHA and BETA for classical weight functions. 
+!! PARCHK checks parameters ALPHA and BETA for classical weight functions.
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -1357,7 +1287,7 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
 !  Reference:
 !
 !    Sylvan Elhay, Jaroslav Kautsky,
-!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
+!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of
 !    Interpolatory Quadrature,
 !    ACM Transactions on Mathematical Software,
 !    Volume 13, Number 4, December 1987, pages 399-415.
@@ -1380,13 +1310,6 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
 !    Input, real ( dp ) ALPHA, BETA, the parameters, if required
 !    by the value of KIND.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'parchk'
-!End of the abilint section
-
   implicit none
 
   real ( dp ) alpha
@@ -1423,13 +1346,13 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
   end if
 
   return
-end subroutine parchk 
+end subroutine parchk
 !!***
 
 
-!!****f* m_hamiltonian/r8_gamma_gq 
+!!****f* m_hamiltonian/r8_gamma_gq
 !! NAME
-!!  r8_gamma_gq 
+!!  r8_gamma_gq
 !!
 !! FUNCTION
 !!  .
@@ -1439,10 +1362,10 @@ end subroutine parchk
 !! OUTPUT
 !!
 !! PARENTS
-!!       
+!!
 !!
 !! CHILDREN
-!!       
+!!
 !!
 !! SOURCE
 
@@ -1464,7 +1387,7 @@ function r8_gamma_gq ( x )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -1497,13 +1420,6 @@ function r8_gamma_gq ( x )
 !
 !    Output, real ( dp ) R8_GAMMA, the value of the function.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'r8_gamma_gq'
-!End of the abilint section
-
   implicit none
 
   real ( dp ), dimension ( 7 ) :: c = (/ &
@@ -1689,12 +1605,12 @@ function r8_gamma_gq ( x )
   r8_gamma_gq = res
 
   return
-end function r8_gamma_gq 
+end function r8_gamma_gq
 !!***
 
-!!****f* m_hamiltonian/r8mat_write 
+!!****f* m_hamiltonian/r8mat_write
 !! NAME
-!!  r8mat_write 
+!!  r8mat_write
 !!
 !! FUNCTION
 !!  .
@@ -1739,13 +1655,6 @@ subroutine r8mat_write ( output_filename, m, n, table )
 !
 !    Input, real ( dp ) TABLE(M,N), the table data.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'r8mat_write'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) m
@@ -1790,13 +1699,13 @@ subroutine r8mat_write ( output_filename, m, n, table )
 !
   close ( unit = output_unit )
 
-end subroutine r8mat_write 
+end subroutine r8mat_write
 !!***
 
 
-!!****f* m_hamiltonian/rule_write 
+!!****f* m_hamiltonian/rule_write
 !! NAME
-!!  rule_write 
+!!  rule_write
 !!
 !! FUNCTION
 !!  .
@@ -1820,7 +1729,7 @@ subroutine rule_write ( order, x, w, r, filename )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -1844,13 +1753,6 @@ subroutine rule_write ( order, x, w, r, filename )
 !    'filename_w.txt', 'filename_x.txt', 'filename_r.txt' defining weights,
 !    abscissas, and region.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rule_write'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) order
@@ -1877,19 +1779,19 @@ subroutine rule_write ( order, x, w, r, filename )
   write ( std_out, '(a)' ) '  Weight file will be   "' // trim ( filename_w ) // '".'
   write ( std_out, '(a)' ) '  Abscissa file will be "' // trim ( filename_x ) // '".'
   write ( std_out, '(a)' ) '  Region file will be   "' // trim ( filename_r ) // '".'
-            
+
   call r8mat_write ( filename_w, 1, order, w )
   call r8mat_write ( filename_x, 1, order, x )
   call r8mat_write ( filename_r, 1, 2,     r )
 
   return
-end subroutine rule_write 
+end subroutine rule_write
 !!***
 
 
-!!****f* m_hamiltonian/s_to_i4 
+!!****f* m_hamiltonian/s_to_i4
 !! NAME
-!!  s_to_i4 
+!!  s_to_i4
 !!
 !! FUNCTION
 !!  .
@@ -1913,7 +1815,7 @@ subroutine s_to_i4 ( s, ival, ierror, length )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -1934,16 +1836,9 @@ subroutine s_to_i4 ( s, ival, ierror, length )
 !    0, no error.
 !    1, an error occurred.
 !
-!    Output, integer ( kind = 4 ) LENGTH, the number of characters of S 
+!    Output, integer ( kind = 4 ) LENGTH, the number of characters of S
 !    used to make IVAL.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 's_to_i4'
-!End of the abilint section
-
   implicit none
 
   character c
@@ -2027,12 +1922,12 @@ subroutine s_to_i4 ( s, ival, ierror, length )
   end if
 
   return
-end subroutine s_to_i4 
+end subroutine s_to_i4
 !!***
 
-!!****f* m_hamiltonian/s_to_r8 
+!!****f* m_hamiltonian/s_to_r8
 !! NAME
-!!  s_to_r8 
+!!  s_to_r8
 !!
 !! FUNCTION
 !!  .
@@ -2099,7 +1994,7 @@ subroutine s_to_r8 ( s, dval, ierror, length )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -2131,13 +2026,6 @@ subroutine s_to_r8 ( s, dval, ierror, length )
 !    to form the number, including any terminating
 !    characters such as a trailing comma or blanks.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 's_to_r8'
-!End of the abilint section
-
   implicit none
 
   character c
@@ -2331,12 +2219,12 @@ subroutine s_to_r8 ( s, dval, ierror, length )
   dval = real ( isgn, dp ) * rexp * rtop / rbot
 
   return
-end subroutine s_to_r8 
+end subroutine s_to_r8
 !!***
 
-!!****f* m_hamiltonian/scqf 
+!!****f* m_hamiltonian/scqf
 !! NAME
-!!  scqf 
+!!  scqf
 !!
 !! FUNCTION
 !!  .
@@ -2368,7 +2256,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -2382,7 +2270,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
 !  Reference:
 !
 !    Sylvan Elhay, Jaroslav Kautsky,
-!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
+!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of
 !    Interpolatory Quadrature,
 !    ACM Transactions on Mathematical Software,
 !    Volume 13, Number 4, December 1987, pages 399-415.
@@ -2399,7 +2287,7 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
 !
 !    Input, integer ( kind = 4 ) NWTS, the number of weights.
 !
-!    Input, integer ( kind = 4 ) NDX(NT), used to index the array WTS.  
+!    Input, integer ( kind = 4 ) NDX(NT), used to index the array WTS.
 !    For more details see the comments in CAWIQ.
 !
 !    Output, real ( dp ) SWTS(NWTS), the scaled weights.
@@ -2423,13 +2311,6 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
 !
 !    Input, real ( dp ) A, B, the interval endpoints.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
@@ -2588,13 +2469,13 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
   end do
 
   return
-end subroutine scqf 
+end subroutine scqf
 !!***
 
 
-!!****f* m_hamiltonian/sgqf 
+!!****f* m_hamiltonian/sgqf
 !! NAME
-!!  sgqf 
+!!  sgqf
 !!
 !! FUNCTION
 !!  .
@@ -2625,7 +2506,7 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
 !
 !  Licensing:
 !
-!    This code is distributed under the GNU LGPL license. 
+!    This code is distributed under the GNU LGPL license.
 !
 !  Modified:
 !
@@ -2639,7 +2520,7 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
 !  Reference:
 !
 !    Sylvan Elhay, Jaroslav Kautsky,
-!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of 
+!    Algorithm 655: IQPACK, FORTRAN Subroutines for the Weights of
 !    Interpolatory Quadrature,
 !    ACM Transactions on Mathematical Software,
 !    Volume 13, Number 4, December 1987, pages 399-415.
@@ -2650,7 +2531,7 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
 !
 !    Input, real ( dp ) AJ(NT), the diagonal of the Jacobi matrix.
 !
-!    Input/output, real ( dp ) BJ(NT), the subdiagonal of the Jacobi 
+!    Input/output, real ( dp ) BJ(NT), the subdiagonal of the Jacobi
 !    matrix, in entries 1 through NT-1.  On output, BJ has been overwritten.
 !
 !    Input, real ( dp ) ZEMU, the zero-th moment of the weight function.
@@ -2659,13 +2540,6 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sgqf'
-!End of the abilint section
-
   implicit none
 
   integer ( kind = 4 ) nt
@@ -2699,7 +2573,7 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
   wts(1:nt) = wts(1:nt)**2
 
   return
-end subroutine sgqf 
+end subroutine sgqf
 !!***
 
 end module m_gaussian_quadrature

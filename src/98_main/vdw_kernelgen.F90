@@ -41,12 +41,10 @@
 program vdw_kernelgen
 
 #if defined DEV_YP_VDWXC
-
  use defs_basis
  use defs_abitypes
  use m_build_info
  use m_errors
- use m_io_tools, only : flush_unit
  use m_xc_vdw
  use m_mpinfo
  use m_xmpi
@@ -54,14 +52,8 @@ program vdw_kernelgen
  use mpi
 #endif
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vdw_kernelgen'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
-!End of the abilint section
-
+ use m_specialmsg,  only : specialmsg_getcount, herald
+ use m_io_tools,    only : flush_unit
  implicit none
 
 #if defined HAVE_MPI1
@@ -121,6 +113,9 @@ program vdw_kernelgen
 !* Init fake MPI type with values for sequential case.
  call initmpi_seq(MPI_enreg_seq)
 
+ write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',&
+& ch10
+ MSG_ERROR(message)
 
 !=== Write greetings ===
  codename='vdW_KernelGen'//repeat(' ',11)

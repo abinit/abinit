@@ -2,6 +2,7 @@
 description: How to perform a GW calculation, including self-consistency
 authors: MG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a GW calculation, including self-consistency with the ABINIT package.
 
@@ -47,7 +48,7 @@ integration along the real and imaginary axes are described in
 
 ## Tutorials
 
-* [[lesson:gw1]] The first lesson on GW (GW1) deals with the computation of the quasi-particle band gap of Silicon (semiconductor), in the GW approximation (much better than the Kohn-Sham LDA band structure), with a plasmon-pole model. 
-* [[lesson:gw2]] The second lesson on GW (GW2) deals with the computation of the quasi-particle band structure of Aluminum, in the GW approximation (so, much better than the Kohn-Sham LDA band structure) without using the plasmon-pole model. 
-* [[lesson:paral_mbt|Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
+* [[tutorial:gw1]] The first tutorial on GW (GW1) deals with the computation of the quasi-particle band gap of Silicon (semiconductor), in the GW approximation (much better than the Kohn-Sham LDA band structure), with a plasmon-pole model. 
+* [[tutorial:gw2]] The second tutorial on GW (GW2) deals with the computation of the quasi-particle band structure of Aluminum, in the GW approximation (so, much better than the Kohn-Sham LDA band structure) without using the plasmon-pole model. 
+* [[tutorial:paral_mbt|Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
 

@@ -1,6 +1,6 @@
 
-.Version 8.5.0 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+.Version 8.10.0 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -10,44 +10,42 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 29 Jun 2017.
-- ( at 09h30 )
+.Starting date : Thu 27 Sep 2018.
+- ( at 13h05 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/alex/Desktop/dev/abinit/abinit_git_dev/tests/v8/Input/t13_ddb.in
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/v8/Input/t13_ddb.in
  to initialize the multibinit input
 
 ================================================================================
 
  -outvars_multibinit: echo values of input variables ----------------------
 
- Flags :
+ Flags : 
      ifcflag         1
    prt_model         2
      strcpli        -1
  Fit the coefficients :
-        fit_coeff  1
- fit_generateTerm  1
-       fit_cutoff  7.00000000E+00
-       fit_option  0
-       fit_ncycle  10
-         fit_grid  1  1  1
-    fit_ts_option  0
-   fit_rangePower  3  4
-   fit_anhaStrain  0
-   fit_SPCoupling  1
-    fit_nbancoeff  0
-     fit_bancoeff
-    fit_nfixcoeff  2
-     fit_fixcoeff        48    50
+         fit_coeff  1
+ fit_generateCoeff  1
+        fit_cutoff  7.00000000E+00
+        fit_option  0
+        fit_ncoeff  10
+          fit_grid  1  1  1
+         ts_option  0
+    fit_rangePower  3  4
+    fit_anhaStrain  0
+    fit_SPCoupling  1
+     fit_nfixcoeff  2
+      fit_fixcoeff         48     50
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -159,25 +157,6 @@
   5  y     0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
   5  z    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000
 
- Displacement-response internal strain tensor (Unit:Bohr)
-
- Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
-  1  x    -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000   0.0000000
-  1  y     0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
-  1  z     0.0000000  -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
-  2  x    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
-  2  y     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-  2  z     0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-  3  x    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
-  3  y    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
-  3  z    -0.0000000   0.0000000   0.0000000   0.0000000   0.0000000   0.0000000
-  4  x     0.0000000   0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
-  4  y    -0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-  4  z     0.0000000  -0.0000000   0.0000000  -0.0000000   0.0000000  -0.0000000
-  5  x     0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000   0.0000000
-  5  y     0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
-  5  z    -0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000
-
 
 
 ================================================================================
@@ -193,7 +172,7 @@
 ================================================================================
 
 -Reading the file the HIST file :
--/home/alex/dev/abinit_git/tests/v8/Input/t13_HIST
+-/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__amartin/tests/v8/Input/t13_HIST
 
 
 ================================================================================
@@ -202,32 +181,32 @@
 
 --------------------------------------------------------------------------------
 
- The coefficients for the fit must  will be generate
+ The coefficients for the fit will be generated
  825 coefficients generated 
 
- Mean Standard Deviation values at the begining of the fit process (meV/f.u.):
-   Energy          :   3.7052089149349636E+00
+ Mean Standard Deviation values at the begining of the fit process (meV/atm):
+   Energy          :   7.4104178298699275E-01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460724822E-03
-   Forces          :   7.3678367059228245E-03
-   Stresses        :   1.3882954014965735E-04
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
-    Coefficient      (meV/f.u.)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     714         2.5619221155E+00  5.2912402489E-03  5.1870133634E-03  1.0422688544E-04
- 4     539         1.9439910781E+00  4.4295944236E-03  4.3237449857E-03  1.0584943786E-04
- 5     95          1.9696907087E+00  3.9429574888E-03  3.8379930016E-03  1.0496448720E-04
- 6     734         2.0038572449E+00  3.7341077229E-03  3.6294179093E-03  1.0468981364E-04
- 7     305         1.9636905625E+00  3.5446666843E-03  3.4399466298E-03  1.0472005442E-04
- 8     203         1.9301713039E+00  3.4270143374E-03  3.3221029103E-03  1.0491142707E-04
- 9     134         2.0403791124E+00  3.2721344818E-03  3.1676473469E-03  1.0448713489E-04
- 10    25          2.0366430560E+00  3.1465833024E-03  3.0419084233E-03  1.0467487910E-04
- 11    23          2.0215975221E+00  3.0437002651E-03  2.9389297950E-03  1.0477047014E-04
- 12    561         2.0197221191E+00  2.9470810833E-03  2.8421558478E-03  1.0492523558E-04
+    Coefficient      (meV/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3     714         5.1238442309E-01  5.2912402489E-03  5.1870133634E-03  1.0422688544E-04
+ 4     539         3.8879821563E-01  4.4295944236E-03  4.3237449857E-03  1.0584943786E-04
+ 5     95          3.9393814175E-01  3.9429574888E-03  3.8379930016E-03  1.0496448720E-04
+ 6     734         4.0077144898E-01  3.7341077229E-03  3.6294179093E-03  1.0468981364E-04
+ 7     305         3.9273811249E-01  3.5446666843E-03  3.4399466298E-03  1.0472005442E-04
+ 8     203         3.8603426078E-01  3.4270143374E-03  3.3221029103E-03  1.0491142707E-04
+ 9     134         4.0807582248E-01  3.2721344818E-03  3.1676473469E-03  1.0448713489E-04
+ 10    25          4.0732861119E-01  3.1465833024E-03  3.0419084233E-03  1.0467487910E-04
+ 11    23          4.0431950443E-01  3.0437002651E-03  2.9389297950E-03  1.0477047014E-04
+ 12    561         4.0394442383E-01  2.9470810833E-03  2.8421558478E-03  1.0492523558E-04
 
  Fitted coefficients at the end of the fit process:
- 48 =>  -5.6544276110E+00 (Sr_x-O1_x)^2(Ru_y-O1_y)^1(eta_2)^1
- 50 =>  -4.6629951051E-01 (Sr_x-O1_x)^2(Ru_y-O1_y)^1(eta_4)^1
+ 48 =>  -5.6544276111E+00 (Sr_x-O1_x)^2(Ru_y-O1_y)^1(eta_2)^1
+ 50 =>  -4.6629951052E-01 (Sr_x-O1_x)^2(Ru_y-O1_y)^1(eta_4)^1
  714 =>   9.2439066391E-01 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
  539 =>   4.4084091038E-01 (Sr_x-Ru_x)^4
  95 =>  -4.3544819421E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
@@ -239,12 +218,12 @@
  23 =>  -3.8083442541E-01 (Sr_x-O1_x)^2(Sr_x-Ru_x)^1(Ru_y-O1_y)^1
  561 =>   2.1418856157E-02 (Sr_x-Ru_x)^2(Ru_y-O1_y)^1
 
- Mean Standard Deviation values at the end of the fit process (meV/f.u.):
-   Energy          :   2.0197221191296992E+00
+ Mean Standard Deviation values at the end of the fit process (meV/atm):
+   Energy          :   4.0394442382594226E-01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   2.9470810833376153E-03
-   Forces          :   2.8421558477572284E-03
-   Stresses        :   1.0492523558038720E-04
+   Forces+Stresses :   2.9470810833375585E-03
+   Forces          :   2.8421558477571929E-03
+   Stresses        :   1.0492523558036568E-04
 
 
 ================================================================================
@@ -256,10 +235,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          3.9
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.4
 
 ================================================================================
 
-+Total cpu time      3.856  and wall time      3.855 sec
++Total cpu time      5.349  and wall time      5.356 sec
 
  multibinit : the run completed succesfully.

@@ -9,7 +9,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS)
+!! Copyright (C) 2008-2018 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,11 +30,13 @@ MODULE m_fft_mesh
 
  use defs_basis
  use m_errors
- use m_profiling_abi
- use m_blas
+ use m_abicore
+ use m_hide_blas
 
  use defs_fftdata,     only : size_goed_fft
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
+ use m_symtk,          only : mati3inv
+ use m_geometry,       only : xred2xcart
  use m_crystal,        only : crystal_t
 
  implicit none
@@ -55,6 +57,7 @@ MODULE m_fft_mesh
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
+ public :: mkgrid_fft          !  It sets the grid of fft (or real space) points to be treated.
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -124,13 +127,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zpad_init'
-!End of the abilint section
 
  implicit none
 
@@ -218,13 +214,6 @@ end subroutine zpad_init
 
 subroutine zpad_free(zpad)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zpad_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -297,14 +286,6 @@ end subroutine zpad_free
 !! SOURCE
 
 subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst,enforce_sym,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setmesh'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -663,13 +644,6 @@ end subroutine setmesh
 
 pure function check_rot_fft(nsym,symrel,nr1,nr2,nr3)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_rot_fft'
-!End of the abilint section
-
  implicit none
 
 !Arguments
@@ -730,14 +704,6 @@ end function check_rot_fft
 !! SOURCE
 
 function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fft_check_rotrans'
- use interfaces_32_util
-!End of the abilint section
 
  implicit none
 
@@ -845,14 +811,6 @@ end function fft_check_rotrans
 
 subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_fft_mesh'
- use interfaces_32_util
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -959,13 +917,6 @@ end subroutine rotate_fft_mesh
 
 subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cigfft'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1051,20 +1002,7 @@ end subroutine cigfft
 
 elemental function ig2gfft(ig,ng) result (gc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ig2gfft'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ig2gfft'
-!End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
@@ -1112,24 +1050,9 @@ end function ig2gfft
 
 pure integer function g2ifft(gg,ngfft) result (gidx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g2ifft'
-!End of the abilint section
-
  implicit none
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'g2ifft'
-!End of the abilint section
-
 !Arguments ------------------------------------
-!scalars
-!arrays
  integer,intent(in) :: gg(3),ngfft(3)
 
 !Local variables-------------------------------
@@ -1187,13 +1110,6 @@ end function g2ifft
 !! SOURCE
 
 pure subroutine get_gftt(ngfft,kpt,gmet,gsq_max,gfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_gftt'
-!End of the abilint section
 
  implicit none
 
@@ -1260,13 +1176,6 @@ end subroutine get_gftt
 !! SOURCE
 
 subroutine calc_ceigr_spc(gg,nfft,nspinor,ngfft,ceigr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ceigr_spc'
-!End of the abilint section
 
  implicit none
 
@@ -1340,13 +1249,6 @@ end subroutine calc_ceigr_spc
 
 subroutine calc_ceigr_dpc(gg,nfft,nspinor,ngfft,ceigr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ceigr_dpc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1417,13 +1319,6 @@ end subroutine calc_ceigr_dpc
 
 pure subroutine calc_eigr(gg,nfft,ngfft,eigr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_eigr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1490,13 +1385,6 @@ end subroutine calc_eigr
 
 pure subroutine calc_ceikr(kk,nfft,ngfft,ceikr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_ceikr'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1559,13 +1447,6 @@ end subroutine calc_ceikr
 !! SOURCE
 
 pure subroutine times_eigr(gg,ngfft,nfft,ndat,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'times_eigr'
-!End of the abilint section
 
  implicit none
 
@@ -1636,13 +1517,6 @@ end subroutine times_eigr
 !! SOURCE
 
 pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'times_eikr'
-!End of the abilint section
 
  implicit none
 
@@ -1715,13 +1589,6 @@ end subroutine times_eikr
 
 subroutine phase(ngfft,ph)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phase'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1752,7 +1619,68 @@ subroutine phase(ngfft,ph)
 end subroutine phase
 !!***
 
-!----------------------------------------------------------------------
+!!****f* ABINIT/mkgrid_fft
+!! NAME
+!!  mkgrid_fft
+!!
+!! FUNCTION
+!!  It sets the grid of fft (or real space) points to be treated.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      mkcore_paw,mklocl_realspace
+!!
+!! CHILDREN
+!!      xred2xcart
+!!
+!! SOURCE
+
+subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer, intent(in) :: nfft
+ integer,intent(in) :: ngfft(18)
+ integer, dimension(*), intent(in) :: ffti3_local,fftn3_distrib
+ real(dp), dimension(3,nfft), intent(out) :: gridcart
+ real(dp),intent(in) :: rprimd(3,3)
+
+!Local variables-------------------------------
+ integer :: ind,i1,i2,i3,i3loc,me,nproc
+ integer :: n1,n2,n3
+ real(dp), dimension(3) :: coord
+ real(dp), dimension(3,nfft) :: gridred
+
+! *************************************************************************
+
+ n1    = ngfft(1)
+ n2    = ngfft(2)
+ n3    = ngfft(3)
+ nproc = ngfft(10)
+ me    = ngfft(11)
+
+ do i3 = 1, n3, 1
+   if(fftn3_distrib(i3) == me) then !MPI
+     i3loc=ffti3_local(i3)
+     coord(3) = real(i3 - 1, dp) / real(n3, dp)
+     do i2 = 1, n2, 1
+       coord(2) = real(i2 - 1, dp) / real(n2, dp)
+       do i1 = 1, n1, 1
+         ind=i1+(i2-1)*n1+(i3loc-1)*n1*n2
+         coord(1) = real(i1 - 1, dp) / real(n1, dp)
+         gridred(:, ind) = coord(:)
+       end do
+     end do
+   end if
+ end do
+ call xred2xcart(nfft, rprimd, gridcart, gridred)
+
+end subroutine mkgrid_fft
+!!***
 
 END MODULE m_fft_mesh
 !!***

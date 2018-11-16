@@ -36,18 +36,12 @@
 
 subroutine abi_dpotrf(uplo,n,a,lda,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dpotrf'
-!End of the abilint section
-
  implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
  integer, intent(in) :: n,lda
  integer, intent(out) :: info
- real(dp), intent(inout) :: a(*) 
+ real(dp), intent(inout) :: a(*)
 
 ! *********************************************************************
 
@@ -78,13 +72,6 @@ end subroutine abi_dpotrf
 
 subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zpotrf_2d'
-
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -96,7 +83,7 @@ subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
 ! *********************************************************************
 
  call abi_zpotrf(uplo,n,a(1,1),lda,info)
-    
+
 end subroutine abi_zpotrf_2d
 !!***
 
@@ -114,12 +101,6 @@ end subroutine abi_zpotrf_2d
 
 subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2zpotrf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -133,9 +114,9 @@ subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
  integer  :: cplx_
 
 ! *********************************************************************
-    
+
  cplx_=1 ; if(PRESENT(x_cplx)) cplx_ = x_cplx
-    
+
 #ifdef HAVE_LINALG_PLASMA
  if (XPLASMA_ISON) then
    if(cplx_ == 2) then
@@ -152,7 +133,7 @@ subroutine abi_d2zpotrf(uplo,n,a,lda,info,x_cplx)
  else
     call dpotrf(uplo,n,a,lda,info)
  end if
-    
+
 end subroutine abi_d2zpotrf
 !!***
 
@@ -170,12 +151,6 @@ end subroutine abi_d2zpotrf
 
 subroutine abi_zpotrf(uplo,n,a,lda,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zpotrf'
-!End of the abilint section
-
  implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: uplo
@@ -185,7 +160,7 @@ subroutine abi_zpotrf(uplo,n,a,lda,info)
 
 ! *********************************************************************
 
-#ifdef HAVE_LINALG_PLASMA    
+#ifdef HAVE_LINALG_PLASMA
  if (XPLASMA_ISON) then
    ! write(*,*) "  abi_zpotrf => PLASMA zpotrf will be called "
    call PLASMA_zpotrf(uplo_plasma(uplo),n,a,lda,info)

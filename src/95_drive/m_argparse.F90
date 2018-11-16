@@ -27,10 +27,11 @@
 module m_argparse
 
  use defs_basis
+ use m_abicore
+ use m_errors
  use m_xmpi
  use m_xomp
  use m_xieee
- use m_errors
  use m_abi_linalg
  use m_fft
  use m_exit
@@ -92,14 +93,6 @@ contains
 !! SOURCE
 
 type(args_t) function args_parser() result(args)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_parser'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -279,14 +272,6 @@ end function args_parser
 
 subroutine args_print(args)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'args_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -313,13 +298,6 @@ end subroutine args_print
 
 pure logical function begins_with(arg, string) result(bool)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'begins_with'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -345,13 +323,6 @@ end function begins_with
 !! SOURCE
 
 logical function parse_yesno(arg, optname, default) result(bool)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'parse_yesno'
-!End of the abilint section
 
  implicit none
 

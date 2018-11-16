@@ -31,7 +31,7 @@ MODULE m_exc_itdiago
  use defs_abitypes
  use m_bs_defs
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_linalg_interfaces
  use m_xmpi
 #if defined HAVE_MPI2
@@ -41,7 +41,7 @@ MODULE m_exc_itdiago
  use m_io_tools,      only : open_file
  use m_time,          only : cwtime
  use m_numeric_tools, only : stats_t, stats_eval
- use m_abilasi,       only : xhpev !xheev,
+ use m_hide_lapack,   only : xhpev !xheev,
  use m_bse_io,        only : exc_read_rcblock
 
  implicit none
@@ -114,14 +114,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_iterative_diago'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -382,7 +374,8 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
        call xmpi_sum(den,comm,ierr)
 
        do ii=my_t1,my_t2
-         xx = hexc_diagonal(ii)/den ! Teter polynomial ratio, modified according to Kresse, Furthmuller, PRB 54, 11169 (1996)
+         ! Teter polynomial ratio, modified according to Kresse, Furthmuller, PRB 54, 11169 (1996) [[cite:Kresse1996]]
+         xx = hexc_diagonal(ii)/den 
          poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
          fac=poly/(poly+16._dp*xx**4)
          kprc = fac*four/(three*den)
@@ -668,14 +661,6 @@ CONTAINS  !===========================================================
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_init_phi_block'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -837,14 +822,6 @@ end subroutine exc_init_phi_block
 !! SOURCE
 
 subroutine exc_write_phi_block(oeig_fname,use_mpio)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_write_phi_block'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -1009,13 +986,6 @@ end subroutine exc_write_phi_block
 
 subroutine exc_subspace_rotation()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_subspace_rotation'
-!End of the abilint section
-
  implicit none
 
 !Local variables ------------------------------
@@ -1121,13 +1091,6 @@ end subroutine exc_subspace_rotation
 
 subroutine exc_cholesky_ortho()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_cholesky_ortho'
-!End of the abilint section
-
  implicit none
 
 !Local variables ------------------------------
@@ -1228,13 +1191,6 @@ end subroutine exc_cholesky_ortho
 
 function convergence_degree(resid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'convergence_degree'
-!End of the abilint section
-
  implicit none
 
 !Arguments
@@ -1275,13 +1231,6 @@ end function convergence_degree
 !! SOURCE
 
 subroutine exc_check_phi_block(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exc_check_phi_block'
-!End of the abilint section
 
  implicit none
 

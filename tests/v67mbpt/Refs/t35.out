@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -359,9 +359,9 @@ P           mkmem           8
  Writing KS-RPA macroscopic dielectric function without local fields to file: t35o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t35o_DS1_GW_NLF_MDF
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 185 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 188 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 186 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 182 iterations.
  Writing EXC Macroscopic dielectric function to file: t35o_DS1_EXC_MDF
@@ -370,7 +370,7 @@ P           mkmem           8
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
    0.0000  20.3372  -0.0000  16.6813  -0.0000  18.2634   0.0000
    0.1000  20.3545   0.0349  16.6902   0.0179  18.2753   0.0239
-   0.2000  20.4068   0.0702  16.7170   0.0358  18.3111   0.0480
+   0.2000  20.4068   0.0702  16.7170   0.0358  18.3112   0.0480
    0.3000  20.4946   0.1064  16.7618   0.0541  18.3712   0.0726
    0.4000  20.6191   0.1439  16.8251   0.0728  18.4561   0.0978
    0.5000  20.7818   0.1833  16.9072   0.0920  18.5666   0.1240
@@ -518,7 +518,7 @@ P           mkmem           8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Efficient on-the-fly interpolation technique for Bethe-Salpeter calculations of optical spectra
 - Y. Gillet, M. Giantomassi, and X. Gonze. Computer Physics Communications 203, 83 (2016)

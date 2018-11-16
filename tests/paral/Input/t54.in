@@ -114,7 +114,6 @@ optdriver5    5
 
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -132,7 +131,7 @@ optdriver5    5
 #%% [NCPU_10]
 #%% files_to_test = t54_MPI10.out, tolnlines=    1,   tolabs=  1.1e-7,      tolrel= 1.1e-4, fld_options = -medium
 #%% [extra_info]
-#%% keywords =  NC, DFPT
+#%% keywords =  NC, DFPT, NONLINEAR
 #%% authors = Unknown
 #%% description = 
 #%%    GaAs in zinc-blende structure; GS and RF calculation

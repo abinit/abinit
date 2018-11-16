@@ -30,14 +30,14 @@ MODULE m_dyson_solver
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  use m_time,          only : timab
  use m_gwdefs,        only : sigparams_t
  use m_numeric_tools, only : linfit, pade, dpade, newrap_step
  use m_io_tools,      only : open_file
  use m_fstrings,      only : int2char10
- use m_abilasi,       only : xheev
+ use m_hide_lapack,   only : xheev
  use m_bz_mesh,       only : kmesh_t, get_BZ_item
  use m_sigma,         only : sigma_t
 
@@ -113,14 +113,6 @@ CONTAINS  !====================================================================
 !! SOURCE
 
 subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp_ene,Sr,prtvol,Dtfil,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_dyson'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -530,14 +522,6 @@ end subroutine solve_dyson
 !! SOURCE
 
 subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,prefil)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_sigma_melems'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 

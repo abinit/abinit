@@ -2,6 +2,7 @@
 description: How to use the Learn-of-the-flight feature
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to use the Learn-of-the-flight feature with the ABINIT package.
 

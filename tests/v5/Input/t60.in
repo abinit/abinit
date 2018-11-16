@@ -39,7 +39,7 @@
 
 #Definition of the unit cell
 acell 3*10.18          # This is equivalent to   10.18 10.18 10.18
-rprim  0.0  0.5  0.5   # In lessons 1 and 2, these primitive vectors
+rprim  0.0  0.5  0.5   # In tutorials 1 and 2, these primitive vectors
        0.5  0.0  0.5   # (to be scaled by acell) were 1 0 0  0 1 0  0 0 1
        0.5  0.5  0.0   # that is, the default.
 
@@ -84,7 +84,6 @@ diemac 12.0       # Although this is not mandatory, it is worth to
                   # is described in the "dielng" input variable section.
                   # Here, we follow the prescription for bulk silicon.
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

@@ -1,6 +1,8 @@
 # Test for ionmov = 24 velocity verlet MD
 # bcc Fe, low ecut, coars kpt grid
 
+  chksymbreak 0
+
   natom   2
   ntypat  1
   znucl   26
@@ -32,7 +34,6 @@
   nshiftk  1
   shiftk   0.0  0.0  0.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

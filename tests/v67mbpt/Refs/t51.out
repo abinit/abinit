@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -621,7 +621,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -15.822  -0.000   0.036   0.000   0.036   0.000   0.036   0.000
        -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254  -0.000  -0.254
@@ -772,13 +772,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 73 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 71 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 72 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 66 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0001_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.5642  -0.0000  46.9558  -0.0000  54.7996   0.0000
+   0.0000  59.5642   0.0000  46.9558   0.0000  54.7996   0.0000
    0.0100  59.5649   0.0043  46.9561   0.0021  54.8001   0.0034
    0.0200  59.5670   0.0087  46.9571   0.0042  54.8017   0.0068
    0.0300  59.5706   0.0130  46.9588   0.0063  54.8044   0.0102
@@ -791,8 +791,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 73 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 52 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
@@ -801,7 +801,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.6498  -0.0000  47.0083  -0.0000  54.8682   0.0000
+   0.0000  59.6498   0.0000  47.0083   0.0000  54.8682   0.0000
    0.0100  59.6505   0.0048  47.0087   0.0023  54.8688   0.0038
    0.0200  59.6527   0.0096  47.0097   0.0046  54.8704   0.0076
    0.0300  59.6563   0.0143  47.0114   0.0070  54.8731   0.0114
@@ -814,8 +814,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 52 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
@@ -824,7 +824,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  59.9453  -0.0000  47.1891  -0.0000  55.1028   0.0000
+   0.0000  59.9453   0.0000  47.1891   0.0000  55.1028   0.0000
    0.0100  59.9460   0.0064  47.1894   0.0031  55.1033   0.0051
    0.0200  59.9482   0.0127  47.1904   0.0061  55.1050   0.0102
    0.0300  59.9519   0.0191  47.1922   0.0092  55.1077   0.0154
@@ -837,17 +837,17 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 55 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 58 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
  Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0004_EXC_MDF
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.3384  -0.0000  47.4288  -0.0000  55.4123   0.0000
+   0.0000  60.3384   0.0000  47.4288   0.0000  55.4123   0.0000
    0.0100  60.3392   0.0086  47.4291   0.0041  55.4129   0.0070
    0.0200  60.3414   0.0171  47.4302   0.0083  55.4145   0.0140
    0.0300  60.3452   0.0257  47.4319   0.0124  55.4173   0.0209
@@ -870,7 +870,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  60.7758  -0.0000  47.6949  -0.0000  55.7547   0.0000
+   0.0000  60.7758   0.0000  47.6949   0.0000  55.7547   0.0000
    0.0100  60.7766   0.0112  47.6952   0.0054  55.7552   0.0091
    0.0200  60.7789   0.0224  47.6963   0.0107  55.7569   0.0183
    0.0300  60.7827   0.0336  47.6980   0.0161  55.7597   0.0274
@@ -893,7 +893,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.2355  -0.0000  47.9741  -0.0000  56.1126   0.0000
+   0.0000  61.2355   0.0000  47.9741   0.0000  56.1126   0.0000
    0.0100  61.2363   0.0141  47.9745   0.0067  56.1132   0.0115
    0.0200  61.2386   0.0282  47.9755   0.0134  56.1149   0.0230
    0.0300  61.2425   0.0422  47.9773   0.0201  56.1178   0.0345
@@ -916,7 +916,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  61.7076  -0.0000  48.2606  -0.0000  56.4785   0.0000
+   0.0000  61.7076   0.0000  48.2606   0.0000  56.4785   0.0000
    0.0100  61.7084   0.0172  48.2610   0.0082  56.4791   0.0140
    0.0200  61.7108   0.0344  48.2621   0.0163  56.4809   0.0280
    0.0300  61.7148   0.0517  48.2639   0.0245  56.4838   0.0420
@@ -939,7 +939,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.1872  -0.0000  48.5516  -0.0000  56.8485   0.0000
+   0.0000  62.1872   0.0000  48.5516   0.0000  56.8485   0.0000
    0.0100  62.1880   0.0206  48.5520   0.0097  56.8491   0.0167
    0.0200  62.1905   0.0412  48.5531   0.0194  56.8509   0.0334
    0.0300  62.1946   0.0617  48.5549   0.0290  56.8539   0.0501
@@ -962,7 +962,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  62.6713  -0.0000  48.8453  -0.0000  57.2203   0.0000
+   0.0000  62.6713   0.0000  48.8453   0.0000  57.2202   0.0000
    0.0100  62.6721   0.0242  48.8456   0.0113  57.2209   0.0195
    0.0200  62.6746   0.0483  48.8468   0.0226  57.2227   0.0390
    0.0300  62.6788   0.0725  48.8487   0.0339  57.2257   0.0586
@@ -985,7 +985,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   
  Macroscopic dielectric function:
  omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
-   0.0000  63.1578  -0.0000  49.1406  -0.0000  57.5922   0.0000
+   0.0000  63.1578   0.0000  49.1406   0.0000  57.5922   0.0000
    0.0100  63.1586   0.0280  49.1410   0.0130  57.5928   0.0225
    0.0200  63.1612   0.0560  49.1421   0.0260  57.5947   0.0450
    0.0300  63.1655   0.0840  49.1441   0.0390  57.5977   0.0675
@@ -1255,7 +1255,7 @@ P           mkmem4          3
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).

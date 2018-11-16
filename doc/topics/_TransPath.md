@@ -2,6 +2,7 @@
 description: How to calculate transition paths
 authors: GG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to calculate transition paths with the ABINIT package.
 
@@ -33,10 +34,11 @@ the potential energy surface of that configuration and a spring force from the
 two closest configurations. The change in images is calculated by projecting
 out the true force perpendicular to the path and the parallel projection of
 the spring force with respect to the path [[cite:Henkelman2000]].
-
 The spring constant is obtained from the keyword [[neb_spring]] and the number
-of iterations is given by [[ntimimage]]. In the String method, the system set
-up is exactly the same as in the NEBM with the difference that no spring
+of iterations is given by [[ntimimage]]. 
+
+In the String method, the system set
+up is exactly the same as in the NEB method with the difference that no spring
 constant needs to be defined. In this case, the forces are obtained as in the
 NEB method from the true force perpendicular but now the configurations are
 equally redistributed along the path at each iteration [[cite:Weinan2007]]. In
@@ -61,5 +63,5 @@ fixed if needed, see [[topic:GeoConstraints]].
 
 ## Tutorials
 
-* [[lesson:paral_images|Parallelism based on "images"]], e.g. for the determination of transitions paths (string method), that can be activated on top of the "KGB" parallelism for force calculations.
+* [[tutorial:paral_images|Parallelism based on "images"]], e.g. for the determination of transitions paths (string method), that can be activated on top of the "KGB" parallelism for force calculations.
 

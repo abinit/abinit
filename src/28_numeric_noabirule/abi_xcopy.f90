@@ -31,12 +31,6 @@
 !!
   subroutine abi_zcopy(size,tsrc,incsrc,tdest,incdest)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zcopy'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -75,13 +69,6 @@ end subroutine abi_zcopy
 
 subroutine abi_zcopy_1d(size,tsrc,incsrc,tdest,incdest)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zcopy_1d'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -109,12 +96,6 @@ end subroutine abi_zcopy_1d
 !! SOURCE
 
   subroutine abi_dcopy(size,tsrc,incsrc,tdest,incdest,x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy'
-!End of the abilint section
 
  implicit none
 
@@ -162,13 +143,6 @@ end subroutine abi_dcopy
 
 subroutine abi_dcopy_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_1d'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -179,9 +153,9 @@ subroutine abi_dcopy_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
  real(dp), intent(inout) :: tdest(*)
 !Only for lobpcgwf
  integer, intent(in), optional :: x_cplx
-    
+
  call abi_dcopy(size,tsrc(1),incsrc,tdest(1),incdest,x_cplx)
-    
+
 end subroutine abi_dcopy_1d
 !!***
 
@@ -199,13 +173,6 @@ end subroutine abi_dcopy_1d
 
 subroutine abi_dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_2d'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -217,7 +184,7 @@ subroutine abi_dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 !Only for lobpcgwf
  integer, intent(in), optional :: x_cplx
 
- ! write(*,*) "dcopy2D size=",size 
+ ! write(*,*) "dcopy2D size=",size
  call abi_dcopy(size,tsrc(1,1),incsrc,tdest(1,1),incdest,x_cplx)
 
 end subroutine abi_dcopy_2d
@@ -237,14 +204,8 @@ end subroutine abi_dcopy_2d
 
 subroutine abi_dcopy_0d_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_0d_1d'
-
-!End of the abilint section
-
  implicit none
+
 !Arguments-------------------------------------
  integer, intent(in) :: size
  integer, intent(in) :: incsrc
@@ -272,12 +233,6 @@ end subroutine abi_dcopy_0d_1d
 
 subroutine abi_dcopy_1d_0d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dcopy_1d_0d'
-
-!End of the abilint section
 
  implicit none
  !Arguments-------------------------------------
@@ -307,11 +262,6 @@ end subroutine abi_dcopy_1d_0d
 
   subroutine abi_d2zcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2zcopy_2d'
-!End of the abilint section
 
  implicit none
 
@@ -338,7 +288,7 @@ end subroutine abi_dcopy_1d_0d
  else
     call dcopy(size,tsrc,incsrc,tdest,incdest)
  end if
- 
+
 #ifdef DEV_LINALG_TIMING
  call timab(TIMAB_XCOPY,2,tsec)
 #endif
@@ -351,7 +301,7 @@ end subroutine abi_d2zcopy_2d
 !! abi_z2dcopy_2d
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
 !!
 !! PARENTS
@@ -359,12 +309,6 @@ end subroutine abi_d2zcopy_2d
 !! SOURCE
 
 subroutine abi_z2dcopy_2d(size,tsrc,incsrc,tdest,incdest,x_cplx)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_z2dcopy_2d'
-!End of the abilint section
 
  implicit none
 

@@ -24,7 +24,7 @@
 #
 
 # Initialize Autoconf
-AC_INIT([ABINIT],[8.9.0],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.11.1],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -159,15 +159,6 @@ AC_MSG_NOTICE([])
 abi_optchk_ok="yes"
 
 AC_MSG_NOTICE([checking consistency of experimental options])
-
-# Bindings require exports
-if test "${enable_bindings}" = "yes"; then
-  if test "${enable_exports}" != "yes"; then
-    enable_exports="yes"
-    AC_MSG_NOTICE([|---> enabling exports (required for bindings])
-    abi_optchk_ok="no"
-  fi
-fi
 
 # Closing remarks
 if test "${abi_optchk_ok}" = "yes"; then
@@ -600,17 +591,6 @@ AC_MSG_RESULT([${FPP}])
 AC_MSG_CHECKING([which Fortran preprocessor flags to apply])
 AC_MSG_RESULT([${FPPFLAGS}])
 
-# Set flags for bindings
-# FIXME: this is not generic enough (should use Libtool)
-if test "${enable_exports}" = "yes"; then
-  AC_MSG_NOTICE([setting PIC flags for C compiler])
-  CFLAGS_HINTS="${CFLAGS_HINTS} ${CFLAGS_PIC}"
-  AC_MSG_NOTICE([setting PIC flags for C++ compiler])
-  CXXFLAGS_HINTS="${CXXFLAGS_HINTS} ${CXXFLAGS_PIC}"
-  AC_MSG_NOTICE([setting PIC flags for Fortran compiler])
-  FCFLAGS_HINTS="${FCFLAGS_HINTS} ${FCFLAGS_PIC}"
-fi
-
 # Display Fortran compiler wrapper status
 AC_MSG_CHECKING([whether to wrap Fortran compiler calls])
 AC_MSG_RESULT([${abi_fc_wrap}])
@@ -708,8 +688,9 @@ if test "${enable_optim}" != "no" -a "${enable_optim}" != "yes"; then
   fi
 fi
 
-# FIXME: 20_datashare does not support optimizations
+# Disable optimization in directories containing big F90 files (efficiency is not critical here)
 fcflags_opt_20_datashare="-O0"
+fcflags_opt_43_ptgroups="-O0"
 
 # Set per-directory Fortran optimizations
 # Note: must be done only once FCFLAGS_OPTIM is set
@@ -971,6 +952,29 @@ fallbacks_incs='-I$(fallbacks_instdir)/include'
 AC_SUBST(fallbacks_instdir)
 AC_SUBST(fallbacks_incs)
 
+# XML support
+lib_xml_fcflags=""
+lib_xml_incs=""
+lib_xml_ldflags=""
+lib_xml_libs=""
+if test "${enable_xml}" = "yes" -o "${enable_xml}" = "auto"; then
+  AC_LANG_PUSH([C])
+  AM_PATH_XML2([2.7.6], [abi_xml_ok="yes"], [abi_xml_ok="no"])
+  AC_LANG_POP([C])
+  if test "${abi_xml_ok}" = "yes"; then
+    AC_DEFINE([HAVE_XML], 1, [Define to 1 if you want XML support.])
+    lib_xml_incs="${XML_CPPFLAGS}"
+    lib_xml_libs="${XML_LIBS}"
+  else
+    AC_MSG_WARN([could not find a usable XML library => disabling XML support])
+    enable_xml="no"
+  fi
+fi
+AC_SUBST(lib_xml_fcflags)
+AC_SUBST(lib_xml_incs)
+AC_SUBST(lib_xml_ldflags)
+AC_SUBST(lib_xml_libs)
+
 # Linear algebra support
 ABI_LINALG_DETECT
 
@@ -1130,11 +1134,6 @@ AC_SUBST(FFLAGS)
 #
 
 ABI_MSG_SECTION([Experimental developments and option triggers])
-
-# Determine Fortran module name mangling for bindings
-if test "${enable_bindings}" = "yes"; then
-  ABI_FC_MODULE_MANGLING
-fi
 
 # Fast checking
 AC_MSG_CHECKING([whether to accelerate 'make check'])

@@ -2,6 +2,7 @@
 description: How to compute vibrational free energy, entropy, specific heat, thermal expansion, as well as atomic temperature factors
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute vibrational free energy, entropy, specific heat, thermal expansion, as
 well as atomic temperature factors with the ABINIT package.
@@ -33,5 +34,5 @@ present topic.
 
 ## Tutorials
 
-* [[lesson:rf2|The lesson Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the preceeding lesson RF1. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this lesson.
+* [[tutorial:rf2|The tutorial Response-Function 2 (RF2)]] presents the analysis of the DDBs that have been introduced in the preceeding tutorial RF1. The computation of the interatomic forces and the computation of thermodynamical properties is an outcome of this tutorial.
 

@@ -19,27 +19,14 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
 "libxc_tools.c",
-"check_kxc.F90",
-"drivexc.F90",
-"drivexc_main.F90",
-"echo_xc_name.F90",
-"invcb.F90",
 "m_libxc_functionals.F90",
+"m_drivexc.F90",
 "m_xc_noncoll.F90",
-"mkdenpos.F90",
-"size_dvxc.F90",
-"xchcth.F90",
-"xchelu.F90",
-"xciit.F90",
-"xclb.F90",
-"xcmult.F90",
-"xcpbe.F90",
-"xcpositron.F90",
-"xcpzca.F90",
-"xcspol.F90",
-"xctetr.F90",
-"xctfw.F90",
-"xcwign.F90",
-"xcxalp.F90" ]
+"m_xchcth.F90",
+"m_xciit.F90",
+"m_xcpbe.F90",
+"m_xcpositron.F90",
+"m_xclda.F90",
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

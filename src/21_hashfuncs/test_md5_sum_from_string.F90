@@ -37,13 +37,6 @@ program test_md5_sum_from_string
 
 use defs_basis, only: ch10,std_out
 use m_hash_md5
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_md5_sum_from_string'
-!End of the abilint section
-
 implicit none
 
 character(len=*), parameter  :: abinit_input_string = "ABINIT" // ch10

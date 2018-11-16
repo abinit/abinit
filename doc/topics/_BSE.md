@@ -2,6 +2,7 @@
 description: How to perform a Bethe-Salpeter calculation of neutral excitation energies and dielectric function
 authors: MG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform a Bethe-Salpeter calculation of neutral excitation energies and
 dielectric function with the ABINIT package.
@@ -84,7 +85,7 @@ RPA_NLF_MDF and GW_NLF_MDF contain the RPA spectrum without local field
 effects obtained with KS energies and the GW energies, respectively.
 
 Different schemes with different degrees of accuracy and computational load
-are available in ABINIT [[cite:Gillet2015]] in order to improve the
+are available in ABINIT [[cite:Gillet2016]] in order to improve the
 convergence rate of BSE calculations. They are are available in ABINITv8 with
 the `bs_interp_*` input variables.
 
@@ -102,5 +103,5 @@ excitations are computed. Spin-polarized case is also available.
 
 ## Tutorials
 
-* The [[lesson:bse]] lesson on the Bethe-Salpeter Equation (BSE) deals with the computation 
+* The [[tutorial:bse]] tutorial on the Bethe-Salpeter Equation (BSE) deals with the computation 
 of the macroscopic dielectric function of Silicon within the Bethe-Salpeter equation. 

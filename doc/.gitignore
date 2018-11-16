@@ -1,11 +1,12 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-README_gpu.md
 README_MacOSX.md
+README_gpu.md
 README_xlf.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
+variables/optic.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -23,9 +24,9 @@ variables/paw.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
+variables/multibinit.md
 variables/aim.md
 variables/anaddb.md
-variables/optic.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
@@ -36,10 +37,12 @@ topics/Bader.md
 topics/Band2eps.md
 topics/Berry.md
 topics/BandOcc.md
+topics/BoundingProcess.md
 topics/BSE.md
 topics/ConstrainedPol.md
 topics/Control.md
 topics/Coulomb.md
+topics/CrossingBarriers.md
 topics/CRPA.md
 topics/crystal.md
 topics/DFT+U.md
@@ -48,7 +51,8 @@ topics/DensityPotential.md
 topics/Dev.md
 topics/DFPT.md
 topics/DMFT.md
-topics/EffMass.md
+topics/DynamicsMultibinit.md
+topics/EffectiveMass.md
 topics/EFG.md
 topics/Elastic.md
 topics/ElPhonInt.md
@@ -56,6 +60,7 @@ topics/ElPhonTransport.md
 topics/ElecDOS.md
 topics/ElecBandStructure.md
 topics/FileFormats.md
+topics/FitProcess.md
 topics/ForcesStresses.md
 topics/FrequencyMeshMBPT.md
 topics/GeoConstraints.md
@@ -66,11 +71,13 @@ topics/GW.md
 topics/GWls.md
 topics/Hybrids.md
 topics/k-points.md
+topics/LatticeModel.md
 topics/LDAminushalf.md
 topics/LOTF.md
 topics/MagField.md
 topics/MagMom.md
 topics/MolecularDynamics.md
+topics/Macroave.md
 topics/multidtset.md
 topics/nonlinear.md
 topics/Optic.md
@@ -95,6 +102,7 @@ topics/SCFAlgorithms.md
 topics/SelfEnergy.md
 topics/SmartSymm.md
 topics/spinpolarisation.md
+topics/SpinDynamicsMultibinit.md
 topics/STM.md
 topics/Susceptibility.md
 topics/TDDFT.md

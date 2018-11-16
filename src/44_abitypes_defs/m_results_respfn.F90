@@ -34,7 +34,7 @@ MODULE m_results_respfn
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -61,7 +61,7 @@ MODULE m_results_respfn
 ! declared in another part of ABINIT, that might need to take into account your modification.
 
 ! Integer scalar
-  integer :: gam_jdtset  
+  integer :: gam_jdtset
   ! jdtset if the results from a q=gamma wavevector calculation, with dataset jdtset have been stored
   ! -jdtset if the results from a q=gamma wavevector calculation, with dataset jdtset should be stored
   ! 0 if no q=gamma wavevector calculation should be stored
@@ -98,13 +98,6 @@ CONTAINS
 !! SOURCE
 
 subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_results_respfn'
-!End of the abilint section
 
  implicit none
 
@@ -174,13 +167,6 @@ end subroutine init_results_respfn
 !! SOURCE
 
 subroutine destroy_results_respfn(results_respfn)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_results_respfn'
-!End of the abilint section
 
  implicit none
 

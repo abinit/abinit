@@ -11,6 +11,9 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
+!! TODO
+!!  Remove this module. At present it's used only in m_iowf.F90
+!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -25,7 +28,7 @@ module m_abi_etsf
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_atomdata
@@ -34,7 +37,7 @@ module m_abi_etsf
 #ifdef HAVE_ETSF_IO
  use etsf_io
 #endif
- 
+
  use m_fstrings,   only : endswith
 
  implicit none
@@ -42,7 +45,7 @@ module m_abi_etsf
  private
 
 #ifdef HAVE_ETSF_IO
- public :: abi_etsf_dims_init   
+ public :: abi_etsf_dims_init
 #endif
  public :: abi_etsf_init
 
@@ -71,13 +74,6 @@ CONTAINS  !===========================================================
 
 subroutine etsf_dims_nullify(Dims,dimlen)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'etsf_dims_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -93,7 +89,7 @@ subroutine etsf_dims_nullify(Dims,dimlen)
   my_dimlen = 3; if (PRESENT(dimlen)) my_dimlen = dimlen
 
   Dims%max_number_of_angular_momenta                 = etsf_no_dimension
-  Dims%max_number_of_basis_grid_points               = etsf_no_dimension 
+  Dims%max_number_of_basis_grid_points               = etsf_no_dimension
   Dims%max_number_of_coefficients                    = etsf_no_dimension
   Dims%max_number_of_projectors                      = etsf_no_dimension
   Dims%max_number_of_states                          = etsf_no_dimension
@@ -106,7 +102,7 @@ subroutine etsf_dims_nullify(Dims,dimlen)
   Dims%number_of_grid_points_vector1                 = etsf_no_dimension
   Dims%number_of_grid_points_vector2                 = etsf_no_dimension
   Dims%number_of_grid_points_vector3                 = etsf_no_dimension
-  Dims%number_of_kpoints                             = etsf_no_dimension 
+  Dims%number_of_kpoints                             = etsf_no_dimension
   Dims%number_of_localization_regions                = etsf_no_dimension
   Dims%number_of_qpoints_dielectric_function         = etsf_no_dimension
   Dims%number_of_qpoints_gamma_limit                 = etsf_no_dimension
@@ -174,13 +170,6 @@ end subroutine etsf_dims_nullify
 
 subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_etsf_dims_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -202,7 +191,7 @@ subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
  dims%number_of_atoms        = dtset%natom
  dims%number_of_atom_species = dtset%ntypat
  dims%number_of_components   = dtset%nspden
-                                                     
+
  dims%number_of_kpoints              = dtset%nkpt
  dims%number_of_spinor_components    = dtset%nspinor
  dims%number_of_spins                = dtset%nsppol
@@ -310,14 +299,6 @@ end subroutine abi_etsf_dims_init
 
 subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_etsf_init'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -348,7 +329,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 #ifdef HAVE_ETSF_IO
 !Initialize the filename
  filetsf = nctk_ncify(filapp)
- call wrtout(std_out,ABI_FUNC//': about to create file '//TRIM(filetsf),'COLL')
+ call wrtout(std_out,"about to create file "//TRIM(filetsf),'COLL')
 
  usewvl = dtset%usewvl
 
@@ -420,7 +401,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
 ! Add the main part as last variables in the ETSF file.
  call etsf_io_main_def(ncid, ok, error, flags = var_main)
  ETSF_CHECK_ERROR(ok, error)
- 
+
 ! Close the file.
  NCF_CHECK(nf90_close(ncid))
 #else
@@ -451,7 +432,7 @@ end subroutine abi_etsf_init
 !!  ntypat=number of types of atoms in cell.
 !!  ncid=the unit of the open NetCDF file.
 !!
-!! SIDE EFFECTS 
+!! SIDE EFFECTS
 !!  New dimensions and variables are added to the initial NetCDF file.
 !!
 !! PARENTS
@@ -462,13 +443,6 @@ end subroutine abi_etsf_init
 !! SOURCE
 
 subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ini_wf_etsf'
-!End of the abilint section
 
  implicit none
 
@@ -498,11 +472,11 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 !Define scalars.
 !If variables already exist, it will check that definitions are coherent.
  ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-&   "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"]) 
+&   "date", "ixc", "intxc", "occopt", "pertcase", "headform", "fform", "usepaw", "usewvl"])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"]) 
+&  "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"])
  NCF_CHECK(ncerr)
 
 !Multi-dimensional variables.

@@ -27,10 +27,10 @@
 
 #include "abi_common.h"
 
-
 module m_lbfgs
+
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
 type,public :: lbfgs_internal
  integer              :: lbfgs_status
@@ -74,6 +74,7 @@ contains
 !!
 !! FUNCTION
 !!   Initialize the internal object lbfgs_internal for LBFGS minimization
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -87,14 +88,7 @@ contains
 !!
 !! SOURCE
 
-subroutine lbfgs_init(ndim,history_record,diag_guess) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_init'
-!End of the abilint section
+subroutine lbfgs_init(ndim,history_record,diag_guess)
 
 implicit none
 
@@ -120,7 +114,6 @@ integer :: nwork
 
  lbfgs_plan%diag(:) = diag_guess(:)
 
-
 end subroutine lbfgs_init
 !!***
 
@@ -133,11 +126,10 @@ end subroutine lbfgs_init
 !!
 !! FUNCTION
 !!   Free the memory of the internal object lbfgs_internal for LBFGS minimization
+!!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!      pred_lbfgs
@@ -147,13 +139,6 @@ end subroutine lbfgs_init
 !! SOURCE
 
 subroutine lbfgs_destroy()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_destroy'
-!End of the abilint section
 
 implicit none
 
@@ -167,7 +152,6 @@ implicit none
 end subroutine lbfgs_destroy
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_lbfgs/lbfgs_execute
@@ -177,13 +161,13 @@ end subroutine lbfgs_destroy
 !! FUNCTION
 !!   Perform one-step of LBFGS minimization
 !!   all the internal information are stored in the lbfgs_internal object
+!!
 !! INPUTS
 !!   x: input and output position vector (atomic reduced coordinates + cell parameters)
 !!   f: total energy
 !!   gradf: gradient of the total energy (=negative forces)
-!! OUTPUT
 !!
-!! SIDE EFFECTS
+!! OUTPUT
 !!
 !! PARENTS
 !!      pred_lbfgs
@@ -192,21 +176,14 @@ end subroutine lbfgs_destroy
 !!
 !! SOURCE
 
-function lbfgs_execute(x,f,gradf) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_execute'
-!End of the abilint section
+function lbfgs_execute(x,f,gradf)
 
 implicit none
 real(dp),intent(inout) :: x(lbfgs_plan%ndim)
 real(dp),intent(in)    :: f
 real(dp),intent(in)    :: gradf(lbfgs_plan%ndim)
 integer                :: lbfgs_execute
- 
+
  call lbfgs(lbfgs_plan%ndim, lbfgs_plan%history_record, x, f, gradf, lbfgs_plan%diag, lbfgs_plan%work, lbfgs_plan%lbfgs_status, &
        lbfgs_plan%gtol, lbfgs_plan%line_stpmin, lbfgs_plan%line_stpmax, lbfgs_plan%line_stp, lbfgs_plan%iter,                   &
        lbfgs_plan%line_info, lbfgs_plan%line_nfev,                                                   &
@@ -232,6 +209,7 @@ end function lbfgs_execute
 !! FUNCTION
 !!   Perform the LBFGS step
 !!   Fortran90 rewritting of the original subroutine by J. Nocera
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -252,14 +230,7 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
                  LINE_STX,LINE_FX,LINE_DGX,   &
                  LINE_STY,LINE_FY,LINE_DGY,   &
                  LINE_STMIN,LINE_STMAX,       &
-                 LINE_BRACKT,LINE_STAGE1,LINE_INFOC) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lbfgs'
-!End of the abilint section
+                 LINE_BRACKT,LINE_STAGE1,LINE_INFOC)
 
  implicit none
 
@@ -298,7 +269,7 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
  MAXFEV = 20
 
  ISPT = N + 2 * M
- IYPT = ISPT + N * M     
+ IYPT = ISPT + N * M
  POINT = MAX( 0 , MOD(ITER-1,M) )
  NPT = POINT * N
  ITER  = ITER + 1
@@ -320,7 +291,7 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
                LINE_STMIN,LINE_STMAX, &
                LINE_BRACKT,LINE_STAGE1,LINE_INFOC)
    !
-   ! Compute the new step and gradient change 
+   ! Compute the new step and gradient change
    !
    NPT = POINT * N
    W(ISPT+NPT+1:ISPT+NPT+N) = STP * W(ISPT+NPT+1:ISPT+NPT+N)
@@ -352,7 +323,7 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
      IYCN = IYPT + CP * N
      W(INMC)= W(N+CP+1) * SQ
      W(1:N) = W(1:N) - W(INMC) * W(IYCN+1:IYCN+N)
-   enddo     
+   enddo
 
    W(1:N) = DIAG(1:N) * W(1:N)
 
@@ -366,7 +337,7 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
      CP = CP + 1
      if (CP == M) CP = 0
    enddo
- 
+
 !
 !  STORE THE NEW SEARCH DIRECTION
    W(ISPT+POINT*N+1:ISPT+POINT*N+N) = W(1:N)
@@ -374,7 +345,7 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
  endif
 
 !
-! Obtain the one-dimensional minimizer of the function 
+! Obtain the one-dimensional minimizer of the function
 ! by using the line search routine mcsrch
 !----------------------------------------------------
  NFEV = 0
@@ -401,8 +372,6 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
 end subroutine lbfgs
 !!***
 
-
-
 !----------------------------------------------------------------------
 
 !!****f* m_lbfgs/mcsrch
@@ -412,6 +381,7 @@ end subroutine lbfgs
 !! FUNCTION
 !!   Perform the line minimization step
 !!   Fortran90 rewritting of the original subroutine by J. Nocera
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -429,13 +399,6 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
                   GTOL,STPMIN,STPMAX,DGINIT,FINIT, &
                   STX,FX,DGX,STY,FY,DGY,STMIN,STMAX, &
                   BRACKT,STAGE1,INFOC)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mcsrch'
-!End of the abilint section
 
  implicit none
 
@@ -627,10 +590,8 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
 
  INFO = -1
 
-
 end subroutine mcsrch
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -641,6 +602,7 @@ end subroutine mcsrch
 !! FUNCTION
 !!   Perform the step choice in line minimization
 !!   Fortran90 rewritting of the original subroutine by J. Nocera
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -655,13 +617,6 @@ end subroutine mcsrch
 !! SOURCE
 
 subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mcstep'
-!End of the abilint section
 
  implicit none
 
@@ -844,8 +799,6 @@ subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
 
 end subroutine mcstep
 !!***
-
-
 
 end module m_lbfgs
 !!***

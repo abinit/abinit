@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!doc/input_variables!doc/variables!' $file > tmp.file
+ sed -e 's!nonlocal pseudopotential part!nonlocal psp + potential Fock ACE part!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file

@@ -29,7 +29,7 @@
 MODULE m_exp_mat
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_linalg_interfaces
 
@@ -70,13 +70,6 @@ CONTAINS  !===========================================================
  !! SOURCE
 
  subroutine exp_mat_cx(mat_a,mat_a_size,factor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'exp_mat_cx'
-!End of the abilint section
 
   implicit none
   !Arguments ------------------------------------

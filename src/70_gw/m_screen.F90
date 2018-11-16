@@ -27,10 +27,10 @@ MODULE m_screen
  use defs_basis
  use defs_abitypes
  use m_xmpi
- use m_blas
+ use m_hide_blas
  use m_errors
  use m_splines
- use m_profiling_abi
+ use m_abicore
  use m_kxc
  use m_screening
  use m_nctk
@@ -311,7 +311,7 @@ end type screen_info_t
  public :: screen_free          ! Free all associated pointers.
  public :: screen_symmetrizer   ! Prepare the object for applying W_qbz.
  public :: screen_w0gemv        ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
- public :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
+ !public :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
 !!***
 
 CONTAINS  !========================================================================================
@@ -344,16 +344,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_info_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -427,15 +417,6 @@ end subroutine screen_info_print
 
 subroutine fgg_free_0D(Fgg)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_free_0D'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(fgg_t),intent(inout) :: Fgg
@@ -471,15 +452,6 @@ end subroutine fgg_free_0D
 !! SOURCE
 
 subroutine fgg_free_1D(Fgg,keep_q)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_free_1D'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -525,15 +497,6 @@ end subroutine fgg_free_1D
 !! SOURCE
 
 subroutine fgg_init(Fgg,npw,nomega,nqlwl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fgg_init'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -588,15 +551,6 @@ end subroutine fgg_init
 !! SOURCE
 
 subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_fgg_qbz_set'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -683,15 +637,6 @@ end subroutine screen_fgg_qbz_set
 
 pure function screen_ihave_fgg(W,iq_ibz,how)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_ihave_fgg'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_ibz
@@ -751,15 +696,6 @@ end function screen_ihave_fgg
 
 subroutine screen_nullify(W)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_nullify'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(screen_t),intent(inout) :: W
@@ -799,15 +735,6 @@ end subroutine screen_nullify
 !! SOURCE
 
 subroutine screen_free(W)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -918,16 +845,6 @@ end subroutine screen_free
 
 subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 &  iomode,ngfftf,nfftf_tot,nsppol,nspden,ae_rhor,prtvol,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_init'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1170,7 +1087,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      !
      ! Read data from file (use MPI-IO if possible)
      if (W%iomode /= IO_MODE_ETSF .and. xmpi_mpiio==1) then
-       call wrtout(std_out,ABI_FUNC//"read_screening with MPI_IO","COLL")
+       call wrtout(std_out, "read_screening with MPI_IO")
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,IO_MODE_MPI,comm,iqiA=iq_ibz)
      else
        call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,W%iomode,comm,iqiA=iq_ibz)
@@ -1290,16 +1207,6 @@ end subroutine screen_init
 !! SOURCE
 
 subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_symmetrizer'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1452,15 +1359,6 @@ end subroutine screen_symmetrizer
 
 subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out_ket)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_w0gemv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: in_npw,nspinor
@@ -1524,116 +1422,6 @@ end subroutine screen_w0gemv
 
 !----------------------------------------------------------------------
 
-!!****f* m_screen/screen_times_ket
-!! NAME
-!! screen_times_ket
-!!
-!! FUNCTION
-!!   Compute \Sigma_c(\omega)|\phi> in reciprocal space.
-!!
-!! INPUTS
-!!  W<screen_t>=Data structure describing the two-point function in reciprocal space. See also SIDE EFFECTS.
-!!  nomega=Total number of frequencies where $\Sigma_c$ matrix elements are evaluated.
-!!  npwc=Number of G vectors for the correlation part.
-!!  npwx=Number of G vectors in rhotwgp for each spinorial component.
-!!  nspinor=Number of spinorial components.
-!!  theta_mu_minus_e0i=1 if e0i is occupied, 0 otherwise. Fractional occupancy in case of metals.
-!!  omegame0i(nomega)=Contains $\omega-\epsilon_{k-q,b1,\sigma}$
-!!  zcut=Small imaginary part to avoid the divergence in the ppmodel. (see related input variable)
-!!  rhotwgp(npwx*nspinor)=Matrix elements: $<k-q,b1,\sigma|e^{-i(q+G)r} |k,b2,\sigma>*vc_sqrt$
-!!
-!! OUTPUT
-!! ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space.
-!!
-!! SIDE EFFECTS
-!! npoles_missing=Incremented with the number of poles whose contribution has not been taken into account due to
-!!  limited frequency mesh used for W.
-!!
-!! OUTPUT
-!!   ket(npwc,nomega)=Contains \Sigma_c(\omega)|\phi> in reciprocal space.
-!!   sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
-!! SOURCE
-
-subroutine screen_times_ket(W,npwc,npwx,nspinor,nomega,rhotwgp,omegame0i,zcut,&
-&  theta_mu_minus_e0i,ket,sigcme,npoles_missing)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_times_ket'
- use interfaces_70_gw
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nomega,npwc,npwx,nspinor
- integer,intent(inout) :: npoles_missing
- real(dp),intent(in) :: theta_mu_minus_e0i,zcut
- type(screen_t),intent(in) :: W
-!arrays
- real(dp),intent(in) :: omegame0i(nomega)
- !complex(gwpc),intent(in) :: epsm1q(npwc,npwc,nomegae)
- complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwpc),intent(inout) :: ket(nspinor*npwc,nomega)
- complex(gwpc),intent(out) :: sigcme(nomega)
-
-!Local variables-------------------------------
-!scalars
- integer :: nomegae,nomegaei,nomegaer
- !character(len=500) :: msg
-!arrays
- complex(gwpc),ABI_CONTIGUOUS pointer :: epsm1_qbz(:,:,:)
-! complex(gwpc),pointer :: botsq(:,:),eig(:,:),otq(:,:)
- !botsq(npwc,PPm%dm2_botsq),eig(PPm%dm_eig,PPm%dm_eig),otq(npwc,PPm%dm2_otq)
-
-! *************************************************************************
-
- ABI_UNUSED(zcut)
-
- ! Mesh for W
- nomegae  = W%nomega; nomegaei = W%nomega_i; nomegaer = W%nomega_r
-
- select case (W%Info%wint_method)
- case (WINT_CONTOUR) ! Contour deformation method.
-   !
-   ! Pass the symmetrized matrix.
-   epsm1_qbz => W%Fgg_qbz%mat(1:npwc,1:npwc,1:nomegae)
-   !
-   call calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotwgp,&
-     W%omega,epsm1_qbz,omegame0i,theta_mu_minus_e0i,ket,one,npoles_missing)
-
- case (WINT_AC)
-   MSG_ERROR("Not implemented error")
-
- case (WINT_PPMODEL)
-   MSG_ERROR("Not implemented error")
-   sigcme = czero
-!   botsq => W%PPm%bigomegatwsq_qbz%value
-!   otq   => W%PPm%omegatw_qbz%value
-!   eig   => W%PPm%eigpot_qbz%value
-!
-!   call calc_sig_ppm(W%PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
-!&     omegame0i,zcut,theta_mu_minus_e0i,eig,npwx,ket,sigcme)
-!%    call ppm_times_ket(W%PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu_minus_e0i,npwx,ket,sigcme)
-
- CASE DEFAULT
-   MSG_ERROR(sjoin("Wrong wint_method: ",itoa(W%Info%wint_method)))
- END SELECT
-
-end subroutine screen_times_ket
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_screen/em1_symmetrize_ip
 !! NAME
 !!  em1_symmetrize_ip
@@ -1677,15 +1465,6 @@ end subroutine screen_times_ket
 !! SOURCE
 
 subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1_symmetrize_ip'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1786,15 +1565,6 @@ end subroutine em1_symmetrize_ip
 !! SOURCE
 
 subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1_symmetrize_op'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

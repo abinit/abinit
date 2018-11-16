@@ -2,6 +2,7 @@
 description: How to compute the matrix elements of the electron-phonon interaction
 authors: MV
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute the matrix elements of the electron-phonon interaction with the ABINIT package.
 
@@ -43,6 +44,6 @@ operational as of v8.5.
 
 ## Tutorials
 
-* [[lesson:rf1|The lesson Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
-* [[lesson:eph|The lesson on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+* [[tutorial:rf1|The tutorial Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
+* [[tutorial:eph|The tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 

@@ -2,6 +2,7 @@
 description: How to analyze the densities and potentials
 authors: SS, XG, YG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to analyze the densities and potentials with the ABINIT package.
 
@@ -16,7 +17,7 @@ charges. It can analyse the charge contained in an atomic sphere, and
 determine the angular momentum projected charge (l=0 to 4) contained in that
 sphere. (only available for norm-conserving pseudopotentials)
 
-See the [[help:cut3d]], as well as the [[lesson:analysis_tools]].
+See the [[help:cut3d]], as well as the [[tutorial:analysis_tools]].
 
 ## Related Input Variables
 
@@ -28,5 +29,5 @@ See the [[help:cut3d]], as well as the [[lesson:analysis_tools]].
 
 ## Tutorials
 
-* [[lesson:analysis_tools]] explains the use and i/o parameters needed for the "Cut 3-Dimensional files" post-processor of the ABINIT package
+* [[tutorial:analysis_tools]] explains the use and i/o parameters needed for the "Cut 3-Dimensional files" post-processor of the ABINIT package
 

@@ -1,5 +1,5 @@
 
-.Version 8.1.5 of ABINIT 
+.Version 8.8.3 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -10,12 +10,12 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  7 Dec 2016.
-- ( at 20h19 )
+.Starting date : Mon  4 Jun 2018.
+- ( at 13h51 )
   
 - input  file    -> t68.in
 - output file    -> t68.out
@@ -34,7 +34,7 @@
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        3210          nfft =      129600          nkpt =           1
 ================================================================================
-P This job should need less than                      33.168 Mbytes of memory.
+P This job should need less than                      32.777 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.100 Mbytes ; DEN or POT disk file :      0.991 Mbytes.
 ================================================================================
@@ -111,6 +111,8 @@ P          mk1mem           1
             rfdir           1       1       1
            rfphon1          0
            rfphon2          1
+          smdelta1          0
+          smdelta2          1
           spgroup           1
            tolmxf1     1.00000000E-09
            tolmxf2     5.00000000E-05
@@ -150,8 +152,8 @@ P          mk1mem           1
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.11938
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/HGH/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/HGH/1h.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/HGH/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/HGH/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -165,7 +167,7 @@ P          mk1mem           1
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   -0.00129784
+  pspatm : epsatm=   -0.00129784
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
@@ -988,7 +990,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    6419.000    6419.000
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2        -0.0009999851         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -1.043312E-03 -1.043312E-03 -8.328283E-07 -8.328200E-07  4.128290E-07
@@ -1100,6 +1102,8 @@ P          mk1mem           1
             rfdir           1       1       1
            rfphon1          0
            rfphon2          1
+          smdelta1          0
+          smdelta2          1
           spgroup           1
            strten1     8.5885998208E-06  1.2912974976E-05  1.2912974971E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1137,7 +1141,7 @@ P          mk1mem           1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Verification of first-principles codes: Comparison of total energies, phonon frequencies,
 - electron--phonon coupling and zero-point motion correction to the gap between ABINIT and QE/Yambo
@@ -1200,10 +1204,10 @@ P          mk1mem           1
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=          7.3  wall=          7.5
+- Proc.   0 individual time (sec): cpu=          8.1  wall=          8.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  22 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.3  wall=          7.5
+.Delivered  22 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.1  wall=          8.6

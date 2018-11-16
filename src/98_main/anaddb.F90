@@ -49,8 +49,9 @@ program anaddb
  use m_build_info
  use m_xmpi
  use m_xomp
- use m_profiling_abi
+ use m_abicore
  use m_errors
+ !use m_argparse
  use m_ifc
  use m_ddb
  use m_ddb_hdr
@@ -63,27 +64,25 @@ program anaddb
  use netcdf
 #endif
 
- use m_dfpt_io,        only : elast_ncwrite
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
+ use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time,           only : asctime, timein
  use m_parser,         only : instrng
+ use m_dtfil,          only : isfile
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
- use m_crystal,        only : crystal_t, crystal_free
- use m_crystal_io,     only : crystal_ncwrite
- use m_dynmat,         only : gtdyn9, dfpt_phfrq
+ use m_ddb_interpolate, only : ddb_interpolate
+ use m_crystal,        only : crystal_t
+ use m_dynmat,         only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_elphon,         only : elphon
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb'
- use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_72_response
- use interfaces_77_ddb
-!End of the abilint section
-
+ use m_harmonic_thermo,only : harmonic_thermo
+ use m_thmeig,         only : thmeig
+ use m_raman,          only : ramansus, electrooptic
+ use m_ddb_diel,       only : ddb_diel
+ use m_relaxpol,       only : relaxpol
+ use m_ddb_elast,      only : ddb_elast
+ use m_ddb_piezo,      only : ddb_piezo
+ use m_ddb_internalstr, only : ddb_internalstr
  implicit none
 
 !Local variables-------------------------------
@@ -93,9 +92,10 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
- integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
+ integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
+ integer :: count_wminmax(2)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli
  real(dp) :: dielt(3,3)
@@ -103,6 +103,7 @@ program anaddb
  real(dp) :: dielt_rlx(3,3),elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: epsinf(3,3),red_ptot(3),pel(3)
  real(dp) :: piezo(6,3),qphnrm(3),qphon(3,3),strten(6),tsec(2)
+ real(dp) :: wminmax(2)
  real(dp),allocatable :: d2cart(:,:),dchide(:,:,:)
  real(dp),allocatable :: dchidt(:,:,:,:),displ(:),eigval(:,:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),fact_oscstr(:,:,:),instrain(:,:)
@@ -115,6 +116,7 @@ program anaddb
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
  character(len=500) :: message
+ !type(args_t) :: args
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
@@ -124,7 +126,7 @@ program anaddb
  type(crystal_t) :: Crystal
  type(supercell_type), allocatable :: thm_scells(:)
 #ifdef HAVE_NETCDF
- integer :: phdos_ncid, ec_ncid, ncerr
+ integer :: phdos_ncid, ncerr
 #endif
 
 !******************************************************************
@@ -138,6 +140,10 @@ program anaddb
  ! MPI variables
  comm = xmpi_world; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
+
+ ! TODO
+ ! Parse command line arguments.
+ !args = args_parser(); if (args%exit /= 0) goto 100
 
 !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
 !set the argument of abimem_init to "2" instead of "0"
@@ -203,6 +209,11 @@ program anaddb
  ! Read the inputs
  call invars9(inp,lenstr,natom,string)
 
+ !if (args%dry_run /= 0) then
+ !  call wrtout(std_out, "Dry run mode. Exiting after have read the input")
+ !  goto 100
+ !end if
+
  ! Open output files and ab_out (might change its name if needed)
  ! MJV 1/2010 : now output file is open, but filnam(2) continues unmodified
  ! so the other output files are overwritten instead of accumulating.
@@ -260,9 +271,21 @@ program anaddb
  if (iam_master) then
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
-   NCF_CHECK(nctk_def_dims(ana_ncid, [nctkdim_t('number_of_phonon_modes', 3*natom)],defmode=.True.))
-   NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
-   NCF_CHECK(crystal_ncwrite(crystal, ana_ncid))
+   ncerr = nctk_def_dims(ana_ncid, [ &
+       nctkdim_t('number_of_atoms', natom), &
+       nctkdim_t('natom3', 3 * natom), &
+       nctkdim_t('number_of_phonon_modes', 3 * natom), &
+       nctkdim_t('anaddb_input_len', lenstr) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ncerr = nctk_def_arrays(ana_ncid, [ &
+     nctkarr_t("anaddb_input_string", "char", "anaddb_input_len") &
+   ])
+   NCF_CHECK(ncerr)
+   !NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
+   NCF_CHECK(nctk_set_datamode(ana_ncid))
+   NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "anaddb_input_string"), string(:lenstr)))
+   NCF_CHECK(crystal%ncwrite(ana_ncid))
 #endif
  end if
 
@@ -307,10 +330,17 @@ program anaddb
    nctkarr_t('becs_cart', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, number_of_atoms")],&
    defmode=.True.)
    NCF_CHECK(ncerr)
+   ncerr = nctk_def_iscalars(ana_ncid, [character(len=nctk_slen) :: &
+       "asr", "chneut", "dipdip", "symdynmat"])
+   NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ana_ncid))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'emacro_cart'), dielt))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'becs_cart'), zeff))
+   ncerr = nctk_write_iscalars(ana_ncid, [character(len=nctk_slen) :: &
+     "asr", "chneut", "dipdip", "symdynmat"], &
+     [inp%asr, inp%chneut, inp%dipdip, inp%symdynmat])
+   NCF_CHECK(ncerr)
 #endif
  end if
 
@@ -436,7 +466,7 @@ program anaddb
    call wrtout(ab_out,message,'COLL')
 
    if (any(inp%qrefine(:) > 1)) then
-     ! Gaal-Nagy's algorithm in PRB 73 014117.
+     ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
 
      ! Build the IFCs using the coarse q-mesh.
      do ii = 1, 3
@@ -486,17 +516,26 @@ program anaddb
 
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_ALLOCATE(thm_scells, (inp%ntemper))
-   call thermal_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
-   call thermal_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
+   call zacharias_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   call zacharias_supercell_print(filnam(2), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
  end if
 
-!Phonon density of states calculation, Start if interatomic forces have been calculated
+ ! Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
+   ! Only 1 shift in q-mesh
+   wminmax = zero
+   do
+     call mkphdos(Phdos, Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
+      "freq_displ", wminmax, count_wminmax, comm)
+     if (all(count_wminmax == 0)) exit
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
+     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     call phdos_free(phdos)
+   end do
 
    if (iam_master) then
      call phdos_print_msqd(Phdos, filnam(2), inp%ntemper, inp%tempermin, inp%temperinc)
@@ -507,7 +546,7 @@ program anaddb
 #ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(2), "_PHDOS.nc"), xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
-     NCF_CHECK(crystal_ncwrite(Crystal, phdos_ncid))
+     NCF_CHECK(Crystal%ncwrite(phdos_ncid))
      call phdos_ncwrite(Phdos, phdos_ncid)
      NCF_CHECK(nf90_close(phdos_ncid))
 #endif
@@ -553,12 +592,9 @@ program anaddb
  ! Interpolate the DDB onto the first list of vectors and write the file.
 
  if (inp%prtddb==1 .and. inp%ifcflag==1) then
-
    call ddb_hdr_open_read(ddb_hdr,filnam(3),ddbun,DDB_VERSION)
    close(ddbun)
-
-   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,filnam(2),comm)
-
+   call ddb_interpolate(Ifc,Crystal,inp,ddb,ddb_hdr,asrq0,filnam(2),comm)
    call ddb_hdr_free(ddb_hdr)
  end if
 
@@ -717,6 +753,10 @@ program anaddb
    qphon(:,1)=zero; qphnrm(1)=zero
    rfphon(1:2)=0; rfelfd(1:2)=2; rfstrs(1:2)=0
    call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+   if (iblok == 0) then
+     MSG_ERROR("DDB file must contain both derivatives wrt electric field, Check your calculations")
+   end if
+
    d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
    ! Print the electronic dielectric tensor
@@ -767,8 +807,13 @@ program anaddb
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     if (iblok == 0) then
+       MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
+     end if
+
      ! then print the internal stain tensor
-     call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
+     prt_internalstr=2
+     call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok,prt_internalstr)
    end if
  end if !end the part for internal strain
 
@@ -797,21 +842,14 @@ program anaddb
 
      ! for both diagonal and shear parts
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     if (iblok == 0) then
+       MSG_ERROR("DDB file must contain both uniaxial and shear strain when elaflag != 0, Check your calculations")
+     end if
 
      ! print the elastic tensor
      call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&     instrain,ab_out,mpert,natom,ddb%nblok)
-
-#ifdef HAVE_NETCDF
-     if (iam_master) then
-       ncerr = nctk_open_create(ec_ncid, strcat(filnam(2), "_EC.nc"), xmpi_comm_self)
-       NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
-       NCF_CHECK(crystal_ncwrite(crystal, ec_ncid))
-       call elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,elast_stress,ec_ncid)
-       NCF_CHECK(nf90_close(ec_ncid))
-     end if
-#endif
+&     instrain,ab_out,mpert,natom,ddb%nblok,ana_ncid)
    end if
  end if !ending the part for elastic tensors
 
@@ -831,12 +869,15 @@ program anaddb
      ! looking for the gamma point block
      qphon(:,1)=zero; qphnrm(1)=zero
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
-     ! for both diagonal and shear parts
 
+     ! for both diagonal and shear parts
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
+     if (iblok == 0) then
+       MSG_ERROR("DDB file must contain both uniaxial and shear strain for piezoelectric, Check your calculations")
+     end if
 
      ! then print out the piezoelectric constants
-     call ddb_piezo(inp,ddb%val,dielt_rlx,elast,iblok,instrain,ab_out,mpert,natom,ddb%nblok,piezo,Crystal%ucvol)
+     call ddb_piezo(inp,ddb%val,dielt_rlx,elast,iblok,instrain,ab_out,mpert,natom,ddb%nblok,piezo,Crystal%ucvol,ana_ncid)
    end if
  end if
 
@@ -856,10 +897,14 @@ program anaddb
 
  call asrq0_free(asrq0)
  call ifc_free(Ifc)
- call crystal_free(Crystal)
+ call crystal%free()
  call ddb_free(ddb)
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
+
+ if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
+   ABI_DEALLOCATE(thm_scells)
+ end if
 
  ! Close files
  if (iam_master) then
@@ -914,7 +959,7 @@ program anaddb
 
  if (iam_master) close(ab_out)
 
- call xmpi_end()
+ 100 call xmpi_end()
 
  end program anaddb
 !!***

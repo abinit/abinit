@@ -30,7 +30,7 @@
 MODULE m_gsphere
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_distribfft
  use m_sort
@@ -41,7 +41,7 @@ MODULE m_gsphere
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fftcore,       only : kpgsph, kgindex, sphereboundary
- use m_mpinfo,        only : destroy_mpi_enreg
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
@@ -210,13 +210,6 @@ CONTAINS  !=====================================================================
 
 subroutine setup_G_rotation(nsym,symrec,timrev,npw,gvec,g2sh,nsh,shlim,grottb,grottbm1)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_G_rotation'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -306,13 +299,6 @@ end subroutine setup_G_rotation
 !! SOURCE
 
 subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_init'
-!End of the abilint section
 
  implicit none
 
@@ -514,14 +500,6 @@ end subroutine gsph_init
 
 subroutine gsph_fft_tabs(Gsph,g0,mgfft,ngfft,use_padfft,gmg0_gbound,gmg0_ifft)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_fft_tabs'
- use interfaces_51_manage_mpi
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -616,13 +594,6 @@ end subroutine gsph_fft_tabs
 !! SOURCE
 
 subroutine gsph_in_fftbox(Gsph,Cryst,ngfft)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_in_fftbox'
-!End of the abilint section
 
  implicit none
 
@@ -727,14 +698,6 @@ end subroutine gsph_in_fftbox
 
 subroutine print_gsphere(Gsph,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_gsphere'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -810,13 +773,6 @@ end subroutine print_gsphere
 
 subroutine gsph_free(Gsph)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -888,13 +844,6 @@ end subroutine gsph_free
 
 pure function gsph_g_idx(Gsph,gg) result(g_idx)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_g_idx'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -954,13 +903,6 @@ end function gsph_g_idx
 !! SOURCE
 
 pure function gsph_gmg_idx(Gsph,ig1,ig2) result(ig1mg2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_gmg_idx'
-!End of the abilint section
 
  implicit none
 
@@ -1023,13 +965,6 @@ end function gsph_gmg_idx
 !! SOURCE
 
 pure function gsph_gmg_fftidx(Gsph,ig1,ig2,ngfft) result(fft_idx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_gmg_fftidx'
-!End of the abilint section
 
  implicit none
 
@@ -1094,13 +1029,6 @@ end function gsph_gmg_fftidx
 !! SOURCE
 
 subroutine prune_g1mg2(npw,gvec,ngdiff,g1mg2)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prune_g1mg2'
-!End of the abilint section
 
  implicit none
 
@@ -1198,15 +1126,6 @@ end subroutine prune_g1mg2
 !! SOURCE
 
 subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtvol,shlim_p)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'merge_and_sort_kg'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
-!End of the abilint section
 
  implicit none
 
@@ -1484,14 +1403,6 @@ end subroutine merge_and_sort_kg
 
 subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getfullg'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1638,13 +1549,6 @@ end subroutine getfullg
 
 subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_irredg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1743,13 +1647,6 @@ end subroutine get_irredg
 !! SOURCE
 
 subroutine merge_kgirr(nsym,pinv,nkpt,mpw,sizepw,symrec,nbasek,cnormk,gbasek,nbase,gbase,cnorm,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'merge_kgirr'
-!End of the abilint section
 
  implicit none
 
@@ -1856,14 +1753,6 @@ end subroutine merge_kgirr
 !! SOURCE
 
 subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setshells'
- use interfaces_51_manage_mpi
-!End of the abilint section
 
  implicit none
 
@@ -2137,13 +2026,6 @@ end subroutine setshells
 
 subroutine kg_map(npw1,kg1,npw2,kg2,g2g1,nmiss)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kg_map'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2223,13 +2105,6 @@ end subroutine kg_map
 !! SOURCE
 
 subroutine make_istwfk_table(istwf_k,ng1,ng2,ng3,ig1_inver,ig2_inver,ig3_inver)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_istwfk_table'
-!End of the abilint section
 
  implicit none
 
@@ -2337,13 +2212,6 @@ end subroutine make_istwfk_table
 
 pure subroutine table_gbig2kg(npw_k,kg_k,maxpw,gbig,gamma2k,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'table_gbig2kg'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2407,13 +2275,6 @@ end subroutine table_gbig2kg
 !! SOURCE
 
 subroutine gsph_extend(in_Gsph,Cryst,new_ecut,new_Gsph)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gsph_extend'
-!End of the abilint section
 
  implicit none
 
@@ -2510,13 +2371,6 @@ end subroutine gsph_extend
 
 subroutine getkpgnorm(gprimd,kpt,kg_k,kpgnorm,npw_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getkpgnorm'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2599,13 +2453,6 @@ end subroutine getkpgnorm
 !! SOURCE
 
 subroutine symg(kg_diel,npwdiel,nsym,phdiel,sym_g,symrel,tmrev_g,tnons)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symg'
-!End of the abilint section
 
  implicit none
 

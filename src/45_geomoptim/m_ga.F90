@@ -28,7 +28,7 @@ MODULE m_ga
  use defs_basis
  use defs_abitypes
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  !use m_results_img, only : results_img_type, gather_array_img
 
@@ -94,23 +94,12 @@ CONTAINS !===========================================================
 
 subroutine ga_init(dtset,ga_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  type(dataset_type),target,intent(in) :: dtset
  type(ga_type),intent(inout) :: ga_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -120,7 +109,7 @@ subroutine ga_init(dtset,ga_param)
    ga_param%ga_fitness           = dtset%ga_fitness
    ga_param%ga_opt_percent       = dtset%ga_opt_percent
    ga_param%ga_algor             = dtset%ga_algor
-   ABI_ALLOCATE(ga_param%ga_iatfix,(3,dtset%natom)) 
+   ABI_ALLOCATE(ga_param%ga_iatfix,(3,dtset%natom))
    ga_param%ga_iatfix            = dtset%iatfix
  end if
 
@@ -142,7 +131,7 @@ end subroutine ga_init
 !!
 !! SIDE EFFECTS
 !!  ga_param=datastructure of type ga_type.
-!!            parameters for Genetic algorithm search. 
+!!            parameters for Genetic algorithm search.
 !!
 !! PARENTS
 !!      gstateimg
@@ -153,22 +142,11 @@ end subroutine ga_init
 
 subroutine ga_destroy(ga_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  type(ga_type),intent(inout) :: ga_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -206,22 +184,11 @@ end subroutine ga_destroy
 
 subroutine ga_nullify(ga_param)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ga_nullify'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
 !scalars
  type(ga_type),intent(inout) :: ga_param
-!arrays
-!Local variables-------------------------------
-!scalars
-!arrays
 
 !************************************************************************
 
@@ -230,7 +197,7 @@ subroutine ga_nullify(ga_param)
 ! ga_param%ga_algor     = -1
  ga_param%ga_opt_percent  = zero
  ga_param%ga_rules(:) = -1
- 
+
 end subroutine ga_nullify
 !!***
 

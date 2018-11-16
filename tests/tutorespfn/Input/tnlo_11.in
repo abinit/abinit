@@ -99,7 +99,6 @@ optdriver    5
 nbdbuf 0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -112,7 +111,7 @@ nbdbuf 0
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Veithen
-#%% keywords = NC, DFPT 
+#%% keywords = NC, DFPT, NONLINEAR
 #%% description = 
 #%%   Linear and nonlinear response calculation for AlAs
 #%%   Perturbations: electric fields & atomic displacements

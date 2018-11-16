@@ -9,7 +9,7 @@
 !! as well as the central mkphdos
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,MG,MJV,GMR)
+!! Copyright (C) 1999-2018 ABINIT group (XG, MG, MJV, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,11 +28,10 @@ module m_phonons
  use defs_basis
  use m_errors
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_tetrahedron
  use m_nctk
  use iso_c_binding
- use m_crystal_io
  use m_atprj
  use m_sortph
  use m_ddb
@@ -43,11 +42,12 @@ module m_phonons
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename, replace
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
+ use m_symtk,           only : matr3inv
  use m_time,            only : cwtime
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
- use m_geometry,        only : mkrdim
- use m_dynmat,          only : gtdyn9, dfpt_phfrq
+ use m_geometry,        only : mkrdim, symredcart
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
  use m_ifc,             only : ifc_type, ifc_fourq, ifc_calcnwrite_nana_terms
@@ -60,13 +60,14 @@ module m_phonons
 
  private
 
-! TODO Write object to store the bands
  public :: mkphbs                        ! Compute phonon band structure
  public :: phonons_write_xmgrace         ! Write phonons bands in Xmgrace format.
  public :: phonons_write_gnuplot         ! Write phonons bands in gnuplot format.
  public :: ifc_mkphbs                    ! Compute the phonon band structure from the IFC and write data to file(s)
  public :: dfpt_symph                    ! Determine the symmetry character of the different phonon modes at Gamma
 
+ public :: zacharias_supercell_make
+ public :: zacharias_supercell_print
  public :: thermal_supercell_make
  public :: thermal_supercell_free
  public :: thermal_supercell_print
@@ -152,7 +153,7 @@ module m_phonons
   real(dp),allocatable :: msqd_dos_atom(:,:,:,:)
    ! msqd_dos_atom(nomega,3,3,natom)
    ! mean square displacement matrix, frequency dependent like a DOS, tensor in cartesian coords.
-   ! allows to calculate Debye Waller factors by integration with 1/omega
+   ! allows one to calculate Debye Waller factors by integration with 1/omega
    ! and the Bose Einstein factor
 
  end type phonon_dos_type
@@ -195,16 +196,6 @@ CONTAINS  !=====================================================================
 
 subroutine phdos_print(PHdos,fname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: fname
  type(phonon_dos_type),intent(in) :: PHdos
@@ -233,9 +224,7 @@ subroutine phdos_print(PHdos,fname)
    MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
  end select
 
-! === Open external file and write results ===
-! TODO Here I have to rationalize how to write all this stuff!!
-!
+ ! Open external file and write results
  if (open_file(fname,msg,newunit=unt,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
@@ -254,8 +243,6 @@ subroutine phdos_print(PHdos,fname)
    write(unt,*)
  end do
  close(unt)
-
-
 
  fname_by_atom = trim(fname) // "_by_atom"
  if (open_file(fname_by_atom,msg,newunit=unt_by_atom,form="formatted",action="write") /= 0) then
@@ -276,8 +263,6 @@ subroutine phdos_print(PHdos,fname)
    write(unt_by_atom,*)
  end do
  close(unt_by_atom)
-
-
 
  fname_msqd = trim(fname) // "_msqd"
  if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
@@ -309,7 +294,6 @@ subroutine phdos_print(PHdos,fname)
  end do
  close(unt_msqd)
 
-
 end subroutine phdos_print
 !!***
 
@@ -340,16 +324,6 @@ end subroutine phdos_print
 !! SOURCE
 
 subroutine phdos_print_debye(PHdos, ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_debye'
- use interfaces_14_hidewrite
-!End of the abilint section
-
-implicit none
 
 !Arguments ------------------------------------
  real(dp), intent(in) :: ucvol
@@ -439,12 +413,12 @@ end subroutine phdos_print_debye
 !----------------------------------------------------------------------
 
 !****f* m_phonons/phdos_print_thermo
-!!
 !! NAME
 !! phdos_print_thermo
 !!
 !! FUNCTION
 !! Print out global thermodynamic quantities based on DOS
+!! Only master node should call this routine.
 !!
 !! INPUTS
 !! phonon_dos= container object for phonon DOS
@@ -464,16 +438,6 @@ end subroutine phdos_print_debye
 
 subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_thermo'
- use interfaces_14_hidewrite
-!End of the abilint section
-
-implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: ntemper
  real(dp), intent(in) :: tempermin, temperinc
@@ -481,69 +445,60 @@ implicit none
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
- integer :: iomega, itemper, thermal_unit
+ integer :: iomega, itemper, tunt
  character(len=500) :: msg
  real(dp) :: wover2t, ln2shx, cothx, invsinh2
  real(dp) :: tmp, domega
 !arrays
  real(dp), allocatable :: free(:), energy(:), entropy(:), spheat(:),wme(:)
 
- ABI_ALLOCATE(free,    (ntemper))
- ABI_ALLOCATE(energy,  (ntemper))
- ABI_ALLOCATE(entropy, (ntemper))
- ABI_ALLOCATE(spheat,  (ntemper))
- ABI_ALLOCATE(wme,     (ntemper))
+! *********************************************************************
 
-!Put zeroes for F, E, S, Cv
- free(:)=zero
- energy(:)=zero
- entropy(:)=zero
- spheat(:)=zero
- wme(:)=zero
+ ! Allocate and put zeroes for F, E, S, Cv
+ ABI_CALLOC(free,    (ntemper))
+ ABI_CALLOC(energy,  (ntemper))
+ ABI_CALLOC(entropy, (ntemper))
+ ABI_CALLOC(spheat,  (ntemper))
+ ABI_CALLOC(wme,     (ntemper))
 
-!open THERMO file
- if (open_file(fname,msg,newunit=thermal_unit,form="formatted",action="write") /= 0) then
+ ! open THERMO file
+ if (open_file(fname, msg, newunit=tunt, form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
-! print header
- write(msg,'(a,a)') ch10,&
-&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
- call wrtout(thermal_unit,msg,'COLL')
- msg = ' # (A mol-c is the abbreviation of a mole-cell, that is, the'
- call wrtout(thermal_unit,msg,'COLL')
- msg = ' #  number of Avogadro times the atoms in a unit cell)'
- call wrtout(thermal_unit,msg,'COLL')
-
  write(msg, '(a,a,a)' )&
-&  ' phdos_print_thermo : thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
+&  ' phdos_print_thermo: thermodynamic functions calculated from prtdos DOS (not histogram)',ch10,&
 &  '     see THERMO output file ...'
  call wrtout(std_out,msg,'COLL')
 
- domega = (PHdos%omega(2)-PHdos%omega(1))
+ ! print header
+ write(tunt,'(a,a)') ch10,&
+&  ' # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1) from prtdos DOS'
+ write(tunt, "(a)")' # (A mol-c is the abbreviation of a mole-cell, that is, the'
+ write(tunt, "(a)")' #  number of Avogadro times the atoms in a unit cell)'
+
+ domega = phdos%omega_step
 
  do itemper=1,ntemper
-
-!  The temperature (tmp) is given in Ha
+   ! The temperature (tmp) is given in Ha
    tmp=(tempermin+temperinc*dble(itemper-1))*kb_HaK
 
    do iomega=1,PHdos%nomega
      if (abs(PHdos%phdos(iomega)) < 1.e-200_dp) cycle
 
-!    wover2t= hbar*w / 2kT dimensionless
+     ! wover2t= hbar*w / 2kT dimensionless
      wover2t = zero;     if(tmp > tol14) wover2t=PHdos%omega(iomega)*half/tmp
      ! should not be much of a problem for the log, but still put a check.
      ln2shx=zero;        if (wover2t > tol16 .and. wover2t < 100.0_dp) ln2shx=log(two * sinh(wover2t))
      cothx=zero;         if (wover2t > tol16) cothx=one/tanh(wover2t)
      invsinh2=zero;      if (wover2t > tol16 .and. wover2t < 100.0_dp) invsinh2=one/sinh(wover2t)**2
 
-!    This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995)
+     ! This matches the equations published in Lee & Gonze, PRB 51, 8610 (1995) [[cite:Lee1995]]
      free(itemper)   = free(itemper)    + PHdos%phdos(iomega)*tmp*ln2shx
      energy(itemper) = energy(itemper)  + PHdos%phdos(iomega)*half*PHdos%omega(iomega)*cothx
      spheat(itemper) = spheat(itemper)  + PHdos%phdos(iomega)*wover2t**2 * invsinh2
      entropy(itemper)= entropy(itemper) + PHdos%phdos(iomega)*(wover2t*cothx - ln2shx)
      wme(itemper)    = wme(itemper)     + PHdos%phdos(iomega)*PHdos%omega(iomega)*wover2t**2 * invsinh2
-
    end do ! iomega
 
    ! suppose homogeneous omega grid and multiply by domega
@@ -555,23 +510,22 @@ implicit none
 
    if (abs(spheat(itemper))>tol8) wme(itemper)=wme(itemper)/spheat(itemper)
 
-! do the printing to file
-   write(msg,'(es11.3,5es15.7)') tmp/kb_HaK,&
+   ! do the printing to file
+   write(tunt,'(es11.3,5es15.7)') tmp/kb_HaK,&
 &    Ha_J*Avogadro*free(itemper),&
 &    Ha_J*Avogadro*energy(itemper),&
 &    Ha_J*Avogadro*kb_HaK*entropy(itemper),&
 &    Ha_J*Avogadro*kb_HaK*spheat(itemper),&
 &    wme(itemper)*Ha_cmm1
-   call wrtout(thermal_unit,msg,'COLL')
  end do ! itemper
 
- ABI_DEALLOCATE(free)
- ABI_DEALLOCATE(energy)
- ABI_DEALLOCATE(entropy)
- ABI_DEALLOCATE(spheat)
- ABI_DEALLOCATE(wme)
+ close(tunt)
 
- close(thermal_unit)
+ ABI_FREE(free)
+ ABI_FREE(energy)
+ ABI_FREE(entropy)
+ ABI_FREE(spheat)
+ ABI_FREE(wme)
 
 end subroutine phdos_print_thermo
 !!***
@@ -601,51 +555,22 @@ end subroutine phdos_print_thermo
 
 subroutine phdos_free(PHdos)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
  type(phonon_dos_type),intent(inout) ::PHdos
 
 ! *************************************************************************
 
  !@phonon_dos_type
- if (allocated(PHdos%atom_mass)) then
-   ABI_FREE(PHdos%atom_mass)
- end if
- if (allocated(PHdos%omega)) then
-   ABI_FREE(PHdos%omega)
- end if
- if (allocated(PHdos%phdos)) then
-   ABI_FREE(PHdos%phdos)
- end if
- if (allocated(PHdos%phdos_int)) then
-   ABI_FREE(PHdos%phdos_int)
- end if
- if (allocated(PHdos%pjdos)) then
-   ABI_FREE(PHdos%pjdos)
- end if
- if (allocated(PHdos%pjdos_int)) then
-   ABI_FREE(PHdos%pjdos_int)
- end if
- if (allocated(PHdos%pjdos_type)) then
-   ABI_FREE(PHdos%pjdos_type)
- end if
- if (allocated(PHdos%pjdos_type_int)) then
-   ABI_FREE(PHdos%pjdos_type_int)
- end if
- if (allocated(PHdos%pjdos_rc_type)) then
-   ABI_FREE(PHdos%pjdos_rc_type)
- end if
- if (allocated(PHdos%msqd_dos_atom)) then
-   ABI_FREE(PHdos%msqd_dos_atom)
- end if
+ ABI_SFREE(PHdos%atom_mass)
+ ABI_SFREE(PHdos%omega)
+ ABI_SFREE(PHdos%phdos)
+ ABI_SFREE(PHdos%phdos_int)
+ ABI_SFREE(PHdos%pjdos)
+ ABI_SFREE(PHdos%pjdos_int)
+ ABI_SFREE(PHdos%pjdos_type)
+ ABI_SFREE(PHdos%pjdos_type_int)
+ ABI_SFREE(PHdos%pjdos_rc_type)
+ ABI_SFREE(PHdos%msqd_dos_atom)
 
 end subroutine phdos_free
 !!***
@@ -658,34 +583,34 @@ end subroutine phdos_free
 !! mkphdos
 !!
 !! FUNCTION
-!! Function to calculate the phonon density of states as well as
+!! Calculate the phonon density of states as well as
 !! the contributions associated to the different types of atoms in the unit cell.
-!! Two methods are implemented: gaussian method and linear interpolation based on
-!! tetrahedrons.
+!! Two methods are implemented: gaussian method and linear interpolation based on tetrahedrons.
 !!
 !! INPUTS
-!! Ifc<ifc_type>=Interatomic force constants
-!! Crystal<crystal_t>=Info on the crystalline Structure.
-!! prtdos=1 for Gaussian method, 2 for tetrahedra.
-!! dosdeltae=Step for the frequency mesh.
-!! dossmear=Gaussian broadening used if prtdos==1.
+!! ifc<ifc_type>=Interatomic force constants
+!! crystal<crystal_t>=Info on the crystalline structure.
+!! prtdos=1 for gaussian method, 2 for tetrahedra.
+!! dosdeltae=Step of frequency mesh.
+!! dossmear=Gaussian broadening, used if prtdos==1.
 !! dos_ngqpt(3)=Divisions of the q-mesh used for computing the DOS
-!! dos_qshift(3)=Shift of the q-mesh.
-!! comm=MPI communicator
+!! nqshift=Number of shifts in Q-mesh
+!! dos_qshift(3, nqshift)=Shift of the q-mesh.
+!! prefix=Prefix for output files.
+!! comm=MPI communicator.
 !!
 !! OUTPUT
-!! PHdos<phonon_dos_type>=Container with phonon DOS, IDOS and atom-projected DOS.
+!! phdos<phonon_dos_type>=Container with phonon DOS, IDOS and atom-projected DOS.
+!! count_wminmax(2)=Number of (interpolated) phonon frequencies that are outside
+!!   input range (see wminmax). Client code can use count_wminmax and wminmax to
+!!   enlarge the mesh and call the routine again to recompute the DOS
+!!   if all frequencies should be included.
 !!
-!! NOTES
-!! On the use of the q-grids:
-!! Two different q-meshes are used in this subroutine. The first one is the coarse
-!! mesh where the interatomic forces have been calculated during the DFPT run.
-!! This q-grid is used to obtain an initial guess for the max and min frequency
-!! value of the phonon spectrum. These values are, indeed, required to dimension
-!! the array containing the PHDOS. The second (dense) grid is used to perform the
-!! PHDOS calculation. If the Fourier interpolation on the second dense q-grid
-!! generates a phonon frequency outside the initially calculated frequency mesh,
-!! the mesh is enlarged and the calculation is restarted.
+!! SIDE EFFECTS
+!! wminmax(2)=
+!!   In input: min and max value of frequency mesh. Used only if minmax(2) > minmax(1)
+!!    else values are taken from ifc%omega_minmax (computed from ab-initio mesh + pad)
+!!   In output: min and max frequency obtained after interpolating the IFCs on the dense q-mesh dos_ngqpt
 !!
 !! PARENTS
 !!      anaddb,eph,m_tdep_phdos
@@ -696,68 +621,47 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
-&   dos_qshift, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphdos'
- use interfaces_14_hidewrite
- use interfaces_41_geometry
-!End of the abilint section
-
- implicit none
+subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
+                   wminmax, count_wminmax, comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: prtdos
- integer,intent(in) :: comm
+ integer,intent(in) :: prtdos,nqshft,comm
  real(dp),intent(in) :: dosdeltae,dossmear
- type(crystal_t),intent(in) :: Crystal
- type(ifc_type),intent(in) :: Ifc
- type(phonon_dos_type),intent(inout) :: PHdos
+ character(len=*),intent(in) ::  prefix
+ type(crystal_t),intent(in) :: crystal
+ type(ifc_type),intent(in) :: ifc
+ type(phonon_dos_type),intent(out) :: phdos
 !arrays
  integer,intent(in) :: dos_ngqpt(3)
- real(dp),intent(in) :: dos_qshift(3)
+ integer,intent(out) :: count_wminmax(2)
+ real(dp),intent(in) :: dos_qshift(3,nqshft)
+ real(dp),intent(inout) :: wminmax(2)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1,master=0
- integer :: iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
- integer :: nmesh,nqbz,nqshft,ierr,natom,nomega
- integer :: jdir, isym
- integer :: nprocs, my_rank
- integer :: ncid
- real(dp) :: nsmallq
- real(dp) :: dum,gaussfactor,gaussprefactor,low_bound,max_occ !,pnorm
- real(dp) :: upr_bound,gaussmaxarg
- real(dp) :: max_smallq = 0.0625_dp
- real(dp) :: normq
+ integer :: iat,jat,idir,imode,io,iq_ibz,itype,nkpt_fullbz
+ integer :: nqbz,ierr,natom,nomega,jdir, isym, nprocs, my_rank, ncid
+ real(dp),parameter :: max_occ1=one, gaussmaxarg = sqrt(-log(1.d-90)), max_smallq = 0.0625_dp
+ real(dp) :: nsmallq,gaussfactor,gaussprefactor,normq,debyefreq,rtmp
  real(dp) :: cpu, wall, gflops
- logical :: out_of_bounds
  character(len=500) :: msg
  character(len=80) :: errstr
- character(len=80) ::  prefix = "freq_displ"
  type(t_tetrahedron) :: tetraq
 !arrays
- integer :: qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:),ngqpt(:,:)
- real(dp) :: speedofsound(3)
- real(dp) :: speedofsound_(3)
- real(dp) :: debyefreq
+ integer :: in_qptrlatt(3,3),new_qptrlatt(3,3)
+ integer,allocatable :: bz2ibz(:)
+ real(dp) :: speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
  real(dp) :: qlatt(3,3),rlatt(3,3)
  real(dp) :: msqd_atom_tmp(3,3),temp_33(3,3)
  real(dp) :: symcart(3,3,crystal%nsym)
- real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:)
- real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
- real(dp),allocatable :: wtqibz(:)
- real(dp), allocatable :: pjdos_tmp(:,:,:)
- real(dp),allocatable :: xvals(:), gvals_wtq(:), wdt(:,:)
  real(dp) :: syme2_xyza(3, crystal%natom)
+ real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
+ real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),tmp_phfrq(:),tweight(:,:)
+ real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:)
 
 ! *********************************************************************
 
@@ -766,391 +670,292 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! Consistency check.
- if (ALL(prtdos /= [1,2])) then
+ if (all(prtdos /= [1, 2])) then
    MSG_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
  end if
- if (dosdeltae<=zero) then
+ if (dosdeltae <= zero) then
    MSG_BUG(sjoin('dosdeltae should be positive, but received', ftoa(dosdeltae)))
  end if
- if (prtdos==1.and.dossmear<=zero) then
+ if (prtdos == 1 .and. dossmear <= zero) then
    MSG_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
  end if
 
  call cwtime(cpu, wall, gflops, "start")
 
- natom = Crystal%natom
- gaussmaxarg = sqrt(-log(1.d-90))
-
- do isym = 1, Crystal%nsym
-   call symredcart(Crystal%rprimd,Crystal%gprimd,symcart(:,:,isym),Crystal%symrel(:,:,isym))
+ ! Get symmetries in cartesian coordinates
+ do isym = 1, crystal%nsym
+   call symredcart(crystal%rprimd,crystal%gprimd,symcart(:,:,isym),crystal%symrel(:,:,isym))
  end do
 
- nomega = 1
- PHdos%ntypat     = crystal%ntypat
- PHdos%natom      = natom
- PHdos%prtdos     = prtdos
- PHdos%nomega     = 1
- PHdos%nqibz      = 1
- PHdos%omega_max  = smallest_real
- PHdos%omega_min  = greatest_real
- PHdos%omega_step = dosdeltae
- PHdos%dossmear   = dossmear
+ natom = crystal%natom
+ phdos%ntypat     = crystal%ntypat
+ phdos%natom      = crystal%natom
+ phdos%prtdos     = prtdos
+ phdos%dossmear   = dossmear
+ phdos%omega_step = dosdeltae
+ ! Use values stored in ifc (obtained with ab-initio q-mesh + pad)
+ if (wminmax(2) > wminmax(1)) then
+   phdos%omega_min = wminmax(1)
+   phdos%omega_max = wminmax(2)
+ else
+   phdos%omega_min = ifc%omega_minmax(1)
+   phdos%omega_max = ifc%omega_minmax(2)
+ end if
+ ! Must be consistent with mesh computed in tetra routines!
+ phdos%nomega = nint((phdos%omega_max - phdos%omega_min) / phdos%omega_step) + 1
+ ! Ensure Simpson integration will be ok
+ phdos%nomega = max(6, phdos%nomega)
+ nomega = phdos%nomega
 
- ABI_MALLOC(PHdos%atom_mass, (natom))
- PHdos%atom_mass(:) = Crystal%amu(Crystal%typat(:))*amu_emass
+ ! Build frequency mesh.
+ ABI_MALLOC(phdos%omega, (phdos%nomega))
+ do io=1,phdos%nomega
+   phdos%omega(io) = phdos%omega_min + phdos%omega_step * (io - 1)
+ end do
+ phdos%omega_min = phdos%omega(1)
+ phdos%omega_max = phdos%omega(phdos%nomega)
 
- ! These arrays are independent of nqibz
- ABI_MALLOC(PHdos%omega, (nomega))
- ABI_MALLOC(PHdos%phdos, (nomega))
- ABI_MALLOC(PHdos%phdos_int, (nomega))
- ABI_MALLOC(PHdos%pjdos, (nomega,3,natom))
- ABI_MALLOC(PHdos%pjdos_int, (nomega,3,natom))
- ABI_MALLOC(PHdos%pjdos_type, (nomega,crystal%ntypat))
- ABI_MALLOC(PHdos%pjdos_type_int, (nomega,crystal%ntypat))
- ABI_MALLOC(PHdos%pjdos_rc_type, (nomega,3,crystal%ntypat))
- ABI_MALLOC(PHdos%msqd_dos_atom, (nomega,3,3,natom))
- ABI_CALLOC(pjdos_tmp,(2,3,natom))
+ ! Allocate arrays that depend on nomega and set them to zero.
+ ABI_CALLOC(phdos%phdos, (nomega))
+ ABI_CALLOC(phdos%phdos_int, (nomega))
+ ABI_CALLOC(phdos%pjdos, (nomega, 3, natom))
+ ABI_CALLOC(phdos%pjdos_int, (nomega, 3, natom))
+ ABI_CALLOC(phdos%msqd_dos_atom, (nomega, 3, 3, natom))
+ ABI_MALLOC(phdos%atom_mass, (natom))
+ phdos%atom_mass = crystal%amu(crystal%typat(:)) * amu_emass
+
+ ABI_MALLOC(gvals_wtq, (nomega))
+ ABI_MALLOC(xvals, (nomega))
 
  ! Parameters defining the gaussian approximant.
- if (prtdos==1) then
+ if (prtdos == 1) then
    ! TODO: use dirac_delta and update reference files.
-   gaussprefactor=one/(dossmear*sqrt(two_pi))
-   gaussfactor=one/(sqrt2*dossmear)
-   write(msg,'(4a,f8.5,2a,f8.5)')ch10,&
-&   ' mkphdos: calculating phonon DOS using gaussian method :',ch10,&
-&   '    gaussian smearing [meV] = ',dossmear*Ha_meV,ch10,&
-&   '    frequency step    [meV] = ',PHdos%omega_step*Ha_meV
- else if (prtdos==2) then
+   gaussprefactor = one / (dossmear * sqrt(two_pi))
+   gaussfactor = one / (sqrt2 * dossmear)
+   write(msg, '(4a,f8.5,2a,f8.5)') ch10, &
+    ' mkphdos: calculating phonon DOS using gaussian method:',ch10, &
+    '    gaussian smearing [meV] = ',dossmear*Ha_meV,ch10, &
+    '    frequency step    [meV] = ',phdos%omega_step*Ha_meV
+ else if (prtdos == 2) then
    write(msg,'(2a)')ch10,' mkphdos: calculating phonon DOS using tetrahedron method'
  end if
- call wrtout(std_out,msg,'COLL')
-
- ! Initial lower and upper bound of the phonon spectrum.
- low_bound=dble(huge(0))*half*PHdos%omega_step
- upr_bound=-low_bound
+ call wrtout(std_out, msg, 'COLL')
 
  ! TODO
  ! 1) fix bug in tetra if degenerate and update ref files
- ! 2) Get rid of double mesh algo and use min/max freq already computed in ifc
- ! 3) Add MPI Parallel version (easy after change in 2)
+ ! 2) nshift > 1?
 
- nmesh=2
- ABI_MALLOC(ngqpt,(3,nmesh))
- do imesh=1,nmesh
+ ! This call will set %nqibz and IBZ and BZ arrays
+ in_qptrlatt = 0; in_qptrlatt(1, 1) = dos_ngqpt(1); in_qptrlatt(2, 2) = dos_ngqpt(2); in_qptrlatt(3, 3) = dos_ngqpt(3)
 
-   write(msg,'(a,I6)') ' Mesh number ', imesh
-   call wrtout(std_out,msg,'COLL')
+ call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, qptopt1, nqshft, dos_qshift, &
+   phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq)
 
-   if (imesh==1) then
-     ! Coarse q-mesh used in RF calculation.
-     ngqpt(:,imesh)=ifc%ngqpt(1:3)
-     nqshft=ifc%nqshft
-     ABI_MALLOC(qshft,(3,nqshft))
-     ! TODO this has to be fixed  there is a small inconsistency in the dimension of q1shft
-     qshft(:,1:nqshft)=ifc%qshft(:,1:nqshft)
-   else
-     ! Dense q-mesh used for the Fourier interpolation.
-     !ngqpt(1:3,imesh)=inp%ng2qpt(1:3)
-     ngqpt(1:3,imesh) = dos_ngqpt
-     nqshft=1 !always 1
-     ABI_MALLOC(qshft,(3,nqshft))
-     !qshft(:,1)=inp%q2shft(:)  ! FIXME small inconsistency in the dimension of q1shft
-     qshft(:,1)=dos_qshift(:)
+ if (prtdos == 2) then
+   ! Prepare tetrahedron method including workspace arrays.
+   ! Convert kptrlatt to double and invert, qlatt here refer to the shortest qpt vectors
+   rlatt = new_qptrlatt; call matr3inv(rlatt, qlatt)
+
+   nkpt_fullbz = nqbz
+   ABI_MALLOC(bz2ibz, (nkpt_fullbz))
+   ABI_MALLOC(kpt_fullbz, (3, nkpt_fullbz))
+
+   ! Make full kpoint grid and get equivalence to irred kpoints.
+   call get_full_kgrid(bz2ibz, qibz, kpt_fullbz, new_qptrlatt, phdos%nqibz, &
+       nkpt_fullbz, size(new_shiftq, dim=2), crystal%nsym, new_shiftq, crystal%symrel)
+
+   ! Init tetrahedra, i.e. indexes of the full q-points at their summits
+   call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr)
+   ABI_CHECK(ierr == 0, errstr)
+
+   ABI_FREE(bz2ibz)
+   ABI_FREE(kpt_fullbz)
+
+   ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
+   ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
+   ABI_CALLOC(full_phfrq, (3*natom, phdos%nqibz))
+   ABI_STAT_MALLOC(full_eigvec, (2, 3, natom, 3*natom, phdos%nqibz), ierr)
+   ABI_CHECK(ierr == 0, 'out-of-memory in full_eigvec')
+   full_eigvec = zero
+ end if ! tetra
+ ABI_FREE(new_shiftq)
+
+ ! MPI Sum over irreducible q-points then sync the following integrals:
+ !   speedofsound, nsmallq
+ !   wminmax and count_wminmax
+ !   if gauss: %phdos, %msqd_dos_atom
+ !   if tetra: full_phfrq, full_eigvec, %phdos_int
+
+ nsmallq = zero; speedofsound = zero
+ wminmax = [huge(one), -huge(one)]; count_wminmax = 0
+ do iq_ibz=1,phdos%nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+
+   ! Fourier interpolation (keep track of min/max to decide if initial mesh was large enough)
+   call ifc_fourq(Ifc, crystal, qibz(:,iq_ibz), phfrq, displ, out_eigvec=eigvec)
+   wminmax(1) = min(wminmax(1), minval(phfrq))
+   if (wminmax(1) < phdos%omega(1)) count_wminmax(1) = count_wminmax(1) + 1
+   wminmax(2) = max(wminmax(2), maxval(phfrq))
+   if (wminmax(2) > phdos%omega(nomega)) count_wminmax(2) = count_wminmax(2) + 1
+
+   normq = sum(qibz(:,iq_ibz) ** 2)
+   if (normq < max_smallq .and. normq > tol6) then
+     call phdos_calc_vsound(eigvec, crystal%gmet, natom, phfrq, qibz(:,iq_ibz), speedofsound_)
+     speedofsound = speedofsound + speedofsound_ * wtq_ibz(iq_ibz)
+     nsmallq = nsmallq + wtq_ibz(iq_ibz)
    end if
 
-   qptrlatt=0
-   qptrlatt(1,1)=ngqpt(1,imesh); qptrlatt(2,2)=ngqpt(2,imesh); qptrlatt(3,3)=ngqpt(3,imesh)
+   select case (prtdos)
+   case (1)
+     do imode=1,3*natom
+       ! Precompute \delta(w - w_{qnu}) * weight(q)
+       xvals = (phdos%omega(:) - phfrq(imode)) * gaussfactor
+       where (abs(xvals) < gaussmaxarg)
+         gvals_wtq = gaussprefactor * exp(-xvals*xvals) * wtq_ibz(iq_ibz)
+       elsewhere
+         gvals_wtq = zero
+       end where
 
-   if(allocated(wtqibz)) then
-     ABI_FREE(wtqibz)
-   end if
-   if(allocated(qibz)) then
-     ABI_FREE(qibz)
-   end if
+       ! Accumulate PHDOS
+       phdos%phdos(:) = phdos%phdos(:) + gvals_wtq
 
-   ! This call will set %nqibz, IBZ and BZ arrays
-   call kpts_ibz_from_kptrlatt(crystal, qptrlatt, qptopt1, nqshft, qshft, &
-     phdos%nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
-   ABI_FREE(qshft)
+       ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
+       ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108 [[cite:Giustino2007]].
+       ! In principle there's a phase due to nonsymmorphic translations
+       ! but we here need |e(Sq)_iatom|**2
+       syme2_xyza = zero
+       do iat=1,natom
+         do isym=1, crystal%nsym
+           jat = crystal%indsym(4,isym,iat)
+           syme2_xyza(:,jat) = syme2_xyza(:,jat) + &
+             matmul(symcart(:,:,isym), eigvec(1,:,iat,imode)) ** 2 + &
+             matmul(symcart(:,:,isym), eigvec(2,:,iat,imode)) ** 2
+         end do
+       end do
+       !syme2_xyza = syme2_xyza / crystal%nsym
 
-   if (prtdos==2.and.imesh==2) then
-     ! Second mesh with tetrahedron method
-     ! convert kptrlatt to double and invert, qlatt here refer to the shortest qpt vectors
-     rlatt = qptrlatt; call matr3inv(rlatt,qlatt)
+       ! Accumulate PJDOS
+       do iat=1,natom
+         do idir=1,3
+           phdos%pjdos(:,idir,iat) = phdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * gvals_wtq
+         end do
+       end do
 
-     ABI_MALLOC(qshft,(3,nqshft))
-     !qshft(:,1)=inp%q2shft(:)  ! FIXME small inconsistency in the dimension of q1shft
-     qshft(:,1)= dos_qshift(:)
-     nkpt_fullbz=nqbz
-     ABI_MALLOC(bz2ibz,(nkpt_fullbz))
-     ABI_MALLOC(kpt_fullbz,(3,nkpt_fullbz))
+       ! Accumulate outer product of displacement vectors
+       ! NB: only accumulate real part. e(-q) = e(q)* thue full sum over the BZ guarantees Im=0
+       ! this sum only does irreducible points: the matrix is symmetrized below
+       ! msqd_atom_tmp has units of bohr^2 / Ha as gaussval ~ 1/smear ~ 1/Ha
+       do iat=1,natom
+         msqd_atom_tmp = zero
+         do idir=1,3
+           do jdir=1,3
+             msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
+                   eigvec(1,idir,iat,imode)* eigvec(1,jdir,iat,imode) &
+                +  eigvec(2,idir,iat,imode)* eigvec(2,jdir,iat,imode) )
+           end do
+         end do
 
-     ! Make full kpoint grid and get equivalence to irred kpoints.
-     ! This routines scales **very badly** wrt nkpt_fullbz, should introduce check on the norm.
-     call get_full_kgrid(bz2ibz,qibz,kpt_fullbz,qptrlatt,PHdos%nqibz,&
-&      nkpt_fullbz,nqshft,Crystal%nsym,qshft,Crystal%symrel)
-
-     ! Get tetrahedra, ie indexes of the full q-points at their summits
-     call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr)
-     ABI_CHECK(ierr==0,errstr)
-
-     ABI_FREE(qshft)
-     ABI_FREE(bz2ibz)
-     ABI_FREE(kpt_fullbz)
-
-     ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
-     ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
-     ABI_MALLOC(full_phfrq,(3*natom,PHdos%nqibz))
-     ABI_STAT_MALLOC(full_eigvec,(2,3,natom,3*natom,PHdos%nqibz), ierr)
-     ABI_CHECK(ierr==0, 'out-of-memory in full_eigvec')
-   end if  ! prtdos==2.and.imesh==2
-
-   ! This infinite loop is used to be sure that the frequency mesh is large enough to contain
-   ! the entire phonon spectrum. The mesh is enlarged if, during the Fourier interpolation,
-   ! a phonon frequency turns out to be outside the interval [omega_min:omega_max]
-   do
-     out_of_bounds=.FALSE.
-     if (allocated(PHdos%omega)) then
-       ABI_FREE(PHdos%omega)
-     end if
-     if (allocated(PHdos%phdos)) then
-       ABI_FREE(PHdos%phdos)
-     end if
-     if (allocated(PHdos%pjdos)) then
-       ABI_FREE(PHdos%pjdos)
-     end if
-     if (allocated(PHdos%msqd_dos_atom)) then
-       ABI_FREE(PHdos%msqd_dos_atom)
-     end if
-
-     ! Frequency mesh.
-     PHdos%omega_min=low_bound; if (ABS(PHdos%omega_min)<tol5) PHdos%omega_min=-tol5
-     PHdos%omega_max=upr_bound
-     PHdos%nomega=NINT((PHdos%omega_max-PHdos%omega_min)/PHdos%omega_step)+1
-     PHdos%nomega=MAX(6,PHdos%nomega) ! Ensure Simpson integration will be ok
-
-     ABI_MALLOC(PHdos%omega,(PHdos%nomega))
-     do io=1,PHdos%nomega
-       PHdos%omega(io)=PHdos%omega_min+PHdos%omega_step*(io-1)
-     end do
-
-     ABI_CALLOC(PHdos%phdos,(PHdos%nomega))
-     ABI_CALLOC(PHdos%pjdos,(PHdos%nomega,3,natom))
-     ABI_CALLOC(PHdos%msqd_dos_atom,(PHdos%nomega,3,3,natom))
-
-     if (allocated(gvals_wtq)) then
-       ABI_FREE(gvals_wtq)
-     end if
-     if (allocated(xvals)) then
-       ABI_FREE(xvals)
-     end if
-     ABI_MALLOC(gvals_wtq, (phdos%nomega))
-     ABI_MALLOC(xvals, (phdos%nomega))
-
-     ! Sum over irreducible q-points
-     nsmallq = zero
-     speedofsound = zero
-     do iq_ibz=1,PHdos%nqibz
-       !if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-
-       !TODO: this is where the mpi distribution should happen.
-       ! then sync the following integrals:
-       !   speedofsound
-       !   nsmallq
-       !   PHdos%phdos
-       !   PHdos%msqd_dos_atom
-       !   full_phfrq
-       !   full_eigvec
-
-       ! Fourier interpolation.
-       call ifc_fourq(Ifc,Crystal,qibz(:,iq_ibz),phfrq,displ,out_eigvec=eigvec)
-
-       dum=MINVAL(phfrq); PHdos%omega_min=MIN(PHdos%omega_min,dum)
-       dum=MAXVAL(phfrq); PHdos%omega_max=MAX(PHdos%omega_max,dum)
-       out_of_bounds = (PHdos%omega_min<low_bound .or. PHdos%omega_max>upr_bound)
-
-       normq = sum(qibz(:,iq_ibz)**2)
-       if (normq < max_smallq .and. normq > tol6) then
-          call phdos_calc_vsound(eigvec, Crystal%gmet, natom, phfrq, qibz(:,iq_ibz), speedofsound_)
-         speedofsound = speedofsound + speedofsound_*wtqibz(iq_ibz)
-         nsmallq = nsmallq + wtqibz(iq_ibz)
-       end if
-
-       if (imesh>1.and..not.out_of_bounds) then
-         select case (prtdos)
-         case (1)
-           do imode=1,3*natom
-             ! Precompute \delta(w - w_{qnu}) * weight(q)
-             xvals = (PHdos%omega(:) - phfrq(imode)) * gaussfactor
-             where (abs(xvals) < gaussmaxarg)
-               gvals_wtq = gaussprefactor * exp(-xvals*xvals) * wtqibz(iq_ibz)
-             elsewhere
-               gvals_wtq = zero
-             end where
-
-             ! Accumulate PHDOS
-             PHdos%phdos(:) = PHdos%phdos(:) + gvals_wtq
-
-             ! Rotate e(q) to get e(Sq) to account for symmetrical q-points in BZ.
-             ! eigenvectors indeed are not invariant under rotation. See e.g. Eq 39-40 of PhysRevB.76.165108
-             ! In principle there's a phase due to nonsymmorphic translations
-             ! but we here need |e(Sq)_iatom|**2
-             syme2_xyza = zero
-             do iat=1,natom
-               do isym=1, Crystal%nsym
-                 jat = Crystal%indsym(4,isym,iat)
-                 syme2_xyza(:,jat) = syme2_xyza(:,jat) + &
-                   matmul(symcart(:,:,isym), eigvec(1,:,iat,imode)) ** 2 + &
-                   matmul(symcart(:,:,isym), eigvec(2,:,iat,imode)) ** 2
-               end do
+         ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
+         ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
+         ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+         ! NB: looks consistent with the sym in harmonic thermo, just used in opposite
+         ! direction for symops: symrel here instead of symrec and the inverse of
+         ! indsym in harmonic_thermo
+         do isym=1, crystal%nsym
+           temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+           jat = crystal%indsym(4,isym,iat)
+           do idir=1,3
+             do jdir=1,3
+               phdos%msqd_dos_atom(:,idir,jdir,jat) = phdos%msqd_dos_atom(:,idir,jdir,jat) + &
+                 temp_33(idir, jdir) * gvals_wtq
              end do
-             !syme2_xyza = syme2_xyza / crystal%nsym
+           end do
+         end do
 
-             ! Accumulate PJDOS
-             do iat=1,natom
-               do idir=1,3
-                 PHdos%pjdos(:,idir,iat) = PHdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * gvals_wtq
-               end do ! idir
-             end do
+       end do ! iat
+     end do ! imode
 
-             ! Accumulate outer product of displacement vectors
-             ! NB: only accumulate real part. e(-q) = e(q)* thue full sum over the BZ guarantees Im=0
-             ! this sum only does irreducible points: the matrix is symmetrized below
-             ! msqd_atom_tmp has units of bohr^2 / Ha as gaussval ~ 1/smear ~ 1/Ha
-             do iat=1,natom
-               msqd_atom_tmp = zero
-               do idir=1,3
-                 do jdir=1,3
-                   msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) + ( &
-                         eigvec(1,idir,iat,imode)* eigvec(1,jdir,iat,imode) &
-                      +  eigvec(2,idir,iat,imode)* eigvec(2,jdir,iat,imode) )
-                 end do
-               end do
+   case (2)
+     ! Tetrahedra
+     ! Save phonon frequencies and eigenvectors.
+     ! Sum is done after the loops over the two meshes.
+     full_phfrq(:,iq_ibz) = phfrq(:)
+     full_eigvec(:,:,:,:,iq_ibz) = eigvec
 
-               ! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
-               ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
-               ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
-               ! NB: looks consistent with the sym in harmonic thermo, just used in opposite
-               ! direction for symops: symrel here instead of symrec and the inverse of
-               ! indsym in harmonic_thermo
-               do isym=1, Crystal%nsym
-                 temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
-                 jat = Crystal%indsym(4,isym,iat)
-                 do idir=1,3
-                   do jdir=1,3
-                     PHdos%msqd_dos_atom(:,idir,jdir,jat) = PHdos%msqd_dos_atom(:,idir,jdir,jat) + &
-                       temp_33(idir, jdir) * gvals_wtq
-                   end do
-                 end do
-               end do
+   case default
+     MSG_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
+   end select
+ end do ! iq_ibz
 
-             end do ! iat
-           end do ! imode
+ ABI_FREE(qbz)
+ ABI_FREE(gvals_wtq)
+ ABI_FREE(xvals)
 
-         case (2)
-           ! Tetrahedrons
-           ! * Save phonon frequencies and eigenvectors.
-           ! * Sum is done after the loops over the two meshes.
-           full_phfrq(:,iq_ibz)=phfrq(:)
-           full_eigvec(:,:,:,:,iq_ibz)=eigvec
+ call xmpi_sum_master(nsmallq, master, comm, ierr)
+ call xmpi_sum_master(speedofsound, master, comm, ierr)
 
-         case default
-           MSG_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
-         end select
+ if (my_rank == master .and. nsmallq > tol10) then
+   ! Write info about speed of sound
+   speedofsound = speedofsound / nsmallq
+   write (msg,'(a,E20.10,3a,F16.4,2a)') &
+       ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10, &
+       '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
+   call wrtout (ab_out,msg,"COLL")
+   call wrtout (std_out,msg,"COLL")
 
-       end if !Second mesh and not out of boundaries
-     end do !irred q-points
+   ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
+   debyefreq = third*sum(speedofsound) * (six*pi**2/crystal%ucvol)**(1./3.)
+   write (msg,'(a,E20.10,3a,E20.10,a)') &
+      ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10, &
+      '-                                 = ', debyefreq*Ha_THz, ' (THz)'
+   call wrtout (ab_out,msg,"COLL")
+   call wrtout (std_out,msg,"COLL")
 
-     if (out_of_bounds) then
-       upr_bound=PHdos%omega_max+ABS(PHdos%omega_max/ten)
-       low_bound=PHdos%omega_min-ABS(PHdos%omega_min/ten)
-       write(msg,'(3a)')&
-&       ' At least one phonon frequency falls outside the frequency mesh chosen',ch10,&
-&       ' restarting the calculation with a larger frequency mesh '
-       if (imesh>1) then
-         MSG_COMMENT(msg)
-       end if
-     else
-       EXIT !infinite loop
-     end if
-   end do !infinite loop
-
-   if (nsmallq > tol10) then
-     speedofsound = speedofsound/nsmallq
-
-     write (msg,'(a,E20.10,3a,F16.4,2a)') ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units)',ch10,&
-&               '-                                   = ', third*sum(speedofsound) * Bohr_Ang * 1.d-13 / Time_Sec, ' [km/s]',ch10
-     call wrtout (ab_out,msg,"COLL")
-     call wrtout (std_out,msg,"COLL")
-
-     ! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
-     debyefreq = third*sum(speedofsound) * (six*pi**2/Crystal%ucvol)**(1./3.)
-     write (msg,'(a,E20.10,3a,E20.10,a)') ' Debye frequency from partial sums: ', debyefreq, ' (Ha)',ch10,&
-&                                         '-                                 = ', debyefreq*Ha_THz, ' (THz)'
-     call wrtout (ab_out,msg,"COLL")
-     call wrtout (std_out,msg,"COLL")
-
-     ! Debye temperature = hbar * Debye frequency / kb
-     write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
-     call wrtout (ab_out,msg,"COLL")
-     call wrtout (std_out,msg,"COLL")
-   end if
-
-   ABI_FREE(qbz)
- end do !imesh
-
- ABI_FREE(ngqpt)
- if (allocated(gvals_wtq)) then
-   ABI_FREE(gvals_wtq)
- end if
- if (allocated(xvals)) then
-   ABI_FREE(xvals)
- end if
- if (allocated(PHdos%phdos_int)) then
-   ABI_FREE(PHdos%phdos_int)
- end if
- if (allocated(PHdos%pjdos_int)) then
-   ABI_FREE(PHdos%pjdos_int)
+   ! Debye temperature = hbar * Debye frequency / kb
+   write (msg,'(a,E20.10,2a)') '-Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
+   call wrtout (ab_out,msg,"COLL")
+   call wrtout (std_out,msg,"COLL")
  end if
 
- ABI_CALLOC(PHdos%phdos_int,(PHdos%nomega))
-
- if (prtdos==2) then
+ if (prtdos == 2) then
    ! Finalize integration with tetrahedra
-   ! * All the data are contained in full_phfrq and full_eigvec.
-   ! * low_bound and upr_bound contain the entire spectrum calculated on the dense mesh.
-   ABI_MALLOC(tmp_phfrq,(PHdos%nqibz))
-   ABI_MALLOC(PHdos%pjdos_int,(PHdos%nomega,3,natom))
-   PHdos%phdos=zero; PHdos%pjdos=zero; PHdos%pjdos_int=zero
-   max_occ=one
+   ! All the data are contained in full_phfrq and full_eigvec.
+   call xmpi_sum(full_phfrq, comm, ierr)
+   call xmpi_sum(full_eigvec, comm, ierr)
 
-   ABI_MALLOC(wdt, (phdos%nomega, 2))
-   ABI_MALLOC(tweight, (PHdos%nomega, PHdos%nqibz))
-   ABI_MALLOC(dtweightde, (PHdos%nomega, PHdos%nqibz))
+   ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
+   ABI_MALLOC(wdt, (nomega, 2))
+   ABI_MALLOC(tweight, (nomega, phdos%nqibz))
+   ABI_MALLOC(dtweightde, (nomega, phdos%nqibz))
 
-   !cnt = 0
    do imode=1,3*natom
-     tmp_phfrq(:)= full_phfrq(imode,:)
-     call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ,phdos%nomega,&
+     tmp_phfrq(:) = full_phfrq(imode,:)
+
+     ! Parallelize weights computation inside comm, then distribute nqibz
+     call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
         phdos%nqibz,bcorr0,tweight,dtweightde,comm)
 
+     !if (mod(imode, nprocs) /= my_rank) cycle ! mpi-parallelism
+     !call tetra_blochl_weights(tetraq,tmp_phfrq,phdos%omega_min,phdos%omega_max,max_occ1,phdos%nomega,&
+     !   phdos%nqibz,bcorr0,tweight,dtweightde,xmpi_comm_self)
+
      do iq_ibz=1,phdos%nqibz
-       !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
-       wdt(:, 2) = tweight(:, iq_ibz)
+       if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
        wdt(:, 1) = dtweightde(:, iq_ibz)
+       wdt(:, 2) = tweight(:, iq_ibz)
 
        !call tetra_get_onewk(tetraq, iq_ibz, bcorr0, phdos%nomega, phdos%nqibz, &
        !  tmp_phfrq, phdos%omega_min, phdos%omega_max, max_occ, wdt)
 
        ! Accumulate DOS/IDOS
-       PHdos%phdos(:) = PHdos%phdos(:) + wdt(:,1)
-       PHdos%phdos_int(:) = PHdos%phdos_int(:) + wdt(:,2)
+       phdos%phdos(:) = phdos%phdos(:) + wdt(:, 1)
+       phdos%phdos_int(:) = phdos%phdos_int(:) + wdt(:, 2)
 
        ! Rotate e(q) to get e(Sq) to account for other q-points in BZ. See notes in gaussian branch
        syme2_xyza = zero
        do iat=1,natom
-         do isym=1, Crystal%nsym
-           jat = Crystal%indsym(4,isym,iat)
+         do isym=1, crystal%nsym
+           jat = crystal%indsym(4,isym,iat)
            syme2_xyza(:,jat) = syme2_xyza(:,jat) + &
              matmul(symcart(:,:,isym), full_eigvec(1,:,iat,imode,iq_ibz)) ** 2 + &
              matmul(symcart(:,:,isym), full_eigvec(2,:,iat,imode,iq_ibz)) ** 2
@@ -1160,9 +965,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
        do iat=1,natom
          do idir=1,3
-           PHdos%pjdos(:,idir,iat) = PHdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,1)
-           PHdos%pjdos_int(:,idir,iat) = PHdos%pjdos_int(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,2)
-         end do ! idir
+           phdos%pjdos(:,idir,iat) = phdos%pjdos(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,1)
+           phdos%pjdos_int(:,idir,iat) = phdos%pjdos_int(:,idir,iat) + syme2_xyza(idir,iat) * wdt(:,2)
+         end do
        end do
 
        do iat=1,natom
@@ -1180,13 +985,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
          ! the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
          ! normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
          ! from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
-         ! TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
-         do isym=1, Crystal%nsym
+         ! TODO: need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
+         do isym=1, crystal%nsym
            temp_33 = matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
-           jat = Crystal%indsym(4,isym,iat)
+           jat = crystal%indsym(4,isym,iat)
            do idir=1,3
              do jdir=1,3
-               PHdos%msqd_dos_atom(:,idir,jdir,jat) = PHdos%msqd_dos_atom(:,idir,jdir,jat) + &
+               phdos%msqd_dos_atom(:,idir,jdir,jat) = phdos%msqd_dos_atom(:,idir,jdir,jat) + &
                  temp_33(idir, jdir) * wdt(:,1)
              end do
            end do
@@ -1198,22 +1003,22 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 
    ABI_FREE(wdt)
 
-   ! Make eigvec into displacements
+   ! Make eigvec into phonon displacements.
    do iat = 1, natom
-     full_eigvec(:,:,iat,:,:) = full_eigvec(:,:,iat,:,:)/sqrt(PHdos%atom_mass(iat))
+     full_eigvec(:,:,iat,:,:) = full_eigvec(:,:,iat,:,:) / sqrt(phdos%atom_mass(iat))
    end do
 
    if (my_rank == master) then
 #ifdef HAVE_NETCDF
-     ! TODO: should pass prefix as arg.
+     ! TODO: make it optional?
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
-     NCF_CHECK(crystal_ncwrite(Crystal, ncid))
-     call phonons_ncwrite(ncid,natom,PHdos%nqibz, qibz, wtqibz, full_phfrq, full_eigvec)
+     NCF_CHECK(crystal%ncwrite(ncid))
+     call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
      NCF_CHECK(nf90_close(ncid))
 #endif
    end if
 
-! immediately free this - it contains displ and not eigvec at this stage
+   ! immediately free this - it contains displ and not eigvec at this stage
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
    ABI_FREE(tmp_phfrq)
@@ -1224,68 +1029,70 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,&
 #ifdef HAVE_NETCDF
    MSG_WARNING('The netcdf PHIBZ file is only output for tetrahedron integration and DOS calculations')
 #endif
- end if ! prtdos 2 = tetrahedra
+ end if ! tetrahedra
 
-! normalize by nsym : symmetrization is used in all prtdos cases
- PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
- PHdos%pjdos = PHdos%pjdos / Crystal%nsym
- if (prtdos == 2) PHdos%pjdos_int = PHdos%pjdos_int / Crystal%nsym
+ ! Test if the initial mesh was large enough
+ call xmpi_sum(count_wminmax, comm, ierr)
+ call xmpi_min(wminmax(1), rtmp, comm, ierr); wminmax(1) = rtmp
+ call xmpi_max(wminmax(2), rtmp, comm, ierr); wminmax(2) = rtmp
 
- ABI_FREE(pjdos_tmp)
- ABI_FREE(qibz)
- ABI_FREE(wtqibz)
-
-! normalize by mass and factor of 2 ! now added in the printout to agree with harmonic_thermo
-! do iat=1, natom
-!   PHdos%msqd_dos_atom(:,:,:,iat) = PHdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
-! end do ! iat
-
- ! =======================
- ! === calculate IPDOS ===
- ! =======================
- if (allocated(PHdos%pjdos_rc_type)) then
-   ABI_FREE(PHdos%pjdos_rc_type)
- end if
- if (allocated(PHdos%pjdos_type)) then
-   ABI_FREE(PHdos%pjdos_type)
- end if
- if (allocated(PHdos%pjdos_type_int)) then
-   ABI_FREE(PHdos%pjdos_type_int)
+ call xmpi_sum(phdos%phdos, comm, ierr)
+ call xmpi_sum(phdos%msqd_dos_atom, comm, ierr)
+ call xmpi_sum(phdos%pjdos, comm, ierr)
+ if (prtdos == 2) then
+   ! Reduce integrals if tetra, gauss will compute idos with simpson.
+   call xmpi_sum(phdos%phdos_int, comm, ierr)
+   call xmpi_sum(phdos%pjdos_int, comm, ierr)
  end if
 
- ABI_CALLOC(PHdos%pjdos_rc_type, (PHdos%nomega,3,Crystal%ntypat))
- ABI_CALLOC(PHdos%pjdos_type, (PHdos%nomega,Crystal%ntypat))
- ABI_CALLOC(PHdos%pjdos_type_int, (PHdos%nomega,Crystal%ntypat))
+ ! normalize by nsym: symmetrization is used in all prtdos cases
+ phdos%msqd_dos_atom = phdos%msqd_dos_atom / crystal%nsym
+ phdos%pjdos = phdos%pjdos / crystal%nsym
+ if (prtdos == 2) phdos%pjdos_int = phdos%pjdos_int / crystal%nsym
+ ! normalize by mass and factor of 2, now added in the printout to agree with harmonic_thermo
+ ! do iat=1, natom
+ !   phdos%msqd_dos_atom(:,:,:,iat) = phdos%msqd_dos_atom(:,:,:,iat) * invmass(iat) * half
+ ! end do ! iat
+
+ ! ===============================
+ ! === Compute Integrated PDOS ===
+ ! ===============================
+ ABI_CALLOC(phdos%pjdos_rc_type, (nomega, 3, crystal%ntypat))
+ ABI_CALLOC(phdos%pjdos_type, (nomega, crystal%ntypat))
+ ABI_CALLOC(phdos%pjdos_type_int, (nomega, crystal%ntypat))
 
  do iat=1,natom
-   itype=Crystal%typat(iat)
-   do io=1,PHdos%nomega
-     PHdos%pjdos_rc_type(io,:,itype)=PHdos%pjdos_rc_type(io,:,itype)+PHdos%pjdos(io,:,iat)
-     PHdos%pjdos_type(io,itype)=PHdos%pjdos_type(io,itype)+sum(PHdos%pjdos(io,:,iat))
+   itype = crystal%typat(iat)
+   do io=1,phdos%nomega
+     phdos%pjdos_rc_type(io,:,itype) = phdos%pjdos_rc_type(io,:,itype) + phdos%pjdos(io,:,iat)
+     phdos%pjdos_type(io,itype) = phdos%pjdos_type(io,itype) + sum(phdos%pjdos(io,:,iat))
    end do
-   if (prtdos==2) then
-     do io=1,PHdos%nomega
-       PHdos%pjdos_type_int(io,itype)=PHdos%pjdos_type_int(io,itype)+SUM(PHdos%pjdos_int(io,:,iat))
+   if (prtdos == 2) then
+     do io=1,phdos%nomega
+       phdos%pjdos_type_int(io,itype) = phdos%pjdos_type_int(io,itype) + sum(phdos%pjdos_int(io,:,iat))
      end do
    end if
  end do
 
  ! Evaluate IDOS using simple simpson integration
- ! TODO should avoid the simpson rule using derf.F90, just to be consistent
- if (prtdos==1) then
-   call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%phdos,PHdos%phdos_int)
-   !do iat=1,natom
-   !  do idir=1,3
-   !    call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos(:,idir,iat),PHdos%pjdos_int(:,idir,iat))
-   !  end do
-   !end do
-   do itype=1,Crystal%ntypat
-     call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos_type(:,itype),PHdos%pjdos_type_int(:,itype))
+ ! In principle one could use derf.F90, just to be consistent ...
+ if (prtdos == 1) then
+   call simpson_int(phdos%nomega,phdos%omega_step, phdos%phdos, phdos%phdos_int)
+   do iat=1,natom
+     do idir=1,3
+       call simpson_int(phdos%nomega, phdos%omega_step, phdos%pjdos(:,idir,iat), phdos%pjdos_int(:,idir,iat))
+     end do
+   end do
+   do itype=1,crystal%ntypat
+     call simpson_int(phdos%nomega, phdos%omega_step, phdos%pjdos_type(:,itype), phdos%pjdos_type_int(:,itype))
    end do
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')" mkphdos completed. cpu:",cpu,", wall:",wall
+ ABI_FREE(qibz)
+ ABI_FREE(wtq_ibz)
+
+ call cwtime(cpu, wall, gflops, "stop")
+ write(msg,'(2(a,f8.2))')" mkphdos completed. cpu:", cpu, ", wall:", wall
  call wrtout(std_out, msg, do_flush=.True.)
 
  DBG_EXIT("COLL")
@@ -1295,13 +1102,13 @@ end subroutine mkphdos
 
 !----------------------------------------------------------------------
 
-!!****f* m_phonons/thermal_supercell_make
+!!****f* m_phonons/zacharias_supercell_make
 !! NAME
-!! thermal_supercell_make
+!! zacharias_supercell_make
 !!
 !! FUNCTION
 !!  Construct an optimally thermalized supercell following Zacharias and Giustino
-!! PRB 94 075125 (2016)
+!!  PRB 94 075125 (2016) [[cite:Zacharias2016]]
 !!
 !! INPUTS
 !!
@@ -1318,17 +1125,7 @@ end subroutine mkphdos
 !!
 !! SOURCE
 
-subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
-&    rlatt, tempermin, temperinc, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_make'
-!End of the abilint section
-
- implicit none
+subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, temperinc, thm_scells)
 
 !Arguments ------------------------------------
 !scalars
@@ -1347,7 +1144,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 !arrays
  integer, allocatable :: modeindex(:)
  real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
- real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
+ real(dp), allocatable :: qbz(:,:), qibz(:,:), wtq_ibz(:)
  real(dp), allocatable :: phfrq_allq(:), phdispl_allq(:,:,:,:,:)
  real(dp), allocatable :: phfrq(:), phdispl(:,:,:,:),pheigvec(:,:,:,:)
  real(dp), allocatable :: phdispl1(:,:,:)
@@ -1356,7 +1153,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 ! *************************************************************************
 
  ! check inputs
-! TODO: add check that all rlatt are the same on input
+ ! TODO: add check that all rlatt are the same on input
 
  if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
 &    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
@@ -1377,7 +1174,7 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
 
  ! This call will set nqibz, IBZ and BZ arrays
  call kpts_ibz_from_kptrlatt(crystal, rlatt, qptopt1, 1, qshft, &
-&   nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+&   nqibz, qibz, wtq_ibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
  ABI_FREE(qshft)
 
  ! allocate arrays with all of the q, omega, and displacement vectors
@@ -1462,6 +1259,225 @@ subroutine thermal_supercell_make(Crystal, Ifc, ntemper, &
  ABI_FREE(phdispl1)
  ABI_FREE(qibz)
  ABI_FREE(qbz)
+ ABI_FREE(wtq_ibz)
+
+end subroutine zacharias_supercell_make
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/thermal_supercell_make
+!! NAME
+!! thermal_supercell_make
+!!
+!! FUNCTION
+!!  Construct an random thermalized supercell configuration, as in TDEP
+!!  main function is for training set generation in multibinit
+!!
+!! INPUTS
+!!   Crystal = crystal object with rprim etc...
+!!   Ifc = interatomic force constants object from anaddb
+!!   option = option to deal with negative frequency -> Bose factor explodes (eg acoustic at Gamma)
+!!      several philosophies to be implemented for the unstable modes:
+!!      option == 1 =>  ignore
+!!      option == 2 =>  populate them according to a default amplitude
+!!      option == 3 =>  populate according to their modulus squared
+!!      option == 4 =>  USER defined value(s), require namplitude and amplitude
+!!   nconfig = numer of requested configurations
+!!   rlatt = matrix of conversion for supercell (3 0 0   0 3 0   0 0 3 for example)
+!!   temperature_K =  temperature in Kelvin
+!!   nqpt = number of q-point
+!!   namplitude = number of amplitude provided by the user
+!!   amplitudes(namplitude) = list of the amplitudes of the unstable phonons
+!!                            amplitudes(1:3,iamplitude) = qpt
+!!                            amplitudes(4,iamplitude)   = mode
+!!                            amplitudes(5,iamplitude)   = amplitude
+!!
+!! OUTPUT
+!!   thm_scells = array of configurations with thermalized supercells
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,option,&
+&                                 rlatt, temperature_K, thm_scells)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: option,nconfig
+ integer, intent(in) :: rlatt(3,3)
+ real(dp), intent(in) :: temperature_K
+ type(crystal_t),intent(in) :: Crystal
+ type(ifc_type),intent(in) :: Ifc
+ type(supercell_type), intent(out) :: thm_scells(nconfig)
+ integer,intent(in) :: namplitude
+!Local variables-------------------------------
+!scalars
+ integer :: iq, nqibz, nqbz, qptopt1, iampl ,imode, ierr, iconfig
+ real(dp) :: temperature, sigma, freeze_displ
+ real(dp) :: rand !, rand1, rand2
+ real(dp),intent(in):: amplitudes(5,namplitude)
+ !arrays
+ real(dp), allocatable :: qshft(:,:) ! dummy with 2 dimensions for call to kpts_ibz_from_kptrlatt
+ real(dp), allocatable :: qbz(:,:), qibz(:,:), wtqibz(:)
+ real(dp), allocatable :: phfrq_allq(:,:), phdispl_allq(:,:,:,:,:)
+ real(dp), allocatable :: phfrq(:), phdispl(:,:,:,:),pheigvec(:,:,:,:)
+ real(dp), allocatable :: phdispl1(:,:,:)
+ character (len=500) :: msg
+
+! *************************************************************************
+! check inputs
+! TODO: add check that all rlatt are the same on input
+ if (rlatt(1,2)/=0 .or.  rlatt(1,3)/=0 .or.  rlatt(2,3)/=0 .or. &
+&    rlatt(2,1)/=0 .or.  rlatt(3,1)/=0 .or.  rlatt(3,2)/=0) then
+   write (msg, '(4a, 9I6, a)') ' for the moment I have not implemented ', &
+&    ' non diagonal supercells.',ch10,' rlatt for temp 1 = ', rlatt, ' Returning '
+   MSG_WARNING(msg)
+   return
+ end if
+
+ temperature = temperature_K /  Ha_K
+
+ ! build qpoint grid used for the Fourier interpolation.
+ !(use no syms for the moment!)
+ qptopt1 = 3
+
+ ! for the moment do not allow shifted q grids.
+ ! We are interpolating anyway, so it will always work
+ ABI_MALLOC(qshft,(3,1))
+ qshft(:,1)=zero
+
+ ! This call will set nqibz, IBZ and BZ arrays
+ call kpts_ibz_from_kptrlatt(crystal, rlatt, qptopt1, 1, qshft, &
+&   nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+ ABI_FREE(qshft)
+
+ ! allocate arrays wzith all of the q, omega, and displacement vectors
+ ABI_STAT_MALLOC(phfrq_allq, (3*Crystal%natom, nqibz), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
+ ABI_STAT_MALLOC(phdispl_allq, (2, 3, Crystal%natom, 3*Crystal%natom, nqibz), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+
+ ABI_STAT_MALLOC(phfrq, (3*Crystal%natom), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phfrq_allq')
+ ABI_STAT_MALLOC(phdispl, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+ ABI_STAT_MALLOC(pheigvec, (2, 3, Crystal%natom, 3*Crystal%natom), ierr)
+ ABI_CHECK(ierr==0, 'out-of-memory in phdispl_allq')
+
+ ! loop over q to get all frequencies and displacement vectors
+ imode = 0
+ do iq = 1, nqibz
+   ! Fourier interpolation.
+   call ifc_fourq(Ifc, Crystal, qibz(:,iq), phfrq, phdispl, out_eigvec=pheigvec)
+   phfrq_allq(1:3*Crystal%natom, iq) = phfrq
+   phdispl_allq(1:2, 1:3, 1:Crystal%natom, 1:3*Crystal%natom, iq) = phdispl
+ end do
+ ABI_FREE(phfrq)
+ ABI_FREE(pheigvec)
+ ABI_FREE(phdispl)
+
+ ! only diagonal supercell case for the moment
+ do iconfig = 1, nconfig
+   call init_supercell(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, Crystal%znucl, thm_scells(iconfig))
+ end do
+
+ ! precalculate phase factors???
+
+ ABI_STAT_MALLOC(phdispl1, (2, 3, Crystal%natom), ierr)
+
+ ! for all modes at all q in whole list, sorted
+ do iq = 1, nqibz
+   do imode = 1, 3*Crystal%natom
+
+     ! skip modes with too low or negative frequency -> Bose factor explodes (eg acoustic at Gamma)
+     ! TODO: check the convergence wrt the tolerance
+     ! several philosophies to be implemented for the unstable modes:
+     ! 1) ignore
+     ! 2) populate them according to a default amplitude
+     ! 3) populate according to their modulus squared
+     if (abs(phfrq_allq(imode, iq))<tol6) cycle
+
+     phdispl1 = phdispl_allq(:,:,:,imode,iq)
+
+     ! loop over configurations
+     do iconfig = 1, nconfig
+
+       ! trick supercell object into using present q point
+       thm_scells(iconfig)%qphon(:) = qibz(:,iq)
+
+       ! find thermal displacement amplitude eq 4 of Zacharias
+       !   combined with l_nu,q expression in paragraph before
+       if (phfrq_allq(imode, iq) > tol6) then
+         sigma = sqrt( (bose_einstein(phfrq_allq(imode,iq), temperature) + half)/phfrq_allq(imode,iq))
+       else
+         !Treat negative frequencies
+         select case (option)
+         case(1)
+           !Do not populate
+           sigma = 0._dp
+         case(2)
+           !Default amplitude for all the frequencies
+           sigma = 100._dp
+         case(3)
+           !Absolute value of the frequencies
+           sigma=sqrt((bose_einstein(abs(phfrq_allq(imode,iq)),temperature)+half)/&
+&                abs(phfrq_allq(imode,iq)))
+         case(4)
+           sigma = 0._dp
+           !Search if the amplitude of this unstable phonon is in the input argument amplitudes
+           do iampl=1,namplitude
+             if(abs(thm_scells(iconfig)%qphon(1) - amplitudes(1,iampl)) < tol8.and.&
+&               abs(thm_scells(iconfig)%qphon(2) - amplitudes(2,iampl)) < tol8.and.&
+&               abs(thm_scells(iconfig)%qphon(3) - amplitudes(3,iampl)) < tol8.and.&
+&               abs(imode - amplitudes(4,iampl)) < tol8) then
+               sigma = amplitudes(5,iampl)
+             end if
+           end do
+           !If not, the amplitude is zero
+           if(abs(sigma) < tol8)then
+             write (msg, '(a,I0,a,3es12.5,2a,I0)') ' The amplitude of the unstable mode ',&
+&                int(imode),' of the qpt ',thm_scells(iconfig)%qphon(:), ch10,&
+&                'is set to zero for the configuration ',iconfig
+             MSG_WARNING(msg)
+           end if
+         end select
+       end if
+
+       ! add displacement for this mode to supercell positions eq 5 of Zacharias
+       call RANDOM_NUMBER(rand)
+       rand = two * rand - one
+
+       ! from TDEP documentation for gaussian distribution of displacements
+       !call RANDOM_NUMBER(rand1)
+       !call RANDOM_NUMBER(rand2)
+       ! rand = sqrt(-two*rand1) * sin(twopi*rand2)
+
+       ! if (rand > half) then
+       !   rand = one
+       ! else
+       !   rand = -one
+       ! end if
+
+       freeze_displ =  rand * sigma
+
+       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))
+     end do !iconfig
+   end do !imode
+ end do !iq
+
+ ABI_FREE(phfrq_allq)
+ ABI_FREE(phdispl_allq)
+ ABI_FREE(phdispl1)
+ ABI_FREE(qibz)
+ ABI_FREE(qbz)
  ABI_FREE(wtqibz)
 
 end subroutine thermal_supercell_make
@@ -1491,39 +1507,29 @@ end subroutine thermal_supercell_make
 !!
 !! SOURCE
 
-subroutine thermal_supercell_free(ntemper, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_free'
-!End of the abilint section
-
- implicit none
+subroutine thermal_supercell_free(nscells, thm_scells)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: ntemper
+ integer, intent(in) :: nscells
  type(supercell_type), allocatable, intent(inout) :: thm_scells(:)
 
 ! local
- integer :: itemp
+ integer :: icell
 
  if(allocated(thm_scells)) then
-   do itemp = 1, ntemper
-     call destroy_supercell(thm_scells(itemp))
+   do icell = 1, nscells
+     call destroy_supercell(thm_scells(icell))
    end do
-   ABI_FREE(thm_scells)
  end if
 end subroutine thermal_supercell_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_phonons/thermal_supercell_print
+!!****f* m_phonons/zacharias_supercell_print
 !! NAME
-!! thermal_supercell_print
+!! zacharias_supercell_print
 !!
 !! FUNCTION
 !!  print files with thermal array of supercells
@@ -1543,16 +1549,7 @@ end subroutine thermal_supercell_free
 !!
 !! SOURCE
 
-subroutine thermal_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'thermal_supercell_print'
-!End of the abilint section
-
- implicit none
+subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_scells)
 
 !Arguments ------------------------------------
 !scalars
@@ -1573,8 +1570,56 @@ subroutine thermal_supercell_print(fname, ntemper, tempermin, temperinc, thm_sce
    temper = dble(itemp-1)*temperinc+tempermin
    write (temper_str,'(I8)') int(temper)
    write (filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
-   write (title1, '(3a)') "#  thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
+   write (title1, '(3a)') "#  Zacharias thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
    title2 = "#  generated with alternating thermal displacements of all phonons"
+   call prt_supercell (filename, thm_scells(itemp), title1, title2)
+ end do
+
+end subroutine zacharias_supercell_print
+!!***
+
+!!****f* m_phonons/thermal_supercell_print
+!! NAME
+!! thermal_supercell_print
+!!
+!! FUNCTION
+!!  print files with thermalized array of random supercell configurations
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!      ifc_fourq,kpath_free,phonons_ncwrite,phonons_write_gnuplot
+!!      phonons_write_phfrq,phonons_write_xmgrace,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: nconfig
+ type(supercell_type), intent(in) :: thm_scells(nconfig)
+ character(len=fnlen), intent(in) :: fname
+ real(dp), intent(in) :: temperature_K
+
+! local
+ integer :: iconfig,itemp
+ character(len=80) :: title1, title2
+ character(len=fnlen) :: filename
+ character(len=10) :: config_str
+
+ do iconfig = 1, nconfig
+   write (config_str,'(I8)') iconfig
+   write (filename, '(3a)') trim(fname), "_cf_", trim(adjustl(config_str))
+   write (title1, '(a,I6,a)') "#  thermalized supercell at temperature T= ", temperature_K, " Kelvin"
+   title2 = "#  generated with random thermal displacements of all phonons"
    call prt_supercell (filename, thm_scells(itemp), title1, title2)
  end do
 
@@ -1610,15 +1655,6 @@ end subroutine thermal_supercell_print
 !! SOURCE
 
 subroutine phdos_ncwrite(phdos,ncid)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_ncwrite'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1656,33 +1692,19 @@ subroutine phdos_ncwrite(phdos,ncid)
 
  ! Write variables. Note unit conversion.
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), phdos%prtdos))
- NCF_CHECK(nf90_put_var(ncid, vid('dossmear'), phdos%dossmear*Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('wmesh'), phdos%omega*Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('phdos'), phdos%phdos/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos'), phdos%pjdos/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos_type'), phdos%pjdos_type/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
- NCF_CHECK(nf90_put_var(ncid, vid('msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "prtdos"), phdos%prtdos))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'dossmear'), phdos%dossmear*Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'wmesh'), phdos%omega*Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdos'), phdos%phdos/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos'), phdos%pjdos/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_type'), phdos%pjdos_type/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
 
 #else
  MSG_ERROR("netcdf support not enabled")
  ABI_UNUSED((/ncid, phdos%nomega/))
 #endif
-
-contains
- integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
 
 end subroutine phdos_ncwrite
 !!***
@@ -1720,18 +1742,6 @@ end subroutine phdos_ncwrite
 
 subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkphbs'
- use interfaces_14_hidewrite
- use interfaces_72_response
- use interfaces_77_ddb
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -1752,7 +1762,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  real(dp) :: cfact
  character(500) :: msg
  character(len=8) :: unitname
-
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer :: nomega, imode, iomega
@@ -1934,7 +1943,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
@@ -2041,17 +2050,7 @@ end subroutine mkphbs
 !!
 !! SOURCE
 
-subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
-&   speedofsound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_calc_vsound'
-!End of the abilint section
-
- implicit none
+subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon,speedofsound)
 
 !Arguments -------------------------------
 !scalras
@@ -2059,7 +2058,6 @@ subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
 !arrays
  real(dp), intent(in) :: gmet(3,3),qphon(3)
  real(dp), intent(in) :: phfrq(3*natom),eigvec(2,3*natom,3*natom)
-
  real(dp), intent(out) :: speedofsound(3)
 
 !Local variables -------------------------
@@ -2085,7 +2083,7 @@ subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
 &           *eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
    end do
    if (isacoustic == 0) cycle
-   imode_acoustic = imode_acoustic + 1
+   imode_acoustic = min(imode_acoustic + 1, 3)
 
 !   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
 !   call wrtout(std_out,msg,'COLL')
@@ -2123,16 +2121,6 @@ end subroutine phdos_calc_vsound
 !! SOURCE
 
 subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_vsound'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalras
@@ -2172,9 +2160,6 @@ subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
 end subroutine phdos_print_vsound
 !!***
 
-
-
-
 !----------------------------------------------------------------------
 
 !!****f* m_phonons/phdos_print_msqd
@@ -2185,6 +2170,7 @@ end subroutine phdos_print_vsound
 !! FUNCTION
 !!  Print out mean square displacement and velocity for each atom (trace and full matrix) as a function of T
 !!  see for example https://atztogo.github.io/phonopy/thermal-displacement.html#thermal-displacement
+!!  Only master node should call this routine.
 !!
 !! INPUTS
 !!   PHdos structure
@@ -2202,15 +2188,6 @@ end subroutine phdos_print_vsound
 !! SOURCE
 
 subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_msqd'
-!End of the abilint section
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2240,31 +2217,21 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    MSG_ERROR(msg)
  end if
 
-! write a header
-   write (msg, '(2a)') '# mean square displacement for each atom as a function of T (bohr^2)'
+ ! write the header
+ write (iunit, '(a)') '# mean square displacement for each atom as a function of T (bohr^2)'
+ write (junit, '(a)') "# mean square velocity for each atom as a function of T (bohr^2/atomic time unit^2)"
 
-! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master.
-!  Do not change this to wrtout without checking extensively.
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
+ write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
+ write (iunit, '(a)') trim(msg)
+ write (junit, '(a)') trim(msg)
 
-   write (msg, '(2a)') '# mean square velocity for each atom as a function of T (bohr^2/atomic time unit^2)'
-   write (junit, '(a)') trim(msg)
-
-   write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
-   write (junit, '(a)') trim(msg)
-
-   write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
-&                                              '                u_yz                u_xz                u_xy in bohr^2'
-   !call wrtout(iunit, msg, 'COLL')
-   write (iunit, '(a)') trim(msg)
-   write (msg, '(3a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
-&                                              '                v_yz                v_xz                v_xy',&
-&                                              ' in bohr^2/atomic time unit^2'
-   !call wrtout(iunit, msg, 'COLL')
-   write (junit, '(a)') trim(msg)
+ write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
+&                                            '                u_yz                u_xz                u_xy in bohr^2'
+ write (iunit, '(a)') trim(msg)
+ write (msg, '(3a)') '#    T             |v^2|                v_xx                v_yy                v_zz',&
+&                                            '                v_yz                v_xz                v_xy',&
+&                                            ' in bohr^2/atomic time unit^2'
+ write (junit, '(a)') trim(msg)
 
  ABI_ALLOCATE (tmp_msqd, (PHdos%nomega,9))
  ABI_ALLOCATE (tmp_msqv, (PHdos%nomega,9))
@@ -2274,7 +2241,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_ALLOCATE (bose_msqv, (PHdos%nomega, ntemper))
 
  do io=1, PHdos%nomega
-     if (PHdos%omega(io) >= 1.d-10) exit
+   if ( PHdos%omega(io) >= 2._dp * 4.56d-6 ) exit ! 2 cm-1 TODO: make this an input parameter
  end do
  iomin = io
 
@@ -2283,11 +2250,11 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  bose_msqv = zero
  do itemp = 1, ntemper
    temper = tempermin + (itemp-1) * temperinc
-   if (abs(temper) < 1.e-10) cycle
+   if (temper < 1.e-3) cycle ! millikelvin at least to avoid exploding Bose factor(TM)
    do io = iomin, PHdos%nomega
-! NB: factors follow convention in phonopy documentation
-!   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
-!   bose() is dimensionless
+     ! NB: factors follow convention in phonopy documentation
+     ! the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
+     ! bose() is dimensionless
      !bose_msqd(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) / PHdos%omega(io)
      !bose_msqv(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) * PHdos%omega(io)
      bose_msqd(io, itemp) =  (half + bose_einstein(PHdos%omega(io),kb_HaK*temper)) / PHdos%omega(io)
@@ -2297,35 +2264,32 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 
  do iatom=1,PHdos%natom
    write (msg, '(a,I8)') '# atom number ', iatom
-   !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
    write (junit, '(a)') trim(msg)
 
-! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
+   ! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
    integ_msqd = zero
    tmp_msqd = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
-! perform all integrations as matrix multiplication: integ_msqd (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose_msqd(io,itemp)
-   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega,&
-&      bose_msqd, PHdos%nomega, zero, integ_msqd, 9)
-! NB: this presumes an equidistant omega grid
+
+   ! perform all integrations as matrix multiplication: integ_msqd (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose_msqd(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega, bose_msqd, PHdos%nomega, zero, integ_msqd, 9)
+   ! NB: this presumes an equidistant omega grid
    integ_msqd = integ_msqd * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
    integ_msqv = zero
    tmp_msqv = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
-! perform all integrations as matrix multiplication: integ_msqv (idir, itemp) = [tmp_msqv(io,idir)]^T  * bose_msqv(io,itemp)
-   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqv,PHdos%nomega,&
-&      bose_msqv, PHdos%nomega, zero, integ_msqv, 9)
-! NB: this presumes an equidistant omega grid
+
+   ! perform all integrations as matrix multiplication: integ_msqv (idir, itemp) = [tmp_msqv(io,idir)]^T  * bose_msqv(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqv,PHdos%nomega, bose_msqv, PHdos%nomega, zero, integ_msqv, 9)
+   ! NB: this presumes an equidistant omega grid
    integ_msqv = integ_msqv * (PHdos%omega(2)-PHdos%omega(1)) / PHdos%atom_mass(iatom)
 
-
-! print out stuff
+   ! print out stuff
    do itemp = 1, ntemper
      temper = tempermin + (itemp-1) * temperinc
      write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqd(1,itemp)+integ_msqd(5,itemp)+integ_msqd(9,itemp)), &
 &                      integ_msqd(1,itemp),integ_msqd(5,itemp),integ_msqd(9,itemp), &
 &                      integ_msqd(6,itemp),integ_msqd(3,itemp),integ_msqd(2,itemp)
-     !call wrtout(iunit, msg, 'COLL')
      write (iunit, '(a)') trim(msg)
      write (msg, '(F10.2,4x,E22.10,2x,6E22.10)') temper, third*(integ_msqv(1,itemp)+integ_msqv(5,itemp)+integ_msqv(9,itemp)), &
 &                      integ_msqv(1,itemp),integ_msqv(5,itemp),integ_msqv(9,itemp), &
@@ -2333,7 +2297,6 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
      write (junit, '(a)') trim(msg)
    end do ! itemp
 
-   !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') ''
    write (junit, '(a)') ''
  enddo ! iatom
@@ -2344,6 +2307,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_DEALLOCATE (bose_msqv)
  ABI_DEALLOCATE (integ_msqd)
  ABI_DEALLOCATE (integ_msqv)
+
  close(iunit)
  close(junit)
 
@@ -2386,15 +2350,6 @@ end subroutine phdos_print_msqd
 
 subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_ncwrite'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,nqpts
@@ -2436,13 +2391,6 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 contains
  integer function vid(vname)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -2483,15 +2431,6 @@ end subroutine phonons_ncwrite
 !! SOURCE
 
  subroutine phonons_write_phfrq(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_phfrq'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2586,15 +2525,6 @@ end subroutine phonons_write_phfrq
 !! SOURCE
 
 subroutine phonons_writeEPS(natom,nqpts,ntypat,typat,phfreq,phdispl_cart)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_writeEPS'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3011,15 +2941,6 @@ end subroutine phonons_writeEPS
 
 subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbounds)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_xmgrace'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nqpts
@@ -3148,15 +3069,6 @@ end subroutine phonons_write_xmgrace
 !! SOURCE
 
 subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'phonons_write_gnuplot'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3288,15 +3200,6 @@ end subroutine phonons_write_gnuplot
 
 subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_mkphbs'
-!End of the abilint section
-
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
@@ -3308,10 +3211,10 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr
- !character(500) :: msg
+ integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr,nph2l
  type(kpath_t) :: qpath
 !arrays
+ real(dp),allocatable :: qph2l(:,:), qnrml2(:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),weights(:)
 
 ! *********************************************************************
@@ -3319,7 +3222,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  if (dtset%prtphbands == 0) return
 
  if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
-   MSG_WARNING("ph_nqpath <=0 or ph_ndivsm <= 0, phonon bands won't be produced. returning")
+   MSG_WARNING("ph_nqpath <= 0 or ph_ndivsm <= 0. Phonon bands won't be produced. returning")
    return
  end if
 
@@ -3346,15 +3249,48 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    ABI_MALLOC(weights, (nqpts))
    weights = one
 
+   ! Compute directions for non-analytical behaviour.
+   ! TODO: The same approach should be used in anaddb.
+   ABI_MALLOC(qph2l, (3, 2*dtset%ph_nqpath))
+   ABI_MALLOC(qnrml2, (2*dtset%ph_nqpath))
+   nph2l = 0
+   if (any(ifc%zeff /= zero)) then
+     do iqpt=1,dtset%ph_nqpath
+       if (sum(dtset%ph_qpath(:, iqpt)**2) < tol14) then
+         nph2l = nph2l + 1
+         if (iqpt == 1) then
+           qph2l(:, nph2l) = dtset%ph_qpath(:, 2) - dtset%ph_qpath(:, 1)
+         else if (iqpt == dtset%ph_nqpath) then
+           qph2l(:, nph2l) = dtset%ph_qpath(:, dtset%ph_nqpath - 1) - dtset%ph_qpath(:, dtset%ph_nqpath)
+         else
+           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt - 1) - dtset%ph_qpath(:, iqpt)
+           nph2l = nph2l + 1
+           qph2l(:, nph2l) = dtset%ph_qpath(:, iqpt + 1) - dtset%ph_qpath(:, iqpt)
+         end if
+       end if
+     end do
+     ! Convert to Cartesian coordinates.
+     do iqpt=1,nph2l
+       qph2l(:, iqpt) = matmul(cryst%gprimd, qph2l(:, iqpt))
+     end do
+     qnrml2 = zero
+   end if
+
 #ifdef HAVE_NETCDF
+   ! TODO: A similar piece of code is used in anaddb (mkpbs + ifc_calcnwrite_nana_terms).
+   ! Should centralize everything in a single routine
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   call phonons_ncwrite(ncid,natom,nqpts, qpath%points, weights, phfrqs, phdispl_cart)
-   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
+   NCF_CHECK(cryst%ncwrite(ncid))
+   call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")], defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
+   if (nph2l /= 0) call ifc_calcnwrite_nana_terms(ifc, cryst, nph2l, qph2l, qnrml2, ncid=ncid)
    NCF_CHECK(nf90_close(ncid))
 #endif
+
+   ABI_FREE(qph2l)
+   ABI_FREE(qnrml2)
 
    select case (dtset%prtphbands)
    case (1)
@@ -3412,17 +3348,6 @@ end subroutine ifc_mkphbs
 !! SOURCE
 
 subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_symph'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3573,9 +3498,7 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
    if(sum(integer_characters(:))==3*natom)exit
  end do !itol
 
-!DEBUG
 !write(std_out,*)' dfpt_symph : degeneracy=',degeneracy(:)
-!ENDDEBUG
 
  write(message,'(a,a,es8.2,a)')ch10,&
 & ' Analysis of degeneracies and characters (maximum tolerance=',ntol*tol6,' a.u.)'
@@ -3589,7 +3512,7 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
      call wrtout(std_out,message,'COLL')
      if(degeneracy(imode)>=2)then
        if(degeneracy(imode)==2) write(message,'(a,i4)') &
-&       '        degenerate with vibration mode #',imode+1
+'        degenerate with vibration mode #',imode+1
        if(degeneracy(imode)>=3) write(message,'(a,i4,a,i4)') &
 &       '       degenerate with vibration modes #',imode+1,' to ',imode+degeneracy(imode)-1
        call wrtout(iout,message,'COLL')
@@ -3612,6 +3535,90 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
  ABI_DEALLOCATE(symind)
 
 end subroutine dfpt_symph
+!!***
+
+!!****f* m_phonons/freeze_displ_allmodes
+!!
+!! NAME
+!! freeze_displ_allmodes
+!!
+!! FUNCTION
+!!  From a given set of phonon modes, generate and output supercells and
+!!  displaced configurations of atoms.
+!!  Typically useful to follow soft modes and see distorsions of crystal structures
+!!
+!! INPUTS
+!! amu(ntypat) = mass of the atoms (atomic mass unit)
+!! displ(2,3*natom,3*natom) = phonon mode displacements (complex)
+!! freeze_displ = amplitude of the displacement to freeze into the supercell
+!! natom = number of atoms in the unit cell
+!! ntypat = number of atom types
+!! phfrq(3*natom) = phonon frequencies
+!! qphnrm = norm of phonon q vector (should be 1 or 0)
+!! qphon = phonon wavevector
+!! rprimd(3,3) = dimensionfull primitive translations in real space
+!! typat(natom) = integer label of each type of atom (1,2,...)
+!! xcart(3,natom) = cartesian coords of atoms in unit cell (bohr)
+!!
+!! OUTPUT
+!! for the moment only prints to file, but could also return pointer to supercell object, with
+!! rprimd and atomic positions, for further use
+!!
+!! NOTES
+!! freeze_displ could be determined automatically from a temperature and the phonon frequency,
+!! as the average displacement of the mode with a Bose distribution.
+!!
+!! PARENTS
+!!      m_phonons
+!!
+!! CHILDREN
+!!      destroy_supercell,freeze_displ_supercell,init_supercell_for_qpt
+!!      prt_supercell_for_qpt
+!!
+!! SOURCE
+!!
+
+subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfreq,  &
+&         qphon, rprimd, typat, xcart, znucl)
+
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom
+ character(len=*),intent(in) :: outfile_radix
+ real(dp), intent(in) :: freeze_displ
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: displ(2,3*natom,3*natom)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: phfreq(3*natom)
+ real(dp),intent(in) :: qphon(3)
+ real(dp),intent(in) :: xcart(3,natom)
+ real(dp),intent(in) :: znucl(:)
+
+! local vars
+ integer :: jmode
+ type(supercell_type) :: scell
+
+! *************************************************************************
+
+!determine supercell needed to freeze phonon
+ call init_supercell_for_qpt(natom, qphon, rprimd, typat, xcart, znucl, scell)
+
+ do jmode = 1, 3*natom
+! reset positions
+   scell%xcart = scell%xcart_ref
+
+!  displace atoms according to phonon jmode
+   call freeze_displ_supercell(displ(:,:,jmode), freeze_displ, scell)
+
+!  print out everything for this wavevector and mode
+   call prt_supercell_for_qpt (phfreq(jmode), jmode, outfile_radix, scell)
+ end do
+
+ call destroy_supercell (scell)
+
+end subroutine freeze_displ_allmodes
 !!***
 
 end module m_phonons

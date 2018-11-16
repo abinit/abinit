@@ -2,12 +2,13 @@
 description: How to set parameters for a multi dataset calculation
 authors: XG
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters for a multi dataset calculation with the ABINIT package.
 
 ## Introduction
 
-The simplest use of ABINIT corresponds to one task, with one set of data : for
+The simplest use of ABINIT corresponds to one task, with one set of data: for
 example, determination of the total energy for some geometry, with some set of
 plane waves and some set of k-points.
 
@@ -37,6 +38,10 @@ with a non-self-consistent calculation of the Kohn-Sham band structure, or
 [[getwfk]] for chaining a ground-state determination of wavefunctions with a
 DFPT or GW computation.
 
+!!! tip
+
+    |AbiPy| provides a programmatic interface to generate input files from python. 
+    For futher detail, please consult the |AbinitInputNb|.
 
 
 ## Related Input Variables

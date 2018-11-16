@@ -2,6 +2,7 @@
 description: How to to tune the computation of forces and stresses
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to to tune the computation of forces and stresses with the ABINIT package.
 
@@ -41,8 +42,8 @@ need a conversion scale, set by [[strprecon]].
 
 ## Tutorials
 
-* [[lesson:base1|The lesson 1]] deals with the H2 molecule: get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy 
-* [[lesson:base2|The lesson 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
-* [[lesson:base3|The lesson 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
-* [[lesson:base4|The lesson 4]] deals with crystalline aluminum (a metal), and its surface: occupation numbers, smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
+* [[tutorial:base1|The tutorial 1]] deals with the H2 molecule: get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy 
+* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [[tutorial:base3|The tutorial 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
+* [[tutorial:base4|The tutorial 4]] deals with crystalline aluminum (a metal), and its surface: occupation numbers, smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
 

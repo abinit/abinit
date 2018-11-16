@@ -26,11 +26,12 @@
 module m_anaddb_dataset
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
- use m_parser,    only : intagm
+ use m_symtk,     only : mati3det
+ use m_parser,    only : intagm, chkvars_in_string
  use m_ddb,       only : DDB_QTOL
 
  implicit none
@@ -224,13 +225,6 @@ contains
 
 subroutine anaddb_dtset_free(anaddb_dtset)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_dtset_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -309,15 +303,6 @@ end subroutine anaddb_dtset_free
 !! SOURCE
 
 subroutine invars9 (anaddb_dtset,lenstr,natom,string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'invars9'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
 
  implicit none
 
@@ -1236,12 +1221,12 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%rifcsph=zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rifcsph',tread,'DPR')
  if(tread==1) anaddb_dtset%rifcsph=dprarr(1)
- if(anaddb_dtset%rifcsph<-tol12)then
-   write(message, '(a,f10.3,3a)' )&
-&   'rifcsph is ',anaddb_dtset%rifcsph,', which is lower than zero.',ch10,&
-&   'Action: correct rifcsph in your input file.'
-   MSG_ERROR(message)
- end if
+! if(anaddb_dtset%rifcsph<-tol12)then
+!   write(message, '(a,f10.3,3a)' )&
+!&   'rifcsph is ',anaddb_dtset%rifcsph,', which is lower than zero.',ch10,&
+!&   'Action: correct rifcsph in your input file.'
+!   MSG_ERROR(message)
+! end if
 
 !S
 
@@ -1774,13 +1759,6 @@ end subroutine invars9
 
 subroutine outvars_anaddb (anaddb_dtset,nunit)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvars_anaddb'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -1881,10 +1859,6 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(a)')' Phonon DOS information :'
    write(nunit,'(3x,a9,es16.8)')'dosdeltae',anaddb_dtset%dosdeltae
    write(nunit,'(3x,a9,es16.8)')' dossmear',anaddb_dtset%dossmear
-   write(nunit,'(a)')' Description of grid 2 for Fourier interpolation :'
-   write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
-   write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
-   write(nunit,'(3x,a9,7x,3es16.8)')'   q2shft',anaddb_dtset%q2shft(1:3)
  end if
 
 !Thermal information
@@ -1897,7 +1871,11 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9,3i10)')'  ntemper',anaddb_dtset%ntemper
    write(nunit,'(3x,a9,7x,3es16.8)')'temperinc',anaddb_dtset%temperinc
    write(nunit,'(3x,a9,7x,3es16.8)')'tempermin',anaddb_dtset%tempermin
-   write(nunit,'(a)')' Description of grid 2 :'
+ endif
+
+!Grid 2 description
+ if(anaddb_dtset%thmflag/=0 .or. anaddb_dtset%prtdos/=0)then
+   write(nunit,'(a)')' Description of grid 2 (Fourier interp. or BZ sampling):'
    write(nunit,'(3x,a9,3i10)')'   ng2qpt',anaddb_dtset%ng2qpt(1:3)
    write(nunit,'(3x,a9,3i10)')'   ngrids',anaddb_dtset%ngrids
    write(nunit,'(3x,a9,7x,3es16.8)')'   q2shft',anaddb_dtset%q2shft(1:3)
@@ -2104,13 +2082,6 @@ end subroutine outvars_anaddb
 
 subroutine anaddb_init(filnam)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -2167,14 +2138,6 @@ end subroutine anaddb_init
 !! SOURCE
 
 subroutine anaddb_chkvars(string)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'anaddb_chkvars'
- use interfaces_57_iovars
-!End of the abilint section
 
  implicit none
 

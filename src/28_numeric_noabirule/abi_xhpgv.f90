@@ -4,11 +4,11 @@
 !!  abi_xhpgv
 !!
 !! FUNCTION
-!!  abi_xhpgv is the generic function that compute 
+!!  abi_xhpgv is the generic function that compute
 !!  all eigenvalues and, optionally, eigenvectors of a
 !!  generalized symmetric-definite eigenproblem, of the form
 !!  A*x=(lambda)*B*x,  A*Bx=(lambda)*x,  or B*A*x=(lambda)*x.
-!!  Here A and B are assumed to be symmetric (or hermitian), 
+!!  Here A and B are assumed to be symmetric (or hermitian),
 !!  stored in packed format  and B is also positive definite.
 !!
 !! COPYRIGHT
@@ -30,12 +30,6 @@
 !! SOURCE
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,info,rwork,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv'
-!End of the abilint section
 
  implicit none
 
@@ -60,7 +54,7 @@
 ! *********************************************************************
 
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-    
+
  !MG: FIXME This is clearly wrong but tests are OK!
  !if ( present(istwf_k) .and. istwf_k == 2 .and. present(rwork)) then
  if (istwf_k_ /= 2) then
@@ -80,7 +74,7 @@ end subroutine abi_dhpgv
 !! abi_dhpgv_alloc_1d
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
 !!
 !! PARENTS
@@ -88,13 +82,6 @@ end subroutine abi_dhpgv
 !! SOURCE
 !!
   subroutine abi_dhpgv_alloc_1d(itype,jobz,uplo,n,a,b,w,z,istwf_k,use_slk)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv_alloc_1d'
-
-!End of the abilint section
 
  implicit none
 
@@ -117,7 +104,7 @@ end subroutine abi_dhpgv
  type(matrix_scalapack)    :: sca_a,sca_b,sca_ev
  integer :: ierr
 #endif
-    
+
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
 
@@ -126,14 +113,14 @@ end subroutine abi_dhpgv
    MSG_ERROR(msg)
  endif
  info = 0 !to avoid unwanted warning when info is not set by scalapack
-    
+
 #ifdef HAVE_LINALG_SCALAPACK
  if (use_slk_ == 1) then
    z = 0._dp
    call init_matrix_scalapack(sca_a,n,n,abi_processor,istwf_k_,10)
    call init_matrix_scalapack(sca_b,n,n,abi_processor,istwf_k_,10)
    call init_matrix_scalapack(sca_ev,n,n,abi_processor,istwf_k_,10)
-#ifdef HAVE_LINALG_ELPA   
+#ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
    call matrix_from_global_sym(sca_b,b,istwf_k_)
 #else
@@ -152,18 +139,18 @@ end subroutine abi_dhpgv
    CALL destruction_matrix_scalapack(sca_a)
    CALL destruction_matrix_scalapack(sca_ev)
  else
-#endif    
+#endif
    call  abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,n, &    !vz_d
 &            eigen_d_work,info, rwork=eigen_z_rwork,istwf_k=istwf_k_)
 #ifdef HAVE_LINALG_SCALAPACK
  end if
 #endif
-    
+
  if(info/=0) then
    write(msg,'(a,i0)')' Problem in abi_xhpgv, info= ',info
    MSG_ERROR(msg)
  endif
-    
+
 end subroutine abi_dhpgv_alloc_1d
 !!***
 
@@ -180,13 +167,6 @@ end subroutine abi_dhpgv_alloc_1d
 !! SOURCE
 
   subroutine abi_dhpgv_alloc_2d(itype,jobz,uplo,n,a,b,w,z,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpgv_alloc_2d'
-
-!End of the abilint section
 
  implicit none
 
@@ -208,10 +188,10 @@ end subroutine abi_dhpgv_alloc_1d
 ! *********************************************************************
 
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-    
+
  call  abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,n,eigen_d_work,info,&
 &         rwork=eigen_z_rwork,istwf_k=istwf_k_)
-    
+
 end subroutine abi_dhpgv_alloc_2d
 !!***
 
@@ -228,12 +208,6 @@ end subroutine abi_dhpgv_alloc_2d
 !! SOURCE
 !!
   subroutine abi_chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpgv'
-!End of the abilint section
 
  implicit none
 
@@ -252,7 +226,7 @@ end subroutine abi_dhpgv_alloc_2d
  integer, intent(out) :: info
 
 ! *********************************************************************
-    
+
  call chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
 
 end subroutine abi_chpgv
@@ -272,13 +246,6 @@ end subroutine abi_chpgv
 
   subroutine abi_chpgv_alloc(itype,jobz,uplo,n,a,b,w,z)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpgv_alloc'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -294,7 +261,7 @@ end subroutine abi_chpgv
  integer :: info
 
 ! *********************************************************************
- 
+
  call abi_chpgv(itype,jobz,uplo,n,a,b,w,z,n,eigen_c_work,eigen_c_rwork,info)
 
 end subroutine abi_chpgv_alloc
@@ -314,12 +281,6 @@ end subroutine abi_chpgv_alloc
 
 subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpgv'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -337,7 +298,7 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
  integer, intent(out) :: info
 
  ! *********************************************************************
- 
+
  call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
 
 end subroutine abi_zhpgv
@@ -356,12 +317,6 @@ end subroutine abi_zhpgv
 !! SOURCE
 
 subroutine abi_zhpgv_alloc(itype,jobz,uplo,n,a,b,w,z)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpgv_alloc'
-!End of the abilint section
 
  implicit none
 

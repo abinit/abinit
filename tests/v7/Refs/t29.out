@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -60,6 +60,7 @@ _ WF disk file :      1.436 Mbytes ; DEN or POT disk file :      0.956 Mbytes.
         dmft_iter           1
         dmft_nwli       10000
         dmft_nwlo         100
+  dmft_occnd_imag           0
   dmft_read_occnd           1
         dmft_rslf           1
              ecut      1.20000000E+01 Hartree
@@ -346,7 +347,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     458.625     458.600
    ...  only 12  components have been written...
 
  "PAW+U" part of augmentation waves occupancies Rhoij:
- Atom #  1 - L=3 ONLY
+ L=3 ONLY
    0.13838   0.00000   0.07220   0.00000   0.00000   0.00000   0.00000   0.00873   0.00000   0.00452   0.00000   0.00000   0.00000   0.00000
    0.00000   0.32561   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.02138   0.00000   0.00000   0.00000   0.00000   0.00000
    0.07220   0.00000   0.10109   0.00000   0.00000   0.00000   0.00000   0.00452   0.00000   0.00640   0.00000   0.00000   0.00000   0.00000
@@ -461,7 +462,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     458.625     458.600
    ...  only 12  components have been written...
 
  "PAW+U" part of augmentation waves occupancies Rhoij:
- Atom #  1 - L=3 ONLY
+ L=3 ONLY
    0.09329   0.00000   0.05112   0.00000   0.00000   0.00000   0.00000   0.00803   0.00000   0.00437   0.00000   0.00000   0.00000   0.00000
    0.00000   0.26500   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.02177   0.00000   0.00000   0.00000   0.00000   0.00000
    0.05112   0.00000   0.06689   0.00000   0.00000   0.00000   0.00000   0.00437   0.00000   0.00577   0.00000   0.00000   0.00000   0.00000
@@ -576,7 +577,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     458.625     458.600
    ...  only 12  components have been written...
 
  "PAW+U" part of augmentation waves occupancies Rhoij:
- Atom #  1 - L=3 ONLY
+ L=3 ONLY
    0.53889   0.00000   0.04596   0.00000   0.00000   0.00000   0.00000  -0.02693   0.00000  -0.00219   0.00000   0.00000   0.00000   0.00000
    0.00000   0.58091   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.02625   0.00000   0.00000   0.00000   0.00000   0.00000
    0.04596   0.00000   0.51516   0.00000   0.00000   0.00000   0.00000  -0.00219   0.00000  -0.02580   0.00000   0.00000   0.00000   0.00000
@@ -813,6 +814,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     458.625     458.600
         dmft_iter           1
         dmft_nwli       10000
         dmft_nwlo         100
+  dmft_occnd_imag           0
   dmft_read_occnd           1
         dmft_rslf           1
              ecut      1.20000000E+01 Hartree
@@ -953,7 +955,7 @@ P           mkmem          10
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] A self-consistent DFT + DMFT scheme in the projector augmented wave method: 
 - applications to cerium, Ce2O3 and Pu2O3 with the Hubbard I solver and comparison to DFT + U,

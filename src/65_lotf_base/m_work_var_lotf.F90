@@ -23,7 +23,7 @@ module work_var_lotf
  use defs_basis
  use defs_param_lotf
  use m_errors
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
@@ -39,8 +39,8 @@ module work_var_lotf
  ! !--Atomflags variables
  integer,allocatable ::  ifixed(:) !--MMANCINI what is its utility
 
- !--Quantflags variables  
- integer,allocatable :: iq(:) 
+ !--Quantflags variables
+ integer,allocatable :: iq(:)
 
  !--Cutoff variables
  real(dp) :: rcut,rcut_nbl
@@ -51,30 +51,23 @@ contains
 !!***
 
 !!****f* work_var_lotf/work_var_set
- !! NAME
- !! work_var_set
- !!
- !! FUNCTION
- !!  set some internal variable of lotf
- !! INPUTS
- !!  natom=number of atoms
- !! CHILDREN
- !!
+!! NAME
+!! work_var_set
+!!
+!! FUNCTION
+!!  set some internal variable of lotf
+!! INPUTS
+!!  natom=number of atoms
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!      dist_pbc
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine work_var_set()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'work_var_set'
-!End of the abilint section
 
   implicit none
   !Local-----------------------------
@@ -82,11 +75,11 @@ contains
 
 ! *************************************************************************
 
-  !--ifixed from ATOMFLAGS is initialized : 
-   ABI_ALLOCATE(ifixed,(lotfvar%natom)) 
+  !--ifixed from ATOMFLAGS is initialized :
+   ABI_ALLOCATE(ifixed,(lotfvar%natom))
    ifixed(:) = 1
 
-  !--FINDS  FITTED ATOMS 
+  !--FINDS  FITTED ATOMS
   ! ABI_ALLOCATE(tquant,(lotfvar%natom))
   ! tquant(:) = .true.
   !  nquant = lotfvar%natom
@@ -99,65 +92,50 @@ contains
  !!***
 
 
- !!****f* work_var_lotf/work_var_dealloc
- !! NAME
- !! work_var_dealloc
- !!
- !! FUNCTION
- !!  deallocate variable
- !!
- !! INPUTS
- !!
- !! CHILDREN
- !!
+!!****f* work_var_lotf/work_var_dealloc
+!! NAME
+!! work_var_dealloc
+!!
+!! FUNCTION
+!!  deallocate variable
+!!
+!! INPUTS
+!!
 !! PARENTS
 !!      m_lotf
 !!
 !! CHILDREN
 !!      dist_pbc
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine work_var_dealloc()
 
 ! *************************************************************************
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'work_var_dealloc'
-!End of the abilint section
-
    ABI_DEALLOCATE(iq)
-   ABI_DEALLOCATE(ifixed) 
+   ABI_DEALLOCATE(ifixed)
  end subroutine work_var_dealloc
  !!***
 
 
 
- !!****f* work_var_lotf/cutoff_init
- !! NAME
- !!  cutoff_init
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+!!****f* work_var_lotf/cutoff_init
+!! NAME
+!!  cutoff_init
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!      dist_pbc
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine cutoff_init()
   use pbc_lotf,only : pbc_bb_contract
   !Local ---------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cutoff_init'
- use interfaces_14_hidewrite
-!End of the abilint section
-
   real(dp)  :: bl(3),blmin
   character(len=500) :: message
 
@@ -175,7 +153,7 @@ contains
      call wrtout(std_out,message,'COLL')
    end if
 
-  !--Cut-off check respect to cell size : 
+  !--Cut-off check respect to cell size :
    bl(:) = pbc_bb_contract()
 
    if (lotfvar%me==1) then
@@ -186,7 +164,7 @@ contains
    end if
    blmin = minval(bl)
 
-   if (rcut_nbl*blmin  > half) then  
+   if (rcut_nbl*blmin  > half) then
      write(message,'(2a,2(a,f12.6))')&
 &     'LOTF: cut off too large : ',ch10,&
 &     ' cut-off (A) is ', rcut_nbl ,  ' min. allowed : ',half/blmin
@@ -195,36 +173,30 @@ contains
  end subroutine cutoff_init
  !!***
 
- 
- !!****f* work_var_lotf/smallfit
- !! NAME
- !! smallfit
- !!
- !! FUNCTION
- !!
- !! INPUTS
- !! PARENTS
+
+!!****f* work_var_lotf/smallfit
+!! NAME
+!! smallfit
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! PARENTS
 !!      m_lotf
 !!
- !! CHILDREN
+!! CHILDREN
 !!      dist_pbc
 !!
- !! SOURCE
+!! SOURCE
+
  subroutine smallfit(tau0,ndum)
   use bond_lotf,only : tafit
   USE pbc_lotf,only : dist_pbc,r2
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'smallfit'
-!End of the abilint section
-
   implicit none
 
   !Arguments ------------------------
   integer,intent(out) :: ndum
-  real(dp),intent(in):: tau0(3,lotfvar%natom)    
+  real(dp),intent(in):: tau0(3,lotfvar%natom)
 
   !Local ---------------------------
   integer  ::  i, j, jat, nquant
@@ -236,15 +208,15 @@ contains
 
    nquant = lotfvar%natom !--to remember old notation with nquant
 
-   ndum = 0  
-   do i = 1, lotfvar%natom    
-     if(.not.tafit(i)) then   
+   ndum = 0
+   do i = 1, lotfvar%natom
+     if(.not.tafit(i)) then
        do j=1,nquant
-         jat = iq(j) 
+         jat = iq(j)
          call dist_pbc(tau0(:,i),tau0(:,jat))
-         if (r2  <  rag_fit) then 
+         if (r2  <  rag_fit) then
            tafit(i) = .true.
-           ndum = ndum + 1 
+           ndum = ndum + 1
            cycle
          end if
        end do !nqtot

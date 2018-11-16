@@ -1,4 +1,433 @@
-## v8.6
+## v8.10
+
+Version 8.10, released on October 15, 2018.
+List of changes with respect to version 8.8.
+
+Many thanks to the contributors to the ABINIT project between
+April 2018 and October 2018. These release notes
+are relative to modifications/improvements of ABINIT v8.10 with respect to v8.8.
+The merge request #408 is the first MR not reported in these release notes. Then, #410-411, #413-416 have also been included.
+
+The list of contributors includes:
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote, 
+J. Denier, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, Xu He, F. Jollet, 
+A. Lherbier, A. Martin, H. Miranda, F. Naccarato, G. Petretto, N. Pike,
+S. Ponce, Y. Pouillon, S. Prokhorenko, F. Ricci, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger.
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### A. Warnings and important remarks
+
+A.1 The correct definition of the temperature has been implemented in the isokinetic algorithm [[ionmov]]=12.
+
+A.2 The multibinit input variable "supercell" has been renamed "supercell_latt".
+
+A.3 Tests v8#100-107 have been moved to v8#81-88.
+    Tests paral#100-103 have been moved to paral#80-83
+
+* * *
+
+### B. Most noticeable achievements
+
+B.1 The computation of the Raman intensity in DFPT with PAW is now possible (it was only available with norm conserving psps previously).
+    This is based on the second-order Sternheimer equation for the derivative
+    with respect to an electric field.
+    See tests [[test:v8_81]] to [[test:v8_89]].  
+    By L. Baguet and M. Torrent.
+
+B.2 There has been a large effort to clean the documentation, that was needed and made possible thanks to the recent move to the mkdocs system.
+    In particular, many new hyperlinks have been created in dozens of markdown files, 
+    references have been centralized in the [[theory:bibliography]].  
+    By B. Amadon, G. Antonius, L. Baguet, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote, G. Geneste,
+    M. Giantomassi, X. Gonze, Xu He, F. Jollet, A. Lherbier, H. Miranda, F. Naccarato, G. Petretto, N. Pike, 
+    S. Ponce, Y. Pouillon, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger.
+
+B.3 The multibinit application (for second-principles calculations) has considerably progressed.
+    Documentation has thus been set up: "topics" have been written, as well as a tutorial,
+    in addition to the already existing input variable documentation and test cases.
+    See [[topic:LatticeModel]], [[topic:BoundingProcess]], [[topic:FitProcess]] and [[topic:DynamicsMultibinit]],
+    that are hub to the relevant tutorial, input variables and test cases 
+    (e.g. [[lesson:lattice_model]],[[test:v8_15]], [[test:v8_16]]...).  
+    By A. Martin, in collaboration with Fabio Ricci and Ph. Ghosez
+
+B.4 Several new options are available for the [[ionmov]] input variable governing ionic dynamic or geometry optimization:
+
+* [[ionmov]]=15 for the FIRE algorithm, [[test:v8_17]];
+* for [[ionmov]]=12, isokinetic ensemble, the fixing of atomic positions is now allowed, [[test:v8_21]] and [[test:v8_22]].
+
+Also, the documentation for the hybrid Monte Carlo algorithm has been improved, see [[test:v8_34]], and the new input variables [[hmcsst]] and [[hmctt]].
+
+By Xu He, S. Prokhorenko and X. Gonze.
+
+B.5 The linear combination of images is now allowed, with the new value for input variable [[imgmov]]=6,
+    and mixing factor given by [[mixesimgf]].
+    In this case, the total energy and forces are also assembled as a linear combination, and the geometry is optimized using 
+    algorithms selected with the usual [[ionmov]] input variable.
+    See test [[test:v8_20]].
+    The wavefunctions from the previous itimimage value (see [[ntimimage]] input variables) can be stored,
+    using the new input variable [[imgwfstor]]. This allows saving CPU time at the expense of memory, in all
+    the image based algorithms.  
+By X. Gonze.
+
+B.6 Tutorial [[tutorial:nuc]]
+    has now a section for the computation of the isomer shift (Mossbauer spectroscopy) based on Fermi contact interaction.  
+By J. Zwanziger.
+
+B.7 The Frohlich model is now implemented in the electron-phonon part of ABINIT, [[optdriver]]=7.
+    The Frohlich average of effective masses is computed with the DFPT computation of effective masses, see [[test:v8_56]].
+    Also, the zero-point renormalization of the band extrema is computed using a general formula valid for isotropic and anisotropic
+    solids, as well as for non-degenerate or degenerate extrema, see [[eph_frohlichm]] and [[test:v8_57]].  
+By X. Gonze.
+
+* * *
+
+### C. Changes for the developers (also compilers)
+
+C.1 All F90 ABINIT sources are now inside modules.
+    Makemake now aborts if F90 procedures outside modules.  
+    By M. Giantomassi, with some help by J. Zwanziger, M. Torrent and B. Amadon.
+
+C.2 Prepared the removal of the bindings subsystem.  
+    By Y. Pouillon and M. Torrent.
+
+C.2 New [Howto for developers](../developers/developers_howto) (variables, mkparents, robodoc, test_suite).  
+    By M. Giantomassi.
+
+C.3 New [Howto for the test suite](../developers/testsuite_howto).    
+    By M. Giantomassi. 
+
+* * *
+
+### D.  Other changes (or on-going developments, not yet finalized)
+
+D.1 New input variable [[prtkbff]].
+    This input variable activates the output of the Kleynman-Bylander form factors in the netcdf WFK file produced at the end of the ground-state calculation. 
+    The form factors are needed to compute the matrix elements of the commutator [Vnl, r] of the non-local part of the (NC) pseudopotentials. 
+    This WFK file can therefore be used to perform optical and/or many-body calculations with external codes such as DP/EXC and Yambo. The option is ignored if PAW.  
+By H. Miranda and M. Giantomassi.
+
+D.2. A new routine to calculate and write the DDK matrix elements in a EVK.nc files for norm-conserving pseudo-potentials (and nspinor == 1),
+    from a WFK file using the commutator [H, r] used to calculate the matrix elements for chi.
+    These files are in the same format and contain the same information as the EVK.nc files (former DDK.nc) produced by the DFPT part of the code. 
+    This routine is parallelized over k-points and bands and requires a much smaller memory footprint than the DFPT code.  
+    By H. Miranda and M. Giantomassi.
+
+D.3 New input variable [[slk_rankpp]].
+    This variable controls how the number of processes to be used in Scalapack diagonalization algorithm: [[np_slk]] will be calculated according to this value.  
+    By J. Bieder.
+
+D.4 New input variables [[prtefmas]], [[irdefmas]] and [[getefmas]], to deal with the effective masses, e.g. to allow feeding computed effective masses
+    from one dataset to another one.   
+    By X. Gonze.
+
+D.5 The spin dynamics has been implemented in multibinit.   
+    By He Xu.
+
+D.5 Automatic test [[test:v8_37]] for TDep application.   
+    By J. Bieder.
+
+D.6 New value for input variable [[usepawu]]=4.
+    The FLL double counting is used. However, and in comparison to usepaw=1, the calculation is done without polarization in the exchange correlation functional.  
+By B. Amadon.
+
+D.7 New extensive testing of the DFPT+PAW+GGA, see [[test:v8_51]].
+    However, [[pawxcdev]]=0 is still needed.  
+    By M. Torrent.
+
+D.8 New input variable [[prtfull1wf]] to print the full perturbed wavefunctions.   
+    By G. Antonius.
+
+D.9 Allows one to suppress completion of the 2DTE for vanishing elements using symmetries only, 
+    negative values of [[rfmeth]].  
+    By X. Gonze.
+    
+D.10 Interface with TRIQS_2.0.  
+    By O. Gingras.
+
+D.11 Allows to define different occupations for different spins, when [[occopt]]=0 and [[nsppol]]=2.
+     By X. Gonze.
+
+D.12 NEB is now tested (at last), [[test:v6_29]].   
+     By X. Gonze.
+
+D.13 Many |abitutorials| have been improved.   
+     By X. Gonze.
+ 
+D.14 Work on orbital magnetization.   
+     By J. Zwanziger.
+
+D.15 Elastic and piezoelectric tensors in netcdf format.  
+     By M. Giantomassi
+
+D.16 Allow [[boxcutmin]] for DFPT case, after check by H. Miranda.
+
+D.17 ABIWAN.nc files with Wannier output that can be analyzed wit AbiPy. 
+     See the |AbiwanFileNb| for futher information.  
+     By M. Giantomassi.
+
+D.18 The [[topic:Macroave]] has been created.  
+     By X. Gonze.
+
+D.19. Include CTQMC Code using non diagonal hybridization function. See [[test:paral_83]].  
+     By B. Amadon, J. Denier and J. Bieder. 
+
+D.20. Finalize scalapack/elpa integration in lobpcg.
+      Use ONLY if no openmp. Warning: scalapack is not thread-safe in general.  
+      By J. Bieder.
+
+D.21 Automatic test [[test:v8_37]] for TDep application.  
+    By J. Bieder.
+
+D.22 Python scripts to calculate physical properties that can be derived from the elastic tensor 
+     (which is the result of an anaddb calculation).  
+     By N. Pike.
+
+D.23 Miscellaneous additional bug fixes and improvements of documentation.  
+     By B. Amadon, G. Antonius, L Baguet, J.-M. Beuken, J. Bieder, F. Goudreault, F. Jollet, H. Miranda, 
+     F. Nacaratto, N. Pike, M. Torrent, M. Verstraete.
+
+* * *
+
+## v8.8
+
+Version 8.8, released on April 28, 2018.
+List of changes with respect to version 8.6.
+
+Many thanks to the contributors to the ABINIT project between
+November 2017 and April 2018. These release notes
+are relative to modifications/improvements of ABINIT v8.8 with respect to v8.6.
+The merge request #285 is the first MR not reported in these release notes.
+
+The list of contributors includes:
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, F. Bottin, Y. Bouchet, E. Bousquet, W. Chen, 
+C. Espejo, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, A. Martin,
+H. Miranda, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, F. Ricci, 
+G.-M. Rignanese, M. Torrent , M. Verstraete, J. Zwanziger
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+
+Xavier
+
+### A. Warnings and important remarks
+
+A.1 Due to the availability of new input variables, some obsolete input variables have been suppressed:
+
+* input variable cgtyphf, see now [[fockoptmix]];
+* input variable gwfockmix, see now [[hyb_mixing]] and [[hyb_mixing_sr]].
+
+A.2 The algorithm used for computing the weights for the phonon band structure interpolation in ANADDB
+    in the case [[brav@anaddb]] = 1 has changed. See B.5.
+
+A.3 Tests v7#71-72 have been moved to v7#76-77.
+
+A.4 Replaced *tribes* by *relevance* in doc/topics.
+
+A.5 Replace `EELF` file extension by `ELF`. See [[prtelf]].
+    By Guido Petretto.
+
+A.6 Definition of a maximal value for dilatmx, at 1.15 , than can be bypassed by setting chkdilatmx=0.
+    This is to prevent users slowing down ABINIT too much inadvertantly.
+
+* * *
+
+### B. Most noticeable achievements
+
+B.1 The whole ABINIT documentation has been placed under the control of [mkdocs](http://www.mkdocs.org/),
+    and most files have been translated to markdown 
+    (well, there are still a few remaining files not placed in this system, but these are quite few).
+    The capabilities developed for [v8.6](#v86)
+    (Topics -B.1-, central bibliography -B.2-, restructured and searcheable list of input variables -B.3-,
+    frequency statistics -B.4-) have been maintained and consolidated.
+    More documentation is available for developers than before. The whole system is better integrated and easier to maintain.
+    The appearance is also new. 
+    The work on documentation is nearly complete, still not all bibliographical references of the doc have been entered in this
+    central bibliographic database.
+    Entry point: see the new header of any ABINIT documentation file e.g. the [new user's guide](..).
+    By M. Giantomassi, with some help from X. Gonze.
+
+B.2 The DFPT has been extended to non-collinear systems ([[nspden]] = 4), with or without spin-orbit coupling,
+    for the ddk, electric field and atomic displacement perturbations,
+    as well as for the Zeeman magnetic field perturbation (see B.3). 
+    See tests from [[test:v8_66]] to [[test:v8_80]]. For experts, see the new input variable [[ixcrot]].
+    By F. Ricci, S. Prokhorenko, M. Verstraete, M. Torrent and E. Bousquet.
+    
+B.3 DFPT can now treat the magnetic field perturbation (Zeeman interaction - magnetic field couple to the spin).
+    See the input variable [[rfmagn]], as well as tests [[test:v8_66]] to [[test:v8_70]].
+    The new input variable [[tim1rev]] has been introduced, to allow treating perturbations with non-zero q wavevectors.
+    By S. Prokhorenko and E. Bousquet.
+
+B.4 The python library [AbiPy](https://github.com/abinit/abipy), for launching ABINIT (also in high-throughput mode)
+    and the jupyter notebook based tutorials, nicknamed [abitutorials](https://github.com/abinit/abitutorials) are now sufficiently 
+    mature to be advertised. They have been used at the ICTP electron-phonon doctoral school in March 2018.
+    Feedback on AbiPy and abitutorials is welcome. 
+    By M. Giantomassi.
+
+B.5 A new algorithm (Wigner-Seitz cell based) for computing the weights for the phonon band structure interpolation in ANADDB
+    has been implemented. It has replaced the old algorithm in case [[brav@anaddb]] = 1. 
+    The old algorithm is still available for back-compatibility purposes, now corresponding to [[brav@anaddb]] = -1, 
+    see [[test:v7_93]], although there is no real reason for using it. 
+    The new algorithm is very general, respect better the symmetries, and should even supercede 
+    the use of other values of [[brav@anaddb]].
+    By G. Petretto following discussions with GM Rignanese and XGonze, and tests by Henrique Pereira Miranda.
+
+B.6 The Chern number can be computed, in the norm-conserving case as well as in the PAW case.
+    See the theory in [[cite:Ceresoli2006]].
+    Associated input variable: [[orbmag]]. Associated test [[test:v8_33]].
+    Nuclear magnetic dipole moment code has been improved for efficiency. In particular,
+    this improvement is due to converted nucdipmom_k to complex type and explicit BLAS call. 
+    Tutorial [[tutorial:nuc|nuc]] is nightly tested.
+    By J. Zwanziger ([[tutorial:nuc|nuc]] testing by X. Gonze).
+
+* * *
+
+###C. Changes for the developers (also compilers)
+
+C.1 Add support for NAG 6.2, use netcdf4 and hdf5 with NAG 6.2.
+    New builders: abiref_nag_6.2_openmpi and atlas_gnu_7.2_fb
+
+C.2 New version of ELPA module (2011 -> 2017 compatible)
+    By M. Torrent
+
+C.3 Replaced http://www.abinit.org by https://www.abinit.org everywhere in the doc. 
+    By JM Beuken
+
+C.4 Added fake -n/--no-split option to makemake. 
+    This little change will let the test farm keep on working with all branches while the source tree is split into common + core.
+    By Y. Pouillon
+
+C.5 Upgrade Abinit to PSML API 1.1.
+    By Y. Pouillon
+
+C.6 Allowed for free-form link flags statements in configure options
+    By Y. Pouillon
+
+C.7 Intel 18.0 is now officially supported (one bot using it is present in the test farm).
+    The situation is not perfect though, as  in mrgscr and mrgdv, the ADVANCE='NO' specification for the write instruction does not work, but
+   it works in simple programs. Thus all tests (and their chain of tests) that rely on mrgscr and mrgdv have been disabled for this compiler.
+   Namely, v3#87-91, vv67mbpt#37-39, v7#86-88, v8#41-44, v8#63
+   Also, the reading of WFK files using MPIIO is not correct, for tests mpiio#26 and 62.
+
+* * *
+
+###D.  Other changes (or on-going developments, not yet finalized)
+
+D.1 Implementation of the LDA-1/2 methodology (see the announcement B.10 of v8.6): [[test:v8_32]] has been provided.
+    By F. Jollet.
+
+D.2 Numerous progresses have been made related to the hybrid functionals (although hybrid functionals
+    are not yet in production).
+
+* Stresses are now computed correctly.
+
+* The downsampling of the Brillouin Zone to build the Fock operator has been implemented and tested.
+See the input variable [[fockdownsampling]] as well as tests [[test:libxc_72]] and [[test:paral_09]]. 
+
+* The B3LYP functional has been implemented, [[ixc]] = -402.
+
+* The new input variables [[hyb_mixing]], [[hyb_mixing_sr]], [[hyb_range_dft]], and [[hyb_range_fock]]
+give sufficient flexibility in the PBE0 and HSE family of functionals. 
+
+* GW calculations can now start on top of hybrid functional calculations.
+
+* At variance, there is also now more flexibility to run hybrid calculations using the GW infrastructure 
+([[gwcalctyp]] = 5, 15, 25) by the definition of the [[ixc_sigma]] input variable.
+
+* There has been also important work concerning the self-consistency, although this work is not finalized yet
+(one reason why hybrid functionals are not yet in production).
+The self-consistency at fixed ACE operator can take advantage of an auxiliary XC functional to decrease
+the number of inner iterations, see [[fockoptmix]], [[auxc_ixc]] and [[auxc_scal]], while for the outer loop,
+in which the ACE operator is upgraded, the wavefunction mixing has been implemented ([[fockoptmix]] and [[wfmix]]).
+
+See the new tests v7#67-72 libxc#44, 45, 72, 73, 74, 
+and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
+By X. Gonze and F. Jollet, with help by M. Torrent.
+
+D.3 The [[tutorial:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
+    See all tests in `tutorespfn/tdepes*`.
+    By X. Gonze and M. Giantomassi
+
+D.4 Output of interpolated density in the MPI-IO case is now tested, [[test:mpiio_26]] and [[test:mpiio_27]].
+
+D.5 Ongoing work on the multibinit project.
+    New input variables fit_nfixcoeff, fit_fixcoeff, fix_generateTerm, 
+    see [[test:v8_13]] and [[test:v8_14]].
+    New input variable dipdip_prt, see [[test:v8_06]], as well as tests [[test:paral_96]] to paral[102].
+    New generator for the polynomial coefficients, debug strain for the fit process, add tolerance in the fit process,
+    add the plot of the comparison between model and DFT.
+    By A. Martin, M. Verstraete and Ph. Ghosez.
+
+D.6 Adjustment of tutorial tutoparal ucrpa, see test tutoparal#tucrpa_4.
+    By B. Amadon
+
+D.7 The ddk file is now available in netCDF format (lightweight version without first-order wavefunctions), 
+    and test with the optic post-processor has been set up.
+    See the new [[test:v7_49]]. 
+    By M. Giantomassi
+
+D.8 Continued development of the electron-phonon [[optdriver]] = 7 module of ABINIT.
+    New input variable [[tmesh]], defining a linear mesh of temperatures, see tests [[test:v8_44]] and [[test:v8_45]].
+    Also, debugging and improvement of doc.
+    By M. Giantomassi
+
+D.9 Added netcdf output of phonons for full grid, not just band structure. Only in tetrahedron prtdos 2 case.
+    By M. Verstraete
+
+D.10 On-going development: main executable `tdep`, for the TDEP algorithm, by Hellman and coworkers.
+     See [[src:98_main/tdep.F90]], as well as directory 80_tdep. 
+     No automatic tests provided yet, no documentation as well ...
+     By F. Bottin, J. Bouchet, J. Bieder.
+
+D.11 Capability to print perturbed vxc potential in response function calculations.
+     By G. Antonius
+
+D.12 On-going modularization of all source F90 files, to get rid off abilint.
+     By M. Giantomassi
+
+D.13 On-going improvements in the doc, to benefit from the new processing capabilities,
+     like central bibliography, matjax, etc ...
+     By M. Giantomassi, X. Gonze
+
+D.14 Post-processing script for Raman calculations (script/post-processing/Raman_spec.py).
+     Reads the anaddb output file and extracts the Raman tensor and then calculates 
+     the Raman spectra as a function of frequency at a user-defined temperature.  
+     Additionally, the script will automatically extract the dielectric tensor as a function of frequency if it is available.
+     By N. Pike
+
+D.15 Refactoring for DFPT+NON_COLL: first version for PAW
+     By M. Torrent
+
+D.16 Fix of several bugs in constrained magnetization calculations [[magconon]].
+     By E. Bousquet
+
+D.17 Wrong sign of the derivative of spherical harmonics for f orbitals.
+     Can lead to problems in BSE and GW calculations if pseudos with explicit f-projectors are used.
+     Detected and corrected by Henrique Pereira Miranda.
+     See [[gitsha:87617d261b5905e368081af4b899b3ddd7ec83fe]] for the corrected expressions.
+
+D.18 Add possibility to do DFT+U calculations without spin polarization 
+     in the exchange and correlation functional: the spin polarization thus only comes from the U and J terms. 
+     Can be used with [[usepawu]] = 4, but still under tests.
+     By B. Amadon
+
+D.19 GW is now available with [[nspinor]] = 2 with or without spin-orbit coupling,
+    and with [[nspden]] = 1 or 4 (collinear or non-collinear spin-magnetisation).
+    Implemented only in the norm-conserving case. Still under testing.
+    See tests from [[test:v8_90]] to [[test:v8_93]]. 
+    By M. Giantomassi.
+
+D.20 Miscellaneous additional bug fixes and improvements of documentation by:
+     L. Baguet, W. Chen, C. Espejo, M. Giantomassi, Y. Pouillon, M. Torrent, J. Zwanziger.
+
+
+* * *
+ 
+## v8.6 
 
 Many thanks to the contributors to the ABINIT project between
 May 2017 and October 2017. These release notes
@@ -10,7 +439,7 @@ M. Giantomassi, O. Gingras, Ph. Ghosez, M. Giantomassi, X. Gonze, F. Jollet, J. 
 F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, S. Prokhorenko, M. Torrent , M. Verstraete, J. Wiktor, J. Zwanziger
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
-and examine the links to help files or test cases ...
+and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
@@ -34,7 +463,7 @@ A.2 Some changes of names :
 * input variable gwls_dielectric_model has become [[gwls_diel_model]];
 * input variable prt_effpot has become prt_model (multibinit input variable);
 * input variable effmass has become [[effmass_free]];
-* lesson tlda has become tdftu;
+* tutorial tlda has become tdftu;
 
     Also, the input variable gwls_second_model_parameter, not used, has been suppressed.
 
@@ -51,7 +480,7 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
     previous "lists of ABINIT features". All the capabilities of ABINIT are now presented in about 70 short topic Web pages.
     Those topic web pages usually have :
     - a brief introduction;
-    - the list of related tutorial lessons -if any-;
+    - the list of related tutorials -if any-;
     - the list of related input variables (ordered according to their importance for the topics -compulsory, basic, useful or expert-);
     - possibly example input files;
     - list of references.
@@ -60,7 +489,7 @@ B.1 The whole ABINIT documentation has been significantly improved by the introd
 
 B.2 A central [[theory:bibliography]] database abiref.bib has been created, and linked to the
     above-mentioned topics (B.1) but also to other parts of the ABINIT documentation (e.g. input variable list,
-    the lessons of the tutorial, the theory documents, the acknowledgments ...).
+    the tutorials, the theory documents, the acknowledgments ...).
     More than 200 bibliographical references are present.  Not all bibliographical references of the doc have been entered in this
     central bibliographic database, though.
     By X. Gonze and F. Jollet.
@@ -71,7 +500,7 @@ B.3 The list of input variables has been restructured, and is now searchable.
 
 B.4 The frequency of usage of each input variable (in the set of automatic tests) is now automatically
     computed, and mentioned in the documentation for this input variable. Examples input files are also now mentioned in the documentation.
-    The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the lessons of the tutorial.
+    The input files for the automatic tests can now be directly accessed on the Web, as well as the reference files for the tutorials.
     By. X. Gonze and F. Jollet.
 
 B.5 Several important developments related to electron-phonon matrix element computation have been made.
@@ -98,7 +527,7 @@ B.7 ABINIT is now interfaced with Libxc 3.0. The interface with Libxc 4.0 is in 
     have been modified, because some functionals of libxc v2.0 have changed category in v3.0.
     By M. Torrent.
 
-B.8 A new lesson of the tutorial, called [[lesson:positron|Electron-positron annihilation]] has been created.
+B.8 A new tutorial, called [[tutorial:positron|Electron-positron annihilation]] has been created.
     By J. Wiktor and M. Torrent.
 
 B.9 The new input variable [[chkdilatmx]] has been introduced, to allow expert users to make
@@ -469,10 +898,10 @@ B.1 Implementation of the Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS
     available on netlib.org.  They have been reshaped and translated into modern fortran, 
     then interfaced to ABINIT by F. Bruneval (sources in 45_geomoptim/m_lbfgs.F90).
 
-B.2 A new tutorial is available : a lesson on the calculation of the effective interactions U and J 
+B.2 A new tutorial is available, on the calculation of the effective interactions U and J 
     using constrained Random Phase Approximation (cRPA) for DFT+DMFT (or DFT+U) calculations.
-    See doc/tutorial/lesson_ucalc_crpa.html as well as the automatic tests tutorial/tucrpa#1-5 .
-    This lesson was prepared by B. Amadon.
+    See doc/tutorial/_ucalc_crpa.md as well as the automatic tests tutorial/tucrpa#1-5 .
+    This tutorial was prepared by B. Amadon.
 
 B.3 Implementation of temperature-dependent spectral functions 
     (electronic spectral function, with electron-phonon interactions),

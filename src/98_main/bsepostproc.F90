@@ -42,17 +42,9 @@
  use m_numeric_tools
 
  use m_time,      only : timein
+ use m_specialmsg,only : specialmsg_getcount, herald
  use m_io_tools,  only : get_unit, flush_unit
- use m_mpinfo,    only : destroy_mpi_enreg, nullify_mpi_enreg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bsepostproc'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
-!End of the abilint section
-
+ use m_mpinfo,    only : destroy_mpi_enreg, nullify_mpi_enreg, initmpi_seq
  implicit none
 
 !Arguments ----------------------------
@@ -72,13 +64,13 @@
  character(len=500) :: frm
  character(len=24) :: codename
  character(len=50) :: output_file
- type(haydock_type) :: haydock_file 
+ type(haydock_type) :: haydock_file
  type(MPI_type) :: mpi_enreg
 !arrays
  real(dp),allocatable :: tmp_eps(:,:)
  real(dp),allocatable :: bb_file(:)
  complex(dpc),allocatable :: omega(:),green_temp(:),green(:,:)
- complex(dpc),allocatable :: aa_file(:),phi_n_file(:),phi_nm1_file(:) 
+ complex(dpc),allocatable :: aa_file(:),phi_n_file(:),phi_nm1_file(:)
  complex(dpc),allocatable :: all_omegas(:)
 
 !*******************************************************
@@ -96,7 +88,7 @@
 
  codename='BSEPOSTPROC'//REPEAT(' ',13)
  call herald(codename,abinit_version,std_out)
- 
+
  write(std_out,'(a)') "Broad_in (eV) ?"
  read(std_in,*) broad_in
 
@@ -124,7 +116,7 @@
    omega(io) = (omega_min + (io-1)*delta_omega)  + j_dpc*broad_in
  end do
 
-!Create new frequencies "mirror" in negative range to add 
+!Create new frequencies "mirror" in negative range to add
 !their contributions. Can be improved by computing only once
 !zero frequency, but loosing clearness
  n_all_omegas = 2*nomega
@@ -135,7 +127,7 @@
 !Put all omegas with frequency < 0
 !Warning, the broadening must be kept positive
  all_omegas(1:nomega) = -DBLE(omega(nomega:1:-1)) &
-& + j_dpc*AIMAG(omega(nomega:1:-1))   
+& + j_dpc*AIMAG(omega(nomega:1:-1))
 
  ABI_MALLOC(green_temp,(n_all_omegas))
 
@@ -157,7 +149,7 @@
    green(:,iq) = cone+factor*green(:,iq)
 
  end do
- 
+
  call close_haydock(haydock_file)
 
  ABI_MALLOC(tmp_eps,(2,haydock_file%nq))

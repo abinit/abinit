@@ -25,7 +25,7 @@
 module m_atprj
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools, only : get_unit, open_file
@@ -87,13 +87,6 @@ contains
 !! SOURCE
 
 subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_init'
-!End of the abilint section
 
  implicit none
 
@@ -169,13 +162,6 @@ end subroutine atprj_init
 
 subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_print'
-!End of the abilint section
-
  implicit none
 
 !arguments
@@ -235,13 +221,6 @@ end subroutine atprj_print
 
 subroutine atprj_destroy(t_atprj)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_destroy'
-!End of the abilint section
-
  implicit none
 
  type(atprj_type), intent(inout) :: t_atprj
@@ -256,5 +235,5 @@ subroutine atprj_destroy(t_atprj)
 
 end subroutine atprj_destroy
 
-end module
+end module m_atprj
 !!***

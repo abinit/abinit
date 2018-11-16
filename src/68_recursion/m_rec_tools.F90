@@ -4,7 +4,7 @@
 !!  m_rec_tools
 !!
 !! FUNCTION
-!!  This module provides some functions more or less generic used  
+!!  This module provides some functions more or less generic used
 !!  in the Recursion Mathod
 !!
 !! COPYRIGHT
@@ -28,12 +28,12 @@
 
 #include "abi_common.h"
 
-
 module m_rec_tools
 
- use m_profiling_abi
-
  use defs_basis
+ use m_abicore
+
+ use defs_rectypes, only : recparall_type
 
  implicit none
 
@@ -42,7 +42,8 @@ module m_rec_tools
  public ::            &
    get_pt0_pt1,       &  !--To get pt0 pt1 from inf,sup
    reshape_pot,       &  !--To rescale the potential between 2 grids
-   trottersum            !--To calculate the trotter sum 
+   trottersum            !--To calculate the trotter sum
+
 CONTAINS  !===========================================================
 !!***
 
@@ -75,15 +76,7 @@ CONTAINS  !===========================================================
 !! SOURCE
 subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
 
-  use defs_rectypes,only   : recparall_type
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_pt0_pt1'
-!End of the abilint section
-
- implicit none  
+ implicit none
 
 !Arguments ------------------------------------
   integer,intent(in)        :: gratio
@@ -100,7 +93,7 @@ subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
     do y = 0,ngfft(2)-1,gratio
       boy = (boz+y)*ngfft(1)
       do x = 0,ngfft(1)-1,gratio
-        pt = boy+x       
+        pt = boy+x
         if(count >= inf) then
           if(count == inf) then
             recpar%pt0%x = x; recpar%pt0%y = y; recpar%pt0%z = z
@@ -116,8 +109,6 @@ subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
   end do
 end subroutine get_pt0_pt1
 !!***
-
-
 
 !!****f* m_rec_tools/reshape_pot
 !! NAME
@@ -146,13 +137,6 @@ end subroutine get_pt0_pt1
 
 subroutine reshape_pot(trasl,nfft,nfftrec,ngfft,ngfftrec,pot,potloc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'reshape_pot'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -167,7 +151,7 @@ subroutine reshape_pot(trasl,nfft,nfftrec,ngfft,ngfftrec,pot,potloc)
  integer :: modi,modj,modk
  !character(len=500) :: msg
  ! *********************************************************************
- do zz = 0,ngfftrec(3)-1         
+ do zz = 0,ngfftrec(3)-1
    modk = modulo(zz-trasl(3),ngfft(3))*ngfft(2)
    parz = ngfftrec(2)*zz
    do yy = 0,ngfftrec(2)-1
@@ -182,8 +166,6 @@ subroutine reshape_pot(trasl,nfft,nfftrec,ngfft,ngfftrec,pot,potloc)
 
 end subroutine reshape_pot
 !!***
-
-
 
 !!****f* m_rec_tools/trottersum
 !! NAME
@@ -203,10 +185,10 @@ end subroutine reshape_pot
 !! OUTPUT
 !!
 !! SIZE EFFECTS
-!!  D,N=denominator and numerator accumalator of PFD 
+!!  D,N=denominator and numerator accumalator of PFD
 !!  Dold,Nold=denominator and numerator of PFD (old values)
 !!  facrec0=used to select irec=0
-!!  error=estimated error of recursion at this step  
+!!  error=estimated error of recursion at this step
 !!  prod_b2=numerical factor
 !!
 !! PARENTS
@@ -221,13 +203,6 @@ subroutine trottersum(dim_trott,error,&
      &                facrec0,coeef_mu,exp1,&
      &                an,bn2,&
      &                N,D,Nold,Dold)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trottersum'
-!End of the abilint section
 
  implicit none
 
@@ -248,15 +223,15 @@ subroutine trottersum(dim_trott,error,&
  complex(dpc) :: Dnew,Nnew,zj
  !character(len=500) :: msg
  ! *********************************************************************
- 
+
  error = zero
  prod_b2 = prod_b2 * exp1 * bn2
 
  do itrot=0,dim_trott
    arg = pi_on_rtrotter*(real( itrot,dp) + half )
    zj = cmplx(cos(arg),sin(arg),dp)*coeef_mu
-   
-   Nnew = zj*facrec0 + & 
+
+   Nnew = zj*facrec0 + &
         & (zj - cmplx(an  ,zero,dp))*N(itrot) - &
         &       cmplx(bn2 ,zero,dp)*Nold(itrot)
    Dnew = (zj - cmplx(an  ,zero,dp))*D(itrot) - &
@@ -265,7 +240,7 @@ subroutine trottersum(dim_trott,error,&
    Dold(itrot) = D(itrot)
    N(itrot) = Nnew
    D(itrot) = Dnew
-     
+
    !--Error estimator
    error = error + abs(prod_b2/(D(itrot)*Dold(itrot)))
  end do
@@ -275,4 +250,4 @@ end subroutine trottersum
 !!***
 
 end module m_rec_tools
-
+!!***

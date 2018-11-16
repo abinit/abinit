@@ -25,7 +25,7 @@ module m_abi_linalg
 
   use defs_basis
   use m_errors
-  use m_profiling_abi
+  use m_abicore
   use m_xmpi
   use m_xomp
   use m_slk
@@ -281,13 +281,6 @@ CONTAINS  !===========================================================
 #if defined HAVE_MPI2
   use mpi
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_linalg_init'
-!End of the abilint section
-
  implicit none
 
 #if defined HAVE_MPI1
@@ -414,13 +407,6 @@ CONTAINS  !===========================================================
 !!
  subroutine abi_linalg_eigen_setmaxsize(max_eigen_pb_size)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_linalg_eigen_setmaxsize'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -496,13 +482,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 !!
  subroutine abi_linalg_finalize(only_scalapack) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_linalg_finalize'
-!End of the abilint section
 
  implicit none
 
@@ -588,13 +567,6 @@ CONTAINS  !===========================================================
 
 subroutine linalg_allow_gemm3m(bool)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linalg_allow_gemm3m'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -638,13 +610,6 @@ end subroutine linalg_allow_gemm3m
 
 pure logical function use_zgemm3m(m,n,k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'use_zgemm3m'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -681,13 +646,6 @@ end function use_zgemm3m
 
 pure logical function use_cgemm3m(m,n,k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'use_cgemm3m'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -717,13 +675,6 @@ end function use_cgemm3m
 !! SOURCE
 
 subroutine linalg_allow_plasma(bool)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linalg_allow_plasma'
-!End of the abilint section
 
  implicit none
 
@@ -756,13 +707,6 @@ end subroutine linalg_allow_plasma
 
 integer function uplo_plasma(uplo)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'uplo_plasma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -793,13 +737,6 @@ end function uplo_plasma
 !! SOURCE
 
 integer function trans_plasma(trans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'trans_plasma'
-!End of the abilint section
 
  implicit none
 
@@ -834,13 +771,6 @@ end function trans_plasma
 
 integer function side_plasma(side)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'side_plasma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -872,13 +802,6 @@ end function side_plasma
 
 integer function diag_plasma(diag)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'diag_plasma'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -909,13 +832,6 @@ end function diag_plasma
 !! SOURCE
 
 integer function jobz_plasma(jobz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jobz_plasma'
-!End of the abilint section
 
  implicit none
 

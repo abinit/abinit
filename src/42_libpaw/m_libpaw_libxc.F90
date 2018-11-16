@@ -330,13 +330,6 @@ contains
 
  subroutine libpaw_libxc_constants_load()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_constants_load'
-!End of the abilint section
-
  implicit none
 
 !Local variables-------------------------------
@@ -390,13 +383,6 @@ contains
 !! SOURCE
 
  function libpaw_libxc_check(stop_if_error)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_check'
-!End of the abilint section
 
  implicit none
 
@@ -463,14 +449,6 @@ contains
 !! SOURCE
 
  subroutine libpaw_libxc_init(ixc,nspden,xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_init'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -628,13 +606,6 @@ end subroutine libpaw_libxc_init
 
  subroutine libpaw_libxc_end(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_end'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -695,13 +666,6 @@ end subroutine libpaw_libxc_init
 !! SOURCE
 
  function libpaw_libxc_fullname(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_fullname'
-!End of the abilint section
 
  implicit none
 
@@ -765,13 +729,6 @@ end function libpaw_libxc_fullname
 
  function libpaw_libxc_family_from_id(xcid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_family_from_id'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -811,13 +768,6 @@ end function libpaw_libxc_family_from_id
 !! SOURCE
 
  function libpaw_libxc_getid(xcname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_getid'
-!End of the abilint section
 
  implicit none
 
@@ -869,13 +819,6 @@ end function libpaw_libxc_getid
 
  function libpaw_libxc_ixc(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_ixc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -910,13 +853,6 @@ end function libpaw_libxc_ixc
 !! SOURCE
 
  function libpaw_libxc_isgga(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_isgga'
-!End of the abilint section
 
  implicit none
 
@@ -958,13 +894,6 @@ end function libpaw_libxc_isgga
 
 function libpaw_libxc_ismgga(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_ismgga'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1002,13 +931,6 @@ end function libpaw_libxc_ismgga
 !! SOURCE
 
  function libpaw_libxc_is_hybrid(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_is_hybrid'
-!End of the abilint section
 
  implicit none
 
@@ -1050,13 +972,6 @@ end function libpaw_libxc_is_hybrid
 
 function libpaw_libxc_has_kxc(xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_has_kxc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1096,13 +1011,6 @@ end function libpaw_libxc_has_kxc
 !! SOURCE
 
 function libpaw_libxc_nspin(xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_nspin'
-!End of the abilint section
 
  implicit none
 
@@ -1167,13 +1075,6 @@ end function libpaw_libxc_nspin
 
  subroutine libpaw_libxc_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho,exc,vxc,&
 &           grho2,vxcgr,lrho,vxclrho,tau,vxctau,dvxc,d2vxc,xc_tb09_c,xc_functionals) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_getvxc'
-!End of the abilint section
 
  implicit none
 
@@ -1482,13 +1383,6 @@ end subroutine libpaw_libxc_getvxc
 
 subroutine libpaw_libxc_get_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_get_hybridparams'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1580,13 +1474,6 @@ end subroutine libpaw_libxc_get_hybridparams
 !! SOURCE
 
 subroutine libpaw_libxc_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range,xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_set_hybridparams'
-!End of the abilint section
 
  implicit none
 
@@ -1695,13 +1582,6 @@ end subroutine libpaw_libxc_set_hybridparams
 !! SOURCE
 
 function libpaw_libxc_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_gga_from_hybrid'
-!End of the abilint section
 
  implicit none
 
@@ -1826,14 +1706,6 @@ end function libpaw_libxc_gga_from_hybrid
 
  subroutine libpaw_libxc_set_tb09(npts,nspden,rho,grho2,xc_tb09_c,xc_functionals)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libpaw_libxc_set_tb09'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1932,13 +1804,6 @@ end subroutine libpaw_libxc_set_tb09
 #if defined LIBPAW_ISO_C_BINDING
 function char_f_to_c(f_string) result(c_string)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'char_f_to_c'
-!End of the abilint section
-
  character(len=*),intent(in) :: f_string
  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
 !Local variables -------------------------------
@@ -1979,13 +1844,6 @@ function char_f_to_c(f_string) result(c_string)
 #if defined LIBPAW_ISO_C_BINDING
 subroutine char_c_to_f(c_string,f_string)
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'char_c_to_f'
-!End of the abilint section
-
  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
  character(len=*),intent(out) :: f_string
 !Local variables -------------------------------

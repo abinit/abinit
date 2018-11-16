@@ -30,10 +30,6 @@
 !!      1WF header = hdr1
 !!      1st order eigenvalues = eigen1
 !!
-!! CHILDREN
-!!      abi_io_redirect,destroy_mpi_enreg,flush_unit,hdr_free,herald
-!!      initmpi_seq,rwwf,wrtout,xmpi_end,xmpi_init
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -54,7 +50,7 @@ program mrggkk
  use defs_basis
  use defs_abitypes
  use m_build_info
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wfk
@@ -64,18 +60,10 @@ program mrggkk
 #endif
  use m_hdr
 
+ use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin
  use m_io_tools,        only : flush_unit, open_file, file_exists
- use m_mpinfo,          only : destroy_mpi_enreg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mrggkk'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
-!End of the abilint section
-
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  implicit none
 
 !Arguments ------------------------------------
@@ -182,7 +170,7 @@ program mrggkk
    ios = open_file(outfile,message,unit=unitout,form='formatted')
    rdwrout = 4
  else
-   MSG_ERROR(' binascii must be 0 or 1')
+   MSG_ERROR(' binascii must be between 0 and 2')
  end if
 
  ABI_CHECK(ios==0,message)

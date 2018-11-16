@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -413,7 +413,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -3.024   0.754  -0.380  -0.896  -0.380  -0.896  -0.380  -0.896
        -0.000   0.000  -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000
@@ -427,8 +427,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
        -0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000   0.000
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =   2.3944
-  dielectric constant without local fields =   2.5833
+  dielectric constant =   2.3945
+  dielectric constant without local fields =   2.5834
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     10.15  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -436,10 +436,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.418   0.023  -0.023  -0.068   0.068   0.068  -0.068  -0.023   0.023
-     -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+      0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.418   0.023  -0.023  -0.068   0.068   0.068  -0.068  -0.023   0.023
-     -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
+      0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.5000 [eV]
@@ -647,9 +647,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =  11.8492 [eV], located at k-point      :  -0.2500  0.0000  0.0000
-   Fundamental gap     =  11.8492 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
-                                        Bottom of conduction at :  -0.2500  0.0000  0.0000
+   Minimum direct gap =  11.8492 [eV], located at k-point      :  -0.2500  0.0000  0.0000
+   Fundamental gap    =  11.8492 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
+                                       Bottom of conduction at :  -0.2500  0.0000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   89
@@ -689,7 +689,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
     3    -2.935   -15.592    -2.935    12.656   -21.204     3.535     1.000     0.000   -17.670    -2.078    -5.013    -5.013
     4    -2.025   -16.284    -2.025    14.259   -21.748     3.556     1.000     0.000   -18.192    -1.908    -3.933    -3.934
     5    11.194    -9.794    11.194    20.988    -4.201    -2.245     1.000     0.000    -6.446     3.348    14.542    14.540
-    6    13.414   -10.964    13.414    24.378    -4.980    -2.195     1.000     0.000    -7.175     3.789    17.203    17.204
+    6    13.414   -10.964    13.414    24.378    -4.980    -2.196     1.000     0.000    -7.175     3.789    17.203    17.204
     7    16.346   -11.650    16.346    27.997    -5.023    -2.360     1.000     0.000    -7.382     4.268    20.614    20.616
     8    19.266   -11.112    19.266    30.378    -4.454    -2.143     1.000     0.000    -6.597     4.515    23.781    23.782
 
@@ -700,7 +700,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
 
  k =   -0.250   0.000   0.000
  Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    2    -3.571   -15.252    -3.571    11.681   -20.975     3.536     1.000     0.000   -17.440    -2.188    -5.759    -5.760
+    2    -3.571   -15.252    -3.571    11.681   -20.975     3.536     1.000     0.000   -17.439    -2.188    -5.759    -5.760
     3    -1.209   -16.792    -1.209    15.583   -22.041     3.540     1.000     0.000   -18.501    -1.709    -2.917    -2.920
     4    -1.209   -16.792    -1.209    15.583   -22.040     3.539     1.000     0.000   -18.501    -1.709    -2.917    -2.915
     5    10.641   -11.182    10.641    21.823    -5.333    -2.404     1.000     0.000    -7.737     3.445    14.086    14.086
@@ -717,9 +717,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =  17.0011 [eV], located at k-point      :  -0.2500  0.0000  0.0000
-   Fundamental gap     =  17.0011 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
-                                        Bottom of conduction at :  -0.2500  0.0000  0.0000
+   Minimum direct gap =  17.0010 [eV], located at k-point      :  -0.2500  0.0000  0.0000
+   Fundamental gap    =  17.0010 [eV], Top of valence bands at :  -0.2500  0.0000  0.0000
+                                       Bottom of conduction at :  -0.2500  0.0000  0.0000
 
  writing QP data on file : t12o_DS3_QPS
 
@@ -865,7 +865,7 @@ P           mkmem           2
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Effect of self-consistency on quasiparticles in solids
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).

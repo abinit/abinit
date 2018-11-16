@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -840,9 +840,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -1009,9 +1009,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.2787 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.8533 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   3.2787 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.8533 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t88o_DS3_QPS
 
@@ -1400,9 +1400,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   2.5213 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   0.6087 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
  SIGMA fundamental parameters:
  MODEL GW with PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                   27
@@ -1569,9 +1569,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   3.4099 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   1.0278 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
-                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+   Minimum direct gap =   3.4099 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   1.0278 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                       Bottom of conduction at :   0.5000  0.5000  0.0000
 
  writing QP data on file : t88o_DS5_QPS
 
@@ -1808,7 +1808,7 @@ P           mkmem           8
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Effect of self-consistency on quasiparticles in solids
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).

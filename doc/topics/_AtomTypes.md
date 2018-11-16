@@ -2,6 +2,7 @@
 description: How to specify the types of atoms that form the system
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to specify the types of atoms that form the system.
 
@@ -52,5 +53,5 @@ electronic properties.
 
 ## Tutorials
 
-* [[lesson:ffield|Lesson on polarization and finite electric fields]]. Polarization, and responses to finite electric fields for AlAs. In the present topic, it is an example of the definition of several atom types ... 
+* [[tutorial:ffield|Tutorial on polarization and finite electric fields]]. Polarization, and responses to finite electric fields for AlAs. In the present topic, it is an example of the definition of several atom types ... 
 

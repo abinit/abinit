@@ -93,13 +93,6 @@ contains
 
 subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkkptrank'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -196,7 +189,6 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 
 ! could add a check that all k in full grid are in the invrank...
 
-
 end subroutine mkkptrank
 !!***
 
@@ -227,13 +219,6 @@ end subroutine mkkptrank
 !! SOURCE
 
 subroutine get_rank_1kpt(kpt,rank,krank)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_rank_1kpt'
-!End of the abilint section
 
  implicit none
 
@@ -315,13 +300,6 @@ end subroutine get_rank_1kpt
 
 integer function kptrank_index(krank, kpt) result(ikpt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kptrank_index'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -366,13 +344,6 @@ end function kptrank_index
 !! SOURCE
 
 subroutine copy_kptrank (krank_in, krank_out)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'copy_kptrank'
-!End of the abilint section
 
  implicit none
 
@@ -422,13 +393,6 @@ end subroutine copy_kptrank
 
 subroutine destroy_kptrank (krank)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_kptrank'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -471,13 +435,6 @@ end subroutine destroy_kptrank
 !! SOURCE
 
 subroutine dump_kptrank (krank, unout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dump_kptrank'
-!End of the abilint section
 
  implicit none
 

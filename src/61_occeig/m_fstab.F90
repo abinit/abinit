@@ -6,7 +6,7 @@
 !!  Tools for the management of a set of Fermi surface k-points
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2018 ABINIT group (MG, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,12 +21,11 @@
 
 #include "abi_common.h"
 
-
 module m_fstab
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_kptrank
@@ -36,6 +35,7 @@ module m_fstab
  use m_time,           only : cwtime
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only : bisect
+ use m_symtk,          only : matr3inv
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_special_funcs,  only : dirac_delta
@@ -134,6 +134,9 @@ module m_fstab
  public :: fstab_print           ! Print the object
 !!***
 
+ !FIXME These routines are deprecated
+ public :: mkqptequiv
+
 !----------------------------------------------------------------------
 
 contains  !============================================================
@@ -160,15 +163,6 @@ contains  !============================================================
 
 subroutine fstab_free(fstab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  type(fstab_t),intent(inout) :: fstab
 
@@ -177,23 +171,13 @@ subroutine fstab_free(fstab)
  !@fstab_t
 
  ! integer
- if (allocated(fstab%istg0)) then
-   ABI_FREE(fstab%istg0)
- end if
- if (allocated(fstab%bstcnt_ibz)) then
-   ABI_FREE(fstab%bstcnt_ibz)
- end if
+ ABI_SFREE(fstab%istg0)
+ ABI_SFREE(fstab%bstcnt_ibz)
 
  ! real
- if (allocated(fstab%kpts)) then
-   ABI_FREE(fstab%kpts)
- end if
- if (allocated(fstab%tetra_wtk)) then
-   ABI_FREE(fstab%tetra_wtk)
- end if
- if (allocated(fstab%tetra_wtk_ene)) then
-   ABI_FREE(fstab%tetra_wtk_ene)
- end if
+ ABI_SFREE(fstab%kpts)
+ ABI_SFREE(fstab%tetra_wtk)
+ ABI_SFREE(fstab%tetra_wtk_ene)
 
  ! types
  call destroy_kptrank(fstab%krank)
@@ -237,17 +221,6 @@ end subroutine fstab_free
 !! SOURCE
 
 subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshiftk, shiftk, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_init'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -318,7 +291,7 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,ebands%kptns,kpt_full,ebands%nkpt,nkpt_full,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
+    sppoldbl,cryst%symafm,cryst%symrel,timrev,comm, use_symrec=.False.)
 
  if (dksqmax > tol12) then
    write(msg, '(7a,es16.6,4a)' )&
@@ -476,11 +449,14 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      !write(std_out,*)"bmin, bmax for tetra: ",bmin,bmax
      ABI_CHECK(bmin /= huge(1) .and. bmax /= -huge(1), "No point on the Fermi surface!")
 
+     !call libtetrabz_dbldelta(ltetra, bvec, nb, nge, eig1, eig2, ngw, wght_bz, comm)
+
      do band=bmin,bmax
        ! Get the contribution of this band
        tmp_eigen = ebands%eig(band, :nkibz, spin)
 
-       ! Calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
+       ! Calculate general integration weights at each irred kpoint
+       ! as in Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
        call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,fs%nene,nkibz,&
          bcorr0,btheta,bdelta,xmpi_comm_self)
 
@@ -539,15 +515,6 @@ end subroutine fstab_init
 
 integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_findkg0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(fstab_t),intent(in) :: fstab
@@ -595,15 +562,6 @@ end function fstab_findkg0
 !! SOURCE
 
 subroutine fstab_weights_ibz(fs, ebands, ik_ibz, spin, sigmas, wtk, iene)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_weights_ibz'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -683,16 +641,6 @@ end subroutine fstab_weights_ibz
 
 subroutine fstab_print(fstab, header, unit, prtvol, mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fstab_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: prtvol,unit
@@ -738,6 +686,132 @@ end subroutine fstab_print
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_fstab/mkqptequiv
+!! NAME
+!! mkqptequiv
+!!
+!! FUNCTION
+!! This routine determines the equivalence between
+!!   1) qpoints and fermi surface kpoints
+!!   2) qpoints under symmetry operations
+!!
+!! INPUTS
+!!   Cryst<crystal_t>=Info on unit cell and symmetries.
+!!   kpt_phon = fermi surface kpoints
+!!   nkpt_phon = number of kpoints in the full FS set
+!!   nqpt = number of qpoints
+!!   qpt_full = qpoint coordinates
+!!
+!! OUTPUT
+!!   FSfullpqtofull = mapping of k + q onto k' for k and k' in full BZ
+!!   qpttoqpt(itim,isym,iqpt) = qpoint index which transforms to iqpt under isym and with time reversal itim.
+!!
+!! NOTES
+!!   REMOVED 3/6/2008: much too large matrix, and not used at present
+!!       FStoqpt = mapping of kpoint pairs (1 irreducible and 1 full) to qpoints
+!!
+!! PARENTS
+!!      elphon,get_tau_k
+!!
+!! CHILDREN
+!!      destroy_kptrank,get_rank_1kpt,mkkptrank,wrtout
+!!
+!! SOURCE
+
+subroutine mkqptequiv(FSfullpqtofull,Cryst,kpt_phon,nkpt_phon,nqpt,qpttoqpt,qpt_full,mqtofull)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt_phon,nqpt
+ type(crystal_t),intent(in) :: Cryst
+!arrays
+ integer,intent(out) :: FSfullpqtofull(nkpt_phon,nqpt),qpttoqpt(2,Cryst%nsym,nqpt)
+ integer,intent(out),optional :: mqtofull(nqpt)
+ real(dp),intent(in) :: kpt_phon(3,nkpt_phon),qpt_full(3,nqpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ikpt_phon,iFSqpt,iqpt,isym,symrankkpt_phon
+ character(len=500) :: message
+ type(kptrank_type) :: kptrank_t
+!arrays
+ real(dp) :: tmpkpt(3),gamma_kpt(3)
+
+! *************************************************************************
+
+ call wrtout(std_out,' mkqptequiv : making rankkpt_phon and invrankkpt_phon',"COLL")
+
+ call mkkptrank (kpt_phon,nkpt_phon,kptrank_t)
+
+ FSfullpqtofull = -999
+ gamma_kpt(:) = zero
+
+ do ikpt_phon=1,nkpt_phon
+   do iqpt=1,nqpt
+!    tmpkpt = jkpt = ikpt + qpt
+     tmpkpt(:) = kpt_phon(:,ikpt_phon) + qpt_full(:,iqpt)
+
+!    which kpt is it among the full FS kpts?
+     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+
+     FSfullpqtofull(ikpt_phon,iqpt) = kptrank_t%invrank(symrankkpt_phon)
+     if (FSfullpqtofull(ikpt_phon,iqpt) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to k+q !!!")
+     end if
+
+   end do
+ end do
+
+ if (present(mqtofull)) then
+   do iqpt=1,nqpt
+     tmpkpt(:) = gamma_kpt(:) - qpt_full(:,iqpt)
+
+!    which kpt is it among the full FS kpts?
+     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+
+     mqtofull(iqpt) = kptrank_t%invrank(symrankkpt_phon)
+     if (mqtofull(iqpt) == -1) then
+       MSG_ERROR("looks like no kpoint equiv to -q !!!")
+     end if
+   end do
+ end if
+
+ call destroy_kptrank (kptrank_t)
+
+!start over with q grid
+ call wrtout(std_out,' mkqptequiv : FSfullpqtofull made. Do qpttoqpt',"COLL")
+
+ call mkkptrank (qpt_full,nqpt,kptrank_t)
+
+ qpttoqpt(:,:,:) = -1
+ do iFSqpt=1,nqpt
+   do isym=1,Cryst%nsym
+     tmpkpt(:) =  Cryst%symrec(:,1,isym)*qpt_full(1,iFSqpt) &
+&     + Cryst%symrec(:,2,isym)*qpt_full(2,iFSqpt) &
+&     + Cryst%symrec(:,3,isym)*qpt_full(3,iFSqpt)
+
+     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+     if (kptrank_t%invrank(symrankkpt_phon) == -1) then
+       message = "looks like no kpoint equiv to q by symmetry without time reversal!!!"
+       MSG_ERROR(message)
+     end if
+     qpttoqpt(1,isym,kptrank_t%invrank(symrankkpt_phon)) = iFSqpt
+
+     tmpkpt = -tmpkpt
+     call get_rank_1kpt (tmpkpt,symrankkpt_phon,kptrank_t)
+     if (kptrank_t%invrank(symrankkpt_phon) == -1) then
+       message = ' mkqptequiv : Error : looks like no kpoint equiv to q by symmetry with time reversal!!!'
+       MSG_ERROR(message)
+     end if
+     qpttoqpt(2,isym,kptrank_t%invrank(symrankkpt_phon)) = iFSqpt
+   end do
+ end do
+
+ call destroy_kptrank (kptrank_t)
+
+end subroutine mkqptequiv
+!!***
 
 end module m_fstab
 !!***

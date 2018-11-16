@@ -41,12 +41,6 @@
 
 subroutine xmpi_isum_int0d(xval, xsum, comm, request, ierr)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_alltoall_dp4d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------

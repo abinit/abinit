@@ -8,7 +8,7 @@
 #
 
 #
-# Source files making up the fftnew library
+# Source files making up the 52_fft_mpi_noabirule library
 #
 
 # Source file attributes
@@ -18,7 +18,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "indirect_parallel_Fourier.F90",
+ "defs_fftdata.F90",
  "m_fftw3.F90",
  "m_dfti.F90",
  "m_fftcore.F90",

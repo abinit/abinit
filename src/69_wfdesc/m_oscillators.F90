@@ -28,13 +28,13 @@ MODULE m_oscillators
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_fft
 
  use m_gwdefs,    only : czero_gw
  use m_fstrings,  only : toupper, itoa, sjoin
  use m_geometry,  only : spinrot_cmat
- use m_blas,      only : xcopy
+ use m_hide_blas, only : xcopy
  use m_gsphere,   only : gsphere_t
 
  implicit none
@@ -52,7 +52,7 @@ MODULE m_oscillators
 
 !----------------------------------------------------------------------
 
-CONTAINS  !=========================================================================================================================
+CONTAINS
 
 !!****f* m_oscillators/rho_tw_g
 !! NAME
@@ -103,13 +103,6 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
 & wfn1,i1,ktabr1,ktabp1,spinrot1,&
 & wfn2,i2,ktabr2,ktabp2,spinrot2,&
 & dim_rtwg,rhotwg) !& nhat12)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rho_tw_g'
-!End of the abilint section
 
  implicit none
 
@@ -252,13 +245,6 @@ end subroutine rho_tw_g
 
 subroutine get_uug(npw,nr,ndat,ngfft,use_padfft,igfftg0,gbound,u1,u2,usug,trans1,trans2)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_uug'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -358,13 +344,6 @@ subroutine ts_usug_kkp_bz(npw,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound
 & u1,time1,ktabr1,ktabp1,&
 & u2,time2,ktabr2,ktabp2,usug) !& nhat12)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ts_usug_kkp_bz'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -457,13 +436,6 @@ end subroutine ts_usug_kkp_bz
 !! SOURCE
 
 subroutine usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12prod)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'usur_kkp_bz'
-!End of the abilint section
 
  implicit none
 
@@ -632,13 +604,6 @@ end subroutine usur_kkp_bz
 
 subroutine gw_box2gsph(nr,ndat,npw,igfftg0,iarrbox,oarrsph)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'gw_box2gsph'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -711,13 +676,6 @@ end subroutine gw_box2gsph
 !! SOURCE
 
 subroutine calc_wfwfg(ktabr_k,ktabi_k,spinrot,nr,nspinor,ngfft_gw,wfr_jb,wfr_kb,wfg2_jk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'calc_wfwfg'
-!End of the abilint section
 
  implicit none
 
@@ -813,13 +771,6 @@ end subroutine calc_wfwfg
 
 function sym_rhotwgq0(itim_k,isym_k,dim_rtwg,npw,rhxtwg_in,Gsph) result(rhxtwg_sym)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sym_rhotwgq0'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -896,13 +847,6 @@ end function sym_rhotwgq0
 !! SOURCE
 
 subroutine rotate_spinor(itim_kbz, ktabr_kbz, ktabp_kbz, spinrot, nr, nspinor, ndat, ug_ibz, cwork, oug_bz)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rotate_spinor'
-!End of the abilint section
 
  implicit none
 

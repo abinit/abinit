@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -553,22 +553,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.500     291.463
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+        0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
     2   0.000  -8.808  -3.130  -4.544  -4.544  -4.544  -4.544   0.000   0.000
        -0.000   0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000
 
   chi0(G,G') at the    2 th omega   0.0000  11.2421 [eV]
        1       2       3       4       5       6       7       8       9
-    1  -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000   0.000
+    1  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
         0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
 
-    2   0.000  -3.025   0.072  -0.512  -0.512  -0.512  -0.512   0.000   0.000
+    2  -0.000  -3.025   0.072  -0.512  -0.512  -0.512  -0.512   0.000   0.000
        -0.000  -0.000   0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =   4.1728
-  dielectric constant without local fields =   4.2115
+  dielectric constant =   4.1729
+  dielectric constant without local fields =   4.2116
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     40.24  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
@@ -576,18 +576,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.500     291.463
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.240   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.012   0.012
-     -0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
+      0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
       0.240   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.012   0.012
-     -0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000  -0.000
+      0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000  -0.000
 
 
    Upper and lower wings at the    2 th omega   0.0000  11.2421 [eV]
        1       2       3       4       5       6       7       8       9
-      0.717   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.018   0.018
+      0.717  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.018   0.018
       0.000   0.000   0.000  -0.000  -0.000  -0.000  -0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
-      0.717   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.018   0.018
+      0.717  -0.000  -0.000  -0.000  -0.000  -0.000  -0.000  -0.018   0.018
       0.000  -0.000  -0.000   0.000   0.000   0.000   0.000   0.000  -0.000
 
 
@@ -860,9 +860,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.500     291.463
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   2.6433 [eV], located at k-point      :   0.3750  0.3750  0.3750
-   Fundamental gap     =   1.1292 [eV], Top of valence bands at :   0.3750  0.3750  0.3750
-                                        Bottom of conduction at :   0.3750  0.1250  0.1250
+   Minimum direct gap =   2.6433 [eV], located at k-point      :   0.3750  0.3750  0.3750
+   Fundamental gap    =   1.1292 [eV], Top of valence bands at :   0.3750  0.3750  0.3750
+                                       Bottom of conduction at :   0.3750  0.1250  0.1250
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                  179
@@ -1179,7 +1179,7 @@ P           mkmem           4
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] ABINIT : First-principles approach of materials and nanosystem properties.
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,

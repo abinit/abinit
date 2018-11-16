@@ -2,6 +2,7 @@
 description: How to compute the linewidth (or lifetime) of phonons, due to the electron-phonon interaction
 authors: MV
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute the linewidth (or lifetime) of phonons, due to the electron-phonon
 interaction with the ABINIT package.
@@ -31,5 +32,5 @@ to 1 (output to `_NEST`).
 
 ## Tutorials
 
-* The lesson on the [[lesson:eph|electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+* The tutorial on the [[tutorial:eph|electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 

@@ -82,25 +82,17 @@ program fftprof
  use m_xomp
  use m_errors
  use m_FFT_prof
- use m_profiling_abi
+ use m_abicore
  use m_dfti
 
  use m_fstrings,   only : lower
+ use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit
  use m_geometry,   only : metric
  use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng
  use m_fft,        only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
  use m_fftw3,      only : fftw3_init_threads
- use m_mpinfo,     only : destroy_mpi_enreg
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fftprof'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
-!End of the abilint section
-
+ use m_mpinfo,     only : destroy_mpi_enreg, initmpi_seq
  implicit none
 
 
@@ -268,10 +260,8 @@ program fftprof
      end do
    end do
 
-!1  continue
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
    call wrtout(std_out,msg,"COLL")
-
    goto 100 ! Jump to xmpi_end
  end if
 
@@ -511,10 +501,9 @@ program fftprof
  ABI_DT_FREE(Ftest)
  call fftprof_free(Ftprof)
  ABI_DT_FREE(Ftprof)
+ call destroy_mpi_enreg(MPI_enreg)
 
  call flush_unit(std_out)
-
- call destroy_mpi_enreg(MPI_enreg)
 
  call abinit_doctor("__fftprof")
 

@@ -64,7 +64,6 @@ nstep 100
 diemac 9.0
 
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -85,6 +84,4 @@ diemac 9.0
 #%%   The second dataset is for ground-state calculation at finite electric field. 
 #%%   The final datasetis the linear-response calculation at finite electric field.
 #%% topics = Berry
-#%%<END TEST_INFO>
-#%%<END TEST_INFO>
 #%%<END TEST_INFO>

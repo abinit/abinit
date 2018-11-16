@@ -8,8 +8,11 @@ import string
 import glob,os
 import re
 import sys
-reload(sys)  
-sys.setdefaultencoding('utf8')
+#reload(sys)  
+try:
+    sys.setdefaultencoding('utf8')
+except AttributeError:
+    pass
 from shutil import rmtree
 
 # ---------------------------------------------------------------------------- #

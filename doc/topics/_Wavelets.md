@@ -2,6 +2,7 @@
 description: How to perform calculations on a wavelet basis
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform calculations on a wavelet basis with the ABINIT package.
 
@@ -30,5 +31,5 @@ performed.
 
 ## Tutorials
 
-* [[lesson:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for the computation of total energy, density, and ground state properties
+* [[tutorial:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for the computation of total energy, density, and ground state properties
 

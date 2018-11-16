@@ -25,11 +25,11 @@ MODULE m_iowf
  use defs_basis
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_wffile
- use m_abi_etsf 
+ use m_abi_etsf
  use m_nctk
  use m_wfk
 #ifdef HAVE_NETCDF
@@ -44,14 +44,17 @@ MODULE m_iowf
  use m_numeric_tools,  only : mask2blocks
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_cgtools,        only : cg_zcopy
- use m_crystal,        only : crystal_t, crystal_free
- use m_crystal_io,     only : crystal_ncwrite, crystal_from_hdr
+ use m_crystal,        only : crystal_t
+ use m_rwwf,           only : rwwf
+ use m_mpinfo,         only : proc_distrb_cycle
+ use m_vkbr,           only : calc_vkb
+ use m_wvl_rwwf,       only : wvl_write
 
  implicit none
 
- private 
+ private
 
- public :: outwf 
+ public :: outwf
 
 !!***
 
@@ -95,7 +98,7 @@ CONTAINS  !=====================================================================
 !!   where resid(n,k)=|<C(n,k)|(H-e(n,k))|C(n,k)>|^2 for the ground state
 !!  response: if == 0, GS wavefunctions , if == 1, RF wavefunctions
 !!  unwff2=unit for output of wavefunction
-!!  wfs <type(wvl_projector_type)>=wavefunctions informations for wavelets.
+!!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!
 !! OUTPUT
 !!  (only writing)
@@ -115,17 +118,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 &                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
 &                nsppol,occ,resid,response,unwff2,&
 &                wfs,wvl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outwf'
- use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_56_io_mpi
- use interfaces_62_wvl_wfs
-!End of the abilint section
 
  implicit none
 
@@ -148,7 +140,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 !Local variables-------------------------------
  integer,parameter :: nkpt_max=50
- integer :: iomode,action,band_index,fform,formeig,iband,ibdkpt,icg
+ integer :: iomode,action,band_index,fform,formeig,iband,ibdkpt,icg,iat,iproj
  integer :: ierr,ii,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
  integer :: nband_k,nkpt_eff,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
@@ -159,12 +151,16 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  logical :: ihave_data,iwrite,iam_master,done
  character(len=500) :: msg
  type(wffile_type) :: wff2
- !type(crystal_t) :: crystal
- !type(ebands_t) :: gs_ebands
+ character(len=fnlen) :: path
 !arrays
  integer,allocatable :: kg_disk(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cg_disk(:,:),eig_k(:),occ_k(:)
+#ifdef HAVE_NETCDF
+ integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk, timrev
+ real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
+ type(crystal_t) :: crystal
+#endif
 
 ! *************************************************************************
 !For readability of the source file, define a "me" variable also in the sequential case
@@ -246,7 +242,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    end do
  end do
 
- write(msg,'(a,1p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
+ write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
@@ -291,12 +287,11 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !if (nstep>0 .and. dtset%prtwf/=0) then
  if (dtset%prtwf/=0) then
 
-!  Only the master write the file, except if MPI I/O, but the
-!  full wff dataset should be provided to WffOpen in this case
+   ! Only the master write the file, except if MPI I/O, but the
+   ! full wff dataset should be provided to WffOpen in this case
    iomode=IO_MODE_FORTRAN_MASTER
    if (dtset%iomode==IO_MODE_MPI)  iomode = IO_MODE_MPI
    if (dtset%iomode==IO_MODE_ETSF) iomode = IO_MODE_ETSF
-!  iomode=IO_MODE_MPI
 
 #ifdef HAVE_NETCDF
    if (dtset%iomode == IO_MODE_ETSF .and. dtset%usewvl == 0) then
@@ -305,6 +300,100 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 #ifdef HAVE_NETCDF_DEFAULT
      ABI_CHECK(done, "cg_ncwrite must handle the output of the WFK file.")
 #endif
+
+     ! Write KB form factors. Only master works. G-vectors are read from file to avoid
+     ! having to deal with paral_kgb distribution.
+     if (me == master .and. dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
+       ABI_CHECK(done, "cg_ncwrite was not able to generate WFK.nc in parallel. Perphase hdf5 is not working")
+       path = nctk_ncify(filnam)
+       call wrtout(std_out, sjoin("Writing KB form factors to:", path))
+       NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
+       NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_plane_waves", kg_varid))
+       mpw_disk = maxval(hdr%npwarr)
+
+       ! Dimensions needed by client code to allocate memory when reading.
+       ncerr = nctk_def_dims(ncid, [ &
+         nctkdim_t("mproj", psps%mproj), &
+         nctkdim_t("mpsang", psps%mpsang), &
+         nctkdim_t("mpssoang", psps%mpssoang), &
+         nctkdim_t("lnmax", psps%lnmax), &
+         nctkdim_t("lmnmax", psps%lmnmax) &
+       ])
+       NCF_CHECK(ncerr)
+
+       ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "mpspso"])
+       NCF_CHECK(ncerr)
+
+       ! Write indlmn table (needed to access vkb arrays)
+       ncerr = nctk_def_arrays(ncid, [ &
+         nctkarr_t("indlmn", "int", "six, lmnmax, number_of_atom_species"), &
+         nctkarr_t("vkbsign", "dp", "lnmax, number_of_atom_species"), &
+         nctkarr_t("vkb", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints"), &
+         nctkarr_t("vkbd", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints") &
+       ], defmode=.True.)
+       NCF_CHECK(ncerr)
+
+       ! Switch to write mode.
+       NCF_CHECK(nctk_set_datamode(ncid))
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "indlmn"), psps%indlmn))
+
+       ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+         "mpspso"], &
+         [psps%mpspso])
+       NCF_CHECK(ncerr)
+
+       ! Calculate KB form factors and derivatives.
+       ! The arrays are allocated with lnmax to support pseudos with more than projector.
+       ! Note that lnmax takes into account lloc hence arrays are in packed form and one should be
+       ! accessed with the indices provided by psps%indlmn.
+       ABI_MALLOC(vkbsign, (psps%lnmax, psps%ntypat))
+       ABI_MALLOC(vkb, (mpw_disk, psps%lnmax, psps%ntypat))
+       ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
+       ABI_MALLOC(kg_disk, (3, mpw_disk))
+
+       timrev = 2 ! FIXME: Use abinit convention for timrev
+       crystal = hdr_get_crystal(hdr, timrev)
+
+       ! For each k-point: read full G-vector list from file, compute KB data and write to file.
+       do ikpt=1,nkpt
+         npwk_disk = hdr%npwarr(ikpt)
+         NCF_CHECK(nf90_get_var(ncid, kg_varid, kg_disk, start=[1, 1, ikpt], count=[3, npwk_disk, 1]))
+         vkb = zero; vkbd = zero
+         call calc_vkb(crystal, psps, kptns(:, ikpt), npwk_disk, mpw_disk, kg_disk, vkbsign, vkb, vkbd)
+
+         if (ikpt == 1) then
+           ! This for the automatic tests.
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
+           if(dtset%prtvol>=2)then
+             write(msg,'(a)') 'prtkbff: writing first and last G-components of the KB form factors'
+             call wrtout(ab_out,msg,'COLL')
+             do iat=1,psps%ntypat
+               write(msg,'(a10,i5)') 'atype ',iat
+               call wrtout(ab_out,msg,'COLL')
+               do iproj=1,psps%lnmax
+                 write(msg,'(a10,i5,a,a10,e12.4,a,3(a10,2e12.4,a))') &
+                        'projector ', iproj,ch10, &
+                        'vkbsign   ', vkbsign(iproj,iat), ch10, &
+                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,:,iat), ch10, &
+                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,:,iat), ''
+                 call wrtout(ab_out,msg,'COLL')
+               end do
+             end do
+           end if
+         end if
+
+         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
+         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
+       end do
+       NCF_CHECK(nf90_close(ncid))
+
+       ABI_FREE(kg_disk)
+       ABI_FREE(vkbsign)
+       ABI_FREE(vkb)
+       ABI_FREE(vkbd)
+       call crystal%free()
+     end if
+
      if (done) return
      ! If cg_ncwrite cannot handle the IO because HDF5 + MPI-IO support is missing, we fallback to Fortran + MPI-IO.
      msg = "Could not produce a netcdf file in parallel (MPI-IO support is missing). Will fallback to MPI-IO with Fortran"
@@ -323,12 +412,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
 #ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
-     !call crystal_from_hdr(crystal, hdr, 2)
-     !NCF_CHECK(crystal_ncwrite_path(crystal, nctk_ncify(filnam)))
-     !call crystal_free(crystal)
+     !crystal = hdr_get_crystal(hdr, 2)
+     !NCF_CHECK(crystal%ncwrite_path(nctk_ncify(filnam)))
+     !call crystal%free()
      !ncerr = ebands_ncwrite_path(gs_ebands, filname, ncid)
      !NCF_CHECK(ncerr)
-#else 
+#else
      MSG_ERROR("ETSF_IO is not activated")
      ABI_UNUSED(psps%ntypat)
 #endif
@@ -643,15 +732,6 @@ end subroutine outwf
 subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspinor,mcg,&
                       mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg_ncwrite'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -670,7 +750,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,fform2=2
- integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k 
+ integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
  integer :: comm_cell,comm_fft,comm_bandfft,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
  integer :: timrev,paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
@@ -705,7 +785,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  me_kpt = mpi_enreg%me_kpt; me_band = mpi_enreg%me_band; me_spinor = mpi_enreg%me_spinor
  iam_master = (me_kpt == master)
 
- paral_kgb = dtset%paral_kgb 
+ paral_kgb = dtset%paral_kgb
  nproc_band = mpi_enreg%nproc_band
  bandpp     = mpi_enreg%bandpp
  nproc_spinor = mpi_enreg%nproc_spinor
@@ -731,11 +811,11 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
  ! FIXME: Use abinit convention for timrev
  timrev = 2
- call crystal_from_hdr(crystal, hdr, timrev)
+ crystal = hdr_get_crystal(hdr, timrev)
 
  ! TODO
  ! Be careful with response == 1.
- ! gs_ebands contains the GS eigenvalues and occupation and will be written if this is a 
+ ! gs_ebands contains the GS eigenvalues and occupation and will be written if this is a
  ! GS wfk. If we have a DFPT file, eigen stores the GKK matrix element, in this case
  ! we don't write gs_ebands but we define new variables in the netcdf file to store the GKK
  ABI_MALLOC(occ3d, (mband,nkpt,nsppol))
@@ -751,7 +831,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    formeig = 1
  end if
 
- ! same_layout is set to True if the interal representation of the cgs 
+ ! same_layout is set to True if the interal representation of the cgs
  ! is compatible with the representation on file.
  iomode = IO_MODE_ETSF
  if (response == 0) then
@@ -762,7 +842,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
    ABI_CHECK(nproc_band==1, "nproc_band != 1 not coded")
    ABI_CHECK(nproc_spinor==1, "nproc_spinor != 1 not coded")
 
-   ! Note: It would be possible to use collective IO if the cg1 are block-distributed 
+   ! Note: It would be possible to use collective IO if the cg1 are block-distributed
    same_layout = .True.
    spin_loop: do spin=1,nsppol
      do ikpt=1,nkpt
@@ -801,14 +881,14 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        NCF_CHECK_MSG(ncerr, sjoin("create_par: ", path))
 
        call wfk_ncdef_dims_vars(ncid, hdr, fform2, write_hdr=.True.)
-       NCF_CHECK(crystal_ncwrite(crystal, ncid))
+       NCF_CHECK(crystal%ncwrite(ncid))
 
        if (response == 0) then
          NCF_CHECK(ebands_ncwrite(gs_ebands, ncid))
        else
          call ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
        end if
-       
+
        NCF_CHECK(nf90_close(ncid))
      end if
 
@@ -821,7 +901,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          nband_k = nband(ikpt + (spin-1)*nkpt)
          npw_k = npwarr(ikpt)
          if (.not. proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,spin,me_kpt)) then
-           ! FIXME v2[01], v3[6], with 4 procs  
+           ! FIXME v2[01], v3[6], with 4 procs
            ! v6[7] and v7[68], v7[69] fail but due to a extra line with nprocs
            ! v7[96] with np=4 seems to be more serious but it crashes also in trunk.
            ! v2[88] is slow likely due to outscfv
@@ -868,7 +948,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        do ii=0,nproc_cell-1
          if (rank_has_cg(ii) == 1) then
            cnt = cnt + 1
-           ranks_io(cnt) = ii 
+           ranks_io(cnt) = ii
          end if
        end do
        !write(std_out,*)"nranks, ranks_io:", nranks, ranks_io
@@ -967,7 +1047,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      call cwtime(cpu,wall,gflops,"stop")
      write(msg,'(2(a,f8.2))')" collective ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
-#endif 
+#endif
 ! HAVE_NETCDF
    else ! single_writer
      if (nproc_cell > 1) then
@@ -983,7 +1063,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      if (iam_master) then
        call wfk_open_write(wfk,hdr,path,formeig,iomode,get_unit(),xmpi_comm_self,write_hdr=.True.)
 
-       NCF_CHECK(crystal_ncwrite(crystal, wfk%fh))
+       NCF_CHECK(crystal%ncwrite(wfk%fh))
        !write(std_out,*)"after crystal_ncwrite"
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
@@ -1079,7 +1159,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        NCF_CHECK_MSG(ncerr, sjoin("create_par:", path))
 
        call wfk_ncdef_dims_vars(ncid, hdr, fform2, write_hdr=.True.)
-       NCF_CHECK(crystal_ncwrite(crystal, ncid))
+       NCF_CHECK(crystal%ncwrite(ncid))
 
        ! Write eigenvalues and occupations (these arrays are not MPI-distributed)
        if (response == 0) then
@@ -1134,7 +1214,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        end if
        ABI_FREE(kg_k)
 
-       ! gblock contains block-distributed G-vectors inside comm_fft 
+       ! gblock contains block-distributed G-vectors inside comm_fft
        !call kg2seqblocks(npwtot_k,npw_k,kg(:,ikg+1:),ind_cg_mpi_to_seq,comm_fft,start_pwblock,count_pwblock,gblock)
        !write(std_out,*)"gblock(:,2)",gblock(:,2)
        !ncerr = nf90_put_var(ncid, kg_varid, gblock, start=[1,start_pwblock,ikpt], count=[3,count_pwblock,1])
@@ -1235,12 +1315,12 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      call cwtime(cpu,wall,gflops,"stop")
      write(msg,'(2(a,f8.2))')"scattered ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
-#endif 
+#endif
 ! HAVE_NETCDF
    end if !nctk_has_mpiio
  end if
 
- call crystal_free(crystal)
+ call crystal%free()
  if (response == 0) call ebands_free(gs_ebands)
 
  ABI_FREE(occ3d)
@@ -1267,11 +1347,11 @@ end subroutine cg_ncwrite
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  eigen((2*mband**2*nkpt*nsppol)= eigenvalues (hartree) for all bands at each k point
 !!  occ3d(mband*nkpt*nsppol)=occupations for all bands at each k point
-!!    Note that occ3d differes from the occ arrays used in the rest of the code. 
+!!    Note that occ3d differes from the occ arrays used in the rest of the code.
 !!    occ3d is an array with constant stride `mband` whereas abinit (for reasons that are not clear to me)
 !!    packs the occupations in a 1d vector with a k-dependent separation (nband_k).
 !!    occ and occ3d differ only if nband is k-dependent but you should never assume this, hence
-!!    remember to *convert* occ into occ3d before calling this routine. 
+!!    remember to *convert* occ into occ3d before calling this routine.
 !!
 !! PARENTS
 !!      m_iowf
@@ -1282,13 +1362,6 @@ end subroutine cg_ncwrite
 !! SOURCE
 
 subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ncwrite_eigen1_occ'
-!End of the abilint section
 
  implicit none
 
@@ -1304,12 +1377,12 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
  integer :: idx,spin,ikpt,nband_k,ib2,ib1
  integer :: ncerr,occ_varid,h1mat_varid
 !arrays
- real(dp),allocatable :: h1mat(:,:,:,:,:) 
+ real(dp),allocatable :: h1mat(:,:,:,:,:)
 
 ! *************************************************************************
 
- ! Declare h1 array with abinit conventions 
- ! Cannot use a 3D array since eigen1 are packed and one could have different number of bands 
+ ! Declare h1 array with abinit conventions
+ ! Cannot use a 3D array since eigen1 are packed and one could have different number of bands
  ! per k-points. (this is not an official etsf-io variable)!
  ! elements in eigen are packed in the first positions.
  ! Remember that eigen are not MPI-distributed so no communication is needed
@@ -1347,7 +1420,7 @@ subroutine ncwrite_eigen1_occ(ncid, nband, mband, nkpt, nsppol, eigen, occ3d)
 end subroutine ncwrite_eigen1_occ
 !!***
 
-#endif 
+#endif
 ! HAVE_NETCDF
 
 !----------------------------------------------------------------------
@@ -1378,13 +1451,6 @@ end subroutine ncwrite_eigen1_occ
 !! SOURCE
 
 subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,count_pwblock,gblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kg2seqblocks'
-!End of the abilint section
 
  implicit none
 
@@ -1424,7 +1490,7 @@ subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,coun
 
  do rank=0,nproc_fft-1
    start_pwblock = igstart_rank(rank)
-   count_pwblock = igstart_rank(rank+1) - igstart_rank(rank)  
+   count_pwblock = igstart_rank(rank+1) - igstart_rank(rank)
 
    gbuf = 0
    do ig=1,npw_k
@@ -1439,13 +1505,13 @@ subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,coun
 
    if (me_fft == rank) then
      ABI_STAT_MALLOC(gblock, (3, count_pwblock), ierr)
-     ABI_CHECK(ierr==0, "oom in gblock") 
+     ABI_CHECK(ierr==0, "oom in gblock")
      gblock = gbuf(:, :count_pwblock)
-   end if 
+   end if
  end do
 
  start_pwblock = igstart_rank(me_fft)
- count_pwblock = igstart_rank(me_fft+1) - igstart_rank(me_fft)  
+ count_pwblock = igstart_rank(me_fft+1) - igstart_rank(me_fft)
 
  ABI_FREE(gbuf)
  ABI_FREE(igstart_rank)
@@ -1481,13 +1547,6 @@ end subroutine kg2seqblocks
 !! SOURCE
 
 subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,bcount,my_cgblock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cg2seqblocks'
-!End of the abilint section
 
  implicit none
 
@@ -1531,14 +1590,14 @@ subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,b
  ABI_STAT_MALLOC(cgbuf, (2, npwtot_k, nbmax), ierr)
  ABI_CHECK(ierr==0, "oom cgbuf")
 
- nbb = bstart_rank(me+1) - bstart_rank(me)  
+ nbb = bstart_rank(me+1) - bstart_rank(me)
  ABI_STAT_MALLOC(my_cgblock, (2, npwtot_k, nbb), ierr)
  ABI_CHECK(ierr==0, "oom my_cgblock")
 
  ! TODO: This should be replaced by gatherv but premature optimization....
  do rank=0,nprocs-1
    bstart = bstart_rank(rank)
-   bcount = bstart_rank(rank+1) - bstart_rank(rank)  
+   bcount = bstart_rank(rank+1) - bstart_rank(rank)
 
    do band=bstart, bstart+bcount-1
      ib = band - bstart + 1
@@ -1554,7 +1613,7 @@ subroutine cg2seqblocks(npwtot_k,npw_k,nband,cg_k,gmpi2seq,comm_bandfft,bstart,b
  end do ! rank
 
  bstart = bstart_rank(me)
- bcount = bstart_rank(me+1) - bstart_rank(me)  
+ bcount = bstart_rank(me+1) - bstart_rank(me)
 
  ABI_FREE(cgbuf)
  ABI_FREE(bstart_rank)

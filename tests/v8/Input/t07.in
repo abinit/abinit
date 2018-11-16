@@ -82,7 +82,6 @@ ndtset 3 jdtset 1 2 3
  prtwf 0 prteig 0 prtden 0
  prtvol 10
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
@@ -100,5 +99,5 @@ ndtset 3 jdtset 1 2 3
 #%%   Computation of elastic tensor and internal strain in DFPT+PAW
 #%%   Ground state is computed.
 #%%   DFPT is computed
-#%% topics = DFPT
+#%% topics = DFPT, LatticeModel
 #%%<END TEST_INFO>

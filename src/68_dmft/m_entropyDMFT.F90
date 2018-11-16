@@ -39,6 +39,7 @@ module m_entropyDMFT
   use m_pawang, only : pawang_type
   use m_pawrad, only : pawrad_type, simp_gen, poisson
   use m_pawtab, only : pawtab_type
+  use m_paw_correlations,only : pawpuxinit
   use m_io_tools, only : get_unit
   use m_data4entropyDMFT
 
@@ -147,14 +148,6 @@ contains
 subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_init'
- use interfaces_14_hidewrite
-!End of the abilint section
-
     type(entropyDMFT_t) , intent(inout) :: e_t
     type(dataset_type)  , intent(in   ) :: dt
     type(pawtab_type)   , intent(in   ) :: pawtab(:)
@@ -339,13 +332,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_allocateAll(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_allocateAll'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 
     ABI_ALLOCATE(e_t%index_atom, (1:e_t%natom))
@@ -404,14 +390,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_restart(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_restart'
- use interfaces_14_hidewrite
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 !Local variables-------------------------------
     logical            :: doBcast
@@ -559,13 +537,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_dump(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_dump'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 !Local variables-------------------------------
     integer            :: ilambda
@@ -687,15 +658,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   function entropyDMFT_nextLambda(e_t,dt,pawtab,pawang,pawrad) result(nextstep)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_nextLambda'
- use interfaces_14_hidewrite
- use interfaces_65_paw
-!End of the abilint section
-
     type(entropyDMFT_t) , intent(inout) :: e_t
     type(dataset_type)  , intent(in) :: dt
     type(pawtab_type)   , intent(inout) :: pawtab(:)
@@ -796,13 +758,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_addIntegrand(e_t,dt,energies,data4etot)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_addIntegrand'
-!End of the abilint section
-
     type(entropyDMFT_t)   , intent(inout) :: e_t
     type(dataset_type) , intent(in   ) :: dt
     type(energies_type), intent(in   ) :: energies
@@ -958,14 +913,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_computeEntropy(e_t,entropy)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_computeEntropy'
- use interfaces_14_hidewrite
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
     real(dp)        , intent(inout) :: entropy !inout in case we do nothing, avoid to change entropy in NaN
 !Local variables ------------------------------
@@ -1114,13 +1061,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_integrate(e_t,integrand,integral)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_integrate'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
     real(dp)        , intent(in   ) :: integrand(:,:)
     real(dp)        , intent(  out) :: integral
@@ -1217,13 +1157,6 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
   subroutine entropyDMFT_destroy(e_t)
 
 !Arguments ------------------------------------
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'entropyDMFT_destroy'
-!End of the abilint section
-
     type(entropyDMFT_t), intent(inout) :: e_t
 
     if ( allocated(e_t%index_atom) ) then

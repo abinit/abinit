@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -318,6 +318,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    2330.375    2330.278
    0.00004   0.00695  -1.07069   0.00001   0.00001   7.67510  -0.00011  -0.00011
    0.00004   0.00695   0.00001  -1.07069   0.00001  -0.00011   7.67510  -0.00011
    0.00004   0.00695   0.00001   0.00001  -1.07069  -0.00011  -0.00011   7.67510
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  1 components have a value greater than  100.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
  Atom # 15
    0.47291  73.86880   0.00000  -0.00002   0.00000   0.00000   0.00009   0.00000
   73.86880 *********   0.00000  -0.00161   0.00000   0.00000   0.00808   0.00000
@@ -327,6 +333,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    2330.375    2330.278
    0.00000   0.00000  -1.07098   0.00000  -0.00003   7.68082   0.00000   0.00046
    0.00009   0.00808   0.00000  -1.07091   0.00000   0.00000   7.67994   0.00000
    0.00000   0.00000  -0.00003   0.00000  -1.07098   0.00046   0.00000   7.68082
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  1 components have a value greater than  100.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
 
 
  Augmentation waves occupancies Rhoij:
@@ -928,7 +940,7 @@ P           mkmem2          1
  Note also that it will be of great value to readers of publications presenting these results,
  to read papers enabling them to understand the theoretical formalism and details
  of the ABINIT implementation.
- For information on why they are suggested, see also https://www.abinit.org/about/?text=acknowledgments.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
 - [1] Two-component density functional theory within the projector augmented-wave approach:
 - Accurate and self-consistent computations of positron lifetimes and momentum distributions

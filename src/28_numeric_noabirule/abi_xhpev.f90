@@ -4,7 +4,7 @@
 !!  abi_xhpev
 !!
 !! FUNCTION
-!!  abi_xhpev is the generic function that compute 
+!!  abi_xhpev is the generic function that compute
 !!  all eigenvalues and, optionally, eigenvectors of a
 !!  symmetric or hermitian matrix A in packed storage
 !!
@@ -31,12 +31,6 @@
 !! SOURCE
 
   subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,work,info,rwork,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev'
-!End of the abilint section
 
  implicit none
 
@@ -89,13 +83,6 @@ end subroutine abi_dhpev
 
   subroutine abi_dhpev_alloc_1d(jobz,uplo,n,a,w,z,istwf_k,use_slk)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev_alloc_1d'
-
-!End of the abilint section
-
  implicit none
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
@@ -126,7 +113,7 @@ end subroutine abi_dhpev
 
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-    
+
 #ifdef HAVE_LINALG_SCALAPACK
  if (use_slk_ == 1) then
    ! if istwfk=1, then dim_evec1=2*n and if istwfk=2, dim_evec1=n
@@ -136,14 +123,14 @@ end subroutine abi_dhpev
    call init_matrix_scalapack(sca_a,n,n,abi_processor,istwf_k_,10)
    call init_matrix_scalapack(sca_ev,n,n,abi_processor,istwf_k_,10)
 
-#ifdef HAVE_LINALG_ELPA   
+#ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
 #else
    call matrix_from_global(sca_a,a,istwf_k_)
 #endif
    call compute_eigen_problem(abi_processor,sca_a,&
 &        sca_ev,w,abi_communicator,istwf_k_)
-       
+
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
 
@@ -153,12 +140,12 @@ end subroutine abi_dhpev
    CALL destruction_matrix_scalapack(sca_ev)
    ABI_DEALLOCATE(tmp_evec)
   else
-#endif    
+#endif
     call abi_dhpev(jobz,uplo,n,a,w,z,n,eigen_d_work,info,&
 &     rwork=eigen_z_rwork,istwf_k=istwf_k_)
 #ifdef HAVE_LINALG_SCALAPACK
   end if
-#endif 
+#endif
   if(info/=0) then
      write(msg,'(a,i3)')' Problem in abi_xhpev, info= ',info
      MSG_WARNING(msg)
@@ -178,17 +165,10 @@ end subroutine abi_dhpev_alloc_1d
 !! INPUTS
 !!
 !! PARENTS
-!!      
+!!
 !! SOURCE
 
  subroutine abi_dhpev_alloc_2d(jobz,uplo,n,a,w,z,istwf_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dhpev_alloc_2d'
-
-!End of the abilint section
 
  implicit none
 
@@ -208,7 +188,7 @@ end subroutine abi_dhpev_alloc_1d
  ! *********************************************************************
 
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
-    
+
  call abi_dhpev(jobz,uplo,n,a,w,z,n,eigen_d_work,info,&
 &  rwork=eigen_z_rwork,istwf_k=istwf_k_)
 
@@ -231,12 +211,6 @@ end subroutine abi_dhpev_alloc_2d
 
   subroutine abi_chpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpev'
-!End of the abilint section
-
  implicit none
 
  !Arguments ------------------------------------
@@ -252,7 +226,7 @@ end subroutine abi_dhpev_alloc_2d
  integer, intent(out) :: info
 
 ! *********************************************************************
-    
+
  call chpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
 
 end subroutine abi_chpev
@@ -273,13 +247,6 @@ end subroutine abi_chpev
 !! SOURCE
 
  subroutine abi_chpev_alloc(jobz,uplo,n,a,w,z)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_chpev_alloc'
-
-!End of the abilint section
 
  implicit none
 
@@ -315,12 +282,6 @@ end subroutine abi_chpev_alloc
 
   subroutine abi_zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpev'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -336,7 +297,7 @@ end subroutine abi_chpev_alloc
  integer, intent(out) :: info
 
 ! *********************************************************************
-    
+
  call zhpev(jobz,uplo,n,a,w,z,ldz,work,rwork,info)
 
 end subroutine abi_zhpev
@@ -360,13 +321,6 @@ end subroutine abi_zhpev
 
  subroutine abi_zhpev_alloc(jobz,uplo,n,a,w,z)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_zhpev_alloc'
-
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -379,7 +333,7 @@ end subroutine abi_zhpev
  integer :: info
 
 ! *********************************************************************
-    
+
  call abi_zhpev(jobz,uplo,n,a,w,z,n,eigen_z_work,eigen_z_rwork,info)
 
 end subroutine abi_zhpev_alloc

@@ -2,9 +2,10 @@
 description: How to compute phonon frequencies and modes, IR and Raman spectra, Born effective charges, IR reflectivity ...
 authors: MT
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to compute phonon frequencies and modes, IR and Raman spectra, Born effective
-charges, IR reflectivity ... with the ABINIT package.
+charges, IR reflectivity with the ABINIT package.
 
 ## Introduction
 
@@ -41,13 +42,19 @@ Phonon calculations are arbitrary q-points can be done under finite electric
 field ([[topic:Berry]]).
 
 It will be the easiest to discover the capabilities of these two executables
-through the [[lesson:rf1]] of the tutorial.
+through the [[tutorial:rf1]] of the tutorial.
 
 See [[topic:DFPT]] for the general information about DFPT, [[topic:q-points]]
 for the specification of q-points, and [[topic:PhononBands]] for the
 computation of full phonon bands.
 
+!!! important
 
+    More than 1500 phonon band structures for insulators, computed with ABINIT, are now available 
+    on the [Materials Project web site](https://materialsproject.org), accompanied with derived 
+    thermodynamic quantities, Born effective charges, and dielectric tensor [[cite:Petretto2018a]].
+    The DDB file can be downloaded automatically with |AbiPy| starting from the materials project
+    identifier. For futher information, please consult the |DdbFileNb|.
 
 ## Related Input Variables
 
@@ -59,5 +66,5 @@ computation of full phonon bands.
 
 ## Tutorials
 
-* [[lesson:rf1|The lesson Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
+* [[tutorial:rf1|The tutorial Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
 

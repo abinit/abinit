@@ -38,12 +38,6 @@
 
 subroutine abi_ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_ztrsm'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------------------
@@ -99,12 +93,6 @@ end subroutine abi_ztrsm
   subroutine abi_dtrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
 &       x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_dtrsm'
-!End of the abilint section
-
  implicit none
 
  !Arguments-------------------------------------
@@ -138,7 +126,7 @@ end subroutine abi_ztrsm
       info = PLASMA_dtrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
 &       m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
    end if
-#endif   
+#endif
  else
    if(cplx_ == 2) then
       call ztrsm(side,uplo,transa,diag,m,n,cmplx(alpha,0.d0,dpc),a,lda,b,ldb)
@@ -171,13 +159,7 @@ end subroutine abi_dtrsm
  subroutine abi_d2ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb,&
 &  x_cplx)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2ztrsm'
-!End of the abilint section
-
- implicit none    
+ implicit none
 !Arguments-------------------------------------
  character(len=1), intent(in) :: side,uplo,transa,diag
  integer, intent(in) :: m,n,lda,ldb
@@ -209,7 +191,7 @@ end subroutine abi_dtrsm
       info = PLASMA_dtrsm_c(side_plasma(side),uplo_plasma(uplo),trans_plasma(TRANSA),diag_plasma(diag),&
 &       m,n,real(alpha,dp),c_loc(a),lda,c_loc(b),ldb)
    end if
-#endif   
+#endif
  else
    if(cplx_ == 2) then
       call ztrsm(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
@@ -241,12 +223,6 @@ end subroutine abi_d2ztrsm
 !!
 
   subroutine abi_d2ztrsm_3d(side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abi_d2ztrsm_3d'
-!End of the abilint section
 
  implicit none
 

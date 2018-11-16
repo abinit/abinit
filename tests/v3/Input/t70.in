@@ -20,6 +20,7 @@
   rfphon6  1
  rfatpol6  2 2
    rfdir6  1 0 0
+  rfmeth6 -1      ! This is simply to exercise this value of frmeth
     nqpt6  1
      qpt6  0.0 0.0 0.0
   getwfk6  3
@@ -53,7 +54,6 @@
  wtk  1
  znucl  1.0
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

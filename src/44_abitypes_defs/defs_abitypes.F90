@@ -7,11 +7,10 @@
 !! This module contains definitions of high-level structured datatypes for the ABINIT package.
 !!
 !! If you are sure a new high-level structured datatype is needed,
-!! write it here, and DOCUMENT it properly (not all datastructure here are
-!! well documented, it is a shame ...).
-!! Do not forget : you will likely be the major winner if you document
-!! properly.
-!! Proper documentation of a structured datatype means :
+!! write it here, and DOCUMENT it properly (not all datastructure here are well documented, it is a shame ...).
+!! Do not forget: you will likely be the major winner if you document properly.
+!!
+!! Proper documentation of a structured datatype means:
 !!  (1) Mention it in the list just below
 !!  (2) Describe it in the NOTES section
 !!  (3) Put it in alphabetical order in the the main section of this module
@@ -20,14 +19,14 @@
 !!      input variables, for which there is a help file)
 !!  (5) Declare variables on separated lines in order to reduce the occurence of git conflicts.
 !!
-!! List of datatypes :
-!! * aim_dataset_type : the "dataset" for aim
-!! * bandfft_kpt_type : the "dataset" for triple band-fft-kpt parallelization
+!! List of datatypes:
+!! * aim_dataset_type: the "dataset" for aim
+!! * bandfft_kpt_type: the "dataset" for triple band-fft-kpt parallelization
 !! * datafiles_type: gather all the variables related to files
-!! * dataset_type : the "dataset" for the main abinit code
-!! * MPI_type : the data related to MPI parallelization
-!! * hdr_type : the header of wf, den and pot files
-!! * macro_uj_type : TO BE COMPLETED
+!! * dataset_type: the "dataset" for the main abinit code
+!! * MPI_type: the data related to MPI parallelization
+!! * hdr_type: the header of wf, den and pot files
+!! * macro_uj_type: TO BE COMPLETED
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2018 ABINIT group (XG)
@@ -47,14 +46,12 @@
 module defs_abitypes
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_distribfft
 
  use m_pawrhoij, only : pawrhoij_type
 
  implicit none
-
-!Structures
 !!***
 
 !!****t* defs_abitypes/aim_dataset_type
@@ -68,11 +65,6 @@ module defs_abitypes
 !! SOURCE
 
  type aim_dataset_type
-
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
-! declared in another part of ABINIT, that might need to take into account your modification.
-
-! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
 
 ! Since all these input variables are described in the aim_help.html
 ! file, they are not described in length here ...
@@ -89,14 +81,14 @@ module defs_abitypes
   integer :: nsb
   integer :: nsc
 
-  integer :: batom  !! Warning : corresponds to the input variable atom
-  integer :: foll   !! Warning : corresponds to the input variable follow
-  integer :: isurf  !! Warning : corresponds to the input variable surf
-  integer :: irsur  !! Warning : corresponds to the input variable rsurf
-  integer :: nph    !! Warning : corresponds to the input variable nphi
-  integer :: npt    !! Warning : corresponds to the input variable inpt
-  integer :: nth    !! Warning : corresponds to the input variable ntheta
-  integer :: plden  !! Warning : not documented in help file ?!
+  integer :: batom  ! Warning : corresponds to the input variable atom
+  integer :: foll   ! Warning : corresponds to the input variable follow
+  integer :: isurf  ! Warning : corresponds to the input variable surf
+  integer :: irsur  ! Warning : corresponds to the input variable rsurf
+  integer :: nph    ! Warning : corresponds to the input variable nphi
+  integer :: npt    ! Warning : corresponds to the input variable inpt
+  integer :: nth    ! Warning : corresponds to the input variable ntheta
+  integer :: plden  ! Warning : not documented in help file ?!
 
   integer :: ngrid(3)
 
@@ -115,12 +107,12 @@ module defs_abitypes
   real(dp) :: phimax
   real(dp) :: phimin
 
-  real(dp) :: dr0    !! Warning : correspond to the input variable radstp
-  real(dp) :: phi0   !! Warning : correspond to the input variable rsurdir(2)
-  real(dp) :: rmin   !! Warning : correspond to the input variable ratmin
-  real(dp) :: th0    !! Warning : correspond to the input variable rsurdir(1)
-  real(dp) :: themax !! Warning : correspond to the input variable thetamax
-  real(dp) :: themin !! Warning : correspond to the input variable thetamin
+  real(dp) :: dr0    ! Warning : correspond to the input variable radstp
+  real(dp) :: phi0   ! Warning : correspond to the input variable rsurdir(2)
+  real(dp) :: rmin   ! Warning : correspond to the input variable ratmin
+  real(dp) :: th0    ! Warning : correspond to the input variable rsurdir(1)
+  real(dp) :: themax ! Warning : correspond to the input variable thetamax
+  real(dp) :: themin ! Warning : correspond to the input variable thetamin
 
   real(dp) :: foldep(3)
   real(dp) :: scal(3)
@@ -151,18 +143,18 @@ module defs_abitypes
 !! objaat,objbat,objaax,objbax,objan,objbn,objarf,objbrf,objaro,objbro
 !! objatr,objbtr,vaclst,vacuum
 !!
+!! WARNING: if you modify this datatype, please check whether there might be
+!! creation/destruction/copy routines, declared in another part of ABINIT,
+!! that might need to take into account your modification.
+!
+!! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
+!
+!! Since all these input variables are described in the abinit_help.html and
+!! associated html files they are not described in length here ...
+!!
 !! SOURCE
 
 type dataset_type
-
-! WARNING : if you modify this datatype, please check whether there might be
-! creation/destruction/copy routines, declared in another part of ABINIT,
-! that might need to take into account your modification.
-
-! Variables should be declared on separated lines in order to reduce the occurence of git conflicts.
-
-! Since all these input variables are described in the abinit_help.html and
-! associated html files they are not described in length here ...
 
 ! Integer
  integer :: iomode
@@ -189,6 +181,7 @@ type dataset_type
  integer :: chksymbreak
  integer :: cineb_start
  integer :: delayperm
+ integer :: densfor_pred
  integer :: diismemory
  integer :: dmatpuopt
  integer :: dmatudiag
@@ -198,6 +191,7 @@ type dataset_type
  integer :: dmft_nlambda
  integer :: dmft_nwli
  integer :: dmft_nwlo
+ integer :: dmft_occnd_imag
  integer :: dmft_rslf
  integer :: dmft_read_occnd
  integer :: dmft_solv
@@ -242,11 +236,13 @@ type dataset_type
  integer :: ga_n_rules
  integer :: getcell
  integer :: getddb
+ integer :: getdvdb = 0
  integer :: getddk
  integer :: getdelfd
  integer :: getdkdk
  integer :: getdkde
  integer :: getden
+ integer :: getefmas
  integer :: getgam_eig2nkq
  integer :: getocc
  integer :: getpawden
@@ -278,9 +274,9 @@ type dataset_type
  integer :: gw_sigxcore
 
  ! GWLS
- integer :: gwls_stern_kmax       ! number of Lanczos steps taken by the gw_sternheimer routine
+ integer :: gwls_stern_kmax             ! number of Lanczos steps taken by the gw_sternheimer routine
  integer :: gwls_npt_gauss_quad         ! number of points used in Gaussian quadrature in gw_sternheimer routine
- integer :: gwls_diel_model       ! switch to determine which dielectic model should be used in integration
+ integer :: gwls_diel_model             ! switch to determine which dielectic model should be used in integration
  integer :: gwls_print_debug            ! switch to determine what to print out for debugging
  integer :: gwls_nseeds                 ! number of seeds in the Lanczos description of the dielectric matrix
  integer :: gwls_n_proj_freq            ! Number of projection frequencies to be used for the construction of the sternheimer basis
@@ -291,30 +287,37 @@ type dataset_type
  integer :: gwls_band_index             ! band index of the state to be corrected
  integer :: gwls_exchange               ! Flag to determine if Exchange energy will be computed
  integer :: gwls_correlation            ! Flag to determine if Correlation energy will be computed
- integer :: gwls_first_seed             ! index of the first seed used in the Lanczos algorithm; seeds will go from first_seed to first_seed+nseeds
- !integer :: gwls_n_ext_freq             ! The number of frequencies to be read in gwls_ext_freq
- integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matric and add them to the other solutions requested. 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
+ integer :: gwls_first_seed             ! index of the first seed used in the Lanczos algorithm;
+                                        ! seeds will go from first_seed to first_seed+nseeds
+ !integer :: gwls_n_ext_freq            ! The number of frequencies to be read in gwls_ext_freq
+ integer :: gwls_recycle                ! Recycle the sternheimer solutions computed to obtain the static dielectric matrix
+                                        ! and add them to the other solutions requested.
+                                        ! 0 : don't recycle. 1 : store in RAM. 2 : Store on disk.
  integer :: gw_frqim_inzgrid
  integer :: gw_frqre_inzgrid
  integer :: gw_frqre_tangrid
  integer :: gw_sctype
  integer :: gwmem
  integer :: gwpara
+ integer :: hmcsst
+ integer :: hmctt
  integer :: iboxcut
  integer :: icoulomb
  integer :: icutcoul
  integer :: ieig2rf
  integer :: imgmov
+ integer :: imgwfstor
  integer :: inclvkb
  integer :: intxc
  integer :: ionmov
- integer :: densfor_pred
  integer :: iprcel
  integer :: iprcfc
  integer :: irandom
  integer :: irdddb
+ integer :: irddvdb = 0
  integer :: irdddk
  integer :: irdden
+ integer :: irdefmas
  integer :: irdhaydock
  integer :: irdpawden
  integer :: irdqps
@@ -395,6 +398,7 @@ type dataset_type
  integer :: nomegasf
  integer :: nomegasi
  integer :: nomegasrd
+ integer :: nonlinear_info
  integer :: npband
  integer :: npfft
  integer :: nphf
@@ -487,6 +491,7 @@ type dataset_type
  integer :: prtdosm
  integer :: prtebands=1
  integer :: prtefg
+ integer :: prtefmas
  integer :: prteig
  integer :: prtelf
  integer :: prtfc
@@ -515,6 +520,7 @@ type dataset_type
  integer :: prtvdw
  integer :: prtvha
  integer :: prtvhxc
+ integer :: prtkbff=0
  integer :: prtvol
  integer :: prtvolimg
  integer :: prtvpsp
@@ -544,6 +550,7 @@ type dataset_type
  integer :: rf2_dkdk
  integer :: rf2_dkde
  integer :: signperm
+ integer :: slk_rankpp
  integer :: smdelta
  integer :: spgaxor
  integer :: spgorig
@@ -569,6 +576,7 @@ type dataset_type
  integer :: use_nonscf_gkk
  integer :: usepaw
  integer :: usepawu
+ integer :: usepead
  integer :: usepotzero
  integer :: userec
  integer :: useria=0
@@ -623,7 +631,7 @@ type dataset_type
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
- integer :: supercell(3)
+ integer :: supercell_latt(3,3)
  integer :: ucrpa_bands(2)
  integer :: vdw_supercell(3)
  integer :: vdw_typfrag(100)
@@ -673,12 +681,14 @@ type dataset_type
  real(dp) :: diemix
  real(dp) :: diemixmag
  real(dp) :: dilatmx
+ real(dp) :: dmft_charge_prec
  real(dp) :: dmft_mxsf
  real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
  real(dp) :: dtion
+ real(dp) :: dvdb_qcache_mb = 1024.0_dp
  real(dp) :: ecut
  real(dp) :: ecuteps
  real(dp) :: ecutsigx
@@ -702,7 +712,7 @@ type dataset_type
  real(dp) :: fxcartfactor
  real(dp) :: ga_opt_percent
  real(dp) :: gwencomp
- real(dp) :: gwls_model_parameter         ! Parameter used in modelization of dielectric function
+ real(dp) :: gwls_model_parameter         ! Parameter used in dielectric function model
  real(dp) :: gw_toldfeig
  real(dp) :: hyb_mixing
  real(dp) :: hyb_mixing_sr
@@ -815,55 +825,55 @@ type dataset_type
  real(dp) :: zeemanfield(3)
  real(dp) :: mdtemp(2)
 
-!Real allocatables   NOTE : the SET2NULL is needed to avoid problem with the perl script abinit_variables.pm ,
-!note also that one needs a blank after the second "!"
- real(dp), allocatable :: acell_orig(:,:)   !SET2NULL  ! acell_orig(3,nimage)
- real(dp), allocatable :: amu_orig(:,:)     !SET2NULL  ! amu(ntypat,nimage)
- real(dp), allocatable :: atvshift(:,:,:)   !SET2NULL  ! atvshift(16,nsppol,natom)
- real(dp), allocatable :: cd_imfrqs(:)      !SET2NULL  ! cd_imfrqs(cd_customnimfrqs)
- real(dp), allocatable :: chempot(:,:,:)    !SET2NULL  ! chempot(3,nzchempot,ntypat)
- real(dp), allocatable :: corecs(:)         !SET2NULL  ! corecs(ntypat)
- real(dp), allocatable :: densty(:,:)       !SET2NULL  ! densty(ntypat,4)
- real(dp), allocatable :: dmatpawu(:,:,:,:,:) !SET2NULL  ! dmatpawu(2*lpawu+1,2*lpawu+1,nsppol*nspinor,natpu,nimage)
-                                        !  where natpu=number of atoms with lpawu/=1
- real(dp), allocatable :: efmas_dirs(:,:)   !SET2NULL  ! efmas_dirs(3,efmas_n_dirs)
- real(dp), allocatable :: f4of2_sla(:)      !SET2NULL  ! f4of2_sla(ntypat)
- real(dp), allocatable :: f6of2_sla(:)      !SET2NULL  ! f6of2_sla(ntypat)
- real(dp), allocatable :: gw_qlwl(:,:)      !SET2NULL  ! gw_qlwl(3,gw_nqlwl)
- real(dp), allocatable :: gw_freqsp(:)      !SET2NULL  ! gw_freqsp(gw_customnfreqsp)
- real(dp), allocatable :: gwls_list_proj_freq(:)      !SET2NULL  ! gwls_list_proj_freq(gwls_n_proj_freq)
- real(dp), allocatable :: jpawu(:,:)        !SET2NULL  ! jpawu(ntypat,nimage)
- real(dp), allocatable :: kpt(:,:)          !SET2NULL  ! kpt(3,nkpt)
- real(dp), allocatable :: kptgw(:,:)        !SET2NULL  ! kptgw(3,nkptgw)
- real(dp), allocatable :: kptns(:,:)        !SET2NULL  ! kptns(3,nkpt) k-points renormalized and shifted.
-                                        !  The ones that should be used inside the code.
- real(dp), allocatable :: kptns_hf(:,:)     !SET2NULL  ! kpthf(3,nkptns_hf)
+!Real allocatables
+ real(dp), allocatable :: acell_orig(:,:)   ! acell_orig(3,nimage)
+ real(dp), allocatable :: amu_orig(:,:)     ! amu(ntypat,nimage)
+ real(dp), allocatable :: atvshift(:,:,:)   ! atvshift(16,nsppol,natom)
+ real(dp), allocatable :: cd_imfrqs(:)      ! cd_imfrqs(cd_customnimfrqs)
+ real(dp), allocatable :: chempot(:,:,:)    ! chempot(3,nzchempot,ntypat)
+ real(dp), allocatable :: corecs(:)         ! corecs(ntypat)
+ real(dp), allocatable :: densty(:,:)       ! densty(ntypat,4)
+ real(dp), allocatable :: dmatpawu(:,:,:,:,:) ! dmatpawu(2*lpawu+1,2*lpawu+1,nsppol*nspinor,natpu,nimage)
+                                              ! where natpu=number of atoms with lpawu/=1
+ real(dp), allocatable :: efmas_dirs(:,:)   ! efmas_dirs(3,efmas_n_dirs)
+ real(dp), allocatable :: f4of2_sla(:)      ! f4of2_sla(ntypat)
+ real(dp), allocatable :: f6of2_sla(:)      ! f6of2_sla(ntypat)
+ real(dp), allocatable :: gw_qlwl(:,:)      ! gw_qlwl(3,gw_nqlwl)
+ real(dp), allocatable :: gw_freqsp(:)      ! gw_freqsp(gw_customnfreqsp)
+ real(dp), allocatable :: gwls_list_proj_freq(:)      ! gwls_list_proj_freq(gwls_n_proj_freq)
+ real(dp), allocatable :: jpawu(:,:)        ! jpawu(ntypat,nimage)
+ real(dp), allocatable :: kpt(:,:)          ! kpt(3,nkpt)
+ real(dp), allocatable :: kptgw(:,:)        ! kptgw(3,nkptgw)
+ real(dp), allocatable :: kptns(:,:)        ! kptns(3,nkpt) k-points renormalized and shifted.
+                                            !  The ones that should be used inside the code.
+ real(dp), allocatable :: kptns_hf(:,:)     ! kpthf(3,nkptns_hf)
 
- real(dp), allocatable :: mixalch_orig(:,:,:) !SET2NULL  ! mixalch_orig(npspalch,ntypalch,nimage)
- real(dp), allocatable :: nucdipmom(:,:)      !SET2NULL  ! nucdipmom(3,natom)
- real(dp), allocatable :: occ_orig(:)         !SET2NULL  ! occ_orig(mband*nkpt*nsppol)
- real(dp), allocatable :: pimass(:)           !SET2NULL  ! pimass(ntypat)
- real(dp), allocatable :: ptcharge(:)         !SET2NULL  ! ptcharge(ntypat)
- real(dp), allocatable :: qmass(:)            !SET2NULL  ! qmass(nnos)
- real(dp), allocatable :: qptdm(:,:)          !SET2NULL  ! qptdm(3,nqptdm)
- real(dp), allocatable :: quadmom(:)          !SET2NULL  ! quadmom(ntypat)
- real(dp), allocatable :: ratsph(:)           !SET2NULL  ! ratsph(ntypat)
- real(dp), allocatable :: rprim_orig(:,:,:)   !SET2NULL  ! rprim_orig(3,3,nimage)
- real(dp), allocatable :: rprimd_orig(:,:,:)  !SET2NULL  ! rprimd_orig(3,3,nimage)
- real(dp), allocatable :: shiftk(:,:)         !SET2NULL  ! shiftk(3,nshiftk)
- real(dp) :: shiftk_orig(3,210)             ! original shifts given in input (changed in inkpts).
+ real(dp), allocatable :: mixalch_orig(:,:,:) ! mixalch_orig(npspalch,ntypalch,nimage)
+ real(dp), allocatable :: mixesimgf(:)        ! mixesimgf(nimage)
+ real(dp), allocatable :: nucdipmom(:,:)      ! nucdipmom(3,natom)
+ real(dp), allocatable :: occ_orig(:,:)       ! occ_orig(mband*nkpt*nsppol,nimage)
+ real(dp), allocatable :: pimass(:)           ! pimass(ntypat)
+ real(dp), allocatable :: ptcharge(:)         ! ptcharge(ntypat)
+ real(dp), allocatable :: qmass(:)            ! qmass(nnos)
+ real(dp), allocatable :: qptdm(:,:)          ! qptdm(3,nqptdm)
+ real(dp), allocatable :: quadmom(:)          ! quadmom(ntypat)
+ real(dp), allocatable :: ratsph(:)           ! ratsph(ntypat)
+ real(dp), allocatable :: rprim_orig(:,:,:)   ! rprim_orig(3,3,nimage)
+ real(dp), allocatable :: rprimd_orig(:,:,:)  ! rprimd_orig(3,3,nimage)
+ real(dp), allocatable :: shiftk(:,:)         ! shiftk(3,nshiftk)
+ real(dp) :: shiftk_orig(3,MAX_NSHIFTK)       ! original shifts given in input (changed in inkpts).
 
- real(dp), allocatable :: spinat(:,:)         !SET2NULL  ! spinat(3,natom)
- real(dp), allocatable :: tnons(:,:)          !SET2NULL  ! tnons(3,nsym)
- real(dp), allocatable :: upawu(:,:)          !SET2NULL  ! upawu(ntypat,nimage)
- real(dp), allocatable :: vel_cell_orig(:,:,:)!SET2NULL  ! vel_cell_orig(3,3,nimage)
- real(dp), allocatable :: vel_orig(:,:,:)     !SET2NULL  ! vel_orig(3,natom,nimage)
- real(dp), allocatable :: wtatcon(:,:,:)      !SET2NULL  ! wtatcon(3,natom,nconeq)
- real(dp), allocatable :: wtk(:)              !SET2NULL  ! wtk(nkpt)
- real(dp), allocatable :: xred_orig(:,:,:)    !SET2NULL  ! xred_orig(3,natom,nimage)
- real(dp), allocatable :: xredsph_extra(:,:)  !SET2NULL  ! xredsph_extra(3,natsph_extra)
- real(dp), allocatable :: ziontypat(:)        !SET2NULL  ! ziontypat(ntypat)
- real(dp), allocatable :: znucl(:)            !SET2NULL  ! znucl(npsp)
+ real(dp), allocatable :: spinat(:,:)         ! spinat(3,natom)
+ real(dp), allocatable :: tnons(:,:)          ! tnons(3,nsym)
+ real(dp), allocatable :: upawu(:,:)          ! upawu(ntypat,nimage)
+ real(dp), allocatable :: vel_cell_orig(:,:,:)! vel_cell_orig(3,3,nimage)
+ real(dp), allocatable :: vel_orig(:,:,:)     ! vel_orig(3,natom,nimage)
+ real(dp), allocatable :: wtatcon(:,:,:)      ! wtatcon(3,natom,nconeq)
+ real(dp), allocatable :: wtk(:)              ! wtk(nkpt)
+ real(dp), allocatable :: xred_orig(:,:,:)    ! xred_orig(3,natom,nimage)
+ real(dp), allocatable :: xredsph_extra(:,:)  ! xredsph_extra(3,natsph_extra)
+ real(dp), allocatable :: ziontypat(:)        ! ziontypat(ntypat)
+ real(dp), allocatable :: znucl(:)            ! znucl(npsp)
 
 
 !BEGIN VARIABLES FOR @Bethe-Salpeter
@@ -901,10 +911,16 @@ type dataset_type
  integer :: symdynmat
 
 ! Phonon variables.
+ integer :: ph_freez_disp_addStrain
+ integer :: ph_freez_disp_option
+ integer :: ph_freez_disp_nampl
  integer :: ph_ndivsm    ! =20
  integer :: ph_nqpath    !=0
  integer :: ph_ngqpt(3)  !0
  integer :: ph_nqshift
+
+ real(dp),allocatable :: ph_freez_disp_ampl(:,:)
+  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)
@@ -915,6 +931,7 @@ type dataset_type
  integer :: eph_intmeth ! = 1
  real(dp) :: eph_extrael != zero
  real(dp) :: eph_fermie != huge(one)
+ integer :: eph_frohlichm != 0
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)
@@ -925,6 +942,18 @@ type dataset_type
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)
  real(dp) :: ddb_shiftq(3)
+
+ integer :: mixprec = 0
+
+ integer :: sigma_ngkpt(3) = 0
+ ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
+
+ integer :: sigma_nshiftk = 1
+ ! Number of shifts in k-mesh for Sigma_{nk}.
+
+ real(dp),allocatable :: sigma_shiftk(:,:)
+ ! sigma_shiftk(3, sigma_nshiftk)
+ ! shifts in k-mesh for Sigma_{nk}.
 !END EPH
 
  integer :: ndivsm=0
@@ -1244,18 +1273,19 @@ type dataset_type
 ! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
 ! declared in another part of ABINIT, that might need to take into account your modification.
 
-
 ! These keywords are only used in algorithms using images of the cell
   integer :: getwfk_from_image
    ! index of image from which read WFK file (0 if standard WFK)
    !    -1: the same image as current one
    !     0: no image
    !    >0: index of an image
+
   integer :: getden_from_image
    ! index of image from which read DEN file (0 if standard DEN)
    !    -1: the same image as current one
    !     0: no image
    !    >0: index of an image
+
   integer :: getpawden_from_image
    ! index of image from which read PAWDEN file (0 if standard PAWDEN)
    !    -1: the same image as current one
@@ -1292,10 +1322,12 @@ type dataset_type
   integer :: unscr   ! unit number for SCR file
   integer :: unwff1  ! unit number for wavefunctions, number one
   integer :: unwff2  ! unit number for wavefunctions, number two
+  integer :: unwff3  ! unit number for wavefunctions, number three
   integer :: unwffgs ! unit number for ground-state wavefunctions
   integer :: unwffkq ! unit number for k+q ground-state wavefunctions
   integer :: unwft1  ! unit number for wavefunctions, temporary one
   integer :: unwft2  ! unit number for wavefunctions, temporary two
+  integer :: unwft3  ! unit number for wavefunctions, temporary three
   integer :: unwftgs ! unit number for ground-state wavefunctions, temporary
   integer :: unwftkq ! unit number for k+q ground-state wavefunctions, temporary
   integer :: unylm   ! unit number for Ylm(k) data
@@ -1319,6 +1351,11 @@ type dataset_type
    ! if no dataset mode             : abi//'DEN'
    ! if dataset mode, and getden==0 : abi//'_DS'//trim(jdtset)//'DEN'
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'DEN'
+
+  character(len=fnlen) :: fildvdbin
+   ! if no dataset mode             : abi//'DVDB'
+   ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
+   ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetden)//'DVDB'
 
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
@@ -1443,22 +1480,23 @@ type dataset_type
 !The following filenames do not depend on itimimage, iimage and itime loops.
 !Note the following convention:
 !  fnameabo_* are filenames used for ouput results (writing)
-!  fnameabi_* are filenames used for data the should be read by the code.
+!  fnameabi_* are filenames used for data that should be read by the code.
 !  fnametmp_* are filenames used for temporary files that should be erased at the end of each dataset.
 !
 !If a file does not have the corresponding "abi" or the corresponding "abo" name, that means that
 !that particular file is only used for writing or for reading results, respectively.
 
+  character(len=fnlen) :: fnameabi_efmas
   character(len=fnlen) :: fnameabi_hes
   character(len=fnlen) :: fnameabi_phfrq
   character(len=fnlen) :: fnameabi_phvec
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
-
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
   character(len=fnlen) :: fnameabo_dos
+  character(len=fnlen) :: fnameabo_dvdb
   character(len=fnlen) :: fnameabo_eelf
   character(len=fnlen) :: fnameabo_eig
   character(len=fnlen) :: fnameabo_eigi2d
@@ -1731,40 +1769,38 @@ type dataset_type
 
  type ab_dimensions
 
-! WARNING : if you modify this datatype, please check whether there might be creation/destruction/copy routines,
-! declared in another part of ABINIT, that might need to take into account your modification.
-
-    integer :: ga_n_rules
-    integer :: gw_nqlwl
-    integer :: lpawu
+    integer :: ga_n_rules   ! maximal value of input ga_n_rules for all the datasets
+    integer :: gw_nqlwl     ! maximal value of input gw_nqlwl for all the datasets
+    integer :: lpawu        ! maximal value of input lpawu for all the datasets
     integer :: mband
-    integer :: mband_upper ! Maybe this one could be removed
+    integer :: mband_upper ! maximal value of input nband for all the datasets
+                           ! Maybe this one could be removed
     integer :: natom
-    integer :: natpawu
-    integer :: natsph
-    integer :: natsph_extra
-    integer :: natvshift
-    integer :: nberry
+    integer :: natpawu     ! maximal value of number of atoms on which +U is applied for all the datasets
+    integer :: natsph      ! maximal value of input natsph for all the datasets
+    integer :: natsph_extra  ! maximal value of input natsph_extra for all the datasets
+    integer :: natvshift   ! maximal value of input natvshift for all the datasets
+    integer :: nberry = 20 ! This is presently a fixed value. Should be changed.
     integer :: nbandhf
-    integer :: nconeq
+    integer :: nconeq      ! maximal value of input nconeq for all the datasets
     integer :: n_efmas_dirs
     integer :: nfreqsp
     integer :: n_projection_frequencies
     integer :: nimage
     integer :: nimfrqs
-    integer :: nkpt
-    integer :: nkptgw
-    integer :: nkpthf
-    integer :: nnos
-    integer :: nqptdm
+    integer :: nkpt       ! maximal value of input nkpt for all the datasets
+    integer :: nkptgw     ! maximal value of input nkptgw for all the datasets
+    integer :: nkpthf     ! maximal value of input nkpthf for all the datasets
+    integer :: nnos       ! maximal value of input nnos for all the datasets
+    integer :: nqptdm     ! maximal value of input nqptdm for all the datasets
     integer :: nshiftk
     integer :: nsp
-    integer :: nspinor
-    integer :: nsppol
-    integer :: nsym
+    integer :: nspinor    ! maximal value of input nspinor for all the datasets
+    integer :: nsppol     ! maximal value of input nsppol for all the datasets
+    integer :: nsym       ! maximum number of symmetries
     integer :: ntypalch
-    integer :: ntypat
-    integer :: nzchempot
+    integer :: ntypat     ! maximum number of types of atoms
+    integer :: nzchempot  ! maximal value of input nzchempot for all the datasets
 
  end type ab_dimensions
 !!***

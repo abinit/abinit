@@ -13,11 +13,11 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! afterscfloop.F90
-!! elpolariz.F90
 !! interfaces_94_scfcv.F90
+!! m_afterscfloop.F90
+!! m_elpolariz.F90
+!! m_outscfcv.F90
 !! m_scfcv.F90
-!! outscfcv.F90
-!! scfcv.F90
+!! m_scfcv_core.F90
 !!
 !!***

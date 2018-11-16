@@ -28,7 +28,7 @@
 module m_psps
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_xmpi
  use m_nctk
@@ -39,6 +39,7 @@ module m_psps
 
  use m_fstrings,      only : itoa, sjoin, yesno
  use m_io_tools,      only : open_file
+ use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
  use defs_abitypes,   only : dataset_type
  use m_paw_numeric,   only : paw_spline
@@ -95,13 +96,6 @@ contains
 !! SOURCE
 
 subroutine test_xml_xmlpaw_upf(path, usexml, xmlpaw, useupf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_xml_xmlpaw_upf'
-!End of the abilint section
 
  implicit none
 
@@ -182,13 +176,6 @@ end subroutine test_xml_xmlpaw_upf
 
 subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_global'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -227,7 +214,6 @@ subroutine psps_init_global(mtypalch, npsp, psps, pspheads)
  ! Transfer md5 checksum
  ABI_ALLOCATE(psps%md5_pseudos, (npsp))
  psps%md5_pseudos = pspheads(1:npsp)%md5_checksum
-
 !Set values independant from dtset
  psps%npsp   = npsp
 !Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
@@ -278,14 +264,6 @@ end subroutine psps_init_global
 !! SOURCE
 
 subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_init_from_dtset'
- use interfaces_32_util
-!End of the abilint section
 
  implicit none
 
@@ -365,6 +343,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
 !Set mpspso and psps%pspso
 !Warning: mpspso might be different for each dataset.
+!         mpspso not relevant in case of PAW.
  psps%mpspso=1
  do ipsp=1,dtset%npsp
    if(dtset%nspinor==1)then
@@ -374,16 +353,20 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
      !  MSG_WARNING("Setting pspso to 2 although nspinor == 1")
      !  psps%pspso(ipsp) = 2
      !end if
-   else
+!    Ideally the following line should not exist,
+!      but at present, the space has to be booked
+     if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
+   else if (psps%usepaw==0) then
      if(dtset%so_psp(ipsp)/=1)then
        psps%pspso(ipsp)=dtset%so_psp(ipsp)
      else
        psps%pspso(ipsp)=pspheads(ipsp)%pspso
      end if
      if(psps%pspso(ipsp)/=0)psps%mpspso=2
+     if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
+   else
+     psps%pspso(ipsp)=1+dtset%pawspnorb
    end if
-!  Ideally the following line should not exist, but at present, the space has to be booked
-   if(pspheads(ipsp)%pspso/=0)psps%mpspso=2
  end do
 
 !Set mpssoang, lmnmax, lnmax
@@ -396,6 +379,7 @@ subroutine psps_init_from_dtset(dtset, idtset, psps, pspheads)
    psps%lmnmax=lmnmaxso
    psps%lnmax=lnmaxso
  end if
+
 !T. Rangel: for wvl + paw do not change psps%lmnmax
  if (psps%useylm==0 .and. psps%usepaw/=1 ) then
    psps%lmnmax=psps%lnmax
@@ -548,13 +532,6 @@ end subroutine psps_init_from_dtset
 
 subroutine psps_free(psps)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -670,13 +647,6 @@ end subroutine psps_free
 !! SOURCE
 
 subroutine psps_copy(pspsin, pspsout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_copy'
-!End of the abilint section
 
  implicit none
 
@@ -830,14 +800,6 @@ end subroutine psps_copy
 
 subroutine psps_print(psps,unit,prtvol,mode_paral)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_print'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -896,24 +858,34 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
 &  '  Number of types of atoms   .. ',psps%ntypat
  call wrtout(unt,msg,mode)
 
- SELECT CASE (psps%mpspso)
- CASE (1)
-   call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
- CASE (2)
-   write(msg,'(3a,i3)')&
-&    '  Calculation with spin-orbit coupling ',ch10,&
-&    '  Max number of channels (spin-orbit included) ',psps%mpssoang
+ if (psps%usepaw==0) then
+   SELECT CASE (psps%mpspso)
+   CASE (1)
+     call wrtout(unt,'  Scalar calculation (no spin-orbit term) ',mode)
+   CASE (2)
+     write(msg,'(3a,i3)')&
+&      '  Calculation with spin-orbit coupling ',ch10,&
+&      '  Max number of channels (spin-orbit included) ',psps%mpssoang
+     call wrtout(unt,msg,mode)
+     do itypat=1,psps%ntypat
+       if (psps%pspso(itypat) /= 1) then
+         write(msg,'(a,i4,a,i2,a)')&
+&          '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
+         call wrtout(unt,msg,mode)
+       end if
+     end do
+   CASE DEFAULT
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'mpspso',psps%mpspso,2,[1,2],unt)
+   END SELECT
+ else
+   SELECT CASE (maxval(psps%pspso))
+   CASE (0,1)
+     msg='  Scalar calculation (no spin-orbit term) '
+   CASE (2)
+     msg='  Calculation with spin-orbit coupling '
+   END SELECT
    call wrtout(unt,msg,mode)
-   do itypat=1,psps%ntypat
-     if (psps%pspso(itypat) /= 1) then
-       write(msg,'(a,i4,a,i2,a)')&
-&        '  - Atom type ',itypat,' has spin-orbit characteristics (pspso= ',psps%pspso(itypat),")"
-       call wrtout(unt,msg,mode)
-     end if
-   end do
- CASE DEFAULT
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'mpspso',psps%mpspso,2,[1,2],unt)
- END SELECT
+ end if
 
  ! Info on nonlocal part
  SELECT CASE (psps%useylm)
@@ -1037,13 +1009,6 @@ end subroutine psps_print
 
 subroutine psps_ncwrite(psps, path)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psps_ncwrite'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1157,14 +1122,6 @@ subroutine psps_ncwrite(psps, path)
 
 contains
  integer function vid(vname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -1202,13 +1159,6 @@ end subroutine psps_ncwrite
 
 subroutine psp2params_init(gth_params, npsp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1222,7 +1172,7 @@ subroutine psp2params_init(gth_params, npsp)
  ABI_ALLOCATE(gth_params%set,(npsp))
  gth_params%set(:) = .false.
 
-!Check array, have geometric informations been filled?
+!Check array, have geometric information been filled?
  ABI_ALLOCATE(gth_params%hasGeometry,(npsp))
  gth_params%hasGeometry(:) = .false.
 
@@ -1261,13 +1211,6 @@ end subroutine psp2params_init
 !! SOURCE
 
 subroutine psp2params_copy(gth_paramsin, gth_paramsout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1320,13 +1263,6 @@ end subroutine psp2params_copy
 !! SOURCE
 
 subroutine psp2params_free(gth_params)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psp2params_free'
-!End of the abilint section
 
  implicit none
 
@@ -1384,13 +1320,6 @@ end subroutine psp2params_free
 
 subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_init'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1437,13 +1366,6 @@ end subroutine nctab_init
 
 subroutine nctab_free(nctab)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1482,13 +1404,6 @@ end subroutine nctab_free
 !! SOURCE
 
 subroutine nctab_copy(nctabin, nctabout)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_copy'
-!End of the abilint section
 
  implicit none
 
@@ -1543,13 +1458,6 @@ end subroutine nctab_copy
 !! SOURCE
 
 subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tvalespl'
-!End of the abilint section
 
  implicit none
 
@@ -1623,13 +1531,6 @@ end subroutine nctab_eval_tvalespl
 !! SOURCE
 
 subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_vl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_eval_tcorespl'
-!End of the abilint section
 
  implicit none
 
@@ -1705,13 +1606,6 @@ end subroutine nctab_eval_tcorespl
 !! SOURCE
 
 subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nctab_mixalch'
-!End of the abilint section
 
  implicit none
 

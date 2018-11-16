@@ -10,7 +10,7 @@
 
  ABINIT is a project of the Universite Catholique de Louvain,
  Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read ~abinit/doc/users/acknowledgments.html for suggested
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
@@ -42,7 +42,7 @@
  Phonon DOS information :
    dosdeltae  4.55633525E-06
     dossmear  9.00000000E-05
- Description of grid 2 for Fourier interpolation :
+ Description of grid 2 (Fourier interp. or BZ sampling):
       ng2qpt        20        20        20
       ngrids         4
       q2shft         0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -185,12 +185,12 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 -                                 =    -0.3577529454E+01 (THz)
 -Debye temperature from partial sums:    -0.1716941307E+03 (K)
 
- Average speed of sound:     0.5989264382E-04 (at units) 
--                      =           0.1310 [km/s]
+ Average speed of sound:     0.2277736510E-04 (at units) 
+-                      =           0.0498 [km/s]
 
- Debye frequency from DOS:     0.4941011685E-04 (Ha) 
--                        =     0.3251029513E+00 (THz)
--Debye temperature from DOS:     0.1560246235E+02 (K)
+ Debye frequency from DOS:     0.1879082637E-04 (Ha) 
+-                        =     0.1236376981E+00 (THz)
+-Debye temperature from DOS:     0.5933666620E+01 (K)
 
 
 ================================================================================

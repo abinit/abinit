@@ -2,6 +2,7 @@
 description: To to calculate the temperature dependence of the electronic structure
 authors: SP
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to calculate the temperature dependence of the electronic structure with the ABINIT package.
 
@@ -25,10 +26,14 @@ functional working with the response-function (RF) part of the code, and
 requires the use of norm-conserving pseudopotentials. NetCDF support is
 mandatory.
 
-The AHC implementation in ABINIT is built on a Sternheimer approach to
-efficiently compute the sum over highly energetic bands appearing in the AHC
-equations [[cite:Gonze2011]]. Such behavior is controlled by the input
-variable [[ieig2rf]].
+The AHC implementation in ABINIT is still under heavy development.
+We do not describe in this topics the most recent procedure that relies on [[optdriver]]=7,
+neither the Frohlich model computations.
+
+In the oldest, well-established, AHC implementation in ABINIT, 
+the sum over highly energetic bands appearing in the AHC
+equations [[cite:Gonze2011]] is efficiently
+computed. Such behavior is controlled by the input variable [[ieig2rf]].
 
 The **k** -point convergence can be strongly improved by restoring the charge
 neutrality through the reading of the Born effective charge and dielectric
@@ -75,5 +80,5 @@ For the temperature dependence of the Fermi energy, see [[topic:ElPhonTransport]
 
 ## Tutorials
 
-* A lesson has been developed on [[lesson:tdepes|the temperature dependence of the electronic structure]]:.
+* A tutorial has been developed on [[tutorial:tdepes|the temperature dependence of the electronic structure]]:.
 

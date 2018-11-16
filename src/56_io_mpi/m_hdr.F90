@@ -40,8 +40,9 @@ MODULE m_hdr
  use defs_basis
  use m_build_info
  use m_xmpi
- use m_profiling_abi
+ use m_abicore
  use m_errors
+ use m_crystal
  use m_wffile
  use m_sort
 #ifdef HAVE_MPI2
@@ -54,13 +55,14 @@ MODULE m_hdr
 
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
- use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust
- use m_crystal,       only : print_symmetries
+ use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust, strcat
+ use m_symtk,         only : print_symmetries
  use defs_wvltypes,   only : wvl_internal_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
  use defs_abitypes,   only : hdr_type, dataset_type
  use m_pawtab,        only : pawtab_type
- use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_io, pawrhoij_get_nspden
+ use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
+&                            pawrhoij_io, pawrhoij_inquire_dim
 
  implicit none
 
@@ -93,9 +95,11 @@ MODULE m_hdr
  public :: hdr_fort_read           ! Reads the header from a logical unit associated to an unformatted file.
  public :: hdr_ncread              ! Reads the header from a Netcdf file.
  public :: hdr_fort_write          ! Writes the header and fform to unformatted file
+ public :: hdr_backspace           ! Backspace the header (Fortran IO).
  public :: hdr_ncwrite             ! Writes the header and fform to a Netcdf file.
  public :: hdr_check               ! Compare two headers.
  public :: hdr_vs_dtset            ! Check the compatibility of header with dtset.
+ public :: hdr_get_crystal
 
 ! Generic interface of the routines hdr_skip
  interface hdr_skip
@@ -173,7 +177,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python!
 
- type(abifile_t),private,parameter :: all_abifiles(47) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(48) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -251,7 +255,8 @@ MODULE m_hdr
 
    ! Miscellaneous
    abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="data"), &
-   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data") &
+   abifile_t(varname="spectral_weights", fform=5000, ext="FOLD2BLOCH", class="data"), &
+   abifile_t(varname="no_fftdatar_write", fform=6000, ext="ABIWAN", class="data") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
@@ -273,13 +278,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 
 integer function fform_from_ext(abiext) result(fform)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fform_from_ext'
-!End of the abilint section
 
  implicit none
 
@@ -345,13 +343,6 @@ end function fform_from_ext
 !! SOURCE
 
 character(len=nctk_slen) function varname_from_fname(filename) result(varname)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'varname_from_fname'
-!End of the abilint section
 
  implicit none
 
@@ -494,13 +485,6 @@ end function varname_from_fname
 
 type(abifile_t) function abifile_from_varname(varname) result(afile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abifile_from_varname'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -539,13 +523,6 @@ end function abifile_from_varname
 
 type(abifile_t) function abifile_from_fform(fform) result(afile)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'abifile_from_fform'
-!End of the abilint section
-
  implicit none
 
 !Arguments ---------------------------------------------
@@ -581,30 +558,10 @@ end function abifile_from_fform
 
 subroutine check_fform(fform)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
-
  implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
 
 !Local variables-------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'check_fform'
-!End of the abilint section
-
  integer,intent(in) :: fform
 #ifdef DEBUG_MODE
  type(abifile_t) :: abifile
@@ -648,13 +605,6 @@ end subroutine check_fform
 !! SOURCE
 
 subroutine test_abifiles()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_abifiles'
-!End of the abilint section
 
  implicit none
 
@@ -707,13 +657,6 @@ end subroutine test_abifiles
 !! SOURCE
 
 subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshiftk_orig, nshiftk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_malloc'
-!End of the abilint section
 
  implicit none
 
@@ -790,13 +733,6 @@ end subroutine hdr_malloc
 
 subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
 &                   mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_init'
-!End of the abilint section
 
  implicit none
 
@@ -901,13 +837,6 @@ end subroutine hdr_init
 
 subroutine hdr_free(hdr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_free'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -921,86 +850,35 @@ subroutine hdr_free(hdr)
  !@hdr_type
 
  !integer
- if (allocated(hdr%istwfk)) then
-   ABI_FREE(hdr%istwfk)
- end if
- if (allocated(hdr%lmn_size)) then
-   ABI_FREE(hdr%lmn_size)
- end if
- if (allocated(hdr%nband)) then
-   ABI_FREE(hdr%nband)
- end if
- if (allocated(hdr%npwarr)) then
-   ABI_FREE(hdr%npwarr)
- end if
-
- if (allocated(hdr%pspcod)) then
-   ABI_FREE(hdr%pspcod)
- end if
- if (allocated(hdr%pspdat)) then
-   ABI_FREE(hdr%pspdat)
- end if
- if (allocated(hdr%pspso)) then
-   ABI_FREE(hdr%pspso)
- end if
- if (allocated(hdr%pspxc)) then
-   ABI_FREE(hdr%pspxc)
- end if
- if (allocated(hdr%so_psp)) then
-   ABI_FREE(hdr%so_psp)
- end if
- if (allocated(hdr%symafm)) then
-   ABI_FREE(hdr%symafm)
- end if
- if (allocated(hdr%symrel)) then
-   ABI_FREE(hdr%symrel)
- end if
- if (allocated(hdr%typat)) then
-   ABI_FREE(hdr%typat)
- end if
+ ABI_SFREE(hdr%istwfk)
+ ABI_SFREE(hdr%lmn_size)
+ ABI_SFREE(hdr%nband)
+ ABI_SFREE(hdr%npwarr)
+ ABI_SFREE(hdr%pspcod)
+ ABI_SFREE(hdr%pspdat)
+ ABI_SFREE(hdr%pspso)
+ ABI_SFREE(hdr%pspxc)
+ ABI_SFREE(hdr%so_psp)
+ ABI_SFREE(hdr%symafm)
+ ABI_SFREE(hdr%symrel)
+ ABI_SFREE(hdr%typat)
 
  !real
- if (allocated(hdr%amu)) then
-   ABI_FREE(hdr%amu)
- end if
- if (allocated(hdr%kptns)) then
-   ABI_FREE(hdr%kptns)
- end if
- if (allocated(hdr%occ)) then
-   ABI_FREE(hdr%occ)
- end if
- if (allocated(hdr%tnons)) then
-   ABI_FREE(hdr%tnons)
- end if
- if (allocated(hdr%wtk)) then
-   ABI_FREE(hdr%wtk)
- end if
- if (allocated(hdr%shiftk)) then
-   ABI_FREE(hdr%shiftk)
- end if
- if (allocated(hdr%shiftk_orig)) then
-   ABI_FREE(hdr%shiftk_orig)
- end if
- if (allocated(hdr%xred)) then
-   ABI_FREE(hdr%xred)
- end if
- if (allocated(hdr%zionpsp)) then
-   ABI_FREE(hdr%zionpsp)
- end if
- if (allocated(hdr%znuclpsp)) then
-   ABI_FREE(hdr%znuclpsp)
- end if
- if (allocated(hdr%znucltypat)) then
-   ABI_FREE(hdr%znucltypat)
- end if
+ ABI_SFREE(hdr%amu)
+ ABI_SFREE(hdr%kptns)
+ ABI_SFREE(hdr%occ)
+ ABI_SFREE(hdr%tnons)
+ ABI_SFREE(hdr%wtk)
+ ABI_SFREE(hdr%shiftk)
+ ABI_SFREE(hdr%shiftk_orig)
+ ABI_SFREE(hdr%xred)
+ ABI_SFREE(hdr%zionpsp)
+ ABI_SFREE(hdr%znuclpsp)
+ ABI_SFREE(hdr%znucltypat)
 
  !string arrays
- if (allocated(hdr%md5_pseudos)) then
-   ABI_FREE(hdr%md5_pseudos)
- end if
- if(allocated(hdr%title)) then
-   ABI_FREE(hdr%title)
- end if
+ ABI_SFREE(hdr%md5_pseudos)
+ ABI_SFREE(hdr%title)
 
  if (hdr%usepaw==1 .and. allocated(hdr%pawrhoij) ) then
    call pawrhoij_free(hdr%pawrhoij)
@@ -1039,13 +917,6 @@ end subroutine hdr_free
 
 subroutine hdr_copy(Hdr_in,Hdr_cp)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_copy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1055,7 +926,8 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex
+ integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij
+
 ! *************************************************************************
 
  !@hdr_type
@@ -1149,10 +1021,12 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
 ! For PAW have to copy Pawrhoij ====
 ! NOTE alchemy requires a different treatment but for the moment it is not available within PAW.
  if (Hdr_in%usepaw==1) then
-   cplex = Hdr_in%Pawrhoij(1)%cplex
+   cplex_rhoij  = Hdr_in%Pawrhoij(1)%cplex_rhoij
+   qphase_rhoij = Hdr_in%Pawrhoij(1)%qphase
+   nspden_rhoij = Hdr_in%Pawrhoij(1)%nspden
    ABI_DT_MALLOC(Hdr_cp%Pawrhoij,(Hdr_in%natom))
-   call pawrhoij_alloc(Hdr_cp%Pawrhoij,cplex,Hdr_in%nspden,Hdr_in%nspinor,Hdr_in%nsppol,Hdr_in%typat,&
-&    lmnsize=Hdr_in%lmn_size(1:Hdr_in%ntypat))
+   call pawrhoij_alloc(Hdr_cp%Pawrhoij,cplex_rhoij,nspden_rhoij,Hdr_in%nspinor,Hdr_in%nsppol,Hdr_in%typat,&
+&                      lmnsize=Hdr_in%lmn_size(1:Hdr_in%ntypat),qphase=qphase_rhoij)
    call pawrhoij_copy(Hdr_in%Pawrhoij,Hdr_cp%Pawrhoij)
  end if
 
@@ -1182,13 +1056,6 @@ end subroutine hdr_copy
 !! SOURCE
 
 real(dp) pure function hdr_nelect_fromocc(Hdr) result(nelect)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_nelect_fromocc'
-!End of the abilint section
 
  implicit none
 
@@ -1256,13 +1123,6 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 &  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
 &  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_init_lowlvl'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1290,7 +1150,8 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor,nspden_rhoij
+ integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor
+ integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij
  integer :: idx,isppol,ikpt,iband,ipsp
  character(len=8) :: date_time
 
@@ -1386,19 +1247,21 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  hdr%amu = amu
 
  if (psps%usepaw==1)then
-   nspden_rhoij=pawrhoij_get_nspden(nspden,nspinor,pawspnorb)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+                             nspden=nspden,spnorb=pawspnorb,cpxocc=pawcpxocc,qpt=qptn)
    ABI_DT_MALLOC(hdr%pawrhoij,(natom))
    !Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
    if (present(comm_atom)) then
      if (present(mpi_atmtab)) then
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
-&                       pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
+       call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
+&                          pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      else
-       call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat, &
-&                       pawtab=pawtab,comm_atom=comm_atom)
+       call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
+&                          pawtab=pawtab,comm_atom=comm_atom)
      end if
    else
-     call pawrhoij_alloc(hdr%pawrhoij,pawcpxocc,nspden_rhoij,nspinor,nsppol,typat,pawtab=pawtab)
+     call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
+&                        pawtab=pawtab)
    end if
  end if
 
@@ -1467,13 +1330,6 @@ end subroutine hdr_init_lowlvl
 !! SOURCE
 
 subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_read_from_fname'
-!End of the abilint section
 
  implicit none
 
@@ -1558,13 +1414,6 @@ end subroutine hdr_read_from_fname
 
 subroutine hdr_write_to_fname(Hdr,fname,fform)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_write_to_fname'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1635,13 +1484,6 @@ end subroutine hdr_write_to_fname
 !! SOURCE
 
 subroutine hdr_mpio_skip(mpio_fh,fform,offset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_mpio_skip'
-!End of the abilint section
 
  implicit none
 
@@ -1752,13 +1594,6 @@ end subroutine hdr_mpio_skip
 !! SOURCE
 
 subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_bsize_frecords'
-!End of the abilint section
 
  implicit none
 
@@ -1891,13 +1726,6 @@ end subroutine hdr_bsize_frecords
 
 subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_io_wfftype'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2010,13 +1838,6 @@ end subroutine hdr_io_wfftype
 
 subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_io_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2070,6 +1891,9 @@ end subroutine hdr_io_int
 !! OUTPUT
 !!  Only writing
 !!
+!! TODO
+!!   Activate new header, avoid printing tons of lines with occupations.
+!!
 !! PARENTS
 !!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_wfd,m_wfk,mrggkk,rchkgsheader
 !!
@@ -2078,13 +1902,6 @@ end subroutine hdr_io_int
 !! SOURCE
 
 subroutine hdr_echo(Hdr,fform,rdwr,unit)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_echo'
-!End of the abilint section
 
  implicit none
 
@@ -2256,13 +2073,6 @@ end subroutine hdr_echo
 
 subroutine hdr_skip_int(unitfi,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_skip_int'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2314,13 +2124,6 @@ end subroutine hdr_skip_int
 !! SOURCE
 
 subroutine hdr_skip_wfftype(wff,ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_skip_wfftype'
-!End of the abilint section
 
  implicit none
 
@@ -2485,13 +2288,6 @@ end subroutine hdr_skip_wfftype
 subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu, &
 &                     comm_atom,mpi_atmtab) ! optional arguments (parallelism)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_update'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2569,13 +2365,6 @@ end subroutine hdr_update
 
 subroutine hdr_bcast(hdr,master,me,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_bcast'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2584,8 +2373,8 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot,cplex,iatom,ierr,index,index2,ipsp,ispden,list_size,list_size2,natom,nkpt
- integer :: npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat
+ integer :: bantot,cplex_rhoij,iatom,ierr,index,index2,ipsp,iq,iq0,ispden,list_size,list_size2
+ integer :: lmn2_size,natom,nkpt,npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat,qphase
  character(len=fnlen) :: list_tmp
 !arrays
  integer,allocatable :: list_int(:)
@@ -2809,7 +2598,8 @@ subroutine hdr_bcast(hdr,master,me,comm)
 
    nrhoij=0
    if (master==me)then
-     cplex=hdr%pawrhoij(1)%cplex
+     cplex_rhoij=hdr%pawrhoij(1)%cplex_rhoij
+     qphase=hdr%pawrhoij(1)%qphase
      nspden=hdr%pawrhoij(1)%nspden
      do iatom=1,natom
        nrhoij=nrhoij+hdr%pawrhoij(iatom)%nrhoijsel
@@ -2817,22 +2607,27 @@ subroutine hdr_bcast(hdr,master,me,comm)
    end if
 
    call xmpi_bcast(nrhoij,master,comm,ierr)
-   call xmpi_bcast(cplex ,master,comm,ierr)
+   call xmpi_bcast(cplex_rhoij,master,comm,ierr)
+   call xmpi_bcast(qphase,master,comm,ierr)
    call xmpi_bcast(nspden,master,comm,ierr)
 
-   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex
+   list_size=natom+nrhoij;list_size2=nspden*nrhoij*cplex_rhoij*qphase
    ABI_MALLOC(list_int,(list_size))
    ABI_MALLOC(list_dpr,(list_size2))
    if (master==me)then
      index=0;index2=0
      do iatom=1,natom
        nsel=hdr%pawrhoij(iatom)%nrhoijsel
+       lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
        list_int(1+index)=nsel
        list_int(2+index:1+nsel+index)=hdr%pawrhoij(iatom)%rhoijselect(1:nsel)
        index=index+1+nsel
        do ispden=1,nspden
-         list_dpr(1+index2:nsel*cplex+index2)=hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex,ispden)
-         index2=index2+nsel*cplex
+         do iq=1,qphase
+           iq0=merge(0,lmn2_size*cplex_rhoij,iq==1)
+           list_dpr(1+index2:nsel*cplex_rhoij+index2)=hdr%pawrhoij(iatom)%rhoijp(iq0+1:iq0+nsel*cplex_rhoij,ispden)
+           index2=index2+nsel*cplex_rhoij
+         end do
        end do
      end do
    end if
@@ -2843,15 +2638,20 @@ subroutine hdr_bcast(hdr,master,me,comm)
    if(master/=me)then
      index=0;index2=0
      ABI_DT_MALLOC(hdr%pawrhoij,(natom))
-     call pawrhoij_alloc(hdr%pawrhoij,cplex,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,lmnsize=hdr%lmn_size)
+     call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,&
+&                        lmnsize=hdr%lmn_size,qphase=qphase)
      do iatom=1,natom
        nsel=list_int(1+index)
+       lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
        hdr%pawrhoij(iatom)%nrhoijsel=nsel
        hdr%pawrhoij(iatom)%rhoijselect(1:nsel)=list_int(2+index:1+nsel+index)
        index=index+1+nsel
        do ispden=1,nspden
-         hdr%pawrhoij(iatom)%rhoijp(1:nsel*cplex,ispden)=list_dpr(1+index2:nsel*cplex+index2)
-         index2=index2+nsel*cplex
+         do iq=1,qphase
+           iq0=merge(0,lmn2_size*cplex_rhoij,iq==1)
+           hdr%pawrhoij(iatom)%rhoijp(iq0+1:iq0+nsel*cplex_rhoij,ispden)=list_dpr(1+index2:nsel*cplex_rhoij+index2)
+           index2=index2+nsel*cplex_rhoij
+         end do
        end do
      end do
    end if
@@ -2897,13 +2697,6 @@ end subroutine hdr_bcast
 !! SOURCE
 
 subroutine hdr_fort_read(Hdr,unit,fform,rewind)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_fort_read'
-!End of the abilint section
 
  implicit none
 
@@ -3028,13 +2821,6 @@ end subroutine hdr_fort_read
 !! SOURCE
 
 subroutine hdr_ncread(Hdr,ncid,fform)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_ncread'
-!End of the abilint section
 
  implicit none
 
@@ -3201,12 +2987,6 @@ subroutine hdr_ncread(Hdr,ncid,fform)
 contains
  integer function vid(vname)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -3243,13 +3023,6 @@ end subroutine hdr_ncread
 !! SOURCE
 
 subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_fort_write'
-!End of the abilint section
 
  implicit none
 
@@ -3321,6 +3094,57 @@ end subroutine hdr_fort_write
 
 !----------------------------------------------------------------------
 
+!!****f* m_hdr/hdr_backspace
+!! NAME
+!! hdr_backspace
+!!
+!! FUNCTION
+!!  Backspace the header. Return exit status and error message
+!!  The file is supposed to be open already
+!!
+!! INPUTS
+!!  Hdr<hdr_type>=The header of the file.
+!!  unit=unit number of the unformatted file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function hdr_backspace(hdr, unit, msg) result(ierr)
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(hdr_type),intent(in) :: hdr
+ integer,intent(in) :: unit
+ character(len=*),intent(out) :: msg
+
+!Local variables-------------------------------
+ integer :: irec
+
+!*************************************************************************
+
+ ierr = 0
+ do irec=1,5 + hdr%npsp
+   backspace(unit=unit, err=10, iomsg=msg)
+ end do
+
+ if (hdr%usepaw == 1) then
+   do irec=1,2
+     backspace(unit=unit, err=10, iomsg=msg)
+   end do
+ end if
+
+ return
+
+ ! Handle IO-error
+10 ierr = 1
+
+end function hdr_backspace
+!!***
+
 !!****f* m_hdr/hdr_ncwrite
 !! NAME
 !! hdr_ncwrite
@@ -3347,13 +3171,6 @@ end subroutine hdr_fort_write
 !! SOURCE
 
 integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_ncwrite'
-!End of the abilint section
 
  implicit none
 
@@ -3573,19 +3390,13 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  ! native support for array and array syntax is one of the reasons why we still use Fortran
  ! and we program like in C but without the power of C!o
 
-! Also, strange problem with Petrus + Nag5 : had to explicitly specify nf90_put_var,
+! Also, strange problem with Petrus + Nag5: had to explicitly specify nf90_put_var,
 ! with explicit definition of start, count and stride .
 ! Direct calls to NCF_CHECK, see below, were working for selected tests, but not all tests
  ABI_MALLOC(arr2d, (hdr%nkpt, hdr%nsppol))
  arr2d(:,:) = reshape(hdr%nband, [hdr%nkpt, hdr%nsppol])
  ncerr = nf90_put_var(ncid, vid("number_of_states"), arr2d, start=[1,1], count=[hdr%nkpt,hdr%nsppol], stride=[1,1])
  NCF_CHECK(ncerr)
-
- !NCF_CHECK(nf90_put_var(ncid, vid("number_of_states"), arr2d))
-!NCF_CHECK(nf90_put_var(ncid, vid("number_of_states"), reshape(hdr%nband, [hdr%nkpt, hdr%nsppol])))
-! XG 20160329  was working for v2#30-32 , tutorial tbs#1-4 and tutorespfn temp_3 , but not v7#68-69
-!NCF_CHECK(nf90_put_var(ncid, vid("number_of_states"), arr2d))
-! XG 20160329  was working for v7#68-69, but not v2#30-32 , tutorial tbs#1-4 and tutorespfn temp_3
  ABI_FREE(arr2d)
 
  ABI_MALLOC(arr3d, (hdr%mband, hdr%nkpt, hdr%nsppol))
@@ -3661,18 +3472,11 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("amu"), hdr%amu))
 
 #else
- MSG_ERROR("netcdf support support not activated")
+ MSG_ERROR("netcdf support not activated")
 #endif
 
 contains
  integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
  end function vid
@@ -3695,13 +3499,6 @@ end function hdr_ncwrite
 !! SOURCE
 
 subroutine hdr_set_occ(hdr, occ3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_set_occ'
-!End of the abilint section
 
  implicit none
 
@@ -3743,13 +3540,6 @@ end subroutine hdr_set_occ
 !! SOURCE
 
 subroutine hdr_get_occ3d(hdr, occ3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_get_occ3d'
-!End of the abilint section
 
  implicit none
 
@@ -3801,7 +3591,7 @@ end subroutine hdr_get_occ3d
 !! INPUTS
 !!  fform=integer specification of data type (expected)
 !!  fform0=integer specification of data type (from disk file)
-!!  mode_paral : COLL or PERS, for all leave_new and wrtout calls
+!!  mode_paral: COLL or PERS, for all wrtout calls
 !!  hdr <type(hdr_type)>=the header structured variable from dtset and psps
 !!  hdr0<type(hdr_type)>=the header structured variable from the disk file
 !!
@@ -3863,14 +3653,6 @@ end subroutine hdr_get_occ3d
 
 subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_check'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3881,20 +3663,15 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  type(hdr_type),intent(in) :: hdr,hdr0
 
 !Local variables-------------------------------
- character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
- character(len=24), save :: bndfmt='(2x, i4,t41,   a,2x, i4)'
- character(len=28), save :: occfmt='(2x, f4.1,t41,   a,2x, f4.1)'
- character(len=28), save :: wtkfmt='(2x, f7.3,t41,   a,2x, f7.3)'
- character(len=28), save :: zatfmt='(2x, f6.2,t41,   a,2x, f6.2)'
+ character(len=500) :: bndfmt, occfmt, wtkfmt, zatfmt, typfmt
 !scalars
  integer,parameter :: mwarning=5,nkpt_max=5
  integer :: bantot,bantot_eff,ii,ipsp,isppol,istart,istop,isym,itest,iwarning
  integer :: jj,mu,natom,nelm,nkpt,npsp,nsppol,nsym,ntypat,tatty,tband,tdg
  integer :: tecut,tgrid,tkpt,tlmn,tng,tpaw,tprim,tpsch,tpseu,tspinor,tsym,twfk
- integer :: twvl,txred
+ integer :: twvl,txred,enough
  real(dp) :: rms
  logical :: tfform2,tfform52
- character(len=26) :: typfmt
  character(len=500) :: msg
  type(abifile_t) :: abifile,abifile0
 
@@ -3975,7 +3752,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      write(msg,'(a,F7.4,a,F7.4)')&
 &     'input wvl_hgrid=', 2. * hdr%rprimd(1,1) / hdr%ngfft(1), &
 &     'not equal disk file wvl_hgrid=', 2. * hdr0%rprimd(1,1) / hdr0%ngfft(1)
-     MSG_WARNING(msg)
+     MSG_COMMENT(msg)
      tgrid = 1
    end if
  end if
@@ -4013,9 +3790,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
  if ( ANY(hdr%ngfft/=hdr0%ngfft) ) then
 !  For sensible rho(r) or V(r) data, fft grid must be identical
-!  MG TODO one should perform an FFT interpolation when the two ngfft differ!
+!  Note, however, that we allow for different FFT meshes and we interpolate the density in the
+!  caller when we are restarting a SCF calculation.
    if (abifile%class == "density" .or. abifile%class == "potential") then
-     write(msg, '(a,a,a,a,a)' )&
+     write(msg, '(5a)' )&
 &     'fft grids must be the same for restart from a ',trim(abifile%class),' file.',ch10,&
 &     'Action: change your fft grid or your restart file.'
      MSG_ERROR(msg)
@@ -4026,7 +3804,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  if (hdr%nkpt/=hdr0%nkpt) then
    if (abifile%class == "wf_planewave") then
      write(msg,'(a,i0,a,i0)' )'input nkpt=',hdr%nkpt,' not equal disk file nkpt=',hdr0%nkpt
-     MSG_WARNING(msg)
+     MSG_COMMENT(msg)
    end if
    tkpt=1; twfk=1
  end if
@@ -4113,21 +3891,30 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsppol*nkpt,9
      istop = min(istart + 8,nsppol*nkpt)
      mu = istop - istart + 1
-!    generate a format specifier
-     bndfmt(5:5) = number(mu)
-     bndfmt(21:21) = number(mu)
-     write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
-     call wrtout(std_out,msg,mode_paral)
+     ! generate a format specifier
+     bndfmt = strcat('(2x,',itoa(mu),'i4,t41,a,2x,',itoa(mu),'i4)')
+     if (istart<=100) then
+       write(msg,fmt=bndfmt) hdr%nband(istart:istop),'|',hdr0%nband(istart:istop)
+       call wrtout(std_out,msg,mode_paral)
+       if (istop>100) call wrtout(std_out, '=> stop printing nband after 100 values', mode_paral)
+     end if
    end do
 
+   enough = 0
    do isppol=1,nsppol
      do ii=1,nkpt
        if (hdr%nband(ii)/=hdr0%nband(ii)) then
          tband=1
+         enough = enough + 1
          if (abifile%class == "wf_planewave") then
-           write(msg,'(a,i0,a,i0,a,i0)' )&
-&           'kpt num',ii,' input nband=',hdr%nband(ii),' not equal disk file nband=',hdr0%nband(ii)
-           MSG_WARNING(msg)
+           if (enough > 5) then
+              write(std_out, "(a)")"Stop writing warnings after 5 values"
+              exit
+           else
+             write(msg,'(a,i0,a,i0,a,i0)' )&
+              'kpt num ',ii,' input nband= ',hdr%nband(ii),' not equal disk file nband=',hdr0%nband(ii)
+             MSG_WARNING(msg)
+           end if
          end if
        end if
      end do
@@ -4144,8 +3931,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end if
  end if
 
-!Compare symmetry arrays (integers) symafm(nsym)
-!-- only for same number of symmetries nsym
+! Compare symmetry arrays (integers) symafm(nsym)
+! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4154,7 +3941,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nsym,12
      istop=min(istart+11,nsym)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%symafm(istart:istop),'|',hdr0%symafm(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4166,8 +3953,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    tsym=1
  end if
 
-!Compare symmetry arrays (integers) symrel(3,3,nsym)
-!-- only for same number of symmetries nsym
+! Compare symmetry arrays (integers) symrel(3,3,nsym)
+! only for same number of symmetries nsym
  itest=0
  if (hdr%nsym==hdr0%nsym) then
    nsym=hdr%nsym
@@ -4197,7 +3984,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,natom,12
      istop=min(istart+11,natom)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%typat(istart:istop),'|',hdr0%typat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4219,7 +4006,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,npsp  ,12
      istop=min(istart+11,npsp  )
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
      write(msg,fmt=typfmt) hdr%so_psp  (istart:istop),'|',hdr0%so_psp  (istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4240,15 +4027,20 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,nkpt,12
      istop=min(istart+11,nkpt)
      nelm = istop - istart + 1
-     call mk_hdr_check_fmt(nelm,typfmt)
-     write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
-     call wrtout(std_out,msg,mode_paral)
+     typfmt = strcat('(2x,',itoa(nelm),'i3,t41,a,2x,',itoa(nelm),'i3)')
+     if (istart<=100) then
+       write(msg,fmt=typfmt) hdr%istwfk(istart:istop),'|',hdr0%istwfk(istart:istop)
+       call wrtout(std_out,msg,mode_paral)
+       if (istop>100) then
+         call wrtout(std_out, '=> stop printing istwfk after 100 values' ,mode_paral)
+       end if
+     end if
    end do
    do ii=1,nkpt
      if (hdr%istwfk(ii)/=hdr0%istwfk(ii)) then
        write(msg, '(a,i0,a,i0,a,i0)' )&
 &       'For k point number ',ii,' input istwfk=',hdr%istwfk(ii),' not equal disk file istwfk=',hdr0%istwfk(ii)
-       MSG_WARNING(msg)
+       MSG_COMMENT(msg)
        twfk=1
      end if
    end do
@@ -4257,10 +4049,10 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 !NEW_HDR
  if (any(hdr%kptrlatt /= hdr0%kptrlatt)) then
     write(msg,"(2(a,9(i0,1x)))")"input kptrlatt= ",hdr%kptrlatt," /= disk file kptrlatt=",hdr0%kptrlatt
-    MSG_WARNING(msg)
+    MSG_COMMENT(msg)
  end if
  if (hdr%kptopt /= hdr0%kptopt) then
-    MSG_WARNING(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
+    MSG_COMMENT(sjoin("input kptopt=",itoa(hdr%kptopt)," /= disk file kptopt=",itoa(hdr0%kptopt)))
  end if
  if (hdr%pawcpxocc /= hdr0%pawcpxocc) then
     MSG_WARNING(sjoin("input pawcpxocc=",itoa(hdr%pawcpxocc)," /= disk file pawcpxocc=",itoa(hdr0%pawcpxocc)))
@@ -4289,8 +4081,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    write(msg,'(a,34x,a,a)') '  kpt:','|','  kpt:'
    call wrtout(std_out,msg,mode_paral)
    do ii = 1,min(nkpt,nkpt_max)
-     write(msg,'(2x,3f12.7,2x,a,2x,3f12.7)')&
-&     hdr%kptns(:,ii),'|',hdr0%kptns(:,ii)
+     write(msg,'(2x,3f12.7,2x,a,2x,3f12.7)')hdr%kptns(:,ii),'|',hdr0%kptns(:,ii)
      call wrtout(std_out,msg,mode_paral)
      if(ii>nkpt_max)then
        call wrtout(std_out,'The number of printed k points is sufficient... stop writing them.',mode_paral)
@@ -4326,8 +4117,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    istop = min(nkpt,nkpt_max)
    do ii = 1, istop, 5
      mu = min(5, istop - ii + 1)
-     wtkfmt(5:5) = number(mu)
-     wtkfmt(23:23) = number(mu)
+     wtkfmt = strcat('(2x,',itoa(mu),'f7.3,t41,a,2x,',itoa(mu),'f7.3)')
      write(msg, wtkfmt)hdr%wtk(ii:min(istop, ii + 5 - 1)),'|',hdr0%wtk(ii:min(istop, ii + 5 - 1))
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4337,7 +4127,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      if (abs( hdr%wtk(ii)-hdr0%wtk(ii) )>tol6) then
        write(msg,'(a,i5,a,es17.7,a,a,es17.7)')&
 &       'kpt num',ii,', input weight=',hdr%wtk(ii),ch10,&
-&       'not equal  disk file weight=',hdr0%wtk(ii)
+&       'not equal to disk file weight=',hdr0%wtk(ii)
        MSG_WARNING(msg)
 
        tkpt=1 ; iwarning=iwarning+1
@@ -4360,8 +4150,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,bantot_eff,9
      istop = min(istart+8,bantot_eff)
      mu = istop - istart + 1
-     occfmt(5:5) = number(mu)
-     occfmt(23:23) = number(mu)
+     occfmt = strcat('(2x,',itoa(mu),'f4.1,t41,a,2x,',itoa(mu),'f4.1)')
      write(msg,fmt=occfmt)hdr%occ(istart:istop),'|', hdr0%occ(istart:istop)
      call wrtout(std_out,msg,mode_paral)
      if(istart>9*nkpt_max)then
@@ -4415,8 +4204,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    do istart = 1,ntypat,6
      istop = min(istart+5,ntypat)
      mu = istop-istart+1
-     zatfmt(5:5) = number(mu)
-     zatfmt(23:23) = number(mu)
+     zatfmt = strcat('(2x,',itoa(mu),'f6.2,t41,a,2x,',itoa(mu),'f6.2)')
      write(msg,fmt=zatfmt) hdr%znucltypat(istart:istop),'|',hdr0%znucltypat(istart:istop)
      call wrtout(std_out,msg,mode_paral)
    end do
@@ -4432,7 +4220,7 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
 !Should perform some checks related to pertcase and qptn,
 !that have been introduced in the header in v4.1
-!Warning : a GS file might be read, while the hdr corresponds
+!Warning: a GS file might be read, while the hdr corresponds
 !to a RF file (to initialize k+q), and vice-versa (in nonlinear).
 
 !Now check agreement of psp headers too
@@ -4441,7 +4229,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    itest=0
 
    do ipsp=1,npsp
-
      write(msg,'(a,i3,a,9x,a,a,i3,a)')&
 &     '  pseudopotential atom type',ipsp,':','|','  pseudopotential atom type',ipsp,':'
      call wrtout(std_out,msg,mode_paral)
@@ -4484,8 +4271,8 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
      end if
 
 !    Second, test
-!    NOTE, XG 000719 : should do something about pspso
-!    NOTE, XG 020716 : znucl and zion are not written
+!    NOTE, XG 000719: should do something about pspso
+!    NOTE, XG 020716: znucl and zion are not written
      if (abs(hdr%znuclpsp(ipsp)-hdr0%znuclpsp(ipsp))>tol6) itest=1
      if (abs(hdr%zionpsp(ipsp)-hdr0%zionpsp(ipsp))>tol6) then
        itest=1; tpsch=1
@@ -4496,15 +4283,13 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
    end do
 
    if (itest==1) then
-     msg = 'input psp header does not agree perfectly with disk file psp header.'
-     MSG_WARNING(msg)
+     MSG_WARNING('input psp header does not agree perfectly with disk file psp header.')
      tpseu=1
    end if
  end if
 
 !Finally, read residm and etotal ("current value" not known), and check xred.
  if (hdr%natom==hdr0%natom) then
-
    natom=hdr%natom
    write(msg,'(a,33x,a,a)') '  xred:','|','  xred:'
    call wrtout(std_out,msg,mode_paral)
@@ -4550,12 +4335,11 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
 
    if (abifile%class == "wf_planewave") then
      restart=2
-     msg = 'Restart of self-consistent calculation need translated wavefunctions.'
+     MSG_COMMENT('Restart of self-consistent calculation need translated wavefunctions.')
    else if (abifile%class == "density") then
      restart=0
-     msg = 'Illegal restart of non-self-consistent calculation'
+     MSG_WARNING('Illegal restart of non-self-consistent calculation')
    end if
-   MSG_WARNING(msg)
 
    write(msg,'(a,a1,a)') &
 &   '  Indeed, critical differences between current calculation and',ch10,&
@@ -4644,70 +4428,6 @@ subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
  write(msg,'(80a)') ('=',ii=1,80)
  call wrtout(std_out,msg,mode_paral)
 
- CONTAINS
-!!***
-
-!!****f* hdr_check/mk_hdr_check_fmt
-!! NAME
-!! mk_hdr_check_fmt
-!!
-!! FUNCTION
-!! make a format needed in hdr_check, for arrays of nint integers each of format i3
-!!
-!! INPUTS
-!!  nelm=number of elements to be printed
-!!
-!! OUTPUT
-!!  character(len=26), typfmt= format needed
-!!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine mk_hdr_check_fmt(nelm,typfmt)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mk_hdr_check_fmt'
-!End of the abilint section
-
-   implicit none
-
-!  Arguments ------------------------------------
-!  scalars
-   integer,intent(in) :: nelm
-   character(len=26),intent(out) :: typfmt
-
-!  Local variables-------------------------------
-!  scalars
-   integer :: ii
-   character(len=1), parameter :: number(0:10)=(/'0','1','2','3','4','5','6','7','8','9',' '/)
-   character(len=26), parameter :: templatefmt='(2x,  i3,t41   ,a,2x,  i3)'
-!  *************************************************************************
-
-!  Initialize the format
-   typfmt=templatefmt
-
-!  Generate the type format specifier
-   ii=nelm/10
-   if ( ii /= 0 ) then
-     typfmt(5:5) = number(ii)
-     typfmt(22:22) = number(ii)
-   else
-     typfmt(5:5) = ' '
-     typfmt(22:22) = ' '
-   end if
-   ii = nelm - 10 * (nelm/10)
-   typfmt(6:6) = number(ii)
-   typfmt(23:23) = number(ii)
-
- end subroutine mk_hdr_check_fmt
-
 end subroutine hdr_check
 !!***
 
@@ -4735,14 +4455,6 @@ end subroutine hdr_check
 !! SOURCE
 
 subroutine hdr_vs_dtset(Hdr,Dtset)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'hdr_vs_dtset'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -4955,14 +4667,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 
  subroutine compare_int(name,iexp,ifound,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'compare_int'
- use interfaces_14_hidewrite
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4990,6 +4694,65 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !!***
 
 end subroutine hdr_vs_dtset
+!!***
+
+!!****f* m_hdr/hdr_get_crystal
+!! NAME
+!!  hdr_get_crystal
+!!
+!! FUNCTION
+!!  Initializes a crystal_t data type starting from the abinit header.
+!!
+!! INPUTS
+!!  hdr<hdr_type>=the abinit header
+!!  timrev ==2 => take advantage of time-reversal symmetry
+!!         ==1 ==> do not use time-reversal symmetry
+!!  remove_inv [optional]= if .TRUE. the inversion symmetry is removed from the set of operations
+!!  even if it is present in the header
+!!
+!! OUTPUT
+!!  cryst<crystal_t>= the data type filled with data reported in the abinit header
+!!
+!! TODO
+!!  Add information on the use of time-reversal in the Abinit header.
+!!
+!! PARENTS
+!!      cut3d,eph,fold2Bloch,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk
+!!      mlwfovlp_qp,mrgscr,setup_bse,setup_screening,setup_sigma,wfk_analyze
+!!
+!! CHILDREN
+!!      atomdata_from_znucl,crystal_init
+!!
+!! SOURCE
+
+type(crystal_t) function hdr_get_crystal(hdr, timrev, remove_inv) result(cryst)
+
+!Arguments ------------------------------------
+ type(hdr_type),intent(in) :: hdr
+ integer,intent(in) :: timrev
+ logical,optional,intent(in) :: remove_inv
+
+!Local variables-------------------------------
+ integer :: space_group
+ logical :: rinv,use_antiferro
+! *********************************************************************
+
+ rinv=.FALSE.; if (PRESENT(remove_inv)) rinv=remove_inv
+ use_antiferro = (hdr%nspden==2.and.hdr%nsppol==1)
+
+ ! Consistency check
+ ABI_CHECK(any(timrev == [1, 2]),"timrev should be in (1|2)")
+ if (use_antiferro) then
+   ABI_CHECK(ANY(hdr%symafm==-1),"Wrong nspden, nsppol, symafm.")
+ end if
+
+ space_group=0 !FIXME not known at this level.
+
+ call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
+& hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
+& symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
+
+end function hdr_get_crystal
 !!***
 
 end module m_hdr

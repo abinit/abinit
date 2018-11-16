@@ -2,6 +2,7 @@
 description: How to set parameters for a spin-polarized calculation
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters for a spin-polarized calculation with the ABINIT package.
 
@@ -28,5 +29,5 @@ be constrained.
 
 ## Tutorials
 
-* [[lesson:spin|The lesson on spin in ABINIT]] presents the properties related to spin: spin-polarized calculations and spin-orbit coupling. 
+* [[tutorial:spin|The tutorial on spin in ABINIT]] presents the properties related to spin: spin-polarized calculations and spin-orbit coupling. 
 

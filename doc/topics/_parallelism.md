@@ -2,6 +2,7 @@
 description: How to set parameters for a parallel calculation
 authors: MT,FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to set parameters for a parallel calculation with the ABINIT package.
 
@@ -34,11 +35,11 @@ This page gives hints on how to set parameters for a parallel calculation with t
 
 ## Tutorials
 
-* [[lesson:basepar|An introduction on ABINIT in Parallel]] should be read before going to the next lessons about parallelism. One simple example of parallelism in ABINIT will be shown.
-* [[lesson:paral_gspw|Parallelism for ground-state calculations, with plane waves]] presents the combined k-point (K), plane-wave (G), band (B), spin/spinor parallelism of ABINIT (so, the "KGB" parallelism), for the computation of total energy, density, and ground state properties 
-* [[lesson:paral_moldyn|Parallelism for molecular dynamics calculations]]
-* [[lesson:paral_images|Parallelism based on "images", e.g. for the determination of transitions paths (NEB, string method) or PIMD]], that can be activated on top of the "KGB" parallelism for force calculations.
-* [[lesson:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for the computation of total energy, density, and ground state properties
-* [[lesson:paral_dfpt|Parallelism of response-function calculations]] - you need to be familiarized with the calculation of linear-response properties within ABINIT, see the tutorial [[lesson:rf1|Response-Function 1 (RF1)]]
-* [[lesson:paral_mbt|Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
+* [[tutorial:basepar|An introduction on ABINIT in Parallel]] should be read before going to the next tutorials about parallelism. One simple example of parallelism in ABINIT will be shown.
+* [[tutorial:paral_gspw|Parallelism for ground-state calculations, with plane waves]] presents the combined k-point (K), plane-wave (G), band (B), spin/spinor parallelism of ABINIT (so, the "KGB" parallelism), for the computation of total energy, density, and ground state properties 
+* [[tutorial:paral_moldyn|Parallelism for molecular dynamics calculations]]
+* [[tutorial:paral_images|Parallelism based on "images", e.g. for the determination of transitions paths (NEB, string method) or PIMD]], that can be activated on top of the "KGB" parallelism for force calculations.
+* [[tutorial:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for the computation of total energy, density, and ground state properties
+* [[tutorial:paral_dfpt|Parallelism of response-function calculations]] - you need to be familiarized with the calculation of linear-response properties within ABINIT, see the tutorial [[tutorial:rf1|Response-Function 1 (RF1)]]
+* [[tutorial:paral_mbt|Parallelism of Many-Body Perturbation calculations (GW)]] allows to speed up the calculation of accurate electronic structures (quasi-particle band structure, including many-body effects).
 

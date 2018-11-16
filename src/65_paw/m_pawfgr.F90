@@ -42,7 +42,7 @@ MODULE m_pawfgr
 
  use defs_basis
  use m_errors
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
 
  use defs_abitypes, only : dataset_type
@@ -167,14 +167,6 @@ CONTAINS
 
 subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
 &                      gsqcutc_eff,gsqcutf_eff,gmet,k0) ! optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_init'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -310,13 +302,6 @@ end subroutine pawfgr_init
 
 subroutine pawfgr_destroy(Pawfgr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -365,13 +350,6 @@ end subroutine pawfgr_destroy
 !! SOURCE
 
 subroutine pawfgr_nullify(Pawfgr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawfgr_nullify'
-!End of the abilint section
 
  implicit none
 
@@ -432,13 +410,6 @@ end subroutine pawfgr_nullify
 !! SOURCE
 
 subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indgrid'
-!End of the abilint section
 
  implicit none
 

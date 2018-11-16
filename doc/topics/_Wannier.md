@@ -2,6 +2,7 @@
 description: How to perform Wannier functions calculation
 authors: BAmadon
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform Wannier functions calculation with the ABINIT package.
 
@@ -43,5 +44,5 @@ related to the use of the wannier90 librairy.
 
 ## Tutorials
 
-* [[lesson:wannier90|The lesson on Wannier90]] deals with the Wannier90 library to obtain Maximally Localized Wannier Functions.
+* [[tutorial:wannier90|The tutorial on Wannier90]] deals with the Wannier90 library to obtain Maximally Localized Wannier Functions.
 

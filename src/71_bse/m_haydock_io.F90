@@ -25,7 +25,7 @@
 MODULE m_haydock_io
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
  use m_errors
 
  use m_io_tools,       only : open_file
@@ -114,13 +114,6 @@ CONTAINS  !====================================================================
 
 subroutine open_haydock(filename, haydock_file)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'open_haydock'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -165,13 +158,6 @@ end subroutine open_haydock
 !! SOURCE
 
 subroutine read_dim_haydock(haydock_file)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_dim_haydock'
-!End of the abilint section
 
  implicit none
 
@@ -239,13 +225,6 @@ end subroutine read_dim_haydock
 
 subroutine write_dim_haydock(haydock_file)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_dim_haydock'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -282,13 +261,6 @@ end subroutine write_dim_haydock
 !! SOURCE
 
 subroutine skip_dim_haydock(haydock_file)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skip_dim_haydock'
-!End of the abilint section
 
  implicit none
 
@@ -336,13 +308,6 @@ end subroutine skip_dim_haydock
 !! SOURCE
 
 subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_haydock'
-!End of the abilint section
 
  implicit none
 
@@ -438,13 +403,6 @@ end subroutine read_haydock
 
 subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, factor)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_haydock'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -495,13 +453,6 @@ end subroutine write_haydock
 !! SOURCE
 
 subroutine close_haydock(haydock_file)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'close_haydock'
-!End of the abilint section
 
  implicit none
 

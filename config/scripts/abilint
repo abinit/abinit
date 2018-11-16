@@ -130,10 +130,14 @@ abilint [options] <source> <dest>
 
 #Operating System (used for os.path)
 import os
+import io
 #filename match as Unix shell
 import fnmatch
 #stderr and stdout
 import sys
+# Handle py2, py3k differences.
+py2 = sys.version_info[0] <= 2
+
 #Options
 import getopt
 #Regular expressions
@@ -151,6 +155,12 @@ if  version_info < [2,3,0]:
     sys.stderr.write("Detected version %d.%d.%d\n" % tuple(version_info))
     sys.stderr.write("Minimal required version is python 2.3.0")
     sys.exit(1)
+
+def my_unicode(s):
+    if py2:
+        return unicode(s)
+    else:
+        return s
 
 #If the class 'set' does not exist use instead Set
 if 'set' not in dir(__builtins__):
@@ -544,6 +554,7 @@ class Project:
                     break
         self.files[fullname] = File_Class(file,dir=dir,read_only=read_only,message=self.message)
         if not create:
+            #print("fullname", fullname)
             self.files[fullname].read()
         #Return the File instance
         return self.files[fullname]
@@ -806,6 +817,8 @@ class Project:
         "Dump with pickle a Fortran type in a file"
         if name in self.ftypes:
             self.message.section("Write the fortran type '%s' into the file '%s'..." % (name,filename))
+            #from pprint import pprint
+            #pprint(self.ftypes[name].dict_vars)
             pickle.dump(self.ftypes[name].dict_vars,open(filename,"wb"))
             self.message.done()
         else:
@@ -1307,7 +1320,7 @@ class Structure:
                 #Do nothing
                 return
         #The code is inserted before the child codes
-        fd.write(self.code)
+        fd.write(my_unicode(self.code))
         for child in self.children:
             child.write(fd,only_if_changed)
 
@@ -1336,8 +1349,10 @@ class File(Structure):
     #
     def read(self,fd=None):
         "Read the file."
-        if fd == None:
-            fd = open("%s/%s" % (self.dir,self.name))
+        if fd is None:
+            #fd = open("%s/%s" % (self.dir,self.name), "rt")
+            fd = io.open("%s/%s" % (self.dir,self.name), 'rt', encoding="utf8")
+
         #Time stamp i.e. the time of the last modification
         self.timestamp = os.path.getmtime(fd.name)
         #We ban \r !!
@@ -1355,10 +1370,11 @@ class File(Structure):
                 #Do nothing
                 return
         self.message.write("[%s/%s]" % (dir,file))
-        if fd == None:
-            fd = open("%s/%s" % (dir,file),"w")
+        if fd is None:
+            #fd = open("%s/%s" % (dir,file),"w")
+            fd = io.open("%s/%s" % (dir,file), "wt", encoding="utf8")
         #The code is inserted before the child codes
-        fd.write(self.code)
+        fd.write(my_unicode(self.code))
         for child in self.children:
             child.write(fd,only_if_changed=False)
         fd.close()
@@ -1554,6 +1570,10 @@ class File_F90(File):
         "Translate macros stored in project.macro_dict"
         if self.dir in project.macro_dirs:
             for mac in project.macro_dict.keys():
+                # This to prevent abinit from expanding LIBPAW macros
+                #print(mac)
+                if mac in ("USE_DEFS", "USE_MPI_WRAPPERS", "USE_MSG_HANDLING", "USE_MEMORY_PROFILING", "LIBPAW_HAVE_LIBXC"): 
+                    continue
                 self.code = self.code.replace(mac,project.macro_dict[mac])
 
 class File_F90_Library(File_F90):
@@ -2529,7 +2549,9 @@ class Use(Code):
               #Add text_use inside use statements
               #self.code += text_use
           text_use += use_after + "\n"
-          self.code += text_use
+
+          # Comment this line to insert empty abilint section
+          #self.code += text_use
 
         #Remove multiple \n
         self.code = self.re_multi_n.sub('\n\n',self.code)
@@ -3827,7 +3849,7 @@ if __name__ == "__main__":
             #Backup before changing to optimize the minimal number of copies
             abinit.backup()
         #Create files for all the interfaces and put them in "defs".
-        abinit.interfaces_all(dir_mod="src/01_interfaces_ext",exclude=["src","98_main","10_defs","01_interfaces_ext","01_linalg_ext","01_triqs_ext","incs","libs","mods","quarantine"])
+        abinit.interfaces_all(dir_mod="src/01_interfaces_ext",exclude=["src","98_main","10_defs","incs","libs","mods","quarantine"])
         if libraries:
             #Regenerate the file _xxx_
             abinit.generate(format="_%s_",pattern_dir="%s/abilint" % OLD)
@@ -3845,7 +3867,7 @@ if __name__ == "__main__":
     except FatalError as value:
         #Rescue routine: Create all interfaces
         abinit.no_fatal()
-        abinit.interfaces_all(dir_mod="01_interfaces_ext",exclude=["98_main","10_defs","01_interfaces_ext","01_linalg_ext","01_triqs_ext","incs","libs","mods","quarantine"],\
+        abinit.interfaces_all(dir_mod="01_interfaces_ext",exclude=["98_main","10_defs","incs","libs","mods","quarantine"],\
                               warning="!!\n!! WARNING\n" \
                 + "!! No interface generated by abilint\n" \
                 + "!! Please, correct the following problem in the code:\n" \

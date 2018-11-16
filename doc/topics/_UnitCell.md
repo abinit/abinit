@@ -2,6 +2,7 @@
 description: How to specify the unit cell
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to specify the unit cell with the ABINIT package.
 
@@ -44,5 +45,5 @@ and also generate all the nuclei positions from the irreducible ones. See
 
 ## Tutorials
 
-* [[lesson:base4|Fourth basic lesson]] Determination of the surface energy of aluminum (100): changing the orientation of the unit cell.
+* [[tutorial:base4|Fourth basic tutorial]] Determination of the surface energy of aluminum (100): changing the orientation of the unit cell.
 

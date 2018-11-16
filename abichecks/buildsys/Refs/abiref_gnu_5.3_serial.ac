@@ -492,7 +492,7 @@ enable_mpi="no"
 enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
-# change the default values of accesswff)   
+# change the default values of iomode)   
 # Beware that not all the features of Abinit support MPI-IO,
 # This options is mainly used by developers for debugging purposes.
 #
@@ -729,7 +729,7 @@ with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
-# change the default values of accesswff)   
+# change the default values of iomode)   
 #
 #enable_netcdf_default="no"
 
@@ -991,8 +991,11 @@ enable_xml="yes"
 
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
+#    Different versions of TRIQS have differents API. Choose your installed 
+#    version.
 #
-#enable_triqs="no"
+#enable_triqs_v2_0="no"
+#enable_triqs_v1_4="no"
 #
 # Include flags for the TRIQS library (default is unset)
 #

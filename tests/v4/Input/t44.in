@@ -7,7 +7,6 @@ t44_VHXC          # Name of the file where the input data is stored
 0                 # Total charge  (not needed)
 spline            # Type of interpolation
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = macroave
@@ -28,4 +27,5 @@ spline            # Type of interpolation
 #%%   Analyze the Hartree and XC potential : two filter functions,
 #%%   using two distinct values (on the order of the average
 #%%   layer width, but otherwise arbitrary), and spline interpolation.
+#%% topics = Macroave
 #%%<END TEST_INFO>

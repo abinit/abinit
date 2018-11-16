@@ -14,8 +14,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -33,7 +31,7 @@ module m_fock
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_errors
  use m_mpinfo
  use m_xmpi
@@ -46,14 +44,12 @@ module m_fock
  use m_cgtools
 
  use m_time,            only : timab
- use m_mpinfo,          only : ptabs_fourdp
  use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_symtk,           only : mati3inv, matr3inv
  use m_fftcore,         only : sphereboundary
- use m_fft,             only : zerosym
+ use m_fft,             only : zerosym, fourwf
  use m_kg,              only : ph1d3d, getph
  use m_kpts,            only : listkk
- use m_paw_ij,          only : paw_ij_type
-
 
  implicit none
 
@@ -67,8 +63,6 @@ module m_fock
 !! FUNCTION
 !!   This object stores the occupied wavefunctions and other quantities
 !!   needed to calculate Fock exact exchange
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -156,6 +150,9 @@ module m_fock
   real(dp) :: hyb_range_fock
     ! hybrid range for separation, used in the fock contribution
 
+  real(dp) :: e_fock0
+    ! contribution of the Fock term to energy (computed and stored here in case of ACE)
+
   integer, allocatable :: atindx(:)
     !  atindx(natom)=index table for atoms (see gstate.f)
 
@@ -198,9 +195,8 @@ module m_fock
   type(pawfgr_type),pointer :: pawfgr
   type(pawfgrtab_type),allocatable :: pawfgrtab(:)
 
-
  end type fock_common_type
-!--------------------------------------------------------------------
+
  type, public :: fock_BZ_type
 
   integer :: mcprj
@@ -356,13 +352,6 @@ contains
 
 subroutine fockbz_create(fockbz,mgfft,mpw,mkpt,mkptband,my_nsppol,natom,n4,n5,n6,use_ACE)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fockbz_create'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -491,15 +480,6 @@ end subroutine fockbz_create
 
 subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_init'
- use interfaces_14_hidewrite
- use interfaces_32_util
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -538,8 +518,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  call timab(1500,1,tsec)
 
  if (dtset%nspinor/=1) then
-   msg='Hartree-Fock option can be used only with option nspinor=1.'
-   MSG_ERROR(msg)
+   MSG_ERROR('Hartree-Fock option can be used only with option nspinor=1.')
  end if
 
 
@@ -750,8 +729,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
 !* Number of iterations with fixed occupied states when calculating the exact exchange contribution.
    if (dtset%nnsclohf<0) then
-     msg='The parameter nnsclohf must be a non-negative integer.'
-     MSG_ERROR(msg)
+     MSG_ERROR('The parameter nnsclohf must be a non-negative integer.')
    end if
    if (dtset%nnsclohf==0) then
      fockcommon%nnsclo_hf=1
@@ -830,11 +808,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 !* No space symmetry is used, if kptopt==2 time reversal symmetry is used.
        symm=0 ; symm(1,1)=1 ; symm(2,2)=1 ; symm(3,3)=1
        call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&          nkpt_bz,1,1,indx,symm,timrev)
+&          nkpt_bz,1,1,indx,symm,timrev,xmpi_comm_self)
      else
 !* As in getkgrid, no use of antiferromagnetic symmetries thans to the option sppoldbl=1
        call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, &
-&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
+&          nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev, xmpi_comm_self)
      end if
 !* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
 !*    indkk(:,1)   = k point of IBZ, kpt_ibz
@@ -848,13 +826,11 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
      if (dtset%kptopt==0) then
 !* kptopt =0 : read directly nkpt, kpt, kptnrm and wtk in the input file
 !*              => this case is not allowed for the moment
-       msg='Hartree-Fock option can not be used with option kptopt=0.'
-       MSG_ERROR(msg)
+       MSG_ERROR('Hartree-Fock option can not be used with option kptopt=0.')
      else
 !* kptopt <0 : rely on kptbounds, and ndivk to set up a band structure calculation
 !*              => a band structure calculation is not yet allowed.
-       msg='Hartree-Fock option can not be used with option kptopt<0.'
-       MSG_ERROR(msg)
+       MSG_ERROR('Hartree-Fock option can not be used with option kptopt<0.')
      end if
    end if
 
@@ -966,8 +942,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
        end do
      end if
      if(invsym(isym)==0) then
-       msg='No inverse has been found for isym'
-       MSG_ERROR(msg)
+       MSG_ERROR('No inverse has been found for isym')
      end if
    end do
 
@@ -1151,7 +1126,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
  call timab(1500,2,tsec)
 
-DBG_EXIT("COLL")
+ DBG_EXIT("COLL")
 
 end subroutine fock_init
 !!***
@@ -1187,13 +1162,6 @@ end subroutine fock_init
 !! SOURCE
 
 subroutine fock_updateikpt(fock,ikpt,isppol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_updateikpt'
-!End of the abilint section
 
  implicit none
 
@@ -1246,13 +1214,6 @@ end subroutine fock_updateikpt
 
 subroutine fock_set_ieigen(fock,iband)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_set_ieigen'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1295,13 +1256,6 @@ end subroutine fock_set_ieigen
 !! SOURCE
 subroutine fock_destroy(fock)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1321,13 +1275,6 @@ subroutine fock_destroy(fock)
 end subroutine fock_destroy
 
 subroutine fock_common_destroy(fock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_common_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -1388,13 +1335,6 @@ end subroutine fock_common_destroy
 
 
 subroutine fock_BZ_destroy(fock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_BZ_destroy'
-!End of the abilint section
 
  implicit none
 
@@ -1505,13 +1445,6 @@ end subroutine fock_BZ_destroy
 
 subroutine fock_ACE_destroy(fockACE)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_ACE_destroy'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1567,13 +1500,6 @@ end subroutine fock_ACE_destroy
 !! SOURCE
 
 subroutine fock_calc_ene(dtset,fock,fock_energy,ikpt,nband,occ)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_calc_ene'
-!End of the abilint section
 
  implicit none
 
@@ -1636,13 +1562,6 @@ end subroutine fock_calc_ene
 !! SOURCE
 
 subroutine fock_update_exc(fock_energy,xc_energy,xcdc_energy)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_update_exc'
-!End of the abilint section
 
  implicit none
 
@@ -1710,15 +1629,6 @@ end subroutine fock_update_exc
 
 subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
 &                              mpi_enreg,nattyp,npwarr,occ,ucvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_updatecwaveocc'
- use interfaces_32_util
- use interfaces_53_ffts
-!End of the abilint section
 
  implicit none
 
@@ -1988,7 +1898,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,indsym,mcg,mcprj,&
                ABI_ALLOCATE(dummytab2,(2,npwj))
                call fourwf(1,dummytab3,cgocc(:,1:npwj),dummytab2,fockbz%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol), &
 &               gbound_k,gbound_k,jstwfk,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,&
-&               npwj,npwj,n4,n5,n6,tim_fourwf0,dtset%paral_kgb,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
+&               npwj,npwj,n4,n5,n6,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
                ABI_DEALLOCATE(dummytab2)
 
              else
@@ -2089,13 +1999,6 @@ end subroutine fock_updatecwaveocc
 
 integer function fock_set_getghc_call(fock, new) result(old)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_set_getghc_call'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2125,13 +2028,6 @@ end function fock_set_getghc_call
 !! SOURCE
 
 pure integer function fock_get_getghc_call(fock)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_get_getghc_call'
-!End of the abilint section
 
  implicit none
 
@@ -2174,14 +2070,6 @@ end function fock_get_getghc_call
 !! SOURCE
 
 subroutine fock_print(fockcommon,fockbz,header,unit,mode_paral,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fock_print'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -2239,8 +2127,6 @@ end subroutine fock_print
 !! FUNCTION
 !! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2
 !!
-!! NOTES
-!!
 !! INPUTS
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
@@ -2270,13 +2156,6 @@ end subroutine fock_print
 !! SOURCE
 
 subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'bare_vqg'
-!End of the abilint section
 
  implicit none
 
@@ -2440,7 +2319,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
 end subroutine bare_vqg
 !!***
-!{\src2tex{textfont=tt}}
+
 !!****f* ABINIT/strfock
 !!
 !! NAME
@@ -2449,13 +2328,6 @@ end subroutine bare_vqg
 !! FUNCTION
 !! Compute Fock energy contribution to stress tensor (Cartesian coordinates).
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FJ)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
 !! INPUTS
 !!  gsqcut=cutoff value on $G^2$ for (large) sphere inside fft box.
 !!  $gsqcut=(boxcut^2)*ecut/(2._dp*(\pi^2))$
@@ -2463,7 +2335,7 @@ end subroutine bare_vqg
 !!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
 !!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
 !!  hyb_range_fock=hybrid range for separation
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nkpt_bz= number of k points in the BZ
@@ -2487,23 +2359,9 @@ end subroutine bare_vqg
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
-
 subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock,mpi_enreg,nfft,ngfft,&
 &                  nkpt_bz,rhog,ucvol,qphon,&
 &                 rhog2) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'strfock'
-!End of the abilint section
 
  implicit none
 
@@ -2644,8 +2502,6 @@ subroutine strfock(gprimd,gsqcut,fockstr,hyb_mixing,hyb_mixing_sr,hyb_range_fock
 
 end subroutine strfock
 !!***
-
-
 
 end module m_fock
 !!***

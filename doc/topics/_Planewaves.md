@@ -2,6 +2,7 @@
 description: How to perform numerically precise calculations with planewaves or projector- augmented waves and pseudopotentials
 authors: FJ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
 This page gives hints on how to perform numerically precise calculations with planewaves or projector-
 augmented waves and pseudopotentials with the ABINIT package.
@@ -44,7 +45,7 @@ pseudopotential calculation. They are described in a specific page
 
 ## Tutorials
 
-* [[lesson:base2|The lesson 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
-* [[lesson:base3|The lesson 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
-* The first lesson on the [[lesson:paw1|the projector-augmented wave]] technique.
+* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [[tutorial:base3|The tutorial 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
+* The first tutorial on the [[tutorial:paw1|the projector-augmented wave]] technique.
 

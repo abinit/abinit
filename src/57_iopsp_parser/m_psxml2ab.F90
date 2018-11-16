@@ -4,7 +4,7 @@
 !! m_psxml2ab
 !!
 !! FUNCTION
-!!  From a SIESTA XML format pseudopotential file 
+!!  From a SIESTA XML format pseudopotential file
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
@@ -18,8 +18,8 @@
 !! psxml  = pseudopotential data structure
 !!
 !! OUTPUT
-!! psphead = psp information structure 
-!! atmsymb = atomic symbol 
+!! psphead = psp information structure
+!! atmsymb = atomic symbol
 !!
 !! PARENTS
 !!      inpspheads,pspatm_abinit
@@ -37,6 +37,15 @@
 
 module m_psxml2ab
 
+ use defs_basis
+ use defs_datatypes
+ use m_abicore
+ use m_errors
+#ifdef HAVE_PSML
+ use m_psml
+ use m_psml_api
+#endif
+
  use m_fstrings,     only : yesno
 
 implicit none
@@ -49,22 +58,7 @@ public :: psxml2abheader
 
 CONTAINS
 
-
 subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
-
- use defs_basis
- use defs_datatypes
- use m_profiling_abi
- use m_errors
- use m_psml
- use m_psml_api
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psxml2abheader'
- use interfaces_14_hidewrite
-!End of the abilint section
 
  implicit none
 
@@ -105,7 +99,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
  psphead%pspdat = MODULO(dy,100) * 10000 + dm * 100 + dd
 
 10 continue
- 
+
  call ps_PseudoAtomSpec_Get(psxml, &
 &  atomic_symbol=atmsymb, atomic_label=label, &
 &  atomic_number=psphead%znuclpsp, z_pseudo=psphead%zionpsp, &
@@ -201,7 +195,7 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
        psphead%nproj(il) = psphead%nproj(il) + 1
      end do
    else
-     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors') 
+     MSG_BUG('Your psml potential should have either scalar- or non- relativistic projectors')
    end if
  end if
 
@@ -380,40 +374,10 @@ subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
 end subroutine psxml2abheader
 !!***
 ! end test on compiling with LIBPSML enabled
-#endif   
+#endif
 
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/psxml2abfull
-!! NAME
-!! psxml2abfull
-!!
-!! FUNCTION
-!!  read in all data from psml file. Call header reader first, then local potential and NL projectors
-!!  
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (MJV).
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! INPUTS
-!!   str = string with error message
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-
-
-
-!!***
 end module m_psxml2ab
+!!***
 
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/psml_die
@@ -441,15 +405,10 @@ end module m_psxml2ab
 !! CHILDREN
 !!
 !! SOURCE
+
 subroutine psml_die(str)
+
   use m_errors
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'psml_die'
-!End of the abilint section
-
   implicit none
 
   character(len=*), intent(in) :: str

@@ -1,9 +1,11 @@
 ---
-description: How to calculate electric fields gradients
+description: How to calculate electric fields gradients and Mossbauer Fermi contact interaction
 authors: JZ
 ---
+<!--- This is the source file for this topics. Can be edited. -->
 
-This page gives hints on how to calculate electric fields gradients with the ABINIT package.
+This page gives hints on how to calculate electric fields gradients 
+and Mossbauer Fermi contact interaction with the ABINIT package.
 
 ## Introduction
 
@@ -98,5 +100,5 @@ on a variety of compounds.
 
 ## Tutorials
 
-* [[lesson:nuc|The lesson on the properties of the nuclei]] shows how to compute the electric field gradient. Prerequisite: PAW1.
+* [[tutorial:nuc|The tutorial on the properties of the nuclei]] shows how to compute the electric field gradient and Mossbauer Fermi contact interaction. Prerequisite: PAW1.
 

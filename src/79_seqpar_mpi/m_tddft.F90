@@ -31,7 +31,7 @@ module m_tddft
 
  use defs_basis
  use defs_abitypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_errors
  use m_wffile
@@ -41,8 +41,12 @@ module m_tddft
 #endif
 
  use m_io_tools, only : get_unit
+ use m_symtk,    only : matr3inv
  use m_time,     only : timab
  use m_fftcore,  only : sphereboundary
+ use m_spacepar, only : hartre
+ use m_mpinfo,   only : proc_distrb_cycle
+ use m_fft,      only : fourwf, fourdp
 
  implicit none
 
@@ -128,17 +132,6 @@ contains
  subroutine tddft(cg,dtfil,dtset,eigen,etotal,gmet,gprimd,gsqcut,&
 &  kg,kxc,mband,mgfftdiel,mkmem,mpi_enreg,mpw,nfft,ngfftdiel,nkpt,nkxc,&
 &  npwarr,nspinor,nsppol,occ,ucvol,wffnew)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tddft'
- use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_53_ffts
- use interfaces_56_xc
-!End of the abilint section
 
  implicit none
 
@@ -251,7 +244,7 @@ contains
 &   'The computation of excited states using TDDFT is only allowed',ch10,&
 &   'with nkpt=1, kpt=(0 0 0), but the following values are input:',ch10,&
 &   'nkpt=',nkpt,', kpt=',dtset%kptns(1:3,1),'.',ch10,&
-&   'Action : in the input file, set nkpt to 1 and kpt to 0 0 0 ,',ch10,&
+&   'Action: in the input file, set nkpt to 1 and kpt to 0 0 0 ,',ch10,&
 &   'or change iscf.'
    MSG_ERROR(message)
  end if
@@ -260,7 +253,7 @@ contains
    write(message, '(a,a,a,a,a,a,a)' )&
 &   'The computation of excited states using TDDFT is restricted',ch10,&
 &   'for the time being to nspinor=1, while input nspinor=2.',ch10,&
-&   'Action : if you want to compute excited states within TDDFT,',ch10,&
+&   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set nsppol to 1 in the input file. Otherwise, do not use iscf=-1.'
    MSG_ERROR(message)
  end if
@@ -271,7 +264,7 @@ contains
 &   'The computation of excited states using TDDFT in the spin',ch10,&
 &   'polarized case for the time being cannot be used with ixc=20',ch10,&
 &   'or ixc=22',ch10,&
-&   'Action : if you want to compute excited states within TDDFT,',ch10,&
+&   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set ixc different from 20 or 22. Otherwise, do not use iscf=-1',ch10,&
 &   'with nsppol=2.'
    MSG_ERROR(message)
@@ -282,7 +275,7 @@ contains
    write(message, '(a,a,a,i2,a,a,a,a,a)' )&
 &   'The computation of excited states using TDDFT is only allowed',ch10,&
 &   'with occopt=0, 1, or 2, while input occopt=',dtset%occopt,'.',ch10,&
-&   'Action : if you want to compute excited states within TDDFT,',ch10,&
+&   'Action: if you want to compute excited states within TDDFT,',ch10,&
 &   'set occopt=0, 1, or 2 in the input file. Otherwise, do not use iscf=-1.'
    MSG_ERROR(message)
  end if
@@ -736,21 +729,17 @@ contains
          cwavef(:,1:npw_k)=cg(:,1+(iband-1)*npw_k+(isppol-1)* (npw_k*nband_k(1)) : iband*npw_k+(isppol-1)*(npw_k*nband_k(1)))
 #endif
 
-!        DEBUG
 !        write(std_out,*)' iband : ',iband, ' isppol', isppol, '  -> index ', &
 !        &            istate,index_state(iband+(isppol-1)*nband_k(1))
-!        ENDDEBUG
 
          tim_fourwf=14
 !        This call should be made by master, and then the results be sent to the other procs
 
          call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &         istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&         0,dtset%paral_kgb,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&         0,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
 
-!        DEBUG
 !        write(std_out,'(a,i5)')' After Fourier proc ',me_loc
-!        ENDDEBUG
 
 !        Fix the phase, and checks that the wavefunction is real
 !        (should be merged with routine fxphas)
@@ -1079,7 +1068,7 @@ contains
 !      call wrtout(std_out,message,'PERS')
 !      ENDDEBUG
 
-       call fourdp(cplex,rhog,work,-1,mpi_enreg,nfftdiel,ngfftdiel,dtset%paral_kgb,0)
+       call fourdp(cplex,rhog,work,-1,mpi_enreg,nfftdiel,1,ngfftdiel,0)
 
 !      DEBUG
 !      write(message,'(a,i3)')'Before Hartree, on proc ',me_loc

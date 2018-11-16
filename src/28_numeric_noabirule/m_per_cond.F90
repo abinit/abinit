@@ -7,7 +7,7 @@
 !!  This module contains basic tools for periodic conditions traitement.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2018 ABINIT group (??)
+!! Copyright (C) 2008-2018 ABINIT group (MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,11 +31,11 @@
 MODULE m_per_cond
 
  use defs_basis
- use m_profiling_abi
+ use m_abicore
 
  implicit none
 
- private 
+ private
 
  public :: per_cond   ! Return an arithmetic progression
  public :: per_dist   ! Return the distance on a periodic grid
@@ -44,7 +44,7 @@ MODULE m_per_cond
  interface per_cond
   module procedure per_cond_re
   module procedure per_cond_int
-  module procedure per_cond_int3 
+  module procedure per_cond_int3
  end interface per_cond
 
  interface per_dist
@@ -62,15 +62,15 @@ CONTAINS  !===========================================================
 !!
 !! FUNCTION
 !! Given a 2d-array of integer initial(3,nb), it calulates the values
-!! of any of the array in the periodic orthogonal discretized 
+!! of any of the array in the periodic orthogonal discretized
 !! grid begining in 0 and of lengths dim_grid(3)
-!! 
+!!
 !!
 !! INPUTS
 !!  initial(1:3,0:nb-1)=initial point
 !!  dim_grid(1:3)= box lengths
-!!  nb= dimension 
-!!  metric=is the factor scale of the box axes 
+!!  nb= dimension
+!!  metric=is the factor scale of the box axes
 !!
 !! OUTPUT
 !!  per_cond_re= initial in the box
@@ -81,13 +81,6 @@ function per_cond_re(nb,initial,dim_grid,metric)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_cond_re'
-!End of the abilint section
-
  integer,intent(in) :: nb
  integer,intent(in) :: dim_grid(3)
  integer :: per_cond_re(3,0:nb-1)
@@ -103,7 +96,7 @@ function per_cond_re(nb,initial,dim_grid,metric)
    per_cond_re(ii,jj)=modulo(nint(initial(ii,jj)/metric(ii)),dim_grid(ii))
   end do
  end do
- 
+
 
 end function per_cond_re
 !!***
@@ -114,15 +107,15 @@ end function per_cond_re
 !!
 !! FUNCTION
 !! Given a 2d-array of integer initial(3,nb), it calulates the values
-!! of any of the array in the periodic orthogonal discretized 
+!! of any of the array in the periodic orthogonal discretized
 !! grid begining in 0 and of lengths dim_grid(3)
-!! 
+!!
 !!
 !! INPUTS
 !!  initial(1:3,0:nb-1)=initial point
 !!  dim_grid(1:3)= box lengths
-!!  nb= dimension 
-!!  metric=is the factor scale of the box axes 
+!!  nb= dimension
+!!  metric=is the factor scale of the box axes
 !!
 !! OUTPUT
 !!  per_cond_int= initial in the box
@@ -133,13 +126,6 @@ function per_cond_int(nb,initial,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_cond_int'
-!End of the abilint section
-
  integer,intent(in) :: nb
  integer,intent(in) :: dim_grid(3)
  integer :: per_cond_int(3,0:nb-1)
@@ -154,7 +140,7 @@ function per_cond_int(nb,initial,dim_grid)
    per_cond_int(ii,jj)=modulo(initial(ii,jj),dim_grid(ii))
   end do
  end do
- 
+
 
 end function per_cond_int
 !!***
@@ -165,15 +151,15 @@ end function per_cond_int
 !!
 !! FUNCTION
 !! Given a 2d-array of integer initial(3,nb), it calulates the values
-!! of any of the array in the periodic orthogonal discretized 
+!! of any of the array in the periodic orthogonal discretized
 !! grid begining in 0 and of lengths dim_grid(3)
-!! 
+!!
 !!
 !! INPUTS
 !!  initial(1:3,0:nb-1)=initial point
 !!  dim_grid(1:3)= box lengths
-!!  nb= dimension 
-!!  metric=is the factor scale of the box axes 
+!!  nb= dimension
+!!  metric=is the factor scale of the box axes
 !!
 !! OUTPUT
 !!  per_cond_int3= initial in the box
@@ -184,13 +170,6 @@ function per_cond_int3(initial,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_cond_int3'
-!End of the abilint section
-
  integer,intent(in) :: dim_grid(3)
  integer :: per_cond_int3(3)
  integer,intent(in) :: initial(3)
@@ -215,15 +194,15 @@ end function per_cond_int3
 !! FUNCTION
 !! Given a two 2d-array of integer initA(3,nb),initB(3,nb) in the
 !! periodic grid, it calulates the values
-!! of any of the distances in the periodic orthogonal discretized 
+!! of any of the distances in the periodic orthogonal discretized
 !! grid begining in 0 and of lengths dim_grid(3)
-!! 
+!!
 !!
 !! INPUTS
 !!  initA(1:3,0:nb-1)=initial point
 !!  initB(1:3,0:nb-1)=initial point
 !!  dim_grid(1:3)= box lengths
-!!  nb= dimension 
+!!  nb= dimension
 !!
 !! OUTPUT
 !!  per_dist_int= initial in the box
@@ -234,13 +213,6 @@ function per_dist_int(nb,initA,initB,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_dist_int'
-!End of the abilint section
-
  integer,intent(in) :: nb
  integer,intent(in) :: dim_grid(3)
  integer :: per_dist_int(3,0:nb-1)
@@ -257,7 +229,7 @@ function per_dist_int(nb,initA,initB,dim_grid)
    per_dist_int(ii,jj) = minval((/ bo,dim_grid(ii)-bo/))
   end do
  end do
- 
+
 
 end function per_dist_int
 !!***
@@ -270,9 +242,9 @@ end function per_dist_int
 !! FUNCTION
 !! Given a two scalars of integer initA,initB in the
 !! periodic grid, it calulates the values
-!! of any of the distances in the periodic orthogonal discretized 
+!! of any of the distances in the periodic orthogonal discretized
 !! grid begining in 0 and of lengths dim_grid
-!! 
+!!
 !!
 !! INPUTS
 !!  initA=initial point
@@ -288,13 +260,6 @@ function per_dist_int1(initA,initB,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_dist_int1'
-!End of the abilint section
-
  integer,intent(in) :: dim_grid,initA,initB
  integer :: per_dist_int1
 
@@ -305,7 +270,7 @@ function per_dist_int1(initA,initB,dim_grid)
 ! *********************************************************************
  bo = abs(initA-initB)
  per_dist_int1 = minval((/ bo,dim_grid-bo/))
- 
+
 end function per_dist_int1
 !!***
 
@@ -317,9 +282,9 @@ end function per_dist_int1
 !! FUNCTION
 !! Given a two 3d-vector of integer initA(3),initB(3) in the
 !! periodic grid, it calulates the values
-!! of any of the distances in the periodic orthogonal discretized 
+!! of any of the distances in the periodic orthogonal discretized
 !! grid begining in 0 and of lengths dim_grid(3)
-!! 
+!!
 !!
 !! INPUTS
 !!  initA(1:3)=initial point
@@ -335,13 +300,6 @@ function per_dist_int3(initA,initB,dim_grid)
 
 !Arguments ------------------------------------
 !scalars
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'per_dist_int3'
-!End of the abilint section
-
  integer,intent(in) :: dim_grid(3)
  integer :: per_dist_int3(3)
  integer,intent(in) :: initA(3),initB(3)
@@ -355,7 +313,6 @@ function per_dist_int3(initA,initB,dim_grid)
   bo = abs(initA(ii)-initB(ii))
   per_dist_int3(ii) = minval((/ bo,dim_grid(ii)-bo/))
  end do
- 
 
 end function per_dist_int3
 !!***

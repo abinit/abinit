@@ -7,7 +7,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf)
+!!  Copyright (C) 2008-2018 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,7 @@ module m_screening_driver
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_profiling_abi
+ use m_abicore
  use m_xmpi
  use m_xomp
  use m_errors
@@ -50,9 +50,8 @@ module m_screening_driver
  use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
- use m_mpinfo,        only : destroy_mpi_enreg
- use m_crystal,       only : crystal_free, crystal_t, crystal_print
- use m_crystal_io,    only : crystal_ncwrite, crystal_from_hdr
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_crystal,       only : crystal_t, crystal_print
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
                              ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
@@ -66,11 +65,11 @@ module m_screening_driver
  use m_spectra,       only : spectra_t, spectra_write, spectra_repr, spectra_free, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
- use m_wfd,           only : wfd_init, wfd_free,  wfd_nullify, wfd_print, wfd_t, wfd_rotate, wfd_test_ortho,&
-                             wfd_read_wfk, wfd_test_ortho, wfd_copy, wfd_change_ngfft
+ use m_fft,           only : fourdp
+ use m_wfd,           only : wfd_init, wfd_t, wfd_copy, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
  use m_io_kss,        only : make_gvec_kss
- use m_chi0,          only : output_chi0sumrule
+ use m_chi0tk,        only : output_chi0sumrule
  use m_pawang,        only : pawang_type
  use m_pawrad,        only : pawrad_type
  use m_pawtab,        only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -78,11 +77,22 @@ module m_screening_driver
  use m_paw_ij,        only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,     only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,      only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy,&
-&                            pawrhoij_free, symrhoij, pawrhoij_get_nspden
+&                            pawrhoij_free, pawrhoij_symrhoij, pawrhoij_inquire_dim
  use m_pawdij,        only : pawdij, symdij_all
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,       only : pawpwff_t, pawpwff_init, pawpwff_free
  use m_pawfgr,        only : pawfgr_type, pawfgr_init, pawfgr_destroy
+ use m_paw_sphharm,   only : setsym_ylm
+ use m_paw_onsite,    only : pawnabla_init
+ use m_paw_nhat,      only : nhatgrid,pawmknhat
+ use m_paw_denpot,    only : pawdenpot
+ use m_paw_init,      only : pawinit,paw_gencond
+ use m_paw_tools,     only : chkpawovlp,pawprt
+ use m_chi0,          only : cchi0, cchi0q0, chi0q0_intraband
+ use m_setvtr,        only : setvtr
+ use m_mkrho,         only : prtrhomxmn
+ use m_pspini,        only : pspini
+ use m_paw_correlations, only : pawpuxinit
 
  implicit none
 
@@ -145,7 +155,7 @@ contains
 !!
 !! CHILDREN
 !!      apply_scissor,calc_rpa_functional,cchi0,cchi0q0,chi0_bksmask
-!!      chi0q0_intraband,chi_free,chkpawovlp,coeffs_gausslegint,crystal_free
+!!      chi0q0_intraband,chi_free,chkpawovlp,coeffs_gausslegint
 !!      destroy_mpi_enreg,ebands_copy,ebands_free,ebands_update_occ
 !!      em1params_free,energies_init,fourdp,get_gftt,getph,gsph_free,hdr_free
 !!      hscr_free,hscr_io,init_distribfft_seq,initmpi_seq,kmesh_free,kxc_ada
@@ -157,7 +167,7 @@ contains
 !!      pawpuxinit,pawpwff_free,pawpwff_init,pawrhoij_alloc,pawrhoij_copy
 !!      pawrhoij_free,pawtab_get_lsize,pawtab_print,print_arr,print_ngfft
 !!      prtrhomxmn,pspini,random_stopping_power,rdgw,rdqps,rotate_fft_mesh
-!!      setsymrhoij,setup_screening,setvtr,spectra_free,spectra_repr
+!!      setsym_ylm,setup_screening,setvtr,spectra_free,spectra_repr
 !!      spectra_write,symdij,symdij_all,test_charge,timab,vcoul_free
 !!      wfd_change_ngfft,wfd_copy,wfd_free,wfd_init,wfd_mkrho,wfd_print
 !!      wfd_read_wfk,wfd_rotate,wfd_test_ortho,write_screening,wrtout
@@ -166,23 +176,6 @@ contains
 !! SOURCE
 
 subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screening'
- use interfaces_14_hidewrite
- use interfaces_51_manage_mpi
- use interfaces_53_ffts
- use interfaces_64_psp
- use interfaces_65_paw
- use interfaces_67_common
- use interfaces_69_wfdesc
- use interfaces_70_gw
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -201,7 +194,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !scalars
  integer,parameter :: tim_fourdp4=4,NOMEGA_PRINTED=15,master=0
  integer :: spin,ik_ibz,my_nbks
- integer :: choice,cplex,dim_kxcg,dim_wing,ount,omp_ncpus
+ integer :: choice,cplex,cplex_rhoij,dim_kxcg,dim_wing,ount,omp_ncpus
  integer :: fform_chi0,fform_em1,gnt_option,iat,ider,idir,ierr,band
  integer :: ifft,ii,ikbz,ikxc,initialized,iomega,ios,ipert
  integer :: iqibz,iqcalc,is_qeq0,isym,izero,ifirst,ilast
@@ -367,9 +360,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,Cryst%xred)
 
    ABI_DT_MALLOC(Pawrhoij,(Cryst%natom))
-   nspden_rhoij=pawrhoij_get_nspden(Dtset%nspden,Dtset%nspinor,Dtset%pawspnorb)
-   call pawrhoij_alloc(Pawrhoij,Dtset%pawcpxocc,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
-&   Cryst%typat,pawtab=Pawtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
+&                      Cryst%typat,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays stored in Pawinit
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
@@ -402,7 +396,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !  TODO solve problem with memory leak and clean this part as well as the associated flag
    call pawnabla_init(Psps%mpsang,Cryst%ntypat,Pawrad,Pawtab)
 
-   call setsymrhoij(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
+   call setsym_ylm(gprimd,Pawang%l_max-1,Cryst%nsym,Dtset%pawprtvol,rprimd,Cryst%symrec,Pawang%zarot)
 
 !  * Initialize and compute data for LDA+U.
 !  paw_dmft%use_dmft=dtset%usedmft
@@ -417,10 +411,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
 
-   ! Re-symmetrize symrhoij.
+   ! Re-symmetrize rhoij.
 !  this call leads to a SIGFAULT, likely some pointer is not initialized correctly
    choice=1; optrhoij=1; ipert=0; idir=0
-!  call symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
+!  call pawrhoij_symrhoij(Pawrhoij,Pawrhoij,choice,Cryst%gprimd,Cryst%indsym,ipert,Cryst%natom,&
 !  &             Cryst%nsym,Cryst%ntypat,optrhoij,Pawang,Dtset%pawprtvol,Pawtab,&
 !  &             Cryst%rprimd,Cryst%symafm,Cryst%symrec,Cryst%typat)
 !
@@ -653,7 +647,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
 
- call wfd_print(Wfd,mode_paral='PERS')
+ call wfd%print(mode_paral='PERS')
 !FIXME: Rewrite the treatment of use_tr branches in cchi0 ...
 !Use a different nbvw for each spin.
 !Now use_tr means that one can use time-reversal symmetry.
@@ -661,21 +655,21 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 !==================================================
 !==== Read KS band structure from the KSS file ====
 !==================================================
- call wfd_read_wfk(Wfd,wfk_fname,iomode_from_fname(wfk_fname))
+ call wfd%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
 
  if (Dtset%pawcross==1) then
    call wfd_copy(Wfd,Wfdf)
-   call wfd_change_ngfft(Wfdf,Cryst,Psps,ngfftf)
+   call wfdf%change_ngfft(Cryst,Psps,ngfftf)
  end if
 
  ! This test has been disabled (too expensive!)
- if (.False.) call wfd_test_ortho(Wfd,Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
+ if (.False.) call wfd%test_ortho(Cryst,Pawtab,unit=ab_out,mode_paral="COLL")
 
  call timab(316,2,tsec) ! screening(wfs
  call timab(319,1,tsec) ! screening(1)
 
  if (Cryst%nsym/=Dtset%nsym .and. Dtset%usepaw==1) then
-   MSG_ERROR('Cryst%nsym/=Dtset%nsym, check pawinit and symrhoij')
+   MSG_ERROR('Cryst%nsym/=Dtset%nsym, check pawinit and pawrhoij_symrhoij')
  end if
 
 ! Get the FFT index of $ (R^{-1}(r-\tau)) $
@@ -769,7 +763,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! === Update only the wfg treated with GW ===
    ! For PAW update and re-symmetrize cprj in the full BZ, TODO add rotation in spinor space
-   if (nscf/=0) call wfd_rotate(Wfd,Cryst,m_lda_to_qp)
+   if (nscf/=0) call wfd%rotate(Cryst,m_lda_to_qp)
 
    ABI_FREE(m_lda_to_qp)
    call timab(304,2,tsec)
@@ -813,9 +807,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(rhor,(nfftf,Dtset%nspden))
  ABI_MALLOC(taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
- call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,rhor)
+ call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,rhor)
  if (Dtset%usekden==1) then
-   call wfd_mkrho(Wfd,Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,taur,optcalc=1)
+   call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,taur,optcalc=1)
  end if
 
  call timab(305,2,tsec) ! screening(densit
@@ -849,7 +843,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nkxc1=0
    ABI_DT_MALLOC(Paw_an,(Cryst%natom))
    call paw_an_nullify(Paw_an)
-   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,Dtset%nspden,&
+   call paw_an_init(Paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
 &   cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=0)
 
    nzlmopt=-1; option=0; compch_sph=greatest_real
@@ -887,9 +881,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ABI_MALLOC(rhog,(2,nfftf))
  ABI_MALLOC(taug,(2,nfftf*Dtset%usekden))
- call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp4)
+ call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp4)
  if(Dtset%usekden==1)then
-   call fourdp(1,taug,taur(:,1),-1,MPI_enreg_seq,nfftf,ngfftf,Dtset%paral_kgb,tim_fourdp4)
+   call fourdp(1,taug,taur(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp4)
  end if
 
 !The following steps have been gathered in the setvtr routine:
@@ -1227,7 +1221,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
-         NCF_CHECK(crystal_ncwrite(cryst, unt_susc))
+         NCF_CHECK(cryst%ncwrite(unt_susc))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_susc))
 #endif
        else
@@ -1450,7 +1444,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
-         NCF_CHECK(crystal_ncwrite(cryst, unt_em1))
+         NCF_CHECK(cryst%ncwrite(unt_em1))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_em1))
 #endif
        else
@@ -1521,7 +1515,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if (Dtset%pawcross==1) then
      call paw_pwaves_lmn_free(Paw_onsite)
      Wfdf%bks_comm = xmpi_comm_null
-     call wfd_free(Wfdf)
+     call wfdf%free()
    end if
  end if
 
@@ -1533,10 +1527,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(ktabrf)
  ABI_DT_FREE(Paw_onsite)
 
- call wfd_free(Wfd)
+ call wfd%free()
  call kmesh_free(Kmesh)
  call kmesh_free(Qmesh)
- call crystal_free(Cryst)
+ call cryst%free()
  call gsph_free(Gsph_epsG0)
  call gsph_free(Gsph_wfn)
  call vcoul_free(Vcp)
@@ -1603,16 +1597,6 @@ end subroutine screening
 
 subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,Pawtab,&
 & ngfft_gw,Hdr_wfk,Hdr_out,Cryst,Kmesh,Qmesh,KS_BSt,Ltg_q,Gsph_epsG0,Gsph_wfn,Vcp,Ep,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_screening'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1760,7 +1744,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    MSG_WARNING(msg)
  end if
 
- call crystal_from_hdr(Cryst,Hdr_wfk,timrev,remove_inv)
+ cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
  call crystal_print(Cryst,mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===
@@ -2232,15 +2216,6 @@ end subroutine setup_screening
 
 subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur,ierr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi0_bksmask'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: my_rank,nprocs,nbvw,nbcw
@@ -2358,6 +2333,399 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
  end select
 
 end subroutine chi0_bksmask
+!!***
+
+!!****f* m_screening_driver/random_stopping_power
+!! NAME
+!! random_stopping_power
+!!
+!! FUNCTION
+!! Calculate the electronic random stopping power
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      screening
+!!
+!! CHILDREN
+!!      get_bz_item,spline,splint,wrtout
+!!
+!! SOURCE
+
+subroutine random_stopping_power(iqibz,npvel,pvelmax,Ep,Gsph_epsG0,Qmesh,Vcp,Cryst,Dtfil,epsm1,rspower)
+
+ use m_splines
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)                    :: iqibz,npvel
+ real(dp),intent(in)                   :: pvelmax(3)
+
+ type(em1params_t),intent(in) :: Ep
+ type(gsphere_t),intent(in)            :: Gsph_epsG0
+ type(kmesh_t),intent(in)              :: Qmesh
+ type(vcoul_t),intent(in)              :: Vcp
+ type(crystal_t),intent(in)            :: Cryst
+ type(Datafiles_type),intent(in)       :: Dtfil
+
+ complex(gwpc),intent(in)              :: epsm1(Ep%npwe,Ep%npwe,Ep%nomega)
+
+ real(dp),intent(inout)                :: rspower(npvel)
+
+!Local variables ------------------------------
+ integer :: ipvel,ig
+ integer :: iq_bz,iq_ibz,isym_q,itim_q
+ integer :: iomega,iomegap,nomega_re
+ integer :: unt_rsp
+ integer,allocatable :: iomega_re(:)
+
+ real(dp),parameter :: zp=1.0_dp              ! Hard-coded charge of the impinging particle
+ real(dp) :: omega_p
+ real(dp) :: im_epsm1_int(1)
+ real(dp) :: qbz(3),qpgcart(3),qpgred(3)
+ real(dp) :: pvel(3,npvel),pvel_norm(npvel)
+ real(dp) :: ypp_i(Ep%nomega)
+ real(dp) :: vcoul(Ep%npwe)
+ real(dp),allocatable :: im_epsm1_diag_qbz(:,:),tmp_data(:)
+ real(dp),allocatable :: omega_re(:)
+
+ character(len=500)     :: msg
+ character(len=fnlen+4) :: fname
+
+!************************************************************************
+
+ !
+ ! First set up the velocities array from the input variables npvel and pvelmax(3)
+ ! Remember pvelmax is in Cartesian coordinates and so is pvel
+ do ipvel=1,npvel
+   pvel(:,ipvel)    = REAL(ipvel,dp) / REAL(npvel,dp) * pvelmax(:)
+   pvel_norm(ipvel) = SQRT( SUM( pvel(:,ipvel)**2 ) )
+ enddo
+ !
+ ! Select the purely real frequency in Ep%omega
+ nomega_re=0
+ do iomega=1,Ep%nomega
+   if( AIMAG(Ep%omega(iomega)) < 1.0e-4_dp ) then
+     nomega_re=nomega_re+1
+   endif
+ enddo
+ ABI_ALLOCATE(omega_re,(nomega_re))
+ ABI_ALLOCATE(iomega_re,(nomega_re))
+ ABI_ALLOCATE(im_epsm1_diag_qbz,(Ep%npwe,Ep%nomega))
+ ABI_ALLOCATE(tmp_data,(Ep%nomega))
+
+ iomegap=0
+ do iomega=1,Ep%nomega
+   if( AIMAG(Ep%omega(iomega)) < 1.0e-4_dp ) then
+     iomegap=iomegap+1
+     iomega_re(iomegap)=iomega
+     omega_re(iomegap)=REAL(Ep%omega(iomega),dp)
+   endif
+ enddo
+
+ !
+ ! Loop over all the q-points in the full Brillouin zone and select only the
+ ! ones that corresponds to the correct q-point in the irreducible wedge we are
+ ! currently treating (index iqibz)
+ do iq_bz=1,Qmesh%nbz
+
+   ! Perform the check and obtain the symmetry information
+   call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
+   if( iqibz /= iq_ibz ) cycle
+
+   ! Apply the symmetry operation to the diagonal of epsm1
+   do iomega=1,nomega_re
+     do ig=1,Ep%npwe
+       im_epsm1_diag_qbz(Gsph_epsG0%rottb(ig,itim_q,isym_q),iomega)= AIMAG( epsm1(ig,ig,iomega_re(iomega)) )
+     enddo
+   enddo
+   ! Apply the symmetry operation to the Coulomb interaction
+   do ig=1,Ep%npwe
+     vcoul(Gsph_epsG0%rottb(ig,itim_q,isym_q))=Vcp%vc_sqrt(ig,iqibz)**2
+   enddo
+
+   !
+   ! Sum over G vectors
+   do ig=1,Ep%npwe
+     !
+     ! Loop over velocities
+     do ipvel=1,npvel
+
+       qpgred(:) = qbz(:) + Gsph_epsG0%gvec(:,ig)
+       ! Transform q + G from reduced to cartesian with the symmetry operation
+       qpgcart(:) = two_pi * Cryst%gprimd(:,1) * qpgred(1) &
+&                 + two_pi * Cryst%gprimd(:,2) * qpgred(2) &
+&                 + two_pi * Cryst%gprimd(:,3) * qpgred(3)
+
+       ! omega_p = ( q + G ) . v
+       omega_p =  DOT_PRODUCT( qpgcart(:) , pvel(:,ipvel) )
+
+       ! Check that the calculated frequency omega_p is within the omega
+       ! range of epsm1 and thus that the interpolation will go fine
+       if ( ABS(omega_p) > omega_re(nomega_re) ) then
+         write(msg,'(a,e16.4,2a,e16.4)') ' freqremax is currently ',omega_re(nomega_re),ch10,&
+&                                        ' increase it to at least ',omega_p
+         MSG_WARNING(msg)
+       endif
+
+       ! Perform the spline interpolation to obtain epsm1 at the desired omega = omega_p
+       tmp_data = im_epsm1_diag_qbz(ig,:)
+
+       call spline( omega_re, tmp_data, nomega_re, 1.0e+32_dp, 1.0e+32_dp, ypp_i)
+       call splint( nomega_re, omega_re, tmp_data, ypp_i, 1, (/ ABS(omega_p) /),  im_epsm1_int )
+
+       !
+       ! Apply the odd parity of Im epsm1 in  omega to recover the causal response function
+       if (omega_p<zero) im_epsm1_int(1)=-im_epsm1_int(1)
+
+       !
+       ! Calculate 4 * pi / |q+G|**2 * omega_p * Im{ epsm1_GG(q,omega_p) }
+       !
+       im_epsm1_int(1) = omega_p * vcoul(ig) * im_epsm1_int(1)
+
+       ! Accumulate the final result without the prefactor
+       ! (It will be included at the very end)
+       rspower(ipvel) = rspower(ipvel) + im_epsm1_int(1)
+
+     end do ! end of velocity loop
+   end do ! end G-loop
+
+ enddo ! end of q loop in the full BZ
+
+ ! If it is the last q, write down the result in the main output file and in a
+ ! separate file _RSP (for Random Stopping Power)
+ if (iqibz == Qmesh%nibz ) then
+
+   ! Multiply by the prefactors
+   ! Note that this expression differs from Eq. (3.11) in Campillo PRB 58, 10307 (1998) [[cite:Campillo1998]].
+   ! A factor one half is missing in the paper.
+   rspower(:) = - zp**2 / ( Cryst%ucvol * Qmesh%nbz * pvel_norm(:) ) * rspower(:)
+
+   write(msg,'(2a)')         ch10,' ==== Random stopping power along Cartesian direction  === '
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a,3(f12.4,2x),a)') ' ====  ',pvelmax(:),'===='
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a)')               '#  |v| (a.u.) , RSP (a.u.) '
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   do ipvel=1,npvel
+     write(msg,'(f16.8,4x,f16.8)') pvel_norm(ipvel),rspower(ipvel)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   enddo
+   write(msg,'(2a)')              ' ========================================================= ',ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+
+   fname=TRIM(Dtfil%filnam_ds(4))//'_RSP'
+   if (open_file(fname,msg,newunit=unt_rsp,status='unknown',form='formatted') /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   write(msg,'(a)')               '# ==== Random stopping power along Cartesian direction  === '
+   call wrtout(unt_rsp,msg,'COLL')
+   write(msg,'(a,3(f12.4,2x))')   '# ====  ',pvelmax(:)
+   call wrtout(unt_rsp,msg,'COLL')
+   write(msg,'(a)')               '#  |v| (a.u.) , RSP (a.u.) '
+   call wrtout(unt_rsp,msg,'COLL')
+   do ipvel=1,npvel
+     write(msg,'(f16.8,4x,f16.8)') pvel_norm(ipvel),rspower(ipvel)
+     call wrtout(unt_rsp,msg,'COLL')
+   enddo
+   close(unt_rsp)
+ end if
+
+ ABI_DEALLOCATE(omega_re)
+ ABI_DEALLOCATE(iomega_re)
+ ABI_DEALLOCATE(im_epsm1_diag_qbz)
+ ABI_DEALLOCATE(tmp_data)
+
+end subroutine random_stopping_power
+!!***
+
+!!****f* m_screening_driver/calc_rpa_functional
+!! NAME
+!! calc_rpa_functional
+!!
+!! FUNCTION
+!!  Routine used to calculate the RPA approximation to the correlation energy
+!!  from the irreducible polarizability.
+!!
+!! INPUTS
+!!  iq=index of the q-point in the array Qmesh%ibz where epsilon^-1 has to be calculated
+!!  Ep<em1params_t>=Structure with parameters and dimensions related to the inverse dielectric matrix.
+!!  Pvc<vcoul_t>=Structure gathering data on the Coulombian interaction
+!!  Qmesh<kmesh_t>=Data type with information on the q-sampling
+!!  Dtfil<Datafiles_type)>=variables related to files
+!!  spaceComm=MPI communicator.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      screening
+!!
+!! CHILDREN
+!!      coeffs_gausslegint,wrtout,xginv,xheev,xmpi_sum_master
+!!
+!! SOURCE
+
+subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,spaceComm,ec_rpa)
+
+ use m_hide_lapack, only : xginv, xheev
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: iqcalc,iq,gwrpacorr,spaceComm
+ type(kmesh_t),intent(in) :: Qmesh
+ type(vcoul_t),intent(in) :: Pvc
+ type(Datafiles_type),intent(in) :: Dtfil
+ type(em1params_t),intent(in) :: Ep
+!arrays
+ real(dp),intent(in) :: gmet(3,3)
+ real(dp),intent(inout) :: ec_rpa(gwrpacorr)
+ complex(gwpc),intent(inout) :: chi0(Ep%npwe,Ep%npwe,Ep%nomega)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr
+ real(dp) :: ecorr
+ real(dp) :: lambda
+ logical :: qeq0
+ character(len=500) :: msg
+!arrays
+ real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
+ complex(gwpc),allocatable :: chi0_diag(:),chitmp(:,:)
+ real(gwpc),allocatable :: eig(:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+! initialize MPI data
+ master=0
+ rank   = xmpi_comm_rank(spaceComm)
+ nprocs = xmpi_comm_size(spaceComm)
+
+ !if (rank==master) then ! presently only master has chi0 in screening
+
+ ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff
+ qeq0=(normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0)
+
+ ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
+ ABI_ALLOCATE(zw,(Ep%nomegaei))
+ ABI_ALLOCATE(z,(Ep%nomegaei))
+ call coeffs_gausslegint(zero,one,z,zw,Ep%nomegaei)
+
+ ! Calculate Gauss-Legendre quadrature knots and weights for the lambda integration
+ ABI_ALLOCATE(zlw,(gwrpacorr))
+ ABI_ALLOCATE(zl,(gwrpacorr))
+ call coeffs_gausslegint(zero,one,zl,zlw,gwrpacorr)
+
+
+ ABI_ALLOCATE(chi0_diag,(Ep%npwe))
+ ABI_STAT_ALLOCATE(chitmp,(Ep%npwe,Ep%npwe), ierr)
+ ABI_CHECK(ierr==0, "out-of-memory in chitmp")
+
+ do io=2,Ep%nomega
+
+   if(gwrpacorr==1) then ! exact integration over the coupling constant
+
+     if(modulo(io-2,nprocs)/=rank) cycle ! distributing the workload
+
+     do ig2=1,Ep%npwe
+       do ig1=1,Ep%npwe
+         chitmp(ig1,ig2) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig2,iq) * chi0(ig1,ig2,io)
+       end do !ig1
+     end do !ig2
+     ABI_ALLOCATE(eig,(Ep%npwe))
+     call xheev('V','U',Ep%npwe,chitmp,eig)
+
+     do ig1=1,Ep%npwe
+       ec_rpa(:) = ec_rpa(:) &
+&         - zw(io-1) / ( z(io-1) * z(io-1) ) &
+&              * Qmesh%wt(iq) * (-log( 1.0_dp-eig(ig1) )  - eig(ig1) ) / (2.0_dp * pi )
+     end do
+     ABI_DEALLOCATE(eig)
+
+   else ! numerical integration over the coupling constant
+
+      if(modulo( (ilambda-1)+gwrpacorr*(io-2),nprocs)/=rank) cycle ! distributing the workload
+
+     do ilambda=1,gwrpacorr
+       lambda=zl(ilambda)
+       do ig1=1,Ep%npwe
+         chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq)**2 * chi0(ig1,ig1,io)
+       end do
+
+       do ig2=1,Ep%npwe
+         do ig1=1,Ep%npwe
+           chitmp(ig1,ig2) = - lambda * Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chi0(ig1,ig2,io)
+         end do !ig1
+         chitmp(ig2,ig2) = chitmp(ig2,ig2) + 1.0_dp
+       end do !ig2
+       call xginv(chitmp(:,:),Ep%npwe)
+       chitmp(:,:) = matmul( chi0(:,:,io) , chitmp(:,:) )
+
+       do ig1=1,Ep%npwe
+         chi0_diag(ig1) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig1,iq) * chitmp(ig1,ig1) - chi0_diag(ig1)
+       end do
+
+       do ig1=1,Ep%npwe
+         ec_rpa(ilambda) = ec_rpa(ilambda) &
+&           - zw(io-1) / ( z(io-1) * z(io-1) ) * Qmesh%wt(iq) * real(  chi0_diag(ig1) ) / (2.0_dp * pi )
+       end do
+
+     end do ! ilambda
+
+   end if ! exact or numerical integration over the coupling constant
+
+ end do ! io
+
+
+ ! Output the correlation energy when the last q-point to be calculated is reached
+ ! This would allow for a manual parallelization over q-points
+ if(iqcalc==Ep%nqcalc) then
+
+   call xmpi_sum_master(ec_rpa,master,spaceComm,ierr)
+
+   if(rank==master) then
+     ecorr = sum( zlw(:)*ec_rpa(:) )
+     if (open_file(dtfil%fnameabo_rpa, msg, newunit=unt) /=0) then
+       MSG_ERROR(msg)
+     end if
+     write(unt,'(a,(2x,f14.8))') '#RPA',ecorr
+     write(msg,'(2a,(2x,f14.8))') ch10,' RPA energy [Ha] :',ecorr
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     if(gwrpacorr>1) then
+       do ilambda=1,gwrpacorr
+         write(unt,'(i6,2x,f10.6,2x,e13.6)') ilambda,zl(ilambda),ec_rpa(ilambda)
+         write(msg,'(i6,2x,f10.6,2x,e13.6)') ilambda,zl(ilambda),ec_rpa(ilambda)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+       end do
+     end if
+     close(unt)
+   end if
+
+ end if
+
+ ABI_DEALLOCATE(chi0_diag)
+ ABI_DEALLOCATE(chitmp)
+ ABI_DEALLOCATE(zl)
+ ABI_DEALLOCATE(zlw)
+ ABI_DEALLOCATE(z)
+ ABI_DEALLOCATE(zw)
+
+ DBG_EXIT("COLL")
+
+end subroutine calc_rpa_functional
 !!***
 
 end module m_screening_driver

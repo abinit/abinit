@@ -19,13 +19,9 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
   "mod_prc_memory.F90",   
-  "moddiel_csrb.F90",
-  "newrho.F90",
-  "newvtr.F90",
-  "prcref.F90",
-  "prcref_PMA.F90",
-  "prcrskerker2.F90",  
-  "prcrskerker1.F90",  
-  "wvl_prcref.F90"]
+  "m_newrho.F90",
+  "m_newvtr.F90",
+  "m_prcref.F90",
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

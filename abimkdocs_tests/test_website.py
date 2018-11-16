@@ -29,6 +29,8 @@ class WebsiteTest(AbimkdocsTest):
         assert e.get("href") == "#internal_link" and e.text == "text"
         e = element("lesson:base1|base1")
         assert e.get("href") == "base1" and e.text == "base1"
+        e = element("tutorial:base1|base1")
+        assert e.get("href") == "base1" and e.text == "base1"
         # This requires howto_topic
         #e = element("topic_SelfEnergy|self-energy")
         #assert e.get("href") == "..//topics/SelfEnergy" and e.text == "self-energy"
@@ -60,6 +62,8 @@ class WebsiteTest(AbimkdocsTest):
         e = element("asr@anaddb")
         assert e.get("href") == "../variables/anaddb#asr" and e.text == "asr@anaddb"
         e = element("lesson:wannier90|w90")
+        assert e.get("href") == "wannier90" and e.text == "w90"
+        e = element("tutorial:wannier90|w90")
         assert e.get("href") == "wannier90" and e.text == "w90"
         e = element("help:abinit|Abinit help")
         assert e.get("href") == "../guide/abinit" and e.text == "Abinit help"
