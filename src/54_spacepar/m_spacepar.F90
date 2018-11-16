@@ -2174,7 +2174,6 @@ end subroutine setsym
 !!***
 
 #ifdef MR_DEV
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/hartredq.F90
 !! NAME
 !!  hartredq.F90

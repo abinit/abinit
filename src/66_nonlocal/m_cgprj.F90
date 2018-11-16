@@ -282,16 +282,15 @@ contains
      end if
 
 !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
-#ifdef MR_DEV
-     gprimddum=0.0_dp
+!MR tmp modi:
+     gprimddum=zero
      call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gprimddum,gx,&
 &     ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
 &     nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
-#else
-     call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
-&     ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
-&     nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
-#endif
+!     call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
+!&     ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
+!&     nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+!..........
 
 !    Transfer result to output variable cwaveprj
      if (cpopt==0) then
