@@ -982,7 +982,6 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
 end subroutine rho_norm_check
 !!***
 
-
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/chern_number
 !! NAME
@@ -1082,7 +1081,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
   integer :: ikg,ikpt,ikpti,ikptb,ikptbi,ikptg,ikptgi,isppol,itrs,job
   integer :: mcg1_k,my_nspinor,nband_k,ncpgr,nn,n1,n2,n3,npw_k,npw_kb,npw_kg,shiftbd
   real(dp) :: deltab,deltag
-  complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B,tprodA,tprodB
+  complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
   character(len=500) :: message
   !arrays
   integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
@@ -1155,46 +1154,44 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
   ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
   has_smat_indx(:,:,:)=.FALSE.
 
-  do adir = 1, 3
+  ! loop over kpts, assuming for now kptopt 3 or 4, nsppol = 1, nspinor = 1
+  ! and no parallelism, no symmorphic symmetry elements
 
-     IA = czero
-     IB = czero
+  cnum(:,:) = zero
+  do ikpt = 1, dtorbmag%fnkpt
+     
+     ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
+     
+     icprji = dtorbmag%cprjindex(ikpti,isppol)
+     
+     npw_k = npwarr(ikpti)
+     icg = dtorbmag%cgindex(ikpti,dtset%nsppol)
+     
+     ikg = dtorbmag%fkgindex(ikpt)
+     
+     call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprji,ikpti,0,isppol,dtset%mband,&
+          &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
+     if ( ikpti /= ikpt ) then
+        call pawcprj_copy(cprj_k,cprj_ikn)
+        call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
+             & dtorbmag%indkk_f2ibz(ikpt,2),dtorbmag%indkk_f2ibz(ikpt,6),&
+             & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikpti)),&
+             & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
+             & dtorbmag%mband_occ,my_nspinor,&
+             & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
+        call pawcprj_copy(cprj_fkn,cprj_k)
+     end if
 
-     do epsabg = 1, -1, -2
+     do adir = 1, 3
 
-        if (epsabg .EQ. 1) then
-           bdir = modulo(adir,3)+1
-           gdir = modulo(adir+1,3)+1
-        else
-           bdir = modulo(adir+1,3)+1
-           gdir = modulo(adir,3)+1
-        end if
+        do epsabg = 1, -1, -2
 
-        ! loop over kpts, assuming for now kptopt 3 or 4, nsppol = 1, nspinor = 1
-        ! and no parallelism, no symmorphic symmetry elements
-
-        do ikpt = 1, dtorbmag%fnkpt
-
-           ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
-
-           icprji = dtorbmag%cprjindex(ikpti,isppol)
-
-           npw_k = npwarr(ikpti)
-           icg = dtorbmag%cgindex(ikpti,dtset%nsppol)
-
-           ikg = dtorbmag%fkgindex(ikpt)
-
-           call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprji,ikpti,0,isppol,dtset%mband,&
-                &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
-           if ( ikpti /= ikpt ) then
-              call pawcprj_copy(cprj_k,cprj_ikn)
-              call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
-                   & dtorbmag%indkk_f2ibz(ikpt,2),dtorbmag%indkk_f2ibz(ikpt,6),&
-                   & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikpti)),&
-                   & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
-                   & dtorbmag%mband_occ,my_nspinor,&
-                   & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
-              call pawcprj_copy(cprj_fkn,cprj_k)
+           if (epsabg .EQ. 1) then
+              bdir = modulo(adir,3)+1
+              gdir = modulo(adir+1,3)+1
+           else
+              bdir = modulo(adir+1,3)+1
+              gdir = modulo(adir,3)+1
            end if
 
            do bfor = 1, 2
@@ -1246,14 +1243,9 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                       &           mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
                       &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
 
-                 do nn = 1, nband_k
-                    do n1 = 1, nband_k
-                       smat_all_indx(1,nn,n1,ikpt,bdx,0) =  smat_kk(1,nn,n1)
-                       smat_all_indx(2,nn,n1,ikpt,bdx,0) =  smat_kk(2,nn,n1)
-                       smat_all_indx(1,n1,nn,ikptb,bdxc,0) =  smat_kk(1,nn,n1)
-                       smat_all_indx(2,n1,nn,ikptb,bdxc,0) = -smat_kk(2,nn,n1)
-                    end do
-                 end do
+                 smat_all_indx(:,:,:,ikpt,bdx,0) = smat_kk(:,:,:)
+                 smat_all_indx(1,:,:,ikptb,bdxc,0) = TRANSPOSE(smat_kk(1,:,:))
+                 smat_all_indx(2,:,:,ikptb,bdxc,0) = -TRANSPOSE(smat_kk(2,:,:))
 
                  has_smat_indx(ikpt,bdx,0) = .TRUE.
                  has_smat_indx(ikptb,bdxc,0) = .TRUE.
@@ -1309,14 +1301,9 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                          &             mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kg,my_nspinor,&
                          &             pwind_kg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
 
-                    do nn = 1, nband_k
-                       do n1 = 1, nband_k
-                          smat_all_indx(1,nn,n1,ikpt,gdx,0) =  smat_kk(1,nn,n1)
-                          smat_all_indx(2,nn,n1,ikpt,gdx,0) =  smat_kk(2,nn,n1)
-                          smat_all_indx(1,n1,nn,ikptg,gdxc,0) =  smat_kk(1,nn,n1)
-                          smat_all_indx(2,n1,nn,ikptg,gdxc,0) = -smat_kk(2,nn,n1)
-                       end do
-                    end do
+                    smat_all_indx(:,:,:,ikpt,gdx,0) = smat_kk(:,:,:)
+                    smat_all_indx(1,:,:,ikptg,gdxc,0) = TRANSPOSE(smat_kk(1,:,:))
+                    smat_all_indx(2,:,:,ikptg,gdxc,0) = -TRANSPOSE(smat_kk(2,:,:))
 
                     has_smat_indx(ikpt,gdx,0) = .TRUE.
                     has_smat_indx(ikptg,gdxc,0) = .TRUE.
@@ -1340,20 +1327,17 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                          &             mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
                          &             pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
 
-                    do nn = 1, nband_k
-                       do n1 = 1, nband_k
-                          smat_all_indx(1,nn,n1,ikpt,bdx,gdx) =  smat_kk(1,nn,n1)
-                          smat_all_indx(2,nn,n1,ikpt,bdx,gdx) =  smat_kk(2,nn,n1)
-                          smat_all_indx(1,n1,nn,ikpt,gdx,bdx) =  smat_kk(1,nn,n1)
-                          smat_all_indx(2,n1,nn,ikpt,gdx,bdx) = -smat_kk(2,nn,n1)
-                       end do
-                    end do
+                    smat_all_indx(:,:,:,ikpt,bdx,gdx) = smat_kk(:,:,:)
+                    smat_all_indx(1,:,:,ikpt,gdx,bdx) = TRANSPOSE(smat_kk(1,:,:))
+                    smat_all_indx(2,:,:,ikpt,gdx,bdx) = -TRANSPOSE(smat_kk(2,:,:))
 
                     has_smat_indx(ikpt,bdx,gdx) = .TRUE.
                     has_smat_indx(ikpt,gdx,bdx) = .TRUE.
 
                  end if
 
+                 IA=czero
+                 IB=czero
                  do nn = 1, nband_k
                     do n1 = 1, nband_k
 
@@ -1372,30 +1356,29 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                              t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0))
                              t4B=conjg(cmplx(smat_all_indx(1,nn,n3,ikpt,gdx,0),smat_all_indx(2,nn,n3,ikpt,gdx,0)))
 
-                             tprodB = t1B*t2B*t3B*t4B
-                             IB = IB - epsabg*bsigma*gsigma*tprodB/(2.0*deltab*2.0*deltag)
+                             IB = IB + t1B*t2B*t3B*t4B
+                             ! IB = IB - epsabg*bsigma*gsigma*tprodB/(2.0*deltab*2.0*deltag)
                           end do ! end loop over n3
 
-                          tprodA = t1A*t2A*t3A
-                          IA = IA + epsabg*bsigma*gsigma*tprodA/(2.0*deltab*2.0*deltag)
-
+                          IA = IA + t1A*t2A*t3A
+                          ! IA = IA + epsabg*bsigma*gsigma*tprodA/(2.0*deltab*2.0*deltag) 
 
                        end do ! end loop over n2
                     end do ! end loop over n1
                  end do ! end loop over nn
 
+                 cnum(1,adir) = cnum(1,adir) + epsabg*bsigma*gsigma*real(IA-IB)/(2.0*deltab*2.0*deltag) 
+                 cnum(2,adir) = cnum(2,adir) + epsabg*bsigma*gsigma*aimag(IA-IB)/(2.0*deltab*2.0*deltag) 
+
               end do ! end loop over gfor
 
            end do ! end loop over bfor
 
-        end do ! end loop over fnkpt
+        end do ! end loop over epsabg
 
-     end do ! end loop over epsabg
+     end do ! end loop over adir
 
-     cnum(1,adir) = real(IA+IB)
-     cnum(2,adir) = aimag(IA+IB)
-
-  end do ! end loop over adir
+  end do ! end loop over kpts
 
   cnum(1,1:3) = MATMUL(gprimd,cnum(1,1:3))
   cnum(2,1:3) = MATMUL(gprimd,cnum(2,1:3))
