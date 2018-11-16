@@ -120,13 +120,21 @@ module m_skw
    ! The 2d derivatives wrt k of the star function for cached_kpt_dk2 (used in skw_eval_bks).
   real(dp) :: cached_kpt_dk2(3)
 
+ contains
+
+   procedure :: print => skw_print
+   ! Print info about object.
+
+   procedure :: eval_bks => skw_eval_bks
+   ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
+
+   procedure :: free => skw_free
+   ! Free memory.
+
  end type skw_t
+!!***
 
  public :: skw_new          ! Create new object.
- public :: skw_print        ! Print info about object.
- public :: skw_eval_bks     ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
- public :: skw_free         ! Free memory.
-!!***
 
 CONTAINS  !=====================================================================================
 !!***
@@ -232,7 +240,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  call cwtime(cpu, wall, gflops, "stop")
  write(std_out,"(2(a,f6.2))")" find_rstar_gen: cpu: ",cpu,", wall: ",wall
 
- if (my_rank == master) call skw_print(new, std_out)
+ if (my_rank == master) call new%print(std_out)
 
  ! Compute (inverse) roughness function.
  r2min = r2vals(2)
@@ -352,7 +360,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 
      do ib=1,bcount
        band = ib + new%band_block(1) - 1
-       call skw_eval_bks(new, band, kpts(:,ik), spin, oeig(ib))
+       call new%eval_bks(band, kpts(:,ik), spin, oeig(ib))
 
        adiff_meV = abs(eig(band,ik,spin) - oeig(ib)); rel_err = zero
        if (abs(eig(band,ik,spin)) > tol16) rel_err = adiff_meV / abs(eig(band,ik,spin))
@@ -418,7 +426,7 @@ subroutine skw_print(skw, unt)
 
 !Arguments ------------------------------------
 !scalars
- type(skw_t),intent(in) :: skw
+ class(skw_t),intent(in) :: skw
  integer,intent(in) :: unt
 
 ! *********************************************************************
@@ -468,7 +476,7 @@ subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band,spin
- type(skw_t),intent(inout) :: skw
+ class(skw_t),intent(inout) :: skw
 !arrays
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(out) :: oeig
@@ -671,7 +679,7 @@ subroutine skw_free(skw)
 
 !Arguments ------------------------------------
 !scalars
- type(skw_t),intent(inout) :: skw
+ class(skw_t),intent(inout) :: skw
 
 ! *********************************************************************
 

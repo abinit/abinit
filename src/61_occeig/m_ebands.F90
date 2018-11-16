@@ -4058,10 +4058,10 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
-                 band_block, comm)
+                 my_bblock, comm)
  case (2)
    bspl_ords = nint(params(2:4))
-   ebspl = ebspl_new(ebands, cryst, bspl_ords, band_block)
+   ebspl = ebspl_new(ebands, cryst, bspl_ords, my_bblock)
 
  case default
    MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
@@ -4073,12 +4073,13 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
    do ik_ibz=1,new%nkpt
      do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+       ! Note the difference between band and ib index if band_block.
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case (2)
-         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case default
          MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
        end select
@@ -4096,7 +4097,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
 !   NCF_CHECK(cryst%ncwrite(ncid))
 !   NCF_CHECK(ebands_ncwrite(new, ncid))
 !   ! TODO
-!   !NCF_CHECK(skw_ncwrite(skw, ncid))
+!   !NCF_CHECK(skw%ncwrite(ncid))
 !
 !   ! Define variables specific to SKW algo.
 !   ncerr = nctk_def_arrays(ncid, [ &
@@ -4113,7 +4114,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
 ! end if
 
  call ebspl_free(ebspl)
- call skw_free(skw)
+ call skw%free()
 
 end function ebands_interp_kmesh
 !!***
@@ -4235,12 +4236,13 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
    do ik_ibz=1,new%nkpt
      do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+       ! Note the difference between band and ib index if band_block.
        band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
-         call skw_eval_bks(skw, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case (2)
-         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case default
          MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
        end select
@@ -4250,7 +4252,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  call xmpi_sum(new%eig, comm, ierr)
 
  call ebspl_free(ebspl)
- call skw_free(skw)
+ call skw%free()
 
 end function ebands_interp_kpath
 !!***
@@ -5293,7 +5295,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands_kpath, ncid))
    ! TODO
-   !NCF_CHECK(skw_ncwrite(skw, ncid))
+   !NCF_CHECK(skw%ncwrite(ncid))
 
    ! Define variables specific to SKW algo.
    ncerr = nctk_def_arrays(ncid, [ &

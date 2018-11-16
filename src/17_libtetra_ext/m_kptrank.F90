@@ -158,8 +158,7 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 ! equivalent to the k-point whose rank is provided
  if (present(symrec)) then
    if(.not. present(nsym)) then
-     write (msg,'(a)')  "need both symrec and nsym arguments together"
-     TETRA_ERROR(msg)
+     TETRA_ERROR("need both symrec and nsym arguments together")
    end if
    do ikpt=1,nkpt
      ! itim == 1 for positive, and itim==2 gives Kramers opposite of k-point

@@ -525,6 +525,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%freqremax          = dtin%freqremax
  dtout%freqspmin          = dtin%freqspmin
  dtout%freqspmax          = dtin%freqspmax
+ dtout%frohl_params       = dtin%frohl_params
  dtout%frzfermi           = dtin%frzfermi
  dtout%ga_algor           = dtin%ga_algor
  dtout%ga_fitness         = dtin%ga_fitness
@@ -2355,8 +2356,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' fit_rangePower fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
- list_vars=trim(list_vars)//' freqspmin'
- list_vars=trim(list_vars)//' friction frzfermi fxcartfactor '
+ list_vars=trim(list_vars)//' freqspmin friction frohl_params frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'

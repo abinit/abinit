@@ -110,8 +110,6 @@ contains
 
 subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp
@@ -239,8 +237,6 @@ end subroutine invars2m
 !! SOURCE
 
 subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -490,6 +486,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmax',tread,'ENE')
  if(tread==1) dtset%freqspmax=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'frohl_params',tread,'DPR')
+ if(tread==1) dtset%frohl_params=dprarr(1:4)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'freqspmin',tread,'ENE')
  if(tread==1) then ! If found, set it

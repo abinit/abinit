@@ -37,6 +37,7 @@ eph_task   4
 tmesh 0 300 2
 gw_qprange 4
 sigma_ngkpt 2 2 2
+#sigma_bsum_range 1 7
 #nkptgw 1
 #kptgw 0.0 0.0 0.0
 #bdgw 1 8

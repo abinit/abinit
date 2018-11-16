@@ -23,7 +23,6 @@
 #include "config.h"
 #endif
 
-
 #include "abi_common.h"
 
 MODULE m_mpiotk

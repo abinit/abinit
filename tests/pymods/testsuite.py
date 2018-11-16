@@ -1964,9 +1964,8 @@ class BaseTest(object):
         """
         Return True if the test should be skipped since we are running on a banned builder.
         """
-        if not hasattr(self.build_env, "buildbot_builder"): return False
+        if getattr(self.build_env, "buildbot_builder", None) is None: return False
         for builder in self.exclude_builders:
-            #if builder == self.build_env.buildbot_builder: return True
             if any(c in builder for c in "*?![]{}"):
                 # Interpret builder as regex.
                 m = re.compile(builder)

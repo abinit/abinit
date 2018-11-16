@@ -1239,8 +1239,7 @@ Here $\omega_p$ is the plasma frequency (default can be overridden by setting
 [[ppmfrq]]). The grid points are then picked by an equidistant grid (number of
 points set by [[nfreqim]]) in the interval  $z \subset [0,1]$. This grid can
 easily be uniquely converged by just increasing [[nfreqim]]. Again the points
-are distributed so that approximately half of them lie below the plasma
-frequency.
+are distributed so that approximately half of them lie below the plasma frequency.
 
   * **User defined** - The user can also define their own grid using the variables [[cd_customnimfrqs]] and [[cd_imfrqs]].
     _With great power comes great responsibility!_
@@ -1250,8 +1249,7 @@ convergence studies. By estimating the densest grid one can afford to
 calculate in the SCR file, and successively removing frequencies from a single
 file (using the utility), one only needs to perform the screening calculation
 **once** on the dense mesh for a given convergence study. One can also use the
-utility to merge independent screening calculations over q-points and
-frequency sections.
+utility to merge independent screening calculations over q-points and frequency sections.
 """,
 ),
 
@@ -1268,8 +1266,7 @@ Variable(
 [[cd_full_grid]] enables the calculation of the screening [both chi0 and
 epsilon^(-1)] on a grid in the first quadrant of the complex plane. The grid
 is determined by the (tensor) product of the grid in real frequency and the
-grid in imaginary frequency. In the SUS and SCR files the grid points are
-stored as follows:
+grid in imaginary frequency. In the SUS and SCR files the grid points are stored as follows:
 
       **Index:**
       1   . . .   nfreqre   nfrqre+1 . . . nfreqre+nfreqim   nfreqre+nfreqim+1 . . . nfreqre*nfreqim
@@ -1641,7 +1638,7 @@ defined in the input file to set up a CPU time limit. When the job reaches
 that limit, it will try to end smoothly. However, note that this might still
 take some time. If the user want a firm CPU time limit, the present parameter
 must be reduced sufficiently. Intuition about the actual margin to be taken
-into account should come with experience...
+into account should come with experience.
 A zero value has no action of the job.
 """,
 ),
@@ -6633,8 +6630,8 @@ Variable(
 Govern the storage of wavefunctions at the level of the loop over images, see [[ntimimage]].
 Possible values of [[imgwfstor]] are 0 or 1.
 If [[imgwfstor]] is 1, the wavefunctions for each image are stored in a big array of
-size [[nimage]] more than the storage needed for one set of wavefunctions..
-When the specific computation (optimization/SCF cycle ...) for this image is started,
+size [[nimage]] more than the storage needed for one set of wavefunctions.
+When the specific computation (optimization/SCF cycle etc) for this image is started,
 the past wavefunctions are used, to speed up the computation. If [[imgwfstor]]==0,
 the wavefunctions are reinitialised, either at random or from the initial wavefunction file (so, without
 any modification to take into account the computations at the previous value of itimimage.
@@ -6697,7 +6694,7 @@ Prior to ABINITv2.3, the choice [[intxc]] = 1 was favoured (it was the default),
 but the continuation of the development of the code lead to prefer the default
 [[intxc]] = 0. Indeed, the benefit of [[intxc]] = 1 is rather small, while making
 it available for all cases is a non-negligible development effort. Other
-targets are prioritary... You will notice that many automatic tests use
+targets are prioritary. You will notice that many automatic tests use
 [[intxc]] = 1. Please, do not follow this historical choice for your production runs.
 """,
 ),
@@ -7673,7 +7670,7 @@ Unfortunately, pseudopotential (or PAW) generators for hybrid functionals and
 mGGA are currently under development, so that one usually uses GGA or LDA
 pseudopotentials instead. The error should be limited when GGA or LDA
 pseudopotentials with semi-core states are used. Still this is a non-
-controlled error.. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
+controlled error. Moreover, the choices [[ixc]] = 1, 2, 3 and 7 are fits to the
 same data, from Ceperley-Alder, and are rather similar, at least for spin-
 unpolarized systems.
 The choice between the non-spin-polarized and spin-polarized case is governed
@@ -9266,7 +9263,7 @@ Variable(
     text=r"""
 Maximum number of wavevectors used to sample the local part of the potential,
 in PAW. Actually referred to as mqgrid_vl internally. Should change name to
-the latter... See also [[mqgrid]]
+the latter. See also [[mqgrid]].
 """,
 ),
 
@@ -11279,8 +11276,7 @@ The code tries to read the same number of pseudopotential files. The first
 pseudopotential is assigned type number 1, and so on...
 
 There is an exception in the case of alchemical mixing of potentials, for
-which there is a different number of pseudopotentials atomic types. See
-[[mixalch]].
+which there is a different number of pseudopotentials atomic types. See [[mixalch]].
 """,
 ),
 
@@ -13256,8 +13252,7 @@ used as input file for the positronic GS calculation.
 The second step is the GS calculation of the positron and subsequently its
 lifetime, with [[positron]] =1. One has to define also [[ixcpositron]].
 Then, it is possible to perform an additional step, computing the GS
-electronic density in presence of the positron, with [[positron]] = 2.
-and so on...
+electronic density in presence of the positron, with [[positron]] = 2 and so on...
 This procedure can be automated (for PAW only) by the use of a negative value
 for [[positron]].
 At the end, a converged value of the positron lifetime (decomposed in several
@@ -13276,8 +13271,7 @@ calculation until convergence (controlled by the use of one of the _tolerance_
 keywords).
 Then will perform a positronic ground state calculation in presence of the
 electrons and ions; then an electronic ground state calculation in presence of
-the positron and the ions...
-and so on... until the total energy is converged.
+the positron and the ions and so on until the total energy is converged.
 The convergence of the total energy of the ions+electrons+positron system is
 controlled by the use of the [[postoldfe]], [[postoldff]] and [[posnstep]]
 input keywords.
@@ -13318,7 +13312,7 @@ points:
 In principle, the positron lifetime should converge with the value of
 [[posocc]] or the size of the supercell.
 
-  * **A positron trapped in a _default_ (vacancy...)**:\n
+  * **A positron trapped in a _default_ (vacancy)**:\n
 In that case, the positron is localized in the default. Its density can be
 localized in the simulation cell (provided that the cell is sufficiently
 large) and influences the electronic density.
@@ -13782,7 +13776,7 @@ calculation are taken into account (occupied and unoccupied). Note that
 Brillouin Zone that is needed to get a converged DOS is usually much finer
 than the sampling needed to converge the total energy or the geometry of the
 system, unless [[tsmear]] is very large (hence the DOS is not obtained
-properly).. A separate convergence study is needed.
+properly). A separate convergence study is needed.
 In order to compute the DOS of an insulator with [[prtdos]] = 1, compute its
 density thanks to a self-consistent calculation (with a non-metallic
 [[occopt]] value, 0, 1 or 2), then use [[prtdos]] = 1, together with
@@ -15134,7 +15128,7 @@ Note that the choice of this radius is however critical for the balance
 between the s, p and d components. Indeed, the integrated charge within a
 given radius, behave as a different power of the radius, for the different
 channels s, p, d. At the limit of very small radii, the s component dominates
-the charge contained in the sphere...
+the charge contained in the sphere.
 
 When [[prtdensph]] = 1:
 
@@ -16203,7 +16197,7 @@ For PAW calculations with SOC, please refer to [[pawspnorb]].
   * If 0: no spin-orbit interaction, even if [[nspinor]] = 2
   * If 1: treat spin-orbit as specified in the pseudopotential file.
   * If 2: treat spin-orbit in the HGH form (usual form, although not allowed for all pseudopotentials)
-  * If 3: treat spin-orbit in the HFN form (Hemstreet-Fong-Nelson) (actually, not implemented...).
+  * If 3: treat spin-orbit in the HFN form (Hemstreet-Fong-Nelson) (actually, not implemented).
 
 For typical usage, the default value is OK. If the spin-orbit needs to be
 turned off for one atom, 0 might be relevant. Note however, that the code will
@@ -18942,7 +18936,7 @@ The different possibilities are:
   where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms.
   By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary.
   For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
-  For more information, see the [ performance guide ](../../theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
+  For more information, see the [performance guide](../../theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
   Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,
 ),
@@ -19507,20 +19501,31 @@ Allowed values:
 Variable(
     abivarname="sigma_bsum_range",
     varset="gw",
-    topics=['SelfEnergy_useful'],
+    topics=['SelfEnergy_expert'],
     vartype="integer",
-    defaultval=0,
+    defaultval=[0, 0],
     dimensions=[2],
-    requires="[[optdriver]] in [4, 7]",
-    mnemonics="SIGMA: Number of Grid points for K PoinTs generation",
+    requires="[[optdriver]] in [7]",
+    mnemonics="SIGMA: Band SUM RANGE",
     text=r"""
-This variable allows the user to specify the list of k-points in the self-energy $\Sigma_{n\kk}$
-in terms of a homogeneous mesh in the IBZ instead of the traditional approach based
-of [[nkptgw]], [[kptgw]], [[bdgw]].
+This variable allows the user to specify the range of bands in the sum over states for the e-ph self-energy $\Sigma_{n\kk}$.
+If not specified, the code includes all the states from 1 to [[nband]] if both the real and imaginary part of the
+self-energy are wanted or all the states in an automatically computed energy window containing those states
+that are supposed to interact with the [[bdgw]] states via phonon scattering.
+""",
+),
 
-The specification in terms of sigma_ngkpt is easier to use in particular when
-the self-energy is needed on a sub-mesh.
-The use of this variables requires a band range specified via [[gw_qprange]].
+Variable(
+    abivarname="frohl_params",
+    varset="gw",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[0, 0, 0, 0],
+    dimensions=[4],
+    requires="[[optdriver]] in [7]",
+    mnemonics="FROHLich PARAMeterS",
+    text=r"""
+This variable is still under development.
 """,
 ),
 
