@@ -68,6 +68,7 @@ module libxc_functionals
  public :: libxc_functionals_init               ! Initialize the desired XC functional, from libXC
  public :: libxc_functionals_end                ! End usage of libXC functional
  public :: libxc_functionals_fullname           ! Return full name of the XC functional
+ public :: libxc_functionals_getrefs            ! Get references of a XC functional
  public :: libxc_functionals_getid              ! Return identifer of a XC functional from its name
  public :: libxc_functionals_family_from_id     ! Retrieve family of a XC functional from its id
  public :: libxc_functionals_ixc                ! The value of ixc used to initialize the XC functionals
@@ -448,7 +449,7 @@ contains
 !!
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
@@ -612,7 +613,7 @@ end subroutine libxc_functionals_init
 !!
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!      calc_vhxc_me,driver,drivexc,invars2,m_kxc,m_xc_vdw,rhotoxc
@@ -679,7 +680,7 @@ end subroutine libxc_functionals_init
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! OUTPUT
 !!
@@ -744,6 +745,56 @@ end subroutine libxc_functionals_init
 #endif
 
  end function libxc_functionals_fullname
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_getrefs
+!! NAME
+!!  libxc_functionals_getrefs
+!!
+!! FUNCTION
+!!  Return the reference(s) of a XC functional
+!!
+!! INPUTS
+!! xc_functional=<type(libxc_functional_type)>, handle for XC functional
+!!
+!! OUTPUT
+!! xcrefs(:)= references(s) of the functional
+!!
+!! SOURCE
+
+subroutine libxc_functionals_getrefs(xcrefs,xc_functional)
+
+ implicit none
+
+!Arguments ------------------------------------
+ character(len=*),intent(out) :: xcrefs(:)
+ type(libxc_functional_type),intent(in) :: xc_functional
+!Local variables-------------------------------
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ integer(C_INT) :: iref_c
+ character(kind=C_CHAR,len=1),pointer :: strg_c
+#endif
+
+! *************************************************************************
+
+ xcrefs(:)=''
+
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ iref_c=0
+ do while (iref_c>=0.and.iref_c<size(xcrefs))
+   call c_f_pointer(xc_get_info_refs(xc_functional%conf,iref_c),strg_c)
+   if (associated(strg_c)) then
+     call xc_char_to_f(strg_c,xcrefs(iref_c+1))
+     iref_c=iref_c+1
+   else
+     iref_c=-1
+   end if
+ end do
+#endif
+
+end subroutine libxc_functionals_getrefs
 !!***
 
 !----------------------------------------------------------------------
@@ -854,7 +905,7 @@ end function libxc_functionals_getid
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!
@@ -893,7 +944,7 @@ end function libxc_functionals_ixc
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!
@@ -937,7 +988,7 @@ end function libxc_functionals_isgga
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!
@@ -985,7 +1036,7 @@ end function libxc_functionals_ismgga
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!
@@ -1029,7 +1080,7 @@ end function libxc_functionals_is_hybrid
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!
@@ -1073,7 +1124,7 @@ end function libxc_functionals_has_kxc
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!
@@ -1136,7 +1187,7 @@ end function libxc_functionals_nspin
 !!
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!      drivexc,m_pawxc,m_xc_vdw
@@ -1442,7 +1493,7 @@ end subroutine libxc_functionals_getvxc
 !!
 !! INPUTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! OUTPUT
 !!  [hyb_mixing]  = mixing factor of Fock contribution
@@ -1538,7 +1589,7 @@ end subroutine libxc_functionals_get_hybridparams
 !! [hyb_mixing_sr]    = mixing factor of short-range Fock contribution
 !! [hyb_range]        = Range (for separation)
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! OUTPUT
 !!
@@ -1789,7 +1840,7 @@ end function libxc_functionals_gga_from_hybrid
 !!
 !! SIDE EFFECTS
 !! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
-!!                     XC functionals to initialize
+!!                     Handle for XC functionals
 !!
 !! PARENTS
 !!      m_libxc_functionals

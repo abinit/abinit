@@ -52,6 +52,7 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_init               ! Initialize the desired XC functional, from libXC
  public :: libpaw_libxc_end                ! End usage of libXC functional
  public :: libpaw_libxc_fullname           ! Return full name of the XC functional
+ public :: libpaw_libxc_getrefs            ! Get references of a XC functional
  public :: libpaw_libxc_getid              ! Return identifer of a XC functional from its name
  public :: libpaw_libxc_family_from_id     ! Retrieve family of a XC functional from its id
  public :: libpaw_libxc_ixc                ! The value of ixc used to initialize the XC functionals
@@ -673,6 +674,7 @@ end subroutine libpaw_libxc_init
  character(len=100) :: libpaw_libxc_fullname
  type(libpaw_libxc_type),intent(in),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
+ integer :: nxc
  type(libpaw_libxc_type),pointer :: xc_funcs(:)
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  character(len=100) :: xcname
@@ -689,8 +691,16 @@ end subroutine libpaw_libxc_init
    xc_funcs => paw_xc_global
  end if
 
+ nxc=size(xc_funcs)
+ if (nxc<1) return
+
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
- if (xc_funcs(1)%id <= 0) then
+ if (nxc<2) then
+   if (xc_funcs(1)%id /= 0) then
+     call c_f_pointer(xc_functional_get_name(xc_funcs(1)%id),strg_c)
+     call xc_char_to_f(strg_c,libpaw_libxc_fullname)
+   end if
+ else if (xc_funcs(1)%id <= 0) then
    if (xc_funcs(2)%id /= 0) then
      call c_f_pointer(xc_functional_get_name(xc_funcs(2)%id),strg_c)
      call char_c_to_f(strg_c,libpaw_libxc_fullname)
@@ -711,6 +721,56 @@ end subroutine libpaw_libxc_init
 #endif
 
 end function libpaw_libxc_fullname
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_libpaw_libxc_funcs/libpaw_libxc_getrefs
+!! NAME
+!!  libpaw_libxc_getrefs
+!!
+!! FUNCTION
+!!  Return the reference(s) of a XC functional
+!!
+!! INPUTS
+!!  xc_functional=<type(libpaw_libxc_type)>, handle for XC functional
+!!
+!! OUTPUT
+!!  xcrefs(:)= references(s) of the functional
+!!
+!! SOURCE
+
+subroutine libpaw_libxc_getrefs(xcrefs,xc_functional)
+
+ implicit none
+
+!Arguments ------------------------------------
+ character(len=*),intent(out) :: xcrefs(:)
+ type(libpaw_libxc_type),intent(in) :: xc_functional
+!Local variables-------------------------------
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ integer(C_INT) :: iref_c
+ character(kind=C_CHAR,len=1),pointer :: strg_c
+#endif
+
+! *************************************************************************
+
+ xcrefs(:)=''
+
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
+ iref_c=0
+ do while (iref_c>=0.and.iref_c<size(xcrefs))
+   call c_f_pointer(libpaw_xc_get_info_refs(xc_functional%conf,iref_c),strg_c)
+   if (associated(strg_c)) then
+     call xc_char_to_f(strg_c,xcrefs(iref_c+1))
+     iref_c=iref_c+1
+   else
+     iref_c=-1
+   end if
+ end do
+#endif
+
+end subroutine libpaw_libxc_getrefs
 !!***
 
 !----------------------------------------------------------------------
@@ -1097,6 +1157,7 @@ end function libpaw_libxc_nspin
  integer  :: ii,ipts
  logical :: is_gga,is_mgga
  real(dp) :: xc_tb09_c_
+ character(len=500) :: msg
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
