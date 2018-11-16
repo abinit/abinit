@@ -733,6 +733,7 @@ end subroutine libxc_functionals_init
  character(len=100) :: libxc_functionals_fullname
  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
+ integer :: nxc
  type(libxc_functional_type),pointer :: xc_funcs(:)
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xcname
@@ -749,8 +750,16 @@ end subroutine libxc_functionals_init
    xc_funcs => xc_global
  end if
 
+ nxc=size(xc_funcs)
+ if (nxc<1) return
+
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
- if (xc_funcs(1)%id <= 0) then
+ if (nxc<2) then
+   if (xc_funcs(1)%id /= 0) then
+     call c_f_pointer(xc_functional_get_name(xc_funcs(1)%id),strg_c)
+     call xc_char_to_f(strg_c,libxc_functionals_fullname)
+   end if
+ else if (xc_funcs(1)%id <= 0) then
    if (xc_funcs(2)%id /= 0) then
      call c_f_pointer(xc_functional_get_name(xc_funcs(2)%id),strg_c)
      call xc_char_to_f(strg_c,libxc_functionals_fullname)
