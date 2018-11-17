@@ -219,7 +219,6 @@ contains
   !!***
 
 
-
   !!****f* m_spin_model/spin_model_t_finalize
   !!
   !! NAME

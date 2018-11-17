@@ -387,7 +387,7 @@ contains
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspins)
     integer :: i, iatom, jatom
-    real(dp) ::  H(3,1)
+    !real(dp) ::  H(3,1)
     !Svec=reshape(S, (/self%nspins*3/))
     !do i = 1, self%bilinear_nint, 1
     !    iatom=self%bilinear_i(i)
@@ -413,7 +413,6 @@ contains
        Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
     end do
     !$OMP END PARALLEL DO
-    !print *, "Heff", Heff
   end subroutine spin_terms_t_calc_bilinear_term_Heff
 
   subroutine spin_terms_t_set_exchange(self, exchange_i, exchange_j, exchange_val)

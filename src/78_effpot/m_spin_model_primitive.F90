@@ -131,18 +131,17 @@ module m_spin_model_primitive
      type(int_array_type):: total_ilist, total_jlist, total_Rlist(3)
      type(real_array_type) :: total_val_list(3,3)
 
-     !  contains
-     !    procedure:: initialize=> spin_model_primitive_t_initialize
-     !    procedure:: finalize=> spin_model_primitive_t_finalize
-     !    procedure:: set_atoms => spin_model_primitive_t_set_atoms
-     !    procedure:: set_bilinear => spin_model_primitive_t_set_bilinear
-     !    procedure:: set_exchange=> spin_model_primitive_t_set_exchange
-     !    procedure:: set_dmi => spin_model_primitive_t_set_dmi
-     !    procedure:: set_uni => spin_model_primitive_t_set_uni
-     !    procedure:: read_xml => spin_model_primitive_t_read_xml
-     !    procedure:: make_supercell => spin_model_primitive_t_make_supercell
-     !    procedure :: print_terms => spin_model_primitive_t_print_terms
-     !    procedure:: get_total_terms => spin_model_primitive_t_get_total_term
+       contains
+         procedure:: initialize=> spin_model_primitive_t_initialize
+         procedure:: finalize=> spin_model_primitive_t_finalize
+         procedure:: set_atoms => spin_model_primitive_t_set_atoms
+         procedure:: set_bilinear => spin_model_primitive_t_set_bilinear
+         procedure:: set_exchange=> spin_model_primitive_t_set_exchange
+         procedure:: set_dmi => spin_model_primitive_t_set_dmi
+         procedure:: set_uni => spin_model_primitive_t_set_uni
+         procedure:: read_xml => spin_model_primitive_t_read_xml
+         procedure:: make_supercell => spin_model_primitive_t_make_supercell
+         procedure :: print_terms => spin_model_primitive_t_print_terms
   end type spin_model_primitive_t
 
 contains
@@ -222,8 +221,7 @@ contains
        bivallist(2,2,idx)=vallist(2, idx)
        bivallist(3,3,idx)=vallist(3, idx)
     end do
-    !call self%set_bilinear(n,ilist,jlist,Rlist,bivallist)
-    call  spin_model_primitive_t_set_bilinear(self,n,ilist,jlist,Rlist,bivallist)
+    call self%set_bilinear(n,ilist,jlist,Rlist,bivallist)
   end subroutine spin_model_primitive_t_set_exchange
 
 
@@ -543,7 +541,7 @@ contains
 
   subroutine spin_ham_set_exchange(self, nnz,  ilist, jlist, Rlist, vallist)
 
-    type(spin_model_primitive_t) , intent(inout) :: self
+    class(spin_model_primitive_t) , intent(inout) :: self
     integer, intent(in) :: nnz,  ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
     integer :: err
