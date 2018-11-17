@@ -678,7 +678,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(nqnu_tlist, (sigma%ntemp))
 
  ! Open the DVDB file
- call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
@@ -690,9 +690,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! which the largest number of operations in the little group (e.g. Gamma) while trying to keep the previous qibz in cache
  ! The cache is built dynamically so it depends on the way we loop over q-points in the caller.
  ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells* to minimise cache misses.
- call dvdb_set_qcache_mb(dvdb, dtset%dvdb_qcache_mb)
- call dvdb_print(dvdb, prtvol=dtset%prtvol)
- call dvdb_qcache_read(dvdb, nfftf, ngfftf, comm)
+ call dvdb%set_qcache_mb(dtset%dvdb_qcache_mb)
+ call dvdb%print(prtvol=dtset%prtvol)
+ call dvdb%qcache_read(nfftf, ngfftf, comm)
 
  ABI_MALLOC(displ_cart, (2,3,cryst%natom,3*cryst%natom))
  ABI_MALLOC(displ_red, (2,3,cryst%natom,3*cryst%natom))
@@ -874,7 +874,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
          ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
          ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-         call dvdb_readsym_qbz(dvdb, cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
+         call dvdb%readsym_qbz(cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
        else
          MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
        end if

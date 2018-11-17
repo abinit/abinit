@@ -3909,12 +3909,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  call edos%free()
 
  ! Open the DVDB file
- call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  do_ftv1q = 0
  do iq_ibz=1,gams%nqibz
    qpt = gams%qibz(:,iq_ibz)
-   if (dvdb_findq(dvdb, qpt) == -1) do_ftv1q = do_ftv1q + 1
+   if (dvdb%findq(qpt) == -1) do_ftv1q = do_ftv1q + 1
 
    do spin=1,nsppol
      fs => fstab(spin)
@@ -4125,13 +4125,13 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    call cwtime(cpu,wall,gflops,"start")
 
    ! Find the index of the q-point in the DVDB.
-   db_iqpt = dvdb_findq(dvdb, qpt)
+   db_iqpt = dvdb%findq(qpt)
 
    if (db_iqpt /= -1) then
      if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found: ",ktoa(qpt)," in DVDB with index ",itoa(db_iqpt)))
      ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
      ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-     call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
+     call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
    else
      MSG_ERROR(sjoin("Could not find q-point:", ktoa(qpt), "in DVDB"))
    end if
