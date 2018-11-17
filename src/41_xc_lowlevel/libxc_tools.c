@@ -185,6 +185,7 @@ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_pa
    {XC(lda_c_xalpha_set_params)(xc_func, *ext_params);}
   else if (xc_func->info->number == XC_MGGA_X_TB09 && n_ext_params == 1)
    {XC(mgga_x_tb09_set_params)(xc_func, *ext_params);}
+#if ( XC_MAJOR_VERSION > 2 || ( XC_MAJOR_VERSION > 1 && XC_MINOR_VERSION > 0 ) ) 
   else if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
    {XC(hyb_gga_xc_pbeh_set_params)(xc_func, *ext_params);}
   else if (xc_func->info->number == XC_HYB_GGA_XC_HSE03 && n_ext_params == 3)
@@ -193,6 +194,14 @@ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_pa
   else if (xc_func->info->number == XC_HYB_GGA_XC_HSE06 && n_ext_params == 3)
    {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[0], ext_params[2]);
     xc_func->cam_omega=ext_params[1];}
+#else
+  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE03 && n_ext_params == 3)
+   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[2]);
+    xc_func->cam_omega=ext_params[1];}
+  else if (xc_func->info->number == XC_HYB_GGA_XC_HSE06 && n_ext_params == 3)
+   {XC(hyb_gga_xc_hse_set_params)(xc_func, ext_params[2]);
+    xc_func->cam_omega=ext_params[1];}
+#endif
 #endif
   else
    {fprintf(stderr, "BUG: invalid entry in set_params!\n");abort();}
