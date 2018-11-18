@@ -221,7 +221,7 @@ contains
     call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 
-    call self%get_dSdt(S_in, Heff, dSdt)
+    call self%get_dSdt(S_in, Htmp, dSdt)
 
     !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
@@ -230,9 +230,9 @@ contains
     !$OMP END PARALLEL DO
 
     ! correction
-    !call calculator%get_dSdt(S_out, H_lang, dSdt2)
     call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
-    etot=calculator%etot
+    Htmp(:,:)=Heff(:,:)+H_lang(:,:)
+    call self%get_dSdt(S_in, Htmp, dSdt2)
     !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
        S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
@@ -281,36 +281,26 @@ contains
     call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
 
     call self%get_Langevin_Heff(H_lang)
-    Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 
+       Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 !$OMP PARALLEL DO private(i)
     do i=1,self%nspins
        ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
        Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
-    end do
-!$OMP END PARALLEL DO
-
-!$OMP PARALLEL DO 
-    do i=1, self%nspins
      call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
     end do
 !$OMP END PARALLEL DO
 
     ! correction
     call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
-    Heff(:,:)=(Heff(:,:)+Htmp(:,:))*0.5_dp
-    Htmp(:,:)=Heff(:,:)+H_lang(:,:)
-    !call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
     !$OMP PARALLEL DO private(i)
     do i=1,self%nspins
+       Heff(:,i)=(Heff(:,i)+Htmp(:,i))*0.5_dp
+       Htmp(:,i)=Heff(:,i)+H_lang(:,i)
        Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
-    end do
-    !$OMP END PARALLEL DO
-
-    do i=1, self%nspins
        call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
     end do
-
+    !$OMP END PARALLEL DO
     call spin_terms_t_get_etot(calculator, S_out, Heff, etot)
   end subroutine spin_mover_t_run_one_step_DM
 

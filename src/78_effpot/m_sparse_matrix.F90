@@ -76,6 +76,7 @@ module m_sparse_matrix
 
   !!***
 
+  !!--------------- LIL-------------------------
   ! node of linked list, which will be one non-zero entry in LIL matrix
   type lnode
      integer :: i
@@ -101,12 +102,14 @@ module m_sparse_matrix
    !  procedure :: print => LIL_mat_print
   end type LIL_mat
 
+  !!----------- Dense ------------------------
   ! dense matrix
   type dense_mat
      integer ::  nrow, ncol
      real(dp), allocatable :: mat(:,:)
   end type dense_mat
 
+  !!----------- COO ------------------------
   ! COO sparse matrix.
   ! i, j, val are the row index, col index and value of each entry.
   ! nnz: number of non-zeros.
@@ -116,6 +119,7 @@ module m_sparse_matrix
      real(dp), allocatable:: val(:)
   end type COO_mat
 
+  !!----------- CSR ------------------------
   ! CSR sparse matrix
   ! nnz: number of non-zeros.
   ! icol : column index of entries .size:nnz
@@ -132,6 +136,9 @@ module m_sparse_matrix
 
   ! linked list format sparse matrix
 contains
+
+  
+  !!----------- DENSE ------------------------
   subroutine dense_mat_initialize(self,  nrow, ncol)
 
     type(dense_mat), intent(inout) :: self
@@ -179,6 +186,8 @@ contains
     call dspmv('U', self%nrow, 1.0d0,self%mat , x, 1, 0.0d0, b, 1)
   end subroutine dense_mat_spmv
 
+  !!--------------- COO ----------------------------
+
   ! COO matrix
   subroutine COO_mat_initialize(A, nrow, ncol, nnz, i, j, val)
 
@@ -220,6 +229,7 @@ endif
     end do
   end subroutine  COO_mat_mv
 
+  !------------------ LIL ---------------------
   subroutine LIL_mat_initialize(self, nrow, ncol)
 
     type(LIL_mat) , intent(inout):: self

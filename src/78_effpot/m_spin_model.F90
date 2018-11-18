@@ -195,6 +195,8 @@ contains
     ! set parameters to hamiltonian and mover
     self%nspins= self%spin_calculator%nspins
 
+    call self%spin_mover%initialize(self%params, self%nspins )
+
     call spin_model_t_set_params(self)
 
     call spin_hist_t_init(hist=self%spin_hist, nspins=self%nspins, &
@@ -206,7 +208,6 @@ contains
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self)
 
-    call self%spin_mover%initialize(self%params, self%nspins )
     call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%gyro_ratio, &
          & damping=self%spin_calculator%gilbert_damping, ms=self%spin_calculator%ms )
 

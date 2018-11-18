@@ -34,17 +34,6 @@ module m_mover_api
 
 contains
 
-  subroutine initialize(self, params, fnames, effpot)
-    class(abstract_mover_t), intent(inout) :: self
-    type(multibinit_dtset_type) :: params  ! read from input file
-    character(len=*), intent(in) :: fnames(:)  !  files file (xml, DDB, etc).
-    ! hexu comment  It's better to get rid of it and put everything into input file!?)
-    class(effpot_t) :: effpot ! may use information from effective potential
-  end subroutine initialize
-
-  subroutine finalize(self)
-    class(abstract_mover_t), intent(inout) :: self
-  end subroutine finalize
 
   subroutine set_params(self, params)
     ! set parameters from input file. (something else, like temperature for MvT calculation?)
@@ -57,16 +46,10 @@ contains
     class(abstract_mover_t), intent(inout) :: self
   end subroutine set_initial_state
 
-  subroutine set_force(self, force, add)
-    ! set force. Should not be here but in lattice mover only.
-    class(abstract_mover_t), intent(inout) :: self
-    real(dp), intent(in) :: force(:,:)
-    logical, optional :: add ! add or reset force.
-  end subroutine set_force
-
-  subroutine run_one_step(self)
+  subroutine run_one_step(self, effpot)
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
+
   end subroutine run_one_step
 
   subroutine run_nstep(self, nstep)
