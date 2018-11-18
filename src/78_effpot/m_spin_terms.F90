@@ -42,16 +42,16 @@ module  m_spin_terms
   use m_abicore
   use m_spin_terms_funcs
   use m_sparse_matrix
+  use m_effpot_api, only : effpot_t
   implicit none
   !!***
 
-  type spin_terms_t
-     integer :: nspins
+  type, extends(effpot_t) :: spin_terms_t
      real(dp) :: etot
      ! ispin_prim: index in the spin model in primitive cell, which is used as the index of sublattice.
      ! rvec: supercell R vector.
      integer, allocatable :: ispin_prim(:), rvec(:,:)
-     real(dp), allocatable :: ms(:), pos(:,:),  spinat(:,:), S(:,:)
+     real(dp), allocatable ::  pos(:,:),  spinat(:,:), S(:,:)
      real(dp):: cell(3,3)
      ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
      integer, allocatable :: iatoms(:)
@@ -121,10 +121,9 @@ module  m_spin_terms
          procedure :: initialize => spin_terms_t_initialize
          procedure :: finalize => spin_terms_t_finalize
          procedure :: get_Heff => spin_terms_t_total_Heff
-     !    procedure :: Heff_to_dSdt => Heff_to_dSdt
-     !    procedure :: get_dSdt => get_dSdt
-     !    procedure :: get_Langevin_Heff => get_Langevin_Heff
+         procedure :: calculate => spin_terms_t_calculate
   end type spin_terms_t
+
 contains
   subroutine spin_terms_t_initialize(self, cell, pos, spinat,  iatoms, &
        & ispin_prim, rvec, gyro_ratio, damping)
@@ -138,6 +137,12 @@ contains
     real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:), gyro_ratio(:), damping(:)
     !Local variables-------------------------------
     integer :: nspins,  i
+
+    self%has_spin=.True.
+    self%has_displacement=.False.
+    self%has_strain=.False.
+    self%is_null=.False.
+
     nspins=size(pos, 2)
     self%nspins=nspins
     ABI_ALLOCATE(self%iatoms, (nspins))
@@ -419,13 +424,31 @@ contains
   end subroutine spin_terms_t_calc_DMI_Heff
 
 
-  subroutine spin_terms_t_total_Heff(self,S, Heff)
+  subroutine spin_terms_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+    class(spin_terms_t), intent(inout) :: self  
+    real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    ! if present in input
+    ! calculate if required
+    if (present(displacement) .or. present(strain) .or. present(force) .or. present(stress)) then
+       write(std_err, *) "spin terms cannot accept atomic input and output"
+    end if
+    call self%get_Heff(spin, bfield, energy)
+  end subroutine spin_terms_t_calculate
+
+
+
+  subroutine spin_terms_t_total_Heff(self,S, Heff, energy)
 
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in):: S(3,self%nspins)
-    real(dp), intent(out):: Heff(3,self%nspins)
+    real(dp), intent(inout):: Heff(3,self%nspins)
+    real(dp), intent(inout) :: energy
     real(dp) :: Htmp(3,self%nspins)
+    integer :: i, j
+
     Heff(:,:) =0.0_dp
+    energy=0.0_dp
 
     if(self%has_bilinear) then
        call spin_terms_t_calc_bilinear_term_Heff(self,S,Htmp)
@@ -440,18 +463,6 @@ contains
     if (self%has_DMI) then
        call spin_terms_t_calc_DMI_Heff(self,S,Htmp)
        Heff = Heff + Htmp
-       !write (*,*) "Htmp", Htmp
-       !write (*,*) "Heff", Heff
-    endif
-
-    if (self%has_dipdip) then
-       continue
-       ! TODO implement dipdip and add it
-    endif
-
-    if (self%has_external_hfield) then
-       call spin_terms_t_calc_external_Heff(self,Htmp)
-       Heff = Heff+Htmp
     endif
 
     if ( self%has_uniaxial_anistropy ) then
@@ -459,26 +470,32 @@ contains
        Heff = Heff+Htmp
     end if
 
-  end subroutine spin_terms_t_total_Heff
+    if (self%has_dipdip) then
+       continue
+       ! TODO implement dipdip and add it
+    endif
 
-  subroutine spin_terms_t_get_etot(self, S, Heff, etot)
-
-    class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in) :: S(3, self%nspins), Heff(3, self%nspins)
-    real(dp), intent(out) :: etot
-    integer :: i, j
-    etot=0.0_dp
+    ! calculate energy from bilinear terms (all the above ones)
     do i=1, self%nspins
        do j=1, 3
-          etot=etot-Heff(j, i)*S(j,i)*self%ms(i)
+          energy=energy-Heff(j, i)*S(j,i)*self%ms(i)*0.5_dp
        end do
     end do
-  end subroutine spin_terms_t_get_etot
+
+    if (self%has_external_hfield) then
+       call spin_terms_t_calc_external_Heff(self,Htmp)
+       Heff = Heff+Htmp
+       energy= energy- Htmp(j, i)*S(j, i)*self%ms(i)
+    endif
+
+  end subroutine spin_terms_t_total_Heff
+
 
   subroutine spin_terms_t_finalize(self)
 
     class(spin_terms_t), intent(inout):: self
 
+    self%is_null=.True.
     if (allocated(self%S)) then
         ABI_DEALLOCATE(self%S)
     endif
@@ -568,8 +585,6 @@ contains
     if (allocated(self%DMI_val))  then
        ABI_DEALLOCATE(self%DMI_val)
     endif
-
-
 
     self%has_dipdip=.False.
     !if (allocated(self%dipdip_i))  then

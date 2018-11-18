@@ -205,6 +205,8 @@ contains
     call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
          &     spin_temperature=self%params%spin_temperature)
 
+    call self%spin_mover%set_hist(self%spin_hist)
+
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self)
 
@@ -481,8 +483,7 @@ contains
   subroutine spin_model_t_run_one_step(self)
 
     class(spin_model_t), intent(inout) :: self
-    call spin_mover_t_run_one_step(self%spin_mover, self%spin_calculator, &
-         self%spin_hist)
+    call spin_mover_t_run_one_step(self%spin_mover, self%spin_calculator)
   end subroutine spin_model_t_run_one_step
   !!***
 
@@ -577,7 +578,7 @@ contains
        call spin_model_t_prepare_ncfile(self, spin_ncfile, & 
             & trim(self%out_fname)//'_T'//post_fname//'_spinhist.nc')
        call spin_ncfile_t_write_one_step(spin_ncfile, self%spin_hist)
-       call spin_mover_t_run_time(self%spin_mover, self%spin_calculator, & 
+       call self%spin_mover%run_time(self%spin_calculator, & 
             & self%spin_hist, ncfile=spin_ncfile, ob=self%spin_ob)
 
        call spin_ncfile_t_close(spin_ncfile)

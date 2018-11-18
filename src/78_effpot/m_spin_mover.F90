@@ -38,11 +38,13 @@ module m_spin_mover
   use m_abicore
   use m_mathfuncs, only : cross
   use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
-  use m_spin_terms, only:  spin_terms_t, spin_terms_t_total_Heff, spin_terms_t_get_etot 
+  use m_spin_terms, only:  spin_terms_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
+  use m_effpot_api, only: effpot_t
+  use m_mover_api, only: abstract_mover_t
   implicit none
   !!***
 
@@ -62,15 +64,19 @@ module m_spin_mover
   !! SOURCE
 
 
-  type spin_mover_t
+  type, extends(abstract_mover_t) :: spin_mover_t
      integer :: nspins, method
      real(dp) :: dt, total_time, temperature, pre_time
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:)
      type(rng_t) :: rng
+     type(spin_hist_t), pointer :: hist
      logical :: gamma_l_calculated
      CONTAINS
         procedure :: initialize => spin_mover_t_initialize
         procedure :: finalize => spin_mover_t_finalize
+        procedure :: set_hist => spin_mover_t_set_hist
+        procedure :: run_one_step_DM => spin_mover_t_run_one_step_DM
+        procedure :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
         procedure :: run_one_step => spin_mover_t_run_one_step
         procedure :: run_time => spin_mover_t_run_time
         procedure :: set_Langevin_params
@@ -125,6 +131,11 @@ contains
   end subroutine spin_mover_t_initialize
   !!***
 
+  subroutine spin_mover_t_set_hist(self, hist)
+    class(spin_mover_t), intent(inout) :: self
+    type(spin_hist_t), target, intent(inout) :: hist
+    self%hist=>hist
+  end subroutine spin_mover_t_set_hist
 
   subroutine set_Langevin_params(self, gyro_ratio, damping, temperature, ms)
     class(spin_mover_t), intent(inout) :: self
@@ -210,7 +221,7 @@ contains
   subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
 
     class (spin_mover_t), intent(inout):: self
-    type(spin_terms_t), intent(inout) :: calculator
+    type(effpot_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
@@ -218,7 +229,7 @@ contains
          & H_lang(3, self%nspins), Htmp(3, self%nspins), Heff(3, self%nspins) 
     ! predict
     call self%get_Langevin_Heff(H_lang)
-    call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
+    call calculator%calculate(spin=S_in, bfield=Heff, energy=etot)
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 
     call self%get_dSdt(S_in, Htmp, dSdt)
@@ -230,7 +241,7 @@ contains
     !$OMP END PARALLEL DO
 
     ! correction
-    call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
+    call calculator%calculate(spin=S_in, bfield=Heff, energy=etot)
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
     call self%get_dSdt(S_in, Htmp, dSdt2)
     !$OMP PARALLEL DO private(i)
@@ -272,17 +283,17 @@ contains
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
-    class(spin_terms_t), intent(inout) :: calculator
+    class(effpot_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
     real(dp) :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
     ! predict
-    call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
-
+    !call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
+    call calculator%calculate(spin=S_in, bfield=Heff, energy=etot)
     call self%get_Langevin_Heff(H_lang)
 
-       Htmp(:,:)=Heff(:,:)+H_lang(:,:)
+    Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 !$OMP PARALLEL DO private(i)
     do i=1,self%nspins
        ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
@@ -292,32 +303,34 @@ contains
 !$OMP END PARALLEL DO
 
     ! correction
-    call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
-    !$OMP PARALLEL DO private(i)
+    call calculator%calculate(spin=S_in, bfield=Htmp, energy=etot)
+    !call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
+
+!$OMP PARALLEL DO private(i)
     do i=1,self%nspins
        Heff(:,i)=(Heff(:,i)+Htmp(:,i))*0.5_dp
        Htmp(:,i)=Heff(:,i)+H_lang(:,i)
        Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
        call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
     end do
-    !$OMP END PARALLEL DO
-    call spin_terms_t_get_etot(calculator, S_out, Heff, etot)
+!$OMP END PARALLEL DO
+    !call spin_terms_t_get_etot(calculator, S_out, Heff, etot)
   end subroutine spin_mover_t_run_one_step_DM
 
 
-  subroutine spin_mover_t_run_one_step(self, calculator, hist)
+  subroutine spin_mover_t_run_one_step(self, effpot)
     class(spin_mover_t), intent(inout) :: self
-    type(spin_terms_t), intent(inout) :: calculator
-    type(spin_hist_t),intent(inout) :: hist
+    class(effpot_t), intent(inout) :: effpot
     real(dp) :: S_out(3,self%nspins), etot
     if(self%method==1) then
-       call spin_mover_t_run_one_step_HeunP(self, calculator, spin_hist_t_get_S(hist), S_out, etot)
+       !call spin_mover_t_run_one_step_HeunP(self, effpot, spin_hist_t_get_S(self%hist), S_out, etot)
+       call self%run_one_step_HeunP(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
     else if (self%method==2) then
-       call spin_mover_t_run_one_step_DM(self, calculator, spin_hist_t_get_S(hist), S_out, etot)
+       call self%run_one_step_DM(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
     end if
 
     ! do not inc until time is set to hist.
-    call spin_hist_t_set_vars(hist=hist, S=S_out, Snorm=calculator%ms, etot=etot, inc=.False.)
+    call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
   end subroutine spin_mover_t_run_one_step
 
   !!****f* m_spin_mover/spin_mover_t_run_time
@@ -343,7 +356,7 @@ contains
   subroutine spin_mover_t_run_time(self, calculator, hist, ncfile, ob)
 
     class(spin_mover_t), intent(inout):: self
-    type(spin_terms_t), intent(inout) :: calculator
+    class(effpot_t), intent(inout) :: calculator
     type(spin_hist_t), intent(inout) :: hist
     type(spin_ncfile_t), intent(inout) :: ncfile
     type(spin_observable_t), intent(inout) :: ob
@@ -381,7 +394,7 @@ contains
 
        do while(t<self%pre_time)
           counter=counter+1
-          call spin_mover_t_run_one_step(self, calculator, hist)
+          call self%run_one_step(calculator)
           call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
           if(mod(counter, hist%spin_nctime)==0) then
              call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
@@ -408,7 +421,7 @@ contains
 
     do while(t<self%total_time)
        counter=counter+1
-       call self%run_one_step(calculator, hist)
+       call self%run_one_step(calculator)
        call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
        call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
             hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))

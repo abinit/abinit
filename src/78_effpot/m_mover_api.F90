@@ -25,7 +25,7 @@ module m_mover_api
      !procedure :: finalize
      procedure :: set_params
      procedure :: set_initial_state ! initial state
-     procedure :: run_one_step
+     procedure:: run_one_step 
      procedure :: run_nstep
      procedure :: reset            ! reset the mover
      procedure :: calc_observables ! call functions to calculate observables
@@ -49,6 +49,7 @@ contains
   subroutine run_one_step(self, effpot)
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
+    class(effpot_t), intent(inout) :: effpot
 
   end subroutine run_one_step
 
