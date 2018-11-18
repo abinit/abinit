@@ -4318,11 +4318,11 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  integer :: ount, unt, fform
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
- character(len=fnlen) :: tmp_fname
 #endif
  logical :: use_netcdf
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
+ character(len=fnlen) :: tmp_fname
  type(hdr_type) :: hdr_ref
  !type(kpath_t) :: qpath
 !arrays

@@ -115,8 +115,6 @@ contains
 subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 &  mxvals,ndtset,ndtset_alloc,npsp,results_out,timopt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,dmatpuflag,iout

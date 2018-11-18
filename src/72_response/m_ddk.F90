@@ -205,10 +205,13 @@ MODULE m_ddk
 
    procedure :: setup_spin_kpoint => ddkop_setup_spin_kpoint
     ! Prepare application of dH/dk for given spin, k-point.
+
    procedure :: apply => ddkop_apply
     ! Apply dH/dk to input wavefunction.
+
    procedure :: get_velocity => ddkop_get_velocity
     ! Compute matrix element.
+
    procedure :: free => ddkop_free
     ! Free memory.
 
@@ -332,7 +335,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  integer :: mband, nbcalc, nsppol, ib_v, ib_c, dummy_gvec(3,dummy_npw)
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: ii, ik, bandmin, bandmax, istwf_k, idir
- integer :: my_rank, nproc, ierr
+ integer :: my_rank, nproc, ierr, bstop
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid
@@ -426,6 +429,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      end do
    end do
  end do
+ !call wrtout(std_out, sjoin(" Rank: ", itoa(my_rank), "will treat", itoa(count(task_distrib == my_rank)))
 
  ! Initialize distributed wavefunctions object
  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,paral_kgb0,dummy_npw,mband,nband,nkpt,nsppol,&
@@ -494,7 +498,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
        end if
 
        ! Loop over bands
-       do ib_c=ib_v,bandmax
+       bstop = bandmax ! if (only_diago) bstop = ib_v
+       do ib_c=ib_v,bstop
          if (task_distrib(ib_c,ib_v,ik,spin) /= my_rank) cycle
 
          if (dtset%useria /= 666) then

@@ -16,12 +16,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! NOTES
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -83,13 +77,21 @@ MODULE m_spectra
   ! emacro_nlf(nomega,nqpoints)
   ! contains e_{G1=0,G2=0}(q-->0,nomega) (without Local field effects)
 
+ contains
+
+   procedure :: free => spectra_free
+   ! Free memory.
+
+   procedure :: write => spectra_write
+   ! Write results on file.
+
+   procedure :: repr => spectra_repr
+   ! Return info on Macroscopic diel. constant in form of a string.
+
  end type spectra_t
 !!***
 
  public :: spectra_init       ! Creation method.
- public :: spectra_free       ! Free memory.
- public :: spectra_write      ! Write results on file.
- public :: spectra_repr       ! Return info on Macroscopic diel. constant in form of a string.
 
  integer,public,parameter :: W_EM_LF  = 1
  integer,public,parameter :: W_EM_NLF = 2
@@ -166,25 +168,15 @@ end subroutine spectra_init
 subroutine spectra_free(Spectra)
 
 !Arguments ------------------------------------
- type(spectra_t),intent(inout) :: spectra
+ class(spectra_t),intent(inout) :: spectra
 
 ! *********************************************************************
 
- if (allocated(Spectra%omega)) then
-   ABI_FREE(Spectra%omega)
- end if
- if (allocated(Spectra%qpts)) then
-   ABI_FREE(Spectra%qpts)
- end if
- if (allocated(Spectra%emacro_lf)) then
-   ABI_FREE(Spectra%emacro_lf)
- end if
- if (allocated(Spectra%emacro_nlf)) then
-   ABI_FREE(Spectra%emacro_nlf)
- end if
- if (allocated(Spectra%eelf)) then
-   ABI_FREE(Spectra%eelf)
- end if
+ ABI_SFREE(Spectra%omega)
+ ABI_SFREE(Spectra%qpts)
+ ABI_SFREE(Spectra%emacro_lf)
+ ABI_SFREE(Spectra%emacro_nlf)
+ ABI_SFREE(Spectra%eelf)
 
 end subroutine spectra_free
 !!***
@@ -216,10 +208,9 @@ subroutine spectra_write(Spectra,write_bits,fname)
 
 !Arguments ------------------------------------
 !scalars
+ class(spectra_t),intent(in) :: Spectra
  integer,intent(in) :: write_bits
  character(len=*),intent(in) :: fname
-!arrays
- type(spectra_t),intent(in) :: Spectra
 
 !Local variables-------------------------------
 !scalars
@@ -336,7 +327,7 @@ subroutine spectra_repr(Spectra,str)
 
 !Arguments ------------------------------------
 !scalars
- type(spectra_t),intent(in) :: Spectra
+ class(spectra_t),intent(in) :: Spectra
  character(len=*),intent(out) :: str
 
 !Local variables-------------------------------

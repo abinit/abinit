@@ -35,6 +35,7 @@ MODULE m_screening
  use m_splines
  use m_abicore
  use m_lebedev
+ use m_spectra
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -56,7 +57,6 @@ MODULE m_screening
  use m_vcoul,           only : vcoul_t
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
- use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
@@ -1029,11 +1029,11 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_FREE(dummy_lwing)
 
          if (is_qeq0==1) then
-           call spectra_repr(spectra,msg)
+           call spectra%repr(msg)
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          end if
-         call spectra_free(spectra)
+         call spectra%free()
 
          call write_screening(out_varname,unt_dump,iomode,npwe,Er%nomega,iqibz,epsm1)
        end do
@@ -1105,12 +1105,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_FREE(dummy_head)
 
        if (is_qeq0==1) then
-         call spectra_repr(spectra,msg)
+         call spectra%repr(msg)
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        end if
 
-       call spectra_free(spectra)
+       call spectra%free()
      end do
 
      Er%id = id_required

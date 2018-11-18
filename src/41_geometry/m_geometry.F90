@@ -2894,7 +2894,6 @@ end subroutine remove_inversion
 
 subroutine symredcart(aprim,bprim,symcart,symred)
 
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(in) :: symred(3,3)

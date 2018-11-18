@@ -2339,7 +2339,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
    end do
  end if
 
- task_distrib = RESHAPE(list,(/n1,n2,n3,n4/))
+ task_distrib = RESHAPE(list, [n1,n2,n3,n4])
 
  if (ANY(task_distrib==-999)) then
    call xmpi_abort(msg="task_distrib == -999")

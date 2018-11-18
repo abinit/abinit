@@ -969,33 +969,15 @@ subroutine esymm_free_0D(esymm)
 ! *************************************************************************
 
  !@esymm_t
- if (allocated(esymm%g0)) then
-   ABI_FREE(esymm%g0)
- end if
- if (allocated(esymm%tr_g0))  then
-   ABI_FREE(esymm%tr_g0)
- end if
- if (allocated(esymm%nelements))  then
-   ABI_FREE(esymm%nelements)
- end if
- if (allocated(esymm%sgk2symrec))  then
-   ABI_FREE(esymm%sgk2symrec)
- end if
- if (allocated(esymm%tr_sgk2symrec)) then
-   ABI_FREE(esymm%tr_sgk2symrec)
- end if
- if (allocated(esymm%herring_test)) then
-   ABI_FREE(esymm%herring_test)
- end if
- if (allocated(esymm%b2irrep)) then
-   ABI_FREE(esymm%b2irrep)
- end if
- if (allocated(esymm%degs_bounds))  then
-   ABI_FREE(esymm%degs_bounds)
- end if
- if (allocated(esymm%degs_dim)) then
-   ABI_FREE(esymm%degs_dim)
- end if
+ ABI_SFREE(esymm%g0)
+ ABI_SFREE(esymm%tr_g0)
+ ABI_SFREE(esymm%nelements)
+ ABI_SFREE(esymm%sgk2symrec)
+ ABI_SFREE(esymm%tr_sgk2symrec)
+ ABI_SFREE(esymm%herring_test)
+ ABI_SFREE(esymm%b2irrep)
+ ABI_SFREE(esymm%degs_bounds)
+ ABI_SFREE(esymm%degs_dim)
 
  if (allocated(esymm%irrep2b)) then
    do ii=LBOUND(esymm%irrep2b,DIM=1),UBOUND(esymm%irrep2b,DIM=1)
@@ -1004,17 +986,9 @@ subroutine esymm_free_0D(esymm)
    ABI_DT_FREE(esymm%irrep2b)
  end if
 
- if (allocated(esymm%Calc_irreps)) then
-   call irrep_free(esymm%Calc_irreps)
- end if
-
- if (allocated(esymm%trCalc_irreps)) then
-   call irrep_free(esymm%trCalc_irreps)
- end if
-
- if (allocated(esymm%Ref_irreps)) then
-   call irrep_free(esymm%Ref_irreps)
- end if
+ if (allocated(esymm%Calc_irreps)) call irrep_free(esymm%Calc_irreps)
+ if (allocated(esymm%trCalc_irreps)) call irrep_free(esymm%trCalc_irreps)
+ if (allocated(esymm%Ref_irreps)) call irrep_free(esymm%Ref_irreps)
 
 end subroutine esymm_free_0D
 !!***
