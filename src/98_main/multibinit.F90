@@ -86,13 +86,14 @@ program multibinit
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(17),tmpfilename,name
  character(len=500) :: message
- type(multibinit_dtset_type) :: inp
+ type(multibinit_dtset_type), target :: inp
  type(effective_potential_type) :: reference_effective_potential
  type(abihist) :: hist
  type(args_t) :: args
 
-!TODO hexu: add types for spin here.
+ ! data for spin
  type(spin_model_t) :: spin_model
+
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)

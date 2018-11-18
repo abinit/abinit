@@ -40,15 +40,11 @@ module  m_spin_terms
   use defs_basis
   use m_errors
   use m_abicore
-  use m_mathfuncs
   use m_spin_terms_funcs
   use m_sparse_matrix
-  use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   implicit none
   !!***
 
-  ! TODO move parameters to somewhere (where?)
-  !real(dp), parameter :: bohr_mag=9.27400995e-24_dp, gyromagnetic_ratio = 1.76e11_dp
   type spin_terms_t
      integer :: nspins
      real(dp) :: etot
@@ -60,7 +56,6 @@ module  m_spin_terms
      ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
      integer, allocatable :: iatoms(:)
      !integer :: seed
-     type(rng_t) :: rng
      ! random seed
      logical :: has_external_hfield, has_uniaxial_anistropy, has_exchange, &
           has_DMI, has_dipdip, has_bilinear
@@ -119,26 +114,20 @@ module  m_spin_terms
      !     Coupling to thermal bath can be on-site
      !     Size should be nspins?
 
-     logical :: gamma_l_calculated = .False.
-     real(dp), allocatable :: gamma_l(:)
-     ! gamma_l= gyro_ratio/(1+gilbert_damping)**2
-
-     real(dp) :: dt, temperature
-     real(dp), allocatable :: H_lang_coeff(:)
-
 
      ! vector for calculating effective field
      real(dp), allocatable :: Htmp(:)
-     !  CONTAINS
-     !    procedure :: initialize => spin_terms_t_initialize
-     !    procedure :: finalize => spin_terms_t_finalize
-     !    procedure :: get_Heff => total_Heff
+       CONTAINS
+         procedure :: initialize => spin_terms_t_initialize
+         procedure :: finalize => spin_terms_t_finalize
+         procedure :: get_Heff => spin_terms_t_total_Heff
      !    procedure :: Heff_to_dSdt => Heff_to_dSdt
      !    procedure :: get_dSdt => get_dSdt
      !    procedure :: get_Langevin_Heff => get_Langevin_Heff
   end type spin_terms_t
 contains
-  subroutine spin_terms_t_initialize(self, cell, pos, spinat,  iatoms, ispin_prim, rvec)
+  subroutine spin_terms_t_initialize(self, cell, pos, spinat,  iatoms, &
+       & ispin_prim, rvec, gyro_ratio, damping)
 
     implicit none
     !Arguments ------------------------------------
@@ -146,7 +135,7 @@ contains
     class(spin_terms_t), intent(out) :: self
     integer, intent(in) :: ispin_prim(:), rvec(:,:)
     integer, intent(in) ::  iatoms(:)
-    real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:)
+    real(dp), intent(in) :: cell(3,3), pos(:,:), spinat(:,:), gyro_ratio(:), damping(:)
     !Local variables-------------------------------
     integer :: nspins,  i
     nspins=size(pos, 2)
@@ -181,21 +170,15 @@ contains
     self%has_bilinear=.False.
 
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
-    ! Defautl gyro_ratio
-    self%gyro_ratio(:)=1.0_dp !gyromagnetic_ratio
-
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
-    ABI_ALLOCATE( self%gamma_l, (nspins))
-
-    ABI_ALLOCATE(self%H_lang_coeff, (nspins))
+    ! Defautl gyro_ratio
+    self%gyro_ratio(:)=gyro_ratio !gyromagnetic_ratio
+    self%gilbert_damping(:)=damping
 
     call LIL_mat_initialize(self%bilinear_lil_mat,self%nspins*3,self%nspins*3)
     ABI_ALLOCATE( self%Htmp, (nspins*3))
-    call set_seed(self%rng, [111111_dp, 2_dp])
 
     ! set dt default value so x/dt would not crash
-    self%dt=1e-16
-    self%temperature=0.0
     
   end subroutine spin_terms_t_initialize
 
@@ -249,32 +232,6 @@ contains
 
   end subroutine spin_terms_t_set_terms
 
-  subroutine spin_terms_t_set_params(self, dt, temperature, gilbert_damping, gyro_ratio)
-
-    class(spin_terms_t) , intent(inout) :: self
-    real(dp), optional, intent(in) :: gilbert_damping(self%nspins), dt, temperature, gyro_ratio(self%nspins)
-
-    if(present(gilbert_damping)) then
-       self%gilbert_damping(:)=gilbert_damping(:)
-    endif
-
-    if(present(gyro_ratio)) then
-       self%gyro_ratio(:)=gyro_ratio(:)
-    endif
-
-    if(present(dt)) then
-       self%dt=dt
-    end if
-
-    if(present(temperature)) then
-       self%temperature=temperature
-    end if
-
-    ! * kb in SI unit.
-    self%H_lang_coeff(:)=sqrt(2.0*self%gilbert_damping(:)* self%temperature &
-         &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
-
-  end subroutine spin_terms_t_set_params
 
 
   subroutine spin_terms_t_add_SIA(self, mode, k1, k1dir)
@@ -295,13 +252,6 @@ contains
        call spin_terms_t_set_uniaxial_MCA(self, k1_tmp, k1dir_tmp)
     endif
   end subroutine spin_terms_t_add_SIA
-
-  subroutine spin_terms_t_get_gamma_l(self)
-
-    type(spin_terms_t), intent(inout) :: self
-    self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%gilbert_damping(:)**2)
-    self%gamma_l_calculated=.True.
-  end subroutine spin_terms_t_get_gamma_l
 
   subroutine spin_terms_t_set_external_hfield(self, external_hfield)
 
@@ -477,10 +427,6 @@ contains
     real(dp) :: Htmp(3,self%nspins)
     Heff(:,:) =0.0_dp
 
-    if(.not. self%gamma_l_calculated) then
-       call spin_terms_t_get_gamma_l(self)
-    end if
-
     if(self%has_bilinear) then
        call spin_terms_t_calc_bilinear_term_Heff(self,S,Htmp)
        Heff=Heff+Htmp
@@ -515,57 +461,6 @@ contains
 
   end subroutine spin_terms_t_total_Heff
 
-  ! A effective torque from Langevin heat bath
-  subroutine spin_terms_t_get_Langevin_Heff(self, dt, temperature, Heff)
-
-    class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in) :: dt, temperature
-    real(dp), intent(out):: Heff(3,self%nspins)
-    real(dp) :: x(3, self%nspins) 
-    integer :: i
-    if ( temperature .gt. 1d-7) then
-       !call rand_normal_ziggurat(x)
-       call rand_normal_array(self%rng, x, 3*self%nspins)
-
-       do i = 1, self%nspins
-          !C=sqrt(2.0*self%gilbert_damping(i)*boltzmann* temperature &
-          !     &  /(self%gyro_ratio(i)* dt *self%ms(i)))
-          Heff(:,i)= x(:,i) * self%H_lang_coeff(i)
-       end do
-    else
-       Heff(:,:)=0.0_dp
-    end if
-  end subroutine spin_terms_t_get_Langevin_Heff
-
-  subroutine spin_terms_t_Hrotate(self, Heff, S, Hrotate)
-    class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in) :: Heff(3,self%nspins), S(3,self%nspins)
-    real(dp), intent(out) :: Hrotate(3, self%nspins)
-    integer :: i
-    !!$OMP PARALLEL DO private(i)
-    do i=1,self%nspins
-       ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
-       Hrotate(:,i) = self%gamma_L(i) * ( Heff(:,i) + self%gilbert_damping(i)* cross(S(:,i), Heff(:,i)))
-    end do
-    !!$OMP END PARALLEL DO
-  end subroutine spin_terms_t_Hrotate
-
-  ! ds/dt = f(Heff, S)
-  subroutine spin_terms_t_Heff_to_dsdt(self, Heff, S, dSdt)
-
-    class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in) :: Heff(3,self%nspins), S(3,self%nspins)
-    real(dp), intent(out) :: dSdt(3, self%nspins)
-    integer :: i
-    real(dp) :: Ri(3)
-!$OMP PARALLEL DO private(Ri, i)
-    do i=1,self%nspins
-       Ri = cross(S(:,i),Heff(:,i))
-       dSdt(:,i) = -self%gamma_L(i)*(Ri+self%gilbert_damping(i)* cross(S(:,i), Ri))
-    end do
-!$OMP END PARALLEL DO
-  end subroutine spin_terms_t_Heff_to_dsdt
-
   subroutine spin_terms_t_get_etot(self, S, Heff, etot)
 
     class(spin_terms_t), intent(inout) :: self
@@ -579,21 +474,6 @@ contains
        end do
     end do
   end subroutine spin_terms_t_get_etot
-
-  subroutine spin_terms_t_get_dSdt(self,  S, H_lang, dSdt )
-
-    class(spin_terms_t) ,intent(inout) :: self
-    real(dp), intent(in):: S(3, self%nspins), H_lang(3, self%nspins)
-    real(dp), intent(out):: dSdt(3, self%nspins)
-    real(dp):: Heff(3, self%nspins)
-    !call self%get_Heff(S=S, Heff=Heff)
-    call spin_terms_t_total_Heff(self=self, S=S, Heff=Heff)
-    call spin_terms_t_get_etot(self=self, S=S, Heff=Heff, etot=self%etot)
-    Heff(:,:)=Heff(:,:)+H_lang(:,:)
-    !call self%Heff_to_dsdt(Heff,S, dSdt)
-    call spin_terms_t_Heff_to_dsdt(self, Heff, S, dSdt)
-
-  end subroutine spin_terms_t_get_dSdt
 
   subroutine spin_terms_t_finalize(self)
 
@@ -656,16 +536,6 @@ contains
     if (allocated(self%gilbert_damping))  then
        ABI_DEALLOCATE(self%gilbert_damping)
     endif
-
-
-    if (allocated(self%gamma_l))  then
-       ABI_DEALLOCATE(self%gamma_l)
-    endif
-
-    if (allocated(self%H_lang_coeff))  then
-       ABI_DEALLOCATE(self%H_lang_coeff)
-    endif
-
 
     self%has_exchange=.False.
     if (allocated(self%exchange_i))  then

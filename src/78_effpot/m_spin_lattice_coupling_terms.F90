@@ -17,7 +17,6 @@ module m_spin_lattice_coupling_terms
   private
 
   type, public, extends(effpot_t) :: abstract_spin_lattice_coupling_term_t
-     integer :: nspin, natom
    contains
      ! things all spin_lattice_couplgin terms share
   end type abstract_spin_lattice_coupling_term_t

@@ -31,16 +31,18 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "abi_common.h"
 module m_spin_mover
   use defs_basis
   use m_errors
   use m_abicore
+  use m_mathfuncs, only : cross
   use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
-  use m_spin_terms, only: spin_terms_t_get_dSdt, spin_terms_t_get_Langevin_Heff, &
-       & spin_terms_t_get_gamma_l, spin_terms_t, spin_terms_t_total_Heff, spin_terms_t_get_etot, &
-       & spin_terms_t_Hrotate
+  use m_spin_terms, only:  spin_terms_t, spin_terms_t_total_Heff, spin_terms_t_get_etot 
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
+  use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   implicit none
   !!***
 
@@ -63,10 +65,17 @@ module m_spin_mover
   type spin_mover_t
      integer :: nspins, method
      real(dp) :: dt, total_time, temperature, pre_time
+     real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:)
+     type(rng_t) :: rng
+     logical :: gamma_l_calculated
      CONTAINS
         procedure :: initialize => spin_mover_t_initialize
+        procedure :: finalize => spin_mover_t_finalize
         procedure :: run_one_step => spin_mover_t_run_one_step
         procedure :: run_time => spin_mover_t_run_time
+        procedure :: set_Langevin_params
+        procedure :: get_Langevin_Heff
+        procedure :: get_dSdt
   end type spin_mover_t
   !!***
 
@@ -91,18 +100,89 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_initialize(self, nspins, dt, total_time, temperature, pre_time, method)
+  subroutine spin_mover_t_initialize(self, params, nspins)
     class(spin_mover_t), intent(inout) :: self
-    real(dp), intent(in) :: dt, total_time, pre_time,temperature
-    integer, intent(in) :: nspins, method
+    type(multibinit_dtset_type) :: params
+    integer, intent(in) :: nspins
     self%nspins=nspins
-    self%dt=dt
-    self%pre_time=pre_time
-    self%total_time=total_time
-    self%temperature=temperature
-    self%method=method
+    self%dt= params%spin_dt
+    self%pre_time= params%spin_ntime_pre * self%dt
+    self%total_time= params%spin_ntime * self%dt
+    self%temperature=params%spin_temperature
+    if(params%spin_dynamics>=0) then
+       self%method=params%spin_dynamics
+    endif
+    call set_seed(self%rng, [111111_dp, 2_dp])
+
+
+    ABI_ALLOCATE(self%ms, (nspins) )
+    ABI_ALLOCATE(self%gyro_ratio, (nspins) )
+    ABI_ALLOCATE(self%damping, (nspins) )
+    ABI_ALLOCATE(self%gamma_l, (nspins) )
+    ABI_ALLOCATE(self%H_lang_coeff, (nspins) )
+
+    self%gamma_l_calculated=.False.
   end subroutine spin_mover_t_initialize
   !!***
+
+
+  subroutine set_Langevin_params(self, gyro_ratio, damping, temperature, ms)
+    class(spin_mover_t), intent(inout) :: self
+    real(dp), optional, intent(in) :: damping(self%nspins), temperature, &
+         &    gyro_ratio(self%nspins), ms(self%nspins)
+
+    if(present(damping)) then
+       self%damping(:)=damping(:)
+    endif
+
+    if(present(gyro_ratio)) then
+       self%gyro_ratio(:)=gyro_ratio(:)
+    endif
+    if(present(ms)) then
+       self%ms(:)=ms(:)
+    endif
+
+
+    if(present(temperature)) then
+       self%temperature=temperature
+    end if
+
+
+    self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
+    self%gamma_l_calculated=.True.
+
+    self%H_lang_coeff(:)=sqrt(2.0*self%damping(:)* self%temperature &
+         &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
+  end subroutine set_Langevin_params
+
+
+  subroutine get_Langevin_Heff(self, H_lang)
+    class(spin_mover_t), intent(inout) :: self
+    real(dp), intent(inout):: H_lang(3,self%nspins)
+    integer :: i
+      if ( self%temperature .gt. 1d-7) then
+         call rand_normal_array(self%rng, H_lang, 3*self%nspins)
+         do i = 1, self%nspins
+            H_lang(:,i)= H_lang(:,i) * self%H_lang_coeff(i)
+         end do
+      else
+         H_lang(:,:)=0.0_dp
+      end if
+    end subroutine get_Langevin_Heff
+
+  subroutine get_dSdt(self, S, Heff, dSdt)
+    class(spin_mover_t), intent(inout) :: self
+    real(dp), intent(in) :: Heff(3,self%nspins), S(3,self%nspins)
+    real(dp), intent(out) :: dSdt(3, self%nspins)
+    integer :: i
+    real(dp) :: Ri(3)
+    !$OMP PARALLEL DO private(Ri, i)
+    do i=1,self%nspins
+       Ri = cross(S(:,i),Heff(:,i))
+       dSdt(:,i) = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S(:,i), Ri))
+    end do
+    !$OMP END PARALLEL DO
+  end subroutine get_dSdt
 
 
 
@@ -129,20 +209,20 @@ contains
 
   subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
 
-    !class (spin_mover_t), intent(inout):: self
-    type(spin_mover_t), intent(inout):: self
+    class (spin_mover_t), intent(inout):: self
     type(spin_terms_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
     real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
-         & H_lang(3, self%nspins)
+         & H_lang(3, self%nspins), Htmp(3, self%nspins), Heff(3, self%nspins) 
     ! predict
-    !call calculator%get_Langevin_Heff(self%dt, self%temperature, H_lang)
-    call spin_terms_t_get_Langevin_Heff(calculator, self%dt, self%temperature, H_lang)
+    call self%get_Langevin_Heff(H_lang)
+    call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
+    Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 
-    !call calculator%get_dSdt(S_in, H_lang, dSdt)
-    call spin_terms_t_get_dSdt(calculator, S_in, H_lang, dSdt)
+    call self%get_dSdt(S_in, Heff, dSdt)
+
     !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
        S_out(:,i)=  S_in(:,i) +dSdt(:,i) * self%dt
@@ -151,7 +231,7 @@ contains
 
     ! correction
     !call calculator%get_dSdt(S_out, H_lang, dSdt2)
-    call spin_terms_t_get_dSdt(calculator, S_out, H_lang, dSdt2)
+    call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
     etot=calculator%etot
     !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
@@ -191,8 +271,8 @@ contains
   subroutine spin_mover_t_run_one_step_DM(self, calculator, S_in, S_out, etot)
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
-    type(spin_mover_t), intent(inout):: self
-    type(spin_terms_t), intent(inout) :: calculator
+    class(spin_mover_t), intent(inout):: self
+    class(spin_terms_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
@@ -200,14 +280,19 @@ contains
     ! predict
     call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
 
-    call spin_terms_t_get_Langevin_Heff(calculator, self%dt, self%temperature, H_lang)
+    call self%get_Langevin_Heff(H_lang)
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
 
-    call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
+!$OMP PARALLEL DO private(i)
+    do i=1,self%nspins
+       ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
+       Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
+    end do
+!$OMP END PARALLEL DO
 
 !$OMP PARALLEL DO 
     do i=1, self%nspins
-     call rotate_S_DM(S_in(:,i), Htmp(:,i), self%dt, S_out(:,i))
+     call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
     end do
 !$OMP END PARALLEL DO
 
@@ -215,7 +300,12 @@ contains
     call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
     Heff(:,:)=(Heff(:,:)+Htmp(:,:))*0.5_dp
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
-    call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
+    !call spin_terms_t_Hrotate(calculator, Htmp, S_in, Hrotate)
+    !$OMP PARALLEL DO private(i)
+    do i=1,self%nspins
+       Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
+    end do
+    !$OMP END PARALLEL DO
 
     do i=1, self%nspins
        call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
@@ -328,7 +418,7 @@ contains
 
     do while(t<self%total_time)
        counter=counter+1
-       call spin_mover_t_run_one_step(self, calculator, hist)
+       call self%run_one_step(calculator, hist)
        call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
        call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
             hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
@@ -411,6 +501,25 @@ contains
   subroutine spin_mover_t_finalize(self)
 
     class(spin_mover_t), intent(inout):: self
+    if(allocated(self%gyro_ratio) ) then
+       ABI_DEALLOCATE(self%gyro_ratio)
+    end if
+
+    if(allocated(self%damping) ) then
+       ABI_DEALLOCATE(self%damping)
+    end if
+
+    if(allocated(self%gamma_l) ) then
+       ABI_DEALLOCATE(self%gamma_l)
+    end if
+
+    if(allocated(self%H_lang_coeff) ) then
+       ABI_DEALLOCATE(self%H_lang_coeff)
+    end if
+
+
+
+
   end subroutine spin_mover_t_finalize
   !!***
 

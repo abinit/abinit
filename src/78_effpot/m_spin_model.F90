@@ -50,7 +50,7 @@ module m_spin_model
   use m_io_tools, only : get_unit, open_file, close_unit
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spin_terms, only: spin_terms_t, spin_terms_t_set_params,  spin_terms_t_finalize, &
+  use m_spin_terms, only: spin_terms_t,  spin_terms_t_finalize, &
        & spin_terms_t_set_external_hfield, spin_terms_t_add_SIA
   use m_spin_model_primitive, only: spin_model_primitive_t, &
        & spin_model_primitive_t_initialize, &
@@ -60,7 +60,7 @@ module m_spin_model
        & spin_model_primitive_t_make_supercell
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
-  use m_spin_mover, only: spin_mover_t, spin_mover_t_initialize, spin_mover_t_finalize, &
+  use m_spin_mover, only: spin_mover_t,  spin_mover_t_finalize, &
        & spin_mover_t_run_time, spin_mover_t_run_one_step
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
@@ -206,9 +206,9 @@ contains
     !call self%set_initial_spin(mode=1)
     call spin_model_t_set_initial_spin(self)
 
-    call spin_mover_t_initialize(self%spin_mover, self%nspins, dt=self%params%spin_dt, &
-         &  total_time=self%params%spin_dt*self%params%spin_ntime, temperature=self%params%spin_temperature, &
-         & pre_time=self%params%spin_dt*self%params%spin_ntime_pre, method=self%params%spin_dynamics)
+    call self%spin_mover%initialize(self%params, self%nspins )
+    call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%gyro_ratio, &
+         & damping=self%spin_calculator%gilbert_damping, ms=self%spin_calculator%ms )
 
     call ob_initialize(self%spin_ob, self%spin_calculator, self%params)
 
@@ -245,7 +245,7 @@ contains
     call spin_model_primitive_t_finalize(self%spin_primitive)
     call spin_terms_t_finalize(self%spin_calculator)
     call spin_hist_t_free(self%spin_hist)
-    call spin_mover_t_finalize(self%spin_mover)
+    call self%spin_mover%finalize()
     call ob_finalize(self%spin_ob)
     call spin_ncfile_t_close(self%spin_ncfile)
     ! TODO: finalize others
@@ -282,11 +282,10 @@ contains
 
     if (self%params%spin_damping >=0) then
        damping(:)= self%params%spin_damping
-       call spin_terms_t_set_params(self%spin_calculator, dt=self%params%spin_dt, &
-            & temperature=self%params%spin_temperature, gilbert_damping=damping)
+       call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature, damping=damping)
     else
-       call spin_terms_t_set_params(self%spin_calculator, dt=self%params%spin_dt, &
-            & temperature=self%params%spin_temperature)
+
+       call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature)
     end if
 
     do i=1, self%nspins
@@ -562,8 +561,7 @@ contains
        ! set temperature
        ! TODO make this into a subroutine set_params
        self%params%spin_temperature=T
-       call spin_terms_t_set_params(self%spin_calculator, temperature=T)
-       self%spin_mover%temperature=T
+       call self%spin_mover%set_Langevin_params(temperature=T)
        call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
             &     spin_temperature=T)
        call ob_reset(self%spin_ob, self%params)

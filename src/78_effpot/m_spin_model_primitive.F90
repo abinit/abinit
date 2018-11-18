@@ -691,16 +691,10 @@ contains
        endif
     end do
 
-    !!do i=1, sc_nspins
-    !   sc_znucl(i)=1
-    !enddo
 
     call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
-         spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, rvec=sc_rvec)
-    
-    !sc_ham%gyro_ratio(:)=sc_gyroratios(:)
-    !sc_ham%gilbert_damping(:)=sc_damping_factors(:)
-    call spin_terms_t_set_params(sc_ham, gyro_ratio=sc_gyroratios, gilbert_damping=sc_damping_factors)
+         & spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, &
+         & rvec=sc_rvec, gyro_ratio=sc_gyroratios, damping=sc_damping_factors)
 
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1

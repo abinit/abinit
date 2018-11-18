@@ -29,7 +29,7 @@ contains
     type(multibinit_dtset_type) :: params
   end subroutine set_params
 
-  subroutine set_deformation(self, displacements, strain)
+  subroutine set_deformation(self, displacements, strain, )
     class(lattice_api_t), intent(inout) :: self
     real(dp), intent(in) :: displacements(:,:), strain(:,:)
   end subroutine set_deformation

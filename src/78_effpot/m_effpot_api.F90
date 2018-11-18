@@ -24,10 +24,12 @@ module m_effpot_api
      !type(prim_model_t) :: prim_model
      !type(sc_model_t) :: sc_model_t
 
+     ! labels for variables
      logical :: has_displacement=.False.
      logical :: has_strain=.False.
      logical :: has_spin=.False.
-     logical :: is_null=.False.
+     logical :: is_null=.False.   ! if is_null, this term does not exist.
+     integer :: natom=0, nspin=0
    contains
      procedure :: initialize
      procedure :: finalize
@@ -93,12 +95,10 @@ contains
     real(dp), optional, intent(in) :: displacements(:,:), strain(:,:)
   end subroutine set_distortion
 
-  
   subroutine get_energy(self, energy)
     class(effpot_t), intent(inout) :: self
     real(dp) , intent(inout) :: energy
   end subroutine get_energy
-
 
 
   subroutine set_spin(self, spin)
