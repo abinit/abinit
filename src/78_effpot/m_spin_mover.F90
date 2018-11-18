@@ -241,9 +241,9 @@ contains
     !$OMP END PARALLEL DO
 
     ! correction
-    call calculator%calculate(spin=S_in, bfield=Heff, energy=etot)
+    call calculator%calculate(spin=S_out, bfield=Heff, energy=etot)
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
-    call self%get_dSdt(S_in, Htmp, dSdt2)
+    call self%get_dSdt(S_out, Htmp, dSdt2)
     !$OMP PARALLEL DO private(i)
     do i =1, self%nspins
        S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
