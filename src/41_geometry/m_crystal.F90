@@ -1045,10 +1045,9 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  NCF_CHECK(nf90_put_att(ncid, vid("reduced_symmetry_translations"), "symmorphic", symmorphic))
 
  ! At this point we have an ETSF-compliant file. Add additional data for internal use in abinit.
- ! TODO add spinat.
  ncerr = nctk_def_arrays(ncid, [ &
    nctkarr_t('symafm', "int", "number_of_symmetry_operations"), &
-   nctkarr_t('symrel_cart', "dp", "number_of_symmetry_operations"), &
+   nctkarr_t('symrel_cart', "dp", "three, three, number_of_symmetry_operations"), &
    nctkarr_t('indsym', "int", "four, number_of_symmetry_operations, number_of_atoms") &
  ])
  NCF_CHECK(ncerr)
