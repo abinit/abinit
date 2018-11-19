@@ -55,8 +55,8 @@ contains
     character(*), intent(in) :: fnames(:)
     self%params = params
     call self%lattice_effpot%initialize(params, fnames)
-    !call self%spin_effpot%initialize(params)
-    !call self%slc_effpot%intialize(params, fnames)
+    !call self%spin_effpot%initialize(params, fnames)
+    call self%slc_effpot%initialize(params, fnames)
 
     call self%lattice_effpot%make_supercell(self%supercell)
     call self%spin_effpot%make_supercell(self%supercell)

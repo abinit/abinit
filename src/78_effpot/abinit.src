@@ -42,7 +42,7 @@ sources = [
     "m_polynomial_term.F90",
     "m_sparse_matrix.F90",
     "m_spin_hist.F90",
-    "m_spin_lattice_coupling_terms.F90",
+    "m_spin_lattice_coupling_effpot.F90",
     "m_spin_model.F90",
     "m_spin_model_primitive.F90",
     "m_spin_mover.F90",
