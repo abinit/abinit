@@ -48,9 +48,16 @@ module m_effpot_api
      !procedure :: get_effective_Bfield ! effective Bfield
   end type effpot_t
 
+  type, public:: effpot_pointer_t ! pointer to effpot
+     class(effpot_t) , pointer :: obj
+  end type effpot_pointer_t
+
   type, public, extends(effpot_t) :: effpot_list_t
      integer :: size=0
-     class (effpot_t) , pointer :: effpots(:)
+     integer :: MAXSIZE=8
+     type(effpot_pointer_t) :: effpots(8)  ! Maximum number of 8, should we make it more dynamic?
+     real(dp) :: stress_tmp(3,3)
+     real(dp), allocatable :: force_tmp(:,:), bfield_tmp(:,:)
    contains
      procedure :: initialize => effpot_list_t_initialize
      procedure :: finalize => effpot_list_t_finalize
@@ -133,51 +140,97 @@ contains
 
 
   !======================== Effpot_list_t======================
-  ! TODO : is this an overkill? 
+  ! TODO : is this an overkill?
 
-  subroutine effpot_list_t_initialize(self)
+  subroutine effpot_list_t_initialize(self, natoms, nspins)
     class (effpot_list_t), intent(inout) :: self
-    ! nothing to do
+    integer, intent(in) :: natoms, nspins
+    self%natoms=natoms
+    self%nspins=nspins
+    ABI_ALLOCATE(self%force_tmp, (3, natoms))
+    ABI_ALLOCATE(self%bfield_tmp, (3, nspins))
   end subroutine effpot_list_t_initialize
-
-  subroutine effpot_list_t_append(self, effpot)
-    class (effpot_list_t) :: self
-    class (effpot_list_t), target :: effpot
-    self%size=self%size + 1
-    self%effpots(self%size) => effpot
-    self%is_null= (self%is_null .or. effpot%is_null)
-    self%has_spin= (self%has_spin .or. effpot%has_spin)
-    self%has_displacement= (self%has_displacement .or. effpot%has_displacement)
-    self%has_strain= (self%has_strain.or. effpot%has_strain)
-  end subroutine effpot_list_t_append
 
   subroutine effpot_list_t_finalize(self)
     class (effpot_list_t) ,intent(inout) :: self
     integer :: i
     do i=1, self%size
-       nullify(self%effpots(i))
+       nullify(self%effpots(i)%obj)
     end do
     self%size=0
     self%is_null=.True.
     self%has_displacement=.False.
     self%has_strain=.False.
     self%has_spin=.False.
+
+    ABI_DEALLOCATE(self%force_tmp)
+    ABI_DEALLOCATE(self%bfield_tmp)
   end subroutine effpot_list_t_finalize
 
-  
+
+
+  subroutine effpot_list_t_append(self, effpot)
+    class (effpot_list_t) :: self
+    class (effpot_t), target :: effpot
+    self%size=self%size + 1
+    if(self%size>self%MAXSIZE) then
+       write(std_err, *) "Number of effpot larger than the maximum 8"
+    end if
+    self%effpots(self%size)%obj => effpot
+    self%is_null= (self%is_null .or. effpot%is_null)
+    self%has_spin= (self%has_spin .or. effpot%has_spin)
+    self%has_displacement= (self%has_displacement .or. effpot%has_displacement)
+    self%has_strain= (self%has_strain.or. effpot%has_strain)
+  end subroutine effpot_list_t_append
+
   subroutine effpot_list_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
     class(effpot_list_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
-    real(dp), save :: force_tmp(size(force, dim=2), size(force, dim=2))
-    real(dp), save :: strain_tmp(size(strain, dim=2), size(strain, dim=2))
+    integer :: i
+    real(dp) :: e
     ! if present in input
     ! calculate if required
-    if(self%has_displacement .and. present(force)) then
-       force(:,:)= 
+    if( present(force) .and. present(stress)) then
+       force(:,:)=0.0
+       stress(:,:)=0.0
+    endif
 
-  end subroutine calculate
+    if(present(bfield)) then
+       bfield(:,:)=0.0
+    end if
 
+    energy=0.0
 
+    ! calculate force and strain if asked to
+    if (present(force) .and. present(strain)) then
+       do i=1, self%size
+          ! only for these effpot has force term
+          if(self%effpots(i)%obj%has_displacement .and. self%effpots(i)%obj%has_strain) then
+             call self%effpots(i)%obj%calculate(displacement=displacement, strain=strain, &
+                     & spin=spin, force=self%force_tmp, stress=self%stress_tmp, energy=e)
+          endif
+          force(:,:) = force(:,:)+self%force_tmp(:,:)
+          stress(:,:) = stress(:,:) + self%stress_tmp(:,:)
+          energy=energy+e
+       end do
+    else if(present(bfield)) then
+       do i=1, self%size
+          ! only for these effpot has force term
+          if(self%effpots(i)%obj%has_spin) then
+             ! uncomment if F2008 style passing optional is not allowed.
+             !if (present(displacement) .and. present(strain)) then
+             call self%effpots(i)%obj%calculate(displacement=displacement, strain=strain, &
+                     & spin=spin, bfield=self%bfield_tmp, energy=e)
+             !else
+             !   call self%effpots(i)%obj%calculate( spin=spin,  &
+             !        & bfield=bfield, energy=e)
+             !endif
+          endif
+          bfield(:,:)=bfield(:,:)+self%bfield_tmp
+       end do
+    endif
+
+  end subroutine effpot_list_t_calculate
 
 end module m_effpot_api

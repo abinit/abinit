@@ -277,9 +277,9 @@ contains
     R(2,3)=B(2)*B(3)*u-B(1)*sinw
     R(3,3)=B(3)*B(3)*u+cosw
     S_out=matmul(R, S_in)
-  end subroutine rotate_S_DM
+  end function rotate_S_DM
 
-  subroutine spin_mover_t_run_one_step_DM(self, effpots, S_in, S_out, etot)
+  subroutine spin_mover_t_run_one_step_DM(self, effpot, S_in, S_out, etot)
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
@@ -287,8 +287,8 @@ contains
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
-    real(dp), save :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
-    real(dp), save :: e, Htmp2(3, self%nspins)
+    real(dp) :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
+    real(dp) :: e, Htmp2(3, self%nspins)
     ! predict
     !call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
     call effpot%calculate(spin=S_in, bfield=Heff, energy=etot)
@@ -304,7 +304,7 @@ contains
 !$OMP END PARALLEL DO
 
     ! correction
-    call calculator%calculate(spin=S_in, bfield=Htmp, energy=etot)
+    call effpot%calculate(spin=S_in, bfield=Htmp, energy=etot)
     !call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
 
 !$OMP PARALLEL DO private(i)
@@ -329,7 +329,6 @@ contains
     else if (self%method==2) then
        call self%run_one_step_DM(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
     end if
-
     ! do not inc until time is set to hist.
     call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
   end subroutine spin_mover_t_run_one_step
@@ -395,7 +394,7 @@ contains
 
        do while(t<self%pre_time)
           counter=counter+1
-          call self%run_one_step(calculator)
+          call self%run_one_step(effpot=calculator)
           call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
           if(mod(counter, hist%spin_nctime)==0) then
              call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
@@ -422,7 +421,7 @@ contains
 
     do while(t<self%total_time)
        counter=counter+1
-       call self%run_one_step(calculator)
+       call self%run_one_step(effpot=calculator)
        call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
        call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
             hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
@@ -520,9 +519,6 @@ contains
     if(allocated(self%H_lang_coeff) ) then
        ABI_DEALLOCATE(self%H_lang_coeff)
     end if
-
-
-
 
   end subroutine spin_mover_t_finalize
   !!***
