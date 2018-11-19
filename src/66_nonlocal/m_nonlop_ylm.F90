@@ -644,7 +644,7 @@ contains
    call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
 
 #ifdef MR_DEV
-   !For the metric dierivatives we need kpg in Cartesian coordinates
+   !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
      ABI_ALLOCATE(kpgcar,(npwin,nkpgin_))
      do ipw=1,npwin
@@ -668,7 +668,7 @@ contains
    call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
 
 #ifdef MR_DEV
-   !For the metric dierivatives we need kpg in Cartesian coordinates
+   !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
      do ipw=1,npwout
        kpgcar(ipw,1)=kpgout_(ipw,1)*gprimd(1,1)+kpgout_(ipw,2)*gprimd(1,2)+kpgout_(ipw,3)*gprimd(1,3)
