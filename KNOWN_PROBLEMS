@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.11.0 is for development
+The present release ABINITv8.11.1 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv8.11.0 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.11.0, list closed on 2018 10 16
+For ABINITv8.11.1, list closed on 2018 11 17
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -29,15 +29,14 @@ but there is no check on the ABINIT testfarm that ABINIT should run correctly.
 
 Status, for the different versions of compilers that are supported (or might become soon).
 
-GNU Fortran compiler (presently tested : v4.9, v5.3, v5.4, v6.3, v6.4, v7.2, v8.1)
+GNU Fortran compiler (presently tested : v4.9, v5.3, v6.3, v6.4, v6.5, v7.2, v7.3, v8.2)
 All are mostly OK
-gnu 4.9 and 5.4: libxc#82 is disactivated on tikal
+gnu 4.9 : libxc#82 is disactivated on tikal
 gnu 5.3 : bigdft#14 is disactivated on ubu_gnu_5.3_openmpi, and abiref_gnu_5.3_XX
 gnu 8.1+openmpi : the reading of WFK files using MPIIO is not correct for test mpiio#26
 
 Intel ifort compiler (presently tested : 13.1, 14.0, 15.0, 16.0, 17.0, 18.0)
 Ifort 13.1, mpiio#25, mpiio#26, paral#25, paral#29i, paral#93, paral#94 are disactivated (MPI IO, KGB, or calculations with exact exchange)
-Ifort 14.0 is mostly OK, except for paral#93 and paral#94.
 Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07.
@@ -46,6 +45,7 @@ Ifort 18.0 is a bit problematic.
    it works in simple programs. Thus all tests (and their chain of tests) that rely on mrgscr and mrgdv have been disabled for this compiler.
    Namely, v3#87-91, vv67mbpt#37-39, v7#86-88, v8#41-44, v8#63
  - Also, the reading of WFK files using MPIIO is not correct, for tests mpiio#26 and 62.
+Ifort 19.0 has the same problems than Ifort 18.0 .
 
 NAG Compilo
 Nag 6.2, mostly OK, except for test etsf_io#4, mpiio#28, v7#80, paral#25, paral#30
