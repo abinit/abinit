@@ -385,7 +385,7 @@ contains
 !Local variables-------------------------------
 !scalars
  integer :: choice_a,choice_b,cplex,cplex_enl,cplex_fac,ia,ia1,ia2,ia3,ia4,ia5
- integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,iln,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
+ integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,iln,ipw,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
  integer :: n1,n2,n3,nd2gxdt,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
  real(dp) :: enlk
@@ -403,6 +403,9 @@ contains
  real(dp),allocatable :: sij_typ(:),strnlk(:)
  real(dp),allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ffnlin_typ(:,:,:),ffnlout_typ(:,:,:),kpgin_(:,:),kpgout_(:,:)
+#ifdef MR_DEV
+ real(dp),allocatable,target :: kpgcar(:,:)
+#endif
 
 ! **********************************************************************
 
@@ -639,15 +642,45 @@ contains
  if (nkpgin<nkpgin_) then
    ABI_ALLOCATE(kpgin_,(npwin,nkpgin_))
    call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
+
+#ifdef MR_DEV
+   !For the metric dierivatives we need kpg in Cartesian coordinates
+   if (choice==33) then
+     ABI_ALLOCATE(kpgcar,(npwin,nkpgin_))
+     do ipw=1,npwin
+       kpgcar(ipw,1)=kpgin_(ipw,1)*gprimd(1,1)+kpgin_(ipw,2)*gprimd(1,2)+kpgin_(ipw,3)*gprimd(1,3)
+       kpgcar(ipw,2)=kpgin_(ipw,1)*gprimd(2,1)+kpgin_(ipw,2)*gprimd(2,2)+kpgin_(ipw,3)*gprimd(2,3)
+       kpgcar(ipw,3)=kpgin_(ipw,1)*gprimd(3,1)+kpgin_(ipw,2)*gprimd(3,2)+kpgin_(ipw,3)*gprimd(3,3)
+     end do
+     nullify(kpgin_)
+     kpgin_ => kpgcar
+   end if
+#endif
+
  else
    nkpgin_ = nkpgin
    kpgin_  => kpgin
  end if
  nkpgout_=0
- if ((choice==2.or.choice==22.or.choice==3.or.choice==54).and.signs==2) nkpgout_=3
+ if ((choice==2.or.choice==22.or.choice==3.or.choice==33.or.choice==54).and.signs==2) nkpgout_=3
  if (nkpgout<nkpgout_) then
    ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
    call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
+
+#ifdef MR_DEV
+   !For the metric dierivatives we need kpg in Cartesian coordinates
+   if (choice==33) then
+     do ipw=1,npwout
+       kpgcar(ipw,1)=kpgout_(ipw,1)*gprimd(1,1)+kpgout_(ipw,2)*gprimd(1,2)+kpgout_(ipw,3)*gprimd(1,3)
+       kpgcar(ipw,2)=kpgout_(ipw,1)*gprimd(2,1)+kpgout_(ipw,2)*gprimd(2,2)+kpgout_(ipw,3)*gprimd(2,3)
+       kpgcar(ipw,3)=kpgout_(ipw,1)*gprimd(3,1)+kpgout_(ipw,2)*gprimd(3,2)+kpgout_(ipw,3)*gprimd(3,3)
+     end do
+     nullify(kpgout_)
+     kpgout_ => kpgcar
+     ABI_DEALLOCATE(kpgcar)
+   end if
+#endif
+
  else
    nkpgout_ = nkpgout
    kpgout_ => kpgout
@@ -819,7 +852,7 @@ contains
 
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
        if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
-         call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gprimd,gx,&
+         call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &         ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
        end if
@@ -918,7 +951,7 @@ contains
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
            call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
-&           d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gprimd,gxfac,gxfac_sij,ia3,&
+&           d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
 &           idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
 &           nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
          end if

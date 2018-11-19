@@ -84,7 +84,6 @@ contains
 !!        2 if <p_lmn|c> scalars are complex
 !!  dimffnl=second dimension of ffnl
 !!  ffnl(npw,dimffnl,nlmn)= nonlocal quantities containing nonlocal form factors
-!!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  ia3=gives the number of the first atom in the subset presently treated
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2) or (choice=22,signs=2)
 !!                        - k point direction in the case (choice=5,signs=2)
@@ -94,6 +93,7 @@ contains
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  kpg(npw,nkpg)=(k+G) components          for ikpg=1...3   (if nkpg=3 or 9)
 !!       [(k+G)_a].[(k+G)_b] quantities for ikpg=4...9   (if nkpg=9)
+!!       (k+G) Cartesian components for choice==33
 !!  matblk=dimension of the array ph3d
 !!  mpi_enreg=information about MPI parallelization
 !!  ndgxdt=second dimension of dgxdt
@@ -151,7 +151,7 @@ contains
 !!
 !! SOURCE
 
-subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gprimd,gx,&
+subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gx,&
 &       ia3,idir,indlmn,istwf_k,kpg,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg,nlmn,&
 &       nloalg,npw,nspinor,ph3d,signs,ucvol,vect,qdir)
 
@@ -167,7 +167,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !arrays
  integer,intent(in) :: indlmn(6,nlmn),nloalg(3)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
- real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),gprimd(3,3),kpg(npw,nkpg),ph3d(2,npw,matblk)
+ real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),kpg(npw,nkpg),ph3d(2,npw,matblk)
  real(dp),intent(in) :: vect(:,:)
  real(dp),intent(out) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor)
  real(dp),intent(out) :: dgxdt(cplex,ndgxdt,nlmn,nincat,nspinor),gx(cplex,nlmn,nincat,nspinor)
@@ -194,7 +194,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  integer,parameter :: idir1(9)=(/1,1,1,2,2,2,3,3,3/),idir2(9)=(/1,2,3,1,2,3,1,2,3/)
  integer :: ffnl_dir(2)
  real(dp) :: tsec(2)
- real(dp),allocatable :: kpgcar(:,:)
+! real(dp),allocatable :: kpg(:,:)
  real(dp),allocatable :: scali(:),scalr(:),scalari(:,:),scalarr(:,:)
 ! *************************************************************************
 
@@ -246,17 +246,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  nthreads=OMP_GET_NUM_THREADS()
 #endif
 
-#ifdef MR_DEV
-!For choice=33 will need kpg in Cartesian coordinates
- if (choice_==33) then
-   ABI_ALLOCATE(kpgcar,(npw,3))
-   do ipw=1,npw
-     kpgcar(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
-     kpgcar(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
-     kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
-   end do
- end if
-#endif
+!#ifdef MR_DEV
+!!For choice=33 will need kpg in Cartesian coordinates
+! if (choice_==33) then
+!   ABI_ALLOCATE(kpg,(npw,3))
+!   do ipw=1,npw
+!     kpg(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
+!     kpg(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
+!     kpg(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
+!   end do
+! end if
+!#endif
 
 !==========================================================================
 !========== STANDARD VERSION ==============================================
@@ -614,18 +614,18 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                aux_i = scali(ipw)*ffnl(ipw,1+igamma,ilmn)
                buffer_r1 = buffer_r1 + aux_r
                buffer_i1 = buffer_i1 + aux_i
-               buffer_r2 = buffer_r2 + aux_r*kpgcar(ipw,ibeta)
-               buffer_i2 = buffer_i2 + aux_i*kpgcar(ipw,ibeta)
+               buffer_r2 = buffer_r2 + aux_r*kpg(ipw,ibeta)
+               buffer_i2 = buffer_i2 + aux_i*kpg(ipw,ibeta)
                aux_r = scalr(ipw)*ffnl(ipw,1+idelta,ilmn)
                aux_i = scali(ipw)*ffnl(ipw,1+idelta,ilmn)
                buffer_r3 = buffer_r3 + aux_r
                buffer_i3 = buffer_i3 + aux_i
-               buffer_r4 = buffer_r4 + aux_r*kpgcar(ipw,ibeta)
-               buffer_i4 = buffer_i4 + aux_i*kpgcar(ipw,ibeta)
+               buffer_r4 = buffer_r4 + aux_r*kpg(ipw,ibeta)
+               buffer_i4 = buffer_i4 + aux_i*kpg(ipw,ibeta)
                aux_r = scalr(ipw)*ffnl(ipw,4+idelgam,ilmn)
                aux_i = scali(ipw)*ffnl(ipw,4+idelgam,ilmn)
-               buffer_r5 = buffer_r5 + aux_r*kpgcar(ipw,ibeta)
-               buffer_i5 = buffer_i5 + aux_i*kpgcar(ipw,ibeta)
+               buffer_r5 = buffer_r5 + aux_r*kpg(ipw,ibeta)
+               buffer_i5 = buffer_i5 + aux_i*kpg(ipw,ibeta)
              end do
 
              if (parity) then
@@ -661,12 +661,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                do ipw=1,npw
                  aux_r = scalr(ipw)*ffnl(ipw,1+igamma,ilmn)
                  buffer_r1 = buffer_r1 + aux_r
-                 buffer_r2 = buffer_r2 + aux_r*kpgcar(ipw,ibeta)
+                 buffer_r2 = buffer_r2 + aux_r*kpg(ipw,ibeta)
                  aux_r = scalr(ipw)*ffnl(ipw,1+idelta,ilmn)
                  buffer_r3 = buffer_r3 + aux_r
-                 buffer_r4 = buffer_r4 + aux_r*kpgcar(ipw,ibeta)
+                 buffer_r4 = buffer_r4 + aux_r*kpg(ipw,ibeta)
                  aux_r = scalr(ipw)*ffnl(ipw,4+idelgam,ilmn)
-                 buffer_r5 = buffer_r5 + aux_r*kpgcar(ipw,ibeta)
+                 buffer_r5 = buffer_r5 + aux_r*kpg(ipw,ibeta)
                end do
 
                  dgxdt(1,1,ilmn,ia,ispinor) = scale*buffer_r1
@@ -683,12 +683,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                do ipw=1,npw
                  aux_i = scali(ipw)*ffnl(ipw,1+igamma,ilmn)
                  buffer_i1 = buffer_i1 + aux_i
-                 buffer_i2 = buffer_i2 + aux_i*kpgcar(ipw,ibeta)
+                 buffer_i2 = buffer_i2 + aux_i*kpg(ipw,ibeta)
                  aux_i = scali(ipw)*ffnl(ipw,1+idelta,ilmn)
                  buffer_i3 = buffer_i3 + aux_i
-                 buffer_i4 = buffer_i4 + aux_i*kpgcar(ipw,ibeta)
+                 buffer_i4 = buffer_i4 + aux_i*kpg(ipw,ibeta)
                  aux_i = scali(ipw)*ffnl(ipw,4+idelgam,ilmn)
-                 buffer_i5 = buffer_i5 + aux_i*kpgcar(ipw,ibeta)
+                 buffer_i5 = buffer_i5 + aux_i*kpg(ipw,ibeta)
                end do
 
                dgxdt(1,1,ilmn,ia,ispinor) =-scale*buffer_i1
@@ -1934,18 +1934,18 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                aux_i = scali(ipw)*ffnl(ipw,1+igamma,ilmn)
                buffer_r1 = buffer_r1 + aux_r
                buffer_i1 = buffer_i1 + aux_i
-               buffer_r2 = buffer_r2 + aux_r*kpgcar(ipw,ibeta)
-               buffer_i2 = buffer_i2 + aux_i*kpgcar(ipw,ibeta)
+               buffer_r2 = buffer_r2 + aux_r*kpg(ipw,ibeta)
+               buffer_i2 = buffer_i2 + aux_i*kpg(ipw,ibeta)
                aux_r = scalr(ipw)*ffnl(ipw,1+idelta,ilmn)
                aux_i = scali(ipw)*ffnl(ipw,1+idelta,ilmn)
                buffer_r3 = buffer_r3 + aux_r
                buffer_i3 = buffer_i3 + aux_i
-               buffer_r4 = buffer_r4 + aux_r*kpgcar(ipw,ibeta)
-               buffer_i4 = buffer_i4 + aux_i*kpgcar(ipw,ibeta)
+               buffer_r4 = buffer_r4 + aux_r*kpg(ipw,ibeta)
+               buffer_i4 = buffer_i4 + aux_i*kpg(ipw,ibeta)
                aux_r = scalr(ipw)*ffnl(ipw,4+idelgam,ilmn)
                aux_i = scali(ipw)*ffnl(ipw,4+idelgam,ilmn)
-               buffer_r5 = buffer_r5 + aux_r*kpgcar(ipw,ibeta)
-               buffer_i5 = buffer_i5 + aux_i*kpgcar(ipw,ibeta)
+               buffer_r5 = buffer_r5 + aux_r*kpg(ipw,ibeta)
+               buffer_i5 = buffer_i5 + aux_i*kpg(ipw,ibeta)
              end do
 !$OMP END DO
 !$OMP SINGLE
@@ -1988,12 +1988,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                do ipw=1,npw
                  aux_r = scalr(ipw)*ffnl(ipw,1+igamma,ilmn)
                  buffer_r1 = buffer_r1 + aux_r
-                 buffer_r2 = buffer_r2 + aux_r*kpgcar(ipw,ibeta)
+                 buffer_r2 = buffer_r2 + aux_r*kpg(ipw,ibeta)
                  aux_r = scalr(ipw)*ffnl(ipw,1+idelta,ilmn)
                  buffer_r3 = buffer_r3 + aux_r
-                 buffer_r4 = buffer_r4 + aux_r*kpgcar(ipw,ibeta)
+                 buffer_r4 = buffer_r4 + aux_r*kpg(ipw,ibeta)
                  aux_r = scalr(ipw)*ffnl(ipw,4+idelgam,ilmn)
-                 buffer_r5 = buffer_r5 + aux_r*kpgcar(ipw,ibeta)
+                 buffer_r5 = buffer_r5 + aux_r*kpg(ipw,ibeta)
                end do
 !$OMP SINGLE
                dgxdt(1,1,ilmn,ia,ispinor) = scale*buffer_r1
@@ -2016,12 +2016,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                do ipw=1,npw
                  aux_i = scali(ipw)*ffnl(ipw,1+igamma,ilmn)
                  buffer_i1 = buffer_i1 + aux_i
-                 buffer_i2 = buffer_i2 + aux_i*kpgcar(ipw,ibeta)
+                 buffer_i2 = buffer_i2 + aux_i*kpg(ipw,ibeta)
                  aux_i = scali(ipw)*ffnl(ipw,1+idelta,ilmn)
                  buffer_i3 = buffer_i3 + aux_i
-                 buffer_i4 = buffer_i4 + aux_i*kpgcar(ipw,ibeta)
+                 buffer_i4 = buffer_i4 + aux_i*kpg(ipw,ibeta)
                  aux_i = scali(ipw)*ffnl(ipw,4+idelgam,ilmn)
-                 buffer_i5 = buffer_i5 + aux_i*kpgcar(ipw,ibeta)
+                 buffer_i5 = buffer_i5 + aux_i*kpg(ipw,ibeta)
                end do
 !$OMP END DO
 !$OMP SINGLE

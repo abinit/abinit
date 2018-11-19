@@ -64,7 +64,6 @@ contains
 !!  dgxdtfac_sij(cplex,ndgxdtfac,nlmn,nincat,nspinor)= gradients of gxfacrelated to Sij (overlap)
 !!  dimffnl=second dimension of ffnl
 !!  ffnl(npw,dimffnl,nlmn)= nonlocal quantities containing nonlocal form factors
-!!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  gxfac(cplex_fac,nlmn,nincat,nspinor)= reduced projected scalars related to Vnl (NL operator)
 !!  gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))= reduced projected scalars related to Sij (overlap)
 !!  ia3=gives the number of the first atom in the subset presently treated
@@ -73,7 +72,8 @@ contains
 !!                        - strain component (1:6) in the case (choice=2,signs=2) or (choice=6,signs=1)
 !!                        - strain component (1:9) in the case (choice=33,signs=2) 
 !!  indlmn(6,nlmn)= array giving l,m,n,lm,ln,s for i=lmn
-!!  kpg(npw,nkpg)=(k+G) components (if nkpg=3)
+!!  kpg(npw,nkpg)=(k+G) components (if nkpg=3).
+!!                (k+G) Cartesian components for choice=33
 !!  matblk=dimension of the array ph3d
 !!  ndgxdtfac=second dimension of dgxdtfac
 !!  nincat=number of atoms in the subset here treated
@@ -156,7 +156,7 @@ contains
 !! SOURCE
 
 subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
-&                      d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnl,gprimd,ffnl,gxfac,gxfac_sij,&
+&                      d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnl,ffnl,gxfac,gxfac_sij,&
 &                      ia3,idir,indlmn,kpg,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpg,nlmn,nloalg,npw,&
 &                      nspinor,paw_opt,ph3d,svect,ucvol,vect,qdir)
 
@@ -175,7 +175,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  real(dp),intent(in) :: dgxdtfac(cplex_fac,ndgxdtfac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: dgxdtfac_sij(cplex,ndgxdtfac,nlmn,nincat*(paw_opt/3),nspinor)
  real(dp),intent(in) :: d2gxdtfac_sij(cplex,nd2gxdtfac,nlmn,nincat*(paw_opt/3),nspinor)
- real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),gprimd(3,3),gxfac(cplex_fac,nlmn,nincat,nspinor)
+ real(dp),intent(in) :: ffnl(npw,dimffnl,nlmn),gxfac(cplex_fac,nlmn,nincat,nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex,nlmn,nincat,nspinor*(paw_opt/3))
  real(dp),intent(in) :: kpg(npw,nkpg),ph3d(2,npw,matblk)
  real(dp),intent(inout) :: svect(:,:),vect(:,:)
@@ -192,7 +192,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
  integer,parameter :: idir1(9)=(/1,1,1,2,2,2,3,3,3/),idir2(9)=(/1,2,3,1,2,3,1,2,3/)
  integer,parameter :: nalpha(9)=(/1,2,3,3,3,2,2,1,1/),nbeta(9)=(/1,2,3,2,1,1,3,3,2/)
  real(dp),allocatable :: d2gxdtfac_(:,:,:),d2gxdtfacs_(:,:,:),dgxdtfac_(:,:,:),dgxdtfacs_(:,:,:),gxfac_(:,:),gxfacs_(:,:)
- real(dp),allocatable :: kpgcar(:,:)
+! real(dp),allocatable :: kpg(:,:)
  complex(dpc),allocatable :: ztab(:)
 
 ! *************************************************************************
@@ -243,12 +243,12 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 !For choice=33 will need kpg in Cartesian coordinates
  if (choice==33) then
    two_piinv=1.0_dp/two_pi
-   ABI_ALLOCATE(kpgcar,(npw,3))
-   do ipw=1,npw
-     kpgcar(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
-     kpgcar(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
-     kpgcar(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
-   end do
+!   ABI_ALLOCATE(kpg,(npw,3))
+!   do ipw=1,npw
+!     kpg(ipw,1)=kpg(ipw,1)*gprimd(1,1)+kpg(ipw,2)*gprimd(1,2)+kpg(ipw,3)*gprimd(1,3)
+!     kpg(ipw,2)=kpg(ipw,1)*gprimd(2,1)+kpg(ipw,2)*gprimd(2,2)+kpg(ipw,3)*gprimd(2,3)
+!     kpg(ipw,3)=kpg(ipw,1)*gprimd(3,1)+kpg(ipw,2)*gprimd(3,2)+kpg(ipw,3)*gprimd(3,3)
+!   end do
  end if
 #endif
 
@@ -518,7 +518,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              end do
            end if
            do ilmn=1,nlmn
-             ztab(:)=ztab(:)+kpgcar(:,ibeta)*ffnl(:,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+             ztab(:)=ztab(:)+kpg(:,ibeta)*ffnl(:,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
              ztab(:)=ztab(:)+ffnl(:,1+idelta,ilmn)*cmplx(d2gxdtfac_(1,1,ilmn),d2gxdtfac_(2,1,ilmn),kind=dp)
              ztab(:)=ztab(:)+ffnl(:,1+igamma,ilmn)*cmplx(d2gxdtfac_(1,2,ilmn),d2gxdtfac_(2,2,ilmn),kind=dp)
              ztab(:)=ztab(:)+ffnl(:,1,ilmn)*cmplx(d2gxdtfac_(1,3,ilmn),d2gxdtfac_(2,3,ilmn),kind=dp)
@@ -1036,7 +1036,7 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
                end do
              end if
              do ilmn=1,nlmn
-               ztab(ipw)=ztab(ipw)+kpgcar(ipw,ibeta)*ffnl(ipw,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
+               ztab(ipw)=ztab(ipw)+kpg(ipw,ibeta)*ffnl(ipw,4+idelgam,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1+idelta,ilmn)*cmplx(d2gxdtfac_(1,1,ilmn),d2gxdtfac_(2,1,ilmn),kind=dp)
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1+igamma,ilmn)*cmplx(d2gxdtfac_(1,2,ilmn),d2gxdtfac_(2,2,ilmn),kind=dp)
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(d2gxdtfac_(1,3,ilmn),d2gxdtfac_(2,3,ilmn),kind=dp)
