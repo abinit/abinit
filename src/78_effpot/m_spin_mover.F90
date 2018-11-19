@@ -221,7 +221,7 @@ contains
   subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
 
     class (spin_mover_t), intent(inout):: self
-    type(effpot_t), intent(inout) :: calculator
+    class(effpot_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
