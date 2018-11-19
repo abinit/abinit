@@ -4578,7 +4578,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ! Create temporary netcdf file used to write Fortran file with contiguous perturbations.
  use_netcdf = .True.
  if (my_rank == master) then
-   tmp_fname = strcat("_tmp", new_dvdb_fname, ".nc")
+   tmp_fname = strcat(new_dvdb_fname, "_TEMPORARY_TRANSFER_FILE.nc")
    dimv1 = cplex * nfftf
    NCF_CHECK(nctk_open_create(ncid, tmp_fname, xmpi_comm_self))
    ncerr = nctk_def_dims(ncid, [&
