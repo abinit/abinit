@@ -1,0 +1,84 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_effpot_manager
+  use defs_basis
+  use m_abicore
+  use m_errors
+  use m_xmpi
+
+  use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_lattice_effpot, only : lattice_effpot_t
+  use m_spin_terms, only : spin_terms_t
+  use m_lattice_mover, only : lattice_mover_t
+  use m_spin_mover, only : spin_mover_t
+  implicit none
+  private
+
+
+  type, public :: base_effpot_manager_t
+
+  end type base_effpot_manager_t
+
+  type, public, extends(base_effpot_driver_t) :: global_manager_t
+     type (lattice_api_t) :: lattice_effpot
+     type (spin_terms_t) :: spin_effpot
+     type (spin_lattice_coupling_term_t) :: slc_effpot
+     type (lattice_mover_t) :: lattice_mover
+     type (spin_mover_t) :: spin_mover
+     type (multibinit_dtset_type):: params
+     type (supercell_type) :: supercell
+   contains
+     procedure initialize => global_manager_initialize
+     procedure finalize => global_manager_finalize
+     procedure run_one_step => global_manager_run_one_step
+     procedure run => global_manager_run
+  end type global_manager_t
+
+contains
+  subroutine global_manager_initialize(self, params, fnames)
+    class (global_manager_t), intent(inout) :: self
+    type (multibinit_dtset_type), intent(inout) :: params
+    character(*), intent(in) :: fnames(:)
+    self%params = params
+    call self%lattice_effpot%initialize(params, fnames)
+    call self%spin_effpot%initialize(params, fnames)
+    call self%slc_effpot%intialize(params, fnames)
+
+    call self%lattice_effpot%make_supercell(self%supercell)
+    call self%spin_effpot%make_supercell(self%supercell)
+    call self%slc_effpot%make_supercell(self%supercell)
+
+    call self%spin_mover%intialize(params, fnames, nspins=self%spin_effpot%nspins)
+    call self%lattice_mover%initialize(params, fnames, natoms=self%lattice_effpot%natoms)
+
+    call self%lattice_mover%set_initial_state()
+    call self%spin_mover%set_initial_state()
+
+  end subroutine global_manager_initialize
+
+  subroutine global_manager_finalize(self)
+    call self%lattice_effpot%finalize()
+    call self%spin_effpot%finalize()
+    call self%slc_effpot%finalize()
+
+    call self%lattice_mover%finalize()
+    call self%spin_mover_finalize()
+  end subroutine global_manager_finalize
+
+  subroutine global_manager_run_one_step(self)
+    class (global_manager_t), intent(inout) :: self
+    ! TODO: steps with only spin or lattice
+    ! one step of lattice
+    call self%lattice_mover%run_one_step(effpots= [self%lattice_effport, self%slc_effpot])
+    ! one step of spin
+    call self%spin_mover%run_one_step(effpots=[self%spin_effpot, self%slc_effpot])
+    ! update changes to spin-lattice_coupling
+    call self%slc_effpot%set_distortion(displacement=self%current_displacement, strain=self%current_strain)
+    call self%slc_effpot%set_spin(spin=self%current_spin)
+  end subroutine global_manager_run_one_step
+
+end module m_effpot_driver

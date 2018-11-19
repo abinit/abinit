@@ -48,22 +48,35 @@ module m_effpot_api
      !procedure :: get_effective_Bfield ! effective Bfield
   end type effpot_t
 
+  type, public, extends(effpot_t) :: effpot_list_t
+     integer :: size=0
+     class (effpot_t) , pointer :: effpots(:)
+   contains
+     procedure :: initialize => effpot_list_t_initialize
+     procedure :: finalize => effpot_list_t_finalize
+     procedure :: append => effpot_list_t_append
+     procedure :: calculate => effpot_list_t_calculate
+  end type effpot_list_t
+
 contains
 
   subroutine read_potential(self, fnames)
     class(effpot_t), intent(inout) :: self
     character(len=*), intent(in) :: fnames(:)  !  files file (xml, DDB, etc).
+    ! TODO
   end subroutine read_potential
 
   subroutine set_params(self, params)
     class(effpot_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    ! TODO
   end subroutine set_params
 
 
   subroutine make_supercell(self, supercell)
     class(effpot_t), intent(inout) :: self
     type(supercell_type), intent(in) :: supercell
+    ! TODO 
   end subroutine make_supercell
 
   ! hexu comment : which one is better, more general variables,
@@ -117,5 +130,54 @@ contains
 !     real(dp), intent(in) :: spin(:,:)
 !     real(dp), intent(inout) :: bfield(:,:)
 !   end subroutine get_effective_Bfield
+
+
+  !======================== Effpot_list_t======================
+  ! TODO : is this an overkill? 
+
+  subroutine effpot_list_t_initialize(self)
+    class (effpot_list_t), intent(inout) :: self
+    ! nothing to do
+  end subroutine effpot_list_t_initialize
+
+  subroutine effpot_list_t_append(self, effpot)
+    class (effpot_list_t) :: self
+    class (effpot_list_t), target :: effpot
+    self%size=self%size + 1
+    self%effpots(self%size) => effpot
+    self%is_null= (self%is_null .or. effpot%is_null)
+    self%has_spin= (self%has_spin .or. effpot%has_spin)
+    self%has_displacement= (self%has_displacement .or. effpot%has_displacement)
+    self%has_strain= (self%has_strain.or. effpot%has_strain)
+  end subroutine effpot_list_t_append
+
+  subroutine effpot_list_t_finalize(self)
+    class (effpot_list_t) ,intent(inout) :: self
+    integer :: i
+    do i=1, self%size
+       nullify(self%effpots(i))
+    end do
+    self%size=0
+    self%is_null=.True.
+    self%has_displacement=.False.
+    self%has_strain=.False.
+    self%has_spin=.False.
+  end subroutine effpot_list_t_finalize
+
+  
+  subroutine effpot_list_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+    class(effpot_list_t), intent(inout) :: self  ! the effpot may save the states.
+    real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    real(dp), save :: force_tmp(size(force, dim=2), size(force, dim=2))
+    real(dp), save :: strain_tmp(size(strain, dim=2), size(strain, dim=2))
+    ! if present in input
+    ! calculate if required
+    if(self%has_displacement .and. present(force)) then
+       force(:,:)= 
+
+  end subroutine calculate
+
+
 
 end module m_effpot_api
