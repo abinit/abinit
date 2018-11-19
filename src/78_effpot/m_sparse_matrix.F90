@@ -637,9 +637,11 @@ endif
         ! gfortran. It may also depend on SIMD instructions the CPU support. Tested on a cpu with AVX2.
         i1=A%row_shift(irow)
         i2=A%row_shift(irow+1)-1
+        !$OMP SIMD private(i)
         do i=i1, i2
             y(irow)=y(irow)+ A%val(i)*x(A%icol(i))
         end do
+        !$OMP END SIMD
 
         ! Same speed as previous 
         !do i=A%row_shift(irow), A%row_shift(irow+1)-1

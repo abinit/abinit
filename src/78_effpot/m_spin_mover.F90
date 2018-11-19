@@ -75,8 +75,8 @@ module m_spin_mover
         procedure :: initialize => spin_mover_t_initialize
         procedure :: finalize => spin_mover_t_finalize
         procedure :: set_hist => spin_mover_t_set_hist
-        procedure :: run_one_step_DM => spin_mover_t_run_one_step_DM
-        procedure :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
+        procedure, private :: run_one_step_DM => spin_mover_t_run_one_step_DM
+        procedure, private :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
         procedure :: run_one_step => spin_mover_t_run_one_step
         procedure :: run_time => spin_mover_t_run_time
         procedure :: set_Langevin_params
@@ -221,7 +221,7 @@ contains
   subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
 
     class (spin_mover_t), intent(inout):: self
-    type(effpot_t), intent(inout) :: calculator
+    class(effpot_t), intent(inout) :: calculator
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
@@ -253,10 +253,10 @@ contains
   end subroutine spin_mover_t_run_one_step_HeunP
   !!***
 
-  subroutine rotate_S_DM(S_in, Heff, dt, S_out)
-    ! Depondt & Mertens method to roate S_in
+  pure function rotate_S_DM(S_in, Heff, dt) result(S_out)
+    ! Depondt & Mertens method to rotate S_in
     real(dp), intent(in) :: S_in(3), Heff(3), dt
-    real(dp), intent(inout) :: S_out(3)
+    real(dp) :: S_out(3)
     real(dp) :: B(3) , w, u, Bnorm, R(3,3), cosw, sinw
     Bnorm=sqrt(sum(Heff*Heff))
     B(:)=Heff(:)/Bnorm
@@ -279,18 +279,19 @@ contains
     S_out=matmul(R, S_in)
   end subroutine rotate_S_DM
 
-  subroutine spin_mover_t_run_one_step_DM(self, calculator, S_in, S_out, etot)
+  subroutine spin_mover_t_run_one_step_DM(self, effpots, S_in, S_out, etot)
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
-    class(effpot_t), intent(inout) :: calculator
+    class(effpot_t), intent(inout) :: effpot
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
-    real(dp) :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
+    real(dp), save :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
+    real(dp), save :: e, Htmp2(3, self%nspins)
     ! predict
     !call spin_terms_t_total_Heff(calculator, S=S_in, Heff=Heff)
-    call calculator%calculate(spin=S_in, bfield=Heff, energy=etot)
+    call effpot%calculate(spin=S_in, bfield=Heff, energy=etot)
     call self%get_Langevin_Heff(H_lang)
 
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
@@ -298,7 +299,7 @@ contains
     do i=1,self%nspins
        ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
        Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
-     call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
+     S_out(:,i)= rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt)
     end do
 !$OMP END PARALLEL DO
 
@@ -311,7 +312,7 @@ contains
        Heff(:,i)=(Heff(:,i)+Htmp(:,i))*0.5_dp
        Htmp(:,i)=Heff(:,i)+H_lang(:,i)
        Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
-       call rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt, S_out(:,i))
+       S_out(:, i)= rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt)
     end do
 !$OMP END PARALLEL DO
     !call spin_terms_t_get_etot(calculator, S_out, Heff, etot)

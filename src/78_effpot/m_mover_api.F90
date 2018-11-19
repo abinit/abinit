@@ -26,14 +26,12 @@ module m_mover_api
      procedure :: set_params
      procedure :: set_initial_state ! initial state
      procedure:: run_one_step 
-     procedure :: run_nstep
      procedure :: reset            ! reset the mover
      procedure :: calc_observables ! call functions to calculate observables
      procedure :: write_hist       ! write hist file
   end type abstract_mover_t
 
 contains
-
 
   subroutine set_params(self, params)
     ! set parameters from input file. (something else, like temperature for MvT calculation?)
@@ -46,17 +44,12 @@ contains
     class(abstract_mover_t), intent(inout) :: self
   end subroutine set_initial_state
 
-  subroutine run_one_step(self, effpot)
+  subroutine run_one_step(self, effpots)
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
-    class(effpot_t), intent(inout) :: effpot
-
+    ! array of effective potentials so that there can be multiple of them.
+    class(effpot_t), intent(inout) :: effpots(:)
   end subroutine run_one_step
-
-  subroutine run_nstep(self, nstep)
-    class(abstract_mover_t), intent(inout) :: self
-    integer, intent(in) :: nstep
-  end subroutine run_nstep
 
   subroutine reset(self)
     ! reset the state of mover (e.g. counter->0)
