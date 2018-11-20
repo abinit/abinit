@@ -601,8 +601,6 @@ CONTAINS  !===========================================================
 
 subroutine xmpi_init()
 
- implicit none
-
 !Local variables-------------------
  integer :: mpierr,ierr,unt
  logical :: exists
@@ -689,8 +687,6 @@ end subroutine xmpi_init
 
 integer function xmpi_get_unit() result(unt)
 
- implicit none
-
 !Local variables-------------------
  logical :: isopen
 
@@ -726,8 +722,6 @@ end function xmpi_get_unit
 !! SOURCE
 
 subroutine xmpi_end()
-
- implicit none
 
 !Local variables-------------------
  integer :: mpierr
@@ -772,8 +766,6 @@ end subroutine xmpi_end
 !! SOURCE
 
 subroutine xmpi_abort(comm,mpierr,msg,exit_status)
-
- implicit none
 
 !Arguments-------------------------
  integer,optional,intent(in) :: comm,mpierr,exit_status
@@ -850,8 +842,6 @@ end subroutine xmpi_abort
 
 subroutine sys_exit(exit_status)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exit_status
@@ -895,8 +885,6 @@ end subroutine sys_exit
 !! SOURCE
 
 subroutine xmpi_show_info(unit)
-
- implicit none
 
 !Arguments-------------------------
  integer,optional,intent(in) :: unit
@@ -960,8 +948,6 @@ end subroutine xmpi_show_info
 
 function xmpi_comm_rank(comm)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: comm
  integer :: xmpi_comm_rank
@@ -1005,8 +991,6 @@ end function xmpi_comm_rank
 
 function xmpi_comm_size(comm)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: comm
  integer :: xmpi_comm_size
@@ -1048,8 +1032,6 @@ end function xmpi_comm_size
 !! SOURCE
 
 subroutine xmpi_comm_free_0D(comm)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(inout) :: comm
@@ -1106,8 +1088,6 @@ end subroutine xmpi_comm_free_0D
 
 subroutine xmpi_comm_free_1D(comms)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(inout) :: comms(:)
 
@@ -1157,8 +1137,6 @@ end subroutine xmpi_comm_free_1D
 !! SOURCE
 
 subroutine xmpi_comm_free_2D(comms)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(inout) :: comms(:,:)
@@ -1212,8 +1190,6 @@ end subroutine xmpi_comm_free_2D
 !! SOURCE
 
 subroutine xmpi_comm_free_3D(comms)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(inout) :: comms(:,:,:)
@@ -1270,8 +1246,6 @@ end subroutine xmpi_comm_free_3D
 !! SOURCE
 
 subroutine xmpi_group_free(spaceGroup)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(inout) :: spaceGroup
@@ -1333,8 +1307,6 @@ end subroutine xmpi_group_free
 
 subroutine xmpi_group_incl(group,nranks,ranks,newgroup,mpierr)
 
- implicit none
-
 !Arguments-------------------------
 !scalars
  integer,intent(in) :: group,nranks
@@ -1380,8 +1352,6 @@ end subroutine xmpi_group_incl
 !! SOURCE
 
 subroutine xmpi_comm_create(comm,group,newcomm,mpierr)
-
- implicit none
 
 !Arguments-------------------------
 !scalars
@@ -1429,8 +1399,6 @@ end subroutine xmpi_comm_create
 !! SOURCE
 
 function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
-
- implicit none
 
 !Arguments-------------------------
 !scalars
@@ -1500,8 +1468,6 @@ end function xmpi_subcomm
 
 subroutine xmpi_comm_group(comm,spaceGroup,mpierr)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: comm
  integer,intent(out) :: mpierr,spaceGroup
@@ -1545,8 +1511,6 @@ end subroutine xmpi_comm_group
 !! SOURCE
 
 subroutine xmpi_comm_split(input_comm,color,key,output_comm,mpierr)
-
- implicit none
 
 !Arguments-------------------------
 !scalars
@@ -1595,8 +1559,6 @@ end subroutine xmpi_comm_split
 
 subroutine xmpi_group_translate_ranks(spaceGroup1,nrank,ranks1,&
 &                                     spaceGroup2,ranks2,mpierr)
-
- implicit none
 
 !Arguments-------------------------
 !scalars
@@ -1649,8 +1611,6 @@ end subroutine xmpi_group_translate_ranks
 !! SOURCE
 
 subroutine xmpi_comm_translate_ranks(from_comm,nrank,from_ranks,to_comm,to_ranks)
-
- implicit none
 
 !Arguments-------------------------
 !scalars
@@ -1707,8 +1667,6 @@ end subroutine xmpi_comm_translate_ranks
 
 subroutine xmpi_barrier(comm)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: comm
 
@@ -1755,8 +1713,6 @@ end subroutine xmpi_barrier
 !! SOURCE
 
 subroutine xmpi_name(name_ch, mpierr)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(out) ::  mpierr
@@ -1812,8 +1768,6 @@ end subroutine xmpi_name
 
 subroutine xmpi_iprobe(source,tag,mpicomm,flag,mpierr)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: mpicomm,source,tag
  integer,intent(out) :: mpierr
@@ -1862,8 +1816,6 @@ end subroutine xmpi_iprobe
 
 subroutine xmpi_wait(request,mpierr)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(out) :: mpierr
  integer,intent(inout) :: request
@@ -1910,8 +1862,6 @@ end subroutine xmpi_wait
 
 subroutine xmpi_waitall(array_of_requests,mpierr)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(inout) :: array_of_requests(:)
  integer,intent(out) :: mpierr
@@ -1957,8 +1907,6 @@ end subroutine xmpi_waitall
 
 subroutine xmpi_request_free(requests,mpierr)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(inout) :: requests(:)
  integer,intent(out)  :: mpierr
@@ -2003,8 +1951,6 @@ end subroutine xmpi_request_free
 
 subroutine xmpi_error_string(mpierr,err_string,ilen,ierror)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(in) :: mpierr
  integer,intent(out) :: ilen,ierror
@@ -2048,8 +1994,6 @@ end subroutine xmpi_error_string
 !! SOURCE
 
 subroutine xmpi_comm_set_errhandler(comm,new_err_handler,old_err_handler,ierror)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(in) :: new_err_handler
@@ -2126,8 +2070,6 @@ end subroutine xmpi_comm_set_errhandler
 !! SOURCE
 
 subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop,warn_msg,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,comm
@@ -2219,8 +2161,6 @@ end subroutine xmpi_split_work_i4b
 
 subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,nprocs
  integer,intent(out) :: ierr
@@ -2294,8 +2234,6 @@ end subroutine xmpi_split_work2_i4b
 
 subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop,warn_msg,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)  :: nprocs
  integer(i8b),intent(in)  :: ntasks
@@ -2366,8 +2304,6 @@ end subroutine xmpi_split_work2_i8b
 
 subroutine xmpi_distab_4D(nprocs,task_distrib)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nprocs
 !arrays
@@ -2409,7 +2345,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
    end do
  end if
 
- task_distrib = RESHAPE(list,(/n1,n2,n3,n4/))
+ task_distrib = RESHAPE(list, [n1,n2,n3,n4])
 
  if (ANY(task_distrib==-999)) then
    call xmpi_abort(msg="task_distrib == -999")
@@ -2444,8 +2380,6 @@ end subroutine xmpi_distab_4D
 !! SOURCE
 
 pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2561,8 +2495,6 @@ end function xmpi_distrib_with_replicas
 
 subroutine xmpio_type_struct(ncount,block_length,block_displ,block_type,new_type,mpierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncount
@@ -2621,8 +2553,6 @@ end subroutine xmpio_type_struct
 !! SOURCE
 
 subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2798,8 +2728,6 @@ end subroutine xmpio_get_info_frm
 
 subroutine xmpio_read_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fh,sc_mode
@@ -2930,8 +2858,6 @@ end subroutine xmpio_read_frm
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_write_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3072,8 +2998,6 @@ end subroutine xmpio_write_frm
 
 subroutine xmpio_create_fstripes(ncount,sizes,types,new_type,my_offpad,mpierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncount
@@ -3165,8 +3089,6 @@ end subroutine xmpio_create_fstripes
 
 subroutine xmpio_create_fsubarray_2D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: old_type
@@ -3256,8 +3178,6 @@ end subroutine xmpio_create_fsubarray_2D
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_create_fsubarray_3D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3360,8 +3280,6 @@ end subroutine xmpio_create_fsubarray_3D
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_create_fsubarray_4D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3473,8 +3391,6 @@ end subroutine xmpio_create_fsubarray_4D
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3662,8 +3578,6 @@ end subroutine xmpio_check_frmarkers
 
 subroutine xmpio_read_int(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fh,sc_mode,ncount
@@ -3761,8 +3675,6 @@ end subroutine xmpio_read_int
 
 subroutine xmpio_read_dp(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fh,sc_mode,ncount
@@ -3834,8 +3746,6 @@ end subroutine xmpio_read_dp
 
 function xmpio_max_address(offset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical :: xmpio_max_address
@@ -3885,8 +3795,6 @@ end function xmpio_max_address
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4088,8 +3996,6 @@ end subroutine xmpio_write_frmarkers
 
 subroutine xmpio_create_fherm_packed(array_of_starts,array_of_ends,is_fortran_file,my_offset,old_type,hmat_type,offset_err)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: old_type
@@ -4244,8 +4150,6 @@ end subroutine xmpio_create_fherm_packed
 
 subroutine xmpio_create_coldistr_from_fpacked(sizes,my_cols,old_type,new_type,my_offpad,offset_err)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: old_type
@@ -4377,8 +4281,6 @@ end subroutine xmpio_create_coldistr_from_fpacked
 #ifdef HAVE_MPI_IO
 
 subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_type,new_type,my_offpad,offset_err)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

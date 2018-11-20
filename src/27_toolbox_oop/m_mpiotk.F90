@@ -23,7 +23,6 @@
 #include "config.h"
 #endif
 
-
 #include "abi_common.h"
 
 MODULE m_mpiotk
@@ -83,8 +82,6 @@ CONTAINS
 
 subroutine no_mpiotk()
 
- implicit none
-
 ! *************************************************************************
 
 end subroutine no_mpiotk
@@ -127,8 +124,6 @@ end subroutine no_mpiotk
 
 subroutine setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,&
 &  my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -248,8 +243,6 @@ end subroutine setup_fsuba_dp2D
 !! SOURCE
 
 subroutine mpiotk_read_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -391,8 +384,6 @@ end subroutine mpiotk_read_fsuba_dp2D
 
 subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fh,comm,bufsz,sc_mode
@@ -530,8 +521,6 @@ end subroutine mpiotk_write_fsuba_dp2D
 !! SOURCE
 
 subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -728,8 +717,6 @@ end subroutine mpiotk_read_fsuba_dpc3D
 !! SOURCE
 
 subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer,chunk_bsize,sc_mode,comm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

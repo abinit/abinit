@@ -50,7 +50,8 @@ module m_dft_energy
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_init_unpacked, &
-                                pawrhoij_mpisum_unpacked, pawrhoij_free_unpacked, pawrhoij_get_nspden, symrhoij
+                                pawrhoij_mpisum_unpacked, pawrhoij_free_unpacked, pawrhoij_inquire_dim, &
+&                               pawrhoij_symrhoij
  use m_pawcprj,          only : pawcprj_type,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
@@ -214,7 +215,7 @@ contains
 !!      mkrho,nonlop,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin
 !!      pawmknhat,pawrhoij_alloc,pawrhoij_free,pawrhoij_free_unpacked
 !!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,prep_bandfft_tabs
-!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,symrhoij,timab
+!!      prep_nonlop,psolver_rhohxc,rhohxcpositron,rhotoxc,pawrhoij_symrhoij,timab
 !!      transgrid,xcdata_init,xmpi_sum
 !!
 !! SOURCE
@@ -272,7 +273,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !Local variables-------------------------------
 !scalars
- integer :: bdtot_index,blocksize,choice,cplex,cplex_rf,cpopt,dimffnl
+ integer :: bdtot_index,blocksize,choice,cplex,cplex_rhoij,cpopt,dimffnl
  integer :: iband,iband_last,iblock,iblocksize,icg,ider,idir,ierr,ifft,ikg,ikpt,ilm
  integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,izero
  integer :: me_distrb,mpi_comm_sphgrid,my_ikpt,my_nspinor,n1,n2,n3,n4,n5,n6
@@ -531,8 +532,9 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end if
    if (paral_atom) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_unsym,(dtset%natom))
-     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-     call pawrhoij_alloc(pawrhoij_unsym,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
      pawrhoij_unsym => pawrhoij
@@ -624,7 +626,6 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
      eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
      if (minval(eig_k)>1.d100) eig_k=zero
-     cplex=2 ; if (istwf_k>1) cplex=1
      eeigk=zero ; ekk=zero ; enlk=zero
 
      ABI_ALLOCATE(kg_k,(3,npw_k))
@@ -733,6 +734,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !        PAW: accumulate rhoij
          if (psps%usepaw==1) then
+           cplex=merge(1,2,istwf_k>1)
            if (mpi_enreg%paral_spinor==1) then
              call pawcprj_gather_spin(cwaveprj,cwaveprj_gat,dtset%natom,1,my_nspinor,dtset%nspinor,&
 &             mpi_enreg%comm_spinor,ierr)
@@ -858,7 +860,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  else
 !  === PAW case: symmetrize rhoij and add compensation charge density
    tim_mkrho=3;option=1;choice=1
-   call symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,0,dtset%natom,dtset%nsym,&
+   call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,0,dtset%natom,dtset%nsym,&
 &   dtset%ntypat,option,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,dtset%typat,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call pawrhoij_free_unpacked(pawrhoij_unsym)
@@ -866,9 +868,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
      call pawrhoij_free(pawrhoij_unsym)
      ABI_DATATYPE_DEALLOCATE(pawrhoij_unsym)
    end if
-   ider=0;izero=0;cplex_rf=1;ipert=0;idir=0;qpt(:)=zero
-
-   call pawmknhat(compch_fft,cplex_rf,ider,idir,ipert,izero,gprimd,&
+   ider=0;izero=0;cplex=1;ipert=0;idir=0;qpt(:)=zero
+   call pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
 &   my_natom,dtset%natom,nfftf,ngfftf,&
 &   0,dtset%nspden,dtset%ntypat,pawang,pawfgrtab,rhodum,nhat,pawrhoij,pawrhoij,&
 &   pawtab,qpt,rprimd,ucvol_local,dtset%usewvl,xred,&

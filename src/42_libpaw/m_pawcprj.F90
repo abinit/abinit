@@ -2905,9 +2905,6 @@ end function paw_overlap
 
 subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
 
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays

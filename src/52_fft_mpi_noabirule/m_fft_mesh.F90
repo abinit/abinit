@@ -128,8 +128,6 @@ CONTAINS  !=====================================================================
 
 subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,mgfft
@@ -214,8 +212,6 @@ end subroutine zpad_init
 
 subroutine zpad_free(zpad)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(zpad_t),intent(inout) :: zpad
@@ -286,8 +282,6 @@ end subroutine zpad_free
 !! SOURCE
 
 subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst,enforce_sym,unit)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -644,8 +638,6 @@ end subroutine setmesh
 
 pure function check_rot_fft(nsym,symrel,nr1,nr2,nr3)
 
- implicit none
-
 !Arguments
 !Scalar
  integer,intent(in) :: nr1,nr2,nr3,nsym
@@ -704,8 +696,6 @@ end function check_rot_fft
 !! SOURCE
 
 function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -811,8 +801,6 @@ end function fft_check_rotrans
 
 subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -917,8 +905,6 @@ end subroutine rotate_fft_mesh
 
 subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwvec
@@ -1002,8 +988,6 @@ end subroutine cigfft
 
 elemental function ig2gfft(ig,ng) result (gc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ig,ng
@@ -1049,8 +1033,6 @@ end function ig2gfft
 !! SOURCE
 
 pure integer function g2ifft(gg,ngfft) result (gidx)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: gg(3),ngfft(3)
@@ -1110,8 +1092,6 @@ end function g2ifft
 !! SOURCE
 
 pure subroutine get_gftt(ngfft,kpt,gmet,gsq_max,gfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1176,8 +1156,6 @@ end subroutine get_gftt
 !! SOURCE
 
 subroutine calc_ceigr_spc(gg,nfft,nspinor,ngfft,ceigr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1249,8 +1227,6 @@ end subroutine calc_ceigr_spc
 
 subroutine calc_ceigr_dpc(gg,nfft,nspinor,ngfft,ceigr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nspinor
@@ -1319,8 +1295,6 @@ end subroutine calc_ceigr_dpc
 
 pure subroutine calc_eigr(gg,nfft,ngfft,eigr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -1385,8 +1359,6 @@ end subroutine calc_eigr
 
 pure subroutine calc_ceikr(kk,nfft,ngfft,ceikr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft
@@ -1447,8 +1419,6 @@ end subroutine calc_ceikr
 !! SOURCE
 
 pure subroutine times_eigr(gg,ngfft,nfft,ndat,ur)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1517,8 +1487,6 @@ end subroutine times_eigr
 !! SOURCE
 
 pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1589,8 +1557,6 @@ end subroutine times_eikr
 
 subroutine phase(ngfft,ph)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ngfft
@@ -1639,8 +1605,6 @@ end subroutine phase
 !! SOURCE
 
 subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: nfft

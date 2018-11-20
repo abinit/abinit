@@ -537,72 +537,28 @@ subroutine psps_free(psps)
 ! *************************************************************************
 
 !Allocation of some arrays independent of the dataset
- if (allocated(psps%filpsp))  then
-   ABI_DEALLOCATE(psps%filpsp)
- end if
- if (allocated(psps%pspcod))  then
-   ABI_DEALLOCATE(psps%pspcod)
- end if
- if (allocated(psps%pspdat))  then
-   ABI_DEALLOCATE(psps%pspdat)
- end if
- if (allocated(psps%pspso))  then
-   ABI_DEALLOCATE(psps%pspso)
- end if
- if (allocated(psps%pspxc))  then
-   ABI_DEALLOCATE(psps%pspxc)
- end if
- if (allocated(psps%title))  then
-   ABI_DEALLOCATE(psps%title)
- end if
- if (allocated(psps%zionpsp))  then
-   ABI_DEALLOCATE(psps%zionpsp)
- end if
- if (allocated(psps%znuclpsp))  then
-   ABI_DEALLOCATE(psps%znuclpsp)
- end if
- if (allocated(psps%algalch))  then
-   ABI_DEALLOCATE(psps%algalch)
- end if
- if (allocated(psps%mixalch))  then
-   ABI_DEALLOCATE(psps%mixalch)
- end if
- if (allocated(psps%ekb))  then
-   ABI_DEALLOCATE(psps%ekb)
- end if
- if (allocated(psps%indlmn))  then
-   ABI_DEALLOCATE(psps%indlmn)
- end if
- if (allocated(psps%ffspl))  then
-   ABI_DEALLOCATE(psps%ffspl)
- end if
- if (allocated(psps%qgrid_ff))  then
-   ABI_DEALLOCATE(psps%qgrid_ff)
- end if
- if (allocated(psps%qgrid_vl))  then
-   ABI_DEALLOCATE(psps%qgrid_vl)
- end if
- if (allocated(psps%vlspl))  then
-   ABI_DEALLOCATE(psps%vlspl)
- end if
- if (allocated(psps%dvlspl))  then
-   ABI_DEALLOCATE(psps%dvlspl)
- end if
- if (allocated(psps%xccc1d))  then
-   ABI_DEALLOCATE(psps%xccc1d)
- end if
- if (allocated(psps%xcccrc))  then
-   ABI_DEALLOCATE(psps%xcccrc)
- end if
- if (allocated(psps%ziontypat))  then
-   ABI_DEALLOCATE(psps%ziontypat)
- end if
- if (allocated(psps%znucltypat))  then
-   ABI_DEALLOCATE(psps%znucltypat)
- end if
- if (allocated(psps%md5_pseudos))  then
-   ABI_DEALLOCATE(psps%md5_pseudos)
- end if
+ ABI_SFREE(psps%filpsp)
+ ABI_SFREE(psps%pspcod)
+ ABI_SFREE(psps%pspdat)
+ ABI_SFREE(psps%pspso)
+ ABI_SFREE(psps%pspxc)
+ ABI_SFREE(psps%title)
+ ABI_SFREE(psps%zionpsp)
+ ABI_SFREE(psps%znuclpsp)
+ ABI_SFREE(psps%algalch)
+ ABI_SFREE(psps%mixalch)
+ ABI_SFREE(psps%ekb)
+ ABI_SFREE(psps%indlmn)
+ ABI_SFREE(psps%ffspl)
+ ABI_SFREE(psps%qgrid_ff)
+ ABI_SFREE(psps%qgrid_vl)
+ ABI_SFREE(psps%vlspl)
+ ABI_SFREE(psps%dvlspl)
+ ABI_SFREE(psps%xccc1d)
+ ABI_SFREE(psps%xcccrc)
+ ABI_SFREE(psps%ziontypat)
+ ABI_SFREE(psps%znucltypat)
+ ABI_SFREE(psps%md5_pseudos)
 
  ! Free types.
  call psp2params_free(psps%gth_params)

@@ -42,7 +42,7 @@ MODULE m_crystal
  use m_fstrings,       only : int2char10, sjoin, yesno
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
- use m_geometry,       only : metric, xred2xcart, remove_inversion, getspinrot
+ use m_geometry,       only : metric, xred2xcart, remove_inversion, getspinrot, symredcart
  use m_io_tools,       only : open_file
 
  implicit none
@@ -70,7 +70,6 @@ MODULE m_crystal
   !integer :: bravais(11)                    ! bravais(1)=iholohedry, bravais(2)=center
                                              ! bravais(3:11)=coordinates of rprim in the axes of the conventional
                                              ! bravais lattice (*2 if center/=0)
-  !integer :: vacuum(3)
   !integer,pointer ptsymrel(:,:,:)
   !ptsymrel(3,3,nptsym)
   ! nptsym point-symmetry operations of the Bravais lattice in real space in terms of primitive translations.
@@ -132,6 +131,10 @@ MODULE m_crystal
   integer,allocatable :: symrel(:,:,:)
   ! symrel(3,3,nsym)
   ! Symmetry operations in direct space (reduced coordinates).
+
+  real(dp),allocatable :: symrel_cart(:,:,:)
+  ! symrel_cart(3,3,nsym)
+  ! Symmetry operations in cartesian coordinates (same order as symrel)
 
   integer,allocatable :: atindx(:)
   integer,allocatable :: atindx1(:)
@@ -281,8 +284,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 & zion,znucl,timrev,use_antiferro,remove_inv,title,&
 & symrel,tnons,symafm) ! Optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat,nsym,timrev,space_group,npsp
@@ -410,6 +411,16 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    MSG_BUG('NotImplememented: symrel, symrec and tnons should be specied')
  end if
 
+ ! Get symmetries in cartesian coordinates
+ ABI_MALLOC(cryst%symrel_cart, (3, 3, cryst%nsym))
+ do isym =1,cryst%nsym
+   call symredcart(cryst%rprimd, cryst%gprimd, cryst%symrel_cart(:,:,isym), cryst%symrel(:,:,isym))
+   ! purify operations in cartesian coordinates.
+   where (abs(cryst%symrel_cart(:,:,isym)) < tol14)
+     cryst%symrel_cart(:,:,isym) = zero
+   end where
+ end do
+
  ! === Obtain a list of rotated atoms ===
  ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
@@ -451,8 +462,6 @@ end subroutine crystal_init
 
 type(crystal_t) function crystal_without_symmetries(self) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
  class(crystal_t), intent(in) :: self
 
@@ -491,8 +500,6 @@ end function crystal_without_symmetries
 
 subroutine crystal_free(Cryst)
 
- implicit none
-
 !Arguments ------------------------------------
  class(crystal_t),intent(inout) :: Cryst
 
@@ -503,6 +510,7 @@ subroutine crystal_free(Cryst)
  ABI_SFREE(Cryst%symafm)
  ABI_SFREE(Cryst%symrec)
  ABI_SFREE(Cryst%symrel)
+ ABI_SFREE(Cryst%symrel_cart)
  ABI_SFREE(Cryst%atindx)
  ABI_SFREE(Cryst%atindx1)
  ABI_SFREE(Cryst%typat)
@@ -552,8 +560,6 @@ end subroutine crystal_free
 !! SOURCE
 
 subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -644,8 +650,6 @@ end subroutine crystal_print
 
 subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat,npsp
@@ -704,8 +708,6 @@ end subroutine symbols_crystal
 
 pure function idx_spatial_inversion(Cryst) result(inv_idx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: inv_idx
@@ -744,8 +746,6 @@ end function idx_spatial_inversion
 
 pure function isymmorphic(Cryst) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical :: ans
@@ -775,8 +775,6 @@ end function isymmorphic
 
 pure function isalchemical(Cryst) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical :: ans
@@ -803,8 +801,6 @@ end function isalchemical
 !! SOURCE
 
 function adata_type(crystal,itypat) result(atom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -833,8 +829,6 @@ end function adata_type
 !! SOURCE
 
 function symbol_type(crystal, itypat) result(symbol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -882,8 +876,6 @@ end function symbol_type
 !! SOURCE
 
 subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion, include_timrev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -990,8 +982,6 @@ end subroutine crystal_point_group
 
 integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  class(crystal_t),intent(in) :: cryst
@@ -1055,8 +1045,11 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  NCF_CHECK(nf90_put_att(ncid, vid("reduced_symmetry_translations"), "symmorphic", symmorphic))
 
  ! At this point we have an ETSF-compliant file. Add additional data for internal use in abinit.
- ! TODO add spinat.
- ncerr = nctk_def_arrays(ncid, nctkarr_t('symafm', "int", "number_of_symmetry_operations"))
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t('symafm', "int", "number_of_symmetry_operations"), &
+   nctkarr_t('symrel_cart', "dp", "three, three, number_of_symmetry_operations"), &
+   nctkarr_t('indsym', "int", "four, number_of_symmetry_operations, number_of_atoms") &
+ ])
  NCF_CHECK(ncerr)
 
  ! Set-up atomic symbols.
@@ -1086,6 +1079,8 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  end if
 
  NCF_CHECK(nf90_put_var(ncid, vid("symafm"), cryst%symafm))
+ NCF_CHECK(nf90_put_var(ncid, vid("symrel_cart"), cryst%symrel_cart))
+ NCF_CHECK(nf90_put_var(ncid, vid("indsym"), cryst%indsym))
 
 #else
  MSG_ERROR("netcdf library not available")
@@ -1123,8 +1118,6 @@ end function crystal_ncwrite
 !! SOURCE
 
 integer function crystal_ncwrite_path(crystal, path) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1176,8 +1169,6 @@ end function crystal_ncwrite_path
 subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
 &   spgaxor, spgroup, spgorig, symrel, tnon, typat, xred, znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom, ntypat, nsym
@@ -1199,18 +1190,14 @@ subroutine prt_cif(brvltt, ciffname, natom, nsym, ntypat, rprimd, &
  integer :: itypat, nat_this_type
  real(dp) :: ucvol
  type(atomdata_t) :: atom
-
 !arrays
  character(len=80) :: tmpstring
-
  character(len=1) :: brvsb
  character(len=15) :: intsb,ptintsb,ptschsb,schsb
  character(len=35) :: intsbl
-
  character(len=10) :: str_nat_type
  character(len=100) :: chemformula
  character(len=500) :: msg
-
  real(dp) :: angle(3)
  real(dp) :: gprimd(3,3)
  real(dp) :: rmet(3,3), gmet(3,3)
@@ -1326,8 +1313,6 @@ end subroutine prt_cif
 
 subroutine symrel2string(symrel1, tnon, string)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: symrel1(3,3)
@@ -1405,8 +1390,6 @@ end subroutine symrel2string
 !! SOURCE
 
 subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xred, znucl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

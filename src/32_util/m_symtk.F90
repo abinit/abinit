@@ -96,8 +96,6 @@ contains
 
 subroutine mati3inv(mm, mit)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(in) :: mm(3,3)
@@ -164,8 +162,6 @@ end subroutine mati3inv
 
 subroutine mati3det(mm, det)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  integer,intent(in) :: mm(3,3)
@@ -211,8 +207,6 @@ end subroutine mati3det
 !! SOURCE
 
 subroutine matr3inv(aa, ait)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -278,8 +272,6 @@ end subroutine matr3inv
 
 subroutine symdet(determinant, nsym, sym)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -335,8 +327,6 @@ end subroutine symdet
 !! SOURCE
 
 subroutine chkgrp(nsym,symafm,symrel,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -464,8 +454,6 @@ end subroutine chkgrp
 !! SOURCE
 
 subroutine sg_multable(nsym,symafm,symrel,tnons,tnons_tol,ierr,multable,toinv)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -597,8 +585,6 @@ end subroutine sg_multable
 
 subroutine chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -725,8 +711,6 @@ end subroutine chkorthsy
 
 subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: chkprim,nsym
@@ -810,8 +794,6 @@ end subroutine chkprimit
 !! SOURCE
 
 subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -922,8 +904,6 @@ end subroutine symrelrot
 !! SOURCE
 
 subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -1060,7 +1040,6 @@ end subroutine littlegroup_q
 subroutine matpointsym(iatom,mat3,natom,nsym,rprimd,symrel,tnons,xred)
 
  use m_linalg_interfaces
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1186,8 +1165,6 @@ end subroutine matpointsym
 !! SOURCE
 
 subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1384,8 +1361,6 @@ end subroutine holocell
 
 subroutine symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -1495,8 +1470,6 @@ end subroutine symmetrize_rprimd
 !! SOURCE
 
 subroutine symmetrize_xred(indsym,natom,nsym,symrel,tnons,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1632,8 +1605,6 @@ end subroutine symmetrize_xred
 !! SOURCE
 
 subroutine symchk(difmin,eatom,natom,tratom,transl,trtypat,typat,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1781,8 +1752,6 @@ end subroutine symchk
 
 subroutine symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nsym
@@ -1925,8 +1894,6 @@ end subroutine symatm
 !! SOURCE
 
 subroutine symcharac(center, determinant, iholohedry, isym, label, symrel, tnons, type_axis)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2190,8 +2157,6 @@ end subroutine symcharac
 
 subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order,trialt,type_axis)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: center,iholohedry,isym,ordersym,tnons_order
@@ -2453,8 +2418,6 @@ end subroutine symaxes
 !! SOURCE
 
 subroutine symplanes(center,iholohedry,isym,isymrelconv,itnonsconv,label,type_axis)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2771,8 +2734,6 @@ end subroutine symplanes
 
 subroutine smallprim(metmin,minim,rprimd)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: rprimd(3,3)
@@ -2994,8 +2955,6 @@ end subroutine smallprim
 !! SOURCE
 
 subroutine print_symmetries(nsym, symrel, tnons, symafm, unit, mode_paral)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -35,7 +35,6 @@ MODULE m_ddk
  use m_hdr
  use m_kptrank
  use m_fstab
- use m_wfk
  use m_wfd
  use m_mpinfo
  use m_cgtools
@@ -48,9 +47,9 @@ MODULE m_ddk
  use netcdf
 #endif
 
- use m_fstrings,      only : strcat, sjoin, itoa, endswith
+ use m_fstrings,      only : strcat, sjoin, itoa, endswith, ktoa
  use m_symtk,         only : matr3inv
- use m_io_tools,      only : iomode_from_fname, get_unit
+ use m_io_tools,      only : iomode_from_fname
  use m_time,          only : cwtime, sec2str
  use defs_abitypes,   only : hdr_type, dataset_type, MPI_type
  use defs_datatypes,  only : ebands_t, pseudopotential_type
@@ -58,7 +57,7 @@ MODULE m_ddk
  use m_crystal,       only : crystal_t
  use m_vkbr,          only : vkbr_t, nc_ihr_comm, vkbr_init, vkbr_free
  use m_pawtab,        only : pawtab_type
-
+ use m_wfk,           only : wfk_read_ebands, wfk_read_h1mat
 
  implicit none
 
@@ -149,7 +148,7 @@ MODULE m_ddk
  public :: ddk_fs_average_veloc  ! find FS average of velocity squared
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
- public :: eph_ddk               ! calculate eph ddk
+ public :: ddk_compute           ! Calculate ddk matrix elements. Save result on disk.
 !!***
 
  type, private :: ham_targets_t
@@ -186,6 +185,9 @@ MODULE m_ddk
   real(dp) :: kpoint(3)
   ! K-point (set in setup_spin_kpoint)
 
+  real(dp) :: eig0nk
+  real(dp) :: dfpt_sciss = zero
+
   type(gs_hamiltonian_type) :: gs_hamkq(3)
 
   type(rf_hamiltonian_type) :: rf_hamkq(3)
@@ -201,13 +203,25 @@ MODULE m_ddk
 
  contains
 
-   !public :: ddkop_init             ! Initialize the object.
    procedure :: setup_spin_kpoint => ddkop_setup_spin_kpoint
+    ! Prepare application of dH/dk for given spin, k-point.
+
    procedure :: apply => ddkop_apply
+    ! Apply dH/dk to input wavefunction.
+
    procedure :: get_velocity => ddkop_get_velocity
-   procedure :: free => ddkop_free   ! Free memory.
+    ! Compute matrix element.
+
+   procedure :: free => ddkop_free
+    ! Free memory.
 
  end type ddkop_t
+
+ public :: ddkop_new   ! Build object
+
+ !interface ddkop_t
+ !  procedure ddkop_new
+ !end interface ddkop_t
 !!***
 
 CONTAINS
@@ -286,9 +300,9 @@ end subroutine ddk_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/eph_ddk
+!!****f* m_ddk/ddk_compute
 !! NAME
-!!  eph_ddk
+!!  ddk_compute
 !!
 !! FUNCTION
 !!  Calculate the DDK matrix elements using the commutator formulation.
@@ -303,118 +317,96 @@ end subroutine ddk_init
 !!
 !! SOURCE
 
-subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
+subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: wfk_path,prefix
+ character(len=*),intent(in) :: wfk_path, prefix
  integer,intent(in) :: comm
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+!arrays
+ integer,intent(in) :: ngfftc(18)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=0, formeig0=0, paral_kgb0=0, master=0
- logical,parameter :: force_istwfk1=.True.
- integer :: mband, nbcalc, nsppol, ib_v, ib_c, inclvkb, dummy_gvec(3,dummy_npw)
+ integer,parameter :: dummy_npw=0, paral_kgb0=0, master=0
+ integer :: mband, nbcalc, nsppol, ib_v, ib_c, dummy_gvec(3,dummy_npw)
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
- integer :: in_iomode, ii, ik, bandmin, bandmax, istwf_k
- integer :: idir,iab,ia,ib
- integer :: my_rank, nproc, ierr
- integer :: ispinor, ipws, ipw
- real(dp) :: cpu,wall,gflops,ecut
- real(dp) :: eshift, dotr, doti
+ integer :: ii, ik, bandmin, bandmax, istwf_k, idir
+ integer :: my_rank, nproc, ierr, bstop
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
 #ifdef HAVE_NETCDF
- integer :: ncerr,ncid
+ integer :: ncerr, ncid
 #endif
- type(wfk_t) :: wfk
+ character(len=500) :: msg
+ character(len=fnlen) :: fname
  type(wfd_t) :: wfd
  type(vkbr_t) :: vkbr
  type(ebands_t) :: ebands
  type(crystal_t) :: cryst
- type(hdr_type) :: hdr_tmp
+ type(hdr_type) :: hdr_tmp, hdr
  type(ddkop_t) :: ddkop
 !arrays
- integer,intent(in) :: ngfftc(18)
- logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  integer,allocatable :: task_distrib(:,:,:,:), nband(:,:), kg_k(:,:)
- character(len=500) :: msg
- character(len=fnlen) :: fname
- real(dp) :: kbz(3)
- real(dp) :: dotarr(2), vv(2, 3)
- real(dp) :: cpu_all, wall_all, gflops_all
+ logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+ real(dp) :: kpt(3), vv(2, 3)
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
- complex(dpc)               :: vg(3), vr(3)
+ complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 !************************************************************************
 
- write(msg, '(2a)') "Computation of electron-photon coupling matrix elements (ddk)", ch10
- call wrtout(ab_out, msg, "COLL", do_flush=.True.)
- call wrtout(std_out, msg, "COLL", do_flush=.True.)
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+
+ if (my_rank == master) then
+   write(msg, '(2a)') "Computation of velocity matrix elements (ddk)", ch10
+   call wrtout(ab_out, msg); call wrtout(std_out, msg)
+ end if
 
  if (psps%usepaw == 1) then
    MSG_ERROR("PAW not implemented")
  end if
 
 #ifndef HAVE_NETCDF
-  MSG_ERROR("The matrix elements are only written in NETCDF format")
+  MSG_ERROR("The matrix elements are only written if NETCDF is activated")
 #endif
 
- ! paralelism
- my_rank = xmpi_comm_rank(comm)
- nproc = xmpi_comm_size(comm)
+ ! Get ebands and hdr from WFK file.
+ ebands = wfk_read_ebands(wfk_path, comm, out_hdr=hdr)
+ cryst = hdr_get_crystal(hdr, 2)
 
- ! Open input file, extract dimensions and allocate workspace arrays.
- in_iomode = iomode_from_fname(wfk_path)
- call wfk_open_read(wfk,wfk_path,formeig0,in_iomode,get_unit(),xmpi_comm_self)
+ ! Extract important dimensions from hdr%
+ nkpt    = hdr%nkpt
+ nsppol  = hdr%nsppol
+ nspinor = hdr%nspinor
+ mband   = hdr%mband
 
- !read crystal
- cryst = hdr_get_crystal(wfk%hdr, 2)
-
- !read ebands
- ebands = wfk_read_ebands(wfk_path,comm)
-
- mpw     = maxval(wfk%Hdr%npwarr)
- nkpt    = wfk%nkpt
- nsppol  = wfk%nsppol
- nspinor = wfk%nspinor
- mband   = wfk%mband
- ecut    = wfk%hdr%ecut
-
- !TODO: hardcoded for now but should be an arugment
- bandmin = 1
- bandmax = mband
- nbcalc  = bandmax-bandmin
-
- ABI_MALLOC(ug_c,    (mpw*nspinor))
- ABI_MALLOC(ug_v,    (mpw*nspinor))
- if (dtset%useria == 666) then
-   ABI_MALLOC(cg_c,   (2,mpw*nspinor))
-   ABI_MALLOC(cg_v,   (2,mpw*nspinor))
- end if
- ABI_MALLOC(kg_k,    (3,mpw))
- ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
- ABI_MALLOC(ihrc,    (3, nspinor**2))
- ABI_MALLOC(nband,   (nkpt, nsppol))
- ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
- ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
+ ! Define band range.
+ !TODO: hardcoded for now but should be an argument.
+ bandmin = 1; bandmax = mband
+ nbcalc  = bandmax - bandmin + 1
 
  if (my_rank == master) then
-   write(std_out, "(a, i0)") 'inclvkb: ', inclvkb
-   write(std_out, "(a, i0)") 'nkpoints:', nkpt
-   write(std_out, "(a, i0)") 'nbands:  ', mband
-   write(std_out, "(a, i0)") 'nspppol:    ', nsppol
-   write(std_out, "(a, i0)") 'nspinor:  ', nspinor
-   write(std_out, "(a, 3(i0,1x))") 'ngfft:   ', wfk%hdr%ngfft(1:3)
-   write(std_out, "(a, i0)") 'mpw:     ', mpw
-   write(std_out, "(a, f5.1)") 'ecut:    ', ecut
+   call wrtout(ab_out, "Parameters extracted from Abinit header:")
+   write(ab_out, "(a, f5.1)") 'ecut:    ', hdr%ecut
+   write(ab_out, "(a, i0)")   'nkpt:    ', nkpt
+   write(ab_out, "(a, i0)")   'mband:   ', mband
+   write(ab_out, "(a, i0)")   'nsppol:  ', nsppol
+   write(ab_out, "(a, i0)")   'nspinor: ', nspinor
+   write(ab_out, "(a, i0)")   'useylm:  ', dtset%useylm
+   write(ab_out, "(a, i0)")   'inclvkb: ', dtset%inclvkb
+   write(ab_out, "(a)")""
  end if
 
- !create distribution of the wavefunctions mask
+ ! Create distribution of the wavefunctions mask
+ ABI_MALLOC(nband, (nkpt, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkpt, nsppol))
+ ABI_MALLOC(bks_mask, (mband, nkpt, nsppol))
+
  keep_ur = .false.; bks_mask = .false.
  nband = mband
 
@@ -422,11 +414,13 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_MALLOC(task_distrib,(bandmin:bandmax,bandmin:bandmax,nkpt,nsppol))
  call xmpi_distab(nproc,task_distrib)
 
- ! create bks_mask to load the wavefunctions
- do spin=1,nsppol ! Loop over spins
-   do ik=1,nkpt ! Loop over kpoints
-     do ib_v=bandmin,bandmax ! Loop over v bands
-       do ib_c=bandmin,bandmax ! Loop over c bands
+ ! Create bks_mask to load the wavefunctions
+ do spin=1,nsppol
+   do ik=1,nkpt
+     ! Loop over v bands
+     do ib_v=bandmin,bandmax
+      ! Loop over c bands
+       do ib_c=bandmin,bandmax
          if (task_distrib(ib_c,ib_v,ik,spin) == my_rank) then
            bks_mask(ib_v,ik,spin) = .true.
            bks_mask(ib_c,ik,spin) = .true.
@@ -435,23 +429,38 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
      end do
    end do
  end do
+ !call wrtout(std_out, sjoin(" Rank: ", itoa(my_rank), "will treat", itoa(count(task_distrib == my_rank)))
 
- !initialize distributed wavefunctions object
+ ! Initialize distributed wavefunctions object
  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,paral_kgb0,dummy_npw,mband,nband,nkpt,nsppol,&
    bks_mask,dtset%nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,&
-   ngfftc,dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+   ngfftc,dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=hdr%ecut)
 
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
  ABI_FREE(nband)
 
- call wfd%print(header="Wavefunctions on the k-points grid",mode_paral='PERS')
+ call wfd%print(header="Wavefunctions on the k-points grid")
 
- ! Read Wavefunctions
+ ! Read wavefunctions from WFK file.
  call wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
 
- if (dtset%useria == 666) then
+ ! Allocate workspace arrays
+ mpw = maxval(wfd%npwarr)
+ ABI_MALLOC(kg_k, (3, mpw))
+ ABI_MALLOC(ug_c, (mpw*nspinor))
+ ABI_MALLOC(ug_v, (mpw*nspinor))
+ if (dtset%useria /= 666) then
+   ABI_MALLOC(cg_c, (2,mpw*nspinor))
+   ABI_MALLOC(cg_v, (2,mpw*nspinor))
+ end if
+
+ ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
+ ABI_MALLOC(ihrc,    (3, nspinor**2))
+
+ if (dtset%useria /= 666) then
    ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+   !if (my_rank == master) call ddkop%print(ab_out)
  end if
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -463,52 +472,40 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
      if (all(task_distrib(bandmin:bandmax,bandmin:bandmax,ik,spin) /= my_rank)) cycle
      call cwtime(cpu,wall,gflops,"start")
 
-     nband_k  = wfk%nband(ik,spin)
-     istwf_k  = wfk%hdr%istwfk(ik)
-     kbz      = wfk%hdr%kptns(:,ik)
-     npw_k    = wfk%hdr%npwarr(ik)
-
-     ! Read WF
+     nband_k  = wfd%nband(ik,spin)
+     istwf_k  = wfd%istwfk(ik)
+     npw_k    = wfd%npwarr(ik)
+     kpt      = wfd%kibz(:,ik)
      kg_k(:,1:npw_k) = wfd%kdata(ik)%kg_k
 
-     if (dtset%useria == 666) then
-       call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kbz, istwf_k, npw_k, kg_k)
+     if (dtset%useria /= 666) then
+       call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kpt, istwf_k, npw_k, kg_k)
      else
        ! Allocate KB form factors
        ! Prepare term i <n,k|[Vnl,r]|n"k>
-       if (inclvkb/=0) call vkbr_init(vkbr,cryst,psps,inclvkb,istwf_k,npw_k,kbz,kg_k)
+       if (dtset%inclvkb/=0) call vkbr_init(vkbr,cryst,psps,dtset%inclvkb,istwf_k,npw_k,kpt,kg_k)
      end if
 
      ! Loop over bands
      do ib_v=bandmin,bandmax
        if (all(task_distrib(:,ib_v,ik,spin) /= my_rank)) cycle
 
-       if (dtset%useria == 666) then
+       if (dtset%useria /= 666) then
          call wfd%copy_cg(ib_v, ik, spin, cg_v)
-         eshift = ebands%eig(ib_v, ik, spin) - dtset%dfpt_sciss
-         call ddkop%apply(eshift, mpw, npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg)
+         call ddkop%apply(ebands%eig(ib_v, ik, spin), mpw, npw_k, wfd%nspinor, cg_v, cwaveprj, wfd%mpi_enreg)
        else
          ug_v(1:npw_k*nspinor) = wfd%wave(ib_v,ik,spin)%ug
        end if
 
        ! Loop over bands
-       do ib_c=ib_v,bandmax
+       bstop = bandmax ! if (only_diago) bstop = ib_v
+       do ib_c=ib_v,bstop
          if (task_distrib(ib_c,ib_v,ik,spin) /= my_rank) cycle
 
-         if (dtset%useria == 666) then
+         if (dtset%useria /= 666) then
            call wfd%copy_cg(ib_c, ik, spin, cg_c)
-
-           ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
-           !do ispinor=1,nspinor
-           !  ipws=(ispinor-1)*npw_k
-           !  do ipw=1+ipws,npw_k+ipws
-           !    if (ddkop%gs_hamkq(1)%kinpw_kp(ipw-ipws)>huge(zero)*1.d-11) then
-           !      cg_c(1:2,ipw)=zero
-           !    end if
-           !  end do
-           !end do
-
-           vv = ddkop%get_velocity(istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_c)
+           vv = ddkop%get_velocity(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, wfd%mpi_enreg%me_g0, cg_c)
+           !if (ib_v == ib_c) vv(2, :) = zero
 
            do idir=1,3
              dipoles(idir,:,ib_c,ib_v,ik,spin) = vv(:, idir)
@@ -520,7 +517,7 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
            ug_c(1:npw_k*nspinor) = wfd%wave(ib_c,ik,spin)%ug
 
            ! Calculate matrix elements of i[H,r] for NC pseudopotentials.
-           ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb, kbz,ug_c,ug_v,kg_k)
+           ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,dtset%inclvkb, kpt,ug_c,ug_v,kg_k)
 
            ! HM: 24/07/2018
            ! Transform dipoles to be consistent with results from DFPT
@@ -553,7 +550,6 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
      ! Free KB form factors
      call vkbr_free(vkbr)
 
-     ! loop over k-points
      call cwtime(cpu,wall,gflops,"stop")
      write(msg,'(2(a,i0),2(a,f8.2))')"k-point [",ik,"/",nkpt,"] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg, do_flush=.True.)
@@ -571,25 +567,26 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  ABI_FREE(ihrc)
  ABI_FREE(task_distrib)
 
- if (dtset%useria == 666) then
+ if (dtset%useria /= 666) then
    ABI_FREE(cg_c)
    ABI_FREE(cg_v)
    call ddkop%free()
  end if
 
  ! Gather the k-points computed by all processes
- call xmpi_sum_master(dipoles,master,comm,ierr)
+ call xmpi_sum_master(dipoles, master, comm, ierr)
 
  ! Write the matrix elements
 #ifdef HAVE_NETCDF
  ! Output EVK file in netcdf format.
  if (my_rank == master) then
    ! Have to build hdr on k-grid with info about perturbation.
-   call hdr_copy(wfk%hdr, hdr_tmp)
+   call hdr_copy(hdr, hdr_tmp)
    hdr_tmp%qptn = [0, 0, 0]
 
    do ii=1,3
      fname = strcat(prefix, '_', itoa(ii), "_EVK.nc")
+     !call wrtout(ab_out, sjoin("- Writing file: ", fname))
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EVK.nc file")
      hdr_tmp%pertcase = 3 * cryst%natom + ii
      NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
@@ -607,18 +604,34 @@ subroutine eph_ddk(wfk_path,prefix,dtset,psps,pawtab,inclvkb,ngfftc,comm)
  end if
 #endif
 
- ! Block all procs here so that we know output files are available when code returns.
- call xmpi_barrier(comm)
+ if (my_rank == master .and. dtset%prtvol > 0) then
+   write(ab_out, "(2a)")ch10,"Writing velocity matrix elements (only diagonal terms, real part) for testing purpose:"
+   do spin=1,nsppol
+     do ik=1,min(nkpt, 4)
+       write(ab_out, "(2(a,1x,i0),2x,2a)")"For spin: ", spin, ", ikbz: ", ik, ", kpt: ", trim(ktoa(wfd%kibz(:,ik)))
+       do ib_c=bandmin,min(bandmin+8, bandmax)
+         write(ab_out, "(3(es16.6,2x))") dipoles(:,1,ib_c,ib_c,ik,spin)
+       end do
+       write(ab_out,*)""
+       !do ib_c=bandmin,min(bandmin+8, bandmax)
+       !  write(ab_out, "(a, 6(es16.6,2x))")"Sum_k: ", sum(dipoles(:,:,ib_c,ib_c,:,spin), dim=3) / nkpt
+       !end do
+     end do
+   end do
+ end if
 
  ! Free memory
  ABI_FREE(dipoles)
 
- call wfk_close(wfk)
  call wfd%free()
  call ebands_free(ebands)
  call cryst%free()
+ call hdr_free(hdr)
 
-end subroutine eph_ddk
+ ! Block all procs here so that we know output files are available when code returns.
+ call xmpi_barrier(comm)
+
+end subroutine ddk_compute
 !!***
 
 !----------------------------------------------------------------------
@@ -976,8 +989,11 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
 
 ! *************************************************************************
 
+ ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
+
  new%inclvkb = dtset%inclvkb
  new%ipert = cryst%natom + 1
+ new%dfpt_sciss = dtset%dfpt_sciss
  new%mpw = mpw
 
  ! Not used because vlocal1 is not applied.
@@ -985,7 +1001,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
  mgfft = maxval(ngfft(1:3))
 
  ABI_MALLOC(new%gh1c, (2, new%mpw*dtset%nspinor, 3))
- ABI_MALLOC(new%gs1c, (2, new%mpw*dtset%nspinor, 3*psps%usepaw))
+ ABI_MALLOC(new%gs1c, (2, new%mpw*dtset%nspinor, 3))
 
  do idir=1,3
    ! ==== Initialize most of the Hamiltonian (and derivative) ====
@@ -1117,14 +1133,14 @@ end subroutine ddkop_setup_spin_kpoint
 !!
 !! SOURCE
 
-subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
+subroutine ddkop_apply(self, eig0nk, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_enreg)
 
 !Arguments ------------------------------------
 !scalars
  class(ddkop_t),intent(inout) :: self
  integer,intent(in) :: mpw, npw_k, nspinor
  type(MPI_type),intent(in) :: mpi_enreg
- real(dp),intent(in) :: eshift
+ real(dp),intent(in) :: eig0nk
 
 !Local variables-------------------------------
 !scalars
@@ -1136,11 +1152,13 @@ subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
 !scalars
  integer,parameter :: berryopt0 = 0, optlocal0 = 0, tim_getgh1c = 1, usevnl0 = 0, opt_gvnlx1 = 0
  integer :: idir, sij_opt, ispinor, ipws, ipw, optnl
+ real(dp) :: eshift
 !arrays
  real(dp) :: grad_berry(2,(berryopt0/4)), gvnlx1(2,usevnl0)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
 
 !************************************************************************
+ self%eig0nk = eig0nk
 
  if (self%inclvkb /= 0) then
    ! optlocal0 = 0: local part of H^(1) is not computed in gh1c=<G|H^(1)|C>
@@ -1148,6 +1166,7 @@ subroutine ddkop_apply(self, eshift, mpw, npw_k, nspinor, cwave, cwaveprj, mpi_e
    ! opt_gvnlx1 = option controlling the use of gvnlx1 array:
    optnl = 2 !; if (self%inclvkb == 0) optnl = 0
 
+   eshift = self%eig0nk - self%dfpt_sciss
    do idir=1,3
      sij_opt = self%gs_hamkq(idir)%usepaw
      call getgh1c(berryopt0,cwave,cwaveprj,self%gh1c(:,:,idir),&
@@ -1192,12 +1211,14 @@ end subroutine ddkop_apply
 !!
 !! SOURCE
 
-function ddkop_get_velocity(self, istwf_k, npw_k, nspinor, me_g0, brag) result(vv)
+function ddkop_get_velocity(self, eig0mk, istwf_k, npw_k, nspinor, me_g0, brag) result(vv)
 
 !Arguments ------------------------------------
 !scalars
  class(ddkop_t),intent(in) :: self
  integer,intent(in) :: istwf_k, npw_k, nspinor, me_g0
+ real(dp),intent(in) :: eig0mk
+!arrays
  real(dp),intent(in) :: brag(npw_k*nspinor)
  real(dp) :: vv(2, 3)
 
@@ -1209,6 +1230,8 @@ function ddkop_get_velocity(self, istwf_k, npw_k, nspinor, me_g0, brag) result(v
  real(dp) :: dotarr(2)
 
 !************************************************************************
+
+
 
  do idir=1,3
    dotarr = cg_zdotc(npw_k * nspinor, brag, self%gh1c(:,:,idir))
@@ -1224,6 +1247,10 @@ function ddkop_get_velocity(self, istwf_k, npw_k, nspinor, me_g0, brag) result(v
    end if
    vv(:, idir) = dotarr
  end do
+
+ ! FOR PAW
+
+ ! eshiftkq = half * (eig0mk - self%eig0nk)
 
 end function ddkop_get_velocity
 !!***

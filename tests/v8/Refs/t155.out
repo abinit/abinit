@@ -274,7 +274,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t155o_DS1_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
@@ -481,7 +482,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t155o_DS2_EDOS
-Number of bands in e-ph self-energy: 8
+Number of bands in e-ph self-energy sum: 8
+From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
