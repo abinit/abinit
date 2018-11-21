@@ -2326,7 +2326,7 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,j0lmn,klmn,kln,mesh_size
+ integer :: idir,ilmn,il,im,iln,ilm,jlmn,jl,jm,jlm,jln,klmn,kln,mesh_size
  real(dp) :: intgr3,RecipAlpha2
  complex(dpc) :: lms
  logical :: ndmom
@@ -2367,13 +2367,12 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
      jm=indlmn(2,jlmn)
      jlm=indlmn(4,jlmn)
      jln=indlmn(5,jlmn)
-     j0lmn=jlmn*(jlmn-1)/2
-     do ilmn=1,jlmn
+     do ilmn=1,pawtab%lmn_size
        il=indlmn(1,ilmn)
        im=indlmn(2,ilmn)
        iln=indlmn(5,ilmn)
        ilm=indlmn(4,ilmn)
-       klmn=j0lmn+ilmn
+       klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
        kln = pawtab%indklmn(2,klmn)
 
   !    Computation of (<phi_i|phi_j>-<tphi_i|tphi_j>)/r^3 radial integral

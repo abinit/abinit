@@ -58,8 +58,8 @@ module m_orbmag
   use m_pawfgr,           only : pawfgr_type
   use m_paw_ij,           only : paw_ij_type
   use m_paw_overlap,      only : overlap_k1k2_paw
-  use m_pawrad,           only : pawrad_type
-  use m_paw_sphharm,      only : initylmr,setsym_ylm
+  use m_pawrad,           only : pawrad_type,pawrad_deducer0,simp_gen
+  use m_paw_sphharm,      only : initylmr,setsym_ylm,slxyzs
   use m_pawtab,           only : pawtab_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
        &                         pawcprj_get, pawcprj_put, pawcprj_getdim, pawcprj_set_zero,&
@@ -1789,16 +1789,17 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  integer :: gdir,gdx,gdxc,gfor,gsigma
  integer :: iatom,icg,icgb,icgg,icprj,icprji,icprjb,icprjbi,icprjg,icprjgi,ider,idir
  integer :: ikg,ikgb,ikgg,ikpt,ikpti,ikptb,ikptbi,ikptg,ikptgi
- integer :: ilm,ilmn,ipw,isppol,istwf_k,itrs,itypat
- integer :: jlmn,job,jpw
- integer :: klmn,mcg1_k,my_cpopt,my_nspinor,nband_k,ncpgr,ndat,nkpg,nn,n1,n2,n3
+ integer :: il,im,ilm,ilmn,ipw,isppol,istwf_k,itrs,itypat
+ integer :: jl,jm,jlmn,job,jpw
+ integer :: klmn,kln,mesh_size,mcg1_k,my_cpopt,my_nspinor,nband_k,ncpgr,ndat,nkpg,nn,n1,n2,n3
  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,npw_k,npw_kb,npw_kg
  integer :: prtvol,shiftbd,sij_opt,tim_getghc,type_calc,type_calc_123
- real(dp) :: deltab,deltag,dkg2,dotr,doti,ENK,EN2K,htpisq,keg,lambda,ucvol
+ real(dp) :: deltab,deltag,dkg2,dotr,doti,ENK,EN2K,htpisq,intg,keg,lambda,ucvol
  complex(dpc) :: cdij,cgdijcb,cpb,cpg,cpk
  complex(dpc) :: CCI,CCI_1,CCI_2,CCI_3
- complex(dpc) :: CCII,CCII_1,CCII_2,CCII_3,CCII_4
- complex(dpc) :: S1trace,VVI,VVI_1,VVI_2
+ complex(dpc) :: CCII,CCII_1,CCII_2,CCII_3,CCII_4,CCVV_k
+ complex(dpc) :: onsite_l_k,orbl_me
+ complex(dpc) :: S1trace_k,VVI,VVI_1,VVI_2
  complex(dpc) :: VVIII,VVIII_1,VVIII_2
  complex(dpc) :: VVII,VVII_1,VVII_2,VVII_3
  character(len=500) :: message
@@ -1809,7 +1810,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp) :: dkb(3),dkg(3),dkbg(3),dtm_k(2),gmet(3,3),gprimd(3,3)
  real(dp) :: kpoint(3),kpointb(3),kpointg(3)
  real(dp) :: orbmagvec(2,3),rhodum(1),rmet(3,3)
- real(dp),allocatable :: bra(:,:),cg1_k(:,:),cgrvtrial(:,:),cwavef(:,:),ffnl(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
+ real(dp),allocatable :: bra(:,:),cg1_k(:,:),cgrvtrial(:,:),cwavef(:,:),ff(:),ffnl(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: hmat(:,:,:,:,:,:),kinpw(:),kk_paw(:,:,:),kpg_k_dummy(:,:)
  real(dp),allocatable :: my_nucdipmom(:,:),ph3d(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:,:),smat_inv(:,:,:)
  real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:),ylm_k(:,:)
@@ -2093,7 +2094,39 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
     do adir = 1, 3
 
-       S1trace = czero
+       CCVV_k = czero
+       S1trace_k = czero
+       onsite_l_k = czero
+
+       do iatom=1,dtset%natom
+          itypat=dtset%typat(iatom)
+          mesh_size=pawtab(itypat)%mesh_size
+          ABI_ALLOCATE(ff,(mesh_size))
+          do jlmn=1,pawtab(itypat)%lmn_size
+             jl=pawtab(itypat)%indlmn(1,jlmn)
+             jm=pawtab(itypat)%indlmn(2,jlmn)
+             do ilmn=1,pawtab(itypat)%lmn_size
+                il=pawtab(itypat)%indlmn(1,ilmn)
+                im=pawtab(itypat)%indlmn(2,ilmn)
+                klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+                kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+                ! compute <L_dir>
+                call slxyzs(jl,jm,adir,il,im,orbl_me)
+                ! compute integral of phi_i*phi_j - tphi_i*tphi_j
+                if (abs(orbl_me) > tol8) then
+                   ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
+                   call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+                   call simp_gen(intg,ff,pawrad(itypat))
+                   do nn = 1, nband_k
+                      cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
+                      cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
+                      onsite_l_k=onsite_l_k+conjg(cpb)*half*orbl_me*intg*cpk
+                   end do ! end loop over nn
+                end if ! end check that |L_dir| > 0, otherwise ignore term
+             end do ! end loop over ilmn
+          end do ! end loop over jlmn
+          ABI_DEALLOCATE(ff)
+       end do ! end loop over atoms
     
        do epsabg = 1, -1, -2
 
@@ -2399,13 +2432,14 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                    do iatom=1,dtset%natom
                       itypat=dtset%typat(iatom)
-                      do klmn=1,pawtab(itypat)%lmn2_size
-                         ilmn=pawtab(itypat)%indklmn(7,klmn)
-                         jlmn=pawtab(itypat)%indklmn(8,klmn)
-                         cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn))
-                         cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn))
-                         S1trace=S1trace+epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk*pawtab(itypat)%dltij(klmn)
-                      end do ! end loop over klmn
+                      do ilmn=1,pawtab(itypat)%lmn_size
+                         do jlmn=1,pawtab(itypat)%lmn_size
+                            klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+                            cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn))
+                            cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn))
+                            S1trace_k=S1trace_k-half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+                         end do ! end loop over jlmn
+                      end do ! end loop over ilmn
                    end do ! end loop over atoms
 
                    do n1 = 1, nband_k
@@ -2473,8 +2507,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                 end do ! end nn
 
-                orbmagvec(1,adir) = orbmagvec(1,adir) + epsabg*bsigma*gsigma*real(CCI+CCII-VVI-VVII-VVIII)/(2.0*deltab*2.0*deltag)
-                orbmagvec(2,adir) = orbmagvec(2,adir) + epsabg*bsigma*gsigma*aimag(CCI+CCII-VVI-VVII-VVIII)/(2.0*deltab*2.0*deltag)
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII-VVI-VVII-VVIII)/(2.0*deltab*2.0*deltag)
+                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII)/(2.0*deltab*2.0*deltag)
 
                 ABI_DEALLOCATE(kg_kg)
 
@@ -2486,8 +2520,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
        end do ! end loop over epsabg
 
-       orbmagvec(1,adir) = orbmagvec(1,adir) - real(S1trace)
-       orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(S1trace)
+       orbmagvec(1,adir) = orbmagvec(1,adir) + real(CCVV_k)
+       orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(CCVV_K)
+       ! orbmagvec(1,adir) = orbmagvec(1,adir) - real(S1trace_k) 
+       ! orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(S1trace_k)
+       ! orbmagvec(1,adir) = orbmagvec(1,adir) + real(onsite_l_k)
+       ! orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(onsite_l_k)
 
     end do ! end loop over adir
     
@@ -2499,11 +2537,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  orbmagvec(1,1:3) = MATMUL(gprimd,orbmagvec(1,1:3))
  orbmagvec(2,1:3) = MATMUL(gprimd,orbmagvec(2,1:3))
 
- ! pre factor is -i*occ/2*N_k
+ ! pre factor is occ/N_k
  ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
- ! factor of 2 in denominator comes from vector potential = 1/2 B x r
- dtorbmag%orbmagvec(1,1:3) =  two*orbmagvec(2,1:3)/(two*dtorbmag%fnkpt)
- dtorbmag%orbmagvec(2,1:3) = -two*orbmagvec(1,1:3)/(two*dtorbmag%fnkpt)
+
+ dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/dtorbmag%fnkpt
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
