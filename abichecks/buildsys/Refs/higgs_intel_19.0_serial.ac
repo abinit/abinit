@@ -725,7 +725,7 @@ with_netcdf_incs="-I/usr/local/netcdf4411_intel19_serial/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L/usr/local/netcdf4411_intel19_serial/lib -lnetcdff -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
