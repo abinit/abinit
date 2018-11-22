@@ -2012,13 +2012,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    end if
 
-   !if (dtset%useria == 567) then
-     ! TODO Uncomment this part to use all states to debug.
-     !call wrtout(ab_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+   if (dtset%useria == 567) then
+     ! Uncomment this part to use all states to debug.
+     call wrtout(ab_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
      call wrtout(std_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
      new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
-   !end if
+   end if
 
  else
    ! Re + Im
@@ -2066,6 +2066,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
+ ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)
  ! Decide default behaviour for Re-Im/Im
  new%qint_method = dtset%eph_intmeth - 1
 

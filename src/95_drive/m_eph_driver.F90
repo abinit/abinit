@@ -505,6 +505,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
      wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos_free(phdos)
+     write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHODOS with wmin, wmax: ",wminmax
+     call wrtout(std_out, msg)
    end do
 
    if (my_rank == master) then
