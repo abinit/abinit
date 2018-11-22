@@ -115,7 +115,7 @@ program anaddb
  character(len=24) :: start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
- character(len=500) :: message
+ character(len=500) :: msg
  !type(args_t) :: args
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
@@ -171,8 +171,8 @@ program anaddb
    call int2char4(my_rank, procstr)
    ABI_CHECK((procstr(1:1)/='#'),'Bug: string length too short!')
    tmpfilename = trim(filnam(2)) // "_LOG_P" // trim(procstr)
-   if (open_file(tmpfilename, message, unit=std_out, form="formatted", action="write") /= 0) then
-     MSG_ERROR(message)
+   if (open_file(tmpfilename, msg, unit=std_out, form="formatted", action="write") /= 0) then
+     MSG_ERROR(msg)
    end if
  end if
 
@@ -220,8 +220,8 @@ program anaddb
  if (iam_master) then
    tmpfilename = filnam(2)
    call isfile(tmpfilename,'new')
-   if (open_file(tmpfilename,message,unit=ab_out,form='formatted',status='new') /= 0) then
-     MSG_ERROR(message)
+   if (open_file(tmpfilename,msg,unit=ab_out,form='formatted',status='new') /= 0) then
+     MSG_ERROR(msg)
    end if
    rewind (unit=ab_out)
    call herald(codename,abinit_version,ab_out)
@@ -236,9 +236,9 @@ program anaddb
 !******************************************************************
 
  ! Read the DDB information, also perform some checks, and symmetrize partially the DDB
- write(message, '(a,a)' )' read the DDB information and perform some checks',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ write(msg, '(a,a)' )' read the DDB information and perform some checks',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
 
  ! DEBUG
  !write(*,*) 'anaddb: natom=', natom
@@ -361,12 +361,12 @@ program anaddb
        d2flg(1:msize)=1
      else
        ! There is a problem !
-       write(message, '(7a)' )&
+       write(msg, '(7a)' )&
 &       'The dynamical matrix at Gamma is needed, in order to perform ',ch10,&
 &       "relaxation at constant polarisation (Na Sai's method)",ch10,&
 &       'However, this was not found in the DDB.',ch10,&
 &       'Action: complete your DDB with the dynamical matrix at Gamma.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end if ! iblok not found
 
@@ -454,16 +454,16 @@ program anaddb
 !**********************************************************************
  if (inp%ifcflag ==1) then
    ! ifc to be calculated for interpolation
-   write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+   write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of the interatomic forces ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
 
 ! TODO : check if this wrtout should be removed in latest merge 17 feb 2017
    call timein(tcpu,twall)
-   write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   write(msg, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
 
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
@@ -522,9 +522,9 @@ program anaddb
 
  ! Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
-   write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
    ! Only 1 shift in q-mesh
    wminmax = zero
@@ -565,20 +565,20 @@ program anaddb
  ! Start if interatomic forces and thermal flags are on
  if (inp%ifcflag==1 .and. any(inp%thmflag==[1,2])) then
 
-   write(message, '(a,(80a),a,a,a,a,a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+   write(msg, '(a,(80a),a,a,a,a,a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of phonon density of states, ',ch10,&
 &   '    thermodynamical properties, ',ch10,&
 &   '    and Debye-Waller factors.',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
    if (inp%thmflag==1) then
      call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm)
 
    else if (inp%thmflag==2) then
-     write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Entering thm9 routine with thmflag=2 ',ch10
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Entering thm9 routine with thmflag=2 ',ch10
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
 
      call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm,thmflag=inp%thmflag)
    end if
@@ -622,10 +622,10 @@ program anaddb
 
  if (inp%nph2l/=0 .or. inp%dieflag==1) then
 
-   write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+   write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
 &   ch10,' Treat the second list of vectors ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
 
    ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
    qphon(:,1)=zero; qphnrm(1)=zero
@@ -711,11 +711,11 @@ program anaddb
 
    ! The frequency-dependent dielectric tensor (and oscillator strength).
    if (inp%dieflag==1)then
-     write(message, '(6a)' )&
+     write(msg, '(6a)' )&
 &     ' the frequency-dependent dielectric tensor (and also once more',ch10,&
 &     ' the phonons at gamma - without non-analytic part )',ch10,ch10,&
 &     ' The frequency-dependent dielectric tensor'
-     call wrtout(std_out,message,'COLL')
+     call wrtout(std_out,msg,'COLL')
 
      ! Initialisation of the phonon wavevector
      qphon(:,1)=zero; qphnrm(1)=zero
@@ -796,10 +796,10 @@ program anaddb
 ! Here treating the internal strain tensors at Gamma point
  if (inp%instrflag/=0) then
 
-   write(message, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+   write(msg, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of the internal-strain  tensor',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
 
    if (inp%instrflag==1) then
      call wrtout(std_out,'instrflag=1, so extract the internal strain constant from the 2DTE','COLL')
@@ -823,10 +823,10 @@ program anaddb
 
 !here treating the elastic tensors at Gamma Point
  if (inp%elaflag/=0) then
-   write(message, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+   write(msg, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of the elastic and compliances tensor (Voigt notation)',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
 
    if (any(inp%elaflag == [1,2,3,4,5])) then
      call wrtout(std_out,'so extract the elastic constant from the 2DTE','COLL')
@@ -859,11 +859,11 @@ program anaddb
 
 !here treating the piezoelectric tensor at Gamma Point
  if (inp%piezoflag/=0 .or. inp%dieflag==4 .or. inp%elaflag==4) then
-   write(message, '(a,a,(80a),a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+   write(msg, '(a,a,(80a),a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of the tensor related to piezoelectric effetc',ch10,&
 &   '  (Elastic indices in Voigt notation)',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
 
    if (any(inp%piezoflag == [1,2,3,4,5,6,7]) .or. inp%dieflag==4 .or.inp%elaflag==4) then
      call wrtout(std_out,'extract the piezoelectric constant from the 2DTE','COLL')
@@ -917,8 +917,8 @@ program anaddb
 
  call timein(tcpu,twall)
  tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli
- write(message, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
- call wrtout(std_out,message,"COLL")
+ write(msg, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
+ call wrtout(std_out,msg,"COLL")
 
  if (iam_master) then
    write(ab_out, '(a,a,a,i4,a,f13.1,a,f13.1)' )'-',ch10,&
@@ -927,13 +927,13 @@ program anaddb
 
  call xmpi_sum(tsec,comm,ierr)
 
- write(message, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
+ write(msg, '(a,(80a),a,a,a,f11.3,a,f11.3,a,a,a,a)' ) ch10,&
 & ('=',ii=1,80),ch10,ch10,&
 & '+Total cpu time',tsec(1),&
 & '  and wall time',tsec(2),' sec',ch10,ch10,&
 & ' anaddb : the run completed succesfully.'
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
 
  if (iam_master) then
    ! Write YAML document with the final summary.

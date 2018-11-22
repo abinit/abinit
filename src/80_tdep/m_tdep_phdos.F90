@@ -44,6 +44,7 @@ subroutine tdep_calc_phdos(Crystal,ddb,Ifc,InVar,Lattice,natom,natom_unitcell,Ph
   integer :: dos_ngqpt(3)
   integer :: count_wminmax(2)
   character (len=25):: phdos_fname
+  character(len=500) :: msg
   double precision :: dossmear,integ,domega
   double precision :: Phij_NN(3*natom,3*natom)
   double precision :: Rlatt4abi(3,natom_unitcell,natom)
