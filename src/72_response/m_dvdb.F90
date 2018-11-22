@@ -172,6 +172,10 @@ module m_dvdb
   logical :: has_dielt_zeff=.False.
    ! Does the dvdb have the dielectric tensor and Born effective charges
 
+  logical :: add_lr_part=.True.
+   ! Logical flag to not add the long range part after the interpolation.
+   ! This is mainly used for debugging
+
   logical :: symv1=.False.
    ! Activate symmetrization of v1 potentials.
 
@@ -1352,13 +1356,11 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
    ABI_FREE(v1scf)
    ! Print progress.
-   if (db_iqpt < 20) then
+   if (mod(db_iqpt,10)==1) then
      call cwtime(cpu, wall, gflops, "stop")
      write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
-   else if (db_iqpt == 20) then
-     call wrtout(std_out, "...")
-  end if
+   end if
  end do
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
@@ -2427,7 +2429,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
  ! Compute long-range part of the coupling potential
  v1r_lr = zero; cnt = 0
- if (db%has_dielt_zeff) then
+ if (db%has_dielt_zeff.and.db%add_lr_part) then
    do mu=1,db%natom3
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
      idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
@@ -2454,8 +2456,10 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
        end do
 
        ! Add the long-range part of the potential
-       ov1r(1,ifft,ispden,mu) = ov1r(1,ifft,ispden,mu) + v1r_lr(1,ifft,mu)
-       ov1r(2,ifft,ispden,mu) = ov1r(2,ifft,ispden,mu) + v1r_lr(2,ifft,mu)
+       if (db%add_lr_part) then
+         ov1r(1,ifft,ispden,mu) = ov1r(1,ifft,ispden,mu) + v1r_lr(1,ifft,mu)
+         ov1r(2,ifft,ispden,mu) = ov1r(2,ifft,ispden,mu) + v1r_lr(2,ifft,mu)
+       end if
      end do
 
      ! Remove the phase.
@@ -2899,7 +2903,7 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
  ! Compute long-range part of the coupling potential
  v1r_lr = zero; cnt = 0
- if (db%has_dielt_zeff) then
+ if (db%has_dielt_zeff.and.db%add_lr_part) then
    call dvdb_v1r_long_range(db,qpt,iat,idir,nfft,ngfft,v1r_lr)
  end if
 
@@ -2918,8 +2922,10 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
      end do
 
      ! Add the long-range part of the potential
-     v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
-     v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+     if (db%add_lr_part) then
+       v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
+       v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
+     end if
    end do
 
    ! Remove the phase.
