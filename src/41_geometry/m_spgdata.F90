@@ -77,8 +77,6 @@ contains
 
 subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,jdtset,ptgroupma,spgroup
@@ -394,8 +392,6 @@ end subroutine prtspgroup
 
 
 subroutine spgdata(brvsb,intsb,intsbl,ptintsb,ptschsb,schsb,spgaxor,spgroup,sporder,spgorig)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2144,8 +2140,6 @@ end subroutine spgdata
 
 subroutine ptgmadata(ptgroupma,ptgrpmasb)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ptgroupma
@@ -2307,8 +2301,6 @@ end subroutine ptgmadata
 
 subroutine getptgroupma(ptgroup,ptgroupha,ptgroupma)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: ptgroupma
@@ -2446,8 +2438,6 @@ end subroutine getptgroupma
 !! SOURCE
 
 subroutine symptgroup(iholohedry,nsym,ptgroup,symrel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

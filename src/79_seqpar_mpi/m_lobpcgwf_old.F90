@@ -68,13 +68,14 @@ contains
 !!  nbdblock : number of blocks
 !!  npw_k=number of plane waves at this k point
 !!  prtvol=control print volume and debugging output
+!!  use_totvnlx=1 if one has to compute totvnlx
 !!
 !! OUTPUT
 !!  resid_k(nband_k)=residuals for each states
 !!  subham(nband_k*(nband_k+1))=the matrix elements of h
 !!  If gs_hamk%usepaw==0:
 !!    gsc(2,mgsc)=<g|s|c> matrix elements (s=overlap)
-!!    totvnlx(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl+vfockACE
+!!    totvnlx(nband_k*use_totvnlx,nband_k*use_totvnlx)=the matrix elements of vnl+vfockACE
 !!
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions
@@ -91,7 +92,7 @@ contains
 !! SOURCE
 
 subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnlx)
+&                   nband_k,nbdblock,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
 
 
  use defs_abitypes
@@ -112,7 +113,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: icg,igsc,mcg,mgsc,nband_k,nbdblock,npw_k,prtvol
+ integer,intent(in) :: icg,igsc,mcg,mgsc,nband_k,nbdblock,npw_k,prtvol,use_totvnlx
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
  type(mpi_type),intent(inout) :: mpi_enreg
@@ -120,7 +121,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  real(dp),intent(in) :: kinpw(npw_k)
  real(dp),intent(out) :: resid_k(nband_k)
  real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
- real(dp),intent(inout) :: totvnlx((3-gs_hamk%istwf_k)*nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))
+ real(dp),intent(inout) :: totvnlx((3-gs_hamk%istwf_k)*nband_k*use_totvnlx,nband_k*use_totvnlx)
 
 !Local variables-------------------------------
  integer, parameter :: tim_getghc=5

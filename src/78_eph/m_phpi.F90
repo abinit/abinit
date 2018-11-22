@@ -197,8 +197,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
 
  ! Open the DVDB file
- call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
-
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
 
  ! Initialize the wave function descriptors.
  ! For the time being, no memory distribution, each node has the full set of states.
@@ -295,7 +294,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  end do
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
 
-
  ! Allow PW-arrays dimensioned with mpw
  ABI_MALLOC(kg_k, (3, mpw))
  ABI_MALLOC(kg_kq, (3, mpw))
@@ -338,24 +336,24 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(blkflg, (natom3,natom3))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
 
-
  call cwtime(cpu,wall,gflops,"start")
 
  ! Find the index of the q-point in the DVDB.
- db_iqpt = dvdb_findq(dvdb, qpt)
+ db_iqpt = dvdb%findq(qpt)
 
  if (db_iqpt /= -1) then
    if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found: ",ktoa(qpt)," in DVDB with index ",itoa(db_iqpt)))
    ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-   call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
+   call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
  else
-   if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find: ",ktoa(qpt), "in DVDB - interpolating"))
+   MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
+   !if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find: ",ktoa(qpt), "in DVDB - interpolating"))
    ! Fourier interpolate of the potential
-   ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
-   cplex = 2
-   ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
-   call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
+   !ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
+   !cplex = 2
+   !ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
+   !call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, comm)
  end if
 
  ! Allocate vlocal1 with correct cplex. Note nvloc

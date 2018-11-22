@@ -89,7 +89,7 @@ contains
 !! type_calc= option governing which part of Hamitonian is to be applied:
 !             0: whole Hamiltonian
 !!            1: local part only
-!!            2: non-local+kinetic only (added to the exixting Hamiltonian)
+!!            2: non-local+Fock+kinetic only (added to the existing Hamiltonian)
 !!            3: local + kinetic only (added to the existing Hamiltonian)
 !! ===== Optional inputs =====
 !!   [kg_fft_k(3,:)]=optional, (k+G) vector coordinates to be used for the FFT tranformation
@@ -109,6 +109,7 @@ contains
 !!                                          or <G|H-lambda.S|C> (if sij_opt=-1)
 !!  gvnlxc(2,npw*my_nspinor*ndat)=matrix elements <G|Vnonlocal+VFockACE|C> (if sij_opt>=0)
 !!                                            or <G|Vnonlocal+VFockACE-lambda.S|C> (if sij_opt=-1)
+!!      include Vnonlocal if NCPP and non-local Fock if associated(gs_ham%fockcommon)
 !!  if (sij_opt=1)
 !!    gsc(2,npw*my_nspinor*ndat)=matrix elements <G|S|C> (S=overlap).
 !!
@@ -166,7 +167,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  real(dp),target :: nonlop_dum(1,1)
  real(dp),allocatable :: buff_wf(:,:),cwavef1(:,:),cwavef2(:,:),cwavef_fft(:,:),cwavef_fft_tr(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),ghc3(:,:),ghc4(:,:),ghcnd(:,:),ghc_mGGA(:,:)
- real(dp),allocatable :: vlocal_tmp(:,:,:),work(:,:,:,:)
+ real(dp),allocatable :: gvnlc(:,:),vlocal_tmp(:,:,:),work(:,:,:,:)
  real(dp), pointer :: kinpw_k1(:),kinpw_k2(:),kpt_k1(:),kpt_k2(:)
  real(dp), pointer :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
@@ -558,7 +559,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  if ((type_calc==0).or.(type_calc==2).or.(type_calc==3)) then
 
 !============================================================
-! Application of the non-local potential
+! Application of the non-local potential and the Fock potential
 !============================================================
 
    if ((type_calc==0).or.(type_calc==2)) then
@@ -592,10 +593,36 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (gs_ham%usepaw==1) gsc_ptr => gsc
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc,select_k=select_k_)
-  end if ! end type_calc 0 or 2 for nonlop application
-  if (type_calc == 3) then ! for kinetic and local only, nonlocal should be zero
+
+     if (gs_ham%usepaw==1 .and. has_fock)then
+       if (fock_get_getghc_call(fock)==1) then
+         ABI_ALLOCATE(gvnlc,(2,npw_k2*my_nspinor*ndat))
+         gvnlc=gvnlxc
+       endif
+     endif
+
+!    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
+     if (has_fock) then
+       if (fock_get_getghc_call(fock)==1) then
+         if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
+         do idat=1,ndat
+           if (fock%use_ACE==0) then
+             if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
+             call fock_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),cwaveprj_idat,&
+&             gvnlxc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
+           else
+             call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
+&             gvnlxc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
+           end if
+         end do ! idat
+       end if
+     end if
+
+   else if (type_calc == 3) then ! for kinetic and local only, nonlocal and vfock should be zero
+
      gvnlxc(:,:) = zero
-  end if
+
+   end if ! if(type_calc...
 
 !============================================================
 ! Assemble kinetic, local, nonlocal and Fock contributions
@@ -693,22 +720,11 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      end do ! idat
    end if
 
-!  Calculation of the Fock exact exchange term
-   if (has_fock) then
-     if (fock_get_getghc_call(fock)==1) then
-       if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
-       do idat=1,ndat
-         if (fock%use_ACE==0) then
-           if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
-           call fock_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),cwaveprj_idat,&
-&           ghc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-         else
-           call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
-&           ghc(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-         end if
-       end do ! idat
-     end if
-   end if
+!  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc
+   if (gs_ham%usepaw==1 .and. has_fock)then
+     gvnlxc=gvnlxc-gvnlc
+     ABI_DEALLOCATE(gvnlc)
+   endif
 
 !  Structured debugging : if prtvol=-level, stop here.
    if(prtvol==-level)then
@@ -1363,7 +1379,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
      else
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
        gs_ham,gvnlxc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
-       select_k=select_k_default)
+       select_K=select_k_default)
      end if
    end if
  end if

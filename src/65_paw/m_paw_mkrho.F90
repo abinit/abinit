@@ -35,7 +35,7 @@ MODULE m_paw_mkrho
  use m_paw_sphharm,      only : initylmr
  use m_pawfgrtab,        only : pawfgrtab_type,pawfgrtab_init,pawfgrtab_free
  use m_pawrhoij,         only : pawrhoij_type,pawrhoij_copy,pawrhoij_free_unpacked, &
-&                               pawrhoij_nullify,pawrhoij_free,symrhoij
+&                               pawrhoij_nullify,pawrhoij_free,pawrhoij_symrhoij
  use m_pawfgr,           only : pawfgr_type
  use m_paw_nhat,         only : pawmknhat,nhatgrid
  use m_paral_atom,       only : get_my_atmtab,free_my_atmtab
@@ -133,7 +133,7 @@ CONTAINS  !=====================================================================
 !!
 !! CHILDREN
 !!      fourdp,pawmknhat,pawrhoij_copy,pawrhoij_free,pawrhoij_free_unpacked
-!!      pawrhoij_nullify,symrhoij,timab,transgrid
+!!      pawrhoij_nullify,pawrhoij_symrhoij,timab,transgrid
 !!
 !! SOURCE
 
@@ -201,15 +201,15 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
  call timab(557,1,tsec)
  option=1;choice=1
  if (present(pawang_sym)) then
-   call symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,ntypat,&
-&   option,pawang_sym,pawprtvol,pawtab,rprimd,symafm,symrec,typat,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&   qphon=qphon)
+   call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,&
+&       natom,nsym,ntypat,option,pawang_sym,pawprtvol,pawtab,rprimd,symafm,&
+&       symrec,typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&       qphon=qphon)
  else
-   call symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,ntypat,&
-&   option,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
-&   qphon=qphon)
+   call pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,&
+&       natom,nsym,ntypat,option,pawang,pawprtvol,pawtab,rprimd,symafm,&
+&       symrec,typat,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&       qphon=qphon)
  end if
  call pawrhoij_free_unpacked(pawrhoij_unsym)
  call timab(557,2,tsec)
@@ -220,7 +220,7 @@ subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,
    call pawrhoij_nullify(pawrhoij_ptr)
    call pawrhoij_copy(pawrhoij,pawrhoij_ptr,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom, &
-&   keep_cplex=.false.,keep_itypat=.false.,keep_nspden=.false.)       
+&   keep_cplex=.false.,keep_qphase=.false.,keep_itypat=.false.,keep_nspden=.false.)
  else
    pawrhoij_ptr=>pawrhoij
  end if
@@ -395,6 +395,10 @@ end subroutine pawmkrho
 
  DBG_ENTER("COLL")
 
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'denfgr not supposed to be called with qphase/=1!')
+ end if
+
 !Set up parallelism over atoms (compatible only with band-FFT parallelism)
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
@@ -410,11 +414,11 @@ end subroutine pawmkrho
  if (my_natom>0) then
    if (paral_atom) then
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat,mpi_atmtab=my_atmtab)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex,l_size_atm,nspden,typat,&
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%qphase,l_size_atm,nspden,typat,&
 &     mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
    else
      call pawtab_get_lsize(pawtab,l_size_atm,my_natom,typat)
-     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%cplex,l_size_atm,nspden,typat)
+     call pawfgrtab_init(local_pawfgrtab,pawrhoij(1)%qphase,l_size_atm,nspden,typat)
    end if
    ABI_DEALLOCATE(l_size_atm)
  end if
@@ -633,7 +637,7 @@ end subroutine pawmkrho
              end if ! check if |r-R| = 0
 
              do ispden=1,nspden
-               if (pawrhoij(iatom)%cplex == 1) then
+               if (pawrhoij(iatom)%cplex_rhoij == 1) then
                  rhor_paw(ifftsph,ispden) = rhor_paw(ifftsph,ispden) + &
 &                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(irhoij,ispden)*(phj*phi - tphj*tphi)
 

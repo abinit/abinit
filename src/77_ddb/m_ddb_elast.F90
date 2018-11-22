@@ -101,8 +101,6 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
 &            instrain,iout,mpert,natom,nblok,ncid)
 
- implicit none
-
 !Arguments -------------------------------------------
 !scalars
  integer,intent(in) :: iblok,iblok_stress,iout,mpert,natom,nblok,ncid

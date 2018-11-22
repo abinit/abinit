@@ -135,6 +135,10 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
 
  DBG_ENTER("COLL")
 
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'make_efg_onsite: not supposed to be called with qphqse=2!')
+ end if
+
  efg(:,:,:) = zero
 
 !Set up parallelism over atoms
@@ -163,7 +167,7 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
    mesh_size=pawtab(itypat)%mesh_size
    ABI_ALLOCATE(ff,(mesh_size))
 
-   cplex = pawrhoij(iatom)%cplex
+   cplex = pawrhoij(iatom)%qphase
    nspden = pawrhoij(iatom)%nspden
    ABI_ALLOCATE(lmselectin,(lm_size))
    ABI_ALLOCATE(lmselectout,(lm_size))
@@ -327,7 +331,7 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
 !Local variables-------------------------------
 !scalars
  integer :: iatom,iatom_tot,ierr,irhoij,islope,ispden,itypat
- integer :: ilmn,il,iln,ilm,im,jl,jlm,jlmn,jln,jm,j0lmn
+ integer :: ilmn,il,iln,ilm,im,jl,jlm,jlmn,jln,jm,j0lmn,jrhoij
  integer :: klmn,kln,mesh_size,my_comm_atom,nslope
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: mi,mj,xi,xxsum,xysumi,xysumj,yi,yj
@@ -338,6 +342,10 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
 ! ************************************************************************
 
  DBG_ENTER("COLL")
+
+ if (my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'make_fc_paw: not supposed to be called with qphqse=2!')
+ end if
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
@@ -380,6 +388,7 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
          if (jl==0 .and. il==0) then ! select only s-states
 
 !          Loop over non-zero elements of rhoij
+           jrhoij=1
            do irhoij=1,pawrhoij(iatom)%nrhoijsel
              if (klmn==pawrhoij(iatom)%rhoijselect(irhoij)) then ! rho_ij /= 0 for this klmn
                xxsum = 0 ! these three variables will be used to compute the slopes
@@ -412,14 +421,10 @@ subroutine make_fc_paw(fc,my_natom,natom,nspden,ntypat,pawrhoij,pawrad,pawtab,&
                mi = xysumi/xxsum
                mj = xysumj/xxsum
 !              accumulate the rho_ij contribution to the fermi contact for this spin density:
-               if (pawrhoij(iatom)%cplex == 1) then
-                 fc(ispden,iatom_tot)=fc(ispden,iatom_tot)+&
-&                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(irhoij,ispden)*mi*mj/four_pi
-               else
-                 fc(ispden,iatom_tot)=fc(ispden,iatom_tot)+&
-&                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(2*irhoij-1,ispden)*mi*mj/four_pi
-               end if
+               fc(ispden,iatom_tot)=fc(ispden,iatom_tot)+&
+&                 pawtab(itypat)%dltij(klmn)*pawrhoij(iatom)%rhoijp(jrhoij,ispden)*mi*mj/four_pi
              end if ! end selection on klmn for nonzero rho_ij
+             jrhoij=jrhoij+pawrhoij(iatom)%cplex_rhoij
            end do ! end loop over nonzero rho_ij
          end if ! end l=l'=0 selection
        end do ! end loop over ilmn

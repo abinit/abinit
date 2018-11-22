@@ -91,6 +91,7 @@ contains
 !!   | prtstm=print STM input variable
 !!   | prtvol= control print volume
 !!   | usedmatpu=LDA+U: number of SCF steps keeping occ. matrix fixed
+!!   | usefock=1 if Fock operator is present (hence possibility of a double loop)
 !!   | usepawu=0 if no LDA+U; 1 if LDA+U
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
@@ -110,6 +111,8 @@ contains
 !!   iscf =6 => SCF cycle, CG based on true minimization of the energy
 !!   iscf =-3, although non-SCF, the energy is computed, so print it here.
 !!  istep=number of the SCF iteration (needed if choice=2)
+!!  istep_fock_outer=number of outer SCF iteration in the double loop approach
+!!  istep_mix=number of inner SCF iteration in the double loop approach
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
@@ -150,7 +153,7 @@ contains
 
 subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &  eigen,etotal,favg,fcart,fermie,fname_eig,filnam1,initGS,&
-&  iscf,istep,kpt,maxfor,moved_atm_inside,mpi_enreg,&
+&  iscf,istep,istep_fock_outer,istep_mix,kpt,maxfor,moved_atm_inside,mpi_enreg,&
 &  nband,nkpt,nstep,occ,optres,&
 &  prtfor,prtxml,quit,res2,resid,residm,response,tollist,usepaw,&
 &  vxcavg,wtk,xred,conv_retcode,&
@@ -160,7 +163,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: choice,initGS,iscf,istep,moved_atm_inside,nkpt,nstep
+ integer,intent(in) :: choice,initGS,iscf,istep,istep_fock_outer,istep_mix
+ integer,intent(in) :: moved_atm_inside,nkpt,nstep
  integer,intent(in) :: optres,prtfor,prtxml,response,usepaw
  integer,intent(out) :: quit,conv_retcode
  real(dp),intent(in) :: cpus,deltae,diffor,etotal,fermie,maxfor,res2,residm
@@ -182,8 +186,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !scalars
  integer,parameter :: master=0
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- integer :: iatom,iband,iexit,ikpt,isppol,nband_index,nband_k,openexit,option, ishift
- integer :: tmagnet, my_rank, ii
+ integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank 
+ integer :: nband_index,nband_k,nnsclohf
+ integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
  integer :: ivdw
 #endif
@@ -206,6 +211,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  my_rank = mpi_enreg%me_cell
 
  quit=0; conv_retcode=0
+ usefock=dtset%usefock
+ nnsclohf=dtset%nnsclohf
  use_dpfft = .False.
 
  tmagnet=0
@@ -610,23 +617,50 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
-       if(toldfe_ok==2 .and. .not.noquit)then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&         ' At SCF step',istep,', etot is converged : ',ch10,&
-&         '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+       if(toldfe_ok==2 .and. (.not.noquit))then
+         if(usefock==0 .or. nnsclohf<2)then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', etot is converged : ',ch10,&
+&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+         else
+           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
+&           '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+         endif
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
          quit=1
        end if
+       if(usefock==1 .and. nnsclohf>1)then
+         if(istep_mix==1 .and. (.not.noquit))then
+!          The change due to the update of the Fock operator is sufficiently small. No need to meet it a second times.
+           if (abs(deltae)<toldfe) then
+             write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+&             ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - etot converged : ',ch10,&
+&             '  update of Fock operator yields diff in etot=',abs(deltae),' < toldfe=',toldfe
+             call wrtout(ab_out,message,'COLL')
+             call wrtout(std_out,message,'COLL')
+             fock%fock_common%fock_converged=.true.
+             quit=1
+           endif
+         endif
+         if(istep_mix==nnsclohf .and. quit==0)then
+           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+&           ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot NOT converged : ',ch10,&
+&           '  diff in etot=',abs(deltae),' > toldfe=',toldfe
+           call wrtout(ab_out,message,'COLL')
+           call wrtout(std_out,message,'COLL')
+         endif
+       endif
 
-       ! Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
-       ! calculations: If input vdw_df_threshold is lesss than toldfe
-       ! then the vdW-DF is triggered once selfconsistency criteria is
-       ! reached for the first time.
-       ! write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
-       ! &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
-       ! &      (abs(deltae)<toldfe),ch10
-       ! call wrtout(std_out,message,'COLL')
+!      Here treat the vdw_df_threshold criterion for non-SCF vdW-DF
+!      calculations: If input vdw_df_threshold is lesss than toldfe
+!      then the vdW-DF is triggered once selfconsistency criteria is
+!      reached for the first time.
+!      write(message,'(1x,a,e10.3,1x,a,e10.3,1x,l1,a)') &
+!      &      '[vdW-DF][DEBUG] deltae=',deltae,'vdw_df_threshold=',vdw_df_threshold, &
+!      &      (abs(deltae)<toldfe),ch10
+!      call wrtout(std_out,message,'COLL')
 #if defined DEV_YP_VDWXC
        ivdw = 0
        if ( toldfe > vdw_df_threshold ) then
@@ -1412,7 +1446,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 !scalars
  integer :: ipositron,mu,optdc
  logical :: directE_avail,testdmft
- real(dp) :: eent,enevalue,etotal,etotaldc
+ real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
  ! Do not modify the length of these strings
  character(len=22) :: eneName
  character(len=500) :: msg
@@ -1469,10 +1503,14 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
      if (ipositron/=1) then
+       exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
+!XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
+!      At present, there is still a problem with the variational formulation for the Fock term with PAW. 
+!      So, for the time being, keep it inside.
+       if(usepaw==1)exc_semilocal=exc_semilocal+energies%e_fock
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &
 &       '    Hartree energy  = ',energies%e_hartree,ch10,&
-&       '    XC energy       = ',energies%e_xc+energies%e_fock+&
-&       energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v,ch10,&
+&       '    XC energy       = ',exc_semilocal,ch10,&
 &       eneName            ,enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
@@ -1486,11 +1524,28 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
      call wrtout(iout,msg,'COLL')
      if (usepaw==0) then
-       write(msg, '(a,es21.14)' ) '    NL   psp  energy= ',energies%e_nlpsp_vfock
+       if(abs(energies%e_fock0)<tol8)then
+         write(msg, '(a,es21.14)' ) &
+&         '    NL   psp  energy= ',energies%e_nlpsp_vfock
+       else
+         write(msg, '(a,es21.14)' ) &
+&         '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
+       endif
+       call wrtout(iout,msg,'COLL')
      else
-       write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_paw
+       write(msg, '(a,es21.14)' ) &
+&       '    Spherical terms = ',energies%e_paw
+       call wrtout(iout,msg,'COLL')
+!XG20181025 Does not work (yet)...
+!       if(abs(energies%e_nlpsp_vfock)>tol8)then
+!         write(msg, '(a,es21.14)' ) &
+!&         '    Fock-type term  = ',energies%e_nlpsp_vfock
+!         call wrtout(iout,msg,'COLL')
+!         write(msg, '(a,es21.14)' ) &
+!&         '    -frozen Fock en.= ',-energies%e_fock0
+!         call wrtout(iout,msg,'COLL')
+!       endif
      end if
-     call wrtout(iout,msg,'COLL')
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
        call wrtout(iout,msg,'COLL')
@@ -1557,8 +1612,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
 &     eneName            ,enevalue,ch10,&
 &     '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
-&     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc+&
-&     energies%e_fock-energies%e_fockdc+&
+&     '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc&
+&     -energies%e_fock0+&
 &     energies%e_hybcomp_E0-energies%e_hybcomp_v0
      call wrtout(iout,msg,'COLL')
    end if
