@@ -3442,7 +3442,6 @@ entries. The first element specificies the interpolation method.
 
   * 0 --> No interpolation (default)
   * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]
-  * 2 --> B-spline interpolation.
 
 The meaning of the other entries depend on the interpolation technique selected.
 In the case of star-function interpolation:
@@ -3453,8 +3452,6 @@ In the case of star-function interpolation:
     the lattice vectors included in the star expansion
   * einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9
 
-For B-spline interpolation: einterp(2:4): Order of B-spline for the three
-reduced directions. Cubic spline (3) is the recommended value.
 """,
 ),
 

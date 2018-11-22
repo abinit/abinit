@@ -838,6 +838,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      else
        MSG_ERROR("Invalid eph_task")
      end if
+     !distrib_bq = 0
+     ABI_CHECK(all(distrib_bq /= -1), "Wrong distrib_bq")
 
      !ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
@@ -1081,15 +1083,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Get gkk(kcalc, q, nu)
          call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
-
-         ! DEBUG: Write gkk matrix elements to file. DO NOT USE IN PRODUCTION
-         ! nctkarr_t("gkk", "dp", "two, max_nbcalc, nbsum, natom3, nqbz, nkcalc, nsppol"), &
-         !ii = nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "gkk"), gkq_nu, &
-         !  start=[1, 1, ibsum, 1, iq_ibz, ikcalc, spin], count=[2, nbcalc_ks, 1, natom3, 1, 1, 1])
-         !NCF_CHECK(ii)
-         !ii = nf90_put_var(sigma%ncid, nctk_idname(ncid, "frohl_gkq2"), gkq_nu, &
-         !  start=[1, 1, ibsum, 1, iq_ibz, ikcalc, spin], count=[])
-         !NCF_CHECK(ii)
 
          ! Save data for Debye-Waller computation (performed outside the q-loop)
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -2190,7 +2183,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  call ebands_free(ebands_dense)
 
  ! Prepare computation of Frohlich self-energy
- new%frohl_model = 0
  new%frohl_model = nint(dtset%frohl_params(1))
  if (new%frohl_model /= 0) then
    ! Init parameters for numerical integration inside sphere.
@@ -2276,8 +2268,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! Compute electron DOS with tetra.
  edos_intmeth = 2; if (new%bcorr == 1) edos_intmeth = 3
  if (dtset%prtdos == 1) edos_intmeth = 1
+ !if (dtset%prtdos == -2) edos_intmeth = 3
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- !edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
  edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
  if (my_rank == master) then
    path = strcat(dtfil%filnam_ds(4), "_EDOS")
@@ -2329,8 +2321,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("eph_ngqpt_fine", "int", "three"), &
      nctkarr_t("ddb_ngqpt", "int", "three"), &
      nctkarr_t("ph_ngqpt", "int", "three"), &
-     !nctkarr_t("sigma_ngkpt", "int", "three"), &
-     !nctkarr_t("frohl_params", "dp", "four"), &
+     nctkarr_t("sigma_ngkpt", "int", "three"), &
+     nctkarr_t("frohl_params", "dp", "four"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      !nctkarr_t("bstop_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
@@ -2350,13 +2342,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("qp_gaps", "dp", "ntemp, nkcalc, nsppol") &
    ])
    NCF_CHECK(ncerr)
-
-   ! DEBUG: Write gkq matrix elements to file. DO NOT USE IN PRODUCTION
-   !ncerr = nctk_def_arrays(ncid, [ &
-   !  nctkarr_t("gkq", "dp", "two, max_nbcalc, nbsum, natom3, nqbz, nkcalc, nsppol"), &
-   !  nctkarr_t("gkq_frohl", "dp", "two, max_nbcalc, nbsum, natom3, nqbz, nkcalc, nsppol") &
-   !])
-   !NCF_CHECK(ncerr)
 
    if (new%frohl_model == 1) then
      ! Arrays storing the Frohlich self-energy.
@@ -2416,8 +2401,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngqpt"), dtset%sigma_ngkpt))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_paramsq))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_params))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), new%kcalc))

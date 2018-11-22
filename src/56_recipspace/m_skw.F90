@@ -32,6 +32,10 @@ module m_skw
  use m_xmpi
  use m_crystal
  use m_sort
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_fstrings,       only : itoa, sjoin, ktoa, yesno, ftoa
  use m_special_funcs,  only : abi_derfc
@@ -100,10 +104,7 @@ module m_skw
     ! operations of the point group (reciprocal space).
 
   complex(dpc),allocatable :: coefs(:,:,:)
-   ! coefs(nr, nbcount, nsppol).
-
-   !type(skcoefs_t),allocatable :: coefs(:,:)
-   ! coefs(mband, nsppol)
+   ! coefs(nr, bcount, nsppol).
 
   complex(dpc),allocatable :: cached_srk(:)
    ! cached_srk(%nr)
@@ -124,6 +125,9 @@ module m_skw
 
    procedure :: print => skw_print
    ! Print info about object.
+
+   procedure :: ncwrite => skw_ncwrite
+   ! Write the object in netcdf format
 
    procedure :: eval_bks => skw_eval_bks
    ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
@@ -442,6 +446,82 @@ end subroutine skw_print
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_skw/skw_ncwrite
+!! NAME
+!! skw_ncwrite
+!!
+!! FUNCTION
+!!   Write the object in netcdf format
+!!
+!! INPUTS
+!!  ncid=NC file handle.
+!!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
+!!   "skw" if not specified.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function skw_ncwrite(self, ncid, prefix) result(ncerr)
+
+!Arguments ------------------------------------
+!scalars
+ class(skw_t),intent(in) :: self
+ integer,intent(in) :: ncid
+ character(len=*),optional,intent(in) :: prefix
+
+#ifdef HAVE_NETCDF
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: prefix_
+!arrays
+ real(dp),allocatable :: real_coefs(:,:,:,:)
+
+! *************************************************************************
+
+ prefix_ = "skw"; if (present(prefix)) prefix_ = trim(prefix)
+
+ ! Define dimensions.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("nr", self%nr), nctkdim_t("nkpt", self%nkpt), nctkdim_t("bcount", self%bcount), &
+   nctkdim_t("nsppol", self%nsppol)], &
+   defmode=.True., prefix=prefix_)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [ &
+  ! Atomic structure and symmetry operations
+  nctkarr_t("rpts", "dp", "three, number_of_cartesian_directions, number_of_vectors"), &
+  nctkarr_t("kpts", "dp", "three, nkpt"), &
+  nctkarr_t("coefs", "dp", "two, nr, bcount, nsppol") &
+ ], prefix=prefix_)
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("rpts")), self%rpts))
+ !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("kpts")), self%kpts))
+ ABI_MALLOC(real_coefs, (2, self%nr, self%bcount, self%nsppol))
+ real_coefs(1,:,:,:) = real(self%coefs); real_coefs(2,:,:,:) = aimag(self%coefs)
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("coefs")), real_coefs))
+ ABI_FREE(real_coefs)
+
+contains
+  pure function pre(istr) result(ostr)
+    character(len=*),intent(in) :: istr
+    character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
+    ostr = trim(prefix_) // trim(istr)
+  end function pre
+
+#endif
+
+end function skw_ncwrite
+!!***
 
 !!****f* m_skw/skw_eval_bks
 !! NAME

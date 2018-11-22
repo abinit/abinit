@@ -36,7 +36,6 @@ MODULE m_ebands
  use m_abicore
  use m_xmpi
  use m_tetrahedron
- use m_bspline
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -100,7 +99,10 @@ MODULE m_ebands
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
  public :: ebands_downsample       ! Build a new ebands_t with a downsampled IBZ.
- public :: ebands_get_jdos         ! Compute the joint density of states.
+ public :: ebands_get_edos         ! Compute electron DOS from band structure.
+ public :: ebands_get_jdos         ! Compute electron joint-DOS from band structure.
+ public :: ebands_get_dos_matrix_elements
+
  public :: ebands_interp_kmesh     ! Interpolate energies on a k-mesh.
  public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
  public :: ebands_interpolate_kpath
@@ -177,8 +179,59 @@ MODULE m_ebands
    ! Write eDOS to netcdf file.
 
  end type edos_t
+!!***
 
- public :: ebands_get_edos   ! Compute electron DOS from band structure.
+!!****t* m_ebands/jdos_t
+!! NAME
+!! jdos_t
+!!
+!! FUNCTION
+!! Store the electron joint DOS
+!!
+!! SOURCE
+
+ type,public :: jdos_t
+
+   integer :: nsppol
+    ! Number of spins.
+
+   integer :: nkibz
+    ! Number of k-points in the IBZ.
+
+   integer :: nw
+   ! Number of points in the frequency mesh.
+
+   integer :: intmeth
+   ! 1 for gaussian, 2 tetra
+
+   real(dp) :: broad = zero
+   ! Gaussian broadening
+
+   real(dp) :: step
+   ! Step of the mesh
+
+   real(dp),allocatable :: mesh(:)
+   ! mesh(nw)
+
+   real(dp),allocatable :: values(:,:)
+   ! dos(nw,0:nsppol)
+   ! Total jDOS, spin up and spin down component.
+
+ contains
+
+   procedure :: free => jdos_free
+   ! Free memory
+
+   !procedure :: write => jdos_write
+   ! Write results to file (formatted mode)
+
+   !procedure :: print => jdos_print
+   ! Print jDOS info to Fortran unit.
+
+   procedure :: ncwrite => jdos_ncwrite
+   ! Write jDOS to netcdf file.
+
+ end type jdos_t
 !!***
 
 !----------------------------------------------------------------------
@@ -233,46 +286,6 @@ MODULE m_ebands
 !!***
 
 !----------------------------------------------------------------------
-
-!!****t* m_ebands/ebspl_t
-!! NAME
-!! ebspl_t
-!!
-!! FUNCTION
-!!  B-spline interpolation of electronic eigenvalues.
-!!
-!! SOURCE
-
- type :: bcoefs_t
-   real(dp),allocatable :: vals(:,:,:)
- end type bcoefs_t
-
- type,public :: ebspl_t
-
-   integer :: nkx,nky,nkz
-   ! Number of input data points
-
-   integer :: kxord,kyord,kzord
-   ! Order of the spline.
-
-   integer :: band_block(2)
-    ! Initial and final band index.
-
-   !real(dp),allocatable :: xvec(:),yvec(:),zvec(:)
-   real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
-   ! Array of length ndata+korder containing the knot
-
-   type(bcoefs_t),allocatable :: coeff(:,:)
-   ! coeff(mband, nsppol)
-   ! coff(band, spin)%vals(nkx, nky, nkz)
-   ! B-spline coefficients for a given (band, spin)
-
- end type ebspl_t
-
- public :: ebspl_new         ! Build B-spline object.
- public :: ebspl_eval_bks    ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
- public :: ebspl_free        ! Free memory.
-
 
 CONTAINS  !=====================================================================================
 !!***
@@ -1861,6 +1874,7 @@ type(stats_t) function ebands_edstats(ebands) result(stats)
 
 ! *************************************************************************
 
+ ! TODO: Remove
  ! Compute energy difference between b+1 and b.
  ABI_CALLOC(ediffs, (ebands%mband-1,ebands%nkpt,ebands%nsppol))
 
@@ -3608,339 +3622,6 @@ end function ebands_downsample
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspl_new
-!! NAME
-!! ebspl_new
-!!
-!! FUNCTION
-!! Build the `ebspl_t` object used to interpolate the band structure.
-!!
-!! INPUTS
-!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nkx] where
-!!    nkx is the number of points along the x-axis.
-!!  band_block(2)=Initial and final band index. If [0,0], all bands are used
-!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!      m_ebands
-!!
-!! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
-!!
-!! SOURCE
-
-type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
-
-!Arguments ------------------------------------
-!scalars
- type(ebands_t),intent(in) :: ebands
- type(crystal_t),intent(in) :: cryst
-!arrays
- integer,intent(in) :: ords(3), band_block(2)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: sppoldbl1=1
- integer :: kxord,kyord,kzord,nxknot,nyknot,nzknot,ierr,nkfull,ikf
- integer :: spin,band,ik_ibz,timrev,ix,iy,iz,nkx,nky,nkz,ii, comm
- real(dp) :: dksqmax
- character(len=500) :: msg
-!arrays
- integer :: ngkpt(3)
- integer,allocatable :: bz2ibz(:,:)
- logical :: shifted(3)
- real(dp),allocatable :: xvec(:),yvec(:),zvec(:),xyzdata(:,:,:),kfull(:,:)
-
-! *********************************************************************
-
- ! Check input parameters
- ierr = 0
- if (ebands%nkpt == 1) then
-   MSG_WARNING("Cannot interpolate with a single k-point")
-   ierr = ierr + 1
- end if
- if (.not. isdiagmat(ebands%kptrlatt)) then
-   MSG_WARNING('kptrlatt is not diagonal. Multiple shifts are not allowed')
-   ierr = ierr + 1
- end if
- if (ebands%nshiftk /= 1) then
-   MSG_WARNING('Multiple shifts not allowed')
-   ierr = ierr + 1
- end if
- if (any(ebands%nband /= ebands%nband(1))) then
-   MSG_WARNING("nband must be constant")
-   ierr = ierr + 1
- end if
- if (ierr /= 0) then
-   MSG_ERROR("bspline interpolation cannot be performed. See messages above.")
- end if
-
- comm = xmpi_comm_self
-
- ! Build BZ mesh Note that in the simplest case of unshifted mesh:
- ! 1) k-point coordinates are in [0, 1]
- ! 2) The mesh is closed i.e. (0,0,0) and (1,1,1) are included
- ngkpt(1)=ebands%kptrlatt(1,1)
- ngkpt(2)=ebands%kptrlatt(2,2)
- ngkpt(3)=ebands%kptrlatt(3,3)
-
- ! Multiple shifts are not supported here.
- shifted(:) = abs(ebands%shiftk(:,1)) > tol8
- nkx = ngkpt(1) + 1; if (shifted(1)) nkx = nkx + 1
- nky = ngkpt(2) + 1; if (shifted(2)) nky = nky + 1
- nkz = ngkpt(3) + 1; if (shifted(3)) nkz = nkz + 1
- ABI_MALLOC(xvec, (nkx))
- ABI_MALLOC(yvec, (nky))
- ABI_MALLOC(zvec, (nkz))
-
- do ix=1,nkx
-   ii = ix; if (shifted(1)) ii = ii - 1
-   xvec(ix) = (ii-1+ebands%shiftk(1,1)) / ngkpt(1)
- end do
- do iy=1,nky
-   ii = iy; if (shifted(2)) ii = ii - 1
-   yvec(iy) = (ii-1+ebands%shiftk(2,1)) / ngkpt(2)
- end do
- do iz=1,nkz
-   ii = iz; if (shifted(3)) ii = ii - 1
-   zvec(iz) = (ii-1+ebands%shiftk(3,1)) / ngkpt(3)
- end do
-
- ! Build list of k-points in full BZ (ordered as required by B-spline routines)
- nkfull = nkx*nky*nkz
- ABI_MALLOC(kfull, (3,nkfull))
- ikf = 0
- do iz=1,nkz
-   do iy=1,nky
-     do ix=1,nkx
-       ikf = ikf + 1
-       kfull(:,ikf) = [xvec(ix), yvec(iy), zvec(iz)]
-     end do
-   end do
- end do
-
- ! Build mapping kfull --> IBZ
- ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1,6))
-
- timrev = kpts_timrev_from_kptopt(ebands%kptopt)
- call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev,comm, use_symrec=.True.)
- ABI_FREE(kfull)
-
- if (dksqmax > tol12) then
-   write(msg, '(3a,es16.6,4a)' )&
-   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
-   'Action: check k-point input variables',ch10,&
-   '        e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-   MSG_ERROR(msg)
- end if
-
- ! Generate knots (ords is input)
- kxord = ords(1); kyord = ords(2); kzord = ords(3)
- nxknot = nkx + kxord
- nyknot = nky + kyord
- nzknot = nkz + kzord
-
- new%nkx = nkx; new%kxord = kxord
- new%nky = nky; new%kyord = kyord
- new%nkz = nkz; new%kzord = kzord
-
- ABI_MALLOC(new%xknot,(nxknot))
- ABI_MALLOC(new%yknot,(nyknot))
- ABI_MALLOC(new%zknot,(nzknot))
- call dbsnak(nkx, xvec, kxord, new%xknot)
- call dbsnak(nky, yvec, kyord, new%yknot)
- call dbsnak(nkz, zvec, kzord, new%zknot)
-
- ABI_MALLOC(xyzdata,(nkx,nky,nkz))
- ABI_DT_MALLOC(new%coeff, (ebands%mband,ebands%nsppol))
- new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, ebands%mband]
-
- do spin=1,ebands%nsppol
-   do band=1,ebands%mband
-     if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
-
-     ABI_MALLOC(new%coeff(band,spin)%vals, (nkx,nky,nkz))
-
-     ! Build array in full bz to prepare call to dbs3in.
-     ikf = 0
-     do iz=1,nkz
-       do iy=1,nky
-         do ix=1,nkx
-           ikf = ikf + 1
-           ik_ibz = bz2ibz(ikf,1)
-           xyzdata(ix,iy,iz) = ebands%eig(band,ik_ibz,spin)
-         end do
-       end do
-     end do
-
-     ! Construct 3D tensor for B-spline. Results in coeff(band,spin)%vals
-     call dbs3in(nkx,xvec,nky,yvec,nkz,zvec,xyzdata,nkx,nky,kxord,kyord,kzord,new%xknot,new%yknot,new%zknot,&
-        new%coeff(band,spin)%vals)
-   end do
- end do
-
- ABI_FREE(xvec)
- ABI_FREE(yvec)
- ABI_FREE(zvec)
- ABI_FREE(bz2ibz)
- ABI_FREE(xyzdata)
-
-end function ebspl_new
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ebands/ebspl_eval_bks
-!! NAME
-!! ebspl_eval_bks
-!!
-!! FUNCTION
-!!   Interpolate eigenvalues, 1st and 2nd derivates wrt k at an arbitrary k-point.
-!!
-!! INPUTS
-!!  band=Band index
-!!  kpt(3)=K-point in reduced coordinate (will be wrapped in the interval [0,1[
-!!  spin=Spin index
-!!
-!! OUTPUT
-!!  oeig=Interpolated eigenvalues.
-!!    Note that oeig is not necessarily sorted in ascending order.
-!!    The routine does not reorder the interpolated eigenvalues
-!!    to be consistent with the interpolation of the derivatives.
-!!  [oder1(3)]=First-order derivatives wrt k in reduced coordinates.
-!!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
-!!
-!! PARENTS
-!!      m_ebands
-!!
-!! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
-!!
-!! SOURCE
-
-subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: band,spin
- type(ebspl_t),intent(in) :: ebspl
-!arrays
- real(dp),intent(in) :: kpt(3)
- real(dp),intent(out) :: oeig
- real(dp),optional,intent(out) :: oder1(3)
- real(dp),optional,intent(out) :: oder2(3,3)
-
-!Local variables-------------------------------
-!scalars
- integer :: ii,jj
-!arrays
- integer :: iders(3)
- real(dp) :: kred(3),shift(3)
-
-! *********************************************************************
-
- DBG_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
-
- ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
- ! This is required because the spline has been constructed in this region.
- call wrap2_zero_one(kpt, kred, shift)
-
- ! B-spline interpolation.
- oeig = dbs3vl(kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
-               ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
-               ebspl%coeff(band,spin)%vals)
-
- if (present(oder1)) then
-   ! Compute first-order derivatives.
-   do ii=1,3
-     iders = 0; iders(ii) = 1
-     oder1(ii) = dbs3dr(iders(1), iders(2), iders(3), &
-                        kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
-                        ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
-                        ebspl%coeff(band,spin)%vals)
-   end do
- end if
-
- if (present(oder2)) then
-   ! Compute second-order derivatives.
-   oder2 = zero
-   do jj=1,3
-     iders = 0; iders(jj) = 1
-     do ii=1,jj
-       iders(ii) = iders(ii) + 1
-       oder2(ii, jj) = dbs3dr(iders(1), iders(2), iders(3), &
-                        kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
-                        ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
-                        ebspl%coeff(band,spin)%vals)
-       if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
-     end do
-   end do
- end if
-
-end subroutine ebspl_eval_bks
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ebands/ebspl_free
-!! NAME
-!! ebspl_free
-!!
-!! FUNCTION
-!!  Free dynamic memory.
-!!
-!! PARENTS
-!!      m_ebands
-!!
-!! CHILDREN
-!!      alloc_copy,ebands_free,ebands_write,kpath_free,kpath_print,wrtout
-!!
-!! SOURCE
-
-subroutine ebspl_free(ebspl)
-
-!Arguments ------------------------------------
-!scalars
- type(ebspl_t),intent(inout) :: ebspl
-
-!Local variables-------------------------------
-!scalars
- integer :: ii,jj
-
-! *********************************************************************
-
- if (allocated(ebspl%xknot)) then
-   ABI_FREE(ebspl%xknot)
- end if
- if (allocated(ebspl%yknot)) then
-   ABI_FREE(ebspl%yknot)
- end if
- if (allocated(ebspl%zknot)) then
-   ABI_FREE(ebspl%zknot)
- end if
-
- ! Free B-spline coefficients.
- if (allocated(ebspl%coeff)) then
-   do jj=1,size(ebspl%coeff, dim=2)
-     do ii=1,size(ebspl%coeff, dim=1)
-       if (allocated(ebspl%coeff(ii,jj)%vals)) then
-         ABI_FREE(ebspl%coeff(ii,jj)%vals)
-       end if
-     end do
-   end do
-   ABI_DT_FREE(ebspl%coeff)
- end if
-
-end subroutine ebspl_free
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_ebands/ebands_interp_kmesh
 !! NAME
 !! ebands_interp_kmesh
@@ -3952,14 +3633,11 @@ end subroutine ebspl_free
 !!  ebands<ebands_t> = Object with input energies.
 !!  cryst<crystal_t> = Crystalline structure.
 !!  params(:):
-!!     params(0): interpolation type. 1 for star-functions, 2 for b-spline
+!!     params(0): interpolation type. 1 for star-functions
 !!     if star-functions:
 !!         params(2): Ratio between star functions and ab-initio k-points.
 !!         params(3:4): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639) if params(2) > tol6
 !!         params(3)=rcut, params(4) = rsigma
-!!     if B-spline:
-!!        params(2:4)=order of the spline for the three directions. params(2) must be in [0, nkx] where
-!!                nkx is the number of points along the x-axis. Same for params(2:3)
 !!  intp_kptrlatt(3,3) = New k-mesh
 !!  intp_nshiftk= Number of shifts in new k-mesh.
 !!  intp_shiftk(3,intp_nshiftk) = Shifts in new k-mesh.
@@ -3982,14 +3660,15 @@ end subroutine ebspl_free
 !! SOURCE
 
 
-function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm) result(new)
+type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
+        band_block, comm, out_prefix) result(new)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: intp_nshiftk,comm
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
- type(ebands_t) :: new
+ character(len=*),optional,intent(in) :: out_prefix
 !arrays
  integer,intent(in) :: intp_kptrlatt(3,3),band_block(2)
  real(dp),intent(in) :: params(:)
@@ -4000,13 +3679,12 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  integer,parameter :: master = 0
  integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib
  integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
-!#ifdef HAVE_NETCDF
-! integer :: ncdif
-!#endif
- type(ebspl_t) :: ebspl
+#ifdef HAVE_NETCDF
+ integer :: ncid
+#endif
  type(skw_t) :: skw
 !arrays
- integer :: new_kptrlatt(3,3),bspl_ords(3),my_bblock(2)
+ integer :: new_kptrlatt(3,3),my_bblock(2)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),allocatable :: new_shiftk(:,:),new_kibz(:,:),new_kbz(:,:),new_wtk(:)
  real(dp),allocatable :: new_doccde(:),new_eig(:),new_occ(:)
@@ -4053,16 +3731,12 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
- ! Build (B-spline|SKW) object for all bands.
+ ! Build SKW object for all bands.
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
                  my_bblock, comm)
- case (2)
-   bspl_ords = nint(params(2:4))
-   ebspl = ebspl_new(ebands, cryst, bspl_ords, my_bblock)
-
  case default
    MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end select
@@ -4078,8 +3752,6 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
        select case (itype)
        case (1)
          call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
-       case (2)
-         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case default
          MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
        end select
@@ -4088,32 +3760,31 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  end do
  call xmpi_sum(new%eig, comm, ierr)
 
-! if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
-!   ! Write ESKW file with crystal and (interpolated) band structure energies.
-!   !call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))
-!#ifdef HAVE_NETCDF
-!   ! Write crystal and (interpolated) band structure energies.
-!   NCF_CHECK(nctk_open_create(ncid, strcat(out_prefix, "_ESKW.nc"), xmpi_comm_self))
-!   NCF_CHECK(cryst%ncwrite(ncid))
-!   NCF_CHECK(ebands_ncwrite(new, ncid))
-!   ! TODO
-!   !NCF_CHECK(skw%ncwrite(ncid))
-!
-!   ! Define variables specific to SKW algo.
-!   ncerr = nctk_def_arrays(ncid, [ &
-!    nctkarr_t("band_block", "int", "two"), &
-!    nctkarr_t("einterp", "dp", "four")], defmode=.True.)
-!   NCF_CHECK(ncerr)
-!
-!   ! Write data.
-!   NCF_CHECK(nctk_set_datamode(ncid))
-!   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "band_block"), band_block))
-!   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
-!   NCF_CHECK(nf90_close(ncid))
-!#endif
-! end if
+ if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
+   ! Write ESKW file with crystal and (interpolated) band structure energies.
+   !call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))
+#ifdef HAVE_NETCDF
+   ! Write crystal and (interpolated) band structure energies.
+   NCF_CHECK(nctk_open_create(ncid, strcat(out_prefix, "_ESKW.nc"), xmpi_comm_self))
+   NCF_CHECK(cryst%ncwrite(ncid))
+   NCF_CHECK(ebands_ncwrite(new, ncid))
+   ! TODO
+   !NCF_CHECK(skw%ncwrite(ncid))
 
- call ebspl_free(ebspl)
+   ! Define variables specific to SKW algo.
+   !ncerr = nctk_def_arrays(ncid, [ &
+   ! nctkarr_t("band_block", "int", "two"), &
+   ! nctkarr_t("einterp", "dp", "four")], defmode=.True.)
+   !NCF_CHECK(ncerr)
+
+   ! Write data.
+   !NCF_CHECK(nctk_set_datamode(ncid))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "band_block"), band_block))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ end if
+
  call skw%free()
 
 end function ebands_interp_kmesh
@@ -4133,7 +3804,7 @@ end function ebands_interp_kmesh
 !!  cryst<crystal_t> = Crystalline structure.
 !!  kpath<kpath_t> = Object describing the k-path
 !!  params(:):
-!!    params(1): 1 for SKW, 2 for B-spline.
+!!    params(1): 1 for SKW.
 !!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
@@ -4164,11 +3835,10 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  integer,parameter :: new_nshiftk=1
  integer :: ik_ibz,spin,new_bantot,new_mband,cplex
  integer :: nprocs,my_rank,cnt,ierr,band,new_nkibz,itype,nb,ib, new_kptopt
- type(ebspl_t) :: ebspl
  type(skw_t) :: skw
 !arrays
  integer,parameter :: new_kptrlatt(3,3)=0
- integer :: bspl_ords(3),my_bblock(2)
+ integer :: my_bblock(2)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),parameter :: new_shiftk(3,1) = zero
  real(dp),allocatable :: new_wtk(:),new_doccde(:),new_eig(:),new_occ(:)
@@ -4216,15 +3886,12 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
- ! Build (B-spline|SKW) object for all bands.
+ ! Build SKW object for all bands.
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
                  my_bblock, comm)
- case (2)
-   bspl_ords = nint(params(2:4))
-   ebspl = ebspl_new(ebands, cryst, bspl_ords, my_bblock)
 
  case default
    MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
@@ -4241,8 +3908,6 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
        select case (itype)
        case (1)
          call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
-       case (2)
-         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
        case default
          MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
        end select
@@ -4251,10 +3916,167 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  end do
  call xmpi_sum(new%eig, comm, ierr)
 
- call ebspl_free(ebspl)
  call skw%free()
 
 end function ebands_interp_kpath
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_get_dos_matrix_elements
+!! NAME
+!!  ebands_get_dos_matrix_elements
+!!
+!! FUNCTION
+!!  Calculate the electronic density of states from ebands_t
+!!
+!! INPUTS
+!!  ebands<ebands_t>=Band structure object.
+!!  cryst<cryst_t>=Info on the crystalline structure.
+!!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
+!!    If nkpt == 1 (Gamma only), the routine fallbacks to gaussian method.
+!!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
+!!  broad=Gaussian broadening, If <0, the routine will use a default
+!!    value for the broadening computed from the mean of the energy level spacing.
+!!    No meaning for tetrahedrons
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth, step, broad, comm, out_mesh, out_dos)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndat, intmeth, comm
+ real(dp),intent(in) :: step, broad
+ class(ebands_t),intent(in)  :: ebands
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: bks_vals(ndat, ebands%mband, ebands%nkpt, ebands%nsppol)
+ real(dp),allocatable,intent(out) :: out_mesh(:), out_dos(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
+ real(dp) :: max_ene,min_ene,wtk,max_occ
+ character(len=500) :: msg
+ type(t_tetrahedron) :: tetra
+!arrays
+ real(dp) :: eminmax_spin(2,ebands%nsppol)
+ real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
+
+! *********************************************************************
+
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ !if (ebands%nkpt == 1) then
+ !  MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
+ !  edos%intmeth = 1
+ !end if
+
+ !edos%broad = broad; edos%step = step
+ !if (broad <= tol16 .or. step <= tol16) then
+ !  ! Compute the mean value of the energy spacing.
+ !  ediffs = ebands_edstats(ebands)
+ !  if (edos%broad <= tol16) edos%broad = ediffs%mean
+ !  if (edos%step <= tol16) edos%step = 0.1 * ediffs%mean
+ !end if
+
+ ! Compute the linear mesh so that it encloses all bands.
+ eminmax_spin = get_minmax(ebands, "eig")
+ min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
+ max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
+
+ nw = nint((max_ene - min_ene) / step) + 1
+
+ ABI_MALLOC(out_mesh, (nw))
+ out_mesh = arth(min_ene, step, nw)
+ ABI_CALLOC(out_dos,  (nw, 2, 0:ebands%nsppol, ndat))
+
+ select case (intmeth)
+ case (1)
+   ! Gaussian
+   ABI_MALLOC(wme0, (nw))
+   cnt = 0
+   do spin=1,ebands%nsppol
+     do ikpt=1,ebands%nkpt
+       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
+       wtk = ebands%wtk(ikpt)
+       do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
+          wme0 = out_mesh - ebands%eig(band, ikpt, spin)
+          wme0 = dirac_delta(wme0, broad) * wtk
+          do idat=1,ndat
+            out_dos(:, 1, spin, idat) = out_dos(:, 1, spin, idat) + wme0(:) * bks_vals(idat, band, ikpt, spin)
+          end do
+       end do
+     end do
+   end do
+   ABI_FREE(wme0)
+   call xmpi_sum(out_dos, comm, ierr)
+
+   ! Compute IDOS with simpson
+   do idat=1,ndat
+     do spin=1,ebands%nsppol
+       call simpson_int(nw, step, out_dos(:,1,spin,idat), out_dos(:,2,spin,idat))
+     end do
+   end do
+
+ case (2, 3)
+   ! Consistency test
+   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedrons, nband(:) must be constant')
+
+   ! Build tetra object.
+   tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
+     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, msg, ierr)
+   if (ierr /= 0) MSG_ERROR(msg)
+
+   ! For each spin and band, interpolate over kpoints,
+   ! calculate integration weights and DOS contribution.
+   ABI_MALLOC(tmp_eigen, (ebands%nkpt))
+   ABI_MALLOC(wdt, (nw, 2))
+
+   bcorr = 0; if (intmeth == 3) bcorr = 1
+   cnt = 0
+   do spin=1,ebands%nsppol
+     do band=1,ebands%nband(1)
+       ! For each band get its contribution
+       tmp_eigen = ebands%eig(band,:,spin)
+       do ikpt=1,ebands%nkpt
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
+
+         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
+         call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
+
+         ! Compute DOS/IDOS
+         do idat=1,ndat
+           out_dos(:, :, spin, idat) = out_dos(:, :, spin, idat) + wdt(:, :) * bks_vals(idat, band, ikpt, spin)
+         end do
+       end do ! ikpt
+     end do ! band
+   end do ! spin
+
+   call xmpi_sum(out_dos, comm, ierr)
+
+   ! Free memory
+   ABI_FREE(tmp_eigen)
+   ABI_FREE(wdt)
+   call destroy_tetra(tetra)
+
+ case default
+   MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
+ end select
+
+ ! Compute total DOS and IDOS
+ max_occ = two / (ebands%nspinor*ebands%nsppol)
+ out_dos(:, :, 0,:) = max_occ * sum(out_dos(:,:,1:,:), dim=3)
+
+end subroutine ebands_get_dos_matrix_elements
 !!***
 
 !----------------------------------------------------------------------
@@ -4285,19 +4107,19 @@ end function ebands_interp_kpath
 !!
 !! SOURCE
 
-subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr) result (jdos)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: intmeth,comm
  integer,intent(out) :: ierr
  real(dp),intent(in) :: step,broad
- type(ebands_t),intent(in) :: ebands
+ class(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,nkibz,cnt,mpierr,unt,bcorr
+ integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,cnt,mpierr,unt,bcorr
  real(dp) :: wtk,wmax,wstep,wbroad
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
@@ -4306,16 +4128,17 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
  real(dp) :: eminmax(2,ebands%nsppol)
- real(dp),allocatable :: jdos(:,:),wmesh(:),cvmw(:),wdt(:,:)
+ real(dp),allocatable :: cvmw(:),wdt(:,:)
 
 ! *********************************************************************
 
  ierr = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- nkibz = ebands%nkpt
+ jdos%nsppol = ebands%nsppol
+ jdos%nkibz = ebands%nkpt
 
- ! Find the valence band index for each k and spin ===
+ ! Find the valence band index for each k and spin.
  val_idx = get_valence_idx(ebands)
 
  do spin=1,ebands%nsppol
@@ -4330,16 +4153,30 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
  ! Compute the mean value of the energy spacing.
  ediffs = ebands_edstats(ebands)
  wbroad = broad; if (wbroad <= tol16) wbroad = 0.1 * ediffs%mean
- wstep = step; if (wstep <= tol16) wstep = 0.02 * ediffs%mean
 
  ! Compute the linear mesh so that it encloses all bands.
+ !if (.not. present(mesh)) then
+ wstep = step; if (wstep <= tol16) wstep = 0.02 * ediffs%mean
  eminmax = get_minmax(ebands, "eig")
  wmax = maxval(eminmax(2,:) - eminmax(1,:))
  nw = nint(wmax/wstep) + 1
+ ABI_MALLOC(jdos%mesh, (nw))
+ jdos%mesh = arth(zero, wstep, nw)
+ !else
+ !  nw = size(mesh)
+ !  call alloc_copy(mesh, jdos%mesh)
+ !end if
 
- ABI_CALLOC(jdos, (nw, ebands%nsppol))
- ABI_MALLOC(wmesh, (nw))
- wmesh = arth(zero, wstep, nw)
+ jdos%nw = nw
+ jdos%intmeth = intmeth
+ jdos%broad = wbroad
+
+ !if (ebands%nkpt == 1) then
+ !  MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
+ !  jdos%intmeth = 1
+ !end if
+
+ ABI_CALLOC(jdos%values, (nw, ebands%nsppol))
 
  select case (intmeth)
  case (1)
@@ -4356,8 +4193,8 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
        do ibv=1,nbv
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
          do ibc=nbv+1,nband_k
-           cvmw = ebands%eig(ibc,ik_ibz,spin) - ebands%eig(ibv,ik_ibz,spin) - wmesh
-           jdos(:, spin) = jdos(:, spin) + wtk * dirac_delta(cvmw, wbroad)
+           cvmw = ebands%eig(ibc,ik_ibz,spin) - ebands%eig(ibv,ik_ibz,spin) - jdos%mesh
+           jdos%values(:, spin) = jdos%values(:, spin) + wtk * dirac_delta(cvmw, wbroad)
          end do
        end do
 
@@ -4365,7 +4202,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
    end do ! spin
 
    ABI_FREE(cvmw)
-   call xmpi_sum(jdos, comm, mpierr)
+   call xmpi_sum(jdos%values, comm, mpierr)
 
  case (2, 3)
    ! Tetrahedron method
@@ -4383,7 +4220,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
-   ABI_MALLOC(cvmw, (nkibz))
+   ABI_MALLOC(cvmw, (jdos%nkibz))
    ABI_MALLOC(wdt, (nw, 2))
 
    bcorr = 0; if (intmeth == 3) bcorr = 1
@@ -4398,14 +4235,14 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
            ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-           call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, wmesh(0), wmesh(nw), one, wdt)
-           jdos(:,spin) = jdos(:,spin) + wdt(:, 1)
+           call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, jdos%mesh(0), jdos%mesh(nw), one, wdt)
+           jdos%values(:,spin) = jdos%values(:,spin) + wdt(:, 1)
          end do
        end do ! ibc
      end do ! ibv
    end do ! spin
 
-   call xmpi_sum(jdos, comm, mpierr)
+   call xmpi_sum(jdos%values, comm, mpierr)
 
    ! Free memory
    ABI_FREE(wdt)
@@ -4416,24 +4253,127 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
- if (ebands%nsppol == 1) jdos = two * jdos
-
- ! Write data.
- if (my_rank == 0) then
-   path = "jdos_gauss.data"; if (intmeth == 2) path = "jdos_tetra.data"
-   if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
-     MSG_ERROR(msg)
-   end if
-   do iw=1,nw
-     write(unt,*)wmesh(iw),(jdos(iw,spin), spin=1,ebands%nsppol)
-   end do
-   close(unt)
+ if (ebands%nsppol == 1) then
+   jdos%values(0,:) = two * jdos%values(1,:)
+ else
+   jdos%values(0,:) = sum(jdos%values(1:2, :), dim=2)
  end if
 
- ABI_FREE(wmesh)
- ABI_FREE(jdos)
+ ! Write data.
+ !if (my_rank == 0) then
+ !  path = "jdos_gauss.data"; if (intmeth == 2) path = "jdos_tetra.data"
+ !  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
+ !    MSG_ERROR(msg)
+ !  end if
+ !  do iw=1,nw
+ !    write(unt,*)jdos%mesh(iw),(jdos(iw,spin), spin=1,ebands%nsppol)
+ !  end do
+ !  close(unt)
+ !end if
 
-end subroutine ebands_get_jdos
+end function ebands_get_jdos
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/jdos_ncwrite
+!! NAME
+!!  jdos_ncwrite
+!!
+!! FUNCTION
+!!  Write JDOS to netcdf file.
+!!
+!! INPUTS
+!!  ncid=NC file handle.
+!!  [prefix]=String prepended to netcdf dimensions/variables (HDF5 poor-man groups)
+!!   Empty string if not specified.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function jdos_ncwrite(jdos, ncid, prefix) result(ncerr)
+
+!Arguments ------------------------------------
+!scalars
+ class(jdos_t),intent(inout)  :: jdos
+ integer,intent(in) :: ncid
+ character(len=*),optional,intent(in) :: prefix
+
+!Local variables-------------------------------
+ character(len=500) :: prefix_
+
+! *********************************************************************
+
+ prefix_ = ""; if (present(prefix)) prefix_ = trim(prefix)
+
+#ifdef HAVE_NETCDF
+ ! Define dimensions.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("nsppol_plus1", jdos%nsppol + 1), nctkdim_t("jdos_nw", jdos%nw)], defmode=.True., prefix=prefix_)
+ NCF_CHECK(ncerr)
+
+ ! Define variables
+ NCF_CHECK(nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "jdos_intmeth", "jdos_nkibz"], prefix=prefix_))
+ NCF_CHECK(nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "jdos_broad"], prefix=prefix_))
+
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("jdos_mesh", "dp", "jdos_nw"), &
+   nctkarr_t("jdos_values", "dp", "jdos_nw, nsppol_plus1") &
+ ],  prefix=prefix_)
+ NCF_CHECK(ncerr)
+
+ ! Write data.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("jdos_intmeth")), jdos%intmeth))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("jdos_nkibz")), jdos%nkibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("jdos_broad")), jdos%broad))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("jdos_mesh")), jdos%mesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, pre("edos_values")), jdos%values))
+
+#else
+ MSG_ERROR("netcdf library not available")
+#endif
+
+contains
+  pure function pre(istr) result(ostr)
+    character(len=*),intent(in) :: istr
+    character(len=len_trim(prefix_) + len_trim(istr)+1) :: ostr
+    ostr = trim(prefix_) // trim(istr)
+  end function pre
+
+end function jdos_ncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/jdos_free
+!! NAME
+!!  jdos_free
+!!
+!! FUNCTION
+!!  Free memory
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine jdos_free(jdos)
+
+!Arguments ------------------------------------
+!scalars
+ class(jdos_t),intent(inout)  :: jdos
+
+! *********************************************************************
+
+ ABI_FREE(jdos%mesh)
+ ABI_FREE(jdos%values)
+
+end subroutine jdos_free
 !!***
 
 !----------------------------------------------------------------------
@@ -5249,17 +5189,6 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  my_rank = xmpi_comm_rank(comm)
 
  itype = nint(dtset%einterp(1)); tag =  "_SKW"
- if (itype == 2) then
-   tag = "_BSPLINE"
-   if (.not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)) then
-     write(msg,"(5a)") &
-        "Cannot interpolate energies with B-spline because:",ch10,&
-        ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)",ch10,&
-        "Returning to caller!"
-     MSG_WARNING(msg)
-     return
-   end if
- end if
  tag = "_INTERP"
 
  ! Generate k-path

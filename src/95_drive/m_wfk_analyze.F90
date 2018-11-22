@@ -135,8 +135,6 @@ contains
 
 subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=6),intent(in) :: codvsn
@@ -420,7 +418,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !case (WFK_TASK_PJDOS)
  !case (WFK_TASK_LDOS)
 
- case (WFK_TASK_DDK)
+ case (WFK_TASK_DDK, WFK_TASK_DDK_DIAGO)
    ! Calculate the DDK matrix elements from the WFK file
    call ddk_compute(wfk0_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
 
@@ -521,8 +519,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 !! SOURCE
 
 subroutine read_wfd()
-
- implicit none
 
 ! *************************************************************************
 
