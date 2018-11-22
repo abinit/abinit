@@ -741,17 +741,6 @@ end subroutine xmpi_sum_dpn
 
 subroutine xmpi_sum_sp2d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_sp2d'
-!End of the abilint section
-
- implicit none
-
-
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer ,intent(in) :: comm
@@ -811,17 +800,8 @@ end subroutine xmpi_sum_sp2d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_sp3d(xval,comm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_sp3d'
-!End of the abilint section
-
- implicit none
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -886,16 +866,6 @@ end subroutine xmpi_sum_sp3d
 !! SOURCE
 subroutine xmpi_sum_sp4d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_sp4d'
-!End of the abilint section
-
- implicit none
-
 !Arguments-------------------------
  real(sp),DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer ,intent(in) :: comm
@@ -959,16 +929,6 @@ end subroutine xmpi_sum_sp4d
 !!
 !! SOURCE
 subroutine xmpi_sum_sp5d(xval,comm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_sp5d'
-!End of the abilint section
-
- implicit none
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -1035,17 +995,6 @@ end subroutine xmpi_sum_sp5d
 !! SOURCE
 subroutine xmpi_sum_sp6d(xval,comm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_sp6d'
-!End of the abilint section
-
- implicit none
-
-
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
  integer ,intent(in) :: comm
@@ -1110,16 +1059,6 @@ end subroutine xmpi_sum_sp6d
 !!   
 !! SOURCE
 subroutine xmpi_sum_sp7d(xval,comm,ier)
-
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_sum_sp7d'
-!End of the abilint section
-
- implicit none
 
 !Arguments-------------------------
  real(sp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)

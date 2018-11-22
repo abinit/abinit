@@ -229,6 +229,11 @@ module m_sigmaph
     !kcalc2ibz(nkcalc, 6))
     ! Mapping kcalc --> ibz as reported by listkk.
 
+  integer,allocatable :: distrib_bq(:,:)
+     ! Table to distribute q-points and bands.
+     ! distrib_bq(bsum_start:bsum_stop, sigma%nqibz_k))
+     ! The distribution must be consistent with the WF distribution done with bks_mask
+
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
    ! List of k-points where the self-energy is computed.
@@ -481,13 +486,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !arrays
  integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3), indkk_kq(1,6) !g0ibz_kq(3),
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:)
  integer,allocatable :: bz2lgkibz_mapping(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
  real(dp) :: vdiag(2, 3)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
- real(dp),allocatable :: deltaw_pm(:,:,:,:,:)
+ !real(dp),allocatable :: deltaw_pm(:,:,:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -589,7 +594,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
  !if (sigma%calc_velocity == 1) then
- call wrtout(std_out, "Computing diagonal elements of velocity operator for all states in Sigma_nk.")
+ call wrtout(std_out, " Computing diagonal elements of velocity operator for all states in Sigma_nk.")
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
  ABI_MALLOC(cgwork,   (2, mpw*wfd%nspinor))
  ABI_CALLOC(vred_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
@@ -621,7 +626,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  call xmpi_sum(vred_calc, comm, ierr)
  call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
- call wrtout(std_out, sjoin("Velocities completed. cpu-time:", sec2str(cpu_ks), ",wall-time:", sec2str(wall_ks)), &
+ call wrtout(std_out, sjoin(" Velocities completed. cpu-time:", sec2str(cpu_ks), ",wall-time:", sec2str(wall_ks)), &
    do_flush=.True.)
 
  ! Write results to disk.
@@ -821,17 +826,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Distribute q-points and bands.
      ! The distribution must be consistent with the WF distribution done with bks_mask
-     ABI_MALLOC(distrib_bq, (bsum_start:bsum_stop, sigma%nqibz_k))
-     distrib_bq = -1
+     ABI_SFREE(sigma%distrib_bq)
+     ABI_MALLOC(sigma%distrib_bq, (bsum_start:bsum_stop, sigma%nqibz_k))
+     sigma%distrib_bq = -1
 
      if (dtset%eph_task == 4) then
        ! Distribute over bands
-       distrib_bq(sigma%my_bstart:sigma%my_bstop, :) = my_rank
+       sigma%distrib_bq(sigma%my_bstart:sigma%my_bstop, :) = my_rank
      else if (dtset%eph_task == -4) then
        if (sigma%nqibz_k >= nprocs) then
          ! Distribute over q-points
          do iq_ibz=1,sigma%nqibz_k
-           distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
+           sigma%distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
          end do
        else
          ! Distribute over bands
@@ -839,14 +845,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
            ! all procs have the bands in the energy window.
            ibsum_kq = ibsum_kq - 1 + sigma%bsum_start
-           distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
+           sigma%distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
          end do
        end if
+       ABI_CHECK(all(sigma%distrib_bq /= -1), "Wrong distrib_bq")
      else
        MSG_ERROR("Invalid eph_task")
      end if
-     !distrib_bq = 0
-     ABI_CHECK(all(distrib_bq /= -1), "Wrong distrib_bq")
+     !sigma%distrib_bq = 0
 
      !ABI_MALLOC(zvals, (nz, nbcalc_ks))
      if (sigma%qint_method == 1) then
@@ -861,20 +867,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        iq_ibz_packed = 1
        do iq_ibz=1,sigma%nqibz_k
          ! Quick-parallelization over q-points
-         if (all(distrib_bq(1:nbsum, iq_ibz) /= my_rank)) cycle
+         if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
          thisproc_nq = thisproc_nq + 1
        end do
        if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
        ABI_MALLOC(sigma%deltaw_pm, (2, nbcalc_ks, natom3, bsum_start:bsum_stop, thisproc_nq, ndiv))
 
        ! Precompute the weights for tetrahedron
-       call sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,distrib_bq,comm)
+       call sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
      endif
 
      ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
        ! Quick-parallelization over q-points
-       if (all(distrib_bq(:, iq_ibz) /= my_rank)) cycle
+       if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = (sum(qpt**2) < tol14) !; if (isqzero) cycle
@@ -1059,7 +1065,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
        do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
-         if (distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
+         if (sigma%distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
          ! This is to check whether the gkk elements in the degenerate subspace break symmetry
          !if (ibsum_kq >= bstart_ks .and. ibsum_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
@@ -1295,8 +1301,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      if (sigma%qint_method > 0) then
        ABI_FREE(sigma%deltaw_pm)
-       ABI_SFREE(deltaw_pm)
        !ABI_FREE(sigma%cweights)
+       !ABI_SFREE(deltaw_pm)
      end if
 
      ! Print cache stats. The first k-point is expected to have lots of misses
@@ -1317,7 +1323,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_FREE(gkq_atm)
      ABI_FREE(gkq_nu)
      ABI_FREE(gkq2_lr)
-     ABI_FREE(distrib_bq)
 
      ! =========================
      ! Compute Debye-Waller term
@@ -2008,11 +2013,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
 
    !if (dtset%useria == 567) then
-   ! TODO Uncomment this part to use all states to debug.
-   !call wrtout(ab_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
-   call wrtout(std_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
-   new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
-   new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
+     ! TODO Uncomment this part to use all states to debug.
+     !call wrtout(ab_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+     call wrtout(std_out, "- Setting bstart to 1 and bstop to nband for debugging purposes")
+     new%nbsum = mband; new%bsum_start = 1; new%bsum_stop = new%bsum_start + new%nbsum - 1
+     new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
    !end if
 
  else
@@ -2469,6 +2474,7 @@ subroutine sigmaph_free(self)
  !ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
  ABI_SFREE(self%kcalc2ibz)
+ ABI_SFREE(self%distrib_bq)
 
  ! real
  ABI_SFREE(self%kcalc)
@@ -2568,7 +2574,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
  if (self%qint_method > 0) then
    if (self%use_doublegrid) then
      call ephwg_double_grid_setup_kpoint(self%ephwg, self%eph_doublegrid, self%kcalc(:, ikcalc), prtvol)
-   else 
+   else
      call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol, comm)
    end if
  endif
@@ -3089,7 +3095,7 @@ end subroutine sigmaph_print
 !!
 !! SOURCE
 
-subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,distrib_bq,comm)
+subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3097,7 +3103,6 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,distrib_bq,co
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: ikcalc, spin, comm
- integer,intent(in) :: distrib_bq(sigma%nbsum,sigma%nqibz_k)
 
 !Local variables ------------------------------
 !scalars
@@ -3160,7 +3165,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,distrib_bq,co
       !for all the q-points that I am going to calculate
       iq_ibz_packed = 1
       do iq_ibz=1,sigma%nqibz_k
-        if (all(distrib_bq(:, iq_ibz) /= my_rank)) cycle
+        if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
         !for all the q-points in the microzone
         if (sigma%use_doublegrid) then
           ! This is done again in the main sigmaph routine

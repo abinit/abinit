@@ -2015,15 +2015,6 @@ end subroutine tetra_get_onewk_wvals
 
 subroutine tetra_get_onetetra_wvals(tetra, itetra, eigen_1tetra, bcorr, nw, wvals, weights, wtol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetra_accumulate_wvals'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nw,bcorr

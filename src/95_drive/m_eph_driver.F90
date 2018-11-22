@@ -508,24 +508,17 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end do
 
    if (my_rank == master) then
-     path = strcat(dtfil%filnam_ds(4), "_PHDOS")
-     call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
-     call phdos_print(phdos, path)
-
-     !call phdos_print_debye(phdos, crystal%ucvol)
-
-     !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
-     ! Otherwise just leave these defaults.
-     !MG: 1) Disabled for the time being because of SIGFPE in v8[41]
-     !    2) I've added a new abinit variable (tmesh) to specifiy the list of temperatures.
-     path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
-     !MG: Disabled for the time being because of SIGFPE in v8[41]
-     !call phdos_print_msqd(phdos, path, 1000, one, one)
-     path = strcat(dtfil%filnam_ds(4), "_THERMO")
-     call phdos_print_thermo(PHdos, path, 1000, zero, one)
+     ! Disabled by default because it's slow and we use netcdf that is much better.
+     if (dtset%prtvol > 0) then
+       path = strcat(dtfil%filnam_ds(4), "_PHDOS")
+       call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
+       call phdos_print(phdos, path)
+       !call phdos_print_debye(phdos, cryst%ucvol)
+     end if
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
+     !call wrtout(ab_out, sjoin("- Writing phonon DOS to netcdf file:", path))
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, sjoin("Creating PHDOS.nc file:", path))
      NCF_CHECK(cryst%ncwrite(ncid))
@@ -534,7 +527,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #endif
    end if
    call phdos_free(phdos)
- end if
+ end if ! prtphdos
 
  if (dtset%prtbltztrp == 1 .and. my_rank == master) then
    call ifc_outphbtrap(ifc,cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))

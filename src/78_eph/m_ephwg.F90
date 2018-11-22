@@ -416,14 +416,6 @@ end subroutine ephwg_setup_kpoint
 
 subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ephwg_setup_kpoint'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(ephwg_t),target,intent(inout) :: self
@@ -463,7 +455,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
 #if 0
    ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, eph_doublegrid%kpts_dense,& 
+   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, eph_doublegrid%kpts_dense,&
                self%lgk%nibz, eph_doublegrid%dense_nbz, cryst%nsym,&
                sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
 
@@ -502,7 +494,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    enddo
    ABI_FREE(indkk)
 #endif
- 
+
  ! self%lgrp%ibz --> dg%bz
  ABI_CALLOC(lgkibz2bz,(self%lgk%nibz))
  do ii=1,self%nbz
@@ -594,7 +586,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 #if 0
    ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
    ABI_MALLOC(bz2bz, (self%nbz * sppoldbl1))
-   call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,& 
+   call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,&
       eph_doublegrid%dense_nbz, self%nbz, cryst%nsym,&
       sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
 
@@ -797,7 +789,7 @@ subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum
  !
  ! This routine still has some bug
  ! The results are not consistent with the calculation where all the weights are precomputed.
- ! 
+ !
 
  ntetra = self%tetra_k%ntetra
  deltaw_pm = 0
@@ -835,13 +827,13 @@ subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum
      do nu = 1, self%natom3
        ! Fill array for e_{k+q, b} +- w_{q,nu)
        do ii=1,4
-         iq = ind_ibz(ii) 
+         iq = ind_ibz(ii)
          iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
          ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
          pme_k(ii, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
          pme_k(ii, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
        end do
-       
+
        do ii = 1,2
          !calculate weights of one tetrahedron
          call tetra_get_onetetra_wvals(self%tetra_k, itetra, pme_k(:,ii), bcorr, &
