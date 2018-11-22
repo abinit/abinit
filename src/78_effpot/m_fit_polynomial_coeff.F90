@@ -59,7 +59,8 @@ module m_fit_polynomial_coeff
  public :: genereList
 !!***
 
-CONTAINS  !===========================================================================================
+CONTAINS  
+!===========================================================================================
 
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_fit

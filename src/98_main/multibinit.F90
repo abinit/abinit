@@ -53,6 +53,7 @@ program multibinit
  use m_argparse
  use m_effective_potential
  use m_fit_polynomial_coeff
+ use m_opt_effpot
  use m_multibinit_dataset
  use m_effective_potential_file
  use m_spin_model
@@ -379,6 +380,21 @@ program multibinit
    if(inp%bound_model>0.and.inp%bound_model<=2)then
      call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_model,comm,hist=hist)
    end if
+
+
+
+!****************************************************************************************
+! OPTIMIZE SECTION, Optimize selected coefficients of effective potential while
+! keeping the others constant
+!****************************************************************************************
+ 
+ if(inp%opt_effpot == 1)then 
+ 
+ 
+
+ end if 
+
+ 
 
 !****************************************************************************************
 ! TEST SECTION test effective potential with regard to test-set 
