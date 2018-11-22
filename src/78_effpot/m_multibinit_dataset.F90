@@ -84,6 +84,8 @@ module m_multibinit_dataset
   integer :: fit_ncoeff
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
+  integer :: opt_effpot 
+  integer :: opt_ncoeff 
   integer :: ts_option
   integer :: ifcana
   integer :: ifcflag
@@ -188,6 +190,9 @@ module m_multibinit_dataset
 
   integer, allocatable :: fit_bancoeff(:)
   ! fit_bancoeffs(fit_nbancoeff)
+
+  integer, allocatable :: opt_coeff(:)
+  ! opt_coeff(opt_ncoeff)
 
   !integer, allocatable :: spin_sublattice(:) ! TODO hexu: difficult to use, better in xml?
 
@@ -327,6 +332,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%nnos=0
  multibinit_dtset%nsphere=0
  multibinit_dtset%optcell=0
+ multibinit_dtset%opt_effpot=0
+ multibinit_dtset%opt_coeff=0
  multibinit_dtset%prt_model=0
  multibinit_dtset%prt_names=0
  multibinit_dtset%prt_phfrq=0
@@ -338,7 +345,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%rifcsph=zero
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
- multibinit_dtset%test_effpot=0 ! TODO MARCUS add test_effpot for test-set implementation
+ multibinit_dtset%test_effpot=0 
  
  multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
@@ -442,8 +449,11 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  if (allocated(multibinit_dtset%fit_fixcoeff))  then
    ABI_DEALLOCATE(multibinit_dtset%fit_fixcoeff)
  end if
-  if (allocated(multibinit_dtset%fit_bancoeff))  then
+ if (allocated(multibinit_dtset%fit_bancoeff))  then
    ABI_DEALLOCATE(multibinit_dtset%fit_bancoeff)
+ end if
+ if (allocated(multibinit_dtset%opt_coeff))  then
+   ABI_DEALLOCATE(multibinit_dtset%opt_coeff)
  end if
  if (allocated(multibinit_dtset%qmass))  then
    ABI_DEALLOCATE(multibinit_dtset%qmass)
@@ -761,6 +771,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+
  multibinit_dtset%ts_option=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ts_option',tread,'INT')
  if(tread==1) multibinit_dtset%ts_option=intarr(1)
@@ -969,6 +980,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !O
+
  multibinit_dtset%optcell=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) multibinit_dtset%optcell=intarr(1)
@@ -980,6 +992,29 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+
+ multibinit_dtset%opt_effpot=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'opt_effpot',tread,'INT')
+ if(tread==1) multibinit_dtset%opt_effpot=intarr(1)
+ if(multibinit_dtset%opt_effpot<0 .and. multibinit_dtset%opt_effpot>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'opt_effpot is',multibinit_dtset%opt_effpot,', but the only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct opt_effpot in your input file.'
+   MSG_ERROR(message)
+ end if
+
+
+ multibinit_dtset%opt_ncoeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'opt_ncoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%opt_ncoeff=intarr(1)
+ if(multibinit_dtset%opt_ncoeff<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'opt_ncoeff is',multibinit_dtset%opt_ncoeff,', but the only positive values',ch10,&
+&   'are allowed for multibinit.',ch10,&
+&   'Action: correct opt_ncoeff in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !P
  multibinit_dtset%prt_model=0
@@ -1885,6 +1920,23 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 !O
 
+ ABI_ALLOCATE(multibinit_dtset%opt_coeff,(multibinit_dtset%opt_ncoeff))
+ if (multibinit_dtset%opt_ncoeff >0)then
+   if(multibinit_dtset%opt_ncoeff>marr)then
+     marr=multibinit_dtset%opt_ncoeff
+     ABI_DEALLOCATE(intarr)
+     ABI_ALLOCATE(intarr,(marr))
+   end if
+   multibinit_dtset%opt_coeff(:)=0
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nfixcoeff,&
+&              string(1:lenstr),'opt_coeff',tread,'INT')
+   if(tread==1)then
+     do ii=1,multibinit_dtset%opt_ncoeff
+       multibinit_dtset%opt_coeff(ii)=intarr(ii)
+     end do
+   end if
+ end if
+
 !P
 
 !Q
@@ -2069,7 +2121,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
-!check the fit_bancoeff and fit_fixcoeff
+!check the fit_bancoeff and fit_fixcoeff and opt_coeff
  do ii=1,multibinit_dtset%fit_nbancoeff
    do jj=ii+1,multibinit_dtset%fit_nbancoeff
      if (multibinit_dtset%fit_bancoeff(ii) == multibinit_dtset%fit_bancoeff(jj))then
@@ -2089,6 +2141,19 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &           ' There is two similar numbers for fit_fixcoeff: ',multibinit_dtset%fit_fixcoeff(ii),&
 &           ' and ', multibinit_dtset%fit_fixcoeff(jj),ch10,&
 &            'Action: change fit_fixcoeff'
+       MSG_BUG(message)
+     end if
+   end do
+ end do
+
+ 
+ do ii=1,multibinit_dtset%opt_ncoeff
+   do jj=ii+1,multibinit_dtset%opt_ncoeff
+     if (multibinit_dtset%opt_coeff(ii) == multibinit_dtset%opt_coeff(jj))then
+       write(message, '(a,I0,a,I0,2a)' )&
+&           ' There is two similar numbers for opt_coeff: ',multibinit_dtset%opt_coeff(ii),&
+&           ' and ', multibinit_dtset%opt_coeff(jj),ch10,&
+&            'Action: change opt_coeff'
        MSG_BUG(message)
      end if
    end do
@@ -2325,6 +2390,16 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(4x,9i7)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
    end if
  end if
+
+ if(multibinit_dtset%opt_effpot/=0)then  
+   write(nunit,'(a)')'Optimize Effective Potential :'
+   if(multibinit_dtset%opt_ncoeff /= 0) then    
+     write(nunit,'(1x,a17,I3)')  '   opt_ncoeff',multibinit_dtset%opt_ncoeff 
+     write(nunit,'(1x,a17)',advance='no')'   opt_coeff'
+     write(nunit,'(4x,9i7)') (multibinit_dtset%opt_coeff(ii),ii=1,multibinit_dtset%opt_ncoeff)
+   end if
+ end if 
+
 
  if(multibinit_dtset%bound_model /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
