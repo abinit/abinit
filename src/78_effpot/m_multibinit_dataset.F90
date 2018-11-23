@@ -1928,10 +1928,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
      ABI_ALLOCATE(intarr,(marr))
    end if
    multibinit_dtset%opt_coeff(:)=0
-   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%fit_nfixcoeff,&
+   write(*,*) "marr ", marr
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%opt_ncoeff,&
 &              string(1:lenstr),'opt_coeff',tread,'INT')
    if(tread==1)then
      do ii=1,multibinit_dtset%opt_ncoeff
+       write(*,*) "intarr(ii)", intarr(ii)
        multibinit_dtset%opt_coeff(ii)=intarr(ii)
      end do
    end if

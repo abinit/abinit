@@ -32,6 +32,7 @@ sources = [
     "m_harmonics_terms.F90",
     "m_mathfuncs.F90",
     "m_multibinit_dataset.F90",
+    "m_opt_effpot.F90",
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
     "m_polynomial_term.F90",

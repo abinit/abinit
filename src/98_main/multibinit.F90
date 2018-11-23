@@ -389,9 +389,7 @@ program multibinit
 !****************************************************************************************
  
  if(inp%opt_effpot == 1)then 
- 
- 
-
+    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,comm)
  end if 
 
  

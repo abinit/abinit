@@ -27,30 +27,16 @@
 module m_opt_effpot
 
  use defs_basis
+ use defs_datatypes
+ use defs_abitypes
  use m_errors
  use m_abicore
- use m_polynomial_coeff
- use m_atomdata
  use m_xmpi
- use m_supercell
-
- use m_special_funcs,only : factorial
- use m_geometry,       only : xred2xcart
- use m_crystal,only : symbols_crystal
- use m_strain,only : strain_type,strain_get
- use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
- use m_effective_potential,only : effective_potential_freeCoeffs,effective_potential_setCoeffs
- use m_effective_potential,only : effective_potential_getDisp, effective_potential_writeAnhHead
- use m_effective_potential_file, only : effective_potential_file_mapHistToRef
- use m_io_tools,   only : open_file,get_unit
- use m_abihist, only : abihist,abihist_free,abihist_init,abihist_copy,write_md_hist,var2hist
- use m_random_zbq
- use m_fit_data
- use m_geometry, only: metric 
+ use m_effective_potential  
 
  implicit none
 
-public :: opt_effpot 
+ public :: opt_effpot 
 
 !!****
 CONTAINS 
@@ -83,15 +69,17 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine opt_effpot(eff_pot,opt_coeff,hist,comm) 
+subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm) 
 
  implicit none  
 
 !Arguments ------------------------------------
 !scalars
-
+ integer,intent(in) :: comm,opt_ncoeff
+ type(effective_potential_type),target,intent(inout) :: eff_pot
+ type(abihist),intent(inout) :: hist
 !arrays 
-
+ integer,intent(in) :: opt_coeff(opt_ncoeff)
 !Logicals 
 !Strings 
 !Local variables ------------------------------
@@ -105,9 +93,12 @@ subroutine opt_effpot(eff_pot,opt_coeff,hist,comm)
 
 
 
+
+
 write(*,*) "I was here, nothing to optimize yet"
+write(*,*) "However, opt_ncoeff = ", opt_ncoeff," and opt_coeff = ", opt_coeff 
       
-end subroutine 
+end subroutine opt_effpot
 
 
 end module m_opt_effpot
