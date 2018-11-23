@@ -1771,7 +1771,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  !call xmpi_comm_free(new%comm_pert)
  !call xmpi_comm_free(comm_cart)
 #endif
- new%comm_pert = xmpi_comm_self; new%my_npert = 3 * cryst%natom; new%me_pert = 0; new%nprocs_pert = 1
+ !new%comm_pert = xmpi_comm_self; new%my_npert = 3 * cryst%natom; new%me_pert = 0; new%nprocs_pert = 1
 
  ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
  do iatom=1,cryst%natom

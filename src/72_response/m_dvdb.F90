@@ -1184,7 +1184,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 !arrays
  integer :: pinfo(3,3*db%mpert)
  integer :: g0q(3),lgsize(db%nqpt),iqmax(1)
- real(dp),allocatable :: work(:,:,:,:)
+ real(dp),allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
 
@@ -1268,24 +1268,43 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
  if (.not. isirr_q) then
    ! Rotate db_iqpt to get qpoint in BZ.
-   ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom), ierr)
-   ABI_CHECK(ierr == 0, 'out of memory in work')
-   work = v1scf
-   call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-     db%nspden, db%nsppol, db%mpi_enreg, work, v1scf)
 
-   ! Reallocate v1scf with my_npert, if parallelism over perturbation.
-   if (db%my_npert /= db%natom3) then
+   if (db%my_npert == db%natom3) then
+     ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+     ABI_CHECK(ierr == 0, 'out of memory in work')
      work = v1scf
+     call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
+       db%nspden, db%nsppol, db%mpi_enreg, work, v1scf)
+     ABI_FREE(work)
+
+   else 
+     ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+     ABI_CHECK(ierr == 0, 'out of memory in work')
+     ABI_STAT_MALLOC(work2, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+     ABI_CHECK(ierr == 0, 'out of memory in work2')
+     work = zero
+     do imyp=1,db%my_npert
+       ipc = db%my_pinfo(3, imyp)
+       work(:,:,:,ipc) = v1scf(:,:,:,imyp)
+     end do
+     call xmpi_sum(work, db%comm_pert, ierr)
+     call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
+       db%nspden, db%nsppol, db%mpi_enreg, work, work2)
+
+     ABI_FREE(work)
+
+     ! Reallocate v1scf with my_npert, if parallelism over perturbation.
+     !work = v1scf
      ABI_FREE(v1scf)
      ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
      do imyp=1,db%my_npert
        ipc = db%my_pinfo(3, imyp)
-       v1scf(:,:,:,imyp) = work(:,:,:,ipc)
+       v1scf(:,:,:,imyp) = work2(:,:,:,ipc)
      end do
+     ABI_FREE(work2)
    end if
 
-   ABI_FREE(work)
+
  end if
 
 end subroutine dvdb_readsym_qbz
