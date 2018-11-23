@@ -2652,8 +2652,11 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                 end do ! end nn
 
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII-VVI-VVII-VVIII)/(2.0*deltab*2.0*deltag)
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII)/(2.0*deltab*2.0*deltag)
-                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI)/(2.0*deltab*2.0*deltag)
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII)/(2.0*deltab*2.0*deltag) ! largely confident that CCI and CCII are ok
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI)/(2.0*deltab*2.0*deltag)
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCII)/(2.0*deltab*2.0*deltag)
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(-VVII)/(2.0*deltab*2.0*deltag) ! VVII is good.
+                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(-VVI-VVIII)/(2.0*deltab*2.0*deltag) ! VVI and VVIII are not good
 
                 ABI_DEALLOCATE(kg_kg)
 
