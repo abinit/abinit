@@ -261,7 +261,7 @@ program multibinit
 
 ! If needed, fit the anharmonic part and compute the confinement potential
 !****************************************************************************************
-   if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0) then
+   if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0 .or. inp%opt_effpot/=0) then
 
      if(iam_master) then
 !    Read the MD file
@@ -275,28 +275,31 @@ program multibinit
          call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
          if (hist%mxhist == 0)then
            write(message, '(5a)' )&
-&           'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
-&           'Action: add MD file'
+&           'The trainig-set ',trim(filnam(5)),' file is not correct ',ch10,&
+&           'Action: add training-set file'
            MSG_ERROR(message)
          end if
        else
          if (inp%fit_coeff/=0) then
            write(message, '(3a)' )&
-&           'There is no MD file to fit the coefficients ',ch10,&
-&           'Action: add MD file'
+&           'There is no training-set file to fit the lattice model ',ch10,&
+&           'Action: add trainings-set-file'
            MSG_ERROR(message)
-         else
-           if (inp%bound_model/=0) then
+         else if (inp%bound_model/=0) then
              write(message, '(3a)' )&
-&             'There is no MD file to bound the model ',ch10,&
-&             'Action: add MD file'
+&             'There is no  training-set file to bound the model ',ch10,&
+&             'Action: add training-set file '
              MSG_ERROR(message)
-           else if(inp%confinement==2) then
+         else if(inp%confinement==2) then
              write(message, '(3a)' )&
-&             'There is no MD file to compute the confinement',ch10,&
-&             'Action: add MD file'
+&             'There is no training-set file to compute the confinement',ch10,&
+&             'Action: add training-set file '
+             MSG_ERROR(message) 
+         else if(inp%opt_effpot==2) then
+             write(message, '(3a)' )&
+&             'There is no training-set file to optimize the latice model',ch10,&
+&             'Action: add training-set file '
              MSG_ERROR(message)
-           end if
          end if
        end if
      end if
@@ -388,7 +391,7 @@ program multibinit
 ! keeping the others constant
 !****************************************************************************************
  
- if(inp%opt_effpot == 1)then 
+ if(inp%opt_effpot == 1)then
     call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,comm)
  end if 
 

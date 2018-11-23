@@ -2288,7 +2288,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
 !Strings/Characters 
- character(len=fnlen) :: file_energy, file_stress, file_anh
+ character(len=fnlen) :: file_energy, file_stress, file_anh, name_file
  character(len=500) :: msg
 ! type(abihist) :: hist_out
 ! character(len=200) :: filename_hist
@@ -2310,28 +2310,32 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
    need_anharmonic = compute_anharmonic
  end if
 
+ name_file=''
+ if(present(filename))name_file = filename
+ 
  if(present(print_file) .and. present(filename))then
 !   call abihist_init(hist_out,natom,ntime,.false.,.false.)
    need_print=print_file
-   file_energy=trim(filename)//'_energy.dat'
+   file_energy=trim(name_file)//'_energy.dat'
    unit_energy = get_unit()
    if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
    unit_stress = get_unit()
-   file_stress=trim(filename)//'_stress.dat'
+   file_stress=trim(name_file)//'_stress.dat'
    if (open_file(file_stress,msg,unit=unit_stress,form="formatted",&
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
- else 
+ else if(present(print_file) .and. .not. present(filename))then 
+   write(*,*) "I was here" 
    write(msg,'(a)')' You asked for printing of the MSD-values',ch10,& 
 &        ' without specifying a filename or the inverse'
    MSG_ERROR(msg) 
  end if
-
- file_anh=trim(filename)//'_anharmonic_terms_energy.dat'
+ 
+ file_anh=trim(name_file)//'_anharmonic_terms_energy.dat'
  anh_opened=.FALSE.
  INQUIRE(FILE=file_anh,OPENED=anh_opened,number=unit_anh)
 
