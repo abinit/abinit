@@ -221,12 +221,12 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
    
   !Transfer new fitted values to coefficients 
   do ii=1,opt_ncoeff 
-     my_coeffs(ii)%coefficient = coeff_values(ii) 
+     my_coeffs(ii)%coefficient = coeff_values(ii)
+     eff_pot%anharmonics_terms%coefficients(opt_coeff(ii)) = my_coeffs(ii)
   end do 
 
   !Transfer coefficients back to effective potential 
-
-  call effective_potential_setCoeffs(my_coeffs,eff_pot,opt_ncoeff)
+ ! call effective_potential_setCoeffs(my_coeffs,eff_pot,opt_ncoeff)
 
  !Deallocation of fitting variables
   do ii=1,opt_ncoeff 
