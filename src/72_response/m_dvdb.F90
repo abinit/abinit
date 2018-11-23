@@ -118,6 +118,21 @@ module m_dvdb
   integer :: comm
   ! MPI communicator used for IO.
 
+  integer :: comm_pert = xmpi_comm_self
+   ! MPI communicator for parallelism over atomic perturbations.
+
+  integer :: nprocs_pert = 1
+   ! Number of cpus for parallelism over atomic perturbations.
+
+  integer :: my_npert = -1
+   ! Number of atomic perturbations or phonon modes treated by this MPI rank
+
+  integer,pointer :: my_pinfo(:,:) => null()
+    ! my_pinfo(3, my_npert)
+    ! my_pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
+    ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
+    ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
+
   integer :: version
   ! File format version read from file.
 
@@ -278,6 +293,8 @@ module m_dvdb
 
    procedure :: findq => dvdb_findq
    ! Returns the index of the q-point.
+
+   procedure :: set_pert_distrib => dvdb_set_pert_distrib
 
    procedure :: read_onev1 => dvdb_read_onev1
    ! Read and return the DFPT potential for given (idir, ipert, iqpt).
@@ -509,6 +526,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
  ! Init crystal_t from the hdr read from file.
  new%cryst = hdr_get_crystal(new%hdr_ref, timrev2)
+ new%my_npert = new%natom3
 
  ! Init Born effective charges
  ABI_CALLOC(new%zeff, (3, 3, new%natom))
@@ -700,6 +718,8 @@ subroutine dvdb_free(db)
    ABI_FREE(db%qcache)
  end if
 
+ db%my_pinfo => null()
+
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
  call dvdb_close(db)
@@ -761,10 +781,12 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("File path:", db%path)
  write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
  write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
+ write(std_out,"(a)")sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert))
+ write(std_out,"(a)")sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert))
  write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
  write(std_out,"(a)")sjoin("Use internal cache for Vscf(q):", yesno(db%qcache_size > 0))
  if (db%qcache_size > 0) then
-   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3 * QCACHE_KIND)
+   cache_size = db%qcache_size * (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%my_npert * QCACHE_KIND)
    write(std_out,'(a,f12.1,a)')'Max memory needed for cache: ', cache_size * b2Mb,' [Mb]'
  end if
  write(std_out,"(a)")"List of q-points: min(10, nqpt)"
@@ -1157,7 +1179,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr
+ integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr, imyp, ipc
  logical :: isirr_q,incache
 !arrays
  integer :: pinfo(3,3*db%mpert)
@@ -1183,7 +1205,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    if (allocated(db%qcache(db_iqpt)%v1scf)) then
       if (size(db%qcache(db_iqpt)%v1scf, dim=1) == cplex .and. &
           size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
-        ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+        ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
         ABI_CHECK(ierr == 0, "Out of memory in v1scf")
         v1scf = real(db%qcache(db_iqpt)%v1scf, kind=QCACHE_KIND)
         db%qcache_stats(2) = db%qcache_stats(2) + 1
@@ -1204,6 +1226,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  if (.not. incache) then
    ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
+   ! TODO: This is a big allocation. Should implement something with MPI_WIN (Henrique is gonna love it!)
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
  end if
 
@@ -1231,17 +1254,37 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    end if
 
    ABI_CHECK(.not. allocated(db%qcache(db_iqpt)%v1scf), "free error")
-   ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
-   db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
+   if (db%my_npert == db%natom3) then
+     db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   else
+     do imyp=1,db%my_npert
+       ipc = db%my_pinfo(3, imyp)
+       db%qcache(db_iqpt)%v1scf(:,:,:,imyp) = real(v1scf(:,:,:,ipc), kind=QCACHE_KIND)
+     end do
+   end if
    db%prev_db_iqpt = db_iqpt
  end if
 
  if (.not. isirr_q) then
-   ! Rotate db_iqpt to get qpoint.
-   ABI_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom))
+   ! Rotate db_iqpt to get qpoint in BZ.
+   ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+   ABI_CHECK(ierr == 0, 'out of memory in work')
    work = v1scf
    call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
      db%nspden, db%nsppol, db%mpi_enreg, work, v1scf)
+
+   ! Reallocate v1scf with my_npert, if parallelism over perturbation.
+   if (db%my_npert /= db%natom3) then
+     work = v1scf
+     ABI_FREE(v1scf)
+     ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     do imyp=1,db%my_npert
+       ipc = db%my_pinfo(3, imyp)
+       v1scf(:,:,:,imyp) = work(:,:,:,ipc)
+     end do
+   end if
+
    ABI_FREE(work)
  end if
 
@@ -1288,7 +1331,7 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
-   db%qcache_size = int(mbsize / (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%natom3 * QCACHE_KIND * b2Mb))
+   db%qcache_size = int(mbsize / (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%my_npert * QCACHE_KIND * b2Mb))
  end if
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
@@ -1335,7 +1378,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex
+ integer :: db_iqpt, cplex, ierr, imyp, ipc
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -1351,12 +1394,25 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  do db_iqpt=1,db%nqpt
    if (db_iqpt > db%qcache_size) exit
    call cwtime(cpu, wall, gflops, "start")
+
+   ! Read all 3*natom potentials inside comm
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
-   ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, 3*db%natom))
-   db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
+
+   ! Transfer to cache taking into account my_npert
+   ABI_STAT_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
+   ABI_CHECK(ierr == 0, 'out of memory in db%qcache')
+   if (db%my_npert == db%natom3) then
+     db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
+   else
+     do imyp=1,db%my_npert
+       ipc = db%my_pinfo(3, imyp)
+       db%qcache(db_iqpt)%v1scf(:,:,:,imyp) = real(v1scf(:,:,:,ipc), kind=QCACHE_KIND)
+     end do
+   end if
    ABI_FREE(v1scf)
+
    ! Print progress.
-   if (mod(db_iqpt,10)==1) then
+   if (mod(db_iqpt, 10) == 1) then
      call cwtime(cpu, wall, gflops, "stop")
      write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
@@ -3082,6 +3138,39 @@ end function dvdb_findq
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_set_pert_distrib
+!! NAME
+!!  dvdb_set_pert_distrib
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_set_pert_distrib(self, comm_pert, my_pinfo)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: self
+ integer,intent(in) :: comm_pert
+!arrays
+ integer,target,intent(in) :: my_pinfo(:,:)
+
+! *************************************************************************
+
+ self%comm_pert = comm_pert
+ self%nprocs_pert = xmpi_comm_size(comm_pert)
+ self%my_pinfo => my_pinfo
+ self%my_npert = size(my_pinfo, dim=2)
+
+end subroutine dvdb_set_pert_distrib
+!!***
 
 !!****f* m_dvdb/dvdb_seek
 !! NAME
