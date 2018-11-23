@@ -168,6 +168,8 @@ module m_orbmag
   public :: initorbmag
   public :: rho_norm_check
   public :: chern_number
+  public :: make_onsite_l_k
+  public :: make_S1trace_k
   public :: orbmag
   public :: ctocprjb
 
@@ -1439,6 +1441,189 @@ end subroutine chern_number
 !!***
 
 !{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_onsite_l_k
+!! NAME
+!! make_onsite_l_k
+!!
+!! FUNCTION
+!! Compute 1/2 <L_R> onsite contribution to orbital magnetization at given k point
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: idir,nband_k
+  complex(dpc),intent(out) :: onsite_l_k
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iatom,ilmn,il,im,itypat,jlmn,jl,jm,klmn,kln,mesh_size,nn
+  real(dp) :: intg
+  complex(dpc) :: cpb,cpk,orbl_me
+
+  !arrays
+  real(dp),allocatable :: ff(:)
+
+!--------------------------------------------------------------------  
+
+  onsite_l_k = czero
+  do iatom=1,dtset%natom
+     itypat=dtset%typat(iatom)
+     mesh_size=pawtab(itypat)%mesh_size
+     ABI_ALLOCATE(ff,(mesh_size))
+     do jlmn=1,pawtab(itypat)%lmn_size
+        jl=pawtab(itypat)%indlmn(1,jlmn)
+        jm=pawtab(itypat)%indlmn(2,jlmn)
+        do ilmn=1,pawtab(itypat)%lmn_size
+           il=pawtab(itypat)%indlmn(1,ilmn)
+           im=pawtab(itypat)%indlmn(2,ilmn)
+           klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+           kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
+           ! compute <L_dir>
+           call slxyzs(jl,jm,idir,il,im,orbl_me)
+           ! compute integral of phi_i*phi_j - tphi_i*tphi_j
+           if (abs(orbl_me) > tol8) then
+              ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
+              call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
+              call simp_gen(intg,ff,pawrad(itypat))
+              do nn = 1, nband_k
+                 cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
+                 cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
+                 onsite_l_k=onsite_l_k+conjg(cpb)*half*orbl_me*intg*cpk
+              end do ! end loop over nn
+           end if ! end check that |L_dir| > 0, otherwise ignore term
+        end do ! end loop over ilmn
+     end do ! end loop over jlmn
+     ABI_DEALLOCATE(ff)
+  end do ! end loop over atoms
+
+end subroutine make_onsite_l_k
+!!***
+
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_S1trace_k
+!! NAME
+!! make_S1trace_k
+!!
+!! FUNCTION
+!! Compute Trace[\rho_0 S^{(1)} \rho_0] in orbital magnetism context
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_S1trace_k(adir,cprj_k,dtset,eeig,nband_k,pawrad,pawtab,S1trace_k)
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,nband_k
+  complex(dpc),intent(out) :: S1trace_k
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  real(dp),intent(in) :: eeig(nband_k,nband_k)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,nband_k)
+  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: bdir,epsabg,gdir,iatom,ilmn,itypat,jlmn,klmn,nn
+  real(dp) :: ENK
+  complex(dpc) :: cpb,cpk
+
+  !arrays
+
+!----------------------------------------------------------------
+
+
+  S1trace_k = czero
+
+  do epsabg = 1, -1, -2
+
+     if (epsabg .EQ. 1) then
+        bdir = modulo(adir,3)+1
+        gdir = modulo(adir+1,3)+1
+     else
+        bdir = modulo(adir+1,3)+1
+        gdir = modulo(adir,3)+1
+     end if
+
+     do nn = 1, nband_k
+        ENK = eeig(nn,nn)
+        do iatom=1,dtset%natom
+           itypat=dtset%typat(iatom)
+           do ilmn=1,pawtab(itypat)%lmn_size
+              do jlmn=1,pawtab(itypat)%lmn_size
+                 klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+                 cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn))
+                 cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn))
+                 S1trace_k=S1trace_k-half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+              end do ! end loop over jlmn
+           end do ! end loop over ilmn
+        end do ! end loop over atoms
+     end do ! end loop over bands
+
+  end do ! end loop over epsabg
+  
+     
+end subroutine make_S1trace_k
+!!***
+
+
+!{\src2tex{textfont=tt}}
 !!****f* ABINIT/ctocprjb
 !! NAME
 !! ctocprjb
@@ -2094,40 +2279,11 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
     do adir = 1, 3
 
-       CCVV_k = czero
-       S1trace_k = czero
-       onsite_l_k = czero
+       call make_onsite_l_k(cprj_k,dtset,adir,nband_k,onsite_l_k,pawrad,pawtab)
 
-       do iatom=1,dtset%natom
-          itypat=dtset%typat(iatom)
-          mesh_size=pawtab(itypat)%mesh_size
-          ABI_ALLOCATE(ff,(mesh_size))
-          do jlmn=1,pawtab(itypat)%lmn_size
-             jl=pawtab(itypat)%indlmn(1,jlmn)
-             jm=pawtab(itypat)%indlmn(2,jlmn)
-             do ilmn=1,pawtab(itypat)%lmn_size
-                il=pawtab(itypat)%indlmn(1,ilmn)
-                im=pawtab(itypat)%indlmn(2,ilmn)
-                klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
-                kln = pawtab(itypat)%indklmn(2,klmn) ! need this for mesh selection below
-                ! compute <L_dir>
-                call slxyzs(jl,jm,adir,il,im,orbl_me)
-                ! compute integral of phi_i*phi_j - tphi_i*tphi_j
-                if (abs(orbl_me) > tol8) then
-                   ff(1:mesh_size)=pawtab(itypat)%phiphj(1:mesh_size,kln) - pawtab(itypat)%tphitphj(1:mesh_size,kln)
-                   call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
-                   call simp_gen(intg,ff,pawrad(itypat))
-                   do nn = 1, nband_k
-                      cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
-                      cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
-                      onsite_l_k=onsite_l_k+conjg(cpb)*half*orbl_me*intg*cpk
-                   end do ! end loop over nn
-                end if ! end check that |L_dir| > 0, otherwise ignore term
-             end do ! end loop over ilmn
-          end do ! end loop over jlmn
-          ABI_DEALLOCATE(ff)
-       end do ! end loop over atoms
-    
+       call make_S1trace_k(adir,cprj_k,dtset,hmat(1,1:nband_k,1:nband_k,ikpt,0,0),nband_k,pawrad,pawtab,S1trace_k)
+
+       CCVV_k = czero
        do epsabg = 1, -1, -2
 
           if (epsabg .EQ. 1) then
@@ -2430,18 +2586,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                 do nn = 1, nband_k
                    ENK = hmat(1,nn,nn,ikpt,0,0)
 
-                   do iatom=1,dtset%natom
-                      itypat=dtset%typat(iatom)
-                      do ilmn=1,pawtab(itypat)%lmn_size
-                         do jlmn=1,pawtab(itypat)%lmn_size
-                            klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
-                            cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn))
-                            cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn))
-                            S1trace_k=S1trace_k-half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
-                         end do ! end loop over jlmn
-                      end do ! end loop over ilmn
-                   end do ! end loop over atoms
-
                    do n1 = 1, nband_k
 
                       VVI_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
@@ -2520,12 +2664,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
        end do ! end loop over epsabg
 
-       orbmagvec(1,adir) = orbmagvec(1,adir) + real(CCVV_k)
-       orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(CCVV_K)
-       ! orbmagvec(1,adir) = orbmagvec(1,adir) - real(S1trace_k) 
-       ! orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(S1trace_k)
-       ! orbmagvec(1,adir) = orbmagvec(1,adir) + real(onsite_l_k)
-       ! orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(onsite_l_k)
+       ! orbmagvec(1,adir) = orbmagvec(1,adir) + real(CCVV_k)
+       ! orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(CCVV_K)
+       orbmagvec(1,adir) = orbmagvec(1,adir) - real(S1trace_k) ! S1trace_k checks out good
+       orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(S1trace_k)
+       orbmagvec(1,adir) = orbmagvec(1,adir) + real(onsite_l_k) ! onside_l_k checks out good
+       orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(onsite_l_k)
 
     end do ! end loop over adir
     
