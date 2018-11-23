@@ -108,7 +108,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
   ntime = hist%mxhist
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
-  ABI_ALLOCATE(my_coeffs,(eff_pot%anharmonics_terms_type%ncoeff))
+  ABI_ALLOCATE(my_coeffs,(opt_ncoeff))
 
  !if the number of atoms in reference supercell into effpot is not correct,
  !wrt to the number of atom in the hist, we set map the hist and set the good supercell
@@ -159,9 +159,8 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
-
- ! Delete coeffs from eff_pot to calculate fit_data
  do ii=1,opt_ncoeff
+   my_coeffs(ii) = eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))
    call polynomial_coeff_free(eff_pot%anharmonics_terms%coefficients(opt_coeff(ii)))
  end do  
 
