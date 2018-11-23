@@ -1045,7 +1045,8 @@ end subroutine dfpt_qdrpole
 !! FUNCTION
 !!  This subroutine gathers the different terms entering the quadrupole tensor,
 !!  perfofms the transformation from reduced to cartesian coordinates and 
-!!  writes out the quadrupole tensor in external files
+!!  writes out the quadrupole tensor in external files. It also writes the firts
+!!  q-gradient of the polarization response to an atomic displacement. 
 !!  
 !! COPYRIGHT
 !!  Copyright (C) 2018 ABINIT group (MR,MS)
@@ -1129,7 +1130,6 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
  real(dp),intent(in) :: rprimd(3,3)
  character(len=fnlen), intent(in) :: filnam
  
-
 !Local variables-------------------------------
 !scalars
  integer :: alpha,beta,gamma
@@ -1138,13 +1138,13 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
  integer, parameter :: re=1,im=2
  real(dp) :: piezore,piezoim,tmpre, tmpim
  character(len=500) :: msg
- character(len=fnlen) :: fiqdrpl
+ character(len=fnlen) :: fiqdrpl,fidqpol
 !arrays
  integer,allocatable :: cartflg(:,:,:,:)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
  real(dp),allocatable :: qdrptens_cart(:,:,:,:,:),qdrptens_red(:,:,:,:,:)
- 
+ real(dp),allocatable :: dqpol_cart(:,:,:,:,:),dqpol_red(:,:,:,:,:)
  
 ! *************************************************************************
 
@@ -1165,13 +1165,22 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
  write(77,*)' Quadrupole tensor, in reduced coordinates,'
  write(77,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
 
-!Gather the different terms in the quadrupole tensor and print the result
+ fidqpol=trim(filnam)//'_DQPOL'
+ open(unit=78,file=fidqpol,status='unknown',form='formatted',action='write')
+ write(78,*)' q-gradient of the polarization response '
+ write(78,*)' to an atomic displacementatom, in reduced coordinates,'
+ write(78,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
+
+!Gather the different terms in the tensors and print the result
  ABI_ALLOCATE(qdrptens_red,(2,matom,3,3,3))
- qdrptens_red=zero
+ ABI_ALLOCATE(dqpol_red,(2,matom,3,3,3))
+! qdrptens_red=zero
+! dqpol_red=zero
 
  if (kptopt==3) then
 
-   !Write real and 'true' imaginary parts of quadrupole tensor and terms
+   !Write real and 'true' imaginary parts of quadrupole tensor and the 
+   !q-gradient of the polarization response
    do iq1grad=1,nq1grad
      iq1dir=q1grad(2,iq1grad)
      do iq2grad=1,nq2grad
@@ -1180,6 +1189,13 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
          iatom=pert_atdis(1,iatpert)
          iatdir=pert_atdis(2,iatpert)
 
+         !Calculate and write the q-gradient of the polarization response
+         tmpre=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
+         tmpim=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
+         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim
+         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=tmpre
+         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim,tmpre
+ 
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
            !Avoid double counting when summing up unsymmetrized contributions
@@ -1205,8 +1221,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
            qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-tmpre
 
            !Write the whole Quadrupole tensor
-           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
-         & qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,tmpim,-tmpre
 
            if (prtvol==1) then
              !Write individual contributions 
@@ -1242,7 +1257,8 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
  else if (kptopt==2) then
 
-   !Write real and zero imaginary parts of quadrupole tensor and terms
+   !Write real and zero imaginary parts of quadrupole tensor and the 
+   !q-gradient of the polarization response
    do iq1grad=1,nq1grad
      iq1dir=q1grad(2,iq1grad)
      do iq2grad=1,nq2grad
@@ -1250,6 +1266,12 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
        do iatpert=1,natpert
          iatom=pert_atdis(1,iatpert)
          iatdir=pert_atdis(2,iatpert)
+
+         !Calculate and write the q-gradient of the polarization response
+         tmpim=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
+         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim
+         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
+         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim,tmpre
 
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
@@ -1269,14 +1291,12 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
          & + qdrpwf(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iiq2grad,iiq1grad) )
 
            !Divide by the imaginary unit to get a real magnitude (see M. Stengel paper)
-           tmpre=qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)
            tmpim=qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
            qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
            qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
            !Write the whole Quadrupole tensor
-           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
-         & qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,tmpim,0.0_dp
 
            if (prtvol==1) then
              !Write individual contributions 
@@ -1325,6 +1345,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
    close(76)
  end if
  close(77)
+ close(78)
 
 !Transformation to cartesian coordinates of the quadrupole tensor
  ABI_ALLOCATE(qdrptens_cart,(2,matom,3,3,3))
@@ -1333,6 +1354,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
  cartflg=0
 
  ABI_DEALLOCATE(qdrptens_red)
+ ABI_DEALLOCATE(dqpol_red)
 
 !1st transform coordenates of the atomic displacement derivative
  do iq1dir=1,3
@@ -1462,7 +1484,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
  ABI_DEALLOCATE(qdrptens_cart)
  ABI_DEALLOCATE(cartflg)
- 
+
  DBG_EXIT("COLL")
 
 end subroutine dfpt_qdrpout
