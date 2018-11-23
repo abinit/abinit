@@ -102,6 +102,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 !Logicals 
 !Strings 
  character(len=1000) :: message
+ character(len=fnlen) :: fn_bf='before', fn_af='after'
 ! *************************************************************************
 
  !Setting/Initializing Variables
@@ -139,7 +140,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  !Before deleting coefficients calculate MSD of initial model  
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                      compute_anharmonic=.TRUE.)
+ &                                     compute_anharmonic=.TRUE.)
 
 
  !  Print the standard deviation after the fit
@@ -218,7 +219,8 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 &                                  fit_data%training_set%sqomega)
 
  
-   
+  write(*,*) "info", info
+  write(*,*) "coeff_values", coeff_values 
   !Transfer new fitted values to coefficients 
   do ii=1,opt_ncoeff 
      my_coeffs(ii)%coefficient = coeff_values(ii)
@@ -250,7 +252,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  !After deleting coefficients calculate MSD  
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                      compute_anharmonic=.TRUE.)
+ &                                     compute_anharmonic=.TRUE.)
 
 
  !  Print the standard deviation after optimization

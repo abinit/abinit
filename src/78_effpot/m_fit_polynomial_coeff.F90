@@ -2329,7 +2329,6 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
      MSG_ERROR(msg)
    end if
  else if(present(print_file) .and. .not. present(filename))then 
-   write(*,*) "I was here" 
    write(msg,'(a)')' You asked for printing of the MSD-values',ch10,& 
 &        ' without specifying a filename or the inverse'
    MSG_ERROR(msg) 
