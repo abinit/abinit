@@ -3652,23 +3652,26 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 ! *********************************************************************
 
  dynmat = zero
+ !cnt = 0
+ !my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  do iqpt=1,nqpt
    do irpt=1,nrpt
+     !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelsim.
 
-!    Calculation of the k coordinates in Normalized Reciprocal coordinates
+     ! Calculation of the k coordinates in Normalized Reciprocal coordinates
      kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
      kk(2)=spqpt(1,iqpt)*gprim(2,1)+spqpt(2,iqpt)* gprim(2,2)+spqpt(3,iqpt)*gprim(2,3)
      kk(3)=spqpt(1,iqpt)*gprim(3,1)+spqpt(2,iqpt)* gprim(3,2)+spqpt(3,iqpt)*gprim(3,3)
 
-!    Product of k and r
+     ! Product of k and r
      kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
 
-!    Get phase factor
+     ! Get phase factor
      re=cos(two_pi*kr)
      im=sin(two_pi*kr)
 
-!    Inner loop on atoms and directions
+     ! Inner loop on atoms and directions
      do ib=1,natom
        do ia=1,natom
          if(abs(wghatm(ia,ib,irpt))>1.0d-10)then
@@ -3676,7 +3679,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
            facti=im*wghatm(ia,ib,irpt)
            do nu=1,3
              do mu=1,3
-!              Real and imaginary part of the dynamical matrices
+               !  Real and imaginary part of the dynamical matrices
                dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
 &               +factr*atmfrc(mu,ia,nu,ib,irpt)
 !              Atmfrc should be real
@@ -3692,6 +3695,8 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
      end do
    end do
  end do
+
+ !call xmpi_sum(dynmat, comm, ierr)
 
 end subroutine ftifc_r2q
 !!***
@@ -5197,8 +5202,6 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 
 ! *********************************************************************
 
- DBG_ENTER("COLL")
-
  do iqpt=1,nqpt
    !  Definition of q in normalized reciprocal space
    kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)*gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
@@ -5228,8 +5231,6 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
      end do
    end do
  end do
-
- DBG_EXIT("COLL")
 
 end subroutine dymfz9
 !!***
@@ -5536,8 +5537,8 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
 ! *********************************************************************
 
-!Prepare the diagonalisation: analytical part.
-!Note: displ is used as work space here
+ ! Prepare the diagonalisation: analytical part.
+ ! Note: displ is used as work space here
  i1=0
  do ipert1=1,natom
    do idir1=1,3
@@ -5554,11 +5555,11 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end do
 
-!Determine the analyticity of the matrix.
+ ! Determine the analyticity of the matrix.
  analyt=1; if(abs(qphnrm)<tol8) analyt=0
  if(abs(qphon(1))<tol8.and.abs(qphon(2))<tol8.and.abs(qphon(3))<tol8) analyt=2
 
-!In case of q=Gamma, only the real part is used
+ ! In case of q=Gamma, only the real part is used
  if(analyt==0 .or. analyt==2)then
    do i1=1,3*natom
      do i2=1,3*natom
@@ -5568,16 +5569,15 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end if
 
-!In the case the non-analyticity is required:
-! the tensor is in cartesian coordinates and this means that qphon must be in
-! given in Cartesian coordinates.
+ !In the case the non-analyticity is required:
+ ! the tensor is in cartesian coordinates and this means that qphon must be in given in Cartesian coordinates.
  if(analyt==0)then
 
-!  Normalize the limiting direction
+   ! Normalize the limiting direction
    qphon2=qphon(1)**2+qphon(2)**2+qphon(3)**2
    qphon(:)=qphon(:)/sqrt(qphon2)
 
-!  Get the dielectric constant for the limiting direction
+   ! Get the dielectric constant for the limiting direction
    epsq=zero
    do idir1=1,3
      do idir2=1,3
@@ -5587,7 +5587,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
    ABI_ALLOCATE(zeff,(3,natom))
 
-!  Get the effective charges for the limiting direction
+   ! Get the effective charges for the limiting direction
    do idir1=1,3
      do ipert1=1,natom
        zeff(idir1,ipert1)=zero
@@ -5597,7 +5597,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
      end do
    end do
 
-!  Get the non-analytical part of the dynamical matrix, and suppress its imaginary part.
+   ! Get the non-analytical part of the dynamical matrix, and suppress its imaginary part.
    i1=0
    do ipert1=1,natom
      do idir1=1,3
@@ -5666,8 +5666,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
 !***********************************************************************
 
-!Get the phonon frequencies (negative by convention, if
-!the eigenvalue of the dynamical matrix is negative)
+!Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
  do imode=1,3*natom
    if(eigval(imode)>=1.0d-16)then
      phfrq(imode)=sqrt(eigval(imode))
@@ -5678,10 +5677,10 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end if
  end do
 
-!Fix the phase of the eigenvectors
+ ! Fix the phase of the eigenvectors
  call fxphas_seq(eigvec,dum,0,0,1,3*natom*3*natom,0,3*natom,3*natom,0)
 
-!Normalise the eigenvectors
+ ! Normalise the eigenvectors
  do imode=1,3*natom
    norm=zero
    do idir1=1,3
@@ -5702,7 +5701,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end do
 
-!Get the phonon displacements
+ ! Get the phonon displacements
  do imode=1,3*natom
    do idir1=1,3
      do ipert1=1,natom

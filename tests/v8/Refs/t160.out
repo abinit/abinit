@@ -393,6 +393,11 @@ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 20
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:
@@ -734,6 +739,11 @@ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 2 up to my_bstop: 4
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:
@@ -967,6 +977,11 @@ List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 9
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:

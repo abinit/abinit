@@ -224,7 +224,6 @@ Values initialized with zeros
 -                                 =     0.3329534472E+02 (THz)
 -Debye temperature from partial sums:     0.1597922629E+04 (K)
 
-- Writing phonon DOS to file: t155o_DS1_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -297,6 +296,11 @@ List of K-points for self-energy corrections:
    6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    6
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    6
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:
@@ -450,7 +454,6 @@ Values initialized with zeros
 -                                 =     0.3329534472E+02 (THz)
 -Debye temperature from partial sums:     0.1597922629E+04 (K)
 
-- Writing phonon DOS to file: t155o_DS2_PHDOS
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -505,6 +508,11 @@ List of K-points for self-energy corrections:
    6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   2    6
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    6
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:

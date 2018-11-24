@@ -1151,11 +1151,12 @@ end subroutine dvdb_readsym_allv1
 !!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoint produced by listkk.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  comm=MPI communicator
+!!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations.
 !!
 !! OUTPUT
 !!  cplex=1 if real, 2 if complex.
-!!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
+!!  v1scf(cplex, nfft, nspden, db%my_npert)= v1scf potentials on the real-space FFT mesh
+!!   for the db%my_npert perturbations treated by this MPI rank.
 !!
 !! PARENTS
 !!
@@ -1202,9 +1203,11 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
    ABI_CHECK(npc /= 0, "npc == 0!")
    db%qcache_stats(1) = db%qcache_stats(1) + 1
 
+   ! Remember that that size of v1scf in qcache depends on db%my_npert
    if (allocated(db%qcache(db_iqpt)%v1scf)) then
       if (size(db%qcache(db_iqpt)%v1scf, dim=1) == cplex .and. &
           size(db%qcache(db_iqpt)%v1scf, dim=2) == nfft) then
+        ! Potential in cache --> copy it in output v1scf.
         ABI_STAT_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
         ABI_CHECK(ierr == 0, "Out of memory in v1scf")
         v1scf = real(db%qcache(db_iqpt)%v1scf, kind=QCACHE_KIND)
@@ -1218,13 +1221,13 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
         ABI_FREE(db%qcache(db_iqpt)%v1scf)
       end if
    else
-      !call wrtout(std_out, sjoin("Cache miss for db_iqpt. Will read from file...", itoa(db_iqpt)))
+      !call wrtout(std_out, sjoin("Cache miss for db_iqpt. Will read it from file...", itoa(db_iqpt)))
       db%qcache_stats(3) = db%qcache_stats(3) + 1
    end if
  end if
 
  if (.not. incache) then
-   ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
+   ! Read the dvscf potentials in the IBZ for all 3*natom perturbations.
    ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
    ! TODO: This is a big allocation. Should implement something with MPI_WIN (Henrique is gonna love it!)
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
@@ -1253,6 +1256,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
      ABI_FREE(db%qcache(iq)%v1scf)
    end if
 
+   ! Allocate new entry and store v1scf
    ABI_CHECK(.not. allocated(db%qcache(db_iqpt)%v1scf), "free error")
    ABI_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert))
    if (db%my_npert == db%natom3) then
@@ -1267,34 +1271,46 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  end if
 
  if (.not. isirr_q) then
-   ! Rotate db_iqpt to get qpoint in BZ.
+   ! Must rotate db_iqpt to get potential for qpoint in the BZ.
+   ! Be careful with the shape of outputt v1scf because the routine returns db%my_npert potentials.
 
    if (db%my_npert == db%natom3) then
-     ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+     ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, db%natom3), ierr)
      ABI_CHECK(ierr == 0, 'out of memory in work')
      work = v1scf
      call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
        db%nspden, db%nsppol, db%mpi_enreg, work, v1scf)
      ABI_FREE(work)
 
-   else 
-     ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, 3*db%natom), ierr)
-     ABI_CHECK(ierr == 0, 'out of memory in work')
-     ABI_STAT_MALLOC(work2, (cplex, nfft, db%nspden, 3*db%natom), ierr)
+   else
+     ! Parallelism over perturbations.
+     ABI_STAT_MALLOC(work2, (cplex, nfft, db%nspden, db%natom3), ierr)
      ABI_CHECK(ierr == 0, 'out of memory in work2')
-     work = zero
-     do imyp=1,db%my_npert
-       ipc = db%my_pinfo(3, imyp)
-       work(:,:,:,ipc) = v1scf(:,:,:,imyp)
-     end do
-     call xmpi_sum(work, db%comm_pert, ierr)
-     call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-       db%nspden, db%nsppol, db%mpi_enreg, work, work2)
 
-     ABI_FREE(work)
+     if (incache) then
+       ! Cache is distributed --> have to collect all 3 natom perts inside db%comm_pert.
+       ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, db%natom3), ierr)
+       ABI_CHECK(ierr == 0, 'out of memory in work')
 
-     ! Reallocate v1scf with my_npert, if parallelism over perturbation.
-     !work = v1scf
+       work = zero
+       do imyp=1,db%my_npert
+         ipc = db%my_pinfo(3, imyp)
+         work(:,:,:,ipc) = v1scf(:,:,:,imyp)
+       end do
+       call xmpi_sum(work, db%comm_pert, ierr)
+
+       call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
+         db%nspden, db%nsppol, db%mpi_enreg, work, work2)
+       ABI_FREE(work)
+
+     else
+       ! All 3 natom have been read in v1scf by dvdb_readsym_allv1
+       write(std_out, *)"! All 3 natom have been read in v1scf by dvdb_readsym_allv1"
+       call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
+         db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2)
+     end if
+
+     ! Reallocate v1scf with my_npert and extract data from work2.
      ABI_FREE(v1scf)
      ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
      do imyp=1,db%my_npert
@@ -1304,8 +1320,21 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
      ABI_FREE(work2)
    end if
 
+ else
+   ! Handle potentials read from file in case of parallelism over perturbations.
+   if (.not. incache .and. db%my_npert /= db%natom3) then
+     ABI_MALLOC(work, (cplex, nfft, db%nspden, db%my_npert))
+     do imyp=1,db%my_npert
+       ipc = db%my_pinfo(3, imyp)
+       work(:,:,:,imyp) = v1scf(:,:,:,ipc)
+     end do
+     ABI_FREE(v1scf)
+     ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
+     v1scf = work
+     ABI_FREE(work)
+   end if
 
- end if
+ end if ! not is_irred
 
 end subroutine dvdb_readsym_qbz
 !!***
@@ -1420,6 +1449,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    ! Transfer to cache taking into account my_npert
    ABI_STAT_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
    ABI_CHECK(ierr == 0, 'out of memory in db%qcache')
+
    if (db%my_npert == db%natom3) then
      db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
    else

@@ -37,6 +37,8 @@ DVDB version: 2
 File path: t44o_DS20_DVDB
 Number of v1scf potentials: 4
 Number of q-points in DVDB: 3
+-P Number of CPUs for parallelism over perturbations: 1
+-P Number of perturbations treated by this CPU: 6
 Activate symmetrization of v1scf(r): no
 Use internal cache for Vscf(q): no
 List of q-points: min(10, nqpt)
