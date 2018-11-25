@@ -415,6 +415,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
    call xmpi_barrier(comm)
 
+ !case (WFK_TASK_EBANDS)
+   !call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+
  !case (WFK_TASK_PJDOS)
  !case (WFK_TASK_LDOS)
 

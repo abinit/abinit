@@ -52,7 +52,7 @@ module m_sigmaph
 #endif
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_time,           only : cwtime, sec2str
+ use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
  use m_io_tools,       only : iomode_from_fname
@@ -1699,7 +1699,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  character(len=fnlen) :: wfk_fname_dense
  character(len=500) :: msg
  real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
- real(dp) :: elow,ehigh,wmax,cpu,wall,gflops
+ real(dp) :: elow,ehigh,wmax
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: changed,found,isirr_k
  character(len=fnlen) :: path
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -1710,7 +1711,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
  integer :: all_pinfo(3, cryst%natom * 3)
- integer,allocatable :: gtmp(:,:),degblock(:,:) !degblock_all(:,:,:), ndeg_all(:)
+ integer,allocatable :: gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),th(:),wth(:)
 #ifdef HAVE_MPI
@@ -1724,6 +1725,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
  call cwtime(cpu, wall, gflops, "start")
 
  ! Copy important dimensions.
@@ -1848,6 +1850,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among processors.
  new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+
+ call cwtime_report("sigmaph_new: k-points", cpu, wall, gflops)
 
  ! TODO: Rename variable
  if (dtset%nkptgw /= 0) then
@@ -1988,17 +1992,17 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_DT_MALLOC(new%degtab, (new%nkcalc, new%nsppol))
  end if
 
+ ABI_ICALLOC(degblock_all, (2, mband, new%nkcalc, new%nsppol))
+ ABI_ICALLOC(ndeg_all, (new%nkcalc, new%nsppol))
  ierr = 0
- !ABI_ICALLOC(degblock_all, (2, mband, new%nkcalc, new%nsppol))
- !ABI_ICALLOC(ndeg_all, (new%nkcalc, new%nsppol))
 
  do ikcalc=1,new%nkcalc
-   !if (mod(ikcalc, nprocs) /= my_rank) then
-   !  new%kcalc2ibz(ikcalc, :) = 0
-   !  new%bstart_ks(ikcalc, :) = 0
-   !  new%nbcalc_ks(ikcalc, :) = 0
-   !  cycle ! MPI parallelsim.
-   !end if
+   if (mod(ikcalc, nprocs) /= my_rank) then
+     new%kcalc2ibz(ikcalc, :) = 0
+     new%bstart_ks(ikcalc, :) = 0
+     new%nbcalc_ks(ikcalc, :) = 0
+     cycle ! MPI parallelism.
+   end if
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
       sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,xmpi_comm_self,use_symrec=.False.)
@@ -2048,46 +2052,48 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
        ! Store band indices used for averaging (shifted by bstart_ks)
        ndeg = size(degblock, dim=2)
-       !ndeg_all(ikcalc, spin) = ndeg
-       !degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
-       ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
-       do ii=1,ndeg
-         cnt = degblock(2, ii) - degblock(1, ii) + 1
-         ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
-         new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii) - new%bstart_ks(ikcalc, spin) + 1, &
-                                                           degblock(2, ii) - new%bstart_ks(ikcalc, spin) + 1)]
-       end do
+       ndeg_all(ikcalc, spin) = ndeg
+       degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
+
+       !ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
+       !do ii=1,ndeg
+       !  cnt = degblock(2, ii) - degblock(1, ii) + 1
+       !  ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
+       !  new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii) - new%bstart_ks(ikcalc, spin) + 1, &
+       !                                                    degblock(2, ii) - new%bstart_ks(ikcalc, spin) + 1)]
+       !end do
        ABI_FREE(degblock)
      end do
    end if ! symsigma
  end do ! ikcalc
  ABI_CHECK(ierr == 0, "Fatal error, kptgw list must be in the IBZ")
 
- !call xmpi_sum(new%kcalc2ibz, comm, ierr)
- !call xmpi_sum(new%bstart_ks, comm, ierr)
- !call xmpi_sum(new%nbcalc_ks, comm, ierr)
+ ! Collect data
+ call xmpi_sum(new%kcalc2ibz, comm, ierr)
+ call xmpi_sum(new%bstart_ks, comm, ierr)
+ call xmpi_sum(new%nbcalc_ks, comm, ierr)
 
- !if (abs(new%symsigma) == 1) then
- !  call xmpi_sum(ndeg_all, comm, ierr)
- !  call xmpi_sum(degblock_all, comm, ierr)
- !  do ikcalc=1,new%nkcalc
- !    do spin=1,new%nsppol
- !      ndeg = ndeg_all(ikcalc, spin)
- !      ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
- !      do ii=1,ndeg
- !          cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
- !          !degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
- !          ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
- !          new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
- !            degblock_all(1, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1, &
- !            degblock_all(2, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1)]
- !      end do
- !    end do
- !  end do
- !end if
+ if (abs(new%symsigma) == 1) then
+   call xmpi_sum(ndeg_all, comm, ierr)
+   call xmpi_sum(degblock_all, comm, ierr)
+   do ikcalc=1,new%nkcalc
+     do spin=1,new%nsppol
+       ndeg = ndeg_all(ikcalc, spin)
+       ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
+       do ii=1,ndeg
+           cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
+           ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
+           new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
+             degblock_all(1, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1, &
+             degblock_all(2, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1)]
+       end do
+     end do
+   end do
+ end if
+ ABI_FREE(degblock_all)
+ ABI_FREE(ndeg_all)
 
- !ABI_FREE(degblock_all)
- !ABI_FREE(ndeg_all)
+ call cwtime_report("sigmaph_new: kptgw", cpu, wall, gflops)
 
  ! Now we can finally compute max_nbcalc
  new%max_nbcalc = maxval(new%nbcalc_ks)
@@ -2096,12 +2102,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! used to symmetrize the wavefunctions in G-space.
  ! TODO: Should loop over IBZ(k)
+ ! This part is very slow for dense meshes should use geometrical approach...
  new%mpw = 0; new%gmax = 0; cnt = 0
  do ik=1,new%nkcalc
    kk = new%kcalc(:, ik)
    do iq_ibz=1,new%nqbz
    !do iq_ibz=1,new%nqibz_k
-     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelsim.
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      !kq = kk + qibz_k(:,iq_ibz)
      kq = kk + new%qbz(:,iq_ibz)
 
@@ -2121,7 +2128,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  my_mpw = new%mpw; call xmpi_max(my_mpw, new%mpw, comm, ierr)
  my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
+
  call wrtout(std_out, sjoin('Optimal value of mpw=', itoa(new%mpw)))
+ call cwtime_report("sigmaph_new: mpw", cpu, wall, gflops)
 
  ! Define number of bands included in self-energy summation as well as band range.
  ! This value depends on the kind of calculation as imag_only can take advantage of
@@ -2310,6 +2319,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    endif
  end if
 
+ call cwtime_report("sigmaph_new: doublegrid", cpu, wall, gflops)
+
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e(:) = ebands%fermie
@@ -2453,6 +2464,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    call edos%print(unit=std_out)
    !call edos%print(unit=ab_out)
  end if
+
+ call cwtime_report("sigmaph_new: ebands", cpu, wall, gflops)
 
  ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
@@ -2599,9 +2612,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  call edos%free()
 
- call cwtime(cpu, wall, gflops, "stop", comm=comm)
- call wrtout(std_out, sjoin("sigmaph_new completed. cpu-time:", sec2str(cpu), &
-   ", wall-time:", sec2str(wall), ch10), do_flush=.True.)
+ call cwtime_report("sigmaph_new: netcdf", cpu, wall, gflops)
+ call cwtime_report("sigmaph_new: all", cpu_all, wall_all, gflops_all)
 
 end function sigmaph_new
 !!***

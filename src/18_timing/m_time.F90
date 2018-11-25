@@ -32,7 +32,7 @@ MODULE m_time
 #endif
 
  use m_xpapi,    only: xpapi_flops
- use m_fstrings, only: char_count
+ use m_fstrings, only: char_count, sjoin
 
  implicit none
 
@@ -48,6 +48,7 @@ MODULE m_time
  public :: abi_wtime     ! Returns wall clock time in seconds since some arbitrary start.
  public :: abi_cpu_time  ! Returns cpu time in seconds since some arbitrary start.
  public :: cwtime        ! Returns cpu, wall clock time and gflops
+ public :: cwtime_report ! Stop timers, write message, reinit counters.
 
  ! FIXME: Deprecated Should be replaced by cwtime
  public :: timein
@@ -548,6 +549,43 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, comm)
  END SELECT
 
 end subroutine cwtime
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_time/cwtime_report
+!! NAME
+!!  cwtime_report
+!!
+!! FUNCTION
+!! Stop timers, write message, reinit counters.
+!!
+!! SIDE EFFECTS
+!!  cpu= cpu time in seconds
+!!  wall= wall clock time in seconds
+!!  gflops = Gigaflops
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cwtime_report(tag, cpu, wall, gflops)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(inout) :: cpu,wall
+ real(dp),intent(out) :: gflops
+ character(len=*),intent(in) :: tag
+
+! *************************************************************************
+
+ call cwtime(cpu, wall, gflops, "stop")
+ call wrtout(std_out, sjoin(tag, "completed. cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+ call cwtime(cpu, wall, gflops, "start")
+
+end subroutine cwtime_report
 !!***
 
 !!****f* m_time/timein

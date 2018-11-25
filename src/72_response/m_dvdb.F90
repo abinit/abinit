@@ -43,7 +43,7 @@ module m_dvdb
 
  use defs_abitypes,   only : hdr_type, mpi_type, dataset_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
- use m_time,          only : cwtime, sec2str
+ use m_time,          only : cwtime, cwtime_report, sec2str
  use m_io_tools,      only : open_file, file_exists, delete_file
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
  use m_symtk,         only : mati3inv, littlegroup_q
@@ -383,6 +383,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  integer,parameter :: master=0,timrev2=2
  integer :: iv1,ii,ierr,unt,fform,nqpt,iq,iq_found,cplex,trev_q
  integer :: idir,ipert,my_rank
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(hdr_type) :: hdr1,hdr_ref
 !arrays
@@ -393,6 +394,9 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
  my_rank = xmpi_comm_rank(comm)
  new%path = path; new%comm = comm; new%iomode = IO_MODE_FORTRAN
+
+ call wrtout(std_out, sjoin("- Analyzing DVDB file: ", path, "..."))
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Master reads the header and builds useful tables
  if (my_rank == master) then
@@ -540,6 +544,8 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
    call littlegroup_q(new%cryst%nsym, new%qpts(:,iq), new%symq_table(:,:,:,iq), &
      new%cryst%symrec, new%cryst%symafm, trev_q, prtvol=0)
  end do
+
+ call cwtime_report("- dvdb_new", cpu, wall, gflops)
 
  return
 
@@ -1389,7 +1395,7 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
 
- call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with input size: ", ftoa(mbsize, fmt="f9.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.1"), " [Mb]"))
  call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
  call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.1"), " [Mb]"))
  call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))

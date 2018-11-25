@@ -38,7 +38,7 @@ MODULE m_wfd
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime
  use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa
- use m_io_tools,       only : get_unit, iomode_from_fname, open_file
+ use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks
  use m_hide_blas,      only : xcopy, xdotc
  use m_pptools,        only : printxsf
@@ -5001,8 +5001,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  ! Select the IO library from the file extension.
  iomode = iomode_from_fname(wfk_fname)
- write(msg,'(3a,i0)')'Writing GS WFK file ',trim(wfk_fname),", with iomode ",iomode
- call wrtout(std_out, msg)
+ call wrtout(std_out, sjoin('Writing GS WFK file: ',wfk_fname,", with iomode ",iomode2str(iomode)))
 
  if (nprocs > 1 .and. iomode /= IO_MODE_MPI) then
    MSG_ERROR("You need MPI-IO to write wavefunctions in parallel")
@@ -5186,7 +5185,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
    MSG_ERROR("gamma_centered not available anymore")
  end if
 
- if (ANY(iomode == [IO_MODE_NETCDF, IO_MODE_FORTRAN_MASTER])) then
+ if (any(iomode == [IO_MODE_NETCDF, IO_MODE_FORTRAN_MASTER])) then
    MSG_ERROR(sjoin("Unsupported value for iomode: ",itoa(iomode)))
  end if
 
@@ -5194,7 +5193,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
  comm = Wfd%comm; my_rank = Wfd%my_rank; master = Wfd%master
 
  tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
- call wrtout(std_out, sjoin(" wfd_read_wfk: reading ", wfk_fname, "with iomode:", itoa(iomode)))
+ call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, "with iomode:", iomode2str(iomode))
 
  wfk_unt = get_unit()
  call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,wfk_unt,Wfd%comm,Hdr_out=Hdr)
