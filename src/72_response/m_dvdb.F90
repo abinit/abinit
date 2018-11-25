@@ -1067,7 +1067,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 !scalars
  integer,intent(in) :: iqpt,nfft,comm
  integer,intent(out) :: cplex
- class(dvdb_t),target,intent(inout) :: db
+ class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),allocatable,intent(out) :: v1scf(:,:,:,:)
@@ -1369,6 +1369,10 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  real(dp),intent(in) :: mbsize
  class(dvdb_t),intent(inout) :: db
 
+!Local variables-------------------------------
+!scalars
+ real(dp) :: onepot_mb
+
 ! *************************************************************************
 
  if (abs(mbsize) < tol3) then
@@ -1376,16 +1380,18 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
    return
  end if
 
+ onepot_mb = two * product(db%ngfft3_v1(:, 1)) * db%nspden * QCACHE_KIND * b2Mb
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
-   db%qcache_size = int(mbsize / (two * product(db%ngfft3_v1(:, 1)) * db%nspden * db%my_npert * QCACHE_KIND * b2Mb))
+   db%qcache_size = int(mbsize / (onepot_mb * db%my_npert))
  end if
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
 
  call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with input size: ", ftoa(mbsize, fmt="f9.1"), " [Mb]"))
  call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
+ call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.1"), " [Mb]"))
  call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
 
  ABI_MALLOC(db%qcache, (db%nqpt))

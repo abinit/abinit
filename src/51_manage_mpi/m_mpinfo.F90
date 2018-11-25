@@ -2287,7 +2287,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 &     'nproc_kpt=',nproc_kpt,' >= nkpt=',nkpt,'* nsppol=',nsppol,ch10,&
 &     'The number of processors is larger than nkpt*nsppol. This is a waste.'
      MSG_WARNING(message)
-   else if(mod(nkpt*nsppol,nproc_kpt)/=0) then
+   else if (mod(nkpt*nsppol,nproc_kpt) /= 0) then
 !    nkpt not a multiple of nproc_kpt
      write(message,'(a,i0,a,i0,3a)')&
 &     'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_kpt (',nproc_kpt, ')', ch10,&

@@ -4405,7 +4405,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  character(len=500) :: msg
 ! *************************************************************************
 
-!=== Check basic dimensions ===
+ ! Check basic dimensions
  ierr=0
  call compare_int('natom',  Hdr%natom,  Dtset%natom,  ierr)
  call compare_int('nkpt',   Hdr%nkpt,   Dtset%nkpt,   ierr)
@@ -4422,7 +4422,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  call compare_int('nshiftk_orig', Hdr%nshiftk_orig, Dtset%nshiftk_orig, ierr)
  call compare_int('nshiftk', Hdr%nshiftk, Dtset%nshiftk, ierr)
 
-!=== The number of fatal errors must be zero ===
+ ! The number of fatal errors must be zero ===
  if (ierr/=0) then
    write(msg,'(3a)')&
 &   'Cannot continue, basic dimensions reported in the header do not agree with input file. ',ch10,&
@@ -4435,50 +4435,42 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 
  test=ALL(Hdr%typat==Dtset%typat(1:Dtset%natom))
  ABI_CHECK(test,'Mismatch in typat')
-!
-!* Check if the lattice from the input file agrees with that read from the KSS file
+
+ ! Check if the lattice from the input file agrees with that read from the KSS file
  if ( (ANY(ABS(Hdr%rprimd-Dtset%rprimd_orig(1:3,1:3,1))>tol6)) ) then
-   write(msg,'(6a)')ch10,&
-&   ' hdr_vs_dtset : ERROR - ',ch10,&
-&   ' real lattice vectors read from Header ',ch10,&
-&   ' differ from the values specified in the input file'
-   call wrtout(std_out,msg,'COLL')
-   write(msg,'(3a,3(3es16.6),3a,3(3es16.6),3a)')ch10,&
-&   ' rprimd from Hdr file   = ',ch10,(Hdr%rprimd(:,jj),jj=1,3),ch10,&
-&   ' rprimd from input file = ',ch10,(Dtset%rprimd_orig(:,jj,1),jj=1,3),ch10,ch10,&
-&   '  Modify the lattice vectors in the input file '
-   call wrtout(std_out,msg,'COLL')
-   MSG_ERROR("")
+   write(msg,'(5a,3(3es16.6),3a,3(3es16.6),3a)')ch10,&
+   ' real lattice vectors read from Header differ from the values specified in the input file', ch10, &
+   ' rprimd from Hdr file   = ',ch10,(Hdr%rprimd(:,jj),jj=1,3),ch10,&
+   ' rprimd from input file = ',ch10,(Dtset%rprimd_orig(:,jj,1),jj=1,3),ch10,ch10,&
+   '  Modify the lattice vectors in the input file '
+   MSG_ERROR(msg)
  end if
 
-!=== Check symmetry operations ===
+ ! Check symmetry operations.
  tsymrel=(ALL(Hdr%symrel==Dtset%symrel(:,:,1:Dtset%nsym)))
  if (.not.tsymrel) then
-   write(msg,'(6a)')ch10,&
-&   ' hdr_vs_dtset : ERROR - ',ch10,&
-&   ' real space symmetries read from Header ',ch10,&
-&   ' differ from the values inferred from the input file'
-   call wrtout(std_out,msg,'COLL')
+   write(msg,'(3a)')&
+   ' real space symmetries read from Header ',ch10,&
+   ' differ from the values inferred from the input file'
+   MSG_WARNING(msg)
    tsymrel=.FALSE.
  end if
 
  ttnons=ALL(ABS(Hdr%tnons-Dtset%tnons(:,1:Dtset%nsym))<tol6)
  if (.not.ttnons) then
-   write(msg,'(6a)')ch10,&
-&   ' hdr_vs_dtset : ERROR - ',ch10,&
-&   ' fractional translations read from Header ',ch10,&
-&   ' differ from the values inferred from the input file'
-   call wrtout(std_out,msg,'COLL')
+   write(msg,'(3a)')&
+   ' fractional translations read from Header ',ch10,&
+   ' differ from the values inferred from the input file'
+   MSG_WARNING(msg)
    ttnons=.FALSE.
  end if
 
  tsymafm=ALL(Hdr%symafm==Dtset%symafm(1:Dtset%nsym))
  if (.not.tsymafm) then
-   write(msg,'(6a)')ch10,&
-&   ' hdr_vs_dtset : ERROR - ',ch10,&
-&   ' AFM symmetries read from Header ',ch10,&
-&   ' differ from the values inferred from the input file'
-   call wrtout(std_out,msg,'COLL')
+   write(msg,'(3a)')&
+   ' AFM symmetries read from Header ',ch10,&
+   ' differ from the values inferred from the input file'
+   MSG_WARNING(msg)
    tsymafm=.FALSE.
  end if
 
@@ -4531,10 +4523,10 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    MSG_ERROR(msg)
  end if
 
-!* Check if the k-points from the input file agrees with that read from the WFK file
+ ! Check if the k-points from the input file agrees with that read from the WFK file
  if ( (ANY(ABS(Hdr%kptns(:,:)-Dtset%kpt(:,1:Dtset%nkpt))>tol6)) ) then
    write(msg,'(9a)')ch10,&
-&   ' hdr_vs_dtset : ERROR - ',ch10,&
+&   ' hdr_vs_dtset: ERROR - ',ch10,&
 &   '  k-points read from Header ',ch10,&
 &   '  differ from the values specified in the input file',ch10,&
 &   '  k-points from Hdr file                        | k-points from input file ',ch10
@@ -4560,7 +4552,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    MSG_ERROR('Check the k-mesh and the symmetries of the system. ')
  end if
 
-!Check istwfk storage
+ ! Check istwfk storage
  if ( (ANY(Hdr%istwfk(:)/=Dtset%istwfk(1:Dtset%nkpt))) ) then
    write(msg,'(9a)')ch10,&
 &   ' hdr_vs_dtset : ERROR - ',ch10,&
@@ -4575,7 +4567,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    MSG_ERROR('Modify istwfk in the input file')
  end if
 
- CONTAINS  !===========================================================
+ CONTAINS
 !!***
 
 !!****f* hdr_vs_dtset/compare_int

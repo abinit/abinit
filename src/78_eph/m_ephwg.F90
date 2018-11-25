@@ -764,9 +764,10 @@ subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: qlklist(nqlk), nqlk, spin, nw, bcorr, nbsum, comm
+ integer,intent(in) :: nqlk, spin, nw, bcorr, nbsum, comm
  type(ephwg_t),intent(in) :: self
 !arrays
+ integer,intent(in) :: qlklist(nqlk)
  real(dp),intent(in) :: wvals(nw)
  real(dp),intent(inout) :: deltaw_pm(2, nw, self%natom3, nbsum, nqlk)
 
