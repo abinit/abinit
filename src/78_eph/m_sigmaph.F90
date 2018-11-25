@@ -624,7 +624,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
  !if (sigma%calc_velocity == 1) then
- call wrtout(std_out, " Computing diagonal elements of velocity operator for all states in Sigma_nk.")
+ call wrtout(std_out, " Computing diagonal elements of velocity operator for all states in Sigma_nk...")
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
  ABI_MALLOC(cgwork,   (2, mpw*wfd%nspinor))
  ABI_CALLOC(vred_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
@@ -1139,6 +1139,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              gkq_atm(:,ib_k,ipc) = [dotr, doti]
            end do
+
+           !call cg_zgemv("N",npw_kq*nspinor,,nbcalc_ks,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone)
          end do
 
          ! Get gkk(kcalc, q, nu)
@@ -1501,7 +1503,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Compute Eliashberg function (useful but cost is not negligible).
        ! May need to deactivate this part for HTC.
        call wrtout(std_out, sjoin("Computing Eliashberg function with nomega:", itoa(sigma%gfw_nomega), &
-           ". Use prtphdos 0 to disable this part"))
+           ". Use prteliash = 0 to disable this part"))
        call cwtime(cpu, wall, gflops, "start")
        call xmpi_sum(sigma%gf_nnuq, comm, ierr)
        ABI_MALLOC(dargs, (sigma%gfw_nomega))
@@ -2034,8 +2036,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
          cnt = cnt + 1
          if (cnt < 5) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
-             "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",spin,ch10,&
-             "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),bstop
+             "Not all the degenerate states for ikcalc= ",ikcalc,", spin= ",spin,ch10,&
+             "were included in the bdgw set. bdgw has been automatically changed to: ",new%bstart_ks(ikcalc,spin),bstop
            MSG_COMMENT(msg)
          end if
          write(msg,'(2(a,i0),2a)') "The number of included states ",bstop,&
@@ -2212,9 +2214,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  ! Prepare calculation of generalized Eliashberg functions.
- ! Allow users to deactivate this part with prtphdos == 0
+ ! Allow users to deactivate this part with prteliash == 0
  new%gfw_nomega = 0
- if (dtset%prtphdos == 1) then
+ if (dtset%prteliash /= 0) then
    new%gfw_nomega = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / dtset%ph_wstep) + 1
    ABI_MALLOC(new%gfw_mesh, (new%gfw_nomega))
    new%gfw_mesh = arth(ifc%omega_minmax(1), dtset%ph_wstep, new%gfw_nomega)

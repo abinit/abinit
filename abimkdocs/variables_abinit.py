@@ -19526,4 +19526,19 @@ This variable is still under development.
 """,
 ),
 
+Variable(
+    abivarname="prteliash",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    requires="[[optdriver]] in [7]",
+    mnemonics="PRINT ELIASHberg function.",
+    text=r"""
+This variable controls the output of the generalized Eliashberg function when [[eph_task]] is +4 or -4.
+If set 1, the EPH code will compute the generalized Eliashberg function and will save the results in the SIGEPH.nc file.
+""",
+),
+
 ]

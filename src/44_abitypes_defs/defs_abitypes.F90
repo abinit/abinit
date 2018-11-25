@@ -938,6 +938,7 @@ type dataset_type
  integer :: eph_transport
 
  integer :: ph_intmeth
+ integer :: prteliash = 0
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)

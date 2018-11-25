@@ -5224,7 +5224,7 @@ subroutine wfd_read_wfk(Wfd,wfk_fname,iomode)
    end do
  end do
 
- write(msg,'(a,i0,a)')" Will read ",COUNT(my_readmask)," (b,k,s) states ..."
+ write(msg,'(a,i0,a)')" Reading ",COUNT(my_readmask)," (b,k,s) states ..."
  call wrtout(std_out, msg)
  if (wfd%prtvol > 0) call wrtout(std_out,' k       eigenvalues [eV]','COLL')
  call cwtime(cpu,wall,gflops,"start")
