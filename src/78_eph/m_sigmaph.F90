@@ -1501,7 +1501,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Compute Eliashberg function (useful but cost is not negligible).
        ! May need to deactivate this part for HTC.
        call wrtout(std_out, sjoin("Computing Eliashberg function with nomega:", itoa(sigma%gfw_nomega), &
-           "Use prtphdos 0 to disable this part"))
+           ". Use prtphdos 0 to disable this part"))
        call cwtime(cpu, wall, gflops, "start")
        call xmpi_sum(sigma%gf_nnuq, comm, ierr)
        ABI_MALLOC(dargs, (sigma%gfw_nomega))
@@ -2020,12 +2020,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      MSG_WARNING(sjoin("For the time being the k-point must be in the IBZ but got", ktoa(kk)))
      ierr = ierr + 1
    end if
-
-   ! Find the little-group of the k-point and initialize the weights for BZ integration.
-   ! Examine the symmetries of the k-point
-   ! TODO: See timerev_k
-   !call littlegroup_q(cryst%nsym,kk,symk,cryst%symrec,cryst%symafm,timerev_k,prtvol=dtset%prtvol)
-   !call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
 
    ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
    ! Here we make sure that all the degenerate states are included.
@@ -3228,7 +3222,7 @@ subroutine sigmaph_print(self, dtset, unt)
    write(unt,"(2(a,i0,1x))")"ntheta:", self%ntheta, "nphi:", self%nphi
    write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
  end if
- !write(unt,"(a, i0)")"Number of k-points for self-energy corrections:", self%nkcalc
+ write(unt,"(a, i0)")"Number of k-points for self-energy corrections: ", self%nkcalc
  write(unt,"(a)")"List of K-points for self-energy corrections:"
  do ikc=1,self%nkcalc
    if (ikc > 10) then

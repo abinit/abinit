@@ -439,6 +439,7 @@ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 1
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
@@ -459,7 +460,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
    2  12.800   -0.333      1.0   21.589
@@ -569,6 +570,7 @@ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 1
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
@@ -589,7 +591,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.1    0.000
    2  12.800   -0.052      6.3   21.589
@@ -703,6 +705,7 @@ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 1
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
@@ -723,7 +726,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.1    0.000
    2  12.800   -0.333      1.0   21.589
@@ -839,6 +842,7 @@ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 1
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
@@ -859,7 +863,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    509.1    0.000
    2  12.800   -0.052      6.3   21.589
@@ -974,6 +978,7 @@ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 1
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
@@ -994,7 +999,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
    2  12.800   -0.333      1.0   21.589
@@ -1102,6 +1107,7 @@ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 1
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
  === MPI parallelism ===
@@ -1122,7 +1128,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1  -8.789   -0.001    557.2    0.000
    2  12.800   -0.333      1.0   21.589
