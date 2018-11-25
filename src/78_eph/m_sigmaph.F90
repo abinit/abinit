@@ -55,7 +55,7 @@ module m_sigmaph
  use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
- use m_io_tools,       only : iomode_from_fname
+ use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq
  use m_cgtools,        only : dotprod_g
@@ -307,6 +307,10 @@ module m_sigmaph
    ! angwgth(angl_size)
    ! For each point of the angular mesh, gives the weight
    ! of the corresponding point on an unitary sphere (Frohlich self-energy)
+
+  integer, allocatable :: qp_done(:,:)
+   ! qp_done(kcalc,spin)
+   ! Keep track of the QP states already computed for restart of the calculation
 
   complex(dpc),allocatable :: vals_e0ks(:,:)
    ! vals_e0ks(ntemp, max_nbcalc)
@@ -711,6 +715,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Loop over k-points in Sigma_nk.
  do ikcalc=1,sigma%nkcalc
+   ! check if this kpoint and spin was already calculated
+   if (all(sigma%qp_done(ikcalc,:)==1)) cycle
+
    call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
    kk = sigma%kcalc(:, ikcalc)
 
@@ -768,6 +775,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout(std_out, sjoin("Setup kcalc completed. cpu-time:", sec2str(cpu_setk), ",wall-time:", sec2str(wall_setk)))
 
    do spin=1,nsppol
+     ! check if thik kpoint and spin was already calculated
+     if (sigma%qp_done(ikcalc,spin)==1) cycle
+
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
@@ -1649,7 +1659,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: isym_k, trev_k, mband
  integer :: ip,npoints,skw_cplex, edos_intmeth
 #ifdef HAVE_NETCDF
- integer :: ncid,ncerr
+ integer :: ncid,ncerr,varid
 #endif
  logical :: downsample
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
@@ -2045,6 +2055,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
  ! ================================================================
+ ABI_CALLOC(new%qp_done, (new%nkcalc, new%nsppol))
  ABI_CALLOC(new%vals_e0ks, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%dvals_de0ks, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%dw_vals, (new%ntemp, new%max_nbcalc))
@@ -2300,9 +2311,25 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
-   ! Master creates the netcdf file used to store the results of the calculation.
-   NCF_CHECK(nctk_open_create(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+   path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+
+   ! Check if a previous netcdf file is present and restart the calculation
+   found = file_exists(path)
+   if (found) then
+       NCF_CHECK(nctk_open_modify(new%ncid, path, xmpi_comm_self))
+   else
+       ! Master creates the netcdf file used to store the results of the calculation.
+       NCF_CHECK(nctk_open_create(new%ncid, path, xmpi_comm_self))
+   endif
+
    ncid = new%ncid
+
+   ! try to read the done array
+   ncerr = nf90_inq_varid(ncid, "qp_done", varid)
+   if (ncerr == nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
+   end if
+   write(*,*) new%qp_done
 
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
@@ -2347,6 +2374,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
      nctkarr_t("kTmesh", "dp", "ntemp"), &
      nctkarr_t("mu_e", "dp", "ntemp"), &
+     nctkarr_t("qp_done", "int", "nkcalc, nsppol"), &
      nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
@@ -2442,6 +2470,179 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  call edos%free()
 
 end function sigmaph_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/sigmaph_from_file
+!! NAME
+!!  sigmaph_new
+!!
+!! FUNCTION
+!!  Start a sigmaph instance from a netcdf file.
+!!
+!! INPUTS
+!!  dtset<dataset_type>=All input variables for this dataset.
+!!  ecut=Cutoff energy for wavefunctions.
+!!  cryst<crystal_t>=Crystalline structure
+!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
+!!  dtfil<datafiles_type>=variables related to files.
+!!  comm=MPI communicator
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: comm
+ real(dp),intent(in) :: ecut
+ type(crystal_t),intent(in) :: cryst
+ type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(in) :: ebands
+ type(ifc_type),intent(in) :: ifc
+ type(datafiles_type),intent(in) :: dtfil
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
+ integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
+ integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop
+ integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz
+ integer :: isym_k, trev_k, mband
+ integer :: ip,npoints,skw_cplex, edos_intmeth
+#ifdef HAVE_NETCDF
+ integer :: ncid,ncerr
+#endif
+ logical :: downsample
+ real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
+ real(dp) :: edos_step, edos_broad, ieta
+ character(len=fnlen) :: wfk_fname_dense
+ character(len=500) :: msg
+ real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
+ real(dp) :: elow,ehigh,wmax
+ logical :: changed,found,isirr_k
+ character(len=fnlen) :: path
+ type(ebands_t) :: tmp_ebands, ebands_dense
+ type(gaps_t) :: gaps
+!arrays
+ integer :: eph_task, symdynmat, eph_fermie, ph_fsewin, ph_wstep, ph_smear, eta, wr_step
+ integer :: eph_extrael, eph_fsmear, ph_intmeth, eph_intmeth, eph_transport
+ integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3), frohl_params(4)
+ integer :: intp_kptrlatt(3,3), g0_k(3), skw_band_block(2)
+ integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
+ integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
+ integer,allocatable :: gtmp(:,:),degblock(:,:),real_tmp(:,:,:)
+ real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
+ real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),th(:),wth(:)
+
+! *************************************************************************
+
+ ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
+ ! This could create problems if MPI parallelism over (spin, nkptgw) ...
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   ! Master readts the netcdf file used to store the results of the calculation.
+   NCF_CHECK(nctk_open_read(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+
+   !TODO?
+   !NCF_CHECK(cryst%ncread(ncid))
+   !TODO?
+   !NCF_CHECK(ebands_ncread(ebands, ncid))
+
+   ! Read sigma_eph dimensions.
+   NCF_CHECK(nctk_get_dim(ncid,"nkcalc",new%nkcalc))
+   NCF_CHECK(nctk_get_dim(ncid,"max_nbcalc", new%max_nbcalc))
+   NCF_CHECK(nctk_get_dim(ncid,"nsppol", new%nsppol))
+   NCF_CHECK(nctk_get_dim(ncid,"ntemp", new%ntemp))
+   !NCF_CHECK(nctk_get_dim(ncid,"natom3", 3 * cryst%natom))
+   NCF_CHECK(nctk_get_dim(ncid,"nqibz", new%nqibz))
+   NCF_CHECK(nctk_get_dim(ncid,"nqbz", new%nqbz))
+
+   NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
+   NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
+
+   ! ======================================================
+   ! Raed data that does not depend on the (kpt, spin) loop.
+   ! ======================================================
+   NCF_CHECK(nctk_set_datamode(ncid))
+   ii = 0; if (new%imag_only) ii = 1
+   NCF_CHECK(nf90_get_var(ncid, vid("symsigma"), new%symsigma))
+   NCF_CHECK(nf90_get_var(ncid, vid("nbsum"), new%nbsum))
+   NCF_CHECK(nf90_get_var(ncid, vid("bsum_start"), new%bsum_start))
+   NCF_CHECK(nf90_get_var(ncid, vid("bsum_stop"), new%bsum_stop))
+   NCF_CHECK(nf90_get_var(ncid, vid("qint_method"), new%qint_method))
+   NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
+   NCF_CHECK(nf90_get_var(ncid, vid("imag_only"), ii))
+   new%imag_only = .false.
+   if (ii == 1) new%imag_only = .true.
+
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_task"),eph_task))
+   NCF_CHECK(nf90_get_var(ncid, vid("symdynmat"),symdynmat))
+   NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"),ph_intmeth))
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"),eph_intmeth))
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"),eph_transport))
+
+   ABI_CHECK(eph_task == dtset%eph_task,'eph_task != input file')
+   ABI_CHECK(symdynmat == symdynmat,'symdynmat != input file')
+   ABI_CHECK(ph_intmeth == dtset%ph_intmeth,'ph_intmeth != input file')
+   ABI_CHECK(eph_intmeth == dtset%eph_intmeth,'eph_intmeth != input file')
+   ABI_CHECK(eph_transport == dtset%eph_transport,'eph_transport != input file')
+
+   NCF_CHECK(nf90_get_var(ncid, vid("eta"),eta))
+   NCF_CHECK(nf90_get_var(ncid, vid("wr_step"),wr_step))
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_fsewin"),ph_fsewin))
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_fsmear"),eph_fsmear))
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_extrael"),eph_extrael))
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_fermie"),eph_fermie))
+   NCF_CHECK(nf90_get_var(ncid, vid("ph_wstep"),ph_wstep))
+   NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"),ph_smear))
+
+   !read and check consistency
+   NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
+   NCF_CHECK(nf90_get_var(ncid, vid("ddb_ngqpt"), ddb_ngqpt))
+   NCF_CHECK(nf90_get_var(ncid, vid("ph_ngqpt"), ph_ngqpt))
+   NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
+   NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
+   ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),'eph_ngqpt_fine != input file')
+   ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     'ddb_ngqpt != input file')
+   ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      'ph_ngqpt != input file')
+   ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   'sigma_ngkpt != input file')
+   ABI_CHECK(all(dtset%frohl_params   == frohl_params),  'frohl_params != input file')
+
+   NCF_CHECK(nf90_get_var(ncid, vid("ngqpt"), new%ngqpt))
+   NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), new%bstart_ks))
+   NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
+   NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), new%kcalc))
+   NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), new%kcalc2ibz))
+   NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), new%kTmesh))
+   NCF_CHECK(nf90_get_var(ncid, vid("mu_e"), new%mu_e))
+   NCF_CHECK(nf90_get_var(ncid, vid("eta"), ieta))
+   new%ieta = j_dpc * ieta
+   if (new%gfw_nomega > 0) then
+     NCF_CHECK(nf90_get_var(ncid, vid("gfw_mesh"), new%gfw_mesh))
+   end if
+   NCF_CHECK(nf90_close(ncid))
+
+ end if ! master
+
+ ! Now reopen the file (note xmpi_comm_self --> only master writes)
+ call xmpi_barrier(comm)
+ NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+ NCF_CHECK(nctk_set_datamode(new%ncid))
+#endif
+
+contains
+ integer function vid(vname)
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+end function vid
+
+end function sigmaph_from_file
 !!***
 
 !!****f* m_sigmaph/sigmaph_free
@@ -2989,6 +3190,10 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  if (self%gfw_nomega > 0) then
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "gfw_vals"), self%gfw_vals, start=[1, 1, 1, ikcalc, spin]))
  end if
+
+ !write array for restart
+ self%qp_done(ikcalc,spin) = 1
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_done"), 1, start=[ikcalc,spin]))
 #endif
 
  call cwtime(cpu, wall, gflops, "stop")
