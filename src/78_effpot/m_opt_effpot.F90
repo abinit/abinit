@@ -102,6 +102,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 !Logicals 
 !Strings 
  character(len=1000) :: message
+ character(len=1000) :: frmt
  character(len=fnlen) :: fn_bf='before', fn_af='after'
 ! *************************************************************************
 
@@ -225,17 +226,17 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 &                                  fit_data%training_set%sqomega)
 
   if (info /= 0 .and. all(coeff_values < tol16))then
-   write(message, '(4a,I4,11a)' )ch10,&
-&        ' --- !WARNING',ch10,&
+    write(frmt,*) opt_ncoeff  
+    write(message, '(2a,'//ADJUSTR(frmt)//'I4,8a)' ) ch10,&
 &        '     The attempt to optimize the terms: ', opt_coeff ,ch10,&
 &        '     , returned a singular solution', ch10,&
 &        '     The terms could not be optimized ',ch10,&
 &        '     and the effective potential has not been altered.', ch10,&
-&        '     Action: Change training set or coefficients to be optimized.',ch10,&
-&        ' ---',ch10
-     call wrtout(std_out,message,"COLL")
+&        '     Action: Change training set or coefficients to be optimized.'
+    MSG_WARNING(message)
     do ii=1,opt_ncoeff 
-      eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient = coeff_init_values(ii)
+      eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient = coeff_init_values(ii)       
+      call polynomial_coeff_free(my_coeffs(ii))
     end do 
   else
   ! Transfer new fitted values to coefficients and write them into effective potential
