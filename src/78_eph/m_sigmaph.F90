@@ -390,6 +390,8 @@ module m_sigmaph
 !!***
 
  private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
+ private :: sigmaph_from_file         ! Read main dimensions and header of sigmaph from a netcdf file.
+ private :: sigmaph_comp              ! Compare two instances of sigmaph raise error if different
  private :: sigmaph_free              ! Free memory.
  private :: sigmaph_setup_kcalc       ! Return tables used to perform the sum over q-points for given k-point.
  private :: sigmaph_gather_and_write  ! Compute the QP corrections.
@@ -484,7 +486,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
- type(sigmaph_t) :: sigma
+ type(sigmaph_t) :: sigma, restart_sigma
  type(ddkop_t) :: ddkop
  character(len=500) :: msg
 !arrays
@@ -538,7 +540,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
+ !restart_sigma = sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, comm)
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+ !call sigmaph_comp(sigma,restart_sigma)
  if (my_rank == master) then
    call sigmaph_print(sigma, dtset, ab_out)
    call sigmaph_print(sigma, dtset, std_out)
@@ -1655,7 +1659,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop
- integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz
+ integer :: nk_found,ifo,jj,bstart,sigma_nkbz
  integer :: isym_k, trev_k, mband
  integer :: ip,npoints,skw_cplex, edos_intmeth
 #ifdef HAVE_NETCDF
@@ -2329,7 +2333,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    if (ncerr == nf90_noerr) then
      NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
    end if
-   write(*,*) new%qp_done
 
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
@@ -2480,6 +2483,7 @@ end function sigmaph_new
 !!
 !! FUNCTION
 !!  Start a sigmaph instance from a netcdf file.
+!!  This routine serves only to read some basic dimensions of sigmaph_t to verify if a restart is possible
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
@@ -2496,7 +2500,7 @@ end function sigmaph_new
 !!
 !! SOURCE
 
-type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
+type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, comm) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2504,136 +2508,118 @@ type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, ifc, dtf
  type(crystal_t),intent(in) :: cryst
  type(dataset_type),intent(in) :: dtset
  type(ebands_t),intent(in) :: ebands
- type(ifc_type),intent(in) :: ifc
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
- integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
- integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop
- integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz
- integer :: isym_k, trev_k, mband
- integer :: ip,npoints,skw_cplex, edos_intmeth
+ integer,parameter :: master=0
+ integer :: imag_only
 #ifdef HAVE_NETCDF
- integer :: ncid,ncerr
+ integer :: ncid
 #endif
- logical :: downsample
- real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
- real(dp) :: edos_step, edos_broad, ieta
- character(len=fnlen) :: wfk_fname_dense
+ real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, wr_step, eph_extrael, eph_fsmear
  character(len=500) :: msg
- real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
- real(dp) :: elow,ehigh,wmax
- logical :: changed,found,isirr_k
  character(len=fnlen) :: path
- type(ebands_t) :: tmp_ebands, ebands_dense
- type(gaps_t) :: gaps
+ logical :: found
 !arrays
- integer :: eph_task, symdynmat, eph_fermie, ph_fsewin, ph_wstep, ph_smear, eta, wr_step
- integer :: eph_extrael, eph_fsmear, ph_intmeth, eph_intmeth, eph_transport
+ integer :: eph_task, symdynmat
+ integer :: ph_intmeth, eph_intmeth, eph_transport
  integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3), frohl_params(4)
- integer :: intp_kptrlatt(3,3), g0_k(3), skw_band_block(2)
- integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
- integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
- integer,allocatable :: gtmp(:,:),degblock(:,:),real_tmp(:,:,:)
- real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
- real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),th(:),wth(:)
 
 ! *************************************************************************
 
- ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
- ! This could create problems if MPI parallelism over (spin, nkptgw) ...
+ ! Open netcdf file 
 #ifdef HAVE_NETCDF
- if (my_rank == master) then
-   ! Master readts the netcdf file used to store the results of the calculation.
-   NCF_CHECK(nctk_open_read(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
 
-   !TODO?
-   !NCF_CHECK(cryst%ncread(ncid))
-   !TODO?
-   !NCF_CHECK(ebands_ncread(ebands, ncid))
+ path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ NCF_CHECK(nctk_open_read(new%ncid, path, comm))
+ ncid = new%ncid
 
-   ! Read sigma_eph dimensions.
-   NCF_CHECK(nctk_get_dim(ncid,"nkcalc",new%nkcalc))
-   NCF_CHECK(nctk_get_dim(ncid,"max_nbcalc", new%max_nbcalc))
-   NCF_CHECK(nctk_get_dim(ncid,"nsppol", new%nsppol))
-   NCF_CHECK(nctk_get_dim(ncid,"ntemp", new%ntemp))
-   !NCF_CHECK(nctk_get_dim(ncid,"natom3", 3 * cryst%natom))
-   NCF_CHECK(nctk_get_dim(ncid,"nqibz", new%nqibz))
-   NCF_CHECK(nctk_get_dim(ncid,"nqbz", new%nqbz))
+ !TODO?
+ !NCF_CHECK(cryst%ncread(ncid))
+ !TODO?
+ !NCF_CHECK(ebands_ncread(ebands, ncid))
 
-   NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
-   NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
+ ! Read sigma_eph dimensions.
+ NCF_CHECK(nctk_get_dim(ncid,"nkcalc",new%nkcalc))
+ NCF_CHECK(nctk_get_dim(ncid,"max_nbcalc", new%max_nbcalc))
+ NCF_CHECK(nctk_get_dim(ncid,"nsppol", new%nsppol))
+ NCF_CHECK(nctk_get_dim(ncid,"ntemp", new%ntemp))
+ !NCF_CHECK(nctk_get_dim(ncid,"natom3", natom3))
+ NCF_CHECK(nctk_get_dim(ncid,"nqibz", new%nqibz))
+ NCF_CHECK(nctk_get_dim(ncid,"nqbz", new%nqbz))
 
-   ! ======================================================
-   ! Raed data that does not depend on the (kpt, spin) loop.
-   ! ======================================================
-   NCF_CHECK(nctk_set_datamode(ncid))
-   ii = 0; if (new%imag_only) ii = 1
-   NCF_CHECK(nf90_get_var(ncid, vid("symsigma"), new%symsigma))
-   NCF_CHECK(nf90_get_var(ncid, vid("nbsum"), new%nbsum))
-   NCF_CHECK(nf90_get_var(ncid, vid("bsum_start"), new%bsum_start))
-   NCF_CHECK(nf90_get_var(ncid, vid("bsum_stop"), new%bsum_stop))
-   NCF_CHECK(nf90_get_var(ncid, vid("qint_method"), new%qint_method))
-   NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
-   NCF_CHECK(nf90_get_var(ncid, vid("imag_only"), ii))
-   new%imag_only = .false.
-   if (ii == 1) new%imag_only = .true.
+ !NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
+ !NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
 
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_task"),eph_task))
-   NCF_CHECK(nf90_get_var(ncid, vid("symdynmat"),symdynmat))
-   NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"),ph_intmeth))
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"),eph_intmeth))
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"),eph_transport))
+ ! ======================================================
+ ! Read data that does not depend on the (kpt, spin) loop.
+ ! ======================================================
+ NCF_CHECK(nf90_get_var(ncid, vid("symsigma"), new%symsigma))
+ NCF_CHECK(nf90_get_var(ncid, vid("nbsum"), new%nbsum))
+ NCF_CHECK(nf90_get_var(ncid, vid("qint_method"), new%qint_method))
+ NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
+ NCF_CHECK(nf90_get_var(ncid, vid("imag_only"), imag_only))
+ new%imag_only = (imag_only == 1)
 
-   ABI_CHECK(eph_task == dtset%eph_task,'eph_task != input file')
-   ABI_CHECK(symdynmat == symdynmat,'symdynmat != input file')
-   ABI_CHECK(ph_intmeth == dtset%ph_intmeth,'ph_intmeth != input file')
-   ABI_CHECK(eph_intmeth == dtset%eph_intmeth,'eph_intmeth != input file')
-   ABI_CHECK(eph_transport == dtset%eph_transport,'eph_transport != input file')
+ ABI_MALLOC(new%kcalc, (3, new%nkcalc))
+ ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
+ ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
+ ABI_MALLOC(new%mu_e, (new%ntemp))
+ ABI_MALLOC(new%kTmesh, (new%ntemp))
+ ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
 
-   NCF_CHECK(nf90_get_var(ncid, vid("eta"),eta))
-   NCF_CHECK(nf90_get_var(ncid, vid("wr_step"),wr_step))
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_fsewin"),ph_fsewin))
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_fsmear"),eph_fsmear))
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_extrael"),eph_extrael))
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_fermie"),eph_fermie))
-   NCF_CHECK(nf90_get_var(ncid, vid("ph_wstep"),ph_wstep))
-   NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"),ph_smear))
+ NCF_CHECK(nf90_get_var(ncid, vid("ngqpt"), new%ngqpt))
+ NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), new%bstart_ks))
+ NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
+ NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), new%kcalc))
+ NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), new%kcalc2ibz))
+ NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), new%kTmesh))
+ NCF_CHECK(nf90_get_var(ncid, vid("wr_step"), new%wr_step))
+ NCF_CHECK(nf90_get_var(ncid, vid("mu_e"), new%mu_e))
+ NCF_CHECK(nf90_get_var(ncid, vid("eta"), eta))
+ new%ieta = j_dpc * eta
 
-   !read and check consistency
-   NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
-   NCF_CHECK(nf90_get_var(ncid, vid("ddb_ngqpt"), ddb_ngqpt))
-   NCF_CHECK(nf90_get_var(ncid, vid("ph_ngqpt"), ph_ngqpt))
-   NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
-   NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
-   ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),'eph_ngqpt_fine != input file')
-   ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     'ddb_ngqpt != input file')
-   ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      'ph_ngqpt != input file')
-   ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   'sigma_ngkpt != input file')
-   ABI_CHECK(all(dtset%frohl_params   == frohl_params),  'frohl_params != input file')
+ ! ============================================================
+ ! Read and check consistency against dtset
+ ! ============================================================
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_fsewin"),eph_fsewin))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_fsmear"),eph_fsmear))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_extrael"),eph_extrael))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_fermie"),eph_fermie))
+ NCF_CHECK(nf90_get_var(ncid, vid("ph_wstep"),ph_wstep))
+ NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"),ph_smear))
+ ABI_CHECK(eph_fsewin  == dtset%eph_fsewin,  "netcdf eph_fsewin != input file")
+ ABI_CHECK(eph_fsmear  == dtset%eph_fsmear,  "netcdf eph_fsmear != input file")
+ ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
+ ABI_CHECK(eph_fermie  == dtset%eph_fermie,  "netcdf eph_feremie != input file")
+ ABI_CHECK(ph_wstep    == dtset%ph_wstep,    "netcdf ph_wstep != input file")
+ ABI_CHECK(ph_smear    == dtset%ph_smear,    "netcdf ph_smear != input file")
 
-   NCF_CHECK(nf90_get_var(ncid, vid("ngqpt"), new%ngqpt))
-   NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), new%bstart_ks))
-   NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
-   NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), new%kcalc))
-   NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), new%kcalc2ibz))
-   NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), new%kTmesh))
-   NCF_CHECK(nf90_get_var(ncid, vid("mu_e"), new%mu_e))
-   NCF_CHECK(nf90_get_var(ncid, vid("eta"), ieta))
-   new%ieta = j_dpc * ieta
-   if (new%gfw_nomega > 0) then
-     NCF_CHECK(nf90_get_var(ncid, vid("gfw_mesh"), new%gfw_mesh))
-   end if
-   NCF_CHECK(nf90_close(ncid))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_task"),eph_task)) 
+ NCF_CHECK(nf90_get_var(ncid, vid("symdynmat"),symdynmat))
+ NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"),ph_intmeth))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"),eph_intmeth))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"),eph_transport))
+ ABI_CHECK(eph_task      == dtset%eph_task,     "netcdf eph_task != input file")
+ ABI_CHECK(symdynmat     == dtset%symdynmat,    "netcdf symdynmat != input file")
+ ABI_CHECK(ph_intmeth    == dtset%ph_intmeth,   "netcdf ph_intmeth != input file")
+ ABI_CHECK(eph_intmeth   == dtset%eph_intmeth,  "netcdf eph_intmeth != input file")
+ ABI_CHECK(eph_transport == dtset%eph_transport,"netcdf eph_transport != input file")
 
- end if ! master
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
+ NCF_CHECK(nf90_get_var(ncid, vid("ddb_ngqpt"), ddb_ngqpt))
+ NCF_CHECK(nf90_get_var(ncid, vid("ph_ngqpt"), ph_ngqpt))
+ NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
+ NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
+ ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),"netcdf eph_ngqpt_fine != input file")
+ ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     "netcdf ddb_ngqpt != input file")
+ ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      "netcdf ph_ngqpt != input file")
+ ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
+ ABI_CHECK(all(dtset%frohl_params   == frohl_params),  "netcdf frohl_params != input file")
+ 
+ NCF_CHECK(nf90_close(ncid))
 
- ! Now reopen the file (note xmpi_comm_self --> only master writes)
- call xmpi_barrier(comm)
- NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
- NCF_CHECK(nctk_set_datamode(new%ncid))
 #endif
 
 contains
@@ -2644,6 +2630,60 @@ end function vid
 
 end function sigmaph_from_file
 !!***
+
+subroutine sigmaph_comp(self,comp)
+
+!!****f* m_sigmaph/sigmaph_comp
+!! NAME
+!!  sigmaph_free
+!!
+!! FUNCTION
+!!  Compare the headers of two sigmaph_t instances
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      m_sigmaph
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+!Arguments ------------------------------------
+ type(sigmaph_t),intent(in) :: self, comp
+
+ ABI_CHECK(self%nkcalc == comp%nkcalc,"Difference found in nkcalc.")
+ ABI_CHECK(self%max_nbcalc == comp%max_nbcalc,"Difference fount in max_nbcalc.")
+ ABI_CHECK(self%nsppol == self%nsppol,"Difference found in nsppol.")
+ ABI_CHECK(self%ntemp == self%ntemp,"Difference found in ntemp.")
+ !ABI_CHECK(natom3 == natom3, "")
+ ABI_CHECK(self%nqibz == self%nqibz,"Difference found in nqibz.")
+ ABI_CHECK(self%nqbz == self%nqbz,"Difference found in nqbz.")
+
+ ! ======================================================
+ ! Read data that does not depend on the (kpt, spin) loop.
+ ! ======================================================
+ ABI_CHECK(self%symsigma == comp%symsigma,"Different value found for symsigma.")
+ ABI_CHECK(self%nbsum == comp%nbsum,"Different value found for nbsum.")
+ ABI_CHECK(self%bsum_start == comp%bsum_start,"Different value found for bsum_start.")
+ ABI_CHECK(self%bsum_stop == comp%bsum_stop,"Different value found for bsum_stop.")
+ ABI_CHECK(self%qint_method == comp%qint_method,"Different value found for qint_method.")
+ ABI_CHECK(self%frohl_model == comp%frohl_model,"Different value found for frohl_model.")
+ !ABI_CHECK(self%imag_only == comp%imag_only,"Difference found in imag_only")
+ ABI_CHECK(self%wr_step==comp%wr_step,"Different value found for wr_step")
+ ABI_CHECK(self%ieta == comp%ieta, "Different value found for zcut.")
+
+ ABI_CHECK(all(self%ngqpt==comp%ngqpt),"Different value found for ngqpt")
+ ABI_CHECK(all(self%bstart_ks==comp%bstart_ks),"Different value found for bstart_ks")
+ ABI_CHECK(all(self%nbcalc_ks==comp%nbcalc_ks),"Different value found for bstop_ks")
+ ABI_CHECK(all(self%kcalc==comp%kcalc),"Different value found for kcalc")
+ ABI_CHECK(all(self%kcalc2ibz==comp%kcalc2ibz),"Different value found for kcalc2ibz")
+ ABI_CHECK(all(self%kTmesh==comp%kTmesh),"Different value found for kTmesh")
+ ABI_CHECK(all(self%mu_e==comp%mu_e),"Different value found for mu_e")
+
+end subroutine sigmaph_comp
+!!***
+
 
 !!****f* m_sigmaph/sigmaph_free
 !! NAME
