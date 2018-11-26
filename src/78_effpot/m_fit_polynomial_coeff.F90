@@ -2313,9 +2313,12 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  name_file=''
  if(present(filename))name_file = filename
  
- if(present(print_file) .and. present(filename))then
+ need_print=.FALSE. 
+ if(present(print_file))need_print=print_file
+
+
+ if(need_print .and. present(filename))then
 !   call abihist_init(hist_out,natom,ntime,.false.,.false.)
-   need_print=print_file
    file_energy=trim(name_file)//'_energy.dat'
    unit_energy = get_unit()
    if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
@@ -2328,9 +2331,9 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 &     status="unknown",action="write") /= 0) then
      MSG_ERROR(msg)
    end if
- else if(present(print_file) .and. .not. present(filename))then 
-   write(msg,'(a)')' You asked for printing of the MSD-values',ch10,& 
-&        ' without specifying a filename or the inverse'
+ else if(need_print .and. .not. present(filename))then 
+   write(msg,'(3a)')' You asked for printing of the MSD-values',ch10,& 
+&        ' without specifying a filename'
    MSG_ERROR(msg) 
  end if
  
@@ -2341,7 +2344,6 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  mse  = zero
  msef = zero
  mses = zero
-
  do ii=1,ntime ! Loop over configurations
    xred(:,:)   = hist%xred(:,:,ii)
    rprimd(:,:) = hist%rprimd(:,:,ii)
@@ -2511,7 +2513,6 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   INQUIRE(FILE='TES_fit_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh)
   if(file_opened) close(unit_anh)
 
-  write(*,*) "I was here everything is nice so far"
 
 end subroutine fit_polynomial_coeff_testEffPot
 

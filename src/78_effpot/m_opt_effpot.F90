@@ -73,7 +73,7 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm) 
+subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh) 
 
  implicit none  
 
@@ -84,11 +84,12 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  type(abihist),intent(inout) :: hist
 !arrays 
  integer,intent(in) :: opt_coeff(opt_ncoeff)
-!Logicals 
+!Logicals
+ logical,optional,intent(in) :: print_anh 
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: ii, info,natom_sc,ntime
+ integer :: ii, info,natom_sc,ntime,unit_anh1,unit_anh2
  real(dp) :: factor,mse,msef,mses
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
@@ -99,18 +100,20 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  real(dp) :: coeff_values(opt_ncoeff), coeff_init_values(opt_ncoeff)
  real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  real(dp), allocatable :: strten_coeffs(:,:,:)
-!Logicals 
+!Logicals
+ logical :: need_print_anh,file_opened 
 !Strings 
  character(len=1000) :: message
  character(len=1000) :: frmt
- character(len=fnlen) :: fn_bf='before', fn_af='after'
+ character(len=fnlen) :: fn_bf='before_opt_diff', fn_af='after_opt_diff'
 ! *************************************************************************
 
  !Setting/Initializing Variables
   ntime = hist%mxhist
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
-
+  if(present(print_anh)) need_print_anh = print_anh
+ 
  !if the number of atoms in reference supercell into effpot is not correct,
  !wrt to the number of atom in the hist, we set map the hist and set the good supercell
   if (natom_sc /= eff_pot%supercell%natom) then
@@ -134,13 +137,16 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  !Compute the variation of the displacement due to strain of each configuration.
  !Compute fixed forces and stresse and get the standard deviation.
  !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
-  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=.TRUE.)
+  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=.FALSE.)
  
- 
+
+  if(need_print_anh) call effective_potential_writeAnhHead(eff_pot%anharmonics_terms%ncoeff,&
+&                            fn_bf,eff_pot%anharmonics_terms)                  
+
  !Before deleting coefficients calculate MSD of initial model  
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                     compute_anharmonic=.TRUE.)
+ &                                     compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=fn_bf)
 
 
  !  Print the standard devition of initial model 
@@ -242,11 +248,10 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
   ! Transfer new fitted values to coefficients and write them into effective potential
   ! Deallcoate temporary coefficients my_coeffs
     do ii=1,opt_ncoeff 
-       my_coeffs(ii)%coefficient = coeff_values(ii)
-       eff_pot%anharmonics_terms%coefficients(opt_coeff(ii)) = my_coeffs(ii)
+       eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient = coeff_values(ii)
        call polynomial_coeff_free(my_coeffs(ii))
     end do
-    !Recalculate MSD of Final Model TODO apply printing of fit_diff files 
+    !Recalculate MSD of Final Model 
     
     !Conpute the strain of each configuration.
     !Compute the displacmeent of each configuration.
@@ -255,11 +260,14 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
     !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
      call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=.TRUE.)
    
-    
+  
+     if(need_print_anh) call effective_potential_writeAnhHead(eff_pot%anharmonics_terms%ncoeff,&
+&                            fn_af,eff_pot%anharmonics_terms)                  
+
     !After optimization of coefficients opt_coeff recalculate MSD
      call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
      &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
-     &                                     compute_anharmonic=.TRUE.)
+     &                                     compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=fn_af)
      
      
      !  Print the standard deviation after optimization
@@ -284,8 +292,13 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  ABI_DEALLOCATE(energy_coeffs) 
  ABI_DEALLOCATE(fcart_coeffs)
  ABI_DEALLOCATE(strten_coeffs)
-
-
+  
+ if(need_print_anh)then 
+  INQUIRE(FILE='before_opt_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh1)
+  if(file_opened) close(unit_anh1)
+  INQUIRE(FILE='after_opt_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh2)
+  if(file_opened) close(unit_anh2)
+ end if 
  ! Deallocate and delete the fit-date 
  call fit_data_free(fit_data)
 end subroutine opt_effpot

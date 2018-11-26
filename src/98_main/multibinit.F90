@@ -392,7 +392,17 @@ program multibinit
 !****************************************************************************************
  
  if(inp%opt_effpot == 1)then
-    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,comm)
+    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,&
+&    'Optimizing Effective Potential',ch10            
+
+    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,message,'COLL')
+
+     need_analyze_anh_pot = .FALSE.
+     if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE. 
+
+    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,comm,& 
+&        print_anh=need_analyze_anh_pot)
  end if 
 
  
@@ -403,7 +413,8 @@ program multibinit
    if(inp%test_effpot == 1)then 
      if(iam_master) then
 !    Read the test-set .nc file
-       write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+       write(message,'(a,(80a),9a)')ch10,('=',ii=1,80),ch10,ch10,&
+&       'TEST - SET Option',ch10,&               
 &       '-Reading the test-set file :',ch10,&
 &       '-',trim(filnam(6)),ch10
 
