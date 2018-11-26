@@ -3029,7 +3029,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
    else
      !call wrtout(std_out,"FFTW3 MPIFOURDP")
      call fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
-&     fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
+      fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    end if
    ! Accumulate timing and return
    call timab(260+tim_fourdp,2,tsec); return

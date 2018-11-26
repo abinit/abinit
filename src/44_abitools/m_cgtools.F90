@@ -914,7 +914,7 @@ end subroutine cg_zgemv
 !!
 !! SOURCE
 
-subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
+subroutine cg_zgemm(transa, transb, npws, ncola, ncolb, cg_a, cg_b, cg_c, alpha, beta)
 
 !Arguments ------------------------------------
 !scalars

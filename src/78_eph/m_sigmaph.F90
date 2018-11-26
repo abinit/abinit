@@ -1140,8 +1140,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              gkq_atm(:,ib_k,ipc) = [dotr, doti]
            end do
+           !call cg_zgemv("C", npw_kq*nspinor, nbcalc_ks, h1kets_kq(:,:,:,imyp), bra_kq, gkq_atm(:,:,ipc))
          end do
-         !call cg_zgemv("C", npw_kq*nspinor, nbcalc_ks, h1kets_kq(:,:,:,imyp), bra_kq, gkq_atm(:,:,ipc))
+         !ii = nbcalc_ks * my_npert
+         !call cg_zgemm("H", "N", npw_kq*nspinor, ii, ii, h1kets_kq, bra_kq, gkq_atm)
 
          ! Get gkk(kcalc, q, nu)
          if (sigma%nprocs_pert > 1) call xmpi_sum(gkq_atm, sigma%comm_pert, ierr)
@@ -1536,10 +1538,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
 
-   call cwtime_report(" Sigma_nk", cpu_ks, wall_ks, gflops_ks)
+   call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
 
- call cwtime_report(" Sigma_eph", cpu_all, wall_all, gflops_all, end_str=ch10)
+ call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -2838,7 +2840,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, end_str=ch10)
+ call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops)
 
  ! Only master writes
  if (my_rank /= master) return
@@ -3153,7 +3155,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  end if
 #endif
 
- call cwtime_report(" Sigma_nk netcdf output", cpu, wall, gflops, end_str=ch10)
+ call cwtime_report(" Sigma_nk netcdf output", cpu, wall, gflops)
 
 end subroutine sigmaph_gather_and_write
 !!***
