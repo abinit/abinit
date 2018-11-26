@@ -1192,9 +1192,9 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
          !Calculate and write the q-gradient of the polarization response
          tmpre=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
          tmpim=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
-         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim
-         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=tmpre
-         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim,tmpre
+         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim/ucvol
+         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=tmpre/ucvol
+         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,tmpre/ucvol
  
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
@@ -1269,9 +1269,9 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
          !Calculate and write the q-gradient of the polarization response
          tmpim=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
-         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim
+         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim/ucvol
          dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
-         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim,tmpre
+         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,tmpre/ucvol
 
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
@@ -1349,8 +1349,10 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
 !Transformation to cartesian coordinates of the quadrupole tensor
  ABI_ALLOCATE(qdrptens_cart,(2,matom,3,3,3))
+ ABI_ALLOCATE(dqpol_cart,(2,matom,3,3,3))
  ABI_ALLOCATE(cartflg,(matom,3,3,3))
  qdrptens_cart(:,:,:,:,:)=qdrptens_red(:,:,:,:,:)
+ dqpol_cart(:,:,:,:,:)=dqpol_red(:,:,:,:,:)
  cartflg=0
 
  ABI_DEALLOCATE(qdrptens_red)
@@ -1361,6 +1363,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
    do iq2dir=1,3
      do ii=1,2
        do iatom=1,matom
+
          do iatdir=1,3
            vec1(iatdir)=qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)
            flg1(iatdir)=qdrflg(iatom,iatdir,iq2dir,iq1dir)
@@ -1370,6 +1373,16 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
            qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iatdir)
            cartflg(iatom,iatdir,iq2dir,iq1dir)=flg2(iatdir)
          end do
+
+         do iatdir=1,3
+           vec1(iatdir)=dqpol_cart(ii,iatom,iatdir,iq2dir,iq1dir)
+           flg1(iatdir)=qdrflg(iatom,iatdir,iq2dir,iq1dir)
+         end do 
+         call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+         do iatdir=1,3
+           dqpol_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iatdir)
+         end do
+
        end do
      end do
    end do
@@ -1389,6 +1402,16 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
            qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iq2dir)
            cartflg(iatom,iatdir,iq2dir,iq1dir)=flg2(iq2dir)
          end do
+
+         do iq2dir=1,3
+           vec1(iq2dir)=dqpol_cart(ii,iatom,iatdir,iq2dir,iq1dir)
+           flg1(iq2dir)=qdrflg(iatom,iatdir,iq2dir,iq1dir)
+         end do 
+         call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+         do iq2dir=1,3
+           dqpol_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iq2dir)
+         end do
+
        end do
      end do
    end do
@@ -1408,6 +1431,16 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
            qdrptens_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iq1dir)
            cartflg(iatom,iatdir,iq2dir,iq1dir)=flg2(iq1dir)
          end do
+
+         do iq1dir=1,3
+           vec1(iq1dir)=dqpol_cart(ii,iatom,iatdir,iq2dir,iq1dir)
+           flg1(iq1dir)=qdrflg(iatom,iatdir,iq2dir,iq1dir)
+         end do
+         call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+         do iq1dir=1,3
+           dqpol_cart(ii,iatom,iatdir,iq2dir,iq1dir)=vec2(iq1dir)
+         end do
+
        end do
      end do
    end do
@@ -1415,9 +1448,6 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
 
 !Write the Quadrupole tensor in cartesian coordinates
-
-! open(unit=78,file='Quadrupole_tensor.cart',status='unknown',form='formatted',action='write')
-
  write(ab_out,*)' '
  write(ab_out,*)' Quadrupole tensor, in cartesian coordinates,'
  write(ab_out,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
@@ -1427,9 +1457,6 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
        do iatom=1,matom
         
          if (cartflg(iatom,iatdir,iq2dir,iq1dir)==1) then
-
-!           write(78,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                   &
-!         & qdrptens_cart(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_cart(im,iatom,iatdir,iq2dir,iq1dir)
 
            write(ab_out,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
          & qdrptens_cart(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_cart(im,iatom,iatdir,iq2dir,iq1dir)
@@ -1441,7 +1468,28 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
    end do
    write(ab_out,*)' '
  end do
-! close(78)
+
+!Write the q-gradient of the Polarization response
+ write(ab_out,*)' q-gradient of the polarization response '
+ write(ab_out,*)' to an atomic displacementatom, in cartesian coordinates,'
+ write(ab_out,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
+ do iq1dir=1,3
+   do iq2dir=1,3
+     do iatdir=1,3
+       do iatom=1,matom
+        
+         if (cartflg(iatom,iatdir,iq2dir,iq1dir)==1) then
+
+           write(ab_out,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
+         & dqpol_cart(re,iatom,iatdir,iq2dir,iq1dir),dqpol_cart(im,iatom,iatdir,iq2dir,iq1dir)
+
+         end if
+
+       end do
+     end do
+   end do
+   write(ab_out,*)' '
+ end do
 
 !Write the electronic (frozen-ion) contribution to the piezoelectric tensor
 !(R.M. Martin, PRB 5, 1607 (1972))
@@ -1483,6 +1531,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
  write(ab_out,'(80a)')('=',ii=1,80)
 
  ABI_DEALLOCATE(qdrptens_cart)
+ ABI_DEALLOCATE(dqpol_cart)
  ABI_DEALLOCATE(cartflg)
 
  DBG_EXIT("COLL")
