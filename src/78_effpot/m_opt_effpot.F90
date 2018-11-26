@@ -93,9 +93,9 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3)
- integer :: test(2)
+ integer :: coeff_inds(opt_ncoeff)
  type(fit_data_type) :: fit_data
- type(polynomial_coeff_type),allocatable :: my_coeffs(:)
+ type(polynomial_coeff_type) :: my_coeffs(opt_ncoeff)
  real(dp) :: coeff_values(opt_ncoeff)
  real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  real(dp), allocatable :: strten_coeffs(:,:,:)
@@ -109,7 +109,6 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
   ntime = hist%mxhist
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
-  ABI_ALLOCATE(my_coeffs,(opt_ncoeff))
 
  !if the number of atoms in reference supercell into effpot is not correct,
  !wrt to the number of atom in the hist, we set map the hist and set the good supercell
@@ -143,7 +142,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  &                                     compute_anharmonic=.TRUE.)
 
 
- !  Print the standard deviation after the fit
+ !  Print the standard devition of initial model 
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
  &                    ' with respect to the training-set before optimization (meV/atm):',&
@@ -160,9 +159,15 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
+
+ ! Write terms to my_coeffs(ii) and zero them in eff_pot      
  do ii=1,opt_ncoeff
-   my_coeffs(ii) = eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))
-   call polynomial_coeff_free(eff_pot%anharmonics_terms%coefficients(opt_coeff(ii)))
+   coeff_inds(ii) = ii
+   call polynomial_coeff_init(coeff_values(ii),eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%nterm,&
+ &                            my_coeffs(ii), eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%terms, & 
+ &                            check=.TRUE.) 
+
+   eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient = zero    
  end do  
 
  !Before the fit, compute constants with fit_data_compute.
@@ -198,7 +203,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 
 
       
-   test = (1,2)
+   
    ABI_ALLOCATE(energy_coeffs,(opt_ncoeff,ntime))
    ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,opt_ncoeff,ntime))
    ABI_ALLOCATE(strten_coeffs,(6,ntime,opt_ncoeff))
@@ -206,7 +211,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 &                                 fit_data%training_set%displacement,&
 &                                 energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
 &                                 opt_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
-&                                 strten_coeffs,fit_data%training_set%ucvol,test,opt_ncoeff)
+&                                 strten_coeffs,fit_data%training_set%ucvol,coeff_inds,opt_ncoeff)
 
 
 !  call the fit process routine
@@ -214,7 +219,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 !  by C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
    call fit_polynomial_coeff_solve(coeff_values(1:opt_ncoeff),fcart_coeffs,fit_data%fcart_diff,&
 &                                  energy_coeffs,fit_data%energy_diff,info,&
-&                                  test,natom_sc,opt_ncoeff,opt_ncoeff,ntime,&
+&                                  coeff_inds,natom_sc,opt_ncoeff,opt_ncoeff,ntime,&
 &                                  strten_coeffs,fit_data%strten_diff,&
 &                                  fit_data%training_set%sqomega)
 
