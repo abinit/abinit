@@ -187,14 +187,15 @@ pure function sec2str(time_s) result(str)
  minutes = MOD(time_s,3600._dp) / 60
  seconds = MOD(time_s,60._dp)
 
- if (days>0) then
+ if (days > 0) then
    write(str,'(i0,3(a,i0.2))')days,"-",hours,":",minutes,":",seconds
- else if (hours>0) then
+ else if (hours > 0) then
    write(str,'(i0.2,2(a,i0.2))')hours,":",minutes,":",seconds
- else if (minutes>0) then
+ else if (minutes > 0) then
    write(str,'(i0.2,a,i0.2)')minutes,":",seconds
  else
-   write(str,'(i0.2,a)')seconds," [s]"
+   !write(str,'(i0.2,a)')seconds," [s]"
+   write(str,'(f5.2,a)')time_s," [s]"
  end if
 
 end function sec2str
@@ -560,6 +561,9 @@ end subroutine cwtime
 !! FUNCTION
 !! Stop timers, write message, reinit counters.
 !!
+!! INPUT
+!!  [pre_str], [end_str]: String to print before and after the timing section
+!!
 !! SIDE EFFECTS
 !!  cpu= cpu time in seconds
 !!  wall= wall clock time in seconds
@@ -571,18 +575,21 @@ end subroutine cwtime
 !!
 !! SOURCE
 
-subroutine cwtime_report(tag, cpu, wall, gflops)
+subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str)
 
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(inout) :: cpu,wall
  real(dp),intent(out) :: gflops
  character(len=*),intent(in) :: tag
+ character(len=*),optional,intent(in) :: pre_str, end_str
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "stop")
+ if (present(pre_str)) call wrtout(std_out, pre_str)
  call wrtout(std_out, sjoin(tag, "completed. cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+ if (present(end_str)) call wrtout(std_out, end_str)
  call cwtime(cpu, wall, gflops, "start")
 
 end subroutine cwtime_report

@@ -491,7 +491,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band_ks,num_smallw,ibsum,ii,jj,im,in
+ integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj !,im,in
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine,iq_ibz_packed
@@ -655,9 +655,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
 
  call xmpi_sum(vred_calc, comm, ierr)
- call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
- call wrtout(std_out, sjoin(" Velocities completed. cpu-time:", sec2str(cpu_ks), ",wall-time:", sec2str(wall_ks)), &
-   do_flush=.True.)
+ call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
  ! Write results to disk.
 #ifdef HAVE_NETCDF
@@ -752,6 +750,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
    msg = sjoin("[", itoa(ikcalc), "/", itoa(sigma%nqibz_k), "]")
    call wrtout(std_out, sjoin("Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
+   spin = 1
+   write(msg, "(3(a, i0))")"For ", sigma%nbcalc_ks(ikcalc, spin), " bands between: ", sigma%bstart_ks(ikcalc, spin), &
+     " and: ", sigma%bstart_ks(ikcalc, spin) + sigma%nbcalc_ks(ikcalc, spin) - 1
+   call wrtout(std_out, msg)
    call wrtout(std_out, sjoin("Number of q-points in the IBZ(k):", itoa(sigma%nqibz_k)))
 
    ! Symmetry indices for kk.
@@ -796,8 +798,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(ylm_kq,(mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
 
-   call cwtime(cpu_setk, wall_setk, gflops_setk, "stop")
-   call wrtout(std_out, sjoin("Setup kcalc completed. cpu-time:", sec2str(cpu_setk), ",wall-time:", sec2str(wall_setk)))
+   call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
    do spin=1,nsppol
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
@@ -1139,13 +1140,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              gkq_atm(:,ib_k,ipc) = [dotr, doti]
            end do
-
-           !call cg_zgemv("N",npw_kq*nspinor,,nbcalc_ks,cg(1,icg+1),scprod,direc,alpha=-cg_cone,beta=cg_cone)
          end do
+         !call cg_zgemv("C", npw_kq*nspinor, nbcalc_ks, h1kets_kq(:,:,:,imyp), bra_kq, gkq_atm(:,:,ipc))
 
          ! Get gkk(kcalc, q, nu)
          if (sigma%nprocs_pert > 1) call xmpi_sum(gkq_atm, sigma%comm_pert, ierr)
-         call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
+         call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
          ! Save data for Debye-Waller computation (performed outside the q-loop)
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -1355,7 +1355,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if
 
      ! Print cache stats. The first k-point is expected to have lots of misses
-     ! especially if it's the Gamma point and symsigma = 1.
      if (dvdb%qcache_size > 0 .and. dvdb%qcache_stats(1) /= 0) then
        write(std_out, "(a)")"Qcache stats"
        write(std_out, "(a,i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
@@ -1494,14 +1493,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(tpp_red)
        ABI_FREE(gkq0_atm)
 
-       call cwtime(cpu_dw, wall_dw, gflops_dw, "stop")
-       call wrtout(std_out, sjoin("DW completed. cpu-time:", sec2str(cpu_dw), ",wall-time:", &
-          sec2str(wall_dw)), do_flush=.True.)
+       call cwtime_report(" DW completed", cpu_dw, wall_dw, gflops_dw)
      end if ! not %imag_only
 
      if (sigma%gfw_nomega /= 0) then
        ! Compute Eliashberg function (useful but cost is not negligible).
-       ! May need to deactivate this part for HTC.
        call wrtout(std_out, sjoin("Computing Eliashberg function with nomega:", itoa(sigma%gfw_nomega), &
            ". Use prteliash = 0 to disable this part"))
        call cwtime(cpu, wall, gflops, "start")
@@ -1510,7 +1506,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(dt_weights, (sigma%gfw_nomega, 2))
        sigma%gfw_vals = zero
        do iq_ibz=1,sigma%nqibz_k
-         if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
+         if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
          call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart) ! TODO: Use phfreqs in ephgw
          do nu=1,natom3
            dargs = sigma%gfw_mesh - phfrq(nu)
@@ -1526,10 +1522,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(dargs)
        ABI_FREE(dt_weights)
        call xmpi_sum(sigma%gfw_vals, comm, ierr)
-
-       call cwtime(cpu, wall, gflops, "stop")
-       call wrtout(std_out, sjoin("Eliashberg function completed. cpu-time:", sec2str(cpu), &
-           ",wall time:", sec2str(wall)), do_flush=.True.)
+       call cwtime_report(" Eliashberg function", cpu, wall, gflops)
      end if
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
@@ -1543,14 +1536,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
 
-   call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
-   call wrtout(std_out, sjoin("Sigma_nk completed. cpu-time:", sec2str(cpu_ks), &
-           ",wall-time:", sec2str(wall_ks)), do_flush=.True.)
+   call cwtime_report(" Sigma_nk", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
 
- call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, "Sigma_eph completed")
- call wrtout(std_out, sjoin("Total cpu-time:", sec2str(cpu_all), ", Total wall-time:", sec2str(wall_all), ch10))
+ call cwtime_report(" Sigma_eph", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -1594,8 +1583,6 @@ end subroutine sigmaph
 !!
 !! OUTPUT
 !!  gkq_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
-!!  num_smallw=Number of negative/too small frequencies that have been ignored
-!!    by setting the corresponding gkq_nu to zero.
 !!
 !! PARENTS
 !!      m_sigmaph
@@ -1604,12 +1591,11 @@ end subroutine sigmaph
 !!
 !! SOURCE
 
-subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
+subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nb1, nb2, nk, natom
- integer,intent(out) :: num_smallw
 !arrays
  real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
  real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
@@ -1621,14 +1607,12 @@ subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu
 
 ! *************************************************************************
 
- gkq_nu = zero; num_smallw = 0
+ gkq_nu = zero
 
  ! Loop over phonon branches.
  do nu=1,3*natom
    ! Ignore negative or too small frequencies
-   if (phfrq(nu) < EPH_WTOL) then
-     num_smallw = num_smallw + 1; cycle
-   end if
+   if (phfrq(nu) < EPH_WTOL) cycle
 
    ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
    do ipc=1,3*natom
@@ -2848,14 +2832,13 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
+ call wrtout(std_out, "Gathering results. Waiting for other processes...")
  call cwtime(cpu, wall, gflops, "start")
  call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- call cwtime(cpu, wall, gflops, "stop", comm=comm)
- call wrtout(std_out, sjoin("Sigma_nk gather completed. Average cpu-time:", sec2str(cpu), &
-     ", Total Average wall-time:", sec2str(wall), ch10), do_flush=.True.)
+ call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, end_str=ch10)
 
  ! Only master writes
  if (my_rank /= master) return
@@ -3089,7 +3072,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    end if
  end if
 
- call cwtime(cpu, wall, gflops, "start")
 #ifdef HAVE_NETCDF
 
  ! Write self-energy matrix elements for this (kpt, spin)
@@ -3171,9 +3153,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  end if
 #endif
 
- call cwtime(cpu, wall, gflops, "stop")
- call wrtout(std_out, sjoin("Sigma_nk netcdf output completed. cpu-time:", sec2str(cpu), &
-     ", Total wall-time:", sec2str(wall), ch10), do_flush=.True.)
+ call cwtime_report(" Sigma_nk netcdf output", cpu, wall, gflops, end_str=ch10)
 
 end subroutine sigmaph_gather_and_write
 !!***
@@ -3703,8 +3683,7 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  call xmpi_sum(sigma%frohl_dvals_de0ks, comm, ierr)
  if (sigma%nwr > 0) call xmpi_sum(sigma%frohl_vals_wr, comm, ierr)
 
- call cwtime(cpu_fr, wall_fr, gflops_fr, "stop")
- call wrtout(std_out, sjoin("Frohlich self-energy completed: cpu-time:", sec2str(cpu_fr), ", wall-time:", sec2str(wall_fr)))
+ call cwtime_report(" Frohlich self-energy", cpu_fr, wall_fr, gflops_fr)
 
 end subroutine eval_sigfrohl
 !!***

@@ -382,7 +382,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 !scalars
  integer,parameter :: master=0,timrev2=2
  integer :: iv1,ii,ierr,unt,fform,nqpt,iq,iq_found,cplex,trev_q
- integer :: idir,ipert,my_rank
+ integer :: idir,ipert,my_rank, nprocs
  real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  type(hdr_type) :: hdr1,hdr_ref
@@ -392,7 +392,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 
 !************************************************************************
 
- my_rank = xmpi_comm_rank(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  new%path = path; new%comm = comm; new%iomode = IO_MODE_FORTRAN
 
  call wrtout(std_out, sjoin("- Analyzing DVDB file: ", path, "..."))
@@ -539,11 +539,13 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  call initmpi_seq(new%mpi_enreg)
 
  ! Precompute symq_table for all q-points in the DVDB.
- ABI_MALLOC(new%symq_table, (4, 2, new%cryst%nsym, new%nqpt))
+ ABI_ICALLOC(new%symq_table, (4, 2, new%cryst%nsym, new%nqpt))
  do iq=1,new%nqpt
+   if (mod(iq, nprocs) /= my_rank) cycle ! MPI parallelism
    call littlegroup_q(new%cryst%nsym, new%qpts(:,iq), new%symq_table(:,:,:,iq), &
      new%cryst%symrec, new%cryst%symafm, trev_q, prtvol=0)
  end do
+ call xmpi_sum(new%symq_table, comm, ierr)
 
  call cwtime_report("- dvdb_new", cpu, wall, gflops)
 
@@ -1480,9 +1482,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    end if
  end do
 
- call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, sjoin("IO + symmetrization completed. Total cpu-time:", sec2str(cpu_all), &
-     ", Total wall-time:", sec2str(wall_all), ch10), do_flush=.True.)
+ call cwtime_report("IO + symmetrization", cpu_all, wall_all, gflops_all)
 
 end subroutine dvdb_qcache_read
 !!***
@@ -4763,9 +4763,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
                              qshift_coarse, nfftf, ngfftf, &
                              dvdb%nrpt, dvdb%nspden, ipert, v1scf_rpt, comm)
 
-     call cwtime(cpu, wall, gflops, "stop")
-     call wrtout(std_out, sjoin("v1scf_rpt built. cpu-time:", sec2str(cpu), ",wall-time:", sec2str(wall)))
-     call cwtime(cpu, wall, gflops, "start")
+     call cwtime_report("v1scf_rpt built", cpu, wall, gflops)
 
      do iq=1,nqpt_interpolate
        if (pertsy(iq,idir,iat) == -1) cycle
@@ -4800,10 +4798,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
        end if
      end do
 
-     call cwtime(cpu, wall, gflops, "stop")
-     write(msg,'(i0,1x,2(a,f8.2))') &
-         nqpt_interpolate, "q-points interpolated and written to new DVDB file. cpu-time:", cpu, ", wall-time:", wall
-     call wrtout(std_out, msg, do_flush=.True.)
+     call cwtime_report(" q-points interpolated and written to new DVDB file.", cpu, wall, gflops)
 
      ABI_FREE(dvdb%rpt)
    end do
