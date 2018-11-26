@@ -96,7 +96,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
  integer :: coeff_inds(opt_ncoeff)
  type(fit_data_type) :: fit_data
  type(polynomial_coeff_type) :: my_coeffs(opt_ncoeff)
- real(dp) :: coeff_values(opt_ncoeff)
+ real(dp) :: coeff_values(opt_ncoeff), coeff_init_values(opt_ncoeff)
  real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  real(dp), allocatable :: strten_coeffs(:,:,:)
 !Logicals 
@@ -166,7 +166,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
    call polynomial_coeff_init(coeff_values(ii),eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%nterm,&
  &                            my_coeffs(ii), eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%terms, & 
  &                            check=.TRUE.) 
-
+   coeff_init_values(ii) = eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient
    eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient = zero    
  end do  
 
@@ -203,10 +203,11 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 
 
       
-   
+   ! Allocate necessary arrays for the fit-data 
    ABI_ALLOCATE(energy_coeffs,(opt_ncoeff,ntime))
    ABI_ALLOCATE(fcart_coeffs,(3,natom_sc,opt_ncoeff,ntime))
    ABI_ALLOCATE(strten_coeffs,(6,ntime,opt_ncoeff))
+   ! Calculate forces and stresses per coefficient, which are to be optimized 
    call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
 &                                 fit_data%training_set%displacement,&
 &                                 energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
@@ -223,60 +224,68 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm)
 &                                  strten_coeffs,fit_data%strten_diff,&
 &                                  fit_data%training_set%sqomega)
 
- 
-  write(*,*) "info", info
-  write(*,*) "coeff_values", coeff_values 
-  !Transfer new fitted values to coefficients 
-  do ii=1,opt_ncoeff 
-     my_coeffs(ii)%coefficient = coeff_values(ii)
-     eff_pot%anharmonics_terms%coefficients(opt_coeff(ii)) = my_coeffs(ii)
-  end do 
-
-  !Transfer coefficients back to effective potential 
- ! call effective_potential_setCoeffs(my_coeffs,eff_pot,opt_ncoeff)
+  if (info /= 0 .and. all(coeff_values < tol16))then
+   write(message, '(4a,I4,11a)' )ch10,&
+&        ' --- !WARNING',ch10,&
+&        '     The attempt to optimize the terms: ', opt_coeff ,ch10,&
+&        '     , returned a singular solution', ch10,&
+&        '     The terms could not be optimized ',ch10,&
+&        '     and the effective potential has not been altered.', ch10,&
+&        '     Action: Change training set or coefficients to be optimized.',ch10,&
+&        ' ---',ch10
+     call wrtout(std_out,message,"COLL")
+    do ii=1,opt_ncoeff 
+      eff_pot%anharmonics_terms%coefficients(opt_coeff(ii))%coefficient = coeff_init_values(ii)
+    end do 
+  else
+  ! Transfer new fitted values to coefficients and write them into effective potential
+  ! Deallcoate temporary coefficients my_coeffs
+    do ii=1,opt_ncoeff 
+       my_coeffs(ii)%coefficient = coeff_values(ii)
+       eff_pot%anharmonics_terms%coefficients(opt_coeff(ii)) = my_coeffs(ii)
+       call polynomial_coeff_free(my_coeffs(ii))
+    end do
+    !Recalculate MSD of Final Model TODO apply printing of fit_diff files 
+    
+    !Conpute the strain of each configuration.
+    !Compute the displacmeent of each configuration.
+    !Compute the variation of the displacement due to strain of each configuration.
+    !Compute fixed forces and stresse and get the standard deviation.
+    !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
+     call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=.TRUE.)
+   
+    
+    !After optimization of coefficients opt_coeff recalculate MSD
+     call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
+     &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
+     &                                     compute_anharmonic=.TRUE.)
+     
+     
+     !  Print the standard deviation after optimization
+          write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+     &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
+     &                    ' with respect to the training-set after optimizing selected terms (meV/atm):',&
+     &               ch10,'   Energy          : ',&
+     &               mse*Ha_EV*1000*factor ,ch10,&
+     &                    ' Goal function values of the effective.potential',ch10,& 
+     &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
+     &                    '   Forces+Stresses : ',&
+     &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+     &                    '   Forces          : ',&
+     &               msef*(HaBohr_meVAng)**2,ch10,&
+     &                    '   Stresses        : ',&
+     &               mses*(HaBohr_meVAng)**2,ch10
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
+  end if 
 
  !Deallocation of fitting variables
-  do ii=1,opt_ncoeff 
-     call polynomial_coeff_free(my_coeffs(ii))
-  end do 
  ABI_DEALLOCATE(energy_coeffs) 
  ABI_DEALLOCATE(fcart_coeffs)
  ABI_DEALLOCATE(strten_coeffs)
 
- !Recalculate MSD of Final Model TODO apply printing of fit_diff files 
 
- !Before the fit, compute constants with fit_data_compute.
- !Conpute the strain of each configuration.
- !Compute the displacmeent of each configuration.
- !Compute the variation of the displacement due to strain of each configuration.
- !Compute fixed forces and stresse and get the standard deviation.
- !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
-  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=.TRUE.)
-
-
- !After deleting coefficients calculate MSD  
-  call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
- &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                     compute_anharmonic=.TRUE.)
-
-
- !  Print the standard deviation after optimization
-      write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
- &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
- &                    ' with respect to the training-set after optimizing selected terms (meV/atm):',&
- &               ch10,'   Energy          : ',&
- &               mse*Ha_EV*1000*factor ,ch10,&
- &                    ' Goal function values of the effective.potential',ch10,& 
- &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
- &                    '   Forces+Stresses : ',&
- &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
- &                    '   Forces          : ',&
- &               msef*(HaBohr_meVAng)**2,ch10,&
- &                    '   Stresses        : ',&
- &               mses*(HaBohr_meVAng)**2,ch10
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
-
+ ! Deallocate and delete the fit-date 
  call fit_data_free(fit_data)
 end subroutine opt_effpot
 
