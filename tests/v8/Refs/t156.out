@@ -432,7 +432,7 @@ Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
+Number of frequency in generalized Eliashberg functions: 0
 Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -563,7 +563,7 @@ Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
+Number of frequency in generalized Eliashberg functions: 0
 Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -698,7 +698,7 @@ Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
+Number of frequency in generalized Eliashberg functions: 0
 Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -835,7 +835,7 @@ Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
+Number of frequency in generalized Eliashberg functions: 0
 Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -971,7 +971,7 @@ Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
+Number of frequency in generalized Eliashberg functions: 0
 Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
@@ -1100,7 +1100,7 @@ Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: Standard quadrature
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
-Number of frequency in generalized Eliashberg functions: 1749
+Number of frequency in generalized Eliashberg functions: 0
 Number of temperatures: 11 From: 0.000000E+00 to 3.000000E+02 [K]
 Ab-initio q-mesh from DDB file: [2,2,2]
 Q-mesh used for self-energy integration [ngqpt]: [2,2,2]

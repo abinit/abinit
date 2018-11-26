@@ -25,6 +25,7 @@ ph_qpath
 
 nfreqsp 100
 freqspmax 2.0 eV
+prteliash 1
 
 # Global
 optdriver  7
