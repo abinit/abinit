@@ -1287,7 +1287,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
      ABI_CHECK(ierr == 0, 'out of memory in work')
      work = v1scf
      call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-       db%nspden, db%nsppol, db%mpi_enreg, work, v1scf)
+       db%nspden, db%nsppol, db%mpi_enreg, work, v1scf, db%comm_pert)
      ABI_FREE(work)
 
    else
@@ -1308,14 +1308,14 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        call xmpi_sum(work, db%comm_pert, ierr)
 
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-         db%nspden, db%nsppol, db%mpi_enreg, work, work2)
+         db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
        ABI_FREE(work)
 
      else
        ! All 3 natom have been read in v1scf by dvdb_readsym_allv1
        write(std_out, *)"! All 3 natom have been read in v1scf by dvdb_readsym_allv1"
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
-         db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2)
+         db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
 
      ! Reallocate v1scf with my_npert and extract data from work2.
@@ -1827,6 +1827,7 @@ end subroutine find_symeq
 !!  mpi_enreg=information about MPI parallelization
 !!  v1r_qibz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space
 !!   for the irreducible q-point `qpt_ibz`
+!!  comm: MPI communicator to distribute natom3 * nspden FFT calls
 !!
 !! OUTPUT
 !!  v1r_qbz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space for the q-point in the BZ
@@ -1838,11 +1839,11 @@ end subroutine find_symeq
 !!
 !! SOURCE
 
-subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r_qibz,v1r_qbz)
+subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r_qibz,v1r_qbz,comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: isym,itimrev,cplex,nfft,nspden,nsppol
+ integer,intent(in) :: isym,itimrev,cplex,nfft,nspden,nsppol,comm
  type(crystal_t),intent(in) :: cryst
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -1853,9 +1854,9 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp0=0
+ integer,parameter :: tim_fourdp0=0, master=0
  integer,save :: enough=0
- integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign
+ integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
  real(dp) :: tnon(3)
@@ -1866,15 +1867,21 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  ABI_UNUSED(nsppol)
  ABI_CHECK(cplex == 2, "cplex != 2")
 
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
 
  ! Compute IBZ potentials in G-space (results in v1g_qibz)
- ABI_MALLOC(v1g_qibz, (2*nfft,nspden,natom3))
+ ABI_CALLOC(v1g_qibz, (2*nfft,nspden,natom3))
+ cnt = 0
  do mu=1,natom3
    do ispden=1,nspden
+     cnt = cnt + 1
+     if (mod(cnt, nproc) /= my_rank) cycle
      call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
    end do
  end do
+ ! TODO: ALLTOALLV?
+ if (nproc > 1) call xmpi_sum(v1g_qibz, comm, ierr)
 
  ABI_MALLOC(workg, (2*nfft,nspden))
  ABI_MALLOC(v1g_mu, (2*nfft,nspden))
@@ -1884,7 +1891,10 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  symrec_eq = cryst%symrec(:,:,isym)
  call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
 
+ v1r_qbz = zero
+
  do mu=1,natom3
+   if (mod(mu, nproc) /= my_rank) cycle
    idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
 
    ! Phase due to L0 + R^{-1}tau
@@ -1911,8 +1921,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    end do ! idir_eq
    ABI_CHECK(cnt /= 0, "cnt should not be zero!")
 
-   ! Transform to real space and take into account a possible shift.
-   ! (results are stored in v1r_qbz)
+   ! Transform to real space and take into account a possible shift. Results are stored in v1r_qbz.
    do ispden=1,nspden
      call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
@@ -1921,6 +1930,8 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
    !call v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
  end do ! mu
+
+ call xmpi_sum(v1r_qbz, comm, ierr)
 
  ABI_FREE(workg)
  ABI_FREE(v1g_mu)
@@ -2389,7 +2400,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
          v1r_qbz = v1r_qibz
        else
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q,&
-           ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz)
+           ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
          !v1r_qbz = zero; v1r_qbz = v1r_qibz
 
          !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
@@ -2855,7 +2866,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
          v1r_qbz = v1r_qibz
        else
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q,&
-           ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz)
+           ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz, xmpi_comm_self)
          !v1r_qbz = zero; v1r_qbz = v1r_qibz
 
          !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
