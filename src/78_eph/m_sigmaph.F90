@@ -390,7 +390,8 @@ module m_sigmaph
 !!***
 
  private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
- private :: sigmaph_from_file         ! Read main dimensions and header of sigmaph from a netcdf file.
+ private :: sigmaph_read              ! Read main dimensions and header of sigmaph from a netcdf file.
+ private :: sigmaph_write             ! Write main dimensions and header of sigmaph on a netcdf file.
  private :: sigmaph_comp              ! Compare two instances of sigmaph raise error if different
  private :: sigmaph_free              ! Free memory.
  private :: sigmaph_setup_kcalc       ! Return tables used to perform the sum over q-points for given k-point.
@@ -486,7 +487,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
- type(sigmaph_t) :: sigma, restart_sigma
+ type(sigmaph_t) :: sigma, sigma_restart
  type(ddkop_t) :: ddkop
  character(len=500) :: msg
 !arrays
@@ -540,9 +541,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
- !restart_sigma = sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, comm)
+ ! Here we try to read an existing SIGEPH file
+ ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
+ if (my_rank == master) sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
- !call sigmaph_comp(sigma,restart_sigma)
+ if (ierr==0 .and. my_rank==master) then
+    call sigmaph_comp(sigma,sigma_restart)
+    sigma%qp_done = sigma_restart%qp_done
+    call sigmaph_free(sigma_restart)
+ end if
+ call xmpi_sum(sigma%qp_done,comm,ierr)
+ call sigmaph_write(sigma, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
  if (my_rank == master) then
    call sigmaph_print(sigma, dtset, ab_out)
    call sigmaph_print(sigma, dtset, std_out)
@@ -1662,12 +1671,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: nk_found,ifo,jj,bstart,sigma_nkbz
  integer :: isym_k, trev_k, mband
  integer :: ip,npoints,skw_cplex, edos_intmeth
-#ifdef HAVE_NETCDF
- integer :: ncid,ncerr,varid
-#endif
  logical :: downsample
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
- real(dp) :: edos_step, edos_broad
  character(len=fnlen) :: wfk_fname_dense
  character(len=500) :: msg
  real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
@@ -2297,8 +2302,65 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
  end if
 
+end function sigmaph_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/sigmaph_write
+!! NAME
+!!  sigmaph_write
+!!
+!! FUNCTION
+!!  Start a sigmaph instance from a netcdf file.
+!!  This routine serves only to read some basic dimensions of sigmaph_t to verify if a restart is possible
+!!
+!! INPUTS
+!!  dtset<dataset_type>=All input variables for this dataset.
+!!  ecut=Cutoff energy for wavefunctions.
+!!  cryst<crystal_t>=Crystalline structure
+!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
+!!  dtfil<datafiles_type>=variables related to files.
+!!  comm=MPI communicator
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: comm
+ real(dp),intent(in) :: ecut
+ type(sigmaph_t),intent(inout) :: self
+ type(crystal_t),intent(in) :: cryst
+ type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(in) :: ebands
+ type(ifc_type),intent(in) :: ifc
+ type(datafiles_type),intent(in) :: dtfil
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: my_rank, ii
+ integer :: edos_intmeth
+#ifdef HAVE_NETCDF
+ integer :: ncid,ncerr,varid
+#endif
+ character(len=500) :: msg
+ real(dp) :: edos_broad,edos_step
+ logical :: found
+ character(len=fnlen) :: path
+ type(edos_t) :: edos
+
+! *************************************************************************
+ my_rank = xmpi_comm_rank(comm)
+
  ! Compute electron DOS with tetra.
- edos_intmeth = 2; if (new%bcorr == 1) edos_intmeth = 3
+ edos_intmeth = 2; if (self%bcorr == 1) edos_intmeth = 3
  if (dtset%prtdos == 1) edos_intmeth = 1
  !if (dtset%prtdos == -2) edos_intmeth = 3
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
@@ -2320,19 +2382,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! Check if a previous netcdf file is present and restart the calculation
    found = file_exists(path)
    if (found) then
-       NCF_CHECK(nctk_open_modify(new%ncid, path, xmpi_comm_self))
+       NCF_CHECK(nctk_open_modify(self%ncid, path, xmpi_comm_self))
    else
        ! Master creates the netcdf file used to store the results of the calculation.
-       NCF_CHECK(nctk_open_create(new%ncid, path, xmpi_comm_self))
+       NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    endif
-
-   ncid = new%ncid
-
-   ! try to read the done array
-   ncerr = nf90_inq_varid(ncid, "qp_done", varid)
-   if (ncerr == nf90_noerr) then
-     NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
-   end if
+   
+   ncid = self%ncid
 
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
@@ -2340,17 +2396,17 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    ! Add sigma_eph dimensions.
    ncerr = nctk_def_dims(ncid, [ &
-     nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
-     nctkdim_t("nsppol", new%nsppol), nctkdim_t("ntemp", new%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
-     nctkdim_t("nqibz", new%nqibz), nctkdim_t("nqbz", new%nqbz)], &
+     nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("max_nbcalc", self%max_nbcalc), &
+     nctkdim_t("nsppol", self%nsppol), nctkdim_t("ntemp", self%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
+     nctkdim_t("nqibz", self%nqibz), nctkdim_t("nqbz", self%nqbz)], &
      defmode=.True.)
    NCF_CHECK(ncerr)
 
-   if (new%nwr > 0) then
-     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nwr", new%nwr)]))
+   if (self%nwr > 0) then
+     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nwr", self%nwr)]))
    end if
-   if (new%gfw_nomega > 0) then
-     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("gfw_nomega", new%gfw_nomega)]))
+   if (self%gfw_nomega > 0) then
+     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("gfw_nomega", self%gfw_nomega)]))
    end if
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
@@ -2391,14 +2447,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ])
    NCF_CHECK(ncerr)
 
-   if (new%frohl_model == 1) then
+   if (self%frohl_model == 1) then
      ! Arrays storing the Frohlich self-energy.
      ! These arrays get two extra dimensions on file (nkcalc, nsppol).
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t("frohl_vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
        nctkarr_t("frohl_dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol") ])
      NCF_CHECK(ncerr)
-     if (new%nwr > 0) then
+     if (self%nwr > 0) then
        ncerr = nctk_def_arrays(ncid, [ &
          nctkarr_t("frohl_vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
          nctkarr_t("frohl_spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol") &
@@ -2407,7 +2463,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      end if
    end if
 
-   if (new%nwr > 0) then
+   if (self%nwr > 0) then
      ! Make room for the spectral function.
      ! These arrays get two extra dimensions on file (nkcalc, nsppol).
      ncerr = nctk_def_arrays(ncid, [ &
@@ -2418,7 +2474,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      NCF_CHECK(ncerr)
    end if
 
-   if (new%gfw_nomega > 0) then
+   if (self%gfw_nomega > 0) then
      ncerr = nctk_def_arrays(ncid, [ &
        nctkarr_t("gfw_mesh", "dp", "gfw_nomega"), &
        nctkarr_t("gfw_vals", "dp", "gfw_nomega, three, max_nbcalc, nkcalc, nsppol") &
@@ -2430,56 +2486,56 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! Write data that do not depend on the (kpt, spin) loop.
    ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
-   ii = 0; if (new%imag_only) ii = 1
+   ii = 0; if (self%imag_only) ii = 1
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
      "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
      "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
      "eph_transport", "imag_only", "frohl_model"], &
-     [dtset%eph_task, new%symsigma, new%nbsum, new%bsum_start, new%bsum_stop, &
-     dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, new%qint_method, &
-     dtset%eph_transport, ii, new%frohl_model])
+     [dtset%eph_task, self%symsigma, self%nbsum, self%bsum_start, self%bsum_stop, &
+     dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, &
+     dtset%eph_transport, ii, self%frohl_model])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
      "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
-     [aimag(new%ieta), new%wr_step, dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, &
+     [aimag(self%ieta), self%wr_step, dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, &
      dtset%ph_wstep, dtset%ph_smear])
    NCF_CHECK(ncerr)
 
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), new%ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), self%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_ngqpt_fine"), dtset%eph_ngqpt_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_params))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), new%bstart_ks))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), new%nbcalc_ks))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), new%kcalc))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), new%kcalc2ibz))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), new%kTmesh))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), new%mu_e))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), aimag(new%ieta)))
-   if (new%gfw_nomega > 0) then
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gfw_mesh"), new%gfw_mesh))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), self%bstart_ks))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), self%nbcalc_ks))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), self%kcalc))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), self%mu_e))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), aimag(self%ieta)))
+   if (self%gfw_nomega > 0) then
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gfw_mesh"), self%gfw_mesh))
    end if
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
  ! Now reopen the file (note xmpi_comm_self --> only master writes)
  call xmpi_barrier(comm)
- NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
- NCF_CHECK(nctk_set_datamode(new%ncid))
+ NCF_CHECK(nctk_open_modify(self%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+ NCF_CHECK(nctk_set_datamode(self%ncid))
 #endif
 
  call edos%free()
 
-end function sigmaph_new
+end subroutine sigmaph_write
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/sigmaph_from_file
+!!****f* m_sigmaph/sigmaph_read
 !! NAME
-!!  sigmaph_new
+!!  sigmaph_read
 !!
 !! FUNCTION
 !!  Start a sigmaph instance from a netcdf file.
@@ -2500,14 +2556,12 @@ end function sigmaph_new
 !!
 !! SOURCE
 
-type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, comm) result(new)
+type (sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- real(dp),intent(in) :: ecut
- type(crystal_t),intent(in) :: cryst
+ integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
- type(ebands_t),intent(in) :: ebands
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables ------------------------------
@@ -2515,7 +2569,7 @@ type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, c
  integer,parameter :: master=0
  integer :: imag_only
 #ifdef HAVE_NETCDF
- integer :: ncid
+ integer :: ncid,varid,ncerr
 #endif
  real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, wr_step, eph_extrael, eph_fsmear
  character(len=500) :: msg
@@ -2528,12 +2582,18 @@ type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, c
 
 ! *************************************************************************
 
- ! Open netcdf file 
+ ! Open netcdf file
 #ifdef HAVE_NETCDF
+ ierr = 0
 
  path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
- NCF_CHECK(nctk_open_read(new%ncid, path, comm))
- ncid = new%ncid
+ if (.not.file_exists(path)) then
+    ierr = 1
+    return
+ end if
+ NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
+ ! so that the structure is properly freed
+ new%ncid = nctk_noid
 
  !TODO?
  !NCF_CHECK(cryst%ncread(ncid))
@@ -2557,6 +2617,9 @@ type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, c
  ! ======================================================
  NCF_CHECK(nf90_get_var(ncid, vid("symsigma"), new%symsigma))
  NCF_CHECK(nf90_get_var(ncid, vid("nbsum"), new%nbsum))
+ NCF_CHECK(nf90_get_var(ncid, vid("bsum_start"), new%bsum_start))
+ NCF_CHECK(nf90_get_var(ncid, vid("bsum_stop"), new%bsum_stop))
+
  NCF_CHECK(nf90_get_var(ncid, vid("qint_method"), new%qint_method))
  NCF_CHECK(nf90_get_var(ncid, vid("frohl_model"), new%frohl_model))
  NCF_CHECK(nf90_get_var(ncid, vid("imag_only"), imag_only))
@@ -2580,6 +2643,13 @@ type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, c
  NCF_CHECK(nf90_get_var(ncid, vid("eta"), eta))
  new%ieta = j_dpc * eta
 
+ ! try to read the done array
+ ABI_CALLOC(new%qp_done, (new%nkcalc, new%nsppol))
+ ncerr = nf90_inq_varid(ncid, "qp_done", varid)
+ if (ncerr == nf90_noerr) then
+   NCF_CHECK(nf90_get_var(ncid, varid, new%qp_done))
+ end if
+
  ! ============================================================
  ! Read and check consistency against dtset
  ! ============================================================
@@ -2596,7 +2666,7 @@ type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, c
  ABI_CHECK(ph_wstep    == dtset%ph_wstep,    "netcdf ph_wstep != input file")
  ABI_CHECK(ph_smear    == dtset%ph_smear,    "netcdf ph_smear != input file")
 
- NCF_CHECK(nf90_get_var(ncid, vid("eph_task"),eph_task)) 
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_task"),eph_task))
  NCF_CHECK(nf90_get_var(ncid, vid("symdynmat"),symdynmat))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"),ph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"),eph_intmeth))
@@ -2617,7 +2687,7 @@ type (sigmaph_t) function sigmaph_from_file(dtset, ecut, cryst, ebands, dtfil, c
  ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      "netcdf ph_ngqpt != input file")
  ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
  ABI_CHECK(all(dtset%frohl_params   == frohl_params),  "netcdf frohl_params != input file")
- 
+
  NCF_CHECK(nf90_close(ncid))
 
 #endif
@@ -2628,14 +2698,14 @@ contains
    vid = nctk_idname(ncid, vname)
 end function vid
 
-end function sigmaph_from_file
+end function sigmaph_read
 !!***
 
-subroutine sigmaph_comp(self,comp)
+!----------------------------------------------------------------------
 
 !!****f* m_sigmaph/sigmaph_comp
 !! NAME
-!!  sigmaph_free
+!!  sigmaph_comp
 !!
 !! FUNCTION
 !!  Compare the headers of two sigmaph_t instances
@@ -2648,6 +2718,8 @@ subroutine sigmaph_comp(self,comp)
 !! CHILDREN
 !!
 !! SOURCE
+
+subroutine sigmaph_comp(self,comp)
 
 !Arguments ------------------------------------
  type(sigmaph_t),intent(in) :: self, comp
@@ -2669,7 +2741,7 @@ subroutine sigmaph_comp(self,comp)
  ABI_CHECK(self%bsum_stop == comp%bsum_stop,"Different value found for bsum_stop.")
  ABI_CHECK(self%qint_method == comp%qint_method,"Different value found for qint_method.")
  ABI_CHECK(self%frohl_model == comp%frohl_model,"Different value found for frohl_model.")
- !ABI_CHECK(self%imag_only == comp%imag_only,"Difference found in imag_only")
+ ABI_CHECK(self%imag_only .eqv. comp%imag_only,"Difference found in imag_only")
  ABI_CHECK(self%wr_step==comp%wr_step,"Different value found for wr_step")
  ABI_CHECK(self%ieta == comp%ieta, "Different value found for zcut.")
 
