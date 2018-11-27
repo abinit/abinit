@@ -30,6 +30,7 @@ MODULE m_ifc
  use defs_basis
  use m_errors
  use m_abicore
+ use m_time
  use m_xmpi
  use m_sort
  use m_cgtools
@@ -904,11 +905,15 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 !scalars
  integer :: natom
  real(dp) :: qphnrm
+ !real(dp) :: cpu, wall, gflops
+ !character(len=500) :: msg
 !arrays
  real(dp) :: my_qpt(3),eigvec(2,3,Crystal%natom,3*Crystal%natom),eigval(3*Crystal%natom)
  real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert)
 
 ! ************************************************************************
+
+ !call cwtime(cpu, wall, gflops, "start")
 
  natom = Crystal%natom
 
@@ -956,6 +961,10 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 
  ! Compute group velocities.
  if (present(dwdq)) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq)
+
+ !call cwtime(cpu, wall, gflops, "stop")
+ !write(msg, "(2(a,f8.5))")"ifc_fourq completed. cpu-time: ", cpu, ", wall-time:", wall
+ !call wrtout(std_out, msg)
 
 end subroutine ifc_fourq
 !!***

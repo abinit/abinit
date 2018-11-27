@@ -195,7 +195,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
 
-
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
@@ -348,12 +347,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    call dvdb%readsym_allv1(db_iqpt, cplex, nfftf, ngfftf, v1scf, comm)
  else
    MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
-   !if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find: ",ktoa(qpt), "in DVDB - interpolating"))
-   ! Fourier interpolate of the potential
-   !ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
-   !cplex = 2
-   !ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
-   !call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, comm)
  end if
 
  ! Allocate vlocal1 with correct cplex. Note nvloc
@@ -502,7 +495,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        end do
 
      end do  ! ipc
-
 
      ! Loop over 3*natom phonon branches.
      do imode=1,natom3
@@ -686,10 +678,6 @@ end subroutine out_phpi
 
 subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom3
@@ -755,7 +743,6 @@ end subroutine out_phpi_nc
 !!***
 
 !----------------------------------------------------------------------
-
 
 end module m_phpi
 !!***

@@ -52,7 +52,7 @@ module m_sigmaph
 #endif
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_time,           only : cwtime, sec2str
+ use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
  use m_io_tools,       only : iomode_from_fname, file_exists
@@ -148,6 +148,30 @@ module m_sigmaph
    ! Processor-dependent if Re-Im calculation.
    ! Processor-independent and computed at runtime on the basis of the nk states in Sigma_{nk} if imag_only
 
+  integer :: my_npert
+   ! Number of atomic perturbations or phonon modes treated by this MPI rank.
+
+  integer :: comm_pert
+   ! MPI communicator for parallelism over atomic perturbations.
+
+  integer :: nprocs_pert
+   ! Number of cpus for parallelism over atomic perturbations.
+
+  integer :: me_pert
+   ! My rank in comm_pert
+
+  integer :: comm_bq
+   ! MPI communicator used to distrubute bsum, q-points (high-level parallelization)
+
+  integer :: me_bq
+  integer :: nprocs_bq
+
+  !integer :: comm_bqfft
+  !integer :: me_bqfft
+  !integer :: nprocs_bqfft
+
+  integer :: coords(3)
+
   integer :: nqbz
   ! Number of q-points in the BZ.
 
@@ -230,9 +254,15 @@ module m_sigmaph
     ! Mapping kcalc --> ibz as reported by listkk.
 
   integer,allocatable :: distrib_bq(:,:)
-     ! Table to distribute q-points and bands.
-     ! distrib_bq(bsum_start:bsum_stop, sigma%nqibz_k))
-     ! The distribution must be consistent with the WF distribution done with bks_mask
+    ! Table to distribute q-points and bands.
+    ! distrib_bq(bsum_start:bsum_stop, sigma%nqibz_k))
+    ! The distribution must be consistent with the WF distribution done with bks_mask
+
+  integer,allocatable :: my_pinfo(:,:)
+    ! my_pinfo(3, my_npert)
+    ! my_pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
+    ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
+    ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
@@ -363,7 +393,7 @@ module m_sigmaph
 
    real(dp),allocatable :: gf_nnuq(:,:,:,:)
    ! (nbcalc_ks, natom3, %nqibz_k, 3)
-   ! Quantities needed to compute generalized Eliashberg functions  (gkq2/Fan-Migdal/DW terms)
+   ! Quantities needed to compute generalized Eliashberg functions (gkq2/Fan-Migdal/DW terms)
    ! This array depends on (ikcalc, spin)
    ! NB: q-weights for integration are not included.
 
@@ -466,9 +496,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer,parameter :: sppoldbl1=1,timrev1=1
- integer :: my_rank,nsppol,nkpt,iq_ibz
+ integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq,ib_k,band_ks,num_smallw,ibsum,ii,jj,im,in
+ integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj !,im,in
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine,iq_ibz_packed
@@ -476,7 +506,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: mpw,ierr,it,ndiv,thisproc_nq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
@@ -499,7 +529,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
  real(dp) :: vdiag(2, 3)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
- !real(dp),allocatable :: deltaw_pm(:,:,:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -556,6 +585,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call sigmaph_print(sigma, dtset, ab_out)
    call sigmaph_print(sigma, dtset, std_out)
  end if
+ my_npert = sigma%my_npert
 
  ! This is the maximum number of PWs for all possible k+q treated.
  mpw = sigma%mpw; gmax = sigma%gmax
@@ -611,7 +641,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
  !if (sigma%calc_velocity == 1) then
- call wrtout(std_out, " Computing diagonal elements of velocity operator for all states in Sigma_nk.")
+ call wrtout(std_out, " Computing diagonal elements of velocity operator for all states in Sigma_nk...")
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
  ABI_MALLOC(cgwork,   (2, mpw*wfd%nspinor))
  ABI_CALLOC(vred_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
@@ -642,9 +672,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
 
  call xmpi_sum(vred_calc, comm, ierr)
- call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
- call wrtout(std_out, sjoin(" Velocities completed. cpu-time:", sec2str(cpu_ks), ",wall-time:", sec2str(wall_ks)), &
-   do_flush=.True.)
+ call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
  ! Write results to disk.
 #ifdef HAVE_NETCDF
@@ -711,6 +739,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (dtset%prtvol > 10) dvdb%debug = .True.
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
+ !dvdb%symv1 = .False.
+ if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo)
 
  ! Set cache in Mb for q-points.
  ! When we ask for a qpt in the BZ the code checks whether the IBZ image is in the cache.
@@ -740,6 +770,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
    msg = sjoin("[", itoa(ikcalc), "/", itoa(sigma%nqibz_k), "]")
    call wrtout(std_out, sjoin("Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
+   spin = 1
+   write(msg, "(3(a, i0))")"For ", sigma%nbcalc_ks(ikcalc, spin), " bands between: ", sigma%bstart_ks(ikcalc, spin), &
+     " and: ", sigma%bstart_ks(ikcalc, spin) + sigma%nbcalc_ks(ikcalc, spin) - 1
+   call wrtout(std_out, msg)
    call wrtout(std_out, sjoin("Number of q-points in the IBZ(k):", itoa(sigma%nqibz_k)))
 
    ! Symmetry indices for kk.
@@ -784,8 +818,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_MALLOC(ylm_kq,(mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
 
-   call cwtime(cpu_setk, wall_setk, gflops_setk, "stop")
-   call wrtout(std_out, sjoin("Setup kcalc completed. cpu-time:", sec2str(cpu_setk), ",wall-time:", sec2str(wall_setk)))
+   call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
    do spin=1,nsppol
      ! check if thik kpoint and spin was already calculated
@@ -805,7 +838,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        sigma%vals_wr = zero
        do ib_k=1,nbcalc_ks
          band_ks = ib_k + bstart_ks - 1
-         ! Build linear mesh **centered** on KS energy.
+         ! Build linear mesh **centered** around the KS energy.
          eig0nk = ebands%eig(band_ks, ik_ibz, spin) - sigma%wr_step * (sigma%nwr / 2)
          sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
        end do
@@ -835,7 +868,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! and save KS energies in sigma%e0vals
-     ! TODO: symmetrize them if kk is not irred
+     ! Note: One should rotate the wavefunctions if kk is not irred (not implemented)
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
      do ib_k=1,nbcalc_ks
@@ -854,36 +887,47 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      sigma%distrib_bq = -1
 
      if (dtset%eph_task == 4) then
-       ! Distribute over bands
+       ! Distribute bands (memory and CPU) inside comm_bq
        sigma%distrib_bq(sigma%my_bstart:sigma%my_bstop, :) = my_rank
+
      else if (dtset%eph_task == -4) then
-       if (sigma%nqibz_k >= nprocs) then
-         ! Distribute over q-points
-         do iq_ibz=1,sigma%nqibz_k
-           sigma%distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
-         end do
+       if (sigma%nqibz_k >= sigma%nprocs_bq) then
+         ! Distribute q-points inside comm_bq
+         !do iq_ibz=1,sigma%nqibz_k
+         !  sigma%distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
+         !end do
+         call xmpi_split_work(sigma%nqibz_k, sigma%comm_bq, q_start, q_stop, msg, ierr)
+         sigma%distrib_bq(:, q_start:q_stop) = my_rank
        else
-         ! Distribute over bands
-         do it=1,nbsum*sigma%nqibz_k
+         ! Distribute bands and q-points inside comm_bq
+         ! ibsum_kq is the fastest index to minimize the number of q-points treated by each rank.
+         ! q-points in IBZ(k) are grouped by shells
+
+         !do it=1,nbsum*sigma%nqibz_k
+         !  ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
+         !  ! all procs have the bands in the energy window.
+         !  ibsum_kq = ibsum_kq - 1 + sigma%bsum_start
+         !  sigma%distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
+         !end do
+
+         call xmpi_split_work(nbsum*sigma%nqibz_k, sigma%comm_bq, q_start, q_stop, msg, ierr)
+         do it=q_start,q_stop
            ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
            ! all procs have the bands in the energy window.
            ibsum_kq = ibsum_kq - 1 + sigma%bsum_start
-           sigma%distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
+           sigma%distrib_bq(ibsum_kq, iq_ibz) = my_rank
          end do
        end if
-       ABI_CHECK(all(sigma%distrib_bq /= -1), "Wrong distrib_bq")
+
      else
        MSG_ERROR("Invalid eph_task")
      end if
-     !sigma%distrib_bq = 0
 
      !ABI_MALLOC(zvals, (nz, nbcalc_ks))
      if (sigma%qint_method == 1) then
        ! Weights for Re-Im with i.eta shift.
        ! FIXME: This part is broken now. Lot of memory allocated here!
-       !ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
-       ! Weights for Im (tethraedron, eta --> 0)
-       !ABI_MALLOC(deltaw_pm, (2 ,nbcalc_ks, natom3, nbsum, sigma%ephwg%nq_k))
+       !ABI_MALLOC(sigma%cweights, (nz, 2, nbcalc_ks, my_npert, bsum_start:bsum_stop, sigma%ephwg%nq_k))
 
        ndiv = 1
        thisproc_nq = 1
@@ -894,15 +938,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          thisproc_nq = thisproc_nq + 1
        end do
        if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
-       ABI_MALLOC(sigma%deltaw_pm, (2, nbcalc_ks, natom3, bsum_start:bsum_stop, thisproc_nq, ndiv))
+       ! Weights for Im (tethraedron, eta --> 0)
+       ABI_MALLOC(sigma%deltaw_pm, (2, nbcalc_ks, my_npert, bsum_start:bsum_stop, thisproc_nq, ndiv))
 
        ! Precompute the weights for tetrahedron
        call sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
      endif
 
-     ! Integrations over q-points in the IBZ(k)
+     ! Integration over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
-       ! Quick-parallelization over q-points
+       ! Parallelization over q-points inside comm_bq
        if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
@@ -915,17 +960,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found:", ktoa(qpt), "in DVDB with index", itoa(db_iqpt)))
          ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
          ! This call allocates v1scf(cplex, nfftf, nspden, 3*natom))
-         call dvdb%readsym_qbz(cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
+         call dvdb%readsym_qbz(cryst, qpt, indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%comm_pert)
        else
          MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
        end if
 
-       ! TODO: Make sure that symmetries in Q-space are preserved.
-       ! Avoid fourq if qpt is in ddb
-       ! Examine the symmetries of the q wavevector
-       !call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
-
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+       ! TODO: Make sure that symmetries in Q-space are preserved.
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
        if (sigma%frohl_model /= 0) then
@@ -1009,22 +1050,23 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
-       ABI_STAT_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nbcalc_ks, natom3), ierr)
+       ABI_STAT_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nbcalc_ks, my_npert), ierr)
        ABI_CHECK(ierr==0, "oom in h1kets_kq")
 
        ! Allocate vlocal1 with correct cplex. Note nvloc
-       ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
+       ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6, gs_hamkq%nvloc, my_npert), ierr)
        ABI_CHECK(ierr==0, "oom in vlocal1")
 
        ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
-       do ipc=1,natom3
+       ! Each CPU prepares its own potentials.
+       do imyp=1,my_npert
          call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
-           pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
+           pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,imyp),vlocal,vlocal1(:,:,:,:,imyp))
        end do
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! BE careful here because I will need sij_opt==-1
-       gen_eigenpb = (psps%usepaw==1)
+       gen_eigenpb = psps%usepaw == 1
        sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2,npw_kq*nspinor*((sij_opt+1)/2)))
 
@@ -1037,16 +1079,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !     [npw_kq],dtset%nsppol,optder,cryst%rprimd,ylm_kq,ylmgr_kq)
        !end if
 
-       ! Loop over all 3*natom perturbations.
+       ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
        ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
-       do ipc=1,natom3
-         idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
+       do imyp=1,my_npert
+         idir = sigma%my_pinfo(1,imyp); ipert = sigma%my_pinfo(2,imyp) !; ipc = sigma%my_pinfo(3, imyp)
 
          ! Prepare application of the NL part.
          call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
              !&paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
              !&mpi_spintab=mpi_enreg%my_isppoltab)
-         call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+         call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,imyp),with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&  ! In
@@ -1061,7 +1103,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,ipc),&
+           call getgh1c(berryopt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,imyp),&
              grad_berry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,mpi_enreg,optlocal,&
              optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
@@ -1076,7 +1118,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(ffnl1)
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
-       end do ! ipc (loop over 3*natom atomic perturbations)
+       end do ! imyp
 
        ABI_FREE(gs1c)
 
@@ -1088,12 +1130,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
        do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
+         ! Parallelization for eph_task == 4 inside comm_bq
          if (sigma%distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
-         ! This is to check whether the gkk elements in the degenerate subspace break symmetry
+         ! This to check whether the gkk elements in the degenerate subspace break symmetry
          !if (ibsum_kq >= bstart_ks .and. ibsum_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
-         ! symmetrize wavefunctions from IBZ (if needed).
-         ! Be careful with time-reversal symmetry.
+         ! symmetrize wavefunctions from IBZ (if needed). Be careful with time-reversal symmetry.
          if (isirr_kq) then
            ! Copy u_kq(G)
            call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1107,21 +1149,28 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
          end if
 
-         do ipc=1,natom3
+         ! Get gkk(kcalc, q, idir-ipert) (atom representation)
+         gkq_atm = zero
+         do imyp=1,my_npert
+           ipc = sigma%my_pinfo(3, imyp)
            ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
            !The array eig1_k contains:
            !
            ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)>                           (NC psps)
            ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
            do ib_k=1,nbcalc_ks
-             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bra_kq,h1kets_kq(:,:,ib_k,ipc),&
+             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bra_kq,h1kets_kq(:,:,ib_k,imyp),&
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              gkq_atm(:,ib_k,ipc) = [dotr, doti]
            end do
+           !call cg_zgemv("C", npw_kq*nspinor, nbcalc_ks, h1kets_kq(:,:,:,imyp), bra_kq, gkq_atm(:,:,ipc))
          end do
+         !ii = nbcalc_ks * my_npert
+         !call cg_zgemm("H", "N", npw_kq*nspinor, ii, ii, h1kets_kq, bra_kq, gkq_atm)
 
          ! Get gkk(kcalc, q, nu)
-         call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
+         if (sigma%nprocs_pert > 1) call xmpi_sum(gkq_atm, sigma%comm_pert, ierr)
+         call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
          ! Save data for Debye-Waller computation (performed outside the q-loop)
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -1131,11 +1180,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          ! Accumulate contribution to self-energy
          eig0mkq = ebands%eig(ibsum_kq,ikq_ibz,spin)
-         ! q-weigths for naive integration
+         ! q-weigth for naive integration
          weigth_q = sigma%wtq_k(iq_ibz)
 
-         do nu=1,natom3
+         !do nu=1,natom3
+         do imyp=1,my_npert
            ! Ignore acoustic or unstable modes.
+           nu = sigma%my_pinfo(3, imyp)
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
 
            ! For each band in Sigma_{bk}
@@ -1246,23 +1297,24 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      if (sigma%imag_only) then
                        ! note pi factor (Sokhotski–Plemelj theorem)
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * j_dpc * pi * ( &
-                         (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iq_ibz_packed, jj) +  &
-                         (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iq_ibz_packed, jj) ) * weight
+                         (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, iq_ibz_packed, jj) +  &
+                         (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, iq_ibz_packed, jj) ) * weight
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
-                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, iq_ibz_fine) +  &
-                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, iq_ibz_fine) ) * weight
+                         (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, iq_ibz_fine) +  &
+                         (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, imyp, ibsum_kq, iq_ibz_fine) ) * weight
                      end if
                    end do
                  else
+                   ! Tetrahedron method without double grid
                    if (sigma%imag_only) then
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * j_dpc * pi * ( &
-                       (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, nu, ibsum_kq, iq_ibz_packed, 1) +  &
-                       (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, nu, ibsum_kq, iq_ibz_packed, 1) )
+                       (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, iq_ibz_packed, 1) +  &
+                       (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, iq_ibz_packed, 1) )
                    else
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
-                       (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, nu, ibsum_kq, iq_ibz_fine) +  &
-                       (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, nu, ibsum_kq, iq_ibz_fine) )
+                       (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, iq_ibz_fine) +  &
+                       (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, imyp, ibsum_kq, iq_ibz_fine) )
                    endif
                  end if
                end if
@@ -1325,11 +1377,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (sigma%qint_method > 0) then
        ABI_FREE(sigma%deltaw_pm)
        !ABI_FREE(sigma%cweights)
-       !ABI_SFREE(deltaw_pm)
      end if
 
      ! Print cache stats. The first k-point is expected to have lots of misses
-     ! especially if it's the Gamma point and symsigma = 1.
      if (dvdb%qcache_size > 0 .and. dvdb%qcache_stats(1) /= 0) then
        write(std_out, "(a)")"Qcache stats"
        write(std_out, "(a,i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
@@ -1353,7 +1403,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (.not. sigma%imag_only) then
        call wrtout(std_out, "Computing Debye-Waller term...")
        call cwtime(cpu_dw, wall_dw, gflops_dw, "start")
-       call xmpi_sum(gkq0_atm, comm, ierr)
+       call xmpi_sum(gkq0_atm, sigma%comm_bq, ierr)
 
        ABI_MALLOC(gdw2_mn, (bsum_start:bsum_stop, nbcalc_ks))
        ABI_MALLOC(tpp_red, (natom3, natom3))
@@ -1362,8 +1412,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
        if (sigma%symsigma == +1) nq = sigma%nqibz_k
 
-       do iq_ibz=1,nq
-         if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
+       call xmpi_split_work(nq, sigma%comm_bq, q_start, q_stop, msg, ierr)
+       do iq_ibz=q_start,q_stop
+       !do iq_ibz=1,nq
+       !  if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
 
          if (abs(sigma%symsigma) == 1) then
            !qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
@@ -1376,7 +1428,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
          ! Sum over modes for this q-point.
-         do nu=1,natom3
+         !do nu=1,natom3
+         do imyp=1,my_npert
+           nu = sigma%my_pinfo(3, imyp)
            ! Ignore acoustic or unstable modes.
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
 
@@ -1405,6 +1459,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! Sum over bands and add (static) DW contribution for the different temperatures.
            do ibsum=bsum_start, bsum_stop
+
              do ib_k=1,nbcalc_ks
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
@@ -1424,8 +1479,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                end do
 
                gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) /  (four * two * wqnu)
-             end do ! ibsum
-           end do ! ib_k
+             end do ! ib_k
+           end do ! ibsum
 
            do ibsum=bsum_start,bsum_stop
              eig0mk = ebands%eig(ibsum, ik_ibz, spin)
@@ -1463,23 +1518,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(tpp_red)
        ABI_FREE(gkq0_atm)
 
-       call cwtime(cpu_dw, wall_dw, gflops_dw, "stop")
-       call wrtout(std_out, sjoin("DW completed. cpu-time:", sec2str(cpu_dw), ",wall-time:", &
-          sec2str(wall_dw)), do_flush=.True.)
+       call cwtime_report(" DW completed", cpu_dw, wall_dw, gflops_dw)
      end if ! not %imag_only
 
      if (sigma%gfw_nomega /= 0) then
-       ! Compute Eliashberg function (useful but cost is not negligible.
-       ! May need to deactivate this part for HTC.
+       ! Compute Eliashberg function (useful but cost is not negligible).
        call wrtout(std_out, sjoin("Computing Eliashberg function with nomega:", itoa(sigma%gfw_nomega), &
-           "Use prtphdos 0 to disable this part"))
+           ". Use prteliash = 0 to disable this part"))
        call cwtime(cpu, wall, gflops, "start")
        call xmpi_sum(sigma%gf_nnuq, comm, ierr)
        ABI_MALLOC(dargs, (sigma%gfw_nomega))
        ABI_MALLOC(dt_weights, (sigma%gfw_nomega, 2))
        sigma%gfw_vals = zero
        do iq_ibz=1,sigma%nqibz_k
-         if (mod(iq_ibz, nprocs) /= my_rank) cycle  ! MPI parallelism
+         if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
          call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart) ! TODO: Use phfreqs in ephgw
          do nu=1,natom3
            dargs = sigma%gfw_mesh - phfrq(nu)
@@ -1495,23 +1547,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(dargs)
        ABI_FREE(dt_weights)
        call xmpi_sum(sigma%gfw_vals, comm, ierr)
-
-       call cwtime(cpu, wall, gflops, "stop")
-       call wrtout(std_out, sjoin("Eliashberg function completed. cpu-time:", sec2str(cpu), &
-           ",wall time:", sec2str(wall)), do_flush=.True.)
-
-       ! For tetrahedron method.
-       !do nu=1,natom3
-       !  do iq_ibz=1,sigma%nqibz_k
-       !    do ib_k=1,nbcalc_ks
-       !        vals_ibz_k = sigma%gf_nnuq(ib_k, nu, :, ii)
-       !        call tetra_get_onewk(sigma%ephwg%tetra_k, iq_ibz, sigma%bcorr, sigma%gfw_nomega, sigma%nqibz_k, vals_ibz_k, &
-       !          sigma%gfw_mesh(1), sigma%gfw_mesh(sigma%gfw_nomega), max_occ1, dt_weights)
-       !        sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
-       !          sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dt_weights(:, 1)  ! sigma%wtq_k(iq_ibz) *
-       !    end do
-       !  end do
-       !end do
+       call cwtime_report(" Eliashberg function", cpu, wall, gflops)
      end if
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
@@ -1525,14 +1561,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
 
-   call cwtime(cpu_ks, wall_ks, gflops_ks, "stop")
-   call wrtout(std_out, sjoin("Sigma_nk completed. cpu-time:", sec2str(cpu_ks), &
-           ",wall-time:", sec2str(wall_ks)), do_flush=.True.)
+   call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
 
- call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, "Sigma_eph completed")
- call wrtout(std_out, sjoin("Total cpu-time:", sec2str(cpu_all), ", Total wall-time:", sec2str(wall_all), ch10))
+ call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -1576,8 +1608,6 @@ end subroutine sigmaph
 !!
 !! OUTPUT
 !!  gkq_nu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
-!!  num_smallw=Number of negative/too small frequencies that have been ignored
-!!    by setting the corresponding gkq_nu to zero.
 !!
 !! PARENTS
 !!      m_sigmaph
@@ -1586,12 +1616,11 @@ end subroutine sigmaph
 !!
 !! SOURCE
 
-subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu, num_smallw)
+subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nb1, nb2, nk, natom
- integer,intent(out) :: num_smallw
 !arrays
  real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
  real(dp),intent(in) :: gkq_atm(2,nb1,nb2,nk,3*natom)
@@ -1603,14 +1632,12 @@ subroutine gkknu_from_atm(nb1, nb2, nk, natom, gkq_atm, phfrq, displ_red, gkq_nu
 
 ! *************************************************************************
 
- gkq_nu = zero; num_smallw = 0
+ gkq_nu = zero
 
  ! Loop over phonon branches.
  do nu=1,3*natom
    ! Ignore negative or too small frequencies
-   if (phfrq(nu) < EPH_WTOL) then
-     num_smallw = num_smallw + 1; cycle
-   end if
+   if (phfrq(nu) < EPH_WTOL) cycle
 
    ! Transform the gkk from (atom, reduced direction) basis to phonon mode representation
    do ipc=1,3*natom
@@ -1668,8 +1695,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,gw_qprange,bstop
- integer :: nk_found,ifo,jj,bstart,sigma_nkbz
+ integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz,natom3
  integer :: isym_k, trev_k, mband
+ integer :: idir, iatom, pertcase
  integer :: ip,npoints,skw_cplex, edos_intmeth
  logical :: downsample
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
@@ -1677,6 +1705,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  character(len=500) :: msg
  real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
  real(dp) :: elow,ehigh,wmax
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: changed,found,isirr_k
  character(len=fnlen) :: path
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -1686,23 +1715,107 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: intp_kptrlatt(3,3), g0_k(3), skw_band_block(2)
  integer :: qptrlatt(3,3),indkk_k(1,6),my_gmax(3),kpos(6),band_block(2),kptrlatt(3,3)
  integer :: val_indeces(ebands%nkpt, ebands%nsppol), intp_nshiftk
- integer,allocatable :: gtmp(:,:),degblock(:,:)
+ integer :: all_pinfo(3, cryst%natom * 3)
+ integer,allocatable :: gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:)
  real(dp):: params(4), my_shiftq(3,1),kk(3),kq(3),intp_shiftk(3)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),th(:),wth(:)
+#ifdef HAVE_MPI
+ integer :: ndims, comm_cart, me_cart
+ logical :: reorder
+ integer,allocatable :: coords(:), dims(:)
+ logical,allocatable :: periods(:), keepdim(:)
+#endif
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call cwtime(cpu, wall, gflops, "start")
+
  ! Copy important dimensions.
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
+ mband = dtset%mband; natom3 = cryst%natom * 3
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
- mband = dtset%mband
 
  ! Broadening parameter from zcut
  new%ieta = + j_dpc * dtset%zcut
+
+ ! Parallelism over atomic perturbations.
+ ! Use MPI communicator to distribute 3 * natom perturbations to reduced memory requirements.
+ ! Perturbations are equally distributed --> Total number of CPUs should be divisible by nprocs_pert.
+ new%comm_pert = xmpi_comm_self; new%my_npert = 3 * cryst%natom; new%me_pert = 0; new%nprocs_pert = 1
+ do cnt=natom3,2,-1
+   if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
+     new%nprocs_pert = cnt
+     new%my_npert = natom3 / cnt
+     exit
+   end if
+ end do
+
+#if 0
+ if (dtset%eph_intmeth == 2) then
+   ! This to deactivate parallelism over perturbations.
+   new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
+   MSG_WARNING("Deactivating parallelism over perturbations.")
+ end if
+#endif
+
+ new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
+#ifdef HAVE_MPI
+ ! Create cartesian communicator (perturbations, bq, fft)
+ ! At present, FFT parallelism is not activated.
+ ndims = 3
+ ABI_MALLOC(dims, (ndims))
+ ABI_MALLOC(periods, (ndims))
+ ABI_MALLOC(keepdim, (ndims))
+ periods(:) = .False.; reorder = .False.
+ dims = [new%nprocs_bq, new%nprocs_pert, 1]
+ call MPI_CART_CREATE(comm, ndims, dims, periods, reorder, comm_cart, ierr)
+
+ ! Find the index and coordinates of the current processor
+ call MPI_COMM_RANK(comm_cart, me_cart, ierr)
+ call MPI_CART_COORDS(comm_cart, me_cart, ndims, new%coords, ierr)
+ !%me_x = coords(1)
+ !%me_pert = coords(2)
+ !%me_fft = coords(2)
+
+ ! Create the communicator for the (band_sum, qpoint_sum) loops
+ keepdim = .False.; keepdim(1) = .True.
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_bq, ierr)
+ call MPI_COMM_RANK(new%comm_bq, new%me_bq, ierr)
+
+ ! Create the communicator to distribute perturbations.
+ keepdim = .False.; keepdim(2) = .True.
+ call MPI_CART_SUB(comm_cart, keepdim, new%comm_pert, ierr)
+ call MPI_COMM_RANK(new%comm_pert, new%me_pert, ierr)
+
+ ! Create the communicator for the band sum / qpoint loops
+ !keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.
+ !call MPI_CART_SUB(comm_cart, keepdim, new%comm_bqfft, ierr)
+ !call MPI_COMM_RANK(new%comm_bqfft, new%me_bqfft, ierr)
+
+ ABI_FREE(dims)
+ ABI_FREE(periods)
+ ABI_FREE(keepdim)
+ !call xmpi_comm_free(comm_cart)
+#endif
+
+ ! Build table with list of perturbations treated by this CPU.
+ ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
+ do iatom=1,cryst%natom
+   do idir=1,3
+     pertcase = (iatom-1) * 3 + idir
+     all_pinfo(:, pertcase) = [idir, iatom, pertcase]
+   end do
+ end do
+ bstart = (natom3 / new%nprocs_pert) * new%me_pert + 1
+ bstop = bstart + new%my_npert - 1
+ new%my_pinfo = all_pinfo(:, bstart:bstop)
+ !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert
+ !write(std_out,*)"my_pinfo", new%my_pinfo
 
  ! Build (linear) mesh of K * temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
@@ -1744,6 +1857,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among processors.
  new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+
+ call cwtime_report("sigmaph_new: k-points", cpu, wall, gflops)
 
  ! TODO: Rename variable
  if (dtset%nkptgw /= 0) then
@@ -1806,7 +1921,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
         ! Include all the k-points in the IBZ.
         ! Note that kcalc == ebands%kptns so we can use a single ik index in the loop over k-points.
         ! No need to map kcalc onto ebands%kptns.
-        call wrtout(std_out, "nkptgw set to 0 ==> Automatic selection of k-points and bands for sigma_{nk}.")
+        call wrtout(std_out, " nkptgw set to 0 ==> Automatic selection of k-points and bands for Sigma_nk.")
         new%nkcalc = ebands%nkpt
         ABI_MALLOC(new%kcalc, (3, new%nkcalc))
         new%kcalc = ebands%kptns
@@ -1841,7 +1956,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! we have compute the union of the k-points where the fundamental and the direct gaps are located.
      !
      ! Find the list of `interesting` kpoints.
-     call wrtout(std_out, "qprange not specified in input --> Include direct and fundamental KS gap in Sigma_{nk}")
+     call wrtout(std_out, " qprange not specified in input --> Include direct and fundamental KS gap in Sigma_nk")
      ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
      nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
 
@@ -1884,8 +1999,17 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_DT_MALLOC(new%degtab, (new%nkcalc, new%nsppol))
  end if
 
+ ABI_ICALLOC(degblock_all, (2, mband, new%nkcalc, new%nsppol))
+ ABI_ICALLOC(ndeg_all, (new%nkcalc, new%nsppol))
  ierr = 0
+
  do ikcalc=1,new%nkcalc
+   if (mod(ikcalc, nprocs) /= my_rank) then
+     new%kcalc2ibz(ikcalc, :) = 0
+     new%bstart_ks(ikcalc, :) = 0
+     new%nbcalc_ks(ikcalc, :) = 0
+     cycle ! MPI parallelism.
+   end if
    kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
       sppoldbl1,cryst%symafm,cryst%symrel,new%timrev,xmpi_comm_self,use_symrec=.False.)
@@ -1910,45 +2034,73 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ierr = ierr + 1
    end if
 
-   ! Find the little-group of the k-point and initialize the weights for BZ integration.
-   ! Examine the symmetries of the k-point
-   ! TODO: See timerev_k
-   !call littlegroup_q(cryst%nsym,kk,symk,cryst%symrec,cryst%symafm,timerev_k,prtvol=dtset%prtvol)
-   !call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
-
    ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
    ! Here we make sure that all the degenerate states are included.
    ! Store also band indices of the degenerate sets, used to average final results.
    if (abs(new%symsigma) == 1) then
+     cnt = 0
      do spin=1,new%nsppol
        bstop = new%bstart_ks(ikcalc,spin) + new%nbcalc_ks(ikcalc,spin) - 1
        call enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc,spin), bstop, changed, tol_enediff, degblock=degblock)
        if (changed) then
          new%nbcalc_ks(ikcalc,spin) = bstop - new%bstart_ks(ikcalc,spin) + 1
-         write(msg,'(2(a,i0),2a,2(1x,i0))')&
-           "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",spin,ch10,&
-           "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),bstop
-         MSG_COMMENT(msg)
+         cnt = cnt + 1
+         if (cnt < 5) then
+           write(msg,'(2(a,i0),2a,2(1x,i0))')&
+             "Not all the degenerate states for ikcalc= ",ikcalc,", spin= ",spin,ch10,&
+             "were included in the bdgw set. bdgw has been automatically changed to: ",new%bstart_ks(ikcalc,spin),bstop
+           MSG_COMMENT(msg)
+         end if
          write(msg,'(2(a,i0),2a)') "The number of included states ",bstop,&
                       " is larger than the number of bands in the input ",dtset%nband(new%nkcalc*(spin-1)+ikcalc),ch10,&
                       "Action: Increase nband."
          ABI_CHECK(bstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg)
        end if
+
        ! Store band indices used for averaging (shifted by bstart_ks)
        ndeg = size(degblock, dim=2)
-       ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
-       do ii=1,ndeg
-         cnt = degblock(2, ii) - degblock(1, ii) + 1
-         ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
-         new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii) - new%bstart_ks(ikcalc, spin) + 1, &
-                                                           degblock(2, ii) - new%bstart_ks(ikcalc, spin) + 1)]
-       end do
+       ndeg_all(ikcalc, spin) = ndeg
+       degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
+
+       !ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
+       !do ii=1,ndeg
+       !  cnt = degblock(2, ii) - degblock(1, ii) + 1
+       !  ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
+       !  new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii) - new%bstart_ks(ikcalc, spin) + 1, &
+       !                                                    degblock(2, ii) - new%bstart_ks(ikcalc, spin) + 1)]
+       !end do
        ABI_FREE(degblock)
      end do
    end if ! symsigma
-
- end do
+ end do ! ikcalc
  ABI_CHECK(ierr == 0, "Fatal error, kptgw list must be in the IBZ")
+
+ ! Collect data
+ call xmpi_sum(new%kcalc2ibz, comm, ierr)
+ call xmpi_sum(new%bstart_ks, comm, ierr)
+ call xmpi_sum(new%nbcalc_ks, comm, ierr)
+
+ if (abs(new%symsigma) == 1) then
+   call xmpi_sum(ndeg_all, comm, ierr)
+   call xmpi_sum(degblock_all, comm, ierr)
+   do ikcalc=1,new%nkcalc
+     do spin=1,new%nsppol
+       ndeg = ndeg_all(ikcalc, spin)
+       ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
+       do ii=1,ndeg
+           cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
+           ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
+           new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
+             degblock_all(1, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1, &
+             degblock_all(2, ii, ikcalc, spin) - new%bstart_ks(ikcalc, spin) + 1)]
+       end do
+     end do
+   end do
+ end if
+ ABI_FREE(degblock_all)
+ ABI_FREE(ndeg_all)
+
+ call cwtime_report("sigmaph_new: kptgw", cpu, wall, gflops)
 
  ! Now we can finally compute max_nbcalc
  new%max_nbcalc = maxval(new%nbcalc_ks)
@@ -1957,12 +2109,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! used to symmetrize the wavefunctions in G-space.
  ! TODO: Should loop over IBZ(k)
+ ! This part is very slow for dense meshes should use geometrical approach...
  new%mpw = 0; new%gmax = 0; cnt = 0
  do ik=1,new%nkcalc
    kk = new%kcalc(:, ik)
    do iq_ibz=1,new%nqbz
    !do iq_ibz=1,new%nqibz_k
-     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelsim.
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      !kq = kk + qibz_k(:,iq_ibz)
      kq = kk + new%qbz(:,iq_ibz)
 
@@ -1982,7 +2135,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  my_mpw = new%mpw; call xmpi_max(my_mpw, new%mpw, comm, ierr)
  my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
+
  call wrtout(std_out, sjoin('Optimal value of mpw=', itoa(new%mpw)))
+ call cwtime_report("sigmaph_new: mpw", cpu, wall, gflops)
 
  ! Define number of bands included in self-energy summation as well as band range.
  ! This value depends on the kind of calculation as imag_only can take advantage of
@@ -2047,8 +2202,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      new%bsum_stop = min(dtset%sigma_bsum_range(2), mband)
    end if
    new%nbsum = new%bsum_stop - new%bsum_start + 1
-   ! Split bands among procs.
-   call xmpi_split_work(new%nbsum, comm, new%my_bstart, new%my_bstop, msg, ierr)
+   ! Split bands among the procs in comm_bq
+   call xmpi_split_work(new%nbsum, new%comm_bq, new%my_bstart, new%my_bstop, msg, ierr)
    if (new%my_bstart == new%nbsum + 1) then
      MSG_ERROR("sigmaph with idle processes should be tested! Decrease ncpus or increase nband")
    end if
@@ -2076,9 +2231,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  ! Prepare calculation of generalized Eliashberg functions.
- ! Allow users to deactivate this part with prtphdos == 0
+ ! Allow users to deactivate this part with prteliash == 0
  new%gfw_nomega = 0
- if (dtset%prtphdos == 1) then
+ if (dtset%prteliash /= 0) then
    new%gfw_nomega = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / dtset%ph_wstep) + 1
    ABI_MALLOC(new%gfw_mesh, (new%gfw_nomega))
    new%gfw_mesh = arth(ifc%omega_minmax(1), dtset%ph_wstep, new%gfw_nomega)
@@ -2171,6 +2326,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      new%ephwg = ephwg_from_ebands(cryst, ifc, ebands_dense, bstart, new%nbsum, comm)
    endif
  end if
+
+ call cwtime_report("sigmaph_new: doublegrid", cpu, wall, gflops)
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
  ABI_MALLOC(new%mu_e, (new%ntemp))
@@ -2301,6 +2458,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ABI_CALLOC(new%frohl_vals_wr, (new%nwr, new%ntemp, new%max_nbcalc))
    end if
  end if
+ 
+ call cwtime_report("sigmaph_new: all", cpu_all, wall_all, gflops_all)
 
 end function sigmaph_new
 !!***
@@ -2352,12 +2511,16 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 #endif
  character(len=500) :: msg
  real(dp) :: edos_broad,edos_step
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: found
  character(len=fnlen) :: path
  type(edos_t) :: edos
 
 ! *************************************************************************
  my_rank = xmpi_comm_rank(comm)
+
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Compute electron DOS with tetra.
  edos_intmeth = 2; if (self%bcorr == 1) edos_intmeth = 3
@@ -2372,6 +2535,8 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
    call edos%print(unit=std_out)
    !call edos%print(unit=ab_out)
  end if
+
+ call cwtime_report("sigmaph_new: ebands", cpu, wall, gflops)
 
  ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
@@ -2527,6 +2692,8 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 #endif
 
  call edos%free()
+
+ call cwtime_report("sigmaph_new: netcdf", cpu, wall, gflops)
 
 end subroutine sigmaph_write
 !!***
@@ -2789,6 +2956,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%nbcalc_ks)
  ABI_SFREE(self%kcalc2ibz)
  ABI_SFREE(self%distrib_bq)
+ ABI_SFREE(self%my_pinfo)
 
  ! real
  ABI_SFREE(self%kcalc)
@@ -2836,6 +3004,11 @@ subroutine sigmaph_free(self)
  call ephwg_free(self%ephwg)
  call eph_double_grid_free(self%eph_doublegrid)
  call self%frohl_skw%free()
+
+ ! Deallocate MPI communicators
+ !call xmpi_comm_free(self%comm_pert)
+ !call xmpi_comm_free(self%comm_bq)
+ !call xmpi_comm_free(self%comm_fft)
 
  ! Close netcdf file.
 #ifdef HAVE_NETCDF
@@ -2968,7 +3141,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  integer :: ncerr
 #endif
 !arrays
- integer :: shape3(3),shape4(4),shape5(5),shape6(6)
+ !integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
  !real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
  real(dp) :: qp_gaps(self%ntemp),qpoms_gaps(self%ntemp)
@@ -2981,14 +3154,13 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
+ call wrtout(std_out, "Gathering results. Waiting for other processes...")
  call cwtime(cpu, wall, gflops, "start")
  call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- call cwtime(cpu, wall, gflops, "stop", comm=comm)
- call wrtout(std_out, sjoin("Sigma_{nk} gather completed. Average cpu-time:", sec2str(cpu), &
-     ", Total Average wall-time:", sec2str(wall), ch10), do_flush=.True.)
+ call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops)
 
  ! Only master writes
  if (my_rank /= master) return
@@ -3073,10 +3245,10 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    ! Write header.
    if (it <= max_ntemp) then
      if (self%nsppol == 1) then
-       write(ab_out,"(3a,f4.1,a)") &
+       write(ab_out,"(3a,f6.1,a)") &
          "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", T= ", self%kTmesh(it) / kb_HaK, " [K]"
      else
-       write(ab_out,"(3a,i1,a,f4.1,a)") &
+       write(ab_out,"(3a,i1,a,f6.1,a)") &
          "K-point: ", trim(ktoa(self%kcalc(:,ikcalc))), ", spin: ", spin, ", T= ",self%kTmesh(it) / kb_HaK, " [K]"
      end if
      if (self%imag_only) then
@@ -3222,7 +3394,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    end if
  end if
 
- call cwtime(cpu, wall, gflops, "start")
 #ifdef HAVE_NETCDF
 
  ! Write self-energy matrix elements for this (kpt, spin)
@@ -3308,9 +3479,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_done"), 1, start=[ikcalc,spin]))
 #endif
 
- call cwtime(cpu, wall, gflops, "stop")
- call wrtout(std_out, sjoin("Sigma_{nk} netcdf output completed. cpu-time:", sec2str(cpu), &
-     ", Total wall-time:", sec2str(wall), ch10), do_flush=.True.)
+ call cwtime_report(" Sigma_nk netcdf output", cpu, wall, gflops)
 
 end subroutine sigmaph_gather_and_write
 !!***
@@ -3373,10 +3542,11 @@ subroutine sigmaph_print(self, dtset, unt)
    write(unt,"(2(a,i0,1x))")"ntheta:", self%ntheta, "nphi:", self%nphi
    write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
  end if
+ write(unt,"(a, i0)")"Number of k-points for self-energy corrections: ", self%nkcalc
  write(unt,"(a)")"List of K-points for self-energy corrections:"
  do ikc=1,self%nkcalc
-   if (ikc > 20) then
-     write(unt, "(a)")"nkcalc > 20. Stop printing more k-point information."
+   if (ikc > 10) then
+     write(unt, "(2a)")"nkcalc > 10. Stop printing more k-point information.",ch10
      exit
    end if
    do is=1,self%nsppol
@@ -3385,6 +3555,13 @@ subroutine sigmaph_print(self, dtset, unt)
        ikc, is, trim(ktoa(self%kcalc(:,ikc))), self%bstart_ks(ikc,is), self%bstart_ks(ikc,is) + self%nbcalc_ks(ikc,is) - 1
      end do
  end do
+
+ write(unt, "(a)")" === MPI parallelism ==="
+ write(unt, "(2(a,i0))")"P Allocating and treating bands from my_bstart: ", self%my_bstart, &
+     " up to my_bstop: ", self%my_bstop
+ write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", self%nprocs_pert
+ write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", self%my_npert
+ write(unt, "(a,i0)")"P Number of CPUs for parallelism over (q-points, bands): ", self%nprocs_bq
 
 end subroutine sigmaph_print
 !!***
@@ -3425,7 +3602,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 !Local variables ------------------------------
 !scalars
  integer :: nu, band_ks, ibsum_kq, ik_ibz, ib_k, bstart_ks, nbcalc_ks, my_rank, natom3, ierr
- integer :: nprocs,this_calc
+ integer :: nprocs,this_calc, imyp
  integer :: iq_ibz_fine,iq_bz_fine,iq_ibz_packed,iq_ibz,jj
  real(dp) :: eig0nk, eminmax(2)
  real(dp) :: kk(3), kq(3), qpt(3)
@@ -3451,8 +3628,10 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  this_calc = 0
  do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
   ! loop over phonon modes
-  do nu=1,natom3
+  !do nu=1,natom3
+  do imyp=1,sigma%my_npert
     ! loop over bands in the self-energy
+    nu = sigma%my_pinfo(3, imyp)
     do ib_k=1,nbcalc_ks
       this_calc = this_calc + 1; if (mod(this_calc,nprocs) /= my_rank) cycle ! MPI parallelism.
       band_ks = ib_k + bstart_ks - 1
@@ -3470,15 +3649,17 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  ! loop over bands to sum
  do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
   ! loop over phonon modes
-  do nu=1,natom3
+  !do nu=1,natom3
+  do imyp=1,sigma%my_npert
+    nu = sigma%my_pinfo(3, imyp)
     ! loop over bands in the self-energy
     do ib_k=1,nbcalc_ks
-      !this_calc = (ibsum_kq-1)*natom3*nbcalc_ks + (nu-1)*nbcalc_ks + ib_k
       band_ks = ib_k + bstart_ks - 1
       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
       eminmax(1) = eig0nk - 0.01
       eminmax(2) = eig0nk + 0.01
-      call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, comm)
+      ! FIXME: This part is not compatibile with parallelism over perturbations.
+      call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
 
       !for all the q-points that I am going to calculate
       iq_ibz_packed = 1
@@ -3492,15 +3673,15 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
           do jj=1,sigma%eph_doublegrid%ndiv
             iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)
             iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
-            sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,iq_ibz_packed,jj) = &
+            sigma%deltaw_pm(1,ib_k,imyp,ibsum_kq,iq_ibz_packed,jj) = &
               tmp_deltaw_pm(2,iq_ibz_fine,1) / ( sigma%ephwg%lgk%weights(iq_ibz_fine) )
-            sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,iq_ibz_packed,jj) = &
+            sigma%deltaw_pm(2,ib_k,imyp,ibsum_kq,iq_ibz_packed,jj) = &
               tmp_deltaw_pm(2,iq_ibz_fine,2) / ( sigma%ephwg%lgk%weights(iq_ibz_fine) )
           end do
         else
-          sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,iq_ibz_packed,1) = &
+          sigma%deltaw_pm(1,ib_k,imyp,ibsum_kq,iq_ibz_packed,1) = &
             tmp_deltaw_pm(2, iq_ibz, 1) / ( sigma%ephwg%lgk%weights(iq_ibz) )
-          sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,iq_ibz_packed,1) = &
+          sigma%deltaw_pm(2,ib_k,imyp,ibsum_kq,iq_ibz_packed,1) = &
             tmp_deltaw_pm(2, iq_ibz, 2) / ( sigma%ephwg%lgk%weights(iq_ibz) )
         end if
         iq_ibz_packed = iq_ibz_packed + 1
@@ -3591,7 +3772,6 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  ! Integrations over q-points in the IBZ(k).
  ! Use densified mesh in each q-microzone.
  ! Use spherical cutoff of radius qrad around q = 0 when computing gkq^{LR}
-
  sigma%frohl_vals_e0ks = zero
  sigma%frohl_dvals_de0ks = zero
  if (sigma%nwr > 0) sigma%frohl_vals_wr = zero
@@ -3829,8 +4009,7 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  call xmpi_sum(sigma%frohl_dvals_de0ks, comm, ierr)
  if (sigma%nwr > 0) call xmpi_sum(sigma%frohl_vals_wr, comm, ierr)
 
- call cwtime(cpu_fr, wall_fr, gflops_fr, "stop")
- call wrtout(std_out, sjoin("Frohlich self-energy completed: cpu-time:", sec2str(cpu_fr), ", wall-time:", sec2str(wall_fr)))
+ call cwtime_report(" Frohlich self-energy", cpu_fr, wall_fr, gflops_fr)
 
 end subroutine eval_sigfrohl
 !!***

@@ -41,8 +41,6 @@
 
 subroutine xmpi_isum_int0d(xval, xsum, comm, request, ierr)
 
- implicit none
-
 !Arguments-------------------------
  integer, intent(in) :: xval
  integer ABI_ASYNC, intent(out) :: xsum

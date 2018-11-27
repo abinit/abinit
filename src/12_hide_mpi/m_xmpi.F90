@@ -1497,7 +1497,7 @@ end subroutine xmpi_comm_group
 !!  input_comm=Input MPI communicator (to be splitted)
 !!  color=Control of subset assignment (nonnegative integer).
 !!        Processes with the same color are in the same new communicator
-!!  key=Ccontrol of rank assigment (integer)
+!!  key=Control of rank assigment (integer)
 !!
 !! OUTPUT
 !!  mpierr=error code returned
