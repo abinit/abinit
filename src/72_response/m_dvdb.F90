@@ -1877,10 +1877,13 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
- real(dp) :: tnon(3)
+ real(dp) :: tnon(3), tsec(2)
  real(dp),allocatable :: v1g_qibz(:,:,:),workg(:,:),v1g_mu(:,:)
 
 ! *************************************************************************
+
+ ! Keep track of total time spent.
+ call timab(1804, 1, tsec)
 
  ABI_UNUSED(nsppol)
  ABI_CHECK(cplex == 2, "cplex != 2")
@@ -1953,6 +1956,8 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  ABI_FREE(workg)
  ABI_FREE(v1g_mu)
  ABI_FREE(v1g_qibz)
+
+ call timab(1804, 2, tsec)
 
 end subroutine v1phq_rotate
 !!***
@@ -2099,12 +2104,16 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
  ABI_CHECK(any(itirev == [1,2]), "Wrong itirev")
  tsign = 3-2*itirev; has_phase = any(abs(tnon) > tol12)
 
+ !outfg = zero
+
  do isp=1,nspden
    ind1 = 0
    do i3=1,n3
      do i2=1,n2
        do i1=1,n1
          ind1 = ind1 + 1
+         !ind1 = 1 + i1 + (i2-1)*n1 + (i3-1)*n1*n2
+         !if (mod(ind1, nprocs) /= my_rank) cycle
 
          ! Get location of G vector (grid point) centered at 0 0 0
          l1 = i1-(i1/id1)*n1-1
@@ -2156,6 +2165,8 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
      end do
    end do
  end do ! isp
+
+ !call xmpi_sum(comm, outfg, ierr)
 
  call timab(1803, 2, tsec)
 

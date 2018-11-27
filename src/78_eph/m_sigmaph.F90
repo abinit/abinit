@@ -981,7 +981,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        if (dksqmax > tol12) then
          write(msg, '(4a,es16.6,7a)' )&
-          "The WFK file cannot be used to compute self-energy corrections at k:.", trim(ktoa(kk)), ch10,&
+          "The WFK file cannot be used to compute self-energy corrections at k:", trim(ktoa(kk)), ch10,&
           "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
           "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
           'Action: check your WFK file and (k,q) point input variables'

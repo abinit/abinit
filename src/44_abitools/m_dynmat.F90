@@ -1916,8 +1916,7 @@ end subroutine d2sym3
 !! Should be used just after each call to dfpt_ewald, for both
 !! q==0 and the real wavelength.
 !!
-!! The q0dy3_apply should be used in conjunction with the subroutine
-!! dfpt_ewald (or ewald9):
+!! The q0dy3_apply should be used in conjunction with the subroutine dfpt_ewald (or ewald9):
 !! First, the call of dfpt_ewald with q==0 should be done,
 !!   then the call to q0dy3_calc will produce
 !!   the dyewq0 matrix from the (q=0) dyew matrix
@@ -1991,8 +1990,7 @@ end subroutine q0dy3_apply
 !!   in an unsymmetrical form (if option=1), or
 !!   in a symmetrical form (if option=2).
 !!
-!! The q0dy3_calc should be used in conjunction with the subroutine
-!! dfpt_ewald (or ewald9).
+!! The q0dy3_calc should be used in conjunction with the subroutine dfpt_ewald (or ewald9).
 !! First, the call of dfpt_ewald with q==0 should be done ,
 !!   then the call to q0dy3_calc will produce
 !!   the dyewq0 matrix from the (q=0) dyew matrix
