@@ -987,14 +987,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1747)='inv eps_m and subtract 1        '
 
  ! IFC object
- names(1748)='ifc_fourq'
+ names(1748)='ifc_fourq'; basic(1748) = 1
 
- names(1780)='ctk_rotate'
+ names(1780)='ctk_rotate'; basic(1780) = 1
 
  ! DVDB object
- names(1800)='dvdb_new                        '
- names(1801)='dvdb_qcache_read                '
- names(1802)='dvdb_readsym_qbz                '
+ names(1800)='dvdb_new'; basic(1800) = 1
+ names(1801)='dvdb_qcache_read'; basic(1801) = 1
+ names(1802)='dvdb_readsym_qbz'; basic(1802) = 1
 
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
