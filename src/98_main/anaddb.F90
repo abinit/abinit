@@ -162,6 +162,9 @@ program anaddb
 
  start_datetime = asctime()
 
+ ! Zero out all accumulators of time and init timers
+ call timab(1, 0, tsec)
+
  ! Initialise the code: write heading, and read names of files.
  if (iam_master) call anaddb_init(filnam)
  call xmpi_bcast (filnam, master, comm, ierr)

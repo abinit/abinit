@@ -43,7 +43,7 @@ module m_dvdb
 
  use defs_abitypes,   only : hdr_type, mpi_type, dataset_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
- use m_time,          only : cwtime, cwtime_report, sec2str
+ use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : open_file, file_exists, delete_file
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
  use m_symtk,         only : mati3inv, littlegroup_q
@@ -389,11 +389,15 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
 !arrays
  integer,allocatable :: tmp_pos(:,:,:)
  real(dp),allocatable :: tmp_qpts(:,:)
+ real(dp) :: tsec(2)
 
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  new%path = path; new%comm = comm; new%iomode = IO_MODE_FORTRAN
+
+ ! Keep track of total time spent.
+ call timab(1800, 1, tsec)
 
  call wrtout(std_out, sjoin("- Analyzing DVDB file: ", path, "..."))
  call cwtime(cpu, wall, gflops, "start")
@@ -548,6 +552,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  call xmpi_sum(new%symq_table, comm, ierr)
 
  call cwtime_report("- dvdb_new", cpu, wall, gflops)
+ call timab(1800, 2, tsec)
 
  return
 
@@ -1115,9 +1120,11 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
    if (db%symv1) then
      if (db%debug) write(std_out,*)"Potentials are available but will call v1phq_symmetrize because of symv1"
      do mu=1,db%natom3
+       !if (mod(mu, nproc) /= my_rank) cycle ! MPI parallelism.
        idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
        call v1phq_symmetrize(db%cryst,idir,ipert,db%symq_table(:,:,:,iqpt),ngfft,cplex,nfft,&
          db%nspden,db%nsppol,db%mpi_enreg,v1scf(:,:,:,mu))
+       !call MPI_Ibcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm, MPI_Request *request)
      end do
    end if
    if (db%debug) write(std_out,*)"All perts available. Returning"
@@ -1150,6 +1157,7 @@ end subroutine dvdb_readsym_allv1
 !!  dvdb_readsym_qbz
 !!
 !! FUNCTION
+!! This is the MAIN ENTRY POINT for client code.
 !! Reconstruct the DFPT potential for a q-point in the BZ starting
 !! from its symmetrical image in the IBZ. Implements caching mechanism to reduce IO.
 !!
@@ -1193,9 +1201,13 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 !arrays
  integer :: pinfo(3,3*db%mpert)
  integer :: g0q(3),lgsize(db%nqpt),iqmax(1)
+ real(dp) :: tsec(2)
  real(dp),allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
+
+ ! Keep track of total time spent.
+ call timab(1802, 1, tsec)
 
  db_iqpt = indq2db(1)
 
@@ -1344,6 +1356,8 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
  end if ! not is_irred
 
+ call timab(1802, 2, tsec)
+
 end subroutine dvdb_readsym_qbz
 !!***
 
@@ -1445,10 +1459,13 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: v1scf(:,:,:,:)
+ real(dp) :: tsec(2)
 
 ! *************************************************************************
 
  if (db%qcache_size == 0) return
+
+ call timab(1801, 1, tsec)
 
  call wrtout(std_out, "Loading Vscf(q) in cache...", do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -1483,6 +1500,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  end do
 
  call cwtime_report("IO + symmetrization", cpu_all, wall_all, gflops_all)
+ call timab(1801, 1, tsec)
 
 end subroutine dvdb_qcache_read
 !!***
@@ -1875,8 +1893,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  cnt = 0
  do mu=1,natom3
    do ispden=1,nspden
-     cnt = cnt + 1
-     if (mod(cnt, nproc) /= my_rank) cycle
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
      call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
    end do
  end do
@@ -1894,7 +1911,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  v1r_qbz = zero
 
  do mu=1,natom3
-   if (mod(mu, nproc) /= my_rank) cycle
+   if (mod(mu, nproc) /= my_rank) cycle ! MPI parallelism.
    idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
 
    ! Phase due to L0 + R^{-1}tau
