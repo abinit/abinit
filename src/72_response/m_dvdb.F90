@@ -1325,7 +1325,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
      else
        ! All 3 natom have been read in v1scf by dvdb_readsym_allv1
-       write(std_out, *)"! All 3 natom have been read in v1scf by dvdb_readsym_allv1"
+       !write(std_out, *)"! All 3 natom have been read in v1scf by dvdb_readsym_allv1"
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
@@ -1500,7 +1500,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  end do
 
  call cwtime_report("IO + symmetrization", cpu_all, wall_all, gflops_all)
- call timab(1801, 1, tsec)
+ call timab(1801, 2, tsec)
 
 end subroutine dvdb_qcache_read
 !!***
@@ -2085,9 +2085,12 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
  logical :: has_phase
 !arrays
  integer :: tsg(3)
- real(dp) :: phnon1(2)
+ real(dp) :: phnon1(2), tsec(2)
 
 ! *************************************************************************
+
+ ! Keep track of total time spent.
+ call timab(1803, 1, tsec)
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); nfftot = product(ngfft(1:3))
  ABI_CHECK(nfftot == nfft, "FFT parallelism not supported")
@@ -2153,6 +2156,8 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
      end do
    end do
  end do ! isp
+
+ call timab(1803, 2, tsec)
 
 end subroutine rotate_fqg
 !!***
