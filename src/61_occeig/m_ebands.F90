@@ -3963,13 +3963,18 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: kptopt3=3
  integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
+ integer :: my_nkibz, nkfull, timrev
  real(dp) :: max_ene,min_ene,wtk,max_occ
+ real(dp) :: dksqmax
  character(len=500) :: msg
  type(t_tetrahedron) :: tetra
 !arrays
+ integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
  real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
+ real(dp),allocatable :: kfull(:,:),wtkfull(:),my_kibz(:,:)
 
 ! *********************************************************************
 
@@ -3998,6 +4003,26 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
  ABI_MALLOC(out_mesh, (nw))
  out_mesh = arth(min_ene, step, nw)
  ABI_CALLOC(out_dos,  (nw, 2, 0:ebands%nsppol, ndat))
+
+ ! Prepare ibz2bz
+ ! Create kpoints in the full brillouin zone note kptop3
+ call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, kptopt3, ebands%nshiftk, ebands%shiftk, &
+   my_nkibz, my_kibz, wtkfull, nkfull, kfull) ! new_kptrlatt, new_shiftk)
+
+ ABI_FREE(my_kibz)
+ ABI_FREE(wtkfull)
+
+ ! Costruct full BZ and create mapping BZ --> IBZ
+ ! Note:
+ !   - we don't change the value of nsppol hence sppoldbl is set to 1
+ !   - we use symrel so that bz2ibz can be used to reconstruct the wavefunctions.
+ !
+ ABI_MALLOC(bz2ibz, (nkfull*ebands%nsppol,6))
+
+ timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+ call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
+   ebands%nsppol,cryst%symafm,cryst%symrel,timrev,comm,use_symrec=.False.)
+
 
  select case (intmeth)
  case (1)

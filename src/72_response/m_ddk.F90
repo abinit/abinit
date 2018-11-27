@@ -347,8 +347,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  type(wfd_t) :: wfd
  type(vkbr_t) :: vkbr
  type(ebands_t) :: ebands
- !type(edos_t)  :: edos
- !type(jdos_t)  :: jdos
+ type(edos_t)  :: edos
+ type(jdos_t)  :: jdos
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp, hdr
  type(ddkop_t) :: ddkop
@@ -360,6 +360,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
  real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:),vv_vals(:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
+ real(dp),allocatable :: vvdos_mesh(:), vvdos_vals(:,:,:,:)
  complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -642,37 +643,34 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  is_kmesh = hdr%kptopt > 0
 
- if (is_kmesh) then
+ if (is_kmesh .and. only_diago) then
    ! Compute electron DOS with tetra.
    edos_intmeth = 2
    if (dtset%prtdos == 1) edos_intmeth = 1
    if (dtset%prtdos == -2) edos_intmeth = 3
    edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
-   !edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
+   if (edos_step == 0) edos_step = 0.001
+   edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
    !jdos = ebands_get_jdos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
 
    ! Compute (v x v) DOS. Upper triangle in Voigt format.
-   !ABI_MALLOC(vv_vals, (6, mband, nkpt, nsppol))
-   !do spin=1,nsppol
-   !  do ik=1,nkpt
-   !    do ib_v=bandmin,bandmax
-   !      ! Go to cartesian coordinates.
-   !      vr = vdiago(:,ib_v,ik,spin)
-   !      do ivoigt=1,6
-   !        ii = voigt2ij(1, ivoigt)
-   !        jj = voigt2ij(2, ivoigt)
-   !        vv_vals(ivoigt, ib_v, ik, spin) = vr(ii) * vr(jj)
-   !      end do
-   !    end do
-   !  end do
-   !end do
-   !call ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 6, edos_intmeth, edos_step, edos_broad, &
-   !                                    vvdos__mesh, vv_dos, comm)
-   !ABI_SFREE(vv_vals)
-   !ABI_SFREE(vvdos_mesh)
-   !ABI_SFREE(vv_dos)
-   !call edos%free()
-   !call jdos%free()
+   ABI_MALLOC(vv_vals, (6, mband, nkpt, nsppol))
+   do spin=1,nsppol
+     do ik=1,nkpt
+       do ib_v=bandmin,bandmax
+         ! Go to cartesian coordinates.
+         vr = vdiago(:,ib_v,ik,spin)
+         do ivoigt=1,6
+           ii = voigt2ij(1, ivoigt)
+           jj = voigt2ij(2, ivoigt)
+           vv_vals(ivoigt, ib_v, ik, spin) = vr(ii) * vr(jj)
+         end do
+       end do
+     end do
+   end do
+   call ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 6, edos_intmeth, edos_step, edos_broad, &
+                                       comm, vvdos_mesh, vvdos_vals)
+   ABI_SFREE(vv_vals)
  end if
 
  ! Write the matrix elements
@@ -705,8 +703,13 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_matrix"), vmat))
    end if
    if (is_kmesh) then
-     !NCF_CHECK(edos%ncwrite(ncid))
+     NCF_CHECK(edos%ncwrite(ncid))
      !NCF_CHECK(jdos%ncwrite(ncid))
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, two, nsppol_plus1, six")], defmode=.True.)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals))
    end if
    NCF_CHECK(nf90_close(ncid))
 
@@ -751,6 +754,12 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_SFREE(vdiago)
  ABI_SFREE(vmat)
 
+ if (is_kmesh) then
+   ABI_SFREE(vvdos_mesh)
+   ABI_SFREE(vvdos_vals)
+   call edos%free()
+   !call jdos%free()
+ end if
  call wfd%free()
  call ebands_free(ebands)
  call cryst%free()
