@@ -1829,8 +1829,8 @@ subroutine xmpi_wait(request,mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
-  call MPI_WAIT(request,status,ier)
-  mpierr=ier
+ call MPI_WAIT(request,status,ier)
+ mpierr=ier
 #endif
 
 end subroutine xmpi_wait

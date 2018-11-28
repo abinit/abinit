@@ -33,6 +33,9 @@ module m_dvdb
  use m_abicore
  use m_errors
  use m_xmpi
+#ifdef HAVE_MPI
+ use mpi
+#endif
  use m_distribfft
  use m_nctk
  use m_sort
@@ -1874,11 +1877,12 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !scalars
  integer,parameter :: tim_fourdp0=0, master=0
  integer,save :: enough=0
- integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr
+ integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr,root
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
  real(dp) :: tnon(3), tsec(2)
- real(dp),allocatable :: v1g_qibz(:,:,:),workg(:,:),v1g_mu(:,:)
+ real(dp) ABI_ASYNC, allocatable :: v1g_qibz(:,:,:),workg(:,:),v1g_mu(:,:)
+ integer :: requests(nspden, 3*cryst%natom)
 
 ! *************************************************************************
 
@@ -1896,12 +1900,28 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  cnt = 0
  do mu=1,natom3
    do ispden=1,nspden
-     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
-     call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
+     cnt = cnt + 1
+     root = mod(cnt, nproc)
+     !if (root /= my_rank) cycle ! MPI parallelism.
+     if (root == my_rank) then
+       call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
+     end if
+#ifdef HAVE_MPI
+     call MPI_IBCAST(v1g_qibz(:,ispden,mu), nfft, MPI_DOUBLE_COMPLEX, root, comm, requests(ispden, mu), ierr)
+#endif
    end do
  end do
  ! TODO: ALLTOALLV?
- if (nproc > 1) call xmpi_sum(v1g_qibz, comm, ierr)
+ !if (nproc > 1) call xmpi_sum(v1g_qibz, comm, ierr)
+
+#ifdef HAVE_MPI
+ do mu=1,natom3
+   do ispden=1,nspden
+      call xmpi_wait(requests(ispden, mu), ierr)
+      !call MPI_REQUEST_FREE(requests(ispden, mu), ierr)
+   end do
+ end do
+#endif
 
  ABI_MALLOC(workg, (2*nfft,nspden))
  ABI_MALLOC(v1g_mu, (2*nfft,nspden))
