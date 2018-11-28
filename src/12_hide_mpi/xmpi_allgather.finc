@@ -45,8 +45,6 @@
 
 subroutine xmpi_allgather_int(xval,recvbuf,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer,intent(inout) :: xval
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
@@ -97,8 +95,6 @@ end subroutine xmpi_allgather_int
 !! SOURCE
 
 subroutine xmpi_allgather_char(charval,recvbuf,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer,intent(in)  :: spaceComm
@@ -151,8 +147,6 @@ end subroutine xmpi_allgather_char
 
 subroutine xmpi_allgather_int1d(xval,nelem,recvbuf,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
@@ -201,8 +195,6 @@ end subroutine xmpi_allgather_int1d
 !! SOURCE
 
 subroutine xmpi_allgather_int2d(xval,nelem,recvbuf,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
@@ -254,8 +246,6 @@ end subroutine xmpi_allgather_int2d
 
 subroutine xmpi_allgather_dp1d(xval,nelem,recvbuf,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
@@ -304,8 +294,6 @@ end subroutine xmpi_allgather_dp1d
 !! SOURCE
 
 subroutine xmpi_allgather_dp2d(xval,nelem,recvbuf,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
@@ -356,9 +344,6 @@ end subroutine xmpi_allgather_dp2d
 
 subroutine xmpi_allgather_dp3d(xval,nelem,recvbuf,spaceComm,ier)
 
- implicit none
-
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
  real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:,:,:)
@@ -407,9 +392,6 @@ end subroutine xmpi_allgather_dp3d
 !! SOURCE
 
 subroutine xmpi_allgather_dp4d(xval,nelem,recvbuf,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)

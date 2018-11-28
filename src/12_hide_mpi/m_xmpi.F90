@@ -196,6 +196,7 @@ MODULE m_xmpi
  public :: xmpi_alltoallv
  public :: xmpi_ialltoallv
  public :: xmpi_bcast
+ public :: xmpi_ibcast
  public :: xmpi_exch
  public :: xmpi_gather
  public :: xmpi_gatherv
@@ -354,6 +355,14 @@ interface xmpi_bcast
   module procedure xmpi_bcast_coeffi2_1d
   module procedure xmpi_bcast_coeff2_1d
 end interface xmpi_bcast
+
+!----------------------------------------------------------------------
+
+interface xmpi_ibcast
+  module procedure xmpi_ibcast_int1d
+  module procedure xmpi_ibcast_dp1d
+  module procedure xmpi_ibcast_dp3d
+end interface xmpi_ibcast
 
 !----------------------------------------------------------------------
 
@@ -1860,7 +1869,7 @@ end subroutine xmpi_wait
 !!
 !! SOURCE
 
-subroutine xmpi_waitall(array_of_requests,mpierr)
+subroutine xmpi_waitall(array_of_requests, mpierr)
 
 !Arguments-------------------------
  integer,intent(inout) :: array_of_requests(:)
@@ -2430,6 +2439,7 @@ end function xmpi_distrib_with_replicas
 #include "xmpi_ialltoallv.finc"
 
 #include "xmpi_bcast.finc"
+#include "xmpi_ibcast.finc"
 
 #include "xmpi_exch.finc"
 

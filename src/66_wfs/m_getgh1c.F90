@@ -953,7 +953,6 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 0
  integer :: dimffnl1,dimffnlk,ider,idir0,idir1,idir2,istr,ntypat,print_info
  logical :: qne0
 !arrays
@@ -961,8 +960,8 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
 
 ! *************************************************************************
 
- ! Keep track of total time spent in getgh1c_setup (use 196 slot)
- call timab(196+tim_getgh1c, 1, tsec)
+ ! Keep track of total time spent in getgh1c_setup (use 195 slot)
+ call timab(195, 1, tsec)
 
  if(.not.present(ddkinpw) .and. ipert==natom+10) then
    MSG_BUG("ddkinpw is not optional for ipert=natom+10.")
@@ -1167,7 +1166,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    end if
  end if
 
- call timab(196+tim_getgh1c,2,tsec)
+ call timab(195,2,tsec)
 
 end subroutine getgh1c_setup
 !!***

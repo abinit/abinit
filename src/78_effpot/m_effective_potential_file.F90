@@ -2623,7 +2623,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 ! Store the highest frequency
   max_phfq = zero
-  
+
   do iphl1=1,inp%nph1l
 
    ! Initialisation of the phonon wavevector
@@ -2634,7 +2634,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
 &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff)
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff,xmpi_comm_self)
 
     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
@@ -3555,33 +3555,33 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  blkval = 1
  list   = 0
 
- !Fill xcart_ref/hist and xred_ref/hist 
- 
- call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
-&                eff_pot%supercell%xcart,xred_ref)                   ! Get xred_ref 
+ !Fill xcart_ref/hist and xred_ref/hist
 
- xcart_ref = eff_pot%supercell%xcart                                 ! Get xcart_ref 
- xred_hist = hist%xred(:,:,1)                                        ! Get xred_hist 
- 
+ call xcart2xred(eff_pot%supercell%natom,eff_pot%supercell%rprimd,&
+&                eff_pot%supercell%xcart,xred_ref)                   ! Get xred_ref
+
+ xcart_ref = eff_pot%supercell%xcart                                 ! Get xcart_ref
+ xred_hist = hist%xred(:,:,1)                                        ! Get xred_hist
+
  do ib=1,natom_hist
-   if((rprimd_hist(1,1)+rprimd_hist(2,1)+rprimd_hist(3,1)) &  !Shift positions to negative coordinates 
+   if((rprimd_hist(1,1)+rprimd_hist(2,1)+rprimd_hist(3,1)) &  !Shift positions to negative coordinates
 &     *(1 - xred_hist(1,ib)) < 1)then                         !if close to unit cell boundary
-      xred_hist(1,ib)=xred_hist(1,ib)-1  
+      xred_hist(1,ib)=xred_hist(1,ib)-1
       hist%xred(1,ib,1)=xred_hist(1,ib)
    end if
-   if((rprimd_hist(1,2)+rprimd_hist(2,2)+rprimd_hist(3,2)) & 
-&     *(1 - xred_hist(2,ib)) < 1 )then 
+   if((rprimd_hist(1,2)+rprimd_hist(2,2)+rprimd_hist(3,2)) &
+&     *(1 - xred_hist(2,ib)) < 1 )then
       xred_hist(2,ib)=xred_hist(2,ib)-1
       hist%xred(2,ib,1)=xred_hist(2,ib)
-   end if 
+   end if
    if((rprimd_hist(1,3)+rprimd_hist(2,3)+rprimd_hist(3,3)) &
-&     *(1 - xred_hist(3,ib)) < 1 )then 
+&     *(1 - xred_hist(3,ib)) < 1 )then
       xred_hist(3,ib)=xred_hist(3,ib)-1
       hist%xred(3,ib,1)=xred_hist(3,ib)
    end if
- enddo  
+ enddo
 
- call xred2xcart(natom_hist,rprimd_hist,xcart_hist,hist%xred(:,:,1)) ! Get xcart_hist 
+ call xred2xcart(natom_hist,rprimd_hist,xcart_hist,hist%xred(:,:,1)) ! Get xcart_hist
 
  if(need_verbose) then
    write(msg,'(2a,I2,a,I2,a,I2)') ch10,&
@@ -3594,9 +3594,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  do ia=1,natom_hist
    do ib=1,natom_hist
      if(blkval(ib)==1)then
-       if(sqrt(abs((xcart_ref(1,ia)-xcart_hist(1,ib)))**2 &          ! Map atoms to each other that are 
+       if(sqrt(abs((xcart_ref(1,ia)-xcart_hist(1,ib)))**2 &          ! Map atoms to each other that are
 &         +  abs((xcart_ref(2,ia)-xcart_hist(2,ib)))**2   &          ! closer than 1.5 bohr
-&         +  abs((xcart_ref(3,ia)-xcart_hist(3,ib)))**2) < 1.5)then 
+&         +  abs((xcart_ref(3,ia)-xcart_hist(3,ib)))**2) < 1.5)then
          blkval(ib) = 0
          list(ib) = ia
        end if

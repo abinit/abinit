@@ -229,6 +229,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
+#ifndef HAVE_MPI_IBCAST
+ MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations will be slow")
+#endif
+
  ! Initialize filenames
  wfk0_path = dtfil%fnamewffk
  wfq_path = dtfil%fnamewffq

@@ -30,8 +30,6 @@
 
 subroutine xmpi_exch_intn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
-
 !Arguments----------------
  integer,intent(in) :: n1
  integer, DEV_CONTARRD intent(in) :: vsend(:)
@@ -90,9 +88,6 @@ end subroutine xmpi_exch_intn
 
 subroutine xmpi_exch_int2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
-
- implicit none
-
 !Arguments----------------
  integer,intent(in) :: nt
  integer, DEV_CONTARRD intent(in) :: vsend(:,:)
@@ -149,9 +144,8 @@ end subroutine xmpi_exch_int2d
 !!  vrecv= receive buffer
 !!
 !! SOURCE
-subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
+subroutine xmpi_exch_dpn(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
 !Arguments----------------
  integer,intent(in) :: n1
@@ -211,9 +205,6 @@ end subroutine xmpi_exch_dpn
 
 subroutine xmpi_exch_dp2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
-
-
 !Arguments----------------
  integer,intent(in) :: nt
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:)
@@ -271,9 +262,6 @@ end subroutine xmpi_exch_dp2d
 
 subroutine xmpi_exch_dp3d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
-
-
 !Arguments----------------
  integer,intent(in) :: nt
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:)
@@ -329,9 +317,8 @@ end subroutine xmpi_exch_dp3d
 !!  vrecv= receive buffer
 !!
 !! SOURCE
-subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
+subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
 !Arguments----------------
  integer,intent(in) :: mtag
@@ -395,9 +382,6 @@ end subroutine xmpi_exch_dp4d_tag
 
 subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
-
-
 !Arguments----------------
  integer,intent(in) ::mtag
  real(dp), DEV_CONTARRD intent(in) :: vsend(:,:,:,:,:)
@@ -448,10 +432,6 @@ end subroutine xmpi_exch_dp5d_tag
 
 subroutine xmpi_exch_spc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
-
- implicit none
-
-
 !Arguments----------------
  integer,intent(in) :: n1
  complex(spc), DEV_CONTARRD intent(in) :: vsend(:)
@@ -497,9 +477,6 @@ end subroutine xmpi_exch_spc_1d
 
 subroutine xmpi_exch_dpc_1d(vsend,n1,sender,vrecv,recever,spaceComm,ier)
 
- implicit none
-
-
 !Arguments----------------
  integer,intent(in) :: n1
  complex(dpc), DEV_CONTARRD intent(in) :: vsend(:)
@@ -544,10 +521,6 @@ end subroutine xmpi_exch_dpc_1d
 !! SOURCE
 
 subroutine xmpi_exch_dpc_2d(vsend,nt,sender,vrecv,recever,spaceComm,ier)
-
-
- implicit none
-
 
 !Arguments----------------
  integer,intent(in) :: nt

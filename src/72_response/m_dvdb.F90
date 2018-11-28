@@ -1086,7 +1086,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),allocatable,intent(out) :: v1scf(:,:,:,:)
+ real(dp) ABI_ASYNC ,allocatable,intent(out) :: v1scf(:,:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -1095,8 +1095,13 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  character(len=500) :: msg
 !arrays
  integer :: pinfo(3,3*db%mpert),pflag(3, db%natom)
+ real(dp) :: tsec(2)
+ integer,allocatable :: requests(:)
 
 ! *************************************************************************
+
+ ! Keep track of total time spent.
+ call timab(1805, 1, tsec)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
@@ -1108,15 +1113,19 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  ABI_CHECK(ierr==0, "OOM in v1scf")
 
  ! Master read all available perturbations and broadcasts data.
- if (my_rank == master) then
-   do ipc=1,npc
-     idir = pinfo(1,ipc); ipert = pinfo(2,ipc); pcase = pinfo(3, ipc)
+ ABI_MALLOC(requests, (npc))
+ do ipc=1,npc
+   idir = pinfo(1,ipc); ipert = pinfo(2,ipc); pcase = pinfo(3, ipc)
+   if (my_rank == master) then
      if (dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1scf(:,:,:,pcase), msg) /= 0) then
        MSG_ERROR(msg)
      end if
-   end do
- end if
- call xmpi_bcast(v1scf, master, comm, ierr)
+   end if
+   call xmpi_ibcast(v1scf(:,:,:,pcase), master, comm, requests(ipc), ierr)
+ end do
+ !call xmpi_bcast(v1scf, master, comm, ierr)
+ call xmpi_waitall(requests, ierr)
+ ABI_FREE(requests)
 
  ! Return if all perts are available.
  if (npc == 3*db%natom) then
@@ -1149,6 +1158,8 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  end do
 
  call v1phq_complete(db%cryst,db%qpts(:,iqpt),ngfft,cplex,nfft,db%nspden,db%nsppol,db%mpi_enreg,db%symv1,pflag,v1scf)
+
+ call timab(1805, 2, tsec)
 
 end subroutine dvdb_readsym_allv1
 !!***
@@ -1871,11 +1882,11 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  integer,intent(in) :: g0q(3),ngfft(18)
  real(dp),intent(in) :: qpt_ibz(3)
  real(dp),intent(inout) :: v1r_qibz(cplex*nfft,nspden,3*cryst%natom)
- real(dp),intent(out) :: v1r_qbz(cplex*nfft,nspden,3*cryst%natom)
+ real(dp) ABI_ASYNC, intent(out) :: v1r_qbz(cplex*nfft,nspden,3*cryst%natom)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp0=0, master=0
+ integer,parameter :: tim_fourdp0=0 !, master=0
  integer,save :: enough=0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr,root
 !arrays
@@ -1883,6 +1894,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  real(dp) :: tnon(3), tsec(2)
  real(dp) ABI_ASYNC, allocatable :: v1g_qibz(:,:,:),workg(:,:),v1g_mu(:,:)
  integer :: requests(nspden, 3*cryst%natom)
+ logical :: requests_v1g_qibz(nspden, 3*cryst%natom), requests_v1r_qbz(3*cryst%natom)
 
 ! *************************************************************************
 
@@ -1897,31 +1909,28 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
  ! Compute IBZ potentials in G-space (results in v1g_qibz)
  ABI_CALLOC(v1g_qibz, (2*nfft,nspden,natom3))
+ requests_v1g_qibz = .False.
  cnt = 0
  do mu=1,natom3
    do ispden=1,nspden
      cnt = cnt + 1
      root = mod(cnt, nproc)
-     !if (root /= my_rank) cycle ! MPI parallelism.
+     if (root /= my_rank) cycle ! MPI parallelism.
+     !call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      if (root == my_rank) then
        call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      end if
-#ifdef HAVE_MPI
-     call MPI_IBCAST(v1g_qibz(:,ispden,mu), nfft, MPI_DOUBLE_COMPLEX, root, comm, requests(ispden, mu), ierr)
-#endif
+     call xmpi_ibcast(v1g_qibz(:,ispden,mu), root, comm, requests(ispden, mu), ierr)
    end do
  end do
- ! TODO: ALLTOALLV?
  !if (nproc > 1) call xmpi_sum(v1g_qibz, comm, ierr)
 
-#ifdef HAVE_MPI
- do mu=1,natom3
-   do ispden=1,nspden
-      call xmpi_wait(requests(ispden, mu), ierr)
-      !call MPI_REQUEST_FREE(requests(ispden, mu), ierr)
-   end do
- end do
-#endif
+ !do mu=1,natom3
+ !  do ispden=1,nspden
+ !    call xmpi_wait(requests(ispden, mu), ierr)
+ !    requests_v1g_qibz(ispden, mu) = .True.
+ !  end do
+ !end do
 
  ABI_MALLOC(workg, (2*nfft,nspden))
  ABI_MALLOC(v1g_mu, (2*nfft,nspden))
@@ -1934,44 +1943,58 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  v1r_qbz = zero
 
  do mu=1,natom3
-   if (mod(mu, nproc) /= my_rank) cycle ! MPI parallelism.
-   idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
+   root = mod(mu, nproc)
+   ! MPI parallelism.
+   if (root == my_rank) then
+     idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
 
-   ! Phase due to L0 + R^{-1}tau
-   l0 = cryst%indsym(1:3,isym,ipert)
-   tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
-   ! FIXME
-   !ABI_CHECK(all(abs(tnon) < tol12), "tnon!")
-   if (.not.all(abs(tnon) < tol12)) then
-     enough = enough + 1
-     if (enough == 1) MSG_WARNING("tnon must be tested!")
-   end if
+     ! Phase due to L0 + R^{-1}tau
+     l0 = cryst%indsym(1:3,isym,ipert)
+     tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
+     ! FIXME
+     !ABI_CHECK(all(abs(tnon) < tol12), "tnon!")
+     if (.not.all(abs(tnon) < tol12)) then
+       enough = enough + 1
+       if (enough == 1) MSG_WARNING("tnon must be tested!")
+     end if
 
-   ipert_eq = cryst%indsym(4,isym,ipert)
+     ipert_eq = cryst%indsym(4,isym,ipert)
 
-   v1g_mu = zero; cnt = 0
-   do idir_eq=1,3
-     if (symrec_eq(idir, idir_eq) == 0) cycle
-     mu_eq = idir_eq + (ipert_eq-1)*3
-     cnt = cnt + 1
+     v1g_mu = zero; cnt = 0
+     do idir_eq=1,3
+       if (symrec_eq(idir, idir_eq) == 0) cycle
+       mu_eq = idir_eq + (ipert_eq-1)*3
+       cnt = cnt + 1
 
-     ! Rotate in G-space and accumulate in workg
-     call rotate_fqg(itimrev,sm1,qpt_ibz,tnon,ngfft,nfft,nspden,v1g_qibz(:,:,mu_eq),workg)
-     v1g_mu = v1g_mu + workg * symrec_eq(idir, idir_eq)
-   end do ! idir_eq
-   ABI_CHECK(cnt /= 0, "cnt should not be zero!")
+       if (.not. all(requests_v1g_qibz(:, mu_eq))) then
+         do ispden=1,nspden
+           call xmpi_wait(requests(ispden, mu_eq), ierr)
+           requests_v1g_qibz(ispden, mu_eq) = .True.
+         end do
+       end if
 
-   ! Transform to real space and take into account a possible shift. Results are stored in v1r_qbz.
-   do ispden=1,nspden
-     call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
-     call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
-     !call times_eigr(tsign * g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
-   end do
+       ! Rotate in G-space and accumulate in workg
+       call rotate_fqg(itimrev,sm1,qpt_ibz,tnon,ngfft,nfft,nspden,v1g_qibz(:,:,mu_eq),workg)
+       v1g_mu = v1g_mu + workg * symrec_eq(idir, idir_eq)
+     end do ! idir_eq
 
-   !call v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
+     ABI_CHECK(cnt /= 0, "cnt should not be zero!")
+
+     ! Transform to real space and take into account a possible shift. Results are stored in v1r_qbz.
+     do ispden=1,nspden
+       call fourdp(cplex,v1g_mu(:,ispden),v1r_qbz(:,ispden,mu),+1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
+       call times_eigr(-g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
+       !call times_eigr(tsign * g0q, ngfft, nfft, 1, v1r_qbz(:,ispden,mu))
+     end do
+
+     !call v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,v1r)
+   end if ! root == myrank
+
+   call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
- call xmpi_sum(v1r_qbz, comm, ierr)
+ call xmpi_waitall(requests_v1r_qbz, ierr)
+ !call xmpi_sum(v1r_qbz, comm, ierr)
 
  ABI_FREE(workg)
  ABI_FREE(v1g_mu)
@@ -2166,6 +2189,8 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
          ! Get linear index of rotated point Gj
          ind2 = k1+n1*((k2-1)+n2*(k3-1))
 
+         ! TOD: Here I believe there are lots of cache misses, should perform low-level profiling
+         ! OMP perhaps can accelerate this part but mind false sharing...
          if (has_phase) then
            ! compute exp(-2*Pi*I*G dot tau) using original G
            arg = two_pi * dot_product(qpt + tsg, tnon)

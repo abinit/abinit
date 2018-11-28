@@ -346,6 +346,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(192)='inkpts                          '
  names(193)='fresid                          '
 
+ names(195)='getgh1c_setup'; basic(195) = 1
  names(196)='getgh1c'; basic(196) = 1
  names(197)='getgh1c%dfpt_cgwf               '
  names(198)='getgh1c%dfpt_nstwf              '
@@ -999,6 +1000,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1802)='dvdb_readsym_qbz'; basic(1802) = 1
  names(1803)='dvdb_rotate_fqg'; basic(1803) = 1
  names(1804)='v1phq_rotate'; basic(1804) = 1
+ names(1805)='v1phq_rotate'; basic(1805) = 1
 
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 

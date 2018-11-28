@@ -944,7 +944,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
        ! TODO: Make sure that symmetries in Q-space are preserved.
-       call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+       call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
        if (sigma%frohl_model /= 0) then
          ! TODO: Recheck this part
@@ -1403,7 +1403,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end if
 
          ! Get phonons for this q-point.
-         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
          ! Sum over modes for this q-point.
          !do nu=1,natom3
