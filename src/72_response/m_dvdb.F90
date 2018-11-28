@@ -467,6 +467,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
      if (new%version > 1) read(unt, err=10, iomsg=msg) new%rhog1_g0(:, iv1)
 
      ! Check whether this q-point is already in the list.
+     ! FIXME: This is gonna be slow if lots of q-points.
      iq_found = 0
      do iq=1,nqpt
        if (all(abs(hdr1%qptn - tmp_qpts(:,iq)) < tol14)) then
@@ -1306,7 +1307,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
  if (.not. isirr_q) then
    ! Must rotate db_iqpt to get potential for qpoint in the BZ.
-   ! Be careful with the shape of outputt v1scf because the routine returns db%my_npert potentials.
+   ! Be careful with the shape of output v1scf because the routine returns db%my_npert potentials.
 
    if (db%my_npert == db%natom3) then
      ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, db%natom3), ierr)
@@ -1326,12 +1327,23 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, db%natom3), ierr)
        ABI_CHECK(ierr == 0, 'out of memory in work')
 
+       ! TODO: IBCAST?
        work = zero
        do imyp=1,db%my_npert
          ipc = db%my_pinfo(3, imyp)
          work(:,:,:,ipc) = v1scf(:,:,:,imyp)
        end do
        call xmpi_sum(work, db%comm_pert, ierr)
+
+       !do mu=1,bs%natom3
+       !  root = db%pert_table(1, mu)
+       !  if (root == my_rank) then
+       !    imyp = db%pert_table(2, mu)
+       !    !ipc = db%my_pinfo(3, imyp)
+       !    work(:,:,:,mu) = v1scf(:,:,:,imyp)
+       !  end if
+       !  call xmpi_ibcast(work(:,:,:,mu), root, comm, requests(mu), ierr)
+       !end do
 
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
