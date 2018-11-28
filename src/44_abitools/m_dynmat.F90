@@ -1916,8 +1916,7 @@ end subroutine d2sym3
 !! Should be used just after each call to dfpt_ewald, for both
 !! q==0 and the real wavelength.
 !!
-!! The q0dy3_apply should be used in conjunction with the subroutine
-!! dfpt_ewald (or ewald9):
+!! The q0dy3_apply should be used in conjunction with the subroutine dfpt_ewald (or ewald9):
 !! First, the call of dfpt_ewald with q==0 should be done,
 !!   then the call to q0dy3_calc will produce
 !!   the dyewq0 matrix from the (q=0) dyew matrix
@@ -1991,8 +1990,7 @@ end subroutine q0dy3_apply
 !!   in an unsymmetrical form (if option=1), or
 !!   in a symmetrical form (if option=2).
 !!
-!! The q0dy3_calc should be used in conjunction with the subroutine
-!! dfpt_ewald (or ewald9).
+!! The q0dy3_calc should be used in conjunction with the subroutine dfpt_ewald (or ewald9).
 !! First, the call of dfpt_ewald with q==0 should be done ,
 !!   then the call to q0dy3_calc will produce
 !!   the dyewq0 matrix from the (q=0) dyew matrix
@@ -3620,6 +3618,7 @@ end subroutine ftifc_q2r
 !!   These coordinates are normalized (=> * acell(3)!!)
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
+!! comm: MPI communicator
 !!
 !! OUTPUT
 !! dynmat(2,3,natom,3,natom,nqpt)= Dynamical matrices coming from the Derivative Data Base
@@ -3631,11 +3630,11 @@ end subroutine ftifc_q2r
 !!
 !! SOURCE
 
-subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
+subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm,comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: natom,nqpt,nrpt
+ integer,intent(in) :: natom,nqpt,nrpt,comm
 !arrays
  real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),spqpt(3,nqpt)
  real(dp),intent(in) :: wghatm(natom,natom,nrpt)
@@ -3644,20 +3643,20 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,iqpt,irpt,mu,nu
+ integer :: ia,ib,iqpt,irpt,mu,nu,cnt,my_rank,nprocs, ierr
  real(dp) :: facti,factr,im,kr,re
 !arrays
  real(dp) :: kk(3)
 
 ! *********************************************************************
 
- dynmat = zero
- !cnt = 0
- !my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ dynmat = zero
+ cnt = 0
  do iqpt=1,nqpt
    do irpt=1,nrpt
-     !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelsim.
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
 
      ! Calculation of the k coordinates in Normalized Reciprocal coordinates
      kk(1)=spqpt(1,iqpt)*gprim(1,1)+spqpt(2,iqpt)* gprim(1,2)+spqpt(3,iqpt)*gprim(1,3)
@@ -3696,7 +3695,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
    end do
  end do
 
- !call xmpi_sum(dynmat, comm, ierr)
+ if (nprocs > 1) call xmpi_sum(dynmat, comm, ierr)
 
 end subroutine ftifc_r2q
 !!***
@@ -5354,6 +5353,7 @@ end subroutine nanal9
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !! xred(3,natom)= relative coords of atoms in unit cell (dimensionless)
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
@@ -5366,11 +5366,11 @@ end subroutine nanal9
 !! SOURCE
 
 subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom,&
-& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff)
+& nrpt,qphnrm,qpt,rmet,rprim,rpt,trans,ucvol,wghatm,xred,zeff,comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: dipdip,mpert,natom,nrpt
+ integer,intent(in) :: dipdip,mpert,natom,nrpt,comm
  real(dp),intent(in) :: qphnrm,ucvol
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qpt(3)
@@ -5401,7 +5401,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  end if
 
 !Generate the analytical part from the interatomic forces
- call ftifc_r2q (atmfrc,dq,gprim,natom,nqpt1,nrpt,rpt,qphon,wghatm)
+ call ftifc_r2q (atmfrc,dq,gprim,natom,nqpt1,nrpt,rpt,qphon,wghatm, comm)
 
 !The analytical dynamical matrix dq has been generated
 !in the normalized canonical coordinate system. Now, the

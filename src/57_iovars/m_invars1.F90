@@ -2351,6 +2351,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%nloalg(1)=4
    dtsets(idtset)%nloalg(2)=1
    dtsets(idtset)%nloalg(3)=dtsets(idtset)%usepaw
+   !if (dtsets(idtset)%optdriver == RUNL_EPH) dtsets(idtset)%nloalg(3) = 1
    dtsets(idtset)%ngkpt=0
    dtsets(idtset)%nnsclo=0
    dtsets(idtset)%nnsclohf=0

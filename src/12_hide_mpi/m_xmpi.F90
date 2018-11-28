@@ -196,6 +196,7 @@ MODULE m_xmpi
  public :: xmpi_alltoallv
  public :: xmpi_ialltoallv
  public :: xmpi_bcast
+ public :: xmpi_ibcast
  public :: xmpi_exch
  public :: xmpi_gather
  public :: xmpi_gatherv
@@ -354,6 +355,15 @@ interface xmpi_bcast
   module procedure xmpi_bcast_coeffi2_1d
   module procedure xmpi_bcast_coeff2_1d
 end interface xmpi_bcast
+
+!----------------------------------------------------------------------
+
+interface xmpi_ibcast
+  module procedure xmpi_ibcast_int1d
+  module procedure xmpi_ibcast_dp1d
+  module procedure xmpi_ibcast_dp2d
+  module procedure xmpi_ibcast_dp3d
+end interface xmpi_ibcast
 
 !----------------------------------------------------------------------
 
@@ -1266,9 +1276,7 @@ subroutine xmpi_group_free(spaceGroup)
 
    if (mpierr/=MPI_SUCCESS) then
      call MPI_ERROR_CLASS(mpierr,mpierr_class,ierr)
-     if (mpierr_class/=MPI_ERR_GROUP) then
-       write(std_out,*)" WARNING: MPI_GROUP_FREE returned ierr= ",mpierr
-     end if
+     if (mpierr_class/=MPI_ERR_GROUP) write(std_out,*)" WARNING: MPI_GROUP_FREE returned ierr= ",mpierr
    end if
 
  end if
@@ -1573,8 +1581,7 @@ subroutine xmpi_group_translate_ranks(spaceGroup1,nrank,ranks1,&
  mpierr=0; ranks2(:)=xmpi_undefined
 #ifdef HAVE_MPI
  if (spaceGroup1/=xmpi_group_null.and.spaceGroup2/=xmpi_group_null) then
-   call MPI_GROUP_TRANSLATE_RANKS(spaceGroup1,nrank,ranks1,&
-&                                 spaceGroup2,ranks2,mpierr)
+   call MPI_GROUP_TRANSLATE_RANKS(spaceGroup1,nrank,ranks1, spaceGroup2,ranks2,mpierr)
  end if
 #else
  ranks2(1)=0
@@ -1682,9 +1689,7 @@ subroutine xmpi_barrier(comm)
 #ifdef HAVE_MPI
  if (comm/=xmpi_comm_null) then
    call MPI_COMM_SIZE(comm,nprocs,ier)
-   if(nprocs>1)then
-     call MPI_BARRIER(comm,ier)
-   end if
+   if(nprocs>1) call MPI_BARRIER(comm,ier)
  end if
 #endif
 
@@ -1829,8 +1834,8 @@ subroutine xmpi_wait(request,mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
-  call MPI_WAIT(request,status,ier)
-  mpierr=ier
+ call MPI_WAIT(request,status,ier)
+ mpierr=ier
 #endif
 
 end subroutine xmpi_wait
@@ -1860,7 +1865,7 @@ end subroutine xmpi_wait
 !!
 !! SOURCE
 
-subroutine xmpi_waitall(array_of_requests,mpierr)
+subroutine xmpi_waitall(array_of_requests, mpierr)
 
 !Arguments-------------------------
  integer,intent(inout) :: array_of_requests(:)
@@ -2091,15 +2096,15 @@ subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop,warn_msg,ierr)
  warn_msg = ""; ierr=0
  if (res/=0) then
    write(warn_msg,'(4a,i0,a,i0)')ch10,&
-&   'xmpi_split_work: ',ch10,&
-&   'The number of tasks= ',ntasks,' is not divisible by nprocs= ',nprocs
+    'xmpi_split_work: ',ch10,&
+    'The number of tasks= ',ntasks,' is not divisible by nprocs= ',nprocs
    ierr=1
  end if
  if (block==0) then
    write(warn_msg,'(4a,i0,a,i0,2a)')ch10,&
-&   'xmpi_split_work: ',ch10,&
-&   'The number of processors= ',nprocs,' is larger than number of tasks= ',ntasks,ch10,&
-&   'This is a waste '
+    'xmpi_split_work: ',ch10,&
+    'The number of processors= ',nprocs,' is larger than number of tasks= ',ntasks,ch10,&
+    'This is a waste'
     ierr=2
  end if
 
@@ -2179,15 +2184,15 @@ subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
  warn_msg = ""; ierr=0
  if (res/=0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
-&   'parallelism is not efficient '
+    'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
+    'parallelism is not efficient '
    ierr=+1
  end if
 
  if (block_tmp==0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   'The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
-&   'This is a waste '
+    'The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
+    'This is a waste '
    ierr=+2
  end if
 
@@ -2253,15 +2258,15 @@ subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop,warn_msg,ierr)
  warn_msg = ""; ierr=0
  if (res/=0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
-&   'parallelism is not efficient '
+    'The number of tasks = ',ntasks,' is not divisible by nprocs = ',nprocs,ch10,&
+    'parallelism is not efficient '
    ierr=+1
  end if
  !
  if (block_tmp==0) then
    write(warn_msg,'(a,i0,a,i0,2a)')&
-&   ' The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
-&   ' This is a waste '
+    ' The number of processors = ',nprocs,' is larger than number of tasks =',ntasks,ch10,&
+    ' This is a waste '
    ierr=+2
  end if
 
@@ -2347,9 +2352,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
 
  task_distrib = RESHAPE(list, [n1,n2,n3,n4])
 
- if (ANY(task_distrib==-999)) then
-   call xmpi_abort(msg="task_distrib == -999")
- end if
+ if (ANY(task_distrib==-999)) call xmpi_abort(msg="task_distrib == -999")
 
  ABI_DEALLOCATE(list)
 
@@ -2430,6 +2433,7 @@ end function xmpi_distrib_with_replicas
 #include "xmpi_ialltoallv.finc"
 
 #include "xmpi_bcast.finc"
+#include "xmpi_ibcast.finc"
 
 #include "xmpi_exch.finc"
 

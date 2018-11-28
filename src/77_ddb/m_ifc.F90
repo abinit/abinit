@@ -865,6 +865,7 @@ end subroutine ifc_print
 !!    matrix will be treated. Possible values:
 !!       "cart" if qpt defines a direction in Cartesian coordinates
 !!       "reduced" if qpt defines a direction in reduced coordinates
+!!  [comm]: MPI communicator
 !!
 !! OUTPUT
 !!  phfrq(3*natom) = Phonon frequencies in Hartree
@@ -885,13 +886,15 @@ end subroutine ifc_print
 !! SOURCE
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
-                     nanaqdir, out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
+                     nanaqdir, comm, &                              ! Optional [in]
+                     out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),optional,intent(in) :: nanaqdir
  type(ifc_type),intent(in) :: Ifc
  type(crystal_t),intent(in) :: Crystal
+ integer,optional,intent(in) :: comm
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: displ_cart(2,3,Crystal%natom,3*Crystal%natom)
@@ -903,19 +906,20 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 
 !Local variables-------------------------------
 !scalars
- integer :: natom
+ integer :: natom, comm_
  real(dp) :: qphnrm
- !real(dp) :: cpu, wall, gflops
- !character(len=500) :: msg
 !arrays
  real(dp) :: my_qpt(3),eigvec(2,3,Crystal%natom,3*Crystal%natom),eigval(3*Crystal%natom)
- real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert)
+ real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert),tsec(2)
 
 ! ************************************************************************
 
- !call cwtime(cpu, wall, gflops, "start")
+ ! Keep track of total time spent.
+ call timab(1748, 1, tsec)
 
  natom = Crystal%natom
+ ! TODO: Rewrite and Parallelize ewald9 in gtdyn9
+ comm_ = xmpi_comm_self; if (present(comm)) comm_ = comm
 
  ! Use my_qpt because dfpt_phfrq can change the q-point (very bad design)
  qphnrm = one; my_qpt = qpt
@@ -939,7 +943,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 
  ! The dynamical matrix d2cart is calculated here:
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
-&  Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff)
+&  Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,comm_)
 
  ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(Ifc%amu,displ_cart,d2cart,eigval,eigvec,Crystal%indsym,&
@@ -960,11 +964,9 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
  ! Compute group velocities.
- if (present(dwdq)) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq)
+ if (present(dwdq)) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq, comm_)
 
- !call cwtime(cpu, wall, gflops, "stop")
- !write(msg, "(2(a,f8.5))")"ifc_fourq completed. cpu-time: ", cpu, ", wall-time:", wall
- !call wrtout(std_out, msg)
+ call timab(1748, 2, tsec)
 
 end subroutine ifc_fourq
 !!***
@@ -981,6 +983,7 @@ end subroutine ifc_fourq
 !!  crystal<crystal_t> = Information on the crystalline structure.
 !!  qpt(3)=q-point in reduced coordinates.
 !!  eigvec(2*3*natom*3*natom) = The eigenvectors of the dynamical matrix.
+!!  comm: MPI communicator
 !!
 !! OUTPUT
 !!  dwdq(3,3*natom) = Group velocities e.g. d(omega(q))/dq in Cartesian coordinates.
@@ -1002,12 +1005,13 @@ end subroutine ifc_fourq
 !!
 !! SOURCE
 
-subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
+subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 
 !Arguments ------------------------------------
 !scalars
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: comm
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(in) :: phfrq(3*cryst%natom)
@@ -2723,7 +2727,7 @@ subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
  call gtdyn9(ifc%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip, &
    ifc%dyewq0,d2cart,crystal%gmet,ifc%gprim,ifc%mpert,crystal%natom, &
    ifc%nrpt,qphnrm(1),qphon,crystal%rmet,ifc%rprim,ifc%rpt, &
-   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff)
+   ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,ifc%zeff, xmpi_comm_self)
 
 #ifdef HAVE_NETCDF
  if (present(ncid)) then

@@ -44,9 +44,6 @@
 !! SOURCE
 subroutine xmpi_scatterv_int(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
- implicit none
-
-
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
  integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
@@ -100,10 +97,6 @@ end subroutine xmpi_scatterv_int
 !! SOURCE
 
 subroutine xmpi_scatterv_int2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
-
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:,:)
@@ -160,9 +153,6 @@ end subroutine xmpi_scatterv_int2d
 
 subroutine xmpi_scatterv_dp(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
  real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:)
@@ -214,10 +204,8 @@ end subroutine xmpi_scatterv_dp
 !!  recvbuf= received buffer
 !!
 !! SOURCE
+
 subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
@@ -271,10 +259,8 @@ end subroutine xmpi_scatterv_dp2d
 !!  recvbuf= received buffer
 !!
 !! SOURCE
+
 subroutine xmpi_scatterv_dp3d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:)
@@ -330,9 +316,6 @@ end subroutine xmpi_scatterv_dp3d
 !! SOURCE
 
 subroutine xmpi_scatterv_dp4d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:,:,:)

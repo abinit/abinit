@@ -128,8 +128,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 &          gvnlx1,idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,&
 &          rf_hamkq,sij_opt,tim_getgh1c,usevnl,conj)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in),optional :: conj
@@ -184,28 +182,23 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
 &      (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc))))then
-     msg='ekb derivatives must be allocated for ipert<=natom or natom+3/4 !'
-     MSG_BUG(msg)
+     MSG_BUG('ekb derivatives must be allocated for ipert<=natom or natom+3/4 !')
    end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
 &      (optnl==2.and.(.not.associated(rf_hamkq%e1kbsc))))then
-     msg='ekb derivatives must be allocated for ipert=natom+2 !'
-     MSG_BUG(msg)
+     MSG_BUG('ekb derivatives must be allocated for ipert=natom+2 !')
    end if
    if (usevnl==0) then
-     msg='gvnlx1 must be allocated for ipert=natom+2 !'
-     MSG_BUG(msg)
+     MSG_BUG('gvnlx1 must be allocated for ipert=natom+2 !')
    end if
  end if
  if(ipert==natom+2.and.opt_gvnlx1==0) then
-   msg='opt_gvnlx1=0 not compatible with ipert=natom+2 !'
-   MSG_BUG(msg)
+   MSG_BUG('opt_gvnlx1=0 not compatible with ipert=natom+2 !')
  end if
  if (mpi_enreg%paral_spinor==1) then
-   msg='Not compatible with parallelization over spinorial components !'
-   MSG_BUG(msg)
+   MSG_BUG('Not compatible with parallelization over spinorial components !')
  end if
 
 !Check sizes
@@ -792,7 +785,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ABI_DEALLOCATE(gvnlx1_)
  end if
 
- call timab(196+tim_getgh1c,1,tsec)
+ call timab(196+tim_getgh1c,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -837,8 +830,6 @@ end subroutine getgh1c
 
 subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvloc,&
 &                                pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -965,9 +956,12 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
  integer :: dimffnl1,dimffnlk,ider,idir0,idir1,idir2,istr,ntypat,print_info
  logical :: qne0
 !arrays
- real(dp) :: ylmgr_dum(1,1,1)
+ real(dp) :: ylmgr_dum(1,1,1), tsec(2)
 
 ! *************************************************************************
+
+ ! Keep track of total time spent in getgh1c_setup (use 195 slot)
+ call timab(195, 1, tsec)
 
  if(.not.present(ddkinpw) .and. ipert==natom+10) then
    MSG_BUG("ddkinpw is not optional for ipert=natom+10.")
@@ -1172,6 +1166,8 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    end if
  end if
 
+ call timab(195,2,tsec)
+
 end subroutine getgh1c_setup
 !!***
 
@@ -1219,8 +1215,6 @@ end subroutine getgh1c_setup
 
 subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 &                 mpi_enreg,natom,nband,npw1,nspinor,optcprj,s1cwave0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -67,7 +67,7 @@ program anaddb
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
  use m_specialmsg,     only : specialmsg_getcount, herald
- use m_time,           only : asctime, timein
+ use m_time,           only : asctime, timein, timab
  use m_parser,         only : instrng
  use m_dtfil,          only : isfile
  use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
@@ -83,6 +83,7 @@ program anaddb
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
+
  implicit none
 
 !Local variables-------------------------------
@@ -161,6 +162,9 @@ program anaddb
  end if
 
  start_datetime = asctime()
+
+ ! Zero out all accumulators of time and init timers
+ call timab(1, 0, tsec)
 
  ! Initialise the code: write heading, and read names of files.
  if (iam_master) call anaddb_init(filnam)
@@ -638,7 +642,7 @@ program anaddb
      call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
 &     Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
 &     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
-&     Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff)
+&     Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff, xmpi_comm_self)
 
    else if (inp%ifcflag==0) then
 

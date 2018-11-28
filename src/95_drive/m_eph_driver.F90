@@ -159,8 +159,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !scalars
  integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
  integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: ii
- integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
+ integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
@@ -228,6 +227,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (.False.) write(std_out,*)acell,codvsn,rprim,xred
 
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+#ifndef HAVE_MPI_IBCAST
+ do ii=1,20
+   MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations will be slow")
+ end do
+#endif
 
  ! Initialize filenames
  wfk0_path = dtfil%fnamewffk

@@ -967,7 +967,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
        ! TODO: Make sure that symmetries in Q-space are preserved.
-       call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+       call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
        if (sigma%frohl_model /= 0) then
          ! TODO: Recheck this part
@@ -1004,7 +1004,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        if (dksqmax > tol12) then
          write(msg, '(4a,es16.6,7a)' )&
-          "The WFK file cannot be used to compute self-energy corrections at k:.", trim(ktoa(kk)), ch10,&
+          "The WFK file cannot be used to compute self-energy corrections at k:", trim(ktoa(kk)), ch10,&
           "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
           "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
           'Action: check your WFK file and (k,q) point input variables'
@@ -1167,6 +1167,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do
          !ii = nbcalc_ks * my_npert
          !call cg_zgemm("H", "N", npw_kq*nspinor, ii, ii, h1kets_kq, bra_kq, gkq_atm)
+         !call cg_zgemm("H", "N", npw_kq*nspinor, ii, ii, bra_kq, h1kets_kq, gkq_atm)
 
          ! Get gkk(kcalc, q, nu)
          if (sigma%nprocs_pert > 1) call xmpi_sum(gkq_atm, sigma%comm_pert, ierr)
@@ -1425,7 +1426,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end if
 
          ! Get phonons for this q-point.
-         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+         call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
          ! Sum over modes for this q-point.
          !do nu=1,natom3
@@ -2180,7 +2181,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! Select indices for energy window.
      call wrtout(std_out, sjoin("elow:", ftoa(elow), "ehigh:", ftoa(ehigh), "[Ha]"))
      call get_bands_from_erange(ebands, elow, ehigh, new%bsum_start, new%bsum_stop)
-     !new%bsum_stop = new%bsum_stop + 11
      ABI_CHECK(new%bsum_start <= new%bsum_stop, "bsum_start > bsum_bstop")
      new%nbsum = new%bsum_stop - new%bsum_start + 1
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop

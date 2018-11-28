@@ -46,9 +46,6 @@
 
 subroutine xmpi_sum_master_int(xval,master,spaceComm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  integer,intent(inout) :: xval
  integer ,intent(in) :: master
@@ -98,8 +95,6 @@ end subroutine xmpi_sum_master_int
 !! SOURCE
 
 subroutine xmpi_sum_master_dp(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  real(dp),intent(inout) :: xval
@@ -151,8 +146,6 @@ end subroutine xmpi_sum_master_dp
 !! SOURCE
 
 subroutine xmpi_sum_master_int2d(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -211,8 +204,6 @@ end subroutine xmpi_sum_master_int2d
 
 subroutine xmpi_sum_master_dp1d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
  integer ,intent(in) :: master
@@ -269,8 +260,6 @@ end subroutine xmpi_sum_master_dp1d
 
 subroutine xmpi_sum_master_dp2d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer ,intent(in) :: master
@@ -325,9 +314,8 @@ end subroutine xmpi_sum_master_dp2d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -386,9 +374,8 @@ end subroutine xmpi_sum_master_dp3d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_dp4d(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_dp4d(xval,master,spaceComm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -447,9 +434,8 @@ end subroutine xmpi_sum_master_dp4d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_dp5d(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_dp5d(xval,master,spaceComm,ier)
 
 !Arguments ------------------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -509,9 +495,8 @@ end subroutine xmpi_sum_master_dp5d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_dp6d(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_dp6d(xval,master,spaceComm,ier)
 
 !Arguments ------------------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
@@ -572,9 +557,8 @@ end subroutine xmpi_sum_master_dp6d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_dp7d(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_dp7d(xval,master,spaceComm,ier)
 
 !Arguments ------------------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
@@ -639,8 +623,6 @@ end subroutine xmpi_sum_master_dp7d
 
 subroutine xmpi_sum_master_int4d(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
  integer,intent(in) :: master
@@ -701,8 +683,6 @@ end subroutine xmpi_sum_master_int4d
 
 subroutine xmpi_sum_master_c1cplx(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:)
  integer ,intent(in) :: master
@@ -758,8 +738,6 @@ end subroutine xmpi_sum_master_c1cplx
 !! SOURCE
 
 subroutine xmpi_sum_master_c2cplx(xval,master,spaceComm,ier)
-
- implicit none
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -819,8 +797,6 @@ end subroutine xmpi_sum_master_c2cplx
 
 subroutine xmpi_sum_master_c3cplx(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
  integer,intent(in) :: master
@@ -877,9 +853,8 @@ end subroutine xmpi_sum_master_c3cplx
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_c4cplx(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_c4cplx(xval,master,spaceComm,ier)
 
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -942,8 +917,6 @@ end subroutine xmpi_sum_master_c4cplx
 
 subroutine xmpi_sum_master_c5cplx(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
  integer,intent(in) :: master
@@ -1004,8 +977,6 @@ end subroutine xmpi_sum_master_c5cplx
 
 subroutine xmpi_sum_master_c1dpc(xval,master,spaceComm,ier)
 
- implicit none
-
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:)
  integer,intent(in) :: master
@@ -1060,9 +1031,8 @@ end subroutine xmpi_sum_master_c1dpc
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_c2dpc(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_c2dpc(xval,master,spaceComm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -1119,9 +1089,8 @@ end subroutine xmpi_sum_master_c2dpc
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_c3dpc(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_c3dpc(xval,master,spaceComm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -1178,9 +1147,8 @@ end subroutine xmpi_sum_master_c3dpc
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_c4dpc(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_c4dpc(xval,master,spaceComm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -1238,9 +1206,8 @@ end subroutine xmpi_sum_master_c4dpc
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_master_c5dpc(xval,master,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_master_c5dpc(xval,master,spaceComm,ier)
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
