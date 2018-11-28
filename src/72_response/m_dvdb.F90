@@ -1893,8 +1893,8 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
  real(dp) :: tnon(3), tsec(2)
  real(dp) ABI_ASYNC, allocatable :: v1g_qibz(:,:,:),workg(:,:),v1g_mu(:,:)
- integer :: requests(nspden, 3*cryst%natom)
- logical :: requests_v1g_qibz(nspden, 3*cryst%natom), requests_v1r_qbz(3*cryst%natom)
+ integer :: requests(nspden, 3*cryst%natom), requests_v1r_qbz(3*cryst%natom)
+ logical :: requests_v1g_qibz_done(nspden, 3*cryst%natom)
 
 ! *************************************************************************
 
@@ -1909,13 +1909,13 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
  ! Compute IBZ potentials in G-space (results in v1g_qibz)
  ABI_CALLOC(v1g_qibz, (2*nfft,nspden,natom3))
- requests_v1g_qibz = .False.
+ requests_v1g_qibz_done = .False.
  cnt = 0
  do mu=1,natom3
    do ispden=1,nspden
      cnt = cnt + 1
      root = mod(cnt, nproc)
-     if (root /= my_rank) cycle ! MPI parallelism.
+     !if (root /= my_rank) cycle ! MPI parallelism.
      !call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      if (root == my_rank) then
        call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
@@ -1928,7 +1928,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  !do mu=1,natom3
  !  do ispden=1,nspden
  !    call xmpi_wait(requests(ispden, mu), ierr)
- !    requests_v1g_qibz(ispden, mu) = .True.
+ !    requests_v1g_qibz_done(ispden, mu) = .True.
  !  end do
  !end do
 
@@ -1966,10 +1966,10 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
        mu_eq = idir_eq + (ipert_eq-1)*3
        cnt = cnt + 1
 
-       if (.not. all(requests_v1g_qibz(:, mu_eq))) then
+       if (.not. all(requests_v1g_qibz_done(:, mu_eq))) then
          do ispden=1,nspden
            call xmpi_wait(requests(ispden, mu_eq), ierr)
-           requests_v1g_qibz(ispden, mu_eq) = .True.
+           requests_v1g_qibz_done(ispden, mu_eq) = .True.
          end do
        end if
 
