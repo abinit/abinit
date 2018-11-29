@@ -369,11 +369,11 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
                write(msg,'(a10,i5)') 'atype ',iat
                call wrtout(ab_out,msg,'COLL')
                do iproj=1,psps%lnmax
-                 write(msg,'(a10,i5,a,a10,e12.4,a,3(a10,2e12.4,a))') &
+                 write(msg,'(a10,i5,a,a10,e12.4,a,2(a10,2e12.4,a))') &
                         'projector ', iproj,ch10, &
                         'vkbsign   ', vkbsign(iproj,iat), ch10, &
-                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,:,iat), ch10, &
-                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,:,iat), ''
+                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,iproj,iat), ch10, &
+                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,iproj,iat), ''
                  call wrtout(ab_out,msg,'COLL')
                end do
              end do
