@@ -1318,6 +1318,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                          (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, imyp, ibsum_kq, iq_ibz_fine) ) * weight
                      end if
                    end do
+
                  else
                    ! Tetrahedron method without double grid
                    if (sigma%imag_only) then
@@ -3611,8 +3612,8 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  integer :: nu, band_ks, ibsum_kq, ik_ibz, ib_k, bstart_ks, nbcalc_ks, my_rank, natom3, ierr
  integer :: nprocs,this_calc, imyp
  integer :: iq_ibz_fine,iq_bz_fine,iq_ibz_packed,iq_ibz,jj
- real(dp),parameter :: tol_delta = tol10
- real(dp) :: eig0nk, inv_weight
+ real(dp),parameter :: tol_delta = tol8
+ real(dp) :: eig0nk, weight
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
 !arrays
@@ -3683,17 +3684,15 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
           do jj=1,sigma%eph_doublegrid%ndiv
             iq_bz_fine = sigma%eph_doublegrid%mapping(3,jj)
             iq_ibz_fine = sigma%eph_doublegrid%bz2lgkibz(iq_bz_fine)
-            inv_weight = one / sigma%ephwg%lgk%weights(iq_ibz_fine)
-            dpm = tmp_deltaw_pm(2,iq_ibz_fine,:) * inv_weight
-            sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,jj) = dpm
+            weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
+            dpm = tmp_deltaw_pm(2, iq_ibz_fine, :)
+            sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,jj) = dpm / weight
             if (any(abs(dpm) > tol_delta / sigma%eph_doublegrid%ndiv)) sigma%mask_qibz_k(iq_ibz) = 1
           end do
-          ! All points of the double grid must be below tol_delta.
-          !sigma%mask_qibz_k(iq_ibz) = sigma%mask_qibz_k(iq_ibz) / sigma%eph_doublegrid%ndiv
         else
-          inv_weight = one / sigma%ephwg%lgk%weights(iq_ibz)
-          dpm = tmp_deltaw_pm(2, iq_ibz, :) * inv_weight
-          sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,1) = dpm
+          weight = sigma%ephwg%lgk%weights(iq_ibz)
+          dpm = tmp_deltaw_pm(2, iq_ibz, :)
+          sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,1) = dpm / weight
           if (any(abs(dpm) > tol_delta)) sigma%mask_qibz_k(iq_ibz) = 1
         end if
         iq_ibz_packed = iq_ibz_packed + 1
