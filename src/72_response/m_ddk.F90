@@ -654,21 +654,30 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    !jdos = ebands_get_jdos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
 
    ! Compute (v x v) DOS. Upper triangle in Voigt format.
-   ABI_MALLOC(vv_vals, (6, mband, nkpt, nsppol))
+   ABI_MALLOC(vv_vals, (9, mband, nkpt, nsppol))
    do spin=1,nsppol
      do ik=1,nkpt
        do ib_v=bandmin,bandmax
-         ! Go to cartesian coordinates.
-         vr = vdiago(:,ib_v,ik,spin)
-         do ivoigt=1,6
-           ii = voigt2ij(1, ivoigt)
-           jj = voigt2ij(2, ivoigt)
-           vv_vals(ivoigt, ib_v, ik, spin) = vr(ii) * vr(jj)
+         !vr = vdiago(:,ib_v,ik,spin)
+         ! Go to cartesian coordinates (same as pmat2cart routine).
+         vr = cryst%rprimd(:,1)*vdiago(1,ib_v,ik,spin) &
+             +cryst%rprimd(:,2)*vdiago(2,ib_v,ik,spin) &
+             +cryst%rprimd(:,3)*vdiago(3,ib_v,ik,spin)
+         vr = vr / two_pi
+         !do ivoigt=1,6
+         !  ii = voigt2ij(1, ivoigt)
+         !  jj = voigt2ij(2, ivoigt)
+         !  vv_vals(ivoigt, ib_v, ik, spin) = vr(ii) * vr(jj)
+         !end do
+         do ii=1,3
+           do jj=1,3
+             vv_vals((ii-1)*3+jj, ib_v, ik, spin) = vr(ii) * vr(jj)
+           end do
          end do
        end do
      end do
    end do
-   call ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 6, edos_intmeth, edos_step, edos_broad, &
+   call ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
                                        comm, vvdos_mesh, vvdos_vals)
    ABI_SFREE(vv_vals)
  end if
@@ -706,7 +715,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      NCF_CHECK(edos%ncwrite(ncid))
      !NCF_CHECK(jdos%ncwrite(ncid))
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, two, nsppol_plus1, six")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, two, nsppol_plus1, nine")], defmode=.True.)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals))

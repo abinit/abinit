@@ -3965,16 +3965,18 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
 !scalars
  integer,parameter :: kptopt3=3
  integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
- integer :: my_nkibz, nkfull, timrev
+ !integer :: my_nkibz, nkfull, timrev
+ integer :: isym, ii, jj, idx
  real(dp) :: max_ene,min_ene,wtk,max_occ
- real(dp) :: dksqmax
+ !real(dp) :: dksqmax
  character(len=500) :: msg
  type(t_tetrahedron) :: tetra
 !arrays
- integer,allocatable :: bz2ibz(:,:)
+ !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
+ real(dp) :: v(3), vsum(3), vsym(3), t(3,3), tsum(3,3), tsym(3,3)
  real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
- real(dp),allocatable :: kfull(:,:),wtkfull(:),my_kibz(:,:)
+ !real(dp),allocatable :: kfull(:,:),wtkfull(:),my_kibz(:,:)
 
 ! *********************************************************************
 
@@ -4004,6 +4006,10 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
  out_mesh = arth(min_ene, step, nw)
  ABI_CALLOC(out_dos,  (nw, 2, 0:ebands%nsppol, ndat))
 
+ ! In principle the implementation could be optimized by using a single 
+ ! symmetry operation for each point in the Brillouin zone.
+ ! Looping over all the symmetry operations is easier so we do that for the moment
+#if 0
  ! Prepare ibz2bz
  ! Create kpoints in the full brillouin zone note kptop3
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, kptopt3, ebands%nshiftk, ebands%shiftk, &
@@ -4022,7 +4028,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
    ebands%nsppol,cryst%symafm,cryst%symrel,timrev,comm,use_symrec=.False.)
-
+#endif
 
  select case (intmeth)
  case (1)
@@ -4034,11 +4040,57 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! MPI parallelism
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
-          wme0 = out_mesh - ebands%eig(band, ikpt, spin)
-          wme0 = dirac_delta(wme0, broad) * wtk
-          do idat=1,ndat
-            out_dos(:, 1, spin, idat) = out_dos(:, 1, spin, idat) + wme0(:) * bks_vals(idat, band, ikpt, spin)
-          end do
+         wme0 = out_mesh - ebands%eig(band, ikpt, spin)
+         wme0 = dirac_delta(wme0, broad) * wtk
+
+         !scalar
+         select case (ndat)
+         case (1)
+           out_dos(:, 1, spin, 1) = out_dos(:, 1, spin, idat) + wme0(:) * bks_vals(1, band, ikpt, spin)
+
+         !vector
+         case (3)
+           !get components
+           v(:) = bks_vals(:, band, ikpt, spin)
+           !symmetrize
+           vsum = 0
+           do isym=1, cryst%nsym
+             vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
+             vsum = vsum + vsym
+           end do
+           vsum = vsum / cryst%nsym
+           !put components
+           do ii=1,3
+             out_dos(:, 1, spin, ii) = out_dos(:, 1, spin, ii) + wme0(:) * vsum(ii)
+           end do
+
+         !tensor
+         case (9)
+           !get components
+           do ii=1,3
+             do jj=1,3
+               idx = (ii-1)*3+jj
+               t(jj,ii) = bks_vals(idx, band, ikpt, spin)
+             end do
+           end do
+           !symmetrize
+           tsum = 0
+           do isym=1, cryst%nsym
+             tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
+             tsum = tsum + tsym
+           end do
+           tsum = tsum / cryst%nsym
+           !put components
+           do ii=1,3
+             do jj=1,3
+               idx = (ii-1)*3+jj
+               out_dos(:, 1, spin, idx) = out_dos(:, 1, spin, idx) + wme0(:) * tsum(jj,ii)
+             end do
+           end do
+
+         case default
+           MSG_ERROR(sjoin("Wrong value for ndat:", itoa(ndat)))
+         end select
        end do
      end do
    end do
@@ -4078,10 +4130,56 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
          call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
-         ! Compute DOS/IDOS
-         do idat=1,ndat
-           out_dos(:, :, spin, idat) = out_dos(:, :, spin, idat) + wdt(:, :) * bks_vals(idat, band, ikpt, spin)
-         end do
+         !scalar
+         select case (ndat)
+         case (1)
+           ! Compute DOS/IDOS
+           do idat=1,ndat
+             out_dos(:, :, spin, idat) = out_dos(:, :, spin, idat) + wdt(:, :) * bks_vals(idat, band, ikpt, spin)
+           end do
+
+         !vector
+         case (3)
+           !get components
+           v(:) = bks_vals(:, band, ikpt, spin)
+           !symmetrize
+           vsum = 0
+           do isym=1, cryst%nsym
+             vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
+             vsum = vsum + vsym
+           end do
+           vsum = vsum / cryst%nsym
+           !put components
+           do ii=1,3
+             out_dos(:, :, spin, ii) = out_dos(:, :, spin, ii) + wdt(:,:) * vsum(ii)
+           end do
+
+         !tensor
+         case (9)
+           !get components
+           do ii=1,3
+             do jj=1,3
+               idx = (ii-1)*3+jj
+               t(jj,ii) = bks_vals(idx, band, ikpt, spin)
+             end do
+           end do
+           !symmetrize
+           tsum = 0
+           do isym=1, cryst%nsym
+             tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
+             tsum = tsum + tsym
+           end do
+           tsum = tsum / cryst%nsym
+           !put components
+           do ii=1,3
+             do jj=1,3
+               idx = (ii-1)*3+jj
+               out_dos(:, :, spin, idx) = out_dos(:, :, spin, idx) + wdt(:,:) * tsum(jj,ii)
+             end do
+           end do
+         case default
+           MSG_ERROR(sjoin("Wrong value for ndat:", itoa(ndat)))
+         end select
        end do ! ikpt
      end do ! band
    end do ! spin
