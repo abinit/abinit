@@ -3487,9 +3487,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "gfw_vals"), self%gfw_vals, start=[1, 1, 1, ikcalc, spin]))
  end if
 
- !write array for restart
+ ! Write array for restart
  self%qp_done(ikcalc,spin) = 1
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_done"), 1, start=[ikcalc,spin]))
+
+ ! Dump the cache to file (this is necessary to ensure we can restart)
+ NCF_CHECK(nf90_sync(self%ncid))
 #endif
 
  call cwtime_report(" Sigma_nk netcdf output", cpu, wall, gflops)
