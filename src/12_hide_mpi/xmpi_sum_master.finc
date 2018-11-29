@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !!  This module contains functions that calls MPI routine,
-!!  if we compile the code using the MPI  CPP flags.
+!!  if we compile the code using the MPI CPP flags.
 !!  xmpi_sum_master is the generic function.
 !!
 !! COPYRIGHT

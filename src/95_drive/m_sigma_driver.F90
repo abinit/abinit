@@ -229,7 +229,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha,opt_ecut
+ real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: ucvol,vxcavg,vxcavg_qp
@@ -715,17 +715,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  end do
 
  ABI_FREE(my_spins)
- opt_ecut=Dtset%ecutwfn
-!opt_ecut=zero
 
- call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,Sigp%npwwfn,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
-& Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-& Gsph_Max%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+ call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+   Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
+   Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
  if (Dtset%pawcross==1) then
-   call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,Dtset%paral_kgb,Sigp%npwwfn,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
-&   Dtset%nspden,Dtset%nspinor,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-&   Gsph_Max%gvec,Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm,opt_ecut=opt_ecut)
+   call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+     Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
+     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
  end if
 
  ABI_FREE(bks_mask)

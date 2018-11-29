@@ -493,7 +493,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0,timrev0=0
+ integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert
@@ -506,7 +506,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: mpw,ierr,it,ndiv,thisproc_nq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
@@ -521,7 +521,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(ddkop_t) :: ddkop
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3),g0_kq(3),dummy_gvec(3,dummy_npw)
+ integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3), indkk_kq(1,6) !g0ibz_kq(3),
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:)
@@ -574,13 +574,23 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  if (my_rank == master) sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+ restart = 0
  if (ierr==0 .and. my_rank==master) then
-    call sigmaph_comp(sigma,sigma_restart)
-    sigma%qp_done = sigma_restart%qp_done
-    call sigmaph_free(sigma_restart)
+    if (any(sigma_restart%qp_done /= 1)) then
+      call sigmaph_comp(sigma,sigma_restart)
+      sigma%qp_done = sigma_restart%qp_done
+      call sigmaph_free(sigma_restart)
+      restart = 1
+      call wrtout(std_out, "- Restarting from previous SIGEPH.nc file")
+      call wrtout(ab_out, "- Restarting from previous SIGEPH.nc file")
+    else
+      restart = 0; sigma%qp_done = 0
+      MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
+    end if
  end if
- call xmpi_sum(sigma%qp_done,comm,ierr)
- call sigmaph_write(sigma, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+ call xmpi_bcast(restart, master, comm,ierr)
+ call xmpi_bcast(sigma%qp_done, master, comm,ierr)
+ call sigmaph_write(sigma, dtset, ecut, cryst, ebands, ifc, dtfil, restart, comm)
  if (my_rank == master) then
    call sigmaph_print(sigma, dtset, ab_out)
    call sigmaph_print(sigma, dtset, std_out)
@@ -622,9 +632,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(wfd_istwfk, (nkpt))
  wfd_istwfk = 1
 
- call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,dtset%mband,nband,nkpt,nsppol,bks_mask,&
-   nspden,nspinor,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
-   dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
+ call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%mband,nband,nkpt,nsppol,bks_mask,&
+   nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
+   dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
 
  call wfd%print(header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
 
@@ -771,10 +781,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    msg = sjoin("[", itoa(ikcalc), "/", itoa(sigma%nqibz_k), "]")
    call wrtout(std_out, sjoin("Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
    spin = 1
-   write(msg, "(3(a, i0))")"For ", sigma%nbcalc_ks(ikcalc, spin), " bands between: ", sigma%bstart_ks(ikcalc, spin), &
+   write(msg, "(3(a, i0))")"Treating ", sigma%nbcalc_ks(ikcalc, spin), " bands between: ", sigma%bstart_ks(ikcalc, spin),&
      " and: ", sigma%bstart_ks(ikcalc, spin) + sigma%nbcalc_ks(ikcalc, spin) - 1
    call wrtout(std_out, msg)
    call wrtout(std_out, sjoin("Number of q-points in the IBZ(k):", itoa(sigma%nqibz_k)))
+   !call wrtout(std_out, sjoin("Number of operations in LG(k):", itoa(sigma%lgk%nsym_lg), "(including time-reversal)")
 
    ! Symmetry indices for kk.
    ik_ibz = sigma%kcalc2ibz(ikcalc,1); isym_k = sigma%kcalc2ibz(ikcalc,2)
@@ -2458,7 +2469,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ABI_CALLOC(new%frohl_vals_wr, (new%nwr, new%ntemp, new%max_nbcalc))
    end if
  end if
- 
+
  call cwtime_report("sigmaph_new: all", cpu_all, wall_all, gflops_all)
 
 end function sigmaph_new
@@ -2481,6 +2492,7 @@ end function sigmaph_new
 !!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
 !!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !!  dtfil<datafiles_type>=variables related to files.
+!!  restart=1 if we are in restart mode, 0 if new SIGEPH.nc file should be created.
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -2489,10 +2501,10 @@ end function sigmaph_new
 !!
 !! SOURCE
 
-subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, comm)
 
 !Arguments ------------------------------------
- integer,intent(in) :: comm
+ integer,intent(in) :: comm, restart
  real(dp),intent(in) :: ecut
  type(sigmaph_t),intent(inout) :: self
  type(crystal_t),intent(in) :: cryst
@@ -2512,7 +2524,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
  character(len=500) :: msg
  real(dp) :: edos_broad,edos_step
  real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
- logical :: found
+ !logical :: found
  character(len=fnlen) :: path
  type(edos_t) :: edos
 
@@ -2545,14 +2557,14 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, comm)
    path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
 
    ! Check if a previous netcdf file is present and restart the calculation
-   found = file_exists(path)
-   if (found) then
+   !found = file_exists(path)
+   if (restart == 1) then
        NCF_CHECK(nctk_open_modify(self%ncid, path, xmpi_comm_self))
    else
        ! Master creates the netcdf file used to store the results of the calculation.
        NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    endif
-   
+
    ncid = self%ncid
 
    NCF_CHECK(cryst%ncwrite(ncid))
@@ -2969,6 +2981,7 @@ subroutine sigmaph_free(self)
  !ABI_SFREE(self%frohl_gkq2)
  ABI_SFREE(self%qvers_cart)
  ABI_SFREE(self%angwgth)
+ ABI_SFREE(self%qp_done)
  ABI_SFREE(self%qbz)
  ABI_SFREE(self%qibz)
  ABI_SFREE(self%wtq)

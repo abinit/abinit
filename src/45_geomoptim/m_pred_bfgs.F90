@@ -31,6 +31,7 @@ module m_pred_bfgs
  use m_abihist
  use m_xfpack
  use m_lbfgs
+ use m_errors
 
  use m_geometry,    only : mkrdim, fcart2fred, metric
  use m_bfgs,        only : hessinit, hessupdt, brdene
@@ -608,6 +609,7 @@ integer,intent(in) :: itime
 integer,intent(in) :: ionmov
 integer,intent(in) :: iexit
 logical,intent(in) :: zDEBUG
+character(len=500) :: ionmov22_errmsg
 
 !Local variables-------------------------------
 !scalars
@@ -879,6 +881,13 @@ real(dp) :: strten(6)
  vin_prev(:) = vin
  vout_prev(:) = vout
  info = lbfgs_execute(vin,etotal,vout)
+
+ if (info /= 1) then
+   write (ionmov22_errmsg, '(a,i0,3a)') &
+    'Lbfgs routine failed. Returned value: ', info,ch10, &
+    'Restart your calculation from last step or try a different ionmov'
+   MSG_ERROR_CLASS(ionmov22_errmsg, "Ionmov22Error")
+ end if
 
 !zDEBUG (vin,vout after prediction)
  if(zDEBUG)then

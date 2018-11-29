@@ -27,8 +27,6 @@
 
 subroutine xmpi_sum_int(xval,comm,ier)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
  integer,intent(in) :: comm
@@ -88,8 +86,6 @@ end subroutine xmpi_sum_int
 
 subroutine xmpi_sum_intv(xval,comm,ier)
 
- implicit none
-
 !Arguments----------------------
  integer,intent(inout) :: xval
  integer,intent(in) :: comm
@@ -138,8 +134,6 @@ end subroutine xmpi_sum_intv
 
 subroutine xmpi_sum_intv2(xval,xsum,comm,ier)
 
- implicit none
-
 !Arguments---------------------
  integer,intent(inout) :: xval,xsum
  integer,intent(in) :: comm
@@ -184,8 +178,6 @@ end subroutine xmpi_sum_intv2
 !! SOURCE
 
 subroutine xmpi_sum_intn(xval,n1,comm,ier)
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
@@ -248,10 +240,8 @@ end subroutine xmpi_sum_intn
 !!  xsum= receive buffer
 !!
 !! SOURCE
+
 subroutine xmpi_sum_int2t(xval,xsum,n1,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:),xsum(:)
@@ -297,10 +287,8 @@ end subroutine xmpi_sum_int2t
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_int2d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -362,9 +350,8 @@ end subroutine xmpi_sum_int2d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_int3d(xval,comm,ier)
 
- implicit none
+subroutine xmpi_sum_int3d(xval,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -427,9 +414,8 @@ end subroutine xmpi_sum_int3d
 !!  xval= buffer array
 !!
 !! SOURCE
-subroutine xmpi_sum_int4d(xval,comm,ier)
 
- implicit none
+subroutine xmpi_sum_int4d(xval,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -494,11 +480,8 @@ end subroutine xmpi_sum_int4d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
@@ -561,10 +544,8 @@ end subroutine xmpi_sum_dp
 !!  None
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp),intent(in) :: xval
@@ -622,8 +603,6 @@ end subroutine xmpi_sum_dpvt
 !! SOURCE
 subroutine xmpi_sum_dpv(xval,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp),intent(inout) :: xval
  integer ,intent(in) :: comm
@@ -674,10 +653,8 @@ end subroutine xmpi_sum_dpv
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dpn(xval,n1,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:)
@@ -1129,10 +1106,6 @@ end subroutine xmpi_sum_sp7d
 
 subroutine xmpi_sum_dp2d(xval,comm,ier)
 
-
- implicit none
-
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:)
  integer ,intent(in) :: comm
@@ -1192,10 +1165,8 @@ end subroutine xmpi_sum_dp2d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp3d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -1258,10 +1229,8 @@ end subroutine xmpi_sum_dp3d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp4d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp),DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -1325,10 +1294,8 @@ end subroutine xmpi_sum_dp4d
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_dp5d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -1395,10 +1362,6 @@ end subroutine xmpi_sum_dp5d
 !! SOURCE
 subroutine xmpi_sum_dp6d(xval,comm,ier)
 
-
- implicit none
-
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
  integer ,intent(in) :: comm
@@ -1462,10 +1425,8 @@ end subroutine xmpi_sum_dp6d
 !!  xval= buffer array
 !!   
 !! SOURCE
+
 subroutine xmpi_sum_dp7d(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
@@ -1533,9 +1494,8 @@ end subroutine xmpi_sum_dp7d
 !!  xsum= receive buffer
 !!
 !! SOURCE
-subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
 
- implicit none
+subroutine xmpi_sum_dp2t(xval,xsum,n1,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:),xsum(:)
@@ -1581,9 +1541,8 @@ end subroutine xmpi_sum_dp2t
 !!  ier= exit status, a non-zero value meaning there is an error
 !!
 !! SOURCE
-subroutine xmpi_sum_dp2d2t(xval,xsum,n,spaceComm,ier)
 
- implicit none
+subroutine xmpi_sum_dp2d2t(xval,xsum,n,spaceComm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:,:)
@@ -1637,8 +1596,6 @@ end subroutine xmpi_sum_dp2d2t
 
 subroutine xmpi_sum_dp3d2t(xval,xsum,n1,comm,ier)
 
- implicit none
-
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:),xsum(:,:,:)
  integer ,intent(in) :: n1
@@ -1684,9 +1641,8 @@ end subroutine xmpi_sum_dp3d2t
 !!  xsum= receive buffer
 !!
 !! SOURCE
-subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
 
- implicit none
+subroutine xmpi_sum_dp4d2t(xval,xsum,n1,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(inout) :: xval(:,:,:,:),xsum(:,:,:,:)
@@ -1731,9 +1687,8 @@ end subroutine xmpi_sum_dp4d2t
 !!  xval= scalar to be summed.
 !!
 !! SOURCE
-subroutine xmpi_sum_c0dc(xval,comm,ier)
 
- implicit none
+subroutine xmpi_sum_c0dc(xval,comm,ier)
 
 !Arguments-------------------------
  complex(dpc),intent(inout) :: xval
@@ -1784,10 +1739,8 @@ end subroutine xmpi_sum_c0dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c1dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:)
@@ -1848,10 +1801,8 @@ end subroutine xmpi_sum_c1dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c2dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -1913,10 +1864,8 @@ end subroutine xmpi_sum_c2dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c3dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -1979,10 +1928,8 @@ end subroutine xmpi_sum_c3dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c4dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -2045,10 +1992,8 @@ end subroutine xmpi_sum_c4dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c5dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -2109,10 +2054,8 @@ end subroutine xmpi_sum_c5dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c6dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
@@ -2176,10 +2119,8 @@ end subroutine xmpi_sum_c6dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c7dc(xval,comm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  complex(dpc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:,:)
@@ -2247,10 +2188,8 @@ end subroutine xmpi_sum_c7dc
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c1cplx(xval,comm,ier)
-
-
- implicit none
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:)
@@ -2311,10 +2250,8 @@ end subroutine xmpi_sum_c1cplx
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c2cplx(xval,comm,ier)
-
-
- implicit none
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:)
@@ -2381,10 +2318,8 @@ end subroutine xmpi_sum_c2cplx
 !!      mpi_allreduce,xmpi_abort
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c3cplx(xval,comm,ier)
-
-
- implicit none
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:)
@@ -2452,11 +2387,8 @@ end subroutine xmpi_sum_c3cplx
 !!      mpi_allreduce,xmpi_abort
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c4cplx(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:)
@@ -2520,11 +2452,8 @@ end subroutine xmpi_sum_c4cplx
 !!  xval= buffer array
 !!
 !! SOURCE
+
 subroutine xmpi_sum_c5cplx(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:)
@@ -2590,10 +2519,6 @@ end subroutine xmpi_sum_c5cplx
 !! SOURCE
 
 subroutine xmpi_sum_c6cplx(xval,comm,ier)
-
-
- implicit none
-
 
 !Arguments----------------
  complex(spc), DEV_CONTARRD intent(inout) :: xval(:,:,:,:,:,:)
