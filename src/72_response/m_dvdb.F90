@@ -1344,6 +1344,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        !  end if
        !  call xmpi_ibcast(work(:,:,:,mu), root, comm, requests(mu), ierr)
        !end do
+       !call xmpi_waitall(requests, ierr)
 
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)

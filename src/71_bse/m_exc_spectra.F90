@@ -637,7 +637,6 @@ end subroutine exc_eps_rpa
 !!
 !! SOURCE
 
-
 subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
 &    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
 

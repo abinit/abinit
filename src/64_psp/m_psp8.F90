@@ -467,13 +467,6 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
      vloc(irad) = vloc(irad) / four_pi
    end do
 
-!! DEBUG
-!  do irad = 1, mmax
-!    write(std_out,*)' Valence Charge  = ', rad(irad), vloc(irad)
-!  enddo
-!  stop
-!! ENDDEBUG
-
    ! Check that rad grid is linear starting at zero
    amesh=rad(2)-rad(1)
    damesh=zero

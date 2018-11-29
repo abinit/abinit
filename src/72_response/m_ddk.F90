@@ -331,8 +331,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=0, paral_kgb0=0, master=0
- integer :: mband, nbcalc, nsppol, ib_v, ib_c, dummy_gvec(3,dummy_npw)
+ integer,parameter :: master=0
+ integer :: mband, nbcalc, nsppol, ib_v, ib_c
  integer :: mpw, spin, nspinor, nkpt, nband_k, npw_k
  integer :: ii, jj, ik, bandmin, bandmax, istwf_k, idir, edos_intmeth
  integer :: my_rank, nproc, ierr, bstop, ivoigt
@@ -461,9 +461,9 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  end if
 
  ! Initialize distributed wavefunctions object
- call wfd_init(wfd,cryst,pawtab,psps,keep_ur,paral_kgb0,dummy_npw,mband,nband,nkpt,nsppol,&
-   bks_mask,dtset%nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,&
-   ngfftc,dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=hdr%ecut)
+ call wfd_init(wfd,cryst,pawtab,psps,keep_ur,mband,nband,nkpt,nsppol,&
+   bks_mask,dtset%nspden,nspinor,hdr%ecut,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,&
+   ngfftc,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
 
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)

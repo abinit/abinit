@@ -129,7 +129,6 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! CHILDREN
-!!      wfd_init,wfd_read_wfk,wfd_test_ortho
 !!
 !! SOURCE
 
@@ -149,7 +148,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,brav1=1,timrev2=2,dummy_npw=1
+ integer,parameter :: master=0,brav1=1,timrev2=2
  integer :: comm,nprocs,my_rank,mgfftf,nfftf !,nfftf_tot
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
@@ -174,7 +173,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  type(mpi_type) :: mpi_enreg
  type(wfd_t) :: wfd
 !arrays
- integer :: dummy_gvec(3,dummy_npw),ngfftc(18),ngfftf(18)
+ integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: l_size_atm(:)
  real(dp),parameter :: k0(3)=zero
  !real(dp) :: nelect_per_spin(dtset%nsppol),n0(dtset%nsppol)
@@ -517,7 +516,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 !!      wfk_analyze
 !!
 !! CHILDREN
-!!      wfd_init,wfd_read_wfk,wfd_test_ortho
 !!
 !! SOURCE
 
@@ -529,10 +527,9 @@ subroutine read_wfd()
    ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
    keep_ur = .False.; bks_mask = .True.
 
-   call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,&
-   ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
-   dtset%nspden,dtset%nspinor,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
-   dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut_eff)
+   call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
+     dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
+     dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
 
    ABI_FREE(keep_ur)
    ABI_FREE(bks_mask)

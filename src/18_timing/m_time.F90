@@ -194,7 +194,6 @@ pure function sec2str(time_s) result(str)
  else if (minutes > 0) then
    write(str,'(i0.2,a,i0.2)')minutes,":",seconds
  else
-   !write(str,'(i0.2,a)')seconds," [s]"
    write(str,'(f5.2,a)')time_s," [s]"
  end if
 
