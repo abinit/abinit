@@ -3708,8 +3708,8 @@ end subroutine ftifc_r2q
 !! dynmat_dq
 !!
 !! FUNCTION
-!!   Compute the derivative D(q)/dq of the dynamical matrix via Fourier transform
-!!   of the interatomic forces
+!!  Compute the derivative D(q)/dq of the dynamical matrix via Fourier transform
+!!  of the interatomic forces
 !!
 !! INPUTS
 !! qpt(3)= Reduced coordinates of the q vector in reciprocal space
@@ -3993,8 +3993,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
 
    ! Does not support multiple shifts
    if (nqshft/=1) then
-     write(message, '(a)' ) 'This version of the weights does not support nqshft/=1.'
-     MSG_ERROR(message)
+     MSG_ERROR('This version of the weights does not support nqshft/=1.')
    end if
 
    ! Find the points of the lattice given by ngqpt*acell. These are used to define
@@ -4018,9 +4017,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
    end do
  end if ! end new_wght
 
-!DEBUG
 !write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
-!ENDDEBUG
 
  r_inscribed_sphere = sum((matmul(rprimd(:,:),ngqpt(1:3)))**2)
  do ii=-1,1
@@ -4152,8 +4149,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbordh==2) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/3
          else if (nbordh/=0) then
-           message = 'There is a problem of borders and weights (hex).'
-           MSG_BUG(message)
+           MSG_BUG('There is a problem of borders and weights (hex).')
          end if
          if (nbord(3)==1)then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
@@ -4203,8 +4199,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
          else if (nbord(1)==4) then
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/6
          else if (nbord(1)/=0) then
-           message = ' There is a problem of borders and weights (BCC).'
-           MSG_ERROR(message)
+           MSG_ERROR(' There is a problem of borders and weights (BCC).')
          end if
 
 !        FCC packing of k-points
@@ -4249,8 +4244,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,t
            wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/4
          else if (nbord(1)/=0 .and. wghatm(ia,ib,irpt)>1.d-10) then
 !          Interestingly nbord(1)==4 happens for some points outside of the volume
-           message = ' There is a problem of borders and weights (FCC).'
-           MSG_BUG(message)
+           MSG_BUG(' There is a problem of borders and weights (FCC).')
          end if
 
        else
@@ -4547,13 +4541,6 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !***********************************************************************
 
-!DEBUG
-!write(std_out,*)'sytens : enter'
-!write(std_out,*)'indsym = '
-!write(std_out,*)indsym
-!stop
-!ENDDEBUG
-
  ABI_ALLOCATE(pertsy,(3,mpert,3,mpert,3,mpert))
  pertsy(:,:,:,:,:,:) = 0
 
@@ -4657,17 +4644,13 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                          end if
                        end if
 
-
-
                      end do
                    end do
                  end do
 
-
                  if (found == 1) then
                    pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
                  end if
-
 
 !                In case a symmetry operation only changes the sign of an
 !                element, this element has to be equal to zero
@@ -4678,8 +4661,6 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
                  end if
 
                end do    ! close loop on symmetries
-
-
 
 !              If the elemetn i1pert,i2pert,i3pert is not symmetric
 !              to a basis element, it is a basis element

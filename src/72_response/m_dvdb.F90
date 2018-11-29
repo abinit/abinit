@@ -2165,16 +2165,16 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
  do isp=1,nspden
    ind1 = 0
    do i3=1,n3
+     ! Get location of G vector (grid point) centered at 0 0 0
+     l3 = i3-(i3/id3)*n3-1
      do i2=1,n2
+       l2 = i2-(i2/id2)*n2-1
        do i1=1,n1
          ind1 = ind1 + 1
          !ind1 = 1 + i1 + (i2-1)*n1 + (i3-1)*n1*n2
          !if (mod(ind1, nprocs) /= my_rank) cycle
 
-         ! Get location of G vector (grid point) centered at 0 0 0
          l1 = i1-(i1/id1)*n1-1
-         l2 = i2-(i2/id2)*n2-1
-         l3 = i3-(i3/id3)*n3-1
 
          ! Get rotated G vector. IS(G)
          j1 = tsign * (symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3)

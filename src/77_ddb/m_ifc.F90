@@ -30,7 +30,6 @@ MODULE m_ifc
  use defs_basis
  use m_errors
  use m_abicore
- use m_time
  use m_xmpi
  use m_sort
  use m_cgtools
@@ -49,7 +48,7 @@ MODULE m_ifc
  use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
  use m_symtk,       only : matr3inv
  use m_special_funcs,  only : abi_derfc
- use m_time,        only : cwtime, cwtime_report
+ use m_time,        only : cwtime, cwtime_report, timab
  use m_copy,        only : alloc_copy
  use m_pptools,     only : printbxsf
  use m_ewald,       only : ewald9
