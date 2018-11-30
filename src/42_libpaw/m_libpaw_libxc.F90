@@ -700,7 +700,7 @@ end subroutine libpaw_libxc_init
  if (nxc<2) then
    if (xc_funcs(1)%id /= 0) then
      call c_f_pointer(xc_functional_get_name(xc_funcs(1)%id),strg_c)
-     call xc_char_to_f(strg_c,libpaw_libxc_fullname)
+     call char_c_to_f(strg_c,libpaw_libxc_fullname)
    end if
  else if (xc_funcs(1)%id <= 0) then
    if (xc_funcs(2)%id /= 0) then
@@ -764,7 +764,7 @@ subroutine libpaw_libxc_getrefs(xcrefs,xc_functional)
  do while (iref_c>=0.and.iref_c<size(xcrefs))
    call c_f_pointer(libpaw_xc_get_info_refs(xc_functional%conf,iref_c),strg_c)
    if (associated(strg_c)) then
-     call xc_char_to_f(strg_c,xcrefs(iref_c+1))
+     call char_c_to_f(strg_c,xcrefs(iref_c+1))
      iref_c=iref_c+1
    else
      iref_c=-1
