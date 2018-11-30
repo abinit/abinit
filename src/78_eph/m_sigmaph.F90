@@ -204,6 +204,10 @@ module m_sigmaph
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
+  real(dp) :: tol_deltaw_pm = zero
+   ! Tolerance on the tetrahedron weights used to filter q-points if imag_only
+   ! Zero to include'em all.
+
   real(dp) :: wr_step
    ! Step of the linear mesh along the real axis (Ha units).
 
@@ -953,13 +957,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      endif
 
      ! Integration over q-points in the IBZ(k)
-     if (sigma%imag_only .and. my_rank == master) then
+     if (my_rank == master .and. sigma%imag_only) then
        write(std_out, "(a,i0)")"Number of q-points contributing: ", count(sigma%mask_qibz_k /= 0)
      end if
 
      do iq_ibz=1,sigma%nqibz_k
        ! Parallelization over q-points inside comm_bq
        if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
+       ! Exclude q-points based on tetrahedron weigths.
        if (sigma%mask_qibz_k(iq_ibz) == 0) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
@@ -1019,7 +1024,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
           "The WFK file cannot be used to compute self-energy corrections at k:", trim(ktoa(kk)), ch10,&
           "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
           "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-          'Action: check your WFK file and (k,q) point input variables'
+          'Action: check your WFK file and (k, q) point input variables'
          MSG_ERROR(msg)
        end if
 
@@ -1162,6 +1167,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end if
 
          ! Get gkk(kcalc, q, idir-ipert) (atom representation)
+         ! No need to handle istwf_kq because it's always 1.
          gkq_atm = zero
          do imyp=1,my_npert
            ipc = sigma%my_pinfo(3, imyp)
@@ -1380,10 +1386,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(vlocal1)
 
        if (sigma%nqibz_k < 1000 .or. (sigma%nqibz_k > 1000 .and. mod(iq_ibz, 200) == 0) .or. iq_ibz <= nprocs) then
-         call cwtime(cpu, wall, gflops, "stop")
-         write(msg,'(4(a,i0),2(a,f8.2))') "k-point [",ikcalc,"/",sigma%nkcalc, &
-                                          "] q-point [",iq_ibz,"/",sigma%nqibz_k,"] completed. cpu:",cpu,", wall:",wall
-         call wrtout(std_out, msg, do_flush=.True.)
+         write(msg,'(4(a,i0),a,f8.2)') " k-point [",ikcalc,"/",sigma%nkcalc, "] q-point [",iq_ibz,"/",sigma%nqibz_k,"]"
+         call cwtime_report(msg, cpu, wall, gflops)
        end if
        iq_ibz_packed = iq_ibz_packed + 1
      end do ! iq_ibz (sum over q-points)
@@ -1753,6 +1757,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
+ new%tol_deltaw_pm = zero
+ new%tol_deltaw_pm = tol20
+ if (dtset%userra /= zero) then
+   new%tol_deltaw_pm = dtset%userra
+ end if
+ call wrtout(std_out, sjoin("Setting tol_deltaw_pm to", ftoa(new%tol_deltaw_pm)))
 
  ! Broadening parameter from zcut
  new%ieta = + j_dpc * dtset%zcut
@@ -2013,6 +2023,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_DT_MALLOC(new%degtab, (new%nkcalc, new%nsppol))
  end if
 
+ ! workspace arrays used to compute degeneracy tables.
  ABI_ICALLOC(degblock_all, (2, mband, new%nkcalc, new%nsppol))
  ABI_ICALLOC(ndeg_all, (new%nkcalc, new%nsppol))
  ierr = 0
@@ -2033,7 +2044,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        "The WFK file cannot be used to compute self-energy corrections at kpoint: ",ktoa(kk),ch10,&
        "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
        "Q-mesh: ",trim(ltoa(new%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-       'Action: check your WFK file and (k,q) point input variables'
+       'Action: check your WFK file and (k, q) point input variables'
       MSG_ERROR(msg)
    end if
 
@@ -2076,13 +2087,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        ndeg_all(ikcalc, spin) = ndeg
        degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
 
-       !ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
-       !do ii=1,ndeg
-       !  cnt = degblock(2, ii) - degblock(1, ii) + 1
-       !  ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
-       !  new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii) - new%bstart_ks(ikcalc, spin) + 1, &
-       !                                                    degblock(2, ii) - new%bstart_ks(ikcalc, spin) + 1)]
-       !end do
        ABI_FREE(degblock)
      end do
    end if ! symsigma
@@ -2094,6 +2098,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  call xmpi_sum(new%bstart_ks, comm, ierr)
  call xmpi_sum(new%nbcalc_ks, comm, ierr)
 
+ ! Build degtab tables.
  if (abs(new%symsigma) == 1) then
    call xmpi_sum(ndeg_all, comm, ierr)
    call xmpi_sum(degblock_all, comm, ierr)
@@ -2180,7 +2185,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! In principle this should be large enough but it seems that the linewidths in v8[160] are slightly affected.
      elow = huge(one); ehigh = - huge(one)
      wmax = 1.1_dp * ifc%omega_minmax(2) + five * dtset%zcut
-     !wmax = 1.1_dp * ifc%omega_minmax(2) + 20 * dtset%zcut
      do ikcalc=1,new%nkcalc
        ik_ibz = new%kcalc2ibz(ikcalc, 1)
        do spin=1,new%nsppol
@@ -2518,19 +2522,18 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: my_rank, ii
- integer :: edos_intmeth
+ integer :: my_rank, ii, edos_intmeth
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr,varid
 #endif
  character(len=500) :: msg
- real(dp) :: edos_broad,edos_step
- real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
+ real(dp) :: edos_broad, edos_step,  cpu_all, wall_all, gflops_all, cpu, wall, gflops
  !logical :: found
  character(len=fnlen) :: path
  type(edos_t) :: edos
 
 ! *************************************************************************
+
  my_rank = xmpi_comm_rank(comm)
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -2769,8 +2772,7 @@ type (sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 
  path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (.not.file_exists(path)) then
-    ierr = 1
-    return
+    ierr = 1; return
  end if
  NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
  ! so that the structure is properly freed
@@ -3612,7 +3614,6 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  integer :: nu, band_ks, ibsum_kq, ik_ibz, ib_k, bstart_ks, nbcalc_ks, my_rank, natom3, ierr
  integer :: nprocs,this_calc, imyp
  integer :: iq_ibz_fine,iq_bz_fine,iq_ibz_packed,iq_ibz,jj
- real(dp),parameter :: tol_delta = tol8
  real(dp) :: eig0nk, weight
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
@@ -3687,13 +3688,13 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
             weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
             dpm = tmp_deltaw_pm(2, iq_ibz_fine, :)
             sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,jj) = dpm / weight
-            if (any(abs(dpm) > tol_delta / sigma%eph_doublegrid%ndiv)) sigma%mask_qibz_k(iq_ibz) = 1
+            if (any(abs(dpm) > sigma%tol_deltaw_pm / sigma%eph_doublegrid%ndiv)) sigma%mask_qibz_k(iq_ibz) = 1
           end do
         else
           weight = sigma%ephwg%lgk%weights(iq_ibz)
           dpm = tmp_deltaw_pm(2, iq_ibz, :)
           sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,1) = dpm / weight
-          if (any(abs(dpm) > tol_delta)) sigma%mask_qibz_k(iq_ibz) = 1
+          if (any(abs(dpm) > sigma%tol_deltaw_pm)) sigma%mask_qibz_k(iq_ibz) = 1
         end if
         iq_ibz_packed = iq_ibz_packed + 1
       end do
@@ -3703,13 +3704,6 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
 #endif
 
  call xmpi_sum(sigma%mask_qibz_k, comm, ierr)
-
- !if (sigma%imag_only .and. self%qint_method > 0 .and. abs(self%symsigma) == 1) then
- !  if (self%use_doublegrid) then
- !    NOT_IMPLEMENTED_ERROR()
- !  else
- !  end if
- !end if
 
  ABI_FREE(tmp_deltaw_pm)
  !call xmpi_sum(sigma%deltaw_pm, comm, ierr)

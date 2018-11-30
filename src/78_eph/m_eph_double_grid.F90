@@ -41,12 +41,6 @@ module m_eph_double_grid
  private
 !!***
 
- public :: eph_double_grid_new   ! Initialize the double grid structure
- public :: eph_double_grid_free  ! Free the double grid structure
- public :: eph_double_grid_get_index ! Get the index of the the kpoint in the double grid
- public :: eph_double_grid_bz2ibz ! Map BZ to IBZ using the double grid structure
- public :: eph_double_grid_get_mapping ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
-
 !----------------------------------------------------------------------
 
 !!****t* m_eph_double_grid/eph_double_grid_t
@@ -115,6 +109,12 @@ module m_eph_double_grid
 
  end type eph_double_grid_t
 !!***
+
+ public :: eph_double_grid_new   ! Initialize the double grid structure
+ public :: eph_double_grid_free  ! Free the double grid structure
+ public :: eph_double_grid_get_index ! Get the index of the the kpoint in the double grid
+ public :: eph_double_grid_bz2ibz ! Map BZ to IBZ using the double grid structure
+ public :: eph_double_grid_get_mapping ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
 
 contains  !=====================================================
 !!***
@@ -374,7 +374,7 @@ end function eph_double_grid_new
 
 subroutine eph_double_grid_free(self)
 
- type(eph_double_grid_t) :: self
+ type(eph_double_grid_t),intent(inout) :: self
 
  ABI_SFREE(self%weights_dense)
  ABI_SFREE(self%bz2ibz_dense)
@@ -416,11 +416,16 @@ integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
  type(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: opt
  real(dp),intent(in) :: kpt(3)
+
+!Local variables ------------------------
  real(dp) :: wrap_kpt(3), shift
+
+! *************************************************************************
 
  call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
  call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
  call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
+
  if (opt==1) then
    ikpt = self%indexes_to_coarse(&
              mod(nint((wrap_kpt(1)+2)*self%nkpt_coarse(1)),self%nkpt_coarse(1))+1,&
@@ -465,16 +470,20 @@ end function eph_double_grid_get_index
 
 subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timrev,mapping)
 
- type(eph_double_grid_t) :: self
+ type(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: nibz, nsym
- integer :: isym, ii, ik_ibz, ik_bz
  real(dp),intent(in) :: kpt_ibz(3,nibz)
  integer,intent(in) :: symmat(3,3,nsym)
  integer,intent(out):: bz2ibz(self%dense_nbz)
+ integer,optional,intent(in) :: has_timrev
+ integer,optional,intent(inout) :: mapping(self%dense_nbz,3)
+
+!Local variables ------------------------
+ integer :: isym, ii, ik_ibz, ik_bz
  real(dp) :: kpt(3), kpt_sym(3), wrap_kpt(3), shift
  integer :: itimrev, timrev, counter
- integer,optional :: has_timrev
- integer,optional :: mapping(self%dense_nbz,3)
+
+!************************************************************************
 
  timrev = 0
  if (present(has_timrev)) timrev=1
@@ -551,8 +560,9 @@ end subroutine eph_double_grid_bz2ibz
 subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
 
 !Arguments --------------------------------
- type(eph_double_grid_t) :: self
- real(dp) :: kk(3), kq(3), qpt(3)
+ type(eph_double_grid_t),intent(inout) :: self
+ real(dp),intent(in) :: kk(3), kq(3), qpt(3)
+
 !Variables --------------------------------
  integer :: jj
  integer :: ik_bz, ikq_bz, iq_bz
@@ -586,4 +596,3 @@ end subroutine eph_double_grid_get_mapping
 
 end module m_eph_double_grid
 !!***
-
