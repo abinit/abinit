@@ -54,6 +54,7 @@ module m_orbmag
   use m_kpts,             only : listkk, smpbz
   use m_mkffnl,           only : mkffnl
   use m_mpinfo,           only : proc_distrb_cycle
+  use m_nonlop,           only : nonlop
   use m_pawang,           only : pawang_type
   use m_pawfgr,           only : pawfgr_type
   use m_paw_ij,           only : paw_ij_type
@@ -168,8 +169,10 @@ module m_orbmag
   public :: initorbmag
   public :: rho_norm_check
   public :: chern_number
+  public :: make_dsdk
   public :: make_onsite_l_k
   public :: make_S1trace_k
+  public :: make_CCIV
   public :: orbmag
   public :: ctocprjb
 
@@ -1622,6 +1625,88 @@ subroutine make_S1trace_k(adir,cprj_k,dtset,eeig,nband_k,pawrad,pawtab,S1trace_k
 end subroutine make_S1trace_k
 !!***
 
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_CCIV
+!! NAME
+!! make_CCIV
+!!
+!! FUNCTION
+!! Compute Trace[dS/db * dS/dg * H] arising in orbital magnetism context
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_CCIV(adir,CCIV,dsdk,eeig,nband_k)
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: adir,nband_k
+  complex(dpc),intent(out) :: CCIV
+
+  !arrays
+  real(dp),intent(in) :: dsdk(2,nband_k,nband_k,3),eeig(nband_k,nband_k)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: bdir,epsabg,gdir,nn,n1
+  real(dp) :: ENK
+  complex(dpc) :: c1,c2
+
+  !arrays
+
+!----------------------------------------------------------------
+
+
+  CCIV = czero
+
+  do epsabg = 1, -1, -2
+
+     if (epsabg .EQ. 1) then
+        bdir = modulo(adir,3)+1
+        gdir = modulo(adir+1,3)+1
+     else
+        bdir = modulo(adir+1,3)+1
+        gdir = modulo(adir,3)+1
+     end if
+
+     do nn = 1, nband_k
+        ENK = eeig(nn,nn)
+
+        do n1 = 1, nband_k
+           c1 = cmplx(dsdk(1,n1,nn,bdir),dsdk(2,n1,nn,bdir))
+           c2 = cmplx(dsdk(1,n1,nn,gdir),dsdk(2,n1,nn,gdir))
+           CCIV=CCIV-half*j_dpc*epsabg*ENK*conjg(c1)*c2
+        end do ! end loop over n1
+
+     end do ! end loop over nn
+
+  end do ! end loop over epsabg
+     
+end subroutine make_CCIV
+!!***
+
 
 !{\src2tex{textfont=tt}}
 !!****f* ABINIT/ctocprjb
@@ -1869,6 +1954,116 @@ end subroutine ctocprjb
 !!***
 
 !{\src2tex{textfont=tt}}
+!!****f* ABINIT/make_dsdk
+!! NAME
+!! make_dsdk
+!!
+!! FUNCTION
+!! Compute <u_n'k'|dS/dk_idir|u_nk>
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2017 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!! cprj_k
+!! dtset
+!! idir
+!! nband_k
+!!
+!! OUTPUT
+!! dsdk(2,nband_k,nband_k)
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_dsdk(atindx1,cg,cprj_k,dimlmn,dsdk,dtset,gs_hamk,idir,icg,ikpt,isppol,&
+     & mcg,mpi_enreg,my_nspinor,nband_k,ncpgr,npw_k)
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: idir,icg,ikpt,isppol,mcg,my_nspinor,nband_k,ncpgr,npw_k
+  type(dataset_type),intent(in) :: dtset
+  type(gs_hamiltonian_type),intent(in) :: gs_hamk
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  integer,intent(in) :: atindx1(dtset%natom),dimlmn(dtset%natom)
+  real(dp),intent(in) :: cg(2,mcg)
+  real(dp),intent(out) :: dsdk(2,nband_k,nband_k)
+  type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: choice,cpopt,ndat,n1,nn,nnlout,paw_opt,signs,tim_nonlop
+
+  !arrays
+  real(dp) :: enlout(1),lambda(1),vectout(2,1)
+  real(dp),allocatable :: cwavef(:,:),swavef(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+
+!--------------------------------------------------------------------  
+
+  ABI_DATATYPE_ALLOCATE(cwaveprj,(dtset%natom,1))
+  call pawcprj_alloc(cwaveprj,ncpgr,dimlmn)
+
+  ABI_ALLOCATE(cwavef,(2,npw_k))
+  ABI_ALLOCATE(swavef,(2,npw_k))
+
+  choice = 5 ! 1st derivative(s) with respect to k wavevector
+  cpopt = 4 ! <p_lmn|in> and first derivatives are already in memory
+  nnlout = 1 ! dimension of enlout, not used in nonlop call
+  lambda = zero ! not used in nonlop call
+  ndat = 1 ! number of wavefunctions on which to apply nonlop
+  paw_opt = 3 ! paw_opt=3 : PAW overlap matrix (Sij)
+  signs = 2 ! if 2, applies the non-local operator to a function in reciprocal space
+  tim_nonlop = 0 ! not using timing
+
+  do nn = 1, nband_k
+
+     call pawcprj_get(atindx1,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
+          &           dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
+
+     cwavef(1,1:npw_k) = cg(1,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
+     cwavef(2,1:npw_k) = cg(2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
+
+     call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,ndat,nnlout, &
+          &                 paw_opt,signs,swavef,tim_nonlop,cwavef,vectout)
+     do n1 = 1, nband_k
+        
+        cwavef(1,1:npw_k) = cg(1,icg+(n1-1)*npw_k+1:icg+n1*npw_k)
+        cwavef(2,1:npw_k) = cg(2,icg+(n1-1)*npw_k+1:icg+n1*npw_k)
+
+        dsdk(1,n1,nn) = DOT_PRODUCT(cwavef(1,1:npw_k),swavef(1,1:npw_k))+DOT_PRODUCT(cwavef(2,1:npw_k),swavef(2,1:npw_k))
+        dsdk(2,n1,nn) = DOT_PRODUCT(cwavef(1,1:npw_k),swavef(2,1:npw_k))-DOT_PRODUCT(cwavef(2,1:npw_k),swavef(1,1:npw_k))
+
+     end do ! end loop over n1
+        
+  end do ! end loop over ket bands
+
+  call pawcprj_free(cwaveprj)
+  ABI_DATATYPE_DEALLOCATE(cwaveprj)
+  ABI_DEALLOCATE(cwavef)
+  ABI_DEALLOCATE(swavef)
+
+end subroutine make_dsdk
+!!***
+
+!{\src2tex{textfont=tt}}
 !!****f* ABINIT/orbmag
 !! NAME
 !! orbmag
@@ -1981,7 +2176,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  integer :: prtvol,shiftbd,sij_opt,tim_getghc,type_calc,type_calc_123
  real(dp) :: deltab,deltag,dkg2,dotr,doti,ENK,EN2K,htpisq,intg,keg,lambda,ucvol
  complex(dpc) :: cdij,cgdijcb,cpb,cpg,cpk
- complex(dpc) :: CCI,CCI_1,CCI_2,CCI_3
+ complex(dpc) :: CCI,CCI_1,CCI_2,CCI_3,CCIV
  complex(dpc) :: CCII,CCII_1,CCII_2,CCII_3,CCII_4,CCVV_k
  complex(dpc) :: onsite_l_k,orbl_me
  complex(dpc) :: S1trace_k,VVI,VVI_1,VVI_2
@@ -1998,9 +2193,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp),allocatable :: bra(:,:),cg1_k(:,:),cgrvtrial(:,:),cwavef(:,:),ff(:),ffnl(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
  real(dp),allocatable :: hmat(:,:,:,:,:,:),kinpw(:),kk_paw(:,:,:),kpg_k(:,:),kpg_k_dummy(:,:)
  real(dp),allocatable :: my_nucdipmom(:,:),ph3d(:,:,:),pwnsfac_k(:,:),smat_all(:,:,:,:,:,:),smat_inv(:,:,:)
+ real(dp),allocatable :: dsmatdk_all(:,:,:,:,:,:)
  real(dp),allocatable :: smat_kk(:,:,:),vlocal(:,:,:,:),vtrial(:,:),ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc),allocatable :: nucdipmom_k(:)
- logical,allocatable :: has_hmat(:,:,:),has_smat(:,:,:)
+ logical,allocatable :: has_dsmatdk(:,:,:),has_hmat(:,:,:),has_smat(:,:,:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kb_k(:,:,:,:,:)
  type(pawcprj_type),allocatable :: cprj_kg(:,:),cwaveprj(:,:)
  type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
@@ -2101,6 +2297,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_ALLOCATE(has_smat,(dtorbmag%fnkpt,0:6,0:6))
  ABI_ALLOCATE(smat_all,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
  has_smat(:,:,:)=.FALSE.
+ ABI_ALLOCATE(has_dsmatdk,(dtorbmag%fnkpt,3,0:6))
+ ABI_ALLOCATE(dsmatdk_all,(2,nband_k,nband_k,dtorbmag%fnkpt,3,0:6))
+ has_dsmatdk(:,:,:) = .FALSE.
  ABI_ALLOCATE(has_hmat,(dtorbmag%fnkpt,0:6,0:6))
  ABI_ALLOCATE(hmat,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
  has_hmat(:,:,:) = .FALSE.
@@ -2277,11 +2476,23 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     end if
     ABI_DEALLOCATE(ph3d)
 
+    ! make the <u_n'k|dS/dk|u_nk> terms
+    do adir = 1, 3
+       if (.NOT. has_dsmatdk(ikpt,adir,0)) then
+          call make_dsdk(atindx1,cg,cprj_k,dimlmn,dsmatdk_all(1:2,1:nband_k,1:nband_k,ikpt,adir,0),&
+               & dtset,gs_hamk,adir,icg,ikpt,isppol,&
+               & mcg,mpi_enreg,my_nspinor,nband_k,ncpgr,npw_k)
+       end if
+    end do
+
     do adir = 1, 3
 
        call make_onsite_l_k(cprj_k,dtset,adir,nband_k,onsite_l_k,pawrad,pawtab)
 
        call make_S1trace_k(adir,cprj_k,dtset,hmat(1,1:nband_k,1:nband_k,ikpt,0,0),nband_k,pawrad,pawtab,S1trace_k)
+
+       call make_CCIV(adir,CCIV,dsmatdk_all(1:2,1:nband_k,1:nband_k,ikpt,1:3,0),&
+            & hmat(1,1:nband_k,1:nband_k,ikpt,0,0),nband_k)
 
        CCVV_k = czero
        do epsabg = 1, -1, -2
@@ -2652,11 +2863,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                 end do ! end nn
 
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII-VVI-VVII-VVIII)/(2.0*deltab*2.0*deltag)
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII)/(2.0*deltab*2.0*deltag) ! largely confident that CCI and CCII are ok
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCII)/(2.0*deltab*2.0*deltag) ! largely confident that CCI and CCII are ok
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI)/(2.0*deltab*2.0*deltag)
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCII)/(2.0*deltab*2.0*deltag)
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(-VVII)/(2.0*deltab*2.0*deltag) ! VVII is good.
-                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(-VVI-VVIII)/(2.0*deltab*2.0*deltag) ! VVI and VVIII are not good
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(-VVI-VVIII)/(2.0*deltab*2.0*deltag) ! VVI and VVIII are not good
+                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI-VVII)/(2.0*deltab*2.0*deltag) ! 
 
                 ABI_DEALLOCATE(kg_kg)
 
@@ -2669,11 +2881,13 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
        end do ! end loop over epsabg
 
        orbmagvec(1,adir) = orbmagvec(1,adir) + real(CCVV_k)
-       orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(CCVV_K)
-       ! orbmagvec(1,adir) = orbmagvec(1,adir) - real(S1trace_k) ! S1trace_k checks out good
-       ! orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(S1trace_k)
-       ! orbmagvec(1,adir) = orbmagvec(1,adir) + real(onsite_l_k) ! onside_l_k checks out good
-       ! orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(onsite_l_k)
+       orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(CCVV_k)
+       orbmagvec(1,adir) = orbmagvec(1,adir) - real(CCIV)
+       orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(CCIV)
+       orbmagvec(1,adir) = orbmagvec(1,adir) - real(S1trace_k) ! S1trace_k checks out good
+       orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(S1trace_k)
+       orbmagvec(1,adir) = orbmagvec(1,adir) + real(onsite_l_k) ! onside_l_k checks out good
+       orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(onsite_l_k)
 
     end do ! end loop over adir
     
@@ -2744,6 +2958,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_DEALLOCATE(smat_all)
  ABI_DEALLOCATE(has_hmat)
  ABI_DEALLOCATE(hmat)
+ ABI_DEALLOCATE(has_dsmatdk)
+ ABI_DEALLOCATE(dsmatdk_all)
 
  ABI_DEALLOCATE(my_nucdipmom)
 
