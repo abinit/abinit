@@ -31,6 +31,7 @@ module m_sigmaph
  use m_xmpi
  use m_errors
  use m_hide_blas
+ use m_copy
  use m_ifc
  use m_ebands
  use m_wfk
@@ -52,7 +53,7 @@ module m_sigmaph
 #endif
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_time,           only : cwtime, cwtime_report, sec2str
+ use m_time,           only : cwtime, cwtime_report
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
  use m_io_tools,       only : iomode_from_fname, file_exists
@@ -90,7 +91,6 @@ module m_sigmaph
  end type degtab_t
 
  ! Store the weights in single or double precision
-
  integer,private,parameter :: DELTAW_KIND = dp
  !integer,private,parameter :: DELTAW_KIND = sp
 
@@ -334,10 +334,6 @@ module m_sigmaph
   ! Each mesh is **centered** on the corresponding KS energy.
   ! This array depends on (ikcalc, spin)
 
-  !real(dp),allocatable :: frohl_gkq2(:,:)
-  ! frohl_gkq2(max_nbcalc, natom3)
-  ! Stores the long-range Frohlich matrix element (squared)
-
   real(dp), allocatable :: qvers_cart(:,:)
    ! qvers_cart(3, angl_size)
    ! For each point of the angular mesh, gives the Cartesian coordinates
@@ -440,7 +436,7 @@ module m_sigmaph
 
 
  real(dp),private,parameter :: EPH_WTOL = tol6
- ! Tolerance for phonon frequencies.
+ ! Tolerance for phonon frequencies to be ignored.
 
 !----------------------------------------------------------------------
 
@@ -1759,6 +1755,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
  new%tol_deltaw_pm = zero
  new%tol_deltaw_pm = tol20
+ new%tol_deltaw_pm = 1e-30
  if (dtset%userra /= zero) then
    new%tol_deltaw_pm = dtset%userra
  end if
@@ -1768,7 +1765,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  new%ieta = + j_dpc * dtset%zcut
 
  ! Parallelism over atomic perturbations.
- ! Use MPI communicator to distribute 3 * natom perturbations to reduced memory requirements.
+ ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements.
  ! Perturbations are equally distributed --> Total number of CPUs should be divisible by nprocs_pert.
  new%comm_pert = xmpi_comm_self; new%my_npert = 3 * cryst%natom; new%me_pert = 0; new%nprocs_pert = 1
  do cnt=natom3,2,-1
@@ -1780,11 +1777,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end do
 
 #if 0
- if (dtset%eph_intmeth == 2) then
-   ! This to deactivate parallelism over perturbations.
-   new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
-   MSG_WARNING("Deactivating parallelism over perturbations.")
- end if
+ ! This to deactivate parallelism over perturbations.
+ new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
+ MSG_WARNING("Deactivating parallelism over perturbations.")
 #endif
 
  new%comm_bq = xmpi_comm_self; new%me_bq = 0; new%nprocs_bq = nprocs / new%nprocs_pert
@@ -1824,6 +1819,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_FREE(dims)
  ABI_FREE(periods)
  ABI_FREE(keepdim)
+ ! TODO: Free comms
  !call xmpi_comm_free(comm_cart)
 #endif
 
@@ -2398,7 +2394,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  if (new%frohl_model /= 0) then
    ! Init parameters for numerical integration inside sphere.
    ! Set sphere radius to a fraction of the smallest reciprocal lattice vector.
-   !ABI_MALLOC(new%frohl_gkq2, (new%max_nbcalc, natom3))
    ! Use sphere whose radius is a fraction of the smallest rec lattice vector.
    new%qrad = huge(one)
    do ii=1,3
@@ -2982,7 +2977,6 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%cweights)
  ABI_SFREE(self%deltaw_pm)
  ABI_SFREE(self%wrmesh_b)
- !ABI_SFREE(self%frohl_gkq2)
  ABI_SFREE(self%qvers_cart)
  ABI_SFREE(self%angwgth)
  ABI_SFREE(self%qp_done)
@@ -3618,6 +3612,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
 !arrays
+ integer,allocatable :: imask(:)
  real(dp) :: kk(3), kq(3), qpt(3), eminmax(2), dpm(2)
  real(dp),allocatable :: tmp_deltaw_pm(:,:,:)
 
@@ -3703,7 +3698,9 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  enddo
 #endif
 
- call xmpi_sum(sigma%mask_qibz_k, comm, ierr)
+ call alloc_copy(sigma%mask_qibz_k, imask)
+ call xmpi_max(imask, sigma%mask_qibz_k, comm, ierr)
+ ABI_FREE(imask)
 
  ABI_FREE(tmp_deltaw_pm)
  !call xmpi_sum(sigma%deltaw_pm, comm, ierr)
