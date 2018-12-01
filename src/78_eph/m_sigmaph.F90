@@ -1728,6 +1728,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
  call wrtout(std_out, sjoin("Setting tol_deltaw_pm to", ftoa(new%tol_deltaw_pm)))
 
+ ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
+ ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)
+ ! Decide default behaviour for Re-Im/Im
+ new%qint_method = dtset%eph_intmeth - 1
+
  ! Broadening parameter from zcut
  new%ieta = + j_dpc * dtset%zcut
 
@@ -2054,7 +2059,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! Also take into account Lorentzian shape if zcut is used.
      ! In principle this should be large enough but it seems that the linewidths in v8[160] are slightly affected.
      elow = huge(one); ehigh = - huge(one)
-     wmax = 1.1_dp * ifc%omega_minmax(2) + five * dtset%zcut
+     wmax = 1.1_dp * ifc%omega_minmax(2)
+     if (new%qint_method == 0) wmax = wmax + five * dtset%zcut
      do ikcalc=1,new%nkcalc
        ik_ibz = new%kcalc2ibz(ikcalc, 1)
        do spin=1,new%nsppol
@@ -2126,11 +2132,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%gfw_mesh = arth(ifc%omega_minmax(1), dtset%ph_wstep, new%gfw_nomega)
    ABI_MALLOC(new%gfw_vals, (new%gfw_nomega, 3, new%max_nbcalc))
  end if
-
- ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
- ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)
- ! Decide default behaviour for Re-Im/Im
- new%qint_method = dtset%eph_intmeth - 1
 
  ! Initialize object for the computation of integration weights (integration in q-space).
  ! Weights can be obtained in different ways:
@@ -2230,7 +2231,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! We only need mu_e so MPI parallelize the T-loop.
    new%mu_e = zero
    do it=1,new%ntemp
-     if (mod(it, nprocs) /= my_rank) cycle   ! MPI parallelism.
+     if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism.
      ! Use Fermi-Dirac occopt
      call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
@@ -4111,7 +4112,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  end do
 
  ! Now we can define the list of k-points and the bands range.
- kcalc = nk_found
+ nkcalc = nk_found
  ABI_MALLOC(kcalc, (3, nkcalc))
  ABI_MALLOC(bstart_ks, (nkcalc, nsppol))
  ABI_MALLOC(nbcalc_ks, (nkcalc, nsppol))
@@ -4186,14 +4187,14 @@ subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks
           if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
             ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
             ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
-            !print *, "Adding valence", band
+            !write(std_out, *), "Adding valence", band
           end if
         end if
         if (dtset%sigma_erange(2) >= zero) then
           if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
             ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
             ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
-            !print *, "Adding conduction", band
+            !write(std_out, *)"Adding conduction", band
           end if
         end if
      end do

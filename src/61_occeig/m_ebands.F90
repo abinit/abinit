@@ -527,7 +527,7 @@ subroutine gaps_print(gaps,header,unit,mode_paral)
     '  >>>> For spin ', spin, ch10, &
     '   Minimum direct gap = ',opt_gap*Ha_eV,' (eV), located at k-point     : ',gaps%kpoints(:,ikopt),ch10,&
     '   Fundamental gap    = ',fun_gap*Ha_eV,' (eV), Top of valence bands at: ',gaps%kpoints(:,ivk),ch10,  &
-                                             '       Bottom of conduction at: ',gaps%kpoints(:,ick)
+                                             '      Bottom of conduction at: ',gaps%kpoints(:,ick)
    call wrtout(my_unt,msg,my_mode)
 
    write(msg, "(2(a, f8.4))") "vmax:", gaps%vb_max(spin) * Ha_eV, " cmin", gaps%cb_min(spin) * Ha_eV
@@ -2073,8 +2073,8 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
    ABI_MALLOC(doccde,(mband*nkpt*nsppol))
 
    call newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,ebands%nband,&
-&    ebands%nelect,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&
-&    my_prtvol,stmbias_local,ebands%tphysel,ebands%tsmear,ebands%wtk)
+    ebands%nelect,ebands%nkpt,ebands%nspinor,ebands%nsppol,occ,ebands%occopt,&
+    my_prtvol,stmbias_local,ebands%tphysel,ebands%tsmear,ebands%wtk)
 
    ! Save output in ebands%.
    ebands%entropy = entropy

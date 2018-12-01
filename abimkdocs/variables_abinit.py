@@ -19549,12 +19549,21 @@ Variable(
     defaultval=["-inf", "-inf"],
     dimensions=[2],
     mnemonics="SIGMA Energy-range.",
+    characteristics=['[[ENERGY]]'],
     text=r"""
 This variable is used to select the k-points and the bands in the self-energy matrix elements on the basis
 of their position with respect to the band edges (Energy differences are always positive, even for holes).
 Only the k-points and the bands whose energy difference if less than this value will be included in the calculation.
 The first entry refers to holes, the second one to electrons.
 A negative entry can be used to exclude either holes or electrons from the calculation.
+
+!!! important
+
+    By default, this variable is in Hartree units. Use
+
+        sigma_erange 1 1 eV
+
+    to specify the energy intervals in eV units.
 """,
 ),
 

@@ -470,9 +470,11 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
      if (new%version > 1) read(unt, err=10, iomsg=msg) new%rhog1_g0(:, iv1)
 
      ! Check whether this q-point is already in the list.
-     ! FIXME: This is gonna be slow if lots of q-points.
+     ! Assume qpoints are grouped so invert the iq loop for better performace.
+     ! This is gonna be slow if lots of q-points and perturbations are not grouped.
      iq_found = 0
-     do iq=1,nqpt
+     !do iq=1,nqpt
+     do iq=nqpt,1,-1
        if (all(abs(hdr1%qptn - tmp_qpts(:,iq)) < tol14)) then
          iq_found = iq; exit
        end if
@@ -1559,14 +1561,15 @@ subroutine dvdb_qcache_report(dvdb)
 ! *************************************************************************
 
  if (dvdb%qcache_size > 0 .and. dvdb%qcache_stats(1) /= 0) then
-   write(std_out, "(a)")"Qcache stats"
-   write(std_out, "(a,i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
+   write(std_out, "(2a)")ch10, " Qcache stats"
+   write(std_out, "(a,i0)")" Total Number of calls: ", dvdb%qcache_stats(1)
    write(std_out, "(a,i0,2x,f5.1,a)")&
-     "Cache hit: ", dvdb%qcache_stats(2), (100.0_dp * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1), "%"
+     " Cache hit: ", dvdb%qcache_stats(2), (100.0_dp * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1), "%"
    write(std_out, "(a,i0,2x,f5.1,a)")&
-     "Cache miss: ", dvdb%qcache_stats(3), (100.0_dp * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1), "%"
+     " Cache miss: ", dvdb%qcache_stats(3), (100.0_dp * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1), "%"
    dvdb%qcache_stats = 0
  end if
+ write(std_out, "(a)")
 
 end subroutine dvdb_qcache_report
 !!***
@@ -1938,7 +1941,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp0=0 !, master=0
+ integer,parameter :: tim_fourdp0=0
  integer,save :: enough=0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr,root
 !arrays
