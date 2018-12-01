@@ -245,7 +245,7 @@ module m_sigmaph
    ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all denerate states should be included when symmetries are used.
 
-  !integer,allocatable :: bstop_ks(:,:)
+  integer,allocatable :: bstop_ks(:,:)
    ! bstop_ks(nkcalc,nsppol)
 
   integer,allocatable :: nbcalc_ks(:,:)
@@ -1852,30 +1852,33 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    call sigtk_kcalc_from_nkptgw(dtset, mband, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
 
  else
-   ! Use qp_range to select the interesting k-points and the corresponding bands.
-   !
-   !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
-   ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
-   !           bands above and below the Fermi level.
-   ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
-   !          Include all occupied states and `num` empty states.
 
-   qprange_ = dtset%gw_qprange
-   if (gap_err /= 0 .and. qprange_ == 0) then
-     MSG_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
-     qprange_ = 1
-   end if
+   if (all(dtset%sigma_erange /= -huge(one))) then
+     call sigtk_kcalc_from_erange(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
 
-   if (qprange_ /= 0) then
-     call sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange_, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
-
-   !else if (sigma_erange /= 0) then
-   !  call sigtk_kcalc_from_erange(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
    else
-     ! qprange is not specified in the input.
-     !   Include direct and fundamental KS gap or include states depending on the position wrt band edges.
-     call sigtk_kcalc_from_gaps(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
-   end if
+     ! Use qp_range to select the interesting k-points and the corresponding bands.
+     !
+     !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
+     ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
+     !           bands above and below the Fermi level.
+     ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
+     !          Include all occupied states and `num` empty states.
+
+     qprange_ = dtset%gw_qprange
+     if (gap_err /= 0 .and. qprange_ == 0) then
+       MSG_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
+       qprange_ = 1
+     end if
+
+     if (qprange_ /= 0) then
+       call sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange_, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
+     else
+       ! qprange is not specified in the input.
+       !   Include direct and fundamental KS gap or include states depending on the position wrt band edges.
+       call sigtk_kcalc_from_gaps(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
+     end if
+    end if
 
  end if ! nkptgw /= 0
 
@@ -1987,6 +1990,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Now we can finally compute max_nbcalc
  new%max_nbcalc = maxval(new%nbcalc_ks)
+
+ ABI_MALLOC(new%bstop_ks, (new%nkcalc, new%nsppol))
+ new%bstop_ks = new%bstart_ks + new%nbcalc_ks - 1
 
  ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
@@ -2826,7 +2832,7 @@ subroutine sigmaph_free(self)
 
  ! integer
  ABI_SFREE(self%bstart_ks)
- !ABI_SFREE(self%bstop_ks)
+ ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
  ABI_SFREE(self%kcalc2ibz)
  ABI_SFREE(self%mask_qibz_k)
@@ -3929,7 +3935,6 @@ subroutine sigtk_kcalc_from_nkptgw(dtset, mband, nkcalc, kcalc, bstart_ks, nbcal
  ABI_MALLOC(kcalc, (3, nkcalc))
  ABI_MALLOC(bstart_ks, (nkcalc, dtset%nsppol))
  ABI_MALLOC(nbcalc_ks, (nkcalc, dtset%nsppol))
- !ABI_MALLOC(bstop_ks, (nkcalc, dtset%nsppol))
 
  kcalc = dtset%kptgw(:,1:nkcalc)
  do spin=1,dtset%nsppol
@@ -4159,35 +4164,38 @@ subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks
 
 ! *************************************************************************
 
- !call wrtout(std_out, " qprange not specified in input --> Include direct and fundamental KS gap in Sigma_nk")
+ call wrtout(std_out, " Selecting k-points and bands according to their position wrt band edges.")
  ABI_CHECK(maxval(gaps%ierr) == 0, "erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  nsppol = ebands%nsppol
  !val_indeces = get_valence_idx(ebands)
 
- ABI_ICALLOC(ib_work, (2,ebands%nkpt, nsppol))
+ ABI_MALLOC(ib_work, (2,ebands%nkpt, nsppol))
 
  do spin=1,nsppol
    ! Get cmb and vbm with some tolerance
-   vmax = gaps%fo_kpos(1, spin) + tol2 * eV_Ha
-   cmin = gaps%fo_kpos(2, spin) - tol2 * eV_Ha
+   vmax = gaps%vb_max(spin) + tol2 * eV_Ha
+   cmin = gaps%cb_min(spin) - tol2 * eV_Ha
+   !print *, "vmax, cmin", vmax, cmin
    do ik=1,ebands%nkpt
      ib_work(1, ik, spin) = huge(1)
      ib_work(2, ik, spin) = -huge(1)
      do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
         ee = ebands%eig(band, ik, spin)
-        !if (dtset%sigma_erange(1) >= zero) then
-        !if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
-          ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
-          ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
-        !end if
-        !end if
-        !if (dtset%sigma_erange(2) >= zero) then
-        !if (ee >= cmin .and. ee - cmin >= dtset%sigma_erange(2)) then
-          ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
-          ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
-        !end if
-        !end if
+        if (dtset%sigma_erange(1) >= zero) then
+          if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
+            ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
+            ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+            !print *, "Adding valence", band
+          end if
+        end if
+        if (dtset%sigma_erange(2) >= zero) then
+          if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
+            ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
+            ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+            !print *, "Adding conduction", band
+          end if
+        end if
      end do
    end do
  end do
@@ -4222,6 +4230,9 @@ subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks
      if (ib_work(1, ik, spin) <= ib_work(2, ik, spin)) then
        bstart_ks(ii,spin) = ib_work(1, ik, spin)
        nbcalc_ks(ii,spin) = ib_work(2, ik, spin) - ib_work(1, ik, spin) + 1
+     end if
+     if (nbcalc_ks(ii,spin) == 0) then
+       MSG_WARNING("Spin-polarized case with nbcalc_ks == 0, don't know if code can handle it!")
      end if
    end do
  end do

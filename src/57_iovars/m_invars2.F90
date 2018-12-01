@@ -3224,7 +3224,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! band range for self-energy corrections.
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
  if (tread == 1) then
-    dtset%sigma_erange = dparr(1:2)
+    dtset%sigma_erange = dprarr(1:2)
     ABI_CHECK(all(dtset%sigma_erange >= 0), "sigma_bsum_range cannot be negative")
  end if
 
@@ -3233,9 +3233,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  if (tread == 1) then
    ! sigma_ngkpt mode --> initialize shifts, provide default if not given in input
-   ! Consistency check: nkptgw must be zero
+   ! Consistency check: nkptgw must be zero or sigma_erange must be given.
    ABI_CHECK(dtset%nkptgw == 0, "nkptgw and sigma_ngkpt are mutually exclusive.")
-   ABI_CHECK(dtset%gw_qprange /= 0, "gw_qprange must be specified when Sigma_ngkpt is used.")
+   if (dtset%gw_qprange == 0 .and. all(dtset%sigma_erange == -huge(one))) then
+     MSG_ERROR("Either gw_qprange or sigma_erange must be specified when sigma_ngkpt is used.")
+   end if
 
    dtset%sigma_ngkpt = intarr(1:3)
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')

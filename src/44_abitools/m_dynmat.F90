@@ -5290,7 +5290,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
    end do
 
  else
-   write(message,'(a,a,a,i0,a)' )&
+   write(message,'(3a,i0,a)' )&
 &   'The argument "plus" must be equal to 0 or 1.',ch10,&
 &   'The value ',plus,' is not available.'
    MSG_BUG(message)
@@ -5986,13 +5986,12 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
 ! *********************************************************************
 
-!This slight breaking of the symmetry allows the
-!results to be more portable between machines
+ ! This slight breaking of the symmetry allows the results to be more portable between machines
  nearidentity(:,:)=one
  nearidentity(1,1)=one+break_symm
  nearidentity(3,3)=one-break_symm
 
-!Include the masses in the dynamical matrix
+ ! Include the masses in the dynamical matrix
  do ipert1=1,natom
    do ipert2=1,natom
      fac=1.0_dp/sqrt(amu(typat(ipert1))*amu(typat(ipert2)))/amu_emass
@@ -6003,8 +6002,7 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
          index=i1+3*natom*(i2-1)
          mat(2*index-1)=mat(2*index-1)*fac*nearidentity(idir1,idir2)
          mat(2*index  )=mat(2*index  )*fac*nearidentity(idir1,idir2)
-!        This is to break slightly the translation invariance, and make
-!        the automatic tests more portable
+         ! This is to break slightly the translation invariance, and make the automatic tests more portable
          if(ipert1==ipert2 .and. idir1==idir2)then
            mat(2*index-1)=mat(2*index-1)+break_symm*natom/amu_emass/idir1*0.01_dp
          end if
@@ -6092,67 +6090,56 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
 ! *********************************************************************
 
  select case (qtor)
-!
-   case (1)  !Recip to real space
-     gam_rpt(:,:,:) = zero
-     do irpt=1,nrpt
-       do iqpt=1,nqpt
-!        Get the phase factor with normalization!
-         re=coskr(iqpt,irpt)
-         im=sinkr(iqpt,irpt)
-         do ip=1,3*natom*3*natom
-!          Real and imaginary part of the real-space gam matrices
-           gam_rpt(1,ip,irpt) = gam_rpt(1,ip,irpt)&
-&           +re*gam_qpt(1,ip,iqpt) &
-&           +im*gam_qpt(2,ip,iqpt)
-           gam_rpt(2,ip,irpt) = gam_rpt(2,ip,irpt)&
-&           +re*gam_qpt(2,ip,iqpt) &
-&           -im*gam_qpt(1,ip,iqpt)
-         end do
+ case (1)
+   ! Recip to real space
+   gam_rpt(:,:,:) = zero
+   do irpt=1,nrpt
+     do iqpt=1,nqpt
+       ! Get the phase factor with normalization!
+       re=coskr(iqpt,irpt)
+       im=sinkr(iqpt,irpt)
+       do ip=1,3*natom*3*natom
+         ! Real and imaginary part of the real-space gam matrices
+         gam_rpt(1,ip,irpt) = gam_rpt(1,ip,irpt) + re*gam_qpt(1,ip,iqpt) + im*gam_qpt(2,ip,iqpt)
+         gam_rpt(2,ip,irpt) = gam_rpt(2,ip,irpt) + re*gam_qpt(2,ip,iqpt) - im*gam_qpt(1,ip,iqpt)
        end do
      end do
-     gam_rpt = gam_rpt/nqpt
-!
-   case (0) ! Recip space from real space
+   end do
+   gam_rpt = gam_rpt/nqpt
 
-     gam_qpt(:,:,:)=zero
+ case (0)
+   ! Recip space from real space
+   gam_qpt(:,:,:)=zero
 
-     do irpt=1,nrpt
-       do iqpt=1,nqpt
+   do irpt=1,nrpt
+     do iqpt=1,nqpt
 
-         do iatom=1,natom
-           do jatom=1,natom
-             re = coskr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
-             im = sinkr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
+       do iatom=1,natom
+         do jatom=1,natom
+           re = coskr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
+           im = sinkr(iqpt,irpt)*wghatm(iatom,jatom,irpt)
 
-             do idir=1,3
-               do jdir=1,3
-!                Get phase factor
+           do idir=1,3
+             do jdir=1,3
+               ! Get phase factor
 
-                 ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
-!                Real and imaginary part of the interatomic forces
-                 gam_qpt(1,ip,iqpt)=&
-&                 gam_qpt(1,ip,iqpt)&
-&                 +re*gam_rpt(1,ip,irpt)&
-&                 -im*gam_rpt(2,ip,irpt)
-!                !DEBUG
-                 gam_qpt(2,ip,iqpt)=&
-&                 gam_qpt(2,ip,iqpt)&
-&                 +im*gam_rpt(1,ip,irpt)&
-&                 +re*gam_rpt(2,ip,irpt)
-!                !ENDDEBUG
+               ip= jdir + (jatom-1)*3 + (idir-1)*3*natom + (iatom-1)*9*natom
+               ! Real and imaginary part of the interatomic forces
+               gam_qpt(1,ip,iqpt) = gam_qpt(1,ip,iqpt) + re*gam_rpt(1,ip,irpt) - im*gam_rpt(2,ip,irpt)
+               !DEBUG
+               gam_qpt(2,ip,iqpt) = gam_qpt(2,ip,iqpt) + im*gam_rpt(1,ip,irpt) + re*gam_rpt(2,ip,irpt)
+               !ENDDEBUG
+             end do ! end jdir
+           end do ! end idir
+         end do
+       end do ! end iatom
 
-               end do ! end jdir
-             end do ! end idir
-           end do
-         end do ! end iatom
+     end do ! end iqpt
+   end do ! end irpt
 
-       end do ! end iqpt
-     end do ! end irpt
-
-   case default ! There is no other space to Fourier transform from
-     write(message,'(a,i0,a)' )'  The only allowed values for qtor are 0 or 1, while  qtor=',qtor,' has been required.'
-     MSG_BUG(message)
+ case default
+   write(message,'(a,i0,a)' )'The only allowed values for qtor are 0 or 1, while qtor= ',qtor,' has been required.'
+   MSG_BUG(message)
  end select
 
 end subroutine ftgam
@@ -6208,17 +6195,9 @@ subroutine ftgam_init (gprim,nqpt,nrpt,qpt_full,rpt,coskr, sinkr)
 ! Prepare the phase factors
  do iqpt=1,nqpt
    ! Calculation of the k coordinates in Normalized Reciprocal coordinates
-   kk(1)=   qpt_full(1,iqpt)*gprim(1,1)+&
-&   qpt_full(2,iqpt)*gprim(1,2)+&
-&   qpt_full(3,iqpt)*gprim(1,3)
-
-   kk(2)=   qpt_full(1,iqpt)*gprim(2,1)+&
-&   qpt_full(2,iqpt)*gprim(2,2)+&
-&   qpt_full(3,iqpt)*gprim(2,3)
-
-   kk(3)=   qpt_full(1,iqpt)*gprim(3,1)+&
-&   qpt_full(2,iqpt)*gprim(3,2)+&
-&   qpt_full(3,iqpt)*gprim(3,3)
+   kk(1) = qpt_full(1,iqpt)*gprim(1,1) + qpt_full(2,iqpt)*gprim(1,2) + qpt_full(3,iqpt)*gprim(1,3)
+   kk(2) = qpt_full(1,iqpt)*gprim(2,1) + qpt_full(2,iqpt)*gprim(2,2) + qpt_full(3,iqpt)*gprim(2,3)
+   kk(3) = qpt_full(1,iqpt)*gprim(3,1) + qpt_full(2,iqpt)*gprim(3,2) + qpt_full(3,iqpt)*gprim(3,3)
    do irpt=1,nrpt
      ! Product of k and r
      kr = kk(1)*rpt(1,irpt)+ kk(2)*rpt(2,irpt)+ kk(3)*rpt(3,irpt)

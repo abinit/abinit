@@ -265,6 +265,11 @@ MODULE m_ebands
      ! fo_values(2,nsppol)]
      ! Fundamental and direct gaps (in Hartree) for each spin.
 
+   real(dp),allocatable :: vb_max(:), cb_min(:)
+     ! vb_max(nsppol)
+     ! valence band max and conduction band min for each spin in Ha.
+     ! Only for Semiconductors, set to (+, -) huge(one) for metals.
+
    real(dp),pointer :: kpoints(:,:) => null()
      ! Reference to the k-points of the band structure used to compute the gaps.
 
@@ -342,12 +347,15 @@ function get_gaps(ebands,gaps,kmask) result(retcode)
  ABI_MALLOC(gaps%fo_kpos, (3,nsppol))
  ABI_MALLOC(gaps%ierr, (nsppol))
  ABI_MALLOC(gaps%fo_values, (2, nsppol))
+ ABI_MALLOC(gaps%vb_max, (nsppol))
+ ABI_MALLOC(gaps%cb_min, (nsppol))
  ABI_MALLOC(gaps%errmsg_spin, (nsppol))
  gaps%kpoints => ebands%kptns
 
  gaps%fo_kpos = 0
  gaps%ierr = 0
  gaps%fo_values = zero
+ gaps%vb_max = huge(one); gaps%cb_min = -huge(one)
  gaps%errmsg_spin(:) = ""
 
  my_kmask=.TRUE.; if (PRESENT(kmask)) my_kmask=kmask
@@ -357,8 +365,8 @@ function get_gaps(ebands,gaps,kmask) result(retcode)
  spin_loop: &
 &  do spin=1,nsppol
 
-   ! No output if system i metallic
-   ismetal=ANY(val_idx(:,spin)/=val_idx(1,spin))
+   ! No output if system is metallic
+   ismetal = ANY(val_idx(:,spin) /= val_idx(1,spin))
    if (ismetal) then
      gaps%ierr(spin) = 1
      write(gaps%errmsg_spin(spin), "(a,i0)")"Metallic system for spin channel ",spin
@@ -381,14 +389,16 @@ function get_gaps(ebands,gaps,kmask) result(retcode)
    end do
 
    ! Minimum of the direct Gaps
-   ikopt= imin_loc(bot_conduct-top_valence,MASK=my_kmask)
-   opt_gap=bot_conduct(ikopt)-top_valence(ikopt)
+   ikopt = imin_loc(bot_conduct - top_valence, MASK=my_kmask)
+   opt_gap = bot_conduct(ikopt) - top_valence(ikopt)
 
    ! Fundamental Gap
-   ick = imin_loc(bot_conduct,MASK=my_kmask)
-   ivk = imax_loc(top_valence,MASK=my_kmask)
-   fun_gap = ebands%eig(icb,ick,spin)-ebands%eig(ivb,ivk,spin)
+   ick = imin_loc(bot_conduct, MASK=my_kmask)
+   ivk = imax_loc(top_valence, MASK=my_kmask)
 
+   gaps%vb_max(spin) = ebands%eig(ivb, ivk, spin)
+   gaps%cb_min(spin) = ebands%eig(icb, ick, spin)
+   fun_gap = ebands%eig(icb, ick, spin) - ebands%eig(ivb, ivk, spin)
    gaps%fo_values(:,spin) = [fun_gap, opt_gap]
    gaps%fo_kpos(:,spin) = [ivk, ick, ikopt]
  end do spin_loop
@@ -422,14 +432,14 @@ subroutine gaps_free(gaps)
 
 ! *********************************************************************
 
- !@gaps_t
-
 !integer
  ABI_SFREE(gaps%fo_kpos)
  ABI_SFREE(gaps%ierr)
 
 !real
  ABI_SFREE(gaps%fo_values)
+ ABI_SFREE(gaps%vb_max)
+ ABI_SFREE(gaps%cb_min)
 
 !chars
  ABI_SFREE(gaps%errmsg_spin)
@@ -514,10 +524,13 @@ subroutine gaps_print(gaps,header,unit,mode_paral)
    ikopt = gaps%fo_kpos(3,spin)
 
    write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)')&
-&    '  >>>> For spin ',spin,ch10,&
-&    '   Minimum direct gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',gaps%kpoints(:,ikopt),ch10,&
-&    '   Fundamental gap    = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',gaps%kpoints(:,ivk),ch10,  &
-&                                              '       Bottom of conduction at : ',gaps%kpoints(:,ick)
+    '  >>>> For spin ', spin, ch10, &
+    '   Minimum direct gap = ',opt_gap*Ha_eV,' (eV), located at k-point     : ',gaps%kpoints(:,ikopt),ch10,&
+    '   Fundamental gap    = ',fun_gap*Ha_eV,' (eV), Top of valence bands at: ',gaps%kpoints(:,ivk),ch10,  &
+                                             '       Bottom of conduction at: ',gaps%kpoints(:,ick)
+   call wrtout(my_unt,msg,my_mode)
+
+   write(msg, "(2(a, f8.4))") "vmax:", gaps%vb_max(spin) * Ha_eV, " cmin", gaps%cb_min(spin) * Ha_eV
    call wrtout(my_unt,msg,my_mode)
  end do !spin
 
@@ -831,7 +844,7 @@ end subroutine ebands_free
 !!  ebands_copy
 !!
 !! FUNCTION
-!! This subroutine performs a deep copy of a ebands_t datatype.
+!! This subroutine performs a deep copy of an ebands_t datatype.
 !! All the associated pointers in the input object will be copied preserving the shape.
 !! If a pointer in ibands happens to be not associated, the corresponding
 !! pointer in the copied object will be nullified.
