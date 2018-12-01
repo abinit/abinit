@@ -19541,4 +19541,21 @@ If set 1, the EPH code will compute the generalized Eliashberg function and will
 """,
 ),
 
+Variable(
+    abivarname="sigma_erange",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=["-inf", "-inf"],
+    dimensions=[2],
+    mnemonics="SIGMA Energy-range.",
+    text=r"""
+This variable is used to select the k-points and the bands in the self-energy matrix elements on the basis
+of their position with respect to the band edges (Energy differences are always positive, even for holes).
+Only the k-points and the bands whose energy difference if less than this value will be included in the calculation.
+The first entry refers to holes, the second one to electrons.
+A negative entry can be used to exclude either holes or electrons from the calculation.
+""",
+),
+
 ]

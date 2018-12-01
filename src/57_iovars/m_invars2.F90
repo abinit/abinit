@@ -3221,6 +3221,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
     ABI_CHECK(dtset%sigma_bsum_range(2) >= dtset%sigma_bsum_range(1), "sigma_bsum_range(2) must be >= (1)")
  end if
 
+ ! band range for self-energy corrections.
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
+ if (tread == 1) then
+    dtset%sigma_erange = dparr(1:2)
+    ABI_CHECK(all(dtset%sigma_erange >= 0), "sigma_bsum_range cannot be negative")
+ end if
+
  ! IBZ k-points for electron self-energy given in terms of sigma_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'sigma_ngkpt', tread, 'INT')
 

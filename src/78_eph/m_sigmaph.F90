@@ -4087,7 +4087,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  val_indeces = get_valence_idx(ebands)
 
  ! Include the direct and the fundamental KS gap.
- ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
+ ! The problem here is that kptgw and nkptgw do not depend on the spin and therefore
  ! we have compute the union of the k-points where the fundamental and the direct gaps are located.
  nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
 
@@ -4121,6 +4121,114 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  end do
 
 end subroutine sigtk_kcalc_from_gaps
+!!***
+
+!!****f* m_sigmaph/sigtk_kcalc_from_erange
+!! NAME
+!!  sigtk_kcalc_from_erange
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+
+!Arguments ------------------------------------
+ type(dataset_type),intent(in) :: dtset
+ type(ebands_t),intent(in) :: ebands
+ type(gaps_t) :: gaps
+ integer,intent(out) :: nkcalc
+!arrays
+ real(dp),allocatable,intent(out) :: kcalc(:,:)
+ integer,allocatable,intent(out) :: bstart_ks(:,:)
+ integer,allocatable,intent(out) :: nbcalc_ks(:,:)
+
+!Local variables ------------------------------
+!scalars
+ integer :: spin, ik, band, ii, nsppol
+ logical :: found
+ real(dp) :: cmin, vmax, ee
+!arrays
+ !integer :: val_indeces(ebands%nkpt, ebands%nsppol)
+ integer,allocatable :: ib_work(:,:,:)
+ integer :: kpos(ebands%nkpt)
+
+! *************************************************************************
+
+ !call wrtout(std_out, " qprange not specified in input --> Include direct and fundamental KS gap in Sigma_nk")
+ ABI_CHECK(maxval(gaps%ierr) == 0, "erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
+
+ nsppol = ebands%nsppol
+ !val_indeces = get_valence_idx(ebands)
+
+ ABI_ICALLOC(ib_work, (2,ebands%nkpt, nsppol))
+
+ do spin=1,nsppol
+   ! Get cmb and vbm with some tolerance
+   vmax = gaps%fo_kpos(1, spin) + tol2 * eV_Ha
+   cmin = gaps%fo_kpos(2, spin) - tol2 * eV_Ha
+   do ik=1,ebands%nkpt
+     ib_work(1, ik, spin) = huge(1)
+     ib_work(2, ik, spin) = -huge(1)
+     do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
+        ee = ebands%eig(band, ik, spin)
+        !if (dtset%sigma_erange(1) >= zero) then
+        !if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
+          ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
+          ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+        !end if
+        !end if
+        !if (dtset%sigma_erange(2) >= zero) then
+        !if (ee >= cmin .and. ee - cmin >= dtset%sigma_erange(2)) then
+          ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
+          ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+        !end if
+        !end if
+     end do
+   end do
+ end do
+
+ ! Now we can define the list of k-points and the bands range.
+ ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
+ ! we have compute the union of the k-points.
+ nkcalc = 0
+ do ik=1,ebands%nkpt
+   found = .False.
+   do spin=1,nsppol
+      if (ib_work(1, ik, spin) <= ib_work(2, ik, spin)) then
+        found = .True.; exit
+      end if
+   end do
+   if (found) then
+     nkcalc = nkcalc + 1
+     kpos(nkcalc) = ik
+   end if
+ end do
+
+ ABI_MALLOC(kcalc, (3, nkcalc))
+ ABI_MALLOC(bstart_ks, (nkcalc, nsppol))
+ ABI_MALLOC(nbcalc_ks, (nkcalc, nsppol))
+
+ do ii=1,nkcalc
+   ik = kpos(ii)
+   kcalc(:,ii) = ebands%kptns(:,ik)
+   do spin=1,nsppol
+     bstart_ks(ii,spin) = 0
+     nbcalc_ks(ii,spin) = 0
+     if (ib_work(1, ik, spin) <= ib_work(2, ik, spin)) then
+       bstart_ks(ii,spin) = ib_work(1, ik, spin)
+       nbcalc_ks(ii,spin) = ib_work(2, ik, spin) - ib_work(1, ik, spin) + 1
+     end if
+   end do
+ end do
+
+ ABI_FREE(ib_work)
+
+end subroutine sigtk_kcalc_from_erange
 !!***
 
 end module m_sigmaph
