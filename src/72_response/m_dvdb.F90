@@ -2229,14 +2229,14 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
          if ( (j1 > n1/2 .or. j1 < -(n1-1)/2) .or. &
               (j2 > n2/2 .or. j1 < -(n2-1)/2) .or. &
               (j3 > n3/2 .or. j3 < -(n3-1)/2) ) then
-           !write(std_out,*)"got it"
+           !write(std_out,*)"outsize box!"
            outfg(:,ind1,isp) = zero
            cycle
          end if
 
          tsg = [j1,j2,j3] ! +- S^{-1} G
 
-         ! Map into [0,n-1] and then add 1 for array index in [1,n]
+         ! Map into [0,n-1] and then add 1 for array index in [1, n]
          k1=1+mod(n1+mod(j1,n1),n1)
          k2=1+mod(n2+mod(j2,n2),n2)
          k3=1+mod(n3+mod(j3,n3),n3)

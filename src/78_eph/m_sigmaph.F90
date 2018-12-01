@@ -53,7 +53,7 @@ module m_sigmaph
 #endif
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_time,           only : cwtime, cwtime_report
+ use m_time,           only : cwtime, cwtime_report, timab
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
  use m_io_tools,       only : iomode_from_fname, file_exists
@@ -533,7 +533,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:)
  integer,allocatable :: bz2lgkibz_mapping(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
- real(dp) :: vdiag(2, 3)
+ real(dp) :: vdiag(2, 3), tsec(2)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -653,7 +653,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (.False.) call wfd%test_ortho(cryst, pawtab, unit=std_out, mode_paral="PERS")
 
  ! TODO FOR PAW
+! if PAW, one has to solve a generalized eigenproblem
+! BE careful here because I will need sij_opt == -1
  usecprj = 0
+ gen_eigenpb = psps%usepaw == 1
+ sij_opt = 0; if (gen_eigenpb) sij_opt = 1
+
  ABI_DT_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
 
  !if (sigma%calc_velocity == 1) then
@@ -825,6 +830,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    do spin=1,nsppol
      ! check if thik kpoint and spin was already calculated
      if (sigma%qp_done(ikcalc,spin)==1) cycle
+     call timab(1900, 1, tsec)
 
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
@@ -880,7 +886,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end do
 
      ! Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
+     call load_spin_hamiltonian(gs_hamkq, spin, with_nonlocal=.true.)
 
      ! Distribute q-points and bands.
      ! The distribution must be consistent with the WF distribution done with bks_mask
@@ -942,7 +948,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        write(std_out, "(a, es16.6)")"Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
        iq_ibz = count(sigma%mask_qibz_k /= 0)
        write(std_out, "(a,i0,f5.1,a)")"Number of q-points contributing: ", iq_ibz, (100.0_dp * iq_ibz) / sigma%nqibz_k, " [%]"
+       ! TODO: should Redistribute these points to avoid load imbalance
      end if
+     call timab(1900, 2, tsec)
 
      do iq_ibz=1,sigma%nqibz_k
        ! Parallelization over q-points inside comm_bq
@@ -953,6 +961,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = (sum(qpt**2) < tol14) !; if (isqzero) cycle
        call cwtime(cpu,wall,gflops,"start")
+       call timab(1901, 1, tsec)
 
        db_iqpt = indq2dvdb(1, iq_ibz)
 
@@ -1050,6 +1059,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
          ABI_FREE(gtmp)
        end if
+       call timab(1901, 2, tsec)
+       call timab(1902, 1, tsec)
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
        ABI_STAT_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nbcalc_ks, my_npert), ierr)
@@ -1059,10 +1070,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6, gs_hamkq%nvloc, my_npert), ierr)
        ABI_CHECK(ierr==0, "oom in vlocal1")
 
-       ! if PAW, one has to solve a generalized eigenproblem
-       ! BE careful here because I will need sij_opt == -1
-       gen_eigenpb = psps%usepaw == 1
-       sij_opt = 0; if (gen_eigenpb) sij_opt = 1
        ABI_MALLOC(gs1c, (2,npw_kq*nspinor*((sij_opt+1)/2)))
 
        ! Set up the spherical harmonics (Ylm) at k and k+q. See also dfpt_looppert
@@ -1076,6 +1083,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
        ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
+
        do imyp=1,my_npert
          idir = sigma%my_pinfo(1, imyp); ipert = sigma%my_pinfo(2, imyp)
 
@@ -1117,6 +1125,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(ph3d)
          ABI_SFREE(ph3d1)
        end do ! imyp
+       call timab(1902, 2, tsec)
 
        ABI_FREE(gs1c)
        ABI_FREE(vlocal1)
@@ -1129,6 +1138,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
+       call timab(1903, 1, tsec)
        do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
          ! Parallelization for eph_task == 4 inside comm_bq
          if (sigma%distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
@@ -1354,6 +1364,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do ! nu
 
        end do ! ibsum_kq (sum over bands at k+q)
+       call timab(1903, 2, tsec)
 
        ABI_FREE(bra_kq)
        ABI_FREE(cgwork)
@@ -3029,7 +3040,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
- call wrtout(std_out, "Gathering results. Waiting for other processes...")
+ call wrtout(std_out, " Gathering results. Waiting for other processes...")
  call cwtime(cpu, wall, gflops, "start")
  call xmpi_sum_master(self%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)

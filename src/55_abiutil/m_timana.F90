@@ -1002,6 +1002,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1804)='v1phq_rotate'; basic(1804) = 1
  names(1805)='dvdb_readsym_allv1'; basic(1805) = 1
 
+ ! SIGEPH
+ names(1900)='sigph_pre_qloop'; basic(1900) = 1
+ names(1901)='sigph_qloop_preamble'; basic(1901) = 1
+ names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
+ names(1903)='sigph_bsum'; basic(1903) = 1
+
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================

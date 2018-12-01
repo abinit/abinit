@@ -858,7 +858,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
  paral_kgb = mpi_enreg%paral_kgb
 
  if (nspden/=4) then
-   vtrial_ptr=>vtrial
+   vtrial_ptr => vtrial
    if (usepaw==0.or.pawfgr%usefinegrid==0) then
      call fftpac(isppol,mpi_enreg,nspden,n1,n2,n3,n4,n5,n6,ngfft,vtrial_ptr,vlocal(:,:,:,1),2)
      call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,vtrial1,vlocal1(:,:,:,1),2)
@@ -873,9 +873,10 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
      ABI_DEALLOCATE(cgrvtrial)
    end if
    nullify(vtrial_ptr)
- else  ! nspden==4 non-collinear magnetism
-   vtrial_ptr=>vtrial
-   vtrial1_ptr=>vtrial1
+ else
+   ! nspden==4 non-collinear magnetism
+   vtrial_ptr => vtrial
+   vtrial1_ptr => vtrial1
    ABI_ALLOCATE(vlocal_tmp,(n4,n5,n6))
    ABI_ALLOCATE(vlocal1_tmp,(cplex*n4,n5,n6))
    if (usepaw==0.or.pawfgr%usefinegrid==0) then
@@ -885,7 +886,8 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
        call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,vtrial1_ptr,vlocal1_tmp,2)
        vlocal1(:,:,:,ispden)=vlocal1_tmp(:,:,:)
      end do
-   else ! TODO FR EB check the correctness of the following lines for PAW calculations
+   else
+     ! TODO FR EB check the correctness of the following lines for PAW calculations
      ABI_ALLOCATE(cgrvtrial,(nfft,nspden))
      ABI_ALLOCATE(cgrvtrial1,(nfft,nspden))
      call transgrid(cplex,mpi_enreg,nspden,-1,0,0,paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial_ptr)

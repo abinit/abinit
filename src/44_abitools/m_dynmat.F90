@@ -4787,7 +4787,6 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
 !Local variables -------------------------
-
 !scalars
  integer :: ia,ib,iblok,idir1,idir2,ii,ipert1,ipert2,iqpt,isym,jj,kk,ll
  integer :: mu,nu,q1,q2,nqmiss,nprocs,my_rank,ierr
