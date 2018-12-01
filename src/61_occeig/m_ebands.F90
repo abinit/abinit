@@ -256,7 +256,7 @@ MODULE m_ebands
     ! fo_kpos(3,spin)   ==> the index of k-point where the direct gap is located (for each spin).
 
    integer,allocatable :: ierr(:)
-     ! The third index corresponds to a "status" :
+     ! The third index corresponds to a "status":
      !   0.0dp if gaps were not computed (because there are only valence bands);
      !  -1.0dp if the system (or spin-channel) is metallic;
      !   1.0dp if the gap was computed

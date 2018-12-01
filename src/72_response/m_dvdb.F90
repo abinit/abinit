@@ -315,6 +315,9 @@ module m_dvdb
    procedure :: qcache_read => dvdb_qcache_read
    ! Read potentials and store them in cache.
 
+   procedure :: qcache_report => dvdb_qcache_report
+   !  Print info on q-cache states and reset counters.
+
    procedure :: list_perts => dvdb_list_perts
    ! Check if all the (phonon) perts are available taking into account symmetries.
 
@@ -1530,6 +1533,42 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  call timab(1801, 2, tsec)
 
 end subroutine dvdb_qcache_read
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_qcache_report
+!! NAME
+!!  dvdb_qcache_report
+!!
+!! FUNCTION
+!!  Print info on q-cache states and reset counters.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_qcache_report(dvdb)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: dvdb
+
+! *************************************************************************
+
+ if (dvdb%qcache_size > 0 .and. dvdb%qcache_stats(1) /= 0) then
+   write(std_out, "(a)")"Qcache stats"
+   write(std_out, "(a,i0)")"Total Number of calls: ", dvdb%qcache_stats(1)
+   write(std_out, "(a,i0,2x,f5.1,a)")&
+     "Cache hit: ", dvdb%qcache_stats(2), (100.0_dp * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1), "%"
+   write(std_out, "(a,i0,2x,f5.1,a)")&
+     "Cache miss: ", dvdb%qcache_stats(3), (100.0_dp * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1), "%"
+   dvdb%qcache_stats = 0
+ end if
+
+end subroutine dvdb_qcache_report
 !!***
 
 !----------------------------------------------------------------------
