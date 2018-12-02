@@ -107,6 +107,10 @@ module defs_datatypes
   ! lifetime(mband,nkpt,nsppol)
   ! Lifetime of each band
 
+  real(dp),allocatable :: velocity(:,:,:,:)
+  ! velocity(3,mband,nkpt,nsppol)
+  ! Group velocity of each band
+
   real(dp),allocatable :: occ(:,:,:)
   ! occ(mband,nkpt,nsppol)
   ! occupation of each band.

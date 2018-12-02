@@ -587,7 +587,7 @@ subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
    end if
 
    do ii=1,3
-     oder1(ii) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk1(:,ii))
+     oder1(ii) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk1(:,ii)) * two_pi
    end do
  end if
 
@@ -601,7 +601,7 @@ subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
    oder2 = zero
    do jj=1,3
      do ii=1,jj
-       oder2(ii, jj) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk2(:,ii,jj))
+       oder2(ii, jj) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk2(:,ii,jj)) * two_pi**2
        if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
      end do
    end do

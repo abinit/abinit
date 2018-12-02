@@ -677,8 +677,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
        end do
      end do
    end do
-   call ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
-                                       comm, vvdos_mesh, vvdos_vals)
+   edos = ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
+                                         comm, vvdos_mesh, vvdos_vals)
    ABI_SFREE(vv_vals)
  end if
 
@@ -715,10 +715,10 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      NCF_CHECK(edos%ncwrite(ncid))
      !NCF_CHECK(jdos%ncwrite(ncid))
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, two, nsppol_plus1, nine")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, nine")], defmode=.True.)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals(:,0,:,:)))
    end if
    NCF_CHECK(nf90_close(ncid))
 

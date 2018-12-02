@@ -3634,6 +3634,7 @@ end function ebands_downsample
 !!  cryst<crystal_t> = Crystalline structure.
 !!  params(:):
 !!     params(0): interpolation type. 1 for star-functions
+!!                                    2 for star-functions with group vlocities
 !!     if star-functions:
 !!         params(2): Ratio between star functions and ab-initio k-points.
 !!         params(3:4): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639) if params(2) > tol6
@@ -3732,16 +3733,16 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  ABI_FREE(new_occ)
 
  ! Build SKW object for all bands.
- select case (itype)
- case (1)
+ if (itype == 1 .or. itype == 2) then
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
-   skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
-                 my_bblock, comm)
- case default
+   skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
+                 ebands%kptns, ebands%eig, my_bblock, comm)
+   if (itype == 2) ABI_MALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
+ else
    MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
- end select
+ end if
 
- ! Interpolate eigenvalues.
+ ! Interpolate eigenvalues and velocities.
  new%eig = zero; cnt = 0
  do spin=1,new%nsppol
    do ik_ibz=1,new%nkpt
@@ -3752,6 +3753,9 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
        select case (itype)
        case (1)
          call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, new%eig(ib,ik_ibz,spin))
+       case (2)
+         call skw%eval_bks(band, new%kptns(:,ik_ibz), spin, &
+                           new%eig(ib,ik_ibz,spin), new%velocity(:,ib,ik_ibz,spin))
        case default
          MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
        end select
@@ -3759,6 +3763,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    end do
  end do
  call xmpi_sum(new%eig, comm, ierr)
+
 
  if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
    ! Write ESKW file with crystal and (interpolated) band structure energies.
@@ -3768,6 +3773,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    NCF_CHECK(nctk_open_create(ncid, strcat(out_prefix, "_ESKW.nc"), xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(new, ncid))
+
    ! TODO
    !NCF_CHECK(skw%ncwrite(ncid))
 
@@ -3949,7 +3955,7 @@ end function ebands_interp_kpath
 !!
 !! SOURCE
 
-subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth, step, broad, comm, out_mesh, out_dos)
+type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth, step, broad, comm, out_mesh, out_dos) result(edos)
 
 !Arguments ------------------------------------
 !scalars
@@ -3966,10 +3972,11 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
  integer,parameter :: kptopt3=3
  integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
  !integer :: my_nkibz, nkfull, timrev
- integer :: isym, ii, jj, idx
+ integer :: ii, jj, idx, ief
  real(dp) :: max_ene,min_ene,wtk,max_occ
  !real(dp) :: dksqmax
  character(len=500) :: msg
+ type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
 !arrays
  !integer,allocatable :: bz2ibz(:,:)
@@ -3987,13 +3994,20 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
  !  edos%intmeth = 1
  !end if
 
- !edos%broad = broad; edos%step = step
- !if (broad <= tol16 .or. step <= tol16) then
- !  ! Compute the mean value of the energy spacing.
- !  ediffs = ebands_edstats(ebands)
- !  if (edos%broad <= tol16) edos%broad = ediffs%mean
- !  if (edos%step <= tol16) edos%step = 0.1 * ediffs%mean
- !end if
+ edos%nkibz = ebands%nkpt; edos%nsppol = ebands%nsppol
+ edos%intmeth = intmeth
+ if (ebands%nkpt == 1) then
+   MSG_COMMENT("Cannot use tetrahedrons for e-DOS when nkpt == 1. Switching to gaussian method")
+   edos%intmeth = 1
+ end if
+
+ edos%broad = broad; edos%step = step
+ if (broad <= tol16 .or. step <= tol16) then
+   ! Compute the mean value of the energy spacing.
+   ediffs = ebands_edstats(ebands)
+   if (edos%broad <= tol16) edos%broad = ediffs%mean
+   if (edos%step <= tol16) edos%step = 0.1 * ediffs%mean
+ end if
 
  ! Compute the linear mesh so that it encloses all bands.
  eminmax_spin = get_minmax(ebands, "eig")
@@ -4001,12 +4015,19 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
  max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
 
  nw = nint((max_ene - min_ene) / step) + 1
+ nw = nint((max_ene - min_ene)/edos%step) + 1; edos%nw = nw
 
  ABI_MALLOC(out_mesh, (nw))
- out_mesh = arth(min_ene, step, nw)
+ ABI_MALLOC(edos%mesh, (nw))
+ edos%mesh = arth(min_ene, edos%step, nw)
+ out_mesh = arth(min_ene, edos%step, nw)
+
+ ABI_CALLOC(edos%gef, (0:edos%nsppol))
+ ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
+ ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
  ABI_CALLOC(out_dos,  (nw, 2, 0:ebands%nsppol, ndat))
 
- ! In principle the implementation could be optimized by using a single 
+ ! In principle the implementation could be optimized by using a single
  ! symmetry operation for each point in the Brillouin zone.
  ! Looping over all the symmetry operations is easier so we do that for the moment
 #if 0
@@ -4042,6 +4063,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
          wme0 = out_mesh - ebands%eig(band, ikpt, spin)
          wme0 = dirac_delta(wme0, broad) * wtk
+         edos%dos(:, spin) = edos%dos(:, spin) + wme0(:)
 
          !scalar
          select case (ndat)
@@ -4053,12 +4075,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
            !get components
            v(:) = bks_vals(:, band, ikpt, spin)
            !symmetrize
-           vsum = 0
-           do isym=1, cryst%nsym
-             vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
-             vsum = vsum + vsym
-           end do
-           vsum = vsum / cryst%nsym
+           vsum = symmetrize_vector(cryst,v)
            !put components
            do ii=1,3
              out_dos(:, 1, spin, ii) = out_dos(:, 1, spin, ii) + wme0(:) * vsum(ii)
@@ -4074,12 +4091,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
              end do
            end do
            !symmetrize
-           tsum = 0
-           do isym=1, cryst%nsym
-             tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
-             tsum = tsum + tsym
-           end do
-           tsum = tsum / cryst%nsym
+           tsum = symmetrize_tensor(cryst,t)
            !put components
            do ii=1,3
              do jj=1,3
@@ -4130,6 +4142,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
          call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
+         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
          !scalar
          select case (ndat)
          case (1)
@@ -4143,12 +4156,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
            !get components
            v(:) = bks_vals(:, band, ikpt, spin)
            !symmetrize
-           vsum = 0
-           do isym=1, cryst%nsym
-             vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
-             vsum = vsum + vsym
-           end do
-           vsum = vsum / cryst%nsym
+           vsum = symmetrize_vector(cryst,v)
            !put components
            do ii=1,3
              out_dos(:, :, spin, ii) = out_dos(:, :, spin, ii) + wdt(:,:) * vsum(ii)
@@ -4164,12 +4172,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
              end do
            end do
            !symmetrize
-           tsum = 0
-           do isym=1, cryst%nsym
-             tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
-             tsum = tsum + tsym
-           end do
-           tsum = tsum / cryst%nsym
+           tsum = symmetrize_tensor(cryst,t)
            !put components
            do ii=1,3
              do jj=1,3
@@ -4177,6 +4180,7 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
                out_dos(:, :, spin, idx) = out_dos(:, :, spin, idx) + wdt(:,:) * tsum(jj,ii)
              end do
            end do
+
          case default
            MSG_ERROR(sjoin("Wrong value for ndat:", itoa(ndat)))
          end select
@@ -4199,7 +4203,58 @@ subroutine ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth
  max_occ = two / (ebands%nspinor*ebands%nsppol)
  out_dos(:, :, 0,:) = max_occ * sum(out_dos(:,:,1:,:), dim=3)
 
-end subroutine ebands_get_dos_matrix_elements
+ ! Use bisection to find fermi level.
+ ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
+ ! fullfilled if we use tetra and this is the reason why we have filtered the DOS.
+ ief = bisect(edos%idos(:,0), ebands%nelect)
+
+ ! Handle out of range condition.
+ if (ief == 0 .or. ief == nw) then
+   write(msg,"(3a)")&
+    "Bisection could not find an initial guess for the Fermi level!",ch10,&
+    "Possible reasons: not enough bands or wrong number of electrons"
+   MSG_WARNING(msg)
+   return
+ end if
+
+ ! TODO: Use linear interpolation to find an improved estimate of the Fermi level?
+ edos%ief = ief
+ do spin=0,edos%nsppol
+   edos%gef(spin) = edos%dos(ief,spin)
+ end do
+
+contains
+ function symmetrize_vector(cryst,v) result(vsum)
+  integer :: isym
+  type(crystal_t) :: cryst
+  real(dp) :: vsum(3), v(3)
+
+  !symmetrize
+  vsum = 0
+  do isym=1, cryst%nsym
+    vsym = matmul( (cryst%symrel_cart(:,:,isym)), v)
+    vsum = vsum + vsym
+  end do
+  vsum = vsum / cryst%nsym
+
+ end function
+
+ function symmetrize_tensor(cryst,t) result(tsum)
+  integer :: isym
+  type(crystal_t) :: cryst
+  real(dp) :: tsum(3,3), t(3,3)
+
+  !symmetrize
+  tsum = 0
+  do isym=1, cryst%nsym
+    tsym = matmul( (cryst%symrel_cart(:,:,isym)), matmul(t, transpose(cryst%symrel_cart(:,:,isym))) )
+    tsum = tsum + tsym
+  end do
+  tsum = tsum / cryst%nsym
+
+ end function
+
+end function ebands_get_dos_matrix_elements
 !!***
 
 !----------------------------------------------------------------------
@@ -5296,17 +5351,24 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
+ type(ebands_t) :: ebands_kmesh
+ integer,parameter :: master=0,intp_nshiftk1=1
  integer :: my_rank,ndivsm,nbounds,itype
+ integer :: nb,spin,ik,ib,ii,jj
+ integer :: edos_intmeth
+ real(dp) :: edos_step,edos_broad
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
+ type(edos_t) :: edos
  type(ebands_t) :: ebands_kpath
  type(kpath_t) :: kpath
  character(len=500) :: msg,tag
 !arrays
+ integer :: intp_kptrlatt(3,3)
+ real(dp) :: vr(3),intp_shiftk(3),params(4)
  real(dp),allocatable :: bounds(:,:)
-
+ real(dp),allocatable :: vv_vals(:,:,:,:), vvdos_mesh(:), vvdos_vals(:,:,:,:)
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
@@ -5337,6 +5399,49 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  ! Interpolate bands on k-path.
  ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, dtset%einterp, band_block, comm)
 
+ if (dtset%useria == 9) then
+   call wrtout(ab_out, "Interpolated energies on a kmesh.")
+   intp_kptrlatt(:,1) = [ebands%kptrlatt(1,1)*dtset%bs_interp_kmult(1), 0, 0]
+   intp_kptrlatt(:,2) = [0, ebands%kptrlatt(2,2)*dtset%bs_interp_kmult(2), 0]
+   intp_kptrlatt(:,3) = [0, 0, ebands%kptrlatt(3,3)*dtset%bs_interp_kmult(3)]
+
+   intp_shiftk = zero
+   params = dtset%einterp
+   params(1) = 2
+   ebands_kmesh = ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, &
+                                      intp_nshiftk1, intp_shiftk, band_block, comm)
+
+   ! Compute DOS and VVDOS
+   edos_intmeth = 2
+   if (dtset%prtdos == 1) edos_intmeth = 1
+   if (dtset%prtdos == -2) edos_intmeth = 3
+   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+   if (edos_step == 0) edos_step = 0.001
+
+   ABI_MALLOC(vv_vals, (9, ebands_kmesh%mband, ebands_kmesh%nkpt, ebands_kmesh%nsppol))
+   do spin=1,ebands_kmesh%nsppol
+     do ik=1,ebands_kmesh%nkpt
+       do ib=1,ebands_kmesh%mband
+         ! Go to cartesian coordinates (same as pmat2cart routine).
+         vr = cryst%rprimd(:,1)*ebands_kmesh%velocity(1,ib,ik,spin) &
+             +cryst%rprimd(:,2)*ebands_kmesh%velocity(2,ib,ik,spin) &
+             +cryst%rprimd(:,3)*ebands_kmesh%velocity(3,ib,ik,spin)
+         vr = vr / two_pi
+         ! Store in vv_vals
+         do ii=1,3
+           do jj=1,3
+             vv_vals((ii-1)*3+jj, ib, ik, spin) = vr(ii) * vr(jj)
+           end do
+         end do
+       end do
+     end do
+   end do
+   edos = ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
+                                         comm, vvdos_mesh, vvdos_vals)
+   ABI_SFREE(vv_vals)
+ end if
+
+
  if (my_rank == master) then
    call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))
    call ebands_write(ebands_kpath, dtset%prtebands, strcat(prefix, tag), kptbounds=kpath%bounds)
@@ -5359,6 +5464,17 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "band_block"), band_block))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), dtset%einterp))
+   if (dtset%useria == 9) then
+     NCF_CHECK(edos%ncwrite(ncid))
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, nine")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvidos_vals', "dp", "edos_nw, nsppol_plus1, nine")], defmode=.True.)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvidos_vals"), vvdos_vals(:,1,:,:)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals(:,1,:,:)))
+   end if
+
    NCF_CHECK(nf90_close(ncid))
 #endif
  end if
