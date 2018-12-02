@@ -578,9 +578,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ecut = dtset%ecut ! dtset%dilatmx
  ! Here we try to read an existing SIGEPH file
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
- if (my_rank == master) sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
- sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+ ! Use __EPH_NORESTART__ to deactivate this feature. Useful when debugging.
  restart = 0
+ if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
+    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
+ end if
+ sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+
  if (ierr==0 .and. my_rank==master) then
     if (any(sigma_restart%qp_done /= 1)) then
       call sigmaph_comp(sigma,sigma_restart)
@@ -616,8 +620,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bstart and my_bstop
  ABI_MALLOC(nband, (nkpt, nsppol))
- ABI_MALLOC(bks_mask,(dtset%mband, nkpt, nsppol))
- ABI_MALLOC(keep_ur,(dtset%mband, nkpt ,nsppol))
+ ABI_MALLOC(bks_mask, (dtset%mband, nkpt, nsppol))
+ ABI_MALLOC(keep_ur, (dtset%mband, nkpt ,nsppol))
 
  nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
  bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
@@ -944,7 +948,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      endif
 
      ! Integration over q-points in the IBZ(k)
-     if (my_rank == master .and. sigma%imag_only .and. sigma%tol_deltaw_pm /= zero) then
+     if (my_rank == master .and. sigma%imag_only) then ! .and. sigma%tol_deltaw_pm /= zero) then
        write(std_out, "(a, es16.6)")"Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
        iq_ibz = count(sigma%mask_qibz_k /= 0)
        write(std_out, "(a,i0,f5.1,a)")"Number of q-points contributing: ", iq_ibz, (100.0_dp * iq_ibz) / sigma%nqibz_k, " [%]"
@@ -955,13 +959,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      do iq_ibz=1,sigma%nqibz_k
        ! Parallelization over q-points inside comm_bq
        if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
+
        ! Exclude q-points based on tetrahedron weigths.
        if (sigma%mask_qibz_k(iq_ibz) == 0) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = (sum(qpt**2) < tol14) !; if (isqzero) cycle
        call cwtime(cpu,wall,gflops,"start")
-       call timab(1901, 1, tsec)
 
        db_iqpt = indq2dvdb(1, iq_ibz)
 
@@ -976,6 +980,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Get phonon frequencies and displacements in reduced coordinates for this q-point
        ! TODO: Make sure that symmetries in Q-space are preserved.
+       call timab(1901, 1, tsec)
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=sigma%comm_pert)
 
        if (sigma%frohl_model /= 0) then
@@ -1000,7 +1005,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            end do
          end do ! nu
          gkq2_lr = gkq2_lr * fqdamp
-       end if
+       end if ! frohl_model
 
        ! Find k+q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered:
@@ -1013,7 +1018,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        if (dksqmax > tol12) then
          write(msg, '(4a,es16.6,7a)' )&
-          "The WFK file cannot be used to compute self-energy corrections at k:", trim(ktoa(kk)), ch10,&
+          "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
           "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
           "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
           'Action: check your WFK file and (k, q) point input variables'
@@ -1034,7 +1039,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (sigma%qint_method > 0) then
          if (.not.sigma%use_doublegrid) then
            iq_ibz_fine = iq_ibz
-           if (sigma%symsigma == 0) iq_ibz_fine = sigma%ephwg%lgk%find_ibzimage( qpt)
+           if (sigma%symsigma == 0) iq_ibz_fine = sigma%ephwg%lgk%find_ibzimage(qpt)
            ABI_CHECK(iq_ibz_fine /= -1, sjoin("Cannot find q-point in IBZ(k)", ktoa(qpt)))
            if (sigma%symsigma == 1) then
               if (.not. all(abs(sigma%qibz_k(:, iq_ibz_fine) - sigma%ephwg%lgk%ibz(:, iq_ibz_fine)) < tol12)) then
@@ -1685,7 +1690,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1
+ integer,parameter :: master=0,occopt3=3,qptopt1=1,sppoldbl1=1,istwfk1=1
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
  integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz,natom3
@@ -1808,15 +1813,23 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Build table with list of perturbations treated by this CPU.
  ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
+ !ABI_MALLOCself%pert_table, (2, natom3))
+
  do iatom=1,cryst%natom
    do idir=1,3
      pertcase = (iatom-1) * 3 + idir
      all_pinfo(:, pertcase) = [idir, iatom, pertcase]
+     !self%pert_table(1, pertcase) = (pertcase - 1) / (natom3 / new%nprocs_pert)
    end do
  end do
  bstart = (natom3 / new%nprocs_pert) * new%me_pert + 1
  bstop = bstart + new%my_npert - 1
  new%my_pinfo = all_pinfo(:, bstart:bstop)
+ !db%pert_table(2, :) = -1
+ !do ii=1,new%my_npert
+ !  ipc = db%my_pinfo(3, ii)
+ !  db%pert_table(2, ipc) = ii
+ !end do
  !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert
  !write(std_out,*)"my_pinfo", new%my_pinfo
 
@@ -2027,7 +2040,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! TODO: g0 umklapp here can enter into play!
      ! fstab should contains the max of the umlapp G-vectors.
      ! gmax could not be large enough!
-     call get_kg(kq,1,ecut,cryst%gmet,onpw,gtmp)
+     call get_kg(kq, istwfk1, ecut, cryst%gmet, onpw, gtmp)
      new%mpw = max(new%mpw, onpw)
      do ipw=1,onpw
        do ii=1,3
@@ -2164,13 +2177,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      MSG_ERROR(msg)
    end if
    call wrtout(std_out,"EPH Interpolation: will read energies from: "//trim(wfk_fname_dense))
-
    ebands_dense = wfk_read_ebands(wfk_fname_dense, comm)
 
    !TODO add a check for consistency
    ! number of bands and kpoints (comensurability)
    ABI_CHECK(ebands_dense%mband == ebands%mband, 'Inconsistent number of bands for the fine and dense grid')
-
    new%use_doublegrid = .True.
 
  ! read bs_interpmult
@@ -2442,7 +2453,6 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
    path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
 
    ! Check if a previous netcdf file is present and restart the calculation
-   !found = file_exists(path)
    if (restart == 1) then
        NCF_CHECK(nctk_open_modify(self%ncid, path, xmpi_comm_self))
    else
@@ -2487,6 +2497,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
      nctkarr_t("ddb_ngqpt", "int", "three"), &
      nctkarr_t("ph_ngqpt", "int", "three"), &
      nctkarr_t("sigma_ngkpt", "int", "three"), &
+     nctkarr_t("sigma_erange", "dp", "two"), &
      nctkarr_t("frohl_params", "dp", "four"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      !nctkarr_t("bstop_ks", "int", "nkcalc, nsppol"), &
@@ -2568,6 +2579,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ddb_ngqpt"), dtset%ddb_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ph_ngqpt"), dtset%ph_ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_ngkpt"), dtset%sigma_ngkpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "frohl_params"), dtset%frohl_params))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), self%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), self%nbcalc_ks))
@@ -2640,6 +2652,7 @@ type (sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 !arrays
  integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
  integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3), frohl_params(4)
+ !real(dp) :: sigma_erange(2)
 
 ! *************************************************************************
 
@@ -2746,7 +2759,11 @@ type (sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     "netcdf ddb_ngqpt != input file")
  ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      "netcdf ph_ngqpt != input file")
  ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
- ABI_CHECK(all(dtset%frohl_params   == frohl_params),  "netcdf frohl_params != input file")
+ ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6),  "netcdf frohl_params != input file")
+
+ !NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
+ ! This can lead SIGFPE if huge...
+ !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
 
  NCF_CHECK(nf90_close(ncid))
 
@@ -3428,6 +3445,9 @@ subroutine sigmaph_print(self, dtset, unt)
    write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
  end if
  write(unt,"(a, i0)")"Number of k-points for self-energy corrections: ", self%nkcalc
+ if (all(dtset%sigma_erange /= -huge(one))) then
+   write(unt, "(a, 2(f6.3, 1x), a)")"sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+ end if
  write(unt,"(a)")"List of K-points for self-energy corrections:"
  do ikc=1,self%nkcalc
    if (ikc > 10) then

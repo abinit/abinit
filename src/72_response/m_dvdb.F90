@@ -1333,6 +1333,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        ABI_CHECK(ierr == 0, 'out of memory in work')
 
        ! TODO: IBCAST?
+       call timab(1806, 1, tsec)
        work = zero
        do imyp=1,db%my_npert
          ipc = db%my_pinfo(3, imyp)
@@ -1344,12 +1345,12 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        !  root = db%pert_table(1, mu)
        !  if (root == my_rank) then
        !    imyp = db%pert_table(2, mu)
-       !    !ipc = db%my_pinfo(3, imyp)
        !    work(:,:,:,mu) = v1scf(:,:,:,imyp)
        !  end if
-       !  call xmpi_ibcast(work(:,:,:,mu), root, comm, requests(mu), ierr)
+       !  call xmpi_ibcast(work(:,:,:,mu), root, db%comm_pert, requests(mu), ierr)
        !end do
        !call xmpi_waitall(requests, ierr)
+       call timab(1806, 2, tsec)
 
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
@@ -1357,7 +1358,6 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
      else
        ! All 3 natom have been read in v1scf by dvdb_readsym_allv1
-       !write(std_out, *)"! All 3 natom have been read in v1scf by dvdb_readsym_allv1"
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
@@ -1385,7 +1385,6 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
      v1scf = work
      ABI_FREE(work)
    end if
-
  end if ! not is_irred
 
  call timab(1802, 2, tsec)
@@ -1963,7 +1962,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
 
  ! Compute IBZ potentials in G-space (results in v1g_qibz)
- ABI_CALLOC(v1g_qibz, (2*nfft,nspden,natom3))
+ ABI_MALLOC(v1g_qibz, (2*nfft,nspden,natom3))
  requests_v1g_qibz_done = .False.
  cnt = 0
  do mu=1,natom3
@@ -1995,7 +1994,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  symrec_eq = cryst%symrec(:,:,isym)
  call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
 
- v1r_qbz = zero
+ !v1r_qbz = zero
 
  do mu=1,natom3
    root = mod(mu, nproc)

@@ -1001,6 +1001,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1803)='dvdb_rotate_fqg'; basic(1803) = 1
  names(1804)='v1phq_rotate'; basic(1804) = 1
  names(1805)='dvdb_readsym_allv1'; basic(1805) = 1
+ names(1806)='dvdb_xmpi_sum'; basic(1806) = 1
 
  ! SIGEPH
  names(1900)='sigph_pre_qloop'; basic(1900) = 1

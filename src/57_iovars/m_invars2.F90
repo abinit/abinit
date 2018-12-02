@@ -3230,10 +3230,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  if (tread == 1) then
    ! sigma_ngkpt mode --> initialize shifts, provide default if not given in input
-   ! Consistency check: nkptgw must be zero or sigma_erange must be given.
+   ! Consistency check: nkptgw must be zero, sigma_erange should not be given.
    ABI_CHECK(dtset%nkptgw == 0, "nkptgw and sigma_ngkpt are mutually exclusive.")
-   if (dtset%gw_qprange == 0 .and. all(dtset%sigma_erange == -huge(one))) then
-     MSG_ERROR("Either gw_qprange or sigma_erange must be specified when sigma_ngkpt is used.")
+   if (dtset%gw_qprange == 0) then
+     MSG_ERROR("gw_qprange must be specified when sigma_ngkpt is used.")
+   end if
+   if (any(dtset%sigma_erange >= zero)) then
+     MSG_ERROR("sigma_eprange cannot be used with sigma_ngkpt.")
    end if
 
    dtset%sigma_ngkpt = intarr(1:3)
