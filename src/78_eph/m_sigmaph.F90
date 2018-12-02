@@ -219,7 +219,7 @@ module m_sigmaph
 
   integer :: qint_method
    ! Defines the method used to integrate in q-space
-   ! 0 --> Standard quadrature (one point per small box)
+   ! 0 --> Standard quadrature (one point per q-box)
    ! 1 --> Use tetrahedron method
 
   integer :: frohl_model
@@ -507,14 +507,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,nz=1
  integer,parameter :: sppoldbl1=1,timrev1=1
- integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert
+ integer :: my_rank,nsppol,nkpt,iq_ibz, iq,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj !,im,in
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine,iq_ibz_packed
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
- integer :: mpw,ierr,it,ndiv,thisproc_nq
+ integer :: mpw,ierr,it,ndiv,thisproc_nq,my_nqibz_k
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
@@ -535,7 +535,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3), indkk_kq(1,6) !g0ibz_kq(3),
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
- integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:)
+ integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:), myq2ibz_k(:)
  integer,allocatable :: bz2lgkibz_mapping(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
  real(dp) :: vdiag(2, 3), tsec(2)
@@ -809,8 +809,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    !   * we use symrec instead of symrel (see also m_dvdb)
    !
    ABI_MALLOC(indq2dvdb, (6, sigma%nqibz_k))
-
    ABI_MALLOC(iqk2dvdb, (sigma%nqibz_k, 6))
+
    call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, sigma%qibz_k, dvdb%nqpt, sigma%nqibz_k, cryst%nsym, &
         1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
    if (dksqmax > tol12) then
@@ -953,16 +953,42 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      endif
 
      ! Integration over q-points in the IBZ(k)
-     if (my_rank == master .and. sigma%imag_only) then ! .and. sigma%tol_deltaw_pm /= zero) then
-       write(std_out, "(a, es16.6)")"Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
-       iq_ibz = count(sigma%mask_qibz_k /= 0)
-       write(std_out, "(a,i0,a, f5.1,a)")"Number of qpts contributing: ", iq_ibz, &
-         "(nq_eff / nqibz): ", (100.0_dp * iq_ibz) / sigma%nqibz_k, " [%]"
+     !qstart = 1; qstop = sigma%nqibz_k
+     !my_nqibz_k = sigma%nqibz_k
+     !ABI_MALLOC(myq2ibz_k, (sigma%nqibz_k))
+     !myq2ibz_k = [iq, (iq, iq=1, sigma%nqibz_k)]
+     !ABI_FREE(myq2ibz_k)
+
+     if (sigma%imag_only) then ! .and. sigma%tol_deltaw_pm /= zero) then
        ! TODO: should Redistribute these points to avoid load imbalance
+       !ABI_MALLOC(qtab, sigma%nqibz_k)
+       !nq = 0
+       !do iq_ibz=1,sigma%nqibz_k
+       !  if (sigma%mask_qibz_k(iq) /= 0) then
+       !    nq = nq + 1; qtab(nq) = iq_ibz
+       !  end if
+       !end do
+       !call xmpi_split_work(nq, sigma%comm_bq, q_start, q_stop, msg, ierr)
+       !my_nqibz_k = q_stop - q_start + 1
+       !ABI_MALLOC(myq2ibz_k, (my_nqibz_k))
+       !ABI_FREE(myq2ibz_k)
+       !if (qstart <= q_stop) then
+       !  myq2ibz_k = qtab(qstart:qstop)
+       !end if
+       !ABI_FREE(qtab)
+       nq = count(sigma%mask_qibz_k /= 0)
+       if (my_rank == master) then
+         write(std_out, "(a, es16.6)")"Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
+         write(std_out, "(a,i0,a,f5.1,a)")"Number of qpts contributing to delta weights: ", nq, &
+           " (nq_eff / nqibz_k): ", (100.0_dp * nq) / sigma%nqibz_k, " [%]"
+       end if
      end if
      call timab(1900, 2, tsec)
 
      do iq_ibz=1,sigma%nqibz_k
+     !do iq_ibz=1,my_nqibz_k
+       !iq_ibz = myq2ibz_k(iq)
+
        ! Parallelization over q-points inside comm_bq
        if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
 
@@ -1094,7 +1120,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
        ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
-
        do imyp=1,my_npert
          idir = sigma%my_pinfo(1, imyp); ipert = sigma%my_pinfo(2, imyp)
 
@@ -1745,7 +1770,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
  new%tol_deltaw_pm = zero
  ! TODO: Still under testing.
- if (dtset%userra /= zero) then
+ if (dtset%userra > 1e-30_dp) then
    new%tol_deltaw_pm = dtset%userra
  end if
  call wrtout(std_out, sjoin("Setting tol_deltaw_pm to", ftoa(new%tol_deltaw_pm)))
@@ -3074,7 +3099,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops)
+ call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
 
  ! Only master writes
  if (my_rank /= master) return

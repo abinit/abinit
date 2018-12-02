@@ -1168,7 +1168,7 @@ subroutine getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,&   
    end if
  end if
 
- call timab(195,2,tsec)
+ call timab(195, 2, tsec)
 
 end subroutine getgh1c_setup
 !!***

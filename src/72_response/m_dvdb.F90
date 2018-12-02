@@ -1711,14 +1711,14 @@ pcase_loop: &
        !call rotate_fqg(itirev_eq,symrec_eq,qpt,tnon,ngfft,nfft,nspden,workg_eq,workg)
        ind1=0
        do i3=1,n3
+         ! Get location of G vector (grid point) centered at 0 0 0
+         l3 = i3-(i3/id3)*n3-1
          do i2=1,n2
+           l2 = i2-(i2/id2)*n2-1
            do i1=1,n1
              ind1=ind1+1
 
-             ! Get location of G vector (grid point) centered at 0 0 0
              l1 = i1-(i1/id1)*n1-1
-             l2 = i2-(i2/id2)*n2-1
-             l3 = i3-(i3/id3)*n3-1
 
              ! Get rotated G vector Gj for each symmetry element
              ! -- here we use the TRANSPOSE of symrel_eq; assuming symrel_eq expresses
@@ -1804,7 +1804,7 @@ pcase_loop: &
      "The following perturbations cannot be recostructed by symmetry for q-point: ",trim(ktoa(qpt))
    do ipert=1,cryst%natom
      do idir=1,3
-        if (pflag(idir, ipert) == 0) write(std_out,"(2(a,i0))")"idir= ",idir,", ipert= ",ipert
+       if (pflag(idir, ipert) == 0) write(std_out,"(2(a,i0))")"idir= ",idir,", ipert= ",ipert
      end do
    end do
    write(msg,"(5a)")&

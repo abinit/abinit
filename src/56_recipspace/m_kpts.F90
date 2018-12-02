@@ -508,7 +508,7 @@ end function symkchk
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
 !!                   value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
-!!  comm=MPI communicator
+!!  comm=MPI communicator.
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT
