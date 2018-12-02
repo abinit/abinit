@@ -274,6 +274,11 @@ module m_sigmaph
     ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
     ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
 
+  integer,allocatable :: pert_table(:,:)
+   ! pert_table(2, natom3)
+   ! pert_table(1, npert): rank of the processor treating this atomic perturbation.
+   ! pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
+
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
    ! List of k-points where the self-energy is computed.
@@ -750,7 +755,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! This to symmetrize the DFPT potentials.
  if (dtset%symdynmat == 1) dvdb%symv1 = .True.
  !dvdb%symv1 = .False.
- if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo)
+ if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
  ! Set cache in Mb for q-points.
  ! When we ask for a qpt in the BZ the code checks whether the IBZ image is in the cache.
@@ -951,7 +956,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      if (my_rank == master .and. sigma%imag_only) then ! .and. sigma%tol_deltaw_pm /= zero) then
        write(std_out, "(a, es16.6)")"Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
        iq_ibz = count(sigma%mask_qibz_k /= 0)
-       write(std_out, "(a,i0,f5.1,a)")"Number of q-points contributing: ", iq_ibz, (100.0_dp * iq_ibz) / sigma%nqibz_k, " [%]"
+       write(std_out, "(a,i0,a, f5.1,a)")"Number of qpts contributing: ", iq_ibz, &
+         "(nq_eff / nqibz): ", (100.0_dp * iq_ibz) / sigma%nqibz_k, " [%]"
        ! TODO: should Redistribute these points to avoid load imbalance
      end if
      call timab(1900, 2, tsec)
@@ -1754,8 +1760,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Parallelism over perturbations.
  ! Use MPI communicator to distribute 3 * natom perturbations to reduce memory requirements.
- ! Perturbations are equally distributed --> Total number of CPUs should be divisible by nprocs_pert.
- new%comm_pert = xmpi_comm_self; new%my_npert = 3 * cryst%natom; new%me_pert = 0; new%nprocs_pert = 1
+ ! Perturbations are equally distributed --> Total number of CPUs should be divisible by 3 * natom
+ new%comm_pert = xmpi_comm_self; new%my_npert = natom3; new%me_pert = 0; new%nprocs_pert = 1
  do cnt=natom3,2,-1
    if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
      new%nprocs_pert = cnt
@@ -1763,6 +1769,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      exit
    end if
  end do
+ if (new%my_npert == natom3 .and. nprocs > 1) then
+   MSG_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
+ end if
 
  ! This to deactivate parallelism over perturbations.
  if (dtset%userib == 789) then
@@ -1813,23 +1822,24 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Build table with list of perturbations treated by this CPU.
  ABI_MALLOC(new%my_pinfo, (3, new%my_npert))
- !ABI_MALLOCself%pert_table, (2, natom3))
+ ABI_MALLOC(new%pert_table, (2, natom3))
 
  do iatom=1,cryst%natom
    do idir=1,3
-     pertcase = (iatom-1) * 3 + idir
+     pertcase = idir + (iatom-1) * 3
      all_pinfo(:, pertcase) = [idir, iatom, pertcase]
-     !self%pert_table(1, pertcase) = (pertcase - 1) / (natom3 / new%nprocs_pert)
+     new%pert_table(1, pertcase) = (pertcase - 1) / (natom3 / new%nprocs_pert)
    end do
  end do
  bstart = (natom3 / new%nprocs_pert) * new%me_pert + 1
  bstop = bstart + new%my_npert - 1
  new%my_pinfo = all_pinfo(:, bstart:bstop)
- !db%pert_table(2, :) = -1
- !do ii=1,new%my_npert
- !  ipc = db%my_pinfo(3, ii)
- !  db%pert_table(2, ipc) = ii
- !end do
+
+ new%pert_table(2, :) = -1
+ do ii=1,new%my_npert
+   ip = new%my_pinfo(3, ii)
+   new%pert_table(2, ip) = ii
+ end do
  !write(std_out,*)"my_npert", new%my_npert, "nprocs_pert", new%nprocs_pert
  !write(std_out,*)"my_pinfo", new%my_pinfo
 
@@ -2867,6 +2877,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%mask_qibz_k)
  ABI_SFREE(self%distrib_bq)
  ABI_SFREE(self%my_pinfo)
+ ABI_SFREE(self%pert_table)
 
  ! real
  ABI_SFREE(self%kcalc)
@@ -2900,22 +2911,22 @@ subroutine sigmaph_free(self)
 
  ! types.
  if (allocated(self%degtab)) then
-    do jj=1,size(self%degtab, dim=2)
-      do ii=1,size(self%degtab, dim=1)
-         do ideg=1,size(self%degtab(ii, jj)%bids)
-           ABI_FREE(self%degtab(ii, jj)%bids(ideg)%vals)
-         end do
-         ABI_DT_FREE(self%degtab(ii, jj)%bids)
-      end do
-    end do
-    ABI_DT_FREE(self%degtab)
+   do jj=1,size(self%degtab, dim=2)
+     do ii=1,size(self%degtab, dim=1)
+        do ideg=1,size(self%degtab(ii, jj)%bids)
+          ABI_FREE(self%degtab(ii, jj)%bids(ideg)%vals)
+        end do
+        ABI_DT_FREE(self%degtab(ii, jj)%bids)
+     end do
+   end do
+   ABI_DT_FREE(self%degtab)
  end if
 
  call ephwg_free(self%ephwg)
  call eph_double_grid_free(self%eph_doublegrid)
  call self%frohl_skw%free()
 
- ! Deallocate MPI communicators
+ ! TODO Deallocate MPI communicators
  !call xmpi_comm_free(self%comm_pert)
  !call xmpi_comm_free(self%comm_bq)
  !call xmpi_comm_free(self%comm_fft)

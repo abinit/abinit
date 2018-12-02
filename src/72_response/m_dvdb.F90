@@ -127,6 +127,9 @@ module m_dvdb
   integer :: nprocs_pert = 1
    ! Number of cpus for parallelism over atomic perturbations.
 
+  integer :: me_pert = 0
+   ! My rank in comm over atomic perturbations.
+
   integer :: my_npert = -1
    ! Number of atomic perturbations or phonon modes treated by this MPI rank
 
@@ -135,6 +138,8 @@ module m_dvdb
     ! my_pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
     ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
     ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
+
+  integer,pointer :: pert_table(:,:) => null()
 
   integer :: version
   ! File format version read from file.
@@ -741,6 +746,7 @@ subroutine dvdb_free(db)
  end if
 
  db%my_pinfo => null()
+ db%pert_table => null()
 
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
@@ -1216,11 +1222,12 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr, imyp, ipc
+ integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr, imyp, ipc, mu, root
  logical :: isirr_q,incache
 !arrays
  integer :: pinfo(3,3*db%mpert)
  integer :: g0q(3),lgsize(db%nqpt),iqmax(1)
+ integer :: requests(db%natom3)
  real(dp) :: tsec(2)
  real(dp),allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
@@ -1332,24 +1339,24 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, db%natom3), ierr)
        ABI_CHECK(ierr == 0, 'out of memory in work')
 
-       ! TODO: IBCAST?
        call timab(1806, 1, tsec)
-       work = zero
-       do imyp=1,db%my_npert
-         ipc = db%my_pinfo(3, imyp)
-         work(:,:,:,ipc) = v1scf(:,:,:,imyp)
-       end do
-       call xmpi_sum(work, db%comm_pert, ierr)
-
-       !do mu=1,bs%natom3
-       !  root = db%pert_table(1, mu)
-       !  if (root == my_rank) then
-       !    imyp = db%pert_table(2, mu)
-       !    work(:,:,:,mu) = v1scf(:,:,:,imyp)
-       !  end if
-       !  call xmpi_ibcast(work(:,:,:,mu), root, db%comm_pert, requests(mu), ierr)
+       ! TODO: IBCAST?
+       !work = zero
+       !do imyp=1,db%my_npert
+       !  ipc = db%my_pinfo(3, imyp)
+       !  work(:,:,:,ipc) = v1scf(:,:,:,imyp)
        !end do
-       !call xmpi_waitall(requests, ierr)
+       !call xmpi_sum(work, db%comm_pert, ierr)
+
+       do mu=1,db%natom3
+         root = db%pert_table(1, mu)
+         if (root == db%me_pert) then
+           imyp = db%pert_table(2, mu)
+           work(:,:,:,mu) = v1scf(:,:,:,imyp)
+         end if
+         call xmpi_ibcast(work(:,:,:,mu), root, db%comm_pert, requests(mu), ierr)
+       end do
+       call xmpi_waitall(requests, ierr)
        call timab(1806, 2, tsec)
 
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
@@ -3357,21 +3364,23 @@ end function dvdb_findq
 !!
 !! SOURCE
 
-subroutine dvdb_set_pert_distrib(self, comm_pert, my_pinfo)
+subroutine dvdb_set_pert_distrib(self, comm_pert, my_pinfo, pert_table)
 
 !Arguments ------------------------------------
 !scalars
  class(dvdb_t),intent(inout) :: self
  integer,intent(in) :: comm_pert
 !arrays
- integer,target,intent(in) :: my_pinfo(:,:)
+ integer,target,intent(in) :: my_pinfo(:,:), pert_table(:,:)
 
 ! *************************************************************************
 
  self%comm_pert = comm_pert
  self%nprocs_pert = xmpi_comm_size(comm_pert)
+ self%me_pert = xmpi_comm_rank(comm_pert)
  self%my_pinfo => my_pinfo
  self%my_npert = size(my_pinfo, dim=2)
+ self%pert_table => pert_table
 
 end subroutine dvdb_set_pert_distrib
 !!***
