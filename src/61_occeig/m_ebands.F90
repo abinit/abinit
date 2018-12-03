@@ -5445,7 +5445,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
        end do
      end do
    end do
-   edos = ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
+   edos = ebands_get_dos_matrix_elements(ebands_kmesh, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
                                          comm, vvdos_mesh, vvdos_vals)
    ABI_SFREE(vv_vals)
  end if
