@@ -127,6 +127,9 @@ module m_dvdb
   integer :: nprocs_pert = 1
    ! Number of cpus for parallelism over atomic perturbations.
 
+  integer :: me_pert = 0
+   ! My rank in comm over atomic perturbations.
+
   integer :: my_npert = -1
    ! Number of atomic perturbations or phonon modes treated by this MPI rank
 
@@ -135,6 +138,8 @@ module m_dvdb
     ! my_pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
     ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
     ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
+
+  integer,pointer :: pert_table(:,:) => null()
 
   integer :: version
   ! File format version read from file.
@@ -315,6 +320,9 @@ module m_dvdb
    procedure :: qcache_read => dvdb_qcache_read
    ! Read potentials and store them in cache.
 
+   procedure :: qcache_report => dvdb_qcache_report
+   !  Print info on q-cache states and reset counters.
+
    procedure :: list_perts => dvdb_list_perts
    ! Check if all the (phonon) perts are available taking into account symmetries.
 
@@ -467,9 +475,11 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
      if (new%version > 1) read(unt, err=10, iomsg=msg) new%rhog1_g0(:, iv1)
 
      ! Check whether this q-point is already in the list.
-     ! FIXME: This is gonna be slow if lots of q-points.
+     ! Assume qpoints are grouped so invert the iq loop for better performace.
+     ! This is gonna be slow if lots of q-points and perturbations are not grouped.
      iq_found = 0
-     do iq=1,nqpt
+     !do iq=1,nqpt
+     do iq=nqpt,1,-1
        if (all(abs(hdr1%qptn - tmp_qpts(:,iq)) < tol14)) then
          iq_found = iq; exit
        end if
@@ -736,6 +746,7 @@ subroutine dvdb_free(db)
  end if
 
  db%my_pinfo => null()
+ db%pert_table => null()
 
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
@@ -1211,11 +1222,12 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr, imyp, ipc
+ integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr, imyp, ipc, mu, root
  logical :: isirr_q,incache
 !arrays
  integer :: pinfo(3,3*db%mpert)
  integer :: g0q(3),lgsize(db%nqpt),iqmax(1)
+ integer :: requests(db%natom3)
  real(dp) :: tsec(2)
  real(dp),allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
@@ -1327,24 +1339,25 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, db%natom3), ierr)
        ABI_CHECK(ierr == 0, 'out of memory in work')
 
+       call timab(1806, 1, tsec)
        ! TODO: IBCAST?
-       work = zero
-       do imyp=1,db%my_npert
-         ipc = db%my_pinfo(3, imyp)
-         work(:,:,:,ipc) = v1scf(:,:,:,imyp)
-       end do
-       call xmpi_sum(work, db%comm_pert, ierr)
-
-       !do mu=1,bs%natom3
-       !  root = db%pert_table(1, mu)
-       !  if (root == my_rank) then
-       !    imyp = db%pert_table(2, mu)
-       !    !ipc = db%my_pinfo(3, imyp)
-       !    work(:,:,:,mu) = v1scf(:,:,:,imyp)
-       !  end if
-       !  call xmpi_ibcast(work(:,:,:,mu), root, comm, requests(mu), ierr)
+       !work = zero
+       !do imyp=1,db%my_npert
+       !  ipc = db%my_pinfo(3, imyp)
+       !  work(:,:,:,ipc) = v1scf(:,:,:,imyp)
        !end do
-       !call xmpi_waitall(requests, ierr)
+       !call xmpi_sum(work, db%comm_pert, ierr)
+
+       do mu=1,db%natom3
+         root = db%pert_table(1, mu)
+         if (root == db%me_pert) then
+           imyp = db%pert_table(2, mu)
+           work(:,:,:,mu) = v1scf(:,:,:,imyp)
+         end if
+         call xmpi_ibcast(work(:,:,:,mu), root, db%comm_pert, requests(mu), ierr)
+       end do
+       call xmpi_waitall(requests, ierr)
+       call timab(1806, 2, tsec)
 
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, work, work2, db%comm_pert)
@@ -1352,7 +1365,6 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
 
      else
        ! All 3 natom have been read in v1scf by dvdb_readsym_allv1
-       !write(std_out, *)"! All 3 natom have been read in v1scf by dvdb_readsym_allv1"
        call v1phq_rotate(cryst, db%qpts(:, db_iqpt), isym, itimrev, g0q, ngfft, cplex, nfft, &
          db%nspden, db%nsppol, db%mpi_enreg, v1scf, work2, db%comm_pert)
      end if
@@ -1380,7 +1392,6 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
      v1scf = work
      ABI_FREE(work)
    end if
-
  end if ! not is_irred
 
  call timab(1802, 2, tsec)
@@ -1534,6 +1545,43 @@ end subroutine dvdb_qcache_read
 
 !----------------------------------------------------------------------
 
+!!****f* m_dvdb/dvdb_qcache_report
+!! NAME
+!!  dvdb_qcache_report
+!!
+!! FUNCTION
+!!  Print info on q-cache states and reset counters.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_qcache_report(dvdb)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: dvdb
+
+! *************************************************************************
+
+ if (dvdb%qcache_size > 0 .and. dvdb%qcache_stats(1) /= 0) then
+   write(std_out, "(2a)")ch10, " Qcache stats"
+   write(std_out, "(a,i0)")" Total Number of calls: ", dvdb%qcache_stats(1)
+   write(std_out, "(a,i0,2x,f5.1,a)")&
+     " Cache hit: ", dvdb%qcache_stats(2), (100.0_dp * dvdb%qcache_stats(2)) / dvdb%qcache_stats(1), "%"
+   write(std_out, "(a,i0,2x,f5.1,a)")&
+     " Cache miss: ", dvdb%qcache_stats(3), (100.0_dp * dvdb%qcache_stats(3)) / dvdb%qcache_stats(1), "%"
+   dvdb%qcache_stats = 0
+ end if
+ write(std_out, "(a)")
+
+end subroutine dvdb_qcache_report
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dvdb/v1phq_complete
 !! NAME
 !! v1phq_complete
@@ -1663,14 +1711,14 @@ pcase_loop: &
        !call rotate_fqg(itirev_eq,symrec_eq,qpt,tnon,ngfft,nfft,nspden,workg_eq,workg)
        ind1=0
        do i3=1,n3
+         ! Get location of G vector (grid point) centered at 0 0 0
+         l3 = i3-(i3/id3)*n3-1
          do i2=1,n2
+           l2 = i2-(i2/id2)*n2-1
            do i1=1,n1
              ind1=ind1+1
 
-             ! Get location of G vector (grid point) centered at 0 0 0
              l1 = i1-(i1/id1)*n1-1
-             l2 = i2-(i2/id2)*n2-1
-             l3 = i3-(i3/id3)*n3-1
 
              ! Get rotated G vector Gj for each symmetry element
              ! -- here we use the TRANSPOSE of symrel_eq; assuming symrel_eq expresses
@@ -1756,7 +1804,7 @@ pcase_loop: &
      "The following perturbations cannot be recostructed by symmetry for q-point: ",trim(ktoa(qpt))
    do ipert=1,cryst%natom
      do idir=1,3
-        if (pflag(idir, ipert) == 0) write(std_out,"(2(a,i0))")"idir= ",idir,", ipert= ",ipert
+       if (pflag(idir, ipert) == 0) write(std_out,"(2(a,i0))")"idir= ",idir,", ipert= ",ipert
      end do
    end do
    write(msg,"(5a)")&
@@ -1899,7 +1947,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: tim_fourdp0=0 !, master=0
+ integer,parameter :: tim_fourdp0=0
  integer,save :: enough=0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr,root
 !arrays
@@ -1921,7 +1969,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
 
  ! Compute IBZ potentials in G-space (results in v1g_qibz)
- ABI_CALLOC(v1g_qibz, (2*nfft,nspden,natom3))
+ ABI_MALLOC(v1g_qibz, (2*nfft,nspden,natom3))
  requests_v1g_qibz_done = .False.
  cnt = 0
  do mu=1,natom3
@@ -1953,7 +2001,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  symrec_eq = cryst%symrec(:,:,isym)
  call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
 
- v1r_qbz = zero
+ !v1r_qbz = zero
 
  do mu=1,natom3
    root = mod(mu, nproc)
@@ -2165,16 +2213,16 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
  do isp=1,nspden
    ind1 = 0
    do i3=1,n3
+     ! Get location of G vector (grid point) centered at 0 0 0
+     l3 = i3-(i3/id3)*n3-1
      do i2=1,n2
+       l2 = i2-(i2/id2)*n2-1
        do i1=1,n1
          ind1 = ind1 + 1
          !ind1 = 1 + i1 + (i2-1)*n1 + (i3-1)*n1*n2
          !if (mod(ind1, nprocs) /= my_rank) cycle
 
-         ! Get location of G vector (grid point) centered at 0 0 0
          l1 = i1-(i1/id1)*n1-1
-         l2 = i2-(i2/id2)*n2-1
-         l3 = i3-(i3/id3)*n3-1
 
          ! Get rotated G vector. IS(G)
          j1 = tsign * (symm(1,1)*l1+symm(1,2)*l2+symm(1,3)*l3)
@@ -2187,14 +2235,14 @@ subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
          if ( (j1 > n1/2 .or. j1 < -(n1-1)/2) .or. &
               (j2 > n2/2 .or. j1 < -(n2-1)/2) .or. &
               (j3 > n3/2 .or. j3 < -(n3-1)/2) ) then
-           !write(std_out,*)"got it"
+           !write(std_out,*)"outsize box!"
            outfg(:,ind1,isp) = zero
            cycle
          end if
 
          tsg = [j1,j2,j3] ! +- S^{-1} G
 
-         ! Map into [0,n-1] and then add 1 for array index in [1,n]
+         ! Map into [0,n-1] and then add 1 for array index in [1, n]
          k1=1+mod(n1+mod(j1,n1),n1)
          k2=1+mod(n2+mod(j2,n2),n2)
          k3=1+mod(n3+mod(j3,n3),n3)
@@ -3316,21 +3364,23 @@ end function dvdb_findq
 !!
 !! SOURCE
 
-subroutine dvdb_set_pert_distrib(self, comm_pert, my_pinfo)
+subroutine dvdb_set_pert_distrib(self, comm_pert, my_pinfo, pert_table)
 
 !Arguments ------------------------------------
 !scalars
  class(dvdb_t),intent(inout) :: self
  integer,intent(in) :: comm_pert
 !arrays
- integer,target,intent(in) :: my_pinfo(:,:)
+ integer,target,intent(in) :: my_pinfo(:,:), pert_table(:,:)
 
 ! *************************************************************************
 
  self%comm_pert = comm_pert
  self%nprocs_pert = xmpi_comm_size(comm_pert)
+ self%me_pert = xmpi_comm_rank(comm_pert)
  self%my_pinfo => my_pinfo
  self%my_npert = size(my_pinfo, dim=2)
+ self%pert_table => pert_table
 
 end subroutine dvdb_set_pert_distrib
 !!***

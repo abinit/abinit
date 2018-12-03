@@ -948,6 +948,8 @@ type dataset_type
 
  integer :: sigma_bsum_range(2) = 0
 
+ real(dp) :: sigma_erange(2) = -huge(one)
+
  integer :: sigma_ngkpt(3) = 0
  ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
 

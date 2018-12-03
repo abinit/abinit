@@ -2058,7 +2058,7 @@ end subroutine xmpi_comm_set_errhandler
 !!    +2 if ntasks>nprocs.
 !!
 !! NOTES
-!!  If nprocs>ntasks then :
+!!  If nprocs>ntasks then:
 !!    my_start=ntasks+1
 !!    my_stop=ntask
 !!

@@ -469,7 +469,7 @@ end function abi_wtime
 !!  start_or_stop=
 !!    "start" to start the timers
 !!    "stop" to stop the timers and return the final cpu_time and wall_time
-!!  comm: MPI communicator. If average value inside comm is wanted. Only for "stop"
+!!  [comm]: MPI communicator. If values averaged inside comm are wanted. Only for "stop"
 !!
 !! OUTPUT
 !!  cpu= cpu time in seconds
@@ -562,6 +562,7 @@ end subroutine cwtime
 !!
 !! INPUT
 !!  [pre_str], [end_str]: String to print before and after the timing section
+!!  [comm]: MPI communicator. If values averaged inside comm is wanted. Only for "stop"
 !!
 !! SIDE EFFECTS
 !!  cpu= cpu time in seconds
@@ -574,20 +575,32 @@ end subroutine cwtime
 !!
 !! SOURCE
 
-subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str)
+subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
 
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(inout) :: cpu,wall
  real(dp),intent(out) :: gflops
+ integer,intent(in),optional :: comm
  character(len=*),intent(in) :: tag
  character(len=*),optional,intent(in) :: pre_str, end_str
 
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: avg_type
+
 ! *************************************************************************
 
- call cwtime(cpu, wall, gflops, "stop")
+ if (present(comm)) then
+   call cwtime(cpu, wall, gflops, "stop", comm=comm)
+   avg_type = "(MPI average)"
+ else
+   call cwtime(cpu, wall, gflops, "stop")
+   avg_type = ""
+ end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
- call wrtout(std_out, sjoin(tag, "completed. cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+ call wrtout(std_out, sjoin(tag, "completed. cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall), avg_type), &
+     do_flush=.True.)
  if (present(end_str)) call wrtout(std_out, end_str)
  call cwtime(cpu, wall, gflops, "start")
 
