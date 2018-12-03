@@ -49,6 +49,7 @@ MODULE m_ebands
  use defs_abitypes,    only : hdr_type, dataset_type
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
+ use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one, &
                               isdiagmat
@@ -3634,7 +3635,7 @@ end function ebands_downsample
 !!  cryst<crystal_t> = Crystalline structure.
 !!  params(:):
 !!     params(0): interpolation type. 1 for star-functions
-!!                                    2 for star-functions with group vlocities
+!!                                    2 for star-functions with group velocities
 !!     if star-functions:
 !!         params(2): Ratio between star functions and ab-initio k-points.
 !!         params(3:4): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639) if params(2) > tol6
@@ -3970,10 +3971,12 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
 !Local variables-------------------------------
 !scalars
  integer,parameter :: kptopt3=3
+ real(dp),parameter :: max_occ1 = one
  integer :: nproc,my_rank,nw,spin,band,ikpt,cnt,idat,ierr,bcorr
  !integer :: my_nkibz, nkfull, timrev
  integer :: ii, jj, idx, ief
  real(dp) :: max_ene,min_ene,wtk,max_occ
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  !real(dp) :: dksqmax
  character(len=500) :: msg
  type(stats_t) :: ediffs
@@ -3982,8 +3985,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
  !integer,allocatable :: bz2ibz(:,:)
  real(dp) :: eminmax_spin(2,ebands%nsppol)
  real(dp) :: v(3), vsum(3), vsym(3), t(3,3), tsum(3,3), tsym(3,3)
- real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
- !real(dp),allocatable :: kfull(:,:),wtkfull(:),my_kibz(:,:)
+ real(dp),allocatable :: wme0(:),wdt(:,:,:),tmp_eigen(:)
 
 ! *********************************************************************
 
@@ -4051,6 +4053,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
    ebands%nsppol,cryst%symafm,cryst%symrel,timrev,comm,use_symrec=.False.)
 #endif
 
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
  select case (intmeth)
  case (1)
    ! Gaussian
@@ -4128,7 +4131,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
    ABI_MALLOC(tmp_eigen, (ebands%nkpt))
-   ABI_MALLOC(wdt, (nw, 2))
+   ABI_MALLOC(wdt, (nw, ebands%nkpt, 2))
 
    bcorr = 0; if (intmeth == 3) bcorr = 1
    cnt = 0
@@ -4136,19 +4139,19 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
      do band=1,ebands%nband(1)
        ! For each band get its contribution
        tmp_eigen = ebands%eig(band,:,spin)
+
+       call tetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
+         bcorr, wdt(:,:,2), wdt(:,:,1), comm)
+
        do ikpt=1,ebands%nkpt
-         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
-
-         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223 [[cite:Bloechl1994a]])
-         call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
-
-         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
+         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, ikpt, 1)
          !scalar
          select case (ndat)
          case (1)
            ! Compute DOS/IDOS
            do idat=1,ndat
-             out_dos(:, :, spin, idat) = out_dos(:, :, spin, idat) + wdt(:, :) * bks_vals(idat, band, ikpt, spin)
+             out_dos(:, 1, spin, idat) = out_dos(:, 1, spin, idat) + wdt(:, ikpt, 1) * bks_vals(idat, band, ikpt, spin)
+             out_dos(:, 2, spin, idat) = out_dos(:, 2, spin, idat) + wdt(:, ikpt, 2) * bks_vals(idat, band, ikpt, spin)
            end do
 
          !vector
@@ -4159,7 +4162,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
            vsum = symmetrize_vector(cryst,v)
            !put components
            do ii=1,3
-             out_dos(:, :, spin, ii) = out_dos(:, :, spin, ii) + wdt(:,:) * vsum(ii)
+             out_dos(:, 1, spin, ii) = out_dos(:, 1, spin, ii) + wdt(:, ikpt, 1) * vsum(ii)
+             out_dos(:, 2, spin, ii) = out_dos(:, 2, spin, ii) + wdt(:, ikpt, 2) * vsum(ii)
            end do
 
          !tensor
@@ -4177,7 +4181,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
            do ii=1,3
              do jj=1,3
                idx = (ii-1)*3+jj
-               out_dos(:, :, spin, idx) = out_dos(:, :, spin, idx) + wdt(:,:) * tsum(jj,ii)
+               out_dos(:, 1, spin, idx) = out_dos(:, 1, spin, idx) + wdt(:, ikpt, 1) * tsum(jj,ii)
+               out_dos(:, 2, spin, idx) = out_dos(:, 2, spin, idx) + wdt(:, ikpt, 2) * tsum(jj,ii)
              end do
            end do
 
@@ -4198,6 +4203,10 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
+
+ call cwtime(cpu_all, wall_all, gflops_all, "stop")
+ call wrtout(std_out, sjoin("Calculation completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
+   sec2str(wall_all)), do_flush=.True.)
 
  ! Compute total DOS and IDOS
  max_occ = two / (ebands%nspinor*ebands%nsppol)
@@ -5468,10 +5477,8 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
      NCF_CHECK(edos%ncwrite(ncid))
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, nine")], defmode=.True.)
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvidos_vals', "dp", "edos_nw, nsppol_plus1, nine")], defmode=.True.)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvidos_vals"), vvdos_vals(:,1,:,:)))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals(:,1,:,:)))
    end if
 
