@@ -4013,7 +4013,6 @@ end subroutine indfftrisc
 
 subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mpw,npw)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,ikg,ikpt,istwf_k,mkmem,mpw
@@ -4533,11 +4532,11 @@ subroutine get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k)
 ! *********************************************************************
 
  call initmpi_seq(MPI_enreg_seq)
- !
- ! * Calculate the number of G-vectors for this k-point.
+
+ ! Calculate the number of G-vectors for this k-point.
  call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_dum,kpoint,0,MPI_enreg_seq,0,npw_k)
- !
- ! * Allocate and calculate the set of G-vectors.
+
+ ! Allocate and calculate the set of G-vectors.
  ABI_MALLOC(kg_k,(3,npw_k))
  call kpgsph(ecut,exchn2n3d0,gmet,ikg0,0,istwf_k,kg_k,kpoint,mkmem_,MPI_enreg_seq,npw_k,npw_k_test)
 

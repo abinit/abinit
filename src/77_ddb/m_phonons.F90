@@ -1841,8 +1841,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom,&
-&     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff)
+     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom, &
+      Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff, &
+      xmpi_comm_self)
 
    else if (ifcflag == 0) then
 

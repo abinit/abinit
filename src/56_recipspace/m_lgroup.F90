@@ -216,8 +216,10 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  call alloc_copy(lgsym2glob(:, 1:new%nsym_lg), new%lgsym2glob)
 
  ! Check group closure.
- call chkgrp(new%nsym_lg, symafm_lg, symrec_lg, ierr)
- ABI_CHECK(ierr == 0, "Error in group closure")
+ if (debug /= 0) then
+   call chkgrp(new%nsym_lg, symafm_lg, symrec_lg, ierr)
+   ABI_CHECK(ierr == 0, "Error in group closure")
+ end if
 
  ! Find the irreducible zone with the little group operations.
  ! Do not use time-reversal since it has been manually introduced previously

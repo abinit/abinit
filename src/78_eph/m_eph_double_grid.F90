@@ -41,12 +41,6 @@ module m_eph_double_grid
  private
 !!***
 
- public :: eph_double_grid_new   ! Initialize the double grid structure
- public :: eph_double_grid_free  ! Free the double grid structure
- public :: eph_double_grid_get_index ! Get the index of the the kpoint in the double grid
- public :: eph_double_grid_bz2ibz ! Map BZ to IBZ using the double grid structure
- public :: eph_double_grid_get_mapping ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
-
 !----------------------------------------------------------------------
 
 !!****t* m_eph_double_grid/eph_double_grid_t
@@ -115,6 +109,12 @@ module m_eph_double_grid
 
  end type eph_double_grid_t
 !!***
+
+ public :: eph_double_grid_new   ! Initialize the double grid structure
+ public :: eph_double_grid_free  ! Free the double grid structure
+ public :: eph_double_grid_get_index ! Get the index of the the kpoint in the double grid
+ public :: eph_double_grid_bz2ibz ! Map BZ to IBZ using the double grid structure
+ public :: eph_double_grid_get_mapping ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
 
 contains  !=====================================================
 !!***
@@ -264,9 +264,12 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
              !     [dble((ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),&
              !      dble((jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),&
              !      dble((kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3))]
-             call wrap2_pmhalf((dble(ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)),eph_dg%kpts_dense(1,i_dense),shift)
-             call wrap2_pmhalf((dble(jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)),eph_dg%kpts_dense(2,i_dense),shift)
-             call wrap2_pmhalf((dble(kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3)),eph_dg%kpts_dense(3,i_dense),shift)
+             call wrap2_pmhalf((dble(ii-1)*interp_kmult(1)+i1-1)/(nkpt_coarse(1)*interp_kmult(1)), &
+               eph_dg%kpts_dense(1,i_dense),shift)
+             call wrap2_pmhalf((dble(jj-1)*interp_kmult(2)+i2-1)/(nkpt_coarse(2)*interp_kmult(2)), &
+               eph_dg%kpts_dense(2,i_dense),shift)
+             call wrap2_pmhalf((dble(kk-1)*interp_kmult(3)+i3-1)/(nkpt_coarse(3)*interp_kmult(3)), &
+               eph_dg%kpts_dense(3,i_dense),shift)
 
              !integer indexes mapping
              eph_dg%indexes_to_dense((ii-1)*interp_kmult(1)+i1,&
@@ -371,7 +374,7 @@ end function eph_double_grid_new
 
 subroutine eph_double_grid_free(self)
 
- type(eph_double_grid_t) :: self
+ type(eph_double_grid_t),intent(inout) :: self
 
  ABI_SFREE(self%weights_dense)
  ABI_SFREE(self%bz2ibz_dense)
@@ -413,11 +416,16 @@ integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
  type(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: opt
  real(dp),intent(in) :: kpt(3)
+
+!Local variables ------------------------
  real(dp) :: wrap_kpt(3), shift
-   
+
+! *************************************************************************
+
  call wrap2_pmhalf(kpt(1),wrap_kpt(1),shift)
  call wrap2_pmhalf(kpt(2),wrap_kpt(2),shift)
  call wrap2_pmhalf(kpt(3),wrap_kpt(3),shift)
+
  if (opt==1) then
    ikpt = self%indexes_to_coarse(&
              mod(nint((wrap_kpt(1)+2)*self%nkpt_coarse(1)),self%nkpt_coarse(1))+1,&
@@ -462,16 +470,20 @@ end function eph_double_grid_get_index
 
 subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timrev,mapping)
 
- type(eph_double_grid_t) :: self
+ type(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: nibz, nsym
- integer :: isym, ii, ik_ibz, ik_bz
  real(dp),intent(in) :: kpt_ibz(3,nibz)
  integer,intent(in) :: symmat(3,3,nsym)
  integer,intent(out):: bz2ibz(self%dense_nbz)
+ integer,optional,intent(in) :: has_timrev
+ integer,optional,intent(inout) :: mapping(self%dense_nbz,3)
+
+!Local variables ------------------------
+ integer :: isym, ii, ik_ibz, ik_bz
  real(dp) :: kpt(3), kpt_sym(3), wrap_kpt(3), shift
  integer :: itimrev, timrev, counter
- integer,optional :: has_timrev
- integer,optional :: mapping(self%dense_nbz,3)
+
+!************************************************************************
 
  timrev = 0
  if (present(has_timrev)) timrev=1
@@ -492,7 +504,7 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timre
        call wrap2_pmhalf(kpt_sym(2),wrap_kpt(2),shift)
        call wrap2_pmhalf(kpt_sym(3),wrap_kpt(3),shift)
        ik_bz = eph_double_grid_get_index(self,wrap_kpt,2)
-       
+
        ! check if applying this symmetry operation to kpt gives kpt_dense
        if (bz2ibz(ik_bz)==0) then
        if (((self%kpts_dense(1,ik_bz)-wrap_kpt(1))**2+&
@@ -515,7 +527,7 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timre
  do ik_bz=1,self%dense_nbz
    ABI_CHECK(bz2ibz(ik_bz).ne.0,'Mapping not found')
  end do
- 
+
  !call cwtime(cpu,wall,gflops,"stop")
  !write(msg,'(2(a,f8.2))') "little group of k mapping cpu:",cpu,", wall:",wall
  !call wrtout(std_out, msg, do_flush=.True.)
@@ -548,8 +560,9 @@ end subroutine eph_double_grid_bz2ibz
 subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
 
 !Arguments --------------------------------
- type(eph_double_grid_t) :: self
- real(dp) :: kk(3), kq(3), qpt(3)
+ type(eph_double_grid_t),intent(inout) :: self
+ real(dp),intent(in) :: kk(3), kq(3), qpt(3)
+
 !Variables --------------------------------
  integer :: jj
  integer :: ik_bz, ikq_bz, iq_bz
@@ -583,4 +596,3 @@ end subroutine eph_double_grid_get_mapping
 
 end module m_eph_double_grid
 !!***
-

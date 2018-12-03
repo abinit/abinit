@@ -2296,6 +2296,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtelf',tread,'INT')
  if(tread==1) dtset%prtelf=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prteliash',tread,'INT')
+ if(tread==1) dtset%prteliash=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
  if(tread==1) dtset%prtfc=intarr(1)
 
@@ -3218,14 +3221,23 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
     ABI_CHECK(dtset%sigma_bsum_range(2) >= dtset%sigma_bsum_range(1), "sigma_bsum_range(2) must be >= (1)")
  end if
 
+ ! band range for self-energy corrections.
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
+ if (tread == 1) dtset%sigma_erange = dprarr(1:2)
+
  ! IBZ k-points for electron self-energy given in terms of sigma_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'sigma_ngkpt', tread, 'INT')
 
  if (tread == 1) then
    ! sigma_ngkpt mode --> initialize shifts, provide default if not given in input
-   ! Consistency check: nkptgw must be zero
+   ! Consistency check: nkptgw must be zero, sigma_erange should not be given.
    ABI_CHECK(dtset%nkptgw == 0, "nkptgw and sigma_ngkpt are mutually exclusive.")
-   ABI_CHECK(dtset%gw_qprange /= 0, "gw_qprange must be specified when Sigma_ngkpt is used.")
+   if (dtset%gw_qprange == 0) then
+     MSG_ERROR("gw_qprange must be specified when sigma_ngkpt is used.")
+   end if
+   if (any(dtset%sigma_erange >= zero)) then
+     MSG_ERROR("sigma_eprange cannot be used with sigma_ngkpt.")
+   end if
 
    dtset%sigma_ngkpt = intarr(1:3)
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')

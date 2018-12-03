@@ -32,7 +32,7 @@ MODULE m_time
 #endif
 
  use m_xpapi,    only: xpapi_flops
- use m_fstrings, only: char_count
+ use m_fstrings, only: char_count, sjoin
 
  implicit none
 
@@ -48,6 +48,7 @@ MODULE m_time
  public :: abi_wtime     ! Returns wall clock time in seconds since some arbitrary start.
  public :: abi_cpu_time  ! Returns cpu time in seconds since some arbitrary start.
  public :: cwtime        ! Returns cpu, wall clock time and gflops
+ public :: cwtime_report ! Stop timers, write message, reinit counters.
 
  ! FIXME: Deprecated Should be replaced by cwtime
  public :: timein
@@ -186,14 +187,14 @@ pure function sec2str(time_s) result(str)
  minutes = MOD(time_s,3600._dp) / 60
  seconds = MOD(time_s,60._dp)
 
- if (days>0) then
+ if (days > 0) then
    write(str,'(i0,3(a,i0.2))')days,"-",hours,":",minutes,":",seconds
- else if (hours>0) then
+ else if (hours > 0) then
    write(str,'(i0.2,2(a,i0.2))')hours,":",minutes,":",seconds
- else if (minutes>0) then
+ else if (minutes > 0) then
    write(str,'(i0.2,a,i0.2)')minutes,":",seconds
  else
-   write(str,'(i0.2,a)')seconds," [s]"
+   write(str,'(f5.2,a)')time_s," [s]"
  end if
 
 end function sec2str
@@ -468,7 +469,7 @@ end function abi_wtime
 !!  start_or_stop=
 !!    "start" to start the timers
 !!    "stop" to stop the timers and return the final cpu_time and wall_time
-!!  comm: MPI communicator. If average value inside comm is wanted. Only for "stop"
+!!  [comm]: MPI communicator. If values averaged inside comm are wanted. Only for "stop"
 !!
 !! OUTPUT
 !!  cpu= cpu time in seconds
@@ -548,6 +549,62 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, comm)
  END SELECT
 
 end subroutine cwtime
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_time/cwtime_report
+!! NAME
+!!  cwtime_report
+!!
+!! FUNCTION
+!! Stop timers, write message, reinit counters.
+!!
+!! INPUT
+!!  [pre_str], [end_str]: String to print before and after the timing section
+!!  [comm]: MPI communicator. If values averaged inside comm is wanted. Only for "stop"
+!!
+!! SIDE EFFECTS
+!!  cpu= cpu time in seconds
+!!  wall= wall clock time in seconds
+!!  gflops = Gigaflops
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(inout) :: cpu,wall
+ real(dp),intent(out) :: gflops
+ integer,intent(in),optional :: comm
+ character(len=*),intent(in) :: tag
+ character(len=*),optional,intent(in) :: pre_str, end_str
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: avg_type
+
+! *************************************************************************
+
+ if (present(comm)) then
+   call cwtime(cpu, wall, gflops, "stop", comm=comm)
+   avg_type = "(MPI average)"
+ else
+   call cwtime(cpu, wall, gflops, "stop")
+   avg_type = ""
+ end if
+ if (present(pre_str)) call wrtout(std_out, pre_str)
+ call wrtout(std_out, sjoin(tag, "completed. cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall), avg_type), &
+     do_flush=.True.)
+ if (present(end_str)) call wrtout(std_out, end_str)
+ call cwtime(cpu, wall, gflops, "start")
+
+end subroutine cwtime_report
 !!***
 
 !!****f* m_time/timein

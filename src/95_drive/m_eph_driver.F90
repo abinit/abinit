@@ -49,7 +49,7 @@ module m_eph_driver
 #endif
 
  use m_io_tools,        only : file_exists
- use m_time,            only : cwtime
+ use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
@@ -159,8 +159,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !scalars
  integer,parameter :: master=0,natifc0=0,timrev2=2,selectz0=0,sppoldbl1=1,timrev1=1
  integer,parameter :: nsphere0=0,prtsrlr0=0
- integer :: ii
- integer :: comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
+ integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,brav1
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
@@ -228,6 +227,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (.False.) write(std_out,*)acell,codvsn,rprim,xred
 
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+#ifndef HAVE_MPI_IBCAST
+ do ii=1,20
+   MSG_WARNING("Your MPI library does not provide MPI_IBCAST. Calculations will be slow")
+ end do
+#endif
 
  ! Initialize filenames
  wfk0_path = dtfil%fnamewffk
@@ -413,9 +418,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')" eph%init: cpu: ",cpu,", wall: ",wall
- call wrtout(std_out, msg, do_flush=.True.)
+ call cwtime_report(" eph%init", cpu, wall, gflops)
 
  ! =======================================
  ! Output useful info on electronic bands
@@ -447,10 +450,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')" eph%ebands_postprocess: cpu:",cpu,", wall: ",wall
- call wrtout(std_out, msg, do_flush=.True.)
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime_report(" eph%ebands_postprocess:", cpu, wall, gflops)
 
  ! Read the DDB file.
  ABI_CALLOC(dummy_atifc, (dtset%natom))
@@ -544,10 +544,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ifc_printbxsf(ifc, cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, path, comm)
  end if
 
- call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')" eph%ifc: cpu:",cpu,", wall: ",wall
- call wrtout(std_out, msg, do_flush=.True.)
- call cwtime(cpu,wall,gflops,"start")
+ call cwtime_report(" eph%ifc:", cpu, wall, gflops)
 
  ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then

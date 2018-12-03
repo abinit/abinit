@@ -524,6 +524,9 @@ contains
  intarr(1,:)=dtsets(:)%prtelf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtelf','INT',0)
 
+ intarr(1,:)=dtsets(:)%prteliash
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prteliash','INT',0)
+
  intarr(1,:)=dtsets(:)%prtfc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfc','INT',0)
 
@@ -858,6 +861,10 @@ contains
  intarr(1,:)=dtsets(:)%sigma_bsum_range(1)
  intarr(2,:)=dtsets(:)%sigma_bsum_range(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'sigma_bsum_range','INT',0)
+
+ dprarr(1,:)=dtsets(:)%sigma_erange(1)
+ dprarr(2,:)=dtsets(:)%sigma_erange(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'sigma_erange','ENE',0)
 
  intarr(1,:)=dtsets(:)%sigma_ngkpt(1)
  intarr(2,:)=dtsets(:)%sigma_ngkpt(2)

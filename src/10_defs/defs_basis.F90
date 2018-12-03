@@ -166,8 +166,8 @@ module defs_basis
 !Real precision
  real(dp), parameter :: greatest_real = huge(one)
  real(dp), parameter :: smallest_real = -greatest_real
- !real(dp), parameter :: tol1= 0.1_dp
- !real(dp), parameter :: tol2= 0.01_dp
+ real(dp), parameter :: tol1= 0.1_dp
+ real(dp), parameter :: tol2= 0.01_dp
  real(dp), parameter :: tol3= 0.001_dp
  real(dp), parameter :: tol4= 0.0001_dp
  real(dp), parameter :: tol5= 0.00001_dp

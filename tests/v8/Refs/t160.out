@@ -180,6 +180,7 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        prteliash           1
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00
@@ -389,10 +390,16 @@ Q-mesh used for self-energy integration [ngqpt]: [2,2,2]
 Number of q-points in the IBZ: 3
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 3
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 20
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:
@@ -406,7 +413,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.735  -19.851   -0.116   -0.154   -0.037    0.751   -0.463    0.310    0.000    0.000
    2  -0.193   -0.096    0.097    0.147   -0.064    0.662   -0.305    0.452   19.542   19.755
@@ -425,7 +432,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.234  -19.361   -0.127   -0.220   -0.137    0.578   -0.525    0.305    0.000    0.000
    2  -2.697   -2.574    0.124    0.137   -0.012    0.901   -0.311    0.448   16.537   16.787
@@ -441,7 +448,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
  QP_gap - KS_gap:    0.071 (OTMS:    0.101)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -18.981  -18.864    0.118    0.178   -0.062    0.659   -0.128    0.307    0.000    0.000
    2  -3.149   -3.188   -0.039   -0.047   -0.023    0.829   -0.406    0.359   15.833   15.676
@@ -730,10 +737,16 @@ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
 Number of q-points in the IBZ: 8
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 3
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 2 up to my_bstop: 4
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:
@@ -747,7 +760,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.735  -19.742   -0.007   -0.007   -0.002    0.982   -0.346    0.339    0.000    0.000
    2  -0.193   -0.025    0.168    0.277   -0.098    0.608    0.277    0.000   19.542   19.717
@@ -766,7 +779,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.234  -19.239   -0.005   -0.005   -0.002    0.981   -0.353    0.347    0.000    0.000
    2  -2.697   -2.976   -0.279   -0.248   -0.199    1.125   -0.248    0.000   16.537   16.263
@@ -782,7 +795,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
  QP_gap - KS_gap:    1.851 (OTMS:   -0.144)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -18.981  -18.997   -0.015   -0.015   -0.002    0.980   -0.356    0.341    0.000    0.000
    2  -3.149   -3.270   -0.121   -0.144   -0.021    0.839   -0.144    0.000   15.833   15.727
@@ -963,10 +976,16 @@ Q-mesh used for self-energy integration [ngqpt]: [4,4,4]
 Number of q-points in the IBZ: 8
 asr: 1 dipdip: 1 symdynmat: 1
 No special treatment of Frohlich divergence in gkq for q --> 0
+Number of k-points for self-energy corrections: 3
 List of K-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   1    8
    2     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   1    8
    3     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    9
+ === MPI parallelism ===
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 9
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over (q-points, bands): 1
 ================================================================================
 Final results in eV.
 Notations:
@@ -980,7 +999,7 @@ Notations:
    TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
  
  
-K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1 -19.735    0.002    139.7    0.000
    2  -0.193    0.000 999999.0   19.542
@@ -997,7 +1016,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
 No more than 1 temperatures are written to the main output file.
 Please use SIGEPH.nc file and AbiPy to analyze the results.
 
-K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1 -19.234    1.427      0.2    0.000
    2  -2.697    0.062      5.3   16.537
@@ -1005,19 +1024,19 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=  0.0 [K]
    4  -0.415    0.248      1.3    0.000
    5  10.027    0.046      7.1   10.441
    6  15.827    0.207      1.6    5.800
-   7  17.971    0.512      0.6    2.144
-   8  17.971    0.512      0.6    0.000
+   7  17.971    0.513      0.6    2.144
+   8  17.971    0.513      0.6    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=  0.0 [K]
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1 -18.981    0.000 999999.0    0.000
-   2  -3.149    0.000   4155.0   15.833
+   2  -3.149    0.000   4155.1   15.833
    3  -1.171    0.120      2.7    1.978
    4  -1.171    0.120      2.7    0.000
-   5  13.987    0.006     59.4   15.158
+   5  13.987    0.006     59.2   15.158
    6  15.747    0.200      1.6    1.760
    7  16.382    0.103      3.2    0.635
    8  19.258    0.193      1.7    2.876
@@ -1264,6 +1283,7 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        prteliash           1
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00

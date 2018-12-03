@@ -499,6 +499,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
 
  dtout%sigma_bsum_range = dtin%sigma_bsum_range
+ dtout%sigma_erange = dtin%sigma_erange
  dtout%sigma_ngkpt = dtin%sigma_ngkpt
  dtout%sigma_nshiftk = dtin%sigma_nshiftk
  if (allocated(dtin%sigma_shiftk)) call alloc_copy(dtin%sigma_shiftk, dtout%sigma_shiftk)
@@ -796,6 +797,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtefmas           = dtin%prtefmas
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
+ dtout%prteliash          = dtin%prteliash
  dtout%prtfc              = dtin%prtfc
  dtout%prtfull1wf         = dtin%prtfull1wf
  dtout%prtfsurf           = dtin%prtfsurf
@@ -2442,7 +2444,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff ppmfrq ppmodel'
  list_vars=trim(list_vars)//' prepanl prepgkk papiopt'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prtelf'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
  list_vars=trim(list_vars)//' prt_model prt_names prtnabla prtnest prtphbands prtphdos prtphsurf prtposcar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
@@ -2463,7 +2465,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
- list_vars=trim(list_vars)//' sigma_bsum_range sigma_ngkpt sigma_nshiftk sigma_shiftk'
+ list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'
  list_vars=trim(list_vars)//' spin_calc_correlation_obs spin_calc_thermo_obs spin_calc_traj_obs'

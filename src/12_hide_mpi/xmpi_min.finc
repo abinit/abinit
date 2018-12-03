@@ -23,9 +23,6 @@
 
 subroutine xmpi_min_intv(xval,xmin,spaceComm,ier)
 
-
- implicit none
-
 !Arguments-------------------------
  integer ,intent(in) :: xval
  integer ,intent(out) :: xmin
@@ -79,9 +76,6 @@ end subroutine xmpi_min_intv
 !!
 !! SOURCE
 subroutine xmpi_min_dpv(xval,xmin,spaceComm,ier)
-
-
- implicit none
 
 !Arguments-------------------------
  real(dp),intent(in) :: xval

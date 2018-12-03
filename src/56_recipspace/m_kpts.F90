@@ -487,7 +487,7 @@ end function symkchk
 !!
 !! FUNCTION
 !! Given a list of nkpt1 initial k points kptns1 and a list of nkpt2
-!! final k points kptns2, associates each final k pt with a "closest"
+!! final k points kptns2, associates each final kpt with a "closest"
 !! initial k point (or symmetric thereof, also taking possible umklapp)
 !! as determined by a metric gmet, that commutes with the symmetry operations.
 !! The algorithm does not scale as nkpt1 times nkpt2, thanks
@@ -508,7 +508,7 @@ end function symkchk
 !!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
 !!                   value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
-!!  comm=MPI communicator
+!!  comm=MPI communicator.
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
 !!
 !! OUTPUT

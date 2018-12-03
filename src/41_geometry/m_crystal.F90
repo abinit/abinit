@@ -367,7 +367,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
    if (.not.remove_inv) then
-     ! * Just a copy
+     ! Just a copy
      Cryst%nsym= nsym
      ABI_MALLOC(Cryst%symrel,(3,3,nsym))
      ABI_MALLOC(Cryst%symrec,(3,3,nsym))
@@ -753,7 +753,7 @@ pure function isymmorphic(Cryst) result(ans)
 
 ! *************************************************************************
 
- ans = ALL (ABS(Cryst%tnons)<tol6)
+ ans = ALL(ABS(Cryst%tnons) < tol6)
 
 end function isymmorphic
 !!***
