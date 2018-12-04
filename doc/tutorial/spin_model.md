@@ -69,11 +69,11 @@ For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wan
 
 ### Basic: how to use MULTIBINIT to run spin dynamics
 
-Once we have the spin model xml file, we can run a spin dynamics calculation with MULTIBINIT. Example input files can be found at ~abinit/tests/tutoMULTIBINIT/Input/tmulti5_1.* .  There are three files: 
+Once we have the spin model xml file, we can run a spin dynamics calculation with MULTIBINIT. Example input files can be found at ~abinit/tests/tutoMULTIBINIT/Input/tmulti5_1.* . There are three files: 
 
 * "tmulti5_1.files" is the "files" file, which gives the names of the input and output files for  MULTIBINIT.
 * "tmulti5_1.in" is the main input file containing the parameters for the spin dynamics simulation.
-* "tmulti5_1.xml" is the file containing the Heisenberg model parameters <!-- TODO: what system is this?.--> .
+* "tmulti5_1.xml" is the file containing the Heisenberg model parameters for an artificial simple cubic structure with only first nearest neighbor exchange. 
 
 You can copy these three files into a directory (e.g. tutor_spindyn). 
 
@@ -140,7 +140,7 @@ Measurement run:
 
 Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment . If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_qpoint]] are aligned , this value is 1.0. It deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system.
 
-There are two stages, the warming up and measurement, in the whole spin dynamics process. The thermolization process the spins evove so that they get to the equilibrium state with temperature defined in the input. And during the measurement stage, the steps are sampled for the calculation of the observables. 
+There are two stages, the thermolization and measurement, in the whole spin dynamics process. The thermolization process the spins evolve so that they get to the equilibrium state with temperature defined in the input. And during the measurement stage, the steps are sampled for the calculation of the observables. 
 
 At the end of the run, there is a summary of the calculation:
 
@@ -252,15 +252,11 @@ Summary of various T run:
 
 They can also be found in the \*.varT file so it's easy to plot the observables as function of temperature. The averge magnetization of each sublattice are also in this file.
 
-If the input parameters are well tuned you will obtain the curves for the different quantities like the following.
-
-<!-- TODO: tune the parameter so the lines are smooth! -->
+If the input parameters are well tuned you will obtain the curves for the different quantities like the following. From the result we can see the Neel temperature is about 800 K (The experimental $T_N$ of LaFeO3 is about 740 K). 
 
 
 
 ![tmulti5_2](spin_model_assets/tmulti5_2.png)
-
-<!--NH: What is the experimental value for T_c for this material?-->
 
 
 
@@ -329,7 +325,7 @@ It shows that the the spins are anti-paralytically aligned along the easy axis (
 ##### To add
 
 - spectral function
-- comparison with experiments? 
+
 
 
 

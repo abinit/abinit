@@ -399,7 +399,7 @@ contains
           if(mod(counter, hist%spin_nctime)==0) then
              call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
                   hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
-             write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t, &
+             write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
                   & ob%Mst_norm_total/ob%Snorm_total, &
                   & hist%etot(hist%ihist_prev)/ob%nscell
              ! total : 13+4+...= 64 
