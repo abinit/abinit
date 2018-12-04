@@ -119,23 +119,19 @@ After the calculation is done, you will find an output file named tmulti5_1.out 
 In the .out file, you can find the lines below, which give a overview of the evolution of the system with time:
 
 ```
-
-  Beginning spin dynamic steps :
-=================================================================
-    Iteration          time(s)       Avg_Mst/Ms      Energy (Ha)
------------------------------------------------------------------
+======================================================================
+    Iteration          time(s)         Avg_Mst/Ms      ETOT(Ha/uc)
+----------------------------------------------------------------------
 Thermolization run:
-          100      9.90000E-15      6.50243E-01     -1.80141E+01
-          200      1.99000E-14      5.56735E-01     -1.54510E+01
-          300      2.99000E-14      5.27193E-01     -1.51304E+01
-          400      3.99000E-14      5.14810E-01     -1.52335E+01
-          500      4.99000E-14      4.85208E-01     -1.45169E+01
-          ......
+-           100      9.90000E-15      6.50748E-01     -2.20454E-03
+-           200      1.99000E-14      5.57558E-01     -1.89219E-03
+-           300      2.99000E-14      5.28279E-01     -1.85341E-03
+  .....
 Measurement run:
-          100      9.90000E-15      4.58301E-01     -1.45716E+01
-          200      1.99000E-14      4.29473E-01     -1.42208E+01
-          300      2.99000E-14      4.10692E-01     -1.36156E+01
-          .....
+-           100      9.90000E-15      4.58081E-01     -1.79152E-03
+-           200      1.99000E-14      4.30639E-01     -1.74361E-03
+-           300      2.99000E-14      4.07684E-01     -1.66528E-03
+  .....
 ```
 
 Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment . If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_qpoint]] are aligned , this value is 1.0. It deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system.
@@ -147,10 +143,11 @@ At the end of the run, there is a summary of the calculation:
 <!--TODO: add more to the summary. What is useful? -->
 
 ```
-Summary of spin dynamics:
-  At the end of the run, the average spin at each sublattice is
-    Sublattice       <M_i>(x)  <M_i>(y)  <M_i>(z)  ||<M_i>||
-       0001          -0.33366   0.12058   0.29499   0.46140    
+Summary of spin dynamics
+   At the end of the run, the average spin at each sublattice is
+      Sublattice       <M_i>(x)  <M_i>(y)  <M_i>(z)  ||<M_i>||
+-        0001          -0.31575   0.08664   0.24544   0.40921
+  
 ```
 
 For structures with more than one magnetic site in the unit cell (sublattices), a separate line will be printed for each sublattice. This allows us to see how the spins in the different sublattices are aligned to each other. 
@@ -159,14 +156,14 @@ The following observables are printed, which are:
 
 ```
 # Temperature              Cv             chi        BinderU4             Mst
-    600.00000     4.65660E-19     3.63349E-30     0.66410E+00     4.22644E-01
+    600.00000     8.26236E+03     6.40552E-02     0.66303E+00     4.19057E-01
 ```
 
 * Cv: volume specific heat, which is
 
   $C_v=(<E^2>-<E>^2)/(k_B^2 T^2)$ . 
 
-  The $<E>$ means average of energy of the unitcell over the observation time. At zero temperature $C_v=0$. 
+  The $<E>$ means average of energy of the unitcell over the observation time. At zero temperature $C_v=0$.  $C_v$ is unitless in atomic unit.
 
 * chi ($\chi$): the isothermal suceptibility, which is:
 
@@ -241,16 +238,16 @@ There are several ways to find the critical temperature. The most natural way is
 These quantities can be found at the end of the various T calculation in the output file:
 
 ```
-Summary of various T run:
+ Summary of various T run:
 # Temperature              Cv             chi        BinderU4             Mst
-      0.00000     0.00000E+00     9.43046E-58     0.66667E+00     1.00000E+00
-    100.00000     1.73504E-18     8.76470E-26     0.66113E+00     9.35103E-01
-    200.00000     4.87449E-20     1.97406E-28     0.66663E+00     9.06288E-01
-    300.00000     5.65182E-20     3.26667E-28     0.66655E+00     8.53895E-01
+      0.00000     0.00000E+00     1.46625E-13     0.66667E+00     1.00000E+00
+    100.00000     8.52440E+02     1.01185E+00     0.66666E+00     9.57752E-01
+    200.00000     7.65946E+02     1.49460E+00     0.66664E+00     9.12555E-01
+    300.00000     9.90440E+02     2.63298E+00     0.66660E+00     8.65566E-01
 ....
 ```
 
-They can also be found in the \*.varT file so it's easy to plot the observables as function of temperature. The averge magnetization of each sublattice are also in this file.
+They can also be found in the \*.varT file so it's easy to plot the observables as function of temperature. The averge magnetization of each sub-lattice are also in this file.
 
 If the input parameters are well tuned you will obtain the curves for the different quantities like the following. From the result we can see the Neel temperature is about 800 K (The experimental $T_N$ of LaFeO3 is about 740 K). 
 
@@ -301,8 +298,8 @@ It shows that the the spins are anti-paralytically aligned along the easy axis (
 ```
     At the end of the run, the average spin at each sublattice is
       Sublattice       <M_i>(x)  <M_i>(y)  <M_i>(z)  ||<M_i>||
--        0001           0.98228   0.18740  -0.00000   1.00000
--        0002          -0.98227   0.18746  -0.00000   1.00000
+-        0001          -0.98217  -0.18802  -0.00000   1.00000
+-        0002           0.98207  -0.18851  -0.00000   1.00000
 ```
 
 
