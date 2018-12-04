@@ -28,7 +28,7 @@
 #include "abi_common.h"
 
 module m_atomdata
-    
+
  use defs_basis
  use m_errors
  use m_abicore
@@ -39,7 +39,7 @@ module m_atomdata
 
 ! Utilities
  public :: symbol2znucl      ! Symbol --> znucl
- public :: znucl2symbol      ! znucl --> symbol 
+ public :: znucl2symbol      ! znucl --> symbol
  public :: atom_length       ! Return atomic decay length for one given type of atom.
  public :: atom_gauss        ! Approximate the atomic density with a gaussian (used to initialize densities)
 !!***
@@ -49,15 +49,15 @@ module m_atomdata
 !!****t* m_atomdata/atomdata_t
 !! NAME
 !! atomdata_t
-!! 
+!!
 !! FUNCTION
 !!  Record with the atomic data (symbol, covalent radius, atomic mass) for a given atomic specie
-!! 
+!!
 !! SOURCE
 
  type,public :: atomdata_t
    real(dp) :: znucl          ! Atomic number (real to treat alchemy)
-   real(dp) :: amu            ! Atomic mass 
+   real(dp) :: amu            ! Atomic mass
    real(dp) :: rcov           ! Covalent radius
    character(len=2) :: symbol ! Atomic symbol
  end type atomdata_t
@@ -69,7 +69,7 @@ module m_atomdata
 
 ! *************************************************************************
 
-contains 
+contains
 
 !!****f* ABINIT/atomdata_from_znucl
 !! NAME
@@ -101,15 +101,6 @@ contains
 !! SOURCE
 
 subroutine atomdata_from_znucl(atom,znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atomdata_from_znucl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -349,7 +340,7 @@ subroutine atomdata_from_znucl(atom,znucl)
 
  end select
 
- atom%znucl = znucl 
+ atom%znucl = znucl
  atom%amu = amu
  atom%rcov = rcov
  atom%symbol = symbol
@@ -374,16 +365,7 @@ end subroutine atomdata_from_znucl
 !!
 !! SOURCE
 
-subroutine atomdata_from_symbol(atom,symbol) 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atomdata_from_symbol'
-!End of the abilint section
-
- implicit none
+subroutine atomdata_from_symbol(atom,symbol)
 
 !Arguments ------------------------------------
 !scalars
@@ -417,196 +399,196 @@ subroutine atomdata_from_symbol(atom,symbol)
      amu=     15.9994d0   ; rcov=0.73d0/Bohr_Ang ; znucl=8
    case(' F', 'F ')
      amu=     18.9984032d0; rcov=0.72d0/Bohr_Ang ; znucl=9
-     
+
    case('Ne')
      amu=     20.1797d0   ; rcov=0.71d0/Bohr_Ang ; znucl=10
-   case('Na')                                             
+   case('Na')
      amu=    22.989768d0 ; rcov=1.54d0/Bohr_Ang ; znucl= 11
-   case('Mg')                                             
+   case('Mg')
      amu=     24.3050d0   ; rcov=1.36d0/Bohr_Ang ; znucl=12
-   case('Al')                                             
+   case('Al')
      amu=     26.981539d0 ; rcov=1.18d0/Bohr_Ang ; znucl=13
-   case('Si')                                             
+   case('Si')
      amu=     28.0855d0   ; rcov=1.11d0/Bohr_Ang ; znucl=14
-   case(' P', 'P ')                                             
+   case(' P', 'P ')
      amu=     30.973762d0 ; rcov=1.06d0/Bohr_Ang ; znucl=15
-   case(' S', 'S ')                                             
+   case(' S', 'S ')
      amu=     32.066d0    ; rcov=1.02d0/Bohr_Ang ; znucl=16
-   case('Cl')                                             
+   case('Cl')
      amu=     35.4527d0   ; rcov=0.99d0/Bohr_Ang ; znucl=17
-   case('Ar')                                             
+   case('Ar')
      amu=     39.948d0    ; rcov=0.98d0/Bohr_Ang ; znucl=18
-   case(' K', 'K ')                                             
+   case(' K', 'K ')
      amu=     39.0983d0   ; rcov=2.03d0/Bohr_Ang ; znucl=19
-     
+
    case('Ca')
      amu=     40.078d0    ; rcov=1.74d0/Bohr_Ang ; znucl=20
-   case('Sc')                                             
+   case('Sc')
      amu=     44.955910d0 ; rcov=1.44d0/Bohr_Ang ; znucl=21
-   case('Ti')                                             
+   case('Ti')
      amu=     47.88d0     ; rcov=1.32d0/Bohr_Ang ; znucl=22
-   case(' V', 'V ')                                             
+   case(' V', 'V ')
      amu=     50.9415d0   ; rcov=1.22d0/Bohr_Ang ; znucl=23
-   case('Cr')                                             
+   case('Cr')
      amu=     51.9961d0   ; rcov=1.18d0/Bohr_Ang ; znucl=24
-   case('Mn')                                             
+   case('Mn')
      amu=     54.93805d0  ; rcov=1.17d0/Bohr_Ang ; znucl=25
-   case('Fe')                                             
+   case('Fe')
      amu=     55.847d0    ; rcov=1.17d0/Bohr_Ang ; znucl=26
-   case('Co')                                             
+   case('Co')
      amu=     58.93320d0  ; rcov=1.16d0/Bohr_Ang ; znucl=27
-   case('Ni')                                             
+   case('Ni')
      amu=     58.69d0     ; rcov=1.15d0/Bohr_Ang ; znucl=28
-   case('Cu')                                             
+   case('Cu')
      amu=     63.546d0    ; rcov=1.17d0/Bohr_Ang ; znucl=29
-     
+
    case('Zn')
      amu=     65.39d0     ; rcov=1.25d0/Bohr_Ang ; znucl=30
-   case('Ga')                                             
+   case('Ga')
      amu=     69.723d0    ; rcov=1.26d0/Bohr_Ang ; znucl=31
-   case('Ge')                                             
+   case('Ge')
      amu=     72.61d0     ; rcov=1.22d0/Bohr_Ang ; znucl=32
-   case('As')                                             
+   case('As')
      amu=     74.92159d0  ; rcov=1.20d0/Bohr_Ang ; znucl=33
-   case('Se')                                             
+   case('Se')
      amu=     78.96d0     ; rcov=1.16d0/Bohr_Ang ; znucl=34
-   case('Br')                                             
+   case('Br')
      amu=     79.904d0    ; rcov=1.14d0/Bohr_Ang ; znucl=35
-   case('Kr')                                             
+   case('Kr')
      amu=     83.80d0     ; rcov=1.12d0/Bohr_Ang ; znucl=36
-   case('Rb')                                             
+   case('Rb')
      amu=     85.4678d0   ; rcov=2.16d0/Bohr_Ang ; znucl=37
-   case('Sr')                                             
+   case('Sr')
      amu=     87.62d0     ; rcov=1.91d0/Bohr_Ang ; znucl=38
-   case(' Y', 'Y ')                                             
+   case(' Y', 'Y ')
      amu=     88.90585d0  ; rcov=1.62d0/Bohr_Ang ; znucl=39
-     
+
    case('Zr')
      amu=     91.224d0    ; rcov=1.45d0/Bohr_Ang ; znucl=40
-   case('Nb')                                             
+   case('Nb')
      amu=     92.90638d0  ; rcov=1.34d0/Bohr_Ang ; znucl=41
-   case('Mo')                                             
+   case('Mo')
      amu=     95.94d0     ; rcov=1.30d0/Bohr_Ang ; znucl=42
-   case('Tc')                                             
+   case('Tc')
      amu=     98.9062d0   ; rcov=1.27d0/Bohr_Ang ; znucl=43
-   case('Ru')                                             
+   case('Ru')
      amu=     101.07d0    ; rcov=1.25d0/Bohr_Ang ; znucl=44
-   case('Rh')                                             
+   case('Rh')
      amu=     102.9055d0  ; rcov=1.25d0/Bohr_Ang ; znucl=45
-   case('Pd')                                             
+   case('Pd')
      amu=     106.42d0    ; rcov=1.28d0/Bohr_Ang ; znucl=46
-   case('Ag')                                             
+   case('Ag')
      amu=     107.8682d0  ; rcov=1.34d0/Bohr_Ang ; znucl=47
-   case('Cd')                                             
+   case('Cd')
      amu=     112.411d0   ; rcov=1.48d0/Bohr_Ang ; znucl=48
-   case('In')                                             
+   case('In')
      amu=     114.82d0    ; rcov=1.44d0/Bohr_Ang ; znucl=49
-     
+
    case('Sn')
      amu=     118.710d0   ; rcov=1.41d0/Bohr_Ang ; znucl=50
-   case('Sb')                                             
+   case('Sb')
      amu=     121.753d0   ; rcov=1.40d0/Bohr_Ang ; znucl=51
-   case('Te')                                             
+   case('Te')
      amu=     127.60d0    ; rcov=1.36d0/Bohr_Ang ; znucl=52
-   case(' I', 'I ')                                             
+   case(' I', 'I ')
      amu=     126.90447d0 ; rcov=1.33d0/Bohr_Ang ; znucl=53
-   case('Xe')                                             
+   case('Xe')
      amu=     131.29d0    ; rcov=1.31d0/Bohr_Ang ; znucl=54
-   case('Cs')                                             
+   case('Cs')
      amu=     132.90543d0 ; rcov=2.35d0/Bohr_Ang ; znucl=55
-   case('Ba')                                             
+   case('Ba')
      amu=     137.327d0   ; rcov=1.98d0/Bohr_Ang ; znucl=56
-   case('La')                                             
+   case('La')
      amu=     138.9055d0  ; rcov=1.69d0/Bohr_Ang ; znucl=57
-   case('Ce')                                             
+   case('Ce')
      amu=     140.115d0   ; rcov=1.65d0/Bohr_Ang ; znucl=58
-   case('Pr')                                             
+   case('Pr')
      amu=     140.90765d0 ; rcov=1.65d0/Bohr_Ang ; znucl=59
-     
+
    case('Nd')
      amu=     144.24d0    ; rcov=1.64d0/Bohr_Ang ; znucl=60
-   case('Pm')                                             
+   case('Pm')
      amu=     147.91d0    ; rcov=1.64d0/Bohr_Ang ; znucl=61
-   case('Sm')                                             
+   case('Sm')
      amu=     150.36d0    ; rcov=1.62d0/Bohr_Ang ; znucl=62
-   case('Eu')                                             
+   case('Eu')
      amu=     151.965d0   ; rcov=1.85d0/Bohr_Ang ; znucl=63
-   case('Gd')                                             
+   case('Gd')
      amu=     157.25d0    ; rcov=1.61d0/Bohr_Ang ; znucl=64
-   case('Tb')                                             
+   case('Tb')
      amu=     158.92534d0 ; rcov=1.59d0/Bohr_Ang ; znucl=65
-   case('Dy')                                             
+   case('Dy')
      amu=     162.50d0    ; rcov=1.59d0/Bohr_Ang ; znucl=66
-   case('Ho')                                             
+   case('Ho')
      amu=     164.93032d0 ; rcov=1.57d0/Bohr_Ang ; znucl=67
-   case('Er')                                             
+   case('Er')
      amu=     167.26d0    ; rcov=1.57d0/Bohr_Ang ; znucl=68
-   case('Tm')                                             
+   case('Tm')
      amu=     168.93421d0 ; rcov=1.56d0/Bohr_Ang ; znucl=69
-     
+
    case('Yb')
      amu=     173.04d0    ; rcov=1.70d0/Bohr_Ang ; znucl=70
-   case('Lu')                                             
+   case('Lu')
      amu=     174.967d0   ; rcov=1.56d0/Bohr_Ang ; znucl=71
-   case('Hf')                                             
+   case('Hf')
      amu=     178.49d0    ; rcov=1.44d0/Bohr_Ang ; znucl=72
-   case('Ta')                                             
+   case('Ta')
      amu=     180.9479d0  ; rcov=1.34d0/Bohr_Ang ; znucl=73
-   case(' W', 'W ')                                             
+   case(' W', 'W ')
      amu=     183.85d0    ; rcov=1.30d0/Bohr_Ang ; znucl=74
-   case('Re')                                             
+   case('Re')
      amu=     186.207d0   ; rcov=1.28d0/Bohr_Ang ; znucl=75
-   case('Os')                                             
+   case('Os')
      amu=     190.2d0     ; rcov=1.26d0/Bohr_Ang ; znucl=76
-   case('Ir')                                             
+   case('Ir')
      amu=     192.22d0    ; rcov=1.27d0/Bohr_Ang ; znucl=77
-   case('Pt')                                             
+   case('Pt')
      amu=     195.08d0    ; rcov=1.30d0/Bohr_Ang ; znucl=78
-   case('Au')                                             
+   case('Au')
      amu=     196.96654d0 ; rcov=1.34d0/Bohr_Ang ; znucl=79
-     
+
    case('Hg')
      amu=     200.59d0    ; rcov=1.49d0/Bohr_Ang ; znucl=80
-   case('Tl')                                             
+   case('Tl')
      amu=     204.3833d0  ; rcov=1.48d0/Bohr_Ang ; znucl=81
-   case('Pb')                                             
+   case('Pb')
      amu=     207.2d0     ; rcov=1.47d0/Bohr_Ang ; znucl=82
-   case('Bi')                                             
+   case('Bi')
      amu=     208.98037d0 ; rcov=1.46d0/Bohr_Ang ; znucl=83
-   case('Po')                                             
+   case('Po')
      amu=     209.0d0     ; rcov=1.46d0/Bohr_Ang ; znucl=84
-   case('At')                                             
+   case('At')
      amu=     210.0d0     ; rcov=1.45d0/Bohr_Ang ; znucl=85
-   case('Rn')                                             
+   case('Rn')
      amu=     222.0d0     ; rcov=1.45d0/Bohr_Ang ; znucl=86
-   case('Fr')                                             
+   case('Fr')
      amu=     223.0d0     ; rcov=2.50d0/Bohr_Ang ; znucl=87
-   case('Ra')                                             
+   case('Ra')
      amu=     226.0254d0  ; rcov=2.10d0/Bohr_Ang ; znucl=88
-   case('Ac')                                             
+   case('Ac')
      amu=     230.0d0     ; rcov=1.85d0/Bohr_Ang ; znucl=89
-     
+
    case('Th')
      amu=     232.0381d0  ; rcov=1.65d0/Bohr_Ang ; znucl=90
-   case('Pa')                                             
+   case('Pa')
      amu=     231.0359d0  ; rcov=1.50d0/Bohr_Ang ; znucl=91
-   case(' U', 'U ')                                             
+   case(' U', 'U ')
      amu=     238.0289d0  ; rcov=1.42d0/Bohr_Ang ; znucl=92
-   case('Np')                                             
+   case('Np')
      amu=     237.0482d0  ; rcov=1.42d0/Bohr_Ang ; znucl=93
-   case('Pu')                                             
+   case('Pu')
      amu=     242.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=94
-   case('Am')                                             
+   case('Am')
      amu=     243.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=95
-   case('Cm')                                             
+   case('Cm')
      amu=     247.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=96
-   case('Bk')                                             
+   case('Bk')
      amu=     247.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=97
-   case('Cf')                                             
+   case('Cf')
      amu=     249.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=98
-   case('Es')                                             
+   case('Es')
      amu=     254.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=89
-     
+
    case('Fm')
      amu=     253.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=100
    case('Md')
@@ -621,7 +603,7 @@ subroutine atomdata_from_symbol(atom,symbol)
      MSG_ERROR("Unknown symbol name: "//TRIM(symbol))
  end select
 
- atom%znucl = znucl 
+ atom%znucl = znucl
  atom%amu = amu
  atom%rcov = rcov
  atom%symbol = symbol
@@ -649,15 +631,6 @@ end subroutine atomdata_from_symbol
 !! SOURCE
 
 function znucl2symbol(znucl) result(symbol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'znucl2symbol'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -692,15 +665,6 @@ end function znucl2symbol
 !! SOURCE
 
 function symbol2znucl(symbol) result(znucl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'symbol2znucl'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -744,15 +708,6 @@ end function symbol2znucl
 !! SOURCE
 
 function atom_length(densty,zion,znucl) result(length)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atom_length'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -860,7 +815,7 @@ end function atom_length
 !! atom_gauss
 !!
 !! FUNCTION
-!! Approximate the atomic density with a gaussian. Used to approximate densities with 
+!! Approximate the atomic density with a gaussian. Used to approximate densities with
 !! atomic-like quantities if the pseudopotential does not provide the valence charge density.
 !!
 !! INPUTS
@@ -881,15 +836,6 @@ end function atom_length
 !! SOURCE
 
 subroutine atom_gauss(ntypat, densty, ziontypat, znucltypat, gauss)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atom_gauss'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

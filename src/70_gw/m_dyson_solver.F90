@@ -114,15 +114,6 @@ CONTAINS  !====================================================================
 
 subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp_ene,Sr,prtvol,Dtfil,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'solve_dyson'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikcalc,nomega_sigc,prtvol,minbnd,maxbnd,comm
@@ -529,15 +520,6 @@ end subroutine solve_dyson
 !! SOURCE
 
 subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,prefil)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'print_sigma_melems'
-!End of the abilint section
-
- implicit none
 
 ! Arguments ------------------------------------
  !scalars

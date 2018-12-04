@@ -552,13 +552,6 @@ CONTAINS  !=====================================================================
 
 subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'blas_cholesky_ortho_spc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -628,15 +621,6 @@ end subroutine blas_cholesky_ortho_spc
 
 subroutine blas_cholesky_ortho_dpc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'blas_cholesky_ortho_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: vec_size,nvec
  logical,optional,intent(in) :: use_gemm
@@ -698,15 +682,6 @@ end subroutine blas_cholesky_ortho_dpc
 
 subroutine sqmat_itranspose_sp(n,mat,alpha)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_itranspose_sp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -762,15 +737,6 @@ end subroutine sqmat_itranspose_sp
 !! SOURCE
 
 subroutine sqmat_itranspose_dp(n,mat,alpha)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_itranspose_dp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -828,15 +794,6 @@ end subroutine sqmat_itranspose_dp
 
 subroutine sqmat_itranspose_spc(n,mat,alpha)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_itranspose_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -892,15 +849,6 @@ end subroutine sqmat_itranspose_spc
 !! SOURCE
 
 subroutine sqmat_itranspose_dpc(n,mat,alpha)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_itranspose_dpc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -958,15 +906,6 @@ end subroutine sqmat_itranspose_dpc
 !! SOURCE
 
 subroutine sqmat_otranspose_sp(n,imat,omat,alpha)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_otranspose_sp'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1026,15 +965,6 @@ end subroutine sqmat_otranspose_sp
 
 subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_otranspose_dp'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1092,15 +1022,6 @@ end subroutine sqmat_otranspose_dp
 !! SOURCE
 
 subroutine sqmat_otranspose_spc(n,imat,omat,alpha)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_otranspose_spc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1160,15 +1081,6 @@ end subroutine sqmat_otranspose_spc
 
 subroutine sqmat_otranspose_dpc(n,imat,omat,alpha)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_otranspose_dpc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1226,15 +1138,6 @@ end subroutine sqmat_otranspose_dpc
 
 subroutine sqmat_iconjgtrans_spc(n,mat,alpha)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_iconjgtrans_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1290,15 +1193,6 @@ end subroutine sqmat_iconjgtrans_spc
 !! SOURCE
 
 subroutine sqmat_iconjgtrans_dpc(n,mat,alpha)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_iconjgtrans_dpc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1357,15 +1251,6 @@ end subroutine sqmat_iconjgtrans_dpc
 
 subroutine sqmat_oconjgtrans_spc(n,imat,omat,alpha)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_oconjgtrans_spc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -1423,15 +1308,6 @@ end subroutine sqmat_oconjgtrans_spc
 !! SOURCE
 
 subroutine sqmat_oconjgtrans_dpc(n,imat,omat,alpha)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sqmat_oconjgtrans_dpc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

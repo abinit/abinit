@@ -39,12 +39,17 @@ module m_occ
 
  implicit none
 
+ real(dp),parameter :: huge_tsmearinv = 1e50_dp
+ real(dp),parameter :: maxFDarg=500.0_dp
+
  private
 !!***
 
  public :: getnel        ! Compute total number of electrons from efermi or DOS
  public :: newocc        ! Compute new occupation numbers at each k point,
  public :: occeig        ! (occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$,
+ public :: occ_fd        ! Fermi-Dirac statistic 1 / [(exp((e - mu)/ KT) + 1]
+ public :: occ_be        ! Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
  public :: dos_hdr_write
  public :: pareigocc
 
@@ -56,17 +61,17 @@ contains
 !! getnel
 !!
 !! FUNCTION
-!! Option=1 :
-!! Get the total number of electrons nelect, given a trial fermienergy fermie.
-!! For this, compute new occupation numbers at each k point,
-!! from eigenenergies eigen, according to the
-!! smearing scheme defined by occopt (and smearing width tsmear or tphysel).
+!! Option=1:
+!!   Get the total number of electrons nelect, given a trial fermienergy fermie.
+!!   For this, compute new occupation numbers at each k point,
+!!   from eigenenergies eigen, according to the
+!!   smearing scheme defined by occopt (and smearing width tsmear or tphysel).
 !!
-!! Option=2 :
-!! Compute and output the smeared density of states, and the integrated density
-!! of states, then write these data
+!! Option=2:
+!!   Compute and output the smeared density of states, and the integrated density
+!!   of states, then write these data
 !!
-!! Warning : this routine assumes checks have been done in the calling
+!! Warning: this routine assumes checks have been done in the calling
 !! routine, and that the values of the arguments are sensible
 !!
 !! NOTE
@@ -115,15 +120,6 @@ contains
 
 subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 &  nelect,nkpt,nsppol,occ,occopt,option,tphysel,tsmear,unitdos,wtk)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getnel'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -176,8 +172,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
 !Initialize the occupation function and generalized entropy function,
 !at the beginning, or if occopt changed
 
-!Just get the number nptsdiv2 and allocate entfun, occfun,
-!smdfun and xgrid accordingly
+!Just get the number nptsdiv2 and allocate entfun, occfun, smdfun and xgrid accordingly
  nptsdiv2 = nptsdiv2_def
 
 ! call init_occ_ent(entfun, limit, &
@@ -190,8 +185,7 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  ABI_ALLOCATE(xgrid,(-nptsdiv2:nptsdiv2))
 
 !Call to init_occ_ent
- call init_occ_ent(entfun, limit, &
-& nptsdiv2, occfun, occopt, option, smdfun, tphysel, &
+ call init_occ_ent(entfun, limit, nptsdiv2, occfun, occopt, option, smdfun, tphysel, &
 & tsmear, tsmearinv, xgrid)
 
 !The initialisation of occfun and entfun is done
@@ -206,10 +200,15 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  ABI_ALLOCATE(ent,(bantot))
 
  if(option==1)then
-   !normal evaluation of occupations and entropy
+   ! normal evaluation of occupations and entropy
 
 !  Compute the arguments of the occupation and entropy functions
-   arg(:)=(fermie-eigen(1:bantot))*tsmearinv
+!  HM 20/08/2018 Treat the T --> 0 limit
+   if (tsmear==0) then
+     arg(:)=sign(huge_tsmearinv,fermie-eigen(1:bantot))
+   else
+     arg(:)=(fermie-eigen(1:bantot))*tsmearinv
+   endif
 
 !  Compute the values of the occupation function, and the entropy function
 !  Note : splfit also takes care of the points outside of the interval,
@@ -402,15 +401,6 @@ end subroutine getnel
 subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &  nelect,nkpt,nspinor,nsppol,occ,occopt,prtvol,stmbias,tphysel,tsmear,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'newocc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,nkpt,nspinor,nsppol,occopt,prtvol
@@ -423,7 +413,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol) !vz_i
 
 !Local variables-------------------------------
- integer,parameter :: niter_max=120,nkpt_max=50,fake_unit=-666,option1=1
+ integer,parameter :: niter_max=120,nkpt_max=2,fake_unit=-666,option1=1
  integer :: cnt,cnt2,cnt3,ib,ii,ik,ikpt,is,isppol,nkpt_eff
  integer :: sign
  integer,allocatable :: nbandt(:)
@@ -519,7 +509,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !If the target nelect is not between nelectlo and nelecthi, exit
  if(nelect<nelectlo .or. nelect>nelecthi)then
    write(message, '(a,a,a,a,d16.8,a,a,d16.8,a,d16.8,a,a,d16.8,a,d16.8)') ch10,&
-&   ' newocc : ',ch10,&
+&   ' newocc: ',ch10,&
 &   '  The calling routine gives nelect=',nelect,ch10,&
 &   '  The lowest bound is ',fermilo,', with nelect=',nelectlo,ch10,&
 &   '  The highest bound is ',fermihi,', with nelect=',nelecthi
@@ -543,7 +533,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 !    Produce nelectmid from fermimid
      call getnel(doccde,dosdeltae,eigen,entropy,fermimid,maxocc,mband,nband,&
 &     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
-!    write(std_out,'(a,es24.16,a,es24.16)' )' newocc : from fermi=',fermimid,', getnel gives nelect=',nelectmid
+!    write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
      if(nelectmid>nelect*(one-tol14))then
        fermihi=fermimid
        nelecthi=nelectmid
@@ -552,8 +542,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
        fermilo=fermimid
        nelectlo=nelectmid
      end if
-     if( abs(nelecthi-nelectlo) <= nelect*two*tol14 .or. &
-&     abs(fermihi-fermilo) <= tol14*abs(fermihi+fermilo) ) exit
+     if( abs(nelecthi-nelectlo) <= nelect*two*tol14 .or. abs(fermihi-fermilo) <= tol14*abs(fermihi+fermilo) ) exit
      if(ii==niter_max)then
        write(message,'(a,i0,3a,es22.14,a,es22.14,a)')&
 &       'It was not possible to find Fermi energy in ',niter_max,' bissections.',ch10,&
@@ -576,14 +565,12 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
 &     nelect_biased,nkpt,nsppol,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      occ(:)=occ(:)-occt(:)
      nelect_biased=abs(nelectmid-nelect_biased)
-!    Here, arrange to have globally positive occupation numbers,
-!    irrespective of the stmbias sign
+!    Here, arrange to have globally positive occupation numbers, irrespective of the stmbias sign
      if(-stmbias>tol10)occ(:)=-occ(:)
      ABI_DEALLOCATE(occt)
 
-     write(message,'(a,f14.6)')' newocc : the number of electrons in the STM range is nelect_biased=',nelect_biased
+     write(message,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
      call wrtout(std_out,message,'COLL')
-
    end if
 
  else ! Calculations with a specified moment
@@ -604,10 +591,8 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      fermilo = fermilot(is)
      nelecthi = nelecthit(is)
      nelectlo = nelectlot(is)
-!    DEBUG
 !    write(std_out,'(a,i1,3(f8.4,1x))') "Spin, N(spin):", is, nelect, fermihi, fermilo
 !    write(std_out,'(a,2(f8.4,1x))') "Hi, lo:", nelecthi, nelectlo
-!    ENDDEBUG
 
      do ii=1,niter_max
        fermimid_tmp=(fermihi+fermilo)/2.0_dp
@@ -638,11 +623,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
            doccde(cnt+cnt2) = doccdet(cnt)
          end do
        end do
-
-!      DEBUG
-!      write(std_out,'(a,es24.16,a,es24.16)' )&
-!      &    ' newocc : from fermi=',fermimid,', getnel gives nelect=',nelectmid
-!      ENDDEBUG
+!      write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
 
        if(nelectmid>=nelect_tmp)then
          fermihi=fermimid_tmp
@@ -665,7 +646,7 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
      entropy = entropy + entropyt(is)
      fermie=fermimid
      write(message, '(a,i2,a,f14.6,a,f14.6,a,a,i4)' ) &
-&     ' newocc : new Fermi energy for spin ', is, ' is ',fermie,' , with nelect=',nelectmid,ch10,&
+&     ' newocc: new Fermi energy for spin ', is, ' is ',fermie,' , with nelect=',nelectmid,ch10,&
 &     '  Number of bissection calls =',ii
      call wrtout(std_out,message,'COLL')
 
@@ -683,70 +664,54 @@ subroutine newocc(doccde,eigen,entropy,fermie,spinmagntarget,mband,nband,&
  nkpt_eff=nkpt
  if(prtvol==0)nkpt_eff=min(nkpt_max,nkpt)
 
- if(nsppol==1)then
-   write(message, '(a,i0,a)' ) &
-&   ' newocc : computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
+ if (nsppol==1)then
+   write(message, '(a,i0,a)' )' newocc: computed new occ. numbers for occopt= ',occopt,' , spin-unpolarized case. '
    call wrtout(std_out,message,'COLL')
    do ikpt=1,nkpt_eff
      write(message,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
      do ii=0,(nband(1)-1)/12
-       write(message,'(12f6.3)') &
-&       occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+       if (ii == 3 .and. prtvol /= 0) exit
+       write(message,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
        call wrtout(std_out,message,'COLL')
      end do
    end do
-   if(nkpt/=nkpt_eff)then
-     call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
-   end if
+   if (nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
 
 !  DEBUG
-!  write(message, '(a)' ) &
-!  &   ' newocc : corresponding derivatives are '
-!  call wrtout(std_out,message,'COLL')
+!  call wrtout(std_out,' newocc: corresponding derivatives are ','COLL')
 !  do ikpt=1,nkpt_eff
 !  write(message,'(a,i4,a)' ) ' k-point number ',ikpt,' :'
 !  do ii=0,(nband(1)-1)/12
-!  write(message,'(12f6.1)') &
-!  &    doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+!  write(message,'(12f6.1)') doccde(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
 !  call wrtout(std_out,message,'COLL')
 !  end do
 !  end do
 !  if(nkpt/=nkpt_eff)then
-!  write(message,'(a)') &
-!  &    ' newocc : prtvol=0, stop printing more k-point informations'
-!  call wrtout(std_out,message,'COLL')
+!    call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
 !  end if
 !  ENDDEBUG
  else
-   write(message, '(a,i0,a,a)' ) &
-&   ' newocc : computed new occupation numbers for occopt= ',occopt,&
-&   ch10,'  (1) spin up   values  '
+   write(message, '(a,i0,2a)' )' newocc: computed new occupation numbers for occopt= ',occopt,ch10,'  (1) spin up   values  '
    call wrtout(std_out,message,'COLL')
    do ikpt=1,nkpt_eff
      write(message,'(a,i0,a)' ) ' k-point number ',ikpt,':'
      do ii=0,(nband(1)-1)/12
-       write(message,'(12f6.3)') &
-&       occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
+       if (ii == 3 .and. prtvol /= 0) exit
+       write(message,'(12f6.3)') occ(1+ii*12+(ikpt-1)*nband(1):min(12+ii*12,nband(1))+(ikpt-1)*nband(1))
        call wrtout(std_out,message,'COLL')
      end do
    end do
-   if(nkpt/=nkpt_eff)then
-     call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
-   end if
+   if (nkpt/=nkpt_eff) call wrtout(std_out,'newocc: prtvol=0, stop printing more k-point information','COLL')
 
    call wrtout(std_out,'  (2) spin down values  ','COLL')
    do ikpt=1,nkpt_eff
      do ii=0,(nband(1)-1)/12
-       write(message,'(12f6.3)') &
-&       occ( 1+ii*12+(ikpt-1+nkpt)*nband(1) : &
-&       min(12+ii*12,nband(1))+(ikpt-1+nkpt)*nband(1) )
+       if (ii == 3 .and. prtvol /= 0) exit
+       write(message,'(12f6.3)') occ( 1+ii*12+(ikpt-1+nkpt)*nband(1):min(12+ii*12,nband(1))+(ikpt-1+nkpt)*nband(1) )
        call wrtout(std_out,message,'COLL')
      end do
    end do
-   if(nkpt/=nkpt_eff)then
-     call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
-   end if
-
+   if(nkpt/=nkpt_eff) call wrtout(std_out,' newocc: prtvol=0, stop printing more k-point information','COLL')
  end if !  End choice based on spin
 
  call timab(74,2,tsec)
@@ -778,15 +743,6 @@ end subroutine newocc
 
 subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphysel,tsmear,tsmearinv,xgrid)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_occ_ent'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: occopt,option
@@ -803,7 +759,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
  integer :: nmaxFD,nminFD
  integer,parameter :: nptsdiv2_def=6000
  integer,save :: dblsmr,occopt_prev=-9999
- real(dp),parameter :: maxFDarg=500.0_dp
  real(dp),save :: convlim,incconv,limit_occ,tphysel_prev=-9999,tsmear_prev=-9999
  real(dp) :: aa,dsqrpi,encorr,factor
  real(dp) :: expinc,expx22,expxo2,gauss,increm
@@ -827,11 +782,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
    return
  end if
 
-
- if(occopt_prev/=occopt           .or. &
-& abs(tsmear_prev-tsmear)  >tol12 .or. &
-& abs(tphysel_prev-tphysel)>tol12       ) then
-!  write(std_out,*) 'INIT_OCC_ENT CHANGE ..........'
+ if (occopt_prev/=occopt .or. abs(tsmear_prev-tsmear)  >tol12 .or. abs(tphysel_prev-tphysel)>tol12) then
    occopt_prev=occopt
    tsmear_prev=tsmear
    tphysel_prev=tphysel
@@ -848,9 +799,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        MSG_ERROR(message)
      end if
    end if
-!  write(std_out,*) 'getnel : input read.'
-!  write(std_out,*) '  dblsmr = ', dblsmr
-!  write(std_out,*) '  tphysel, tsmear = ', tphysel, tsmear
 
    ABI_ALLOCATE(entder,(-nptsdiv2_def:nptsdiv2_def))
    ABI_ALLOCATE(occder,(-nptsdiv2_def:nptsdiv2_def))
@@ -1031,7 +979,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        MSG_BUG(message)
      end if
 
-
 !    Use O(1/N4) algorithm from Num Rec (see below)
 !
 !    The grid for the convoluted delta is taken (conservatively)
@@ -1046,8 +993,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 !    do jj=-nptsdiv2_def,-nptsdiv2_def
 !    do ii=-nconvd2+4,nconvd2
 !    call smdFD(xgrid_prev(jj) - tgrid(ii)*tratio, resFD)
-!    write(std_out,*) 'ii jj = ', ii,jj, ' smdFD (', &
-!    &    xgrid_prev(jj) - tgrid(ii)*tratio, ') ', resFD
+!    write(std_out,*) 'ii jj = ', ii,jj, ' smdFD (', xgrid_prev(jj) - tgrid(ii)*tratio, ') ', resFD
 !    end do
 !    end do
 
@@ -1172,12 +1118,6 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
      encorr =  smom2*tratio*tratio/secmom
 
-!    DEBUG
-!    write(std_out,*) ' getnel : debug, secmoms = ', secmom, smom1, smom2
-!    write(std_out,*) ' getnel : debug, thdmoms = ', thdmom, tmom1, tmom2
-!    write(std_out,*) ' getnel : encorr = ', encorr
-!    ENDDEBUG
-
      ABI_DEALLOCATE(tgrid)
      ABI_DEALLOCATE(smd1)
      ABI_DEALLOCATE(smd2)
@@ -1282,7 +1222,11 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
  end if
 
  if (abs(tphysel)<tol12) then
-   tsmearinv=one/tsmear
+   if (tsmear == zero) then
+     tsmearinv = huge_tsmearinv
+   else
+     tsmearinv=one/tsmear
+   end if
  else
    tsmearinv=one/tphysel
  end if
@@ -1342,15 +1286,6 @@ end subroutine init_occ_ent
 
 subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,rocceig)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'occeig'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband_k,occopt
@@ -1386,14 +1321,11 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
          if( abs(diffocc) > tol5 ) then
            write(message,'(a,a,a,a,a,a,a,2(a,i4,a,es16.6,a,es16.6,a,a),a)' ) &
 &           'In a non-metallic case (occopt<3), for a RF calculation,',ch10,&
-&           'if the eigenvalues are degenerate,',&
-&           ' the occupation numbers must also be degenerate.',ch10,&
+&           'if the eigenvalues are degenerate,',' the occupation numbers must also be degenerate.',ch10,&
 &           'However, the following pair of states gave :',ch10,&
-&           'k -state, band number',ibandk,', occ=',occ_k(ibandk),&
-&           'eigenvalue=',eig0_k(ibandk),',',ch10,&
-&           ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),&
-&           ', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
-&           'Action : change occopt, consistently, in GS and RF calculations.'
+&           'k -state, band number',ibandk,', occ=',occ_k(ibandk),'eigenvalue=',eig0_k(ibandk),',',ch10,&
+&           ' kq-state, band number',ibandkq,', occ=',occ_kq(ibandkq),', eigenvalue=',eig0_kq(ibandkq),'.',ch10,&
+&           'Action: change occopt, consistently, in GS and RF calculations.'
            MSG_ERROR(message)
          end if
          ratio=0.0_dp
@@ -1401,10 +1333,8 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
 !        In the metallic case, one can compute a better approximation of the
 !        ratio by using derivatives doccde
          ratio=0.5_dp*(doccde_kq(ibandkq)+doccde_k(ibandk))
-!        DEBUG
 !        write(std_out,*)' occeig : ibandkq,doccde_kq(ibandkq)',ibandkq,doccde_kq(ibandkq)
 !        write(std_out,*)'          ibandk ,doccde_k (ibandk )',ibandk,doccde_k(ibandk)
-!        ENDDEBUG
        end if
      end if
 
@@ -1425,6 +1355,112 @@ subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,
  end do ! ibandk
 
 end subroutine occeig
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_occ/occ_fd
+!! NAME
+!!  occ_fd
+!!
+!! FUNCTION
+!!  Fermi-Dirac statistic: 1 / [(exp((e - mu)/ KT) + 1]
+!!  Note that occ_fs in [0, 1] so the spin factor is not included, unlike the
+!!  occupations stored in ebands%occ.
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!   mu=Chemical potential in Ha.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function occ_fd(ee, kT, mu)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, kT, mu
+
+!Local variables ------------------------------
+ real(dp) :: ee_mu,arg
+! *************************************************************************
+
+ ee_mu = ee - mu
+
+ !TODO: Find good tols.
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol6) then
+   arg = ee_mu / kT
+   if (arg > maxFDarg) then
+     occ_fd = zero
+   else if (arg < -maxFDarg) then
+     occ_fd = one
+   else
+     occ_fd = one / (exp(arg) + one)
+   end if
+ else
+   ! Heaviside
+   if (ee_mu > zero) then
+     occ_fd = zero
+   else if (ee_mu < zero) then
+     occ_fd = one
+   else
+     occ_fd = half
+   end if
+ end if
+
+end function occ_fd
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_occ/occ_be
+!! NAME
+!!  occ_be
+!!
+!! FUNCTION
+!!   Bose-Einstein statistic  1 / [(exp((e - mu)/ KT) - 1]
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!   mu=Chemical potential in Ha (usually zero)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function occ_be(ee, kT, mu)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, kT, mu
+
+!Local variables ------------------------------
+ real(dp) :: ee_mu, arg
+! *************************************************************************
+
+ ee_mu = ee - mu
+
+ !TODO: Find good tols.
+ ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
+ if (kT > tol12) then
+   arg = ee_mu / kT
+   if (arg > tol12 .and. arg < 600._dp) then
+     occ_be = one / (exp(arg) - one)
+   else
+     occ_be = zero
+   end if
+ else
+   ! No condensate for T --> 0
+   occ_be = zero
+ end if
+
+end function occ_be
 !!***
 
 !!****f* m_occ/dos_hdr_write
@@ -1463,18 +1499,8 @@ end subroutine occeig
 !!
 !! SOURCE
 
-subroutine dos_hdr_write(deltaene,&
-&  eigen,enemax,enemin,fermie,mband,nband,nene,&
+subroutine dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
 &  nkpt,nsppol,occopt,prtdos,tphysel,tsmear,unitdos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dos_hdr_write'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1615,15 +1641,6 @@ end subroutine dos_hdr_write
 
 subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,occ,transmit_occ)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pareigocc'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: formeig,localrdwf,mband,nkpt,nsppol,transmit_occ
@@ -1671,16 +1688,13 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
          if(mpi_enreg%paralbd==0)then
 
            if(formeig==0)then
-             buffer1(2*band_index+1:2*band_index+nbks)=&
-&             eigen(band_index+1:band_index+nbks)
+             buffer1(2*band_index+1:2*band_index+nbks) = eigen(band_index+1:band_index+nbks)
              if(transmit_occ==2) then
-               buffer1(2*band_index+nbks+1:2*band_index+2*nbks)=&
-&               occ(band_index+1:band_index+nbks)
+               buffer1(2*band_index+nbks+1:2*band_index+2*nbks) = occ(band_index+1:band_index+nbks)
              end if
              band_index=band_index+nbks
            else if(formeig==1)then
-             buffer1(band_index+1:band_index+2*nbks**2)=&
-&             eigen(band_index+1:band_index+2*nbks**2)
+             buffer1(band_index+1:band_index+2*nbks**2) = eigen(band_index+1:band_index+2*nbks**2)
              band_index=band_index+2*nbks**2
            end if
 
@@ -1700,14 +1714,10 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
              if(mpi_enreg%proc_distrb(ikpt, iband,isppol) /= me)cycle
              if(formeig==0)then
                buffer1(2*band_index+iband)=eigen(band_index+iband)
-!              if(transmit_occ==2) then
-!              buffer1(2*band_index+iband+nbdks)=occ(band_index+iband)
-!              end if
+!              if(transmit_occ==2) buffer1(2*band_index+iband+nbdks)=occ(band_index+iband)
              else if (formeig==1)then
-               buffer1(band_index+(iband-1)*2*nbks+1: &
-&               band_index+(iband-1)*2*nbks+2*nbks)=&
-&               eigen(band_index+(iband-1)*2*nbks+1: &
-&               band_index+(iband-1)*2*nbks+2*nbks)
+               buffer1(band_index+(iband-1)*2*nbks+1:band_index+(iband-1)*2*nbks+2*nbks) = &
+&               eigen(band_index+(iband-1)*2*nbks+1:band_index+(iband-1)*2*nbks+2*nbks)
              end if
            end do
            if(formeig==0)then
@@ -1722,7 +1732,6 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
 
 !    Build sum of everything
      call timab(48,1,tsec)
-!    call wrtout(std_out,' pareigocc : MPI_ALLREDUCE','COLL')
      if(formeig==0)band_index=band_index*2
      call xmpi_sum(buffer1,buffer2,band_index,spaceComm,ierr)
      call timab(48,2,tsec)
@@ -1732,16 +1741,13 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
        do ikpt=1,nkpt
          nbks=nband(ikpt+(isppol-1)*nkpt)
          if(formeig==0)then
-           eigen(band_index+1:band_index+nbks)=&
-&           buffer2(2*band_index+1:2*band_index+nbks)
+           eigen(band_index+1:band_index+nbks) = buffer2(2*band_index+1:2*band_index+nbks)
            if(transmit_occ==2) then
-             occ(band_index+1:band_index+nbks)=&
-&             buffer2(2*band_index+nbks+1:2*band_index+2*nbks)
+             occ(band_index+1:band_index+nbks) = buffer2(2*band_index+nbks+1:2*band_index+2*nbks)
            end if
            band_index=band_index+nbks
          else if(formeig==1)then
-           eigen(band_index+1:band_index+2*nbks**2)=&
-&           buffer1(band_index+1:band_index+2*nbks**2)
+           eigen(band_index+1:band_index+2*nbks**2) = buffer1(band_index+1:band_index+2*nbks**2)
            band_index=band_index+2*nbks**2
          end if
        end do
@@ -1749,9 +1755,7 @@ subroutine pareigocc(eigen,formeig,localrdwf,mpi_enreg,mband,nband,nkpt,nsppol,o
 
      ABI_DEALLOCATE(buffer1)
      ABI_DEALLOCATE(buffer2)
-
    end if
-
  end if
 
 end subroutine pareigocc

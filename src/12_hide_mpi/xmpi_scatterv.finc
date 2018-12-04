@@ -44,14 +44,6 @@
 !! SOURCE
 subroutine xmpi_scatterv_int(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_scatterv_int'
-!End of the abilint section
-
  implicit none
 
 
@@ -109,13 +101,6 @@ end subroutine xmpi_scatterv_int
 
 subroutine xmpi_scatterv_int2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_scatterv_int2d'
-!End of the abilint section
 
  implicit none
 
@@ -176,13 +161,6 @@ end subroutine xmpi_scatterv_int2d
 subroutine xmpi_scatterv_dp(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_scatterv_dp'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -238,13 +216,6 @@ end subroutine xmpi_scatterv_dp
 !! SOURCE
 subroutine xmpi_scatterv_dp2d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_scatterv_dp2d'
-!End of the abilint section
 
  implicit none
 
@@ -303,13 +274,6 @@ end subroutine xmpi_scatterv_dp2d
 subroutine xmpi_scatterv_dp3d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_scatterv_dp3d'
-!End of the abilint section
-
  implicit none
 
 !Arguments-------------------------
@@ -367,13 +331,6 @@ end subroutine xmpi_scatterv_dp3d
 
 subroutine xmpi_scatterv_dp4d(xval,sendcounts,displs,recvbuf,recvcount,root,spaceComm,ier)
 
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'xmpi_scatterv_dp4d'
-!End of the abilint section
 
  implicit none
 

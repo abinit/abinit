@@ -41,7 +41,7 @@ module m_extraprho
  use m_jellium,  only : jellium
  use m_atm2fft,  only : atm2fft
  use m_pawtab,   only : pawtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_inquire_dim, pawrhoij_filter
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_get, pawcprj_lincom, &
                         pawcprj_free, pawcprj_zaxpby,pawcprj_axpby, pawcprj_put, pawcprj_getdim
  use m_mpinfo,   only : proc_distrb_cycle
@@ -128,13 +128,6 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 & pawtab,ph1d,psps,qgrid,rhor,rprimd,scf_history,ucvol,usepaw,&
 & xred_new,xred_old,ylm,zion,znucl)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extraprho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -161,9 +154,9 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex,dplex,iatom,ii,ind1,ind1new,ind2,ind2new,irhoij,ispden,itypat,jrhoij,klmn
+ integer :: cplex_rhoij,dplex,iatom,ii,ind1,ind1new,ind2,ind2new,iq,iq0,irhoij,ispden,itypat,jrhoij,klmn
  integer :: lmn2_size,nselect,nspden_rhoij,optatm,optdyfr,opteltfr,optgr,option,optn,optn2
- integer :: optstr,optv
+ integer :: optstr,optv,qphase_rhoij
  real(dp) :: a11,a12,a22,a33,alpha,b1,b2,beta,detA,fact,ratio1,ratio2
  logical :: hasmoved,usegauss
  character(len=500) :: message
@@ -379,8 +372,9 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
  if (usepaw==1) then
 
    if (ind2==0) then
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
-     call pawrhoij_alloc(scf_history%pawrhoij(:,ind1new),dtset%pawcpxocc,nspden_rhoij,&
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_alloc(scf_history%pawrhoij(:,ind1new),cplex_rhoij,nspden_rhoij,&
 &     dtset%nspinor,dtset%nsppol,dtset%typat,pawtab=pawtab,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
@@ -389,48 +383,52 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 
      nspden_rhoij=pawrhoij(iatom)%nspden
      lmn2_size=pawrhoij(iatom)%lmn2_size
-     cplex=pawrhoij(iatom)%cplex;dplex=cplex-1
+     cplex_rhoij=pawrhoij(iatom)%cplex_rhoij;dplex=cplex_rhoij-1
+     qphase_rhoij=pawrhoij(iatom)%qphase
 
      if (hasmoved) then
-       ABI_ALLOCATE(rhoijtmp,(cplex*lmn2_size,nspden_rhoij))
+       ABI_ALLOCATE(rhoijtmp,(cplex_rhoij*qphase_rhoij*lmn2_size,nspden_rhoij))
        rhoijtmp=zero
 
        do ispden=1,nspden_rhoij
+         do iq=1,qphase_rhoij
+           iq0=merge(0,cplex_rhoij*lmn2_size,iq==1)
 
-!        rhoij(t+dt) <- rhoij(t) + alpha.rhoij(t)
-         fact=one+alpha
-         jrhoij=1
-         do irhoij=1,pawrhoij(iatom)%nrhoijsel
-           klmn=cplex*pawrhoij(iatom)%rhoijselect(irhoij)-dplex
-           rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&           +fact*pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-           jrhoij=jrhoij+cplex
-         end do
-
-!        rhoij(t+dt) <- -alpha.rhoij(t-dt) + beta.rhoij(t-dt)
-         if (abs(beta-alpha)>tol14.and.ind1>0) then
-           fact=beta-alpha
-           jrhoij=1
-           do irhoij=1,scf_history%pawrhoij(iatom,ind1)%nrhoijsel
-             klmn=cplex*scf_history%pawrhoij(iatom,ind1)%rhoijselect(irhoij)-dplex
+!          rhoij(t+dt) <- rhoij(t) + alpha.rhoij(t)
+           fact=one+alpha
+           jrhoij=1+iq0
+           do irhoij=1,pawrhoij(iatom)%nrhoijsel
+             klmn=cplex_rhoij*pawrhoij(iatom)%rhoijselect(irhoij)-dplex+iq0
              rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&             +fact*scf_history%pawrhoij(iatom,ind1)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-             jrhoij=jrhoij+cplex
+&             +fact*pawrhoij(iatom)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+             jrhoij=jrhoij+cplex_rhoij
            end do
-         end if
 
-!        rho(t+dt) <- -beta.rhoij(t-2dt)
-         if (abs(beta)>tol14.and.ind2>0) then
-           fact=-beta
-           jrhoij=1
-           do irhoij=1,scf_history%pawrhoij(iatom,ind2)%nrhoijsel
-             klmn=cplex*scf_history%pawrhoij(iatom,ind2)%rhoijselect(irhoij)-dplex
-             rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
-&             +fact*scf_history%pawrhoij(iatom,ind2)%rhoijp(jrhoij:jrhoij+dplex,ispden)
-             jrhoij=jrhoij+cplex
-           end do
-         end if
+!          rhoij(t+dt) <- -alpha.rhoij(t-dt) + beta.rhoij(t-dt)
+           if (abs(beta-alpha)>tol14.and.ind1>0) then
+             fact=beta-alpha
+             jrhoij=1+iq0
+             do irhoij=1,scf_history%pawrhoij(iatom,ind1)%nrhoijsel
+               klmn=cplex_rhoij*scf_history%pawrhoij(iatom,ind1)%rhoijselect(irhoij)-dplex+iq0
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
+&               +fact*scf_history%pawrhoij(iatom,ind1)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+               jrhoij=jrhoij+cplex_rhoij
+             end do
+           end if
 
+!          rho(t+dt) <- -beta.rhoij(t-2dt)
+           if (abs(beta)>tol14.and.ind2>0) then
+             fact=-beta
+             jrhoij=1+iq0
+             do irhoij=1,scf_history%pawrhoij(iatom,ind2)%nrhoijsel
+               klmn=cplex_rhoij*scf_history%pawrhoij(iatom,ind2)%rhoijselect(irhoij)-dplex+iq0
+               rhoijtmp(klmn:klmn+dplex,ispden)=rhoijtmp(klmn:klmn+dplex,ispden) &
+&               +fact*scf_history%pawrhoij(iatom,ind2)%rhoijp(jrhoij:jrhoij+dplex,ispden)
+               jrhoij=jrhoij+cplex_rhoij
+             end do
+           end if
+
+         end do ! iq
        end do !ispden
      end if !hasmoved
 
@@ -438,35 +436,16 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 !    (cannot use pawrhoij_copy here because update for single atom)
      nselect=pawrhoij(iatom)%nrhoijsel
      scf_history%pawrhoij(iatom,ind1new)%nrhoijsel=nselect
+     scf_history%pawrhoij(iatom,ind1new)%rhoijselect(:)=0
      scf_history%pawrhoij(iatom,ind1new)%rhoijselect(1:nselect)=pawrhoij(iatom)%rhoijselect(1:nselect)
-     scf_history%pawrhoij(iatom,ind1new)%rhoijp(1:cplex*nselect,1:nspden_rhoij)= &
-&     pawrhoij(iatom)%rhoijp(1:cplex*nselect,1:nspden_rhoij)
+     scf_history%pawrhoij(iatom,ind1new)%rhoijp(1:cplex_rhoij*nselect,1:nspden_rhoij)= &
+&     pawrhoij(iatom)%rhoijp(1:cplex_rhoij*nselect,1:nspden_rhoij)
 
 !    Select non-zero values of rhoij(t+dt)
      if (hasmoved) then
-       nselect=0
-       if (cplex==1) then
-         do klmn=1,lmn2_size
-           if (any(abs(rhoijtmp(klmn,:))>tol10)) then
-             nselect=nselect+1
-             pawrhoij(iatom)%rhoijselect(nselect)=klmn
-             do ispden=1,nspden_rhoij
-               pawrhoij(iatom)%rhoijp(nselect,ispden)=rhoijtmp(klmn,ispden)
-             end do
-           end if
-         end do
-       else
-         do klmn=1,lmn2_size
-           if (any(abs(rhoijtmp(2*klmn-1:2*klmn,:))>tol10)) then
-             nselect=nselect+1
-             pawrhoij(iatom)%rhoijselect(nselect)=klmn
-             do ispden=1,nspden_rhoij
-               pawrhoij(iatom)%rhoijp(2*nselect-1:2*nselect,ispden)=rhoijtmp(2*klmn-1:2*klmn,ispden)
-             end do
-           end if
-         end do
-       end if
-       pawrhoij(iatom)%nrhoijsel=nselect
+       call pawrhoij_filter(pawrhoij(iatom)%rhoijp,pawrhoij(iatom)%rhoijselect,pawrhoij(iatom)%nrhoijsel,&
+&                           cplex_rhoij,qphase_rhoij,lmn2_size,nspden_rhoij,&
+&                           rhoij_input=rhoijtmp)
        ABI_DEALLOCATE(rhoijtmp)
      end if
 
@@ -560,13 +539,6 @@ end subroutine extraprho
 
 subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 & nattyp,ngfft,npwarr,ntypat,pawtab,psps,rprimd,scf_history,usepaw,xred_old,ylm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extrapwf'
-!End of the abilint section
 
  implicit none
 
@@ -1183,13 +1155,6 @@ end subroutine extrapwf
 
  !use m_scf_history
  use m_cgcprj,  only : dotprod_set_cgcprj,cgcprj_cholesky,lincom_cgcprj
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'extrapwf_biortho'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------

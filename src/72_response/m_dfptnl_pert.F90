@@ -172,7 +172,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_rf2
  use m_kg
 
- use m_dtfil,      only : status
  use m_cgtools,    only : dotprod_g,sqnorm_g,dotprod_vn
  use m_pawang,     only : pawang_type
  use m_pawfgrtab,  only : pawfgrtab_type
@@ -183,7 +182,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_pawdij,     only : pawdijfr
  use m_pawfgr,     only : pawfgr_type
  use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
-&                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked
+&                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_paw_an,     only : paw_an_type
  use m_paw_mkrho,  only : pawmkrho
  use m_paw_nhat,   only : pawnhatfr
@@ -197,13 +196,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  use m_nonlop,     only : nonlop
  use m_fourier_interpol, only : transgrid
  use m_cgprj,     only : getcprj
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_pert'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -265,7 +257,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  integer :: idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,ipert_elfd
  integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ifft,ifft_re,ifft_im,ilm,isppol,istwf_k,jband
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
- integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,debug_mode
+ integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,qphase_rhoij,debug_mode
  integer :: signs,size_wf,size_cprj,spaceComm,typat_ipert_phon,usepaw,useylmgr1
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,e3tot,lagi,lagi_paw,lagr,lagr_paw
  real(dp) :: rho2ur,rho2ui,rho2dr,rho2di,rho3ur,rho3ui,rho3dr,rho3di
@@ -304,8 +296,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  me = mpi_enreg%me
  spaceComm=mpi_enreg%comm_cell
 
- call status(0,dtfil%filstat,iexit,level,'enter         ')
-
  npert_phon = 0
  if(i1pert<=natom) npert_phon = npert_phon + 1
  if(i2pert<=natom) npert_phon = npert_phon + 1
@@ -339,20 +329,22 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
      idir_elfd  = i1dir
      pawrhoij11 => pawrhoij1_i1pert
    end if
-   cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
    ABI_DATATYPE_ALLOCATE(pawrhoij21,(natom))
    call pawrhoij_nullify(pawrhoij21)
-   call pawrhoij_alloc(pawrhoij21,cplex_rhoij,nspden_rhoij,nspinor,dtset%nsppol,&
-&   dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+   call pawrhoij_alloc(pawrhoij21,cplex_rhoij,nspden_rhoij,nspinor,dtset%nsppol,dtset%typat,&
+&       qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_DATATYPE_ALLOCATE(cwaveprj0,(natom,size_cprj))
    ABI_DATATYPE_ALLOCATE(cwaveprj1,(natom,size_cprj))
    call pawcprj_alloc(cwaveprj0,1,gs_hamkq%dimcprj)
    call pawcprj_alloc(cwaveprj1,1,gs_hamkq%dimcprj)
 !   if (paral_atom) then
 !     ABI_DATATYPE_ALLOCATE(pawrhoij1_unsym,(natom))
-!     cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
+!     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+!&                              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
 !     call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-!&     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+!&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
 !   else
    pawrhoij21_unsym => pawrhoij21
    call pawrhoij_init_unpacked(pawrhoij21_unsym)
@@ -370,8 +362,8 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    call paw_ij_init(paw_ij_tmp,cplex_loc,dtset%nspinor,nsp,nsp,dtset%pawspnorb,natom,psps%ntypat,&
 &   dtset%typat,pawtab,has_dijfr=1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_reset_flags(paw_ij_tmp,all=.True.)
-   call pawdijfr(cplex_loc,gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
-&   1,paw_ij_tmp,pawang,pawfgrtab,pawrad,pawtab,&
+   call pawdijfr(gs_hamkq%gprimd,idir_elfd,ipert_elfd,natom,natom,nfftf,ngfftf,nsp,nsp,psps%ntypat,&
+&   1,paw_ij_tmp,pawang,pawfgrtab,pawrad,pawtab,cplex_loc,&
 &   (/zero,zero,zero/),rprimd,ucvol,dummy_array2,dummy_array2,dummy_array2,xred,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_ALLOCATE(chi_ij,(gs_hamkq%dimekb1,gs_hamkq%dimekb2,dtset%nspinor**2,cplex_loc))
@@ -407,7 +399,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
  ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
  if (psps%useylm==1) then
-   call status(0,dtfil%filstat,iexit,level,'call initylmg ')
    option=2
    call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,&
    dtset%nkpt,npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
@@ -1229,8 +1220,6 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  ABI_DEALLOCATE(vlocal)
  ABI_DEALLOCATE(vlocal1_i2pert)
  ABI_DEALLOCATE(wfraug)
-
- call status(0,dtfil%filstat,iexit,level,'exit          ')
 
  DBG_EXIT("COLL")
 

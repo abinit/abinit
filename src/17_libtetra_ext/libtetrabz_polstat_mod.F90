@@ -41,13 +41,6 @@ SUBROUTINE libtetrabz_polstat(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,comm)
   !
   USE ISO_C_BINDING
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER(C_INT),INTENT(IN) :: ltetra, nb, nge(3), ngw(3)
@@ -105,13 +98,6 @@ SUBROUTINE libtetrabz_polstat_main(wlsm,nt_local,ik_global,ik_local,nb,nkBZ,eig1
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat_main'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nt_local, nb, nkBZ, nk_local, &
@@ -268,13 +254,6 @@ SUBROUTINE libtetrabz_polstat2(nb,ei1,ej1,w1)
   &                             libtetrabz_tsmall_b2, libtetrabz_tsmall_b3, &
   &                             libtetrabz_tsmall_c1, libtetrabz_tsmall_c2, &
   &                             libtetrabz_tsmall_c3
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat2'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: nb
@@ -390,13 +369,6 @@ END SUBROUTINE libtetrabz_polstat2
 SUBROUTINE libtetrabz_polstat3(de,w1)
   !
   USE libtetrabz_common, ONLY : libtetrabz_sort
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat3'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: de(4)
@@ -554,13 +526,6 @@ END SUBROUTINE libtetrabz_polstat3
 !
 FUNCTION libtetrabz_polstat_1234(g1,g2,g3,g4,lng1,lng2,lng3,lng4)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat_1234'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1,g2,g3,g4,lng1,lng2,lng3,lng4
@@ -582,13 +547,6 @@ END FUNCTION libtetrabz_polstat_1234
 !
 FUNCTION libtetrabz_polstat_1231(g1,g2,g3,lng1,lng2,lng3)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat_1231'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1,g2,g3,lng1,lng2,lng3
@@ -611,13 +569,6 @@ END FUNCTION libtetrabz_polstat_1231
 !
 FUNCTION libtetrabz_polstat_1233(g1,g2,g3,lng1,lng2,lng3)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat_1233'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1,g2,g3,lng1,lng2,lng3
@@ -642,13 +593,6 @@ END FUNCTION libtetrabz_polstat_1233
 !
 FUNCTION libtetrabz_polstat_1221(g1,g2,lng1,lng2)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat_1221'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, lng1, lng2
@@ -666,13 +610,6 @@ END FUNCTION libtetrabz_polstat_1221
 !
 FUNCTION libtetrabz_polstat_1222(g1,g2,lng1,lng2)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat_1222'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1, g2, lng1, lng2
@@ -690,13 +627,6 @@ END FUNCTION libtetrabz_polstat_1222
 !
 FUNCTION libtetrabz_polstat_1211(g1,g2,lng1,lng2)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_polstat_1211'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: g1,g2,lng1,lng2

@@ -111,15 +111,6 @@ contains
 subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xccc,&
 & n2,n3,option,rprimd,typat,ucvol,vxc,xcccrc,xccc1d,xccc3d,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n1xccc,n2,n3,natom,nfft,nspden,ntypat,option
@@ -562,13 +553,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
    function cross_mkcore(xx,yy,zz,aa,bb,cc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_mkcore'
-!End of the abilint section
-
    real(dp) :: cross_mkcore
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
 ! *************************************************************************
@@ -644,15 +628,6 @@ end subroutine mkcore
 subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,nspden,&
 &          nattyp,ntypat,n1,n1xccc,n2,n3,option,rprimd,ucvol,vxc,xcccrc,xccc1d,&
 &          xccc3d,xred,pawrad,pawtab,usepaw)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkcore_alt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1098,13 +1073,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
    function cross_mkcore_alt(xx,yy,zz,aa,bb,cc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_mkcore_alt'
-!End of the abilint section
-
     real(dp) :: cross_mkcore_alt
     real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
 ! *************************************************************************
@@ -1132,13 +1100,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
    subroutine indpos_mkcore_alt(periodic,ii,nn,jj,inside)
 !    Find the grid index of a given position in the cell according to the BC
 !    Determine also whether the index is inside or outside the box for free BC
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'indpos_mkcore_alt'
-!End of the abilint section
-
     integer, intent(in) :: ii,nn
     integer, intent(out) :: jj
     logical, intent(in) :: periodic
@@ -1203,15 +1164,6 @@ end subroutine mkcore_alt
 
 subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 & n2,n3,qphon,rprimd,typat,ucvol,xcccrc,xccc1d,xccc3d1,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_mkcore'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1488,13 +1440,6 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
  contains
 
    function cross_mk(xx,yy,zz,aa,bb,cc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cross_mk'
-!End of the abilint section
 
    real(dp) :: cross_mk
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc

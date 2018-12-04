@@ -91,13 +91,6 @@ subroutine wvl_initro(&
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY, ext_buffers, ind_positions
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_initro'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -433,13 +426,6 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
 #if defined HAVE_BIGDFT
   use BigDFT_API, only : sumrho, symmetry_data, ELECTRONIC_DENSITY, communicate_density
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_mkrho'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------
@@ -529,13 +515,6 @@ end subroutine wvl_mkrho
 subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 & rhoijrespc,usepaw,vresid,vrespc)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_prcref'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -584,8 +563,9 @@ subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 !with the same mixing factor as the model dielectric function.
 
  if (usepaw==1.and.my_natom>0) then
+   ABI_CHECK(pawrhoij(1)%qphase==1,'wvl_prcref: not available with qphase=1!')
 !  mixfac=dielar(4);mixfacmag=abs(dielar(7))
-   if (pawrhoij(1)%cplex==1) then
+   if (pawrhoij(1)%cplex_rhoij==1) then
      index=0
      do iatom=1,my_natom
        do ispden=1,pawrhoij(iatom)%nspden

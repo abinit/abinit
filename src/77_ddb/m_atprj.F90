@@ -88,13 +88,6 @@ contains
 
 subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_init'
-!End of the abilint section
-
  implicit none
 
  type(atprj_type), intent(out) :: t_atprj
@@ -169,13 +162,6 @@ end subroutine atprj_init
 
 subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_print'
-!End of the abilint section
-
  implicit none
 
 !arguments
@@ -234,13 +220,6 @@ end subroutine atprj_print
 !! SOURCE
 
 subroutine atprj_destroy(t_atprj)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atprj_destroy'
-!End of the abilint section
 
  implicit none
 

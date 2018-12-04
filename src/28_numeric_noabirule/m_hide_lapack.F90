@@ -216,15 +216,6 @@ CONTAINS  !=====================================================================
 
 subroutine wrap_CHEEV(jobz,uplo,n,a,w)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_CHEEV'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -322,15 +313,6 @@ end subroutine wrap_CHEEV
 !! SOURCE
 
 subroutine wrap_ZHEEV(jobz,uplo,n,a,w,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_ZHEEV'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -494,15 +476,6 @@ end subroutine wrap_ZHEEV
 !! SOURCE
 
 subroutine wrap_DSYEV_ZHEEV(jobz,uplo,cplex,n,a,w,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_DSYEV_ZHEEV'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -708,15 +681,6 @@ end subroutine wrap_DSYEV_ZHEEV
 
 subroutine wrap_CHPEV(jobz,uplo,n,ap,w,z,ldz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_CHPEV'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n,ldz
@@ -827,15 +791,6 @@ end subroutine wrap_CHPEV
 !! SOURCE
 
 subroutine wrap_ZHPEV(jobz,uplo,n,ap,w,z,ldz,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_ZHPEV'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1013,15 +968,6 @@ end subroutine wrap_ZHPEV
 !! SOURCE
 
 subroutine wrap_ZHEGV(itype,jobz,uplo,n,a,b,w,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_ZHEGV'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1220,15 +1166,6 @@ end subroutine wrap_ZHEGV
 !! SOURCE
 
 subroutine wrap_DSYGV_ZHEGV(itype,jobz,uplo,cplex,n,a,b,w,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_DSYGV_ZHEGV'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1509,15 +1446,6 @@ end subroutine wrap_DSYGV_ZHEGV
 
 subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_ZHEEVX'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,iu,ldz,n
@@ -1757,15 +1685,6 @@ end subroutine wrap_ZHEEVX
 !! SOURCE
 
 subroutine wrap_DSYEVX_ZHEEVX(jobz,range,uplo,cplex,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_DSYEVX_ZHEEVX'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2055,15 +1974,6 @@ end subroutine wrap_DSYEVX_ZHEEVX
 
 subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_ZHEGVX'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,iu,ldz,n,itype
@@ -2333,15 +2243,6 @@ end subroutine wrap_ZHEGVX
 
 subroutine wrap_DSYGVX_ZHEGVX(itype,jobz,range,uplo,cplex,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_DSYGVX_ZHEGVX'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: il,iu,ldz,n,itype,cplex
@@ -2592,15 +2493,6 @@ end subroutine wrap_DSYGVX_ZHEGVX
 
 subroutine wrap_CGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_CGEEV'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n,lda,ldvl,ldvr
@@ -2720,15 +2612,6 @@ end subroutine wrap_CGEEV
 
 subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wrap_ZGEEV'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n,lda,ldvl,ldvr
@@ -2821,15 +2704,6 @@ end subroutine wrap_ZGEEV
 !! SOURCE
 
 subroutine cginv(a,n,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cginv'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3023,15 +2897,6 @@ end subroutine cginv
 
 subroutine zginv(a,n,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zginv'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
@@ -3181,15 +3046,6 @@ end subroutine zginv
 
 subroutine zhpd_invert(uplo,a,n,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'zhpd_invert'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3305,15 +3161,6 @@ end subroutine zhpd_invert
 
 subroutine test_xginv(msize,skinds,do_check,Tres,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'test_xginv'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: msize,comm
@@ -3354,7 +3201,7 @@ subroutine test_xginv(msize,skinds,do_check,Tres,comm)
  call xginv(cmat_dpc,msize,comm)
 
  call cwtime(Tres%ctime,Tres%wtime,Tres%gflops,"stop")
- Tres%testname  = ABI_FUNC
+ Tres%testname  = 'test_xginv'
  Tres%msize     = msize
 
  max_abserr = -one
@@ -3400,15 +3247,6 @@ end subroutine test_xginv
 !! SOURCE
 
 subroutine matrginv(a,lda,n)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matrginv'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3534,15 +3372,6 @@ end subroutine matrginv
 
 subroutine matr3eigval(eigval,matr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'matr3eigval'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  real(dp),intent(in) :: matr(3,3)
@@ -3601,14 +3430,6 @@ end subroutine matr3eigval
 
 subroutine jacobi(a,n,np,d,v,nrot)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'jacobi'
-!End of the abilint section
-
- implicit none
 !Arguments
  integer :: n,np,nrot
  real*8 :: a(np,np),d(np),v(np,np)
@@ -3733,15 +3554,6 @@ end subroutine jacobi
 
 SUBROUTINE ludcmp(a,n,np,indx,id,info)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ludcmp'
-!End of the abilint section
-
-      implicit none
-
       INTEGER n,np,indx(n),NMAX,id,info
       REAL*8 a(np,np),TINY
       PARAMETER (NMAX=500,TINY=1.0e-20)
@@ -3847,15 +3659,6 @@ END SUBROUTINE ludcmp
 
 SUBROUTINE lubksb(a,n,np,indx,b)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lubksb'
-!End of the abilint section
-
-      IMPLICIT NONE
-
       INTEGER n,np,indx(n)
       REAL*8 a(np,np),b(n)
 
@@ -3916,15 +3719,6 @@ END SUBROUTINE LUBKSB
 !! SOURCE
 
 subroutine dzgedi(a,lda,n,ipvt,det,work,job)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dzgedi'
-!End of the abilint section
-
-      implicit none
 
       integer :: lda,n,ipvt(n),job
       real*8 :: a(2,lda,n),det(2,2),work(2,n)
@@ -4116,14 +3910,6 @@ end subroutine dzgedi
 subroutine dzgefa(a,lda,n,ipvt,info)
 
  use m_linalg_interfaces
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dzgefa'
-!End of the abilint section
-
- implicit none
 
 !Arguments
  integer :: lda,n,ipvt(n),info

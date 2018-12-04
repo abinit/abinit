@@ -47,7 +47,7 @@ module m_positron
  use m_paw_ij,   only : paw_ij_type
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij,only : pawrhoij_type, pawrhoij_copy, pawrhoij_alloc, pawrhoij_free,&
-                       pawrhoij_nullify, pawrhoij_gather, pawrhoij_get_nspden, symrhoij
+                       pawrhoij_nullify, pawrhoij_gather, pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_mpi_send, &
                         pawcprj_mpi_recv, pawcprj_free, pawcprj_copy, pawcprj_bcast
  use m_pawfgr,   only : pawfgr_type
@@ -187,13 +187,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
 &          xccc3d,xred,ylm,ylmgr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setup_positron'
-!End of the abilint section
 
  implicit none
 
@@ -428,7 +421,7 @@ type(fock_type),pointer, intent(inout) :: fock
        call read_rhor(trim(fname), cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
        hdr_den, electronpositron%pawrhoij_ep, comm_cell, check_hdr=hdr)
        etotal_read = hdr_den%etot; call hdr_free(hdr_den)
-       call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+       call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
        if (dtset%usepaw==1.and.allocated(electronpositron%nhat_ep)) then
          call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&
 &         dtset%nspden,dtset%ntypat,pawang,pawfgrtab,nhatgr,electronpositron%nhat_ep,&
@@ -449,10 +442,10 @@ type(fock_type),pointer, intent(inout) :: fock
        if (dtset%usepaw==1) then
          if (size(electronpositron%pawrhoij_ep)>0) then
            ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
-           call initrhoij(electronpositron%pawrhoij_ep(1)%cplex,dtset%lexexch,&
+           call initrhoij(electronpositron%pawrhoij_ep(1)%cplex_rhoij,dtset%lexexch,&
 &           dtset%lpawu,my_natom,dtset%natom,dtset%nspden,&
 &           electronpositron%pawrhoij_ep(1)%nspinor,dtset%nsppol,&
-&           dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,dtset%spinat,dtset%typat,&
+&           dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,cplex1,dtset%spinat,dtset%typat,&
 &           ngrhoij=electronpositron%pawrhoij_ep(1)%ngrhoij,&
 &           nlmnmix=electronpositron%pawrhoij_ep(1)%lmnmix_sz,&
 &           use_rhoij_=electronpositron%pawrhoij_ep(1)%use_rhoij_,&
@@ -531,9 +524,9 @@ type(fock_type),pointer, intent(inout) :: fock
          if (dtset%usepaw==1) then
            if (size(pawrhoij)>0) then
              ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
-             call initrhoij(pawrhoij(1)%cplex,dtset%lexexch,dtset%lpawu,&
+             call initrhoij(pawrhoij(1)%cplex_rhoij,dtset%lexexch,dtset%lpawu,&
 &             my_natom,dtset%natom,dtset%nspden,pawrhoij(1)%nspinor,dtset%nsppol,&
-&             dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,dtset%spinat,&
+&             dtset%ntypat,pawrhoij_tmp,dtset%pawspnorb,pawtab,pawrhoij(1)%qphase,dtset%spinat,&
 &             dtset%typat,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
 &             use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres,&
 &             comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -566,12 +559,12 @@ type(fock_type),pointer, intent(inout) :: fock
        end do
      end do
      rhog_ep(:,:)=rhog
-     call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,rhog,rhor,-1,mpi_enreg,nfft,1,ngfft,0)
 !    If PAW, exchange "positronic" and "electronic" rhoij
      if (dtset%usepaw==1) then
        if (size(pawrhoij)>0.and.size(electronpositron%pawrhoij_ep)>0) then
          ABI_DATATYPE_ALLOCATE(pawrhoij_tmp,(my_natom))
-         call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex,pawrhoij(1)%nspden,&
+         call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &         pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
 &         pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
 &         use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres, &
@@ -596,7 +589,7 @@ type(fock_type),pointer, intent(inout) :: fock
 
 !  ===== COMPUTE HARTREE POTENTIAL ASSOCIATED TO RHOR_EP
    if (history_level==4) then
-     call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
+     call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,1,ngfft,0)
    end if
    if (history_level/=-1) then
      call hartre(1,gsqcut,dtset%usepaw,mpi_enreg,nfft,ngfft,dtset%paral_kgb,rhog_ep,rprimd,&
@@ -915,13 +908,6 @@ end subroutine setup_positron
 subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,nfft,ngfft,nhat,&
 &                      option,pawang,pawrad,pawrhoij,pawtab,rate,rate_paw,rhor,ucvol,xccc3d,&
 &                      rhor_dop_el,pawrhoij_dop_el,pawrhoij_ep) ! optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'poslifetime'
-!End of the abilint section
 
  implicit none
 
@@ -1848,7 +1834,7 @@ end subroutine poslifetime
 !!      pawcprj_copy,pawcprj_free,pawcprj_get,pawcprj_mpi_recv,pawcprj_mpi_send
 !!      pawpsp_read_corewf,pawrhoij_alloc,pawrhoij_free,pawrhoij_gather
 !!      pawrhoij_nullify,poslifetime,posratecore,prep_fourwf,ptabs_fourdp,sbf8
-!!      set_mpi_enreg_fft,simp_gen,sphereboundary,symrhoij,unset_mpi_enreg_fft
+!!      set_mpi_enreg_fft,simp_gen,sphereboundary,pawrhoij_symrhoij,unset_mpi_enreg_fft
 !!      wffclose,wffopen,wrtout,xderivewrecend,xderivewrecinit,xderivewrite
 !!      xmoveoff,xmpi_bcast,xmpi_recv,xmpi_send,xmpi_sum
 !!
@@ -1863,13 +1849,6 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                     filpsp,kg,mcg,mcprj,mpi_enreg,my_natom,&
 &                     n3xccc,nfft,ngfft,nhat,npwarr,occ,pawang,pawrad,&
 &                     pawrhoij,pawtab,rhor,xccc3d)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'posdoppler'
-!End of the abilint section
 
  implicit none
 
@@ -2382,10 +2361,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    ABI_ALLOCATE(rhor_dop_el,(nfft))
    if (dtset%usepaw==1) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_dop_el,(dtset%natom))
-     nspden_rhoij=pawrhoij_get_nspden(dtset%nspden,dtset%nspinor,dtset%pawspnorb)
-     call pawrhoij_alloc(pawrhoij_dop_el,dtset%pawcpxocc,nspden_rhoij,&
-     dtset%nspinor,dtset%nsppol,dtset%typat,&
-     pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_alloc(pawrhoij_dop_el,cplex_rhoij,nspden_rhoij,&
+                         dtset%nspinor,dtset%nsppol,dtset%typat,&
+                         pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)
 !    Cancel distribution of PAW data over atomic sites
 !    We use here pawrhoij because polifetime routine
 !    detects by itself the particle described by pawrhoij
@@ -2529,7 +2509,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
          call fourwf(1,denpot_dum,cwaveg_pos,fofgout_dum,cwaveaug_pos,&
 &         gbound_pos,gbound_pos,istwf_k_pos,kg_k_pos,kg_k_pos,&
 &         dtset%mgfft,mpi_enreg,1,ngfft,npw_k_pos,npw_k_pos,&
-&         n4,n5,n6,option,mpi_enreg%paral_kgb,tim_fourwf,weight_pos,weight_pos,&
+&         n4,n5,n6,option,tim_fourwf,weight_pos,weight_pos,&
 &         use_gpu_cuda=dtset%use_gpu_cuda)
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
@@ -2757,7 +2737,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                        call fourwf(1,denpot_dum,cwaveg,fofgout_dum,cwaveaug,&
 &                       gbound,gbound,istwf_k,kg_k,kg_k,&
 &                       dtset%mgfft,mpi_enreg,1,ngfft,npw_k,npw_k,&
-&                       n4,n5,n6,option,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
+&                       n4,n5,n6,option,tim_fourwf,weight,weight,&
 &                       use_gpu_cuda=dtset%use_gpu_cuda)
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&
@@ -2817,10 +2797,10 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                              call pawaccrhoij(Crystal%atindx,cplex_rhoij,cprj_k(:,ib_cprj),cprj_k(:,ib_cprj),0,isppol,&
 &                             dtset%natom,dtset%natom,dtset%nspinor,occ_el,1,pawrhoij_dop_el,usetimerev,wtk_k)
 !                            Is it correct to apply symetries here (on a single band)?
-!                            If not, call symrhoij with nsym=1
-                             call symrhoij(pawrhoij_dop_el,pawrhoij_dop_el,1,Crystal%gprimd,Crystal%indsym,0,dtset%natom,&
-&                             Crystal%nsym,dtset%ntypat,1,pawang,-10001,pawtab,Crystal%rprimd,Crystal%symafm,&
-&                             Crystal%symrec,dtset%typat)
+!                            If not, call pawrhoij_symrhoij with nsym=1
+                             call pawrhoij_symrhoij(pawrhoij_dop_el,pawrhoij_dop_el,1,Crystal%gprimd,&
+&                             Crystal%indsym,0,dtset%natom,Crystal%nsym,dtset%ntypat,1,pawang,-10001,&
+&                             pawtab,Crystal%rprimd,Crystal%symafm,Crystal%symrec,dtset%typat)
                            end if
 !                          Has to call poslifetime in sequential because we are in a parallel section
 !                          Only FFT parallelism is allowed
@@ -2855,8 +2835,8 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                          end if
 
 !                        FFT of (Psi+.Psi-.gamma) to get Intg[(Psi+.Psi-.gamma).exp(-igr)]
-                         call fourdp(cplex,rho_contrib_g,rho_contrib,-1,mpi_enreg,nfft,ngfft,&
-&                         mpi_enreg%paral_kgb,tim_fourdp)
+                         call fourdp(cplex,rho_contrib_g,rho_contrib,-1,mpi_enreg,nfft,1,ngfft,&
+&                         tim_fourdp)
 
                          rho_pw(1:nfft,jkpt)=rho_pw(1:nfft,jkpt) +gammastate*occ_el*occ_pos &
 &                         *(rho_contrib_g(1,1:nfft)**2+rho_contrib_g(2,1:nfft)**2)
@@ -3358,13 +3338,6 @@ end subroutine posdoppler
 subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enreg,&
 &                      option,pawang,pawrad,pawrhoij,pawrhoij_ep,&
 &                      pawtab,rate,rhocorej)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'posratecore'
-!End of the abilint section
 
  implicit none
 

@@ -116,13 +116,6 @@ CONTAINS  !=====================================================================
 
 subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effpot_mpi_init'
-!End of the abilint section
-
   implicit none
 
 !Arguments ------------------------------------
@@ -301,13 +294,6 @@ end subroutine effpot_mpi_init
 !! SOURCE
 
 subroutine effpot_mpi_free(effpot_mpi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effpot_mpi_free'
-!End of the abilint section
 
   implicit none
 

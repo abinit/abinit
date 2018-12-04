@@ -83,13 +83,6 @@ CONTAINS
 
 SUBROUTINE ERROR(message)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ERROR'
-!End of the abilint section
-
 !Arguments ------------------------------------
 #ifdef HAVE_MPI1
 include 'mpif.h'
@@ -145,13 +138,6 @@ END SUBROUTINE ERROR
 
 SUBROUTINE WARN(message)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WARN'
-!End of the abilint section
-
 !Arguments ------------------------------------
 #ifdef HAVE_MPI1
 include 'mpif.h'
@@ -204,13 +190,6 @@ END SUBROUTINE WARN
 !! SOURCE
 
 SUBROUTINE WARNALL(message)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'WARNALL'
-!End of the abilint section
 
 !Arguments ------------------------------------
 #ifdef HAVE_MPI1

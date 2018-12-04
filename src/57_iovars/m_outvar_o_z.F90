@@ -115,15 +115,6 @@ contains
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
 & results_out,strimg,timopt)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'outvar_o_z'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,iout,marr,ndtset
@@ -860,11 +851,18 @@ contains
        multi_kptopt=1
      end if
    end do
-   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
-&   narrm,ncid,ndtset_alloc,'shiftk','DPR',&
-&   multivals%nshiftk)
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'shiftk','DPR',multivals%nshiftk)
 !  End of test to see whether kptopt/=0 for some dataset
  end if
+
+ intarr(1,:)=dtsets(:)%sigma_bsum_range(1)
+ intarr(2,:)=dtsets(:)%sigma_bsum_range(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'sigma_bsum_range','INT',0)
+
+ intarr(1,:)=dtsets(:)%sigma_ngkpt(1)
+ intarr(2,:)=dtsets(:)%sigma_ngkpt(2)
+ intarr(3,:)=dtsets(:)%sigma_ngkpt(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'sigma_ngkpt','INT',0)
 
  intarr(1,:)=dtsets(:)%signperm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'signperm','INT',0)
@@ -1565,15 +1563,6 @@ contains
 !! SOURCE
 
 subroutine prtocc(dtsets,iout,jdtset_,mxvals,ndtset_alloc,nimagem,prtvol_glob,results_out,strimg)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'prtocc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

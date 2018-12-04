@@ -46,30 +46,65 @@ def cd(path):
     finally:
         os.chdir(cwd)
 
+
+#@task
+#def vim(ctx, tag):
+#    """Invoke """
+#    with cd(ABINIT_SRCDIR):
+#        cmd = "mvim -t %s" % tag
+#        #cmd = "vim -t %s" % tag
+#        ctx.run(cmd)
+
+
 @task
-def make(ctx, jobs="auto", clean=False):
+def make(ctx, jobs="auto", touch=False, clean=False):
     """
     Touch all modified files and recompile the code with -jNUM.
     """
     with cd(ABINIT_SRCDIR):
-        cmd = "./abisrc.py touch"
-        cprint("Executing: %s" % cmd, "yellow")
-        result = ctx.run(cmd, pty=True)
-        if not result.ok:
-            cprint("`%s` failed. Aborting now!" % cmd, "red")
-            return 1
+        if touch:
+            cmd = "./abisrc.py touch"
+            cprint("Executing: %s" % cmd, "yellow")
+            result = ctx.run(cmd, pty=True)
+            if not result.ok:
+                cprint("`%s` failed. Aborting now!" % cmd, "red")
+                return 1
 
     top = find_top_build_tree(".", with_abinit=False)
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
     with cd(top):
         if clean: ctx.run("make clean", pty=True)
-        #cmd = "make -j%d > make.log 2> make.stderr" % jobs
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, "yellow")
-        ctx.run(cmd, pty=True)
+        retcode = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
+        #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
+
+@task
+def runemall(ctx, make=True, jobs="auto", touch=False, clean=False, keywords=None):
+    """
+    Run all tests (sequential and parallel).
+    Exit immediately if errors
+    """
+    make(ctx, jobs=jobs, touch=touch, clean=clean)
+
+    top = find_top_build_tree(".", with_abinit=True)
+    jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
+    kws = "" if keywords is None else "-k %s" % keywords
+
+    with cd(os.path.join(top, "tests")):
+        cmd = "./runtests.py -j%d %s" % (jobs, kws)
+        cprint("Executing: %s" % cmd, "yellow")
+        ctx.run(cmd, pty=True)
+        # Now run the parallel tests.
+        for n in [2, 4, 10]:
+            j = jobs // n
+            if j == 0: continue
+            cmd = "./runtests.py paral mpiio -j%d -n%d %s" % (j, n, kws)
+            cprint("Executing: %s" % cmd, "yellow")
+            ctx.run(cmd, pty=True)
 
 @task
 def makemake(ctx):

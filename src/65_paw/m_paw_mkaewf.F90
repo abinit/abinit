@@ -46,7 +46,6 @@ module m_paw_mkaewf
  use m_fftcore,        only : sphereboundary
  use m_geometry,       only : xcart2xred
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
  use m_ebands,         only : ebands_ncwrite
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
@@ -141,13 +140,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 & istwfk,npwarr,kpt,ngfftf,kg,dimcprj,Pawfgrtab,Pawrad,Pawtab,&
 & Hdr,Dtfil,cg,Cprj,MPI_enreg,ierr,pseudo_norms,set_k,set_band , &
 & mpi_atmtab,comm_atom) ! Optional arguments
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawmkaewf'
-!End of the abilint section
 
  implicit none
 
@@ -345,10 +337,10 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
    !  [max_number_of_states][number_of_kpoints][number_of_spins]
 
    ncerr = nctk_def_dims(ncid, [ &
-   nctkdim_t("real_or_complex_wavefunctions", 2),  &
-   nctkdim_t("number_of_grid_points_vector1", n1), &
-   nctkdim_t("number_of_grid_points_vector2", n2), &
-   nctkdim_t("number_of_grid_points_vector3", n3)  &
+     nctkdim_t("real_or_complex_wavefunctions", 2),  &
+     nctkdim_t("number_of_grid_points_vector1", n1), &
+     nctkdim_t("number_of_grid_points_vector2", n2), &
+     nctkdim_t("number_of_grid_points_vector3", n3)  &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -359,18 +351,17 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
    ! Define wavefunctions in real space.
    ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t('ur_ae', "dp", shape_str),&
-   nctkarr_t('ur_pw', "dp", shape_str),&
-   nctkarr_t('ur_ae_onsite', "dp", shape_str),&
-   nctkarr_t('ur_ps_onsite', "dp", shape_str) &
+     nctkarr_t('ur_ae', "dp", shape_str),&
+     nctkarr_t('ur_pw', "dp", shape_str),&
+     nctkarr_t('ur_ae_onsite', "dp", shape_str),&
+     nctkarr_t('ur_ps_onsite', "dp", shape_str) &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ! Complete the geometry information.
-   NCF_CHECK(crystal_ncwrite(crystal, ncid))
+   NCF_CHECK(crystal%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
 
-   ! Close the file.
    NCF_CHECK(nf90_close(ncid))
  end if
 
@@ -498,7 +489,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        ABI_MALLOC(fofgout,(2,npwout*ndat))
 
        call fourwf(cplex,denpot,fofgin(:,1:npw_k),fofgout,fofr(:,:,:,1:n6),gbound,gbound,istwf_k,kg_k,kg_k,&
-&       mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,paral_kgb,tim_fourwf0,weight1,weight1,&
+&       mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1,&
 &       use_gpu_cuda=Dtset%use_gpu_cuda)
 
 !      Here I do not know if fourwf works in the case of spinors,
@@ -513,7 +504,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 !        NOTE: fofr_down can NOT be replaced by fofr(:,:,:,n6+1:2*n6), or else
 !        the data in fofr(:,:,:,1:n6) will be the same with fofr(:,:,:,n6+1:2*n6)
          call fourwf(cplex,denpot,fofgin_down,fofgout,fofr_down,gbound,gbound,istwf_k,kg_k,kg_k,&
-&         mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,paral_kgb,tim_fourwf0,weight1,weight1)
+&         mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1)
          ABI_FREE(fofgin_down)
        end if
 

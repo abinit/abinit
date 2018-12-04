@@ -67,7 +67,6 @@ diemac 6
 ecut 30               # Underconverged ecut. 
 #ecut 50               # ecut used in Nery2018.
 nstep 100
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit

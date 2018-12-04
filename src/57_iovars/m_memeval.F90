@@ -86,15 +86,6 @@ contains
 
 subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memory_eval'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,ndtset,ndtset_alloc,npsp
@@ -297,7 +288,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
        ! Don't perform memory tests if MBPT.
        mem_test = dtsets(idtset)%mem_test
-       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE])) mem_test = 0
+       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE, RUNL_EPH])) mem_test = 0
 
        call memory(n1xccc,extrapwf,getcell,idtset,dtsets(idtset)%icoulomb,&
 &       intxc,dtsets(idtset)%ionmov,iout,densfor_pred,&
@@ -305,7 +296,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       mpi_enregs(idtset),mpsang,mpssoang,mpw,mqgrid_ff,mqgrid_vl,natom,nband,dtsets(idtset)%nfft,nfftdiel,nfftf,&
 &       dtsets(idtset)%ngfft,ngfftdiel,ngfftf,dtsets(idtset)%nimage,nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,&
 &       nsppol,nsym,ntypat,occopt,optforces,mem_test,optstress,pawcpxocc,pawmixdg,&
-&       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,dtsets(idtset)%tfkinfunc,&
+&       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,qphon,dtsets(idtset)%tfkinfunc,&
 &       dtsets(idtset)%typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
      else if( dtsets(idtset)%usepaw==0) then
        if (mpi_enregs(idtset)%me == 0) then
@@ -452,7 +443,7 @@ end subroutine memory_eval
 !! arrays allocated in move.f, brdmin.f, gstate.f (xf array) or pspini.f
 !! In the case 3<=occopt<=8 this amount is increased by 760 Kbytes
 !! to take into account the arrays smdfun, occfun, entfun, workfun and xgrid,
-!! declared in getnel
+!! declared in getnel.
 !!
 !! The current version takes into account
 !! 1) and 2) the "main chain" in its two slightly different versions :
@@ -477,16 +468,14 @@ end subroutine memory_eval
 !! driver - gstate - (move or brdmin) - scfcv - vtorho - tddft
 !!
 !! It is valid for all values of iscf, but not for nstep=0 (when the chain
-!!     goes through energy instead of vtorho).
+!! goes through energy instead of vtorho).
 !!
 !! Also, it is assumed that the potentials are non-local, even if there
-!!     are local ! It would be necessary to update this routine
-!!     now that the beginning of psp files is read before
-!!     the present call (XG 980502)
+!! are local ! It would be necessary to update this routine
+!! now that the beginning of psp files is read before the present call (XG 980502)
 !!
-!! One might also estimate if there must be a chain arriving at :
-!!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro,
-!!  clnup1.
+!! One might also estimate if there must be a chain arriving at:
+!!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro, clnup1.
 !! This is because there are allocated arrays in these routines.
 !!
 !! PARENTS
@@ -503,16 +492,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & natom,nband,nfft,nfftdiel,nfftf,ngfft,ngfftdiel,ngfftf,nimage,&
 & nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
-& prtvol,pspheads,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memory'
-!End of the abilint section
-
- implicit none
+& prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
 
 !Arguments ------------------------------------
 !scalars
@@ -529,6 +509,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol),ngfft(18),ngfftdiel(18),ngfftf(18)
  integer,intent(in) :: nloalg(3),typat(natom)
+ real(dp),intent(in) :: qphon(3)
  type(pspheader_type) :: pspheads(npsp)
 
 !Local variables-------------------------------
@@ -555,7 +536,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  integer,parameter :: marrays=150,nchain=10
  integer :: fftalgb,histsz,ii,iscf10,jj,l_max,l_size_max,matblk,mblk,mincat,mu
  integer :: my_natom,n_fftgr,narr_fourdp,nbnd_in_blk,ndiel4,ndiel456,ndiel5,ndiel6
- integer :: ngrad,nprocwf,nspgrad,rhoij_nspden
+ integer :: ngrad,nprocwf,nspgrad,qphase_rhoij,rhoij_nspden
  real(dp) :: mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm
  character(len=500) :: message
 ! character(len=1) :: firstchar
@@ -580,7 +561,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
 
- call wrtout(std_out,'memory : analysis of memory needs ','COLL')
+ call wrtout(std_out,'memory: analysis of memory needs ','COLL')
 
  if(jdtset>=100)then
    write(message,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
@@ -733,6 +714,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
        my_nattyp(jj)=my_nattyp(jj)+1
      end do
    end if
+   qphase_rhoij=merge(2,1,any(qphon(:)>tol8))
  else
 !  Do the allocation to avoid uninitialised variables.
    ABI_ALLOCATE(my_nattyp,(1))
@@ -747,6 +729,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    rhoij_nspden=nspden
    l_size_max=1
    l_max=1
+   qphase_rhoij=1
  end if
 
  n_fftgr=1;iscf10=mod(iscf,10)
@@ -838,8 +821,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    dttyp(20)=4
    if (usepaw==1) then
      do ii=1,ntypat
-       cadd(19)=cadd(19)+histsz*2*my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc  ! %pawrhoij()%rhoijp
-       cadd(20)=cadd(20)+histsz*2*my_nattyp(ii)*(2+lmn2_size(ii))*nspden              ! %pawrhoij()%rhoijselect
+       cadd(19)=cadd(19)+histsz*2*my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*qphase_rhoij*pawcpxocc ! %pawrhoij()%rhoijp
+       cadd(20)=cadd(20)+histsz*2*my_nattyp(ii)*(2+lmn2_size(ii))*nspden ! %pawrhoij()%rhoijselect
      end do
    end if
    if (extrapwf>0) then
@@ -990,7 +973,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !(6e) is for the arrays in dielmt, for the dielmt chain, see (11)
 !(6f) is for the arrays in pawmkrhoij
 
-!eknlk, enlnk, grnlnk
+!eknlk, enlxnk, grnlnk
  cadd(51)=(11+3*natom)*mband*nkpt*nsppol &
 & ; dttyp(51)=8
 !kg_k
@@ -1004,7 +987,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !  cg_disk
    cmpw(54)=2*nspinor*mband      ; dttyp(54)=8
  end if
-!eig_k, ek_k, enl_k, grnl_k, occ_k, resid_k
+!eig_k, ek_k, enlx_k, grnl_k, occ_k, resid_k
  cadd(56)=(14+3*natom)*mband   ; dttyp(56)=8
 !ylm_k
  cmpw(57)=mpsang*mpsang*useylm ; dttyp(57)=8
@@ -1069,13 +1052,13 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 !(6d) and (6e)           in suscep and dielmt, called by vtorho,
 !see (10) and (11) -------------------------------
 
-!(6f)  in pawmkrhoij or symrhoij called by pawmkrho, called by vtorho--------
+!(6f)  in pawmkrhoij or pawrhoij_symrhoij called by pawmkrho, called by vtorho--------
 !only when paralellim over atoms is activated
  dttyp(63)=8
  if((usepaw==1) .and. ((iscf>0) .or. (iscf == -3) .and. mpi_enreg%nproc_atom>1 ))then
    do ii=1,ntypat
-     cadd(63)=cadd(63)+nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc   ! Rhoij_gather and related data
-     cadd(63)=cadd(63)+nattyp(ii)*(2+lmn2_size(ii))    ! Rhoij_gather (rhoijselect, ...)
+     cadd(63)=cadd(63)+nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc*qphase_rhoij ! Rhoij_gather and related data
+     cadd(63)=cadd(63)+nattyp(ii)*(2+lmn2_size(ii)) ! Rhoij_gather (rhoijselect, ...)
    end do
  end if
 
@@ -1083,7 +1066,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !evec
  cadd(71)=2*mband*mband        ; dttyp(71)=8
-!subham, subvnl(if not PAW)
+!subham, subvnlx(if not PAW or if usefock_ACE)
  cadd(72)=(1+usepaw)*mband*(mband+1)    ; dttyp(72)=8
 !gkpsq
  cmpw(73)=1                    ; dttyp(73)=8
@@ -1110,9 +1093,9 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
 !(8)                     in cgwf------------------------------------------
 
-!conjgr, cwavef, direc, gh_direc, gvnl_direc
+!conjgr, cwavef, direc, gh_direc, gvnlx_direc
  cmpw(81)=2*5*nspinor          ; dttyp(81)=8
-!ghc,gvnlc
+!ghc,gvnlxc
  cmpw(82)=2*2*nspinor          ; dttyp(82)=8
 !PAW: scwavef,direc_tmp,ghc_all
  cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
@@ -1393,15 +1376,6 @@ end subroutine memory
 subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 & marrays,mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm,mffmem,&
 & mpw,natom,nchain,nfft,nfftf,occopt,option,prtvol)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memana'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1976,15 +1950,6 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & nkpt,nloalg,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optddk,optphon,option,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'memorf'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,getcell,idtset,intxc,iout,iprcel,iscf
@@ -2198,7 +2163,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  cmpw(51)=2                    ; dttyp(51)=8
 !ffnlk,ffnl1,ffnlkq
  cmpw(52)=2*(ntypat+2)*lmnmax  ; dttyp(52)=8
-!ghc,gvnlc,gvnl1
+!ghc,gvnlxc,gvnlx1
  cmpw(53)=6*nspinor            ; dttyp(53)=8
 !ph3d
  matblk=NLO_MINCAT
@@ -2212,7 +2177,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 
 !(6)                     in dfpt_cgwf ----------------------------------------
 
-!gh1, gh_direc, gvnl_direc, conjgr, direc, vresid, cwaveq
+!gh1, gh_direc, gvnlx_direc, conjgr, direc, vresid, cwaveq
  cmpw(61)=14*nspinor            ; dttyp(61)=8
 
 !(9a)                    in getghc and fourwf----------------------------
@@ -2347,15 +2312,6 @@ end subroutine memorf
 
 subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
 & ntypat,ntypalch,pspheads)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getdim_nloc'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2502,15 +2458,6 @@ end subroutine getdim_nloc
 
 subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'setmqgrid'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(inout)  :: mqgrid,mqgriddg
  integer , intent(in)  :: nptsgvec,usepaw
@@ -2629,14 +2576,6 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
       & atomic_info, memory_estimation
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'wvl_memory'
-!End of the abilint section
-
-  implicit none
 
 !Arguments ------------------------------------
   !scalars

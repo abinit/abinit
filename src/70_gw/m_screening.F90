@@ -35,6 +35,7 @@ MODULE m_screening
  use m_splines
  use m_abicore
  use m_lebedev
+ use m_spectra
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -56,7 +57,6 @@ MODULE m_screening
  use m_vcoul,           only : vcoul_t
  use m_io_screening,    only : hscr_free, hscr_io, hscr_print, hscr_from_file, read_screening, write_screening, &
 &                              hscr_copy, HSCR_LATEST_HEADFORM, hscr_t, ncname_from_id, em1_ncname
- use m_spectra,         only : spectra_t, spectra_init, spectra_free, spectra_repr
  use m_paw_sphharm,     only : ylmc
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
 
@@ -282,15 +282,6 @@ CONTAINS  !=====================================================================
 
 subroutine em1results_free(Er)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1results_free'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(Epsilonm1_results),intent(inout) :: Er
@@ -351,15 +342,6 @@ end subroutine em1results_free
 !! SOURCE
 
 subroutine em1results_print(Er,unit,prtvol,mode_paral)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'em1results_print'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: unit,prtvol
@@ -543,15 +525,6 @@ end subroutine em1results_print
 
 subroutine Epsm1_symmetrizer(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,epsm1_qbz)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Epsm1_symmetrizer'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz,nomega,npwc
@@ -677,15 +650,6 @@ end subroutine Epsm1_symmetrizer
 
 subroutine Epsm1_symmetrizer_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'Epsm1_symmetrizer_inplace'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iq_bz,nomega,npwc
@@ -781,15 +745,6 @@ end subroutine Epsm1_symmetrizer_inplace
 !! SOURCE
 
 subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_Er_from_file'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mqmem,npwe_asked,comm
@@ -926,15 +881,6 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 &                    ikxc_required,option_test,fname_dump,iomode,&
 &                    nfftot,ngfft,comm,fxc_ADA)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkdump_Er'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: id_required,approx_type,option_test,ikxc_required,nkxc
@@ -995,7 +941,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
      ABI_CHECK(ierr==0, "Out-of-memory in Er%epsm1 (in-core)")
 
      if (iomode == IO_MODE_MPI) then
-       !call wrtout(std_out,sjoin(ABI_FUNC, " read_screening with MPI_IO"))
+       !call wrtout(std_out, "read_screening with MPI_IO")
        MSG_WARNING("SUSC files is buggy. Using Fortran IO")
        call read_screening(in_varname,Er%fname,Er%npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      else
@@ -1083,11 +1029,11 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
          ABI_FREE(dummy_lwing)
 
          if (is_qeq0==1) then
-           call spectra_repr(spectra,msg)
+           call spectra%repr(msg)
            call wrtout(std_out,msg,'COLL')
            call wrtout(ab_out,msg,'COLL')
          end if
-         call spectra_free(spectra)
+         call spectra%free()
 
          call write_screening(out_varname,unt_dump,iomode,npwe,Er%nomega,iqibz,epsm1)
        end do
@@ -1127,7 +1073,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      ! FIXME there's a problem with SUSC files and MPI-IO
      !if (iomode == IO_MODE_MPI) then
-     !  !call wrtout(std_out,sjoin(ABI_FUNC, "read_screening with MPI_IO"))
+     !  !call wrtout(std_out, "read_screening with MPI_IO")
      !  MSG_WARNING("SUSC files is buggy. Using Fortran IO")
      !  call read_screening(in_varname,Er%fname,npwe,Er%nqibz,Er%nomega,Er%epsm1,IO_MODE_FORTRAN,comm)
      !else
@@ -1159,12 +1105,12 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        ABI_FREE(dummy_head)
 
        if (is_qeq0==1) then
-         call spectra_repr(spectra,msg)
+         call spectra%repr(msg)
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        end if
 
-       call spectra_free(spectra)
+       call spectra%free()
      end do
 
      Er%id = id_required
@@ -1215,15 +1161,6 @@ end subroutine mkdump_Er
 !! SOURCE
 
 subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_epsm1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1301,15 +1238,6 @@ end subroutine get_epsm1
 !! SOURCE
 
 subroutine decompose_epsm1(Er,iqibz,eigs)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'decompose_epsm1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1479,15 +1407,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
   approx_type,option_test,Vcp,nfftot,ngfft,nkxc,kxcg,gvec,chi0_head,&
   chi0_lwing,chi0_uwing,chi0,spectra,comm,&
   fxc_ADA) ! optional argument
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'make_epsm1_driver'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1695,7 +1614,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    end do
 
  CASE (4)
-   !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]] 
+   !@WC bootstrap vertex correction, Sharma et al. PRL 107, 196401 (2011) [[cite:Sharma2011]]
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
    ABI_STAT_MALLOC(chi0_tmp,(npwe*nI,npwe*nJ), ierr)
@@ -1846,7 +1765,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
 
 CASE(6)
    !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) [[cite:Rigamonti2015]]
-   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]] 
+   !@WC: and Berger (PRL 115, 137402) [[cite:Berger2015]]
    ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
    ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
    ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
@@ -2004,15 +1923,6 @@ end subroutine make_epsm1_driver
 
 subroutine rpa_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,my_nqlwl,dim_wing,chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'rpa_symepsm1'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqibz,nI,nJ,npwe,dim_wing,my_nqlwl,comm
@@ -2167,15 +2077,6 @@ end subroutine rpa_symepsm1
 
 subroutine atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0,kxcg_mat,option_test,my_nqlwl,dim_wing,omega,&
 & chi0_head,chi0_lwing,chi0_uwing,epsm_lf,epsm_nlf,eelf,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'atddft_symepsm1'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2395,15 +2296,6 @@ end subroutine atddft_symepsm1
 
 subroutine mkem1_q0(npwe,n1,n2,nomega,Cryst,Vcp,gvec,chi0_head,chi0_lwing,chi0_uwing,chi0,eps_head,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkem1_q0'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npwe,nomega,n1,n2,comm
@@ -2525,15 +2417,6 @@ end subroutine mkem1_q0
 
 subroutine lebedev_laikov_int()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lebedev_laikov_int'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 
 !Local variables-------------------------------
@@ -2652,15 +2535,6 @@ end subroutine lebedev_laikov_int
 
 function ylmstar_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmstar_over_qTq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: cart_vers(3)
@@ -2720,15 +2594,6 @@ end function ylmstar_over_qTq
 
 function ylmstar_wtq_over_qTq(cart_vers,int_pars,real_pars,cplx_pars)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ylmstar_wtq_over_qTq'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: cart_vers(3)
@@ -2784,15 +2649,6 @@ end function ylmstar_wtq_over_qTq
 !! SOURCE
 
 elemental function mdielf_bechstedt(eps_inf,qnrm,rhor) result(mdielf)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mdielf_bechstedt'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2850,15 +2706,6 @@ end function mdielf_bechstedt
 !! SOURCE
 
 subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,nspden,nfft,ngfft,rhor,which,w_qbz,comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'screen_mdielf'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2957,7 +2804,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
        MSG_ERROR(sjoin("Unknown model_type:",itoa(model_type)))
      end select
 
-     call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,ngfft,paral_kgb0,tim_fourdp0)
+     call fourdp(cplex1,fofg,em1_qpg2r,-1,MPI_enreg_seq,nfft,1,ngfft,tim_fourdp0)
      !
      ! Here, unlike the other parts of the code, the unsymmetrized e^{-1} is used.
      do ig1=1,npw
@@ -3034,15 +2881,6 @@ end subroutine screen_mdielf
 
 type(chi_t) function chi_new(npwe, nomega) result(chi)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi_new'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: npwe,nomega
 
@@ -3079,15 +2917,6 @@ end function chi_new
 !! SOURCE
 
 subroutine chi_free(chi)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'chi_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3131,15 +2960,6 @@ end subroutine chi_free
 !! SOURCE
 
 subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0_lwing, chi0_uwing, comm)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_write'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3305,15 +3125,6 @@ end subroutine lwl_write
 
 subroutine lwl_init(lwl, path, method, cryst, vcp, npwe, gvec, comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_init'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm,method,npwe
@@ -3385,15 +3196,6 @@ end subroutine lwl_init
 !! SOURCE
 
 subroutine lwl_free(lwl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'lwl_free'
-!End of the abilint section
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

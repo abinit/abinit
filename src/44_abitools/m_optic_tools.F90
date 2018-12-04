@@ -90,18 +90,7 @@ CONTAINS  !===========================================================
 
 subroutine sym2cart(gprimd,nsym,rprimd,symrel,symcart)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sym2cart'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------------------
-! in
-! out
 !scalars
  integer,intent(in) :: nsym
 !arrays
@@ -161,18 +150,7 @@ end subroutine sym2cart
 
 subroutine getwtk(kpt,nkpt,nsym,symrel,wtk)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getwtk'
-!End of the abilint section
-
- implicit none
-
 !Arguments -----------------------------------------------
-! in
-! out
 !scalars
  integer,intent(in) :: nkpt,nsym
 !arrays
@@ -251,7 +229,8 @@ end subroutine getwtk
 !! pmat2cart
 !!
 !! FUNCTION
-!!  turn momentum matrix elements to cartesian axes. To be used in optic calculation of linear and non-linear RPA dielectric matrices
+!!  turn momentum matrix elements to cartesian axes. To be used in optic calculation of linear
+!!  and non-linear RPA dielectric matrices
 !!
 !! INPUTS
 !!  eigen11,eigen12,eigen13 = first order ddk eigen values = d eig_i,k / dk for 3 reduced directions
@@ -272,15 +251,6 @@ end subroutine getwtk
 !! SOURCE
 
 subroutine pmat2cart(eigen11,eigen12,eigen13,mband,nkpt,nsppol,pmat,rprimd)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pmat2cart'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------------------
 !scalars
@@ -348,15 +318,6 @@ end subroutine pmat2cart
 !! SOURCE
 
 subroutine pmat_renorm(efermi, evalv, mband, nkpt, nsppol, pmat, sc)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pmat_renorm'
-!End of the abilint section
-
- implicit none
 
 !Arguments -----------------------------------------------
 !scalars
@@ -450,17 +411,7 @@ end subroutine pmat_renorm
 subroutine linopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
   v1,v2,nmesh,de,sc,brod,fnam,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linopt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin,ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -479,8 +430,6 @@ real(dp), intent(in) :: sc
 real(dp), intent(in) :: brod
 character(len=*), intent(in) :: fnam
 integer, intent(in) :: comm
-
-
 
 !Local variables -------------------------
 !no_abirules
@@ -837,17 +786,7 @@ end subroutine linopt
 subroutine nlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nlinopt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -1626,17 +1565,7 @@ end subroutine nlinopt
 subroutine linelop(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'linelop'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt
@@ -2208,17 +2137,7 @@ end subroutine linelop
 subroutine nonlinopt(icomp,itemp,nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,evalv,occv,efermi, &
   pmat,v1,v2,v3,nmesh,de,sc,brod,tol,fnam,do_antiresonant,ncid,comm)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nonlinopt'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
-!no_abirules
 integer, intent(in) :: icomp,itemp,nspin, ncid
 real(dp), intent(in) :: omega
 integer, intent(in) :: nkpt

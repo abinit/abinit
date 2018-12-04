@@ -47,13 +47,6 @@ CONTAINS
 !
 SUBROUTINE libtetrabz_initialize(ltetra,nge,ngw,bvec,linterpol,wlsm,nk_local,nt_local,nkBZ,ik_global,ik_local,kvec,comm)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_initialize'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: ltetra, nge(3), ngw(3)
@@ -202,13 +195,6 @@ END SUBROUTINE libtetrabz_initialize
 !
 SUBROUTINE libtetrabz_kgrid(linterpol,ivvec,ng,nkBZ,nk_local,nt_local,ik_global,ik_local,kvec,comm)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_kgrid'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   LOGICAL,INTENT(INOUT) :: linterpol
@@ -303,13 +289,6 @@ SUBROUTINE libtetrabz_divideMPI(comm,nt,nt_front,nt_local)
 #if defined HAVE_MPI2
   USE mpi, ONLY : MPI_COMM_SIZE, MPI_COMM_RANK
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_divideMPI'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(IN) :: comm, nt
@@ -336,13 +315,6 @@ END SUBROUTINE libtetrabz_divideMPI
 !
 pure SUBROUTINE libtetrabz_sort(n,key,indx)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_sort'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   integer,INTENT(IN) :: n
@@ -375,13 +347,6 @@ END SUBROUTINE libtetrabz_sort
 !
 pure SUBROUTINE libtetrabz_interpol_indx(nintp,ng,kvec,kintp,wintp)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_interpol_indx'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER,INTENT(in) :: nintp, ng(3)
@@ -485,13 +450,6 @@ END SUBROUTINE libtetrabz_interpol_indx
 !
 pure SUBROUTINE libtetrabz_tsmall_a1(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_tsmall_a1'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -518,13 +476,6 @@ END SUBROUTINE libtetrabz_tsmall_a1
 !
 pure SUBROUTINE libtetrabz_tsmall_b1(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_tsmall_b1'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -551,13 +502,6 @@ END SUBROUTINE libtetrabz_tsmall_b1
 !
 pure SUBROUTINE libtetrabz_tsmall_b2(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_tsmall_b2'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -584,13 +528,6 @@ END SUBROUTINE libtetrabz_tsmall_b2
 !
 pure SUBROUTINE libtetrabz_tsmall_b3(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_tsmall_b3'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -617,13 +554,6 @@ END SUBROUTINE libtetrabz_tsmall_b3
 !
 pure SUBROUTINE libtetrabz_tsmall_c1(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_tsmall_c1'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -650,13 +580,6 @@ END SUBROUTINE libtetrabz_tsmall_c1
 !
 pure SUBROUTINE libtetrabz_tsmall_c2(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_tsmall_c2'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -683,13 +606,6 @@ END SUBROUTINE libtetrabz_tsmall_c2
 !
 pure SUBROUTINE libtetrabz_tsmall_c3(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_tsmall_c3'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -716,13 +632,6 @@ END SUBROUTINE libtetrabz_tsmall_c3
 !
 pure SUBROUTINE libtetrabz_triangle_a1(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_triangle_a1'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -749,13 +658,6 @@ END SUBROUTINE libtetrabz_triangle_a1
 !
 pure SUBROUTINE libtetrabz_triangle_b1(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_triangle_b1'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -782,13 +684,6 @@ END SUBROUTINE libtetrabz_triangle_b1
 !
 pure SUBROUTINE libtetrabz_triangle_b2(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_triangle_b2'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -815,13 +710,6 @@ END SUBROUTINE libtetrabz_triangle_b2
 !
 pure SUBROUTINE libtetrabz_triangle_c1(e,V,tsmall)
   !
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_triangle_c1'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   REAL(8),INTENT(IN) :: e(4)
@@ -851,13 +739,6 @@ SUBROUTINE libtetrabz_mpisum_d(comm,scaler)
 #if defined HAVE_MPI2
   USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_mpisum_d'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER :: comm
@@ -879,13 +760,6 @@ SUBROUTINE libtetrabz_mpisum_dv(comm,ndim,vector)
 #if defined HAVE_MPI2
   USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_mpisum_dv'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER :: comm, ndim
@@ -907,13 +781,6 @@ SUBROUTINE libtetrabz_mpisum_zv(comm,ndim,vector)
 #if defined HAVE_MPI2
   USE mpi, ONLY : MPI_DOUBLE_COMPLEX, MPI_IN_PLACE, MPI_SUM
 #endif
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'libtetrabz_mpisum_zv'
-!End of the abilint section
-
   IMPLICIT NONE
   !
   INTEGER :: comm, ndim
