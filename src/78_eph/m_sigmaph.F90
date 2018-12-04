@@ -261,7 +261,7 @@ module m_sigmaph
     ! mask_qibz_k(nqibz_k)
     ! Mask array used to select the subspace of q-points in the IBZ with
     ! non-negligible contribution to the delta (> 0 to include)
-    ! Only used for the computation of the imaginary part when tetrahedron method is on.
+    ! Only used for the computation of the imaginary part when tetrahedron method is activated.
 
   integer,allocatable :: distrib_bq(:,:)
     ! Table to distribute q-points and bands.
@@ -1918,7 +1918,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  else
 
    if (all(dtset%sigma_erange /= -huge(one))) then
-     call sigtk_kcalc_from_erange(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
+     call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks, comm)
 
    else
      ! Use qp_range to select the interesting k-points and the corresponding bands.
@@ -3592,7 +3592,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
   enddo
  enddo
 #else
- sigma%mask_qibz_k = 0
+ !sigma%mask_qibz_k = 0
  ! loop over bands to sum
  do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
   ! loop over phonon modes
@@ -3624,13 +3624,13 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
             weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
             dpm = tmp_deltaw_pm(2, iq_ibz_fine, :)
             sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,jj) = dpm / weight
-            if (any(abs(dpm) > sigma%tol_deltaw_pm / sigma%eph_doublegrid%ndiv)) sigma%mask_qibz_k(iq_ibz) = 1
+            !if (any(abs(dpm) > sigma%tol_deltaw_pm / sigma%eph_doublegrid%ndiv)) sigma%mask_qibz_k(iq_ibz) = 1
           end do
         else
           weight = sigma%ephwg%lgk%weights(iq_ibz)
           dpm = tmp_deltaw_pm(2, iq_ibz, :)
           sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,1) = dpm / weight
-          if (any(abs(dpm) > sigma%tol_deltaw_pm)) sigma%mask_qibz_k(iq_ibz) = 1
+          !if (any(abs(dpm) > sigma%tol_deltaw_pm)) sigma%mask_qibz_k(iq_ibz) = 1
         end if
 
         iq_ibz_packed = iq_ibz_packed + 1
@@ -3640,9 +3640,9 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  enddo
 #endif
 
- call alloc_copy(sigma%mask_qibz_k, imask)
- call xmpi_max(imask, sigma%mask_qibz_k, comm, ierr)
- ABI_FREE(imask)
+ !call alloc_copy(sigma%mask_qibz_k, imask)
+ !call xmpi_max(imask, sigma%mask_qibz_k, comm, ierr)
+ !ABI_FREE(imask)
 
  ABI_FREE(tmp_deltaw_pm)
  !call xmpi_sum(sigma%deltaw_pm, comm, ierr)
@@ -4211,12 +4211,14 @@ end subroutine sigtk_kcalc_from_gaps
 !!
 !! SOURCE
 
-subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks, comm)
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(gaps_t) :: gaps
+ type(gaps_t),intent(in) :: gaps
+ integer,intent(in) :: comm
  integer,intent(out) :: nkcalc
 !arrays
  real(dp),allocatable,intent(out) :: kcalc(:,:)
@@ -4225,45 +4227,83 @@ subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks
 
 !Local variables ------------------------------
 !scalars
- integer :: spin, ik, band, ii, nsppol
+ integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz
  logical :: found
- real(dp) :: cmin, vmax, ee
+ real(dp) :: cmin, vmax, ee, dksqmax
+ character(len=500) :: msg
 !arrays
- !integer :: val_indeces(ebands%nkpt, ebands%nsppol)
- integer,allocatable :: ib_work(:,:,:)
+ integer :: kptrlatt(3,3)
+ integer,allocatable :: ib_work(:,:,:), sigmak2ebands(:), indkk(:,:)
  integer :: kpos(ebands%nkpt)
+ real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:),tmp_kcalc(:,:)
 
 ! *************************************************************************
 
  call wrtout(std_out, " Selecting k-points and bands according to their position wrt band edges.")
  ABI_CHECK(maxval(gaps%ierr) == 0, "erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
- nsppol = ebands%nsppol
- !val_indeces = get_valence_idx(ebands)
+ if (any(dtset%sigma_ngkpt /= 0)) then
+    call wrtout(std_out, "Generating initial list of k-points from sigma_nkpt.")
+    ! Get tentative tmp_nkpt and tmp_kcalc from sigma_ngkpt.
+    kptrlatt = 0
+    kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
+    call kpts_ibz_from_kptrlatt(cryst, kptrlatt, dtset%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
+      tmp_nkpt, tmp_kcalc, sigma_wtk, sigma_nkbz, sigma_kbz)
 
- ABI_MALLOC(ib_work, (2,ebands%nkpt, nsppol))
+    ABI_FREE(sigma_kbz)
+    ABI_FREE(sigma_wtk)
+
+    ! Map tmp_kcalc to ebands%kpts
+    timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+    ABI_MALLOC(indkk, (tmp_nkpt,  6))
+    call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, tmp_kcalc, ebands%nkpt, tmp_nkpt, cryst%nsym, &
+         1, cryst%symafm, cryst%symrec, timrev, comm, use_symrec=.True.)
+    if (dksqmax > tol12) then
+      write(msg, '(a,es16.6,2a)' )&
+        "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
+        'Action: check your WFK file and the value of sigma_nkpt, sigma_shiftk in the input file.'
+      MSG_ERROR(msg)
+    end if
+
+    ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
+    sigmak2ebands = indkk(:, 1)
+    ABI_FREE(tmp_kcalc)
+    ABI_FREE(indkk)
+ else
+   ! Include all the k-points in the IBZ in the initial list.
+   call wrtout(std_out, "Generating initial list of k-points from ebands%kptns.")
+   tmp_nkpt = ebands%nkpt
+   ! Trivial map
+   ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
+   sigmak2ebands = [ii, (ii, ii=1, ebands%nkpt)]
+ end if
+
+ nsppol = ebands%nsppol
+ ABI_MALLOC(ib_work, (2, tmp_nkpt, nsppol))
 
  do spin=1,nsppol
    ! Get cmb and vbm with some tolerance
    vmax = gaps%vb_max(spin) + tol2 * eV_Ha
    cmin = gaps%cb_min(spin) - tol2 * eV_Ha
    !print *, "vmax, cmin", vmax, cmin
-   do ik=1,ebands%nkpt
-     ib_work(1, ik, spin) = huge(1)
-     ib_work(2, ik, spin) = -huge(1)
+   do ii=1,tmp_nkpt
+     ! Index in ebands.
+     ik = sigmak2ebands(ii)
+     ib_work(1, ii, spin) = huge(1)
+     ib_work(2, ii, spin) = -huge(1)
      do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
         ee = ebands%eig(band, ik, spin)
         if (dtset%sigma_erange(1) >= zero) then
           if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
-            ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
-            ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+            ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
+            ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)
             !write(std_out, *), "Adding valence", band
           end if
         end if
         if (dtset%sigma_erange(2) >= zero) then
           if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
-            ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
-            ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+            ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
+            ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)
             !write(std_out, *)"Adding conduction", band
           end if
         end if
@@ -4275,16 +4315,16 @@ subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks
  ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
  ! we have compute the union of the k-points.
  nkcalc = 0
- do ik=1,ebands%nkpt
+ do ii=1,tmp_nkpt
    found = .False.
    do spin=1,nsppol
-      if (ib_work(1, ik, spin) <= ib_work(2, ik, spin)) then
+      if (ib_work(1, ii, spin) <= ib_work(2, ii, spin)) then
         found = .True.; exit
       end if
    end do
    if (found) then
      nkcalc = nkcalc + 1
-     kpos(nkcalc) = ik
+     kpos(nkcalc) = ii
    end if
  end do
 
@@ -4292,23 +4332,27 @@ subroutine sigtk_kcalc_from_erange(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks
  ABI_MALLOC(bstart_ks, (nkcalc, nsppol))
  ABI_MALLOC(nbcalc_ks, (nkcalc, nsppol))
 
- do ii=1,nkcalc
-   ik = kpos(ii)
-   kcalc(:,ii) = ebands%kptns(:,ik)
+ do ic=1,nkcalc
+   ! index in ib_work array
+   ii = kpos(ic)
+   ! index in ebands.
+   ik = sigmak2ebands(ii)
+   kcalc(:,ic) = ebands%kptns(:,ik)
    do spin=1,nsppol
-     bstart_ks(ii,spin) = 0
-     nbcalc_ks(ii,spin) = 0
-     if (ib_work(1, ik, spin) <= ib_work(2, ik, spin)) then
-       bstart_ks(ii,spin) = ib_work(1, ik, spin)
-       nbcalc_ks(ii,spin) = ib_work(2, ik, spin) - ib_work(1, ik, spin) + 1
+     bstart_ks(ic, spin) = 0
+     nbcalc_ks(ic, spin) = 0
+     if (ib_work(1, ii, spin) <= ib_work(2, ii, spin)) then
+       bstart_ks(ic, spin) = ib_work(1, ii, spin)
+       nbcalc_ks(ic, spin) = ib_work(2, ii, spin) - ib_work(1, ii, spin) + 1
      end if
-     if (nbcalc_ks(ii,spin) == 0) then
+     if (nbcalc_ks(ic, spin) == 0) then
        MSG_WARNING("Spin-polarized case with nbcalc_ks == 0, don't know if code can handle it!")
      end if
    end do
  end do
 
  ABI_FREE(ib_work)
+ ABI_FREE(sigmak2ebands)
 
 end subroutine sigtk_kcalc_from_erange
 !!***
