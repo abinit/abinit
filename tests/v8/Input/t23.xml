@@ -17,27 +17,27 @@
     <nterms>6</nterms>
     <spin_exchange_term>
       <ijR>1 1 0 -1 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 1 0 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 0 1 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 0 0 1</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 -1 0 0</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
     <spin_exchange_term>
       <ijR>1 1 0 0 -1</ijR>
-      <data>0.0375 	 0.0375 	 0.0375</data>
+      <data>0.01875 	 0.01875 	 0.01875</data>
     </spin_exchange_term>
   </spin_exchange_list>
 </System_definition>
