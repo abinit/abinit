@@ -3969,12 +3969,14 @@ end function ebands_interp_kpath
 !!
 !! SOURCE
 
-type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth, step, broad, comm, out_mesh, out_dos) result(edos)
+type(edos_t) function & 
+ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, ndat, intmeth, step, broad, comm, out_mesh, out_dos, emin, emax) result(edos)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndat, intmeth, comm
  real(dp),intent(in) :: step, broad
+ real(dp),optional,intent(in) :: emin, emax
  class(ebands_t),intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
@@ -4028,6 +4030,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
  eminmax_spin = get_minmax(ebands, "eig")
  min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
  max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
+ if (present(emin)) min_ene = emin
+ if (present(emax)) max_ene = emax
 
  nw = nint((max_ene - min_ene) / step) + 1
  nw = nint((max_ene - min_ene)/edos%step) + 1; edos%nw = nw
@@ -4067,7 +4071,9 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
 #endif
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- select case (intmeth)
+ call wrtout(std_out, "Computing DOS weighted by matrix elements.")
+
+select case (intmeth)
  case (1)
    ! Gaussian
    ABI_MALLOC(wme0, (nw))
@@ -4153,10 +4159,15 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
        ! For each band get its contribution
        tmp_eigen = ebands%eig(band,:,spin)
 
+       if (present(emin) .and. all(tmp_eigen<emin)) cycle
+       if (present(emax) .and. all(tmp_eigen>emax)) cycle
+
+       write(*,*) band,'\',ebands%nband(1)
        call tetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
 
        do ikpt=1,ebands%nkpt
+
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, ikpt, 1)
          !scalar
          select case (ndat)
@@ -4218,7 +4229,7 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, bks_vals, nd
  end select
 
  call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, sjoin("Calculation completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
+ call wrtout(std_out, sjoin("Computation of DOS weighted by matrix elements completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
    sec2str(wall_all)), do_flush=.True.)
 
  ! Compute total DOS and IDOS
@@ -4259,7 +4270,7 @@ contains
   end do
   vsum = vsum / cryst%nsym
 
- end function
+ end function symmetrize_vector
 
  function symmetrize_tensor(cryst,t) result(tsum)
   integer :: isym
@@ -4274,7 +4285,7 @@ contains
   end do
   tsum = tsum / cryst%nsym
 
- end function
+ end function symmetrize_tensor
 
 end function ebands_get_dos_matrix_elements
 !!***
@@ -5374,11 +5385,12 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
 !Local variables-------------------------------
 !scalars
  type(ebands_t) :: ebands_kmesh
+ type(gaps_t) :: gaps
  integer,parameter :: master=0,intp_nshiftk1=1
  integer :: my_rank,ndivsm,nbounds,itype
  integer :: nb,spin,ik,ib,ii,jj
  integer :: edos_intmeth
- real(dp) :: edos_step,edos_broad
+ real(dp) :: edos_step,edos_broad,emin,emax
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
 #endif
@@ -5389,6 +5401,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
 !arrays
  integer :: intp_kptrlatt(3,3)
  real(dp) :: vr(3),intp_shiftk(3),params(4)
+ real(dp) :: eminmax_spin(2,ebands%nsppol)
  real(dp),allocatable :: bounds(:,:)
  real(dp),allocatable :: vv_vals(:,:,:,:), vvdos_mesh(:), vvdos_vals(:,:,:,:)
 ! *********************************************************************
@@ -5458,8 +5471,21 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
        end do
      end do
    end do
+
+   !set default erange
+   eminmax_spin = get_minmax(ebands, "eig")
+   emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
+   emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
+
+   ! If sigma_erange is set, get emin and emax
+   ncerr = get_gaps(ebands_kmesh,gaps)
+   do spin=1,ebands%nsppol
+     if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
+     if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
+   end do
+
    edos = ebands_get_dos_matrix_elements(ebands_kmesh, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
-                                         comm, vvdos_mesh, vvdos_vals)
+                                         comm, vvdos_mesh, vvdos_vals, emin, emax)
    ABI_SFREE(vv_vals)
  end if
 

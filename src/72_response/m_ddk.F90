@@ -349,6 +349,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  type(ebands_t) :: ebands
  type(edos_t)  :: edos
  type(jdos_t)  :: jdos
+ type(gaps_t)  :: gaps
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp, hdr
  type(ddkop_t) :: ddkop
@@ -357,6 +358,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:),nband(:,:), kg_k(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  real(dp) :: kpt(3), vv(2, 3)
+ real(dp) :: eminmax_spin(2,2)
+ real(dp) :: emin, emax
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
  real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:),vv_vals(:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
@@ -677,8 +680,21 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
        end do
      end do
    end do
+
+   !set default erange
+   eminmax_spin(:,:ebands%nsppol) = get_minmax(ebands, "eig")
+   emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
+   emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
+
+   ! If sigma_erange is set, get emin and emax
+   ncerr = get_gaps(ebands,gaps)
+   do spin=1,ebands%nsppol
+     if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
+     if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
+   end do
+
    edos = ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
-                                         comm, vvdos_mesh, vvdos_vals)
+                                         comm, vvdos_mesh, vvdos_vals, emin, emax)
    ABI_SFREE(vv_vals)
  end if
 
@@ -718,7 +734,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, nine")], defmode=.True.)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals(:,0,:,:)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals(:,1,:,:)))
    end if
    NCF_CHECK(nf90_close(ncid))
 
