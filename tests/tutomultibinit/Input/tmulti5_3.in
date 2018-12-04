@@ -3,9 +3,16 @@
 # without regeneration of dipole-dipole just reading xml
 ##############################################################################
 prt_model = 0
+
+#--------------------------------------------------------------
+#Monte carlo / molecular dynamics
+#--------------------------------------------------------------
 dynamics =  0    ! disable molecular dynamics
 
 ncell =   4 1 1  ! size of supercell.   
+#-------------------------------------------------------------
+#Spin dynamics
+#------------------------------------------------------------
 spin_dynamics= 2                ! enable spin dynamics. Depondt-Mertens algorithm.
 spin_ntime_pre =100000          ! warming up steps. 
 spin_ntime =100000              ! number of steps. 

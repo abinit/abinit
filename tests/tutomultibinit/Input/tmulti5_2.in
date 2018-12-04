@@ -23,8 +23,8 @@ spin_init_state = 2           ! FM initial state. May cause some trouble
 
 spin_var_temperature=1        ! switch on variable temperature calculation
 spin_temperature_start=0      ! starting point of temperature
-spin_temperature_end=500      ! ending point of temperature. smaller than Neel T?
-spin_temperature_nstep=6      ! number of temperature steps. Enough?
+spin_temperature_end=900      ! ending point of temperature. smaller than Neel T?
+spin_temperature_nstep= 10    ! number of temperature steps. Enough?
 
 spin_sia_add = 1              ! add a single ion anistropy (SIA) term?
 spin_sia_k1amp = 1e-6         ! amplitude of SIA (in Ha), how large should be used?
@@ -50,7 +50,8 @@ spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
 #%% authors = X. He
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read xml  and run spin dynamics. MvT calculation.  
+#%%   read xml  and run spin dynamics. MvT calculation. 
+#%%   LaFeO3 Pnma with U(Fe)=4 eV; PBEsol; exchange parameter generated with TB2J.  
 #%%   Parameters in this file does not give reasonable results and should be
 #%%   tuned, which is designed for the tutorial. It also serve the purpose  of
 #%%   limiting the test run to a short enough time.
