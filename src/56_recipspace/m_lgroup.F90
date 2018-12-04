@@ -122,14 +122,21 @@ module m_lgroup
    ! weights(nibz)
    ! Weights in the IBZ(q), normalized to 1
 
+ contains
+
+   procedure :: findq_ibzk => lgroup_findq_ibzk
+   ! Find the index of the point in the IBZ(k).
+   procedure :: find_ibzimage => lgroup_find_ibzimage
+   ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
+   procedure :: print => lgroup_print
+   ! Print the object
+   procedure :: free => lgroup_free
+   ! Free memory.
+
  end type lgroup_t
 !!***
 
  public :: lgroup_new                 ! Creation method.
- public :: lgroup_findq_ibzk          ! Find the index of the point in the IBZ(k).
- public :: lgroup_find_ibzimage       ! Find the symmetrical image in the IBZ(k) of a qpoint in the BZ.
- public :: lgroup_print               ! Print the object
- public :: lgroup_free                ! Free memory.
 
 contains  !=====================================================
 !!***
@@ -160,8 +167,6 @@ contains  !=====================================================
 !! SOURCE
 
 type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, sord) result(new)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -303,12 +308,10 @@ end function lgroup_new
 
 integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),optional,intent(in) :: qtol
- type(lgroup_t),intent(in) :: self
+ class(lgroup_t),intent(in) :: self
 !arrays
  real(dp),intent(in) :: qpt(3)
 
@@ -352,10 +355,8 @@ end function lgroup_findq_ibzk
 
 integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
 
- implicit none
-
 !Arguments ------------------------------------
- type(lgroup_t),intent(in) :: self
+ class(lgroup_t),intent(in) :: self
  real(dp),intent(in) :: qpt(3)
 
 !Local variables-------------------------------
@@ -401,12 +402,10 @@ end function lgroup_find_ibzimage
 
 subroutine lgroup_print(self, title, unit, prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,optional,intent(in) :: unit, prtvol
  character(len=*),optional,intent(in) :: title
- type(lgroup_t),intent(in) :: self
+ class(lgroup_t),intent(in) :: self
 
 !Local variables-------------------------------
 !scalars
@@ -452,10 +451,8 @@ end subroutine lgroup_print
 
 subroutine lgroup_free(self)
 
- implicit none
-
 !Arguments ------------------------------------
- type(lgroup_t),intent(inout) :: self
+ class(lgroup_t),intent(inout) :: self
 
 ! *************************************************************************
 

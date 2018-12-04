@@ -90,8 +90,6 @@ contains  !============================================================
 
 integer pure function kpts_timrev_from_kptopt(kptopt) result(timrev)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt
@@ -140,8 +138,6 @@ end function kpts_timrev_from_kptopt
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
   new_kptrlatt, new_shiftk)  ! Optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -238,8 +234,6 @@ end subroutine kpts_ibz_from_kptrlatt
 
 type(t_tetrahedron) function tetra_from_kptrlatt( &
 &  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, msg, ierr) result (tetra)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -372,8 +366,6 @@ end function tetra_from_kptrlatt
 !! SOURCE
 
 integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -551,8 +543,6 @@ end function symkchk
 
 subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,symafm,symmat,timrev,comm, &
                   use_symrec) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -917,8 +907,6 @@ end subroutine listkk
 subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 & msym,nkpt,nkpt_computed,nshiftk,nsym,rprimd,shiftk,symafm,symrel,vacuum,wtk,&
 & fullbz,nkpthf,kpthf,downsampling) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1377,8 +1365,6 @@ end subroutine getkgrid
 subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
 & nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,nkpt_fullbz,nshiftk,nsym
@@ -1467,8 +1453,6 @@ end subroutine get_full_kgrid
 !! SOURCE
 
 subroutine get_kpt_fullbz(kpt_fullbz,kptrlatt,nkpt_fullbz,nshiftk,shiftk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1640,8 +1624,6 @@ end subroutine get_kpt_fullbz
 !! SOURCE
 
 subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsampling)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -2204,8 +2186,6 @@ end subroutine smpbz
 
 subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 & msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2885,8 +2865,6 @@ end subroutine testkgrid
 
 
 subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
-
- implicit none
 
 !Arguments ------------------------------------
  !F95 construct, interface required but we can call mknormpath once

@@ -296,7 +296,6 @@ CONTAINS  !===========================================================
 
 pure function arth_int(start,step,nn)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -339,7 +338,6 @@ end function arth_int
 
 pure function arth_rdp(start,step,nn)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -390,7 +388,6 @@ end function arth_rdp
 
 pure function geop(start,factor,nn) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -427,7 +424,6 @@ end function geop
 
 subroutine reverse_int(arr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -465,7 +461,6 @@ end subroutine reverse_int
 
 subroutine reverse_rdp(arr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -507,7 +502,6 @@ end subroutine reverse_rdp
 
 pure subroutine unit_matrix_int(matrix)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(inout) :: matrix(:,:)
@@ -546,7 +540,6 @@ end subroutine unit_matrix_int
 
 pure subroutine unit_matrix_rdp(matrix)
 
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(inout) :: matrix(:,:)
@@ -585,7 +578,6 @@ end subroutine unit_matrix_rdp
 
 pure subroutine unit_matrix_cdp(matrix)
 
- implicit none
 
 !Arguments ------------------------------------
  complex(dpc),intent(inout) :: matrix(:,:)
@@ -623,7 +615,6 @@ end subroutine unit_matrix_cdp
 
 pure function get_trace_int(matrix) result(trace)
 
- implicit none
 
 !Arguments ------------------------------------
  integer :: trace
@@ -661,7 +652,6 @@ end function get_trace_int
 
 pure function get_trace_rdp(matrix) result(trace)
 
- implicit none
 
 !Arguments ------------------------------------
  real(dp) :: trace
@@ -697,7 +687,6 @@ end function get_trace_rdp
 
 pure function get_trace_cdp(matrix) result(trace)
 
- implicit none
 
 !Arguments ------------------------------------
  complex(dpc) :: trace
@@ -733,7 +722,6 @@ end function get_trace_cdp
 
 function get_diag_int(mat) result(diag)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -772,7 +760,6 @@ end function get_diag_int
 !! SOURCE
 function get_diag_rdp(mat) result(diag)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -841,7 +828,6 @@ end function get_diag_cdp
 
 pure logical function isdiagmat_int(mat) result(ans)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -877,7 +863,6 @@ end function isdiagmat_int
 
 pure logical function isdiagmat_rdp(mat, atol) result(ans)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -920,7 +905,6 @@ end function isdiagmat_rdp
 
 pure function l2int_1D(larr) result(int_arr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -954,7 +938,6 @@ end function l2int_1D
 
 pure function l2int_2D(larr) result(int_arr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -988,7 +971,6 @@ end function l2int_2D
 
 pure function l2int_3D(larr) result(int_arr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1025,7 +1007,6 @@ end function l2int_3D
 
 pure function rdp2cdp_1D(rr) result(cc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1055,7 +1036,6 @@ end function rdp2cdp_1D
 
 pure function rdp2cdp_2D(rr) result(cc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1085,7 +1065,6 @@ end function rdp2cdp_2D
 
 pure function rdp2cdp_3D(rr) result(cc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1115,7 +1094,6 @@ end function rdp2cdp_3D
 
 pure function rdp2cdp_4D(rr) result(cc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1145,7 +1123,6 @@ end function rdp2cdp_4D
 
 pure function rdp2cdp_5D(rr) result(cc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1175,7 +1152,6 @@ end function rdp2cdp_5D
 
 pure function rdp2cdp_6D(rr) result(cc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1208,7 +1184,6 @@ end function rdp2cdp_6D
 
 pure function cdp2rdp_1D(cc) result(rr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1239,7 +1214,6 @@ end function cdp2rdp_1D
 
 pure function cdp2rdp_2D(cc) result(rr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1269,7 +1243,6 @@ end function cdp2rdp_2D
 
 pure function cdp2rdp_3D(cc) result(rr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1300,7 +1273,6 @@ end function cdp2rdp_3D
 
 pure function cdp2rdp_4D(cc) result(rr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1330,7 +1302,6 @@ end function cdp2rdp_4D
 
 pure function cdp2rdp_5D(cc) result(rr)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1362,7 +1333,6 @@ end function cdp2rdp_5D
 
 elemental function iseven(nn)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1392,7 +1362,6 @@ end function iseven
 
 pure function is_integer_0d(rr,tol) result(ans)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1424,7 +1393,6 @@ end function is_integer_0d
 
 pure function is_integer_1d(rr,tol) result(ans)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1463,7 +1431,6 @@ end function is_integer_1d
 
 function is_zero_rdp_0d(rr,tol) result(ans)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1494,7 +1461,6 @@ end function is_zero_rdp_0d
 
 function is_zero_rdp_1d(rr,tol) result(ans)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1522,7 +1488,6 @@ end function is_zero_rdp_1d
 
 pure logical function inrange_int(xval, win)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1547,7 +1512,6 @@ end function inrange_int
 
 pure logical function inrange_dp(xval, win)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1572,7 +1536,6 @@ end function inrange_dp
 
 pure function bisect_rdp(AA,xx) result(loc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1629,7 +1592,6 @@ end function bisect_rdp
 !! SOURCE
 pure function bisect_int(AA,xx) result(loc)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1681,7 +1643,6 @@ end function bisect_int
 
 pure function imax_loc_int(iarr,mask)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1719,7 +1680,6 @@ end function imax_loc_int
 !! SOURCE
 pure function imax_loc_rdp(arr,mask)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1755,7 +1715,6 @@ end function imax_loc_rdp
 
 pure function imin_loc_int(arr,mask)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1794,7 +1753,6 @@ end function imin_loc_int
 
 pure function imin_loc_rdp(arr,mask)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1840,7 +1798,6 @@ end function imin_loc_rdp
 
 integer pure function lfind(mask, back)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1908,7 +1865,6 @@ end function lfind
 
 subroutine list2blocks(list,nblocks,blocks)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1982,7 +1938,6 @@ end subroutine list2blocks
 
 subroutine mask2blocks(mask,nblocks,blocks)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2068,7 +2023,6 @@ end subroutine mask2blocks
 
 function linfit_rdp(nn,xx,yy,aa,bb) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2176,7 +2130,6 @@ end function linfit_spc
 
 function linfit_dpc(nn,xx,zz,aa,bb) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2240,7 +2193,6 @@ end function linfit_dpc
 
 subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2360,7 +2312,6 @@ end subroutine llsfit_svd
 
 subroutine polyn_interp(xa,ya,x,y,dy)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2442,7 +2393,6 @@ end subroutine polyn_interp
 
 recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2548,7 +2498,6 @@ end subroutine trapezoidal_
 
  recursive subroutine midpoint_(func,nn,xmin,xmax,quad)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2649,7 +2598,6 @@ end subroutine midpoint_
 
 recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,npts)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2859,7 +2807,6 @@ end subroutine quadrature
 
 subroutine ctrap(imax,ff,hh,ans)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3018,7 +2965,6 @@ end subroutine ctrap
 
 subroutine cspint ( ftab, xtab, ntab, a, b, y, e, work, result )
 
-  implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3180,7 +3126,6 @@ end subroutine cspint
 
 subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3259,7 +3204,6 @@ end subroutine coeffs_gausslegint
 
 function simpson_cplx(npts,step,ff)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3331,7 +3275,6 @@ end function simpson_cplx
 
 subroutine hermitianize_spc(mat,uplo)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3421,7 +3364,6 @@ end subroutine hermitianize_spc
 
 subroutine hermitianize_dpc(mat,uplo)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3507,7 +3449,6 @@ end subroutine hermitianize_dpc
 
 pure subroutine mkherm(array,ndim)
 
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3571,7 +3512,6 @@ end subroutine mkherm
 
 subroutine hermit(chmin,chmout,ierr,ndim)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3681,7 +3621,6 @@ end subroutine hermit
 
 subroutine symmetrize_spc(mat,uplo)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3763,7 +3702,6 @@ end subroutine symmetrize_spc
 
 subroutine symmetrize_dpc(mat,uplo)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3839,7 +3777,6 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
- implicit none
 
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
@@ -3894,7 +3831,6 @@ end subroutine pack_matrix
 
 subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3956,7 +3892,6 @@ end subroutine print_arr1d_spc
 
 subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4018,7 +3953,6 @@ end subroutine print_arr1d_dpc
 
 subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4085,7 +4019,6 @@ end subroutine print_arr2d_spc
 
 subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4145,7 +4078,6 @@ end subroutine print_arr2d_dpc
 
 function pade(n,z,f,zz)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4194,7 +4126,6 @@ end function pade
 
 function dpade(n,z,f,zz)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4260,7 +4191,6 @@ end function dpade
 
 subroutine calculate_pade_a(a,n,z,f)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4306,7 +4236,6 @@ end subroutine calculate_pade_a
 
 function newrap_step(z,f,df)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4337,7 +4266,6 @@ end function newrap_step
 !!
 pure function cross_product_int(vec1,vec2) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: vec1(3),vec2(3)
@@ -4362,7 +4290,6 @@ end function cross_product_int
 !!
 pure function cross_product_rdp(vec1,vec2) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: vec1(3),vec2(3)
@@ -4388,7 +4315,6 @@ end function cross_product_rdp
 
 pure function l2norm_rdp(vec) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: vec(:)
@@ -4436,7 +4362,6 @@ end function l2norm_rdp
 
 subroutine remove_copies(n_in,set_in,n_out,is_equal)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4523,7 +4448,6 @@ end subroutine remove_copies
 
 integer function denominator(dd,ierr,tolerance)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4572,7 +4496,6 @@ end function denominator
 
 integer function mincm(ii,jj)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4633,7 +4556,6 @@ end function mincm
 
 subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4744,7 +4666,6 @@ end subroutine continued_fract
 
 subroutine cmplx_sphcart(carr, from, units)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4832,7 +4753,6 @@ end subroutine cmplx_sphcart
 
 subroutine pfactorize(nn,nfactors,pfactors,powers)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4893,7 +4813,6 @@ end subroutine pfactorize
 
 function isordered_rdp(nn,arr,direction,tol) result(isord)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4964,7 +4883,6 @@ end function isordered_rdp
 
 pure function stats_eval(arr) result(stats)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5040,7 +4958,6 @@ end function stats_eval
 
 elemental subroutine wrap2_zero_one(num,red,shift)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5090,7 +5007,6 @@ end subroutine wrap2_zero_one
 
 elemental subroutine wrap2_pmhalf(num,red,shift)
 
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -5141,7 +5057,6 @@ end subroutine wrap2_pmhalf
 
 pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
 
- implicit none
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5207,7 +5122,6 @@ end function interpol3d
 
 pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
 
- implicit none
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5281,7 +5195,6 @@ end subroutine interpol3d_indices
 
 subroutine interpolate_denpot(cplex, in_ngfft, nspden, in_rhor, out_ngfft, out_rhor)
 
- implicit none
 
 !Arguments-------------------------------------------------------------
 !scalars
@@ -5363,7 +5276,6 @@ end subroutine interpolate_denpot
 
 subroutine simpson_int(npts,step,values,int_values)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5435,7 +5347,6 @@ end subroutine simpson_int
 
 function simpson(step,values) result(res)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5480,7 +5391,6 @@ end function simpson
 
 pure subroutine rhophi(cx,phi,rho)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5545,7 +5455,6 @@ end subroutine rhophi
 
 pure function vdiff_eval(cplex,nr,f1,f2,volume) result(vd)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5612,7 +5521,6 @@ end function vdiff_eval
 
 subroutine vdiff_print(vd, unit)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5657,8 +5565,6 @@ end subroutine vdiff_print
 !! SOURCE
 
 subroutine smooth(a,mesh,it)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5725,8 +5631,6 @@ end subroutine smooth
 !! SOURCE
 
 subroutine nderiv(hh,yy,zz,ndim,norder)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -5820,8 +5724,6 @@ end subroutine nderiv
 
 real(dp) function central_finite_diff(order, ipos, npts) result(fact)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ipos,order,npts
@@ -5914,8 +5816,6 @@ end function central_finite_diff
 !! SOURCE
 
 function uniformrandom(seed)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -6029,8 +5929,6 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 & d2edv2_1,d2edv2_2,d2edv2_predict,&
 & etotal_1,etotal_2,etotal_predict,&
 & lambda_1,lambda_2,lambda_predict,status)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -6215,8 +6113,6 @@ end subroutine findmin
 
 subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: method,nomega,only_check
@@ -6378,8 +6274,6 @@ end subroutine kramerskronig
 
 function dotproduct(nv1,nv2,v1,v2)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nv1,nv2
@@ -6425,8 +6319,6 @@ end function dotproduct
 !! SOURCE
 
 subroutine invcb(rhoarr,rspts,npts)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

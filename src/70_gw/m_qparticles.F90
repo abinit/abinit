@@ -117,8 +117,6 @@ CONTAINS  !=====================================================================
 
 subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,ngfftf,Sr,Bst,m_lda_to_qp,rho_qp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftot,nscf,nspden
@@ -274,8 +272,6 @@ end subroutine wrqps
 
 subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 & nfftot,ngfftf,ucvol,paral_kgb,Cryst,Pawtab,MPI_enreg,nbsc,m_lda_to_qp,rhor_out,Pawrhoij)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -573,8 +569,6 @@ end subroutine rdqps
 
 subroutine show_QP(Bst,m_lda_to_qp,fromb,tob,unit,prtvol,tolmat,kmask)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: fromb,tob
@@ -714,8 +708,6 @@ end subroutine show_QP
 !! SOURCE
 
 subroutine rdgw(Bst,fname,igwene,extrapolate)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -925,8 +917,6 @@ end subroutine rdgw
 !! SOURCE
 
 subroutine updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

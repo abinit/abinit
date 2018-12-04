@@ -111,8 +111,6 @@ contains
 subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xccc,&
 & n2,n3,option,rprimd,typat,ucvol,vxc,xcccrc,xccc1d,xccc3d,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n1xccc,n2,n3,natom,nfft,nspden,ntypat,option
@@ -630,8 +628,6 @@ end subroutine mkcore
 subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,nspden,&
 &          nattyp,ntypat,n1,n1xccc,n2,n3,option,rprimd,ucvol,vxc,xcccrc,xccc1d,&
 &          xccc3d,xred,pawrad,pawtab,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1168,8 +1164,6 @@ end subroutine mkcore_alt
 
 subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 & n2,n3,qphon,rprimd,typat,ucvol,xcccrc,xccc1d,xccc3d1,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

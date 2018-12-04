@@ -279,8 +279,6 @@ CONTAINS  !===========================================================
 
 integer function fform_from_ext(abiext) result(fform)
 
- implicit none
-
 !Arguments ---------------------------------------------
  character(len=*),intent(in) :: abiext
 
@@ -343,8 +341,6 @@ end function fform_from_ext
 !! SOURCE
 
 character(len=nctk_slen) function varname_from_fname(filename) result(varname)
-
- implicit none
 
 !Arguments ---------------------------------------------
  character(len=*),intent(in) :: filename
@@ -485,8 +481,6 @@ end function varname_from_fname
 
 type(abifile_t) function abifile_from_varname(varname) result(afile)
 
- implicit none
-
 !Arguments ---------------------------------------------
  character(len=*),intent(in) :: varname
 
@@ -523,8 +517,6 @@ end function abifile_from_varname
 
 type(abifile_t) function abifile_from_fform(fform) result(afile)
 
- implicit none
-
 !Arguments ---------------------------------------------
  integer,intent(in) :: fform
 
@@ -557,8 +549,6 @@ end function abifile_from_fform
 !! SOURCE
 
 subroutine check_fform(fform)
-
- implicit none
 
 !Local variables-------------------------------
 !scalars
@@ -605,8 +595,6 @@ end subroutine check_fform
 !! SOURCE
 
 subroutine test_abifiles()
-
- implicit none
 
 !Arguments ---------------------------------------------
 
@@ -657,8 +645,6 @@ end subroutine test_abifiles
 !! SOURCE
 
 subroutine hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat, nsym, nshiftk_orig, nshiftk)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -733,8 +719,6 @@ end subroutine hdr_malloc
 
 subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
 &                   mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -837,8 +821,6 @@ end subroutine hdr_init
 
 subroutine hdr_free(hdr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(hdr_type),intent(inout) :: hdr
@@ -916,8 +898,6 @@ end subroutine hdr_free
 !! SOURCE
 
 subroutine hdr_copy(Hdr_in,Hdr_cp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1057,8 +1037,6 @@ end subroutine hdr_copy
 
 real(dp) pure function hdr_nelect_fromocc(Hdr) result(nelect)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  type(hdr_type),intent(in) :: Hdr
@@ -1122,8 +1100,6 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 &  kptopt,nelect,charge,kptrlatt_orig,kptrlatt,&
 &  nshiftk_orig,nshiftk,shiftk_orig,shiftk,&
 &  mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1331,8 +1307,6 @@ end subroutine hdr_init_lowlvl
 
 subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  integer,intent(out) :: fform
@@ -1414,8 +1388,6 @@ end subroutine hdr_read_from_fname
 
 subroutine hdr_write_to_fname(Hdr,fname,fform)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: fform
  character(len=*),intent(in) :: fname
@@ -1484,8 +1456,6 @@ end subroutine hdr_write_to_fname
 !! SOURCE
 
 subroutine hdr_mpio_skip(mpio_fh,fform,offset)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpio_fh
@@ -1594,8 +1564,6 @@ end subroutine hdr_mpio_skip
 !! SOURCE
 
 subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1726,8 +1694,6 @@ end subroutine hdr_bsize_frecords
 
 subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(inout) :: fform
  integer,intent(in) :: rdwr
@@ -1838,8 +1804,6 @@ end subroutine hdr_io_wfftype
 
 subroutine hdr_io_int(fform,hdr,rdwr,unitfi)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(inout) :: fform
  integer,intent(in) :: rdwr,unitfi
@@ -1902,8 +1866,6 @@ end subroutine hdr_io_int
 !! SOURCE
 
 subroutine hdr_echo(Hdr,fform,rdwr,unit)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(inout) :: fform
@@ -2073,8 +2035,6 @@ end subroutine hdr_echo
 
 subroutine hdr_skip_int(unitfi,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: unitfi
  integer,intent(out) :: ierr
@@ -2124,8 +2084,6 @@ end subroutine hdr_skip_int
 !! SOURCE
 
 subroutine hdr_skip_wfftype(wff,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  type(wffile_type),intent(inout) :: wff
@@ -2288,8 +2246,6 @@ end subroutine hdr_skip_wfftype
 subroutine hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,amu, &
 &                     comm_atom,mpi_atmtab) ! optional arguments (parallelism)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot
@@ -2364,8 +2320,6 @@ end subroutine hdr_update
 !! SOURCE
 
 subroutine hdr_bcast(hdr,master,me,comm)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: master,me,comm
@@ -2698,8 +2652,6 @@ end subroutine hdr_bcast
 
 subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: fform
  integer,intent(in) :: unit
@@ -2821,8 +2773,6 @@ end subroutine hdr_fort_read
 !! SOURCE
 
 subroutine hdr_ncread(Hdr,ncid,fform)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3024,8 +2974,6 @@ end subroutine hdr_ncread
 
 subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(out) :: ierr
  integer,intent(in) :: unit,fform
@@ -3114,8 +3062,6 @@ end subroutine hdr_fort_write
 
 integer function hdr_backspace(hdr, unit, msg) result(ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  type(hdr_type),intent(in) :: hdr
  integer,intent(in) :: unit
@@ -3171,8 +3117,6 @@ end function hdr_backspace
 !! SOURCE
 
 integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3500,8 +3444,6 @@ end function hdr_ncwrite
 
 subroutine hdr_set_occ(hdr, occ3d)
 
- implicit none
-
 !Arguments ------------------------------------
  type(hdr_type),intent(inout) :: hdr
  real(dp),intent(in) :: occ3d(hdr%mband,hdr%nkpt,hdr%nsppol)
@@ -3540,8 +3482,6 @@ end subroutine hdr_set_occ
 !! SOURCE
 
 subroutine hdr_get_occ3d(hdr, occ3d)
-
- implicit none
 
 !Arguments ------------------------------------
  type(hdr_type),intent(in) :: hdr
@@ -3652,8 +3592,6 @@ end subroutine hdr_get_occ3d
 !! SOURCE
 
 subroutine hdr_check(fform,fform0,hdr,hdr0,mode_paral,restart,restartpaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4456,8 +4394,6 @@ end subroutine hdr_check
 
 subroutine hdr_vs_dtset(Hdr,Dtset)
 
- implicit none
-
 !Arguments ------------------------------------
  type(Hdr_type),intent(in) :: Hdr
  type(Dataset_type),intent(in) :: Dtset
@@ -4666,8 +4602,6 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 !! SOURCE
 
  subroutine compare_int(name,iexp,ifound,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: iexp,ifound

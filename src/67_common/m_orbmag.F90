@@ -297,8 +297,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
      &                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
      &                     rprimd,symrec,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(out) :: pwind_alloc
@@ -895,12 +893,6 @@ end subroutine initorbmag
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
      & npwarr,pawtab,usecprj,usepaw)
 
@@ -931,7 +923,7 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
   type(pawcprj_type),allocatable :: cprj_k(:,:)
 
   !----------------------------------------------------
-  
+
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
@@ -940,12 +932,12 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
   ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
-  
+
   nband_k = dtorbmag%mband_occ
 
   trace=zero
   do ikpt = 1, dtorbmag%fnkpt
-           
+
      icprj = dtorbmag%cprjindex(ikpt,isppol)
 
      npw_k = npwarr(ikpt)
@@ -978,9 +970,9 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
 
   ! final trace: factor of two assumes two electrons per band (normal occupance for an insulator)
   trace = trace*two/dtorbmag%fnkpt
-  
+
   write(std_out,'(a,2i4,es16.8)')'JWZ debug nkpt nband_k trace ',dtorbmag%fnkpt,nband_k,trace
-  
+
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
   ABI_DATATYPE_DEALLOCATE(cprj_k)
@@ -1060,8 +1052,6 @@ end subroutine rho_norm_check
 subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
      &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
      &            symrec,usecprj,usepaw,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1237,7 +1227,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                       & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
                  call pawcprj_copy(cprj_fkn,cprj_kb)
               end if
-              
+
               if (.NOT. has_smat_indx(ikpt,bdx,0)) then
 
                  call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
@@ -1394,7 +1384,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
   ! gives number of electrons as expected.
   dtorbmag%chern(1,1:3) = -cnum(2,1:3)*two/(two_pi*dtorbmag%fnkpt)
   dtorbmag%chern(2,1:3) =  cnum(1,1:3)*two/(two_pi*dtorbmag%fnkpt)
-  
+
   write(message,'(a,a,a)')ch10,'====================================================',ch10
   call wrtout(ab_out,message,'COLL')
 
@@ -1484,7 +1474,6 @@ subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
   integer,intent(in) :: idir,nband_k
   complex(dpc),intent(out) :: onsite_l_k
   type(dataset_type),intent(in) :: dtset
-
   !arrays
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,nband_k)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
@@ -2457,6 +2446,32 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     if(any(abs(gs_hamk%nucdipmom)>0.0)) then
        if(allocated(nucdipmom_k)) then
           ABI_DEALLOCATE(nucdipmom_k)
+                     & dtorbmag%indkk_f2ibz(ikptb,2),dtorbmag%indkk_f2ibz(ikptb,6),&
+                     & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptbi)),&
+                     & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
+                     & dtorbmag%mband_occ,my_nspinor,&
+                     & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
+                call pawcprj_copy(cprj_fkn,cprj_kb)
+             end if
+
+             if (.NOT. has_smat(ikpt,bdx,0)) then
+
+                call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
+                     &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+
+                sflag_k=0
+                call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icg,icgb,itrs,job,nband_k,&
+                     &           mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
+                     &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
+
+                smat_all(:,:,:,ikpt,bdx,0) = smat_kk(:,:,:)
+                smat_all(1,:,:,ikptb,bdxc,0) = TRANSPOSE(smat_kk(1,:,:))
+                smat_all(2,:,:,ikptb,bdxc,0) = -TRANSPOSE(smat_kk(2,:,:))
+
+                has_smat(ikpt,bdx,0) = .TRUE.
+                has_smat(ikptb,bdxc,0) = .TRUE.
+
+             end if
        end if
        ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
        call mknucdipmom_k(gmet,kg_k,kpoint,dtset%natom,gs_hamk%nucdipmom,&
@@ -2581,32 +2596,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
              if ( ikptbi /= ikptb ) then
                 call pawcprj_copy(cprj_kb,cprj_ikn)
                 call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
-                     & dtorbmag%indkk_f2ibz(ikptb,2),dtorbmag%indkk_f2ibz(ikptb,6),&
-                     & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptbi)),&
-                     & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
-                     & dtorbmag%mband_occ,my_nspinor,&
-                     & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
-                call pawcprj_copy(cprj_fkn,cprj_kb)
-             end if
-
-             if (.NOT. has_smat(ikpt,bdx,0)) then
-
-                call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,dtorbmag%lmn_size,dtset%mband,&
-                     &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
-
-                sflag_k=0
-                call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icg,icgb,itrs,job,nband_k,&
-                     &           mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
-                     &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,psps%usepaw)
-
-                smat_all(:,:,:,ikpt,bdx,0) = smat_kk(:,:,:)
-                smat_all(1,:,:,ikptb,bdxc,0) = TRANSPOSE(smat_kk(1,:,:))
-                smat_all(2,:,:,ikptb,bdxc,0) = -TRANSPOSE(smat_kk(2,:,:))
-
-                has_smat(ikpt,bdx,0) = .TRUE.
-                has_smat(ikptb,bdxc,0) = .TRUE.
-
-             end if
 
              do gfor = 1, 2
                 if (gfor .EQ. 1) then
@@ -2846,7 +2835,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                       VVIII_2 = cmplx(smat_all(1,n1,nn,ikptg,gdxc,0),smat_all(2,n1,nn,ikptg,gdxc,0))
 
                       VVII_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
-                      
+
                       CCI_1 = cmplx(smat_all(1,nn,n1,ikpt,gdx,0),smat_all(2,nn,n1,ikpt,gdx,0))
 
                       ! CCII_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
@@ -2854,7 +2843,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                       do n2 = 1, nband_k
                          VVII_2 = cmplx(smat_all(1,n1,n2,ikpt,bdx,gdx),smat_all(2,n1,n2,ikpt,bdx,gdx))
                          VVII_3 = cmplx(smat_all(1,n2,nn,ikptg,gdxc,0),smat_all(2,n2,nn,ikptg,gdxc,0))
-                         
+
                          CCI_2 = cmplx(hmat(1,n1,n2,ikpt,gdx,bdx),hmat(2,n1,n2,ikpt,gdx,bdx))
                          CCI_3 = cmplx(smat_all(1,n2,nn,ikptb,bdxc,0),smat_all(2,n2,nn,ikptb,bdxc,0))
 
@@ -2990,7 +2979,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
 end subroutine orbmag
 !!***
-
 
 end module m_orbmag
 !!***
