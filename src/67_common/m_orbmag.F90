@@ -2046,6 +2046,8 @@ subroutine make_dsdk(atindx1,cg,cprj_k,dimlmn,dsdk,dtorbmag,dtset,gs_hamk,&
   signs = 2 ! if 2, applies the non-local operator to a function in reciprocal space
   tim_nonlop = 0 ! not using timing
 
+  dsdk(1:2,1:nband_k,1:nband_k,0:6) = zero
+  
   do nn = 1, nband_k
 
      call pawcprj_get(atindx1,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
@@ -2082,9 +2084,12 @@ subroutine make_dsdk(atindx1,cg,cprj_k,dimlmn,dsdk,dtorbmag,dtset,gs_hamk,&
               cwaveb(2,1:npw_kb) = cg(2,icgb+(n1-1)*npw_kb+1:icgb+n1*npw_kb)
               cwaveb(1:2,0) = zero
 
-              call overlap_g(doti,dotr,dtset%mpw,npw_kb,npw_k,dtset%nspinor,pwind_kb,cwaveb,swavef)
+              call overlap_g(doti,dotr,dtset%mpw,npw_k,npw_kb,dtset%nspinor,pwind_kb,swavef,cwaveb)
+              if (ISNAN(doti) .or. ISNAN(dotr)) then
+                 write(std_out,'(a,2i4)')'JWZ debug ',npw_kb,npw_k
+              end if
 
-              dsdk(1,n1,nn,bdx) = dotr; dsdk(2,n1,nn,bdx) = doti
+              dsdk(1,n1,nn,bdx) = dotr; dsdk(2,n1,nn,bdx) = -doti
 
            end do ! end loop over bfor
         end do ! end loop over bdir
@@ -2841,6 +2846,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                       VVI_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
                       VVI_2 = cmplx(dsmatdk_all(1,nn,n1,ikpt,gdir,bdx),dsmatdk_all(2,nn,n1,ikpt,gdir,bdx))
+                      ! if (ISNAN(real(VVI_2))) then
+                      !    write(std_out,'(a,5i4)')'JWZ debug VVI_2',nn,n1,ikpt,gdir,bdx
+                      ! end if
+                      
 
                       VVIII_1 = cmplx(dsmatdk_all(1,nn,n1,ikpt,bdir,gdx),dsmatdk_all(2,nn,n1,ikpt,bdir,gdx))
                       VVIII_2 = cmplx(smat_all(1,n1,nn,ikptg,gdxc,0),smat_all(2,n1,nn,ikptg,gdxc,0))
@@ -2875,6 +2884,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                       end do ! end n2
 
                       VVI = VVI + ENK*VVI_1*VVI_2
+                      ! write(std_out,'(a,2es16.8)')'JWZ debug VVI',real(VVI),aimag(VVI)
 
                       VVIII = VVIII + ENK*conjg(VVIII_1)*VVIII_2
 
@@ -2882,11 +2892,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                 end do ! end nn
 
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII-VVI-VVII-VVIII)/(2.0*deltab*2.0*deltag)
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCII)/(2.0*deltab*2.0*deltag) ! largely confident that CCI and CCII are ok
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI)/(2.0*deltab*2.0*deltag)
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCII)/(2.0*deltab*2.0*deltag)
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(-VVII)/(2.0*deltab*2.0*deltag) ! VVII is good.
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*(-half*VVI)/(2.0*deltab) 
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*gsigma*(-half*VVIII)/(2.0*deltag) ! VVI and VVIII are not good
                 CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI-VVII)/(2.0*deltab*2.0*deltag) ! 
