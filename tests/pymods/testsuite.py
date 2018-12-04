@@ -1966,7 +1966,6 @@ class BaseTest(object):
         """
         if getattr(self.build_env, "buildbot_builder", None) is None: return False
         for builder in self.exclude_builders:
-            #if builder == self.build_env.buildbot_builder: return True
             if any(c in builder for c in "*?![]{}"):
                 # Interpret builder as regex.
                 m = re.compile(builder)
@@ -2760,7 +2759,7 @@ class TdepTest(BaseTest):
             self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
         md_hist_fname = self.cygwin_path(md_hist_fname)
-        t_stdin.write(md_hist_fname + "\n") 
+        t_stdin.write(md_hist_fname + "\n")
         t_stdin.write( self.id + "\n")       # 2) formatted output file e.g. t13.out
 
         return t_stdin.getvalue()

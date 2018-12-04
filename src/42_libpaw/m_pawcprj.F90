@@ -2905,8 +2905,6 @@ end function paw_overlap
 
 subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -3023,7 +3021,7 @@ subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
  if (present(buffer_gr)) then
    ncpgr=size(buffer_gr,dim=2)
  end if
- 
+
 !=== Unpack buffers into cprj ===
  ipck=0
  do jj=1,n2dim

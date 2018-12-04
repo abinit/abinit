@@ -244,8 +244,6 @@ CONTAINS  !=====================================================================
 
 subroutine build_grid_scalapack(grid,nbprocs,comm)
 
-  implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: nbprocs,comm
  type(grid_scalapack),intent(out) :: grid
@@ -304,8 +302,6 @@ end subroutine build_grid_scalapack
 
 subroutine build_processor_scalapack(processor,grid,myproc,comm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: myproc,comm
  type(processor_scalapack),intent(inout) :: processor
@@ -360,8 +356,6 @@ end subroutine build_processor_scalapack
 
 subroutine init_scalapack(processor,comm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: comm
  type(processor_scalapack),intent(out) :: processor
@@ -413,8 +407,6 @@ end subroutine init_scalapack
 
 subroutine end_scalapack(processor)
 
- implicit none
-
 !Arguments ------------------------------------
  type(processor_scalapack),intent(inout)    :: processor
 
@@ -454,8 +446,6 @@ end subroutine end_scalapack
 !! SOURCE
 
 subroutine init_matrix_scalapack(matrix,nbli_global,nbco_global,processor,istwf_k,tbloc)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nbli_global,nbco_global,istwf_k
@@ -549,8 +539,6 @@ end subroutine init_matrix_scalapack
 
 subroutine destruction_matrix_scalapack(matrix)
 
- implicit none
-
 !Arguments ------------------------------------
  type(matrix_scalapack),intent(inout)    :: matrix
 
@@ -605,8 +593,6 @@ end subroutine destruction_matrix_scalapack
 
 pure function matrix_get_local_cplx(matrix,i,j)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
  complex(dp) :: matrix_get_local_cplx
@@ -638,8 +624,6 @@ end function matrix_get_local_cplx
 !! SOURCE
 
 pure function matrix_get_local_real(matrix,i,j)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
@@ -680,8 +664,6 @@ end function matrix_get_local_real
 
 pure subroutine matrix_set_local_cplx(matrix,i,j,value)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
  complex(dp), intent(in) :: value
@@ -717,8 +699,6 @@ end subroutine matrix_set_local_cplx
 !! SOURCE
 
 pure subroutine matrix_set_local_real(matrix,i,j,value)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
@@ -760,8 +740,6 @@ end subroutine matrix_set_local_real
 
 subroutine idx_loc(matrix,i,j,iloc,jloc)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: i,j
  integer, intent(out) :: iloc,jloc
@@ -794,8 +772,6 @@ end subroutine idx_loc
 !! SOURCE
 
 function glob_loc(matrix,idx,lico)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: idx, lico
@@ -842,8 +818,6 @@ end function glob_loc
 
 pure subroutine idx_glob(matrix,iloc,jloc,i,j)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: iloc,jloc
  integer, intent(out) :: i,j
@@ -878,8 +852,6 @@ end subroutine idx_glob
 !! SOURCE
 
 pure function loc_glob(matrix,proc,idx,lico)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: idx,lico
@@ -924,8 +896,6 @@ end function loc_glob
 !! SOURCE
 
 subroutine matrix_from_global(matrix,reference,istwf_k)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1001,8 +971,6 @@ end subroutine matrix_from_global
 !! SOURCE
 
 subroutine matrix_from_global_sym(matrix,reference,istwf_k)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1086,8 +1054,6 @@ end subroutine matrix_from_global_sym
 
 subroutine matrix_from_realmatrix(matrix,reference,istwf_k)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
  type(matrix_scalapack),intent(inout) :: matrix
@@ -1146,8 +1112,6 @@ end subroutine matrix_from_realmatrix
 !! SOURCE
 
 subroutine matrix_from_complexmatrix(matrix,reference,istwf_k)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1208,8 +1172,6 @@ end subroutine matrix_from_complexmatrix
 !! SOURCE
 
 subroutine matrix_to_global(matrix,reference,istwf_k)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k          !,nband_k
@@ -1276,8 +1238,6 @@ end subroutine matrix_to_global
 
 subroutine matrix_to_realmatrix(matrix,reference,istwf_k)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
  type(matrix_scalapack),intent(in) :: matrix
@@ -1336,8 +1296,6 @@ end subroutine matrix_to_realmatrix
 
 subroutine matrix_to_complexmatrix(matrix,reference,istwf_k)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
  type(matrix_scalapack),intent(in) :: matrix
@@ -1393,8 +1351,6 @@ end subroutine matrix_to_complexmatrix
 !! SOURCE
 
 subroutine matrix_to_reference(matrix,reference,istwf_k)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: istwf_k
@@ -1466,8 +1422,6 @@ end subroutine matrix_to_reference
 !! SOURCE
 
 subroutine slk_matrix_from_global_dpc_2D(Slk_mat,uplo,glob_mat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1556,8 +1510,6 @@ end subroutine slk_matrix_from_global_dpc_2D
 !! SOURCE
 
 subroutine slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,glob_pmat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1651,8 +1603,6 @@ end subroutine slk_matrix_from_global_dpc_1Dp
 
 subroutine slk_matrix_to_global_dpc_2D(Slk_mat,uplo,glob_mat)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalaras
  character(len=*),intent(in) :: uplo
@@ -1732,8 +1682,6 @@ end subroutine slk_matrix_to_global_dpc_2D
 
 function my_locr(Slk_mat)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: my_locr
@@ -1789,8 +1737,6 @@ end function my_locr
 !! SOURCE
 
 function my_locc(Slk_mat)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1851,8 +1797,6 @@ end function my_locc
 
 subroutine slk_pzgemm(transa,transb,matrix1,alpha,matrix2,beta,results)
 
- implicit none
-
 !Arguments ------------------------------------
  character(len=*),intent(in) :: transa,transb
  type(matrix_scalapack),intent(in) :: matrix1,matrix2
@@ -1902,8 +1846,6 @@ end subroutine slk_pzgemm
 !! SOURCE
 
 subroutine compute_eigen_problem(processor,matrix,results,eigen,comm,istwf_k)
-
-  implicit none
 
 #ifdef HAVE_LINALG_ELPA
   !Arguments ------------------------------------
@@ -2114,8 +2056,6 @@ end subroutine compute_eigen_problem
 subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
                               my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
 
-  implicit none
-
   !-Arguments
   integer,intent(in) :: na
   integer,intent(in) :: nev
@@ -2178,8 +2118,6 @@ end subroutine solve_gevp_complex
 subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
                            my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
 
-  implicit none
-
   !-Arguments
   integer,intent(in) :: na
   integer,intent(in) :: nev
@@ -2238,8 +2176,6 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 #endif
 
 subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k)
-
-  implicit none
 
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
@@ -2464,8 +2400,6 @@ end subroutine compute_generalized_eigen_problem
 
 subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalaras
  integer,intent(in) :: comm
@@ -2592,8 +2526,6 @@ end subroutine compute_eigen1
 !! SOURCE
 
 subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2730,8 +2662,6 @@ end subroutine compute_eigen2
 !! SOURCE
 
 subroutine slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2874,8 +2804,6 @@ end subroutine slk_pzheev
 !! SOURCE
 
 subroutine slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_found,eigen)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: il,iu
@@ -3158,8 +3086,6 @@ end subroutine slk_pzheevx
 
 subroutine slk_pzhegvx(ibtype,jobz,range,uplo,Slk_matA,Slk_matB,vl,vu,il,iu,abstol,Slk_vec,mene_found,eigen)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: il,iu,ibtype
  integer,intent(out) :: mene_found
@@ -3383,8 +3309,6 @@ end subroutine slk_pzhegvx
 
 subroutine slk_zinvert(Slk_mat)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(matrix_scalapack),intent(inout) :: Slk_mat
@@ -3486,8 +3410,6 @@ end subroutine slk_zinvert
 
 subroutine slk_zdhp_invert(Slk_mat,uplo)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: uplo
@@ -3572,8 +3494,6 @@ end subroutine slk_zdhp_invert
 !! SOURCE
 
 subroutine slk_write(Slk_mat,uplo,is_fortran_file,fname,mpi_fh,offset,flags,glob_subarray)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3787,8 +3707,6 @@ end subroutine slk_write
 
 subroutine slk_read(Slk_mat,uplo,symtype,is_fortran_file,fname,mpi_fh,offset,flags)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: flags,mpi_fh
@@ -3978,8 +3896,6 @@ end subroutine slk_read
 subroutine slk_single_fview_read_mask(Slk_mat,mask_of_glob,offset_of_glob,nsblocks,sub_block,&
 & my_nel,myel2loc,etype,slk_type,offset_err,is_fortran_file)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsblocks
@@ -4136,8 +4052,6 @@ end subroutine slk_single_fview_read_mask
 
 subroutine slk_symmetrize(Slk_mat,uplo,symtype)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: symtype
@@ -4272,8 +4186,6 @@ end subroutine slk_symmetrize
 !! SOURCE
 
 subroutine slk_single_fview_read(Slk_mat,uplo,etype,slk_type,offset_err,is_fortran_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4476,8 +4388,6 @@ end subroutine slk_single_fview_read
 
 subroutine slk_single_fview_write(Slk_mat,uplo,nelw,elw2slk,etype,slk_type,offset_err,is_fortran_file,glob_subarray)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: offset_err,slk_type,etype,nelw
@@ -4669,8 +4579,6 @@ end subroutine slk_single_fview_write
 
 subroutine slk_bsize_and_type(Slk_mat,bsize_elm,mpi_type_elm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(matrix_scalapack),intent(in) :: Slk_mat
@@ -4737,8 +4645,6 @@ end subroutine slk_bsize_and_type
 !! SOURCE
 
 subroutine slk_my_rclist(Slk_mat,rc_str,how_many,rc_list)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

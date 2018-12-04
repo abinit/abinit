@@ -255,9 +255,7 @@ subroutine ifc_free(ifc)
  ABI_SFREE(ifc%qbz)
  ABI_SFREE(ifc%zeff)
  ABI_SFREE(ifc%dynmat)
- !if (allocated(ifc%dynmat_lr)) then
- !  ABI_FREE(ifc%dynmat_lr)
- !end if
+ !ABI_SFREE(ifc%dynmat_lr)
 
 end subroutine ifc_free
 !!***
@@ -553,7 +551,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    MSG_BUG(message)
  end if
 
-! Fourier transformation of the dynamical matrices (q-->R)
+! Fourier transform of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(3,natom,3,natom,ifc_tmp%nrpt))
  call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz, comm)
 
@@ -884,7 +882,6 @@ end subroutine ifc_print
 !!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
-
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
                      nanaqdir, out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
