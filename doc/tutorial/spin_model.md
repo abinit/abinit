@@ -14,10 +14,11 @@ With this lesson, you will learn to:
 
   * Run a spin dynamics calculation with MULTIBINIT
   * Determine the critical temperature for a magnetic phase transition
+  * Calculate spin canting angles for systems with Dzyaloshinskii-Moriya interaction
 
 The TB2J python package, which can be used to generate a spin model, can be found on the ABINIT gitlab website at https://gitlab.abinit.org/xuhe/TB2J. This package will be included in the ABINIT package in the future. 
 
-
+*Before beginning, you might consider to work in a subdirectory for this tutorial. Why not Work_spindyn?* 
 
 [TUTORIAL_README]
 
@@ -69,11 +70,11 @@ For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wan
 
 ### Basic: how to use MULTIBINIT to run spin dynamics
 
-Once we have the spin model xml file, we can run a spin dynamics calculation with MULTIBINIT. Example input files can be found at ~abinit/tests/tutoMULTIBINIT/Input/tmulti5_1.* .  There are three files: 
+Once we have the spin model xml file, we can run a spin dynamics calculation with MULTIBINIT. Example input files can be found at ~abinit/tests/tutomultibinit/Input/tmulti5_1.* .  There are three files: 
 
 * "tmulti5_1.files" is the "files" file, which gives the names of the input and output files for  MULTIBINIT.
 * "tmulti5_1.in" is the main input file containing the parameters for the spin dynamics simulation.
-* "tmulti5_1.xml" is the file containing the Heisenberg model parameters <!-- TODO: what system is this?.--> .
+* "tmulti5_1.xml" is the file containing the Heisenberg model parameters.
 
 You can copy these three files into a directory (e.g. tutor_spindyn). 
 
@@ -85,7 +86,7 @@ tmulti5_1.out
 tmulti5_1.xml
 ```
 
-which gives the input, output and xml file names. 
+which gives the input, output and xml file names. The file tmulti5_1.xml contains the $J_{ij}$ values for a simple toy system which has a cubic lattice and one atom per unit cell. Its critical temperature is around 600K.
 
 In tmulti5_1.in, the variables for running a spin dynamics calculation are given:
 
@@ -93,24 +94,25 @@ In tmulti5_1.in, the variables for running a spin dynamics calculation are given
 prt_model = 0
 ncell =   16 16 16              ! number of unit cells in supercell
 
-spin_mag_field = 0.0 0.0 0.0    ! external magnetic field (Tesla)
 spin_dynamics = 1               ! switch on spin dynamics
 spin_init_state = 2             ! ferromagnetic initial state
 
 spin_temperature = 600          ! temperature of spin (Kelvin)
 spin_ntime_pre = 10000          ! time steps for thermolization
-spin_ntime = 10000              ! time steps for measurement
+spin_ntime = 20000              ! time steps for measurement
 spin_nctime = 100               ! Number of time steps between two writes 
                                 ! into netcdf
 spin_dt = 1e-16 s               ! Time step (seconds) 
 spin_qpoint = 0.0 0.0 0.0       ! Wave vector for summation of spin in each 
                                 ! sublattice.
+                                
+spin_write_traj = 0             ! do not write spin trajectory to netcdf file
 ```
 
-To run spin dynamics with MULTIBINIT:
+To run spin dynamics with MULTIBINIT
 
 ```
-cd tutor_spindyn
+cd Work_spindyn
 MULTIBINIT < tmulti5_1.files > tmulti5_1.txt
 ```
 
@@ -124,7 +126,7 @@ In the .out file, you can find the lines below, which give a overview of the evo
 =================================================================
     Iteration          time(s)       Avg_Mst/Ms      Energy (Ha)
 -----------------------------------------------------------------
-Thermolization run:
+Thermalization run:
           100      9.90000E-15      6.50243E-01     -1.80141E+01
           200      1.99000E-14      5.56735E-01     -1.54510E+01
           300      2.99000E-14      5.27193E-01     -1.51304E+01
@@ -138,13 +140,11 @@ Measurement run:
           .....
 ```
 
-Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment . If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_qpoint]] are aligned , this value is 1.0. It deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system.
+Here, the Avg_mst ($||<m_i e^{2\pi \vec{q}\cdot\vec{R_i}}>||$) means the average staggered magnetic moment, Ms is the saturated magnetic moment. If all the spins for the wave-vector ($\vec{q}$) [[multibinit:spin_qpoint]] are aligned , the value for Avg_Mst/Ms is 1.0, it deviates from 1.0 due to thermal  fluctuations. The last column states the total energy of the system per unit cell.
 
-There are two stages, the warming up and measurement, in the whole spin dynamics process. The thermolization process the spins evove so that they get to the equilibrium state with temperature defined in the input. And during the measurement stage, the steps are sampled for the calculation of the observables. 
+There are two stages, the warming up and measurement, in the whole spin dynamics process. During the  thermalization the spins evolve towards the equilibrium state for the temperature defined in the input file. During the measurement stage, the steps are sampled for the calculation of the observables. 
 
-At the end of the run, there is a summary of the calculation:
-
-<!--TODO: add more to the summary. What is useful? -->
+At the end of the run, there is a summary of the calculation
 
 ```
 Summary of spin dynamics:
@@ -162,17 +162,17 @@ The following observables are printed, which are:
     600.00000     4.65660E-19     3.63349E-30     0.66410E+00     4.22644E-01
 ```
 
-* Cv: volume specific heat, which is
+* Cv: volume specific heat:
 
   $C_v=(<E^2>-<E>^2)/(k_B^2 T^2)$ . 
 
-  The $<E>$ means average of energy of the unitcell over the observation time. At zero temperature $C_v=0$. 
+  $<E>$ means average of energy per unit cell during the observation time. At zero temperature $C_v=0$. 
 
-* chi ($\chi$): the isothermal suceptibility, which is:
+* chi ($\chi$): the isothermal susceptibility:
 
   $\chi=\frac{\partial <m>}{\partial H}= (<m^2>-<m>^2)/(k_B T)$ .
 
- The $<m>$ is the average of total staggered magnetic moment.  At zero temperature, $\chi$ is not well defined. <!--TODO: check this-->. 
+  $<m>$ is the average of the total staggered magnetic moment.  At zero temperature, $\chi$ is not well defined. <!--TODO: check this-->. 
 
 * BinderU4: The Binder cumulant, which is 
 
@@ -184,7 +184,7 @@ The following observables are printed, which are:
 
   $M=\sum_i m_i \exp(i \vec{q}\cdot{\vec{R_i}})$. 
 
-  Here Mst is normalized to the saturate magenetic moment so the maximum of M is 1.
+  Here Mst is normalized to the saturated magnetic moment so the maximum of M is 1.
 
 In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using post-processing tools.  <!-- TODO: add postprocessing.-->
 
@@ -200,9 +200,9 @@ We are now coming back to the values chosen for the input variables in the tmult
 
   For anti-ferromagnetic structures, or more generally, structures with non-zero wave vector, the box size should allow the spins to fit to the q-vector, i.e. ($\vec{q}\cdot \vec{n}$) should be integers. For some structures, it is not easy or sometimes impossible to find such $\vec{n}$. In these cases, a large box is usually required.  
 
-* Thermolization time([[multibinit: spin_ntime_pre]])
+* Thermalization time([[multibinit: spin_ntime_pre]])
 
-    The thermolization time should at least allow the spins to relax to the equilibrium state. To see how much time is needed for the system to get to the equilibrium state, we can plot the magnetic moment as function of time. It should be noted that the relaxation to the equilibrium state usually takes much longer near the phase transition temperature. Therefore, it is important to test the relaxation time.
+    The thermalization time should at least allow the spins to relax to the equilibrium state. To see how much time is needed for the system to get to the equilibrium state, we can plot the magnetic moment as a function of time. It should be noted that the relaxation to the equilibrium state usually takes much longer near the phase transition temperature. Therefore, it is important to test the relaxation time.
 
 * Measurement time ([[multibinit: spin_ntime]])
 
@@ -212,7 +212,7 @@ We are now coming back to the values chosen for the input variables in the tmult
 
 A most common usage of spin dynamics is to calculate the magnetic quantities (e.g. magnetic moments, susceptibility, specific heat ) as a function of temperature and determine the critical  temperature where a phase transition from one magnetic phase to another occurs. 
 
-By setting [[multibinit:spin_var_temperature]] to 1 and specifying the starting temperature, final temperature, and the number of steps, a series of calculations will be carried out. (See e.g. ~abinit/tests/tutomultibinit/Input/tmulti5_2.* )
+By setting [[multibinit:spin_var_temperature]] to 1 and specifying the starting temperature, final temperature, and the number of steps, a series of calculations is carried out. (See e.g. ~abinit/tests/tutomultibinit/Input/tmulti5_2.* )
 
 (*Note that some of the parameters in the input file are set to "bad" values. Let's try to tune them to make a meaningful calculation.* )
 
@@ -250,7 +250,7 @@ Summary of various T run:
 ....
 ```
 
-They can also be found in the \*.varT file so it's easy to plot the observables as function of temperature. The averge magnetization of each sublattice are also in this file.
+They can also be found in the \*.varT file so it's easy to plot the observables as functions of temperature. The average magnetization of each sublattice is also in this file.
 
 If the input parameters are well tuned you will obtain the curves for the different quantities like the following.
 
@@ -266,15 +266,15 @@ If the input parameters are well tuned you will obtain the curves for the differ
 
 ### Example with DMI: 1D canted AFM-chain 
 
-This example shows how to get the spin canting angle. (~abinit/tests/tutomultibinit/Input/tmulti5_3.*)
+We now study a system with Dzyaloshinskii-Moriya interaction (DMI). The system is a simple 1D chain with a unit cell consisting of two sites A and B, as shown below. The exchange between A and B is $J= 5$ meV, and the DMI $\vec{D}= (0, 0, 2)$ meV. The arrow from A to B means $D_{AB}$, where $D_{AB}=-D_{BA}$.
 
- The system is a simple 1D chain with first nearest neighbor exchange and Dzyaloshinskii-Moriya interaction (DMI). The unitcell consists of two sites A and B, as shown below. The exchange between A and B is $J=$ 5 meV, and the DMI $\vec{D}= (0, 0, 2)$ meV. The arrow from A to B means $D_{AB}$, where $D_{AB}=-D_{BA}$. 
+The input files can be found in ~abinit/tests/tutomultibinit/Input/tmulti5_3.* 
 
 
 
 ![canting_DMI](spin_model_assets/canting_DMI.png)
 
-In this system, the exchange favors a collinear spin alignment, while the DMI favors the spins to be perpendicular to their neighbors. Usually, the DMI is much smaller than the exchange interaction, thus the system has a canted AFM spin alignment. We can run spin dynamics at zero temperature to get the ground state and see how the spins are canted.
+In this system, the exchange favors a collinear spin alignment, while the DMI favors the spins to be perpendicular to their neighbors. Usually, the DMI is much smaller than the exchange interaction, thus the system has a canted AFM spin alignment. We can run spin dynamics at zero temperature to get the ground state and calculate the canting angle.
 
 ```
 prt_model = 0
@@ -294,13 +294,11 @@ spin_sia_k1amp = 1e-4 eV        ! amplitude of SIA, 0.1 meV. +: easy axis, -: ha
 spin_sia_k1dir = 1.0 0.0 0.0    ! direction of SIA, easy axis along x.
 ```
 
-Here we add a relatively small (0.1 meV) single ion anisotropy term so that the easy axis is along x. Note that the DMI $\vec{D}$ is along z axis, therefor it can lower the energy if the spins have x and y components, while in the xy plane, the energy is isotropic. That is the reason why a SIA along x can be useful. We can try to rotate the SIA direction in the xy plane to see if the result changes, and try SIA along z to see what happens.
-
-
+Here, we add a relatively small (0.1 meV) single ion anisotropy term so that the easy axis is along x. Note that the DMI $\vec{D}$ is along the z-axis, therefore it lowers the energy if the spins have x and y components, while in the xy plane, the energy is isotropic. Hence, a SIA along x can be useful to break this symmetry. We can try to rotate the SIA direction in the xy plane to see if the result changes, and also try a SIA z-direction to see what happens.
 
 At the end of spin dynamics, we can find the following output, which is the last snapshot of the spins.
 
-It shows that the the spins are anti-paralytically aligned along the easy axis (x), with a canting towards the y-axis. The canting angle is about arctan(0.187/0.982). 
+It shows that the the spins have anti-parallel alignment along the easy axis (x), with a canting towards the y-axis. The canting angle is about arctan(0.187/0.982). 
 
 ```
     At the end of the run, the average spin at each sublattice is
@@ -329,7 +327,6 @@ It shows that the the spins are anti-paralytically aligned along the easy axis (
 ##### To add
 
 - spectral function
-- comparison with experiments? 
 
 
 
