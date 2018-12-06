@@ -75,11 +75,11 @@ def make(ctx, jobs="auto", touch=False, clean=False):
 
     with cd(top):
         if clean: ctx.run("make clean", pty=True)
-        #cmd = "make -j%d > make.log 2> make.stderr" % jobs
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
         cprint("Executing: %s" % cmd, "yellow")
-        ctx.run(cmd, pty=True)
+        retcode = ctx.run(cmd, pty=True)
         # TODO Check for errors in make.stderr
+        #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
 
 @task

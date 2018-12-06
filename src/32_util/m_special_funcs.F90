@@ -165,8 +165,6 @@ CONTAINS  !===========================================================
 
 pure function clp(x)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp) :: clp
@@ -205,8 +203,6 @@ end function clp
 !! SOURCE
 
 elemental function factorial(nn)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -254,8 +250,6 @@ end function factorial
 !! SOURCE
 
 pure function permutations(nn,kk)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -307,8 +301,6 @@ end function permutations
 
 elemental function binomcoeff(n,k)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: n,k
@@ -347,8 +339,6 @@ end function binomcoeff
 !! SOURCE
 
 function laguerre(x,n,a)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -416,8 +406,6 @@ end function laguerre
 
 
 function RadFnH(r,n,l,Z)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -491,8 +479,6 @@ end function RadFnH
 !! SOURCE
 
 recursive function IRadFnH(a,b,n,l,Z,m) result(x)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -571,8 +557,6 @@ end function IRadFnH
 
 elemental function dirac_delta(arg,sigma)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  real(dp),intent(in) :: arg,sigma
@@ -611,8 +595,6 @@ end function dirac_delta
 !! SOURCE
 
 elemental function gaussian(arg,sigma)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -656,8 +638,6 @@ end function gaussian
 !! SOURCE
 
 elemental function abi_derf(yy) result(derf_yy)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -808,8 +788,6 @@ end function abi_derf
 !! SOURCE
 
 elemental function abi_derfc(yy) result(derfc_yy)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1111,8 +1089,6 @@ end subroutine GAMMA_FUNCTION
 
 subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn,nx
@@ -1325,8 +1301,6 @@ end subroutine besjm
 
 subroutine sbf8(nm,xx,sb_out)
 
- implicit none
-
 !Arguments----------------------------------------------------------
 !scalars
  integer,intent(in) :: nm
@@ -1403,8 +1377,6 @@ end subroutine sbf8
 
 function fermi_dirac(energy, mu, temperature)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: energy, mu, temperature
@@ -1450,8 +1422,6 @@ end function fermi_dirac
 !! SOURCE
 
 function bose_einstein(energy, temperature)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1501,8 +1471,6 @@ end function bose_einstein
 
 elemental function k_fermi(rhor)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(in) :: rhor
@@ -1536,8 +1504,6 @@ end function k_fermi
 !! SOURCE
 
 elemental function k_thfermi(rhor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1582,8 +1548,6 @@ end function k_thfermi
 !! SOURCE
 
 type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1662,8 +1626,6 @@ end function jlspline_new
 
 subroutine jlspline_free(jlspl)
 
- implicit none
-
 !Arguments ------------------------------------
  type(jlspline_t),intent(inout) :: jlspl
 
@@ -1699,8 +1661,6 @@ end subroutine jlspline_free
 !! SOURCE
 
 real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: il,nr,powr
@@ -1750,8 +1710,6 @@ end function jlspline_integral
 !! SOURCE
 
 type (gspline_t) function gspline_new(sigma) result(new)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1815,8 +1773,6 @@ end function gspline_new
 !! SOURCE
 
 pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1886,8 +1842,6 @@ end subroutine gspline_eval
 !! SOURCE
 
 subroutine gspline_free(self)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

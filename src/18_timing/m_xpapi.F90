@@ -63,8 +63,6 @@ CONTAINS  !===========================================================
 
 subroutine xpapi_init()
 
- implicit none
-
 #ifdef HAVE_PAPI
 !Local variables-------------------------------
  character(len=PAPI_MAX_STR_LEN) :: papi_errstr
@@ -125,8 +123,6 @@ end subroutine xpapi_init
 !! SOURCE
 
 subroutine xpapi_show_info(unit,mode_paral)
-
- implicit none
 
 !Arguments-------------------------
  integer,optional,intent(in) :: unit
@@ -214,8 +210,6 @@ end subroutine xpapi_show_info
 
 subroutine xpapi_flops(real_time,proc_time,flops,mflops,check)
 
- implicit none
-
 !Arguments-------------------------
  integer(C_INT),intent(out) :: check
  integer(C_LONG_LONG),intent(out) :: flops
@@ -249,8 +243,6 @@ end subroutine xpapi_flops
 
 subroutine xpapi_shutdown()
 
- implicit none
-
 ! *************************************************************************
 
 #ifdef HAVE_PAPI
@@ -276,8 +268,6 @@ end subroutine xpapi_shutdown
 !! SOURCE
 
 subroutine xpapi_handle_error(check,err_msg,file,line)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

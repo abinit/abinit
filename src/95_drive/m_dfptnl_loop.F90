@@ -176,7 +176,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags, paw_ij_print
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
- use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, pawrhoij_io
+ use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
+&                          pawrhoij_io, pawrhoij_inquire_dim
  use m_paw_nhat,    only : pawmknhat,pawnhatfr
  use m_paw_denpot,  only : pawdenpot
  use m_pawtab,      only : pawtab_type
@@ -243,7 +244,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ii,ireadwf
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
- integer :: rdwrpaw,second_idir,timrev,usexcnhat
+ integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fnamewff(5)
@@ -326,7 +327,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  rdwrpaw=psps%usepaw
 !Allocate 1st-order PAW occupancies (rhoij1)
  if (psps%usepaw==1) then
-   cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                        nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
    ABI_DATATYPE_ALLOCATE(pawrhoij1_i1pert,(natom))
    ABI_DATATYPE_ALLOCATE(pawrhoij1_i2pert,(natom))
    ABI_DATATYPE_ALLOCATE(pawrhoij1_i3pert,(natom))
@@ -334,11 +336,11 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    call pawrhoij_nullify(pawrhoij1_i2pert)
    call pawrhoij_nullify(pawrhoij1_i3pert)
    call pawrhoij_alloc(pawrhoij1_i1pert,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&   dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&   dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call pawrhoij_alloc(pawrhoij1_i2pert,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&   dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&   dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call pawrhoij_alloc(pawrhoij1_i3pert,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&   dtset%typat,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&   dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  else
    ABI_DATATYPE_ALLOCATE(pawrhoij1_i1pert,(0))
    ABI_DATATYPE_ALLOCATE(pawrhoij1_i2pert,(0))
@@ -630,8 +632,8 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
                      call paw_an_reset_flags(paw_an1_i2pert) ! Force the recomputation of on-site potentials
                      call paw_ij_reset_flags(paw_ij1_i2pert,all=.true.) ! Force the recomputation of Dij
                      optfr=0
-                     call pawdijfr(cplex,gprimd,i2dir,i2pert,natom,natom,nfftf,ngfftf,nspden,nsppol,&
-&                     psps%ntypat,optfr,paw_ij1_i2pert,pawang,pawfgrtab,pawrad,pawtab,qphon,&
+                     call pawdijfr(gprimd,i2dir,i2pert,natom,natom,nfftf,ngfftf,nspden,nsppol,&
+&                     psps%ntypat,optfr,paw_ij1_i2pert,pawang,pawfgrtab,pawrad,pawtab,cplex,qphon,&
 &                     rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 

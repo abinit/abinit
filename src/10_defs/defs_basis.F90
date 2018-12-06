@@ -279,6 +279,7 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_FULLBZ    = 1
  integer,public,parameter :: WFK_TASK_CLASSIFY  = 2
  integer,public,parameter :: WFK_TASK_PAW_AEPSI = 3
+ integer,public,parameter :: WFK_TASK_EINTERP   = 4
  integer,public,parameter :: WFK_TASK_DDK       = 5
 
 ! Flags defining the method used for performing IO (input variable iomode)
@@ -541,6 +542,8 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_CLASSIFY
  case ("paw_aepsi")
    wfk_task = WFK_TASK_PAW_AEPSI
+ case ("wfk_einterp")
+   wfk_task = WFK_TASK_EINTERP
  case ("wfk_ddk")
    wfk_task = WFK_TASK_DDK
  case default
