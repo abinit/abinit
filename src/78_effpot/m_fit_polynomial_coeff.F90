@@ -2283,7 +2283,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !scalar
  integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh
 ! integer :: ifirst
- real(dp):: energy,energy_harm
+ real(dp):: energy,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE., anh_opened
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
@@ -2350,16 +2350,19 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
    if(anh_opened .eqv. .TRUE.)then
      write(unit_anh,'(I7)',advance='no') ii !If wanted Write cycle to anharmonic_energy_contribution file
    end if 
-   call effective_potential_evaluate(eff_pot,energy_harm,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald,&
+&                                    fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=.False.,verbose=.false.)
 
-   call effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+   call effective_potential_evaluate(eff_pot,energy,energy_ph_htot,energy_harm_short,energy_harm_ewald,& 
+&                                    fcart,fred,strten,natom,rprimd,&
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.,&
 &                                    filename=file_anh)
 
    if(need_print)then
-     WRITE(unit_energy ,'(I10,5(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
-&                                       abs(hist%etot(ii) - energy_harm),abs(hist%etot(ii) - energy)
+     WRITE(unit_energy ,'(I10,7(F23.14))') ii,hist%etot(ii),energy_ph_htot,energy_harm_short,&
+&                                           energy_harm_ewald,energy,&
+&                                       abs(hist%etot(ii) - energy_harm_tot),abs(hist%etot(ii) - energy)
      WRITE(unit_stress,'(I10,12(F23.14))') ii,hist%strten(:,ii),strten(:)
    end if
 

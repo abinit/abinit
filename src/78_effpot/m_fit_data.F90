@@ -312,7 +312,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 !Local variables-------------------------------
 !scalar
  integer :: ii,itime,natom,ntime
- real(dp):: energy
+ real(dp):: energy,e_d_ht,e_d_short,e_d_ewald
  logical :: need_verbose
 !arrays
  character(len=500) :: message
@@ -386,7 +386,7 @@ subroutine fit_data_compute(fit_data,eff_pot,hist,comm,verbose)
 &                                   compute_displacement=.TRUE.,compute_duDelta=.TRUE.)
 
 !  Get forces and stresses from harmonic part (fixed part)     
-   call effective_potential_evaluate(eff_pot,energy,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
+   call effective_potential_evaluate(eff_pot,energy,e_d_ht,e_d_short,e_d_ewald,fcart_fixed(:,:,itime),fred_fixed(:,:,itime),&
 &                                    strten_fixed(:,itime),natom,hist%rprimd(:,:,itime),&
 &                                    displacement=displacement(:,:,itime),&
 &                                    du_delta=du_delta(:,:,:,itime),strain=strain(:,itime),&

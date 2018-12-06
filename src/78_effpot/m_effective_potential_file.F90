@@ -309,7 +309,9 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
       call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
-      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
+      if(inp%dipdip == 1) then 
+        call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
+      end if 
 
 !     If needed, print the effective potential into the output
       if (inp%prt_model>=3.or.inp%prt_model==-1) then

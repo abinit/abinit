@@ -570,20 +570,23 @@ end subroutine harmonics_terms_setDynmat
 !!
 !! SOURCE
 
-subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,ncell,nrpt,&
-&                                      atmrpt_index,index_cells,sc_size,rpt,comm)
+subroutine harmonics_terms_evaluateIFC(atmfrc,short_atmfrc,ewald_atmfrc,disp,energy_tot,&
+&                                      energy_short,energy_ewald,fcart,natom_sc,natom_uc,&
+&                                      ncell,nrpt,atmrpt_index,index_cells,sc_size,rpt,comm)
 
  implicit none
 
 !Arguments -------------------------------
 ! scalars
-  real(dp),intent(out) :: energy
+  real(dp),intent(out) :: energy_tot,energy_short,energy_ewald
   integer,intent(in) :: natom_uc,natom_sc,ncell,nrpt
   integer,intent(in) :: comm
 ! array
   integer,intent(in) :: sc_size(3),atmrpt_index(nrpt,ncell)
   integer,intent(in) ::  index_cells(4,ncell),rpt(nrpt)
   real(dp),intent(in) :: atmfrc(3,natom_uc,3,natom_uc,nrpt)
+  real(dp),intent(in) :: short_atmfrc(3,natom_uc,3,natom_uc,nrpt)
+  real(dp),intent(in) :: ewald_atmfrc(3,natom_uc,3,natom_uc,nrpt)
   real(dp),intent(in) :: disp(3,natom_sc)
   real(dp),intent(out) :: fcart(3,natom_sc)
 
@@ -591,8 +594,9 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
 ! scalar
   integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,irpt_tmp,ii,jj,kk,ll
   integer :: mu,nu
-  real(dp):: disp1,disp2,ifc,tmp,tmp2
-! array
+  real(dp):: disp1,disp2,ifc,short_ifc,ewald_ifc,tmp_etot1,tmp_etot2
+  real(dp):: tmp_ewald1,tmp_ewald2,tmp_short1,tmp_short2
+  ! array
   character(500) :: msg
 
 ! *************************************************************************
@@ -603,7 +607,10 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
   end if
 
 ! Initialisation of variables
-  energy   = zero
+  energy_tot   = zero
+  energy_short   = zero
+  energy_ewald   = zero
+
   fcart(:,:) = zero
 
   do icell = 1,ncell
@@ -626,13 +633,25 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
+              !MS calculate also short and ewald part. 
+              short_ifc = short_atmfrc(mu,ia,nu,ib,irpt)
+              ewald_ifc = ewald_atmfrc(mu,ia,nu,ib,irpt)
+              
 !              if(abs(ifc) > tol10)then
-                tmp = disp2 * ifc
+                tmp_etot1  = disp2 * ifc
+                tmp_short1 = disp2 * short_ifc 
+                tmp_ewald1 = disp2 * ewald_ifc 
 !               accumule energy
-                tmp2 = disp1*tmp
-                energy =  energy + tmp2
+                tmp_etot2  = disp1*tmp_etot1
+                tmp_short2 = disp1*tmp_short1
+                tmp_ewald2 = disp1*tmp_ewald1
+
+                energy_tot =  energy_tot + tmp_etot2
+                energy_short =  energy_short + tmp_short2
+                energy_ewald =  energy_ewald + tmp_ewald2
+
 !               accumule forces
-                fcart(mu,kk) = fcart(mu,kk) + tmp
+                fcart(mu,kk) = fcart(mu,kk) + tmp_etot1
 !              end if
             end do
           end do
@@ -641,10 +660,13 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
     end do
   end do
 
-  energy = half * energy
-
+  energy_tot = half * energy_tot
+  energy_short = half * energy_short
+  energy_ewald = half * energy_ewald
 ! MPI_SUM
-  call xmpi_sum(energy, comm, ierr)
+  call xmpi_sum(energy_tot, comm, ierr)
+  call xmpi_sum(energy_short, comm, ierr)
+  call xmpi_sum(energy_ewald, comm, ierr)
   call xmpi_sum(fcart , comm, ierr)
 
 end subroutine harmonics_terms_evaluateIFC
