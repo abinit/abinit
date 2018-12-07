@@ -3490,7 +3490,7 @@ subroutine sigmaph_print(self, dtset, unt)
    write(unt,"((a,i0,1x,a,f5.3,1x,a))")"nr points:", self%nqr, "qrad:", self%qrad, "[Bohr^-1]"
  end if
  write(unt,"(a, i0)")"Number of k-points for self-energy corrections: ", self%nkcalc
- if (all(dtset%sigma_erange /= -huge(one))) then
+ if (all(dtset%sigma_erange /= -one)) then
    write(unt, "(a, 2(f6.3, 1x), a)")"sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
  end if
  write(unt,"(a)")"List of K-points for self-energy corrections:"
