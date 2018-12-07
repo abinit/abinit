@@ -629,7 +629,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(keep_ur, (dtset%mband, nkpt ,nsppol))
 
  nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
- bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
 
  ! Each node needs the wavefunctions for Sigma_{nk}
  do spin=1,sigma%nsppol
@@ -640,6 +639,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      bks_mask(bstart:bstop, ik_ibz, spin) = .True.
    end do
  end do
+
+ ! TODO: Remove k-points if tau with tetra.
+ !if (.not. sigma%imag_only .and. sigma%qint_method == 1) then
+ bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+
  !bks_mask = .True. ! Uncomment this line to have all states on each MPI rank.
 
  ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
@@ -1917,7 +1921,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  else
 
-   if (all(dtset%sigma_erange /= -huge(one))) then
+   if (any(dtset%sigma_erange > zero)) then
      call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks, comm)
 
    else
@@ -2007,9 +2011,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
              "were included in the bdgw set. bdgw has been automatically changed to: ",new%bstart_ks(ikcalc,spin),bstop
            MSG_COMMENT(msg)
          end if
-         write(msg,'(2(a,i0),2a)') "The number of included states ",bstop,&
-                      " is larger than the number of bands in the input ",dtset%nband(new%nkcalc*(spin-1)+ikcalc),ch10,&
-                      "Action: Increase nband."
+         write(msg,'(2(a,i0),2a)') &
+           "The number of included states ",bstop,&
+           " is larger than the number of bands in the input ",dtset%nband(new%nkcalc*(spin-1)+ikcalc),ch10,&
+           "Action: Increase nband."
          ABI_CHECK(bstop <= dtset%nband(new%nkcalc*(spin-1)+ikcalc), msg)
        end if
 
@@ -2115,11 +2120,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    else
      ! Compute the min/max KS energy to be included in the imaginary part.
      ! ifc%omega_minmax(2) comes froms the coarse Q-mesh of the DDB so increase it by 10%.
-     ! Also take into account Lorentzian shape if zcut is used.
+     ! Also take into account the Lorentzian function if zcut is used.
      ! In principle this should be large enough but it seems that the linewidths in v8[160] are slightly affected.
      elow = huge(one); ehigh = - huge(one)
      wmax = 1.1_dp * ifc%omega_minmax(2)
      if (new%qint_method == 0) wmax = wmax + five * dtset%zcut
+     !if (new%qint_method == 1) wmax = wmax + five * dtset%zcut
      do ikcalc=1,new%nkcalc
        ik_ibz = new%kcalc2ibz(ikcalc, 1)
        do spin=1,new%nsppol
@@ -4285,7 +4291,6 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    ! Get cmb and vbm with some tolerance
    vmax = gaps%vb_max(spin) + tol2 * eV_Ha
    cmin = gaps%cb_min(spin) - tol2 * eV_Ha
-   !print *, "vmax, cmin", vmax, cmin
    do ii=1,tmp_nkpt
      ! Index in ebands.
      ik = sigmak2ebands(ii)
@@ -4293,14 +4298,14 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
      ib_work(2, ii, spin) = -huge(1)
      do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
         ee = ebands%eig(band, ik, spin)
-        if (dtset%sigma_erange(1) >= zero) then
+        if (dtset%sigma_erange(1) > zero) then
           if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
             ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
             ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)
             !write(std_out, *), "Adding valence", band
           end if
         end if
-        if (dtset%sigma_erange(2) >= zero) then
+        if (dtset%sigma_erange(2) > zero) then
           if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
             ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
             ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)

@@ -680,7 +680,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
  type(ephwg_t),intent(in) :: self
  real(dp),optional,intent(in) :: broad
 !arrays
-! This arrays have the same order as the little group used in sigmaph.
+! These arrays have the same order as the little group used in sigmaph.
  real(dp),intent(in) :: eminmax(2)
  real(dp),intent(out) :: deltaw_pm(nene, self%nq_k, 2)
 
