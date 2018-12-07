@@ -2673,7 +2673,7 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type (sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
+type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2953,7 +2953,7 @@ subroutine sigmaph_free(self)
    ABI_DT_FREE(self%degtab)
  end if
 
- call ephwg_free(self%ephwg)
+ call self%ephwg%free()
  call eph_double_grid_free(self%eph_doublegrid)
  call self%frohl_skw%free()
 
@@ -3010,9 +3010,9 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
  ! Prepare weights for BZ(k) integration
  if (self%qint_method > 0) then
    if (self%use_doublegrid) then
-     call ephwg_double_grid_setup_kpoint(self%ephwg, self%eph_doublegrid, self%kcalc(:, ikcalc), prtvol)
+     call self%ephwg%double_grid_setup_kpoint(self%eph_doublegrid, self%kcalc(:, ikcalc), prtvol)
    else
-     call ephwg_setup_kpoint(self%ephwg, self%kcalc(:, ikcalc), prtvol, comm)
+     call self%ephwg%setup_kpoint(self%kcalc(:, ikcalc), prtvol, comm)
    end if
  endif
 
@@ -3590,7 +3590,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
       eminmax(1) = eig0nk - 0.01
       eminmax(2) = eig0nk + 0.01
-      call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, xmpi_comm_self)
+      call sigma%ephwg%get_deltas(ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, xmpi_comm_self)
       ! we pay the efficiency here
       sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) )
       sigma%deltaw_pm(2,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 2) / ( sigma%ephwg%lgk%weights(:) )
@@ -3612,7 +3612,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
       eminmax(1) = eig0nk - 0.01
       eminmax(2) = eig0nk + 0.01
       ! FIXME: This part is not compatibile with parallelism over perturbations.
-      call ephwg_get_deltas(sigma%ephwg, ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
+      call sigma%ephwg%get_deltas(ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
 
       !for all the q-points that I am going to calculate
       iq_ibz_packed = 1
