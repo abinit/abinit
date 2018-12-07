@@ -26,6 +26,8 @@ supercell_latt
 0 2 0
 0 0 2
 
+prtebands 0
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
