@@ -161,7 +161,7 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
 
   dnl Look for C includes
   AC_LANG_PUSH([C])
-  AC_CHECK_HEADERS([xc.h xc_funcs.h],[abi_dft_libxc_has_incs="yes"],[abi_dft_libxc_has_incs="no"])
+  AC_CHECK_HEADERS([xc.h xc_funcs.h xc_version.h],[abi_dft_libxc_has_incs="yes"],[abi_dft_libxc_has_incs="no"])
   AC_LANG_POP([C])
 
   dnl Look for libraries and routines
@@ -177,25 +177,16 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
   fi
   LIBS="${abi_dft_libxc_libs} ${LIBS}"
 
-  dnl Look for Fortran includes
-  ABI_FC_MOD_INCS([xc_f90_lib_m])
-  FCFLAGS="${FCFLAGS} ${fc_mod_incs}"
-  if test "${abi_fc_mod_incs_ok}" = "unknown"; then
-    abi_dft_libxc_has_incs="no"
-  fi
-
-  dnl Check whether the Fortran wrappers work
+  dnl Check whether the C wrappers work
   if test "${abi_dft_libxc_has_incs}" = "yes"; then
-    AC_MSG_CHECKING([whether LibXC has Fortran support])
-    AC_LANG_PUSH([Fortran])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-      [[
-        use xc_f90_lib_m
-        integer :: i
-        type(xc_f90_pointer_t) :: info
-        i = xc_f90_info_number(info)
+    AC_MSG_CHECKING([whether LibXC is usable])
+    AC_LANG_PUSH([C])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "xc.h"]],
+      [[xc_func_type func;
+        int func_id = 1;
+        int i=xc_func_init(&func, func_id, XC_UNPOLARIZED);
       ]])], [abi_dft_libxc_has_libs="yes"], [abi_dft_libxc_has_libs="no"])
-    AC_LANG_POP([Fortran])
+    AC_LANG_POP([C])
     AC_MSG_RESULT([${abi_dft_libxc_has_libs}])
   fi
 
@@ -205,7 +196,7 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
     AC_MSG_CHECKING([whether this is LibXC version $1.$2->$3.$4])
     AC_LANG_PUSH([C])
     AC_RUN_IFELSE([AC_LANG_PROGRAM(
-      [[#include "xc.h"]],
+      [[#include "xc_version.h"]],
       [[int ver=100*XC_MAJOR_VERSION+XC_MINOR_VERSION;
         int ver_min=100*$1+$2,ver_max=100*$3+$4;
         if ( (ver<ver_min) || (ver>ver_max)) {return 1;}
