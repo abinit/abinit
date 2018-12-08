@@ -947,7 +947,7 @@
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyam"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
