@@ -1229,7 +1229,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  integer :: g0q(3),lgsize(db%nqpt),iqmax(1)
  integer :: requests(db%natom3)
  real(dp) :: tsec(2)
- real(dp),allocatable :: work(:,:,:,:), work2(:,:,:,:)
+ real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
 
@@ -2054,14 +2054,14 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
+ call xmpi_waitall(requests_v1r_qbz, ierr)
+ !call xmpi_sum(v1r_qbz, comm, ierr)
+
  ABI_FREE(workg)
  ABI_FREE(v1g_mu)
  ABI_FREE(v1g_qibz)
 
  call timab(1804, 2, tsec)
-
- call xmpi_waitall(requests_v1r_qbz, ierr)
- !call xmpi_sum(v1r_qbz, comm, ierr)
 
 end subroutine v1phq_rotate
 !!***

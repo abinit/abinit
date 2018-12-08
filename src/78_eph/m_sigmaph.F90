@@ -511,7 +511,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj !,im,in
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
- integer :: ik_ibz,ikq_ibz,prev_ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
+ integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !prev_ikq_ibz,
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine,iq_ibz_packed
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it,ndiv,thisproc_nq,my_nqibz_k
@@ -519,7 +519,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
- real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, elow, ehigh
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp
@@ -841,6 +840,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    do iq_ibz=1,sigma%nqibz_k
      indq2dvdb(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
    end do
+
+   !ABI_MALLOC(kq_list, (3, sigma%nqibz_k))
+   !do iq_ibz=1,sigma%nqibz_k
+   !  kq_list(:, iq_ibz) = sigma%kcalc(:, ikcalc) + sigma%qibz_k(:,iq_ibz)
+   !end do
+   !call listkk(dksqmax,cryst%gmet,iqk2dvdb,ebands%kptns,kq_list,ebands%nkpt,sigma%nqibz_k,cryst%nsym,&
+   !  sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, sigma%comm, use_symrec=.False.)
+   !ABI_FREE(kq_list)
+   !ABI_MALLOC(indkk_kq, (6, sigma%nqibz_k))
+   !do iq_ibz=1,sigma%nqibz_k
+   !  indkk_kq(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
+   !end do
+
    ABI_FREE(iqk2dvdb)
 
    ! Allocate PW-arrays. Note mpw in kg_kq
@@ -1004,7 +1016,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if
      call timab(1900, 2, tsec)
 
-     ikq_ibz = -1; prev_ikq_ibz = -1
+     !prev_ikq_ibz = -1
      do iq_ibz=1,sigma%nqibz_k
      !do iq_ibz=1,my_nqibz_k
        !iq_ibz = myq2ibz_k(iq)
@@ -1069,53 +1081,53 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        ! q-points are grouped in shells so it's probable that k + q is the image of prev_ikq_ibz
        ! with different symmetry operations. Check this immediately and fallback to listkk if not found.
-       kq_found = .False.
-       if (prev_ikq_ibz /= -1) then
-symloop: &
-         do itimrev=0,sigma%timrev
-           do isym=1,cryst%nsym
-              kpt1a(:) = (1-2*itimrev) * MATMUL(TRANSPOSE(cryst%symrel(:,:,isym)), ebands%kptns(:,prev_ikq_ibz))
-              dk(:)= kq - kpt1a(:)
-              dkint(:) = nint(dk(:)+tol12)
-              dk(:) = dk(:) - dkint(:)
+       !kq_found = .False.
+       !if (prev_ikq_ibz /= -1) then
+       !symloop: &
+       !  do itimrev=0,sigma%timrev
+       !    do isym=1,cryst%nsym
+       !       kpt1a(:) = (1-2*itimrev) * MATMUL(TRANSPOSE(cryst%symrel(:,:,isym)), ebands%kptns(:,prev_ikq_ibz))
+       !       dk(:)= kq - kpt1a(:)
+       !       dkint(:) = nint(dk(:)+tol12)
+       !       dk(:) = dk(:) - dkint(:)
 
-              ! Compute norm of the difference vector, and update kpt1 if better.
-              dksq = cryst%gmet(1,1)*dk(1)**2+cryst%gmet(2,2)*dk(2)**2+ &
-                     cryst%gmet(3,3)*dk(3)**2+two*(cryst%gmet(2,1)*dk(2)*dk(1)+ &
-                     cryst%gmet(3,2)*dk(3)*dk(2)+cryst%gmet(3,1)*dk(3)*dk(1))
+       !       ! Compute norm of the difference vector, and update kpt1 if better.
+       !       dksq = cryst%gmet(1,1)*dk(1)**2+cryst%gmet(2,2)*dk(2)**2+ &
+       !              cryst%gmet(3,3)*dk(3)**2+two*(cryst%gmet(2,1)*dk(2)*dk(1)+ &
+       !              cryst%gmet(3,2)*dk(3)*dk(2)+cryst%gmet(3,1)*dk(3)*dk(1))
 
-              ! Compute difference with respect to kpt2, modulo a lattice vector
-              if (dksq < tol12) then
-                indkk_kq(1,1) = prev_ikq_ibz
-                indkk_kq(1,2) = isym
-                indkk_kq(1, 3:5) = dkint
-                trev_kq = itimrev
-                kq_found = .True.
-                write(std_out, *)"Found kq"
-                exit symloop
-              end if
-           end do
-          end do symloop
+       !       ! Compute difference with respect to kpt2, modulo a lattice vector
+       !       if (dksq < tol12) then
+       !         indkk_kq(1,1) = prev_ikq_ibz
+       !         indkk_kq(1,2) = isym
+       !         indkk_kq(1, 3:5) = dkint
+       !         trev_kq = itimrev
+       !         kq_found = .True.
+       !         write(std_out, *)"Found kq"
+       !         exit symloop
+       !       end if
+       !    end do
+       !   end do symloop
+       !end if
+       !if (.not. kq_found) then
+
+       call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
+         sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, xmpi_comm_self, use_symrec=.False.)
+       if (dksqmax > tol12) then
+         write(msg, '(4a,es16.6,7a)' )&
+          "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
+          "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+          "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
+          'Action: check your WFK file and (k, q) point input variables'
+         MSG_ERROR(msg)
        end if
+       !end if
 
-       if (.not. kq_found) then
-         call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
-           sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, sigma%comm_pert, use_symrec=.False.)
-         if (dksqmax > tol12) then
-           write(msg, '(4a,es16.6,7a)' )&
-            "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
-            "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
-            "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-            'Action: check your WFK file and (k, q) point input variables'
-           MSG_ERROR(msg)
-         end if
-       end if
-
-       if (ikq_ibz /= -1) prev_ikq_ibz = ikq_ibz
        ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
+       !prev_ikq_ibz = ikq_ibz
 
        ! Double grid stuff
        if (sigma%use_doublegrid) then
@@ -4408,7 +4420,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  end do
 
  write(msg, "(a, i0, a, 2(f6.3, 1x), a)")&
-   " Found ", nkcalc, " k-points within erange", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+   " Found ", nkcalc, " k-points within erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
  call wrtout(std_out, msg)
 
  ABI_FREE(ib_work)
