@@ -2054,14 +2054,14 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
- call xmpi_waitall(requests_v1r_qbz, ierr)
- !call xmpi_sum(v1r_qbz, comm, ierr)
-
  ABI_FREE(workg)
  ABI_FREE(v1g_mu)
  ABI_FREE(v1g_qibz)
 
  call timab(1804, 2, tsec)
+
+ call xmpi_waitall(requests_v1r_qbz, ierr)
+ !call xmpi_sum(v1r_qbz, comm, ierr)
 
 end subroutine v1phq_rotate
 !!***
