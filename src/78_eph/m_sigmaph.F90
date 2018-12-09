@@ -531,9 +531,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(ddkop_t) :: ddkop
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3),g0_kq(3)
- integer :: work_ngfft(18),gmax(3), indkk_kq(1,6) !g0ibz_kq(3),
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
+ integer :: g0_k(3),g0_kq(3) !, indkk_kq_one(1,6)
+ integer :: work_ngfft(18),gmax(3) !g0ibz_kq(3),
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), indkk_kq(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:), myq2ibz_k(:)
  integer,allocatable :: bz2lgkibz_mapping(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
@@ -543,7 +543,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gdw2_mn(:,:),gkq0_atm(:,:,:,:),gkq2_lr(:,:)
- real(dp),allocatable :: vred_calc(:,:,:,:)
+ real(dp),allocatable :: vred_calc(:,:,:,:), kq_list(:,:)
  complex(dpc),allocatable :: tpp_red(:,:) !,zvals(:,:)
  complex(dpc) :: cdd(3)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
@@ -800,15 +800,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Find IBZ(k) for q-point integration.
    call cwtime(cpu_setk, wall_setk, gflops_setk, "start")
    call sigmaph_setup_kcalc(sigma, cryst, ikcalc, dtset%prtvol, comm)
-   call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
-   msg = sjoin("[", itoa(ikcalc), "/", itoa(sigma%nkcalc), "]")
-   call wrtout(std_out, sjoin(" Computing self-energy matrix elements for k-point:", ktoa(kk), msg))
-   spin = 1
-   write(msg, "(3(a, i0))")" Treating ", sigma%nbcalc_ks(ikcalc, spin), " band(s) between: ", &
-     sigma%bstart_ks(ikcalc, spin)," and: ", sigma%bstart_ks(ikcalc, spin) + sigma%nbcalc_ks(ikcalc, spin) - 1
-   call wrtout(std_out, msg)
-   call wrtout(std_out, sjoin("Number of q-points in the IBZ(k):", itoa(sigma%nqibz_k)))
-   !call wrtout(std_out, sjoin("Number of operations in LG(k):", itoa(sigma%lgk%nsym_lg), "(including time-reversal)")
 
    ! Symmetry indices for kk.
    ik_ibz = sigma%kcalc2ibz(ikcalc,1); isym_k = sigma%kcalc2ibz(ikcalc,2)
@@ -839,17 +830,31 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      indq2dvdb(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
    end do
 
-   !ABI_MALLOC(kq_list, (3, sigma%nqibz_k))
-   !do iq_ibz=1,sigma%nqibz_k
-   !  kq_list(:, iq_ibz) = sigma%kcalc(:, ikcalc) + sigma%qibz_k(:,iq_ibz)
-   !end do
-   !call listkk(dksqmax,cryst%gmet,iqk2dvdb,ebands%kptns,kq_list,ebands%nkpt,sigma%nqibz_k,cryst%nsym,&
-   !  sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, sigma%comm, use_symrec=.False.)
-   !ABI_FREE(kq_list)
-   !ABI_MALLOC(indkk_kq, (6, sigma%nqibz_k))
-   !do iq_ibz=1,sigma%nqibz_k
-   !  indkk_kq(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
-   !end do
+   ! Find k+q in the extended zone and extract symmetry info.
+   ! Be careful here because there are two umklapp vectors to be considered:
+   !
+   !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
+   !
+   ABI_MALLOC(kq_list, (3, sigma%nqibz_k))
+   do iq_ibz=1,sigma%nqibz_k
+     kq_list(:, iq_ibz) = sigma%kcalc(:, ikcalc) + sigma%qibz_k(:,iq_ibz)
+   end do
+   ! Use iqk2dvdb as workspace array.
+   call listkk(dksqmax,cryst%gmet,iqk2dvdb,ebands%kptns,kq_list,ebands%nkpt,sigma%nqibz_k,cryst%nsym,&
+     sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, comm, use_symrec=.False.)
+   if (dksqmax > tol12) then
+     write(msg, '(4a,es16.6,7a)' )&
+      "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
+      "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+      "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
+      'Action: check your WFK file and (k, q) point input variables'
+     MSG_ERROR(msg)
+   end if
+   ABI_FREE(kq_list)
+   ABI_MALLOC(indkk_kq, (6, sigma%nqibz_k))
+   do iq_ibz=1,sigma%nqibz_k
+     indkk_kq(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
+   end do
 
    ABI_FREE(iqk2dvdb)
 
@@ -866,8 +871,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
    do spin=1,nsppol
-     ! check if thik kpoint and spin was already calculated
-     if (sigma%qp_done(ikcalc,spin)==1) cycle
+     ! Check if this kpoint and spin was already calculated
+     if (sigma%qp_done(ikcalc,spin) == 1) cycle
      call timab(1900, 1, tsec)
 
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
@@ -945,7 +950,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! Distribute bands and q-points inside comm_bq
          ! ibsum_kq is the fastest index to minimize the number of q-points treated by each rank.
          ! q-points in IBZ(k) are grouped by shells
-
          call xmpi_split_work(nbsum*sigma%nqibz_k, sigma%comm_bq, q_start, q_stop, msg, ierr)
          do it=q_start,q_stop
            ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
@@ -954,7 +958,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            sigma%distrib_bq(ibsum_kq, iq_ibz) = my_rank
          end do
        end if
-
      else
        MSG_ERROR("Invalid eph_task")
      end if
@@ -1008,7 +1011,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        nq = count(sigma%mask_qibz_k /= 0)
        if (my_rank == master) then
          write(std_out, "(a, es16.6)")" Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
-         write(std_out, "(a,i0,a,f5.1,a)")" Number of qpts contributing to delta weights: ", nq, &
+         write(std_out, "(a,i0,a,f5.1,a)")" Number of q-points contributing to delta weights: ", nq, &
            " (nq_eff / nqibz_k): ", (100.0_dp * nq) / sigma%nqibz_k, " [%]"
        end if
      end if
@@ -1075,19 +1078,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !
        kq = kk + qpt
 
-       call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
-         sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, xmpi_comm_self, use_symrec=.False.)
-       if (dksqmax > tol12) then
-         write(msg, '(4a,es16.6,7a)' )&
-          "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
-          "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
-          "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-          'Action: check your WFK file and (k, q) point input variables'
-         MSG_ERROR(msg)
-       end if
+       !call listkk(dksqmax,cryst%gmet,indkk_kq_one,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
+       !  sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, xmpi_comm_self, use_symrec=.False.)
+       !if (dksqmax > tol12) then
+       !  write(msg, '(4a,es16.6,7a)' )&
+       !   "The WFK file cannot be used to compute self-energy corrections at k: ", trim(ktoa(kk)), ch10,&
+       !   "At least one of the k+q points could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10,&
+       !   "Q-mesh: ",trim(ltoa(sigma%ngqpt)),", K-mesh (from kptrlatt) ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
+       !   'Action: check your WFK file and (k, q) point input variables'
+       !  MSG_ERROR(msg)
+       !end if
+       !ABI_CHECK(all(indkk_kq_one(1,:) == indkk_kq(:,iq_ibz)), "Wrong indkk")
+       !ikq_ibz = indkk_kq_one(1,1); isym_kq = indkk_kq_one(1,2)
+       !trev_kq = indkk_kq_one(1, 6); g0_kq = indkk_kq_one(1, 3:5)
 
-       ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
-       trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
+       ikq_ibz = indkk_kq(1, iq_ibz); isym_kq = indkk_kq(2, iq_ibz)
+       trev_kq = indkk_kq(6, iq_ibz); g0_kq = indkk_kq(3:5, iq_ibz)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
 
@@ -1614,6 +1620,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end do ! spin
 
    ABI_FREE(indq2dvdb)
+   ABI_FREE(indkk_kq)
    ABI_FREE(kg_k)
    ABI_FREE(kg_kq)
    ABI_FREE(ylm_k)
@@ -2090,19 +2097,16 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! used to symmetrize the wavefunctions in G-space.
- ! TODO: Should loop over IBZ(k)
+ ! Note that we loop over the full BZ instead of the IBZ(k)
  ! This part is very slow for dense meshes should use geometrical approach...
  new%mpw = 0; new%gmax = 0; cnt = 0
  do ik=1,new%nkcalc
    kk = new%kcalc(:, ik)
    do iq_ibz=1,new%nqbz
-   !do iq_ibz=1,new%nqibz_k
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-     !kq = kk + qibz_k(:,iq_ibz)
      kq = kk + new%qbz(:,iq_ibz)
 
      ! TODO: g0 umklapp here can enter into play!
-     ! fstab should contains the max of the umlapp G-vectors.
      ! gmax could not be large enough!
      call get_kg(kq, istwfk1, ecut, cryst%gmet, onpw, gtmp)
      new%mpw = max(new%mpw, onpw)
@@ -3024,12 +3028,22 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
  type(sigmaph_t),intent(inout) :: self
 
 !Local variables-------------------------------
+ integer :: spin
+ character(len=500) :: msg
  type(lgroup_t) :: lgk
 
 ! *************************************************************************
 
  ABI_SFREE(self%qibz_k)
  ABI_SFREE(self%wtq_k)
+
+ call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
+ msg = sjoin("[", itoa(ikcalc), "/", itoa(self%nkcalc), "]")
+ call wrtout(std_out, sjoin(" Computing self-energy matrix elements for k-point:", ktoa(self%kcalc(:,ikcalc)), msg))
+ spin = 1
+ write(msg, "(3(a, i0))")" Treating ", self%nbcalc_ks(ikcalc, spin), " band(s) between: ", &
+   self%bstart_ks(ikcalc, spin)," and: ", self%bstart_ks(ikcalc, spin) + self%nbcalc_ks(ikcalc, spin) - 1
+ call wrtout(std_out, msg)
 
  ! Prepare weights for BZ(k) integration
  if (self%qint_method > 0) then
@@ -3046,10 +3060,13 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    self%qibz_k = self%qbz; self%wtq_k = one / self%nqbz
+   call wrtout(std_out, sjoin(" symsigma = 0 --> Integration done over full BZ with nqbz:", itoa(self%nqibz_k)))
 
  else if (abs(self%symsigma) == 1) then
    ! Use the symmetries of the little group
    lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
+   call wrtout(std_out, sjoin(" Number of operations in Lgroup(k):", itoa(lgk%nsym_lg), "(including time-reversal)"))
+   call wrtout(std_out, sjoin(" Number of q-points in the IBZ(k):", itoa(self%nqibz_k)))
 
    self%nqibz_k = lgk%nibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
@@ -3060,7 +3077,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc, prtvol, comm)
    MSG_ERROR(sjoin("Wrong symsigma:", itoa(self%symsigma)))
  end if
 
- ! Prepare table to file q-points.
+ ! Prepare table to filter q-points.
  ABI_SFREE(self%mask_qibz_k)
  ABI_MALLOC(self%mask_qibz_k, (self%nqibz_k))
  self%mask_qibz_k = 1
