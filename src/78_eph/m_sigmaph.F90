@@ -511,11 +511,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj !,im,in
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
- integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !prev_ikq_ibz,
+ integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine,iq_ibz_packed
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,it,ndiv,thisproc_nq,my_nqibz_k
- integer :: n1,n2,n3,n4,n5,n6,nspden,nu, itimrev, isym
+ integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
@@ -523,7 +523,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu_setk, wall_setk, gflops_setk, elow, ehigh
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum
- logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero, kq_found
+ logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -533,14 +533,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3), indkk_kq(1,6) !g0ibz_kq(3),
- integer :: dkint(3)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
  integer,allocatable :: indq2dvdb(:,:),wfd_istwfk(:),iqk2dvdb(:,:), myq2ibz_k(:)
  integer,allocatable :: bz2lgkibz_mapping(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
- real(dp) :: dk(3),kpt1a(3)
  real(dp) :: vdiag(2, 3), tsec(2)
- real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq,dksq
+ real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -1009,14 +1007,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !ABI_FREE(qtab)
        nq = count(sigma%mask_qibz_k /= 0)
        if (my_rank == master) then
-         write(std_out, "(a, es16.6)")"Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
-         write(std_out, "(a,i0,a,f5.1,a)")"Number of qpts contributing to delta weights: ", nq, &
+         write(std_out, "(a, es16.6)")" Removing q-points with delta weight <= tol_deltaw_pm = ", sigma%tol_deltaw_pm
+         write(std_out, "(a,i0,a,f5.1,a)")" Number of qpts contributing to delta weights: ", nq, &
            " (nq_eff / nqibz_k): ", (100.0_dp * nq) / sigma%nqibz_k, " [%]"
        end if
      end if
      call timab(1900, 2, tsec)
 
-     !prev_ikq_ibz = -1
      do iq_ibz=1,sigma%nqibz_k
      !do iq_ibz=1,my_nqibz_k
        !iq_ibz = myq2ibz_k(iq)
@@ -1024,8 +1021,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! Parallelization over q-points inside comm_bq
        if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
 
-       ! Exclude q-points based on tetrahedron weigths.
-       ! TODO
+       ! TODO Exclude q-points based on tetrahedron weigths.
        !if (sigma%mask_qibz_k(iq_ibz) == 0) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
@@ -1079,38 +1075,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !
        kq = kk + qpt
 
-       ! q-points are grouped in shells so it's probable that k + q is the image of prev_ikq_ibz
-       ! with different symmetry operations. Check this immediately and fallback to listkk if not found.
-       !kq_found = .False.
-       !if (prev_ikq_ibz /= -1) then
-       !symloop: &
-       !  do itimrev=0,sigma%timrev
-       !    do isym=1,cryst%nsym
-       !       kpt1a(:) = (1-2*itimrev) * MATMUL(TRANSPOSE(cryst%symrel(:,:,isym)), ebands%kptns(:,prev_ikq_ibz))
-       !       dk(:)= kq - kpt1a(:)
-       !       dkint(:) = nint(dk(:)+tol12)
-       !       dk(:) = dk(:) - dkint(:)
-
-       !       ! Compute norm of the difference vector, and update kpt1 if better.
-       !       dksq = cryst%gmet(1,1)*dk(1)**2+cryst%gmet(2,2)*dk(2)**2+ &
-       !              cryst%gmet(3,3)*dk(3)**2+two*(cryst%gmet(2,1)*dk(2)*dk(1)+ &
-       !              cryst%gmet(3,2)*dk(3)*dk(2)+cryst%gmet(3,1)*dk(3)*dk(1))
-
-       !       ! Compute difference with respect to kpt2, modulo a lattice vector
-       !       if (dksq < tol12) then
-       !         indkk_kq(1,1) = prev_ikq_ibz
-       !         indkk_kq(1,2) = isym
-       !         indkk_kq(1, 3:5) = dkint
-       !         trev_kq = itimrev
-       !         kq_found = .True.
-       !         write(std_out, *)"Found kq"
-       !         exit symloop
-       !       end if
-       !    end do
-       !   end do symloop
-       !end if
-       !if (.not. kq_found) then
-
        call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
          sppoldbl1,cryst%symafm,cryst%symrel,sigma%timrev, xmpi_comm_self, use_symrec=.False.)
        if (dksqmax > tol12) then
@@ -1121,13 +1085,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
           'Action: check your WFK file and (k, q) point input variables'
          MSG_ERROR(msg)
        end if
-       !end if
 
        ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
-       !prev_ikq_ibz = ikq_ibz
 
        ! Double grid stuff
        if (sigma%use_doublegrid) then
@@ -1148,8 +1110,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          endif
        end if
 
-       ! Get npw_kq, kg_kq for k+q
-       ! Be careful with time-reversal symmetry and istwf_kq
+       ! Get npw_kq, kg_kq for k+q. Be careful with time-reversal symmetry and istwf_kq
        if (isirr_kq) then
          ! Copy u_kq(G)
          istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
@@ -3661,7 +3622,7 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
   enddo
  enddo
 #else
- !sigma%mask_qibz_k = 0
+ sigma%mask_qibz_k = 0
  ! loop over bands to sum
  do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
   ! loop over phonon modes
@@ -3693,13 +3654,13 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
             weight = sigma%ephwg%lgk%weights(iq_ibz_fine)
             dpm = tmp_deltaw_pm(2, iq_ibz_fine, :)
             sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,jj) = dpm / weight
-            !if (any(abs(dpm) > sigma%tol_deltaw_pm / sigma%eph_doublegrid%ndiv)) sigma%mask_qibz_k(iq_ibz) = 1
+            if (any(abs(dpm) > sigma%tol_deltaw_pm / sigma%eph_doublegrid%ndiv)) sigma%mask_qibz_k(iq_ibz) = 1
           end do
         else
           weight = sigma%ephwg%lgk%weights(iq_ibz)
           dpm = tmp_deltaw_pm(2, iq_ibz, :)
           sigma%deltaw_pm(:,ib_k,imyp,ibsum_kq,iq_ibz_packed,1) = dpm / weight
-          !if (any(abs(dpm) > sigma%tol_deltaw_pm)) sigma%mask_qibz_k(iq_ibz) = 1
+          if (any(abs(dpm) > sigma%tol_deltaw_pm)) sigma%mask_qibz_k(iq_ibz) = 1
         end if
 
         iq_ibz_packed = iq_ibz_packed + 1
@@ -3709,9 +3670,9 @@ subroutine sigmaph_get_all_qweights(sigma,cryst,ebands,spin,ikcalc,comm)
  enddo
 #endif
 
- !call alloc_copy(sigma%mask_qibz_k, imask)
- !call xmpi_max(imask, sigma%mask_qibz_k, comm, ierr)
- !ABI_FREE(imask)
+ call alloc_copy(sigma%mask_qibz_k, imask)
+ call xmpi_max(imask, sigma%mask_qibz_k, comm, ierr)
+ ABI_FREE(imask)
 
  ABI_FREE(tmp_deltaw_pm)
  !call xmpi_sum(sigma%deltaw_pm, comm, ierr)
