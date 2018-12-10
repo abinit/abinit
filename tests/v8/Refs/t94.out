@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  6 Dec 2018.
-- ( at 12h17 )
+.Starting date : Mon 10 Dec 2018.
+- ( at 13h49 )
   
 - input  file    -> t94.in
 - output file    -> t94.out
@@ -100,6 +100,7 @@ P           mkmem           1
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000
         pawecutdg      1.50000000E+01 Hartree
+        prtebands           0
             rprim      2.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  2.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  2.0000000000E+00
@@ -662,6 +663,7 @@ P           mkmem           1
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000
         pawecutdg      1.50000000E+01 Hartree
+        prtebands           0
             rprim      2.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  2.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  2.0000000000E+00
@@ -875,10 +877,10 @@ P           mkmem           1
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.5
+- Proc.   0 individual time (sec): cpu=         16.5  wall=         17.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.5  wall=         16.5
++Overall time at end (sec) : cpu=         16.5  wall=         17.1
