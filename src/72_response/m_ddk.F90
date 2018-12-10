@@ -361,7 +361,9 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  real(dp) :: eminmax_spin(2,2)
  real(dp) :: emin, emax
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
- real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:),vv_vals(:,:,:,:)
+ real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:), vvdos_tens(:,:,:,:,:,:)
+ real(dp),allocatable :: dummy_vals(:,:,:),dummy_vecs(:,:,:,:),vv_tens(:,:,:,:,:,:)
+ real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
  real(dp),allocatable :: vvdos_mesh(:), vvdos_vals(:,:,:,:)
  complex(dpc) :: vg(3), vr(3)
@@ -657,7 +659,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    !jdos = ebands_get_jdos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
 
    ! Compute (v x v) DOS. Upper triangle in Voigt format.
-   ABI_MALLOC(vv_vals, (9, mband, nkpt, nsppol))
+   ABI_MALLOC(vv_tens, (3, 3, 1, mband, nkpt, nsppol))
    do spin=1,nsppol
      do ik=1,nkpt
        do ib_v=bandmin,bandmax
@@ -674,7 +676,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
          !end do
          do ii=1,3
            do jj=1,3
-             vv_vals((ii-1)*3+jj, ib_v, ik, spin) = vr(ii) * vr(jj)
+             vv_tens(ii, jj, 1, ib_v, ik, spin) = vr(ii) * vr(jj)
            end do
          end do
        end do
@@ -693,9 +695,11 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
    end do
 
-   edos = ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 9, edos_intmeth, edos_step, edos_broad, &
-                                         comm, vvdos_mesh, vvdos_vals, emin, emax)
-   ABI_SFREE(vv_vals)
+   edos = ebands_get_dos_matrix_elements(ebands, cryst, &
+                                         dummy_vals, 0, dummy_vecs, 0, vv_tens, 1, &
+                                         edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
+                                         dummy_dosvals, dummy_dosvecs, vvdos_tens, emin, emax)
+   ABI_SFREE(vv_tens)
  end if
 
  ! Write the matrix elements
@@ -731,10 +735,10 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      NCF_CHECK(edos%ncwrite(ncid))
      !NCF_CHECK(jdos%ncwrite(ncid))
      ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, nine")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")], defmode=.True.)
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_vals(:,1,:,:)))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_tens(:,1,:,:,:,1)))
    end if
    NCF_CHECK(nf90_close(ncid))
 
@@ -781,7 +785,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  if (is_kmesh) then
    ABI_SFREE(vvdos_mesh)
-   ABI_SFREE(vvdos_vals)
+   ABI_SFREE(vvdos_tens)
    call edos%free()
    !call jdos%free()
  end if
