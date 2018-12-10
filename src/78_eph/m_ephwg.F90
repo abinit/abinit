@@ -122,6 +122,8 @@ type, public :: ephwg_t
   integer,allocatable :: lgk2ibz(:)
   ! lgk2ibz(nq_k)
   ! Mapping Little-group IBZ_k --> initial IBZ
+  ! TODO: This should be generalized to have the symmetry indices as well so
+  ! that we can use it in sigmaph but then we have to implement similar algo for double grid.
 
   real(dp),allocatable :: phfrq_ibz(:,:)
   ! (nibz, natom3)
