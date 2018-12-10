@@ -366,6 +366,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IBCAST],[
   if test "${abi_mpi_ibcast_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IBCAST],1,
       [Define to 1 if your MPI library supports MPI_IBCAST.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IBCAST     
@@ -423,6 +425,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALL],[
   if test "${abi_mpi_ialltoall_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IALLTOALL],1,
       [Define to 1 if your MPI library supports MPI_IALLTOALL.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IALLTOALL     
@@ -482,6 +486,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV],[
   if test "${abi_mpi_ialltoallv_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IALLTOALLV],1,
       [Define to 1 if your MPI library supports MPI_IALLTOALLV.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IALLTOALLV
@@ -537,6 +543,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
   if test "${abi_mpi_igatherv_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IGATHERV],1,
       [Define to 1 if your MPI library supports MPI_IGATHERV.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IGATHERV
@@ -593,6 +601,8 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLREDUCE],[
   if test "${abi_mpi_iallreduce_ok}" = "yes"; then
     AC_DEFINE([HAVE_MPI_IALLREDUCE],1,
       [Define to 1 if your MPI library supports MPI_IALLREDUCE.])
+  else
+    AC_MSG_WARN([Your MPI library does not support non-blocking communications. The wall time of certain algorithms will increase with the number of MPI processes. It is strongly suggested to use a more recent MPI2+ library!])
   fi
 
 ]) # _ABI_MPI_CHECK_IALLREDUCE     

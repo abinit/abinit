@@ -141,17 +141,29 @@ type, public :: ephwg_t
   type(t_tetrahedron) :: tetra_k
   ! Used to evaluate delta(w - e_{k+q} +/- phw_q) with tetrahedron method.
 
+ contains
+
+     procedure :: setup_kpoint => ephwg_setup_kpoint
+     ! Prepare tetrahedron method for given external k-point.
+
+     procedure :: double_grid_setup_kpoint => ephwg_double_grid_setup_kpoint
+     ! Prepare tetrahedron method for given external k-point using double grid routines.
+
+     procedure :: get_deltas => ephwg_get_deltas
+     ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+
+     procedure :: get_dweights => ephwg_get_dweights
+     ! Compute weights for a set of frequencies.
+
+     procedure :: get_zinv_weights => ephwg_get_zinv_weights
+     ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
+
+     procedure :: free => ephwg_free
+     ! Free memory
  end type ephwg_t
 
  public :: ephwg_new             ! Basic Constructor
  public :: ephwg_from_ebands     ! Build object from ebands_t
- public :: ephwg_setup_kpoint    ! Prepare tetrahedron method for given external k-point.
- public :: ephwg_double_grid_setup_kpoint ! Prepare tetrahedron method for given external k-point using double grid routines.
- public :: ephwg_get_deltas      ! Compute weights for $ \int \delta(\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
- public :: ephwg_get_dweights    ! Compute weights for a set of frequencies.
- public :: ephwg_zinv_weights    ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
- public :: ephwg_free            ! Free memory
- !public :: ephwg_test
 
 contains
 !!***
@@ -316,7 +328,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
 !Arguments ------------------------------------
 !scalars
- type(ephwg_t),target,intent(inout) :: self
+ class(ephwg_t),target,intent(inout) :: self
  integer,intent(in) :: prtvol, comm
 !arrays
  real(dp),intent(in) :: kpoint(3)
@@ -418,7 +430,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- type(ephwg_t),target,intent(inout) :: self
+ class(ephwg_t),target,intent(inout) :: self
  type(eph_double_grid_t),intent(inout) :: eph_doublegrid
  integer,intent(in) :: prtvol
 !arrays
@@ -677,10 +689,10 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: band, spin, nu, nene, bcorr, comm
- type(ephwg_t),intent(in) :: self
+ class(ephwg_t),intent(in) :: self
  real(dp),optional,intent(in) :: broad
 !arrays
-! This arrays have the same order as the little group used in sigmaph.
+! These arrays have the same order as the little group used in sigmaph.
  real(dp),intent(in) :: eminmax(2)
  real(dp),intent(out) :: deltaw_pm(nene, self%nq_k, 2)
 
@@ -765,7 +777,7 @@ subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqlk, spin, nw, bcorr, nbsum, comm
- type(ephwg_t),intent(in) :: self
+ class(ephwg_t),intent(in) :: self
 !arrays
  integer,intent(in) :: qlklist(nqlk)
  real(dp),intent(in) :: wvals(nw)
@@ -861,9 +873,9 @@ end subroutine ephwg_get_dweights
 
 !----------------------------------------------------------------------
 
-!!****f* m_ephwg/ephwg_zinv_weights
+!!****f* m_ephwg/ephwg_get_zinv_weights
 !! NAME
-!! ephwg_zinv_weights
+!! ephwg_get_zinv_weights
 !!
 !! FUNCTION
 !! Compute weights for a given (kpoint, qpoint, spin) for all phonon modes.
@@ -891,12 +903,12 @@ end subroutine ephwg_get_dweights
 !!
 !! SOURCE
 
-subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iqlk, band, spin, nz, nbsigma,comm
- type(ephwg_t),intent(in) :: self
+ class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arraye
  complex(dpc),intent(in) :: zvals(nz, nbsigma)
@@ -996,7 +1008,7 @@ subroutine ephwg_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweigh
 
  ABI_FREE(pme_k)
 
-end subroutine ephwg_zinv_weights
+end subroutine ephwg_get_zinv_weights
 !!***
 
 !!****f* m_ephwg/ephwg_free
@@ -1019,7 +1031,7 @@ end subroutine ephwg_zinv_weights
 subroutine ephwg_free(self)
 
 !Arguments ------------------------------------
- type(ephwg_t),intent(inout) :: self
+ class(ephwg_t),intent(inout) :: self
 
 !----------------------------------------------------------------------
 
@@ -1042,226 +1054,6 @@ subroutine ephwg_free(self)
 
 end subroutine ephwg_free
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ephwg/ephwg_test
-!! NAME
-!! ephwg_test
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!! dtset<dataset_type>=All input variables for this dataset.
-!! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-!! subroutine ephwg_test(dtset, cryst, ebands, ifc, prefix, comm)
-!!
-!!  implicit none
-!!
-!! !Arguments ------------------------------------
-!! !scalarster
-!!  integer,intent(in) :: comm
-!!  type(dataset_type),intent(in) :: dtset
-!!  type(crystal_t),intent(in) :: cryst
-!!  type(ebands_t),intent(in) :: ebands
-!!  type(ifc_type),intent(in) :: ifc
-!!  character(len=*),intent(in) :: prefix
-!!
-!! !Local variables-------------------------------
-!! !scalars
-!!  integer,parameter :: bcorr0 = 0, intp_nshiftk = 1, master = 0
-!!  integer,parameter :: nz = 2, nbsigma= 1
-!!  integer :: band, spin, nu, bstart, nbcount, ik_ibz, ii, it, nene, nprocs, my_rank, cnt, ierr, ntemp
-!!  integer :: iq, iq_ibz, ikpq_ibz
-!! #ifdef HAVE_NETCDF
-!!  integer :: ncid, ncerr
-!! #endif
-!!  real(dp) :: omega_step
-!!  real(dp) :: cpu, wall, gflops
-!!  character(len=500) :: msg
-!!  type(ephwg_t) :: ephwg
-!!  type(ebands_t) :: eb_dense
-!!  type(edos_t) :: edos
-!! !arrays
-!!  integer :: intp_kptrlatt(3, 3), band_block(2)
-!!  real(dp):: intp_shiftk(3, intp_nshiftk), eminmax(2)
-!!  real(dp),allocatable :: deltaw_pm(:,:,:), nq_list(:),fkq_list(:)
-!!  real(dp),allocatable :: sdelta(:,:,:,:,:), omega_mesh(:), ktmesh(:)
-!!  real(dp),allocatable :: ekq_list(:), phq_list(:)
-!!
-!!  !complex(dpc) :: zvals(nz, nbsigma)
-!!  !complex(dpc) :: cweights(nz, 2, cryst%natom * 3, nbsigma)
-!!
-!! !----------------------------------------------------------------------
-!!
-!!  ! Consistency check
-!!  ierr = 0
-!!  if (nint(dtset%einterp(1)) == 0) then
-!!    MSG_ERROR_NOSTOP("einterp must be specified in the input file", ierr)
-!!  end if
-!!  if (ierr /= 0) then
-!!    MSG_ERROR("Fatal error. See above warnings")
-!!  end if
-!!
-!!  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-!!
-!!  ! Interpolate band energies with star-functions
-!!  ! FIXME: One should include all degenerate states from the energy window
-!!  ! but it seems there's a problem if I don't include all states.
-!!  band_block = [1, 7]
-!!  !intp_kptrlatt = reshape([8, 0, 0, 0, 8, 0, 0, 0, 8], [3, 3])
-!!  intp_kptrlatt = reshape([1, 0, 0, 0, 1, 0, 0, 0, 1], [3, 3]) * dtset%useria
-!!  !ABI_CHECK(all(dtset%bs_interp_kmult /= 0), "bs_interp_kmult == 0!")
-!!  !do ii = 1, 3
-!!  !  intp_kptrlatt(:, ii) = dtset%bs_interp_kmult(ii) * ebands%kptrlatt(:, ii)
-!!  !end do
-!!  !intp_nshiftk =
-!!  intp_shiftk = zero
-!!
-!!  call ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
-!!
-!!  eb_dense = ebands_interp_kmesh(ebands, cryst, dtset%einterp, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm)
-!!  !call ebands_set_scheme(eb_dense, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
-!!
-!!  ! Initalize object for eph weights.
-!!  bstart = band_block(1); nbcount = band_block(2) - band_block(1) + 1
-!!  ephwg = ephwg_new(cryst, ifc, bstart, nbcount, eb_dense%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
-!!    eb_dense%nkpt, eb_dense%kptns, eb_dense%nsppol, eb_dense%eig, comm)
-!!
-!!  ! Frequency mesh for delta functions.
-!!  eminmax(1) = minval(eb_dense%eig(band_block(1):band_block(2), :, :))
-!!  eminmax(2) = maxval(eb_dense%eig(band_block(1):band_block(2), :, :))
-!!  omega_step = 0.1_dp * eV_Ha
-!!  nene = 1 + nint((eminmax(2) - eminmax(1)) / omega_step)
-!!  ABI_MALLOC(omega_mesh, (nene))
-!!  omega_mesh = arth(eminmax(1), omega_step, nene)
-!!
-!!  ! Temperature mesh.
-!!  ntemp = nint(dtset%tmesh(3))
-!!  ABI_CHECK(ntemp > 0, "ntemp <= 0")
-!!  ABI_MALLOC(ktmesh, (ntemp))
-!!  ktmesh = arth(dtset%tmesh(1), dtset%tmesh(2), ntemp) * kb_HaK
-!!
-!!  ! Print important parameters.
-!!  if (my_rank == master) then
-!!    write(std_out,"(2a)")ch10," === Parameters used to compute EPH weights ==="
-!!    write(std_out,"(a)")sjoin("Band block for SKW interpolation:", ltoa(band_block))
-!!    write(std_out,"(a)")sjoin("Number of points in the IBZ:", itoa(eb_dense%nkpt))
-!!    write(std_out,"(a)")sjoin("Dense k-mesh:", ltoa(pack(transpose(intp_kptrlatt), mask=.True.)))
-!!    write(std_out,"(a)")sjoin("Shifts:", ltoa(pack(intp_shiftk, mask=.True.)))
-!!    write(std_out,"(a)")sjoin("Number of frequencies in delta functions:", itoa(nene), &
-!!      "From:", ftoa(omega_mesh(1) * Ha_eV), "to", ftoa(omega_mesh(nene) * Ha_eV), "[eV]")
-!!    write(std_out,"(a)")sjoin("Number of temperatures:", itoa(ntemp), &
-!!      "From:", ftoa(kTmesh(1) / kb_HaK), "to", ftoa(kTmesh(ntemp) / kb_HaK), "[K]")
-!!    write(std_out,"(a)")ch10
-!!  end if
-!!
-!!  ! Compute electron DOS with tetra.
-!!  edos = ebands_get_edos(eb_dense, cryst, 2, omega_step, zero, comm)
-!!
-!!  ABI_CALLOC(sdelta, (nene, 2, ntemp, eb_dense%nkpt, eb_dense%nsppol))
-!!  cnt = 0
-!!  do ik_ibz=1,eb_dense%nkpt
-!!    cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
-!!    call cwtime(cpu, wall, gflops, "start")
-!!    call ephwg_setup_kpoint(ephwg, eb_dense%kptns(:, ik_ibz), dtset%prtvol, xmpi_comm_self)
-!!
-!!    ABI_MALLOC(deltaw_pm, (nene, ephwg%nq_k, 2))
-!!    ABI_MALLOC(phq_list, (ephwg%nq_k))
-!!    ABI_MALLOC(nq_list, (ephwg%nq_k))
-!!    ABI_MALLOC(ekq_list, (ephwg%nq_k))
-!!    ABI_MALLOC(fkq_list, (ephwg%nq_k))
-!!
-!!    do nu = 1, ifc%natom * 3
-!!      ! Load phonons in IBZ(k)
-!!      do iq=1,ephwg%nq_k
-!!        iq_ibz = ephwg%lgk2ibz(iq)  ! IBZ_k --> IBZ
-!!        phq_list(iq) = ephwg%phfrq_ibz(iq_ibz, nu)
-!!      end do
-!!
-!!      do band = band_block(1), band_block(2)
-!!        do spin = 1, eb_dense%nsppol
-!!          call ephwg_get_deltas(ephwg, band, spin, nu, nene, eminmax, bcorr0, deltaw_pm, xmpi_comm_self)
-!!          !call ephwg_get_deltas(ephwg, band, spin, nu, nene, eminmax, bcorr0, deltaw_pm, xmpi_comm_self, broad=0.3 * eV_Ha)
-!!
-!!          ! Load e_{k+q} in IBZ(k)
-!!          do iq=1,ephwg%nq_k
-!!            ikpq_ibz = ephwg%kq2ibz(iq)  ! k + q --> IBZ
-!!            ekq_list(iq) = eb_dense%eig(band, ikpq_ibz, spin)
-!!          end do
-!!
-!!          ! TODO: Check conventions.
-!!          ! Note fermi level taken from ebands.
-!!          do it=1,ntemp
-!!            nq_list = occ_be(phq_list, ktmesh(it), zero)
-!!            fkq_list = occ_fd(ekq_list, ktmesh(it), ebands%fermie)
-!!            do iq=1,ephwg%nq_k
-!!              sdelta(:, 1, it, ik_ibz, spin) = sdelta(:, 1, it, ik_ibz, spin) +  &
-!!                (nq_list(iq) + fkq_list(iq)) * deltaw_pm(:, iq, 1)
-!!              sdelta(:, 2, it, ik_ibz, spin) = sdelta(:, 2, it, ik_ibz, spin) +  &
-!!                (nq_list(iq) + one - fkq_list(iq)) * deltaw_pm(:, iq, 2)
-!!            end do
-!!          end do
-!!
-!!        end do ! spin
-!!      end do ! band
-!!    end do ! nu
-!!
-!!    ABI_FREE(deltaw_pm)
-!!    ABI_FREE(phq_list)
-!!    ABI_FREE(nq_list)
-!!    ABI_FREE(ekq_list)
-!!    ABI_FREE(fkq_list)
-!!
-!!    call cwtime(cpu, wall, gflops, "stop")
-!!    write(msg,'(2(a,i0),2(a,f8.2))')"k-point [", ik_ibz, "/", eb_dense%nkpt, "] completed. cpu:",cpu,", wall:",wall
-!!    call wrtout(std_out, msg, do_flush=.True.)
-!!  end do
-!!
-!!  ! Collect data, then master writes data.
-!!  call xmpi_sum_master(sdelta, master, comm, ierr)
-!!  if (my_rank == master) then
-!! #ifdef HAVE_NETCDF
-!!    NCF_CHECK(nctk_open_create(ncid, strcat(prefix, "_SDELTA.nc"), xmpi_comm_self))
-!!    NCF_CHECK(crystal_ncwrite(cryst, ncid))
-!!    NCF_CHECK(ebands_ncwrite(eb_dense, ncid))
-!!    NCF_CHECK(edos_ncwrite(edos, ncid))
-!!    ! Add dimensions for SDELTA arrays.
-!!    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nomega", nene), nctkdim_t("ntemp", ntemp)], defmode=.True.))
-!!    ncerr = nctk_def_arrays(ncid, [ &
-!!      nctkarr_t("omega_mesh", "dp", "nomega"), &
-!!      nctkarr_t("kTmesh", "dp", "ntemp"), &
-!!      nctkarr_t("sdelta", "dp", "nomega, two, ntemp, number_of_kpoints, number_of_spins") &
-!!    ])
-!!    NCF_CHECK(ncerr)
-!!    ! Write data
-!!    NCF_CHECK(nctk_set_datamode(ncid))
-!!    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "omega_mesh"), omega_mesh))
-!!    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), ktmesh))
-!!    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sdelta"), sdelta))
-!!    NCF_CHECK(nf90_close(ncid))
-!! #endif
-!!  end if
-!!
-!!  ABI_FREE(omega_mesh)
-!!  ABI_FREE(ktmesh)
-!!  ABI_FREE(sdelta)
-!!
-!!  call ebands_free(eb_dense)
-!!  call edos_free(edos)
-!!  call ephwg_free(ephwg)
-!!
-!! end subroutine ephwg_test
-!! !!***
 
 end module m_ephwg
 !!***

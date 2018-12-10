@@ -1225,11 +1225,9 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  integer :: db_iqpt,itimrev,isym,nqcache,iq,npc,ierr, imyp, ipc, mu, root
  logical :: isirr_q,incache
 !arrays
- integer :: pinfo(3,3*db%mpert)
- integer :: g0q(3),lgsize(db%nqpt),iqmax(1)
- integer :: requests(db%natom3)
+ integer :: pinfo(3,3*db%mpert), g0q(3),lgsize(db%nqpt), iqmax(1), requests(db%natom3)
  real(dp) :: tsec(2)
- real(dp),allocatable :: work(:,:,:,:), work2(:,:,:,:)
+ real(dp) ABI_ASYNC, allocatable :: work(:,:,:,:), work2(:,:,:,:)
 
 ! *************************************************************************
 
@@ -1339,15 +1337,8 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
        ABI_STAT_MALLOC(work, (cplex, nfft, db%nspden, db%natom3), ierr)
        ABI_CHECK(ierr == 0, 'out of memory in work')
 
+       ! IBCAST is much faster than a naive xmpi_sum.
        call timab(1806, 1, tsec)
-       ! TODO: IBCAST?
-       !work = zero
-       !do imyp=1,db%my_npert
-       !  ipc = db%my_pinfo(3, imyp)
-       !  work(:,:,:,ipc) = v1scf(:,:,:,imyp)
-       !end do
-       !call xmpi_sum(work, db%comm_pert, ierr)
-
        do mu=1,db%natom3
          root = db%pert_table(1, mu)
          if (root == db%me_pert) then

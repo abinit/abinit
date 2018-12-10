@@ -179,6 +179,9 @@ MODULE m_ddk
   ! Option for calculating the matrix elements of [Vnl,r].
   ! 0 to exclude commutator, 2 to include it
 
+  integer :: usepaw
+  ! 0 for NC, 1 for PAW
+
   integer :: mpw
   ! Maximum number of plane-waves over k-points (used to dimension arrays)
 
@@ -1158,6 +1161,7 @@ type(ddkop_t) function ddkop_new(dtset, cryst, pawtab, psps, mpi_enreg, mpw, ngf
  ABI_CHECK(dtset%usepaw == 0, "PAW not tested/implemented!")
 
  new%inclvkb = dtset%inclvkb
+ new%usepaw = dtset%usepaw
  new%ipert = cryst%natom + 1
  new%dfpt_sciss = dtset%dfpt_sciss
  new%mpw = mpw
@@ -1397,24 +1401,27 @@ function ddkop_get_velocity(self, eig0mk, istwf_k, npw_k, nspinor, me_g0, brag) 
 
 !************************************************************************
 
- do idir=1,3
-   dotarr = cg_zdotc(npw_k * nspinor, brag, self%gh1c(:,:,idir))
-   if (istwf_k > 1) then
-     !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
-     doti = two * dotarr(2)
-     if (istwf_k == 2 .and. me_g0 == 1) then
-       ! nspinor always 1
-       ! TODO: Recheck this part but it should be ok.
-       doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
+ if (self%usepaw == 0) then
+   !<u_(iband,k+q)^(0)|H_(k+q,k)^(1)|u_(jband,k)^(0)>  (NC psps)
+   do idir=1,3
+     dotarr = cg_zdotc(npw_k * nspinor, brag, self%gh1c(:,:,idir))
+     if (istwf_k > 1) then
+       !dum = two * j_dpc * AIMAG(dum); if (vkbr%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
+       doti = two * dotarr(2)
+       if (istwf_k == 2 .and. me_g0 == 1) then
+         ! nspinor always 1
+         ! TODO: Recheck this part but it should be ok.
+         doti = doti - (brag(1) * self%gh1c(2,1,idir) - brag(2) * self%gh1c(1,1,idir))
+       end if
+       dotarr(2) = doti; dotarr(1) = zero
      end if
-     dotarr(2) = doti; dotarr(1) = zero
-   end if
-   vv(:, idir) = dotarr
- end do
-
- ! FOR PAW
-
- ! eshiftkq = half * (eig0mk - self%eig0nk)
+     vv(:, idir) = dotarr
+   end do
+ else
+   MSG_ERROR("PAW Not Implemented")
+   ! <u_(iband,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(jband,k)^(0)> (PAW)
+   ! eshiftkq = half * (eig0mk - self%eig0nk)
+ end if
 
 end function ddkop_get_velocity
 !!***

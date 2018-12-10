@@ -1,7 +1,7 @@
 # C in diamond structure. 
 # Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 2
+ndtset 4
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB files from DS20_DDB
@@ -35,7 +35,12 @@ gw_qprange 2
 # Use of the two-grids technique
 ###########
 getwfkfine1 20
-bs_interp_kmult2 2 2 2
+getwfkfine2 20
+eph_intmeth2 2
+
+bs_interp_kmult3 2 2 2
+bs_interp_kmult4 2 2 2
+eph_intmeth4 2
 
 # Structure 
 acell 3*6.70346805

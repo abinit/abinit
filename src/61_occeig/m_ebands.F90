@@ -80,6 +80,7 @@ MODULE m_ebands
  public :: get_bandenergy          ! Returns the band energy of the system.
  public :: get_valence_idx         ! Gives the index of the (valence|bands at E_f).
  public :: get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
+ public :: ebands_vcbm_range_from_gaps ! Find band and energy range for states close to the CBM/VBM given input energies.
  public :: apply_scissor           ! Apply a scissor operator (no k-dependency)
  public :: get_occupied            ! Returns band indeces after wich occupations are less than an input value.
  public :: enclose_degbands        ! Adjust band indeces such that all degenerate states are treated.
@@ -361,7 +362,7 @@ function get_gaps(ebands,gaps,kmask) result(retcode)
 
  my_kmask=.TRUE.; if (PRESENT(kmask)) my_kmask=kmask
 
- val_idx(:,:) = get_valence_idx(ebands,tol_fermi)
+ val_idx(:,:) = get_valence_idx(ebands, tol_fermi)
 
  spin_loop: &
 &  do spin=1,nsppol
@@ -1315,8 +1316,8 @@ end function get_bandenergy
 !!
 !! FUNCTION
 !!  For each k-point and spin polarisation, report:
-!!   The index of the valence in case of Semiconductors.
-!!   The index of the band at the Fermi energy+toldfe
+!!   the index of the valence in case of Semiconductors.
+!!   the index of the band at the Fermi energy+toldfe
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The object describing the band structure.
@@ -1345,21 +1346,21 @@ pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
 
 ! *************************************************************************
 
- tol_=tol6; if (PRESENT(tol_fermi)) tol_=tol_fermi
+ tol_=tol6; if (present(tol_fermi)) tol_ = tol_fermi
 
  do spin=1,ebands%nsppol
    do ikpt=1,ebands%nkpt
-     nband_k=ebands%nband(ikpt+(spin-1)*ebands%nkpt)
+     nband_k = ebands%nband(ikpt+(spin-1)*ebands%nkpt)
 
-     idx=0
+     idx = 0
      do band=1,nband_k
-       if (ebands%eig(band,ikpt,spin) > ebands%fermie+ABS(tol_)) then
-         idx=band; EXIT
+       if (ebands%eig(band,ikpt,spin) > ebands%fermie + abs(tol_)) then
+         idx=band; exit
        end if
      end do
-     val_idx(ikpt,spin)=idx-1
-     if (idx==1) val_idx(ikpt,spin)=idx
-     if (idx==0) val_idx(ikpt,spin)=nband_k
+     val_idx(ikpt,spin) = idx - 1
+     if (idx==1) val_idx(ikpt,spin) = idx
+     if (idx==0) val_idx(ikpt,spin) = nband_k
 
    end do
  end do
@@ -1412,6 +1413,103 @@ pure subroutine get_bands_from_erange(ebands, elow, ehigh, bstart, bstop)
  end do
 
 end subroutine get_bands_from_erange
+!!***
+
+!!****f* m_ebands/ebands_vcbm_range_from_gaps
+!! NAME
+!!  ebands_vcbm_range_from_gaps
+!!
+!! FUNCTION
+!! Find band and energy range for states close to the CBM/VBM given input energies in ebands and gaps.
+!! Return exit status and error message in msg.
+!!
+!! INPUTS
+!!  gaps<gaps_t>=Object with info on the gaps.
+!!  erange(2)=Energy range for holes and electrons. Only those states whose relative position
+!!    wrt to the VBM/CBM is <= than erange are icluded. Note that relative positions are always
+!!    positive (even for holes). Use a negative value to exclude either holes or electrons.
+!!
+!! OUTPUT
+!!  e_lowhigh(2)=min and Max energy.
+!!  band_lowhigh=min and Max band index.
+!!  [ks_range]: For each spin and k-point, the min and max band index included in the output set.
+!!     if (ik, spin) is not included then ib_work(1, ik, spin) > ib_work(2, ik, spin) = -huge(1)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function ebands_vcbm_range_from_gaps(ebands, gaps, erange, e_lowhigh, band_lowhigh, ks_range, msg) result(ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(ebands_t),intent(in) :: ebands
+ class(gaps_t),intent(in) :: gaps
+ real(dp),intent(in) :: erange(2)
+ real(dp),intent(out) :: e_lowhigh(2)
+ integer,intent(out) :: band_lowhigh(2)
+ integer,optional,intent(out) :: ks_range(2, ebands%nkpt, ebands%nsppol)
+ character(len=*),intent(out) :: msg
+
+!Local variables-------------------------------
+ integer :: band, ik, spin, band_low, band_high
+ real(dp) :: cmin, vmax, ee, elow, ehigh
+ integer,allocatable :: ib_work(:,:,:)
+
+! *************************************************************************
+
+ ABI_MALLOC(ib_work, (2, ebands%nkpt, ebands%nsppol))
+ elow = huge(one); ehigh = -huge(one)
+ band_low = huge(1); band_high = -huge(1)
+
+ ierr = 1
+ do spin=1,ebands%nsppol
+   ! Get cmb and vbm with some tolerance
+   vmax = gaps%vb_max(spin) + tol2 * eV_Ha
+   cmin = gaps%cb_min(spin) - tol2 * eV_Ha
+   do ik=1,ebands%nkpt
+     ib_work(1, ik, spin) = huge(1)
+     ib_work(2, ik, spin) = -huge(1)
+     do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
+        ee = ebands%eig(band, ik, spin)
+        if (erange(1) > zero) then
+          if (ee <= vmax .and. vmax - ee <= erange(1)) then
+            ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
+            ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+            elow = min(elow, ee); ehigh = max(ehigh, ee)
+            band_low = min(band_low, band); band_high = max(band_high, band)
+            !write(std_out, *), "Adding valence", band
+          end if
+        end if
+        if (erange(2) > zero) then
+          if (ee >= cmin .and. ee - cmin <= erange(2)) then
+            ib_work(1, ik, spin) = min(ib_work(1, ik, spin), band)
+            ib_work(2, ik, spin) = max(ib_work(2, ik, spin), band)
+            elow = min(elow, ee); ehigh = max(ehigh, ee)
+            band_low = min(band_low, band); band_high = max(band_high, band)
+            !write(std_out, *)"Adding conduction", band
+          end if
+        end if
+     end do
+   end do
+ end do
+
+ e_lowhigh = [elow, ehigh]
+ band_lowhigh = [band_low, band_high]
+
+ if (present(ks_range)) ks_range = ib_work
+ ABI_FREE(ib_work)
+
+ ! Set exit status and msg. Caller will Handle it.
+ ierr = 0; msg = ""
+ if (elow > ehigh) then
+   ierr = 1
+   write(msg, *)"Cannot find states close to the band edges with erange: ", erange
+ end if
+
+end function ebands_vcbm_range_from_gaps
 !!***
 
 !----------------------------------------------------------------------

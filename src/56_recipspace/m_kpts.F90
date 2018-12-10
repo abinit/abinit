@@ -592,7 +592,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  !write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
  call timab(1021,1,tsec)
 
- !comm = xmpi_comm_self
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  if (sppoldbl<1 .or. sppoldbl>2) then

@@ -1009,6 +1009,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1901)='sigph_qloop_preamble'; basic(1901) = 1
  names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
  names(1903)='sigph_bsum'; basic(1903) = 1
+ names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
 
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
@@ -1319,7 +1320,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end do
 
  percent_limit=0.5_dp; if (timopt<0) percent_limit=0.0001_dp
- percent_limit=tol12
+ !percent_limit=tol12
 
 !In case there is parallelism, report times for node 0
 !if (me==0 .and. nproc>1) then
