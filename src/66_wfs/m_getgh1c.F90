@@ -847,11 +847,13 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !scalars
  integer :: n1,n2,n3,n4,n5,n6,paral_kgb,ispden
 !arrays
- real(dp) :: rhodum(1)
+ real(dp) :: rhodum(1), tsec(2)
  real(dp), ABI_CONTIGUOUS pointer :: vtrial_ptr(:,:),vtrial1_ptr(:,:)
  real(dp),allocatable :: cgrvtrial(:,:),cgrvtrial1(:,:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:)
 
 ! *************************************************************************
+
+ call timab(1904, 1, tsec)
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
@@ -903,6 +905,8 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    ABI_DEALLOCATE(vlocal_tmp)
    ABI_DEALLOCATE(vlocal1_tmp)
  end if !nspden
+
+ call timab(1904, 2, tsec)
 
 end subroutine rf_transgrid_and_pack
 !!***
