@@ -533,8 +533,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t155o_DS2_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
+Number of bands in e-ph self-energy sum: 7
+From bmin: 1 to bmax: 7
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: tetrahedron method
@@ -558,7 +558,7 @@ List of K-points for self-energy corrections:
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    6
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 7
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over (q-points, bands): 1
@@ -959,8 +959,8 @@ All the independent perturbations are available
 --------------------------------------------------------------------------------
 
 - Writing electron DOS to file: t155o_DS4_EDOS
-Number of bands in e-ph self-energy sum: 8
-From bmin: 1 to bmax: 8
+Number of bands in e-ph self-energy sum: 7
+From bmin: 1 to bmax: 7
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: tetrahedron method
@@ -984,7 +984,7 @@ List of K-points for self-energy corrections:
    7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   1    6
    8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   1    6
  === MPI parallelism ===
-P Allocating and treating bands from my_bstart: 1 up to my_bstop: 8
+P Allocating and treating bands from my_bstart: 1 up to my_bstop: 7
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over (q-points, bands): 1
