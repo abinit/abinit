@@ -158,35 +158,30 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
   tmp_saved_LIBS="${LIBS}"
   CPPFLAGS="${CPPFLAGS} ${abi_dft_libxc_incs}"
   FCFLAGS="${FCFLAGS} ${abi_dft_libxc_incs}"
+  AC_LANG_PUSH([C])
 
   dnl Look for C includes
-  AC_LANG_PUSH([C])
   AC_CHECK_HEADERS([xc.h xc_funcs.h xc_version.h],[abi_dft_libxc_has_incs="yes"],[abi_dft_libxc_has_incs="no"])
-  AC_LANG_POP([C])
 
   dnl Look for libraries and routines
   if test "${with_libxc_libs}" = ""; then
-    AC_LANG_PUSH([C])
-    AC_SEARCH_LIBS([xc_func_init],[xc dft_xc],[abi_dft_libxc_has_libs="yes"])
+    AC_SEARCH_LIBS([xc_func_init],[xc dft_xc],[abi_dft_libxc_has_libs="yes"],[abi_dft_libxc_has_libs="yes"],[m])
     if test "${abi_dft_libxc_has_libs}" = "yes"; then
       if test "${ac_cv_search_xc_func_init}" != "none required"; then
         abi_dft_libxc_libs="${ac_cv_search_xc_func_init}"
       fi
     fi
-    AC_LANG_POP([C])
   fi
   LIBS="${abi_dft_libxc_libs} ${LIBS}"
 
   dnl Check whether the C wrappers work
   if test "${abi_dft_libxc_has_incs}" = "yes"; then
     AC_MSG_CHECKING([whether LibXC is usable])
-    AC_LANG_PUSH([C])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "xc.h"]],
       [[xc_func_type func;
         int func_id = 1;
         int i=xc_func_init(&func, func_id, XC_UNPOLARIZED);
       ]])], [abi_dft_libxc_has_libs="yes"], [abi_dft_libxc_has_libs="no"])
-    AC_LANG_POP([C])
     AC_MSG_RESULT([${abi_dft_libxc_has_libs}])
   fi
 
@@ -194,14 +189,12 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
   if test "${abi_dft_libxc_has_incs}" = "yes" -a \
           "${abi_dft_libxc_has_libs}" = "yes"; then
     AC_MSG_CHECKING([whether this is LibXC version $1.$2->$3.$4])
-    AC_LANG_PUSH([C])
     AC_RUN_IFELSE([AC_LANG_PROGRAM(
       [[#include "xc_version.h"]],
       [[int ver=100*XC_MAJOR_VERSION+XC_MINOR_VERSION;
         int ver_min=100*$1+$2,ver_max=100*$3+$4;
         if ( (ver<ver_min) || (ver>ver_max)) {return 1;}
       ]])], [abi_dft_libxc_version="yes"], [abi_dft_libxc_version="no"])
-    AC_LANG_POP([C])
     AC_MSG_RESULT([${abi_dft_libxc_version}])
   fi
 
@@ -220,6 +213,7 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
   fi
 
   dnl Restore environment
+  AC_LANG_POP([C])
   CPPFLAGS="${tmp_saved_CPPFLAGS}"
   FCFLAGS="${tmp_saved_FCFLAGS}"
   LIBS="${tmp_saved_LIBS}"
