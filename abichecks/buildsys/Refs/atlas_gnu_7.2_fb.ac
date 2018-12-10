@@ -947,7 +947,7 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
 
                        # ------------------------------ #
 
