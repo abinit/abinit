@@ -523,7 +523,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine,iq_ibz_packed
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
- integer :: mpw,ierr,it,ndiv,thisproc_nq, miq
+ integer :: mpw,ierr,it,ndiv,thisproc_nq, imyq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
@@ -891,37 +891,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq, spin, with_nonlocal=.true.)
 
-     ! Distribute q-points and bands.
-     ! The distribution must be consistent with the WF distribution done with bks_mask
-     ABI_SFREE(sigma%distrib_bq)
-     ABI_MALLOC(sigma%distrib_bq, (bsum_start:bsum_stop, sigma%nqibz_k))
-     sigma%distrib_bq = -1
-
-     if (dtset%eph_task == 4) then
-       ! Distribute bands (memory and CPU) inside comm_bq
-       sigma%distrib_bq(sigma%my_bstart:sigma%my_bstop, :) = my_rank
-
-     else if (dtset%eph_task == -4) then
-       if (sigma%nqibz_k >= sigma%nprocs_bq) then
-         ! Distribute q-points inside comm_bq
-         call xmpi_split_work(sigma%nqibz_k, sigma%comm_bq, q_start, q_stop, msg, ierr)
-         sigma%distrib_bq(:, q_start:q_stop) = my_rank
-       else
-         ! Distribute bands and q-points inside comm_bq
-         ! ibsum_kq is the fastest index to minimize the number of q-points treated by each rank.
-         ! q-points in IBZ(k) are grouped by shells
-         call xmpi_split_work(nbsum*sigma%nqibz_k, sigma%comm_bq, q_start, q_stop, msg, ierr)
-         do it=q_start,q_stop
-           ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
-           ! all procs have the bands in the energy window.
-           ibsum_kq = ibsum_kq - 1 + sigma%bsum_start
-           sigma%distrib_bq(ibsum_kq, iq_ibz) = my_rank
-         end do
-       end if
-     else
-       MSG_ERROR("Invalid eph_task")
-     end if
-
      !ABI_MALLOC(zvals, (nz, nbcalc_ks))
      if (sigma%qint_method == 1) then
        ! Weights for Re-Im with i.eta shift.
@@ -948,14 +917,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! =======================================
      ! Integration over q-points in the IBZ(k)
      ! =======================================
-     do miq=1,sigma%my_nqibz_k
-       iq_ibz = sigma%myq2ibz_k(miq)
+     do imyq=1,sigma%my_nqibz_k
+       iq_ibz = sigma%myq2ibz_k(imyq)
 
        ! Parallelization over q-points inside comm_bq
        if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
 
        ! TODO Exclude q-points based on tetrahedron weigths but all procs in comm_pert must agree!
-       !if (sigma%ignore_miq(miq, sigma%comm_pert)) cycle
+       !if (sigma%ignore_miq(imyq, sigma%comm_pert)) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = sum(qpt**2) < tol14 !; if (isqzero) cycle
@@ -1122,13 +1091,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
        call timab(1903, 1, tsec)
-       do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
+       do ibsum_kq=sigma%my_bstart, sigma%my_bstop
+       !do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
          ! Parallelization for eph_task == 4 inside comm_bq
-         if (sigma%distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
+         !if (sigma%distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
          ! This to check whether the gkk elements in the degenerate subspace break symmetry
          !if (ibsum_kq >= bstart_ks .and. ibsum_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
-         ! symmetrize wavefunctions from IBZ (if needed). Be careful with time-reversal symmetry.
+         ! Symmetrize wavefunctions from IBZ (if needed). Be careful with time-reversal symmetry.
          if (isirr_kq) then
            ! Copy u_kq(G)
            call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1173,7 +1143,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! q-weighh for naive integration
          weigth_q = sigma%wtq_k(iq_ibz)
 
-         !do nu=1,natom3
          do imyp=1,my_npert
            ! Ignore acoustic or unstable modes.
            nu = sigma%my_pinfo(3, imyp)
@@ -2948,8 +2917,9 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1=1,timrev1=1
- integer :: spin, iq_ibz, cnt !, nqeff
+ integer :: spin, my_rank, iq_ibz, cnt, ierr !, nqeff
  !integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop
+ integer :: q_start, q_stop
  real(dp) :: dksqmax, ediff
  character(len=500) :: msg
  type(lgroup_t) :: lgk
@@ -2962,6 +2932,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
  ABI_SFREE(self%qibz_k)
  ABI_SFREE(self%wtq_k)
+
+ my_rank = xmpi_comm_rank(comm)
 
  kk = self%kcalc(:, ikcalc)
 
@@ -3106,10 +3078,10 @@ ibsum_loop: &
    !    " (nq_eff / nqibz_k): ", (100.0_dp * nqeff) / sigma%nqibz_k, " [%]"
    !end if
 
-   if (qstart <= q_stop) then
+   if (q_start <= q_stop) then
      self%my_nqibz_k = q_stop - q_start + 1
      ABI_MALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-     self%myq2ibz_k = qtab(qstart:qstop)
+     self%myq2ibz_k = qtab(q_start:q_stop)
    else
      self%my_nqibz_k = 0
      ABI_MALLOC(self%myq2ibz_k, (self%my_nqibz_k))
@@ -3123,6 +3095,38 @@ ibsum_loop: &
    ABI_MALLOC(self%myq2ibz_k, (self%my_nqibz_k))
    self%myq2ibz_k = [(iq_ibz, iq_ibz=1, self%nqibz_k)]
  !end if
+
+#if 1
+ ! Distribute q-points and bands.
+ ! The distribution must be consistent with the WF distribution done with bks_mask
+ ABI_REMALLOC(self%distrib_bq, (self%bsum_start:self%bsum_stop, self%nqibz_k))
+ self%distrib_bq = -1
+
+ if (dtset%eph_task == 4) then
+   ! Distribute bands (memory and CPU) inside comm_bq
+   self%distrib_bq(self%my_bstart:self%my_bstop, :) = my_rank
+
+ else if (dtset%eph_task == -4) then
+   !if (self%nqibz_k >= self%nprocs_bq) then
+     ! Distribute q-points inside comm_bq
+     call xmpi_split_work(self%nqibz_k, self%comm_bq, q_start, q_stop, msg, ierr)
+     self%distrib_bq(:, q_start:q_stop) = my_rank
+   !else
+   !  ! Distribute bands and q-points inside comm_bq
+   !  ! ibsum_kq is the fastest index to minimize the number of q-points treated by each rank.
+   !  ! q-points in IBZ(k) are grouped by shells
+   !  call xmpi_split_work(nbsum*self%nqibz_k, self%comm_bq, q_start, q_stop, msg, ierr)
+   !  do it=q_start,q_stop
+   !    ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
+   !    ! all procs have the bands in the energy window.
+   !    ibsum_kq = ibsum_kq - 1 + self%bsum_start
+   !    self%distrib_bq(ibsum_kq, iq_ibz) = my_rank
+   !  end do
+   !end if
+ else
+   MSG_ERROR(sjoin("Invalid eph_task:", itoa(dtset%eph_task)))
+ end if
+#endif
 
 end subroutine sigmaph_setup_kcalc
 !!***
@@ -3635,7 +3639,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 !Local variables ------------------------------
 !scalars
  integer :: nu, band_ks, ibsum_kq, ik_ibz, ib_k, bstart_ks, nbcalc_ks, my_rank, natom3, ierr
- integer :: nprocs,this_calc, imyp
+ integer :: nprocs,this_calc, imyp, imyq
  integer :: iq_ibz_fine,iq_bz_fine,iq_ibz_packed,iq_ibz,jj
  real(dp) :: eig0nk, weight
  real(dp) :: cpu,wall,gflops
@@ -3669,7 +3673,7 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
       this_calc = this_calc + 1; if (mod(this_calc,nprocs) /= my_rank) cycle ! MPI parallelism.
       band_ks = ib_k + bstart_ks - 1
       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-      eminmax = [eig0nk - 0.01, eig0nk + 0.01]
+      eminmax = [eig0nk - tol2, eig0nk + tol2]
       call sigma%ephwg%get_deltas(ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, xmpi_comm_self)
       ! we pay the efficiency here
       sigma%deltaw_pm(1,ib_k,nu,ibsum_kq,:) = tmp_deltaw_pm(2, :, 1) / ( sigma%ephwg%lgk%weights(:) )
@@ -3687,12 +3691,14 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
     do ib_k=1,nbcalc_ks
       band_ks = ib_k + bstart_ks - 1
       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-      eminmax = [eig0nk - 0.01, eig0nk + 0.01]
+      eminmax = [eig0nk - tol2, eig0nk + tol2]
       ! Compute weights inside comm_bq
       call sigma%ephwg%get_deltas(ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, sigma%comm_bq)
 
       ! For all the q-points that I am going to calculate
       iq_ibz_packed = 1
+      !do imyq=1,sigma%my_nqibz_k
+      ! iq_ibz = sigma%myq2ibz_k(imyq)
       do iq_ibz=1,sigma%nqibz_k
         if (all(sigma%distrib_bq(:, iq_ibz) /= my_rank)) cycle
 
