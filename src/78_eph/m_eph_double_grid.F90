@@ -107,14 +107,25 @@ module m_eph_double_grid
    integer,allocatable :: mapping(:,:)
    ! map k, k+q and q in the IBZ and FBZ of the double grid structure
 
+ contains
+
+   procedure :: free => eph_double_grid_free
+   ! Free the double grid structure
+
+   procedure :: get_index => eph_double_grid_get_index
+   ! Get the index of the the kpoint in the double grid
+
+   procedure :: bz2ibz => eph_double_grid_bz2ibz
+   ! Map BZ to IBZ using the double grid structure
+
+   procedure :: get_mapping => eph_double_grid_get_mapping
+   ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
+
  end type eph_double_grid_t
 !!***
 
- public :: eph_double_grid_new   ! Initialize the double grid structure
- public :: eph_double_grid_free  ! Free the double grid structure
- public :: eph_double_grid_get_index ! Get the index of the the kpoint in the double grid
- public :: eph_double_grid_bz2ibz ! Map BZ to IBZ using the double grid structure
- public :: eph_double_grid_get_mapping ! Get a mapping of k, k+q and q to the BZ and IBZ of the double grid
+ public :: eph_double_grid_new
+ ! Initialize the double grid structure
 
 contains  !=====================================================
 !!***
@@ -362,6 +373,7 @@ end function eph_double_grid_new
 !! NAME
 !!
 !! FUNCTION
+!!  Free memory
 !!
 !! INPUTS
 !!
@@ -374,7 +386,7 @@ end function eph_double_grid_new
 
 subroutine eph_double_grid_free(self)
 
- type(eph_double_grid_t),intent(inout) :: self
+ class(eph_double_grid_t),intent(inout) :: self
 
  ABI_SFREE(self%weights_dense)
  ABI_SFREE(self%bz2ibz_dense)
@@ -413,7 +425,7 @@ end subroutine eph_double_grid_free
 
 integer function eph_double_grid_get_index(self,kpt,opt) result(ikpt)
 
- type(eph_double_grid_t),intent(in) :: self
+ class(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: opt
  real(dp),intent(in) :: kpt(3)
 
@@ -470,7 +482,7 @@ end function eph_double_grid_get_index
 
 subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timrev,mapping)
 
- type(eph_double_grid_t),intent(in) :: self
+ class(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: nibz, nsym
  real(dp),intent(in) :: kpt_ibz(3,nibz)
  integer,intent(in) :: symmat(3,3,nsym)
@@ -537,7 +549,6 @@ end subroutine eph_double_grid_bz2ibz
 
 !----------------------------------------------------------------------
 
-
 !!****f* m_sigmaph/eph_double_grid_mapping
 !! NAME
 !!  eph_double_grid_mapping
@@ -560,7 +571,7 @@ end subroutine eph_double_grid_bz2ibz
 subroutine eph_double_grid_get_mapping(self,kk,kq,qpt)
 
 !Arguments --------------------------------
- type(eph_double_grid_t),intent(inout) :: self
+ class(eph_double_grid_t),intent(inout) :: self
  real(dp),intent(in) :: kk(3), kq(3), qpt(3)
 
 !Variables --------------------------------

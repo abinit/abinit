@@ -463,7 +463,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  ! get dg%bz --> self%lgrp%ibz
  ABI_SFREE(eph_doublegrid%bz2lgkibz)
  ABI_MALLOC(eph_doublegrid%bz2lgkibz,(eph_doublegrid%dense_nbz))
- call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
+ call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
                              cryst%symrel, cryst%nsym, &
                              eph_doublegrid%bz2lgkibz, has_timrev=1)
 
@@ -550,7 +550,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
  ! get dg%bz --> lgk%ibz (k+q)
  ABI_MALLOC(bz2lgkibzkq, (eph_doublegrid%dense_nbz))
- call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
+ call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
                              cryst%symrel, cryst%nsym, &
                              bz2lgkibzkq, has_timrev=1)
 
@@ -606,7 +606,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
    do ii=1,self%nbz
       ! get self%bz --> self%bz
-      bz2bz(ii) = eph_double_grid_get_index(eph_doublegrid,self%bz(:,ii),2)
+      bz2bz(ii) = eph_doublegrid%get_index(self%bz(:,ii),2)
    end do
 
    !check if same results as listkk
@@ -619,7 +619,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
  do ii=1,self%nbz
     ! get self%bz --> dg%bz
-    ik_idx = eph_double_grid_get_index(eph_doublegrid,self%bz(:,ii),2)
+    ik_idx = eph_doublegrid%get_index(self%bz(:,ii),2)
     ! dg%bz --> self%lgrp%ibz
     bz2lgkibz(ii) = eph_doublegrid%bz2lgkibz(ik_idx)
  end do

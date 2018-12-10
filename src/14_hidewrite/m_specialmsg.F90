@@ -444,6 +444,7 @@ subroutine wrtout(unit,msg,mode_paral,do_flush)
 
  use m_xmpi,      only : xmpi_world, xmpi_comm_rank, xmpi_comm_size
  use m_io_tools,  only : flush_unit, write_lines
+
  implicit none
 
 !Arguments ------------------------------------
