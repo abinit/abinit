@@ -743,7 +743,7 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
  NCF_CHECK(ncerr)
 
  ! In case of a Berry phase calculation output the polarization
- if (res%berryopt) then
+ if (res%berryopt/=0) then
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t('reduced_electronic_polarization', "dp", "number_of_cartesian_dimensions"),&
      nctkarr_t('reduced_ionic_polarization', "dp", "number_of_cartesian_dimensions")])
@@ -762,7 +762,7 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid("cartesian_forces"), res%fcart))
  NCF_CHECK(nf90_put_var(ncid, vid("cartesian_stress_tensor"), res%strten))
 
- if (res%berryopt) then
+ if (res%berryopt/=0) then
    NCF_CHECK(nf90_put_var(ncid, vid("reduced_electronic_polarization"), res%pel))
    NCF_CHECK(nf90_put_var(ncid, vid("reduced_ionic_polarization"), res%pion))
  end if
