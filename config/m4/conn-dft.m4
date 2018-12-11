@@ -158,21 +158,24 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
   tmp_saved_LIBS="${LIBS}"
   CPPFLAGS="${CPPFLAGS} ${abi_dft_libxc_incs}"
   FCFLAGS="${FCFLAGS} ${abi_dft_libxc_incs}"
+  LIBS="${abi_dft_libxc_libs} ${LIBS}"
   AC_LANG_PUSH([C])
 
   dnl Look for C includes
   AC_CHECK_HEADERS([xc.h xc_funcs.h xc_version.h],[abi_dft_libxc_has_incs="yes"],[abi_dft_libxc_has_incs="no"])
 
   dnl Look for libraries and routines
-  if test "${with_libxc_libs}" = ""; then
-    AC_SEARCH_LIBS([xc_func_init],[xc dft_xc],[abi_dft_libxc_has_libs="yes"],[abi_dft_libxc_has_libs="yes"],[m])
+  if test "${abi_dft_libxc_libs}" = ""; then
+    AC_SEARCH_LIBS([xc_func_init],[xc dft_xc],[abi_dft_libxc_has_libs="yes"],[abi_dft_libxc_has_libs="yes"],[-lm])
     if test "${abi_dft_libxc_has_libs}" = "yes"; then
       if test "${ac_cv_search_xc_func_init}" != "none required"; then
         abi_dft_libxc_libs="${ac_cv_search_xc_func_init}"
       fi
     fi
+    LIBS="${abi_dft_libxc_libs} ${LIBS}"
+  else
+    AC_CHECK_LIB([xc],[xc_func_init],[abi_dft_libxc_has_incs="yes"],[abi_dft_libxc_has_incs="no"],[-lm])
   fi
-  LIBS="${abi_dft_libxc_libs} ${LIBS}"
 
   dnl Check whether the C wrappers work
   if test "${abi_dft_libxc_has_incs}" = "yes"; then
