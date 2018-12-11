@@ -186,6 +186,9 @@ module m_sigmaph
   ! Number of q-points in the IBZ(k) treated by this MPI proc. Depends on ikcalc.
   ! Differs from nqibz_k only if imag with tetra because in this case we can introduce a cutoff on the weights
 
+  integer :: nqskip = 0
+  ! Number of IBZ(k) q-points ignored because weights are negligible. Only if imag + tetra
+
   integer :: ncid = nctk_noid
   ! Netcdf file used to save results.
 
@@ -196,7 +199,7 @@ module m_sigmaph
   ! 1 to include Blochl correction in tetrahedron method else 0.
 
   integer :: ntheta, nphi
-  ! Numner of division for spherical integration of Frohlich term.
+  ! Number of division for spherical integration of Frohlich term.
 
   integer :: nqr = 0
    ! Number of points on the radial mesh for spherical integration of the Frohlich self-energy
@@ -2905,6 +2908,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  kk = self%kcalc(:, ikcalc)
+ self%nqskip = 0
 
  call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
  msg = sjoin("[", itoa(ikcalc), "/", itoa(self%nkcalc), "]")
@@ -3041,7 +3045,8 @@ ibsum_loop: &
              ! The goal is to remove a fraction of the q-points and redistribute them
              ! to avoid load imbalance, there's another check inside the loop in which
              ! we test the value of the weights ...
-             if (ediff <= two * ten * self%wmax) then
+             !if (ediff <= two * ten * self%wmax) then
+             if (ediff <= two * self%wmax) then
                mask_qibz_k(iq_ibz) = 1; exit ibsum_loop
              end if
            end do
@@ -3146,9 +3151,13 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
-
  ! Only master writes
  if (my_rank /= master) return
+
+ if (self%imag_only .and. self%qint_method == 1) then
+   !ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
+   write(std_out, "(a,i0,a,es16.6)")" Skipped: ", self%nqibz, " q-point because weight <= ", self%tol_deltaw_pm !/ ndiv
+ end if
 
  ik_ibz = self%kcalc2ibz(ikcalc, 1)
 
@@ -3764,8 +3773,8 @@ integer function ignore_imyq(sigma, imyq, comm_pert) result(skip)
 
  call xmpi_min(my_skip, skip, comm_pert, ierr)
  if (skip == 1) then
-   !sigma%num_qskip = sigma%num_qskip + 1
-   write(std_out, "(a, es16.6)")" Skipping q-point with weight <=", sigma%tol_deltaw_pm / ndiv
+   sigma%nqskip = sigma%nqskip + 1
+   !write(std_out, "(a, es16.6)")" Skipping q-point with weight <=", sigma%tol_deltaw_pm / ndiv
  end if
 
 end function ignore_imyq

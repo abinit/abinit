@@ -2045,6 +2045,12 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
+ do mu=1,natom3
+   do ispden=1,nspden
+     if (.not. requests_v1g_qibz_done(ispden, mu)) call xmpi_wait(requests(ispden, mu), ierr)
+   end do
+ end do
+
  call xmpi_waitall(requests_v1r_qbz, ierr)
  !call xmpi_sum(v1r_qbz, comm, ierr)
 

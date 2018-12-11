@@ -77,7 +77,7 @@ module m_eph_double_grid
    integer :: interp_kmult(3)
    ! multiplicity of the meshes
 
-   integer :: ndiv
+   integer :: ndiv = 1
    ! interp_kmult(1)*interp_kmult(2)*interp_kmult(3)
 
    ! the integer indexes for the coarse grid are calculated for kk(3) with:
