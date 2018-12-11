@@ -38,7 +38,6 @@ MODULE m_FFT_prof
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
  use m_oscillators,    only : rho_tw_g
 
-
  implicit none
 
  private
@@ -176,8 +175,6 @@ CONTAINS  !====================================================================
 
 subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: nsym
@@ -268,8 +265,6 @@ end subroutine fft_test_init
 
 subroutine fft_test_nullify(Ftest)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  type(FFT_test_t),intent(inout) :: Ftest
@@ -305,8 +300,6 @@ end subroutine fft_test_nullify
 !! SOURCE
 
 subroutine fft_test_free_0D(Ftest)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -373,8 +366,6 @@ end subroutine fft_test_free_0D
 
 subroutine fft_test_free_1D(Ftest)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  type(FFT_test_t),intent(inout) :: Ftest(:)
@@ -415,8 +406,6 @@ end subroutine fft_test_free_1D
 !! SOURCE
 
 subroutine fft_test_print(Ftest,header,unit,mode_paral,prtvol)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -468,8 +457,6 @@ end subroutine fft_test_print
 
 function name_of(Ftest)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  character(len=TNAME_LEN) :: name_of
@@ -514,8 +501,6 @@ end function name_of
 !! SOURCE
 
 subroutine fftprof_init(Ftprof,test_name,nthreads,ncalls,ndat,cpu_time,wall_time,gflops,results)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -572,8 +557,6 @@ end subroutine fftprof_init
 
 subroutine fftprof_free_0D(Ftprof)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  type(FFT_prof_t),intent(inout) :: Ftprof
@@ -617,8 +600,6 @@ end subroutine fftprof_free_0D
 
 subroutine fftprof_free_1D(Ftprof)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  type(FFT_prof_t),intent(inout) :: Ftprof(:)
@@ -659,8 +640,6 @@ end subroutine fftprof_free_1D
 !! SOURCE
 
 subroutine fftprof_print(Fprof,header,unit,mode_paral,prtvol)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -774,8 +753,6 @@ end subroutine fftprof_print
 !! SOURCE
 
 subroutine time_fourdp(Ftest,isign,cplex,header,Ftprof)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -914,8 +891,6 @@ end subroutine time_fourdp
 
 subroutine time_fftbox(Ftest,isign,inplace,header,Ftprof)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: isign,inplace
@@ -1050,8 +1025,6 @@ end subroutine time_fftbox
 !! SOURCE
 
 subroutine time_fourwf(Ftest,cplex,option_fourwf,header,Ftprof)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1344,8 +1317,6 @@ end subroutine time_fourwf
 
 subroutine fftprof_ncalls_per_test(ncalls)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: ncalls
@@ -1380,8 +1351,6 @@ end subroutine fftprof_ncalls_per_test
 !! SOURCE
 
 subroutine time_rhotwg(Ftest,map2sphere,use_padfft,osc_npw,osc_gvec,header,Ftprof)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1534,8 +1503,6 @@ end subroutine time_rhotwg
 !! SOURCE
 
 subroutine time_fftu(Ftest,isign,header,Ftprof)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1705,8 +1672,6 @@ end subroutine time_fftu
 
 subroutine prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: nsym,isign,cplex,necut
@@ -1811,8 +1776,6 @@ end subroutine prof_fourdp
 !! SOURCE
 
 subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,rprimd,nsym,symrel,MPI_enreg_in)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -1919,8 +1882,6 @@ end subroutine prof_fourwf
 
 subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin,&
 &  rprimd,nsym,symrel,gmet,MPI_enreg_in)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -2030,8 +1991,6 @@ end subroutine prof_rhotwg
 !! SOURCE
 
 function empty_cache(kbsize) result(fake)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars

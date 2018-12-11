@@ -86,8 +86,6 @@ contains
 subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
   npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isym,itimrev,nspinor,ndat,npw1,npw2,istwf1,istwf2
@@ -239,8 +237,6 @@ end subroutine cgtk_rotate
 !! SOURCE
 
 subroutine cgtk_change_gsphere(ndat, npw1, istwf1, kg1, cg1, npw2, istwf2, kg2, cg2, work_ngfft, work)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

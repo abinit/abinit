@@ -139,8 +139,6 @@ contains
 
 subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,ndtset,nfft,nkpt,nsppol,timopt

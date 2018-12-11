@@ -58,7 +58,7 @@ module m_nonlinear
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
-&                          pawrhoij_bcast, pawrhoij_nullify
+&                          pawrhoij_bcast, pawrhoij_nullify, pawrhoij_inquire_dim
  use m_pawdij,      only : pawdij, symdij
  use m_paw_finegrid,only : pawexpiqr
  use m_pawxc,       only : pawxc_get_nkxc
@@ -182,7 +182,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !scalars
  logical :: paral_atom,call_pawinit,qeq0
  integer,parameter :: level=50,formeig=0,response=1,cplex1=1
- integer :: ask_accurate,band_index,bantot,cplex,dum_nshiftk,flag,gnt_option,gscase
+ integer :: ask_accurate,band_index,bantot,cplex,cplex_rhoij,dum_nshiftk,flag,gnt_option,gscase
  integer :: has_dijnd,has_diju,has_kxc,has_k3xc
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: iatom,indx,iband,ider,idir,ierr,ifft,ikpt,ipert,isppol
@@ -191,7 +191,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer :: nkpt_eff,nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nk3xc1,nneigh,ntypat,nsym1,nspden_rhoij,nzlmopt
  integer :: optcut,optgr0,optgr1,optgr2,optrad,option,optorth
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
- integer :: psp_gencond,pead,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
+ integer :: psp_gencond,pead,qphase_rhoij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
  integer :: use_sym,usecprj,usexcnhat
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
@@ -534,7 +534,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    call pawrhoij_nullify(pawrhoij)
    call initrhoij(dtset%pawcpxocc,dtset%lexexch,dtset%lpawu, &
 &   my_natom,natom,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
-&   pawrhoij,dtset%pawspnorb,pawtab,dtset%spinat,dtset%typat,&
+&   pawrhoij,dtset%pawspnorb,pawtab,cplex1,dtset%spinat,dtset%typat,&
 &   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
  else
    ABI_DATATYPE_ALLOCATE(pawrhoij,(0))
@@ -765,9 +765,10 @@ end if
    if (rdwrpaw/=0) then
      ABI_DATATYPE_ALLOCATE(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
-     nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
-     call pawrhoij_alloc(pawrhoij_read,dtset%pawcpxocc,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,pawtab=pawtab)
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_alloc(pawrhoij_read,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
+&                        dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab)
    else
      ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
    end if

@@ -881,7 +881,6 @@ end function libpaw_get_free_unit
 !!  This routine comes directly from the FLUSH_UNIT routine delivered with ABINIT.
 !!
 !! PARENTS
-!!      m_pawrhoij
 !!
 !! CHILDREN
 !!      flush,flush_

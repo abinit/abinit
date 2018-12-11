@@ -45,7 +45,7 @@ prtden 0  prteig 0  prtwf 0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t17.out, tolnlines = 5, tolabs = 1.100e-02, tolrel = 1.001e+00, fld_options = -easy
+#%%   t17.out, tolnlines = 7, tolabs = 1.100e-02, tolrel = 1.001e+00, fld_options = -easy
 #%% psp_files = 83bi.paw
 #%% [paral_info]
 #%% max_nprocs = 2

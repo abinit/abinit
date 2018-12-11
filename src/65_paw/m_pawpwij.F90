@@ -375,7 +375,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
  ABI_MALLOC(my_qtmp,(3,my_nqpt))
  my_qtmp(:,1)=qpt_in(:)
  !
- ! * dummy_nband and dummy_nsppol are not used in sequential mode.
+ ! dummy_nband and dummy_nsppol are not used in sequential mode.
  dummy_nsppol=1
  ABI_MALLOC(dummy_nband,(my_nqpt*dummy_nsppol))
  dummy_nband=0
