@@ -74,7 +74,7 @@ MODULE m_results_gs
    ! Can be 0 (not allocated) or natom
 
   integer :: berryopt
-   ! Store the Berry phase option to know whether to use pel and pion (0 means no, otherwise means yes)
+   ! Store the Berry phase option to know whether to use pel and pion (0 means no, otherwise yes)
 
 ! Real (real(dp)) scalars
 
@@ -251,6 +251,7 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
  results_gs%natom  =natom
  results_gs%ngrvdw =0
  results_gs%nsppol =nsppol
+ results_gs%berryopt=zero
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
@@ -271,6 +272,7 @@ subroutine init_results_gs(natom,nsppol,results_gs,only_part)
  results_gs%gaps =zero
  if (full_init) then
    results_gs%pel=zero
+   results_gs%pion=zero
    ABI_ALLOCATE(results_gs%gresid,(3,natom))
    results_gs%gresid=zero
    ABI_ALLOCATE(results_gs%grewtn,(3,natom))
@@ -347,6 +349,7 @@ subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
        results_gs(jj,ii)%natom  =natom
        results_gs(jj,ii)%ngrvdw =0
        results_gs(jj,ii)%nsppol =nsppol
+       results_gs(jj,ii)%berryopt=zero
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero
@@ -367,6 +370,7 @@ subroutine init_results_gs_array(natom,nsppol,results_gs,only_part)
        results_gs(jj,ii)%gaps =zero
        if (full_init) then
          results_gs(jj,ii)%pel=zero
+         results_gs(jj,ii)%pion=zero
          ABI_ALLOCATE(results_gs(jj,ii)%gresid,(3,natom))
          results_gs(jj,ii)%gresid=zero
          ABI_ALLOCATE(results_gs(jj,ii)%grewtn,(3,natom))
@@ -427,6 +431,7 @@ subroutine destroy_results_gs(results_gs)
  results_gs%natom =0
  results_gs%ngrvdw=0
  results_gs%nsppol=0
+ results_gs%berryopt=0
  if (allocated(results_gs%fcart))   then
    ABI_DEALLOCATE(results_gs%fcart)
  end if
@@ -505,6 +510,7 @@ subroutine destroy_results_gs_array(results_gs)
        results_gs(jj,ii)%natom =0
        results_gs(jj,ii)%ngrvdw=0
        results_gs(jj,ii)%nsppol=0
+       results_gs(jj,ii)%berryopt=0
        if (allocated(results_gs(jj,ii)%fcart))   then
          ABI_DEALLOCATE(results_gs(jj,ii)%fcart)
        end if
@@ -650,6 +656,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%natom  =results_gs_in%natom
  results_gs_out%ngrvdw =results_gs_in%ngrvdw
  results_gs_out%nsppol =results_gs_in%nsppol
+ results_gs_out%berryopt=results_gs_in%berryopt
  results_gs_out%deltae =results_gs_in%deltae
  results_gs_out%diffor =results_gs_in%diffor
  results_gs_out%entropy=results_gs_in%entropy
@@ -662,6 +669,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  call energies_copy(results_gs_in%energies,results_gs_out%energies)
 
  results_gs_out%pel(:)=results_gs_in%pel(:)
+ results_gs_out%pion(:)=results_gs_in%pion(:)
  results_gs_out%strten(:)=results_gs_in%strten(:)
 
  if (allocated(results_gs_in%fcart))  results_gs_out%fcart(:,1:natom_in) =results_gs_in%fcart(:,1:natom_in)
