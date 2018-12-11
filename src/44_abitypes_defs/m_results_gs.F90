@@ -73,6 +73,9 @@ MODULE m_results_gs
    ! Size of grvdw array
    ! Can be 0 (not allocated) or natom
 
+  integer :: berryopt
+   ! Store the Berry phase option to know whether to use pel and pion (0 means no, otherwise means yes)
+
 ! Real (real(dp)) scalars
 
   real(dp) :: deltae
@@ -165,6 +168,9 @@ MODULE m_results_gs
 
   real(dp) :: pel(3)
    ! ucvol times the electronic polarization in reduced coordinates
+
+  real(dp) :: pion(3)
+   ! ucvol times the ionic polarization in reduced coordinates
 
   real(dp) :: strten(6)
    ! Stress tensor in cartesian coordinates (Hartree/Bohr^3)
@@ -736,6 +742,14 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
    nctkarr_t('cartesian_stress_tensor', "dp", 'six')])
  NCF_CHECK(ncerr)
 
+ ! In case of a Berry phase calculation output the polarization
+ if (res%berryopt) then
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t('reduced_electronic_polarization', "dp", "number_of_cartesian_dimensions"),&
+     nctkarr_t('reduced_ionic_polarization', "dp", "number_of_cartesian_dimensions")])
+   NCF_CHECK(ncerr)
+ end if
+
 ! Write data.
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
@@ -747,6 +761,11 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, vid("cartesian_forces"), res%fcart))
  NCF_CHECK(nf90_put_var(ncid, vid("cartesian_stress_tensor"), res%strten))
+
+ if (res%berryopt) then
+   NCF_CHECK(nf90_put_var(ncid, vid("reduced_electronic_polarization"), res%pel))
+   NCF_CHECK(nf90_put_var(ncid, vid("reduced_ionic_polarization"), res%pion))
+ end if
 
 ! Add energies
  call energies_ncwrite(res%energies, ncid)
