@@ -1011,8 +1011,6 @@ end subroutine rho_norm_check
 !! cg(2,mcg)=planewave coefficients of wavefunctions
 !! cprj(natom,mcprj*usecrpj)=<p_lmn|Cnk> coefficients for each WF |Cnk> and each |p_lmn> non-local projector
 !! dtset <type(dataset_type)>=all input variables in this dataset
-!! gmet(3,3)=metric in reciprocal space
-!! gprimd(3,3)=reciprocal space dimensional primitive translations
 !! kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
 !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !! mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
@@ -1025,6 +1023,7 @@ end subroutine rho_norm_check
 !! pwind(pwind_alloc,2,3) = array used to compute
 !!           the overlap matrix smat between k-points (see initberry.f)
 !! pwind_alloc = first dimension of pwind
+!! rprimd(3,3) = real space translation vectors
 !! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
 !!   reciprocal space primitive translations
 !! usecprj=1 if cprj datastructure has been allocated
@@ -1059,9 +1058,9 @@ end subroutine rho_norm_check
 !!
 !! SOURCE
 
-subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
+subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     &            symrec,usecprj,usepaw,xred)
+     &            rprimd,symrec,usecprj,usepaw,xred)
 
   implicit none
 
@@ -1077,7 +1076,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
   !arrays
   integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
-  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
+  real(dp), intent(in) :: cg(2,mcg),rprimd(3,3),xred(3,dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
@@ -1088,12 +1087,12 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
   integer :: icg,icgb,icgg,icprj,icprji,icprjb,icprjbi,icprjg,icprjgi
   integer :: ikg,ikpt,ikpti,ikptb,ikptbi,ikptg,ikptgi,isppol,itrs,job
   integer :: mcg1_k,my_nspinor,nband_k,ncpgr,nn,n1,n2,n3,npw_k,npw_kb,npw_kg,shiftbd
-  real(dp) :: deltab,deltag
+  real(dp) :: deltab,deltag,ucvol
   complex(dpc) :: IA,IB,t1A,t2A,t3A,t1B,t2B,t3B,t4B
   character(len=500) :: message
   !arrays
   integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
-  real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2)
+  real(dp) :: cnum(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2),gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp),allocatable :: cg1_k(:,:),kk_paw(:,:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_all_indx(:,:,:,:,:,:),smat_inv(:,:,:),smat_kk(:,:,:)
   logical,allocatable :: has_smat_indx(:,:,:)
@@ -1162,6 +1161,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
   ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
   has_smat_indx(:,:,:)=.FALSE.
 
+  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
   ! loop over kpts, assuming for now kptopt 3 or 4, nsppol = 1, nspinor = 1
   ! and no parallelism, no symmorphic symmetry elements
 
@@ -1214,7 +1215,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
               bdxc = 2*bdir-2+bfor+bsigma
 
               dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
-              deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
+              ! deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
+              deltab = sqrt(DOT_PRODUCT(dkb,dkb))
 
               ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
               ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
@@ -1272,7 +1274,8 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                  gdxc = 2*gdir-2+gfor+gsigma
 
                  dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
-                 deltag = sqrt(DOT_PRODUCT(dkg,MATMUL(gmet,dkg)))
+                 ! deltag = sqrt(DOT_PRODUCT(dkg,MATMUL(gmet,dkg)))
+                 deltag = sqrt(DOT_PRODUCT(dkg,dkg))
 
                  ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
                  ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
@@ -1388,14 +1391,14 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
 
   end do ! end loop over kpts
 
-  cnum(1,1:3) = MATMUL(gprimd,cnum(1,1:3))
-  cnum(2,1:3) = MATMUL(gprimd,cnum(2,1:3))
+  cnum(1,1:3) = ucvol*MATMUL(gprimd,cnum(1,1:3))
+  cnum(2,1:3) = ucvol*MATMUL(gprimd,cnum(2,1:3))
 
   ! factor of 2 in the numerator is the occupation number--each band contains
   ! two electrons, by assumption. Necessary such that trace over density operator
   ! gives number of electrons as expected.
-  dtorbmag%chern(1,1:3) = -cnum(2,1:3)*two/(two_pi*dtorbmag%fnkpt)
-  dtorbmag%chern(2,1:3) =  cnum(1,1:3)*two/(two_pi*dtorbmag%fnkpt)
+  dtorbmag%chern(1,1:3) = -cnum(2,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
+  dtorbmag%chern(2,1:3) =  cnum(1,1:3)*two/(two_pi*ucvol*dtorbmag%fnkpt)
   
   write(message,'(a,a,a)')ch10,'====================================================',ch10
   call wrtout(ab_out,message,'COLL')
@@ -2121,7 +2124,7 @@ end subroutine ctocprjb
 !!
 !! SOURCE
 
-subroutine make_dsdk_FD(bdir,cprj_kb_k,dsdk_FD,dtorbmag,dtset,gmet,ikpt,nband_k,pawtab)
+subroutine make_dsdk_FD(bdir,cprj_k,cprj_kb_k,dsdk_FD,dtorbmag,dtset,gmet,ikpt,nband_k,pawtab)
 
   implicit none
 
@@ -2134,6 +2137,7 @@ subroutine make_dsdk_FD(bdir,cprj_kb_k,dsdk_FD,dtorbmag,dtset,gmet,ikpt,nband_k,
   !arrays
   real(dp),intent(in) :: gmet(3,3)
   real(dp),intent(out) :: dsdk_FD(2,nband_k,nband_k)
+  type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,dtorbmag%nspinor*dtset%mband)
   type(pawcprj_type),intent(in) :: cprj_kb_k(dtorbmag%fnkpt,6,0:6,dtset%natom,dtorbmag%nspinor*dtset%mband)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
@@ -2141,7 +2145,7 @@ subroutine make_dsdk_FD(bdir,cprj_kb_k,dsdk_FD,dtorbmag,dtset,gmet,ikpt,nband_k,
   !scalars
   integer :: bdx,bfor,bsigma,iatom,ilmn,jlmn,klmn,itypat,nn, n1
   real(dp) :: deltab,sij
-  complex(dpc) :: cp,cp1,cp2
+  complex(dpc) :: cp,cp1,cp2,cp3,cp4
   !arrays
   real(dp) :: dkb(3)
 
@@ -2157,17 +2161,24 @@ subroutine make_dsdk_FD(bdir,cprj_kb_k,dsdk_FD,dtorbmag,dtset,gmet,ikpt,nband_k,
            do ilmn = 1, pawtab(itypat)%lmn_size
               do jlmn = 1, pawtab(itypat)%lmn_size
                  klmn = max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+                 ! cp1=cmplx(cprj_k(iatom,n1)%dcp(1,bdir,ilmn),cprj_k(iatom,n1)%dcp(2,bdir,ilmn))
+                 ! cp2=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
+                 ! cp3=cmplx(cprj_k(iatom,n1)%cp(1,ilmn),cprj_k(iatom,n1)%cp(2,ilmn))
+                 ! cp4=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn))
+                 ! sij=pawtab(itypat)%sij(klmn)
+                 ! cp = cp + sij*(conjg(cp1)*cp2 + conjg(cp3)*cp4)
                  do bfor = 1, 2
                     bsigma = 1
                     if (bfor .EQ. 2) bsigma = -1
                     bdx = 2*bdir-2+bfor
                     dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
-                    deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
+                    ! deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
+                    deltab = sqrt(DOT_PRODUCT(dkb,dkb))
 
-                    cp1=cmplx(cprj_kb_k(ikpt,bdx,0,iatom,nn)%cp(1,ilmn),&
-                         &    cprj_kb_k(ikpt,bdx,0,iatom,nn)%cp(2,ilmn))
-                    cp2=cmplx(cprj_kb_k(ikpt,bdx,0,iatom,n1)%cp(1,jlmn),&
-                         &    cprj_kb_k(ikpt,bdx,0,iatom,n1)%cp(2,jlmn))
+                    cp1=cmplx(cprj_kb_k(ikpt,bdx,0,iatom,n1)%cp(1,ilmn),&
+                         &    cprj_kb_k(ikpt,bdx,0,iatom,n1)%cp(2,ilmn))
+                    cp2=cmplx(cprj_kb_k(ikpt,bdx,0,iatom,nn)%cp(1,jlmn),&
+                         &    cprj_kb_k(ikpt,bdx,0,iatom,nn)%cp(2,jlmn))
                     sij=pawtab(itypat)%sij(klmn)
                     cp=cp+conjg(cp1)*cp2*sij*bsigma/(2.0*deltab)
 
@@ -2175,8 +2186,8 @@ subroutine make_dsdk_FD(bdir,cprj_kb_k,dsdk_FD,dtorbmag,dtset,gmet,ikpt,nband_k,
               end do ! end loop over jlmn
            end do ! end loop over ilmn
         end do ! end loop over iatom
-        dsdk_FD(1,nn,n1) = real(cp)
-        dsdk_FD(2,nn,n1) = aimag(cp)
+        dsdk_FD(1,n1,nn) = real(cp)
+        dsdk_FD(2,n1,nn) = aimag(cp)
      end do ! end loop over n1
   end do ! end loop over nn
 
@@ -2459,7 +2470,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:),kg_kb(:,:),kg_kg(:,:)
  integer,allocatable :: pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
- real(dp) :: dkb(3),dkg(3),dkbg(3),dtm_k(2),gmet(3,3),gprimd(3,3)
+ real(dp) :: CCIV(2,3),CCVV(2,3),dkb(3),dkg(3),dkbg(3),dtm_k(2),gmet(3,3),gprimd(3,3)
  real(dp) :: kpoint(3),kpointb(3),kpointg(3)
  real(dp) :: onsite_l(2,3),orbmagvec(2,3),rhodum(1),rmet(3,3),S1trace(2,3)
  real(dp),allocatable :: bra(:,:),cg1_k(:,:),cgrvtrial(:,:),cwavef(:,:),ff(:),ffnl(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
@@ -2623,6 +2634,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  orbmagvec(:,:) = zero
  S1trace(:,:) = zero
  onsite_l(:,:) = zero
+ CCIV(:,:) = zero
+ CCVV(:,:) = zero
  do ikpt = 1, dtorbmag%fnkpt
 
     kpoint(:)=dtorbmag%fkptns(:,ikpt)
@@ -2757,8 +2770,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
           call make_dsdk(atindx1,cg,cprj_k,dimlmn,dsmatdk_all(1:2,1:nband_k,1:nband_k,ikpt,adir,0:6),&
                & dtorbmag,dtset,gs_hamk,adir,ikpt,isppol,mcg,mpi_enreg,my_nspinor,nband_k,ncpgr,npwarr,&
                & pwind,pwind_alloc)
-          call make_dsdk_FD(adir,cprj_kb_k,dsdk_FD(1:2,1:nband_k,1:nband_k,ikpt,adir),dtorbmag,dtset,gmet,ikpt,nband_k,pawtab)
-          write(std_out,'(a,2es16.8)')'JWZ debug anal FD ',maxval(dsmatdk_all(:,:,:,ikpt,adir,0)),maxval(dsdk_FD(:,:,:,ikpt,adir))
+          call make_dsdk_FD(adir,cprj_k,cprj_kb_k,dsdk_FD(1:2,1:nband_k,1:nband_k,ikpt,adir),&
+               & dtorbmag,dtset,gmet,ikpt,nband_k,pawtab)
        end if
     end do
 
@@ -2796,7 +2809,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
              bdxc = 2*bdir-2+bfor+bsigma
 
              dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
-             deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
+             ! deltab = sqrt(DOT_PRODUCT(dkb,MATMUL(gmet,dkb)))
+             deltab = sqrt(DOT_PRODUCT(dkb,dkb))
 
              ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
              kpointb(:)=dtorbmag%fkptns(:,ikptb)
@@ -2859,7 +2873,8 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                 gdxc = 2*gdir-2+gfor+gsigma
 
                 dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
-                deltag = sqrt(DOT_PRODUCT(dkg,MATMUL(gmet,dkg)))
+                ! deltag = sqrt(DOT_PRODUCT(dkg,MATMUL(gmet,dkg)))
+                deltag = sqrt(DOT_PRODUCT(dkg,dkg))
 
                 ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
                 ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
@@ -3079,10 +3094,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                    do n1 = 1, nband_k
 
                       VVI_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
-                      VVI_2 = cmplx(dsmatdk_all(1,nn,n1,ikpt,gdir,bdx),dsmatdk_all(2,nn,n1,ikpt,gdir,bdx))
+                      VVI_2 = cmplx(dsmatdk_all(1,n1,nn,ikpt,gdir,bdx),dsmatdk_all(2,n1,nn,ikpt,gdir,bdx))
 
-                      VVIII_1 = cmplx(dsmatdk_all(1,nn,n1,ikpt,bdir,gdx),dsmatdk_all(2,nn,n1,ikpt,bdir,gdx))
-                      VVIII_2 = cmplx(smat_all(1,n1,nn,ikptg,gdxc,0),smat_all(2,n1,nn,ikptg,gdxc,0))
+                      VVIII_1 = cmplx(dsmatdk_all(1,n1,nn,ikpt,bdir,gdx),dsmatdk_all(2,n1,nn,ikpt,bdir,gdx))
+                      VVIII_2 = cmplx(smat_all(1,nn,n1,ikpt,gdx,0),smat_all(2,nn,n1,ikpt,gdx,0))
 
                       VVII_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
                       
@@ -3113,17 +3128,17 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                       end do ! end n2
 
-                      VVI = VVI + ENK*VVI_1*VVI_2
+                      VVI = VVI + ENK*VVI_1*VVI_2*bsigma/(2.0*deltab)
 
-                      VVIII = VVIII + ENK*conjg(VVIII_1)*VVIII_2
+                      VVIII = VVIII + ENK*conjg(VVIII_1)*conjg(VVIII_2)*gsigma/(2.0*deltag)
 
                    end do ! end n1
 
                 end do ! end nn
 
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*(-half*VVI)/(2.0*deltab) 
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*gsigma*(-half*VVIII)/(2.0*deltag) ! VVI and VVIII are not good
-                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI-VVII)/(2.0*deltab*2.0*deltag) ! 
+                CCVV_k = CCVV_k - half*j_dpc*epsabg*gsigma*(-half*VVIII)/(2.0*deltag) ! VVI and VVIII are not good
+                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI-VVII)/(2.0*deltab*2.0*deltag) ! 
 
                 ABI_DEALLOCATE(kg_kg)
 
@@ -3137,10 +3152,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
        ! orbmagvec(1,adir) = orbmagvec(1,adir) + real(CCVV_k)
        ! orbmagvec(2,adir) = orbmagvec(2,adir) + aimag(CCVV_k)
-       ! orbmagvec(1,adir) = orbmagvec(1,adir) - real(CCIV_k)
-       ! orbmagvec(2,adir) = orbmagvec(2,adir) - aimag(CCIV_k)
+       CCVV(1,adir) = CCVV(1,adir) + real(CCVV_k)
+       CCVV(2,adir) = CCVV(2,adir) + aimag(CCVV_k)
+
+       CCIV(1,adir) = CCIV(1,adir) + real(CCIV_k)
+       CCIV(2,adir) = CCIV(2,adir) + aimag(CCIV_k)
+
        S1trace(1,adir) = S1trace(1,adir) - real(S1trace_k)
        S1trace(2,adir) = S1trace(2,adir) - aimag(S1trace_k)
+
        onsite_l(1,adir) = onsite_l(1,adir) + real(onsite_l_k)
        onsite_l(2,adir) = onsite_l(2,adir) + aimag(onsite_l_k)
 
@@ -3151,21 +3171,42 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  end do ! end loop over fnkpt
 
  ! convert terms to cartesian coordinates as needed
+ ! note that terms like <dv/dk| x |dw/dk> computed in reduced coords,
+ ! become ucvol*gprimd*<dv/dk| x |dw/dk> when expressed in cartesian coords
+
+ CCVV(1,1:3) = ucvol*MATMUL(gprimd,CCVV(1,1:3))
+ CCVV(2,1:3) = ucvol*MATMUL(gprimd,CCVV(2,1:3))
+ 
  S1trace(1,1:3) = ucvol*MATMUL(gprimd,S1trace(1,1:3))
  S1trace(2,1:3) = ucvol*MATMUL(gprimd,S1trace(2,1:3))
+
+ CCIV(1,1:3) = ucvol*MATMUL(gprimd,CCIV(1,1:3))
+ CCIV(2,1:3) = ucvol*MATMUL(gprimd,CCIV(2,1:3))
 
  ! onsite_l is already cartesian
  
  ! accumulate in orbmagvec
+ ! terms are: CCI to CCIV, VV1 to VVIII, S1trace, and onsite_l.
+ ! Signs appear as CCI - CCII - CCIII + CCIV - VVI - VVII - VVIII
+ ! also, |CCII| = |CCIII| = |CCIV|
+ ! CCVV includes CCI and all VV terms
+
+ ! orbmagvec(1:2,1:3) = CCVV(1:2,1:3) - CCIV(1:2,1:3) +  S1trace(1:2,1:3) + onsite_l(1:2,1:3)
+
+ orbmagvec(1,1:3) = CCVV(1,1:3)
+ orbmagvec(2,1:3) = CCVV(2,1:3)
  ! orbmagvec(1,1:3) = S1trace(1,1:3)
  ! orbmagvec(2,1:3) = S1trace(2,1:3)
- orbmagvec(1,1:3) = onsite_l(1,1:3)
- orbmagvec(2,1:3) = onsite_l(2,1:3)
-
- ! pre factor is occ/N_k
+ ! orbmagvec(1,1:3) = onsite_l(1,1:3)
+ ! orbmagvec(2,1:3) = onsite_l(2,1:3)
+ ! orbmagvec(1,1:3) = CCIV(1,1:3)
+ ! orbmagvec(2,1:3) = CCIV(2,1:3)
+ 
+ ! pre factor is occ/ucvol*N_k
  ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
+ ! converting integral over k space to a sum gives a factor of Omega_BZ/N_k or 1/ucvol*N_k
 
- dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/dtorbmag%fnkpt
+ dtorbmag%orbmagvec(1:2,1:3) = two*orbmagvec(1:2,1:3)/(ucvol*dtorbmag%fnkpt)
 
  write(message,'(a,a,a)')ch10,'====================================================',ch10
  call wrtout(ab_out,message,'COLL')
