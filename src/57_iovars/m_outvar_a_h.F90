@@ -742,6 +742,10 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'enunit','INT',0)
 
 !eph variables
+ dprarr(1,:)=dtsets(:)%eph_tols_idelta(1)
+ dprarr(2,:)=dtsets(:)%eph_tols_idelta(2)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'eph_tols_idelta','DPR',0)
+
  intarr(1,:)=dtsets(:)%eph_intmeth
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_intmeth','INT',0)
 

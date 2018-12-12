@@ -831,10 +831,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
    ! TODO: Spin should be treated in a more scalable way --> kcalc and bdgw should depend on spin.
+   ! Introduce other comm and cart dimensio for spin
    do spin=1,nsppol
      ! Check if this kpoint and spin was already calculated
      if (sigma%qp_done(ikcalc, spin) == 1) cycle
+
      call timab(1900, 1, tsec)
+     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, spin, ikcalc, dtset%prtvol, comm)
+
+     ! Precompute weights for tetrahedron
+     !if (sigma%qint_method == 1) call sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
 
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
@@ -891,11 +897,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq, spin, with_nonlocal=.true.)
-
-     if (sigma%qint_method == 1) then
-       ! Precompute weights for tetrahedron
-       call sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
-     endif
      call timab(1900, 2, tsec)
 
      ! =======================================
@@ -1686,6 +1687,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  ! This to deactivate parallelism over perturbations.
+ !if (dtset%nppert == -1)
  if (dtset%userib == 789) then
    new%my_npert = 3 * cryst%natom; new%nprocs_pert = 1
    MSG_WARNING("Deactivating parallelism over perturbations.")
@@ -2889,14 +2891,12 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1, master = 0
- integer :: spin, my_rank, iq_ibz, cnt, ierr, q_start, q_stop, nprocs
- integer :: nbcalc_ks, bstart_ks, bstart, bstop, nqeff, band_ks, ib_k, ibsum_kq, ik_ibz, ikq_ibz
- real(dp) :: dksqmax, ediff, eig0nk, eig0mkq
- logical :: qfilter
+ integer :: spin, my_rank, iq_ibz, ierr, nprocs, nbcalc_ks, bstart_ks
+ real(dp) :: dksqmax
  character(len=500) :: msg
  type(lgroup_t) :: lgk
 !arrays
- integer,allocatable :: iqk2dvdb(:,:) , mask_qibz_k(:), imask(:), qtab(:)
+ integer,allocatable :: iqk2dvdb(:,:)
  real(dp) :: kk(3)
  real(dp),allocatable :: kq_list(:,:)
 
@@ -2908,7 +2908,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  kk = self%kcalc(:, ikcalc)
- self%nqskip = 0
 
  call wrtout(std_out, sjoin(ch10, repeat("=", 92)))
  msg = sjoin("[", itoa(ikcalc), "/", itoa(self%nkcalc), "]")
@@ -3001,6 +3000,59 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  end do
  ABI_FREE(iqk2dvdb)
 
+end subroutine sigmaph_setup_kcalc
+!!***
+
+!!****f* m_sigmaph/sigmaph_setup_qloop
+!! NAME
+!!  sigmaph_setup_qloop
+!!
+!! FUNCTION
+!!  Prepare integration of self-energy matrix in q-space foe given (spin, ikcalc)
+!!
+!! INPUTS
+!!  dtset<dataset_type>=All input variables for this dataset.
+!!  cryst<crystal_t> = Crystal structure.
+!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!!  spin: spin index.
+!!  ikcalc=Index of the k-point to compute.
+!!  prtvol= Verbosity level
+!!  comm= MPI communicator
+!!
+!! PARENTS
+!!      m_sigmaph
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol, comm)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: spin, ikcalc, prtvol, comm
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(sigmaph_t),intent(inout) :: self
+ type(ebands_t),intent(in) :: ebands
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0
+ integer :: my_rank, iq_ibz, cnt, ierr, q_start, q_stop, nprocs, imyq
+ integer :: nbcalc_ks, bstart_ks, nqeff, band_ks, ib_k, ibsum_kq, ik_ibz, ikq_ibz, ndiv
+ real(dp) :: ediff, eig0nk, eig0mkq
+ logical :: qfilter
+ character(len=500) :: msg
+!!arrays
+ integer,allocatable :: mask_qibz_k(:), imask(:), qtab(:)
+! real(dp) :: kk(3)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ !kk = self%kcalc(:, ikcalc)
+ self%nqskip = 0
+
  ! Find number of q-points treated by this MPI rank and build redirection table.
  ! The distribution must be consistent with the WF distribution done with bks_mask
  select case (dtset%eph_task)
@@ -3014,78 +3066,64 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    qfilter = .True.; if (dtset%userie == 123) qfilter = .False.
    !qfilter = .False.
 
-   if (self%qint_method == 0 .or. .not. qfilter) then
-     ! Imag with zcut --> Distribute ALL q-points inside comm_bq
-     call xmpi_split_work(self%nqibz_k, self%comm_bq, q_start, q_stop, msg, ierr)
-     self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
-     ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-     if (self%my_nqibz_k /= 0) self%myq2ibz_k = [(iq_ibz, iq_ibz=q_start, q_stop)]
+   ! Distribute ALL nqibz_k q-points inside comm_bq
+   call xmpi_split_work(self%nqibz_k, self%comm_bq, q_start, q_stop, msg, ierr)
+   self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
+   ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+   if (self%my_nqibz_k /= 0) self%myq2ibz_k = [(iq_ibz, iq_ibz=q_start, q_stop)]
 
-   else
-     ! Imag with Tetra --> Remove q-points with negligible weight and distribute this set inside comm_bq.
-     ABI_ICALLOC(mask_qibz_k, (self%nqibz_k))
-     ik_ibz = self%kcalc2ibz(ikcalc, 1)
-     cnt = 0
-     do spin=1,dtset%nsppol
-       nbcalc_ks = self%nbcalc_ks(ikcalc, spin)
-       bstart_ks = self%bstart_ks(ikcalc, spin)
+   if (self%qint_method == 1) then
+     ! Imag with tetra --> Precompute weights with initial q-point distribution
+     call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
+
+     if (qfilter) then
+       ! Select q-points with significant weight, recompute my_nqibz_k and myq2ibz_k.
+       ! Finally, recompute weights with new distribution.
+       ! self%deltaw_pm, (2, nbcalc_ks, my_npert, bsum_start:bsum_stop, my_nqibz_k, ndiv))
+       ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
+       ABI_ICALLOC(mask_qibz_k, (self%nqibz_k))
+       do imyq=1,self%my_nqibz_k
+         iq_ibz = self%myq2ibz_k(imyq)
+         if (any(self%deltaw_pm(:, :, :, :, imyq, :) > self%tol_deltaw_pm / ndiv)) mask_qibz_k(iq_ibz) = 1
+       end do
+
+       ! Take max inside comm.
+       call alloc_copy(mask_qibz_k, imask)
+       call xmpi_max(imask, mask_qibz_k, comm, ierr)
+       ABI_FREE(imask)
+
+       ! Redistribute q-points inside comm_bq to reduce load imbalance
+       ABI_MALLOC(qtab, (self%nqibz_k))
+       nqeff = 0
        do iq_ibz=1,self%nqibz_k
-         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism
-         ikq_ibz = self%indkk_kq(1, iq_ibz)
-ibsum_loop: &
-         do ibsum_kq = self%bsum_start, self%bsum_stop
-           eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
-           do ib_k=1,nbcalc_ks
-             band_ks = ib_k + bstart_ks - 1
-             eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-             ediff = abs(eig0nk - eig0mkq)
-             ! Test whether electronic states differ by less than ...
-             ! TODO: 3 seems to be small, 20 perhaps is a bit too large...
-             ! But I prefer to be on the safe side and overestimate.
-             ! The goal is to remove a fraction of the q-points and redistribute them
-             ! to avoid load imbalance, there's another check inside the loop in which
-             ! we test the value of the weights ...
-             !if (ediff <= two * ten * self%wmax) then
-             if (ediff <= two * self%wmax) then
-               mask_qibz_k(iq_ibz) = 1; exit ibsum_loop
-             end if
-           end do
-         end do ibsum_loop
-       end do ! iq_ibz
-     end do ! spin
+         if (mask_qibz_k(iq_ibz) == 1) then
+           nqeff = nqeff + 1; qtab(nqeff) = iq_ibz
+         end if
+       end do
+       ABI_FREE(mask_qibz_k)
 
-     ! Take max inside comm.
-     call alloc_copy(mask_qibz_k, imask)
-     call xmpi_max(imask, mask_qibz_k, comm, ierr)
-     ABI_FREE(imask)
-
-     ! Redistribute q-points inside comm_bq to reduce load imbalance
-     ABI_MALLOC(qtab, (self%nqibz_k))
-     nqeff = 0
-     do iq_ibz=1,self%nqibz_k
-       if (mask_qibz_k(iq_ibz) == 1) then
-         nqeff = nqeff + 1; qtab(nqeff) = iq_ibz
+       call xmpi_split_work(nqeff, self%comm_bq, q_start, q_stop, msg, ierr)
+       if (my_rank == master) then
+         write(std_out, "(a, es16.6)")" Removing q-points with delta weight <= tol_deltaw_pm = ", self%tol_deltaw_pm / ndiv
+         write(std_out, "(a,i0,a,f5.1,a)")" Number of q-points contributing to delta: ", nqeff, &
+           " (nq_eff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
        end if
-     end do
-     ABI_FREE(mask_qibz_k)
-     call xmpi_split_work(nqeff, self%comm_bq, q_start, q_stop, msg, ierr)
-     if (my_rank == master) then
-       !write(std_out, "(a, es16.6)")" Removing q-points with delta weight <= tol_deltaw_pm = ", self%tol_deltaw_pm
-       write(std_out, "(a,i0,a,f5.1,a)")" Number of q-points contributing to delta: ", nqeff, &
-         " (nq_eff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
-     end if
 
-     self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
-     ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
-     if (self%my_nqibz_k /= 0) self%myq2ibz_k = qtab(q_start:q_stop)
-     ABI_FREE(qtab)
+       self%my_nqibz_k = 0; if (q_start <= q_stop) self%my_nqibz_k = q_stop - q_start + 1
+       ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
+       if (self%my_nqibz_k /= 0) self%myq2ibz_k = qtab(q_start:q_stop)
+       ABI_FREE(qtab)
+
+       ! Recompute weights with new q-point distribution.
+       call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
+     end if ! qfilter
    end if
 
  case default
    MSG_ERROR(sjoin("Invalid eph_task:", itoa(dtset%eph_task)))
  end select
 
-end subroutine sigmaph_setup_kcalc
+end subroutine sigmaph_setup_qloop
 !!***
 
 !!****f* m_sigmaph/sigmaph_gather_and_write

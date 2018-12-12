@@ -19567,4 +19567,20 @@ A negative entry can be used to exclude either holes or electrons from the calcu
 """,
 ),
 
+Variable(
+    abivarname="eph_tols_idelta",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[1e-20, 1e-20],
+    dimensions=[2],
+    mnemonics="EPH TOLeranceS on Integral of DELTA.",
+    text=r"""
+This variable can be used to introduce a cutoff on the q-points when computing the imaginary
+part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2)
+The first entry refers to phonon absorption while the second one is associated to phonon emission.
+A q-point is considered in the sum if both the tetrahedron weight for phonon absorption
+""",
+),
+
 ]
