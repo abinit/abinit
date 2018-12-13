@@ -19572,7 +19572,7 @@ Variable(
     varset="eph",
     topics=['SelfEnergy_expert'],
     vartype="real",
-    defaultval=[1e-20, 1e-20],
+    defaultval=[1e-12, 1e-12],
     dimensions=[2],
     mnemonics="EPH TOLeranceS on Integral of DELTA.",
     text=r"""
