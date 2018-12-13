@@ -524,7 +524,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
- integer :: mpw,ierr,it,imyq
+ integer :: mpw,ierr,it,imyq,band
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
@@ -647,26 +647,29 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      bstart = sigma%bstart_ks(ikcalc,spin)
      bstop = bstart + sigma%nbcalc_ks(ikcalc,spin) - 1
      bks_mask(bstart:bstop, ik_ibz, spin) = .True.
-     ehigh = max(ehigh, maxval(ebands%eig(bstart:bstop, ik_ibz, spin)))
      elow = min(elow, minval(ebands%eig(bstart:bstop, ik_ibz, spin)))
+     ehigh = max(ehigh, maxval(ebands%eig(bstart:bstop, ik_ibz, spin)))
    end do
  end do
 
- ! TODO: Remove k-points if tau with tetra.
- !if (sigma%imag_only .and. sigma%qint_method == 1) then
- !do spin=1,new%nsppol
- !  do ik_ibz=1,nkpt
- !    do band=sigma%my_bstart, sigma%my_bstart
- !      eig0mk = ebands%eig(band, ik_ibz, spin)
- !      if (eig0mk >= elow - ... .and. eig0mk <= ehigh + ) bks_mask(band, ik_ibz ,spin) = .True.
- !      end if
- !    end do
- !  end do
- !end do
+ ! TODO: Still under testing
+ if (sigma%imag_only .and. sigma%qint_method == 1 .and. .not. sigma%use_doublegrid) then
+   MSG_WARNING("Including limited set of states within energy window around bdgw states")
+   do spin=1,sigma%nsppol
+     do ik_ibz=1,ebands%nkpt
+       do band=sigma%my_bstart, sigma%my_bstop
+         eig0mk = ebands%eig(band, ik_ibz, spin)
+         if (eig0mk >= elow - ten * sigma%wmax .and. eig0mk <= ehigh + ten * sigma%wmax) then
+            bks_mask(band, ik_ibz ,spin) = .True.
+         end if
+       end do
+     end do
+   end do
 
- !else
- bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
- !endif
+   !bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+ else
+   bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+ endif
 
  !bks_mask = .True. ! Uncomment this line to have all states on each MPI rank.
 
@@ -889,6 +892,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
      do ib_k=1,nbcalc_ks
        band_ks = ib_k + bstart_ks - 1
+       !write(std_out, *)"band_ks", band_ks
        call wfd%copy_cg(band_ks, ik_ibz, spin, kets_k(1, 1, ib_k))
        sigma%e0vals(ib_k) = ebands%eig(band_ks, ik_ibz, spin)
      end do
@@ -902,13 +906,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! =======================================
      do imyq=1,sigma%my_nqibz_k
        iq_ibz = sigma%myq2ibz_k(imyq)
-
-       ! Exclude q-points based on tetrahedron weigths. Note all procs in comm_pert must agree!
-       !if (ignore_imyq(sigma, imyq, sigma%comm_pert) == 1) cycle
-
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = sum(qpt**2) < tol14 !; if (isqzero) cycle
        call cwtime(cpu,wall,gflops,"start")
+
+       ! Find k+q in the extended zone and extract symmetry info.
+       ! Be careful here because there are two umklapp vectors to be considered:
+       !
+       !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
+       kq = kk + qpt
+       ikq_ibz = sigma%indkk_kq(1, iq_ibz); isym_kq = sigma%indkk_kq(2, iq_ibz)
+       trev_kq = sigma%indkk_kq(6, iq_ibz); g0_kq = sigma%indkk_kq(3:5, iq_ibz)
+       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
+       kq_ibz = ebands%kptns(:,ikq_ibz)
+
+       ! Exclude q-points based on tetrahedron weigths. Note all procs in comm_pert must agree!
+       !if (ignore_imyq(sigma, imyq, sigma%comm_pert) == 1) cycle
 
        db_iqpt = sigma%indq2dvdb(1, iq_ibz)
 
@@ -948,16 +961,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do ! nu
          gkq2_lr = gkq2_lr * fqdamp
        end if ! frohl_model
-
-       ! Find k+q in the extended zone and extract symmetry info.
-       ! Be careful here because there are two umklapp vectors to be considered:
-       !
-       !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
-       kq = kk + qpt
-       ikq_ibz = sigma%indkk_kq(1, iq_ibz); isym_kq = sigma%indkk_kq(2, iq_ibz)
-       trev_kq = sigma%indkk_kq(6, iq_ibz); g0_kq = sigma%indkk_kq(3:5, iq_ibz)
-       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
-       kq_ibz = ebands%kptns(:,ikq_ibz)
 
        ! Double grid stuff
        if (sigma%use_doublegrid) then
@@ -1072,6 +1075,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        call timab(1903, 1, tsec)
        do ibsum_kq=sigma%my_bstart, sigma%my_bstop
+
+         ! TODO: Still under testing.
+         if (sigma%imag_only .and. sigma%qint_method == 1) then
+           if (.not. wfd%ihave_ug(ibsum_kq, ikq_ibz, spin)) then
+             write(msg, "(a, 3(i0,1x))")"Ignoring wavefunction with band, ikq_ibz, spin: ", ibsum_kq, ikq_ibz, spin
+             MSG_WARNING(msg)
+             cycle
+           end if
+         end if
 
          ! Symmetrize wavefunctions from IBZ (if needed). Be careful with time-reversal symmetry.
          if (isirr_kq) then
@@ -1984,10 +1996,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  !    wavefunctions are not distributed but only states between my_bstart and my_bstop
  !    are allocated and read from file.
 
- new%wmax = 1.1_dp * ifc%omega_minmax(2)
+ new%wmax = 1.1_dp * abs(ifc%omega_minmax(2))
  if (new%qint_method == 0) new%wmax = new%wmax + five * dtset%zcut
  ! TODO: One should be consistent with tolerances when using tetra + q-point filtering.
  !if (new%qint_method == 1) new%wmax = new%wmax + five * dtset%zcut
+ new%wmax = new%wmax + five * dtset%zcut
+ write(std_out,*)"wmax:", new%wmax * Ha_eV, " (eV)"
 
  if (new%imag_only) then
 
@@ -2906,6 +2920,9 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  spin = 1
  write(msg, "(3(a, i0))")" Treating ", self%nbcalc_ks(ikcalc, spin), " band(s) between: ", &
    self%bstart_ks(ikcalc, spin)," and: ", self%bstart_ks(ikcalc, spin) + self%nbcalc_ks(ikcalc, spin) - 1
+ call wrtout(std_out, msg)
+ write(msg, "(2(a,i0))")"P Allocating and treating bands from my_bstart: ", self%my_bstart, &
+     " up to my_bstop: ", self%my_bstop
  call wrtout(std_out, msg)
 
  ! Prepare weights for BZ(k) integration
