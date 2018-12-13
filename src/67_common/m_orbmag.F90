@@ -2217,13 +2217,15 @@ end subroutine make_dsdk_FD
 !! nband_k
 !!
 !! OUTPUT
-!! dsdk(2,nband_k,nband_k)
+!! dsdk(2,nband_k,nband_k,0:6) = <u_n'k'|dS/dk_idir|u_nk>
 !!
 !! SIDE EFFECTS
 !!
 !! TODO
 !!
 !! NOTES
+!! dsdk(2,nband_k,nband_k,0:6) = <u_n'k'|dS/dk_idir|u_nk>
+!! where 0 entry is for k' = k and 1-6 entries are for k' = k + dk, with indexing as in berryphase_new
 !!
 !! PARENTS
 !!
@@ -2294,8 +2296,7 @@ subroutine make_dsdk(atindx1,cg,cprj_k,dimlmn,dsdk,dtorbmag,dtset,gs_hamk,&
      call pawcprj_get(atindx1,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
           &           dtset%mkmem,dtset%natom,1,nband_k,my_nspinor,dtset%nsppol,0)
 
-     cwavef(1,1:npw_k) = cg(1,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
-     cwavef(2,1:npw_k) = cg(2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
+     cwavef(1:2,1:npw_k) = cg(1:2,icg+(nn-1)*npw_k+1:icg+nn*npw_k)
      cwavef(1:2,0) = zero
 
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,ndat,nnlout, &
@@ -2304,13 +2305,13 @@ subroutine make_dsdk(atindx1,cg,cprj_k,dimlmn,dsdk,dtorbmag,dtset,gs_hamk,&
      
      do n1 = 1, nband_k
         
-        cwavef(1,1:npw_k) = cg(1,icg+(n1-1)*npw_k+1:icg+n1*npw_k)
-        cwavef(2,1:npw_k) = cg(2,icg+(n1-1)*npw_k+1:icg+n1*npw_k)
+        cwavef(1:2,1:npw_k) = cg(1:2,icg+(n1-1)*npw_k+1:icg+n1*npw_k)
 
         dsdk(1,n1,nn,0) = DOT_PRODUCT(cwavef(1,1:npw_k),swavef(1,1:npw_k))+DOT_PRODUCT(cwavef(2,1:npw_k),swavef(2,1:npw_k))
         dsdk(2,n1,nn,0) = DOT_PRODUCT(cwavef(1,1:npw_k),swavef(2,1:npw_k))-DOT_PRODUCT(cwavef(2,1:npw_k),swavef(1,1:npw_k))
 
         do bdir = 1, 3
+           ! never need bdir // idir so ignore
            if (bdir .EQ. idir) cycle
            do bfor = 1, 2
               ! index of neighbor 1..6
@@ -2321,12 +2322,12 @@ subroutine make_dsdk(atindx1,cg,cprj_k,dimlmn,dsdk,dtorbmag,dtset,gs_hamk,&
               icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
               pwind_kb(1:npw_k) = pwind(ikg+1:ikg+npw_k,bfor,bdir)
 
-              cwaveb(1,1:npw_kb) = cg(1,icgb+(n1-1)*npw_kb+1:icgb+n1*npw_kb)
-              cwaveb(2,1:npw_kb) = cg(2,icgb+(n1-1)*npw_kb+1:icgb+n1*npw_kb)
+              cwaveb(1:2,1:npw_kb) = cg(1:2,icgb+(n1-1)*npw_kb+1:icgb+n1*npw_kb)
               cwaveb(1:2,0) = zero
 
+              ! overlap_g is computing <swavef|cwaveb>, that is <u_nk|dS/dk|u_n'k'> which is the
+              ! conjugate of of the term we want
               call overlap_g(doti,dotr,dtset%mpw,npw_k,npw_kb,dtset%nspinor,pwind_kb,swavef,cwaveb)
-
               dsdk(1,n1,nn,bdx) = dotr; dsdk(2,n1,nn,bdx) = -doti
 
            end do ! end loop over bfor
@@ -2781,10 +2782,10 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
        call make_S1trace_k(adir,cprj_k,dtset,hmat(1,1:nband_k,1:nband_k,ikpt,0,0),nband_k,pawrad,pawtab,S1trace_k)
 
-       ! call make_CCIV_k(adir,CCIV_k,dsmatdk_all(1:2,1:nband_k,1:nband_k,ikpt,1:3,0),&
-       !      & hmat(1,1:nband_k,1:nband_k,ikpt,0,0),nband_k)
-       call make_CCIV_k(adir,CCIV_k,dsdk_FD(1:2,1:nband_k,1:nband_k,ikpt,1:3),&
+       call make_CCIV_k(adir,CCIV_k,dsmatdk_all(1:2,1:nband_k,1:nband_k,ikpt,1:3,0),&
             & hmat(1,1:nband_k,1:nband_k,ikpt,0,0),nband_k)
+       ! call make_CCIV_k(adir,CCIV_k,dsdk_FD(1:2,1:nband_k,1:nband_k,ikpt,1:3),&
+       !      & hmat(1,1:nband_k,1:nband_k,ikpt,0,0),nband_k)
 
        CCVV_k = czero
        do epsabg = 1, -1, -2
@@ -3128,17 +3129,17 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
                       end do ! end n2
 
-                      VVI = VVI + ENK*VVI_1*VVI_2*bsigma/(2.0*deltab)
+                      VVI = VVI + ENK*VVI_1*VVI_2
 
-                      VVIII = VVIII + ENK*conjg(VVIII_1)*conjg(VVIII_2)*gsigma/(2.0*deltag)
+                      VVIII = VVIII + ENK*conjg(VVIII_1)*conjg(VVIII_2)
 
                    end do ! end n1
 
                 end do ! end nn
 
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*(-half*VVI)/(2.0*deltab) 
+                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*(-half*VVI)/(2.0*deltab) 
                 CCVV_k = CCVV_k - half*j_dpc*epsabg*gsigma*(-half*VVIII)/(2.0*deltag) ! VVI and VVIII are not good
-                ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI-VVII)/(2.0*deltab*2.0*deltag) ! 
+                CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI-VVII)/(2.0*deltab*2.0*deltag) ! 
 
                 ABI_DEALLOCATE(kg_kg)
 
@@ -3186,15 +3187,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! onsite_l is already cartesian
  
  ! accumulate in orbmagvec
- ! terms are: CCI to CCIV, VV1 to VVIII, S1trace, and onsite_l.
+ ! terms are: CCI to CCIV, VVI to VVIII, S1trace, and onsite_l.
  ! Signs appear as CCI - CCII - CCIII + CCIV - VVI - VVII - VVIII
  ! also, |CCII| = |CCIII| = |CCIV|
  ! CCVV includes CCI and all VV terms
 
- ! orbmagvec(1:2,1:3) = CCVV(1:2,1:3) - CCIV(1:2,1:3) +  S1trace(1:2,1:3) + onsite_l(1:2,1:3)
+ orbmagvec(1:2,1:3) = CCVV(1:2,1:3) - CCIV(1:2,1:3) +  S1trace(1:2,1:3) + onsite_l(1:2,1:3)
 
- orbmagvec(1,1:3) = CCVV(1,1:3)
- orbmagvec(2,1:3) = CCVV(2,1:3)
+ ! orbmagvec(1,1:3) = CCVV(1,1:3)
+ ! orbmagvec(2,1:3) = CCVV(2,1:3)
  ! orbmagvec(1,1:3) = S1trace(1,1:3)
  ! orbmagvec(2,1:3) = S1trace(2,1:3)
  ! orbmagvec(1,1:3) = onsite_l(1,1:3)
