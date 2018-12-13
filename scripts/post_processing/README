@@ -56,7 +56,7 @@ post-processing tools
 
 - Raman_spec.py
     Determines the Raman spectra from the anaddb output file as a function 
-    of frequency.  With version 0.3 the user creates a simple input file to run
+    of frequency.  With version 0.4 the user creates a simple input file to run
     the script. Examples are given with in the script itself.  After finding the
     anaddb output file it extracts the raman matrix. The code is documented
     internally.
