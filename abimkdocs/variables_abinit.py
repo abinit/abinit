@@ -1493,14 +1493,15 @@ Variable(
     text=r"""
 This variable governs the behaviour of the code when there are potential
 source of symmetry breaking, related e.g. to the k point grid or the presence
-of non-symmorphic translations which might not be coherent with the exchange-
-correlation grid.
+of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
 
 When [[chksymbreak]] = 1, the code stops (or issue a warning) if:
 
   * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
   * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
     or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+
+Note that the check is disabled when the number of k-points in the BZ is greater than 40 ** 3.
 
 When [[chksymbreak]] = 0, there is no such check.
 

@@ -169,6 +169,11 @@ MODULE m_xmpi
    module procedure xmpi_comm_free_3D
  end interface xmpi_comm_free
 
+ interface xmpi_waitall
+   module procedure xmpi_waitall_1d
+   module procedure xmpi_waitall_2d
+ end interface xmpi_waitall
+
  interface xmpi_split_work
    module procedure xmpi_split_work_i4b
  end interface xmpi_split_work
@@ -1843,9 +1848,9 @@ end subroutine xmpi_wait
 
 !----------------------------------------------------------------------
 
-!!****f* m_xmpi/xmpi_waitall
+!!****f* m_xmpi/xmpi_waitall_1d
 !! NAME
-!!  xmpi_waitall
+!!  xmpi_waitall_1d
 !!
 !! FUNCTION
 !!  Hides MPI_WAITALL from MPI library.
@@ -1865,7 +1870,7 @@ end subroutine xmpi_wait
 !!
 !! SOURCE
 
-subroutine xmpi_waitall(array_of_requests, mpierr)
+subroutine xmpi_waitall_1d(array_of_requests, mpierr)
 
 !Arguments-------------------------
  integer,intent(inout) :: array_of_requests(:)
@@ -1880,11 +1885,55 @@ subroutine xmpi_waitall(array_of_requests, mpierr)
 
  mpierr = 0
 #ifdef HAVE_MPI
-  call MPI_WAITALL(size(array_of_requests),array_of_requests,status,ier)
-  mpierr=ier
+ call MPI_WAITALL(size(array_of_requests), array_of_requests, status, ier)
+ mpierr=ier
 #endif
 
-end subroutine xmpi_waitall
+end subroutine xmpi_waitall_1d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_waitall_2d
+!! NAME
+!!  xmpi_waitall_2d
+!!
+!! FUNCTION
+!!  Hides MPI_WAITALL from MPI library.
+!!  Waits for all given MPI Requests to complete.
+!!
+!! INPUTS
+!!  array_of_requests= array of request handles
+!!
+!! OUTPUT
+!!  mpierr= status error
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine xmpi_waitall_2d(array_of_requests, mpierr)
+
+!Arguments-------------------------
+ integer,intent(inout) :: array_of_requests(:,:)
+ integer,intent(out) :: mpierr
+
+!Local variables-------------------
+#ifdef HAVE_MPI
+ integer :: ier,status(MPI_STATUS_SIZE, product(shape(array_of_requests)))
+#endif
+
+! *************************************************************************
+
+ mpierr = 0
+#ifdef HAVE_MPI
+ call MPI_WAITALL(product(shape(array_of_requests)), array_of_requests, status, ier)
+ mpierr=ier
+#endif
+
+end subroutine xmpi_waitall_2d
 !!***
 
 !----------------------------------------------------------------------

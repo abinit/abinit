@@ -126,8 +126,7 @@ subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
 ! *************************************************************************
 
 !This is to treat the case where ecut has not been initialized,
-!for wavelet computations. The default for ecut is -1.0 , allowed
-!only for wavelets calculations
+!for wavelet computations. The default for ecut is -1.0 , allowed only for wavelets calculations
  ecut_pw=ecut
  if(ecut<-tol8)ecut_pw=ten
 

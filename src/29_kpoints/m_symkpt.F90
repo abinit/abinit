@@ -86,6 +86,9 @@ contains
 !! The decomposition of the symmetry group in its primitives might speed up the execution.
 !! The output variables are stored only in the range 1:nkbz
 !!
+!! TODO
+!!  Bad scaling wrt nkbz. Should try to MPI parallelize or implement more efficient algorithm
+!!
 !! PARENTS
 !!      dfpt_looppert,elphon,ep_setupqpt,get_npert_rbz,getkgrid,harmonic_thermo
 !!      m_bz_mesh,m_ifc,m_sigmaph
@@ -102,7 +105,6 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,&
  use m_abicore
  use m_errors
  use m_sort
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -205,7 +207,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,&
 !  end do
 
 !  Examine whether the k point grid is symmetric or not
-   if(chksymbreak==1)then
+   if (chksymbreak == 1 .and. nkbz < 40**3) then
      ikpt_current_length=1
 !    Loop on all k points
      do ikpt=1,nkbz
@@ -248,10 +250,10 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,&
              end do
              if(quit==0)then
                write(message,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
-&               'Chksymbreak=1 . It has been observed that the k point grid is not symmetric :',ch10,&
-&               'for the symmetry number ',isym,ch10,&
-&               'with symrec=',symrec(1:3,1:3,isym),ch10,&
-&               'the symmetric of the k point number ',ind_ikpt2,' with components', kbz(1:3,ind_ikpt2),ch10,&
+&               'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
+&               'for the symmetry number: ',isym,ch10,&
+&               'with symrec= ',symrec(1:3,1:3,isym),ch10,&
+&               'the symmetric of the k point number: ',ind_ikpt2,' with components: ', kbz(1:3,ind_ikpt2),ch10,&
 &               'does not belong to the k point grid.',ch10,&
 &               'Read the description of the input variable chksymbreak,',ch10,&
 &               'You might switch it to zero, or change your k point grid to one that is symmetric.'

@@ -1400,6 +1400,7 @@ end subroutine dvdb_readsym_qbz
 !! Allocate internal cache storing v1scf potentials.
 !!
 !! INPUTS
+!!  ngfftf(18)=information on 3D FFT for interpolated potential
 !!  mbsize: Cache size in megabytes.
 !!    < 0 to allocate all q-points.
 !!    0 has not effect.
@@ -1413,12 +1414,15 @@ end subroutine dvdb_readsym_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_set_qcache_mb(db, mbsize)
+subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
 
 !Arguments ------------------------------------
 !scalars
+ !integer,intent(in) :: nfftf
  real(dp),intent(in) :: mbsize
  class(dvdb_t),intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngfftf(18)
 
 !Local variables-------------------------------
 !scalars
@@ -1431,7 +1435,7 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
    return
  end if
 
- onepot_mb = two * product(db%ngfft3_v1(:, 1)) * db%nspden * QCACHE_KIND * b2Mb
+ onepot_mb = two * product(ngfftf(1:3)) * db%nspden * QCACHE_KIND * b2Mb
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
@@ -1965,24 +1969,13 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  cnt = 0
  do mu=1,natom3
    do ispden=1,nspden
-     cnt = cnt + 1
-     root = mod(cnt, nproc)
-     !if (root /= my_rank) cycle ! MPI parallelism.
-     !call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
-     if (root == my_rank) then
+     cnt = cnt + 1; root = mod(cnt, nproc)
+     if (root == my_rank) then ! Non-blocking
        call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      end if
      call xmpi_ibcast(v1g_qibz(:,ispden,mu), root, comm, requests(ispden, mu), ierr)
    end do
  end do
- !if (nproc > 1) call xmpi_sum(v1g_qibz, comm, ierr)
-
- !do mu=1,natom3
- !  do ispden=1,nspden
- !    call xmpi_wait(requests(ispden, mu), ierr)
- !    requests_v1g_qibz_done(ispden, mu) = .True.
- !  end do
- !end do
 
  ABI_MALLOC(workg, (2*nfft,nspden))
  ABI_MALLOC(v1g_mu, (2*nfft,nspden))
@@ -1993,7 +1986,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
 
  !v1r_qbz = zero
-
  do mu=1,natom3
    root = mod(mu, nproc)
    ! MPI parallelism.
@@ -2018,6 +2010,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
        mu_eq = idir_eq + (ipert_eq-1)*3
        cnt = cnt + 1
 
+       ! Wait for request before operating on v1g_qibz
        if (.not. all(requests_v1g_qibz_done(:, mu_eq))) then
          do ispden=1,nspden
            call xmpi_wait(requests(ispden, mu_eq), ierr)
@@ -2045,14 +2038,15 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
- do mu=1,natom3
-   do ispden=1,nspden
-     if (.not. requests_v1g_qibz_done(ispden, mu)) call xmpi_wait(requests(ispden, mu), ierr)
-   end do
- end do
+ ! Relase all requests if not done.
+ !do mu=1,natom3
+ !  do ispden=1,nspden
+ !    if (.not. requests_v1g_qibz_done(ispden, mu)) call xmpi_wait(requests(ispden, mu), ierr)
+ !  end do
+ !end do
+ call xmpi_waitall(requests, ierr)
 
  call xmpi_waitall(requests_v1r_qbz, ierr)
- !call xmpi_sum(v1r_qbz, comm, ierr)
 
  ABI_FREE(workg)
  ABI_FREE(v1g_mu)

@@ -3131,7 +3131,7 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!  rhoijselect(lmn2_size)=contains the indices of the selected (i,j) pairs
 !!                         rhoijselect(nselect+1:lmn2_size)=0
 !!
-!! SIDE EFFECTS   
+!! SIDE EFFECTS
 !!  rhoij(cplex*qphase*lmn2_size,nspden)=
 !!     * Input: the array is filled with all rhoij values (only if rhoij_input is not present)
 !!     * Output: the nselect first elements contain the non-zero rhoij values,
@@ -3210,7 +3210,7 @@ subroutine pawrhoij_filter(rhoij,rhoijselect,nselect,cplex,qphase,lmn2_size,nspd
    end if
 
  else ! cplex=2
- 
+
    if (qphase==1) then
      do klmn=1,lmn2_size
        klmn1=2*klmn
@@ -3960,7 +3960,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                        summaggr(1:cplex_eff,nu,mu,1)=summaggr(1:cplex_eff,nu,mu,1) &
 &                         +fact(1:cplex_eff)*zarot2*grad(nu,indexkc+1:indexkc+cplex_eff,1+mu)
                      end do
-                   end do 
+                   end do
                    if (qphase==2) then
                      do mu=1,3
                        do nu=1,ngrhoij
@@ -4009,7 +4009,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  if (noncoll) then
                    do iplex=1,cplex_rhoij
                      do mu=1,3
-                       do nu=1,ngrhoij             
+                       do nu=1,ngrhoij
                          rhoijc(1)=summaggr(iplex,nu,mu,1)
                          rhoijc(2)=summaggr(iplex,nu,mu,2)
                          summaggr(iplex,nu,mu,1)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
@@ -4026,7 +4026,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                do iq=1,qphase
                  rotrho(1:cplex_eff,iafm,iq)=rotrho(1:cplex_eff,iafm,iq) &
 &                                           +sumrho(1:cplex_eff,iafm,iq)
-               end do  
+               end do
              end if
 
 
@@ -4272,7 +4272,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
      msg=' In the antiferromagnetic case, nsym cannot be 1'
      MSG_BUG(msg)
    end if
-   
+
    if (optrhoij==1) then
 
      do iatm=1,nrhoij
