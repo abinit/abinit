@@ -3432,9 +3432,9 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 !        If still not admitted, then there is a problem
        else
          write(message, '(7a)' )&
-&         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-&         'This name is not one of the registered input variable names (see https://www.abinit.org/doc).',ch10,&
-&         'Action: check your input file. You likely mistyped the input variable.'
+         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
+         'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
+         'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(message)
        end if
      end if

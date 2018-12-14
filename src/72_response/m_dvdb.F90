@@ -2038,14 +2038,8 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
- ! Relase all requests if not done.
- !do mu=1,natom3
- !  do ispden=1,nspden
- !    if (.not. requests_v1g_qibz_done(ispden, mu)) call xmpi_wait(requests(ispden, mu), ierr)
- !  end do
- !end do
+ ! Relase all requests
  call xmpi_waitall(requests, ierr)
-
  call xmpi_waitall(requests_v1r_qbz, ierr)
 
  ABI_FREE(workg)
