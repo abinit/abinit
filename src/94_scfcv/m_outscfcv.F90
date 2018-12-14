@@ -196,7 +196,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_paw_ij,           only : paw_ij_type
  use m_paw_mkrho,        only : denfgr
  use m_pawfgrtab,        only : pawfgrtab_type
- use m_pawrhoij,         only : pawrhoij_type, pawrhoij_nullify, pawrhoij_copy
+ use m_pawrhoij,         only : pawrhoij_type, pawrhoij_nullify, pawrhoij_copy, pawrhoij_free
  use m_pawcprj,          only : pawcprj_type
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
@@ -495,7 +495,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &       abs_n_tilde_nt_diff=nt_ntone_norm,znucl=dtset%znucl,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      end if
-     if (mpi_enreg%paral_kgb==1.and.my_natom/=natom) then
+     if (mpi_enreg%paral_kgb==0.and.my_natom/=natom) then
+       call pawrhoij_free(pawrhoij_all)
        ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
      end if
 
