@@ -655,7 +655,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 end subroutine ephwg_double_grid_setup_kpoint
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_ephwg/ephwg_get_deltas

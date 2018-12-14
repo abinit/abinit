@@ -212,10 +212,6 @@ module m_sigmaph
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
-  !real(dp) :: tol_deltaw_pm = zero
-   ! Tolerance on the tetrahedron weights used to filter q-points if imag_only
-   ! Zero to include'em all.
-
   real(dp) :: wr_step
    ! Step of the linear mesh along the real axis (Ha units).
 
@@ -654,6 +650,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ! TODO: Still under testing
  if (sigma%imag_only .and. sigma%qint_method == 1 .and. .not. sigma%use_doublegrid) then
+#if 1
    MSG_WARNING("Including limited set of states within energy window around bdgw states")
    do spin=1,sigma%nsppol
      do ik_ibz=1,ebands%nkpt
@@ -665,8 +662,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end do
      end do
    end do
-
-   !bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+#else
+   bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+#endif
  else
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  endif
@@ -892,7 +890,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
      do ib_k=1,nbcalc_ks
        band_ks = ib_k + bstart_ks - 1
-       !write(std_out, *)"band_ks", band_ks
        call wfd%copy_cg(band_ks, ik_ibz, spin, kets_k(1, 1, ib_k))
        sigma%e0vals(ib_k) = ebands%eig(band_ks, ik_ibz, spin)
      end do
@@ -1618,7 +1615,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,spin,gap_err,ikcalc,qprange_,bstop
  integer :: nk_found,ifo,jj,bstart,nbcount,sigma_nkbz,natom3
- integer :: isym_k, trev_k, mband
+ integer :: isym_k, trev_k, mband, i1,i2,i3
  integer :: idir, iatom, pertcase
  integer :: ip,npoints,skw_cplex, edos_intmeth
  logical :: downsample
@@ -1661,11 +1658,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
- !new%tol_deltaw_pm = tol16
- !dtset%eph_tols_idelta
- ! TODO: Still under testing.
- !if (dtset%userra > 1e-30_dp) new%tol_deltaw_pm = dtset%userra
- !call wrtout(std_out, sjoin("Setting tol_deltaw_pm to", ftoa(new%tol_deltaw_pm)))
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)
@@ -1712,9 +1704,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! Find the index and coordinates of the current processor
  call MPI_COMM_RANK(comm_cart, me_cart, ierr)
  call MPI_CART_COORDS(comm_cart, me_cart, ndims, new%coords, ierr)
- !%me_x = coords(1)
- !%me_pert = coords(2)
- !%me_fft = coords(2)
 
  ! Create the communicator for the (band_sum, qpoint_sum) loops
  keepdim = .False.; keepdim(1) = .True.
@@ -1769,7 +1758,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  gap_err = get_gaps(ebands, gaps)
  call gaps%print(unit=std_out)
- !call ebands_report_gap(ebands, unit=std_out)
  val_indeces = get_valence_idx(ebands)
 
  ! Frequency mesh for sigma(w) and spectral function.
@@ -1789,7 +1777,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
 
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
  qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
    new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz)
@@ -1832,7 +1820,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        call sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange_, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
      else
        ! qprange is not specified in the input.
-       !   Include direct and fundamental KS gap or include states depending on the position wrt band edges.
+       ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
        call sigtk_kcalc_from_gaps(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
      end if
     end if
@@ -1847,7 +1835,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_DT_MALLOC(new%degtab, (new%nkcalc, new%nsppol))
  end if
 
- ! workspace arrays used to compute degeneracy tables.
+ ! Workspace arrays used to compute degeneracy tables.
  ABI_ICALLOC(degblock_all, (2, mband, new%nkcalc, new%nsppol))
  ABI_ICALLOC(ndeg_all, (new%nkcalc, new%nsppol))
  ierr = 0
@@ -1957,16 +1945,21 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! used to symmetrize the wavefunctions in G-space.
  ! Note that we loop over the full BZ instead of the IBZ(k)
  ! This part is very slow for dense meshes should use geometrical approach...
+
  new%mpw = 0; new%gmax = 0; cnt = 0
  do ik=1,new%nkcalc
    kk = new%kcalc(:, ik)
-   do iq_ibz=1,new%nqbz
+   do i3=-1,1
+     do i2=-1,1
+       do i1=-1,1
+     !do iq_ibz=1,new%nqbz
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-     kq = kk + new%qbz(:,iq_ibz)
+     !kq = kk + new%qbz(:,iq_ibz)
+     kq = kk + half * [i1, i2, i3]
 
      ! TODO: g0 umklapp here can enter into play!
      ! gmax could not be large enough!
-     call get_kg(kq, istwfk1, ecut, cryst%gmet, onpw, gtmp)
+     call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
      new%mpw = max(new%mpw, onpw)
      do ipw=1,onpw
        do ii=1,3
@@ -1975,12 +1968,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      end do
      ABI_FREE(gtmp)
    end do
+   end do
+   end do
  end do
 
  my_mpw = new%mpw; call xmpi_max(my_mpw, new%mpw, comm, ierr)
  my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
 
- call wrtout(std_out, sjoin('Optimal value of mpw=', itoa(new%mpw)))
+ call wrtout(std_out, sjoin('Optimal value of mpw:', itoa(new%mpw), "gmax:", ltoa(new%gmax)))
  call cwtime_report("sigmaph_new: mpw", cpu, wall, gflops)
 
  ! Define number of bands included in self-energy summation as well as band range.
@@ -2000,7 +1995,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  if (new%qint_method == 0) new%wmax = new%wmax + five * dtset%zcut
  ! TODO: One should be consistent with tolerances when using tetra + q-point filtering.
  !if (new%qint_method == 1) new%wmax = new%wmax + five * dtset%zcut
- new%wmax = new%wmax + five * dtset%zcut
+ !new%wmax = new%wmax + five * dtset%zcut
  write(std_out,*)"wmax:", new%wmax * Ha_eV, " (eV)"
 
  if (new%imag_only) then
@@ -3096,7 +3091,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
        do imyq=1,self%my_nqibz_k
          iq_ibz = self%myq2ibz_k(imyq)
          !weight_q = self%wtq_k(iq_ibz)
-         !if (any(abs(self%deltaw_pm(:, :, :, :, imyq, :)) > self%tol_deltaw_pm / ndiv)) mask_qibz_k(iq_ibz) = 1
          if (any(abs(self%deltaw_pm(1, :, :, :, imyq, :)) > dtset%eph_tols_idelta(1) / ndiv)) mask_qibz_k(iq_ibz) = 1
          if (any(abs(self%deltaw_pm(2, :, :, :, imyq, :)) > dtset%eph_tols_idelta(2) / ndiv)) mask_qibz_k(iq_ibz) = 1
        end do
@@ -3118,7 +3112,6 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
 
        call xmpi_split_work(nqeff, self%comm_bq, q_start, q_stop, msg, ierr)
        if (my_rank == master) then
-         !write(std_out, "(a, es16.6)")" Removing q-points with delta weight <= ", self%tol_deltaw_pm / ndiv
          write(std_out, "(a, 2(es16.6,1x))")" Removing q-points with delta weight <= ", dtset%eph_tols_idelta(:) / ndiv
          write(std_out, "(a,i0,a,f5.1,a)")" Total number of q-points contributing to integral: ", nqeff, &
            " (nq_eff / nqibz_k): ", (100.0_dp * nqeff) / self%nqibz_k, " [%]"
@@ -3208,11 +3201,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
  ! Only master writes
  if (my_rank /= master) return
-
- !if (self%imag_only .and. self%qint_method == 1) then
- !  !ndiv = 1; if (self%use_doublegrid) ndiv = self%eph_doublegrid%ndiv
- !  write(std_out, "(a,i0,a,es16.6)")" Skipped: ", self%nqskip, " q-point because weight <= ", self%tol_deltaw_pm !/ ndiv
- !end if
 
  ik_ibz = self%kcalc2ibz(ikcalc, 1)
 
@@ -3756,23 +3744,23 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    NOT_IMPLEMENTED_ERROR()
 
    ! FIXME: This part is broken now.
+   !nz = 1 if (sigma%nwr > 0) nz = 1 + sigma%nwr
+   ! wrmesh_b(nwr, max_nbcalc)
    !ABI_REMALLOC(sigma%cweights, (nz, 2, nbcalc_ks, sigma%my_npert, sigma%my_bstart:sigma%my_bstop, sigma%my_nqibz_k, ndiv))
-   !ABI_REMALLOC(sigma%cweights, (nz, 2, nbcalc_ks, sigma%my_npert, bsum_start:bsum_stop, sigma%ephwg%nq_k))
 
    ! Loop over my bands in self-energy sum.
    do ibsum_kq=sigma%my_bstart, sigma%my_bstop
-     ! loop over my phonon modes
+     ! Loop over my phonon modes
      do imyp=1,sigma%my_npert
        nu = sigma%my_pinfo(3, imyp)
        ! Loop over bands in self-energy matrix elements.
        do ib_k=1,nbcalc_ks
          band_ks = ib_k + bstart_ks - 1
          eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-         eminmax = [eig0nk - tol2, eig0nk + tol2]
          ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
          !ABI_MALLOC(zvals, (nz, nbc))
          !zvals(1, 1:nbc) = sigma%e0vals + sigma%ieta
-         !call ephwg_zinv_weights(sigma%ephwg, iqlk, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights, xmpi_comm_self, &
+         !call sigma%ephwg%get_zinv_weights(iqlk, nz, nbc, zvals, ibsum_kq, spin, sigma%cweights, xmpi_comm_self, &
          !  use_bzsum=sigma%symsigma == 0)
          !call sigma%ephwg%get_deltas(ibsum_kq, spin, nu, 3, eminmax, sigma%bcorr, tmp_deltaw_pm, xmpi_comm_self)
          ! For all the q-points that I am going to calculate
