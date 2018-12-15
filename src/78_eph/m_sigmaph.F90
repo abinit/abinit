@@ -2367,6 +2367,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
  if (dtset%prtdos == 1) edos_intmeth = 1
  !if (dtset%prtdos == -2) edos_intmeth = 3
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ call wrtout(std_out, "Computing electron dos...", do_flush=.True.)
  edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
  if (my_rank == master) then
    path = strcat(dtfil%filnam_ds(4), "_EDOS")

@@ -1921,17 +1921,15 @@ subroutine xmpi_waitall_2d(array_of_requests, mpierr)
  integer,intent(out) :: mpierr
 
 !Local variables-------------------
-#ifdef HAVE_MPI
- integer :: ier,status(MPI_STATUS_SIZE, product(shape(array_of_requests)))
-#endif
+ integer :: flat_requests(product(shape(array_of_requests)))
 
 ! *************************************************************************
 
- mpierr = 0
-#ifdef HAVE_MPI
- call MPI_WAITALL(product(shape(array_of_requests)), array_of_requests, status, ier)
- mpierr=ier
-#endif
+ ! MPI_WAITALL is a Fortran interface so cannot pass count and base address a la C
+ ! so flat 2d array and copy in-out. See https://github.com/open-mpi/ompi/issues/587
+ flat_requests = pack(array_of_requests, mask=.True.)
+ call xmpi_waitall_1d(flat_requests, mpierr)
+ array_of_requests = reshape(flat_requests,  shape(array_of_requests))
 
 end subroutine xmpi_waitall_2d
 !!***
