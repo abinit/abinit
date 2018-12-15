@@ -515,7 +515,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    nqibz, qibz, wtq, nqbz, qbz)
 
  ! Build tetrahedra
- tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, msg, ierr)
+ tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, comm, msg, ierr)
  if (ierr /= 0) MSG_ERROR(msg)
 
  ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))

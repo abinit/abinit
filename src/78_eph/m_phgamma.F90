@@ -2035,7 +2035,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
      qptrlatt(ii,ii) = a2f%ngqpt(ii)
    end do
 
-   tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f%nqshift, a2f%qshift, nqibz, qibz, msg, ierr)
+   tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f%nqshift, a2f%qshift, nqibz, qibz, comm, msg, ierr)
    if (ierr/=0) MSG_ERROR(msg)
 
    ABI_STAT_MALLOC(lambda_tetra, (nqibz,natom3,nsppol), ierr)
@@ -3264,7 +3264,7 @@ subroutine a2fw_tr_init(a2f_tr,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,
      qptrlatt(ii,ii) = a2f_tr%ngqpt(ii)
    end do
 
-   tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f_tr%nqshift, a2f_tr%qshift, nqibz, qibz, msg, ierr)
+   tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f_tr%nqshift, a2f_tr%qshift, nqibz, qibz, comm, msg, ierr)
    if (ierr/=0) MSG_ERROR(msg)
 
    ABI_STAT_MALLOC(lambda_in_tetra, (nqibz,3,3,natom3,nsppol), ierr)

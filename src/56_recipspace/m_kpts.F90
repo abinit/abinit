@@ -51,6 +51,7 @@ module m_kpts
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
  public :: listkk                    ! Find correspondence between two set of k-points.
+ public :: kpts_map
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
  !FIXME: Deprecated
  public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
@@ -218,6 +219,7 @@ end subroutine kpts_ibz_from_kptrlatt
 !!  shiftk(3,nshiftk)=shift vectors for k point generation
 !!  nkibz=Number of points in the IBZ
 !!  kibz(3,nkibz)=Reduced coordinates of the k-points in the IBZ.
+!!  comm= MPI communicator
 !!
 !! OUTPUT
 !!  tetra<t_tetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
@@ -233,11 +235,11 @@ end subroutine kpts_ibz_from_kptrlatt
 !! SOURCE
 
 type(t_tetrahedron) function tetra_from_kptrlatt( &
-&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, msg, ierr) result (tetra)
+&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, comm, msg, ierr) result (tetra)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,nshiftk,nkibz
+ integer,intent(in) :: kptopt,nshiftk,nkibz,comm
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: msg
  type(crystal_t),intent(in) :: cryst
@@ -309,7 +311,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
  ! Compute k points from input file closest to the output file
  call listkk(dksqmax,cryst%gmet,indkk,kibz,kfull,nkibz,nkfull,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrec,timrev,xmpi_comm_self,use_symrec=.True.)
+    sppoldbl,cryst%symafm,cryst%symrec,timrev,comm,use_symrec=.True.)
 
  if (dksqmax > tol12) then
    write(msg, '(3a,es16.6,6a)' )&
@@ -505,8 +507,7 @@ end function symkchk
 !!  sppoldbl=if 1, no spin-polarisation doubling
 !!           if 2, spin-polarisation doubling using symafm
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
-!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
-!!                   value of use_symrec
+!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  comm=MPI communicator.
 !!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
@@ -557,7 +558,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 !Local variables-------------------------------
 !scalars
  integer,parameter :: usesym=1, limit=1
- integer :: nprocs, my_rank, ierr
+ integer :: nprocs, my_rank, ierr !i_start, i_stop
  integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done
  integer :: ilarger,ismaller,itrial
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime
@@ -574,8 +575,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 
 ! *************************************************************************
 
- !write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
- call timab(1021,1,tsec)
+ call timab(1021, 1, tsec)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -591,11 +591,14 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  if(usesym==0)timrev_used=0
 
  ! Precompute the length of the kpt1 vectors, also taking into account possible umpklapp vectors
+ call timab(1022,1,tsec)
  l3 = (2*limit+1)**3
  ABI_CALLOC(lkpg1,(l3*nkpt1))
  ABI_CALLOC(lkpg1_sorted,(l3*nkpt1))
  ABI_ALLOCATE(isort,(l3*nkpt1))
  isort = 0
+
+ !call xmpi_split_work(nkpt1, comm, i_start, i_stop, msg, ierr)
 
  !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
  do ikpt1=1,nkpt1
@@ -631,6 +634,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  end if
 
  call sort_dp(l3*nkpt1,lkpg1_sorted,isort,tol12)
+ call timab(1022,2,tsec)
 
 !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
 !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
@@ -639,11 +643,16 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
 !enddo
 
+ call timab(1023,1,tsec)
  dksqmax = zero
  indkk = 0
+ !call xmpi_split_work(sppoldbl * nkpt2, comm, i_start, i_stop, msg, ierr)
+
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
-     if (mod(ikpt2 + (isppol-1)*nkpt2, nprocs) /= my_rank) cycle  ! MPI parallelism
+     ii = ikpt2 + (isppol-1)*nkpt2
+     if (mod(ii, nprocs) /= my_rank) cycle  ! MPI parallelism
+     !if (ii < i_start .or. ii > i_stop) cycle
 
      ikpt2_done=0
      ! Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
@@ -651,16 +660,16 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
      k2int(:)=nint(k2(:)+tol12)
      k2(:)=k2(:)-k2int(:)
      lk2=sqrt(gmet(1,1)*k2(1)**2+gmet(2,2)*k2(2)**2+&
-&     gmet(3,3)*k2(3)**2+two*(gmet(2,1)*k2(2)*k2(1)+&
-&     gmet(3,2)*k2(3)*k2(2)+gmet(3,1)*k2(3)*k2(1)))
+              gmet(3,3)*k2(3)**2+two*(gmet(2,1)*k2(2)*k2(1)+&
+              gmet(3,2)*k2(3)*k2(2)+gmet(3,1)*k2(3)*k2(1)))
      ! write(std_out, '(a,i4,7es16.6)' )' listkk : ikpt2,kptns2(:,ikpt2),k2(:),lk2=',ikpt2,kptns2(:,ikpt2),k2(:),lk2
 
      ! Find the kpt1 vector whose length is the most similar to the length of lk2 up to a tolerance.
-     ! Use a bissection algorithm.
-     ismaller=0       ; lsmaller=zero
-     ilarger=l3*nkpt1+1 ; llarger=huge(one)
+     ! Use a bisection algorithm.
+     ismaller=0; lsmaller=zero
+     ilarger=l3*nkpt1+1; llarger=huge(one)
 
-     ! This loop should never reach l3*nkpt1, since this is a bissection algorithm
+     ! This loop should never reach l3*nkpt1, since this is a bisection algorithm
      do ii=1,l3*nkpt1
        if((ilarger-ismaller)<2 .or. (llarger-lsmaller)<2*tol12)exit
        itrial=(ilarger+ismaller)/2 ; ltrial=lkpg1_sorted(itrial)
@@ -683,8 +692,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 
      ! The ii index is dummy. This avoids an infinite loop.
      do ii=1,l3*nkpt1
-       ! do ikpt1=1,nkpt1
-
        ! If the difference in length between the trial vector and the target vector is bigger
        ! than the already achieved distance, the search is finished ...
        ldiff=abs(lkpg1_sorted(itrial)-lk2)
@@ -700,10 +707,10 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 
        ! Then compare with the current ldiff
        ! write(std_out,*)' listkk : ikpt1,min_l,ldiff=',ikpt1,min_l,ldiff
-       if(min_l > ldiff-tol12)then
+       if (min_l > ldiff-tol12) then
 
          ! Now, will examine the trial vector, and the symmetric ones
-         !MG FIXME:
+         ! MG FIXME:
          ! Here there's a possible problem with the order of symmetries because
          ! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
          ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
@@ -736,8 +743,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
              if(usesym==1)then
                ! The tolerance insure similar behaviour on different platforms
                ! XG120418: Actually, *assumes* that the closest point will have reduced
-               ! coordinates differing by less than 1/2 . There might be elongated
-               ! cells where this is not correct ...
+               ! coordinates differing by less than 1/2. There might be elongated cells where this is not correct ...
                dkint(:)=nint(dk(:)+tol12)
                dk(:)=dk(:)-dkint(:)
              else
@@ -745,28 +751,25 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
              end if
 
              ! Compute norm of the difference vector, and update kpt1 if better.
-             dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+&
-&             gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+&
-&             gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
+             dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+ &
+                  gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+ &
+                  gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
 
              if (dksq<dksqmn+tol8) then
-
                 ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
-                ! Note that in this condition, each coordinate is tested separately, without squaring. So, it is a much stronger
-                ! condition than dksqmn<tol12
-               if(sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12)then
-                 ikpt2_done=1
-               end if
+                ! Note that in this condition, each coordinate is tested separately, without squaring.
+                ! So, it is a much stronger condition than dksqmn < tol12
+               if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done=1
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
                ! in order to respect previous ordering
-               if(  ikpt2_done==1 .or. &
-&               dksq+tol12<dksqmn .or. &
-&               ( abs(dksq-dksqmn)<tol12 .and. &
-&               ((itimrev<jtime) .or. &
-&               (itimrev==jtime .and. isym<jsym) .or. &
-&               (itimrev==jtime .and. isym==jsym .and. ikpt1<jkpt1))))then
+               if (ikpt2_done==1 .or. &
+                  dksq+tol12<dksqmn .or. &
+                  ( abs(dksq-dksqmn)<tol12 .and. &
+                   ((itimrev<jtime) .or. &
+                   (itimrev==jtime .and. isym<jsym) .or. &
+                   (itimrev==jtime .and. isym==jsym .and. ikpt1<jkpt1))))then
 
                  dksqmn=dksq
                  jkpt1=ikpt1
@@ -834,16 +837,19 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
      !if(nkpt1==17)stop
    end do ! ikpt2
  end do ! isppol
+ call timab(1023,2,tsec)
 
  ABI_DEALLOCATE(isort)
  ABI_DEALLOCATE(lkpg1)
  ABI_DEALLOCATE(lkpg1_sorted)
 
+ call timab(1024,1,tsec)
  if (nprocs > 1) then
    call xmpi_sum(indkk, comm, ierr)
    dksqmn = dksqmax
    call xmpi_max(dksqmn, dksqmax, comm, ierr)
  end if
+ call timab(1024,2,tsec)
 
  call timab(1021,2,tsec)
 
@@ -1361,8 +1367,7 @@ end subroutine getkgrid
 !!
 !! SOURCE
 
-subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
-& nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
+subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,nkpt_fullbz,nshiftk,nsym,shiftk,symrel)
 
 !Arguments ------------------------------------
 !scalars
@@ -1379,7 +1384,6 @@ subroutine get_full_kgrid(indkpt,kpt,kpt_fullbz,kptrlatt,nkpt,&
  integer :: symrankkpt
  character(len=500) :: msg
  type(kptrank_type) :: kptrank_t
-
 !arrays
  integer :: inv_symrel(3,3,nsym)
  real(dp) :: k2(3)
@@ -2950,6 +2954,255 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 end subroutine mknormpath
 !!***
 
+!!****f* m_kpts/kpts_map
+!! NAME
+!! kpts_map
+!!
+!! FUNCTION
+!! Given a list of nkpt1 initial k points kptns1 and a list of nkpt2
+!! final k points kptns2, associates each final kpt with a "closest"
+!! initial k point (or symmetric thereof, also taking possible umklapp)
+!! as determined by a metric gmet, that commutes with the symmetry operations.
+!! Returns indirect indexing list indkk.
+!!
+!! INPUTS
+!!  kptns1(3,nkpt1)=list of initial k points (reduced coordinates)
+!!  kptns2(3,nkpt2)=list of final k points
+!!  nkpt1=number of initial k points
+!!  nkpt2=number of final k points
+!!  nsym=number of symmetry elements in space group
+!!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
+!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on value of use_symrec
+!!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
+!!  comm=MPI communicator.
+!!  [use_symrec]: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
+!!
+!! OUTPUT
+!!  indkk(nkpt2*sppoldbl,6)=describe k point number of kpt1 that allows to
+!!    generate wavefunctions closest to given kpt2
+!!    if sppoldbl=2, use symafm to generate spin down wfs from spin up wfs
+!!    indkk(:,1)=k point number of kptns1
+!!    indkk(:,2)=symmetry operation to be applied to kpt1, to give kpt1a
+!!      (if 0, means no symmetry operation, equivalent to identity )
+!!    indkk(:,3:5)=shift in reciprocal space to be given to kpt1a,
+!!      to give kpt1b, that is the closest to kpt2.
+!!    indkk(:,6)=1 if time-reversal was used to generate kpt1a from kpt1, 0 otherwise
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpts_map(indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, symafm, symmat, timrev, comm, ierr, &
+                    use_symrec) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpt1,nkpt2,nsym,timrev,comm
+ logical,optional,intent(in) :: use_symrec
+ integer,intent(out) :: ierr
+!arrays
+ integer,intent(in) :: symafm(nsym),symmat(3,3,nsym)
+ real(dp),intent(in) :: kptns1(3,nkpt1), kptns2(3,nkpt2)
+ integer,intent(out) :: indkk(6, nkpt2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nprocs, my_rank, ikpt1,ikpt2, isppol, isym, itimrev, symrank
+ logical :: found
+ type(kptrank_type) :: kptrank_t
+!arrays
+ integer :: dkint(3)
+ real(dp) :: tsec(2), dk(3),kpt1a(3)
+
+! *************************************************************************
+
+ call timab(1021, 1, tsec)
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ ! Make full k-point rank arrays
+ call mkkptrank(kptns1, nkpt1, kptrank_t)
+
+ ! Find equivalence to irred kpoints in kpt
+ ierr = 0; indkk = 0
+ do ikpt2=1,nkpt2
+   if (mod(ikpt2, nprocs) /= my_rank) cycle ! MPI parallelism
+   found = .False.
+
+ikpt1_loop: &
+   do ikpt1=1,nkpt1
+     do itimrev=0,timrev
+       do isym=1,nsym
+         ! Select magnetic characteristic of symmetries
+         if (symafm(isym) == -1) cycle
+
+         ! Original code only used transpose(symrel)
+         if (present(use_symrec)) then
+           if (use_symrec) then
+             kpt1a(:) = MATMUL(symmat(:,:,isym), kptns1(:,ikpt1))
+           else
+             kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)), kptns1(:,ikpt1))
+           end if
+         else
+           kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)), kptns1(:,ikpt1))
+         end if
+         kpt1a(:) = (1 - 2*itimrev) * kpt1a(:)
+         call get_rank_1kpt(kpt1a, symrank, kptrank_t)
+
+         if (kptrank_t%invrank(symrank) /= -1) then
+           ! Compute difference with respect to kpt2, modulo a lattice vector
+           ! The tolerance insure similar behaviour on different platforms
+           ! XG120418: Actually, *assumes* that the closest point will have reduced
+           ! coordinates differing by less than 1/2 . There might be elongated cells where this is not correct ...
+           dk(:) = kptns2(:,ikpt2) - kpt1a(:)
+           dkint(:) = nint(dk(:) + tol12)
+           !dk(:)=dk(:)-dkint(:)
+           ! Store indices.
+           !indkk(1, ikpt2) = ikpt1
+           indkk(1, ikpt2) = kptrank_t%invrank(symrank)
+           indkk(2, ikpt2) = isym
+           indkk(3:5, ikpt2) = dkint
+           indkk(6, ikpt2) = itimrev
+           found = .True.; exit ikpt1_loop
+         end if
+       end do ! isym
+     end do !  itimrev
+   end do ikpt1_loop
+
+   if (.not. found) then
+     ierr = ierr + 1
+     !write(msg,'(a,i0)')' indkpt(ikpt) is still 0: no irred kpoint is equiv to ikpt ',ikpt
+     !MSG_BUG(msg)
+   end if
+ end do ! ikpt2
+
+ call destroy_kptrank(kptrank_t)
+
+ if (nprocs > 1) call xmpi_sum(indkk, comm, ierr)
+ call timab(1021, 2, tsec)
+
+ !dksqmax = zero
+ !indkk = 0
+ !do isppol=1,sppoldbl
+ !  do ikpt2=1,nkpt2
+ !    if (mod(ikpt2 + (isppol-1)*nkpt2, nprocs) /= my_rank) cycle  ! MPI parallelism
+ !    dksqmn=huge(one)
+ !    ! The ii index is dummy. This avoids an infinite loop.
+ !    do ii=1,l3*nkpt1
+ !      ! If the difference in length between the trial vector and the target vector is bigger
+ !      ! than the already achieved distance, the search is finished ...
+ !      ldiff=abs(lkpg1_sorted(itrial)-lk2)
+
+ !      if(ldiff**2>dksqmn+tol8) exit
+
+ !      ! If this k-point has already been examined in a previous batch, skip it
+ !      ! First, compute the minimum of the difference of length of the sets of associated vectors thanks to Umklapp vectors
+ !      ! with the target vector
+ !      ikpt1=(isort(itrial)-1)/l3+1
+ !      min_l=minval(abs(lkpg1((ikpt1-1)*l3+1:(ikpt1-1)*l3+l3)-lk2))
+
+ !      ! Then compare with the current ldiff
+ !      ! write(std_out,*)' listkk : ikpt1,min_l,ldiff=',ikpt1,min_l,ldiff
+ !      if(min_l > ldiff-tol12)then
+
+ !        ! Now, will examine the trial vector, and the symmetric ones
+ !        ! MG FIXME:
+ !        ! Here there's a possible problem with the order of symmetries because
+ !        ! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
+ !        ! Besides, one should use symrel^{-1 T} to keep the correspondence between isym -> R or S
+ !        do itimrev=0,timrev_used
+ !          do isym=1,nsym_used
+
+ !            ! Select magnetic characteristic of symmetries
+ !            if(isppol==1 .and. symafm(isym)==-1)cycle
+ !            if(isppol==2 .and. symafm(isym)==1)cycle
+
+ !            ! Compute symmetric point to kpt1
+ !            if(usesym==1)then
+ !              ! original code only used transpose(symrel)
+ !              if (present(use_symrec)) then
+ !                if (use_symrec) then
+ !                  kpt1a(:) = MATMUL(symmat(:,:,isym),kptns1(:,ikpt1))
+ !                else
+ !                  kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)),kptns1(:,ikpt1))
+ !                end if
+ !              else
+ !                kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,isym)),kptns1(:,ikpt1))
+ !              end if
+ !              kpt1a(:)=(1-2*itimrev)*kpt1a(:)
+ !            else
+ !              kpt1a(:)=kptns1(:,ikpt1)
+ !            end if
+
+ !            ! Compute difference with respect to kpt2, modulo a lattice vector
+ !            dk(:)=kptns2(:,ikpt2)-kpt1a(:)
+ !            if(usesym==1)then
+ !              ! The tolerance insure similar behaviour on different platforms
+ !              ! XG120418: Actually, *assumes* that the closest point will have reduced
+ !              ! coordinates differing by less than 1/2 . There might be elongated cells where this is not correct ...
+ !              dkint(:)=nint(dk(:)+tol12)
+ !              dk(:)=dk(:)-dkint(:)
+ !            else
+ !              dkint(:)=0
+ !            end if
+
+ !            ! Compute norm of the difference vector, and update kpt1 if better.
+ !            dksq=gmet(1,1)*dk(1)**2+gmet(2,2)*dk(2)**2+&
+ !             gmet(3,3)*dk(3)**2+two*(gmet(2,1)*dk(2)*dk(1)+&
+ !             gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
+
+ !            if (dksq<dksqmn+tol8) then
+ !               ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
+ !               ! Note that in this condition, each coordinate is tested separately, without squaring. So, it is a much stronger
+ !               ! condition than dksqmn<tol12
+ !              if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done=1
+
+ !              ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
+ !              ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
+ !              ! in order to respect previous ordering
+ !              if(  ikpt2_done==1 .or. &
+ !              dksq+tol12<dksqmn .or. &
+ !              ( abs(dksq-dksqmn)<tol12 .and. &
+ !              ((itimrev<jtime) .or. &
+ !              (itimrev==jtime .and. isym<jsym) .or. &
+ !              (itimrev==jtime .and. isym==jsym .and. ikpt1<jkpt1))))then
+
+ !                dksqmn=dksq
+ !                jkpt1=ikpt1
+ !                jsym=isym
+ !                jtime=itimrev
+ !                jdkint(:)=dkint(:)
+ !              end if
+
+ !            end if
+ !            if(ikpt2_done==1)exit
+ !          end do ! isym
+ !          if(ikpt2_done==1)exit
+ !        end do ! itimrev
+ !        if(ikpt2_done==1)exit
+ !      end if
+
+ !    end do ! ikpt1
+
+ !    ! Store indices.
+ !    indkk(ikpt2+(isppol-1)*nkpt2,1)=jkpt1
+ !    indkk(ikpt2+(isppol-1)*nkpt2,2)=jsym
+ !    indkk(ikpt2+(isppol-1)*nkpt2,3:5)=jdkint(:)
+ !    indkk(ikpt2+(isppol-1)*nkpt2,6)=jtime
+ !    dksqmax=max(dksqmax,dksqmn)
+
+ !    if (dksqmn<-tol12) then
+ !      write(msg, '(a,es16.6)' )'The minimum square of dk has negative norm: dksqmn= ',dksqmn
+ !      MSG_BUG(msg)
+ !    end if
+
+ !  end do ! ikpt2
+ !end do ! isppol
+
+end subroutine kpts_map
+!!***
 
 end module m_kpts
 !!***

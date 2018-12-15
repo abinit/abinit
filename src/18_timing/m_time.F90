@@ -188,11 +188,11 @@ pure function sec2str(time_s) result(str)
  seconds = MOD(time_s,60._dp)
 
  if (days > 0) then
-   write(str,'(i0,3(a,i0.2))')days,"-",hours,":",minutes,":",seconds
+   write(str,'(i0,3(a,i0.2),a)')days,"-",hours,":",minutes,":",seconds, " [days]"
  else if (hours > 0) then
-   write(str,'(i0.2,2(a,i0.2))')hours,":",minutes,":",seconds
+   write(str,'(i0.2,2(a,i0.2),a)')hours,":",minutes,":",seconds, " [hours]"
  else if (minutes > 0) then
-   write(str,'(i0.2,a,i0.2)')minutes,":",seconds
+   write(str,'(i0.2,a,i0.2)')minutes,":",seconds, " [minutes]"
  else
    write(str,'(f5.2,a)')time_s," [s]"
  end if

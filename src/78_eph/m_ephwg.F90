@@ -55,7 +55,7 @@ module m_ephwg
  use m_special_funcs,   only : dirac_delta
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
- use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt
+ use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt, kpts_map
  use m_occ,             only : occ_fd, occ_be
 
  implicit none
@@ -344,7 +344,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
 !arrays
- integer,allocatable :: indkk(:,:)
+ integer,allocatable :: indkk(:,:), kmap(:,:)
 
 !----------------------------------------------------------------------
 
@@ -392,6 +392,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  end do
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
+#if 1
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
@@ -400,6 +401,15 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
     "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
+#else
+ ABI_MALLOC(kmap, (6, self%nbz))
+ call kpts_map(kmap, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym, &
+    cryst%symafm, cryst%symrel, self%timrev, comm, ierr, use_symrec=.False.)
+ ABI_CHECK(ierr == 0, "Cannot map BZ --> IBZ_k")
+ ABI_MALLOC(indkk, (self%nbz, 1))
+ indkk(:, 1) = kmap(1, :)
+ ABI_FREE(kmap)
+#endif
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
