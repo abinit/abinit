@@ -170,7 +170,7 @@ The following observables are printed, which are:
 
   $\chi=\frac{\partial <m>}{\partial H}= (<m^2>-<m>^2)/(k_B T)$ .
 
-  $<m>$ is the average of the total staggered magnetic moment.  At zero temperature, $\chi$ is not well defined. <!--TODO: check this-->. 
+  $<m>$ is the average of the total staggered magnetic moment.  At zero temperature, $\chi$ is not well defined. 
 
 * BinderU4: The Binder cumulant, which is 
 
@@ -184,13 +184,13 @@ The following observables are printed, which are:
 
   Here Mst is normalized to the saturated magnetic moment so the maximum of M is 1.
 
-In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using post-processing tools.  <!-- TODO: add postprocessing.-->
+In the netcdf file, the trajectories of the spins can be found. They can be further analyzed using post-processing tools.  
 
 We are now coming back to the values chosen for the input variables in the tmulti5_1.in file. It is essential to choose these values such that the results of the calculation are meaningful. Therefore, we recommend a convergence study concerning the following parameters: 
 
 * time step ([[multibinit: spin_dt]]):
 
-    Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.  (<!--TODO: there must be a better way.-->)
+    Typical time steps are about $10^{-15}  $ to $10^{-17}$ s. An optimal time step can be determined by trying several values and comparing the results (equilibrium magnetic order, moments, etc) to a calculation with a small time step (e.g. $10^{-17}$ s). At this stage, a small box and a temperature close to zero can be used.  
 
 * supercell size ([[multibinit:ncell]])
 
@@ -318,7 +318,7 @@ It shows that the the spins have anti-parallel alignment along the easy axis (x)
   ```
 
 
-##### To add
+##### 
 
 
 
