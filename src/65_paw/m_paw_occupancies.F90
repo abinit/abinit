@@ -30,7 +30,7 @@ MODULE m_paw_occupancies
 
  use m_pawtab,     only : pawtab_type
  use m_pawrhoij,   only : pawrhoij_type,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked, &
-&                         pawrhoij_alloc,pawrhoij_free,pawrhoij_get_nspden
+&                         pawrhoij_alloc,pawrhoij_free,pawrhoij_inquire_dim
  use m_pawcprj,    only : pawcprj_type,pawcprj_alloc,pawcprj_get, &
 &                         pawcprj_gather_spin, pawcprj_free, pawcprj_mpi_send, &
 &                         pawcprj_mpi_recv, pawcprj_copy, pawcprj_unpack, pawcprj_pack
@@ -82,7 +82,6 @@ CONTAINS  !=====================================================================
 !!  occ(mband*nkpt*nsppol)=occupation number for each band for each k
 !!  paral_kgb=Flag related to the kpoint-band-fft parallelism
 !!  paw_dmft  <type(paw_dmft_type)>= paw+dmft related data
-!!  pawprtvol=control print volume and debugging output for PAW
 !!  unpaw=unit number for cprj PAW data (if used)
 !!  wtk(nkpt)=weight assigned to each k point
 !!
@@ -98,7 +97,7 @@ CONTAINS  !=====================================================================
 !!
 !! CHILDREN
 !!      pawaccrhoij,pawcprj_alloc,pawcprj_free,pawcprj_gather_spin,pawcprj_get
-!!      pawio_print_ij,pawrhoij_free,pawrhoij_init_unpacked
+!!      pawrhoij_free,pawrhoij_init_unpacked
 !!      pawrhoij_mpisum_unpacked,wrtout
 !!
 !! NOTES
@@ -109,15 +108,14 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawmkrhoij(atindx,atindx1,cprj,dimcprj,istwfk,kptopt,mband,mband_cprj,mcprj,mkmem,mpi_enreg,&
-&                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,&
-&                      pawprtvol,pawrhoij,unpaw,usewvl,wtk)
+&                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,pawrhoij,unpaw,usewvl,wtk)
 
  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: kptopt,mband,mband_cprj,mcprj,mkmem,natom,nkpt,nspinor,nsppol
- integer,intent(in) :: paral_kgb,pawprtvol,unpaw,usewvl
+ integer,intent(in) :: paral_kgb,unpaw,usewvl
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),atindx1(natom),dimcprj(natom),istwfk(nkpt)
@@ -133,12 +131,11 @@ CONTAINS  !=====================================================================
  integer :: bdtot_index,cplex
  integer :: iatom,iatom_tot,ib,ib1,iband,ibc1,ibg,ib_this_proc,ierr
  integer :: ikpt,iorder_cprj,isppol,jb_this_proc,jbg,me,my_nspinor,nband_k,nband_k_cprj
- integer :: nbandc1,nband_k_cprj_read,nband_k_cprj_used,nprocband,nrhoij,nsp2
+ integer :: nbandc1,nband_k_cprj_read,nband_k_cprj_used,nprocband,nrhoij
  integer :: option,spaceComm,use_nondiag_occup_dmft
  logical :: locc_test,paral_atom,usetimerev
  integer :: ib1_this_proc, ib_loop, proc_sender, proc_recver
  real(dp) :: wtk_k
- character(len=4) :: wrt_mode
  character(len=500) :: msg
 
 !arrays
@@ -173,19 +170,13 @@ CONTAINS  !=====================================================================
 !Check if cprj is distributed over bands
  nprocband=(mband/mband_cprj)
  if (paral_kgb==1.and.nprocband/=mpi_enreg%nproc_band) then
-   msg=' mband/mband_cprj must be equal to nproc_band!'
+   msg='mband/mband_cprj must be equal to nproc_band!'
    MSG_BUG(msg)
  end if
-! if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then
-!   write(msg,'(4a,e14.3,a)') ch10,&
-!&   ' Parallelization over bands is not yet compatible with self-consistency in DMFT !',ch10,&
-!&   ' Calculation is thus restricted to nstep =1.'
-!   MSG_WARNING(msg)
-! end if
 
  if( usewvl==1 .and. (nprocband/=1)) then
    write(msg,'(2a)') ch10,&
-&   '  ERROR: parallelization over bands is not compatible with WAVELETS'
+&   'Parallelization over bands is not compatible with WAVELETS!'
    MSG_ERROR(msg)
  end if
 
@@ -202,7 +193,7 @@ CONTAINS  !=====================================================================
 !Check if pawrhoij is distributed over atomic sites
  paral_atom=(nrhoij/=natom.and.mpi_enreg%nproc_atom>1)
  if (paral_atom.and.nrhoij/=mpi_enreg%my_natom) then
-   msg=' Size of pawrhoij should be natom or my_natom !'
+   msg='Size of pawrhoij should be natom or my_natom!'
    MSG_BUG(msg)
  end if
 
@@ -502,31 +493,6 @@ CONTAINS  !=====================================================================
    ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
  end if
 
-!Print info
- if (abs(pawprtvol)>=1) then
-   wrt_mode='COLL';if (paral_atom) wrt_mode='PERS'
-   do iatom=1,nrhoij
-     iatom_tot=iatom;if (paral_atom) iatom_tot=mpi_enreg%my_atmtab(iatom)
-     if (pawprtvol>=0.and.iatom_tot/=1.and.iatom_tot/=natom) cycle
-     nsp2=pawrhoij(iatom)%nsppol;if (pawrhoij(iatom)%nspden==4) nsp2=4
-     write(msg, '(4a,i3,a)') ch10," PAW TEST:",ch10,&
-&     ' ====== Values of RHOIJ in pawmkrhoij (iatom=',iatom_tot,') ======'
-     if (pawrhoij(iatom)%nspden==2.and.pawrhoij(iatom)%nsppol==1) write(msg,'(3a)') trim(msg),ch10,&
-&     '      (antiferromagnetism case: only one spin component)'
-     call wrtout(std_out,msg,wrt_mode)
-     do isppol=1,nsp2
-       if (pawrhoij(iatom)%nspden/=1) then
-         write(msg,'(3a)') '   Component ',trim(dspin(isppol+2*(pawrhoij(iatom)%nspden/4))),':'
-         call wrtout(std_out,msg,wrt_mode)
-       end if
-       option=2;if (pawrhoij(iatom)%cplex==2.and.pawrhoij(iatom)%nspinor==1) option=1
-       call pawio_print_ij(std_out,pawrhoij(iatom)%rhoij_(:,isppol),pawrhoij(iatom)%lmn2_size,&
-&       pawrhoij(iatom)%cplex,pawrhoij(iatom)%lmn_size,-1,idum,0,pawprtvol,idum,&
-&       -1._dp,1,opt_sym=option,mode_paral=wrt_mode)
-     end do
-   end do
- end if
-
  DBG_EXIT("COLL")
 
 end subroutine pawmkrhoij
@@ -617,7 +583,7 @@ end subroutine pawmkrhoij
 
 !Local variables ---------------------------------------
 !scalars
- integer :: cplex_rhoij,iatm,iatom,iatom1,ilmn,iplex,j0lmn,jlmn,klmn,klmn_im,klmn_re
+ integer :: cplex_rhoij,iatm,iatom,iatom1,ilmn,iplex,iq0,j0lmn,jlmn,klmn,klmn_im,klmn_re
  integer :: mu,my_comm_atom,ncpgr,nspden_rhoij
  logical :: compute_impart,compute_impart_cplex,substract_diagonal
  logical :: my_atmtab_allocated,paral_atom
@@ -637,17 +603,22 @@ end subroutine pawmkrhoij
  ncpgr=0
  if (option==2.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4)) ncpgr=1
  if (option==3) ncpgr=cwaveprj(1,1)%ncpgr
+
 !Tests
  if(option==2.and.(ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11)) then
-   message = ' not relevant for ipert=natom+1 or ipert=natom+10 or ipert=natom+11 !'
+   message = 'Not relevant for ipert=natom+1 or ipert=natom+10 or ipert=natom+11!'
    MSG_BUG(message)
  end if
  if(option==2.and.cwaveprj(1,1)%ncpgr<ncpgr) then
-   message = ' Error on cwaveprj1 factors derivatives !'
+   message = 'Error on cwaveprj1 factors derivatives!'
    MSG_BUG(message)
  end if
  if(option==3.and.cwaveprj(1,1)%ncpgr/=ncpgr) then
-   message = ' Error on cwaveprj factors derivatives !'
+   message = 'Error on cwaveprj factors derivatives!'
+   MSG_BUG(message)
+ end if
+ if (pawrhoij(1)%qphase==2.and.option/=2) then
+   message = 'pawaccrhoij: qphase=2 only allowed with option=2 (1st-order rhoij)!'
    MSG_BUG(message)
  end if
 
@@ -661,9 +632,10 @@ end subroutine pawmkrhoij
  weight=wtk_k*occ_k
  weight_2=zero
  if(present(occ_k_2)) then
-   if (cplex /= 2) then
-     ! DMFT need complex cprj
-     MSG_ERROR('DMFT computation must be done with complex cprj. Check that istwfk = 1.')
+   if (cplex==1) then
+     !DMFT need complex cprj
+     message='DMFT computation must be done with complex cprj. Check that istwfk = 1!'
+     MSG_ERROR(message)
    end if
    weight_2=wtk_k*occ_k_2
  end if
@@ -675,10 +647,10 @@ end subroutine pawmkrhoij
 !  ==================================================================
 !  === OPTION 1: Accumulate (n,k) contribution to rhoij =============
 !  ==================================================================
-   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex==2))
+   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex_rhoij==2))
    compute_impart_cplex=((compute_impart).and.(cplex==2))
    if (nspinor==1) then
-     cplex_rhoij=pawrhoij(1)%cplex
+     cplex_rhoij=pawrhoij(1)%cplex_rhoij
      if (cplex_rhoij==1) then
        do iatom=1,my_natom
          iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
@@ -737,7 +709,7 @@ end subroutine pawmkrhoij
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        nspden_rhoij=pawrhoij(iatom)%nspden
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
@@ -764,6 +736,8 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
              pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
              if (cplex==2) then
+               !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+               ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                ro12_im=cpi0(1,2)*cpj0(2,1)-cpi0(2,2)*cpj0(1,1)
                ro21_im=cpi0(1,1)*cpj0(2,2)-cpi0(2,1)*cpj0(1,2)
                pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
@@ -807,23 +781,16 @@ end subroutine pawmkrhoij
 !  === OPTION 2: Accumulate (n,k) contribution to 1st-order rhoij ===
 !  ==================================================================
 
-   compute_impart=(pawrhoij(1)%cplex==2)
-   compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
-   substract_diagonal=(ipert==natom+3)
-
-   if (compute_impart_cplex) then
-     if (.not.allocated(pawrhoij(1)%rhoijim)) then
-       MSG_BUG("pawrhoij(:)%rhoijim must be allocated!")
-     end if
-   end if
-
 !  Accumulate (n,k) contribution to rhoij1
 !  due to derivative of wave-function
+   compute_impart=(pawrhoij(1)%qphase==2)
+   compute_impart_cplex=(compute_impart.and.(cplex==2))
    if (nspinor==1) then
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
+       iq0=cplex_rhoij*pawrhoij(iatom)%lmn2_size
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          cpj0(1:2,1)=cwaveprj (iatm,1)%cp(1:2,jlmn)
@@ -839,7 +806,7 @@ end subroutine pawmkrhoij
            end do
            pawrhoij(iatom)%rhoij_(klmn_re,isppol)=pawrhoij(iatom)%rhoij_(klmn_re,isppol)+weight*ro11_re
            if (compute_impart_cplex) then
-             klmn_im=klmn_re+1
+             klmn_im=klmn_re+iq0
              ro11_im=cpi0(1,1)*cpj1(2,1)-cpi0(2,1)*cpj1(1,1)+cpj0(1,1)*cpi1(2,1)-cpj0(2,1)*cpi1(1,1)
              pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
            end if
@@ -850,8 +817,9 @@ end subroutine pawmkrhoij
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        nspden_rhoij=pawrhoij(iatom)%nspden
+       iq0=cplex_rhoij*pawrhoij(iatom)%lmn2_size
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          cpj0(1:2,1)=cwaveprj (iatm,1)%cp(1:2,jlmn)
@@ -881,21 +849,23 @@ end subroutine pawmkrhoij
              pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
              pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
              if (cplex==2) then
-               ro12_im=cpj0(1,1)*cpi1(2,2)-cpi1(1,1)*cpj0(2,2)+cpi0(1,2)*cpj1(2,1)-cpj1(1,2)*cpi0(2,1)
-               ro21_im=cpj0(1,2)*cpi1(2,1)-cpi1(1,2)*cpj0(2,1)+cpi0(1,1)*cpj1(2,2)-cpj1(1,1)*cpi0(2,2)
+               !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+               ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
+               ro12_im=cpj0(2,1)*cpi1(1,2)-cpi1(2,2)*cpj0(1,1)+cpi0(1,2)*cpj1(2,1)-cpj1(1,1)*cpi0(2,2)
+               ro21_im=cpj0(2,2)*cpi1(1,1)-cpi1(2,1)*cpj0(1,2)+cpi0(1,1)*cpj1(2,2)-cpj1(1,2)*cpi0(2,1)
                pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
              end if
            end if
            if (compute_impart) then
-             klmn_im=klmn_re+1
+             klmn_im=klmn_re+iq0
              if (nspden_rhoij>1) pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro12_re-ro21_re)
              if (cplex==2) then
-               ro11_im=cpj0(1,1)*cpi1(2,1)-cpi1(1,1)*cpj0(2,1)+cpi0(1,1)*cpj1(2,1)-cpj1(1,1)*cpi0(2,1)
-               ro22_im=cpj0(1,2)*cpi1(2,2)-cpi1(1,2)*cpj0(2,2)+cpi0(1,2)*cpj1(2,2)-cpj1(1,2)*cpi0(2,2)
+               ro11_im=cpj0(2,1)*cpi1(1,1)-cpi1(2,1)*cpj0(1,1)+cpi0(1,1)*cpj1(2,1)-cpj1(1,1)*cpi0(2,1)
+               ro22_im=cpj0(2,2)*cpi1(1,2)-cpi1(2,2)*cpj0(1,2)+cpi0(1,2)*cpj1(2,2)-cpj1(1,2)*cpi0(2,2)
                pawrhoij(iatom)%rhoij_(klmn_im,1)=pawrhoij(iatom)%rhoij_(klmn_im,1)+weight*(ro11_im+ro22_im)
                if (nspden_rhoij>1) then
                  pawrhoij(iatom)%rhoij_(klmn_im,4)=pawrhoij(iatom)%rhoij_(klmn_im,4)+weight*(ro11_im-ro22_im)
-                 pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_im+ro21_im)
+                 pawrhoij(iatom)%rhoij_(klmn_im,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_im+ro21_im)
                end if
              end if
            end if
@@ -907,12 +877,15 @@ end subroutine pawmkrhoij
 !  Accumulate (n,k) contribution to rhoij1
 !  due to derivative of projectors
    if (ipert/=natom+2) then
+     compute_impart=(pawrhoij(1)%cplex_rhoij==2)
+     compute_impart_cplex=(compute_impart.and.(cplex==2))
+     substract_diagonal=(ipert==natom+3)
      if (nspinor==1) then
        do iatom=1,my_natom
          iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
          iatm=atindx(iatom1)
          if (ipert<=natom.and.iatom/=ipert) cycle
-         cplex_rhoij=pawrhoij(iatom)%cplex
+         cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
          do jlmn=1,pawrhoij(iatom)%lmn_size
            j0lmn=jlmn*(jlmn-1)/2
            cpj0 (1:2,1)  =cwaveprj(iatm,1)%cp (1:2  ,jlmn)
@@ -940,8 +913,7 @@ end subroutine pawmkrhoij
                if (substract_diagonal) then
                  ro11_im=ro11_im-cpi0(1,1)*cpj0(2,1)+cpi0(2,1)*cpj0(1,1)
                end if
-               pawrhoij(iatom)%rhoijim(klmn,isppol)=pawrhoij(iatom)%rhoijim(klmn,isppol)+weight*ro11_im
-!              pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
+               pawrhoij(iatom)%rhoij_(klmn_im,isppol)=pawrhoij(iatom)%rhoij_(klmn_im,isppol)+weight*ro11_im
              end if
            end do
          end do
@@ -951,7 +923,7 @@ end subroutine pawmkrhoij
          iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
          iatm=atindx(iatom1)
          if (ipert<=natom.and.iatom/=ipert) cycle
-         cplex_rhoij=pawrhoij(iatom)%cplex
+         cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
          nspden_rhoij=pawrhoij(iatom)%nspden
          do jlmn=1,pawrhoij(iatom)%lmn_size
            j0lmn=jlmn*(jlmn-1)/2
@@ -994,6 +966,8 @@ end subroutine pawmkrhoij
                pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
                pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
                if (cplex==2) then
+                 !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+                 ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                  ro12_im=dcpi0(1,2,1)*cpj0(2,1)-dcpi0(2,2,1)*cpj0(1,1)+cpi0(1,2)*dcpj0(2,1,1)-cpi0(2,2)*dcpj0(1,1,1)
                  ro21_im=dcpi0(1,1,1)*cpj0(2,2)-dcpi0(2,1,1)*cpj0(1,2)+cpi0(1,1)*dcpj0(2,2,1)-cpi0(2,1)*dcpj0(1,2,1)
                  if (substract_diagonal) then
@@ -1032,13 +1006,13 @@ end subroutine pawmkrhoij
 !  === OPTION 3: Accumulate (n,k) contribution to drhoij/dr =========
 !  ==================================================================
 
-   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex==2))
+   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex_rhoij==2))
    compute_impart_cplex=((compute_impart).and.(cplex==2))
    if (nspinor==1) then
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
          cpj0(1:cplex,1)         =cwaveprj(iatm,1)%cp (1:cplex,jlmn)
@@ -1069,7 +1043,7 @@ end subroutine pawmkrhoij
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
-       cplex_rhoij=pawrhoij(iatom)%cplex
+       cplex_rhoij=pawrhoij(iatom)%cplex_rhoij
        nspden_rhoij=pawrhoij(iatom)%nspden
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
@@ -1102,6 +1076,8 @@ end subroutine pawmkrhoij
                pawrhoij(iatom)%grhoij(mu,klmn_re,4)=pawrhoij(iatom)%grhoij(mu,klmn_re,4)+weight*(ro11_re-ro22_re)
                pawrhoij(iatom)%grhoij(mu,klmn_re,2)=pawrhoij(iatom)%grhoij(mu,klmn_re,2)+weight*(ro12_re+ro21_re)
                if (cplex==2) then
+                 !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
+                 ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                  ro12_im=dcpi0(1,2,mu)*cpj0(2,1)+cpi0(1,2)*dcpj0(2,1,mu)-dcpi0(2,2,mu)*cpj0(1,1)-cpi0(2,2)*dcpj0(1,1,mu)
                  ro21_im=dcpi0(1,1,mu)*cpj0(2,2)+cpi0(1,1)*dcpj0(2,2,mu)-dcpi0(2,1,mu)*cpj0(1,2)-cpi0(2,1)*dcpj0(1,2,mu)
                  pawrhoij(iatom)%grhoij(mu,klmn_re,3)=pawrhoij(iatom)%grhoij(mu,klmn_re,3)+weight*(ro21_im-ro12_im)
@@ -1149,7 +1125,7 @@ end subroutine pawaccrhoij
 !! from atomic ones
 !!
 !! INPUTS
-!!  cplex=1 if rhoij are REAL, 2 if they are complex
+!!  cpxocc=1 if rhoij are real, 2 if they are complex
 !!  lexexch(ntypat)=l on which local exact-exchange is applied for a given type of atom
 !!  lpawu(ntypat)=l on which U is applied for a given type of atom (PAW+U)
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
@@ -1163,6 +1139,7 @@ end subroutine pawaccrhoij
 !!  pawspnorb=flag: 1 if spin-orbit coupling is activated in PAW augmentation regions
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!                                     (containing initial rhoij)
+!!  qphase=2 if rhoij have a exp(iqR) phase, 1 if not (typical use: response function at q<>0)
 !!  spinat(3,natom)=initial spin of each atom, in unit of hbar/2.
 !!  typat(natom)=type of each atom
 !!  === Optional arguments
@@ -1184,8 +1161,8 @@ end subroutine pawaccrhoij
 !!
 !! SOURCE
 
-subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
-&                    nspden,nspinor,nsppol,ntypat,pawrhoij,pawspnorb,pawtab,spinat,typat,&
+subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
+&                    ntypat,pawrhoij,pawspnorb,pawtab,qphase,spinat,typat,&
 &                    ngrhoij,nlmnmix,use_rhoij_,use_rhoijres,& ! optional arguments
 &                    mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
@@ -1193,7 +1170,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: cplex,my_natom,natom,nspden,nspinor,nsppol,ntypat,pawspnorb
+ integer,intent(in) :: cpxocc,my_natom,natom,nspden,nspinor,nsppol,ntypat,pawspnorb,qphase
  integer,intent(in),optional :: comm_atom,ngrhoij,nlmnmix,use_rhoij_,use_rhoijres
  character(len=500) :: message
 !arrays
@@ -1207,8 +1184,10 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 !Local variables ---------------------------------------
 !Arrays
 !scalars
- integer :: iatom,iatom_rhoij,ilmn,ispden,itypat,j0lmn,jl,jlmn,jspden,klmn,klmn1,ln,lnspinat0,my_comm_atom
- integer :: ngrhoij0,nlmnmix0,nselect,nselect1,nspden_rhoij,use_rhoij_0,use_rhoijres0
+ integer :: cplex_rhoij,iatom,iatom_rhoij,ilmn,ispden,itypat,j0lmn,jl,jlmn,jspden
+ integer :: klmn,klmn1,ln,lnspinat0,my_comm_atom
+ integer :: ngrhoij0,nlmnmix0,nselect,nselect1,nspden_rhoij,qphase_rhoij
+ integer :: use_rhoij_0,use_rhoijres0
  real(dp) :: ratio,ro,roshift,zratio,zz
  logical :: my_atmtab_allocated,paral_atom,spinat_zero,test_exexch,test_pawu,test_lnspinat
 !arrays
@@ -1232,7 +1211,9 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
- nspden_rhoij=pawrhoij_get_nspden(nspden,nspinor,pawspnorb)
+ call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                          nspden=nspden,spnorb=pawspnorb,cpxocc=cpxocc,cplex=qphase)
+
  ratio=one;if (nspden_rhoij==2) ratio=half
  spinat_zero=all(abs(spinat(:,:))<tol10)
 
@@ -1242,12 +1223,12 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
    use_rhoij_0=0;if (present(use_rhoij_)) use_rhoij_0=use_rhoij_
    use_rhoijres0=0;if (present(use_rhoijres)) use_rhoijres0=use_rhoijres
    if (paral_atom) then
-     call pawrhoij_alloc(pawrhoij,cplex,nspden_rhoij,nspinor,nsppol,typat,&
+     call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,&
 &     ngrhoij=ngrhoij0,nlmnmix=nlmnmix0,use_rhoij_=use_rhoij_0,use_rhoijres=use_rhoijres0,&
-&     pawtab=pawtab,comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
+&     qphase=qphase_rhoij,pawtab=pawtab,comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
    else
-     call pawrhoij_alloc(pawrhoij,cplex,nspden_rhoij,nspinor,nsppol,typat,pawtab=pawtab,&
-&     ngrhoij=ngrhoij0,nlmnmix=nlmnmix0,use_rhoij_=use_rhoij_0,use_rhoijres=use_rhoijres0)
+     call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
+&     pawtab=pawtab,ngrhoij=ngrhoij0,nlmnmix=nlmnmix0,use_rhoij_=use_rhoij_0,use_rhoijres=use_rhoijres0)
    end if
  end if
 
@@ -1318,7 +1299,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
        end if
      end if
 
-     nselect=0;nselect1=1-cplex
+     nselect=0;nselect1=1-cpxocc
      do jlmn=1,pawtab(itypat)%lmn_size
        jl=pawtab(itypat)%indlmn(1,jlmn)
        ln=pawtab(itypat)%indlmn(5,jlmn)
@@ -1335,7 +1316,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
            ro=ro*ratio*roshift
          end if
 
-         klmn1=cplex*(klmn-1)+1
+         klmn1=cpxocc*(klmn-1)+1
          if (abs(ro)>tol10) then
            pawrhoij(iatom_rhoij)%rhoijp(klmn1,ispden)=ro
          else
@@ -1344,7 +1325,7 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 
          if (ispden==nspden_rhoij) then
            if (any(abs(pawrhoij(iatom_rhoij)%rhoijp(klmn1,:))>tol10)) then
-             nselect=nselect+1;nselect1=nselect1+cplex
+             nselect=nselect+1;nselect1=nselect1+cpxocc
              pawrhoij(iatom_rhoij)%rhoijselect(nselect)=klmn
              do jspden=1,nspden_rhoij
                pawrhoij(iatom_rhoij)%rhoijp(nselect1,jspden)=pawrhoij(iatom_rhoij)%rhoijp(klmn1,jspden)
@@ -1357,6 +1338,8 @@ subroutine initrhoij(cplex,lexexch,lpawu,my_natom,natom,&
 
    end do
    pawrhoij(iatom_rhoij)%nrhoijsel=nselect
+   if (nselect<pawrhoij(iatom_rhoij)%lmn2_size) &
+&    pawrhoij(iatom_rhoij)%rhoijselect(nselect+1:pawrhoij(iatom_rhoij)%lmn2_size)=0
 
 !  Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
 !    Add a small real to the magnetization ; not yet activated => must be tested.

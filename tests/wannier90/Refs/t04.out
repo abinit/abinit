@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 29 Oct 2018.
-- ( at 15h21 )
+.Starting date : Sat 10 Nov 2018.
+- ( at 02h43 )
   
 - input  file    -> t04.in
 - output file    -> t04.out
 - root for input  files -> t04i
 - root for output files -> t04o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_dfpt-nspinor-rhoij/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
 
  Symmetries : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -492,9 +492,9 @@ P           mkmem          64
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.91825
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/xuhe_Multibinit-spin-doc/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_dfpt-nspinor-rhoij/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_dfpt-nspinor-rhoij/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_dfpt-nspinor-rhoij/tests/Psps_for_tests/Fe.GGA_PBE-JTH.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -656,7 +656,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     216.172     216.101
  ETOT  6  -124.43070252413    -4.83E-04 4.02E-02 9.93E-02 0.0E+00 0.00E+00 2.000
  ETOT  7  -124.43066939835     3.31E-05 2.10E-03 9.05E-02 0.0E+00 0.00E+00 1.999
  ETOT  8  -124.43074563000    -7.62E-05 8.99E-04 9.03E-02 0.0E+00 0.00E+00 2.000
- ETOT  9  -124.43101162324    -2.66E-04 1.86E-03 3.30E-01 0.0E+00 0.00E+00 2.000
+ ETOT  9  -124.43101162322    -2.66E-04 1.86E-03 3.30E-01 0.0E+00 0.00E+00 2.000
  ETOT 10  -124.43062483421     3.87E-04 3.71E-04 8.89E-02 0.0E+00 0.00E+00 2.000
  ETOT 11  -124.43062410312     7.31E-07 5.29E-05 5.13E-02 0.0E+00 0.00E+00 2.000
  ETOT 12  -124.43062696373    -2.86E-06 1.54E-04 8.03E-04 0.0E+00 0.00E+00 2.000
@@ -670,9 +670,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     216.172     216.101
  At SCF step   18       nres2   =  4.05E-06 < tolvrs=  1.00E-05 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.51666081E-04  sigma(3 2)=  7.63583860E-12
-  sigma(2 2)=  2.51665985E-04  sigma(3 1)=  3.02135068E-11
-  sigma(3 3)=  2.51666210E-04  sigma(2 1)= -1.35368760E-10
+  sigma(1 1)=  2.51666084E-04  sigma(3 2)=  7.63581478E-12
+  sigma(2 2)=  2.51665988E-04  sigma(3 1)=  3.02134994E-11
+  sigma(3 3)=  2.51666213E-04  sigma(2 1)= -1.35368752E-10
 
 
 ---------------------------------------------------------------
@@ -711,45 +711,45 @@ are mandatory secondary input
    m=n=1:3, ikb=1, ik=1
    spin up:
 ;   (   0.979140   0.000000 ,   0.191446  -0.000000 ,   0.000000  -0.000000 ,    )
-;   (  -0.096258  -0.000000 ,   0.481252   0.000000 ,  -0.698133   0.000000 ,    )
-;   (  -0.099118   0.000000 ,   0.495549  -0.000001 ,   0.694251  -0.000000 ,    )
+;   (  -0.096258  -0.000000 ,   0.481250   0.000000 ,  -0.698130   0.000000 ,    )
+;   (  -0.099118   0.000000 ,   0.495548  -0.000001 ,   0.694254  -0.000000 ,    )
    spin down:
 ;   (   0.979061  -0.000000 ,   0.191839   0.000000 ,   0.000000   0.000000 ,    )
-;   (  -0.094033   0.000000 ,   0.468925  -0.000000 ,  -0.692480   0.000000 ,    )
-;   (  -0.083672  -0.000001 ,   0.417258   0.000003 ,   0.698107   0.000000 ,    )
+;   (  -0.094036   0.000000 ,   0.468940  -0.000000 ,  -0.692516   0.000000 ,    )
+;   (  -0.083676  -0.000001 ,   0.417279   0.000003 ,   0.698069   0.000000 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
    spin up:
-;   (  -0.723757   0.003955 ,  -0.528927  -0.006482 ,   0.166950  -0.007792 ,    )
-;   (   0.240989  -0.001006 ,  -0.400645  -0.020972 ,  -0.582005   0.006904 ,    )
-;   (  -0.436384  -0.004001 ,   0.655899   0.009051 ,  -0.220904   0.011842 ,    )
+;   (  -0.723809   0.003952 ,  -0.528840  -0.006482 ,   0.167066  -0.007793 ,    )
+;   (   0.240800  -0.001008 ,  -0.400690  -0.020971 ,  -0.581992   0.006905 ,    )
+;   (  -0.436401  -0.003998 ,   0.655941   0.009050 ,  -0.220850   0.011841 ,    )
    spin down:
-;   (   0.694112   0.011196 ,   0.462148   0.011121 ,  -0.282761   0.042497 ,    )
-;   (   0.180425  -0.015865 ,  -0.621822  -0.050765 ,  -0.466964   0.033383 ,    )
-;   (  -0.437242  -0.043451 ,   0.478210   0.009829 ,  -0.332170   0.038485 ,    )
+;   (   0.694133   0.011208 ,   0.462068   0.011106 ,  -0.282830   0.042481 ,    )
+;   (   0.180293  -0.015851 ,  -0.621847  -0.050747 ,  -0.466953   0.033374 ,    )
+;   (  -0.437263  -0.043441 ,   0.478257   0.009830 ,  -0.332129   0.038482 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
    spin up:
 ;   (   0.398055   0.000000 ,   0.000000  -0.000000 ,   0.000000   0.000000 ,    )
-;   (   0.000000   0.000000 ,  -0.000000  -0.375123 ,   0.000000  -0.000865 ,    )
-;   (  -0.000000  -0.000000 ,   0.000000  -0.000952 ,  -0.000000  -0.311726 ,    )
+;   (  -0.000000   0.000000 ,  -0.000000  -0.375123 ,   0.000000  -0.000865 ,    )
+;   (  -0.000000   0.000000 ,   0.000000  -0.000951 ,  -0.000000  -0.311726 ,    )
    spin down:
-;   (   0.399684   0.000000 ,  -0.000000  -0.000000 ,  -0.000000   0.000000 ,    )
-;   (  -0.000000   0.000000 ,  -0.000000  -0.376432 ,  -0.000000   0.001785 ,    )
-;   (  -0.000000   0.000000 ,   0.000000   0.002362 ,   0.000001  -0.288614 ,    )
+;   (   0.399684   0.000000 ,  -0.000000   0.000000 ,  -0.000000   0.000000 ,    )
+;   (  -0.000000   0.000000 ,  -0.000000  -0.376432 ,  -0.000000   0.001787 ,    )
+;   (   0.000000  -0.000000 ,   0.000000   0.002342 ,   0.000001  -0.288612 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
    spin up:
-;   (  -0.002693  -0.000224 ,   0.018513  -0.000048 ,   0.006581   0.000001 ,    )
-;   (  -0.016161  -0.000029 ,  -0.003156   0.000195 ,  -0.000864   0.000293 ,    )
-;   (  -0.000388   0.000339 ,   0.003011   0.000040 ,  -0.009705   0.000009 ,    )
+;   (  -0.002690  -0.000224 ,   0.018513  -0.000048 ,   0.006581   0.000001 ,    )
+;   (  -0.016162  -0.000029 ,  -0.003152   0.000195 ,  -0.000864   0.000293 ,    )
+;   (  -0.000386   0.000339 ,   0.003012   0.000040 ,  -0.009705   0.000009 ,    )
    spin down:
-;   (   0.000683  -0.000602 ,   0.010308   0.000139 ,   0.004146  -0.000156 ,    )
-;   (   0.008891  -0.000153 ,  -0.000170  -0.000434 ,  -0.001516  -0.000488 ,    )
-;   (   0.002133  -0.000501 ,  -0.002701  -0.000497 ,   0.004881  -0.000126 ,    )
+;   (   0.000684  -0.000601 ,   0.010308   0.000139 ,   0.004146  -0.000156 ,    )
+;   (   0.008891  -0.000153 ,  -0.000172  -0.000434 ,  -0.001516  -0.000488 ,    )
+;   (   0.002133  -0.000501 ,  -0.002702  -0.000497 ,   0.004881  -0.000125 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t04o_w90_up.wout for details.
@@ -771,8 +771,8 @@ are mandatory secondary input
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      8.585478070477167
- Compensation charge over fine fft grid    =      8.584604381232536
+ Compensation charge over spherical meshes =      8.585478070275203
+ Compensation charge over fine fft grid    =      8.584604381667683
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -818,8 +818,8 @@ are mandatory secondary input
    0.00000   0.00000   0.00000  -0.01158   0.00000   0.00000   0.00420   0.00000   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000  -0.01158   0.00000   0.00000   0.00420   0.00000   0.00000   0.00000   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.93056   0.00000  -0.05978   0.00000 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.88175   0.00000  -0.06903 ...
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.05978   0.00000   0.86955   0.00000 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.88175  -0.00000  -0.06903 ...
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.05978  -0.00000   0.86955   0.00000 ...
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.06903   0.00000   0.93056 ...
    ...  only 12  components have been written...
  Atom #  1 - Spin component 2
@@ -843,28 +843,28 @@ are mandatory secondary input
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   58.688E-10; max=  47.039E-09
-   0.0000  0.0000  0.0000    1  6.53639E-10 kpt; spin; max resid(k); each band:
+   0.0000  0.0000  0.0000    1  6.53638E-10 kpt; spin; max resid(k); each band:
   2.69E-10 1.55E-11 1.55E-11 1.55E-11 6.54E-10 1.62E-12 1.62E-12 1.62E-12
   1.13E-12 1.13E-12 2.79E-12 2.80E-12
-   0.2500  0.0000  0.0000    1  5.01129E-09 kpt; spin; max resid(k); each band:
+   0.2500  0.0000  0.0000    1  5.01128E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
-   0.5000  0.0000  0.0000    1  3.27804E-09 kpt; spin; max resid(k); each band:
+   0.5000  0.0000  0.0000    1  3.27803E-09 kpt; spin; max resid(k); each band:
   4.44E-10 3.77E-10 7.16E-12 1.26E-10 2.10E-09 2.25E-12 5.10E-11 3.40E-13
   1.27E-09 1.00E-13 3.28E-09 3.98E-10
-  -0.2500  0.0000  0.0000    1  5.01125E-09 kpt; spin; max resid(k); each band:
+  -0.2500  0.0000  0.0000    1  5.01124E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
-   0.0000  0.2500  0.0000    1  5.01132E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.0000    1  5.01131E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
    0.2500  0.2500  0.0000    1  4.84663E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.5000  0.2500  0.0000    1  4.84686E-09 kpt; spin; max resid(k); each band:
+   0.5000  0.2500  0.0000    1  4.84685E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-  -0.2500  0.2500  0.0000    1  5.01134E-09 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500  0.0000    1  5.01133E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
    0.0000  0.5000  0.0000    1  3.27850E-09 kpt; spin; max resid(k); each band:
@@ -876,10 +876,10 @@ are mandatory secondary input
    0.5000  0.5000  0.0000    1  3.27870E-09 kpt; spin; max resid(k); each band:
   4.44E-10 3.77E-10 7.16E-12 1.26E-10 2.10E-09 2.25E-12 5.10E-11 3.40E-13
   1.27E-09 9.99E-14 3.28E-09 5.33E-10
-  -0.2500  0.5000  0.0000    1  4.84725E-09 kpt; spin; max resid(k); each band:
+  -0.2500  0.5000  0.0000    1  4.84724E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.0000 -0.2500  0.0000    1  5.01130E-09 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500  0.0000    1  5.01129E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.19E-09
    0.2500 -0.2500  0.0000    1  5.01134E-09 kpt; spin; max resid(k); each band:
@@ -888,34 +888,34 @@ are mandatory secondary input
    0.5000 -0.2500  0.0000    1  4.84683E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-  -0.2500 -0.2500  0.0000    1  4.84669E-09 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.0000    1  4.84668E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.0000  0.0000  0.2500    1  5.01133E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.0000  0.2500    1  5.01132E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
-   0.2500  0.0000  0.2500    1  4.84668E-09 kpt; spin; max resid(k); each band:
+   0.2500  0.0000  0.2500    1  4.84667E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
    0.5000  0.0000  0.2500    1  4.84680E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-  -0.2500  0.0000  0.2500    1  5.01136E-09 kpt; spin; max resid(k); each band:
+  -0.2500  0.0000  0.2500    1  5.01135E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
-   0.0000  0.2500  0.2500    1  4.84623E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.2500    1  4.84622E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.2500  0.2500  0.2500    1  5.24256E-09 kpt; spin; max resid(k); each band:
+   0.2500  0.2500  0.2500    1  5.24255E-09 kpt; spin; max resid(k); each band:
   7.32E-12 3.03E-10 3.03E-10 3.03E-10 1.89E-09 1.89E-09 1.89E-09 2.84E-13
   2.84E-13 5.24E-09 5.23E-09 5.22E-09
    0.5000  0.2500  0.2500    1  4.84637E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-  -0.2500  0.2500  0.2500    1  5.18079E-09 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500  0.2500    1  5.18072E-09 kpt; spin; max resid(k); each band:
   2.00E-10 1.10E-10 4.63E-10 4.63E-10 2.17E-09 3.38E-12 1.26E-09 1.26E-09
   2.05E-12 4.58E-10 5.18E-09 4.08E-09
-   0.0000  0.5000  0.2500    1  4.84687E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.5000  0.2500    1  4.84686E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
    0.2500  0.5000  0.2500    1  4.84665E-09 kpt; spin; max resid(k); each band:
@@ -924,22 +924,22 @@ are mandatory secondary input
    0.5000  0.5000  0.2500    1  3.48315E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.49E-13 2.00E-09 3.48E-09 3.26E-09
-  -0.2500  0.5000  0.2500    1  3.48292E-09 kpt; spin; max resid(k); each band:
+  -0.2500  0.5000  0.2500    1  3.48291E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.49E-13 2.00E-09 3.48E-09 3.25E-09
-   0.0000 -0.2500  0.2500    1  5.01135E-09 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500  0.2500    1  5.01134E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.16E-09
-   0.2500 -0.2500  0.2500    1  5.46335E-09 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  5.46333E-09 kpt; spin; max resid(k); each band:
   2.00E-10 1.10E-10 4.63E-10 4.63E-10 2.17E-09 3.38E-12 1.26E-09 1.26E-09
   2.05E-12 4.58E-10 5.46E-09 5.06E-09
    0.5000 -0.2500  0.2500    1  3.48243E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.50E-13 2.00E-09 3.48E-09 3.26E-09
-  -0.2500 -0.2500  0.2500    1  5.26054E-09 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.2500    1  5.26053E-09 kpt; spin; max resid(k); each band:
   2.00E-10 1.10E-10 4.63E-10 4.63E-10 2.17E-09 3.38E-12 1.26E-09 1.26E-09
   2.05E-12 4.58E-10 5.26E-09 3.28E-09
-   0.0000  0.0000  0.5000    1  3.27850E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.0000  0.5000    1  3.27849E-09 kpt; spin; max resid(k); each band:
   4.44E-10 3.77E-10 7.16E-12 1.26E-10 2.10E-09 2.25E-12 5.10E-11 3.40E-13
   1.27E-09 9.99E-14 3.28E-09 4.06E-10
    0.2500  0.0000  0.5000    1  4.84726E-09 kpt; spin; max resid(k); each band:
@@ -951,7 +951,7 @@ are mandatory secondary input
   -0.2500  0.0000  0.5000    1  4.84728E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.0000  0.2500  0.5000    1  4.84682E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.5000    1  4.84681E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
    0.2500  0.2500  0.5000    1  4.84665E-09 kpt; spin; max resid(k); each band:
@@ -963,10 +963,10 @@ are mandatory secondary input
   -0.2500  0.2500  0.5000    1  3.48291E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.49E-13 2.00E-09 3.48E-09 3.25E-09
-   0.0000  0.5000  0.5000    1  3.27911E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.5000  0.5000    1  3.27910E-09 kpt; spin; max resid(k); each band:
   4.44E-10 3.77E-10 7.42E-12 1.26E-10 2.10E-09 2.25E-12 5.10E-11 3.40E-13
   1.27E-09 9.97E-14 3.28E-09 4.90E-10
-   0.2500  0.5000  0.5000    1  3.48366E-09 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.5000    1  3.48365E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.49E-13 2.00E-09 3.48E-09 3.26E-09
    0.5000  0.5000  0.5000    1  1.76293E-09 kpt; spin; max resid(k); each band:
@@ -981,40 +981,40 @@ are mandatory secondary input
    0.2500 -0.2500  0.5000    1  3.48293E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.49E-13 2.00E-09 3.48E-09 3.26E-09
-   0.5000 -0.2500  0.5000    1  3.48317E-09 kpt; spin; max resid(k); each band:
+   0.5000 -0.2500  0.5000    1  3.48316E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.49E-13 2.00E-09 3.48E-09 3.26E-09
   -0.2500 -0.2500  0.5000    1  4.84664E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.72E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.0000  0.0000 -0.2500    1  5.01130E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.0000 -0.2500    1  5.01129E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.17E-09
    0.2500  0.0000 -0.2500    1  5.01137E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
-   0.5000  0.0000 -0.2500    1  4.84688E-09 kpt; spin; max resid(k); each band:
+   0.5000  0.0000 -0.2500    1  4.84687E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
   -0.2500  0.0000 -0.2500    1  4.84662E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.0000  0.2500 -0.2500    1  5.01135E-09 kpt; spin; max resid(k); each band:
+   0.0000  0.2500 -0.2500    1  5.01134E-09 kpt; spin; max resid(k); each band:
   3.17E-10 2.93E-10 1.72E-11 9.90E-11 1.13E-09 2.17E-12 1.55E-09 7.01E-12
   3.04E-11 1.06E-10 5.01E-09 1.18E-09
-   0.2500  0.2500 -0.2500    1  5.93556E-09 kpt; spin; max resid(k); each band:
+   0.2500  0.2500 -0.2500    1  5.93557E-09 kpt; spin; max resid(k); each band:
   2.00E-10 1.10E-10 4.63E-10 4.63E-10 2.17E-09 3.39E-12 1.26E-09 1.26E-09
   2.05E-12 4.58E-10 5.68E-09 5.94E-09
-   0.5000  0.2500 -0.2500    1  3.48244E-09 kpt; spin; max resid(k); each band:
+   0.5000  0.2500 -0.2500    1  3.48243E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.50E-13 2.00E-09 3.48E-09 3.26E-09
-  -0.2500  0.2500 -0.2500    1  4.77753E-09 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500 -0.2500    1  4.77749E-09 kpt; spin; max resid(k); each band:
   2.00E-10 1.10E-10 4.63E-10 4.63E-10 2.17E-09 3.38E-12 1.26E-09 1.26E-09
   2.05E-12 4.58E-10 3.53E-09 4.78E-09
    0.0000  0.5000 -0.2500    1  4.84686E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.2500  0.5000 -0.2500    1  3.48292E-09 kpt; spin; max resid(k); each band:
+   0.2500  0.5000 -0.2500    1  3.48291E-09 kpt; spin; max resid(k); each band:
   3.32E-10 4.85E-10 5.39E-10 1.08E-10 5.21E-10 6.98E-10 4.00E-10 3.50E-10
   2.49E-13 2.00E-09 3.48E-09 3.25E-09
    0.5000  0.5000 -0.2500    1  3.48315E-09 kpt; spin; max resid(k); each band:
@@ -1026,10 +1026,10 @@ are mandatory secondary input
    0.0000 -0.2500 -0.2500    1  4.84627E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
-   0.2500 -0.2500 -0.2500    1  4.37712E-09 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500 -0.2500    1  4.37703E-09 kpt; spin; max resid(k); each band:
   2.00E-10 1.10E-10 4.63E-10 4.63E-10 2.17E-09 3.38E-12 1.26E-09 1.26E-09
   2.05E-12 4.58E-10 4.38E-09 3.02E-09
-   0.5000 -0.2500 -0.2500    1  4.84630E-09 kpt; spin; max resid(k); each band:
+   0.5000 -0.2500 -0.2500    1  4.84629E-09 kpt; spin; max resid(k); each band:
   4.68E-10 4.23E-10 3.53E-10 2.99E-11 1.71E-09 1.90E-09 6.89E-10 2.24E-11
   9.94E-11 1.86E-09 4.85E-09 2.41E-09
   -0.2500 -0.2500 -0.2500    1  5.24681E-09 kpt; spin; max resid(k); each band:
@@ -1050,10 +1050,10 @@ are mandatory secondary input
    0.0000  0.2500  0.0000    2  4.33331E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.69E-08
-   0.2500  0.2500  0.0000    2  4.63361E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.2500  0.0000    2  4.63360E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.63E-08 2.09E-08
-   0.5000  0.2500  0.0000    2  4.65220E-08 kpt; spin; max resid(k); each band:
+   0.5000  0.2500  0.0000    2  4.65219E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.65E-08 2.09E-08
   -0.2500  0.2500  0.0000    2  4.33189E-08 kpt; spin; max resid(k); each band:
@@ -1062,55 +1062,55 @@ are mandatory secondary input
    0.0000  0.5000  0.0000    2  3.26572E-08 kpt; spin; max resid(k); each band:
   3.21E-10 2.04E-09 4.36E-12 5.05E-10 3.27E-08 2.87E-11 1.36E-08 2.36E-10
   7.30E-12 1.98E-12 2.59E-08 2.53E-09
-   0.2500  0.5000  0.0000    2  4.64897E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.0000    2  4.64896E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.65E-08 2.09E-08
    0.5000  0.5000  0.0000    2  3.26374E-08 kpt; spin; max resid(k); each band:
   3.21E-10 2.04E-09 4.36E-12 5.05E-10 3.26E-08 2.87E-11 1.36E-08 2.36E-10
   7.30E-12 1.98E-12 2.62E-08 2.45E-09
-  -0.2500  0.5000  0.0000    2  4.70334E-08 kpt; spin; max resid(k); each band:
+  -0.2500  0.5000  0.0000    2  4.70333E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.70E-08 2.10E-08
    0.0000 -0.2500  0.0000    2  4.33202E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.42E-08
-   0.2500 -0.2500  0.0000    2  4.33197E-08 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.0000    2  4.33196E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.67E-08
-   0.5000 -0.2500  0.0000    2  4.62696E-08 kpt; spin; max resid(k); each band:
+   0.5000 -0.2500  0.0000    2  4.62695E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.63E-08 2.09E-08
-  -0.2500 -0.2500  0.0000    2  4.64887E-08 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.0000    2  4.64886E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.65E-08 2.10E-08
    0.0000  0.0000  0.2500    2  4.33408E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.68E-08
-   0.2500  0.0000  0.2500    2  4.68434E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.0000  0.2500    2  4.68433E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.68E-08 2.11E-08
-   0.5000  0.0000  0.2500    2  4.68306E-08 kpt; spin; max resid(k); each band:
+   0.5000  0.0000  0.2500    2  4.68305E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.68E-08 2.09E-08
   -0.2500  0.0000  0.2500    2  4.33236E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.62E-08
-   0.0000  0.2500  0.2500    2  4.68375E-08 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.2500    2  4.68374E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.10E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.68E-08 2.09E-08
-   0.2500  0.2500  0.2500    2  4.37387E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.2500  0.2500    2  4.37386E-08 kpt; spin; max resid(k); each band:
   7.86E-12 1.47E-09 1.47E-09 1.47E-09 3.78E-08 3.78E-08 3.78E-08 5.28E-12
   5.28E-12 4.32E-08 4.36E-08 4.37E-08
-   0.5000  0.2500  0.2500    2  4.68331E-08 kpt; spin; max resid(k); each band:
+   0.5000  0.2500  0.2500    2  4.68330E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.10E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.68E-08 2.09E-08
-  -0.2500  0.2500  0.2500    2  4.05905E-08 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500  0.2500    2  4.05904E-08 kpt; spin; max resid(k); each band:
   2.86E-10 8.63E-10 8.60E-10 8.63E-10 1.59E-08 5.63E-11 1.24E-08 1.24E-08
   1.18E-11 2.19E-09 4.06E-08 2.38E-08
-   0.0000  0.5000  0.2500    2  4.68672E-08 kpt; spin; max resid(k); each band:
+   0.0000  0.5000  0.2500    2  4.68671E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.69E-08 2.09E-08
-   0.2500  0.5000  0.2500    2  4.69762E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.2500    2  4.69761E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.70E-08 2.09E-08
    0.5000  0.5000  0.2500    2  3.43075E-08 kpt; spin; max resid(k); each band:
@@ -1134,7 +1134,7 @@ are mandatory secondary input
    0.0000  0.0000  0.5000    2  3.26385E-08 kpt; spin; max resid(k); each band:
   3.21E-10 2.04E-09 4.36E-12 5.05E-10 3.26E-08 2.87E-11 1.36E-08 2.36E-10
   7.30E-12 1.98E-12 2.62E-08 2.59E-09
-   0.2500  0.0000  0.5000    2  4.68192E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.0000  0.5000    2  4.68191E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.68E-08 2.11E-08
    0.5000  0.0000  0.5000    2  3.26591E-08 kpt; spin; max resid(k); each band:
@@ -1143,10 +1143,10 @@ are mandatory secondary input
   -0.2500  0.0000  0.5000    2  4.68246E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.68E-08 2.10E-08
-   0.0000  0.2500  0.5000    2  4.69241E-08 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.5000    2  4.69240E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.69E-08 2.10E-08
-   0.2500  0.2500  0.5000    2  4.68558E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.2500  0.5000    2  4.68557E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.69E-08 2.11E-08
    0.5000  0.2500  0.5000    2  3.43048E-08 kpt; spin; max resid(k); each band:
@@ -1167,7 +1167,7 @@ are mandatory secondary input
   -0.2500  0.5000  0.5000    2  3.43061E-08 kpt; spin; max resid(k); each band:
   2.87E-10 1.45E-09 1.17E-09 4.21E-10 8.14E-09 1.50E-08 4.01E-09 3.58E-09
   3.80E-12 3.07E-08 3.43E-08 3.05E-08
-   0.0000 -0.2500  0.5000    2  4.69773E-08 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500  0.5000    2  4.69772E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.70E-08 2.09E-08
    0.2500 -0.2500  0.5000    2  3.43086E-08 kpt; spin; max resid(k); each band:
@@ -1176,55 +1176,55 @@ are mandatory secondary input
    0.5000 -0.2500  0.5000    2  3.43084E-08 kpt; spin; max resid(k); each band:
   2.87E-10 1.45E-09 1.17E-09 4.21E-10 8.14E-09 1.50E-08 4.01E-09 3.58E-09
   3.80E-12 3.08E-08 3.43E-08 3.06E-08
-  -0.2500 -0.2500  0.5000    2  4.69497E-08 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.5000    2  4.69496E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.69E-08 2.10E-08
    0.0000  0.0000 -0.2500    2  4.33187E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.68E-08
-   0.2500  0.0000 -0.2500    2  4.33174E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.0000 -0.2500    2  4.33173E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.57E-08
-   0.5000  0.0000 -0.2500    2  4.70390E-08 kpt; spin; max resid(k); each band:
+   0.5000  0.0000 -0.2500    2  4.70389E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.70E-08 2.09E-08
-  -0.2500  0.0000 -0.2500    2  4.68507E-08 kpt; spin; max resid(k); each band:
+  -0.2500  0.0000 -0.2500    2  4.68506E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.69E-08 2.09E-08
    0.0000  0.2500 -0.2500    2  4.33182E-08 kpt; spin; max resid(k); each band:
   3.92E-10 8.69E-10 8.26E-11 2.60E-10 7.07E-09 1.95E-11 1.96E-08 1.33E-10
   4.83E-10 1.43E-09 4.33E-08 1.69E-08
-   0.2500  0.2500 -0.2500    2  4.08840E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.2500 -0.2500    2  4.08839E-08 kpt; spin; max resid(k); each band:
   2.86E-10 8.63E-10 8.61E-10 8.61E-10 1.59E-08 5.63E-11 1.24E-08 1.24E-08
   1.18E-11 2.19E-09 4.09E-08 1.68E-08
    0.5000  0.2500 -0.2500    2  3.43081E-08 kpt; spin; max resid(k); each band:
   2.87E-10 1.45E-09 1.17E-09 4.21E-10 8.14E-09 1.50E-08 4.01E-09 3.58E-09
   3.80E-12 3.07E-08 3.43E-08 3.06E-08
-  -0.2500  0.2500 -0.2500    2  4.01496E-08 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500 -0.2500    2  4.01495E-08 kpt; spin; max resid(k); each band:
   2.86E-10 8.63E-10 8.60E-10 8.60E-10 1.59E-08 5.63E-11 1.23E-08 1.24E-08
   1.18E-11 2.19E-09 4.01E-08 1.93E-08
-   0.0000  0.5000 -0.2500    2  4.68286E-08 kpt; spin; max resid(k); each band:
+   0.0000  0.5000 -0.2500    2  4.68285E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.21E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.68E-08 2.10E-08
-   0.2500  0.5000 -0.2500    2  3.42985E-08 kpt; spin; max resid(k); each band:
+   0.2500  0.5000 -0.2500    2  3.42984E-08 kpt; spin; max resid(k); each band:
   2.87E-10 1.45E-09 1.17E-09 4.21E-10 8.14E-09 1.50E-08 4.01E-09 3.58E-09
   3.80E-12 3.07E-08 3.43E-08 3.04E-08
    0.5000  0.5000 -0.2500    2  3.43074E-08 kpt; spin; max resid(k); each band:
   2.87E-10 1.45E-09 1.17E-09 4.21E-10 8.14E-09 1.50E-08 4.01E-09 3.58E-09
   3.80E-12 3.08E-08 3.43E-08 3.06E-08
-  -0.2500  0.5000 -0.2500    2  4.68605E-08 kpt; spin; max resid(k); each band:
+  -0.2500  0.5000 -0.2500    2  4.68604E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.09E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.69E-08 2.10E-08
-   0.0000 -0.2500 -0.2500    2  4.69642E-08 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500 -0.2500    2  4.69641E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.10E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.70E-08 2.10E-08
-   0.2500 -0.2500 -0.2500    2  4.05445E-08 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500 -0.2500    2  4.05447E-08 kpt; spin; max resid(k); each band:
   2.86E-10 8.63E-10 8.62E-10 8.62E-10 1.59E-08 5.63E-11 1.23E-08 1.24E-08
-  1.18E-11 2.19E-09 4.05E-08 3.03E-08
-   0.5000 -0.2500 -0.2500    2  4.62350E-08 kpt; spin; max resid(k); each band:
+  1.18E-11 2.19E-09 4.05E-08 3.04E-08
+   0.5000 -0.2500 -0.2500    2  4.62349E-08 kpt; spin; max resid(k); each band:
   3.32E-10 1.33E-09 9.35E-10 7.10E-11 3.35E-08 3.20E-08 1.14E-08 1.15E-10
   3.64E-10 1.44E-08 4.62E-08 2.10E-08
-  -0.2500 -0.2500 -0.2500    2  4.36948E-08 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500 -0.2500    2  4.36942E-08 kpt; spin; max resid(k); each band:
   7.86E-12 1.47E-09 1.47E-09 1.47E-09 3.78E-08 3.78E-08 3.78E-08 5.28E-12
   5.28E-12 4.32E-08 4.37E-08 4.23E-08
  reduced coordinates (array xred) for    1 atoms
@@ -2050,42 +2050,42 @@ are mandatory secondary input
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.21726158428720E+01
-    Hartree energy  =  2.38332108053070E+01
-    XC energy       = -3.41098554198126E+00
+    Kinetic energy  =  1.21726158426863E+01
+    Hartree energy  =  2.38332108060587E+01
+    XC energy       = -3.41098554220729E+00
     Ewald energy    = -8.65492581337439E+01
     PspCore energy  =  6.37909129650513E+00
-    Loc. psp. energy= -6.55634912202744E+01
-    Spherical terms = -1.12911932914856E+01
-    >>>>> Internal E= -1.24430010242801E+02
+    Loc. psp. energy= -6.55634912212063E+01
+    Spherical terms = -1.12911932927466E+01
+    >>>>> Internal E= -1.24430010244654E+02
 
-    -kT*entropy     = -4.56960959008543E-05
-    >>>>>>>>> Etotal= -1.24430055938897E+02
+    -kT*entropy     = -4.56960955984101E-05
+    >>>>>>>>> Etotal= -1.24430055940750E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.33334818034305E+01
+    Band energy     = -1.33334818034389E+01
     Ewald energy    = -8.65492581337439E+01
     PspCore energy  =  6.37909129650513E+00
-    Dble-C XC-energy= -2.28010908214480E+01
-    Spherical terms = -8.12584905967093E+00
-    >>>>> Internal E= -1.24430588521788E+02
+    Dble-C XC-energy= -2.28010908221308E+01
+    Spherical terms = -8.12584905898017E+00
+    >>>>> Internal E= -1.24430588521789E+02
 
-    -kT*entropy     = -4.56960959008543E-05
+    -kT*entropy     = -4.56960955984101E-05
     >>>> Etotal (DC)= -1.24430634217884E+02
 
-  >Total energy in eV           = -3.38591401587460E+03
+  >Total energy in eV           = -3.38591401592501E+03
   >Total DC energy in eV        = -3.38592975164610E+03
 --------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.51666081E-04  sigma(3 2)=  7.63583860E-12
-  sigma(2 2)=  2.51665985E-04  sigma(3 1)=  3.02135068E-11
-  sigma(3 3)=  2.51666210E-04  sigma(2 1)= -1.35368760E-10
+  sigma(1 1)=  2.51666084E-04  sigma(3 2)=  7.63581478E-12
+  sigma(2 2)=  2.51665988E-04  sigma(3 1)=  3.02134994E-11
+  sigma(3 3)=  2.51666213E-04  sigma(2 1)= -1.35368752E-10
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.4043E+00 GPa]
-- sigma(1 1)=  7.40427048E+00  sigma(3 2)=  2.24654090E-07
-- sigma(2 2)=  7.40426766E+00  sigma(3 1)=  8.88911910E-07
-- sigma(3 3)=  7.40427428E+00  sigma(2 1)= -3.98268576E-06
+- sigma(1 1)=  7.40427057E+00  sigma(3 2)=  2.24653389E-07
+- sigma(2 2)=  7.40426775E+00  sigma(3 1)=  8.88911691E-07
+- sigma(3 3)=  7.40427437E+00  sigma(2 1)= -3.98268551E-06
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2458,8 +2458,8 @@ P           mkmem          64
                       -3.3333333441E-01 -4.7140452114E-01  8.1649658029E-01
           spgroup         229
            spinat      0.0000000000E+00  0.0000000000E+00  4.0000000000E+00
-           strten      2.5166608072E-04  2.5166598500E-04  2.5166620992E-04
-                       7.6358385969E-12  3.0213506818E-11 -1.3536876022E-10
+           strten      2.5166608365E-04  2.5166598793E-04  2.5166621286E-04
+                       7.6358147838E-12  3.0213499368E-11 -1.3536875169E-10
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                       -1 -1 -1   0  0  1   0  1  0       1  1  1   0  0 -1   0 -1  0
                        0  1  0   1  0  0  -1 -1 -1       0 -1  0  -1  0  0   1  1  1
@@ -2582,10 +2582,10 @@ P           mkmem          64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         61.4  wall=         61.7
+- Proc.   0 individual time (sec): cpu=         60.7  wall=         61.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         61.4  wall=         61.7
++Overall time at end (sec) : cpu=         60.7  wall=         61.2

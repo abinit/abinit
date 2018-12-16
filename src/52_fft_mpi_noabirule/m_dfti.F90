@@ -209,8 +209,6 @@ CONTAINS  !===========================================================
 
 subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -361,8 +359,6 @@ end subroutine dfti_seqfourdp
 
 subroutine dfti_seqfourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -597,8 +593,6 @@ end subroutine dfti_seqfourwf
 subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
@@ -721,8 +715,6 @@ end subroutine dfti_fftrisc_sp
 subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,ldx,ldy,ldz,npwin,npwout,option
@@ -786,8 +778,6 @@ end subroutine dfti_fftrisc_dp
 
 subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -870,8 +860,6 @@ end subroutine dfti_fftrisc_mixprec
 
 subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -941,8 +929,6 @@ end subroutine dfti_fftug_dp
 
 subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1011,8 +997,6 @@ end subroutine dfti_fftug_spc
 !! SOURCE
 
 subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1085,8 +1069,6 @@ end subroutine dfti_fftug_dpc
 !! SOURCE
 
 subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1162,8 +1144,6 @@ end subroutine dfti_fftur_dp
 
 subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1237,8 +1217,6 @@ end subroutine dfti_fftur_spc
 
 subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
@@ -1303,8 +1281,6 @@ end subroutine dfti_fftur_dpc
 
 subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -1350,8 +1326,6 @@ end subroutine dfti_c2c_ip_spc
 !! SOURCE
 
 subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1399,8 +1373,6 @@ end subroutine dfti_c2c_ip_dpc
 
 subroutine dfti_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
@@ -1447,8 +1419,6 @@ end subroutine dfti_c2c_op_spc
 !! SOURCE
 
 subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1498,8 +1468,6 @@ end subroutine dfti_c2c_op_dpc
 !! SOURCE
 
 subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1568,8 +1536,6 @@ end subroutine dfti_many_dft_op
 
 subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
@@ -1635,8 +1601,6 @@ end subroutine dfti_many_dft_ip
 !! SOURCE
 
 subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1706,8 +1670,6 @@ end subroutine dfti_fftpad_dp
 
 subroutine dfti_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
@@ -1771,8 +1733,6 @@ end subroutine dfti_fftpad_dpc
 
 subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
@@ -1826,8 +1786,6 @@ end subroutine dfti_fftpad_spc
 !! SOURCE
 
 subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1957,8 +1915,6 @@ end subroutine dfti_r2c_op_dpc
 
 subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2017,8 +1973,6 @@ end subroutine dfti_r2c_op_dp
 !! SOURCE
 
 subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2122,8 +2076,6 @@ end subroutine dfti_c2r_op_dpc
 
 subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat
@@ -2178,8 +2130,6 @@ end subroutine dfti_c2r_op_dp
 #ifdef HAVE_FFT_DFTI
 
 subroutine dfti_check_status(status,file,line)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2243,8 +2193,6 @@ end subroutine dfti_check_status
 
 function dfti_spawn_threads_here(ndat,nthreads) result(ans)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndat,nthreads
@@ -2283,8 +2231,6 @@ end function dfti_spawn_threads_here
 
 subroutine dfti_use_lib_threads(logvar)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: logvar
@@ -2318,8 +2264,6 @@ end subroutine dfti_use_lib_threads
 #ifdef HAVE_FFT_DFTI
 
 subroutine dfti_alloc_real_dp(size,cptr,fptr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2365,8 +2309,6 @@ end subroutine dfti_alloc_real_dp
 
 subroutine dfti_alloc_complex_spc(size,cptr,fptr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
@@ -2410,8 +2352,6 @@ end subroutine dfti_alloc_complex_spc
 #ifdef HAVE_FFT_DFTI
 
 subroutine dfti_alloc_complex_dpc(size,cptr,fptr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

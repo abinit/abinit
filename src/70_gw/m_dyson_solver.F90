@@ -114,8 +114,6 @@ CONTAINS  !====================================================================
 
 subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp_ene,Sr,prtvol,Dtfil,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikcalc,nomega_sigc,prtvol,minbnd,maxbnd,comm
@@ -522,8 +520,6 @@ end subroutine solve_dyson
 !! SOURCE
 
 subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,prefil)
-
- implicit none
 
 ! Arguments ------------------------------------
  !scalars

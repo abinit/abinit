@@ -139,8 +139,6 @@ contains
 
 subroutine destroy_tetra (tetra)
 
- implicit none
-
  type(t_tetrahedron), intent(inout) :: tetra
 
  if (allocated(tetra%tetra_full))  then
@@ -195,8 +193,6 @@ end subroutine destroy_tetra
 !! SOURCE
 
 subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,errorstring)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -546,8 +542,6 @@ end subroutine init_tetra
 
 subroutine tetra_write(tetra, nkibz, kibz, path)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkibz
@@ -652,8 +646,6 @@ end subroutine tetra_write
 subroutine get_tetra_weight(eigen_in,enemin,enemax,max_occ,nene,nkpt,tetra,&
   bcorr,tweight,dtweightde,comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nene,nkpt,bcorr,comm
@@ -702,8 +694,6 @@ end subroutine get_tetra_weight
 
 subroutine tetra_blochl_weights(tetra,eigen_in,enemin,enemax,max_occ,nene,nkpt,&
   bcorr,tweight_t,dtweightde_t,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -828,8 +818,6 @@ end subroutine tetra_blochl_weights
 
 subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enemax2,&
 &    max_occ,nene1,nene2,nkpt,tetra,tweight,dtweightde, ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1324,8 +1312,6 @@ end subroutine get_dbl_tetra_weight
 
 subroutine sort_tetra(n,list,iperm,tol)
 
- implicit none
-
  integer, intent(in) :: n
  integer, intent(inout) :: iperm(n)
  real(dp_), intent(inout) :: list(n)
@@ -1464,8 +1450,6 @@ end function tetralib_has_mpi
 
 subroutine split_work(ntasks,comm,nprocs,my_start,my_stop,ierr)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,comm
  integer,intent(out) :: nprocs,my_start,my_stop,ierr
@@ -1515,8 +1499,6 @@ end subroutine split_work
 
 pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,bcorr, &
 &  tweight_tmp,dtweightde_tmp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1857,8 +1839,6 @@ end subroutine get_onetetra_
 
 subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,max_occ,weights)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ik_ibz,nene,nkibz,bcorr
@@ -1938,8 +1918,6 @@ end subroutine tetra_get_onewk
 !! SOURCE
 
 subroutine tetra_get_onewk_wvals(tetra, ik_ibz, bcorr, nw, wvals, nkibz, eig_ibz, weights, wtol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

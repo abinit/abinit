@@ -2905,15 +2905,6 @@ end function paw_overlap
 
 subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_pack'
-!End of the abilint section
-
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -2993,13 +2984,6 @@ end subroutine pawcprj_pack
 
 subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'pawcprj_unpack'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3037,7 +3021,7 @@ subroutine pawcprj_unpack(nlmn,cprj,buffer,buffer_gr)
  if (present(buffer_gr)) then
    ncpgr=size(buffer_gr,dim=2)
  end if
- 
+
 !=== Unpack buffers into cprj ===
  ipck=0
  do jj=1,n2dim
