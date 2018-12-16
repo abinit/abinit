@@ -114,6 +114,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  integer,intent(inout) :: ibz2bz(nkbz) !vz_i
  real(dp),intent(in) :: gmet(3,3),kbz(3,nkbz),wtk(nkbz)
  real(dp),intent(out) :: wtk_folded(nkbz)
+ !real(dp),optional,intent(out) :: bz2ibz(6, nkbz)
 
 !Local variables -------------------------
 !scalars
@@ -159,6 +160,13 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    wtk_folded(ikpt)=wtk(ikpt)
  end do
 
+ !if (present(bz2ibz)) then
+ !  bz2ibz = 0
+ !  do ikpt=1,nkbz
+ !    bz2ibz(1, ikpt) = ikpt
+ !  end do
+ !end if
+
  ! Here begins the serious business
 
  ! If there is some possibility for a change (otherwise, wtk_folded is correctly initialized to give no change)
@@ -168,12 +176,9 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    ! processes by selecting the smallest length of all symmetric vectors
    ABI_ALLOCATE(length2,(nkbz))
 
-   !MG FIXME:
-   ! Here there's a possible problem with the order of symmetries because
-   ! in listkk, time-reversal is the outermost loop. This can create inconsistencies in the symmetry tables.
    do ikpt=1,nkbz
-     do isym=1,nsym
-       do itim=1,(1-2*timrev),-2
+     do itim=1,(1-2*timrev),-2
+       do isym=1,nsym
          ! Get the symmetric of the vector
          do ii=1,3
            ksym(ii)=itim*( kbz(1,ikpt)*symrec(ii,1,isym)&
@@ -207,9 +212,8 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
        ! Keep track of the current length, to avoid doing needless comparisons
        if(length2(ikpt)-length2(ikpt_current_length)>tol8) ikpt_current_length=ikpt
 
-       do isym=1,nsym
-         do itim=1,(1-2*timrev),-2
-
+       do itim=1,(1-2*timrev),-2
+         do isym=1,nsym
            if(isym/=identi .or. itim/=1 )then
              ! Get the symmetric of the vector
              do ii=1,3
@@ -281,10 +285,12 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
        if (wtk_folded(ind_ikpt2) < tol16) cycle
 
        quit=0
-       do isym=1,nsym
-         do itim=1,(1-2*timrev),-2
-           if (isym/=identi .or. itim/=1) then
+       !MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
+       ! Should always use this convention when applying symmetry operations in k-space.
+       do itim=1,(1-2*timrev),-2
+         do isym=1,nsym
 
+           if (isym/=identi .or. itim/=1) then
              ! Get the symmetric of the vector
              do ii=1,3
                ksym(ii)=itim*( kbz(1,ind_ikpt)*symrec(ii,1,isym) &
@@ -307,6 +313,14 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              ! Assign all the weight of the k-vector to its symmetrical
              wtk_folded(ind_ikpt)=wtk_folded(ind_ikpt)+wtk_folded(ind_ikpt2)
              wtk_folded(ind_ikpt2)=0._dp
+
+             !if (present(bz2ibz)) then
+             !  bz2ibz(1, ind_ikpt2) = ind_ikpt
+             !  bz2ibz(2, ind_ikpt2) = isym
+             !  bz2ibz(3:5, ind_ikpt2) = g0
+             !  ii = 0; if (itim == -1) ii = 1
+             !  bz2ibz(6, ind_ikpt2) = ii
+             !end if
 
              ! Go to the next ikpt2 if the symmetric was found
              quit=1; exit
