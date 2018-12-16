@@ -1,0 +1,49 @@
+module m_spmat_dense
+  use defs_basis
+  use m_spmat_base
+  implicit none
+  private
+  type, extends(base_mat_t), public :: dense_mat_t
+     real(dp), allocatable :: mat(:,:)
+   contains
+     procedure :: initialize => dense_mat_t_initialize
+     procedure :: finalize => dense_mat_t_finalize
+     procedure :: mv => dense_mat_t_mv
+  end type dense_mat_t
+
+contains
+  subroutine dense_mat_t_initialize(self,  nrow, ncol)
+    class(dense_mat_t), intent(inout) :: self
+    integer, intent(in):: nrow, ncol
+    integer:: err
+    self%nrow=nrow
+    self%ncol=ncol
+    allocate(self%mat(nrow, ncol), stat=err)
+    self%mat(:,:)=0.0d0
+  end subroutine dense_mat_t_initialize
+
+  subroutine dense_mat_t_finalize(self)
+    class(dense_mat_t), intent(inout) :: self
+    integer :: err
+    if (allocated(self%mat)) deallocate(self%mat, stat=err)
+    self%ncol=0
+    self%nrow=0
+  end subroutine dense_mat_t_finalize
+
+  subroutine dense_mat_insert(self, irow, icol, val)
+    class(dense_mat_t), intent(inout) :: self
+    integer, intent(inout) :: irow, icol
+    real(dp), intent(in) :: val
+    self%mat(irow, icol)=val
+  end subroutine dense_mat_insert
+
+  ! dense matrix-vector multiplication, using blas DGEMV
+  subroutine dense_mat_t_mv(self, x, b)
+    class(dense_mat_t), intent(in) :: self
+    real(dp), intent(in) :: x(:)
+    real(dp), intent(out) :: b(:)
+    call dgemv("N", self%nrow, self%ncol, 1.0d0,self%mat , 2,  x, 1, 0.0d0,  b, 1)
+  end subroutine dense_mat_t_mv
+
+
+end module m_spmat_dense

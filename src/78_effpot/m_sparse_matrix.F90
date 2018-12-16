@@ -130,8 +130,9 @@ module m_sparse_matrix
      integer :: nnz,  nrow, ncol
      integer, allocatable :: icol(:), row_shift(:)
      real(dp), allocatable:: val(:)
-   !contains
-   !  procedure :: print=> CSR_mat_print
+   contains
+     procedure :: mv => CSR_mat_mv
+     procedure :: mv_select_row => CSR_mat_mv_select_row
   end type CSR_mat
 
   ! linked list format sparse matrix
@@ -608,11 +609,9 @@ endif
   end subroutine CSR_mat_initialize
 
   subroutine CSR_mat_mv(A, x, y)
-
-    type(CSR_mat), intent(in):: A
+    class(CSR_mat), intent(in):: A
     real(dp), intent(in) :: x(A%ncol)
     real(dp), intent(out) :: y(A%nrow)
-    real(dp)::ddot
     integer::irow, i1, i2, i
     !external ddot
     y(:)=0.0d0
@@ -637,11 +636,9 @@ endif
         ! gfortran. It may also depend on SIMD instructions the CPU support. Tested on a cpu with AVX2.
         i1=A%row_shift(irow)
         i2=A%row_shift(irow+1)-1
-        !!$OMP SIMD 
         do i=i1, i2
             y(irow)=y(irow)+ A%val(i)*x(A%icol(i))
         end do
-        !!$OMP END SIMD
 
         ! Same speed as previous 
         !do i=A%row_shift(irow), A%row_shift(irow+1)-1

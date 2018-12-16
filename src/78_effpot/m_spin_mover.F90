@@ -120,7 +120,6 @@ contains
     endif
     call set_seed(self%rng, [111111_dp, 2_dp])
 
-
     ABI_ALLOCATE(self%ms, (nspins) )
     ABI_ALLOCATE(self%gyro_ratio, (nspins) )
     ABI_ALLOCATE(self%damping, (nspins) )

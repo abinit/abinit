@@ -63,27 +63,28 @@ module m_random_xoroshiro128plus
 
      real(dp) :: residual =0.0d0 ! for saving residual in normal function.
      logical :: has_residual = .False.
-  ! contains
-  !   procedure, non_overridable :: set_seed    ! Seed the generator
-  !   procedure, non_overridable :: jump        ! Jump function (see below)
-  !   procedure, non_overridable :: rand_int4       ! 4-byte random integer
-  !   procedure, non_overridable :: rand_int8       ! 8-byte random integer
-  !   procedure, non_overridable :: rand_unif_01     ! Uniform (0,1] real
-  !   procedure, non_overridable :: rand_unif_01_array     ! Uniform (0,1] real
-  !   procedure, non_overridable :: rand_two_normals ! Two normal(0,1) samples
-  !   procedure, non_overridable :: rand_normal ! Two normal(0,1) samples
-  !   procedure, non_overridable :: rand_normal_array ! Two normal(0,1) samples
-  !   procedure, non_overridable :: rand_poisson     ! Sample from Poisson-dist.
-  !   procedure, non_overridable :: rand_circle      ! Sample on a rand_circle
-  !   procedure, non_overridable :: rand_sphere      ! Sample on a rand_sphere
-  !   procedure, non_overridable :: next        ! Internal method
+   contains
+     procedure, non_overridable :: set_seed    ! Seed the generator
+     procedure, non_overridable :: jump        ! Jump function (see below)
+     procedure, non_overridable :: rand_int4       ! 4-byte random integer
+     procedure, non_overridable :: rand_int8       ! 8-byte random integer
+     procedure, non_overridable :: rand_unif_01     ! Uniform (0,1] real
+     procedure, non_overridable :: rand_unif_01_array     ! Uniform (0,1] real
+     procedure, non_overridable :: rand_two_normals ! Two normal(0,1) samples
+     procedure, non_overridable :: rand_normal ! Two normal(0,1) samples
+     procedure, non_overridable :: rand_normal_array ! Two normal(0,1) samples
+     procedure, non_overridable :: rand_poisson     ! Sample from Poisson-dist.
+     procedure, non_overridable :: rand_circle      ! Sample on a rand_circle
+     procedure, non_overridable :: rand_sphere      ! Sample on a rand_sphere
+     proceduer, non_overridable :: rand_choice      ! select from 1 to N randomly
+     procedure, non_overridable :: next        ! Internal method
   end type rng_t
 
   !> Parallel random number generator type
   type prng_t
      type(rng_t), allocatable :: rngs(:)
-   !contains
-   !  procedure, non_overridable :: init_parallel
+   contains
+     procedure, non_overridable :: init_parallel
   end type prng_t
 
 
@@ -273,8 +274,7 @@ contains
 
     expl = exp(-lambda)
     rr   = 0
-    !p    = self%rand_unif_01()
-    p    = rand_unif_01(self)
+    p    = self%rand_unif_01()
 
     do while (p > expl)
        rr = rr + 1
@@ -316,10 +316,8 @@ contains
 
     ! Marsaglia method for uniform sampling on rand_sphere
     do
-       !rands(1) = 2 * self%rand_unif_01() - 1
-       !rands(2) = 2 * self%rand_unif_01() - 1
-       rands(1) = 2 * rand_unif_01(self) - 1
-       rands(2) = 2 * rand_unif_01(self) - 1
+       rands(1) = 2 * self%rand_unif_01() - 1
+       rands(2) = 2 * self%rand_unif_01() - 1
        sum_sq   = sum(rands**2)
        if (sum_sq <= 1) exit
     end do
@@ -329,6 +327,13 @@ contains
     xyz(3)   = 1 - 2 * sum_sq
     xyz      = xyz * radius
   end function rand_sphere
+
+  function rand_choice(self, N) result(i)
+    class(rng_t), intent(inout) :: self
+    integer, intent(in) :: N
+    integer :: i
+    i=int(self%rand_unif_01()*N)+1
+  end function rand_choice
 
   !> Interal routine: get the next value (returned as 64 bit signed integer)
   function next(self) result(res)
