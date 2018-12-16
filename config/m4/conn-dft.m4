@@ -174,7 +174,13 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
     fi
     LIBS="${abi_dft_libxc_libs} ${LIBS}"
   else
-    AC_CHECK_LIB([xc],[xc_func_init],[abi_dft_libxc_has_incs="yes"],[abi_dft_libxc_has_incs="no"],[-lm])
+    AC_CHECK_LIB([m], [pow],abi_has_libm="yes",abi_has_libm="no")
+    if test "${abi_has_libm}" = "yes"; then
+      abi_dft_libxc_libs="${abi_dft_libxc_libs} -lm"
+      with_libxc_libs="${with_libxc_libs} -lm"
+      LIBS="${LIBS} -lm"
+    fi
+    AC_CHECK_LIB([xc],[xc_func_init],[abi_dft_libxc_has_libs="yes"],[abi_dft_libxc_has_libs="no"])
   fi
 
   dnl Check whether the C wrappers work
