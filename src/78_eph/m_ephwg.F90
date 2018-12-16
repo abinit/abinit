@@ -55,7 +55,7 @@ module m_ephwg
  use m_special_funcs,   only : dirac_delta
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
- use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt, kpts_map
+ use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt, kpts_map, kpts_check_indkk
  use m_occ,             only : occ_fd, occ_be
 
  implicit none
@@ -253,7 +253,7 @@ type(ephwg_t) function ephwg_new( &
    new%eigkbs_ibz(ik, :, :) = eig_ibz(:, ik, :)
  end do
 
- ! Fourier interpolate frequencies on the same mesh.
+ ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -350,13 +350,13 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  cryst => self%cryst
 
- ! Get little group of the kpoint.
+ ! Get little group of the (external) kpoint.
  call self%lgk%free()
  self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
- ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
+ ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
@@ -378,6 +378,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
     "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
@@ -406,9 +407,22 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  call kpts_map(kmap, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym, &
     cryst%symafm, cryst%symrel, self%timrev, comm, ierr, use_symrec=.False.)
  ABI_CHECK(ierr == 0, "Cannot map BZ --> IBZ_k")
- ABI_MALLOC(indkk, (self%nbz, 1))
- indkk(:, 1) = kmap(1, :)
+ ABI_MALLOC(indkk, (self%nbz, 6))
+ indkk = transpose(kmap)
  ABI_FREE(kmap)
+#endif
+
+#if 0
+ do ii=1,self%nbz * sppoldbl1
+   write(777, *)ii, indkk(ii, :)
+ end do
+ call kpts_check_indkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, &
+     cryst%nsym, sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+ if (dksqmax > tol12) then
+   write(msg, '(a,es16.6)' ) &
+    "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
+   MSG_ERROR(msg)
+ end if
 #endif
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
@@ -468,7 +482,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
  cryst => self%cryst
 
- ! Get little group of the kpoint.
+ ! Get little group of the (external) kpoint.
  call self%lgk%free()
  self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
  if (prtvol > 0) call self%lgk%print()
@@ -485,7 +499,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, eph_doublegrid%kpts_dense,&
                self%lgk%nibz, eph_doublegrid%dense_nbz, cryst%nsym,&
-               sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+               sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -542,7 +556,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -588,7 +602,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ! Get mapping (k + q) --> initial IBZ.
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -616,7 +630,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ABI_MALLOC(bz2bz, (self%nbz * sppoldbl1))
    call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,&
       eph_doublegrid%dense_nbz, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    do ii=1,self%nbz
       ! get self%bz --> self%bz
@@ -642,7 +656,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
    ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -723,7 +737,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 
  ib = band - self%bstart + 1
 
- ! fill array for e_{k+q, b} +- w_{q,nu)
+ ! Fill array for e_{k+q, b} +- w_{q,nu)
  do iq=1,self%nq_k
    iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
    ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
@@ -905,7 +919,7 @@ end subroutine ephwg_get_dweights
 !!   integrate over the BZ without using symmetries.
 !!
 !! OUTPUT
-!!  cweights(nz, 2, nbcalc, %natom3)  (plus, minus)
+!!  cweights(nz, 2, nbcalc, %nq_k)  (plus, minus)
 !!  include weights for BZ integration.
 !!
 !! PARENTS

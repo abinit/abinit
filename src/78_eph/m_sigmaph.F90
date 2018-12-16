@@ -586,13 +586,13 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Here we try to read an existing SIGEPH file
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  ! Use __EPH_NORESTART__ to deactivate this feature. Useful when debugging.
- restart = 0
+ restart = 0; ierr = 1
  if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
     sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
  end if
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 
- if (ierr==0 .and. my_rank==master) then
+ if (ierr == 0 .and. my_rank == master) then
     if (any(sigma_restart%qp_done /= 1)) then
       call sigmaph_comp(sigma,sigma_restart)
       sigma%qp_done = sigma_restart%qp_done
@@ -605,6 +605,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
       MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
     end if
  end if
+
  call xmpi_bcast(restart, master, comm,ierr)
  call xmpi_bcast(sigma%qp_done, master, comm,ierr)
  call sigmaph_write(sigma, dtset, ecut, cryst, ebands, ifc, dtfil, restart, comm)
@@ -838,15 +839,12 @@ endif
    call cwtime_report(" Setup kcalc", cpu_setk, wall_setk, gflops_setk)
 
    ! TODO: Spin should be treated in a more scalable way --> kcalc and bdgw should depend on spin.
-   ! Introduce other comm and cart dimensio for spin
+   ! Introduce other comm and cart dimension for spin
    do spin=1,nsppol
      ! Check if this kpoint and spin was already calculated
      if (sigma%qp_done(ikcalc, spin) == 1) cycle
 
      call timab(1900, 1, tsec)
-     ! Distribute q-points, compute tetra weigths.
-     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, spin, ikcalc, dtset%prtvol, comm)
-
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
@@ -899,6 +897,9 @@ endif
        call wfd%copy_cg(band_ks, ik_ibz, spin, kets_k(1, 1, ib_k))
        sigma%e0vals(ib_k) = ebands%eig(band_ks, ik_ibz, spin)
      end do
+
+     ! Distribute q-points, compute tetra weigths.
+     call sigmaph_setup_qloop(sigma, dtset, cryst, ebands, spin, ikcalc, dtset%prtvol, comm)
 
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq, spin, with_nonlocal=.true.)
@@ -1294,8 +1295,13 @@ endif
 
                  ! Accumulate Sigma(w) for state ib_k if spectral function is wanted.
                  if (sigma%nwr > 0) then
-                   cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
-                                 (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
+                   if (sigma%qint_method == 1) then
+                     cfact_wr(:) = (nqnu + f_mkq      ) * sigma%cweights(2:, 1, ib_k, imyp, ibsum_kq, imyq, 1) + &
+                                   (nqnu - f_mkq + one) * sigma%cweights(2:, 2, ib_k, imyp, ibsum_kq, imyq, 1)
+                   else
+                     cfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu + sigma%ieta) + &
+                                   (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu + sigma%ieta)
+                   end if
                    sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
                  end if
 
@@ -3072,6 +3078,9 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
    self%my_nqibz_k = self%nqibz_k
    ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
    self%myq2ibz_k = [(iq_ibz, iq_ibz=1, self%nqibz_k)]
+   if (self%qint_method == 1) then
+     call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
+   end if
 
  case (-4)
    ! Computation of imaginary part.
@@ -3746,16 +3755,22 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    ABI_FREE(tmp_deltaw_pm)
 
  else
-   ! Weights for Re-Im with i.eta shift.
-   NOT_IMPLEMENTED_ERROR()
+   ! Both real and imag part --> compute \int 1/z with tetrahedron.
+   ! Note that we still need a finite i.eta in the expression (hopefully smaller than default value).
+   ! Besides we have to take into account the case in which the spectral function in wanted.
+   ! Derivative wrt omega is still computed with finite i.eta.
+   ABI_CHECK(sigma%symsigma == 1, "symsigma 0 with tetra not implemented")
+   ABI_CHECK(.not. sigma%use_doublegrid, "double grid for Re-Im not implemented")
 
-   ! FIXME: This part is broken now.
+   ! TODO: This part should be tested.
    nz = 1;  if (sigma%nwr > 0) nz = 1 + sigma%nwr
-   ! wrmesh_b(nwr, max_nbcalc)
    ABI_REMALLOC(sigma%cweights, (nz, 2, nbcalc_ks, sigma%my_npert, sigma%my_bstart:sigma%my_bstop, sigma%my_nqibz_k, ndiv))
    ABI_MALLOC(tmp_cweights, (nz, 2, nbcalc_ks, sigma%nqibz_k))
    ABI_MALLOC(zvals, (nz, nbcalc_ks))
 
+   ! Initialize z-points for Sigma_{nk} for different n bands.
+   zvals(1, :) = sigma%e0vals + sigma%ieta
+   if (sigma%nwr > 0) zvals(2:sigma%nwr+1, :) = sigma%wrmesh_b(:, 1:nbcalc_ks) + sigma%ieta
    ! Loop over my bands in self-energy sum.
    ! TODO: Check comm_bq and MPI version
    do ibsum_kq=sigma%my_bstart, sigma%my_bstop
@@ -3763,16 +3778,8 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
      do imyp=1,sigma%my_npert
        nu = sigma%my_pinfo(3, imyp)
 
-       ! Initialize z-points for self-energy
-       do ib_k=1,nbcalc_ks
-         band_ks = ib_k + bstart_ks - 1
-         eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-         zvals(1, 1:nbcalc_ks) = sigma%e0vals + sigma%ieta
-       end do
-
-       ! Compute \int 1/z with tetrahedron if both real and imag part of sigma are wanted.
        !complex(dpc),intent(out) :: cweights(nz, 2, nbsigma, self%nq_k)
-       call sigma%ephwg%get_zinv_weights(nz, nbcalc_ks, zvals, ibsum_kq, spin, nu, tmp_cweights, sigma%comm_bq)
+       call sigma%ephwg%get_zinv_weights(nz, nbcalc_ks, zvals, ibsum_kq, spin, nu, tmp_cweights, xmpi_comm_self)
        !  use_bzsum=sigma%symsigma == 0)
 
        ! For all the q-points that I am going to calculate
@@ -3785,7 +3792,6 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    end do
    ABI_FREE(zvals)
    ABI_FREE(tmp_cweights)
-
  end if
 
  call cwtime_report(" weights with tetrahedron", cpu, wall, gflops)
