@@ -40,7 +40,6 @@ module  m_spin_terms
   use defs_basis
   use m_errors
   use m_abicore
-  use m_spin_terms_funcs
   use m_spmat_csr, only : CSR_mat_t
   use m_spmat_lil, only : LIL_mat_t
   use m_spmat_convert, only : LIL_to_CSR
@@ -125,6 +124,7 @@ module  m_spin_terms
          procedure :: get_Heff => spin_terms_t_total_Heff
          procedure :: calculate => spin_terms_t_calculate
          procedure :: get_delta_E => spin_terms_t_get_delta_E
+         procedure :: set_bilinear_term => spin_terms_t_set_bilinear_term
   end type spin_terms_t
 
 contains
@@ -217,7 +217,8 @@ contains
    end if
 
     if ( present(bilinear_i) .and. present( bilinear_j) .and. present(bilinear_val) ) then
-       call spin_terms_t_set_bilinear_term(bilinear_i, bilinear_j, bilinear_val)
+       !call spin_terms_t_set_bilinear_term(bilinear_i, bilinear_j, bilinear_val)
+       call self%set_bilinear_term(bilinear_i, bilinear_j, bilinear_val)
     endif
 
   end subroutine spin_terms_t_set_terms
@@ -240,7 +241,7 @@ contains
 
   subroutine spin_terms_t_set_bilinear_term_single(self, i, j, val)
 
-    type(spin_terms_t), intent(inout) :: self
+    class(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: i, j
     real(dp), intent(in) :: val(:,:)
     integer :: ia, ib
@@ -255,7 +256,7 @@ contains
 
   subroutine spin_terms_t_set_bilinear_term(self, idx_i, idx_j, val)
 
-    type(spin_terms_t), intent(inout) :: self
+    class(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: idx_i(:), idx_j(:)
     real(dp), intent(in) :: val(:,:,:)
     integer :: i, j, ia, ib, nnz
@@ -273,7 +274,7 @@ contains
 
   subroutine spin_terms_t_calc_bilinear_term_Heff(self, S, Heff)
 
-    type(spin_terms_t), intent(inout) :: self
+    class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspins)
     integer :: i, iatom, jatom
@@ -338,7 +339,7 @@ contains
 
   subroutine spin_terms_t_get_delta_E(self, S, ispin, Snew, deltaE)
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in):: S(3,self%nspins), Snew(3)
+    real(dp), intent(in):: S(:,:), Snew(:)
     integer, intent(in) :: ispin
     real(dp), intent(out) ::deltaE
     real(dp) ::Stmp(3, self%nspins), Htmp(3,self%nspins), Eold, Enew

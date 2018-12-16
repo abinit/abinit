@@ -51,7 +51,7 @@ module m_spin_model
 
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_terms, only: spin_terms_t,  spin_terms_t_finalize, &
-       & spin_terms_t_set_external_hfield, spin_terms_t_add_SIA
+       & spin_terms_t_set_external_hfield
   use m_spin_model_primitive, only: spin_model_primitive_t, &
        & spin_model_primitive_t_initialize, &
        & spin_model_primitive_t_print_terms, &
@@ -96,16 +96,16 @@ module m_spin_model
      type(spin_observable_t) :: spin_ob
      integer :: nspins
      character(len=fnlen) :: in_fname, out_fname, xml_fname
-     !  CONTAINS
-     !    procedure :: run => spin_model_t_run
-     !    procedure :: initialize=>spin_model_t_initialize
-     !    procedure :: set_initial_spin => spin_model_t_set_initial_spin
-     !    procedure :: finalize => spin_model_t_finalize
-     !    procedure :: read_xml => spin_model_t_read_xml
-     !    procedure :: make_supercell => spin_model_t_make_supercell
-     !    procedure :: run_one_step => spin_model_t_run_one_step
-     !    procedure :: run_time => spin_model_t_run_time
-     !    procedure :: run_MvT => spin_model_t_run_MvT
+       CONTAINS
+         procedure :: run => spin_model_t_run
+         procedure :: initialize=>spin_model_t_initialize
+         procedure :: set_initial_spin => spin_model_t_set_initial_spin
+         procedure :: finalize => spin_model_t_finalize
+         procedure :: read_xml => spin_model_t_read_xml
+         procedure :: make_supercell => spin_model_t_make_supercell
+         procedure :: run_one_step => spin_model_t_run_one_step
+         procedure :: run_time => spin_model_t_run_time
+         procedure :: run_various_T => spin_model_t_run_various_T
   end type spin_model_t
   !!***
 contains
@@ -181,6 +181,9 @@ contains
     call spin_model_primitive_t_initialize(self%spin_primitive)
     !call self%read_xml(xml_fname)
     call spin_model_t_read_xml(self, trim(self%xml_fname)//char(0))
+
+   
+    
     !call self%spin_primitive%print_terms()
     call spin_model_primitive_t_print_terms(self%spin_primitive)
 
@@ -296,10 +299,10 @@ contains
     end do
     call spin_terms_t_set_external_hfield(self%spin_calculator, mfield)
 
-    if (self%params%spin_sia_add /= 0 ) then
-       call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
-            &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
-    end if
+    !if (self%params%spin_sia_add /= 0 ) then
+    !   call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
+    !        &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
+    !end if
 
     ! params -> hist
 
@@ -341,6 +344,14 @@ contains
 
     call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname, &
          & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
+
+    if (self%params%spin_sia_add /= 0 ) then
+       !call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
+       !     &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
+       call self%spin_primitive%add_input_sia(self%params%spin_sia_k1amp, &
+            & self%params%spin_sia_k1dir)
+    end if
+ 
   end subroutine spin_model_t_read_xml
   !!***
 

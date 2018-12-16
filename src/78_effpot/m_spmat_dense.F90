@@ -40,8 +40,8 @@ contains
   ! dense matrix-vector multiplication, using blas DGEMV
   subroutine dense_mat_t_mv(self, x, b)
     class(dense_mat_t), intent(in) :: self
-    real(dp), intent(in) :: x(:)
-    real(dp), intent(out) :: b(:)
+    real(dp), intent(in) :: x(self%ncol)
+    real(dp), intent(out) :: b(self%nrow)
     call dgemv("N", self%nrow, self%ncol, 1.0d0,self%mat , 2,  x, 1, 0.0d0,  b, 1)
   end subroutine dense_mat_t_mv
 

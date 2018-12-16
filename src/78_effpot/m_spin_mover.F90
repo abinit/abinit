@@ -45,6 +45,7 @@ module m_spin_mover
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_effpot_api, only: effpot_t
   use m_mover_api, only: abstract_mover_t
+  use m_spin_mc_mover, only : spin_mc_t
   implicit none
   !!***
 
@@ -71,12 +72,14 @@ module m_spin_mover
      type(rng_t) :: rng
      type(spin_hist_t), pointer :: hist
      logical :: gamma_l_calculated
+     type(spin_mc_t) :: spin_mc
      CONTAINS
         procedure :: initialize => spin_mover_t_initialize
         procedure :: finalize => spin_mover_t_finalize
         procedure :: set_hist => spin_mover_t_set_hist
         procedure, private :: run_one_step_DM => spin_mover_t_run_one_step_DM
         procedure, private :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
+        procedure, private :: run_one_step_MC=> spin_mover_t_run_one_step_MC
         procedure :: run_one_step => spin_mover_t_run_one_step
         procedure :: run_time => spin_mover_t_run_time
         procedure :: set_Langevin_params
@@ -118,6 +121,9 @@ contains
     if(params%spin_dynamics>=0) then
        self%method=params%spin_dynamics
     endif
+    if(params%spin_dynamics==3) then ! Monte carlo
+       call self%spin_mc%initialize(nspins=nspins, angle=0.1_dp, temperature=params%spin_temperature)
+    end if
     call set_seed(self%rng, [111111_dp, 2_dp])
 
     ABI_ALLOCATE(self%ms, (nspins) )
@@ -125,7 +131,6 @@ contains
     ABI_ALLOCATE(self%damping, (nspins) )
     ABI_ALLOCATE(self%gamma_l, (nspins) )
     ABI_ALLOCATE(self%H_lang_coeff, (nspins) )
-
     self%gamma_l_calculated=.False.
   end subroutine spin_mover_t_initialize
   !!***
@@ -152,17 +157,19 @@ contains
        self%ms(:)=ms(:)
     endif
 
-
     if(present(temperature)) then
        self%temperature=temperature
     end if
-
 
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
     self%gamma_l_calculated=.True.
 
     self%H_lang_coeff(:)=sqrt(2.0*self%damping(:)* self%temperature &
          &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
+
+    if(self%method==3) then
+       self%spin_mc%temperature = temperature
+    end if
   end subroutine set_Langevin_params
 
 
@@ -317,6 +324,14 @@ contains
     !call spin_terms_t_get_etot(calculator, S_out, Heff, etot)
   end subroutine spin_mover_t_run_one_step_DM
 
+  subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot)
+    class(spin_mover_t), intent(inout) :: self
+    class(effpot_t), intent(inout) :: effpot
+    real(dp), intent(in) :: S_in(3,self%nspins)
+    real(dp), intent(out) :: S_out(3,self%nspins), etot
+    call self%spin_mc%run_MC(self%rng, effpot, S_in, S_out, etot)
+    ! TODO: mc do not know about etot
+  end subroutine spin_mover_t_run_one_step_MC
 
   subroutine spin_mover_t_run_one_step(self, effpot)
     class(spin_mover_t), intent(inout) :: self
@@ -327,6 +342,8 @@ contains
        call self%run_one_step_HeunP(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
     else if (self%method==2) then
        call self%run_one_step_DM(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
+    else if (self%method==3) then
+       call self%run_one_step_MC(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
     end if
     ! do not inc until time is set to hist.
     call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)

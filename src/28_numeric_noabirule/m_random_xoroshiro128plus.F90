@@ -76,7 +76,7 @@ module m_random_xoroshiro128plus
      procedure, non_overridable :: rand_poisson     ! Sample from Poisson-dist.
      procedure, non_overridable :: rand_circle      ! Sample on a rand_circle
      procedure, non_overridable :: rand_sphere      ! Sample on a rand_sphere
-     proceduer, non_overridable :: rand_choice      ! select from 1 to N randomly
+     procedure, non_overridable :: rand_choice      ! select from 1 to N randomly
      procedure, non_overridable :: next        ! Internal method
   end type rng_t
 

@@ -1,6 +1,7 @@
 #include "abi_common.h"
 module m_spmat_csr
-  use mpi
+  use defs_basis  
+  use m_xmpi
   use m_spmat_base
   use m_mpi_scheduler
   implicit none
@@ -24,7 +25,7 @@ module m_spmat_csr
      procedure :: mv => csr_mat_t_mv
      procedure :: sync => csr_mat_t_sync
      procedure :: mv_mpi => csr_mat_t_mv_mpi
-     procedure :: mv_select_row =>csr_mat
+     procedure :: mv_select_row =>csr_mat_t_mv_select_row
   end type CSR_mat_t
 contains
 
@@ -40,7 +41,8 @@ contains
     real(dp), intent(in), optional :: val(:)
     integer :: ierr, iproc
 
-    call MPI_COMM_RANK(MPI_COMM_WORLD, iproc,ierr)
+    !call MPI_COMM_RANK(MPI_COMM_WORLD, iproc,ierr)
+    iproc=xmpi_comm_rank(xmpi_world)
     if (iproc/=0) then
        print *, "This function should be only used on root node"
     end if
@@ -75,14 +77,19 @@ contains
   subroutine CSR_mat_t_sync(self)
     class (csr_mat_t), intent(inout) :: self
     integer :: ierr, iproc
-    call mpi_comm_rank(MPI_COMM_WORLD, iproc, ierr)
+    !call mpi_comm_rank(MPI_COMM_WORLD, iproc, ierr)
+    iproc=xmpi_comm_rank(xmpi_world)
 
-    call mpi_barrier(MPI_COMM_WORLD, ierr)
-    call mpi_bcast(self%ncol, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(self%nrow, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(self%nnz, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    call xmpi_barrier(xmpi_world)
+    !call mpi_barrier(MPI_COMM_WORLD, ierr)
+    !call mpi_bcast(self%ncol, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    !call mpi_bcast(self%nrow, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    !call mpi_bcast(self%nnz, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
 
-    call self%mpi_scheduler%initialize(self%nrow, MPI_COMM_WORLD)
+    call xmpi_bcast(self%ncol, 0, xmpi_world, ierr)
+    call xmpi_bcast(self%nrow, 0, xmpi_world, ierr)
+    call xmpi_bcast(self%nnz, 0, xmpi_world, ierr)
+    call self%mpi_scheduler%initialize(self%nrow, xmpi_world)
     if (.not. self%mpi_scheduler%iproc==0) then
        if(.not. allocated(self%icol)) then
           ABI_ALLOCATE(self%icol, (self%nnz))
@@ -98,10 +105,13 @@ contains
 
     ! TODO: no need to send all the data to all the
     ! only the corresponding row data.
-    call mpi_bcast(self%icol, self%nnz, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(self%row_shift, self%nrow+1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
-    call mpi_bcast(self%val, self%nnz, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    !call mpi_bcast(self%icol, self%nnz, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    !call mpi_bcast(self%row_shift, self%nrow+1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+    !call mpi_bcast(self%val, self%nnz, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
 
+    call xmpi_bcast(self%icol, 0, xmpi_world, ierr)
+    call xmpi_bcast(self%row_shift, 0, xmpi_world, ierr)
+    call xmpi_bcast(self%val, 0, xmpi_world, ierr)
 
   end subroutine CSR_mat_t_sync
 
@@ -127,9 +137,8 @@ contains
   subroutine CSR_mat_t_mv(self, x, b)
 
     class(CSR_mat_t), intent(in):: self
-    real(dp), intent(in) :: x(:)
-    real(dp), intent(out) :: b(:)
-    real(dp)::ddot
+    real(dp), intent(in) :: x(self%ncol)
+    real(dp), intent(out) :: b(self%nrow)
     integer::irow, i1, i2, i
     b(:)=0.0d0
     !!$OMP PARALLEL DO private(i, i1, i2)
@@ -146,38 +155,40 @@ contains
 
   subroutine CSR_mat_t_mv_mpi(self, x, b)
     class(CSR_mat_t), intent(in) :: self
-    real(dp), intent(in) :: x(:)
+    real(dp), intent(inout) :: x(:)
     real(dp), intent(out) :: b(:)
-    real(dp):: my_b(self%nrow)
+    !real(dp):: my_b(self%nrow)
     integer :: ierr, irow, icol, i1, i2, i
-    call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    my_b(:)=0.0_dp
+    !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    call xmpi_bcast(x, 0, xmpi_world, ierr)
+    !my_b(:)=0.0_dp
     b(:)=0.0_dp
 
     do irow= self%mpi_scheduler%istart(self%mpi_scheduler%iproc), self%mpi_scheduler%iend(self%mpi_scheduler%iproc)
        i1=self%row_shift(irow)
        i2=self%row_shift(irow+1)-1
        do i=i1, i2
-          my_b(irow)=my_b(irow)+ self%val(i)*x(self%icol(i))
+          b(irow)=b(irow)+ self%val(i)*x(self%icol(i))
        end do
     enddo
     ! TODO : use gather instead of reduce.
-    call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
+    !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
+    call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine CSR_mat_t_mv_mpi
 
-  subroutine CSR_mat_t_mv_select_row(A, nrow, id_row, x, y)
-    class(CSR_mat), intent(in):: A
+  subroutine CSR_mat_t_mv_select_row(self, nrow, id_row, x, y)
+    class(CSR_mat_t), intent(in)::self 
     integer, intent(in) :: nrow,  id_row(nrow)
-    real(dp), intent(in) :: x(:)
+    real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: y(nrow)
     integer :: i, irow, i1, i2, j
 
     do j=1, nrow
        irow=id_row(j)
-       i1=A%row_shift(irow)
-       i2=A%row_shift(irow+1)-1
+       i1=self%row_shift(irow)
+       i2=self%row_shift(irow+1)-1
        do i=i1, i2
-          y(j)= y(j)+A%val(i)*x(A%icol(i))
+          y(j)= y(j)+self%val(i)*x(self%icol(i))
        end do
     end do
   end subroutine CSR_mat_t_mv_select_row

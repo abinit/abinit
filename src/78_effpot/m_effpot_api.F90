@@ -36,6 +36,7 @@ module m_effpot_api
      procedure :: read_potential  ! read effpot from file (primtive cell) (e.g. DDB, xml)
      procedure :: make_supercell  ! build supercell potential
      procedure :: calculate       ! get energy and 1st derivative from input state
+     procedure :: get_delta_E=> effpot_t_get_delta_E ! calculate energy diffence if one component is changed for Monte carlo algorithm
 
      !procedure :: set_variables
      !procedure :: get_1st_deriv
@@ -116,6 +117,15 @@ contains
     ! calculate if required
   end subroutine calculate
 
+  subroutine effpot_t_get_delta_E(self, S, ispin, Snew, deltaE)
+    ! for spin monte carlo
+    ! calculate energy difference if one spin is moved.
+    class(effpot_t), intent(inout) :: self  ! the effpot may save the states.
+    real(dp), intent(in) :: S(:,:),  Snew(:)
+    integer, intent(in) :: ispin
+    real(dp), intent(out) :: deltaE
+  end subroutine effpot_t_get_delta_E
+
 !   subroutine get_energy(self, energy)
 !     class(effpot_t), intent(inout) :: self
 !     real(dp) , intent(inout) :: energy
@@ -166,7 +176,6 @@ contains
     ABI_DEALLOCATE(self%force_tmp)
     ABI_DEALLOCATE(self%bfield_tmp)
   end subroutine effpot_list_t_finalize
-
 
 
   subroutine effpot_list_t_append(self, effpot)

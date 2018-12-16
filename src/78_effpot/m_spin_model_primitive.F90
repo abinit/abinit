@@ -138,7 +138,8 @@ module m_spin_model_primitive
          procedure:: set_bilinear => spin_model_primitive_t_set_bilinear
          procedure:: set_exchange=> spin_model_primitive_t_set_exchange
          procedure:: set_dmi => spin_model_primitive_t_set_dmi
-         procedure:: set_uni => spin_model_primitive_t_set_uni
+         procedure:: set_sia=> spin_model_primitive_t_set_sia
+         procedure :: add_input_sia => spin_model_primitive_t_add_input_sia
          procedure:: read_xml => spin_model_primitive_t_read_xml
          procedure:: make_supercell => spin_model_primitive_t_make_supercell
          procedure :: print_terms => spin_model_primitive_t_print_terms
@@ -246,7 +247,7 @@ contains
     call  spin_model_primitive_t_set_bilinear(self,n,ilist,jlist,Rlist,bivallist)
   end subroutine spin_model_primitive_t_set_dmi
 
-  subroutine spin_model_primitive_t_set_uni(self, n, ilist, k1list, k1dirlist)
+  subroutine spin_model_primitive_t_set_sia(self, n, ilist, k1list, k1dirlist)
 
     class(spin_model_primitive_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:)
@@ -261,9 +262,34 @@ contains
        bivallist(:,:, idx)= (- k1list(idx))*  &
             outer_product(k1dirlist(:,idx), k1dirlist(:, idx))
     end do
-    !call self%set_bilinear(n,ilist,ilist,Rlist,bivallist)
-    call  spin_model_primitive_t_set_bilinear(self,n,ilist,ilist,Rlist,bivallist)
-  end subroutine spin_model_primitive_t_set_uni
+    call self%set_bilinear(n,ilist,ilist,Rlist,bivallist)
+    !call  spin_model_primitive_t_set_bilinear(self,n,ilist,ilist,Rlist,bivallist)
+  end subroutine spin_model_primitive_t_set_sia
+
+  subroutine spin_model_primitive_t_add_input_sia(self,  input_sia_k1amp, input_sia_k1dir)
+    class(spin_model_primitive_t), intent(inout) :: self
+    real(dp), intent(in):: input_sia_k1amp, input_sia_k1dir(3)
+    integer :: in_sia_ind(self%nspins)
+    real(dp)::  in_sia_k1amp(self%nspins), in_sia_k1dir(3, self%nspins)
+
+    integer :: i
+
+     write(*,'(A28)') "Adding SIA terms from input"
+     !ABI_ALLOCATE(in_sia_ind,(self%nspins))
+     !ABI_ALLOCATE(in_sia_k1amp,(self%nspins))
+     !ABI_ALLOCATE(in_sia_k1dir,(3, nspins))
+     do i =1, self%nspins
+        in_sia_ind=i
+        in_sia_k1amp(i)=input_sia_k1amp
+        in_sia_k1dir(:,i)=input_sia_k1dir
+     end do
+     call self%set_sia(self%nspins, in_sia_ind, in_sia_k1amp, in_sia_k1dir )
+     !ABI_DEALLOCATE(in_sia_ind)
+     !ABI_DEALLOCATE(in_sia_k1amp)
+     !ABI_DEALLOCATE(in_sia_k1dir)
+   end subroutine spin_model_primitive_t_add_input_sia
+
+
 
   subroutine spin_model_primitive_t_read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
 
@@ -273,6 +299,7 @@ contains
     logical, optional, intent(in) :: use_exchange, use_dmi, use_sia, use_bi
     logical :: uexc, udmi, usia, ubi
     real(dp) :: ref_energy
+    integer :: i
 
     type(c_ptr) ::  p_unitcell,         &
          p_masses,  p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
@@ -391,8 +418,6 @@ contains
     else
        print *, " DMI term from xml file not used"
     end if
-    !call self%set_uni(uni_nnz, uni_ilist, uni_amplitude_list, &
-    !     reshape(uni_direction_list, [3, uni_nnz]) )
 
     if(.not. present(use_sia)) then
        usia=.True.
@@ -401,11 +426,8 @@ contains
     end if
     if (usia) then
        write(*,'(A18)') "Setting SIA terms"
-       call spin_model_primitive_t_set_uni(self, uni_nnz, uni_ilist, uni_amplitude_list, &
+       call spin_model_primitive_t_set_sia(self, uni_nnz, uni_ilist, uni_amplitude_list, &
             reshape(uni_direction_list, [3, uni_nnz]) )
-    !call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
-    !     Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
-    !     vallist = reshape(bi_vallist, (/3,3, bi_nnz/)) )
     else
        print *, " SIA term in xml file not used"
     end if

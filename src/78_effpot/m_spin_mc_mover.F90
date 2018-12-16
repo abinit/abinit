@@ -4,35 +4,67 @@
 #include "abi_common.h"
     module m_spin_mc_mover
     use defs_basis
-    use m_errors
     use m_abicore
-    use m_mathfuncs, only : cross
-    use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
-    use m_spin_terms, only:  spin_terms_t
-    use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
-    use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
-    use m_multibinit_dataset, only: multibinit_dtset_type
-    use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
     use m_effpot_api, only: effpot_t
-    use m_mover_api, only: abstract_mover_t
+    use m_random_xoroshiro128plus, only: rng_t
     implicit none
     private
 
-    type, extends(spin_mover_t):: spin_mc_mover_t
-       type(rng_t) :: rng
+    type,public :: spin_mc_t
+       real(dp), allocatable :: S(:,:)
+       real(dp) ::  Sold(3), Snew(3)
+       real(dp) :: angle
+       real(dp) :: energy, deltaE
+       real(dp) :: temperature
+       real(dp) :: beta  ! 1/(kb T)
+       integer :: nspins
+       integer :: nstep
+       integer :: imove ! index of spin to be moved
+       integer :: naccept
      contains
-    end type spin_mc_mover_t
+       procedure :: initialize
+       procedure :: finalize
+       procedure, private :: attempt
+       procedure, private :: accept
+       procedure, private :: reject
+       procedure, private :: run_one_step
+       procedure :: run_MC
+    end type spin_mc_t
+
 
   contains
-    subroutine initialize(self)
+    subroutine initialize(self, nspins, angle, temperature)
+      class(spin_mc_t), intent(inout) :: self
+      integer, intent(in) :: nspins
+      real(dp), intent(in) :: angle, temperature
+      self%nstep=self%nspins
+      ABI_ALLOCATE(self%S, (3, self%nspins))
+      self%angle=angle
+      self%temperature=temperature
+      self%beta=1.0/temperature ! Kb in a.u. is 1.
+      self%Sold(:)=0.0_dp
+      self%Snew(:)=0.0_dp
     end subroutine initialize
 
-   subroutine run_one_step(self, effpot)
-     class(spin_mc_mover_t) :: self
+    subroutine finalize(self)
+      class(spin_mc_t), intent(inout) :: self
+      if (allocated(self%S)) then
+         ABI_DEALLOCATE(self%S)
+      end if
+      self%Sold=zero
+      self%Snew=zero
+      self%nspins=0
+      self%nstep=0
+    end subroutine finalize
+
+
+   subroutine run_one_step(self, rng, effpot)
+     class(spin_mc_t) :: self
+     class(rng_t) :: rng
      class(effpot_t), intent(inout) :: effpot
      real(dp) :: S_out(3,self%nspins), etot
      integer :: i, j
-     if(self%rng%rand_unif_01< min(1.0, self%attempt())) then
+     if(rng%rand_unif_01()< min(1.0, self%attempt(rng, effpot)) ) then
         self%naccept=self%naccept+1
         call self%accept()
      else
@@ -40,18 +72,46 @@
      end if
    end subroutine run_one_step
 
-   function attempt(self) result(y)
-     class(spin_mc_mover_t) :: self
-     real(dp) :: y, Sold(3), Snew(3)
-     integer :: ispin
+   subroutine run_MC(self, rng, effpot, S_in, S_out, etot)
+     class(spin_mc_t), intent(inout) :: self
+     type(rng_t) :: rng
+     class(effpot_t), intent(inout) :: effpot
+     real(dp), intent(in) :: S_in(3,self%nspins)
+     real(dp), intent(out) :: S_out(3,self%nspins), etot
+     integer :: i
+     do i = 1, self%nstep
+        call self%run_one_step(rng, effpot)
+     end do
+     S_out(:, :)=self%S(:,:)
+     etot=self%energy
+   end subroutine run_MC
+
+   subroutine accept(self)
+     class(spin_mc_t), intent(inout) :: self
+     self%S(:,self%imove)=self%Snew(:)
+     self%energy=self%energy+self%deltaE
+   end subroutine accept
+
+   subroutine reject(self)
+     class(spin_mc_t), intent(inout) :: self
+     ! do nothing.
+   end subroutine reject
+
+   function attempt(self,rng, effpot) result(r)
+     class(spin_mc_t) :: self
+     class(rng_t) :: rng
+     class(effpot_t), intent(inout) :: effpot
+     real(dp) :: r
      ! choose one site
-     ispin = self%rand_choice(self%nspins)
-     Sold(3)= self%S(:,ispin)
-     call move_hinzke_nowak(Sold, Snew, self%angle)
-     call self%effpot%calc_delta_energy(ispin, S, Sold, Snew)
+     self%imove = rng%rand_choice(self%nspins)
+     self%Sold(:)= self%S(:,self%imove)
+     call move_hinzke_nowak(rng, self%Sold, self%Snew, self%angle)
+     call effpot%get_delta_E( self%S, self%imove, self%Snew, self%deltaE)
+     r=exp(-self%deltaE * self%beta)
    end function attempt
 
-   subroutine move_angle(Sold, Snew, angle)
+   subroutine move_angle(rng, Sold, Snew, angle)
+     type(rng_t) :: rng
      real(dp), intent(in) :: Sold(3), angle
      real(dp), intent(out) :: Snew(3)
      real(dp) :: m
@@ -66,32 +126,29 @@
      Snew(:)=-Sold(:)
    end subroutine move_flip
 
-   subroutine move_uniform( Snew)
+   subroutine move_uniform(rng, Snew)
+     type(rng_t) :: rng
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
      Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
    end subroutine move_uniform
 
-   subroutine move_hinzke_nowak(Sold, Snew, angle)
+   subroutine move_hinzke_nowak(rng, Sold, Snew, angle)
+     type(rng_t) :: rng
      real(dp), intent(in) :: Sold(3), angle
      real(dp), intent(out) :: Snew(3)
      integer :: move
      move=rng%rand_choice(3)
      select case (move)
      case (1)
-        call move_angle(Sold, Snew, angle)
+        call move_angle(rng, Sold, Snew, angle)
      case(2)
         call move_flip(Sold, Snew)
      case(3)
-        call move_uniform(Snew)
+        call move_uniform(rng, Snew)
      case default
-        call move_angle(Sold, Snew, angle)
+        call move_angle(rng, Sold, Snew, angle)
      end select
    end subroutine move_hinzke_nowak
 
-   subroutine accept(self)
-   end subroutine accept
-
-   subroutine reject(self)
-   end subroutine reject
 end module m_spin_mc_mover

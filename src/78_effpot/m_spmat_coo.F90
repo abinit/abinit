@@ -1,7 +1,8 @@
 #include "abi_common.h"
 module m_spmat_COO
+  use defs_basis  
+  use m_xmpi
   use m_spmat_base
-  use mpi
   implicit none
 
   !!----------- COO ------------------------
@@ -65,8 +66,8 @@ contains
   ! COO sparse matrix-vector multiplication. naive implementation.
   subroutine COO_mat_t_mv(self, x, b)
     class(COO_mat_t), intent(in) :: self
-    real(dp), intent(in):: x(:)
-    real(dp), intent(out):: b(:)
+    real(dp), intent(in):: x(self%ncol)
+    real(dp), intent(out):: b(self%nrow)
     integer:: ind, ind_i, ind_j
     b(:)=0.0D0
     do ind = 1, self%nnz, 1
@@ -78,19 +79,21 @@ contains
 
   subroutine COO_mat_t_mv_mpi(self, x ,b)
     class(coo_mat_t), intent(in) :: self
-    real(dp), intent(in) :: x(:)
+    real(dp), intent(inout) :: x(:)
     real(dp), intent(out) :: b(:)
-    real(dp):: my_b(self%nrow)
+    !real(dp):: my_b(self%nrow)
     integer :: ierr, irow, icol
-    call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
-    my_b(:)=0.0_dp
+    !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
+    call xmpi_bcast(x, 0, xmpi_world, ierr)
+    !my_b(:)=0.0_dp
     b(:)=0.0_dp
 
     ! TODO implement
     print *, "mpi COO mv Not implemented yet"
     ! TODO : use gather instead of reduce.
-    call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
+    !call mpi_reduce(my_b, b, self%nrow, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
 
+    call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine COO_mat_t_mv_mpi
 
 
