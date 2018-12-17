@@ -40,6 +40,6 @@ prtebands 0
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% keywords = LDA
-#%% authors = Ricci
+#%% authors = F. Ricci
 #%% description = test supercell_latt construction
 #%%<END TEST_INFO>
