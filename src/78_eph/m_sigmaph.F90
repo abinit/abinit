@@ -135,7 +135,7 @@ module m_sigmaph
    ! Required when the sum over q in the BZ is replaced by IBZ(k).
 
   integer :: timrev
-   !  timrev=1 if the use of time-reversal is allowed; 0 otherwise
+   ! timrev=1 if the use of time-reversal is allowed; 0 otherwise
 
   integer :: nbsum
    ! Total number of bands used in sum over states without taking into account MPI distribution.

@@ -395,8 +395,14 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
 #if 1
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+ !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ ! Use symmetries of the litte group (This version should be the correct one).
+ call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
+    sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
     "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
@@ -411,6 +417,15 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  indkk = transpose(kmap)
  ABI_FREE(kmap)
 #endif
+
+ !ABI_CHECK(all(self%lgk%bz2ibz_smap(1, :) == indkk(:, 1)), "bz2ibz_smap != indkk")
+ !do ii=1,self%nbz
+ !  write(666, *)ii, self%lgk%bz2ibz_smap(1, ii)
+ !  write(667, *)ii, indkk(ii, 1)
+ !end do
+ !indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
+ !write(std_out, *)"About to call tetra"
+ !stop
 
 #if 0
  do ii=1,self%nbz * sppoldbl1

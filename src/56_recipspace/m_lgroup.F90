@@ -105,6 +105,10 @@ module m_lgroup
    ! symafm_lg(nsym_lg)
    ! Anti-ferromagnetic character
 
+   integer,allocatable :: bz2ibz_smap(:,:)
+   ! bz2ibz_smap(nbz, 6) Mapping BZ --> IBZ.
+   ! Note that here we used the symmetries of the little group.
+
    integer, allocatable :: lgsym2glob(:, :)
    ! lgsym2glob(2, nsym_lg)
    ! Mapping isym_lg --> [isym, itime]
@@ -228,9 +232,12 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  ABI_MALLOC(wtk, (nkbz))
  wtk = one / nkbz ! Weights sum up to one
 
+ ABI_MALLOC(new%bz2ibz_smap, (6, nkbz))
+ ! IBZ2BZ ?
+
  ! TODO: In principle here we would like to have a set that contains the initial IBZ.
  call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
-   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded)
+   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, bz2ibz_smap=new%bz2ibz_smap)
 
  ABI_MALLOC(new%ibz, (3, new%nibz))
  ABI_MALLOC(new%weights, (new%nibz))
@@ -241,6 +248,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
    new%weights(ik_ibz) = wtk_folded(ik_bz)
  end do
 
+#if 1
  ! Here I repack the IBZ points. In principle, the best would be
  ! to pack stars using crystal%symrec. For the time being we pack shells (much easier).
  ! Use wtk as workspace to store the norm.
@@ -253,13 +261,14 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
    call wrap2_pmhalf(new%ibz(:, ik_ibz), kred, shift)
    wtk(ik_ibz) = ksign * normv(kred, cryst%gmet, "G")
  end do
- ABI_MALLOC(kord, (3, new%nibz))
+
  ABI_MALLOC(iperm, (new%nibz))
  iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
  call sort_dp(new%nibz, wtk, iperm, tol12)
+ !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
 
  ! Trasfer data.
- !iperm = [(ik_ibz, ik_ibz=1, new%nibz)]
+ ABI_MALLOC(kord, (3, new%nibz))
  do ik_ibz=1,new%nibz
    kord(:, ik_ibz) = new%ibz(:, iperm(ik_ibz))
    wtk_folded(ik_ibz) = new%weights(iperm(ik_ibz))
@@ -267,8 +276,16 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  new%ibz = kord(:, 1:new%nibz)
  new%weights = wtk_folded(1:new%nibz)
 
- ABI_FREE(iperm)
+ ! Rearrange bz2ibz_smap as well.
+ do ik_bz=1,new%nbz
+   ik_ibz = new%bz2ibz_smap(1, ik_bz)
+   new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
+ end do
+
  ABI_FREE(kord)
+ ABI_FREE(iperm)
+#endif
+
  ABI_FREE(ibz2bz)
  ABI_FREE(wtk_folded)
  ABI_FREE(wtk)
@@ -461,6 +478,7 @@ subroutine lgroup_free(self)
  ! integer
  ABI_SFREE(self%symrec_lg)
  ABI_SFREE(self%symafm_lg)
+ ABI_SFREE(self%bz2ibz_smap)
  ABI_SFREE(self%lgsym2glob)
  ABI_SFREE(self%symtab)
  ! real

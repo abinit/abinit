@@ -81,6 +81,7 @@ contains
 !!
 !! nkibz = number of k-points in the irreducible set
 !! wtk_folded(nkbz)=weight assigned to each k point, taking into account the symmetries
+!! [bz2ibz_smap(nkbz, 6)]= Mapping BZ --> IBZ.
 !!
 !! NOTES
 !! The decomposition of the symmetry group in its primitives might speed up the execution.
@@ -98,7 +99,8 @@ contains
 !!
 !! SOURCE
 
-subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,wtk,wtk_folded)
+subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,wtk,wtk_folded, &
+                  bz2ibz_smap) ! Optional
 
  use defs_basis
  use m_abicore
@@ -114,16 +116,16 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  integer,intent(inout) :: ibz2bz(nkbz) !vz_i
  real(dp),intent(in) :: gmet(3,3),kbz(3,nkbz),wtk(nkbz)
  real(dp),intent(out) :: wtk_folded(nkbz)
- !real(dp),optional,intent(out) :: bz2ibz(6, nkbz)
+ integer,optional,intent(out) :: bz2ibz_smap(6, nkbz)
 
 !Local variables -------------------------
 !scalars
- integer :: identi,ii,ikpt,ikpt2,ind_ikpt,ind_ikpt2
+ integer :: identi,ii,ikpt,ikpt2,ind_ikpt,ind_ikpt2,ierr
  integer :: ikpt_current_length,isym,itim,jj,nkpout,quit,tident
  real(dp) :: difk,difk1,difk2,difk3,length2trial,reduce,reduce1,reduce2,reduce3
  character(len=500) :: message
 !arrays
- integer,allocatable :: list(:)
+ integer,allocatable :: list(:),bz2ibz_idx(:)
  real(dp) :: gmetkpt(3),ksym(3)
  real(dp),allocatable :: length2(:)
 
@@ -160,12 +162,14 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    wtk_folded(ikpt)=wtk(ikpt)
  end do
 
- !if (present(bz2ibz)) then
- !  bz2ibz = 0
- !  do ikpt=1,nkbz
- !    bz2ibz(1, ikpt) = ikpt
- !  end do
- !end if
+ ! Initialize bz2ibz_smap
+ if (present(bz2ibz_smap)) then
+   bz2ibz_smap = 0
+   do ikpt=1,nkbz
+     bz2ibz_smap(1, ikpt) = ikpt
+     bz2ibz_smap(2, ikpt) = 1
+   end do
+ end if
 
  ! Here begins the serious business
 
@@ -314,13 +318,18 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              wtk_folded(ind_ikpt)=wtk_folded(ind_ikpt)+wtk_folded(ind_ikpt2)
              wtk_folded(ind_ikpt2)=0._dp
 
-             !if (present(bz2ibz)) then
-             !  bz2ibz(1, ind_ikpt2) = ind_ikpt
-             !  bz2ibz(2, ind_ikpt2) = isym
-             !  bz2ibz(3:5, ind_ikpt2) = g0
-             !  ii = 0; if (itim == -1) ii = 1
-             !  bz2ibz(6, ind_ikpt2) = ii
-             !end if
+             if (present(bz2ibz_smap)) then
+               ! Fill entries following listkk convention.
+               bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
+               bz2ibz_smap(2, ind_ikpt2) = isym
+               ! Compute difference with respect to kpt2, modulo a lattice vector
+               ! TODO
+               !dk(:) = kptns2(:,ikpt2) - kpt1a(:)
+               !dkint(:) = nint(dk(:) + tol12)
+               !bz2ibz_smap(3:5, ind_ikpt2) = g0
+               ii = 0; if (itim == -1) ii = 1
+               bz2ibz_smap(6, ind_ikpt2) = ii
+             end if
 
              ! Go to the next ikpt2 if the symmetric was found
              quit=1; exit
@@ -337,13 +346,32 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  end if ! End check on possibility of change
 
  ! Create the indexing array ibz2bz
- nkibz=0
+ ABI_MALLOC(bz2ibz_idx, (nkbz))
+ bz2ibz_idx = 0
+ nkibz = 0
  do ikpt=1,nkbz
    if (wtk_folded(ikpt) > tol8) then
      nkibz=nkibz+1
      ibz2bz(nkibz)=ikpt
+     bz2ibz_idx(ikpt) = nkibz
    end if
  end do
+
+ if (present(bz2ibz_smap)) then
+   ierr = 0
+   do ikpt=1,nkbz
+     ind_ikpt = bz2ibz_smap(1, ikpt)
+     ind_ikpt = bz2ibz_idx(ind_ikpt)
+     if (ind_ikpt /= 0) then
+       bz2ibz_smap(1, ikpt) = ind_ikpt
+     else
+       ierr = ierr + 1
+     end if
+   end do
+   ABI_CHECK(ierr == 0, "Error while remapping bz2ibz_smap array")
+ end if
+
+ ABI_FREE(bz2ibz_idx)
 
  if(iout/=0)then
    if(nkbz/=nkibz)then
