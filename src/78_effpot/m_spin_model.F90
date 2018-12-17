@@ -47,9 +47,9 @@ module m_spin_model
   use m_abicore
   use m_errors
   use m_xmpi
+  use m_multibinit_global, only: iam_master, my_rank, ierr, comm, master
   use m_io_tools, only : get_unit, open_file, close_unit
 
-  use m_multibinit_global
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_terms, only: spin_terms_t,  spin_terms_t_finalize, &
        & spin_terms_t_set_external_hfield

@@ -78,7 +78,7 @@ contains
 
  subroutine Oiju_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
      class(slc_Oiju_t), intent(inout) :: self  ! the effpot may save the states.
-     real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
      real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
      ! if present in input
      ! calculate if required
@@ -106,7 +106,7 @@ contains
 
  subroutine Tijuv_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
    class(slc_Tijuv_t), intent(inout) :: self  ! the effpot may save the states.
-   real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+   real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
  end subroutine Tijuv_calculate
 
@@ -142,7 +142,7 @@ contains
 
  subroutine slc_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
    class(spin_lattice_coupling_effpot_t), intent(inout) :: self  ! the effpot may save the states.
-   real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+   real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
  end subroutine slc_calculate
 

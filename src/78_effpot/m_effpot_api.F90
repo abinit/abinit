@@ -111,7 +111,7 @@ contains
 
   subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
     class(effpot_t), intent(inout) :: self  ! the effpot may save the states.
-    real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
     ! if present in input
     ! calculate if required
@@ -194,7 +194,7 @@ contains
 
   subroutine effpot_list_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
     class(effpot_list_t), intent(inout) :: self  ! the effpot may save the states.
-    real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
     integer :: i
     real(dp) :: e

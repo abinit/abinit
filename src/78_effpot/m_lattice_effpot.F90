@@ -61,7 +61,7 @@ contains
 
    subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
     class(lattice_effpot_t), intent(inout) :: self  ! the effpot may save the states.
-    real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
     if(present(force)) then
        force(:,:)=zero

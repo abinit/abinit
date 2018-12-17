@@ -254,7 +254,7 @@ contains
 
     class (spin_mover_t), intent(inout):: self
     class(effpot_t), intent(inout) :: calculator
-    real(dp), intent(in) :: S_in(3,self%nspins)
+    real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
     real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
@@ -315,7 +315,7 @@ contains
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(effpot_t), intent(inout) :: effpot
-    real(dp), intent(in) :: S_in(3,self%nspins)
+    real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
     real(dp) :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
@@ -352,7 +352,7 @@ contains
   subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot)
     class(spin_mover_t), intent(inout) :: self
     class(effpot_t), intent(inout) :: effpot
-    real(dp), intent(in) :: S_in(3,self%nspins)
+    real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     !print *, "S_in+", S_in
     call self%spin_mc%run_MC(self%rng, effpot, S_in, S_out, etot)

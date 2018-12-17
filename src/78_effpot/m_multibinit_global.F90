@@ -4,8 +4,8 @@
     use m_xmpi
     implicit none
     integer, parameter :: master =0
-    logical, save :: iam_master =.False.
-    integer, save :: my_rank, comm, nproc, ierr
+    logical :: iam_master =.False.
+    integer :: my_rank, comm, nproc, ierr
   contains
     subroutine init_multibinit_global()
       comm = xmpi_world

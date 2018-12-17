@@ -155,8 +155,8 @@ contains
 
   subroutine CSR_mat_t_mv_mpi(self, x, b)
     class(CSR_mat_t), intent(in) :: self
-    real(dp), intent(inout) :: x(:)
-    real(dp), intent(out) :: b(:)
+    real(dp), intent(inout) :: x(self%ncol)
+    real(dp), intent(out) :: b(self%nrow)
     !real(dp):: my_b(self%nrow)
     integer :: ierr, irow,  i1, i2, i
     !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)

@@ -151,41 +151,41 @@ contains
 
     nspins=size(pos, 2)
     self%nspins=nspins
-    xmpi_bcast(nspins, master, comm, ierr)
-    xmpi_bcast(self%nspins, master, comm, ierr)
+    call xmpi_bcast(nspins, master, comm, ierr)
+    call xmpi_bcast(self%nspins, master, comm, ierr)
 
     ABI_ALLOCATE(self%iatoms, (nspins))
     self%iatoms(:)=iatoms(:)
-    xmpi_bcast(self%iatoms, master, comm, ierr)
+    call xmpi_bcast(self%iatoms, master, comm, ierr)
     self%cell(:,:)=cell(:,:)
-    xmpi_bcast(self%cell, master, comm, ierr)
+    call xmpi_bcast(self%cell, master, comm, ierr)
 
     ABI_ALLOCATE( self%pos, (3,nspins) )
     self%pos(:,:)=pos(:,:)
-    xmpi_bcast(self%pos, master, comm, ierr)
+    call xmpi_bcast(self%pos, master, comm, ierr)
 
     ABI_ALLOCATE( self%spinat, (3, nspins))
     self%spinat(:,:)=spinat(:,:)
-    xmpi_bcast(self%spinat, master, comm, ierr)
+    call xmpi_bcast(self%spinat, master, comm, ierr)
 
     ABI_ALLOCATE( self%ms, (nspins) )
     self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))* mu_B
-    xmpi_bcast(self%ms, master, comm, ierr)
+    call xmpi_bcast(self%ms, master, comm, ierr)
 
     ABI_ALLOCATE( self%ispin_prim, (nspins))
     ABI_ALLOCATE(self%rvec, (3, nspins))
     
     self%ispin_prim(:)=ispin_prim(:)
 
-    xmpi_bcast(self%ispin_prim, master, comm, ierr)
+    call xmpi_bcast(self%ispin_prim, master, comm, ierr)
     self%rvec(:,:)=rvec(:,:)
-    xmpi_bcast(self%rvec, master, comm, ierr)
+    call xmpi_bcast(self%rvec, master, comm, ierr)
 
     ABI_ALLOCATE( self%S, (3, nspins))
     do i=1,nspins
        self%S(:,i)=self%spinat(:,i)/self%ms(i)
     end do
-    xmpi_bcast(self%S, master, comm, ierr)
+    call xmpi_bcast(self%S, master, comm, ierr)
     
     self%has_external_hfield=.False.
     !self%has_uniaxial_anistropy=.False.
@@ -193,17 +193,17 @@ contains
     !self%has_DMI=.False.
     self%has_dipdip=.False.
     self%has_bilinear=.False.
-    xmpi_bcast(self%has_external_hfield, master, comm, ierr)
-    xmpi_bcast(self%has_dipdip, master, comm, ierr)
-    xmpi_bcast(self%has_bilinear, master, comm, ierr)
+    call xmpi_bcast(self%has_external_hfield, master, comm, ierr)
+    call xmpi_bcast(self%has_dipdip, master, comm, ierr)
+    call xmpi_bcast(self%has_bilinear, master, comm, ierr)
 
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
     ! Defautl gyro_ratio
     self%gyro_ratio(:)=gyro_ratio !gyromagnetic_ratio
-    xmpi_bcast(self%gyro_ratio, master, comm, ierr)
+    call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     self%gilbert_damping(:)=damping
-    xmpi_bcast(self%gilbert_damping, master, comm, ierr)
+    call xmpi_bcast(self%gilbert_damping, master, comm, ierr)
     call self%bilinear_lil_mat%initialize(self%nspins*3,self%nspins*3)
 
     ABI_ALLOCATE( self%Htmp, (3, nspins))
@@ -274,6 +274,7 @@ contains
                icol=(j-1)*3+ib,val=val(ia,ib),mode=1)
        end do
     end do
+    call xmpi_bcast(self%has_bilinear, master, comm, ierr)
   end subroutine spin_terms_t_set_bilinear_term_single
 
   subroutine spin_terms_t_set_bilinear_term(self, idx_i, idx_j, val)
@@ -292,27 +293,33 @@ contains
           end do
        end do
     end do
+    call xmpi_bcast(self%has_bilinear, master, comm, ierr)
   end subroutine spin_terms_t_set_bilinear_term
 
   subroutine spin_terms_t_calc_bilinear_term_Heff(self, S, Heff)
 
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in) :: S(:,:)
+    real(dp), intent(inout) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspins)
     integer :: i, iatom, jatom
     if (.not. self%csr_mat_ready) then
-       call LIL_to_CSR(self%bilinear_lil_mat, self%bilinear_csr_mat)
+       if(iam_master) then
+          call LIL_to_CSR(self%bilinear_lil_mat, self%bilinear_csr_mat)
+       endif
+       call self%bilinear_csr_mat%sync()
        self%csr_mat_ready=.True.
     endif
-    call self%bilinear_csr_mat%mv(S ,Heff)
-    do i =1, self%nspins
-       Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
-    end do
+    call self%bilinear_csr_mat%mv_mpi(S ,Heff)
+    if(iam_master) then
+       do i =1, self%nspins
+          Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
+       end do
+    endif
   end subroutine spin_terms_t_calc_bilinear_term_Heff
 
   subroutine spin_terms_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
     class(spin_terms_t), intent(inout) :: self  
-    real(dp), optional, intent(in) :: displacement(:,:), strain(:,:), spin(:,:)
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
     ! if present in input
     ! calculate if required
@@ -329,7 +336,7 @@ contains
 
   subroutine spin_terms_t_total_Heff(self,S, Heff, energy)
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in):: S(3,self%nspins)
+    real(dp), intent(inout):: S(3,self%nspins)
     real(dp), intent(inout):: Heff(3,self%nspins)
     real(dp), intent(inout) :: energy
     integer :: i, j
@@ -364,7 +371,7 @@ contains
 
   subroutine spin_terms_t_get_energy(self, S, energy)
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in):: S(3,self%nspins)
+    real(dp), intent(inout):: S(3,self%nspins)
     real(dp), intent(inout) :: energy
     integer :: i, j
     energy=0.0_dp
@@ -372,20 +379,25 @@ contains
     if(self%has_bilinear) then
        if (.not. self%csr_mat_ready) then
           call LIL_to_CSR(self%bilinear_lil_mat, self%bilinear_csr_mat)
+          call self%bilinear_csr_mat%sync()
           self%csr_mat_ready=.True.
        endif
-       call self%bilinear_csr_mat%mv(S ,self%Htmp)
-       energy=energy - sum(sum(self%Htmp* S, dim=1))
+       call self%bilinear_csr_mat%mv_mpi(S ,self%Htmp)
+       if(iam_master) then
+          energy=energy - sum(sum(self%Htmp* S, dim=1))
+       endif
     end if
 
-    if (self%has_external_hfield) then
-       call spin_terms_t_calc_external_Heff(self,self%Htmp)
-       do i=1, self%nspins
-          do j=1, 3
-             energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
+    if(iam_master) then
+       if (self%has_external_hfield) then
+          call spin_terms_t_calc_external_Heff(self,self%Htmp)
+          do i=1, self%nspins
+             do j=1, 3
+                energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
+             end do
           end do
-       end do
-    endif
+       endif
+    end if
   end subroutine spin_terms_t_get_energy
 
 

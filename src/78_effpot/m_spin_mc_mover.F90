@@ -79,7 +79,7 @@
      class(spin_mc_t), intent(inout) :: self
      type(rng_t) :: rng
      class(effpot_t), intent(inout) :: effpot
-     real(dp), intent(in) :: S_in(3,self%nspins)
+     real(dp), intent(inout) :: S_in(3,self%nspins)
      real(dp), intent(out) :: S_out(3,self%nspins), etot
      integer :: i
      self%S(:,:)=S_in(:,:)
