@@ -103,9 +103,9 @@ module defs_datatypes
   ! eig(mband,nkpt,nsppol)
   ! Eigenvalues of each band.
 
-  real(dp),allocatable :: lifetime(:,:,:)
-  ! lifetime(mband,nkpt,nsppol)
-  ! Lifetime of each band
+  real(dp),allocatable :: linewidth(:,:,:,:)
+  ! linewidth(itemp,mband,nkpt,nsppol)
+  ! Linewidth of each band
 
   real(dp),allocatable :: velocity(:,:,:,:)
   ! velocity(3,mband,nkpt,nsppol)

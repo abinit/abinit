@@ -79,6 +79,8 @@ module m_sigmaph
 !!***
 
  public :: sigmaph   ! Main entry point to compute self-energy matrix elements
+ public :: sigmaph_read    ! Read main dimensions and header of sigmaph from a netcdf file.
+ public :: sigmaph_ebands  ! Fill in values in ebands from the sigmaph structure and netcdf file
 !!***
 
  ! Tables for degenerated KS states.
@@ -107,7 +109,7 @@ module m_sigmaph
 !!
 !! SOURCE
 
- type,private :: sigmaph_t
+ type,public :: sigmaph_t
 
   integer :: nkcalc
    ! Number of k-points computed.
@@ -431,7 +433,6 @@ module m_sigmaph
 !!***
 
  private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
- private :: sigmaph_read              ! Read main dimensions and header of sigmaph from a netcdf file.
  private :: sigmaph_write             ! Write main dimensions and header of sigmaph on a netcdf file.
  private :: sigmaph_comp              ! Compare two instances of sigmaph raise error if different
  private :: sigmaph_free              ! Free memory.
@@ -2735,7 +2736,8 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  end if
  NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
  ! so that the structure is properly freed
- new%ncid = nctk_noid
+ !new%ncid = nctk_noid
+ new%ncid = ncid
 
  !TODO?
  !NCF_CHECK(cryst%ncread(ncid))
@@ -2813,7 +2815,6 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"),ph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"),eph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"),eph_transport))
- ABI_CHECK(eph_task      == dtset%eph_task,     "netcdf eph_task != input file")
  ABI_CHECK(symdynmat     == dtset%symdynmat,    "netcdf symdynmat != input file")
  ABI_CHECK(ph_intmeth    == dtset%ph_intmeth,   "netcdf ph_intmeth != input file")
  ABI_CHECK(eph_intmeth   == dtset%eph_intmeth,  "netcdf eph_intmeth != input file")
@@ -2834,7 +2835,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  ! This can lead SIGFPE if huge...
  !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
 
- NCF_CHECK(nf90_close(ncid))
+ !NCF_CHECK(nf90_close(ncid))
 
 contains
  integer function vid(vname)
@@ -2846,6 +2847,88 @@ end function vid
 
 end function sigmaph_read
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/sigmaph_read
+!! NAME
+!!  sigmaph_read
+!!
+!! FUNCTION
+!!  Read quantities from the sigmaph to a ebands structure and return mapping
+!!
+!! INPUTS
+!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!!  opt=integer option selecting what to read on the ebands object. 1-only mapping, 10+n-read n temperature linewidths
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, indq2ebands)
+
+!Arguments -----------------------------------------------
+ integer,intent(in) :: comm
+ integer,intent(in) :: opt
+ type(sigmaph_t),intent(in) :: self
+ type(ebands_t),intent(inout) :: ebands
+ type(crystal_t),intent(in) :: cryst
+ integer, intent(out) :: ierr
+ integer, allocatable, optional, intent(out) :: indq2ebands(:)
+ character(len=500) :: msg
+
+!Local variables -----------------------------------------
+ integer :: ii, spin, ikpt, ikcalc, iband, itemp
+ integer :: band_ks, bstart_ks, nbcalc_ks
+ integer :: ncid
+ integer,allocatable :: indkk(:,:)
+ real,allocatable :: linewidth(:,:,:,:)
+ real(dp) :: dksqmax
+
+ ABI_MALLOC(indkk,(ebands%nkpt,6))
+ ! map ebands kpoints to sigmaph
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, &
+             self%nkcalc, cryst%nsym, 1, cryst%symafm, cryst%symrec, &
+             self%timrev, comm, use_symrec=.True.)
+
+ if (dksqmax > tol12) then
+    write(msg, '(4a)' ) &
+     "Error mapping ebands to sigmaph",ch10,&
+     "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
+    MSG_ERROR(msg)
+ end if
+
+ ! store mapping to return
+ if (present(indq2ebands)) then
+   ABI_MALLOC(indq2ebands,(ebands%nkpt))
+   indq2ebands(:) = indkk(:,1)
+ end if
+
+ select case (opt)
+ case (1)
+   ! read linewidths from sigmaph
+   ABI_MALLOC(ebands%linewidth,(self%ntemp,ebands%mband,ebands%nkpt,ebands%nsppol))
+   do spin=1,ebands%nsppol
+     do ikcalc=1,ebands%nkpt
+       bstart_ks = self%bstart_ks(ikcalc,spin)
+       nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
+       do iband=1,nbcalc_ks
+         band_ks = iband + bstart_ks
+         ikpt = indkk(ikcalc,1)
+         do itemp=1,self%ntemp
+           ! read from netcdf file
+           NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), ebands%linewidth(itemp,band_ks,ikcalc,spin), start=[2,itemp,iband,ikcalc,spin]))
+         end do
+       end do
+     end do
+   end do
+ end select
+
+ ABI_FREE(indkk)
+
+end subroutine sigmaph_ebands
 
 !----------------------------------------------------------------------
 

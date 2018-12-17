@@ -445,7 +445,7 @@ integer :: ncerr
 #endif
 integer :: ierr
 integer :: fout1
-logical :: do_lifetime
+logical :: do_linewidth
 complex(dpc) :: e1,e2,e12
 complex(dpc) :: e1_ep,e2_ep,e12_ep
 real(dp) :: deltav1v2
@@ -529,11 +529,11 @@ complex(dpc), allocatable :: eps(:)
 
  ABI_CHECK(KSBSt%mband==nstval, "The number of bands in the BSt should be equal to nstval !")
 
- do_lifetime = allocated(EPBSt%lifetime)
-! TODO: activate this, and remove do_lifetime - always add it in even if 0.
-! if (.not. allocated(EPBSt%lifetime)) then
-!   ABI_ALLOCATE(EPBSt%lifetime, (nstval, my_k2-my_k1+1, nspin))
-!   EPBSt%lifetime = zero
+ do_linewidth = allocated(EPBSt%linewidth)
+! TODO: activate this, and remove do_linewidth - always add it in even if 0.
+! if (.not. allocated(EPBSt%linewidth)) then
+!   ABI_ALLOCATE(EPBSt%linewidth, (1, nstval, my_k2-my_k1+1, nspin))
+!   EPBSt%linewidth = zero
 ! end if
 
 !allocate local arrays
@@ -582,16 +582,16 @@ complex(dpc), allocatable :: eps(:)
        e1_ep=EPBSt%eig(ist1,ik,isp)
 ! TODO: unless memory is a real issue, should set lifetimes to 0 and do this sum systematically
 ! instead of putting an if statement in a loop! See above
-       if(do_lifetime) then
-         e1_ep = e1_ep + EPBSt%lifetime(ist1,ik,isp)*(0.0_dp,1.0_dp)
+       if(do_linewidth) then
+         e1_ep = e1_ep + EPBSt%linewidth(1,ist1,ik,isp)*(0.0_dp,1.0_dp)
        end if
 !      if (e1.lt.efermi) then
 !      do ist2=ist1,nstval
        do ist2=1,nstval
          e2=KSBSt%eig(ist2,ik,isp)
          e2_ep=EPBSt%eig(ist2,ik,isp)
-         if(do_lifetime) then
-           e2_ep = e2_ep - EPBSt%lifetime(ist2,ik,isp)*(0.0_dp,1.0_dp)
+         if(do_linewidth) then
+           e2_ep = e2_ep - EPBSt%linewidth(1,ist2,ik,isp)*(0.0_dp,1.0_dp)
          end if
 !        if (e2.gt.efermi) then
          if (ist1.ne.ist2) then

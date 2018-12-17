@@ -527,9 +527,9 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 !scalars
  integer :: iw,ib_v,ib_c,ik_bz,ik_ibz,spin,iq
  real(dp) :: fact,arg,ediff
- real(dp) :: lifetime
+ real(dp) :: linewidth
  complex(dpc) :: ctemp
- logical :: do_lifetime
+ logical :: do_linewidth
 
 !************************************************************************
 
@@ -540,8 +540,8 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
  eps_rpa=czero; dos=zero
 
- do_lifetime = .FALSE.
- do_lifetime = allocated(BSt%lifetime)
+ do_linewidth = .FALSE.
+ do_linewidth = allocated(BSt%linewidth)
 
  !write(std_out,*)nsppol,Kmesh%nbz,lomo_min,homo,nbnds
  !
@@ -556,13 +556,13 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
          ediff = BSt%eig(ib_c,ik_ibz,spin) - BSt%eig(ib_v,ik_ibz,spin)
 
          !
-         if(do_lifetime) then
-           lifetime = BSt%lifetime(ib_c,ik_ibz,spin) + BSt%lifetime(ib_v,ik_ibz,spin)
+         if(do_linewidth) then
+           linewidth = BSt%linewidth(1,ib_c,ik_ibz,spin) + BSt%linewidth(1,ib_v,ik_ibz,spin)
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
                eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
-&             (one/(ediff-j_dpc*lifetime-omega(iw)) + one/(ediff+j_dpc*lifetime+omega(iw)))
+&             (one/(ediff-j_dpc*linewidth-omega(iw)) + one/(ediff+j_dpc*linewidth+omega(iw)))
              end do
            end do
            !
@@ -573,7 +573,7 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 
            do iw=1,nomega
              arg = DBLE(omega(iw)) - ediff
-             dos(iw) = dos(iw) + dirac_delta(arg,lifetime)
+             dos(iw) = dos(iw) + dirac_delta(arg,linewidth)
            end do
          else
            do iq=1,nq
