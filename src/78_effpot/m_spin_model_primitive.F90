@@ -42,6 +42,7 @@ module m_spin_model_primitive
   use m_abicore
   use m_errors
   use m_supercell
+  use m_multibinit_global
   use m_spin_terms
   implicit none
 
@@ -643,7 +644,7 @@ contains
 
   subroutine spin_model_primitive_t_make_supercell(self, sc_matrix, sc_ham)
 
-    class(spin_model_primitive_t) , intent(in) :: self
+    class(spin_model_primitive_t) , intent(inout) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
     integer :: sc_matrix(3,3), iatoms(self%nspins)
 
@@ -655,6 +656,7 @@ contains
     real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
     integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
 
+    if(iam_master) then
     typat_primcell(:)=1
     ! TODO hexu:should use supercell generate with lattice model
     !init_supercell(natom_primcell, sc_matrix, rprimd_primcell,
@@ -713,13 +715,18 @@ contains
        endif
     end do
 
+    endif
 
+    
     call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
          & spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, &
          & rvec=sc_rvec, gyro_ratio=sc_gyroratios, damping=sc_damping_factors)
 
+    call  xmpi_bcast(self%total_nnz, master, comm, ierr)
+    call  xmpi_bcast(scell%ncells, master, comm, ierr)
     do i =1, self%total_nnz, 1
        do icell=1, scell%ncells, 1
+        if(iam_master) then
           ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index
           call find_supercell_ijR(scell=scell, i0=iatoms(self%total_ilist%data(i)), &
                j0=iatoms(self%total_jlist%data(i)), &
@@ -734,9 +741,9 @@ contains
              end do
           end do
           call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp)
+         endif
        enddo
     enddo
-
     if (allocated(sc_ispin_prim)) then
        ABI_DEALLOCATE(sc_ispin_prim)
     endif

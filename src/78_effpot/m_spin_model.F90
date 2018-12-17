@@ -47,7 +47,7 @@ module m_spin_model
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_multibinit_global, only: iam_master, my_rank, ierr, comm, master
+  use m_multibinit_global
   use m_io_tools, only : get_unit, open_file, close_unit
 
   use m_multibinit_dataset, only: multibinit_dtset_type
@@ -61,8 +61,7 @@ module m_spin_model
        & spin_model_primitive_t_make_supercell
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
-  use m_spin_mover, only: spin_mover_t,  spin_mover_t_finalize, &
-       & spin_mover_t_run_time, spin_mover_t_run_one_step
+  use m_spin_mover, only: spin_mover_t
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_init, spin_ncfile_t_close, spin_ncfile_t_def_sd, &
        & spin_ncfile_t_write_primitive_cell, spin_ncfile_t_write_supercell, spin_ncfile_t_write_parameters, &
        & spin_ncfile_t_write_one_step, spin_ncfile_t_def_ob
@@ -101,6 +100,7 @@ module m_spin_model
          procedure :: run => spin_model_t_run
          procedure :: initialize=>spin_model_t_initialize
          procedure :: set_initial_spin => spin_model_t_set_initial_spin
+         procedure :: set_params => spin_model_t_set_params
          procedure :: finalize => spin_model_t_finalize
          procedure :: read_xml => spin_model_t_read_xml
          procedure :: make_supercell => spin_model_t_make_supercell
@@ -186,25 +186,26 @@ contains
        call spin_model_t_read_xml(self, trim(self%xml_fname)//char(0))
 
 
-
        !call self%spin_primitive%print_terms()
        call spin_model_primitive_t_print_terms(self%spin_primitive)
+
 
        ! make supercell
        sc_matrix(:,:)=0.0_dp
        sc_matrix(1,1)=self%params%ncell(1)
        sc_matrix(2,2)=self%params%ncell(2)
        sc_matrix(3,3)=self%params%ncell(3)
-       !call self%make_supercell(sc_matrix)
-       call spin_model_t_make_supercell(self, sc_matrix)
+     end if
+       call self%make_supercell(sc_matrix)
 
        ! set parameters to hamiltonian and mover
        self%nspins= self%spin_calculator%nspins
 
        call self%spin_mover%initialize(self%params, self%nspins )
 
-       call spin_model_t_set_params(self)
+       call self%set_params()
 
+    if(iam_master) then
        call spin_hist_t_init(hist=self%spin_hist, nspins=self%nspins, &
             &   mxhist=3, has_latt=.False.)
 
@@ -213,18 +214,20 @@ contains
 
        call self%spin_mover%set_hist(self%spin_hist)
 
-       !call self%set_initial_spin(mode=1)
-       call spin_model_t_set_initial_spin(self)
+     endif
+       call self%set_initial_spin()
 
        call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%gyro_ratio, &
             & damping=self%spin_calculator%gilbert_damping, ms=self%spin_calculator%ms )
 
+    if(iam_master) then
        call ob_initialize(self%spin_ob, self%spin_calculator, self%params)
 
        call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
 
        call spin_ncfile_t_write_one_step(self%spin_ncfile, self%spin_hist)
-    end if
+     endif
+
   end subroutine spin_model_t_initialize
   !!***
 
@@ -252,12 +255,14 @@ contains
 
     class(spin_model_t), intent(inout) :: self
     !call self%spin_primitive%finalize()
-    call spin_model_primitive_t_finalize(self%spin_primitive)
-    call spin_terms_t_finalize(self%spin_calculator)
-    call spin_hist_t_free(self%spin_hist)
+    if(iam_master) then
+      call spin_model_primitive_t_finalize(self%spin_primitive)
+      call spin_hist_t_free(self%spin_hist)
+      call ob_finalize(self%spin_ob)
+      call spin_ncfile_t_close(self%spin_ncfile)
+    end if
+    call self%spin_calculator%finalize()
     call self%spin_mover%finalize()
-    call ob_finalize(self%spin_ob)
-    call spin_ncfile_t_close(self%spin_ncfile)
     ! TODO: finalize others
   end subroutine spin_model_t_finalize
   !!***
@@ -290,11 +295,11 @@ contains
     ! params -> calculator
 
 
+    call xmpi_bcast(self%params%spin_damping, master, comm, ierr)
     if (self%params%spin_damping >=0) then
        damping(:)= self%params%spin_damping
        call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature, damping=damping)
     else
-
        call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature)
     end if
 
@@ -383,8 +388,8 @@ contains
 
     class(spin_model_t), intent(inout) :: self
     integer , intent(in):: sc_mat(3, 3)
-    !call self%spin_primitive%make_supercell(sc_mat, self%spin_calculator)
-    call spin_model_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
+    call self%spin_primitive%make_supercell(sc_mat, self%spin_calculator)
+    !call spin_model_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
   end subroutine spin_model_t_make_supercell
   !!***
 
@@ -409,12 +414,14 @@ contains
     class(spin_model_t), intent(inout) :: self
     type(spin_ncfile_t), intent(out) :: spin_ncfile
     character(len=*) :: fname
+    if(iam_master) then
     call spin_ncfile_t_init(spin_ncfile, trim(fname), self%params%spin_write_traj)
     call spin_ncfile_t_def_sd(spin_ncfile, self%spin_hist )
     call spin_ncfile_t_def_ob(spin_ncfile, self%spin_ob)
     !call spin_ncfile_t_write_primitive_cell(self%spin_ncfile, self%spin_primitive)
     call spin_ncfile_t_write_supercell(spin_ncfile, self%spin_calculator)
     call spin_ncfile_t_write_parameters(spin_ncfile, self%params)
+    endif
   end subroutine spin_model_t_prepare_ncfile
   !!***
 
@@ -445,6 +452,7 @@ contains
     integer :: i
     real(dp) :: S(3, self%nspins)
     character(len=500) :: msg
+    if(iam_master) then
     mode=self%params%spin_init_state
     if(mode==2) then
        ! set all spin to z direction.
@@ -471,6 +479,8 @@ contains
 
     call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%ms, &
          &  time=0.0_dp, ihist_latt=0, inc=.True.)
+
+   endif
   end subroutine spin_model_t_set_initial_spin
   !!***
 
@@ -523,7 +533,7 @@ contains
   subroutine spin_model_t_run_time(self)
 
     class(spin_model_t), intent(inout) :: self
-    call spin_mover_t_run_time(self%spin_mover,self%spin_calculator,self%spin_hist, self%spin_ncfile, self%spin_ob)
+    call self%spin_mover%run_time(self%spin_calculator,self%spin_hist, self%spin_ncfile, self%spin_ob)
   end subroutine spin_model_t_run_time
   !!***
 
@@ -546,17 +556,11 @@ contains
     real(dp) :: Tlist(T_nstep), chi_list(T_nstep), Cv_list(T_nstep), binderU4_list(T_nstep)
     real(dp) :: Mst_sub_list(3, self%spin_ob%nsublatt, T_nstep), Mst_sub_norm_list(self%spin_ob%nsublatt, T_nstep)
     real(dp) ::  Mst_norm_total_list(T_nstep)
-    logical :: iam_master
-    integer :: ierr
-    iam_master=(xmpi_comm_rank(xmpi_world) == 0 )
     if (iam_master) then
        Tfile=get_unit()
        Tfname = trim(self%out_fname)//'.varT'
        iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
 
-       !do i=1, self%spin_ob%nsublatt
-       !   sublatt(i)=i
-       !end do
        T_step=(T_end-T_start)/(T_nstep-1)
 
        write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
@@ -567,6 +571,7 @@ contains
     end if
 
     call xmpi_bcast(T_nstep, 0, xmpi_world, ierr)
+    call xmpi_bcast(T_step, 0, xmpi_world, ierr)
     do i=1, T_nstep
        if(iam_master) then
           T=T_start+(i-1)*T_step
@@ -583,13 +588,15 @@ contains
           ! set temperature
           ! TODO make this into a subroutine set_params
           self%params%spin_temperature=T
-          call self%spin_mover%set_Langevin_params(temperature=T)
+        endif
+        call self%spin_mover%set_Langevin_params(temperature=T)
+        if(iam_master) then
           call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)
           call ob_reset(self%spin_ob, self%params)
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
           if(i==0) then
-             call spin_model_t_set_initial_spin(self)
+             call self%set_initial_spin()
           else
              call spin_hist_t_inc(self%spin_hist)
           endif

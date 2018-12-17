@@ -155,37 +155,36 @@ contains
     call xmpi_bcast(self%nspins, master, comm, ierr)
 
     ABI_ALLOCATE(self%iatoms, (nspins))
-    self%iatoms(:)=iatoms(:)
+    if (iam_master) self%iatoms(:)=iatoms(:)
     call xmpi_bcast(self%iatoms, master, comm, ierr)
-    self%cell(:,:)=cell(:,:)
+    if (iam_master) self%cell(:,:)=cell(:,:)
     call xmpi_bcast(self%cell, master, comm, ierr)
 
     ABI_ALLOCATE( self%pos, (3,nspins) )
-    self%pos(:,:)=pos(:,:)
+    if (iam_master) self%pos(:,:)=pos(:,:)
     call xmpi_bcast(self%pos, master, comm, ierr)
 
     ABI_ALLOCATE( self%spinat, (3, nspins))
-    self%spinat(:,:)=spinat(:,:)
+    if (iam_master) self%spinat(:,:)=spinat(:,:)
     call xmpi_bcast(self%spinat, master, comm, ierr)
 
     ABI_ALLOCATE( self%ms, (nspins) )
-    self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))* mu_B
+    if (iam_master) self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))* mu_B
     call xmpi_bcast(self%ms, master, comm, ierr)
 
     ABI_ALLOCATE( self%ispin_prim, (nspins))
     ABI_ALLOCATE(self%rvec, (3, nspins))
     
-    self%ispin_prim(:)=ispin_prim(:)
+    if (iam_master) self%ispin_prim(:)=ispin_prim(:)
 
     call xmpi_bcast(self%ispin_prim, master, comm, ierr)
-    self%rvec(:,:)=rvec(:,:)
+    if (iam_master) self%rvec(:,:)=rvec(:,:)
     call xmpi_bcast(self%rvec, master, comm, ierr)
 
     ABI_ALLOCATE( self%S, (3, nspins))
     do i=1,nspins
        self%S(:,i)=self%spinat(:,i)/self%ms(i)
     end do
-    call xmpi_bcast(self%S, master, comm, ierr)
     
     self%has_external_hfield=.False.
     !self%has_uniaxial_anistropy=.False.
@@ -200,9 +199,9 @@ contains
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
     ! Defautl gyro_ratio
-    self%gyro_ratio(:)=gyro_ratio !gyromagnetic_ratio
+   if(iam_master)  self%gyro_ratio(:)=gyro_ratio !gyromagnetic_ratio
     call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
-    self%gilbert_damping(:)=damping
+    if(iam_master) self%gilbert_damping(:)=damping
     call xmpi_bcast(self%gilbert_damping, master, comm, ierr)
     call self%bilinear_lil_mat%initialize(self%nspins*3,self%nspins*3)
 
@@ -274,7 +273,7 @@ contains
                icol=(j-1)*3+ib,val=val(ia,ib),mode=1)
        end do
     end do
-    call xmpi_bcast(self%has_bilinear, master, comm, ierr)
+    !call xmpi_bcast(self%has_bilinear, master, comm, ierr)
   end subroutine spin_terms_t_set_bilinear_term_single
 
   subroutine spin_terms_t_set_bilinear_term(self, idx_i, idx_j, val)
@@ -302,6 +301,7 @@ contains
     real(dp), intent(inout) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspins)
     integer :: i, iatom, jatom
+    call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
     if (.not. self%csr_mat_ready) then
        if(iam_master) then
           call LIL_to_CSR(self%bilinear_lil_mat, self%bilinear_csr_mat)
@@ -344,6 +344,7 @@ contains
     Heff(:,:) =0.0_dp
     energy=0.0_dp
 
+    call xmpi_bcast(self%has_bilinear, master, comm, ierr)
     if(self%has_bilinear) then
        call spin_terms_t_calc_bilinear_term_Heff(self,S,self%Htmp)
        Heff=Heff+self%Htmp

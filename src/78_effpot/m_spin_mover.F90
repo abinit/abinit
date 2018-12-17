@@ -132,6 +132,7 @@ contains
     call xmpi_bcast(self%pre_time, master, comm, ierr)
     call xmpi_bcast(self%total_time, master, comm, ierr)
     call xmpi_bcast(self%temperature, master, comm, ierr)
+    call xmpi_bcast(self%method, master, comm, ierr)
     call set_seed(self%rng, [111111_dp, 2_dp])
     if(my_rank>0) then
        do i =1,my_rank
@@ -152,7 +153,9 @@ contains
   subroutine spin_mover_t_set_hist(self, hist)
     class(spin_mover_t), intent(inout) :: self
     type(spin_hist_t), target, intent(inout) :: hist
-    self%hist=>hist
+    if (iam_master) then
+      self%hist=>hist
+    end if
   end subroutine spin_mover_t_set_hist
 
   subroutine set_Langevin_params(self, gyro_ratio, damping, temperature, ms)
@@ -183,7 +186,6 @@ contains
           call xmpi_bcast(self%spin_mc%temperature, master, comm, ierr)
           call xmpi_bcast(self%spin_mc%beta, master, comm, ierr)
        end if
-
     end if
 
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
@@ -365,19 +367,17 @@ contains
     class(effpot_t), intent(inout) :: effpot
     real(dp) :: S_out(3,self%nspins), etot
     integer :: ierr
-    self%Stmp=spin_hist_t_get_S(self%hist)
+    if(iam_master) self%Stmp=spin_hist_t_get_S(self%hist)
     if(self%method==1) then
-       !call spin_mover_t_run_one_step_HeunP(self, effpot, spin_hist_t_get_S(self%hist), S_out, etot)
        call self%run_one_step_HeunP(effpot, self%Stmp, S_out, etot)
     else if (self%method==2) then
        call self%run_one_step_DM(effpot, self%Stmp, S_out, etot)
     else if (self%method==3) then
-       if(iam_master) then ! only serial mode for MC
           call self%run_one_step_MC(effpot, self%Stmp, S_out, etot)
-       endif
     end if
+    call xmpi_barrier(comm)
     ! do not inc until time is set to hist.
-    call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
+    if(iam_master) call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
   end subroutine spin_mover_t_run_one_step
 
   !!****f* m_spin_mover/spin_mover_t_run_time
@@ -436,7 +436,6 @@ contains
        call wrtout(ab_out, msg, 'COLL')
     end if
 
-    call xmpi_bcast(self%pre_time, 0, xmpi_world, ierr)
     if (abs(self%pre_time) > 1e-30) then
        if (iam_master) then
           msg="Thermalization run:"

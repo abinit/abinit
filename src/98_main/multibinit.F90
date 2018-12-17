@@ -76,7 +76,7 @@ program multibinit
 
 !Local variables-------------------------------
 ! Set array dimensions
- integer :: filetype,ii,ierr,lenstr
+ integer :: filetype,ii,lenstr
  integer :: natom,nph1l,nrpt,ntypat
  integer :: option
  real(dp) :: tcpu,tcpui,twall,twalli
