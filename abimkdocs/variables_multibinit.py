@@ -827,6 +827,8 @@ Flag to run spin dynamics.
 
 * 2 --> Run spin dynamics with Depondt-Mertens method [[cite:Depondt2009]].
 
+* 3 --> Run Monte Carlo.
+
 The HeunP method does less computation for each step,
 whereas the Depondt-Mertens method allow larger time step.
 For system with very simple interaction terms, HeunP could be faster.

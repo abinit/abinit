@@ -1176,10 +1176,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%spin_dynamics=intarr(1)
  if(multibinit_dtset%spin_dynamics< 0 .or.&
-      &   multibinit_dtset%spin_dynamics > 2) then
+      &   multibinit_dtset%spin_dynamics > 3) then
     write(message, '(a,i8,a,a,a,a,a)' )&
          &   'spin_dynamics is',multibinit_dtset%spin_dynamics,', but the only allowed values',ch10,&
-         &   'are 0, 1, and 2.',ch10,&
+         &   'are 0, 1, 2, and 3.',ch10,&
          &   'Action: correct spin_dynamics in your input file.'
     MSG_ERROR(message)
  end if
