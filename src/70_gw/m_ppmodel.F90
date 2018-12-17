@@ -160,7 +160,6 @@ MODULE m_ppmodel
 
  end type ppmodel_t
 
-
  public :: ppm_get_qbz              ! Symmetrize the PPm parameters in the BZ.
  public :: ppm_nullify              ! Nullify all pointers
  public :: ppm_init                 ! Initialize dimensions and pointers
@@ -451,12 +450,8 @@ subroutine ppm_free(PPm)
 #endif
 
  ! logical flags must be deallocated here.
- if (allocated(PPm%keep_q)) then
-   ABI_FREE(PPm%keep_q)
- end if
- if (allocated(PPm%has_q)) then
-   ABI_FREE(PPm%has_q)
- end if
+ ABI_SFREE(PPm%keep_q)
+ ABI_SFREE(PPm%has_q)
 
 end subroutine ppm_free
 !!***
@@ -534,17 +529,9 @@ subroutine ppm_table_free(PPm,iq_ibz)
 ! *********************************************************************
 
  !@ppmodel_t
- if (allocated(PPm%bigomegatwsq)) then
-   call array_free(PPm%bigomegatwsq(iq_ibz))
- end if
-
- if (allocated(PPm%omegatw)) then
-   call array_free(PPm%omegatw(iq_ibz))
- end if
-
- if (allocated(PPm%eigpot)) then
-   call array_free(PPm%eigpot(iq_ibz))
- end if
+ if (allocated(PPm%bigomegatwsq)) call array_free(PPm%bigomegatwsq(iq_ibz))
+ if (allocated(PPm%omegatw)) call array_free(PPm%omegatw(iq_ibz))
+ if (allocated(PPm%eigpot)) call array_free(PPm%eigpot(iq_ibz))
 
  PPm%has_q(iq_ibz) = PPM_NOTAB
 
@@ -1501,21 +1488,21 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
        nimwp=nimwp+1
 
        if ( invalid_freq == 1 ) then
-       ! set omegatwsq to 1 hartree
+        ! set omegatwsq to 1 hartree
          omegatwsq(ig,igp)=cone
          AA = epsm1(ig,igp)
          if ( ig == igp ) AA = AA - one
          omegatw(ig,igp)=SQRT(REAL(omegatwsq(ig,igp)))
          bigomegatwsq(ig,igp)=-AA*omegatw(ig,igp)**2
        elseif ( invalid_freq == 2 ) then
-       ! set omegatwsq to infinity
+         ! set omegatwsq to infinity
          omegatwsq(ig,igp)=cone/tol6
          AA = epsm1(ig,igp)
          if ( ig == igp ) AA = AA - one
          omegatw(ig,igp)=SQRT(REAL(omegatwsq(ig,igp)))
          bigomegatwsq(ig,igp)=-AA*omegatw(ig,igp)**2
        else
-       ! simply ignore all cases of omegatw with imaginary values
+         ! simply ignore all cases of omegatw with imaginary values
          bigomegatwsq(ig,igp)=(0.,0.)
          omegatw(ig,igp)=(ten,0.)
        end if

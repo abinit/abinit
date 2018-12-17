@@ -108,8 +108,6 @@ contains
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
 & iout,lst,mpert,natom,nph2l,phfrq,comm,ncid)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iout,mpert,natom,nph2l,comm,ncid
@@ -557,8 +555,6 @@ end subroutine ddb_diel
 !! SOURCE
 
 subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

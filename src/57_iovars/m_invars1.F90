@@ -98,8 +98,6 @@ contains
 subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 & msym,mxnatom,mxnimage,mxntypat,ndtset,ndtset_alloc,npsp,papiopt,timopt,string)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lenstr,ndtset,ndtset_alloc
@@ -587,8 +585,6 @@ end subroutine invars0
 subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 & msym, ndtset, ndtset_alloc, string, npsp, zionpsp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,lenstr,msym,ndtset,ndtset_alloc,npsp
@@ -797,8 +793,6 @@ end subroutine invars1m
 
 subroutine indefo1(dtset)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -916,10 +910,6 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
- dtset%supercell_latt(:,:) = 0
- do ii=1,3
-   dtset%supercell_latt(ii,ii) = 1
- end do
  dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0
@@ -1014,8 +1004,6 @@ end subroutine indefo1
 
 subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 & string,symafm,symrel,tnons,zionpsp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1907,7 +1895,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 
  use defs_abitypes,  only : dataset_type
  use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
- implicit none
 
 !Arguments ------------------------------------
 !scalars

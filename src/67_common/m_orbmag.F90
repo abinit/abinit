@@ -291,8 +291,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
      &                     pawtab,psps,pwind,pwind_alloc,pwnsfac,&
      &                     rprimd,symrec,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(out) :: pwind_alloc
@@ -889,12 +887,6 @@ end subroutine initorbmag
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
      & npwarr,pawtab,usecprj,usepaw)
 
@@ -925,7 +917,7 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
   type(pawcprj_type),allocatable :: cprj_k(:,:)
 
   !----------------------------------------------------
-  
+
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
@@ -934,12 +926,12 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
   call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
   ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natom,dtorbmag%nspinor*dtset%mband))
   call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
-  
+
   nband_k = dtorbmag%mband_occ
 
   trace=zero
   do ikpt = 1, dtorbmag%fnkpt
-           
+
      icprj = dtorbmag%cprjindex(ikpt,isppol)
 
      npw_k = npwarr(ikpt)
@@ -972,9 +964,9 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
 
   ! final trace: factor of two assumes two electrons per band (normal occupance for an insulator)
   trace = trace*two/dtorbmag%fnkpt
-  
+
   write(std_out,'(a,2i4,es16.8)')'JWZ debug nkpt nband_k trace ',dtorbmag%fnkpt,nband_k,trace
-  
+
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
   ABI_DATATYPE_DEALLOCATE(cprj_k)
@@ -1055,8 +1047,6 @@ end subroutine rho_norm_check
 subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
      &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
      &            symrec,usecprj,usepaw,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1234,7 +1224,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
                       & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
                  call pawcprj_copy(cprj_fkn,cprj_kb)
               end if
-              
+
               if (.NOT. has_smat_indx(ikpt,bdx,0)) then
 
                  call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
@@ -1405,7 +1395,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,gmet,gprimd,kg,&
   ! gives number of electrons as expected.
   dtorbmag%chern(1,1:3) = -cnum(2,1:3)*two/(two_pi*dtorbmag%fnkpt)
   dtorbmag%chern(2,1:3) =  cnum(1,1:3)*two/(two_pi*dtorbmag%fnkpt)
-  
+
   write(message,'(a,a,a)')ch10,'====================================================',ch10
   call wrtout(ab_out,message,'COLL')
 
@@ -1530,8 +1520,6 @@ end subroutine chern_number
 subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
-
- implicit none
 
  !Arguments ------------------------------------
  !scalars
@@ -1740,7 +1728,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     VVI = czero; VVII = czero; VVIII = czero
     CCI = czero; CCII=czero
     S1trace = czero
-    
+
     do epsabg = 1, -1, -2
 
        if (epsabg .EQ. 1) then
@@ -2230,7 +2218,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                       VVIII_2 = cmplx(smat_all(1,n1,nn,ikptg,gdxc,0),smat_all(2,n1,nn,ikptg,gdxc,0))
 
                       VVII_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
-                      
+
                       CCI_1 = cmplx(smat_all(1,nn,n1,ikpt,gdx,0),smat_all(2,nn,n1,ikpt,gdx,0))
 
                       CCII_1 = cmplx(smat_all(1,nn,n1,ikpt,bdx,0),smat_all(2,nn,n1,ikpt,bdx,0))
@@ -2238,7 +2226,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                       do n2 = 1, nband_k
                          VVII_2 = cmplx(smat_all(1,n1,n2,ikpt,bdx,gdx),smat_all(2,n1,n2,ikpt,bdx,gdx))
                          VVII_3 = cmplx(smat_all(1,n2,nn,ikptg,gdxc,0),smat_all(2,n2,nn,ikptg,gdxc,0))
-                         
+
                          CCI_2 = cmplx(hmat(1,n1,n2,ikpt,gdx,bdx),hmat(2,n1,n2,ikpt,gdx,bdx))
                          CCI_3 = cmplx(smat_all(1,n2,nn,ikptb,bdxc,0),smat_all(2,n2,nn,ikptb,bdxc,0))
 
@@ -2257,14 +2245,14 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                          VVII = VVII - epsabg*bsigma*gsigma*ENK*VVII_1*VVII_2*VVII_3/(2.0*deltab*2.0*deltag)
 
                       end do ! end n2
-                      
+
                       VVI = VVI - epsabg*bsigma*gsigma*ENK*VVI_1*VVI_2/(2.0*deltab*2.0*deltag)
                       VVIII = VVIII - epsabg*bsigma*gsigma*ENK*VVIII_1*VVIII_2/(2.0*deltab*2.0*deltag)
 
                    end do ! end n1
 
                 end do ! end nn
-                
+
                 ABI_DEALLOCATE(kg_kg)
 
              end do ! end gfor
@@ -2393,8 +2381,6 @@ end subroutine orbmag
 subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
      & istwf_k,kg,mcg,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: istwf_k,mcg,ncpgr
@@ -2517,7 +2503,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                    & dtset%mgfft,mpi_enreg,&
                    & dtset%natom,nattyp,dtset%ngfft,dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,&
                    & phkxred,ph1d,ph3d,ucvol,psps%useylm)
-              
+
               call pawcprj_put(atindx1,cwaveprj,cprj_kb_k(ikpt,bdx,0,:,:),dtset%natom,&
                    & iband,0,ikpt,0,1,nband_k,1,dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0)
 
@@ -2549,7 +2535,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                  kptns(:,1) = kpointb(:)
                  call initylmg(gprimd,kg_k,kptns,1,mpi_enreg,psps%mpsang,npw_k,&
                       & nband_dum,1,npwarr_dum,dtset%nsppol,optder,rprimd,ylm_k,ylm_k_gr)
-           
+
                  !      Compute nonlocal form factors ffnl at all (k+b+G_k):
                  ider=0 ! no derivatives
                  idir=0 ! not applicable
@@ -2558,7 +2544,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                       & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
                       & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
                       & psps%usepaw,psps%useylm,ylm_k,ylm_k_gr)
-           
+
                  choice=1 ! no derivs
                  cpopt=0
                  idir=0 ! not applicable for choice 1
@@ -2571,7 +2557,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                          & dtset%mgfft,mpi_enreg,&
                          & dtset%natom,nattyp,dtset%ngfft,dtset%nloalg,npw_k,dtset%nspinor,dtset%ntypat,&
                          & phkxred,ph1d,ph3d,ucvol,psps%useylm)
-              
+
                     call pawcprj_put(atindx1,cwaveprj,cprj_kb_k(ikpt,bdx,gdx,:,:),dtset%natom,&
                          & iband,0,ikpt,0,1,nband_k,1,dtset%natom,1,nband_k,dimlmn,dtset%nspinor,dtset%nsppol,0)
 
