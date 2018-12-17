@@ -121,7 +121,7 @@ contains
     ! for spin monte carlo
     ! calculate energy difference if one spin is moved.
     class(effpot_t), intent(inout) :: self  ! the effpot may save the states.
-    real(dp), intent(in) :: S(:,:),  Snew(:)
+    real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin
     real(dp), intent(out) :: deltaE
   end subroutine effpot_t_get_delta_E

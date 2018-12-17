@@ -122,7 +122,7 @@ contains
        self%method=params%spin_dynamics
     endif
     if(params%spin_dynamics==3) then ! Monte carlo
-       call self%spin_mc%initialize(nspins=nspins, angle=0.1_dp, temperature=params%spin_temperature)
+       call self%spin_mc%initialize(nspins=nspins, angle=1.0_dp, temperature=params%spin_temperature)
     end if
     call set_seed(self%rng, [111111_dp, 2_dp])
 
@@ -159,6 +159,10 @@ contains
 
     if(present(temperature)) then
        self%temperature=temperature
+       if(self%method==3) then
+          self%spin_mc%temperature = temperature
+          self%spin_mc%beta=1.0_dp/temperature
+       end if
     end if
 
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
@@ -167,9 +171,6 @@ contains
     self%H_lang_coeff(:)=sqrt(2.0*self%damping(:)* self%temperature &
          &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
 
-    if(self%method==3) then
-       self%spin_mc%temperature = temperature
-    end if
   end subroutine set_Langevin_params
 
 
@@ -267,7 +268,6 @@ contains
     Bnorm=sqrt(sum(Heff*Heff))
     B(:)=Heff(:)/Bnorm
     w=Bnorm*dt
-    !print *, w
     sinw=sin(w)
     cosw=sqrt(1.0_dp- sinw*sinw)
     u=1.0d0-cosw
@@ -329,7 +329,9 @@ contains
     class(effpot_t), intent(inout) :: effpot
     real(dp), intent(in) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
+    !print *, "S_in+", S_in
     call self%spin_mc%run_MC(self%rng, effpot, S_in, S_out, etot)
+    !print *, "S_out+", S_out
     ! TODO: mc do not know about etot
   end subroutine spin_mover_t_run_one_step_MC
 
@@ -534,6 +536,10 @@ contains
 
     if(allocated(self%H_lang_coeff) ) then
        ABI_DEALLOCATE(self%H_lang_coeff)
+    end if
+
+    if(self%method==3) then
+       call self%spin_mc%finalize()
     end if
 
   end subroutine spin_mover_t_finalize

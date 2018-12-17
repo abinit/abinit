@@ -119,12 +119,13 @@ module  m_spin_terms
      ! vector for calculating effective field
      real(dp), allocatable :: Htmp(:, :)
        CONTAINS
-         procedure :: initialize => spin_terms_t_initialize
-         procedure :: finalize => spin_terms_t_finalize
-         procedure :: get_Heff => spin_terms_t_total_Heff
-         procedure :: calculate => spin_terms_t_calculate
-         procedure :: get_delta_E => spin_terms_t_get_delta_E
-         procedure :: set_bilinear_term => spin_terms_t_set_bilinear_term
+         procedure, non_overridable :: initialize => spin_terms_t_initialize
+         procedure, non_overridable :: finalize => spin_terms_t_finalize
+         procedure, non_overridable :: get_Heff => spin_terms_t_total_Heff
+         procedure, non_overridable :: calculate => spin_terms_t_calculate
+         procedure, non_overridable :: get_energy => spin_terms_t_get_energy
+         procedure, non_overridable :: get_delta_E => spin_terms_t_get_delta_E
+         procedure, non_overridable :: set_bilinear_term => spin_terms_t_set_bilinear_term
   end type spin_terms_t
 
 contains
@@ -297,12 +298,15 @@ contains
     if (present(displacement) .or. present(strain) .or. present(force) .or. present(stress)) then
        write(std_err, *) "spin terms cannot accept atomic input and output"
     end if
-    call self%get_Heff(spin, bfield, energy)
+    if (present(bfield)) then
+       call self%get_Heff(spin, bfield, energy)
+    else
+       call self%get_energy(spin, energy)
+    end if
   end subroutine spin_terms_t_calculate
 
 
   subroutine spin_terms_t_total_Heff(self,S, Heff, energy)
-
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(in):: S(3,self%nspins)
     real(dp), intent(inout):: Heff(3,self%nspins)
@@ -337,38 +341,69 @@ contains
 
   end subroutine spin_terms_t_total_Heff
 
-  subroutine spin_terms_t_get_delta_E(self, S, ispin, Snew, deltaE)
+  subroutine spin_terms_t_get_energy(self, S, energy)
     class(spin_terms_t), intent(inout) :: self
-    real(dp), intent(in):: S(:,:), Snew(:)
-    integer, intent(in) :: ispin
-    real(dp), intent(out) ::deltaE
-    real(dp) ::Stmp(3, self%nspins), Htmp(3,self%nspins), Eold, Enew
-    real(dp) :: tmp(3)
-    integer :: i
-    ! naive implementation
-    call self%get_Heff(S, Htmp, Eold)
-    Stmp(:,:)=S(:,:)
-    Stmp(:, ispin)= Snew(:)
-    call self%get_Heff(Stmp, Htmp, Enew)
-    deltaE=Enew-Eold
+    real(dp), intent(in):: S(3,self%nspins)
+    real(dp), intent(inout) :: energy
+    integer :: i, j
+    energy=0.0_dp
 
-    ! test
-    deltaE=0.0_dp
-    Stmp(:,:)=S(:,:)
-    Stmp(:, ispin)= (S(:, ispin)+ Snew(:))*0.5_dp
     if(self%has_bilinear) then
        if (.not. self%csr_mat_ready) then
           call LIL_to_CSR(self%bilinear_lil_mat, self%bilinear_csr_mat)
           self%csr_mat_ready=.True.
        endif
-       call self%bilinear_csr_mat%mv_select_row(3, [3*ispin-2, 3*ispin-1, 3*ispin], Stmp, tmp)
-       deltaE=deltaE+dot_product(tmp, Snew(:)-S(:, ispin)) *2.0
+       call self%bilinear_csr_mat%mv(S ,self%Htmp)
+       energy=energy - sum(sum(self%Htmp* S, dim=1))
+    end if
+
+    if (self%has_external_hfield) then
+       call spin_terms_t_calc_external_Heff(self,self%Htmp)
+       do i=1, self%nspins
+          do j=1, 3
+             energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
+          end do
+       end do
+    endif
+  end subroutine spin_terms_t_get_energy
+
+
+  subroutine spin_terms_t_get_delta_E(self, S, ispin, Snew, deltaE)
+    class(spin_terms_t), intent(inout) :: self
+    real(dp), intent(inout):: S(:,:), Snew(:)
+    integer, intent(in) :: ispin
+    real(dp), intent(out) ::deltaE
+    !real(dp) ::  Eold, Enew
+    real(dp) :: tmp(3), dS(3)
+    ! naive implementation, just for test
+    !call self%get_Heff(S, self%Htmp, Eold)
+    !call self%bilinear_csr_mat%mv(S, self%Htmp)
+    !Eold=-sum(sum(self%Htmp(:,:)*S(:,:), dim=1))
+
+    !Stmp(:,:)=S(:,:)
+    !Stmp(:, ispin)= Snew(:)
+    !call self%get_Heff(Stmp, self%Htmp, Enew)
+    !deltaE=Enew-Eold
+
+    ! test
+    deltaE=0.0_dp
+    dS(:)=Snew(:)-S(:, ispin)
+    S(:, ispin)= S(:, ispin)+ dS
+
+    if(self%has_bilinear) then
+       if (.not. self%csr_mat_ready) then
+          call LIL_to_CSR(self%bilinear_lil_mat, self%bilinear_csr_mat)
+          self%csr_mat_ready=.True.
+       endif
+       call self%bilinear_csr_mat%mv_select_row(3, [3*ispin-2, 3*ispin-1, 3*ispin], S, tmp)
+
+       deltaE=deltaE-dot_product(tmp, dS ) *2.0
     end if
 
     if(self%has_external_hfield) then
-       deltaE=deltaE+ dot_product(self%external_hfield(:, ispin), Snew(:)-S(:, ispin))
+       deltaE=deltaE - dot_product(self%external_hfield(:, ispin), dS)*self%ms(ispin)
     end if
-
+    S(:, ispin)=S(:,ispin)-dS
   end subroutine spin_terms_t_get_delta_E
 
 

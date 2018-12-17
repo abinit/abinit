@@ -182,7 +182,7 @@ contains
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: y(nrow)
     integer :: i, irow, i1, i2, j
-
+    y(:)=0.0_dp
     do j=1, nrow
        irow=id_row(j)
        i1=self%row_shift(irow)

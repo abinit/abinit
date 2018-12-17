@@ -37,6 +37,7 @@
       class(spin_mc_t), intent(inout) :: self
       integer, intent(in) :: nspins
       real(dp), intent(in) :: angle, temperature
+      self%nspins=nspins
       self%nstep=self%nspins
       ABI_ALLOCATE(self%S, (3, self%nspins))
       self%angle=angle
@@ -62,9 +63,11 @@
      class(spin_mc_t) :: self
      class(rng_t) :: rng
      class(effpot_t), intent(inout) :: effpot
-     real(dp) :: S_out(3,self%nspins), etot
+     real(dp) :: S_out(3,self%nspins), etot, r
      integer :: i, j
-     if(rng%rand_unif_01()< min(1.0, self%attempt(rng, effpot)) ) then
+     r=self%attempt(rng, effpot)
+     !print *, "r", r
+     if(rng%rand_unif_01()< min(1.0, r) ) then
         self%naccept=self%naccept+1
         call self%accept()
      else
@@ -79,6 +82,10 @@
      real(dp), intent(in) :: S_in(3,self%nspins)
      real(dp), intent(out) :: S_out(3,self%nspins), etot
      integer :: i
+     self%S(:,:)=S_in(:,:)
+     !print*, "S_in", S_in
+     call effpot%calculate(spin=S_in, energy=self%energy)
+     !print *, self%energy
      do i = 1, self%nstep
         call self%run_one_step(rng, effpot)
      end do
@@ -107,7 +114,7 @@
      self%Sold(:)= self%S(:,self%imove)
      call move_hinzke_nowak(rng, self%Sold, self%Snew, self%angle)
      call effpot%get_delta_E( self%S, self%imove, self%Snew, self%deltaE)
-     r=exp(-self%deltaE * self%beta)
+     r=exp(-self%deltaE *self%beta)
    end function attempt
 
    subroutine move_angle(rng, Sold, Snew, angle)
@@ -127,18 +134,19 @@
    end subroutine move_flip
 
    subroutine move_uniform(rng, Snew)
-     type(rng_t) :: rng
+     type(rng_t), intent(inout) :: rng
      real(dp), intent(out) :: Snew(3)
      call rng%rand_normal_array(Snew, 3)
      Snew(:)=Snew(:)/sqrt(Snew(1)*Snew(1)+Snew(2)*Snew(2)+Snew(3)*Snew(3))
    end subroutine move_uniform
 
    subroutine move_hinzke_nowak(rng, Sold, Snew, angle)
-     type(rng_t) :: rng
+     type(rng_t), intent(inout) :: rng
      real(dp), intent(in) :: Sold(3), angle
      real(dp), intent(out) :: Snew(3)
      integer :: move
      move=rng%rand_choice(3)
+     !print *, "choice of move", move
      select case (move)
      case (1)
         call move_angle(rng, Sold, Snew, angle)
