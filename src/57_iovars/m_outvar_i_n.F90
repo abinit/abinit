@@ -112,8 +112,6 @@ subroutine outvar_i_n (dtsets,iout,&
 & jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
 & response_,results_out,strimg)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,marr,ndtset

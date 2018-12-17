@@ -120,8 +120,6 @@ subroutine psp1in(dq,ekb,ekb1,ekb2,epsatm,epspsp,&
 &                  qchrg,qgrid,rcpsp,rms,useylm,vlspl,xcccrc,xccc1d,&
 &                  zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lloc,lmax,lmnmax,lnmax,mmax,mpsang,mqgrid,n1xccc,pspcod
@@ -450,8 +448,6 @@ end subroutine psp1in
 subroutine psp1lo(drad,epsatm,mmax,mqgrid,qgrid,q2vq,rad,&
 &  vloc,wksincos,yp1,ypn,zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mmax,mqgrid
@@ -616,8 +612,6 @@ end subroutine psp1lo
 
 subroutine psp1nl(dr,ekb,ffspl,lloc,lmax,mmax,mpsang,mqgrid,&
 &                  qgrid,rad,vloc,vpspll,wfll,wksincos)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -886,8 +880,6 @@ end subroutine psp1nl
 
 subroutine der_int(ff,df,rr,dr,nlast,smf)
 
- implicit none
-
 !Arguments ------------------------------------
 !nmax sets standard number of grid points ! SHOULD BE REMOVED
 !scalars
@@ -992,8 +984,6 @@ end subroutine der_int
 !! SOURCE
 
 subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1109,8 +1099,6 @@ end subroutine sincos
 !! SOURCE
 
 subroutine psp4cc(fchrg,n1xccc,xccc1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

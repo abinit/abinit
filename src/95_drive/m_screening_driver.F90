@@ -62,7 +62,7 @@ module m_screening_driver
  use m_qparticles,    only : rdqps, rdgw, show_QP
  use m_screening,     only : make_epsm1_driver, lwl_write, chi_t, chi_free, chi_new
  use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_free, hscr_t
- use m_spectra,       only : spectra_t, spectra_write, spectra_repr, spectra_free, W_EM_LF, W_EM_NLF, W_EELF
+ use m_spectra,       only : spectra_t, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
  use m_fft,           only : fourdp
@@ -1368,20 +1368,20 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(chi0_head)
 
    if (my_rank==master .and. is_qeq0==1) then
-     call spectra_repr(spectra,msg)
+     call spectra%repr(msg)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
 
      if (Ep%nomegaer>2) then
-       call spectra_write(spectra,W_EELF  ,Dtfil%fnameabo_eelf)
-       call spectra_write(spectra,W_EM_LF ,Dtfil%fnameabo_em1_lf)
-       call spectra_write(spectra,W_EM_NLF,Dtfil%fnameabo_em1_nlf)
+       call spectra%write(W_EELF  ,Dtfil%fnameabo_eelf)
+       call spectra%write(W_EM_LF ,Dtfil%fnameabo_em1_lf)
+       call spectra%write(W_EM_NLF,Dtfil%fnameabo_em1_nlf)
      end if
    end if ! master and is_qeq0==1
 
    if (is_qeq0==1) call chi_free(chihw)
 
-   call spectra_free(spectra)
+   call spectra%free()
    if (allocated(kxcg)) then
      ABI_FREE(kxcg)
    end if

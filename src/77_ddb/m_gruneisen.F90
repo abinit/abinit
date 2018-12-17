@@ -129,8 +129,6 @@ contains  !===========================================================
 
 type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  type(anaddb_dataset_type),intent(in) :: inp
@@ -259,8 +257,6 @@ end function gruns_new
 
 subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq, phdispl_cart)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(gruns_t),intent(in) :: gruns
@@ -353,8 +349,6 @@ end subroutine gruns_fourq
 !! SOURCE
 
 subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -486,8 +480,6 @@ end subroutine gruns_qpath
 !! SOURCE
 
 subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -710,8 +702,6 @@ end subroutine gruns_qmesh
 
 subroutine gruns_free(gruns)
 
- implicit none
-
 !Arguments ------------------------------------
 !array
  type(gruns_t),intent(inout) :: gruns
@@ -773,8 +763,6 @@ end subroutine gruns_free
 !! SOURCE
 
 subroutine gruns_anaddb(inp, prefix, comm)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm

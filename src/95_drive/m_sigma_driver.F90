@@ -59,7 +59,7 @@ module m_sigma_driver
  use m_crystal,       only : crystal_t, crystal_print
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
 &                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath, get_eneocc_vect, &
-                             enclose_degbands, get_gaps, gaps_free, gaps_t, gaps_print
+                             enclose_degbands, get_gaps, gaps_t
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free, &
                              kmesh_init, has_BZ_item, isamek, get_ng0sh, kmesh_print, &
@@ -2871,7 +2871,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=0)
 
  gap_err = get_gaps(KS_BSt, gaps)
- call gaps_print(gaps, unit=std_out)
+ call gaps%print(unit=std_out)
  call ebands_report_gap(KS_BSt, unit=std_out)
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
@@ -3430,7 +3430,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    if (Sigp%gwcomp==1) MSG_ERROR("AC with extrapolar technique not implemented")
  end if
 
- call gaps_free(gaps)
+ call gaps%free()
 
  ABI_FREE(val_indeces)
 

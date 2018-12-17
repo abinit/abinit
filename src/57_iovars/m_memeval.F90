@@ -86,8 +86,6 @@ contains
 
 subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,ndtset,ndtset_alloc,npsp
@@ -495,8 +493,6 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
 & prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1381,8 +1377,6 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 & marrays,mbcg,mbdiskpd,mbdiskwf,mbf_fftgr,mbgylm,mffmem,&
 & mpw,natom,nchain,nfft,nfftf,occopt,option,prtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,iprcel,iscf,marrays,mffmem,mpw,natom,nchain
@@ -1956,8 +1950,6 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & nkpt,nloalg,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optddk,optphon,option,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,getcell,idtset,intxc,iout,iprcel,iscf
@@ -2321,8 +2313,6 @@ end subroutine memorf
 subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
 & ntypat,ntypalch,pspheads)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nimage,npsp,npspalch,ntypalch,ntypat
@@ -2468,8 +2458,6 @@ end subroutine getdim_nloc
 
 subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
  integer , intent(inout)  :: mqgrid,mqgriddg
  integer , intent(in)  :: nptsgvec,usepaw
@@ -2588,7 +2576,6 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
       & atomic_info, memory_estimation
 #endif
-  implicit none
 
 !Arguments ------------------------------------
   !scalars

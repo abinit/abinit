@@ -73,8 +73,6 @@ contains
 
 subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,npsp,ndtset_alloc
