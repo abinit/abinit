@@ -3,7 +3,7 @@ module m_mpi_scheduler
   !use mpi
   use m_xmpi
   implicit none
-
+  private
   type, public :: mpi_scheduler_t
      integer :: nproc, ntasks, iproc
      integer,  allocatable :: istart(:), iend(:), ntask_proc(:)

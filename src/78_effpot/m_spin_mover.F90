@@ -36,6 +36,8 @@ module m_spin_mover
   use defs_basis
   use m_errors
   use m_abicore
+  use m_xmpi
+  use m_multibinit_global
   use m_mathfuncs, only : cross
   use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
   use m_spin_terms, only:  spin_terms_t
@@ -68,23 +70,23 @@ module m_spin_mover
   type, extends(abstract_mover_t) :: spin_mover_t
      integer :: nspins, method
      real(dp) :: dt, total_time, temperature, pre_time
-     real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:)
+     real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:)
      type(rng_t) :: rng
      type(spin_hist_t), pointer :: hist
      logical :: gamma_l_calculated
      type(spin_mc_t) :: spin_mc
-     CONTAINS
-        procedure :: initialize => spin_mover_t_initialize
-        procedure :: finalize => spin_mover_t_finalize
-        procedure :: set_hist => spin_mover_t_set_hist
-        procedure, private :: run_one_step_DM => spin_mover_t_run_one_step_DM
-        procedure, private :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
-        procedure, private :: run_one_step_MC=> spin_mover_t_run_one_step_MC
-        procedure :: run_one_step => spin_mover_t_run_one_step
-        procedure :: run_time => spin_mover_t_run_time
-        procedure :: set_Langevin_params
-        procedure :: get_Langevin_Heff
-        procedure :: get_dSdt
+   CONTAINS
+     procedure :: initialize => spin_mover_t_initialize
+     procedure :: finalize => spin_mover_t_finalize
+     procedure :: set_hist => spin_mover_t_set_hist
+     procedure, private :: run_one_step_DM => spin_mover_t_run_one_step_DM
+     procedure, private :: run_one_step_HeunP => spin_mover_t_run_one_step_HeunP
+     procedure, private :: run_one_step_MC=> spin_mover_t_run_one_step_MC
+     procedure :: run_one_step => spin_mover_t_run_one_step
+     procedure :: run_time => spin_mover_t_run_time
+     procedure :: set_Langevin_params
+     procedure :: get_Langevin_Heff
+     procedure :: get_dSdt
   end type spin_mover_t
   !!***
 
@@ -113,6 +115,7 @@ contains
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     integer, intent(in) :: nspins
+    integer :: ierr, i
     self%nspins=nspins
     self%dt= params%spin_dt
     self%pre_time= params%spin_ntime_pre * self%dt
@@ -124,13 +127,24 @@ contains
     if(params%spin_dynamics==3) then ! Monte carlo
        call self%spin_mc%initialize(nspins=nspins, angle=1.0_dp, temperature=params%spin_temperature)
     end if
+    call xmpi_bcast(self%nspins, master, comm, ierr)
+    call xmpi_bcast(self%dt, master, comm, ierr)
+    call xmpi_bcast(self%pre_time, master, comm, ierr)
+    call xmpi_bcast(self%total_time, master, comm, ierr)
+    call xmpi_bcast(self%temperature, master, comm, ierr)
     call set_seed(self%rng, [111111_dp, 2_dp])
+    if(my_rank>0) then
+       do i =1,my_rank
+          call self%rng%jump()
+       end do
+    end if
 
     ABI_ALLOCATE(self%ms, (nspins) )
     ABI_ALLOCATE(self%gyro_ratio, (nspins) )
     ABI_ALLOCATE(self%damping, (nspins) )
     ABI_ALLOCATE(self%gamma_l, (nspins) )
     ABI_ALLOCATE(self%H_lang_coeff, (nspins) )
+    ABI_ALLOCATE(self%Stmp, (3,nspins) )
     self%gamma_l_calculated=.False.
   end subroutine spin_mover_t_initialize
   !!***
@@ -145,6 +159,7 @@ contains
     class(spin_mover_t), intent(inout) :: self
     real(dp), optional, intent(in) :: damping(self%nspins), temperature, &
          &    gyro_ratio(self%nspins), ms(self%nspins)
+    integer :: ierr
 
     if(present(damping)) then
        self%damping(:)=damping(:)
@@ -152,25 +167,33 @@ contains
 
     if(present(gyro_ratio)) then
        self%gyro_ratio(:)=gyro_ratio(:)
+       call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     endif
     if(present(ms)) then
        self%ms(:)=ms(:)
+       call xmpi_bcast(self%ms, master, comm, ierr)
     endif
 
     if(present(temperature)) then
        self%temperature=temperature
+       call xmpi_bcast(self%temperature, master, comm, ierr)
        if(self%method==3) then
           self%spin_mc%temperature = temperature
           self%spin_mc%beta=1.0_dp/temperature
+          call xmpi_bcast(self%spin_mc%temperature, master, comm, ierr)
+          call xmpi_bcast(self%spin_mc%beta, master, comm, ierr)
        end if
+
     end if
 
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
+    call xmpi_bcast(self%gamma_l, master, comm, ierr)
     self%gamma_l_calculated=.True.
+    call xmpi_bcast(self%gamma_l_calculated, master, comm, ierr)
 
     self%H_lang_coeff(:)=sqrt(2.0*self%damping(:)* self%temperature &
          &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
-
+    call xmpi_bcast(self%H_lang_coeff, master, comm, ierr)
   end subroutine set_Langevin_params
 
 
@@ -178,15 +201,17 @@ contains
     class(spin_mover_t), intent(inout) :: self
     real(dp), intent(inout):: H_lang(3,self%nspins)
     integer :: i
-      if ( self%temperature .gt. 1d-7) then
-         call rand_normal_array(self%rng, H_lang, 3*self%nspins)
-         do i = 1, self%nspins
-            H_lang(:,i)= H_lang(:,i) * self%H_lang_coeff(i)
-         end do
-      else
-         H_lang(:,:)=0.0_dp
-      end if
-    end subroutine get_Langevin_Heff
+    if(iam_master) then
+       if ( self%temperature .gt. 1d-7) then
+          call rand_normal_array(self%rng, H_lang, 3*self%nspins)
+          do i = 1, self%nspins
+             H_lang(:,i)= H_lang(:,i) * self%H_lang_coeff(i)
+          end do
+       else
+          H_lang(:,:)=0.0_dp
+       end if
+    end if
+  end subroutine get_Langevin_Heff
 
   subroutine get_dSdt(self, S, Heff, dSdt)
     class(spin_mover_t), intent(inout) :: self
@@ -301,26 +326,26 @@ contains
     call self%get_Langevin_Heff(H_lang)
 
     Htmp(:,:)=Heff(:,:)+H_lang(:,:)
-!$OMP PARALLEL DO private(i)
+    !$OMP PARALLEL DO private(i)
     do i=1,self%nspins
        ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
        Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
-     S_out(:,i)= rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt)
+       S_out(:,i)= rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt)
     end do
-!$OMP END PARALLEL DO
+    !$OMP END PARALLEL DO
 
     ! correction
     call effpot%calculate(spin=S_in, bfield=Htmp, energy=etot)
     !call spin_terms_t_total_Heff(self=calculator, S=S_in, Heff=Htmp)
 
-!$OMP PARALLEL DO private(i)
+    !$OMP PARALLEL DO private(i)
     do i=1,self%nspins
        Heff(:,i)=(Heff(:,i)+Htmp(:,i))*0.5_dp
        Htmp(:,i)=Heff(:,i)+H_lang(:,i)
        Hrotate(:,i) = self%gamma_L(i) * ( Htmp(:,i) + self%damping(i)* cross(S_in(:,i), Htmp(:,i)))
        S_out(:, i)= rotate_S_DM(S_in(:,i), Hrotate(:,i), self%dt)
     end do
-!$OMP END PARALLEL DO
+    !$OMP END PARALLEL DO
     !call spin_terms_t_get_etot(calculator, S_out, Heff, etot)
   end subroutine spin_mover_t_run_one_step_DM
 
@@ -339,13 +364,17 @@ contains
     class(spin_mover_t), intent(inout) :: self
     class(effpot_t), intent(inout) :: effpot
     real(dp) :: S_out(3,self%nspins), etot
+    integer :: ierr
+    self%Stmp=spin_hist_t_get_S(self%hist)
     if(self%method==1) then
        !call spin_mover_t_run_one_step_HeunP(self, effpot, spin_hist_t_get_S(self%hist), S_out, etot)
-       call self%run_one_step_HeunP(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
+       call self%run_one_step_HeunP(effpot, self%Stmp, S_out, etot)
     else if (self%method==2) then
-       call self%run_one_step_DM(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
+       call self%run_one_step_DM(effpot, self%Stmp, S_out, etot)
     else if (self%method==3) then
-       call self%run_one_step_MC(effpot, spin_hist_t_get_S(self%hist), S_out, etot)
+       if(iam_master) then ! only serial mode for MC
+          call self%run_one_step_MC(effpot, self%Stmp, S_out, etot)
+       endif
     end if
     ! do not inc until time is set to hist.
     call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
@@ -382,119 +411,131 @@ contains
     real(dp):: t
     integer :: counter, i, ii
     character(len=80) :: msg, msg_empty
+
     t=0.0
     counter=0
+    if(iam_master) then
+       msg_empty=ch10
 
-    msg_empty=ch10
-
-    msg=repeat("=", 80)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-    write(msg, '(A20)') "Spin dynamic steps:"
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-    msg=repeat("=", 80)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-
-    write(msg, "(A13, 4X, A13, 6X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-
-    msg=repeat("-", 80)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-
-    if (abs(self%pre_time) > 1e-30) then
-       msg="Thermalization run:"
+       msg=repeat("=", 80)
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
+       write(msg, '(A20)') "Spin dynamic steps:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+       msg=repeat("=", 80)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+
+       write(msg, "(A13, 4X, A13, 6X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+
+       msg=repeat("-", 80)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+    end if
+
+    call xmpi_bcast(self%pre_time, 0, xmpi_world, ierr)
+    if (abs(self%pre_time) > 1e-30) then
+       if (iam_master) then
+          msg="Thermalization run:"
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
+       end if
 
        do while(t<self%pre_time)
           counter=counter+1
           call self%run_one_step(effpot=calculator)
-          call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
-          if(mod(counter, hist%spin_nctime)==0) then
-             call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
-                  hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
-             write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
-                  & ob%Mst_norm_total/ob%Snorm_total, &
-                  & hist%etot(hist%ihist_prev)/ob%nscell
-             ! total : 13+4+...= 64 
-             call wrtout(std_out,msg,'COLL')
-             call wrtout(ab_out, msg, 'COLL')
-          endif
+          if (iam_master) then
+             call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
+             if(mod(counter, hist%spin_nctime)==0) then
+                call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+                     hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
+                write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
+                     & ob%Mst_norm_total/ob%Snorm_total, &
+                     & hist%etot(hist%ihist_prev)/ob%nscell
+                ! total : 13+4+...= 64 
+                call wrtout(std_out,msg,'COLL')
+                call wrtout(ab_out, msg, 'COLL')
+             endif
+          end if
           t=t+self%dt
        end do
+
        t=0.0
        counter=0
-       call spin_hist_t_reset(hist,array_to_zero=.False.)
-       msg="Measurement run:"
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-
-
+       if (iam_master) then
+          call spin_hist_t_reset(hist,array_to_zero=.False.)
+          msg="Measurement run:"
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
+       end if
     endif
-    call ob_reset(ob)
+    if(iam_master) then
+       call ob_reset(ob)
+    endif
 
+    call xmpi_bcast(self%total_time, 0, xmpi_world, ierr)
     do while(t<self%total_time)
        counter=counter+1
        call self%run_one_step(effpot=calculator)
-       call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
-       call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
-            hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
-       if(mod(counter, hist%spin_nctime)==0) then
-          call spin_ncfile_t_write_one_step(ncfile, hist)
-          write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
-               & ob%Mst_norm_total/ob%Snorm_total, &
-               & hist%etot(hist%ihist_prev)/ob%nscell
-          call wrtout(std_out,msg,'COLL')
-          call wrtout(ab_out, msg, 'COLL')
-       endif
+       if (iam_master) then
+          call spin_hist_t_set_vars(hist=hist, time=t,  inc=.True.)
+          call ob_calc_observables(ob, hist%S(:,:, hist%ihist_prev), &
+               hist%Snorm(:,hist%ihist_prev), hist%etot(hist%ihist_prev))
+          if(mod(counter, hist%spin_nctime)==0) then
+             call spin_ncfile_t_write_one_step(ncfile, hist)
+             write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
+                  & ob%Mst_norm_total/ob%Snorm_total, &
+                  & hist%etot(hist%ihist_prev)/ob%nscell
+             call wrtout(std_out,msg,'COLL')
+             call wrtout(ab_out, msg, 'COLL')
+          endif
+       end if
        t=t+self%dt
     enddo
 
-    msg=repeat("-", 80)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-
-    write(msg, "(A27)") "Summary of spin dynamics:"
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-
-    write(msg, "(A65)") "At the end of the run, the average spin at each sublattice is"
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-
-    write(msg, "(6X, A10, 5X, 3A10, A11)")  'Sublattice', '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-
-    do i =1, ob%nsublatt
-       write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B , ii=1, 3), &
-            sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B)**2))
+    if (iam_master) then
+       msg=repeat("-", 80)
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out, msg, 'COLL')
-    end do
 
-    call wrtout(std_out,msg_empty,'COLL')
-    call wrtout(ab_out, msg_empty, 'COLL')
+       write(msg, "(A27)") "Summary of spin dynamics:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
 
-    write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13 )" ) &
-         "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
-    call wrtout(std_out, msg, "COLL")
-    call wrtout(ab_out, msg, "COLL")
-    write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X )" ) &
-         self%temperature*Ha_K , ob%Cv, ob%chi,  ob%binderU4, ob%Avg_Mst_norm_total/ob%snorm_total
-    call wrtout(std_out, msg, "COLL")
-    call wrtout(ab_out,  msg, "COLL")
+       write(msg, "(A65)") "At the end of the run, the average spin at each sublattice is"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
 
-    msg=repeat("=", 80)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
+       write(msg, "(6X, A10, 5X, 3A10, A11)")  'Sublattice', '<M_i>(x)', '<M_i>(y)', '<M_i>(z)', '||<M_i>||'
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
 
+       do i =1, ob%nsublatt
+          write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B , ii=1, 3), &
+               sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B)**2))
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
+       end do
 
+       call wrtout(std_out,msg_empty,'COLL')
+       call wrtout(ab_out, msg_empty, 'COLL')
 
+       write(msg, "(A1, 1X, A11, 3X, A13, 3X, A13, 3X, A13, 3X, A13 )" ) &
+            "#", "Temperature", "Cv", "chi",  "BinderU4", "Mst"
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+       write(msg, "(2X, F11.5, 3X, ES13.5, 3X, ES13.5, 3X, E13.5, 3X, ES13.5, 3X )" ) &
+            self%temperature*Ha_K , ob%Cv, ob%chi,  ob%binderU4, ob%Avg_Mst_norm_total/ob%snorm_total
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out,  msg, "COLL")
+
+       msg=repeat("=", 80)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+    end if
   end subroutine spin_mover_t_run_time
   !!***
 
@@ -542,6 +583,9 @@ contains
        call self%spin_mc%finalize()
     end if
 
+    if(allocated(self%Stmp)) then
+       ABI_DEALLOCATE(self%Stmp)
+    end if
   end subroutine spin_mover_t_finalize
   !!***
 

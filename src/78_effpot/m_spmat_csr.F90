@@ -158,7 +158,7 @@ contains
     real(dp), intent(inout) :: x(:)
     real(dp), intent(out) :: b(:)
     !real(dp):: my_b(self%nrow)
-    integer :: ierr, irow, icol, i1, i2, i
+    integer :: ierr, irow,  i1, i2, i
     !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
     call xmpi_bcast(x, 0, xmpi_world, ierr)
     !my_b(:)=0.0_dp

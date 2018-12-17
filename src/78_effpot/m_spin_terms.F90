@@ -40,6 +40,8 @@ module  m_spin_terms
   use defs_basis
   use m_errors
   use m_abicore
+  use m_xmpi
+  use m_multibinit_global
   use m_spmat_csr, only : CSR_mat_t
   use m_spmat_lil, only : LIL_mat_t
   use m_spmat_convert, only : LIL_to_CSR
@@ -118,14 +120,14 @@ module  m_spin_terms
 
      ! vector for calculating effective field
      real(dp), allocatable :: Htmp(:, :)
-       CONTAINS
-         procedure, non_overridable :: initialize => spin_terms_t_initialize
-         procedure, non_overridable :: finalize => spin_terms_t_finalize
-         procedure, non_overridable :: get_Heff => spin_terms_t_total_Heff
-         procedure, non_overridable :: calculate => spin_terms_t_calculate
-         procedure, non_overridable :: get_energy => spin_terms_t_get_energy
-         procedure, non_overridable :: get_delta_E => spin_terms_t_get_delta_E
-         procedure, non_overridable :: set_bilinear_term => spin_terms_t_set_bilinear_term
+   CONTAINS
+     procedure, non_overridable :: initialize => spin_terms_t_initialize
+     procedure, non_overridable :: finalize => spin_terms_t_finalize
+     procedure, non_overridable :: get_Heff => spin_terms_t_total_Heff
+     procedure, non_overridable :: calculate => spin_terms_t_calculate
+     procedure, non_overridable :: get_energy => spin_terms_t_get_energy
+     procedure, non_overridable :: get_delta_E => spin_terms_t_get_delta_E
+     procedure, non_overridable :: set_bilinear_term => spin_terms_t_set_bilinear_term
   end type spin_terms_t
 
 contains
@@ -149,53 +151,72 @@ contains
 
     nspins=size(pos, 2)
     self%nspins=nspins
+    xmpi_bcast(nspins, master, comm, ierr)
+    xmpi_bcast(self%nspins, master, comm, ierr)
+
     ABI_ALLOCATE(self%iatoms, (nspins))
     self%iatoms(:)=iatoms(:)
+    xmpi_bcast(self%iatoms, master, comm, ierr)
     self%cell(:,:)=cell(:,:)
+    xmpi_bcast(self%cell, master, comm, ierr)
+
     ABI_ALLOCATE( self%pos, (3,nspins) )
     self%pos(:,:)=pos(:,:)
+    xmpi_bcast(self%pos, master, comm, ierr)
+
     ABI_ALLOCATE( self%spinat, (3, nspins))
     self%spinat(:,:)=spinat(:,:)
+    xmpi_bcast(self%spinat, master, comm, ierr)
 
     ABI_ALLOCATE( self%ms, (nspins) )
     self%ms(:)= sqrt(sum(spinat(:,:)**2, dim=1))* mu_B
+    xmpi_bcast(self%ms, master, comm, ierr)
 
     ABI_ALLOCATE( self%ispin_prim, (nspins))
     ABI_ALLOCATE(self%rvec, (3, nspins))
-
+    
     self%ispin_prim(:)=ispin_prim(:)
+
+    xmpi_bcast(self%ispin_prim, master, comm, ierr)
     self%rvec(:,:)=rvec(:,:)
+    xmpi_bcast(self%rvec, master, comm, ierr)
 
     ABI_ALLOCATE( self%S, (3, nspins))
     do i=1,nspins
        self%S(:,i)=self%spinat(:,i)/self%ms(i)
     end do
-
+    xmpi_bcast(self%S, master, comm, ierr)
+    
     self%has_external_hfield=.False.
-    self%has_uniaxial_anistropy=.False.
-    self%has_exchange=.False.
-    self%has_DMI=.False.
+    !self%has_uniaxial_anistropy=.False.
+    !self%has_exchange=.False.
+    !self%has_DMI=.False.
     self%has_dipdip=.False.
     self%has_bilinear=.False.
+    xmpi_bcast(self%has_external_hfield, master, comm, ierr)
+    xmpi_bcast(self%has_dipdip, master, comm, ierr)
+    xmpi_bcast(self%has_bilinear, master, comm, ierr)
 
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
     ! Defautl gyro_ratio
     self%gyro_ratio(:)=gyro_ratio !gyromagnetic_ratio
+    xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     self%gilbert_damping(:)=damping
-
+    xmpi_bcast(self%gilbert_damping, master, comm, ierr)
     call self%bilinear_lil_mat%initialize(self%nspins*3,self%nspins*3)
+
     ABI_ALLOCATE( self%Htmp, (3, nspins))
 
     ! set dt default value so x/dt would not crash
-    
+
   end subroutine spin_terms_t_initialize
 
   subroutine spin_terms_t_set_terms(self, &
        &     external_hfield, &
-       !&     exchange_i, exchange_j, exchange_val, &
-       !&     DMI_i, DMI_j, DMI_val, &
-       !&   k1,k1dir, &
+                                !&     exchange_i, exchange_j, exchange_val, &
+                                !&     DMI_i, DMI_j, DMI_val, &
+                                !&   k1,k1dir, &
        & bilinear_i, bilinear_j, bilinear_val)
 
     implicit none
@@ -215,7 +236,7 @@ contains
 
     if(present(external_hfield)) then
        call spin_terms_t_set_external_hfield(self, external_hfield)
-   end if
+    end if
 
     if ( present(bilinear_i) .and. present( bilinear_j) .and. present(bilinear_val) ) then
        !call spin_terms_t_set_bilinear_term(bilinear_i, bilinear_j, bilinear_val)
@@ -321,7 +342,7 @@ contains
        Heff=Heff+self%Htmp
     endif
 
-     if (self%has_dipdip) then
+    if (self%has_dipdip) then
        continue
        ! TODO implement dipdip and add it
     endif
@@ -414,11 +435,11 @@ contains
 
     self%is_null=.True.
     if (allocated(self%S)) then
-        ABI_DEALLOCATE(self%S)
+       ABI_DEALLOCATE(self%S)
     endif
 
     if (allocated(self%Htmp)) then
-        ABI_DEALLOCATE(self%Htmp)
+       ABI_DEALLOCATE(self%Htmp)
     endif
 
 

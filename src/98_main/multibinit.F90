@@ -54,6 +54,7 @@ program multibinit
  use m_effective_potential
  use m_fit_polynomial_coeff
  use m_multibinit_dataset
+ use m_multibinit_global
  use m_effective_potential_file
  use m_spin_model
  use m_abihist
@@ -75,11 +76,9 @@ program multibinit
 
 !Local variables-------------------------------
 ! Set array dimensions
- integer,parameter :: master=0 ! FIXME: these should not be reserved unit numbers!
- integer :: comm,filetype,ii,ierr,lenstr
- integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
+ integer :: filetype,ii,ierr,lenstr
+ integer :: natom,nph1l,nrpt,ntypat
  integer :: option
- logical :: iam_master
  real(dp) :: tcpu,tcpui,twall,twalli
  real(dp) :: tsec(2)
  character(len=24) :: codename,start_datetime
@@ -107,10 +106,7 @@ program multibinit
  call xmpi_init()
 
 !MPI variables
- comm = xmpi_world
- nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- iam_master = (my_rank == master)
-
+ call init_multibinit_global()
 
 ! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
@@ -211,11 +207,10 @@ program multibinit
 !****************************************************************************************
   if (inp%spin_dynamics>0) then
    if (iam_master) then
-
      write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     'reading spin terms.'
-     call spin_model_t_initialize(spin_model, filnam, inp )
-   end if
+  end if
+     call spin_model%initialize( filnam, inp )
  else
    !  Read the model (from DDB or XML)
    call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
@@ -407,7 +402,7 @@ program multibinit
        name = trim(filnam(2))//"_sys.nc"
        call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
      end if
-   end if
+  end if
 !****************************************************************************************
 
 !TEST_AM SECTION
@@ -447,10 +442,7 @@ program multibinit
 ! Run spin dynamics
 !****************************************************************************************
    if(inp%spin_dynamics>0) then
-  ! TODO hexu: no mpi yet.
-     if(iam_master) then
-       call spin_model_t_run(spin_model)
-     end if
+      call spin_model%run()
    end if
 !****************************************************************************************
 
