@@ -567,7 +567,7 @@ contains
    xc_func%has_kxc=(iand(flags,XC_FLAGS_HAVE_KXC)>0)
 
 !  Retrieve parameters for hybrid functionals
-   if (xc_func%family==XC_FAMILY_HYB_GGA.or.xc_func%family==XC_FAMILY_MGGA) then
+   if (xc_func%family==XC_FAMILY_HYB_GGA.or.xc_func%family==XC_FAMILY_HYB_MGGA) then
      call xc_hyb_cam_coef(xc_func%conf,omega_c,alpha_c,beta_c)
      xc_func%hyb_mixing=real(alpha_c,kind=dp)
      xc_func%hyb_mixing_sr=real(beta_c,kind=dp)
