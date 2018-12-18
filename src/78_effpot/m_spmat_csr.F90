@@ -90,7 +90,7 @@ contains
     call xmpi_bcast(self%nrow, 0, xmpi_world, ierr)
     call xmpi_bcast(self%nnz, 0, xmpi_world, ierr)
     call self%mpi_scheduler%initialize(self%nrow, xmpi_world)
-    if (.not. self%mpi_scheduler%iproc==0) then
+    if (.not. self%mpi_scheduler%irank==0) then
        if(.not. allocated(self%icol)) then
           ABI_ALLOCATE(self%icol, (self%nnz))
        endif
@@ -164,7 +164,7 @@ contains
     !my_b(:)=0.0_dp
     b(:)=0.0_dp
 
-    do irow= self%mpi_scheduler%istart(self%mpi_scheduler%iproc), self%mpi_scheduler%iend(self%mpi_scheduler%iproc)
+    do irow= self%mpi_scheduler%get_istart(), self%mpi_scheduler%get_iend()
        i1=self%row_shift(irow)
        i2=self%row_shift(irow+1)-1
        do i=i1, i2
@@ -192,7 +192,5 @@ contains
        end do
     end do
   end subroutine CSR_mat_t_mv_select_row
-
-
 
 end module m_spmat_csr

@@ -56,7 +56,7 @@ program multibinit
  use m_multibinit_dataset
  use m_multibinit_global
  use m_effective_potential_file
- use m_spin_model
+ use m_spin_model, only: spin_model_t
  use m_abihist
 
  use m_specialmsg, only : specialmsg_getcount, herald
@@ -452,7 +452,7 @@ program multibinit
    call effective_potential_free(reference_effective_potential)
    call multibinit_dtset_free(inp)
    call abihist_free(hist)
-   call spin_model_t_finalize(spin_model)
+   call spin_model%finalize()
 !****************************************************************************************
 
    write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

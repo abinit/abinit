@@ -49,16 +49,10 @@ module m_spin_model
   use m_xmpi
   use m_multibinit_global
   use m_io_tools, only : get_unit, open_file, close_unit
-
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_terms, only: spin_terms_t,  spin_terms_t_finalize, &
        & spin_terms_t_set_external_hfield
-  use m_spin_model_primitive, only: spin_model_primitive_t, &
-       & spin_model_primitive_t_initialize, &
-       & spin_model_primitive_t_print_terms, &
-       & spin_model_primitive_t_finalize, &
-       & spin_model_primitive_t_read_xml, &
-       & spin_model_primitive_t_make_supercell
+  use m_spin_model_primitive, only: spin_model_primitive_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
   use m_spin_mover, only: spin_mover_t
@@ -133,8 +127,7 @@ contains
   !! SOURCE
   subroutine spin_model_t_run(self)
     class(spin_model_t), intent(inout) :: self
-    integer :: ierr
-    call xmpi_bcast(self%params%spin_var_temperature, 0, xmpi_world, ierr)
+    call xmpi_bcast(self%params%spin_var_temperature, master, comm, ierr)
     if(self%params%spin_var_temperature==1) then
        call spin_model_t_run_various_T(self, self%params%spin_temperature_start, &
             & self%params%spin_temperature_end, self%params%spin_temperature_nstep)
@@ -180,14 +173,13 @@ contains
     if(iam_master) then
        self%params=params
        call spin_model_t_unit_conversion(self)
-       !call self%spin_primitive%initialize()
-       call spin_model_primitive_t_initialize(self%spin_primitive)
+       call self%spin_primitive%initialize()
+       !call spin_model_primitive_t_initialize(self%spin_primitive)
        !call self%read_xml(xml_fname)
-       call spin_model_t_read_xml(self, trim(self%xml_fname)//char(0))
+       call self%read_xml(trim(self%xml_fname)//char(0))
 
 
        !call self%spin_primitive%print_terms()
-       call spin_model_primitive_t_print_terms(self%spin_primitive)
 
 
        ! make supercell
@@ -201,8 +193,9 @@ contains
        ! set parameters to hamiltonian and mover
        self%nspins= self%spin_calculator%nspins
 
+       print *, "Init mover"
        call self%spin_mover%initialize(self%params, self%nspins )
-
+       print *, "Init mover Finished"
        call self%set_params()
 
     if(iam_master) then
@@ -254,9 +247,8 @@ contains
   subroutine spin_model_t_finalize(self)
 
     class(spin_model_t), intent(inout) :: self
-    !call self%spin_primitive%finalize()
     if(iam_master) then
-      call spin_model_primitive_t_finalize(self%spin_primitive)
+      call self%spin_primitive%finalize()
       call spin_hist_t_free(self%spin_hist)
       call ob_finalize(self%spin_ob)
       call spin_ncfile_t_close(self%spin_ncfile)
@@ -351,7 +343,7 @@ contains
     ! Do not use sia term in xml if spin_sia_add is set to 1.
     if(self%params%spin_sia_add == 1) use_sia=.False.
 
-    call spin_model_primitive_t_read_xml(self%spin_primitive, xml_fname, &
+    call self%spin_primitive%read_xml( xml_fname, &
          & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
 
     if (self%params%spin_sia_add /= 0 ) then
@@ -570,8 +562,7 @@ contains
        call wrtout(ab_out, msg, "COLL")
     end if
 
-    call xmpi_bcast(T_nstep, 0, xmpi_world, ierr)
-    call xmpi_bcast(T_step, 0, xmpi_world, ierr)
+    call xmpi_bcast(T_nstep, 0, comm, ierr)
     do i=1, T_nstep
        if(iam_master) then
           T=T_start+(i-1)*T_step

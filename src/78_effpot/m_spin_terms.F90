@@ -192,9 +192,6 @@ contains
     !self%has_DMI=.False.
     self%has_dipdip=.False.
     self%has_bilinear=.False.
-    call xmpi_bcast(self%has_external_hfield, master, comm, ierr)
-    call xmpi_bcast(self%has_dipdip, master, comm, ierr)
-    call xmpi_bcast(self%has_bilinear, master, comm, ierr)
 
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
@@ -309,6 +306,7 @@ contains
        call self%bilinear_csr_mat%sync()
        self%csr_mat_ready=.True.
     endif
+    !call self%bilinear_csr_mat%mv(S ,Heff)
     call self%bilinear_csr_mat%mv_mpi(S ,Heff)
     if(iam_master) then
        do i =1, self%nspins
@@ -350,6 +348,7 @@ contains
        Heff=Heff+self%Htmp
     endif
 
+    if(iam_master) then
     if (self%has_dipdip) then
        continue
        ! TODO implement dipdip and add it
@@ -366,6 +365,7 @@ contains
        call spin_terms_t_calc_external_Heff(self,self%Htmp)
        Heff = Heff+self%Htmp
        energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
+    endif
     endif
 
   end subroutine spin_terms_t_total_Heff
