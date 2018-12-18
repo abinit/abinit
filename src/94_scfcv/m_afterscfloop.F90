@@ -1041,7 +1041,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%gresid(:,:)=gresid(:,:)
  results_gs%grewtn(:,:)=grewtn(:,:)
  results_gs%grxc(:,:)  =grxc(:,:)
+ results_gs%berryopt   =dtset%berryopt
  results_gs%pel(1:3)   =pel(1:3)
+ results_gs%pion(1:3)  =pion(1:3)
  results_gs%strten(1:6)=strten(1:6)
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
