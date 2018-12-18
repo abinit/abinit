@@ -359,8 +359,10 @@ contains
     end do
         
     ! correction
-    call effpot%calculate(spin=S_in, bfield=self%Htmp, energy=etot)
-    call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
+    call self%mpi_scheduler%gatherv_dp2d(S_out, 3)
+    call xmpi_bcast(S_out, master, comm, ierr)
+    call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
+    call xmpi_bcast(self%Htmp, master, comm, ierr)
 
     do i=self%mpi_scheduler%get_istart(), self%mpi_scheduler%get_iend()
        self%Heff_tmp(:,i)=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp

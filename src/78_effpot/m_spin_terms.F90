@@ -409,7 +409,7 @@ contains
     real(dp), intent(out) ::deltaE
     !real(dp) ::  Eold, Enew
     real(dp) :: tmp(3), dS(3)
-    ! naive implementation, just for test
+    ! naive implementation, for test only
     !call self%get_Heff(S, self%Htmp, Eold)
     !call self%bilinear_csr_mat%mv(S, self%Htmp)
     !Eold=-sum(sum(self%Htmp(:,:)*S(:,:), dim=1))
