@@ -18,7 +18,7 @@ module m_spmat_csr
      integer :: nnz
      integer, allocatable :: icol(:), row_shift(:)
      real(dp), allocatable:: val(:)
-     type(mpi_scheduler_t) :: mpi_scheduler
+     type(mpi_scheduler_t) :: mps
    contains
      procedure :: initialize => csr_mat_t_initialize
      procedure :: finalize=> csr_mat_t_finalize
@@ -89,8 +89,9 @@ contains
     call xmpi_bcast(self%ncol, 0, xmpi_world, ierr)
     call xmpi_bcast(self%nrow, 0, xmpi_world, ierr)
     call xmpi_bcast(self%nnz, 0, xmpi_world, ierr)
-    call self%mpi_scheduler%initialize(self%nrow, xmpi_world)
-    if (.not. self%mpi_scheduler%irank==0) then
+
+    call self%mps%initialize(self%nrow/3, xmpi_world, 3)
+    if (.not. self%mps%irank==0) then
        if(.not. allocated(self%icol)) then
           ABI_ALLOCATE(self%icol, (self%nnz))
        endif
@@ -164,7 +165,7 @@ contains
     !my_b(:)=0.0_dp
     b(:)=0.0_dp
 
-    do irow= self%mpi_scheduler%get_istart(), self%mpi_scheduler%get_iend()
+    do irow= self%mps%istart, self%mps%iend
        i1=self%row_shift(irow)
        i2=self%row_shift(irow+1)-1
        do i=i1, i2

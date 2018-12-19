@@ -193,9 +193,7 @@ contains
        ! set parameters to hamiltonian and mover
        self%nspins= self%spin_calculator%nspins
 
-       print *, "Init mover"
        call self%spin_mover%initialize(self%params, self%nspins )
-       print *, "Init mover Finished"
        call self%set_params()
 
     if(iam_master) then

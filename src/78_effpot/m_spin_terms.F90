@@ -308,11 +308,9 @@ contains
     endif
     !call self%bilinear_csr_mat%mv(S ,Heff)
     call self%bilinear_csr_mat%mv_mpi(S ,Heff)
-    if(iam_master) then
-       do i =1, self%nspins
-          Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
-       end do
-    endif
+    do i =1, self%nspins
+       Heff(:, i)=Heff(:,i)/self%ms(i)*2.0_dp
+    end do
   end subroutine spin_terms_t_calc_bilinear_term_Heff
 
   subroutine spin_terms_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)

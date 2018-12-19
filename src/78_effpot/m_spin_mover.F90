@@ -78,7 +78,7 @@ module m_spin_mover
      type(spin_hist_t), pointer :: hist
      logical :: gamma_l_calculated
      type(spin_mc_t) :: spin_mc
-     type(mpi_scheduler_t) :: mpi_scheduler
+     type(mpi_scheduler_t) :: mps
    CONTAINS
      procedure :: initialize => spin_mover_t_initialize
      procedure :: finalize => spin_mover_t_finalize
@@ -150,7 +150,6 @@ contains
     ABI_ALLOCATE(self%gamma_l, (self%nspins) )
     ABI_ALLOCATE(self%H_lang_coeff, (self%nspins) )
 
-    print *, "Allocting"
     ABI_ALLOCATE(self%Heff_tmp, (3,self%nspins) )
     ABI_ALLOCATE(self%Htmp, (3,self%nspins) )
     ABI_ALLOCATE(self%Hrotate, (3,self%nspins) )
@@ -159,7 +158,7 @@ contains
 
     self%gamma_l_calculated=.False.
 
-    call self%mpi_scheduler%initialize(nspins, comm)
+    call self%mps%initialize(nspins, comm)
   end subroutine spin_mover_t_initialize
   !!***
 
@@ -215,13 +214,9 @@ contains
     class(spin_mover_t), intent(inout) :: self
     real(dp), intent(inout):: H_lang(3,self%nspins)
     integer :: i, istart, iend, ntask
-    istart=self%mpi_scheduler%get_istart()
-    iend=self%mpi_scheduler%get_iend()
-    ntask=self%mpi_scheduler%get_ntask_proc()
-
     if ( self%temperature .gt. 1d-7) then
-       call rand_normal_array(self%rng, H_lang(:, istart:iend), 3*ntask)
-       do i = istart, iend
+       call rand_normal_array(self%rng, H_lang(:, self%mps%istart:self%mps%iend), 3*self%mps%ntask)
+       do i = self%mps%istart, self%mps%iend
           H_lang(:,i)= H_lang(:,i) * self%H_lang_coeff(i)
        end do
     else
@@ -244,7 +239,6 @@ contains
   end subroutine get_dSdt
 
 
-
   !!****f* m_spin_mover/spin_mover_t_run_one_step_HeunP
   !!
   !! NAME
@@ -265,46 +259,49 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-
-  subroutine spin_mover_t_run_one_step_HeunP(self, calculator, S_in, S_out, etot)
-
-    class (spin_mover_t), intent(inout):: self
-    class(effpot_t), intent(inout) :: calculator
+  subroutine spin_mover_t_run_one_step_HeunP(self, effpot, S_in, S_out, etot)
+    ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
+    !class (spin_mover_t), intent(inout):: self
+    class(spin_mover_t), intent(inout):: self
+    class(effpot_t), intent(inout) :: effpot
     real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
-    real(dp) ::  dSdt(3, self%nspins), dSdt2(3, self%nspins), &
-         & H_lang(3, self%nspins), Htmp(3, self%nspins), Heff(3, self%nspins) 
+    real(dp) :: dSdt(3), Htmp(3), Ri(3)
+
     ! predict
-    call self%get_Langevin_Heff(H_lang)
-    call calculator%calculate(spin=S_in, bfield=Heff, energy=etot)
+    S_out(:,:)=0.0_dp
+    call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
+    !call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
+    call self%get_Langevin_Heff(self%H_lang)
+    do i=self%mps%istart, self%mps%iend
+       Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
+       Ri = cross(S_in(:,i),Htmp)
+       dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
+       Ri=S_in(:,i)+dSdt*self%dt
+       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       S_out(:,i)=Ri
+    end do
+    call self%mps%gatherv_dp2d(S_out, 3)
+    call xmpi_bcast(S_out, master, comm, ierr)
 
-    if(iam_master) then
-       Htmp(:,:)=Heff(:,:)+H_lang(:,:)
-
-       call self%get_dSdt(S_in, Htmp, dSdt)
-
-       !$OMP PARALLEL DO private(i)
-       do i =1, self%nspins
-          S_out(:,i)=  S_in(:,i) +dSdt(:,i) * self%dt
-       end do
-       !$OMP END PARALLEL DO
-
-    end if
     ! correction
-    call calculator%calculate(spin=S_out, bfield=Heff, energy=etot)
-    if(iam_master) then
-       Htmp(:,:)=Heff(:,:)+H_lang(:,:)
-       call self%get_dSdt(S_out, Htmp, dSdt2)
-       !$OMP PARALLEL DO private(i)
-       do i =1, self%nspins
-          S_out(:,i)=  S_in(:,i) +(dSdt(:,i)+dSdt2(:,i)) * (0.5_dp*self%dt)
-          S_out(:,i)=S_out(:,i)/sqrt(sum(S_out(:,i)**2))
-       end do
-       !$OMP END PARALLEL DO
-    end if
+    call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
+    !call xmpi_bcast(self%Htmp, master, comm, ierr)
+
+    do i=self%mps%istart, self%mps%iend
+       Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp+self%H_lang(:,i)
+       Ri = cross(S_in(:,i),Htmp)
+       dSdt = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S_in(:,i), Ri))
+       Ri=S_in(:,i)+dSdt*self%dt
+       Ri=Ri/sqrt(Ri(1)*Ri(1)+Ri(2)*Ri(2)+Ri(3)*Ri(3))
+       S_out(:,i)=Ri
+    end do
+    call self%mps%gatherv_dp2d(S_out, 3)
+    call xmpi_bcast(S_out, master, comm, ierr)
   end subroutine spin_mover_t_run_one_step_HeunP
-  !!***
+
+
 
   pure function rotate_S_DM(S_in, Heff, dt) result(S_out)
     ! Depondt & Mertens method to rotate S_in
@@ -339,45 +336,31 @@ contains
     real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
-    !real(dp) :: H_lang(3, self%nspins),  Heff(3, self%nspins), Htmp(3, self%nspins), Hrotate(3, self%nspins)
-    !real(dp), pointer :: H_lang(:,:), Heff(:,:), Htmp(:,:)!, Hrotate(:,:)
-    !H_lang => self%Stmp
-    !Heff => self%Heff_tmp
-    !Htmp => self%Htmp
-    !Hrotate => self%Hrotate
-    
+
     ! predict
     S_out(:,:)=0.0_dp
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
-    do i=self%mpi_scheduler%get_istart(), self%mpi_scheduler%get_iend()
+    do i=self%mps%istart, self%mps%iend
        self%Htmp(:,i)=self%Heff_tmp(:,i)+self%H_lang(:,i)
        ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
        self%Hrotate(:,i) = self%gamma_L(i) * ( self%Htmp(:,i) + self%damping(i)* cross(S_in(:,i), self%Htmp(:,i)))
        S_out(:,i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-        
-    ! correction
-    call self%mpi_scheduler%gatherv_dp2d(S_out, 3)
+    call self%mps%gatherv_dp2d(S_out, 3)
     call xmpi_bcast(S_out, master, comm, ierr)
+
+    ! correction
     call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
-    do i=self%mpi_scheduler%get_istart(), self%mpi_scheduler%get_iend()
-       self%Heff_tmp(:,i)=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp
-       self%Htmp(:,i)=self%Heff_tmp(:,i)+self%H_lang(:,i)
+    do i=self%mps%istart, self%mps%iend
+       self%Heff_tmp(:,i)=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp+self%H_lang(:,i)
        self%Hrotate(:,i) = self%gamma_L(i) * ( self%Htmp(:,i) + self%damping(i)* cross(S_in(:,i), self%Htmp(:,i)))
        S_out(:, i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
-
-    !call xmpi_gatherv(S_out(:,self%mpi_scheduler%get_istart(): self%mpi_scheduler%get_iend()), &
-    !     & self%mpi_scheduler%get_ntask_proc()*3, &
-    !     & S_out,&
-    !     & self%mpi_scheduler%ntask_proc*3, &
-    !     & (self%mpi_scheduler%istart-1)*3, &
-    !     & master, comm, ierr)
-    call self%mpi_scheduler%gatherv_dp2d(S_out, 3)
+    call self%mps%gatherv_dp2d(S_out, 3)
     call xmpi_bcast(S_out, master, comm, ierr)
   end subroutine spin_mover_t_run_one_step_DM
 
@@ -402,7 +385,9 @@ contains
        call self%run_one_step_MC(effpot, self%Stmp, S_out, etot)
     end if
     ! do not inc until time is set to hist.
-    if(iam_master) call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
+    if(iam_master) then
+       call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
+    end if
   end subroutine spin_mover_t_run_one_step
 
   !!****f* m_spin_mover/spin_mover_t_run_time
@@ -610,7 +595,7 @@ contains
        ABI_DEALLOCATE(self%Stmp)
     end if
 
-    
+
     if(allocated(self%Heff_tmp)) then
        ABI_DEALLOCATE(self%Heff_tmp)
     end if
@@ -624,13 +609,13 @@ contains
     if(allocated(self%Hrotate)) then
        ABI_DEALLOCATE(self%Hrotate)
     end if
-    
+
     if(allocated(self%H_lang)) then
        ABI_DEALLOCATE(self%H_lang)
     end if
 
 
-    call self%mpi_scheduler%finalize()
+    call self%mps%finalize()
   end subroutine spin_mover_t_finalize
   !!***
 
