@@ -517,7 +517,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine
  integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
- integer :: mpw,ierr,it,imyq,band
+ integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
@@ -587,6 +587,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  ! Use __EPH_NORESTART__ to deactivate this feature. Useful when debugging.
  restart = 0; ierr = 1
+ !if (my_rank == master .and. dtset%eph_restart == 1) then
  if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
     sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
  end if
@@ -908,6 +909,7 @@ endif
      ! =======================================
      ! Integration over q-points in the IBZ(k)
      ! =======================================
+     ignore_kq = 0; ignore_ibsum_kq = 0
      do imyq=1,sigma%my_nqibz_k
        iq_ibz = sigma%myq2ibz_k(imyq)
 
@@ -924,10 +926,9 @@ endif
        trev_kq = sigma%indkk_kq(6, iq_ibz); g0_kq = sigma%indkk_kq(3:5, iq_ibz)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
-       if (.not. ihave_ikibz_spin(ikq_ibz, spin)) cycle
-
-       ! Exclude q-points based on tetrahedron weigths. Note all procs in comm_pert must agree!
-       !if (ignore_imyq(sigma, imyq, sigma%comm_pert) == 1) cycle
+       if (.not. ihave_ikibz_spin(ikq_ibz, spin)) then
+         ignore_kq = ignore_kq + 1; cycle
+       end if
 
        db_iqpt = sigma%indq2dvdb(1, iq_ibz)
 
@@ -1083,9 +1084,9 @@ endif
          ! TODO: Still under testing.
          if (sigma%imag_only .and. sigma%qint_method == 1) then
            if (.not. wfd%ihave_ug(ibsum_kq, ikq_ibz, spin)) then
-             write(msg, "(a, 3(i0,1x))")"Ignoring wavefunction with band, ikq_ibz, spin: ", ibsum_kq, ikq_ibz, spin
-             MSG_WARNING(msg)
-             cycle
+             !write(msg, "(a, 3(i0,1x))")"Ignoring wavefunction with band, ikq_ibz, spin: ", ibsum_kq, ikq_ibz, spin
+             !MSG_WARNING(msg)
+             ignore_kq = ignore_kq + 1; cycle
            end if
          end if
 
@@ -1482,6 +1483,11 @@ endif
        ABI_FREE(dt_weights)
        call xmpi_sum(sigma%gfw_vals, comm, ierr)
        call cwtime_report(" Eliashberg function", cpu, wall, gflops)
+     end if
+
+     if (my_rank == master) then
+       if (ignore_kq /= 0) write(std_out, "(a, i0)")"Number of kq points ignored:", ignore_kq
+       if (ignore_ibsum_kq /= 0) write(std_out, "(a, i0)")"Number of kqb states ignored:", ignore_ibsum_kq
      end if
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
@@ -2368,19 +2374,21 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call cwtime(cpu, wall, gflops, "start")
 
- ! Compute electron DOS with tetra.
- edos_intmeth = 2; if (self%bcorr == 1) edos_intmeth = 3
- if (dtset%prtdos == 1) edos_intmeth = 1
- !if (dtset%prtdos == -2) edos_intmeth = 3
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- call wrtout(std_out, "Computing electron dos...", do_flush=.True.)
- edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
- if (my_rank == master) then
-   path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos%write(path)
-   call edos%print(unit=std_out)
-   !call edos%print(unit=ab_out)
+ if (dtset%prtdos /= 0) then
+   ! Compute electron DOS.
+   edos_intmeth = 2; if (self%bcorr == 1) edos_intmeth = 3
+   if (dtset%prtdos == 1) edos_intmeth = 1
+   !if (dtset%prtdos == -2) edos_intmeth = 3
+   edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+   call wrtout(std_out, "Computing electron dos. Use prtdos 0 to disable this part...", do_flush=.True.)
+   edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
+   if (my_rank == master) then
+     path = strcat(dtfil%filnam_ds(4), "_EDOS")
+     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+     call edos%write(path)
+     call edos%print(unit=std_out)
+     !call edos%print(unit=ab_out)
+   end if
  end if
 
  call cwtime_report("sigmaph_new: ebands", cpu, wall, gflops)
@@ -2403,7 +2411,9 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
 
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   NCF_CHECK(edos%ncwrite(ncid))
+   if (dtset%prtdos /= 0) then
+     NCF_CHECK(edos%ncwrite(ncid))
+   end if
 
    ! Add sigma_eph dimensions.
    ncerr = nctk_def_dims(ncid, [ &
@@ -2972,7 +2982,6 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  ! Note:
  !   * q --> -q symmetry is always used for phonons.
  !   * we use symrec instead of symrel (see also m_dvdb)
-
  ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, self%qibz_k, dvdb%nqpt, self%nqibz_k, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
@@ -3057,16 +3066,20 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
  integer,parameter :: master = 0
  integer :: my_rank, iq_ibz, cnt, ierr, q_start, q_stop, nprocs, imyq
  integer :: nbcalc_ks, bstart_ks, nqeff, band_ks, ib_k, ibsum_kq, ik_ibz, ikq_ibz, ndiv
- real(dp) :: weight_q
+ real(dp) :: weight_q, cpu, wall, gflops
  logical :: qfilter
  character(len=500) :: msg
-!!arrays
+!arrays
  integer,allocatable :: mask_qibz_k(:), imask(:), qtab(:)
 ! real(dp) :: kk(3)
 
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"
+ call wrtout(std_out, sjoin("Preparing q-loop with integration method:", msg))
+ call cwtime(cpu, wall, gflops, "start")
 
  !kk = self%kcalc(:, ikcalc)
 
@@ -3148,6 +3161,8 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
  case default
    MSG_ERROR(sjoin("Invalid eph_task:", itoa(dtset%eph_task)))
  end select
+
+ call cwtime_report(" Setup qloop", cpu, wall, gflops)
 
 end subroutine sigmaph_setup_qloop
 !!***
@@ -3772,13 +3787,13 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    zvals(1, :) = sigma%e0vals + sigma%ieta
    if (sigma%nwr > 0) zvals(2:sigma%nwr+1, :) = sigma%wrmesh_b(:, 1:nbcalc_ks) + sigma%ieta
    ! Loop over my bands in self-energy sum.
-   ! TODO: Check comm_bq and MPI version
+   ! TODO: Really slow if nz >> 1, reduce the number of ibsum_kq bands for which tetra must be used.
    do ibsum_kq=sigma%my_bstart, sigma%my_bstop
      ! Loop over my phonon modes
      do imyp=1,sigma%my_npert
        nu = sigma%my_pinfo(3, imyp)
 
-       !complex(dpc),intent(out) :: cweights(nz, 2, nbsigma, self%nq_k)
+       ! cweights(nz, 2, nbsigma, self%nq_k)
        call sigma%ephwg%get_zinv_weights(nz, nbcalc_ks, zvals, ibsum_kq, spin, nu, tmp_cweights, xmpi_comm_self)
        !  use_bzsum=sigma%symsigma == 0)
 

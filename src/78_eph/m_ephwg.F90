@@ -49,7 +49,7 @@ module m_ephwg
 
  use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : dataset_type
- use m_time,            only : cwtime, sec2str
+ use m_time,            only : cwtime, cwtime_report, sec2str
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  use m_special_funcs,   only : dirac_delta
@@ -339,7 +339,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 !scalars
  integer,parameter :: sppoldbl1=1
  integer :: ierr,ii
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, cpu, wall, gflops
  character(len=80) :: errorstring
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
@@ -349,6 +349,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 !----------------------------------------------------------------------
 
  cryst => self%cryst
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Get little group of the (external) kpoint.
  call self%lgk%free()
@@ -356,10 +357,15 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
+ call cwtime_report(" lgroup_new", cpu, wall, gflops)
+
  ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
+ !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
@@ -369,6 +375,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ABI_SFREE(self%lgk2ibz)
  call alloc_copy(indkk(:, 1), self%lgk2ibz)
  ABI_FREE(indkk)
+ call cwtime_report(" listkk1", cpu, wall, gflops)
 
  ! Get mapping (k + q) --> initial IBZ.
  do ii=1,self%nq_k
@@ -384,6 +391,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
     "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
+ call cwtime_report(" listkk2", cpu, wall, gflops)
 
  ABI_SFREE(self%kq2ibz)
  call alloc_copy(indkk(:, 1), self%kq2ibz)
@@ -396,12 +404,14 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 #if 1
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
 
- !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
- !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+ call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
 
- ! Use symmetries of the litte group (This version should be the correct one).
- call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
-    sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+ ! Use symmetries of the litte group
+ ! FIXME This version should be the correct one but I got different results. It seems that
+ ! tetra integration depends on the indkk mapping.
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
+ !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
@@ -439,6 +449,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
    MSG_ERROR(msg)
  end if
 #endif
+ call cwtime_report(" listkk3", cpu, wall, gflops)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
@@ -446,6 +457,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
  ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
+
+ !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
+ call cwtime_report(" tetra3", cpu, wall, gflops)
 
 end subroutine ephwg_setup_kpoint
 !!***
@@ -965,7 +979,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  real(dp),allocatable :: pme_k(:,:)
  integer :: ind_ibz(4)
  !complex(dpc) :: SIM0, SIM0I
- complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(nz,4)
+ complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(4,nz)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -987,8 +1001,6 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  do itetra = 1, self%tetra_k%ntetra
    if (mod(itetra, nprocs) /= my_rank) cycle ! MPI parallelism
    ! Here we need the original ordering to reference the correct irred kpoints
-   ! Cycle if this tetra does not contribute to this k-point.
-   ! indices of the vertex in IBZ (symmetrical image)
    ! See also tetra_get_onewk
    !if (all(self%tetra_k%tetra_full(:, 1, itetra) /= iqlk)) cycle
    ind_ibz = self%tetra_k%tetra_full(:, 1, itetra)
@@ -999,22 +1011,21 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
    do ib=1,nbcalc
      do ii=1,2
        ! Compute weights for nz points.
+       ! TODO: This is slow if nz >> 1
        do iz=1,nz
          verm = zvals(iz, ib) - ework(:, ii)
          !verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii)
          !call SIM0ONEI(SIM0, SIM0I, VERM)
          !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
          call SIM0TWOI(VERL, VERLI, VERM)
-         cint(iz,:) = verl(:) * volconst_mult
+         cint(:, iz) = verl(:) * volconst_mult
        end do
 
        ! TODO
        ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
        do jj=1,4
          iqlk = ind_ibz(jj)
-         !weights(:,1) = weights(:,1) + dtweightde_tmp(:,jj)
-         !cweights(:, ii, ib, nu) = cweights(:, ii, ib, nu) + cint(:, jj)
-         cweights(:, ii, ib, iqlk) = cweights(:, ii, ib, iqlk) + cint(:, jj)
+         cweights(:, ii, ib, iqlk) = cweights(:, ii, ib, iqlk) + cint(jj, :)
        end do
      end do  ! +-
    end do ! ib

@@ -723,7 +723,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
              if (isppol == 2 .and. symafm(isym) == 1) cycle
 
              ! Compute symmetric point to kpt1
-             if(usesym==1)then
+             if (usesym==1) then
                ! original code only used transpose(symrel)
                if (present(use_symrec)) then
                  if (use_symrec) then
@@ -1179,10 +1179,9 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 & -kptrlatt2(1,3)*kptrlatt2(2,2)*kptrlatt2(3,1) &
 & -kptrlatt2(1,1)*kptrlatt2(2,3)*kptrlatt2(3,2)
 
-!Check whether the number of k points is positive,
-!otherwise, change the handedness of kptrlatt2
+!Check whether the number of k points is positive, otherwise, change the handedness of kptrlatt2
  if(nkptlatt<=0)then
-!  write(std_out,*)' getkgrid : nkptlatt is negative !'
+   ! write(std_out,*)' getkgrid : nkptlatt is negative !'
    kptrlatt2(:,3)=-kptrlatt2(:,3)
    nkptlatt=-nkptlatt
    do ishiftk=1,nshiftk2
@@ -1252,16 +1251,17 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  if (PRESENT(downsampling))then
    call smpbz(brav,iout,kptrlatt2,mkpt,nkpthf_computed,nshiftk2,option,shiftk2,spkpt,downsampling=downsampling)
-   if (PRESENT(kpthf) .and. nkpthf/=0) then ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
+   if (PRESENT(kpthf) .and. nkpthf/=0) then
+     ! Returns list of k-points in the Full BZ, possibly downsampled for Fock
      kpthf = spkpt(:,1:nkpthf)
    end if
    nkpthf=nkpthf_computed
-
  end if
 
  call smpbz(brav,iout,kptrlatt2,mkpt,nkpt_fullbz,nshiftk2,option,shiftk2,spkpt)
 
- if (PRESENT(fullbz)) then ! Returns list of k-points in the Full BZ.
+ if (PRESENT(fullbz)) then
+   ! Returns list of k-points in the Full BZ.
    ABI_ALLOCATE(fullbz,(3,nkpt_fullbz))
    fullbz = spkpt(:,1:nkpt_fullbz)
  end if

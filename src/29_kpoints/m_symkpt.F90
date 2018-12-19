@@ -208,6 +208,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    ! do ikpt=1,nkbz; write(std_out,*)ikpt,length2(ikpt),list(ikpt),kbz(1:3,list(ikpt)); end do
 
    ! Examine whether the k point grid is symmetric or not
+   ! This check scales badly with nkbz hence it's disabled for dense meshes.
    if (chksymbreak == 1 .and. nkbz < 40**3) then
      ikpt_current_length=1
      ! Loop on all k points
@@ -272,7 +273,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
      ! Not worth to examine a k point that is a symmetric of another,
      ! which is the case if its weight has been set to 0 by previous folding
-     if(wtk_folded(ind_ikpt) < tol16) cycle
+     if (wtk_folded(ind_ikpt) < tol16) cycle
 
      ! Loop on the remaining k-points
      do ikpt2=ikpt+1,nkbz
@@ -280,7 +281,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
        ! The next line eliminates pairs of vectors that differs by their length.
        ! Moreover, since the list is ordered according to the length,
        ! one can skip all other ikpt2 vectors, as soon as one becomes larger than length2(ikpt)
-       if (length2(ikpt2)-length2(ikpt) > tol8) exit
+       if (length2(ikpt2) - length2(ikpt) > tol8) exit
 
        ! Ordered index
        ind_ikpt2=list(ikpt2)
@@ -288,8 +289,8 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
        ! If the second vector is already empty, no interest to treat it
        if (wtk_folded(ind_ikpt2) < tol16) cycle
 
-       quit=0
-       !MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
+       quit = 0
+       ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
        ! Should always use this convention when applying symmetry operations in k-space.
        do itim=1,(1-2*timrev),-2
          do isym=1,nsym
@@ -315,8 +316,8 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
              ! Here, have successfully found a symmetrical k-vector
              ! Assign all the weight of the k-vector to its symmetrical
-             wtk_folded(ind_ikpt)=wtk_folded(ind_ikpt)+wtk_folded(ind_ikpt2)
-             wtk_folded(ind_ikpt2)=0._dp
+             wtk_folded(ind_ikpt) = wtk_folded(ind_ikpt) + wtk_folded(ind_ikpt2)
+             wtk_folded(ind_ikpt2) = zero
 
              if (present(bz2ibz_smap)) then
                ! Fill entries following listkk convention.
@@ -332,14 +333,15 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              end if
 
              ! Go to the next ikpt2 if the symmetric was found
-             quit=1; exit
+             quit = 1; exit
            end if ! End condition of non-identity symmetry
-         end do ! End loop on itim
 
-         if(quit==1) exit
-       end do ! isym
-     end do ! End secondary loop over k-points
-   end do ! End primary loop over k-points
+         end do ! isym
+         if (quit == 1) exit
+       end do ! itim
+
+     end do ! ikpt2
+   end do ! ikpt
 
    ABI_DEALLOCATE(length2)
    ABI_DEALLOCATE(list)
@@ -351,17 +353,17 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  nkibz = 0
  do ikpt=1,nkbz
    if (wtk_folded(ikpt) > tol8) then
-     nkibz=nkibz+1
-     ibz2bz(nkibz)=ikpt
+     nkibz = nkibz+1
+     ibz2bz(nkibz) = ikpt
      bz2ibz_idx(ikpt) = nkibz
    end if
  end do
 
  if (present(bz2ibz_smap)) then
+   ! bz2ibz_smap stores the index in the BZ. Here we replace the BZ index with the IBZ index.
    ierr = 0
    do ikpt=1,nkbz
-     ind_ikpt = bz2ibz_smap(1, ikpt)
-     ind_ikpt = bz2ibz_idx(ind_ikpt)
+     ind_ikpt = bz2ibz_idx(bz2ibz_smap(1, ikpt))
      if (ind_ikpt /= 0) then
        bz2ibz_smap(1, ikpt) = ind_ikpt
      else

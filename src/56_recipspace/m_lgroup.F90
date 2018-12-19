@@ -249,9 +249,9 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  end do
 
 #if 1
- ! Here I repack the IBZ points. In principle, the best would be
- ! to pack stars using crystal%symrec. For the time being we pack shells (much easier).
- ! Use wtk as workspace to store the norm.
+ ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
+ ! In principle, the best approach would be to pack in stars using crystal%symrec.
+ ! For the time being we pack in shells (much easier). Use wtk as workspace to store the norm.
  ksign = + one
  if (present(sord)) then
    if (sord == "<") ksign = - one

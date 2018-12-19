@@ -1532,7 +1532,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    end if
  end do
 
- call cwtime_report("IO + symmetrization", cpu_all, wall_all, gflops_all)
+ call cwtime_report("Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
 end subroutine dvdb_qcache_read
