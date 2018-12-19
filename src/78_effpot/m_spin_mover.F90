@@ -335,6 +335,7 @@ contains
     class(effpot_t), intent(inout) :: effpot
     real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
+    real(dp) :: Htmp(3)
     integer :: i
 
     ! predict
@@ -343,9 +344,9 @@ contains
     call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
-       self%Htmp(:,i)=self%Heff_tmp(:,i)+self%H_lang(:,i)
+       Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
        ! Note that there is no - , because dsdt =-cross (S, Hrotate) 
-       self%Hrotate(:,i) = self%gamma_L(i) * ( self%Htmp(:,i) + self%damping(i)* cross(S_in(:,i), self%Htmp(:,i)))
+       self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
        S_out(:,i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
     call self%mps%gatherv_dp2d(S_out, 3)
@@ -356,8 +357,8 @@ contains
     call xmpi_bcast(self%Htmp, master, comm, ierr)
 
     do i=self%mps%istart, self%mps%iend
-       self%Heff_tmp(:,i)=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp+self%H_lang(:,i)
-       self%Hrotate(:,i) = self%gamma_L(i) * ( self%Htmp(:,i) + self%damping(i)* cross(S_in(:,i), self%Htmp(:,i)))
+       Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp + self%H_lang(:,i)
+       self%Hrotate(:,i) = self%gamma_L(i) * (Htmp + self%damping(i)* cross(S_in(:,i), Htmp))
        S_out(:, i)= rotate_S_DM(S_in(:,i), self%Hrotate(:,i), self%dt)
     end do
     call self%mps%gatherv_dp2d(S_out, 3)
