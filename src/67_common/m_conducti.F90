@@ -1084,7 +1084,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !size of the frequency range
  read(iunt,*)dom,wind
  close(iunt)
- mom=dint(wind/dom)
+ mom=int(wind/dom)
  ABI_ALLOCATE(oml1,(mom))
  do iom=1,mom
    oml1(iom)=tol10*1000.0d0+dble(iom)*dom
@@ -1178,6 +1178,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
      do iband=1,nband_k
        do jband=1,nband_k
 !
+! TODO : replace with BLAS calls
          do l1=1,3
            do l2=1,3
              do ii=1,3
@@ -1198,12 +1199,13 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
            end do
          end do
 !
+! TODO: replace with BLAS calls
          do l1=1,3
            do l2=1,3
              dhdk2_g(iband,jband)=dhdk2_g(iband,jband)+gmet_inv(l1,l2)*( &
 &             eig1_k(2*iband-1+(jband-1)*2*nband_k,l1)*&
 &             eig1_k(2*iband-1+(jband-1)*2*nband_k,l2) &
-&             +eig1_k(2*iband  +(jband-1)*2*nband_k,l1)*&
+&            +eig1_k(2*iband  +(jband-1)*2*nband_k,l1)*&
 &             eig1_k(2*iband  +(jband-1)*2*nband_k,l2))
            end do
          end do
@@ -1526,7 +1528,6 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: npt=10000
  integer :: ii,ip,npt1,npt2,eps_unt,abs_unt
  real(dp),parameter :: del=0.001_dp,ohmtosec=9.d11
  real(dp) :: dx,dx1,dx2,eps1,eps2,idel,komega,pole,refl,sigma2,xsum
@@ -1538,6 +1539,11 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 
 ! *********************************************************************************
 !BEGIN EXECUTABLE SECTION
+
+ if (npti > 12000) then
+   msg = "Sorry - the interpolator INTRPL is hard coded for maximum 12000 points. Reduce the conducti input npti, or implement a better interpolator!"
+   MSG_ERROR(msg)
+ end if
 
  write(std_out,'(2a)')ch10,'Calculate the principal value and related optical properties'
  write(std_out,'(a)')'following W.J. Thomson computer in physics vol 12 p94 1998 for '
@@ -1556,33 +1562,28 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
  end if
  write(abs_unt,'(a)')'#energy(eV),nomega,komega,refl.,abso.(cm-1)'
 
- ABI_ALLOCATE(fct,(npt))
- ABI_ALLOCATE(fct2,(npt))
- ABI_ALLOCATE(fct3,(npt))
- ABI_ALLOCATE(fct4,(npt))
- ABI_ALLOCATE(fct5,(npt))
- ABI_ALLOCATE(fp,(npt))
- ABI_ALLOCATE(fpp,(npt))
- ABI_ALLOCATE(fppp,(npt))
- ABI_ALLOCATE(x1,(npt))
- ABI_ALLOCATE(x2,(npt))
- ABI_ALLOCATE(fct1,(npt))
- ABI_ALLOCATE(ppsig,(npt))
- ABI_ALLOCATE(fctii,(npt))
- ABI_ALLOCATE(abso,(npt))
- ABI_ALLOCATE(nomega,(npt))
-
- if (npti > npt) then
-   write (std_out,*) 'msig: input npti is too large for hard coded npt array size = ', npt
-   MSG_ERROR("Aborting now")
- end if
+ ABI_ALLOCATE(fct,(npti))
+ ABI_ALLOCATE(fct2,(npti))
+ ABI_ALLOCATE(fct3,(npti))
+ ABI_ALLOCATE(fct4,(npti))
+ ABI_ALLOCATE(fct5,(npti))
+ ABI_ALLOCATE(fp,(npti))
+ ABI_ALLOCATE(fpp,(npti))
+ ABI_ALLOCATE(fppp,(npti))
+ ABI_ALLOCATE(x1,(npti))
+ ABI_ALLOCATE(x2,(npti))
+ ABI_ALLOCATE(fct1,(npti))
+ ABI_ALLOCATE(ppsig,(npti))
+ ABI_ALLOCATE(fctii,(npti))
+ ABI_ALLOCATE(abso,(npti))
+ ABI_ALLOCATE(nomega,(npti))
 
 !loop on the initial energy grid
  do ip=1,npti
 
 !  adjust the interval before and after the pole to reflect range/npt interval
    xsum=zero
-   dx=(xi(npti)-xi(1))/dble(npt-1)
+   dx=(xi(npti)-xi(1))/dble(npti-1)
    pole=xi(ip)
    npt1=int((pole-del)/dx)
    dx1=zero
@@ -1616,6 +1617,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
 !    MJV 6/12/2008:
 !    for each use of fctii should ensure that npt1 npt2 etc... are less than
 !    npt=len(fctii)
+! TODO: move to spline/splint routines with no memory limitation
      call intrpl(npti,xi,fctii,npt1,x1,fct4,fct1,fct5,1)
      call intrpl(npti,xi,fctii,npt2,x2,fct3,fct2,fct5,1)
 
@@ -1637,6 +1639,7 @@ subroutine msig(fcti,npti,xi,filnam_out_sig)
      xsum=xsum+half*(fct1(1)+fct1(npt1))*dx1+half*(fct2(1)+fct2(npt2))*dx2
 
 !    calculate the first and third derivative at the pole and add the taylor expansion
+! TODO: move to spline/splint routines with no memory limitation
      call intrpl(npti,xi,fctii,npti,xi,fct3,fct4,fct5,1)
      call intrpl(npti,xi,fct4,1,(/pole/),fp,fpp,fppp,1)
 

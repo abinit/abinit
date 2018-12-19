@@ -2949,11 +2949,14 @@ subroutine symredcart(aprim,bprim,symcart,symred)
    end do
  end do
 
+ ! work = bprim * symred^T
+
  symcart=zero
  do kk=1,3
    do jj=1,3
      symtmp=work(jj,kk)
      do ii=1,3
+       ! symcart = aprim * work^T = aprim * symred * bprim^T
        symcart(ii,jj)=symcart(ii,jj)+aprim(ii,kk)*symtmp
      end do
    end do
