@@ -101,6 +101,7 @@ MODULE m_ebands
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
  public :: ebands_downsample       ! Build a new ebands_t with a downsampled IBZ.
+ public :: ebands_chop             ! Build a new ebands_t with selected nbands.
  public :: ebands_get_edos         ! Compute electron DOS from band structure.
  public :: ebands_get_jdos         ! Compute electron joint-DOS from band structure.
  public :: ebands_get_dos_matrix_elements
@@ -3730,6 +3731,68 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
  ABI_FREE(ibz_c2f)
 
 end function ebands_downsample
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_chop
+!! NAME
+!! ebands_chop
+!!
+!! FUNCTION
+!!  Return a new ebands_t object of type ebands_t with only a selected number of bands
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Info on unit cell and symmetries.
+!!  in_kptrlatt(3,3)=Defines the sampling of the "small" IBZ. Must be submesh of the "fine" mesh.
+!!  in_nshiftk= Number of shifts in the coarse k-mesh
+!!  in_shiftk(3, in_nshiftk) = Shifts of the coarse k-mesh
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(ebands_t) function ebands_chop(self, nband) result(new)
+
+!Arguments ------------------------------------
+!scalars
+ type(ebands_t),intent(in) :: self
+ integer,intent(in) :: nband(self%nkpt*self%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nkpt, nsppol, bantot
+ character(len=500) :: msg
+!arrays
+ real(dp),allocatable :: doccde(:), eig(:), occ(:)
+
+! *********************************************************************
+
+ ! Copy important dimensions
+ nkpt = self%nkpt
+ nsppol = self%nsppol
+ bantot = sum(nband)
+
+ ! Have to pack data to call ebands_init (I wonder who decided to use vectors!)
+ ABI_MALLOC(doccde, (bantot))
+ ABI_MALLOC(eig, (bantot))
+ ABI_MALLOC(occ, (bantot))
+
+ call pack_eneocc(nkpt, nsppol, self%mband, nband, bantot, self%doccde, doccde)
+ call pack_eneocc(nkpt, nsppol, self%mband, nband, bantot, self%eig, eig)
+ call pack_eneocc(nkpt, nsppol, self%mband, nband, bantot, self%occ, occ)
+
+ ! This is basically a copy of the ebands structure
+ bantot = sum(nband)
+ call ebands_init(bantot,new,self%nelect,doccde,eig,self%istwfk,self%kptns,&
+   nband,nkpt,self%npwarr,self%nsppol,self%nspinor,self%tphysel,self%tsmear,&
+   self%occopt,occ,self%wtk,self%charge, self%kptopt, self%kptrlatt_orig, &
+   self%nshiftk_orig, self%shiftk_orig, &
+   self%kptrlatt, self%nshiftk, self%shiftk)
+
+end function ebands_chop
 !!***
 
 !----------------------------------------------------------------------

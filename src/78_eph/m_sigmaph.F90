@@ -2771,6 +2771,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 
  ABI_MALLOC(new%kcalc, (3, new%nkcalc))
  ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
+ ABI_MALLOC(new%bstop_ks, (new%nkcalc, new%nsppol))
  ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
  ABI_MALLOC(new%mu_e, (new%ntemp))
  ABI_MALLOC(new%kTmesh, (new%ntemp))
@@ -2779,6 +2780,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  NCF_CHECK(nf90_get_var(ncid, vid("ngqpt"), new%ngqpt))
  NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), new%bstart_ks))
  NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
+ new%bstop_ks = new%bstart_ks + new%nbcalc_ks - 1
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), new%kcalc))
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), new%kcalc2ibz))
  NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), new%kTmesh))
@@ -2867,29 +2869,35 @@ end function sigmaph_read
 !!
 !! SOURCE
 
-subroutine sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, indq2ebands)
+type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, indq2ebands) result(new)
 
 !Arguments -----------------------------------------------
  integer,intent(in) :: comm
- integer,intent(in) :: opt
+ integer,intent(in) :: opt(:)
  type(sigmaph_t),intent(in) :: self
- type(ebands_t),intent(inout) :: ebands
+ type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  integer, intent(out) :: ierr
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
  character(len=500) :: msg
 
 !Local variables -----------------------------------------
- integer :: ii, spin, ikpt, ikcalc, iband, itemp
- integer :: band_ks, bstart_ks, nbcalc_ks
- integer :: ncid
- integer,allocatable :: indkk(:,:)
+ integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkpt, nsppol
+ integer :: band_ks, bstart_ks, nbcalc_ks, mband
+#ifdef HAVE_NETCDF
+ integer :: ncid, varid
+#endif
+ integer,allocatable :: indkk(:,:), nband(:)
  real,allocatable :: linewidth(:,:,:,:)
  real(dp) :: dksqmax
 
- ABI_MALLOC(indkk,(ebands%nkpt,6))
+ !copy useful dimensions
+ nsppol = ebands%nsppol
+ nkpt = ebands%nkpt
+
+ ABI_MALLOC(indkk,(nkpt,6))
  ! map ebands kpoints to sigmaph
- call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, &
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, nkpt, &
              self%nkcalc, cryst%nsym, 1, cryst%symafm, cryst%symrec, &
              self%timrev, comm, use_symrec=.True.)
 
@@ -2902,33 +2910,65 @@ subroutine sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, indq2ebands)
 
  ! store mapping to return
  if (present(indq2ebands)) then
-   ABI_MALLOC(indq2ebands,(ebands%nkpt))
+   ABI_MALLOC(indq2ebands,(nkpt))
    indq2ebands(:) = indkk(:,1)
  end if
 
- select case (opt)
- case (1)
+ ! Allocate using only the relevant bands for transport
+ ! includin valence states to allow to compute different doping
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ mband = maxval(self%bstop_ks)
+ nband = mband
+ write(*,*) nband
+ new = ebands_chop(ebands, nband)
+ ABI_FREE(nband)
+
+#ifdef HAVE_NETCDF
+ if (opt(1)==1) then
    ! read linewidths from sigmaph
-   ABI_MALLOC(ebands%linewidth,(self%ntemp,ebands%mband,ebands%nkpt,ebands%nsppol))
-   do spin=1,ebands%nsppol
-     do ikcalc=1,ebands%nkpt
+   ABI_MALLOC(new%linewidth,(self%ntemp,mband,nkpt,nsppol))
+   do spin=1,nsppol
+     do ikcalc=1,nkpt
        bstart_ks = self%bstart_ks(ikcalc,spin)
        nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
        do iband=1,nbcalc_ks
-         band_ks = iband + bstart_ks
+         band_ks = iband + bstart_ks - 1
          ikpt = indkk(ikcalc,1)
          do itemp=1,self%ntemp
            ! read from netcdf file
-           NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), ebands%linewidth(itemp,band_ks,ikcalc,spin), start=[2,itemp,iband,ikcalc,spin]))
+           NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), new%linewidth(itemp,band_ks,ikcalc,spin), start=[2,itemp,iband,ikcalc,spin]))
          end do
        end do
      end do
    end do
- end select
+ end if
+
+ ! read band velocities
+ if (opt(2)==1) then
+   ierr = nf90_inq_varid(self%ncid, "vred_calc", varid)
+   if (ierr /= nf90_noerr) then
+     ierr = 99
+     return
+   endif
+   ABI_MALLOC(new%velocity,(3,mband,nkpt,nsppol))
+   do spin=1,nsppol
+     do ikcalc=1,nkpt
+       bstart_ks = self%bstart_ks(ikcalc,spin)
+       nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
+       do iband=1,nbcalc_ks
+         band_ks = iband + bstart_ks - 1
+         ikpt = indkk(ikcalc,1)
+         ! read from netcdf file
+         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"), new%velocity(:,band_ks,ikcalc,spin), start=[1,iband,ikcalc,spin]))
+       end do
+     end do
+   end do
+ end if
+#endif
 
  ABI_FREE(indkk)
 
-end subroutine sigmaph_ebands
+end function sigmaph_ebands
 
 !----------------------------------------------------------------------
 

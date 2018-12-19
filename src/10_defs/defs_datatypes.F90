@@ -75,6 +75,7 @@ module defs_datatypes
   integer :: nkpt                  ! number of k points
   integer :: nspinor               ! 1 for collinear, 2 for noncollinear.
   integer :: nsppol                ! number of spin-polarizations
+  integer :: ntemp                 ! Number of temperatures
   integer :: occopt                ! Occupation option, see input variable.
 
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
@@ -106,6 +107,10 @@ module defs_datatypes
   real(dp),allocatable :: linewidth(:,:,:,:)
   ! linewidth(itemp,mband,nkpt,nsppol)
   ! Linewidth of each band
+
+  real(dp),allocatable :: kTmesh(:)
+  ! kTmesh(ntemp)
+  ! List of temperatures (KT units).
 
   real(dp),allocatable :: velocity(:,:,:,:)
   ! velocity(3,mband,nkpt,nsppol)
