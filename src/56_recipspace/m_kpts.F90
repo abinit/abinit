@@ -559,8 +559,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
 !Local variables-------------------------------
 !scalars
  integer,parameter :: usesym=1, limit=1
- integer :: nprocs, my_rank, ierr !i_start, i_stop
- integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done
+ integer :: nprocs, my_rank, ierr, isk_start, isk_stop
+ integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done, isk
  integer :: ilarger,ismaller,itrial
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime
  integer :: nsym_used,timrev_used
@@ -568,7 +568,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  character(len=500) :: msg
 !arrays
  integer :: dkint(3),jdkint(3),k1int(3),k2int(3)
- integer, allocatable :: isort(:)
+ integer, allocatable :: isort(:), tmp_indkk(:,:)
  real(dp) :: tsec(2)
  real(dp) :: dk(3),kpg1(3),kpt1a(3),k1(3),k2(3)
  !real(dp) :: kasq,ka(3)
@@ -599,11 +599,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  ABI_ALLOCATE(isort,(l3*nkpt1))
  isort = 0
 
- !call xmpi_split_work(nkpt1, comm, i_start, i_stop, msg, ierr)
-
+ call xmpi_split_work(nkpt1, comm, isk_start, isk_stop, msg, ierr)
  !write(std_out,*)' List of kpt1 vectors'; write(std_out,*)' Length of the kpt1 vectors:'
- do ikpt1=1,nkpt1
-   if (mod(ikpt1, nprocs) /= my_rank) cycle  ! MPI parallelism
+
+ do ikpt1=isk_start,isk_stop
+ !do ikpt1=1,nkpt1
+   !if (mod(ikpt1, nprocs) /= my_rank) cycle  ! MPI parallelism
    k1(:)=kptns1(:,ikpt1)
    !write(std_out,*)ikpt1,k1(:)
    k1int(:)=nint(k1(:)+tol12)
@@ -647,13 +648,19 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  call timab(1023,1,tsec)
  dksqmax = zero
  indkk = 0
- !call xmpi_split_work(sppoldbl * nkpt2, comm, i_start, i_stop, msg, ierr)
+ ! TODO: Should change API to use this shape.
+ ! workspace array for improved memory access.
+ ABI_MALLOC(tmp_indkk, (6, nkpt2*sppoldbl))
+ tmp_indkk = 0
+
+ ! Split loop in contiguous blocks
+ call xmpi_split_work(sppoldbl * nkpt2, comm, isk_start, isk_stop, msg, ierr)
 
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
-     ii = ikpt2 + (isppol-1)*nkpt2
-     if (mod(ii, nprocs) /= my_rank) cycle  ! MPI parallelism
-     !if (ii < i_start .or. ii > i_stop) cycle
+     isk = ikpt2 + (isppol-1)*nkpt2
+     !if (mod(isk, nprocs) /= my_rank) cycle  ! MPI parallelism
+     if (isk < isk_start .or. isk > isk_stop) cycle
 
      ikpt2_done=0
      ! Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
@@ -760,7 +767,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
                 ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
                 ! Note that in this condition, each coordinate is tested separately, without squaring.
                 ! So, it is a much stronger condition than dksqmn < tol12
-               if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done=1
+               if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
+               !if (dksq < tol12) ikpt2_done = 1
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
@@ -824,11 +832,17 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
        !if(ismaller==1 .and. ilarger==l3*nkpt1), we are done with the loop !
      end do ! ikpt1
 
-     ! Store indices.
-     indkk(ikpt2+(isppol-1)*nkpt2,1) = jkpt1
-     indkk(ikpt2+(isppol-1)*nkpt2,2) = jsym
-     indkk(ikpt2+(isppol-1)*nkpt2,3:5) = jdkint(:)
-     indkk(ikpt2+(isppol-1)*nkpt2,6) = jtime
+     ! Store indices (lots of cache miss here)
+     !indkk(isk, 1) = jkpt1
+     !indkk(isk, 2) = jsym
+     !indkk(isk, 3:5) = jdkint(:)
+     !indkk(isk, 6) = jtime
+
+     tmp_indkk(1, isk) = jkpt1
+     tmp_indkk(2, isk) = jsym
+     tmp_indkk(3:5, isk) = jdkint(:)
+     tmp_indkk(6, isk) = jtime
+
      dksqmax = max(dksqmax, dksqmn)
 
      if (dksqmn < -tol12) then
@@ -837,7 +851,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
      end if
 
      !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )&
-     ! ' listkk: ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:)=',ikpt2,isppol,indkk(ikpt2+(isppol-1)*nkpt2,:),dksqmn
+     ! ' listkk: ikpt2,isppol,indkk(isk,:)=',ikpt2,isppol,indkk(isk,:),dksqmn
    end do ! ikpt2
  end do ! isppol
 
@@ -848,6 +862,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  ABI_DEALLOCATE(lkpg1_sorted)
 
  call timab(1024,1,tsec)
+ indkk = transpose(tmp_indkk)
+ ABI_FREE(tmp_indkk)
  if (nprocs > 1) then
    call xmpi_sum(indkk, comm, ierr)
    dksqmn = dksqmax

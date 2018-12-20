@@ -224,6 +224,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
 
 ! *********************************************************************
 
+ ! TODO: Pass comm to parallelize this part
  ierr = 0
  errorstring = ""
 !jmb
@@ -299,8 +300,8 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  ialltetra = 1
  do ikpt_full=1,nkpt_fullbz
    do itetra=1,6
+     !ialltetra = itetra + (ikpt_full -1) * 6
      do isummit=1,4
-
        k1(:) = kpt_fullbz(:,ikpt_full) &
 &       + tetra_shifts(1,isummit,itetra)*klatt(:,1) &
 &       + tetra_shifts(2,isummit,itetra)*klatt(:,2) &
