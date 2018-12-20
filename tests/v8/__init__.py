@@ -94,6 +94,7 @@ inp_files = [
 "t91.in",
 "t92.in",
 "t93.in",
+"t94.in",
 #Electron-phonon
 "t150.in",
 "t151.in",

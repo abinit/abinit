@@ -910,10 +910,6 @@ subroutine indefo1(dtset)
  dtset%slabzend=zero
  dtset%so_psp(:)=1
  dtset%spinat(:,:)=zero
- dtset%supercell_latt(:,:) = 0
- do ii=1,3
-   dtset%supercell_latt(ii,ii) = 1
- end do
  dtset%symmorphi=1
 !T
  dtset%tfkinfunc=0
