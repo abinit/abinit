@@ -1544,7 +1544,7 @@ subroutine mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,bdx,bdxc,bfor,bsigma,epsabg,gdir,gdx,gdxc,gfor,gsigma
+  integer :: adir,bdir,bdx,bdxc,bfor,bsigma,epsabg,gdir,gdx,gdxstor,gfor,gsigma
   integer :: ikpt,isppol
   integer :: my_nspinor,nband_k,nn,n1,n2,n3
   real(dp) :: deltab,deltag,ucvol
@@ -1567,10 +1567,21 @@ subroutine mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
   nband_k = dtorbmag%mband_occ
 
-  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6))
-
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
+  ! the smat_all_indx structure holds the <u_nk|S|u_n'k'> overlap matrix
+  ! elements. k ranges over the k pts in the FBZ.
+  ! k' can be k + bsigma*dkb, so k +/- an increment in the b direction,
+  ! where b ranges over bdir = 1 .. 3. In these cases (equivalent to berryphase_new.F90)
+  ! storage is in smat_all_indx(1:2,n,n',ikpt,bdx,0) where bdx maps bdir, bfor onto
+  ! the range 1..6. In addition, we also need twist matrix elements of the form
+  ! <u_nk+bsigma*dkb|S|u_n'k+gsigma*dkg>, that is, overlap between two functions
+  ! that both are neighbors to ikpt, so depend on both bdir and gdir. But we never need
+  ! the case bdir // gdir, so we only need four additional slots, not 6. Thus if
+  ! bdir = 1, gdir = 2 or 3 and gdx = 3,4,5,6; if bdir = 2, gdir = 3 or 1 and gdx = 5,6,1,2;
+  ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
+  ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
+  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
   call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
 
@@ -1604,8 +1615,8 @@ subroutine mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
               end if
               ! index of neighbor 1..6
               gdx = 2*gdir-2+gfor
-              ! index of ikpt viewed from neighbor
-              gdxc = 2*gdir-2+gfor+gsigma
+              gdxstor=mod(gdx+6-2*bdir,6)
+
               dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
               deltag = sqrt(DOT_PRODUCT(dkg,dkg))
               do ikpt = 1, dtorbmag%fnkpt
@@ -1616,7 +1627,7 @@ subroutine mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                        t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
                        t1B = t1A
                        do n2 = 1, nband_k
-                          t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdx),smat_all_indx(2,n1,n2,ikpt,bdx,gdx))
+                          t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor))
                           t3A = conjg(cmplx(smat_all_indx(1,nn,n2,ikpt,gdx,0),smat_all_indx(2,nn,n2,ikpt,gdx,0)))
                           t2B = conjg(cmplx(smat_all_indx(1,n2,n1,ikpt,bdx,0),smat_all_indx(2,n2,n1,ikpt,bdx,0)))
                           do n3 = 1, nband_k
@@ -1721,13 +1732,13 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
   integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
-  real(dp),intent(out) :: smat_all(2,nband_k,nband_k,dtorbmag%fnkpt,0:6,0:6)
+  real(dp),intent(out) :: smat_all(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: bdir,bdx,bdxc,bfor,bsigma,ddkflag,gdir,gdx,gdxc,gfor,gsigma
+  integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,ddkflag,gdir,gdx,gdxc,gdxstor,gfor,gsigma
   integer :: icg,icgb,icgg,icprjbi,icprjgi,icprji,ikg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ikpti,isppol,itrs
   integer :: job,mcg1_k,my_nspinor,ncpgr,npw_k,npw_kb,npw_kg,shiftbd,usepaw
 
@@ -1775,7 +1786,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
   ABI_ALLOCATE(smat_inv,(2,nband_k,nband_k))
   ABI_ALLOCATE(smat_kk,(2,nband_k,nband_k))
 
-  ABI_ALLOCATE(has_smat,(dtorbmag%fnkpt,0:6,0:6))
+  ABI_ALLOCATE(has_smat,(dtorbmag%fnkpt,1:6,0:6))
 
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
@@ -1917,10 +1928,13 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
                     call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icgb,icgg,itrs,job,nband_k,&
                          &             mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
                          &             pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
-                    
-                    smat_all(:,:,:,ikpt,bdx,gdx) = smat_kk(:,:,:)
-                    smat_all(1,:,:,ikpt,gdx,bdx) = TRANSPOSE(smat_kk(1,:,:))
-                    smat_all(2,:,:,ikpt,gdx,bdx) = -TRANSPOSE(smat_kk(2,:,:))
+
+                    gdxstor = mod(gdx+6-2*bdir,6)
+                    smat_all(:,:,:,ikpt,bdx,gdxstor) = smat_kk(:,:,:)
+
+                    bdxstor = mod(bdx+6-2*gdir,6)
+                    smat_all(1,:,:,ikpt,gdx,bdxstor) = TRANSPOSE(smat_kk(1,:,:))
+                    smat_all(2,:,:,ikpt,gdx,bdxstor) = -TRANSPOSE(smat_kk(2,:,:))
                     
                     has_smat(ikpt,bdx,gdx) = .TRUE.
                     has_smat(ikpt,gdx,bdx) = .TRUE.
