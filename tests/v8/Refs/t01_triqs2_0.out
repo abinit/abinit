@@ -17,10 +17,10 @@
 .Starting date : Thu 13 Dec 2018.
 - ( at 08h41 )
   
-- input  file    -> t01.in
-- output file    -> t01.out
-- root for input  files -> t01i
-- root for output files -> t01o
+- input  file    -> t01_triqs2_0.in
+- output file    -> t01_triqs2_0.out
+- root for input  files -> t01_triqs2_0i
+- root for output files -> t01_triqs2_0o
 
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
@@ -744,7 +744,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
               =  3.842091122968  3.842091122968  3.842091122968 angstroms
- prteigrs : about to open file t01o_DS1_EIG
+ prteigrs : about to open file t01_triqs2_0o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.32226   Average Vxc (hartree)=  -0.44651
  Magnetization (Bohr magneton)=  4.61142236E-12
  Total spin up =  2.05000000E+01   Total spin down =  2.05000000E+01
@@ -1016,7 +1016,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
          ecut(hartree)=     60.000   => boxcut(ratio)=   2.13298
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t01o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t01_triqs2_0o_DS1_WFK
 P newkpt: treating     23 bands with npw=    1174 for ikpt=   1 by node    0
 P newkpt: treating     23 bands with npw=    1165 for ikpt=   2 by node    0
 P newkpt: treating     23 bands with npw=    1172 for ikpt=   3 by node    0
@@ -1377,7 +1377,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
     5      0.00000000000000     0.00000000000000     1.92104556148385
  length scales=  7.260500000000  7.260500000000  7.260500000000 bohr
               =  3.842091122968  3.842091122968  3.842091122968 angstroms
- prteigrs : about to open file t01o_DS2_EIG
+ prteigrs : about to open file t01_triqs2_0o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.32227   Average Vxc (hartree)=  -0.44651
  Magnetization (Bohr magneton)=  6.37934656E-02
  Total spin up =  2.04681012E+01   Total spin down =  2.05318947E+01

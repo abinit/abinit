@@ -83,8 +83,8 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% need_cpp_vars = HAVE_TRIQS_v2_0
 #%% [files]
 #%% files_to_test = 
-#%%    t01_triqs2_0.out,  tolnlines =0, tolabs =1.1e-11, tolrel = 2.0e-12, fld_options=-medium ;
-#%%    t01_triqs2_0o_DS2_Legendre_coefficients.dat,  tolnlines =0, tolabs =1.1e-11, tolrel = 2.0e-12, fld_options=-medium 
+#%%    t01_triqs2_0.out,  tolnlines =1, tolabs =1e-7, tolrel = 1e-7, fld_options=-medium ;
+#%%    t01_triqs2_0o_DS2_Legendre_coefficients.dat,  tolnlines =0, tolabs =1e-7, tolrel = 1e-7, fld_options=-medium 
 #%% psp_files = 23v.paw, 38sr.paw, 8o.2.paw
 #%% [paral_info]
 #%% max_nprocs = 2
