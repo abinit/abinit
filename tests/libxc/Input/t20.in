@@ -3,8 +3,8 @@
 
 ndtset 38
 jdtset 1 2 3 4 5 6 7 8 9
-    10 11 12 13 14 15 16 17 18 19
-       21    23 24 25 26    28 29
+    10 11 12 13 14 15 16 17
+             23 24 25 26    28 29
     30 31 32 33 34 35 36 37 38
                 44 45 46
 
@@ -28,10 +28,10 @@ ixc14 -191131
 ixc15 -192131
 ixc16 -193131
 ixc17 -524131
-ixc18 -525131
-ixc19 -526131
+# ixc18 -525131 ! Not portable from libxc v3 to v4
+# ixc19 -526131 ! Not portable from libxc v3 to v4
 # ixc20 -527131 ! Activating it cause ABINIT to crash
-ixc21 -528131
+# ixc21 -528131 ! Not portable from libxc v3 to v4
 # ixc22 -529131 ! Not portable
 
 # GGAs : Becke 88 exchange + different correlations

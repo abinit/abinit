@@ -20,7 +20,7 @@
  ecut 13   pawecutdg 35
  ionmov 2
  ntime 15 
- tolrff 0.02
+ tolrff 0.005
  tolmxf 5.0d-5
 
  kptopt 1
@@ -36,7 +36,7 @@
  nstep 6
  ntypat  2
  typat  1 2
- xcart -0.562   0 0  0.562  0 0 Angstrom   
+ xcart -0.562   0 0  0.562  0 0 Angstrom
  znucl  6 1
 
  
