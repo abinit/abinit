@@ -288,7 +288,8 @@ contains
     call xmpi_bcast(self%params%spin_damping, master, comm, ierr)
     if (self%params%spin_damping >=0) then
        damping(:)= self%params%spin_damping
-       call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature, damping=damping)
+       call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature, &
+            & damping=damping, ms=self%spin_calculator%ms, gyro_ratio=self%spin_calculator%gyro_ratio)
     else
        call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature)
     end if

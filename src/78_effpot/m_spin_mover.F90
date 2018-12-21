@@ -177,12 +177,14 @@ contains
 
     if(present(damping)) then
        self%damping(:)=damping(:)
+       call xmpi_bcast(self%damping, master, comm, ierr)
     endif
 
     if(present(gyro_ratio)) then
        self%gyro_ratio(:)=gyro_ratio(:)
        call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     endif
+
     if(present(ms)) then
        self%ms(:)=ms(:)
        call xmpi_bcast(self%ms, master, comm, ierr)
@@ -192,21 +194,18 @@ contains
        self%temperature=temperature
        call xmpi_bcast(self%temperature, master, comm, ierr)
        if(self%method==3) then
-          self%spin_mc%temperature = temperature
-          self%spin_mc%beta=1.0_dp/temperature
+          if(iam_master) self%spin_mc%temperature = temperature
+          if(iam_master) self%spin_mc%beta=1.0_dp/temperature
           call xmpi_bcast(self%spin_mc%temperature, master, comm, ierr)
           call xmpi_bcast(self%spin_mc%beta, master, comm, ierr)
        end if
     end if
 
     self%gamma_l(:)= self%gyro_ratio(:)/(1.0_dp+ self%damping(:)**2)
-    call xmpi_bcast(self%gamma_l, master, comm, ierr)
     self%gamma_l_calculated=.True.
-    call xmpi_bcast(self%gamma_l_calculated, master, comm, ierr)
 
     self%H_lang_coeff(:)=sqrt(2.0*self%damping(:)* self%temperature &
          &  /(self%gyro_ratio(:)* self%dt *self%ms(:)))
-    call xmpi_bcast(self%H_lang_coeff, master, comm, ierr)
   end subroutine set_Langevin_params
 
 
@@ -272,7 +271,7 @@ contains
     ! predict
     S_out(:,:)=0.0_dp
     call effpot%calculate(spin=S_in, bfield=self%Heff_tmp, energy=etot)
-    !call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
+    call xmpi_bcast(self%Heff_tmp, master, comm, ierr)
     call self%get_Langevin_Heff(self%H_lang)
     do i=self%mps%istart, self%mps%iend
        Htmp=self%Heff_tmp(:,i)+self%H_lang(:,i)
@@ -287,7 +286,7 @@ contains
 
     ! correction
     call effpot%calculate(spin=S_out, bfield=self%Htmp, energy=etot)
-    !call xmpi_bcast(self%Htmp, master, comm, ierr)
+    call xmpi_bcast(self%Htmp, master, comm, ierr)
 
     do i=self%mps%istart, self%mps%iend
        Htmp=(self%Heff_tmp(:,i)+self%Htmp(:,i))*0.5_dp+self%H_lang(:,i)
