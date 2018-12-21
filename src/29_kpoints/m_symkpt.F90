@@ -181,8 +181,9 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    ABI_ALLOCATE(length2,(nkbz))
 
    do ikpt=1,nkbz
-     do itim=1,(1-2*timrev),-2
+     !do itim=1,(1-2*timrev),-2
        do isym=1,nsym
+     do itim=1,(1-2*timrev),-2
          ! Get the symmetric of the vector
          do ii=1,3
            ksym(ii)=itim*( kbz(1,ikpt)*symrec(ii,1,isym)&
@@ -217,8 +218,9 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
        ! Keep track of the current length, to avoid doing needless comparisons
        if(length2(ikpt)-length2(ikpt_current_length)>tol8) ikpt_current_length=ikpt
 
-       do itim=1,(1-2*timrev),-2
+       !do itim=1,(1-2*timrev),-2
          do isym=1,nsym
+       do itim=1,(1-2*timrev),-2
            if(isym/=identi .or. itim/=1 )then
              ! Get the symmetric of the vector
              do ii=1,3
@@ -292,8 +294,10 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
        quit = 0
        ! MG Dec 16 2018, Invert isym, itim loop to be consistent with listkk and GW routines
        ! Should always use this convention when applying symmetry operations in k-space.
-       do itim=1,(1-2*timrev),-2
+       ! TODO: Postponed to v9 because it won't be possible to read old WFK files.
+       !do itim=1,(1-2*timrev),-2
          do isym=1,nsym
+       do itim=1,(1-2*timrev),-2
 
            if (isym/=identi .or. itim/=1) then
              ! Get the symmetric of the vector

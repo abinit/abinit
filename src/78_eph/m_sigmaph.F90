@@ -3078,7 +3078,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"
- call wrtout(std_out, sjoin("Preparing q-loop with integration method:", msg))
+ call wrtout(std_out, sjoin(" Preparing q-loop with integration method:", msg))
  call cwtime(cpu, wall, gflops, "start")
 
  !kk = self%kcalc(:, ikcalc)
@@ -3150,7 +3150,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
        if (self%my_nqibz_k /= 0) self%myq2ibz_k = qtab(q_start:q_stop)
        ABI_FREE(qtab)
        if (my_rank == master) then
-         write(std_out, "(a, i0)")" Number of q-points treated my this MPI rank: ", self%my_nqibz_k
+         write(std_out, "(a, i0)")" Number of q-points treated by this MPI proc: ", self%my_nqibz_k
        end if
 
        ! Recompute weights with new q-point distribution.

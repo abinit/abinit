@@ -850,8 +850,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
        MSG_BUG(msg)
      end if
 
-     !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )&
-     ! ' listkk: ikpt2,isppol,indkk(isk,:)=',ikpt2,isppol,indkk(isk,:),dksqmn
+     !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )' listkk: ikpt2,isppol,indkk(isk,:)=',ikpt2,isppol,indkk(isk,:),dksqmn
    end do ! ikpt2
  end do ! isppol
 
