@@ -644,10 +644,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
+
+! use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
+!& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+!& cpopt < 3 .and. hamk%useylm /= 0 .and. &
+!& (choice < 2 .or. choice == 7) )
+
  use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+& signs == 2 .and. paw_opt /= 2 .and. &
 & cpopt < 3 .and. hamk%useylm /= 0 .and. &
 & (choice < 2 .or. choice == 7) )
+
  if(use_gemm_nonlop) then
    call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
 &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
