@@ -130,7 +130,7 @@ int xc_get_info_flags(XC(func_type) *xc_func)
 int xc_get_info_kind(XC(func_type) *xc_func)
  {return xc_func_info_get_kind(xc_func->info);}
 char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
- {if (*number>=0&&*number<=XC_MAX_REFERENCES)
+ {if (*number>=0&&*number<XC_MAX_REFERENCES)
    {if (xc_func_info_get_references(xc_func->info,*number) != NULL)
     {return xc_func_info_get_references(xc_func->info,*number)->ref;}}
   else {return NULL;}
