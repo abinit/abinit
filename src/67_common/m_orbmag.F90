@@ -65,7 +65,7 @@ module m_orbmag
   use m_pawtab,           only : pawtab_type
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_copy, pawcprj_free,&
        &                         pawcprj_get, pawcprj_put, pawcprj_getdim, pawcprj_set_zero,&
-       &                         pawcprj_symkn
+       &                         pawcprj_symkn,pawcprj_mpi_recv,pawcprj_mpi_send
   use m_symtk,            only : symatm
   use m_time,             only : timab
 
@@ -1738,20 +1738,27 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
 
   !Local variables -------------------------
   !scalars
-  integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,ddkflag,gdir,gdx,gdxc,gdxstor,gfor,gsigma
-  integer :: icg,icgb,icgg,icprjbi,icprjgi,icprji,ikg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ikpti,isppol,itrs
-  integer :: job,mcg1_k,my_nspinor,ncpgr,npw_k,npw_kb,npw_kg,shiftbd,usepaw
+  integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countg,ddkflag,dest,gdir,gdx,gdxstor,gfor,gg,gsigma
+  integer :: icg,icgb,icgg,icprjbi,icprjgi,icprji,ierr,ikg,ikpt,ikpt_loc
+  integer :: ikptb,ikptbi,ikptg,ikptgi,ikpti,isppol,itrs,jkpt,jkptb,jkptbi,jkptg,jkptgi,jsppol
+  integer :: job,mcg1_k,me,my_nspinor,n2dim,ncpgr,nproc,npw_k,npw_kb,npw_kg,ntotcp
+  integer :: shiftbd,sourceb,sourceg,spaceComm,tagb,tagg,usepaw
 
   !arrays
   integer,allocatable :: dimlmn(:),nattyp_dum(:),pwind_kb(:),pwind_kg(:),pwind_bg(:),sflag_k(:)
   real(dp) :: dkb(3),dkg(3),dkbg(3),dtm_k(2)
-  real(dp),allocatable :: cg1_k(:,:),kk_paw(:,:,:),pwnsfac_k(:,:)
+  real(dp),allocatable :: buffer(:,:),cg1_k(:,:),cgqb(:,:),cgqg(:,:),kk_paw(:,:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:)
   logical,allocatable :: has_smat(:,:,:)
-  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
+  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_k(:,:),cprj_kb(:,:),cprj_kg(:,:)
   type(pawcprj_type),allocatable :: cprj_fkn(:,:),cprj_ikn(:,:)
 
   ! ***********************************************************************
+
+  !Init MPI
+  spaceComm=mpi_enreg%comm_cell
+  nproc=xmpi_comm_size(spaceComm)
+  me=mpi_enreg%me_kpt
 
   ! TODO: generalize to nsppol > 1
   ncpgr = cprj(1,1)%ncpgr
@@ -1768,6 +1775,13 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
      ABI_DATATYPE_ALLOCATE(cprj_fkn,(dtset%natom,dtorbmag%nspinor*dtset%mband))
      call pawcprj_alloc(cprj_ikn,ncpgr,dimlmn)
      call pawcprj_alloc(cprj_fkn,ncpgr,dimlmn)
+  end if
+
+  n2dim = dtorbmag%nspinor*nband_k
+  ntotcp = n2dim*SUM(dimlmn(:))
+  if (nproc>1) then
+     ABI_DATATYPE_ALLOCATE(cprj_buf,(dtset%natom,n2dim))
+     call pawcprj_alloc(cprj_buf,ncpgr,dimlmn)
   end if
 
   ABI_ALLOCATE(kk_paw,(2,dtset%mband,dtset%mband))
@@ -1788,6 +1802,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
 
   ABI_ALLOCATE(has_smat,(dtorbmag%fnkpt,1:6,0:6))
 
+  ! eventually must generalize to nsppol, nspinor .NE. 1
   isppol = 1
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
@@ -1800,156 +1815,265 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
   
   smat_all(:,:,:,:,:,:) = zero
   has_smat(:,:,:) = .FALSE.
-  do ikpt = 1, dtorbmag%fnkpt
-     
-     ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
-     icprji = dtorbmag%cprjindex(ikpti,isppol)
-     npw_k = npwarr(ikpti)
-     icg = dtorbmag%cgindex(ikpti,dtset%nsppol)
-     ikg = dtorbmag%fkgindex(ikpt)
-     
-     call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprji,ikpti,0,isppol,dtset%mband,&
-          &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
-     if ( ikpti /= ikpt ) then
-        call pawcprj_copy(cprj_k,cprj_ikn)
-        call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
-             & dtorbmag%indkk_f2ibz(ikpt,2),dtorbmag%indkk_f2ibz(ikpt,6),&
-             & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikpti)),&
-             & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
-             & dtorbmag%mband_occ,my_nspinor,&
-             & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
-        call pawcprj_copy(cprj_fkn,cprj_k)
-     end if
 
-     do bdir = 1, 3
+  do bdir = 1, 3
+     do gg = bdir,bdir+1
+        gdir=mod(gg,3)+1
+
         do bfor = 1, 2
-           if (bfor .EQ. 1) then
-              bsigma = 1
-           else
-              bsigma = -1
-           end if
+           bsigma = -2*bfor+3
            ! index of neighbor 1..6
            bdx = 2*bdir-2+bfor
-           dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
            ! index of ikpt viewed from neighbor
            bdxc = 2*bdir-2+bfor+bsigma
+           dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)        
 
-           ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
-           ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
-           icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
-           npw_kb = npwarr(ikptbi)
-           icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
+           do gfor = 1, 2
+              gsigma=-2*gfor+3
+              ! index of neighbor 1..6
+              gdx = 2*gdir-2+gfor
+              dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
+              dkbg = dkg - dkb
 
-           pwind_kb(1:npw_k) = pwind(ikg+1:ikg+npw_k,bfor,bdir)
+              !    Loop on the values of ikpt_loc and ikpt1 :
+              !    ikpt1 is incremented one by one, and number the k points in the FBZ
+              !    ikpt1i refer to the k point numbering in the IBZ
+              !    ikpt_loc differs from ikpt1 only in the parallel case, and gives
+              !    the index of the k point in the FBZ, in the set treated by the present processor
+              !    NOTE : in order to allow synchronisation, ikpt_loc contain information about
+              !    ikpt AND ISPPOL !
+              !    It means that the following loop is equivalent to a double loop :
+              !    do isppol = 1, nsppol
+              !    do ikpt1 =  1, dtefield%fmkmem
+              !
+              ! do ikpt_loc = 1, dtorbmag%fmkmem_max*nsppol
+              do ikpt_loc = 1, dtorbmag%fmkmem_max
+  
+                 ikpt=mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc,1)
+                 ! isppol=mpi_enreg%kpt_loc2fbz_sp(me, ikpt_loc,2)
 
-           call pawcprj_get(atindx1,cprj_kb,cprj,dtset%natom,1,icprjbi,&
-                &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                &         my_nspinor,dtset%nsppol,0)
-           if ( ikptbi /= ikptb ) then
-              call pawcprj_copy(cprj_kb,cprj_ikn)
-              call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
-                   & dtorbmag%indkk_f2ibz(ikptb,2),dtorbmag%indkk_f2ibz(ikptb,6),&
-                   & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptbi)),&
-                   & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
-                   & dtorbmag%mband_occ,my_nspinor,&
-                   & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
-              call pawcprj_copy(cprj_fkn,cprj_kb)
-           end if
-              
-           if (.NOT. has_smat(ikpt,bdx,0)) then
-              call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
-                   &           dtorbmag%lmn_size,dtset%mband,&
-                   &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
-           
-              sflag_k=0
-              call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icg,icgb,itrs,job,nband_k,&
-                   &           mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
-                   &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
-           
-              smat_all(:,:,:,ikpt,bdx,0) = smat_kk(:,:,:)
-              smat_all(1,:,:,ikptb,bdxc,0) = TRANSPOSE(smat_kk(1,:,:))
-              smat_all(2,:,:,ikptb,bdxc,0) = -TRANSPOSE(smat_kk(2,:,:))
-              has_smat(ikpt,bdx,0) = .TRUE.
-              has_smat(ikptb,bdxc,0) = .TRUE.
-           end if
+                 ! if this k and spin are for me do it
+                 ! if (ikpt1 > 0 .and. isppol > 0) then
+                 if (ikpt > 0) then
 
-           do gdir = 1, 3
-              if (gdir .EQ. bdir) cycle
-              do gfor = 1, 2
-                 if (gfor .EQ. 1) then
-                    gsigma = 1
+                    ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
+                    icprji = dtorbmag%cprjindex(ikpti,isppol)
+                    npw_k = npwarr(ikpti)
+                    icg = dtorbmag%cgindex(ikpti,dtset%nsppol)
+                    ikg = dtorbmag%fkgindex(ikpt)
+
+                    ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+                    ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
+                    npw_kb = npwarr(ikptbi)
+                    pwind_kb(1:npw_k) = pwind(ikg+1:ikg+npw_k,bfor,bdir)
+
+                    ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
+                    ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
+                    npw_kg = npwarr(ikptgi)
+                    pwind_kg(1:npw_k) = pwind(ikg+1:ikg+npw_k,gfor,gdir)
+
+                    call pawcprj_get(atindx1,cprj_k,cprj,dtset%natom,1,icprji,ikpti,0,isppol,dtset%mband,&
+                         &       dtset%mkmem,dtset%natom,nband_k,nband_k,my_nspinor,dtset%nsppol,0)
+                    if ( ikpti /= ikpt ) then
+                       call pawcprj_copy(cprj_k,cprj_ikn)
+                       call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
+                            & dtorbmag%indkk_f2ibz(ikpt,2),dtorbmag%indkk_f2ibz(ikpt,6),&
+                            & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikpti)),&
+                            & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
+                            & dtorbmag%mband_occ,my_nspinor,&
+                            & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
+                       call pawcprj_copy(cprj_fkn,cprj_k)
+                    end if
+
+                 end if ! end check that ikpt > 0
+
+                 !      --------------------------------------------------------------------------------
+                 !      Communication
+                 !      --------------------------------------------------------------------------------
+                 if (ikpt > 0 .and. isppol > 0) then ! I currently have a true kpt to use
+                    countb = npw_kb*my_nspinor*nband_k
+                    ABI_ALLOCATE(cgqb,(2,countb))
+                    cgqb = zero
+                    sourceb = me
+                    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptbi,1,nband_k,isppol,me)) then
+                       ! I need the datas from someone else
+                       sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
+                    end if
+                    countg = npw_kg*my_nspinor*nband_k
+                    ABI_ALLOCATE(cgqg,(2,countg))
+                    cgqg = zero
+                    sourceg = me
+                    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikptgi,1,nband_k,isppol,me)) then
+                       ! I need the datas from someone else
+                       sourceg = mpi_enreg%proc_distrb(ikptgi,1,isppol)
+                    end if
                  else
-                    gsigma = -1
+                    sourceb = -1 ! I do not have a kpt to use
+                    sourceg = -1
                  end if
-                 ! index of neighbor 1..6
-                 gdx = 2*gdir-2+gfor
-                 ! index of ikpt viewed from neighbor
-                 gdxc = 2*gdir-2+gfor+gsigma
 
-                 dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
+                 do dest = 0, nproc - 1
+                    if ((dest.EQ.me) .AND. (ikpt.GT.0) .AND. (isppol.GT.0)) then
+                       ! I am destination and I have something to do
+                       if(sourceb.EQ.me) then
+                          ! I am destination and source for kptb
+                          icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
+                          icgb = dtorbmag%cgindex(ikptbi,dtset%nsppol)
+                          call pawcprj_get(atindx1,cprj_kb,cprj,dtset%natom,1,icprjbi,&
+                               &         ikptbi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                               &         my_nspinor,dtset%nsppol,0)
+                          cgqb(1:2,1:countb) = cg(1:2,icgb+1:icgb+countb)
+                       else ! sourceb .NE. me
+                          ! receive cgqb (and cprj_kb)
+                          tagb = ikptbi + (isppol - 1)*dtset%nkpt
+                          call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
+                          call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
+                       end if
+                       if(sourceg.EQ.me) then
+                          ! I am destination and source for kptg
+                          icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
+                          icgg = dtorbmag%cgindex(ikptgi,dtset%nsppol)
+                          call pawcprj_get(atindx1,cprj_kg,cprj,dtset%natom,1,icprjgi,&
+                               &           ikptgi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                               &           my_nspinor,dtset%nsppol,0)
+                          cgqg(1:2,1:countg) = cg(1:2,icgg+1:icgg+countg)
+                       else ! sourceg .NE. me
+                          ! receive cgqg (and cprj_kg)
+                          tagg = ikptgi + (isppol - 1)*dtset%nkpt
+                          call xmpi_recv(cgqg,sourceg,tagg,spaceComm,ierr)
+                          call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kg,sourceg,spaceComm,ierr)
+                       end if
+                    else if (dest.NE.me) then
+                       ! jkpt is the kpt which is being treated by dest
+                       ! jsppol is his isppol
+                       jkpt = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,1)
+                       jsppol = mpi_enreg%kpt_loc2fbz_sp(dest, ikpt_loc,2)
+                       if (jkpt > 0 .and. jsppol > 0) then ! dest is treating a true kpt
 
-                 ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
-                 ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
+                          jkptb = dtorbmag%ikpt_dk(jkpt,bfor,bdir)
+                          jkptbi = dtorbmag%indkk_f2ibz(jkptb,1)
+                          jkptg = dtorbmag%ikpt_dk(jkpt,gfor,gdir)
+                          jkptgi = dtorbmag%indkk_f2ibz(jkptg,1)
+
+                          if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
+                             icgb = dtorbmag%cgindex(jkptbi,jsppol)
+                             icprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
+                             call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,icprjbi,jkptbi,0,jsppol,&
+                                  & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+                                  & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+                                  & proc_distrb=mpi_enreg%proc_distrb)
+                             tagb = jkptbi + (jsppol - 1)*dtset%nkpt
+                             countb = npwarr(jkptbi)*my_nspinor*nband_k
+                             ABI_ALLOCATE(buffer,(2,countb))
+                             buffer(:,1:countb)  = cg(:,icgb+1:icgb+countb)
+                             call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
+                             ABI_DEALLOCATE(buffer)
+                             call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+                          end if ! end check that I am his source
+                          if((mpi_enreg%proc_distrb(jkptgi,1,jsppol) == me))  then
+                             icgg = dtorbmag%cgindex(jkptgi,jsppol)
+                             icprjgi=dtorbmag%cprjindex(jkptbi,jsppol)
+                             call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,icprjgi,jkptgi,0,jsppol,&
+                                  & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+                                  & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+                                  & proc_distrb=mpi_enreg%proc_distrb)
+                             tagg = jkptgi + (jsppol - 1)*dtset%nkpt
+                             countg = npwarr(jkptgi)*my_nspinor*nband_k
+                             ABI_ALLOCATE(buffer,(2,countg))
+                             buffer(:,1:countg)  = cg(:,icgg+1:icgg+countg)
+                             call xmpi_send(buffer,dest,tagg,spaceComm,ierr)
+                             ABI_DEALLOCATE(buffer)
+                             call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+                          end if ! end check that I am his source
+
+                       end if ! end check that jkpt > 0 and jsppol > 0
+
+                    end if ! test dest .EQ. me and ikpt .GT. 0
+
+                 end do ! end loop over dest
+
+                 if (ikpt > 0 .and. isppol > 0) then ! if I am treating a kpt, compute the overlaps
+                    
+                    if ( ikptbi /= ikptb ) then
+                       call pawcprj_copy(cprj_kb,cprj_ikn)
+                       call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
+                            & dtorbmag%indkk_f2ibz(ikptb,2),dtorbmag%indkk_f2ibz(ikptb,6),&
+                            & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptbi)),&
+                            & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
+                            & dtorbmag%mband_occ,my_nspinor,&
+                            & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
+                       call pawcprj_copy(cprj_fkn,cprj_kb)
+                    end if
                  
-                 icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
-
-                 npw_kg = npwarr(ikptgi)
-                 icgg = dtorbmag%cgindex(ikptgi,dtset%nsppol)
-
-                 pwind_kg(1:npw_k) = pwind(ikg+1:ikg+npw_k,gfor,gdir)
-
-                 call pawcprj_get(atindx1,cprj_kg,cprj,dtset%natom,1,icprjgi,&
-                      &           ikptgi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                      &           my_nspinor,dtset%nsppol,0)
-                 if ( ikptgi /= ikptg ) then
-                    call pawcprj_copy(cprj_kg,cprj_ikn)
-                    call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
-                         & dtorbmag%indkk_f2ibz(ikptg,2),dtorbmag%indkk_f2ibz(ikptg,6),&
-                         & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptgi)),&
-                         & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
-                         & dtorbmag%mband_occ,my_nspinor,&
-                         & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
-                    call pawcprj_copy(cprj_fkn,cprj_kg)
-                 end if
-
-                 dkbg = dkg - dkb
-
-                 if (.NOT. has_smat(ikpt,bdx,gdx)) then
-                    
-                    call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                         &             dtorbmag%lmn_size,dtset%mband,&
-                         &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
-                    
-                    call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
-                         &             dtorbmag%indkk_f2ibz,ikptb,ikptg,&
-                         &             kg,dtorbmag%kgindex,mpi_enreg,npwarr,pwind_bg,symrec)
-                    
-                    sflag_k=0
-                    call smatrix(cg,cg,cg1_k,ddkflag,dtm_k,icgb,icgg,itrs,job,nband_k,&
-                         &             mcg,mcg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
-                         &             pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
-
-                    gdxstor = mod(gdx+6-2*bdir,6)
-                    smat_all(:,:,:,ikpt,bdx,gdxstor) = smat_kk(:,:,:)
-
-                    bdxstor = mod(bdx+6-2*gdir,6)
-                    smat_all(1,:,:,ikpt,gdx,bdxstor) = TRANSPOSE(smat_kk(1,:,:))
-                    smat_all(2,:,:,ikpt,gdx,bdxstor) = -TRANSPOSE(smat_kk(2,:,:))
-                    
-                    has_smat(ikpt,bdx,gdx) = .TRUE.
-                    has_smat(ikpt,gdx,bdx) = .TRUE.
-                    
-                 end if
+                    if ( ikptgi /= ikptg ) then
+                       call pawcprj_copy(cprj_kg,cprj_ikn)
+                       call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
+                            & dtorbmag%indkk_f2ibz(ikptg,2),dtorbmag%indkk_f2ibz(ikptg,6),&
+                            & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptgi)),&
+                            & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
+                            & dtorbmag%mband_occ,my_nspinor,&
+                            & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
+                       call pawcprj_copy(cprj_fkn,cprj_kg)
+                    end if
                  
-              end do ! end loop over gfor
+                    if (.NOT. has_smat(ikpt,bdx,0)) then
+                       call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
+                            &           dtorbmag%lmn_size,dtset%mband,&
+                            &           dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                       
+                       sflag_k=0
+                       call smatrix(cg,cgqb,cg1_k,ddkflag,dtm_k,icg,0,itrs,job,nband_k,&
+                            &           mcg,countb,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_k,npw_kb,my_nspinor,&
+                            &           pwind_kb,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
+                       
+                       smat_all(:,:,:,ikpt,bdx,0) = smat_kk(:,:,:)
+                       smat_all(1,:,:,ikptb,bdxc,0) = TRANSPOSE(smat_kk(1,:,:))
+                       smat_all(2,:,:,ikptb,bdxc,0) = -TRANSPOSE(smat_kk(2,:,:))
+                       has_smat(ikpt,bdx,0) = .TRUE.
+                       has_smat(ikptb,bdxc,0) = .TRUE.
+                    end if
+                    
+                    if (.NOT. has_smat(ikpt,bdx,gdx)) then
+                       
+                       call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
+                            &             dtorbmag%lmn_size,dtset%mband,&
+                            &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                       
+                       call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+                            &             dtorbmag%indkk_f2ibz,ikptb,ikptg,&
+                            &             kg,dtorbmag%kgindex,mpi_enreg,npwarr,pwind_bg,symrec)
+                       
+                       sflag_k=0
+                       call smatrix(cgqb,cgqg,cg1_k,ddkflag,dtm_k,0,0,itrs,job,nband_k,&
+                            &             countb,countg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
+                            &             pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
+                       
+                       gdxstor = mod(gdx+6-2*bdir,6)
+                       smat_all(:,:,:,ikpt,bdx,gdxstor) = smat_kk(:,:,:)
+                    
+                       bdxstor = mod(bdx+6-2*gdir,6)
+                       smat_all(1,:,:,ikpt,gdx,bdxstor) = TRANSPOSE(smat_kk(1,:,:))
+                       smat_all(2,:,:,ikpt,gdx,bdxstor) = -TRANSPOSE(smat_kk(2,:,:))
+                       
+                       has_smat(ikpt,bdx,gdx) = .TRUE.
+                       has_smat(ikpt,gdx,bdx) = .TRUE.
+                       
+                    end if
+
+                    ABI_DEALLOCATE(cgqb)
+                    ABI_DEALLOCATE(cgqg)
+
+                 end if ! end check on ikpt > 0
+                 
+              end do ! end loop over ikpt_loc
               
-           end do ! end loop over gdir
+           end do ! end loop over gfor
 
         end do ! end loop over bfor
         
-     end do ! end loop over bdir
+     end do ! end loop over gg
 
-  end do ! end loop over kpts
+  end do ! end loop over bdir
 
   ABI_DEALLOCATE(dimlmn)
   call pawcprj_free(cprj_k)
@@ -1963,6 +2087,10 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
      call pawcprj_free(cprj_fkn)
      ABI_DATATYPE_DEALLOCATE(cprj_ikn)
      ABI_DATATYPE_DEALLOCATE(cprj_fkn)
+  end if
+  if (nproc>1) then
+     call pawcprj_free(cprj_buf)
+     ABI_DATATYPE_DEALLOCATE(cprj_buf)
   end if
 
   ABI_DEALLOCATE(kk_paw)
