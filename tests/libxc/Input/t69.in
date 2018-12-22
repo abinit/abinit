@@ -20,7 +20,7 @@
  ecut 13   pawecutdg 35
  ionmov 2
  ntime 15 
- tolrff 0.005
+ tolrff 0.001
  tolmxf 5.0d-5
 
  kptopt 1
@@ -33,7 +33,7 @@
  nband 4
  nbdbuf 0
 
- nstep 6
+ nstep 10
  ntypat  2
  typat  1 2
  xcart -0.562   0 0  0.562  0 0 Angstrom
@@ -45,7 +45,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t69.out, tolnlines = 3, tolabs = 2.000e-04, tolrel = 3.000e-02, fld_options = -easy
+#%%   t69.out, tolnlines = 20, tolabs = 2.000e-04, tolrel = 3.000e-02, fld_options = -easy
 #%% psp_files = C.xml, H4.GGA_X_PBE+GGA_C_PBE-paw.xml
 #%% [paral_info]
 #%% max_nprocs = 1
