@@ -33,7 +33,7 @@
  nband 4
  nbdbuf 0
 
- nstep 10
+ nstep 15
  ntypat  2
  typat  1 2
  xcart -0.562   0 0  0.562  0 0 Angstrom
