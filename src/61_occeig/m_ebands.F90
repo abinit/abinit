@@ -3792,6 +3792,8 @@ type(ebands_t) function ebands_chop(self, nband) result(new)
    self%nshiftk_orig, self%shiftk_orig, &
    self%kptrlatt, self%nshiftk, self%shiftk)
 
+ new%fermie = self%fermie
+
 end function ebands_chop
 !!***
 
@@ -4209,15 +4211,9 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  ABI_CALLOC(edos%gef, (0:edos%nsppol))
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
  ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
- if (nvals > 0) then
-    ABI_CALLOC(out_valsdos,  (nw, 2, 0:ebands%nsppol, nvals))
- end if
- if (nvecs > 0) then
-    ABI_CALLOC(out_vecsdos,  (nw, 2, 0:ebands%nsppol, 3, nvecs))
- end if
- if (ntens > 0) then
-    ABI_CALLOC(out_tensdos,  (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
- end if
+ ABI_CALLOC(out_valsdos,  (nw, 2, 0:ebands%nsppol, nvals))
+ ABI_CALLOC(out_vecsdos,  (nw, 2, 0:ebands%nsppol, 3, nvecs))
+ ABI_CALLOC(out_tensdos,  (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call wrtout(std_out, "Computing DOS weighted by matrix elements.")

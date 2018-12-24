@@ -45,6 +45,7 @@ module m_transport
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
+ use m_fstrings,       only : strcat
  use m_io_tools,       only : iomode_from_fname, file_exists
  use m_pawang,         only : pawang_type, gauleg
  use m_pawrad,         only : pawrad_type
@@ -70,13 +71,14 @@ module m_transport
 
  type,private :: transport_rta_t
 
+
    integer :: nsppol
    ! number of spin polarizations
 
    integer :: ntemp
    ! number of temperatures
 
-   real(dp),allocatable :: tmesh(:)
+   real(dp),allocatable :: kTmesh(:)
    ! a list of temperatures at which to compute the transport
 
    !integer :: nmu
@@ -91,13 +93,13 @@ module m_transport
    type(edos_t) :: edos
    ! electronic density of states
 
-   real(dp),allocatable :: vvdos(:,:,:,:,:)
-   ! velocity density of states
-   ! (nw, 2, 0:nsppol, 3, 3)
+   real(dp),allocatable :: vvdos_mesh(:)
+   ! velocity density of states mesh
+   ! (nw)
 
-   real(dp),allocatable :: vvdos_tau(:,:,:,:,:,:)
-   ! velocity density of states times the lifetimes for different temperatures
-   ! (nw, 2, 0:nsppol, 3, 3, ntemps)
+   real(dp),allocatable :: vvdos(:,:,:,:,:,:)
+   ! velocity density of states
+   ! (nw, 2, 0:nsppol, 3, 3, 1+ntemps)
 
  end type transport_rta_t
 
@@ -138,23 +140,30 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
  integer,intent(in) :: ngfft(18),ngfftf(18)
 
 !Local variables ------------------------------
- type(sigmaph_t) :: sigma
+ type(sigmaph_t) :: sigmaph
  type(transport_rta_t) :: transport_rta
  type(wfd_t) :: wfd
  real(dp) :: ecut
  integer :: ierr
  integer :: nsppol, nspinor, nkpt, nspden
+#ifdef HAVE_NETCDF
+ integer :: ncid
+#endif
+ character(len=fnlen) :: path
+ character(len=500) :: msg
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
  write(*,*) 'Transport computation driver'
 
+ sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr)
+ if (ierr/=0) MSG_ERROR(msg)
+
 ! intialize transport
- transport_rta = transport_rta_new()
+ transport_rta = transport_rta_new(sigmaph)
 
 ! read lifetimes to ebands object
- sigma = sigmaph_read(dtset,dtfil,xmpi_comm_self,ierr)
- transport_rta%ebands = sigmaph_ebands(sigma,cryst,ebands,[1,1],comm,ierr)
+ transport_rta%ebands = sigmaph_ebands(sigmaph,cryst,ebands,[1,1],comm,ierr)
 
  if (ierr == 99) then
    ! compute velocities if not present in the SIGEPH.nc file
@@ -201,6 +210,17 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
 
  call transport_rta_compute(transport_rta,cryst,dtset,comm)
 
+ ! write netcdf file
+ path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
+
+ ! Master creates the netcdf file used to store the results of the calculation.
+ NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+
+ call transport_rta_ncwrite(transport_rta, cryst, ncid)
+
+ ! Close the netcdf file
+ NCF_CHECK(nf90_close(ncid))
+
 end subroutine transport
 
 !----------------------------------------------------------------------
@@ -216,11 +236,15 @@ end subroutine transport
 !!
 !! SOURCE
 
-type(transport_rta_t) function transport_rta_new() result (transport)
+type(transport_rta_t) function transport_rta_new(sigmaph) result (transport)
 
 !Arguments -------------------------------------
+ type(sigmaph_t) :: sigmaph
 
- !Allocate important arrays
+ ! Allocate important arrays
+ ABI_MALLOC(transport%kTmesh,(sigmaph%ntemp))
+ transport%ntemp = sigmaph%ntemp
+ transport%kTmesh = sigmaph%kTmesh
 
 end function transport_rta_new
 
@@ -291,18 +315,20 @@ subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  if (edos_step == 0) edos_step = 0.001
 
- !set default erange
+ ! Set default erange
  eminmax_spin = get_minmax(transport_rta%ebands, "eig")
  emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
  emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
- !compute dos and vvdos multiplied by lifetimes
+ ! Compute dos and vvdos multiplied by lifetimes
  transport_rta%edos = ebands_get_dos_matrix_elements(transport_rta%ebands, cryst, &
                                        dummy_vals, nvals, dummy_vecs, nvecs, vv_tens, ntens, &
-                                       edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
-                                       dummy_dosvals, dummy_dosvecs, vvdos_tens, emin, emax )
+                                       edos_intmeth, edos_step, edos_broad, comm, &
+                                       transport_rta%vvdos_mesh, &
+                                       dummy_dosvals, dummy_dosvecs, transport_rta%vvdos, emin, emax )
 
- !unpack the data
+ ! Free memory
+ ABI_FREE(vv_tens)
 
 end subroutine transport_rta_compute
 
@@ -317,22 +343,30 @@ end subroutine transport_rta_compute
 !!
 !! SOURCE
 
-subroutine transport_rta_ncwrite(transport_rta, ncid)
+subroutine transport_rta_ncwrite(self, cryst, ncid)
 
 !Arguments --------------------------------------
- type(transport_rta_t),intent(in) :: transport_rta
+ type(transport_rta_t),intent(in) :: self
+ type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: ncid
 
 !Local variables --------------------------------
  integer :: ncerr
 
 ! write to netcdf file
- NCF_CHECK(transport_rta%edos%ncwrite(ncid))
- ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
- ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")], defmode=.True.)
+ ncerr = nctk_def_dims(ncid, [ nctkdim_t("ntemp", self%ntemp) ], defmode=.True.)
+ NCF_CHECK(self%edos%ncwrite(ncid))
+ NCF_CHECK(ebands_ncwrite(self%ebands,ncid))
+ NCF_CHECK(cryst%ncwrite(ncid))
+ ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
+ ncerr = nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")])
+ ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")])
+ ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp")], defmode=.True.)
  NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), transport_rta%vvdos(:,1,:,:,:)))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau"), transport_rta%vvdos_tau(:,1,:,:,:,:)))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), self%vvdos_mesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), self%vvdos(:,1,:,:,:,1)))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau"),  self%vvdos(:,1,:,:,:,2:)))
 
 end subroutine transport_rta_ncwrite
 
@@ -352,9 +386,12 @@ subroutine transport_rta_free(transport_rta)
 !Arguments --------------------------------------
  type(transport_rta_t),intent(inout) :: transport_rta
 
+ call ebands_free(transport_rta%ebands)
+
  ! free the allocated arrays and datastructure
  ABI_SFREE(transport_rta%vvdos)
- ABI_SFREE(transport_rta%vvdos_tau)
+ ABI_SFREE(transport_rta%vvdos_mesh)
+ ABI_SFREE(transport_rta%kTmesh)
 
 end subroutine transport_rta_free
 

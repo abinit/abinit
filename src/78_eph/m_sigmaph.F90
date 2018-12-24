@@ -586,7 +586,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Use __EPH_NORESTART__ to deactivate this feature. Useful when debugging.
  restart = 0
  if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
-    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
+    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr)
  end if
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 
@@ -2702,13 +2702,14 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
+type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
+ character(len=500),intent(out) :: msg
 
 !Local variables ------------------------------
 !scalars
@@ -2717,7 +2718,6 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  integer :: ncid,varid,ncerr
 #endif
  real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, wr_step, eph_extrael, eph_fsmear
- character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
  integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
@@ -2732,6 +2732,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 
  path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (.not.file_exists(path)) then
+    write(msg,"(5a)") "File ",trim(path), "not found."
     ierr = 1; return
  end if
  NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
@@ -2919,14 +2920,13 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
  ABI_MALLOC(nband,(nkpt*nsppol))
  mband = maxval(self%bstop_ks)
  nband = mband
- write(*,*) nband
  new = ebands_chop(ebands, nband)
  ABI_FREE(nband)
 
 #ifdef HAVE_NETCDF
  if (opt(1)==1) then
    ! read linewidths from sigmaph
-   ABI_MALLOC(new%linewidth,(self%ntemp,mband,nkpt,nsppol))
+   ABI_CALLOC(new%linewidth,(self%ntemp,mband,nkpt,nsppol))
    do spin=1,nsppol
      do ikcalc=1,nkpt
        bstart_ks = self%bstart_ks(ikcalc,spin)
@@ -2950,7 +2950,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
      ierr = 99
      return
    endif
-   ABI_MALLOC(new%velocity,(3,mband,nkpt,nsppol))
+   ABI_CALLOC(new%velocity,(3,mband,nkpt,nsppol))
    do spin=1,nsppol
      do ikcalc=1,nkpt
        bstart_ks = self%bstart_ks(ikcalc,spin)
