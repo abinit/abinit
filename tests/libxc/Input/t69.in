@@ -14,13 +14,18 @@
  getwfk3   2
  getxred3  2
 
+!For testing purpose, HSE XC functional
+! has to be converged very precisely
+! (because of libXC v3->v4 changes)
+ nstep3 15 tolvrs3 1.d-15
+
 #Common
  acell 5  2*4 Angstrom
  diemac 1.0d0   diemix 0.5d0
  ecut 13   pawecutdg 35
  ionmov 2
  ntime 15 
- tolrff 0.001
+ tolrff 0.005
  tolmxf 5.0d-5
 
  kptopt 1
@@ -33,7 +38,7 @@
  nband 4
  nbdbuf 0
 
- nstep 15
+ nstep 10 
  ntypat  2
  typat  1 2
  xcart -0.562   0 0  0.562  0 0 Angstrom
