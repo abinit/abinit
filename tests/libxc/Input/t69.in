@@ -17,7 +17,7 @@
 !For testing purpose, HSE XC functional
 ! has to be converged very precisely
 ! (because of libXC v3->v4 changes)
- nstep3 15 tolvrs3 1.d-15
+ nstep3 15 tolvrs3 1.d-20
 
 #Common
  acell 5  2*4 Angstrom
