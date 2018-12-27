@@ -4485,13 +4485,11 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
 
  if (abs(Dtset%nelect-hdr%nelect)>tol6) then
-   write(msg,'(2(a,f8.2))')&
-&   "File contains ", hdr%nelect," electrons but nelect initialized from input is ",Dtset%nelect
+   write(msg,'(2(a,f8.2))')"File contains ", hdr%nelect," electrons but nelect initialized from input is ",Dtset%nelect
    MSG_ERROR(msg)
  end if
  if (abs(Dtset%charge-hdr%charge)>tol6) then
-   write(msg,'(2(a,f8.2))')&
-&   "File contains charge ", hdr%charge," but charge from input is ",Dtset%charge
+   write(msg,'(2(a,f8.2))')"File contains charge ", hdr%charge," but charge from input is ",Dtset%charge
    MSG_ERROR(msg)
  end if
 
@@ -4524,30 +4522,34 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  end if
 
  ! Check if the k-points from the input file agrees with that read from the WFK file
- if ( (ANY(ABS(Hdr%kptns(:,:)-Dtset%kpt(:,1:Dtset%nkpt))>tol6)) ) then
+ if ((ANY(ABS(Hdr%kptns(:,:) - Dtset%kpt(:,1:Dtset%nkpt)) > tol6))) then
    write(msg,'(9a)')ch10,&
-&   ' hdr_vs_dtset: ERROR - ',ch10,&
-&   '  k-points read from Header ',ch10,&
-&   '  differ from the values specified in the input file',ch10,&
-&   '  k-points from Hdr file                        | k-points from input file ',ch10
+   ' hdr_vs_dtset: ERROR - ',ch10,&
+   '  k-points read from Header ',ch10,&
+   '  differ from the values specified in the input file',ch10,&
+   '  k-points from Hdr file                        | k-points from input file ',ch10
    call wrtout(std_out,msg,'COLL')
    do ik=1,Dtset%nkpt
-     write(msg,'(3(3es16.6,3x))')Hdr%kptns(:,ik),Dtset%kpt(:,ik)
-     call wrtout(std_out,msg,'COLL')
+     if (any(abs(Hdr%kptns(:,ik) - Dtset%kpt(:,ik)) > tol6)) then
+       write(msg,'(3(3es16.6,3x))')Hdr%kptns(:,ik),Dtset%kpt(:,ik)
+       call wrtout(std_out,msg,'COLL')
+     end if
    end do
    MSG_ERROR('Modify the k-mesh in the input file')
  end if
 
- if (ANY(ABS(Hdr%wtk(:)-Dtset%wtk(1:Dtset%nkpt))>tol6)) then
+ if (ANY(ABS(Hdr%wtk(:) - Dtset%wtk(1:Dtset%nkpt)) > tol6)) then
    write(msg,'(9a)')ch10,&
-&   ' hdr_vs_dtset : ERROR - ',ch10,&
-&   '  k-point weights read from Header ',ch10,&
-&   '  differ from the values specified in the input file',ch10,&
-&   '  Hdr file  |  File ',ch10
+   ' hdr_vs_dtset : ERROR - ',ch10,&
+   '  k-point weights read from Header ',ch10,&
+   '  differ from the values specified in the input file',ch10,&
+   '  Hdr file  |  File ',ch10
    call wrtout(std_out,msg,'COLL')
    do ik=1,Dtset%nkpt
-     write(msg,'(2(f11.5,1x))')Hdr%wtk(ik),Dtset%wtk(ik)
-     call wrtout(std_out,msg,'COLL')
+     if (abs(Hdr%wtk(ik) - Dtset%wtk(ik)) > tol6) then
+       write(msg,'(2(f11.5,1x))')Hdr%wtk(ik),Dtset%wtk(ik)
+       call wrtout(std_out,msg,'COLL')
+     end if
    end do
    MSG_ERROR('Check the k-mesh and the symmetries of the system. ')
  end if
@@ -4555,10 +4557,10 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  ! Check istwfk storage
  if ( (ANY(Hdr%istwfk(:)/=Dtset%istwfk(1:Dtset%nkpt))) ) then
    write(msg,'(9a)')ch10,&
-&   ' hdr_vs_dtset : ERROR - ',ch10,&
-&   '  istwfk read from Header ',ch10,&
-&   '  differ from the values specified in the input file',ch10,&
-&   '  Hdr | input ',ch10
+   ' hdr_vs_dtset : ERROR - ',ch10,&
+   '  istwfk read from Header ',ch10,&
+   '  differ from the values specified in the input file',ch10,&
+   '  Hdr | input ',ch10
    call wrtout(std_out,msg,'COLL')
    do ik=1,Dtset%nkpt
      write(msg,'(i5,3x,i5)')Hdr%istwfk(ik),Dtset%istwfk(ik)

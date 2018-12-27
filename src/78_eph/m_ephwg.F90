@@ -345,6 +345,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  type(crystal_t),pointer :: cryst
 !arrays
  integer,allocatable :: indkk(:,:), kmap(:,:)
+ !integer, save :: ikcalc = 0
 
 !----------------------------------------------------------------------
 
@@ -404,14 +405,41 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 #if 1
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
 
+ ! Old version
  call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ !ikcalc = ikcalc + 1
+ !write(111, *)"kpoint:", ktoa(kpoint)
+ !do ii=1,self%nbz
+ !  write(111, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))
+ !end do
+ !call destroy_tetra(self%tetra_k)
+ !call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_111_", itoa(ikcalc)))
+
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+ !   sppoldbl1, cryst%symafm, cryst%symrec, self%timrev, comm, use_symrec=.True.)
+ !write(112, *)"kpoint:", ktoa(kpoint)
+ !do ii=1,self%nbz
+ !  write(112, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))
+ !enddo
+ !call destroy_tetra(self%tetra_k)
+ !call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_112_", itoa(ikcalc)))
 
  ! Use symmetries of the litte group
  ! FIXME This version should be the correct one but I got different results. It seems that
  ! tetra integration depends on the indkk mapping.
  !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
  !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+ !write(113, *)"kpoint:", ktoa(kpoint)
+ !do ii=1,self%nbz
+ !  write(113, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))
+ !enddo
+ !call destroy_tetra(self%tetra_k)
+ !call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_113_", itoa(ikcalc)))
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
@@ -455,10 +483,10 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call destroy_tetra(self%tetra_k)
  call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
 
- !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  call cwtime_report(" tetra3", cpu, wall, gflops)
 
 end subroutine ephwg_setup_kpoint
