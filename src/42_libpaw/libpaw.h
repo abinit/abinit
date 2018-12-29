@@ -78,7 +78,7 @@
 /* =============================
  * ========= BIGDFT ============
  * ============================= */
-#elif HAVE_LIBPAW_BIGDFT
+#elif defined HAVE_LIBPAW_BIGDFT
 
 /* Constants and defs */
 #  define USE_DEFS use m_libpaw_defs
