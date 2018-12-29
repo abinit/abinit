@@ -4,6 +4,7 @@
  #mixprec 1
  boxcutmin 1.7
  timopt -1
+ prtphdos 0
  
  ecut 35.0
  #ecut 34.0
