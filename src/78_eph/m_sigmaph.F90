@@ -3593,6 +3593,7 @@ subroutine sigmaph_print(self, dtset, unt)
  write(unt,"(a)")sjoin("Imaginary shift in the denominator (zcut): ", ftoa(aimag(self%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
  msg = "Standard quadrature"; if (self%qint_method == 1) msg = "tetrahedron method"
  write(unt, "(2a)")sjoin("Method for q-space integration:", msg)
+ if (self%use_doublegrid) write(unt, "(a, i0)")"Using double grid technique with ndiv: ", self%eph_doublegrid%ndiv
  if (self%imag_only) write(unt, "(a)")"Only the Imaginary part of Sigma will be computed."
  if (.not. self%imag_only) write(unt, "(a)")"Both Real and Imaginary part of Sigma will be computed."
  write(unt,"(a)")sjoin("Number of frequencies along the real axis:", itoa(self%nwr), &

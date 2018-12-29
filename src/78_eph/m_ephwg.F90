@@ -406,8 +406,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
 
  ! Old version
- call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+ !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
 
  !ikcalc = ikcalc + 1
  !write(111, *)"kpoint:", ktoa(kpoint)
@@ -431,8 +431,8 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ! Use symmetries of the litte group
  ! FIXME This version should be the correct one but I got different results. It seems that
  ! tetra integration depends on the indkk mapping.
- !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
- !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+ call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
+    sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
  !write(113, *)"kpoint:", ktoa(kpoint)
  !do ii=1,self%nbz
  !  write(113, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))

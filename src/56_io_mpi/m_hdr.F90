@@ -4422,11 +4422,11 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
  call compare_int('nshiftk_orig', Hdr%nshiftk_orig, Dtset%nshiftk_orig, ierr)
  call compare_int('nshiftk', Hdr%nshiftk, Dtset%nshiftk, ierr)
 
- ! The number of fatal errors must be zero ===
+ ! The number of fatal errors must be zero.
  if (ierr/=0) then
    write(msg,'(3a)')&
-&   'Cannot continue, basic dimensions reported in the header do not agree with input file. ',ch10,&
-&   'Check consistency between the content of the external file and the input file. '
+   'Cannot continue, basic dimensions reported in the header do not agree with input file. ',ch10,&
+   'Check consistency between the content of the external file and the input file. '
    MSG_ERROR(msg)
  end if
 
@@ -4614,7 +4614,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
      ' hdr_vs_dtset : WARNING - Mismatch in '//TRIM(name),ch10,&
      '  Expected = ',iexp,' Found = ',ifound
      call wrtout(std_out,msg,'COLL')
-!      Increase ierr to signal we should stop in the caller.
+     ! Increase ierr to signal we should stop in the caller.
      ierr=ierr+1
    end if
 
