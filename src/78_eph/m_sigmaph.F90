@@ -539,7 +539,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
- real(dp) :: vdiag(2, 3), tsec(2)
+ real(dp) :: vk(2, 3), tsec(2)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -731,8 +731,8 @@ endif
        call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
        call ddkop%apply(eig0nk, mpw, npw_k, wfd%nspinor, cgwork, cwaveprj0, wfd%mpi_enreg)
-       vdiag = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
-       vred_calc(:, ib_k, ikcalc, spin) = vdiag(1, :)
+       vk = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
+       vred_calc(:, ib_k, ikcalc, spin) = vk(1, :)
      end do
 
    end do
@@ -1022,6 +1022,8 @@ endif
        !     [npw_kq],dtset%nsppol,optder,cryst%rprimd,ylm_kq,ylmgr_kq)
        !end if
 
+       !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+
        ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
        ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
        do imyp=1,my_npert
@@ -1134,6 +1136,10 @@ endif
          eig0mkq = ebands%eig(ibsum_kq,ikq_ibz,spin)
          ! q-weight for naive integration
          weight_q = sigma%wtq_k(iq_ibz)
+
+         !call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
+         !vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
+         !alpha_vkvkq = (one - (vkq * vk) / vkk_norm
 
          do imyp=1,my_npert
            ! Ignore acoustic or unstable modes.
