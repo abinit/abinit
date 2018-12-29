@@ -431,8 +431,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ! Use symmetries of the litte group
  ! FIXME This version should be the correct one but I got different results. It seems that
  ! tetra integration depends on the indkk mapping.
- call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
-    sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
+ !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+
  !write(113, *)"kpoint:", ktoa(kpoint)
  !do ii=1,self%nbz
  !  write(113, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))
@@ -441,11 +442,11 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  !call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
  !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_113_", itoa(ikcalc)))
 
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6)' ) &
-    "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
-   MSG_ERROR(msg)
- end if
+ !if (dksqmax > tol12) then
+ !  write(msg, '(a,es16.6)' ) &
+ !   "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
+ !  MSG_ERROR(msg)
+ !end if
 #else
  ABI_MALLOC(kmap, (6, self%nbz))
  call kpts_map(kmap, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym, &
@@ -461,7 +462,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  !  write(666, *)ii, self%lgk%bz2ibz_smap(1, ii)
  !  write(667, *)ii, indkk(ii, 1)
  !end do
- !indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
+ indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
  !write(std_out, *)"About to call tetra"
  !stop
 

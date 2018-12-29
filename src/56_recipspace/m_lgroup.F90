@@ -188,7 +188,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 !arrays
  integer :: symrec_lg(3,3,2*cryst%nsym), symafm_lg(2*cryst%nsym), lgsym2glob(2, 2*cryst%nsym)
  real(dp) :: kred(3),shift(3)
- integer,allocatable :: ibz2bz(:), iperm(:)
+ integer,allocatable :: ibz2bz(:), iperm(:), inv_iperm(:)
  real(dp),allocatable :: wtk(:),wtk_folded(:), kord(:,:)
 
 ! *************************************************************************
@@ -248,7 +248,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
    new%weights(ik_ibz) = wtk_folded(ik_bz)
  end do
 
-#if 1
+#if 0
  ! Need to repack the IBZ points and rearrange the other arrays dimensioned with nibz.
  ! In principle, the best approach would be to pack in stars using crystal%symrec.
  ! For the time being we pack in shells (much easier). Use wtk as workspace to store the norm.
@@ -277,11 +277,18 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
  new%weights = wtk_folded(1:new%nibz)
 
  ! Rearrange bz2ibz_smap as well.
+ ABI_MALLOC(inv_iperm, (new%nibz))
+ do ik_ibz=1,new%nibz
+   inv_iperm(iperm(ik_ibz)) =  ik_ibz
+ end do
+
  do ik_bz=1,new%nbz
    ik_ibz = new%bz2ibz_smap(1, ik_bz)
    new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
+   !new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
  end do
 
+ ABI_FREE(inv_iperm)
  ABI_FREE(kord)
  ABI_FREE(iperm)
 #endif
