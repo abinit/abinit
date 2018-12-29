@@ -284,8 +284,8 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 
  do ik_bz=1,new%nbz
    ik_ibz = new%bz2ibz_smap(1, ik_bz)
-   new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
-   !new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
+   !new%bz2ibz_smap(1, ik_bz) = iperm(ik_ibz)
+   new%bz2ibz_smap(1, ik_bz) = inv_iperm(ik_ibz)
  end do
 
  ABI_FREE(inv_iperm)

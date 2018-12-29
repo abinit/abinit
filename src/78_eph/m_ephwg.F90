@@ -55,7 +55,7 @@ module m_ephwg
  use m_special_funcs,   only : dirac_delta
  use m_fstrings,        only : strcat, ltoa, itoa, ftoa, ktoa, sjoin
  use m_simtet,          only : sim0onei, SIM0TWOI
- use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt, kpts_map, kpts_check_indkk
+ use m_kpts,            only : kpts_timrev_from_kptopt, listkk, kpts_ibz_from_kptrlatt
  use m_occ,             only : occ_fd, occ_be
 
  implicit none
@@ -344,8 +344,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
 !arrays
- integer,allocatable :: indkk(:,:), kmap(:,:)
- !integer, save :: ikcalc = 0
+ integer,allocatable :: indkk(:,:)
 
 !----------------------------------------------------------------------
 
@@ -402,82 +401,27 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  end do
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
-#if 1
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
 
  ! Old version
  !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
  !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
 
- !ikcalc = ikcalc + 1
- !write(111, *)"kpoint:", ktoa(kpoint)
- !do ii=1,self%nbz
- !  write(111, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))
- !end do
- !call destroy_tetra(self%tetra_k)
- !call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
- !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_111_", itoa(ikcalc)))
-
- !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
- !   sppoldbl1, cryst%symafm, cryst%symrec, self%timrev, comm, use_symrec=.True.)
- !write(112, *)"kpoint:", ktoa(kpoint)
- !do ii=1,self%nbz
- !  write(112, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))
- !enddo
- !call destroy_tetra(self%tetra_k)
- !call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
- !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_112_", itoa(ikcalc)))
-
  ! Use symmetries of the litte group
- ! FIXME This version should be the correct one but I got different results. It seems that
+ ! This version should be OK but now we used the symmetry tables computed in symkpt
  ! tetra integration depends on the indkk mapping.
  !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
  !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
-
- !write(113, *)"kpoint:", ktoa(kpoint)
- !do ii=1,self%nbz
- !  write(113, *)ii, indkk(ii, 1), trim(ktoa(self%bz(:, ii))), " --> ", trim(ktoa(self%lgk%ibz(:, indkk(ii, 1))))
- !enddo
- !call destroy_tetra(self%tetra_k)
- !call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
- !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_113_", itoa(ikcalc)))
 
  !if (dksqmax > tol12) then
  !  write(msg, '(a,es16.6)' ) &
  !   "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
  !  MSG_ERROR(msg)
  !end if
-#else
- ABI_MALLOC(kmap, (6, self%nbz))
- call kpts_map(kmap, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym, &
-    cryst%symafm, cryst%symrel, self%timrev, comm, ierr, use_symrec=.False.)
- ABI_CHECK(ierr == 0, "Cannot map BZ --> IBZ_k")
- ABI_MALLOC(indkk, (self%nbz, 6))
- indkk = transpose(kmap)
- ABI_FREE(kmap)
-#endif
 
  !ABI_CHECK(all(self%lgk%bz2ibz_smap(1, :) == indkk(:, 1)), "bz2ibz_smap != indkk")
- !do ii=1,self%nbz
- !  write(666, *)ii, self%lgk%bz2ibz_smap(1, ii)
- !  write(667, *)ii, indkk(ii, 1)
- !end do
  indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
- !write(std_out, *)"About to call tetra"
- !stop
 
-#if 0
- do ii=1,self%nbz * sppoldbl1
-   write(777, *)ii, indkk(ii, :)
- end do
- call kpts_check_indkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, &
-     cryst%nsym, sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6)' ) &
-    "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
-   MSG_ERROR(msg)
- end if
-#endif
  call cwtime_report(" listkk3", cpu, wall, gflops)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
