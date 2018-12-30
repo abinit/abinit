@@ -762,11 +762,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
                   gmet(3,2)*dk(3)*dk(2)+gmet(3,1)*dk(3)*dk(1))
 
              if (dksq < dksqmn+tol8) then
-                ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
-                ! Note that in this condition, each coordinate is tested separately, without squaring.
-                ! So, it is a much stronger condition than dksqmn < tol12
+               ! If exactly the right point (without using symmetries neither umklapp vector), will exit the search
+               ! Note that in this condition, each coordinate is tested separately, without squaring.
+               ! So, it is a much stronger condition than dksqmn < tol12
                if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
-               !if (dksq < tol12) ikpt2_done = 1
+               if (dksq < tol12) ikpt2_done = 1
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,

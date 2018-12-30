@@ -2922,7 +2922,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 !Local variables-------------------------------
  integer,parameter :: sppoldbl1 = 1, timrev1 = 1, master = 0
  integer :: spin, my_rank, iq_ibz, ierr, nprocs, nbcalc_ks, bstart_ks
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
  type(lgroup_t) :: lgk
 !arrays
@@ -2959,6 +2959,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    end if
  endif
 
+ call cwtime(cpu, wall, gflops, "start")
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
    self%nqibz_k = self%nqbz
@@ -2982,6 +2983,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    MSG_ERROR(sjoin("Wrong symsigma:", itoa(self%symsigma)))
  end if
 
+ call cwtime_report(" lgroup_symsigma", cpu, wall, gflops)
+
  ! Find correspondence IBZ_k --> set of q-points in DVDB.
  ! Need to handle q_bz = S q_ibz by symmetrizing the potentials already available in the DVDB.
  !
@@ -2997,6 +3000,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
      'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
    MSG_ERROR(msg)
  end if
+
+ call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
 
  ABI_REMALLOC(self%indq2dvdb, (6, self%nqibz_k))
  do iq_ibz=1,self%nqibz_k
@@ -3031,6 +3036,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
    self%indkk_kq(:, iq_ibz) = iqk2dvdb(iq_ibz, :)
  end do
  ABI_FREE(iqk2dvdb)
+
+ call cwtime_report(" k+q --> ebands", cpu, wall, gflops)
 
 end subroutine sigmaph_setup_kcalc
 !!***

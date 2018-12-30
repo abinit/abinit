@@ -422,8 +422,6 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  !ABI_CHECK(all(self%lgk%bz2ibz_smap(1, :) == indkk(:, 1)), "bz2ibz_smap != indkk")
  indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
 
- call cwtime_report(" listkk3", cpu, wall, gflops)
-
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call destroy_tetra(self%tetra_k)
