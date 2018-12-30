@@ -1,6 +1,6 @@
 # C in diamond structure. 
 # Very rough 2x2x2 q-point grid; low ecut.
-ndtset 4
+ndtset 5
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB files from DS20_DDB
@@ -82,6 +82,19 @@ eph_task4 4
 getdvdb4 -1
 eph_ngqpt_fine4  4 4 4 
 symsigma4 1
+
+#############
+## Dataset 5
+#############
+# Read previous (interpolated) DVDB file, compute QP corrections on a 4x4x4 q-mesh
+# with Tetrahedron method.
+eph_task5 4
+getdvdb5 3
+eph_ngqpt_fine5  4 4 4 
+symsigma5 1
+eph_intmeth5 2
+prteliash5 0
+nfreqsp5 0
 
 #########
 # Global

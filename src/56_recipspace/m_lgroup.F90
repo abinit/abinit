@@ -446,10 +446,10 @@ subroutine lgroup_print(self, title, unit, prtvol)
  if (present(title)) msg = ' ==== '//trim(adjustl(title))//' ==== '
  call wrtout(my_unt, msg)
 
- write(msg, '(3a, 2(a, i0), a)') &
+ write(msg, '(3a, 2(a, i0, a))') &
   ' Little group point: ................... ', trim(ktoa(self%point)), ch10, &
   ' Number of points in IBZ(p) ............ ', self%nibz, ch10, &
-  ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev
+  ' Time-reversal flag (0: No, 1: Yes) .... ', self%input_timrev, ch10
  call wrtout(my_unt, msg)
 
  if (my_prtvol /= 0) then

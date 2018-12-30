@@ -407,7 +407,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
  !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
 
- ! Use symmetries of the litte group
+ ! Use symmetries of the little group
  ! This version should be OK but now we used the symmetry tables computed in symkpt
  ! tetra integration depends on the indkk mapping.
  !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
