@@ -1,3 +1,29 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spmat_csr
+!! NAME
+!! m_spmat_csr
+!!
+!! FUNCTION
+!! This module contains the a CSR (compressed row) format of sparse matrix.
+!! Efficient for mat vec multiplication.
+!! MPI matvec is also implemented.
+!! Datatypes:
+!!  CSR_mat_t: CSR matrix
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #include "abi_common.h"
 module m_spmat_csr
   use defs_basis  
@@ -5,6 +31,7 @@ module m_spmat_csr
   use m_spmat_base
   use m_mpi_scheduler
   implicit none
+!!***
   private
   !!----------- CSR ------------------------
   ! CSR sparse matrix
@@ -22,10 +49,10 @@ module m_spmat_csr
    contains
      procedure :: initialize => csr_mat_t_initialize
      procedure :: finalize=> csr_mat_t_finalize
-     procedure :: mv => csr_mat_t_mv
-     procedure :: sync => csr_mat_t_sync
-     procedure :: mv_mpi => csr_mat_t_mv_mpi
-     procedure :: mv_select_row =>csr_mat_t_mv_select_row
+     procedure :: mv => csr_mat_t_mv ! mat vec multiplication serial version
+     procedure :: sync => csr_mat_t_sync ! sync data to all mpi ranks
+     procedure :: mv_mpi => csr_mat_t_mv_mpi ! mpi version of mv
+     procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
   end type CSR_mat_t
 contains
 

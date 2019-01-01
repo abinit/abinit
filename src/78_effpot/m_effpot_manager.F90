@@ -1,3 +1,32 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_effpot_api
+!! NAME
+!! m_effpot_api
+!!
+!! FUNCTION
+!! This module contains the manager type, which is a thin layer above ALL 
+!! TODO: the structure of this is yet to be discussed
+!!
+!!
+!! Datatypes:
+!!
+!! * base_manager_t: 
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -21,6 +50,7 @@ module m_effpot_manager
   implicit none
   private
 
+!!***
 
   type, public :: base_manager_t
    contains

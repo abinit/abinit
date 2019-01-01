@@ -1,9 +1,35 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spmat_coo
+!! NAME
+!! m_spmat_coo
+!!
+!! FUNCTION
+!! This module contains the a COO (coordinate) format of sparse matrix.
+!! The efficiency of mat vec multiplication is fine but not as good as CSR
+!! Datatypes:
+!!  COO_mat_t: COO matrix
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #include "abi_common.h"
 module m_spmat_COO
   use defs_basis  
   use m_xmpi
   use m_spmat_base
   implicit none
+!!***
 
   !!----------- COO ------------------------
   ! COO sparse matrix.

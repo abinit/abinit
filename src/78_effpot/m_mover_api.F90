@@ -1,3 +1,30 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mover_api
+!! NAME
+!! m_mover_api
+!!
+!! FUNCTION
+!! This module contains the base type for all mover types.
+!!
+!!
+!! Datatypes:
+!!
+!! * abstract_mover_t: defines the base api of movers.
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -13,6 +40,8 @@ module m_mover_api
   use m_effpot_api, only: effpot_t
 
   implicit none
+!!***
+
   private
   type ,public :: abstract_mover_t
      ! This is the abstract class of mover

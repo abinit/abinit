@@ -1,12 +1,50 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mpi_scheduler
+!! NAME
+!! m_mpi_scheduler
+!!
+!! FUNCTION
+!! This module contains the mpi scheduler for spin dynamics
+!! It provide the function to assign site to mpi nodes, and methods for scattering (TODO),
+!! and gathering data from nodes.
+!!
+!! Datatypes:
+!!
+!! * mpi_scheduler_t
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #include "abi_common.h"
 module m_mpi_scheduler
   use defs_basis
   use m_xmpi
   implicit none
+!!***
+
   private
   type, public :: mpi_scheduler_t
      integer :: nproc, ntasks, irank, comm, istart, iend, ntask, nblock
+     ! ntasks:  total number of tasks
+     ! istart: first task id in this proc
+     ! iend: last task id in this proc
+     ! ntask: number of tasks in this proc
+     ! nblock: sometimes it is useful to group task into blocks(eg. each spin has 3 components and its better to put them together.)
      integer,  allocatable :: istart_list(:), iend_list(:), ntask_list(:)
+     ! istart_list: istart for all nodes
+     ! iend_list: iend for all nodes
+     ! ntask_list: ntast for all nodes
    contains
      procedure :: initialize => mpi_scheduler_t_initialize
      procedure :: finalize => mpi_scheduler_t_finalize
@@ -14,12 +52,15 @@ module m_mpi_scheduler
      procedure :: get_istart
      procedure :: get_iend
      procedure :: get_ntask
-     procedure :: gatherv_dp1d
-     procedure :: gatherv_dp2d
+     procedure :: gatherv_dp1d ! helper function to gather 1d real(dp) array from nodes.
+     procedure :: gatherv_dp2d ! helper function to gather 2d real(dp) array from nodes.
   end type mpi_scheduler_t
 
 contains
   subroutine mpi_scheduler_t_initialize(self, ntasks, comm, nblock)
+    ! assign ntasks to ranks in mpi comm.
+    ! ntask: number of tasks
+    ! nblock: number of subtask per task. TODO: should improve the naming.
     class(mpi_scheduler_t), intent(inout) :: self
     integer, intent(in) :: ntasks
     integer, intent(in) :: comm

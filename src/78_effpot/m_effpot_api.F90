@@ -1,3 +1,31 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_effpot_api
+!! NAME
+!! m_effpot_api
+!!
+!! FUNCTION
+!! This module contains the base type for all effective potentials. 
+!!
+!!
+!! Datatypes:
+!!
+!! * effpot_t: defines the base api of effective potentials.
+!! * effpot_list_t: list of effpot_t, which is essentially a list of pointer to effpot_t
+!!    itself is also a effpot type, and its energy, 1st derivative to energy are the sum of all items.
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -14,6 +42,7 @@ module m_effpot_api
   use m_supercell, only: supercell_type
 
   implicit none
+!!***
   private
   type ,public :: effpot_t
      ! This is the abstract class of effective potential.
@@ -55,8 +84,8 @@ module m_effpot_api
 
   type, public, extends(effpot_t) :: effpot_list_t
      integer :: size=0
-     integer :: MAXSIZE=8
-     type(effpot_pointer_t) :: effpots(8)  ! Maximum number of 8, should we make it more dynamic?
+     integer :: MAXSIZE=8  ! TODO: make it dynamic. This is only for demo version.
+     type(effpot_pointer_t) :: effpots(8)  ! Maximum number of 8,TODO: make it dynamic.
      real(dp) :: stress_tmp(3,3)
      real(dp), allocatable :: force_tmp(:,:), bfield_tmp(:,:)
    contains

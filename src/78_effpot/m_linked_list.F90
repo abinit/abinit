@@ -1,8 +1,38 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_linked_list
+!! NAME
+!! m_linked_list
+!!
+!! FUNCTION
+!! This module contains the a linked list for real(dp).
+!! It is used to build the LIL (list of linked list) format of sparse matrix.
+!!
+!! Datatypes:
+!!
+!! * lnode: a node in the linked list
+!! * llist: linked list
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
+
 #include "abi_common.h"
 
 module m_linked_list
   use defs_basis
   implicit none
+!!***
 
   ! node of linked list, which will be one non-zero entry in LIL matrix
   type, public:: lnode

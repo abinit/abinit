@@ -1,3 +1,32 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_mc_mover
+!! NAME
+!! m_spin_mc_mover
+!!
+!! FUNCTION
+!! This module contains the spin Markov chain Monte Carlo functions for spin mover .
+!!
+!!
+!! Datatypes:
+!!
+!! * spin_mc_t : MCMC. It defines how to move spins in one step,
+!! attempt function: whether to accept move
+!! accecpt/reject method which define what to do if move is
+!! accepted or rejected!! . 
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif

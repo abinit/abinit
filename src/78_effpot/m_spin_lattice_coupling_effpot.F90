@@ -1,3 +1,31 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spin_lattice_coupling_effpot
+!! NAME
+!! m_spin_lattice_coupling_effpot
+!!
+!! FUNCTION
+!! This module define the spin-lattice coupling terms.
+!! The terms are derived from the effpot_t type.
+!! It can calculate the energy, first derivative to spin or lattice.
+!!
+!! Datatypes:
+!!  base_spin_lattice_coupling_effpot_t
+!!  slc_Oiju_t: Oiju (one lattice, two spin)
+!!  slc_Tijuv_t: Tijuv term (two lattice, two spin)
+!!
+!! Subroutines:
+!! TODO: add this when F2003 documentation system is determined
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -15,6 +43,7 @@ module m_spin_lattice_coupling_effpot
   use m_supercell, only : supercell_type
 
   implicit none
+!!***
   private
 
   type, public, extends(effpot_t) :: base_spin_lattice_coupling_effpot_t

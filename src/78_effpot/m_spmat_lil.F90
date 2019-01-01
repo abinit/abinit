@@ -1,3 +1,28 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spmat_lil
+!! NAME
+!! m_spmat_lil
+!!
+!! FUNCTION
+!! This module contains the a LIL(list of linked list) format of sparse matrix.
+!! It is useful for constructing sparse matrix, but not efficient for calculation. Use this to construct and then convert it to other format (COO, CSR...)
+!! Datatypes:
+!!  LIL_mat_t: LIL matrix
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 #include "abi_common.h"
 
 module m_spmat_lil
@@ -5,6 +30,8 @@ module m_spmat_lil
   use m_spmat_base
   use m_linked_list
   implicit none
+!!***
+
   private
 
   ! linked list type sparse matrix

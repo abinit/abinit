@@ -1,3 +1,27 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spmat_base
+!! NAME
+!! m_spmat_base
+!!
+!! FUNCTION
+!! This module contains the base type for sparse matrix. 
+!!
+!! Datatypes:
+!!  base_mat_t: base sparse matrix.
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
 module m_spmat_base
   use defs_basis
   implicit none

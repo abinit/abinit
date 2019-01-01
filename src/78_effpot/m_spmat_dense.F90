@@ -1,7 +1,33 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spmat_dense
+!! NAME
+!! m_spmat_dense
+!!
+!! FUNCTION
+!! This module contains the dense matrix as sparse matrix type.
+!!
+!! Datatypes:
+!!  dense_mat_t: dense matrix pretending to be sparse, mostly for test. Sometimes when the matrix is not so sparse, it is then more efficient to use this.
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
 module m_spmat_dense
   use defs_basis
   use m_spmat_base
   implicit none
+!!***
   private
   type, extends(base_mat_t), public :: dense_mat_t
      real(dp), allocatable :: mat(:,:)

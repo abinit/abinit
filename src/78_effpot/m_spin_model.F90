@@ -10,7 +10,8 @@
 !!
 !! Datatypes:
 !!
-!! * spin_model_t
+!! * spin_model_t : which is the main entrance to spin dynamics.
+!! It has all the data inside and is a thin layer above others.
 !!
 !! Subroutines:
 !!
@@ -26,7 +27,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
