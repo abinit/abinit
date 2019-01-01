@@ -80,7 +80,7 @@ contains  !============================================================
 !!
 !! INPUTS
 !!  kptopt=option for the generation of k points
-!!    (defines whether spatical symmetries and/or time-reversal can be used)
+!!    (defines whether spatial symmetries and/or time-reversal can be used)
 !!
 !! PARENTS
 !!
@@ -112,7 +112,7 @@ end function kpts_timrev_from_kptopt
 !! INPUTS
 !!  cryst<crystal_t> = crystalline structure with info on symmetries and time-reversal.
 !!  kptopt=option for the generation of k points
-!!    (defines whether spatical symmetries and/or time-reversal can be used)
+!!    (defines whether spatial symmetries and/or time-reversal can be used)
 !!  kptrlatt(3,3)=integer coordinates of the primitive vectors of the
 !!   lattice reciprocal to the k point lattice to be generated here
 !!   If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
@@ -288,7 +288,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  end if
 
  ! Do not support new_nshiftk > 1: lattice must be decomposed into boxes
- ! and this is not always possible (I think) with bizzare shiftks
+ ! and this is not always possible (I think) with bizarre shifts
  ! normally at this point we have incorporated everything into
  ! new_kptrlatt, and only 1 shift is needed (in particular for MP grids).
  if (new_nshiftk > 1) then
@@ -300,7 +300,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    ierr = 2; goto 10
  end if
 
- ! Costruct full BZ and create mapping BZ --> IBZ
+ ! Cosntruct full BZ and create mapping BZ --> IBZ
  ! Note:
  !   - we don't change the value of nsppol hence sppoldbl is set to 1
  !   - we use symrec (operations in reciprocal space)
@@ -589,7 +589,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  if(usesym==0)nsym_used=1
  if(usesym==0)timrev_used=0
 
- ! Precompute the length of the kpt1 vectors, also taking into account possible umpklapp vectors
+ ! Precompute the length of the kpt1 vectors, also taking into account possible umklapp vectors
  call timab(1022,1,tsec)
  l3 = (2*limit+1)**3
  ABI_CALLOC(lkpg1,(l3*nkpt1))
@@ -1372,7 +1372,7 @@ end subroutine getkgrid
 !!  kpt_fullbz(3,nkpt_fullbz)=kpoints in full brillouin zone
 !!
 !! NOTES
-!!  MG: The present inplementation always assumes kptopt==1 !!!!
+!!  MG: The present implementation always assumes kptopt==1 !!!!
 !!
 !! TODO: This routine should be removed
 !!
@@ -2177,7 +2177,7 @@ end subroutine smpbz
 !!               bravais(3:11)=coordinates of rprim in the axes of the conventional bravais lattice (*2 if center/=0)
 !!  iout=unit number for echoed output
 !!  msym=default maximal number of symmetries
-!!  nsym=number of symetries
+!!  nsym=number of symmetries
 !!  prtkpt=if non-zero, will write the characteristics of k grids, then stop
 !!  rprimd(3,3)=dimensional real space primitive translations (bohr)
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations

@@ -430,7 +430,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
 
- call cwtime_report(" tetra3", cpu, wall, gflops)
+ call cwtime_report(" init_tetra", cpu, wall, gflops)
 
 end subroutine ephwg_setup_kpoint
 !!***

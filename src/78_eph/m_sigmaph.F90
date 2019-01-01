@@ -1022,7 +1022,9 @@ endif
        !     [npw_kq],dtset%nsppol,optder,cryst%rprimd,ylm_kq,ylmgr_kq)
        !end if
 
-       !call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+       !if (mrta) then
+       ! call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+       !end if
 
        ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
        ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
@@ -1137,9 +1139,11 @@ endif
          ! q-weight for naive integration
          weight_q = sigma%wtq_k(iq_ibz)
 
-         !call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
-         !vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
-         !alpha_vkvkq = (one - (vkq * vk) / vkk_norm
+         !if (mrta) then
+         !  call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
+         !  vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
+         !  alpha_vkvkq = (one - (vkq * vk) / vkk_norm
+         !end if
 
          do imyp=1,my_npert
            ! Ignore acoustic or unstable modes.
@@ -2915,7 +2919,7 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  integer,intent(in) :: ikcalc, prtvol, comm
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
- type(sigmaph_t),intent(inout) :: self
+ type(sigmaph_t),target,intent(inout) :: self
  type(ebands_t),intent(in) :: ebands
  type(dvdb_t),intent(in) :: dvdb
 
@@ -2924,7 +2928,9 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  integer :: spin, my_rank, iq_ibz, ierr, nprocs, nbcalc_ks, bstart_ks
  real(dp) :: dksqmax, cpu, wall, gflops
  character(len=500) :: msg
- type(lgroup_t) :: lgk
+ logical :: compute_lgk
+ type(lgroup_t),target :: lgk
+ type(lgroup_t),pointer :: lgk_ptr
 !arrays
  integer,allocatable :: iqk2dvdb(:,:)
  real(dp) :: kk(3)
@@ -2970,15 +2976,24 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
 
  else if (abs(self%symsigma) == 1) then
    ! Use the symmetries of the little group
-   lgk = lgroup_new(cryst, kk, self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
-   call wrtout(std_out, sjoin(" Number of operations in Lgroup(k):", itoa(lgk%nsym_lg), "(including time-reversal symmetry)"))
-   call wrtout(std_out, sjoin(" Number of q-points in the IBZ(k):", itoa(lgk%nibz)))
+   compute_lgk = .not. (self%qint_method > 0 .and. .not. self%use_doublegrid)
+   if (compute_lgk) then
+     lgk = lgroup_new(cryst, kk, self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
+     lgk_ptr => lgk
+   else
+     ! Avoid this call to lgroup new. Use lgk already computed in self%ephwg
+     lgk_ptr => self%ephwg%lgk
+   end if
 
-   self%nqibz_k = lgk%nibz
+   call wrtout(std_out, sjoin(" Number of operations in Lgroup(k):", itoa(lgk_ptr%nsym_lg), &
+     "(including time-reversal symmetry)"))
+   call wrtout(std_out, sjoin(" Number of q-points in the IBZ(k):", itoa(lgk_ptr%nibz)))
+
+   self%nqibz_k = lgk_ptr%nibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
-   self%qibz_k = lgk%ibz; self%wtq_k = lgk%weights
-   call lgk%free()
+   self%qibz_k = lgk_ptr%ibz; self%wtq_k = lgk_ptr%weights
+   if (compute_lgk) call lgk%free()
  else
    MSG_ERROR(sjoin("Wrong symsigma:", itoa(self%symsigma)))
  end if

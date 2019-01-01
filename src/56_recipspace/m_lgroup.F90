@@ -393,7 +393,7 @@ integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
  integer :: indkk(6)
 ! *************************************************************************
 
- ! Note use_symrec
+ ! Note use_symrec and timrev0
  call listkk(dksqmax, self%gmet, indkk, self%ibz, qpt, self%nibz, 1, self%nsym_lg, &
     1, self%symafm_lg, self%symrec_lg, timrev0, xmpi_comm_self, use_symrec=.True.)
 

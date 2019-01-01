@@ -211,6 +211,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  integer :: ii,jj,maxibz,ind_ibz(4),ikibz,nkpt_ibz
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
  real(dp_) :: shift1,shift2,shift3, rcvol,hashfactor
+ real :: cpu_start, cpu_stop
  type(kptrank_type) :: kptrank_t
 !arrays
  integer :: tetra_shifts(3,4,6)  ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
@@ -223,6 +224,8 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  real(dp_), allocatable :: tetra_hash(:)
 
 ! *********************************************************************
+
+ call cpu_time(cpu_start)
 
  ! TODO: Pass comm to parallelize this part
  ierr = 0
@@ -382,6 +385,10 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
    end do ! itetra
  end do ! ikpt_full
 
+ call cpu_time(cpu_stop)
+ write(*,*)"tetra_init ikpt_loop:", cpu_stop - cpu_start
+ cpu_start = cpu_stop
+
  call destroy_kptrank (kptrank_t)
 
  rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
@@ -513,6 +520,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
      tetra%ibz_tetra_mapping(ikibz,tetra%ibz_tetra_count(ikibz)) = ii
    end do
  end do
+
+ write(*,*)"tetra_init 2nd part:", cpu_stop - cpu_start
+ cpu_start = cpu_stop
 
 end subroutine init_tetra
 !!***
