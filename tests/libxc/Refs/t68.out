@@ -1,5 +1,5 @@
 
-.Version 8.11.0 of ABINIT 
+.Version 8.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2018 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 15 Oct 2018.
-- ( at 22h30 )
+.Starting date : Fri 21 Dec 2018.
+- ( at 14h38 )
   
 - input  file    -> t68.in
 - output file    -> t68.out
@@ -170,8 +170,8 @@ P           mkmem           1
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -184,8 +184,8 @@ P           mkmem           1
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -505,8 +505,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -519,8 +519,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -794,8 +794,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.08662
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -808,8 +808,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
              1   -3.489168   -1.040664
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/H.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_libxc4/tests/Psps_for_tests/H.psp8
 - H     ONCVPSP  r_core=  1.01  0.71
 -  1.00000   1.00000    161003                znucl, zion, pspdat
     8   11    1    4       300   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -894,7 +894,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
  ETOT  2  -6.5134993676250    -1.733E-07 1.791E-13 5.461E-02 2.417E-04 1.905E-04
  ETOT  3  -6.5134993747985    -7.174E-09 2.064E-10 1.363E-04 2.359E-05 2.141E-04
  ETOT  4  -6.5134993766061    -1.808E-09 2.447E-11 2.016E-05 1.014E-05 2.242E-04
- ETOT  5  -6.5134993765988     7.232E-12 5.327E-12 1.125E-06 6.886E-06 2.311E-04
+ ETOT  5  -6.5134993765988     7.231E-12 5.327E-12 1.125E-06 6.886E-06 2.311E-04
  ETOT  6  -6.5134993767099    -1.110E-10 3.266E-12 1.954E-07 3.906E-06 2.272E-04
  ETOT  7  -6.5134993767209    -1.108E-11 6.831E-15 1.309E-08 9.765E-08 2.271E-04
 
@@ -947,14 +947,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    1207.000    1207.000
  ETOT  2  -6.5134994598407    -8.369E-08 8.511E-14 2.763E-02 1.695E-04 2.815E-05
  ETOT  3  -6.5134994632715    -3.431E-09 1.072E-10 6.061E-05 1.772E-05 1.043E-05
  ETOT  4  -6.5134994640457    -7.743E-10 1.012E-11 9.366E-06 6.409E-06 4.022E-06
- ETOT  5  -6.5134994640429     2.831E-12 2.703E-12 5.598E-07 4.815E-06 7.936E-07
+ ETOT  5  -6.5134994640429     2.832E-12 2.703E-12 5.598E-07 4.815E-06 7.936E-07
  ETOT  6  -6.5134994640930    -5.014E-11 1.284E-12 9.025E-08 2.477E-06 1.683E-06
- ETOT  7  -6.5134994640970    -3.982E-12 1.705E-14 1.011E-08 2.619E-07 1.945E-06
+ ETOT  7  -6.5134994640970    -3.981E-12 1.705E-14 1.011E-08 2.619E-07 1.945E-06
  ETOT  8  -6.5134994640978    -7.612E-13 8.653E-14 4.017E-09 5.919E-07 1.353E-06
- ETOT  9  -6.5134994640980    -2.496E-13 2.894E-15 6.088E-10 9.130E-08 1.444E-06
- ETOT 10  -6.5134994640983    -2.771E-13 2.421E-15 2.254E-11 9.657E-08 1.541E-06
- ETOT 11  -6.5134994640984    -5.773E-14 4.312E-16 8.409E-11 4.332E-08 1.584E-06
- ETOT 12  -6.5134994640982     2.149E-13 8.561E-17 4.307E-11 1.279E-08 1.572E-06
+ ETOT  9  -6.5134994640980    -2.505E-13 2.894E-15 6.088E-10 9.130E-08 1.444E-06
+ ETOT 10  -6.5134994640983    -2.780E-13 2.421E-15 2.254E-11 9.657E-08 1.541E-06
+ ETOT 11  -6.5134994640984    -5.596E-14 4.312E-16 8.409E-11 4.332E-08 1.584E-06
+ ETOT 12  -6.5134994640982     2.132E-13 8.561E-17 4.307E-11 1.279E-08 1.572E-06
  ETOT 13  -6.5134994640983    -1.261E-13 2.156E-17 1.153E-10 7.155E-09 1.579E-06
 
  At SCF step   13, forces are sufficiently converged : 
@@ -1234,10 +1234,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         27.0  wall=         32.4
+- Proc.   0 individual time (sec): cpu=         26.7  wall=         27.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.0  wall=         32.4
++Overall time at end (sec) : cpu=         26.7  wall=         27.6
