@@ -1740,7 +1740,8 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
   !scalars
   integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countg,ddkflag,dest,gdir,gdx,gdxstor,gfor,gg,gsigma
   integer :: icg,icgb,icgg,icprjbi,icprjgi,icprji,ierr,ikg,ikpt,ikpt_loc
-  integer :: ikptb,ikptbi,ikptg,ikptgi,ikpti,isppol,itrs,jkpt,jkptb,jkptbi,jkptg,jkptgi,jsppol
+  integer :: ikptb,ikptbi,ikptg,ikptgi,ikpti,isppol,itrs
+  integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jsppol
   integer :: job,mcg1_k,me,my_nspinor,n2dim,ncpgr,nproc,npw_k,npw_kb,npw_kg,ntotcp
   integer :: shiftbd,sourceb,sourceg,spaceComm,tagb,tagg,usepaw
 
@@ -1892,6 +1893,9 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
                  !      --------------------------------------------------------------------------------
                  if (ikpt > 0 .and. isppol > 0) then ! I currently have a true kpt to use
                     countb = npw_kb*my_nspinor*nband_k
+                    if(allocated(cgqb)) then
+                       ABI_DEALLOCATE(cgqb)
+                    endif
                     ABI_ALLOCATE(cgqb,(2,countb))
                     cgqb = zero
                     sourceb = me
@@ -1900,6 +1904,9 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
                        sourceb = mpi_enreg%proc_distrb(ikptbi,1,isppol)
                     end if
                     countg = npw_kg*my_nspinor*nband_k
+                    if(allocated(cgqg)) then
+                       ABI_DEALLOCATE(cgqg)
+                    end if
                     ABI_ALLOCATE(cgqg,(2,countg))
                     cgqg = zero
                     sourceg = me
@@ -1929,20 +1936,20 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
                           call xmpi_recv(cgqb,sourceb,tagb,spaceComm,ierr)
                           call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kb,sourceb,spaceComm,ierr)
                        end if
-                       if(sourceg.EQ.me) then
-                          ! I am destination and source for kptg
-                          icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
-                          icgg = dtorbmag%cgindex(ikptgi,dtset%nsppol)
-                          call pawcprj_get(atindx1,cprj_kg,cprj,dtset%natom,1,icprjgi,&
-                               &           ikptgi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                               &           my_nspinor,dtset%nsppol,0)
-                          cgqg(1:2,1:countg) = cg(1:2,icgg+1:icgg+countg)
-                       else ! sourceg .NE. me
-                          ! receive cgqg (and cprj_kg)
-                          tagg = ikptgi + (isppol - 1)*dtset%nkpt
-                          call xmpi_recv(cgqg,sourceg,tagg,spaceComm,ierr)
-                          call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kg,sourceg,spaceComm,ierr)
-                       end if
+                       ! if(sourceg.EQ.me) then
+                       !    ! I am destination and source for kptg
+                       !    icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
+                       !    icgg = dtorbmag%cgindex(ikptgi,dtset%nsppol)
+                       !    call pawcprj_get(atindx1,cprj_kg,cprj,dtset%natom,1,icprjgi,&
+                       !         &           ikptgi,0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                       !         &           my_nspinor,dtset%nsppol,0)
+                       !    cgqg(1:2,1:countg) = cg(1:2,icgg+1:icgg+countg)
+                       ! else ! sourceg .NE. me
+                       !    ! receive cgqg (and cprj_kg)
+                       !    tagg = ikptgi + (isppol - 1)*dtset%nkpt
+                       !    call xmpi_recv(cgqg,sourceg,tagg,spaceComm,ierr)
+                       !    call pawcprj_mpi_recv(dtset%natom,n2dim,dimlmn,ncpgr,cprj_kg,sourceg,spaceComm,ierr)
+                       ! end if
                     else if (dest.NE.me) then
                        ! jkpt is the kpt which is being treated by dest
                        ! jsppol is his isppol
@@ -1956,35 +1963,35 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
                           jkptgi = dtorbmag%indkk_f2ibz(jkptg,1)
 
                           if((mpi_enreg%proc_distrb(jkptbi,1,jsppol) == me))  then
-                             icgb = dtorbmag%cgindex(jkptbi,jsppol)
-                             icprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
-                             call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,icprjbi,jkptbi,0,jsppol,&
+                             jcgb = dtorbmag%cgindex(jkptbi,jsppol)
+                             jcprjbi=dtorbmag%cprjindex(jkptbi,jsppol)
+                             call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,jcprjbi,jkptbi,0,jsppol,&
                                   & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
                                   & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
                                   & proc_distrb=mpi_enreg%proc_distrb)
                              tagb = jkptbi + (jsppol - 1)*dtset%nkpt
                              countb = npwarr(jkptbi)*my_nspinor*nband_k
                              ABI_ALLOCATE(buffer,(2,countb))
-                             buffer(:,1:countb)  = cg(:,icgb+1:icgb+countb)
+                             buffer(:,1:countb)  = cg(:,jcgb+1:jcgb+countb)
                              call xmpi_send(buffer,dest,tagb,spaceComm,ierr)
                              ABI_DEALLOCATE(buffer)
                              call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
                           end if ! end check that I am his source
-                          if((mpi_enreg%proc_distrb(jkptgi,1,jsppol) == me))  then
-                             icgg = dtorbmag%cgindex(jkptgi,jsppol)
-                             icprjgi=dtorbmag%cprjindex(jkptbi,jsppol)
-                             call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,icprjgi,jkptgi,0,jsppol,&
-                                  & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
-                                  & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
-                                  & proc_distrb=mpi_enreg%proc_distrb)
-                             tagg = jkptgi + (jsppol - 1)*dtset%nkpt
-                             countg = npwarr(jkptgi)*my_nspinor*nband_k
-                             ABI_ALLOCATE(buffer,(2,countg))
-                             buffer(:,1:countg)  = cg(:,icgg+1:icgg+countg)
-                             call xmpi_send(buffer,dest,tagg,spaceComm,ierr)
-                             ABI_DEALLOCATE(buffer)
-                             call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
-                          end if ! end check that I am his source
+                          ! if((mpi_enreg%proc_distrb(jkptgi,1,jsppol) == me))  then
+                          !    jcgg = dtorbmag%cgindex(jkptgi,jsppol)
+                          !    jcprjgi=dtorbmag%cprjindex(jkptgi,jsppol)
+                          !    call pawcprj_get(atindx1,cprj_buf,cprj,dtset%natom,1,jcprjgi,jkptgi,0,jsppol,&
+                          !         & dtset%mband,dtset%mkmem,dtset%natom,dtorbmag%mband_occ,dtorbmag%mband_occ,&
+                          !         & my_nspinor,dtset%nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
+                          !         & proc_distrb=mpi_enreg%proc_distrb)
+                          !    tagg = jkptgi + (jsppol - 1)*dtset%nkpt
+                          !    countg = npwarr(jkptgi)*my_nspinor*nband_k
+                          !    ABI_ALLOCATE(buffer,(2,countg))
+                          !    buffer(:,1:countg)  = cg(:,jcgg+1:jcgg+countg)
+                          !    call xmpi_send(buffer,dest,tagg,spaceComm,ierr)
+                          !    ABI_DEALLOCATE(buffer)
+                          !    call pawcprj_mpi_send(dtset%natom,n2dim,dimlmn,ncpgr,cprj_buf,dest,spaceComm,ierr)
+                          ! end if ! end check that I am his source
 
                        end if ! end check that jkpt > 0 and jsppol > 0
 
@@ -2005,16 +2012,16 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
                        call pawcprj_copy(cprj_fkn,cprj_kb)
                     end if
                  
-                    if ( ikptgi /= ikptg ) then
-                       call pawcprj_copy(cprj_kg,cprj_ikn)
-                       call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
-                            & dtorbmag%indkk_f2ibz(ikptg,2),dtorbmag%indkk_f2ibz(ikptg,6),&
-                            & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptgi)),&
-                            & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
-                            & dtorbmag%mband_occ,my_nspinor,&
-                            & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
-                       call pawcprj_copy(cprj_fkn,cprj_kg)
-                    end if
+                    ! if ( ikptgi /= ikptg ) then
+                    !    call pawcprj_copy(cprj_kg,cprj_ikn)
+                    !    call pawcprj_symkn(cprj_fkn,cprj_ikn,dtorbmag%atom_indsym,dimlmn,-1,psps%indlmn,&
+                    !         & dtorbmag%indkk_f2ibz(ikptg,2),dtorbmag%indkk_f2ibz(ikptg,6),&
+                    !         & dtorbmag%fkptns(:,dtorbmag%i2fbz(ikptgi)),&
+                    !         & dtorbmag%lmax,dtorbmag%lmnmax,dtset%mband,dtset%natom,&
+                    !         & dtorbmag%mband_occ,my_nspinor,&
+                    !         & dtorbmag%nsym,dtset%ntypat,dtset%typat,dtorbmag%zarot)
+                    !    call pawcprj_copy(cprj_fkn,cprj_kg)
+                    ! end if
                  
                     if (.NOT. has_smat(ikpt,bdx,0)) then
                        call overlap_k1k2_paw(cprj_k,cprj_kb,dkb,gprimd,kk_paw,dtorbmag%lmn2max,&
@@ -2033,35 +2040,39 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
                        has_smat(ikptb,bdxc,0) = .TRUE.
                     end if
                     
-                    if (.NOT. has_smat(ikpt,bdx,gdx)) then
+                    ! if (.NOT. has_smat(ikpt,bdx,gdx)) then
                        
-                       call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
-                            &             dtorbmag%lmn_size,dtset%mband,&
-                            &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
+                    !    call overlap_k1k2_paw(cprj_kb,cprj_kg,dkbg,gprimd,kk_paw,dtorbmag%lmn2max,&
+                    !         &             dtorbmag%lmn_size,dtset%mband,&
+                    !         &             dtset%natom,my_nspinor,dtset%ntypat,pawang,pawrad,pawtab,dtset%typat,xred)
                        
-                       call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
-                            &             dtorbmag%indkk_f2ibz,ikptb,ikptg,&
-                            &             kg,dtorbmag%kgindex,mpi_enreg,npwarr,pwind_bg,symrec)
+                    !    call mkpwind_k(dkbg,dtset,dtorbmag%fnkpt,dtorbmag%fkptns,gmet,&
+                    !         &             dtorbmag%indkk_f2ibz,ikptb,ikptg,&
+                    !         &             kg,dtorbmag%kgindex,mpi_enreg,npwarr,pwind_bg,symrec)
                        
-                       sflag_k=0
-                       call smatrix(cgqb,cgqg,cg1_k,ddkflag,dtm_k,0,0,itrs,job,nband_k,&
-                            &             countb,countg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
-                            &             pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
+                    !    sflag_k=0
+                    !    call smatrix(cgqb,cgqg,cg1_k,ddkflag,dtm_k,0,0,itrs,job,nband_k,&
+                    !         &             countb,countg,mcg1_k,1,dtset%mpw,nband_k,nband_k,npw_kb,npw_kg,my_nspinor,&
+                    !         &             pwind_bg,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_kk,kk_paw,usepaw)
                        
-                       gdxstor = mod(gdx+6-2*bdir,6)
-                       smat_all(:,:,:,ikpt,bdx,gdxstor) = smat_kk(:,:,:)
+                    !    gdxstor = mod(gdx+6-2*bdir,6)
+                    !    smat_all(:,:,:,ikpt,bdx,gdxstor) = smat_kk(:,:,:)
                     
-                       bdxstor = mod(bdx+6-2*gdir,6)
-                       smat_all(1,:,:,ikpt,gdx,bdxstor) = TRANSPOSE(smat_kk(1,:,:))
-                       smat_all(2,:,:,ikpt,gdx,bdxstor) = -TRANSPOSE(smat_kk(2,:,:))
+                    !    bdxstor = mod(bdx+6-2*gdir,6)
+                    !    smat_all(1,:,:,ikpt,gdx,bdxstor) = TRANSPOSE(smat_kk(1,:,:))
+                    !    smat_all(2,:,:,ikpt,gdx,bdxstor) = -TRANSPOSE(smat_kk(2,:,:))
                        
-                       has_smat(ikpt,bdx,gdx) = .TRUE.
-                       has_smat(ikpt,gdx,bdx) = .TRUE.
+                    !    has_smat(ikpt,bdx,gdx) = .TRUE.
+                    !    has_smat(ikpt,gdx,bdx) = .TRUE.
                        
-                    end if
+                    ! end if
 
-                    ABI_DEALLOCATE(cgqb)
-                    ABI_DEALLOCATE(cgqg)
+                    ! if(allocated(cgqb)) then
+                    !    ABI_DEALLOCATE(cgqb)
+                    ! end if
+                    ! if(allocated(cgqg)) then
+                    !    ABI_DEALLOCATE(cgqg)
+                    ! end if
 
                  end if ! end check on ikpt > 0
                  
