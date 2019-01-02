@@ -32,16 +32,18 @@ contains
     class(lattice_effpot_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(inout) :: params
     character(*), intent(in) :: fnames(:)
+    MSG_ERROR("initialize for lattice_effpot not yet implemented")
   end subroutine initialize
 
   subroutine finalize(self)
     class(lattice_effpot_t), intent(inout) :: self
-
+    MSG_ERROR("finalize for lattice_effpot not yet implemented")
   end subroutine finalize
 
   subroutine set_params(self, params)
     class(lattice_effpot_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    MSG_ERROR("set_params for lattice_effpot not yet implemented")
   end subroutine set_params
 
   ! subroutine set_deformation(self, displacements, strain )
@@ -72,6 +74,7 @@ contains
     if (present(energy)) then
        energy=zero
     end if
+    MSG_ERROR("calculate for lattice_effpot not yet implemented.")
   end subroutine calculate
  
 end module m_lattice_effpot

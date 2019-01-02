@@ -1,9 +1,37 @@
-  ! global
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_mpi_scheduler
+!! NAME
+!! m_mpi_scheduler
+!!
+!! FUNCTION
+!! This module contains global variables for multibinit
+!!
+!! Datatypes:
+!!
+!! * mpi_scheduler_t
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "abi_common.h"
+
   module m_multibinit_global
     use defs_basis
     use m_random_xoroshiro128plus, only: rng_t
     use m_xmpi
     implicit none
+!!****m*
     integer, parameter :: master =0
     logical :: iam_master =.False.
     integer :: my_rank, comm, nproc, ierr
@@ -15,10 +43,4 @@
       iam_master = (my_rank == master)
     end subroutine init_multibinit_global
 
-    subroutine test_bcast()
-       real(dp) :: x
-       if (iam_master) call random_number(x) 
-       call xmpi_bcast(x, master, comm, ierr)
-       print *, "myrank :", my_rank, x
-    end subroutine test_bcast
   end module m_multibinit_global

@@ -1,4 +1,35 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spmat_convert
+!! NAME
+!! m_spmat_convert
+!!
+!! FUNCTION
+!! This module contains the functions to convert between sparse matrix formats
+!!
+!!
+!! Subroutines:
+!! - dense_to_LIL
+!! - LIL_to_dense
+!! - LIL_to_COO
+!! - LIL_to_CSR
+!! - Dense_to_CSR
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "abi_common.h"
+
+
 module m_spmat_convert
   use defs_basis
   use m_spmat_dense
@@ -7,6 +38,7 @@ module m_spmat_convert
   use m_spmat_csr
   use m_spmat_coo
   implicit none
+!!****m*
   public
 contains
   subroutine dense_to_LIL(mat, ll)

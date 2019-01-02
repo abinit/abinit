@@ -25,7 +25,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -143,7 +143,14 @@ module m_spin_hist
      real(dp), allocatable :: chi_sub(:, :), chi(:) ! magnetic susceptibility
      real(dp), allocatable :: rcorr(:,:)
      real(dp), allocatable :: sp_corr_func(:,:,:)
-
+   contains
+     procedure :: init => spin_hist_t_init
+     procedure :: free => spin_hist_t_free
+     procedure :: reset => spin_hist_t_reset
+     procedure :: get_S => spin_hist_t_get_S
+     procedure :: findIndex => spin_hist_t_findIndex
+     procedure :: set_params => spin_hist_t_set_params
+     procedure :: inc => spin_hist_t_inc
   end type spin_hist_t
   !!***
 
@@ -497,7 +504,7 @@ contains
   !! SOURCE
   function spin_hist_t_findIndex(hist, step) result(index)
 
-    type(spin_hist_t), intent(inout) :: hist
+    class(spin_hist_t), intent(inout) :: hist
     integer , intent(in) :: step
     integer :: index
     !Local variables-------------------------------

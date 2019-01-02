@@ -25,8 +25,12 @@
 !!
 !! SOURCE
 
-
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "abi_common.h"
+
+
 module m_mpi_scheduler
   use defs_basis
   use m_xmpi

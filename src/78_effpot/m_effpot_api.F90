@@ -114,6 +114,7 @@ contains
     class(effpot_t), intent(inout) :: self
     type(supercell_type), intent(in) :: supercell
     ! TODO 
+    MSG_ERROR("make_supercell not implemented.")
   end subroutine make_supercell
 
   ! hexu comment : which one is better, more general variables,
@@ -131,19 +132,27 @@ contains
   subroutine set_distortion(self, displacement, strain)
     class(effpot_t), intent(inout) :: self
     real(dp), optional, intent(in) :: displacement(:,:), strain(:,:)
+    MSG_ERROR("set_distortion not implemented.")
   end subroutine set_distortion
 
   subroutine set_spin(self, spin)
     class(effpot_t), intent(inout) :: self
     real(dp), optional, intent(in) :: spin
+    MSG_ERROR("set_spin not implemented.")
   end subroutine set_spin
 
   subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+    ! This function calculate the energy and its first derivative
+    ! the inputs and outputs are optional so that each effpot can adapt to its
+    ! own.
+    ! In principle, the 1st derivatives are only calculated if asked to (present). However, they can be computed if it is simply convinient to do.
     class(effpot_t), intent(inout) :: self  ! the effpot may save the states.
+
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
     ! if present in input
     ! calculate if required
+    MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
   subroutine effpot_t_get_delta_E(self, S, ispin, Snew, deltaE)
@@ -153,6 +162,7 @@ contains
     real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin
     real(dp), intent(out) :: deltaE
+    MSG_ERROR("get_delta_E not implemented for this effpot.")
   end subroutine effpot_t_get_delta_E
 
 !   subroutine get_energy(self, energy)
@@ -208,6 +218,7 @@ contains
 
 
   subroutine effpot_list_t_append(self, effpot)
+    ! Add a pointer to an effpot term to list.
     class (effpot_list_t) :: self
     class (effpot_t), target :: effpot
     self%size=self%size + 1
@@ -222,6 +233,7 @@ contains
   end subroutine effpot_list_t_append
 
   subroutine effpot_list_t_calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+    ! calculate energy and its first derivatives.
     class(effpot_list_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy

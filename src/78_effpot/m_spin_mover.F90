@@ -16,10 +16,11 @@
 !! * spin_mover_t_initialize
 !! * spin_mover_t_run_one_step
 !! * spin_mover_t_run_time
+!! * TODO: update this when F2003 documentation format decided.
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2017 ABINIT group (hexu)
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -247,11 +248,12 @@ contains
   !! run one spin step using HeunP method
   !!
   !! INPUTS
+  !! effpot: effpot_t type.
+  !! S_in : input spin. (3*nspin)
   !!
   !! OUTPUT
-  !!
-  !! NOTES
-  !!
+  !! S_out: output spin (3*nspin)
+  !! etot: energy (scalar)
   !!
   !! PARENTS
   !!
@@ -299,6 +301,7 @@ contains
     call self%mps%gatherv_dp2d(S_out, 3)
     call xmpi_bcast(S_out, master, comm, ierr)
   end subroutine spin_mover_t_run_one_step_HeunP
+!!***
 
 
 

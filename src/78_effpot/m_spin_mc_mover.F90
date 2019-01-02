@@ -37,6 +37,7 @@
     use m_effpot_api, only: effpot_t
     use m_random_xoroshiro128plus, only: rng_t
     implicit none
+!!***
     private
 
     type,public :: spin_mc_t

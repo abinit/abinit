@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_effpot_api
+!!****m* ABINIT/m_effpot_manager
 !! NAME
-!! m_effpot_api
+!! m_effpot_manager
 !!
 !! FUNCTION
 !! This module contains the manager type, which is a thin layer above ALL 
@@ -10,7 +10,7 @@
 !!
 !! Datatypes:
 !!
-!! * base_manager_t: 
+!! * base_manager_t: base type for effective potential managers.
 !!
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
@@ -69,8 +69,10 @@ module m_effpot_manager
    contains
      procedure :: initialize => global_manager_initialize
      procedure :: finalize => global_manager_finalize
+     ! run one step of dynamics
      procedure :: run_one_step => global_manager_run_one_step
-     procedure :: run => global_manager_run
+     ! run: the main entry to all dynamics.
+     procedure :: run => global_manager_run 
   end type global_manager_t
 
 contains

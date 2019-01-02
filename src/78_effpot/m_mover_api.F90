@@ -66,11 +66,13 @@ contains
     ! set parameters from input file. (something else, like temperature for MvT calculation?)
     class(abstract_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+    MSG_ERROR("set_params not implemented for this mover")
   end subroutine set_params
 
   subroutine set_initial_state(self)
     ! set initial positions, spin, etc
     class(abstract_mover_t), intent(inout) :: self
+    MSG_ERROR("set_initial_state not implemented for this mover")
   end subroutine set_initial_state
 
   subroutine run_one_step(self, effpot)
@@ -78,29 +80,36 @@ contains
     class(abstract_mover_t), intent(inout) :: self
     ! should we use array of effective potentials so that there can be multiple of them?
     class(effpot_t), intent(inout) :: effpot
+    MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 
   subroutine reset(self)
     ! reset the state of mover (e.g. counter->0)
     ! so it can be reused.
     class(abstract_mover_t), intent(inout) :: self
+    MSG_ERROR("reset not implemented for this mover")
   end subroutine reset
 
   subroutine calc_observables(self)
     ! call functions to calculate observables.
     class(abstract_mover_t), intent(inout) :: self
+
+    MSG_ERROR("calc_observables not implemented for this mover")
   end subroutine calc_observables
 
   subroutine write_hist(self)
     ! write to hist file
     class(abstract_mover_t), intent(inout) :: self
+    MSG_ERROR("write_hist not implemented for this mover")
   end subroutine write_hist
 
   subroutine get_state(self, position, strain, spin, ihist)
     ! get the state of the ihist(th) step. ihist can be 0 (current), -1 (last), ... -maxhist..
+    !Note that the params are optional so it will be returned only if asked for.
     class(abstract_mover_t), intent(in):: self
     real(dp), optional, intent(inout) :: position, strain, spin
     integer, optional, intent(in):: ihist
+    MSG_ERROR("get_state not implemented for this mover")
   end subroutine get_state
 
 end module m_mover_api

@@ -22,10 +22,18 @@
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "abi_common.h"
+
+
 module m_spmat_base
   use defs_basis
   implicit none
   private
+!!***
+
   type, public ::  base_mat_t
      integer :: nrow, ncol
    contains

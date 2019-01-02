@@ -23,8 +23,11 @@
 !!
 !! SOURCE
 
-
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "abi_common.h"
+
 module m_spmat_csr
   use defs_basis  
   use m_xmpi

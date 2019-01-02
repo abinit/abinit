@@ -23,6 +23,12 @@
 !! SOURCE
 
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "abi_common.h"
+
+
 module m_spmat_dense
   use defs_basis
   use m_spmat_base
