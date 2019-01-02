@@ -1185,13 +1185,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(142,2,tsec)
 
 !  Set up the spherical harmonics (Ylm) at k+q
-   useylmgr1=0; option=0 ; ; nylmgr1=0
+   useylmgr1=0; option=0 ; nylmgr1=0
    if (psps%useylm==1.and. &
 &   (ipert==dtset%natom+1.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or. &
 &   (psps%usepaw==1.and.ipert==dtset%natom+2))) then
-     useylmgr1=1; option=1 ;  ; nylmgr1=3
+     useylmgr1=1; option=1; nylmgr1=3
    else if (psps%useylm==1.and.(ipert==dtset%natom+10.or.ipert==dtset%natom+11)) then
-     useylmgr1=1; option=2 ;  ; nylmgr1=9
+     useylmgr1=1; option=2; nylmgr1=9
    end if
    ABI_ALLOCATE(ylm1,(mpw1*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_ALLOCATE(ylmgr1,(mpw1*mk1mem_rbz,nylmgr1,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))

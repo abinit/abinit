@@ -2282,7 +2282,7 @@ subroutine create_mlms2jmj(lcor,mlmstwojmj)
 !--------------- Built indices + allocations
  ll=lcor
  mlmstwojmj=czero
- LIBPAW_ALLOCATE(ind_msml,(2,-ll:ll))
+ LIBPAW_BOUND2_ALLOCATE(ind_msml,BOUNDS(1,2),BOUNDS(-ll,ll))
  LIBPAW_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
  mlmstwojmj=czero
  jc1=0

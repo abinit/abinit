@@ -74,6 +74,7 @@ MODULE m_vkbr
 
   integer :: inclvkb
   ! Option for calculating the matrix elements of [Vnl,r].
+  ! 0 to exclude commutator, 2 to include it
 
   real(dp) :: kpoint(3)
   ! The k-point in reduced coordinates.
@@ -131,8 +132,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -217,8 +216,6 @@ end subroutine vkbr_init
 
 subroutine vkbr_free_0D(vkbr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(vkbr_t),intent(inout) :: vkbr
@@ -226,12 +223,8 @@ subroutine vkbr_free_0D(vkbr)
 !************************************************************************
 
 !complex
- if (allocated(vkbr%fnl)) then
-   ABI_FREE(vkbr%fnl)
- end if
- if (allocated(vkbr%fnld)) then
-   ABI_FREE(vkbr%fnld)
- end if
+ ABI_SFREE(vkbr%fnl)
+ ABI_SFREE(vkbr%fnld)
 
 end subroutine vkbr_free_0D
 !!***
@@ -253,8 +246,6 @@ end subroutine vkbr_free_0D
 !! SOURCE
 
 subroutine vkbr_free_1D(vkbr)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -317,8 +308,6 @@ end subroutine vkbr_free_1D
 !! SOURCE
 
 subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -425,8 +414,6 @@ end subroutine add_vnlr_commutator
 !! SOURCE
 
 subroutine calc_vkb(cryst,psps,kpoint,npw_k,mpw,kg_k,vkbsign,vkb,vkbd)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -581,8 +568,6 @@ end subroutine calc_vkb
 
 function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,nspinor,inclvkb,istwfk
@@ -612,8 +597,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
  ! -i <c,k|\nabla_r|v,k> = \sum_G u_{ck}^*(G) [k+G] u_{vk}(G)
  ! Note that here we assume c/=v, moreover the ug are supposed to be orthonormal and
  ! hence k+G can be replaced by G.
- ! HM 03/08/2018: we need band velocities so we don't assume c/=v anymore and we use
- ! k+G.
+ ! HM 03/08/2018: we need band velocities so we don't assume c/=v anymore and we use k+G.
 
  spinorwf_pad = RESHAPE([0, 0, npw, npw, 0, npw, npw, 0], [2, 4])
  ihr_comm = czero
@@ -624,7 +608,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
    do iab=1,nspinor
      spad1 = spinorwf_pad(1,iab); spad2 = spinorwf_pad(2,iab)
      do ig=1,npw
-       c_tmp = CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
+       c_tmp = GWPC_CONJG(ug1(ig+spad1)) * ug2(ig+spad2)
        ihr_comm(:,iab) = ihr_comm(:,iab) + c_tmp * (kpoint + gvec(:,ig))
      end do
    end do
@@ -632,7 +616,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
    ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0,G0) term is null.
    ABI_CHECK(nspinor == 1, "nspinor != 1")
    do ig=1,npw
-     c_tmp = CONJG(ug1(ig)) * ug2(ig)
+     c_tmp = GWPC_CONJG(ug1(ig)) * ug2(ig)
      ihr_comm(:,1) = ihr_comm(:,1) + two*j_dpc * AIMAG(c_tmp) * (kpoint + gvec(:,ig))
    end do
  end if
@@ -685,8 +669,6 @@ end function nc_ihr_comm
 !! SOURCE
 
 subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -767,7 +749,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
      xdotg = gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
      ! Remember that in the GW code the reciprocal vectors
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
-     sfac=CMPLX(COS(xdotg), SIN(xdotg))
+     sfac=CMPLX(COS(xdotg), SIN(xdotg), kind=dpc)
 
      iln0 = 0
      nlmn = count(psps%indlmn(3,:,itypat) > 0)

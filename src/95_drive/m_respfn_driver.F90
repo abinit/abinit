@@ -216,8 +216,6 @@ contains
 subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &  mkmems,mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(inout) :: iexit
  real(dp),intent(in) :: cpui
@@ -1922,8 +1920,6 @@ end subroutine respfn
 
 subroutine wrtloctens(blkflg,d2bbb,d2nl,mband,mpert,natom,prtbbb,rprimd,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mpert,natom,prtbbb,usepaw
@@ -2165,8 +2161,6 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddboun,ddkfil,dyew,dyfrlo,d
 & has_full_piezo,has_allddk,iout,mband,mpert,natom,ntypat,&
 & outd2,pawbec,pawpiezo,piezofrnl,prtbbb,prtvol,qphon,qzero,typat,rfdir,&
 & rfpert,rfphon,rfstrs,usepaw,usevdw,zion)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -3476,8 +3470,6 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
 & rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion)
 
- implicit none
-
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: berryopt,dyfr_cplex,dyfr_nondiag,mband,mpert,natom,ntypat,outd2
@@ -4001,8 +3993,6 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 &  qphon,rhog,rprimd,symq,symrec,typat,ucvol,usepaw,vlspl,vxc,&
 &  xcccrc,xccc1d,xccc3d,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
@@ -4218,7 +4208,6 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  use m_cgtools,       only : dotprod_vn
  use m_atm2fft,       only : dfpt_atm2fft
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
- implicit none
 
 !Arguments ------------------------------------
 !scalars

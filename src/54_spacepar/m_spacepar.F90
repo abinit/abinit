@@ -109,8 +109,6 @@ contains
 subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,paral_kgb,rhog,rprimd,vhartr,&
 &  divgq0,qpt) ! Optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,izero,nfft,paral_kgb
@@ -339,8 +337,6 @@ end subroutine hartre
 
 subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: filter,istwf_k,npw,nspinor,use_ndo
@@ -561,8 +557,6 @@ end subroutine meanvalue_g
 subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,paral_kgb,rdfuncr,&
 &  laplacerdfuncr,rdfuncg_out,laplacerdfuncg_out,g2cart_out,rdfuncg_in,g2cart_in)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,nfunc,paral_kgb
@@ -740,8 +734,6 @@ end subroutine laplacian
 
 subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,paral_kgb
@@ -892,8 +884,6 @@ end subroutine redgr
 
 subroutine hartrestr(gsqcut,idir,ipert,mpi_enreg,natom,nfft,ngfft,&
 &  paral_kgb,rhog,rprimd,vhartr1)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1090,8 +1080,6 @@ end subroutine hartrestr
 
 subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,paral_kgb,&
 &                 phnons,rhog,rhor,rprimd,symafm,symrel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1535,8 +1523,6 @@ end subroutine symrhg
 
 subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,nspden,nsppol,nsym
@@ -1933,8 +1919,6 @@ end subroutine irrzg
 subroutine rotate_rho(cplex, itirev, mpi_enreg, nfft, ngfft, nspden, &
 &   rhor1, rhog1_eq, rhor1_eq, symrel1, tnon)
 
- implicit none
-
 !args
  integer,intent(in) :: cplex, nfft, nspden, itirev
  integer,intent(in) :: ngfft(18)
@@ -2114,8 +2098,6 @@ end subroutine rotate_rho
 
 subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,&
 & symafm,symrec,symrel,tnons,typat,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

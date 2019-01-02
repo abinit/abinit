@@ -26,7 +26,7 @@
 
 MODULE m_kg
 
- use defs_abitypes, only : dataset_type
+ use defs_abitypes, only : dataset_type, MPI_type
  use defs_basis
  use m_errors
  use m_abicore
@@ -34,9 +34,7 @@ MODULE m_kg
  use m_xmpi
 
  use m_fftcore,     only : kpgsph, bound
- use defs_abitypes, only : MPI_type
  use m_mpinfo,      only : proc_distrb_cycle
-
 
  implicit none
 
@@ -111,8 +109,6 @@ contains
 !! SOURCE
 
 subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -247,8 +243,6 @@ end subroutine getcut
 
 subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,nkpt
@@ -350,8 +344,6 @@ end subroutine getmpw
 !! SOURCE
 
 subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -509,8 +501,6 @@ end subroutine mkkin
 subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 & mode_paral,mpi_enreg,mpw,npwarr,npwtot,nsppol)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: exchn2n3d,mkmem,mpw,nkpt,nsppol
@@ -657,8 +647,6 @@ end subroutine kpgio
 
 subroutine ph1d3d(iatom,jatom,kg_k,matblk,natom,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iatom,jatom,matblk,n1,n2,n3,natom,npw_k
@@ -769,8 +757,6 @@ end subroutine ph1d3d
 
 subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n1,n2,n3,natom
@@ -862,8 +848,6 @@ end subroutine getph
 !! SOURCE
 
 subroutine kpgstr(dkinpw,ecut,ecutsm,effmass_free,gmet,gprimd,istr,kg,kpt,npw)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -979,8 +963,6 @@ end subroutine kpgstr
 
 subroutine mkkpg(kg,kpg,kpt,nkpg,npw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpg,npw
@@ -1088,8 +1070,6 @@ end subroutine mkkpg
 
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 & kg,kgindex,mpi_enreg,npwarr,pwind_k1,symrec)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -1249,8 +1229,6 @@ end subroutine mkpwind_k
 
 subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
 
-  implicit none
-
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: natom,npw
@@ -1279,7 +1257,7 @@ subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvo
   ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
   ! 4\pi i comes from series expansion of plane waves, and ucvol comes from integration over space
   cscale_conversion = CMPLX(zero,four_pi*scale_conversion/ucvol)
-  
+
   ! make list of atoms with non-zero nuclear magnetic dipoles
   atom_nd_tot = 0
   do iatom = 1, natom

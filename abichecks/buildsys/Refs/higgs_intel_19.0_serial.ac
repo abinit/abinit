@@ -721,11 +721,11 @@ with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_PATH}
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf4/4.4.1.1/include -I${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/include -I/usr/include/hdf5/serial"
+with_netcdf_incs="-I/usr/local/netcdf4411_intel19_serial/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_PATH}/netcdf4/4.4.1.1/lib -lnetcdf"
+with_netcdf_libs="-L/usr/local/netcdf4411_intel19_serial/lib -lnetcdff -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -923,7 +923,7 @@ with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+bigdft+libxc+wannier90"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 
@@ -947,7 +947,7 @@ with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.0.1.0/lib -latompaw"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
@@ -957,7 +957,7 @@ with_libxc_incs="-I${FALLBACKS_PATH}/libxc/3.0.1/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.1/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.1/lib -lxc"
 
                        # ------------------------------ #
 

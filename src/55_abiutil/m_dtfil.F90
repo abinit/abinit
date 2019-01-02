@@ -99,8 +99,6 @@ contains
 subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset,&
 &                      image_index) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: idtset,ndtset
@@ -639,8 +637,6 @@ end subroutine dtfil_init
 
 subroutine dtfil_init_time(dtfil,iapp)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: iapp
@@ -744,8 +740,6 @@ end subroutine dtfil_init_time
 subroutine fappnd(filapp,filnam,iapp,&
 &                 suff) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iapp
@@ -831,8 +825,6 @@ end subroutine fappnd
 
 subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: idtset,ndtset,ndtset_alloc
@@ -845,7 +837,6 @@ subroutine dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset,ndtset,ndtset_alloc)
 !Local variables -------------------------
 !scalars
  integer :: iget
-!arrays
 
 ! *********************************************************************
 
@@ -942,8 +933,6 @@ end subroutine dtfil_init_img
 !! SOURCE
 
 subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1066,8 +1055,6 @@ end subroutine mkfilename
 !! SOURCE
 
 subroutine isfile(filnam, status)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1204,8 +1191,6 @@ end subroutine isfile
 !! SOURCE
 
 subroutine iofn1(filnam,filstat,comm)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm

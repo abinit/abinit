@@ -25,6 +25,64 @@
 
 module m_outscfcv
 
+ use defs_basis
+ use defs_datatypes
+ use defs_wvltypes
+ use defs_abitypes
+ use m_abicore
+ use m_sort
+ use m_efield
+ use m_errors
+ use m_xmpi
+ use m_mpinfo
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
+ use m_hdr
+ use m_plowannier
+ use m_splines
+ use m_ebands
+
+ use m_time,             only : timab
+ use m_io_tools,         only : open_file
+ use m_fstrings,         only : strcat, endswith
+ use m_geometry,         only : bonds_lgth_angles
+ use m_electronpositron, only : electronpositron_type,electronpositron_calctype
+ use m_oper,             only : oper_type,init_oper,destroy_oper
+ use m_crystal,          only : crystal_init, crystal_t, prt_cif
+ use m_results_gs,       only : results_gs_type, results_gs_ncwrite
+ use m_ioarr,            only : ioarr, fftdatar_write
+ use m_nucprop,          only : calc_efg,calc_fc
+ use m_outwant,          only : outwant
+ use m_pawang,           only : pawang_type
+ use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
+ use m_pawtab,           only : pawtab_type
+ use m_paw_an,           only : paw_an_type
+ use m_paw_ij,           only : paw_ij_type
+ use m_paw_mkrho,        only : denfgr
+ use m_pawfgrtab,        only : pawfgrtab_type
+ use m_pawrhoij,         only : pawrhoij_type, pawrhoij_nullify, pawrhoij_copy, pawrhoij_free
+ use m_pawcprj,          only : pawcprj_type
+ use m_pawfgr,           only : pawfgr_type
+ use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
+ use m_paw_optics,       only : optics_paw,optics_paw_core
+ use m_paw_tools,        only : pawprt
+ use m_numeric_tools,    only : simpson_int
+ use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
+                                epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
+ use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
+ use m_io_kss,           only : outkss
+ use m_multipoles,       only : multipoles_out, out1dm
+ use m_mlwfovlp_qp,      only : mlwfovlp_qp
+ use m_paw_mkaewf,       only : pawmkaewf
+ use m_dens,             only : mag_constr_e, calcdensph
+ use m_mlwfovlp,         only : mlwfovlp
+ use m_datafordmft,      only : datafordmft
+ use m_mkrho,            only : read_atomden
+ use m_positron,         only : poslifetime, posdoppler
+ use m_optics_vloc,      only : optics_vloc
+
  implicit none
 
  private
@@ -156,65 +214,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
 & prtvol,psps,results_gs,rhor,rprimd,&
 & taur,ucvol,usecprj,vhartr,vpsp,vtrial,vxc,wvl_den,xccc3d,xred)
-
- use defs_basis
- use defs_datatypes
- use defs_wvltypes
- use defs_abitypes
- use m_abicore
- use m_sort
- use m_efield
- use m_errors
- use m_xmpi
- use m_mpinfo
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
- use m_nctk
- use m_hdr
- use m_plowannier
- use m_splines
- use m_ebands
-
- use m_time,             only : timab
- use m_io_tools,         only : open_file
- use m_fstrings,         only : strcat, endswith
- use m_geometry,         only : bonds_lgth_angles
- use m_electronpositron, only : electronpositron_type,electronpositron_calctype
- use m_oper,             only : oper_type,init_oper,destroy_oper
- use m_crystal,          only : crystal_init, crystal_t, prt_cif
- use m_results_gs,       only : results_gs_type, results_gs_ncwrite
- use m_ioarr,            only : ioarr, fftdatar_write
- use m_nucprop,          only : calc_efg,calc_fc
- use m_outwant,          only : outwant
- use m_pawang,           only : pawang_type
- use m_pawrad,           only : pawrad_type, simp_gen, bound_deriv
- use m_pawtab,           only : pawtab_type
- use m_paw_an,           only : paw_an_type
- use m_paw_ij,           only : paw_ij_type
- use m_paw_mkrho,        only : denfgr
- use m_pawfgrtab,        only : pawfgrtab_type
- use m_pawrhoij,         only : pawrhoij_type, pawrhoij_nullify, pawrhoij_copy
- use m_pawcprj,          only : pawcprj_type
- use m_pawfgr,           only : pawfgr_type
- use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
- use m_paw_optics,       only : optics_paw,optics_paw_core
- use m_paw_tools,        only : pawprt
- use m_numeric_tools,    only : simpson_int
- use m_epjdos,           only : dos_calcnwrite, partial_dos_fractions, partial_dos_fractions_paw, &
-                                epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
- use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
- use m_io_kss,           only : outkss
- use m_multipoles,       only : multipoles_out, out1dm
- use m_mlwfovlp_qp,      only : mlwfovlp_qp
- use m_paw_mkaewf,       only : pawmkaewf
- use m_dens,             only : mag_constr_e, calcdensph
- use m_mlwfovlp,         only : mlwfovlp
- use m_datafordmft,      only : datafordmft
- use m_mkrho,            only : read_atomden
- use m_positron,         only : poslifetime, posdoppler
- use m_optics_vloc,      only : optics_vloc
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -486,7 +485,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &       abs_n_tilde_nt_diff=nt_ntone_norm,znucl=dtset%znucl,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      end if
-     if (mpi_enreg%paral_kgb==1.and.my_natom/=natom) then
+     if (mpi_enreg%paral_kgb==0.and.my_natom/=natom) then
+       call pawrhoij_free(pawrhoij_all)
        ABI_DATATYPE_DEALLOCATE(pawrhoij_all)
      end if
 
@@ -569,21 +569,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end if ! All indivdual density cont.
    end if ! if master
 
-   if (allocated(rhor_paw))  then
-     ABI_DEALLOCATE(rhor_paw)
-   end if
-   if (allocated(rhor_paw_core))  then
-     ABI_DEALLOCATE(rhor_paw_core)
-   end if
-   if (allocated(rhor_paw_val))  then
-     ABI_DEALLOCATE(rhor_paw_val)
-   end if
-   if (allocated(rhor_n_one))  then
-     ABI_DEALLOCATE(rhor_n_one)
-   end if
-   if (allocated(rhor_nt_one))  then
-     ABI_DEALLOCATE(rhor_nt_one)
-   end if
+   ABI_SFREE(rhor_paw)
+   ABI_SFREE(rhor_paw_core)
+   ABI_SFREE(rhor_paw_val)
+   ABI_SFREE(rhor_n_one)
+   ABI_SFREE(rhor_nt_one)
 
  end if ! if paw+pawprtden
 
@@ -596,7 +586,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
 
-   ! Write density, crystal, band structure energies.
+   ! Write crystal and band structure energies.
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
    NCF_CHECK(hdr_ncwrite(hdr, ncid, fform_den, nc_define=.True.))
    NCF_CHECK(crystal%ncwrite(ncid))
@@ -915,10 +905,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
 !  Here, computation and output of DOS and partial DOS  _DOS
-   if (dos%fatbands_flag == 0) then
-     if (dos%prtdos /= 4) then
-       call dos_calcnwrite(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,spacecomm)
-     end if
+   if (dos%fatbands_flag == 0 .and. dos%prtdos /= 4) then
+     call dos_calcnwrite(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,spacecomm)
    end if
 
 #ifdef HAVE_NETCDF
@@ -1195,7 +1183,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
  if (nint(dtset%einterp(1)) /= 0) then
-   call ebands_interpolate_kpath(ebands, dtset, crystal, [0,0], dtfil%filnam_ds(4), spacecomm)
+   call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
 
  call crystal%free()

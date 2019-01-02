@@ -1073,7 +1073,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   Number of electrons    =    7.9799
 
   QP Band energy    [Ha] =  5.84974807324812E+00
-  QP Hartree energy [Ha] =  6.43684703330319E-01
+  QP Hartree energy [Ha] =  6.43684697185468E-01
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -1331,8 +1331,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9786
 
-  QP Band energy    [Ha] =  8.83694863376521E-01
-  QP Hartree energy [Ha] =  8.13687214470569E-01
+  QP Band energy    [Ha] =  8.83694864140622E-01
+  QP Hartree energy [Ha] =  8.13687201885982E-01
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -1490,7 +1490,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  DeltaE^GW_gap    0.094
 
 
- New Fermi energy :        6.273938E-01 Ha ,    1.707225E+01 eV
+ New Fermi energy :        6.273937E-01 Ha ,    1.707225E+01 eV
  New Exchange energy :    -6.909744E-01 Ha ,   -1.880237E+01 eV
 
  === QP Band Gaps ===
@@ -1503,12 +1503,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (   0.537  -0.000) for band index:  7
-.  kptgw no:  2; Maximum DeltaE = (   0.498   0.000) for band index:  8
+.  kptgw no:  1; Maximum DeltaE = (   0.537   0.000) for band index:  7
+.  kptgw no:  2; Maximum DeltaE = (   0.498  -0.000) for band index:  8
 .  kptgw no:  3; Maximum DeltaE = (   0.618   0.000) for band index:  7
-.  kptgw no:  4; Maximum DeltaE = (   0.547  -0.000) for band index:  7
-.  kptgw no:  5; Maximum DeltaE = (   0.581   0.000) for band index: 10
-.  kptgw no:  6; Maximum DeltaE = (   0.650  -0.000) for band index:  8
+.  kptgw no:  4; Maximum DeltaE = (   0.547   0.000) for band index:  7
+.  kptgw no:  5; Maximum DeltaE = (   0.581  -0.000) for band index: 10
+.  kptgw no:  6; Maximum DeltaE = (   0.650   0.000) for band index:  8
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1590,8 +1590,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9787
 
-  QP Band energy    [Ha] =  1.02299478656087E+00
-  QP Hartree energy [Ha] =  8.01579076633447E-01
+  QP Band energy    [Ha] =  1.02299478297015E+00
+  QP Hartree energy [Ha] =  8.01579064554345E-01
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -1749,7 +1749,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  DeltaE^GW_gap   -0.008
 
 
- New Fermi energy :        6.262955E-01 Ha ,    1.704237E+01 eV
+ New Fermi energy :        6.262954E-01 Ha ,    1.704237E+01 eV
  New Exchange energy :    -6.896837E-01 Ha ,   -1.876725E+01 eV
 
  === QP Band Gaps ===
@@ -1762,10 +1762,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (  -0.037   0.000) for band index:  2
+.  kptgw no:  1; Maximum DeltaE = (  -0.037  -0.000) for band index:  2
 .  kptgw no:  2; Maximum DeltaE = (  -0.036  -0.000) for band index:  4
-.  kptgw no:  3; Maximum DeltaE = (  -0.043  -0.000) for band index:  8
-.  kptgw no:  4; Maximum DeltaE = (  -0.037  -0.000) for band index:  8
+.  kptgw no:  3; Maximum DeltaE = (  -0.043   0.000) for band index:  8
+.  kptgw no:  4; Maximum DeltaE = (  -0.037   0.000) for band index:  8
 .  kptgw no:  5; Maximum DeltaE = (  -0.041  -0.000) for band index: 10
 .  kptgw no:  6; Maximum DeltaE = (  -0.042  -0.000) for band index:  8
 
@@ -1849,8 +1849,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9787
 
-  QP Band energy    [Ha] =  1.01312379926223E+00
-  QP Hartree energy [Ha] =  8.02454482845706E-01
+  QP Band energy    [Ha] =  1.01312379602749E+00
+  QP Hartree energy [Ha] =  8.02454470725157E-01
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -2022,10 +2022,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (   0.003  -0.000) for band index:  2
-.  kptgw no:  2; Maximum DeltaE = (   0.003  -0.000) for band index:  4
-.  kptgw no:  3; Maximum DeltaE = (   0.003  -0.000) for band index:  8
-.  kptgw no:  4; Maximum DeltaE = (   0.003  -0.000) for band index:  7
-.  kptgw no:  5; Maximum DeltaE = (   0.003  -0.000) for band index: 10
+.  kptgw no:  2; Maximum DeltaE = (   0.003   0.000) for band index:  4
+.  kptgw no:  3; Maximum DeltaE = (   0.003   0.000) for band index:  8
+.  kptgw no:  4; Maximum DeltaE = (   0.003   0.000) for band index:  7
+.  kptgw no:  5; Maximum DeltaE = (   0.003   0.000) for band index: 10
 .  kptgw no:  6; Maximum DeltaE = (   0.003  -0.000) for band index:  8
 
 ================================================================================
@@ -2108,8 +2108,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9787
 
-  QP Band energy    [Ha] =  1.01383294075340E+00
-  QP Hartree energy [Ha] =  8.02394480588952E-01
+  QP Band energy    [Ha] =  1.01383293748917E+00
+  QP Hartree energy [Ha] =  8.02394468471722E-01
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -2267,7 +2267,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  DeltaE^GW_gap   -0.000
 
 
- New Fermi energy :        6.263705E-01 Ha ,    1.704441E+01 eV
+ New Fermi energy :        6.263704E-01 Ha ,    1.704441E+01 eV
  New Exchange energy :    -6.897758E-01 Ha ,   -1.876975E+01 eV
 
  === QP Band Gaps ===
@@ -2283,7 +2283,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 .  kptgw no:  1; Maximum DeltaE = (  -0.000   0.000) for band index:  2
 .  kptgw no:  2; Maximum DeltaE = (  -0.000  -0.000) for band index:  4
 .  kptgw no:  3; Maximum DeltaE = (  -0.000   0.000) for band index:  7
-.  kptgw no:  4; Maximum DeltaE = (  -0.000  -0.000) for band index:  8
+.  kptgw no:  4; Maximum DeltaE = (  -0.000   0.000) for band index:  8
 .  kptgw no:  5; Maximum DeltaE = (  -0.000   0.000) for band index: 10
 .  kptgw no:  6; Maximum DeltaE = (  -0.000  -0.000) for band index:  8
 
@@ -2346,9 +2346,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  ETOT  5  -11.078834740301    -9.922E-09 7.786E-11 1.088E-07
  ETOT  6  -11.078834740419    -1.175E-10 1.511E-11 3.037E-10
  ETOT  7  -11.078834740423    -4.677E-12 6.494E-13 4.879E-12
- ETOT  8  -11.078834740424    -3.908E-14 7.328E-14 4.383E-13
+ ETOT  8  -11.078834740424    -3.730E-14 7.328E-14 4.383E-13
  ETOT  9  -11.078834740423     4.974E-14 6.828E-15 8.638E-15
- ETOT 10  -11.078834740424    -4.796E-14 8.242E-16 4.922E-17
+ ETOT 10  -11.078834740424    -4.974E-14 8.242E-16 4.922E-17
 
  At SCF step   10       vres2   =  4.92E-17 < tolvrs=  1.00E-15 =>converged.
 
@@ -3197,8 +3197,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
   Number of electrons    =    7.9787
 
-  QP Band energy    [Ha] =  1.01378409842004E+00
-  QP Hartree energy [Ha] =  8.02398728820155E-01
+  QP Band energy    [Ha] =  1.01378409515821E+00
+  QP Hartree energy [Ha] =  8.02398716702680E-01
 
 --------------------------------------------------------------------------------
  SIGMA fundamental parameters:
@@ -3355,7 +3355,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
     7    35.813     0.000    22.068    36.182    -8.585    -4.083     0.853    -0.172   -12.881     1.234    23.302    23.514
     8    40.406     0.000    26.668    41.123    -7.851    -5.651     0.830    -0.205   -13.664     0.791    27.459    27.621
     9    44.296     0.000    33.306    43.843    -4.123    -6.051     0.826    -0.211   -10.237     0.300    33.606    33.676
-   10    53.652     0.000    41.536    54.230    -5.987    -4.983     0.831    -0.203   -11.261     1.433    42.969    43.259
+   10    53.652     0.000    41.536    54.230    -5.987    -4.984     0.831    -0.203   -11.261     1.433    42.969    43.259
    11    53.652     0.000    41.536    54.230    -5.987    -4.984     0.831    -0.203   -11.261     1.433    42.969    43.259
    12    53.652     0.000    43.028    53.146    -3.195    -6.413     0.781    -0.280    -9.719     0.398    43.426    43.539
    13    54.148     0.000    43.028    53.146    -3.195    -6.413     0.781    -0.280    -9.719     0.398    43.426    43.539
