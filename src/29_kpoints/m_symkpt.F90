@@ -106,6 +106,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  use m_abicore
  use m_errors
  use m_sort
+ use m_time
 
 !Arguments -------------------------------
 !scalars
@@ -123,6 +124,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  integer :: identi,ii,ikpt,ikpt2,ind_ikpt,ind_ikpt2,ierr
  integer :: ikpt_current_length,isym,itim,jj,nkpout,quit,tident
  real(dp) :: difk,difk1,difk2,difk3,length2trial,reduce,reduce1,reduce2,reduce3
+ real(dp) :: cpu,wall,gflops
  character(len=500) :: message
 !arrays
  integer,allocatable :: list(:),bz2ibz_idx(:)
@@ -130,6 +132,8 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  real(dp),allocatable :: length2(:)
 
 ! *********************************************************************
+
+
 
  if (timrev/=1 .and. timrev/=0) then
    write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
@@ -175,6 +179,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
  ! If there is some possibility for a change (otherwise, wtk_folded is correctly initialized to give no change)
  if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
+   call cwtime(cpu, wall, gflops, "start")
 
    ! Store the length of vectors, but take into account umklapp
    ! processes by selecting the smallest length of all symmetric vectors
@@ -201,11 +206,15 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      end do
    end do
 
+   call cwtime_report("simkpt: length", cpu, wall, gflops)
+
    ! Sort the lengths
    ABI_ALLOCATE(list,(nkbz))
    list(:)=(/ (ikpt,ikpt=1,nkbz) /)
    call sort_dp(nkbz,length2,list,tol14)
    ! do ikpt=1,nkbz; write(std_out,*)ikpt,length2(ikpt),list(ikpt),kbz(1:3,list(ikpt)); end do
+
+   call cwtime_report("simkpt: sort", cpu, wall, gflops)
 
    ! Examine whether the k point grid is symmetric or not
    ! This check scales badly with nkbz hence it's disabled for dense meshes.
@@ -344,6 +353,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
    ABI_DEALLOCATE(length2)
    ABI_DEALLOCATE(list)
+   call cwtime_report("simkpt: loop", cpu, wall, gflops)
  end if ! End check on possibility of change
 
  ! Create the indexing array ibz2bz

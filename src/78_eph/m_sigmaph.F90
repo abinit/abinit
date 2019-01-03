@@ -607,8 +607,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
     end if
  end if
 
- call xmpi_bcast(restart, master, comm,ierr)
- call xmpi_bcast(sigma%qp_done, master, comm,ierr)
+ call xmpi_bcast(restart, master, comm, ierr)
+ call xmpi_bcast(sigma%qp_done, master, comm, ierr)
  call sigmaph_write(sigma, dtset, ecut, cryst, ebands, ifc, dtfil, restart, comm)
  if (my_rank == master) then
    call sigmaph_print(sigma, dtset, ab_out)
@@ -915,7 +915,7 @@ endif
 
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = sum(qpt**2) < tol14 !; if (isqzero) cycle
-       call cwtime(cpu, wall, gflops,"start")
+       call cwtime(cpu, wall, gflops, "start")
 
        ! Find k+q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered:
@@ -1142,7 +1142,7 @@ endif
          !if (mrta) then
          !  call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
          !  vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
-         !  alpha_vkvkq = (one - (vkq * vk) / vkk_norm
+         !  alpha_mrta = one - (vkq * vk) / vkk_norm**2
          !end if
 
          do imyp=1,my_npert

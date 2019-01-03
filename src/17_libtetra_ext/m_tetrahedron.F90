@@ -211,7 +211,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  integer :: ii,jj,maxibz,ind_ibz(4),ikibz,nkpt_ibz
  integer :: symrankkpt,mtetra,itmp,ntetra_irred
  real(dp_) :: shift1,shift2,shift3, rcvol,hashfactor
- real :: cpu_start, cpu_stop
+ !real :: cpu_start, cpu_stop
  type(kptrank_type) :: kptrank_t
 !arrays
  integer :: tetra_shifts(3,4,6)  ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
@@ -225,7 +225,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
 
 ! *********************************************************************
 
- call cpu_time(cpu_start)
+ !call cpu_time(cpu_start)
 
  ! TODO: Pass comm to parallelize this part
  ierr = 0
@@ -385,9 +385,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
    end do ! itetra
  end do ! ikpt_full
 
- call cpu_time(cpu_stop)
- write(*,*)"tetra_init ikpt_loop:", cpu_stop - cpu_start
- cpu_start = cpu_stop
+ !call cpu_time(cpu_stop)
+ !write(*,*)"tetra_init ikpt_loop:", cpu_stop - cpu_start
+ !cpu_start = cpu_stop
 
  call destroy_kptrank (kptrank_t)
 
@@ -427,6 +427,8 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
  end do
 
  call sort_tetra(tetra%ntetra, tetra_hash, reforder, tol6)
+ ! Most of the wall-time is spent in the  preamble of this routine (up to this point).
+ ! sort_tetra is not easy to parallelize...
 
  ! determine number of tetra after reduction
  TETRA_ALLOCATE(irred_itetra, (tetra%ntetra))
@@ -521,8 +523,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetra,ierr,err
    end do
  end do
 
- write(*,*)"tetra_init 2nd part:", cpu_stop - cpu_start
- cpu_start = cpu_stop
+ !call cpu_time(cpu_stop)
+ !write(*,*)"tetra_init 2nd part:", cpu_stop - cpu_start
+ !cpu_start = cpu_stop
 
 end subroutine init_tetra
 !!***
