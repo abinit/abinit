@@ -404,7 +404,7 @@ contains
  real(dp),allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: ffnlin_typ(:,:,:),ffnlout_typ(:,:,:),kpgin_(:,:),kpgout_(:,:)
 #ifdef MR_DEV
- real(dp),allocatable,target :: kpgcar(:,:)
+ real(dp),allocatable,target :: kpgincar(:,:),kpgoutcar(:,:)
 #endif
 
 ! **********************************************************************
@@ -646,14 +646,14 @@ contains
 #ifdef MR_DEV
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
-     ABI_ALLOCATE(kpgcar,(npwin,nkpgin_))
+     ABI_ALLOCATE(kpgincar,(npwin,nkpgin_))
      do ipw=1,npwin
-       kpgcar(ipw,1)=kpgin_(ipw,1)*gprimd(1,1)+kpgin_(ipw,2)*gprimd(1,2)+kpgin_(ipw,3)*gprimd(1,3)
-       kpgcar(ipw,2)=kpgin_(ipw,1)*gprimd(2,1)+kpgin_(ipw,2)*gprimd(2,2)+kpgin_(ipw,3)*gprimd(2,3)
-       kpgcar(ipw,3)=kpgin_(ipw,1)*gprimd(3,1)+kpgin_(ipw,2)*gprimd(3,2)+kpgin_(ipw,3)*gprimd(3,3)
+       kpgincar(ipw,1)=kpgin_(ipw,1)*gprimd(1,1)+kpgin_(ipw,2)*gprimd(1,2)+kpgin_(ipw,3)*gprimd(1,3)
+       kpgincar(ipw,2)=kpgin_(ipw,1)*gprimd(2,1)+kpgin_(ipw,2)*gprimd(2,2)+kpgin_(ipw,3)*gprimd(2,3)
+       kpgincar(ipw,3)=kpgin_(ipw,1)*gprimd(3,1)+kpgin_(ipw,2)*gprimd(3,2)+kpgin_(ipw,3)*gprimd(3,3)
      end do
      nullify(kpgin_)
-     kpgin_ => kpgcar
+     kpgin_ => kpgincar
    end if
 #endif
 
@@ -670,14 +670,14 @@ contains
 #ifdef MR_DEV
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
+     ABI_ALLOCATE(kpgoutcar,(npwin,nkpgin_))
      do ipw=1,npwout
-       kpgcar(ipw,1)=kpgout_(ipw,1)*gprimd(1,1)+kpgout_(ipw,2)*gprimd(1,2)+kpgout_(ipw,3)*gprimd(1,3)
-       kpgcar(ipw,2)=kpgout_(ipw,1)*gprimd(2,1)+kpgout_(ipw,2)*gprimd(2,2)+kpgout_(ipw,3)*gprimd(2,3)
-       kpgcar(ipw,3)=kpgout_(ipw,1)*gprimd(3,1)+kpgout_(ipw,2)*gprimd(3,2)+kpgout_(ipw,3)*gprimd(3,3)
+       kpgoutcar(ipw,1)=kpgout_(ipw,1)*gprimd(1,1)+kpgout_(ipw,2)*gprimd(1,2)+kpgout_(ipw,3)*gprimd(1,3)
+       kpgoutcar(ipw,2)=kpgout_(ipw,1)*gprimd(2,1)+kpgout_(ipw,2)*gprimd(2,2)+kpgout_(ipw,3)*gprimd(2,3)
+       kpgoutcar(ipw,3)=kpgout_(ipw,1)*gprimd(3,1)+kpgout_(ipw,2)*gprimd(3,2)+kpgout_(ipw,3)*gprimd(3,3)
      end do
      nullify(kpgout_)
-     kpgout_ => kpgcar
-     ABI_DEALLOCATE(kpgcar)
+     kpgout_ => kpgoutcar
    end if
 #endif
 
@@ -1265,11 +1265,13 @@ contains
    ABI_DEALLOCATE(ddkk)
    ABI_DEALLOCATE(strnlk)
  end if
- if (nkpgin<nkpgin_) then
-   ABI_DEALLOCATE(kpgin_)
- end if
- if (nkpgout<nkpgout_) then
-   ABI_DEALLOCATE(kpgout_)
+ if (choice/=33) then
+   if (nkpgin<nkpgin_) then
+     ABI_DEALLOCATE(kpgin_)
+   end if
+   if (nkpgout<nkpgout_) then
+     ABI_DEALLOCATE(kpgout_)
+   end if
  end if
 
  DBG_EXIT("COLL")

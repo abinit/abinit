@@ -1143,7 +1143,6 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
 !Additional definitions
  tim_getgh1c=0
 
-
 !Additional allocations
  ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
  ABI_ALLOCATE(cwave0j,(2,npw_k*dtset%nspinor))
@@ -1215,6 +1214,7 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
 
        !Compute ci_vefielddag_cj=(< u_{j,k}^{(0)} | V^{E_{\alpha}} | u_{i,k}^{(0)} >)^*    
        call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cwave0j,gv1c,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+
        ci_vefielddag_cj(1,iefipert,jband,iband)=dotr
        ci_vefielddag_cj(2,iefipert,jband,iband)=-doti
 

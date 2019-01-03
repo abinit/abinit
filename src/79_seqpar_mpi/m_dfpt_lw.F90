@@ -704,7 +704,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bs_rbz)
 
-
 !!Initialize GS wavefunctions at k
  ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
  mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
@@ -999,8 +998,8 @@ qdrpwf_t5=zero
  ABI_DEALLOCATE(kg)
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(kpt_rbz)
- ABI_DEALLOCATE(mpi_enreg%my_kpttab)
- ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+! ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+! ABI_DEALLOCATE(mpi_enreg%proc_distrb)
  ABI_DEALLOCATE(nband_rbz)
  ABI_DEALLOCATE(npwarr)
  ABI_DEALLOCATE(occ_rbz)
@@ -2498,8 +2497,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(kg)
  ABI_DEALLOCATE(kg_k)
  ABI_DEALLOCATE(npwarr)
- ABI_DEALLOCATE(mpi_enreg%my_kpttab)
- ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+ !ABI_DEALLOCATE(mpi_enreg%my_kpttab)
+ !ABI_DEALLOCATE(mpi_enreg%proc_distrb)
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
  ABI_DEALLOCATE(wfk_t_ddk)

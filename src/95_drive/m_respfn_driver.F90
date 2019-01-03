@@ -1772,7 +1772,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if 
 
 !Calculate the flexoelectric tensor
- if (dtset%userib==2) then
+ if (dtset%userib==1.or.dtset%userib==2) then
    call dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 &   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
 &   mpert,mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
