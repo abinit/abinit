@@ -1064,6 +1064,7 @@ end subroutine mpi_setup
  iam_master = (mpi_enreg%me==0)
  optdriver = dtset%optdriver
  max_ncpus = dtset%max_ncpus
+ nthreads=xomp_get_max_threads()
  algo_old_lobpcg= (dtset%wfoptalg==14)
  algo_new_lobpcg= (dtset%wfoptalg==114)
  algo_chebfi    = (dtset%wfoptalg==1)
@@ -1071,7 +1072,13 @@ end subroutine mpi_setup
    message="autoparal not yet available for Chebyshev filtering algorithm (wfoptalg=1)!"
    MSG_ERROR(message)
  end if
+ 
+!Some algorithms need paral_kgb=1
+ if (tread(1)==0) then
+   if (algo_old_lobpcg.or.algo_new_lobpcg.or.algo_chebfi) dtset%paral_kgb=1
+ end if
 
+!max_ncpus requires a stop
  if (max_ncpus > 0 .and. autoparal/=0) then
    iexit = iexit + 1 ! will stop in the parent.
  end if
@@ -1108,7 +1115,7 @@ end subroutine mpi_setup
 
      do ii=1,max_ncpus
        if (ii > work_size) cycle
-       do omp_ncpus=1,xomp_get_max_threads()
+       do omp_ncpus=1,nthreads
          nks_per_proc = work_size / ii
          nks_per_proc = nks_per_proc + MOD(work_size, ii)
          eff = (one * work_size) / (ii * nks_per_proc)
@@ -1129,9 +1136,8 @@ end subroutine mpi_setup
 
 
  nproc=mpi_enreg%nproc
- nthreads=xomp_get_max_threads()
  !if (xmpi_paral==1.and.dtset%paral_kgb <0) nproc=-dtset%paral_kgb
- if (max_ncpus > 0) nproc = dtset%max_ncpus
+ if (max_ncpus > 0) nproc = dtset%max_ncpus/nthreads
  !if (xmpi_paral==1.and.dtset%paral_kgb <0) nproc=dtset%max_ncpus
  if (xmpi_paral==0.and.dtset%paral_kgb>=0) nproc=1
 
@@ -1437,16 +1443,16 @@ end subroutine mpi_setup
            do bpp=bpp_min,bpp_max
 
              if (algo_new_lobpcg) then
+               blocksize=npb*bpp;nblocks=mband/blocksize
                if (modulo(bpp,nthreads)>0) cycle
                if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
                if (modulo(mband,npb*bpp)>0) cycle
-               blocksize=npb*bpp;nblocks=mband/blocksize
              else if (algo_old_lobpcg) then
+               blocksize=npb*bpp;nblocks=mband/blocksize
                if (modulo(mband/npb,bpp)>0) cycle
                if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
                if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
-               blocksize=npb*bpp;nblocks=mband/blocksize
              else if (algo_chebfi) then
              else
                if (bpp/=1.or.npb/=1) cycle
@@ -1459,10 +1465,18 @@ end subroutine mpi_setup
              if (algo_old_lobpcg) then
                if (npb*npf>4.and.mband>30) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
              end if
-!            NEW LOBPCG: promote minimal number of blocks, promote block size <= BLOCKSIZE_MAX
+!            NEW LOBPCG: promote minimal number of blocks
+!                        promote bandpp=nthreads
+!                        promote block size <= BLOCKSIZE_MAX
              if (algo_new_lobpcg) then
-               if( blocksize>BLOCKSIZE_MAX) acc_kgb=acc_kgb*max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX))
+               acc_kgb=acc_kgb*(one-min(0.1_dp,0.001_dp*bpp/nthreads))
                acc_kgb=acc_kgb*(one-0.9_dp*dble(nblocks-1)/dble(mband-1))
+               if( blocksize>BLOCKSIZE_MAX) acc_kgb=acc_kgb*max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX))
+               write(77,*) npb,bpp,&
+               & (one-min(0.2_dp,0.02_dp*bpp/nthreads)),&
+               & (one-0.9_dp*dble(nblocks-1)/dble(mband-1)),&
+               & merge(one,max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX)),blocksize>BLOCKSIZE_MAX)
+               flush(77)
              end if
 
 !            Resulting speedup
