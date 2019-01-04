@@ -964,7 +964,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 &  173,179,181,191,193, 197,199/)
  integer :: kptrlatt2(3,3)
  integer,allocatable :: belong_chain(:),generator(:),indkpt(:),number_in_chain(:)
- integer,allocatable :: repetition_factor(:),symrec(:,:,:)
+ integer,allocatable :: repetition_factor(:),symrec(:,:,:), bz2ibz_smap(:,:)
 ! real(dp) :: cart(3,3)
  real(dp) :: dijk(3),delta_dmult(3),dmult(3),fact_vacuum(3),gmet(3,3)
  real(dp) :: gmet_super(3,3),gprimd(3,3),gprimd_super(3,3),klatt2(3,3)
@@ -1285,6 +1285,7 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
    ABI_ALLOCATE(wtk_fullbz,(nkpt_fullbz))
    ABI_ALLOCATE(wtk_folded,(nkpt_fullbz))
+   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt_fullbz))
 
    kpt_fullbz(:,:)=spkpt(:,1:nkpt_fullbz)
    wtk_fullbz(1:nkpt_fullbz)=1.0_dp/dble(nkpt_fullbz)
@@ -1292,8 +1293,9 @@ subroutine getkgrid(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
    timrev=1;if (kptopt==4) timrev=0
 
    call symkpt(chksymbreak,gmet,indkpt,iout,kpt_fullbz,nkpt_fullbz,&
-&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded)
+&   nkpt_computed,nsym_used,symrec,timrev,wtk_fullbz,wtk_folded, bz2ibz_smap, xmpi_comm_self)
 
+   ABI_FREE(bz2ibz_smap)
    ABI_DEALLOCATE(symrec)
    ABI_DEALLOCATE(wtk_fullbz)
 

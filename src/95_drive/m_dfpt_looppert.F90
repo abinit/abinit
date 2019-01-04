@@ -328,7 +328,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,allocatable :: kg(:,:),kg1(:,:),nband_rbz(:),npwar1(:),npwarr(:),npwtot(:)
  integer,allocatable :: kg1_mq(:,:),npwar1_mq(:),npwtot1_mq(:) !+q/-q duplicates
  integer,allocatable :: npwtot1(:),npwar1_pert(:,:),npwarr_pert(:,:),npwtot_pert(:,:)
- integer,allocatable :: pert_calc(:,:),pert_tmp(:,:)
+ integer,allocatable :: pert_calc(:,:),pert_tmp(:,:),bz2ibz_smap(:,:)
  integer,allocatable :: symaf1(:),symaf1_tmp(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:)
  integer, pointer :: old_atmtab(:)
  real(dp) :: dielt(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),tsec(2)
@@ -898,12 +898,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Determine the subset of k-points needed in the "reduced Brillouin zone" and initialize other quantities
    ABI_ALLOCATE(indkpt1_tmp,(nkpt))
    ABI_ALLOCATE(wtk_folded,(nkpt))
+   ABI_ALLOCATE(bz2ibz_smap, (6, nkpt))
    indkpt1_tmp(:)=0 ; optthm=0
    timrev_pert=timrev
    if(dtset%ieig2rf>0) then
      timrev_pert=0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
-&     1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
+&     1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    else
 !    For the time being, the time reversal symmetry is not used
 !    for ddk, elfd, mgfd perturbations.
@@ -917,8 +918,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !    The time reversal symmetry is not used for the BZ sampling when kptopt=3 or 4
      if (dtset%kptopt==3.or.dtset%kptopt==4) timrev_kpt = 0
      call symkpt(0,gmet,indkpt1_tmp,ab_out,dtset%kptns,nkpt,nkpt_rbz,&
-     nsym1,symrc1,timrev_kpt,dtset%wtk,wtk_folded)
+     nsym1,symrc1,timrev_kpt,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    end if
+
+   ABI_DEALLOCATE(bz2ibz_smap)
 
    ABI_ALLOCATE(doccde_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(indkpt1,(nkpt_rbz))

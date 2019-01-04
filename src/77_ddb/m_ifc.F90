@@ -346,7 +346,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(ifc_type) :: ifc_tmp
 !arrays
  integer :: ngqpt(9),qptrlatt(3,3)
- integer,allocatable :: qmissing(:),ibz2bz(:)
+ integer,allocatable :: qmissing(:),ibz2bz(:),bz2ibz_smap(:,:)
  real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3)
  real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
@@ -417,9 +417,12 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_MALLOC(wtq_folded, (nqbz))
  ABI_MALLOC(wtq, (nqbz))
  wtq = one / nqbz ! Weights sum up to one
+ ABI_MALLOC(bz2ibz_smap, (6, nqbz))
 
  call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,ifc%nqibz,crystal%nsym,&
-   crystal%symrec,timrev1,wtq,wtq_folded)
+   crystal%symrec,timrev1,wtq,wtq_folded, bz2ibz_smap, xmpi_comm_self)
+
+ ABI_FREE(bz2ibz_smap)
 
  ABI_MALLOC(ifc%qibz, (3,ifc%nqibz))
  ABI_MALLOC(ifc%wtq, (ifc%nqibz))

@@ -70,6 +70,7 @@ contains
 !! timrev: if 1, the time reversal operation has to be taken into account
 !!         if 0, no time reversal symmetry.
 !! wtk(nkbz)=weight assigned to each k point.
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !! ibz2bz(nkbz)=non-symmetrized indices of the k-points a.k.a. ibz2bz mapping
@@ -81,7 +82,7 @@ contains
 !!
 !! nkibz = number of k-points in the irreducible set
 !! wtk_folded(nkbz)=weight assigned to each k point, taking into account the symmetries
-!! [bz2ibz_smap(nkbz, 6)]= Mapping BZ --> IBZ.
+!! bz2ibz_smap(nkbz, 6)= Mapping BZ --> IBZ.
 !!
 !! NOTES
 !! The decomposition of the symmetry group in its primitives might speed up the execution.
@@ -100,24 +101,24 @@ contains
 !! SOURCE
 
 subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev,wtk,wtk_folded, &
-                  bz2ibz_smap) ! Optional
+                  bz2ibz_smap, comm) ! Optional
 
  use defs_basis
  use m_abicore
  use m_errors
  use m_sort
- use m_time
+ !use m_time
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: chksymbreak,iout,nkbz,nsym,timrev
+ integer,intent(in) :: chksymbreak,iout,nkbz,nsym,timrev,comm
  integer,intent(out) :: nkibz
 !arrays
  integer,intent(in) :: symrec(3,3,nsym)
  integer,intent(inout) :: ibz2bz(nkbz) !vz_i
  real(dp),intent(in) :: gmet(3,3),kbz(3,nkbz),wtk(nkbz)
  real(dp),intent(out) :: wtk_folded(nkbz)
- integer,optional,intent(out) :: bz2ibz_smap(6, nkbz)
+ integer,intent(out) :: bz2ibz_smap(6, nkbz)
 
 !Local variables -------------------------
 !scalars
@@ -132,8 +133,6 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  real(dp),allocatable :: length2(:)
 
 ! *********************************************************************
-
-
 
  if (timrev/=1 .and. timrev/=0) then
    write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
@@ -167,19 +166,19 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
  end do
 
  ! Initialize bz2ibz_smap
- if (present(bz2ibz_smap)) then
+ !if (present(bz2ibz_smap)) then
    bz2ibz_smap = 0
    do ikpt=1,nkbz
      bz2ibz_smap(1, ikpt) = ikpt
      bz2ibz_smap(2, ikpt) = 1
    end do
- end if
+ !end if
 
  ! Here begins the serious business
 
  ! If there is some possibility for a change (otherwise, wtk_folded is correctly initialized to give no change)
  if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
-   call cwtime(cpu, wall, gflops, "start")
+   !call cwtime(cpu, wall, gflops, "start")
 
    ! Store the length of vectors, but take into account umklapp
    ! processes by selecting the smallest length of all symmetric vectors
@@ -206,7 +205,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      end do
    end do
 
-   call cwtime_report("simkpt: length", cpu, wall, gflops)
+   !call cwtime_report("symkpt: length", cpu, wall, gflops)
 
    ! Sort the lengths
    ABI_ALLOCATE(list,(nkbz))
@@ -214,7 +213,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    call sort_dp(nkbz,length2,list,tol14)
    ! do ikpt=1,nkbz; write(std_out,*)ikpt,length2(ikpt),list(ikpt),kbz(1:3,list(ikpt)); end do
 
-   call cwtime_report("simkpt: sort", cpu, wall, gflops)
+   !call cwtime_report("symkpt: sort", cpu, wall, gflops)
 
    ! Examine whether the k point grid is symmetric or not
    ! This check scales badly with nkbz hence it's disabled for dense meshes.
@@ -328,7 +327,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
              wtk_folded(ind_ikpt) = wtk_folded(ind_ikpt) + wtk_folded(ind_ikpt2)
              wtk_folded(ind_ikpt2) = zero
 
-             if (present(bz2ibz_smap)) then
+             !if (present(bz2ibz_smap)) then
                ! Fill entries following listkk convention.
                bz2ibz_smap(1, ind_ikpt2) = ind_ikpt
                bz2ibz_smap(2, ind_ikpt2) = isym
@@ -339,7 +338,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
                !bz2ibz_smap(3:5, ind_ikpt2) = g0
                ii = 0; if (itim == -1) ii = 1
                bz2ibz_smap(6, ind_ikpt2) = ii
-             end if
+             !end if
 
              ! Go to the next ikpt2 if the symmetric was found
              quit = 1; exit
@@ -353,7 +352,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 
    ABI_DEALLOCATE(length2)
    ABI_DEALLOCATE(list)
-   call cwtime_report("simkpt: loop", cpu, wall, gflops)
+   !call cwtime_report("symkpt: loop", cpu, wall, gflops)
  end if ! End check on possibility of change
 
  ! Create the indexing array ibz2bz
@@ -368,7 +367,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
    end if
  end do
 
- if (present(bz2ibz_smap)) then
+ !if (present(bz2ibz_smap)) then
    ! bz2ibz_smap stores the index in the BZ. Here we replace the BZ index with the IBZ index.
    ierr = 0
    do ikpt=1,nkbz
@@ -380,7 +379,7 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
      end if
    end do
    ABI_CHECK(ierr == 0, "Error while remapping bz2ibz_smap array")
- end if
+ !end if
 
  ABI_FREE(bz2ibz_idx)
 

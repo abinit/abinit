@@ -237,7 +237,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kib
 
  ! TODO: In principle here we would like to have a set that contains the initial IBZ.
  call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, kbz, nkbz, new%nibz,&
-   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, bz2ibz_smap=new%bz2ibz_smap)
+   new%nsym_lg, new%symrec_lg, my_timrev0, wtk, wtk_folded, new%bz2ibz_smap, xmpi_comm_self)
 
  ABI_MALLOC(new%ibz, (3, new%nibz))
  ABI_MALLOC(new%weights, (new%nibz))
