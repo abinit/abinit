@@ -1018,9 +1018,9 @@ end subroutine mpi_setup
 !Local variables-------------------------------
 !scalars
 !128 should be a reasonable maximum for npfft (scaling is very poor for npfft>20)
- integer,parameter :: NPFMAX=128
+ integer,parameter :: NPFMAX=128,BLOCKSIZE_MAX=1000
  integer,parameter :: MAXCOUNT=250,MAXBENCH=25,NPF_CUTOFF=20
- integer :: bpp,bpp_max,bpp_min,optdriver,autoparal
+ integer :: bpp,bpp_max,bpp_min,optdriver,autoparal,nblocks,blocksize
  integer :: npi_max,npi_min,npc,npc_max,npc_min
  integer :: npk,npk_max,npk_min,npp_max,npp_min
  integer :: nps,nps_max,nps_min,npf,npf_max,npf_min
@@ -1028,9 +1028,8 @@ end subroutine mpi_setup
  integer :: work_size,nks_per_proc,tot_ncpus
  integer :: icount,ii,imin,jj,mcount,mcount_eff,mpw
  integer :: n2,n3,ncell_eff,ncount,nimage_eff,nkpt_eff,npert_eff
- integer :: nproc,nproc1,nprocmin,np_slk,use_linalg_gpu,omp_ncpus
- logical,parameter :: new_version=.true.
- logical :: dtset_found,file_found,first_bpp,iam_master
+ integer :: nproc,nproc1,nprocmin,np_slk,nthreads,use_linalg_gpu,omp_ncpus
+ logical :: algo_chebfi,algo_new_lobpcg,algo_old_lobpcg,dtset_found,file_found,first_bpp,iam_master
  real(dp):: acc_c,acc_k,acc_kgb,acc_kgb_0,acc_s,ecut_eff,ucvol,weight0
  real(dp):: eff
  character(len=9) :: suffix
@@ -1065,6 +1064,13 @@ end subroutine mpi_setup
  iam_master = (mpi_enreg%me==0)
  optdriver = dtset%optdriver
  max_ncpus = dtset%max_ncpus
+ algo_old_lobpcg= (dtset%wfoptalg==14)
+ algo_new_lobpcg= (dtset%wfoptalg==114)
+ algo_chebfi    = (dtset%wfoptalg==1)
+ if (algo_chebfi) then
+   message="autoparal not yet available for Chebyshev filtering algorithm (wfoptalg=1)!"
+   MSG_ERROR(message)
+ end if
 
  if (max_ncpus > 0 .and. autoparal/=0) then
    iexit = iexit + 1 ! will stop in the parent.
@@ -1080,7 +1086,7 @@ end subroutine mpi_setup
  !end if
 
  if (optdriver==RUNL_GSTATE .and. dtset%paral_kgb==0 .and. &
-& max_ncpus>0 .and. autoparal/=0) then
+&    max_ncpus>0 .and. autoparal/=0) then
    if (iam_master) then
      ! This corresponds to the simplest algorithm for GS (band-by-band CG)
      ! with distribution of k-points and spin.
@@ -1123,6 +1129,7 @@ end subroutine mpi_setup
 
 
  nproc=mpi_enreg%nproc
+ nthreads=xomp_get_max_threads()
  !if (xmpi_paral==1.and.dtset%paral_kgb <0) nproc=-dtset%paral_kgb
  if (max_ncpus > 0) nproc = dtset%max_ncpus
  !if (xmpi_paral==1.and.dtset%paral_kgb <0) nproc=dtset%max_ncpus
@@ -1143,7 +1150,7 @@ end subroutine mpi_setup
      return
    end if
    if ((dtset%optdriver/=RUNL_GSTATE.and.dtset%optdriver/=RUNL_RESPFN.and.dtset%optdriver/=RUNL_GWLS).or. &
-&   (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
+&      (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
      dtset%paral_kgb= 0
      dtset%npimage  = max(1,dtset%npimage)
      dtset%nppert   = max(1,dtset%nppert)
@@ -1240,12 +1247,13 @@ end subroutine mpi_setup
 
 !KGB Parallelization
 
-!>> FFT level
  npf_min=1;npf_max=1
  npb_min=1;npb_max=1
  bpp_min=1;bpp_max=1
  n2=0;n3=0
  if (dtset%optdriver==RUNL_GSTATE) then
+
+!  >> FFT level
    npf_min=max(1,dtset%npfft)
    npf_min=min(npf_min,ngmin(2))
    npf_max=min(nproc,NPFMAX)
@@ -1259,7 +1267,12 @@ end subroutine mpi_setup
      end if
    end if
    npf_max=min(npf_max,ngmin(2))
+   !Deactivate MPI FFT parallelism for GPU
    if (dtset%use_gpu_cuda==1) then
+     npf_min=1;npf_max=1
+   end if
+   !Deactivate MPI FFT parallelism for multi-threaded LOBPCG
+   if (algo_new_lobpcg.and.nthreads>1) then
      npf_min=1;npf_max=1
    end if
 
@@ -1311,9 +1324,11 @@ end subroutine mpi_setup
 
 !  >> banddp level
    bpp_min=max(1,dtset%bandpp)
-   bpp_max=max(4,nint(mband/10.)) ! reasonnable bandpp max
+   bpp_max=mband
+   if (algo_old_lobpcg) bpp_max=max(4,nint(mband/10.)) ! reasonnable bandpp max
    if (tread(8)==1) bpp_max=dtset%bandpp
- end if
+
+ end if ! RUNL_GSTATE
 
 !Disable KGB parallelisation in some cases:
 !  - no GS
@@ -1322,8 +1337,8 @@ end subroutine mpi_setup
 !  - Self-consistent DMFT
 !  - Hartree-Fock or hybrid calculation (for now on)
  if ( (optdriver/=RUNL_GSTATE) .or. (dtset%paral_kgb==0.and.tread(1)==1) .or. &
-& (dtset%nstep==0).or. (dtset%usedmft==1.and.dtset%nstep>1) .or. &
-& (dtset%usefock==1) ) then
+&     (dtset%nstep==0).or. (dtset%usedmft==1.and.dtset%nstep>1) .or. &
+&     (dtset%usefock==1) ) then
    nps_min=1; nps_max=1
    npf_min=1; npf_max=1
    npb_min=1; npb_max=1
@@ -1370,172 +1385,186 @@ end subroutine mpi_setup
 
 !Loop over all possibilities
 !Computation of weight~"estimated acceleration"
- if (new_version) then
 
-!  ======= NEW VERSION ========
-   do npc=npc_min,npc_max
-     acc_c=one;if (npc>1) acc_c=0.99_dp*speedup_fdp(ncell_eff,npc)
+ do npc=npc_min,npc_max
+   acc_c=one;if (npc>1) acc_c=0.99_dp*speedup_fdp(ncell_eff,npc)
 
-     do npk=npk_min,npk_max
-!      -> for DFPT runs, impose that nsppol divide npk
-       if (optdriver==RUNL_RESPFN.and.modulo(npk,dtset%nsppol)>0.and.npk>1) cycle
-       acc_k=one;if (npk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,npk)
+   do npk=npk_min,npk_max
+!    -> for DFPT runs, impose that nsppol divide npk
+     if (optdriver==RUNL_RESPFN.and.modulo(npk,dtset%nsppol)>0.and.npk>1) cycle
+     acc_k=one;if (npk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,npk)
 
-       do nps=nps_min,nps_max
-         acc_s=one;if (nps>1) acc_s=0.85_dp*speedup_fdp(dtset%nspinor,nps)
+     do nps=nps_min,nps_max
+       acc_s=one;if (nps>1) acc_s=0.85_dp*speedup_fdp(dtset%nspinor,nps)
 
-         do npf=npf_min,npf_max
-!          -> npf should divide ngfft if set (if unset, ngfft=0 so the modulo test is ok)
-           if((modulo(n2,npf)>0).or.(modulo(n3,npf)>0)) cycle
-!          -> npf should be only divisible by 2, 3 or 5
-           ii=npf
-           do while (modulo(ii,2)==0)
-             ii=ii/2
-           end do
-           do while (modulo(ii,3)==0)
-             ii=ii/3
-           end do
-           do while (modulo(ii,5)==0)
-             ii=ii/5
-           end do
-           if(ii/=1) cycle
+       do npf=npf_min,npf_max
+!        -> npf should divide ngfft if set (if unset, ngfft=0 so the modulo test is ok)
+         if((modulo(n2,npf)>0).or.(modulo(n3,npf)>0)) cycle
+!        -> npf should be only divisible by 2, 3 or 5
+         ii=npf
+         do while (modulo(ii,2)==0)
+           ii=ii/2
+         end do
+         do while (modulo(ii,3)==0)
+           ii=ii/3
+         end do
+         do while (modulo(ii,5)==0)
+           ii=ii/5
+         end do
+         if(ii/=1) cycle
 
-           do npb=npb_min,npb_max
-             nproc1=npc*npk*nps*npf*npb
-             if (nproc1<nprocmin)     cycle
-             if (nproc1>nproc)        cycle
-             if (modulo(mband,npb)>0) cycle
+         do npb=npb_min,npb_max
+           nproc1=npc*npk*nps*npf*npb
+           if (nproc1<nprocmin)     cycle
+           if (nproc1>nproc)        cycle
+           if (modulo(mband,npb)>0) cycle
 
-!            Base speedup
-             acc_kgb_0=one;if (npb*npf>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf))
+!          Base speedup
+           acc_kgb_0=one;if (npb*npf>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf))
 
-             if (npb*npf>4) then
-!              Promote npb=npf
-               acc_kgb_0=acc_kgb_0*min((one*npf)/(one*npb),(one*npb)/(one*npf))
-!              Promote npf<=20
-               if (npf>20)then
-                 acc_kgb_0=acc_kgb_0* &
+           if (npb*npf>4.and.algo_old_lobpcg) then
+!            Promote npb=npf
+             acc_kgb_0=acc_kgb_0*min((one*npf)/(one*npb),(one*npb)/(one*npf))
+!            Promote npf<=20
+             if (npf>20)then
+               acc_kgb_0=acc_kgb_0* &
 &                 0.2_dp+(one-0.2_dp)*(sin((pi*(npf-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))) &
 &                 /((pi*(npf-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))))**2
-               end if
              end if
+           end if
 
-             first_bpp=.true.
-             do bpp=bpp_min,bpp_max
+           first_bpp=.true.
+           do bpp=bpp_min,bpp_max
+
+             if (algo_new_lobpcg) then
+               if (modulo(bpp,nthreads)>0) cycle
+               if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
+               if (modulo(mband,npb*bpp)>0) cycle
+               blocksize=npb*bpp;nblocks=mband/blocksize
+             else if (algo_old_lobpcg) then
                if (modulo(mband/npb,bpp)>0) cycle
                if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
                if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
-               first_bpp=.false.
+               blocksize=npb*bpp;nblocks=mband/blocksize
+             else if (algo_chebfi) then
+             else
+               if (bpp/=1.or.npb/=1) cycle
+             end if
 
-               acc_kgb=acc_kgb_0
-!              Promote bpp*npb>mband/3
+             first_bpp=.false.
+
+             acc_kgb=acc_kgb_0
+!            OLD LOBPCG: promote bpp*npb>mband/3
+             if (algo_old_lobpcg) then
                if (npb*npf>4.and.mband>30) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
+             end if
+!            NEW LOBPCG: promote minimal number of blocks, promote block size <= BLOCKSIZE_MAX
+             if (algo_new_lobpcg) then
+               if( blocksize>BLOCKSIZE_MAX) acc_kgb=acc_kgb*max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX))
+               acc_kgb=acc_kgb*(one-0.9_dp*dble(nblocks-1)/dble(mband-1))
+             end if
 
-!              Resulting speedup
-!              weight0=acc_c*acc_k*acc_s*acc_kgb
-               weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
+!            Resulting speedup
+!            weight0=acc_c*acc_k*acc_s*acc_kgb
+             weight0=nproc1*(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
 
-!              Store data
-               icount=icount+1
-               if (icount<=MAXCOUNT) then
-                 my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                 weight(icount)=weight0
-                 if (weight0<weight(imin)) imin=icount
-               else
-                 if (weight0>weight(imin)) then
-                   my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                   weight(imin)=weight0
-                   idum=minloc(weight);imin=idum(1)
-                 end if
+!            Store data
+             icount=icount+1
+             if (icount<=MAXCOUNT) then
+               my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+               weight(icount)=weight0
+               if (weight0<weight(imin)) imin=icount
+             else
+               if (weight0>weight(imin)) then
+                 my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+                 weight(imin)=weight0
+                 idum=minloc(weight);imin=idum(1)
                end if
+             end if
 
-             end do ! bpp
-           end do ! npb
-         end do ! npf
-       end do ! nps
-     end do ! npk
-   end do ! npc
- else
+           end do ! bpp
+         end do ! npb
+       end do ! npf
+     end do ! nps
+   end do ! npk
+ end do ! npc
 
-!  ======= OLD VERSION ========
-   do npc=npc_min,npc_max
-     acc_c=one;if (npc>1) acc_c = 0.99_dp*ncell_eff/((ncell_eff+npc-1)/npc)
-
-     do npk=npk_min,npk_max
-       acc_k=one;if (npk>1) acc_k = 0.96_dp*nkpt_eff/((nkpt_eff+npk-1)/npk)
-
-       do nps=nps_min,nps_max
-         acc_s=one;if (nps>1) acc_s = 0.85_dp*dtset%nspinor/ ((dtset%nspinor+nps-1)/nps)
-
-         do npf=npf_min,npf_max
-!          -> npf should divide ngfft if set (if unset, ngfft=0 so the modulo test is ok)
-           if((modulo(n2,npf)>0).or.(modulo(n3,npf)>0)) cycle
-!          -> npf should be only divisible by 2, 3, 5, 7 or 11
-           npb=npf ! Note that here, npb is used as a temp var
-           do while (modulo(npb,2)==0)
-             npb=npb/2
-           end do
-           do while (modulo(npb,3)==0)
-             npb=npb/3
-           end do
-           do while (modulo(npb,5)==0)
-             npb=npb/5
-           end do
-           do while (modulo(npb,7)==0)
-             npb=npb/7
-           end do
-           do while (modulo(npb,11)==0)
-             npb=npb/11
-           end do
-           if(npb/=1) cycle
-
-           do npb=npb_min,npb_max
-             nproc1=npc*npk*nps*npf*npb
-             if (nproc1<nprocmin) cycle
-             if (nproc1>nproc) cycle
-             if(modulo(mband,npb)>0) cycle
-
-             do bpp=bpp_max,bpp_min,-1
-               if(modulo(mband/npb,bpp)>0) cycle
-               if((bpp>1).and.(modulo(bpp,2)>0)) cycle
-               if (1.*npb*bpp >max(1.,mband/3.)) cycle
-
-               acc_kgb=one
-               if (npb*npf>4) then
-                 acc_kgb=min((one*npf)/(one*npb),(one*npb)/(one*npf))  * &
-                 (mpw/(mpw/(npb*npf)))*(one-(three*bpp*npb)/mband)
-               else if (npb*npf >1) then
-                 acc_kgb=(mpw*mband/(mband*mpw/(npb*npf)))*0.7_dp
-               end if
-
-!              Weight average for efficiency and estimated acceleration
-               weight0=(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
-               weight0=weight0*nproc1
-
-!              Store data
-               icount=icount+1
-               if (icount<=MAXCOUNT) then
-                 my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                 weight(icount)=weight0
-                 if (weight0<weight(imin)) imin=icount
-               else
-                 if (weight0>weight(imin)) then
-                   my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
-                   weight(imin)=weight0
-                   idum=minloc(weight);imin=idum(1)
-                 end if
-               end if
-
-             end do ! bpp
-           end do ! npb
-         end do ! npf
-       end do ! nps
-     end do ! npk
-   end do ! npc
-
-!  New or old version
- end if
+! !  ======= OLD VERSION ========
+!    do npc=npc_min,npc_max
+!      acc_c=one;if (npc>1) acc_c = 0.99_dp*ncell_eff/((ncell_eff+npc-1)/npc)
+! 
+!      do npk=npk_min,npk_max
+!        acc_k=one;if (npk>1) acc_k = 0.96_dp*nkpt_eff/((nkpt_eff+npk-1)/npk)
+! 
+!        do nps=nps_min,nps_max
+!          acc_s=one;if (nps>1) acc_s = 0.85_dp*dtset%nspinor/ ((dtset%nspinor+nps-1)/nps)
+! 
+!          do npf=npf_min,npf_max
+! !          -> npf should divide ngfft if set (if unset, ngfft=0 so the modulo test is ok)
+!            if((modulo(n2,npf)>0).or.(modulo(n3,npf)>0)) cycle
+! !          -> npf should be only divisible by 2, 3, 5, 7 or 11
+!            npb=npf ! Note that here, npb is used as a temp var
+!            do while (modulo(npb,2)==0)
+!              npb=npb/2
+!            end do
+!            do while (modulo(npb,3)==0)
+!              npb=npb/3
+!            end do
+!            do while (modulo(npb,5)==0)
+!              npb=npb/5
+!            end do
+!            do while (modulo(npb,7)==0)
+!              npb=npb/7
+!            end do
+!            do while (modulo(npb,11)==0)
+!              npb=npb/11
+!            end do
+!            if(npb/=1) cycle
+! 
+!            do npb=npb_min,npb_max
+!              nproc1=npc*npk*nps*npf*npb
+!              if (nproc1<nprocmin) cycle
+!              if (nproc1>nproc) cycle
+!              if(modulo(mband,npb)>0) cycle
+! 
+!              do bpp=bpp_max,bpp_min,-1
+!                if(modulo(mband/npb,bpp)>0) cycle
+!                if((bpp>1).and.(modulo(bpp,2)>0)) cycle
+!                if (1.*npb*bpp >max(1.,mband/3.)) cycle
+! 
+!                acc_kgb=one
+!                if (npb*npf>4) then
+!                  acc_kgb=min((one*npf)/(one*npb),(one*npb)/(one*npf))  * &
+!                  (mpw/(mpw/(npb*npf)))*(one-(three*bpp*npb)/mband)
+!                else if (npb*npf >1) then
+!                  acc_kgb=(mpw*mband/(mband*mpw/(npb*npf)))*0.7_dp
+!                end if
+! 
+! !              Weight average for efficiency and estimated acceleration
+!                weight0=(acc_c+acc_k+acc_s+acc_kgb)/(npc+npk+nps+(npf*npb))
+!                weight0=weight0*nproc1
+! 
+! !              Store data
+!                icount=icount+1
+!                if (icount<=MAXCOUNT) then
+!                  my_distp(1:7,icount)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+!                  weight(icount)=weight0
+!                  if (weight0<weight(imin)) imin=icount
+!                else
+!                  if (weight0>weight(imin)) then
+!                    my_distp(1:7,imin)=(/npc,npk,nps,npf,npb,bpp,nproc1/)
+!                    weight(imin)=weight0
+!                    idum=minloc(weight);imin=idum(1)
+!                  end if
+!                end if
+! 
+!              end do ! bpp
+!            end do ! npb
+!          end do ! npf
+!        end do ! nps
+!      end do ! npk
+!    end do ! npc
 
  mcount_eff=icount
  mcount=min(mcount_eff,MAXCOUNT)
