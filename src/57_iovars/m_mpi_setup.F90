@@ -1018,15 +1018,16 @@ end subroutine mpi_setup
 !Local variables-------------------------------
 !scalars
 !128 should be a reasonable maximum for npfft (scaling is very poor for npfft>20)
- integer,parameter :: NPFMAX=128,BLOCKSIZE_MAX=1000
+ integer,parameter :: NPFMAX=128,BLOCKSIZE_MAX=3000
  integer,parameter :: MAXCOUNT=250,MAXBENCH=25,NPF_CUTOFF=20
+ real(dp),parameter :: relative_nband_range=0.15,relative_nproc_range=0.15
  integer :: bpp,bpp_max,bpp_min,optdriver,autoparal,nblocks,blocksize
  integer :: npi_max,npi_min,npc,npc_max,npc_min
  integer :: npk,npk_max,npk_min,npp_max,npp_min
  integer :: nps,nps_max,nps_min,npf,npf_max,npf_min
  integer :: npb,npb_max,npb_min,max_ncpus,ount
  integer :: work_size,nks_per_proc,tot_ncpus
- integer :: icount,ii,imin,jj,mcount,mcount_eff,mpw
+ integer :: ib1,ib2,ibest,icount,ii,imin,jj,kk,mcount,mcount_eff,mpw
  integer :: n2,n3,ncell_eff,ncount,nimage_eff,nkpt_eff,npert_eff
  integer :: nproc,nproc1,nprocmin,np_slk,nthreads,use_linalg_gpu,omp_ncpus
  logical :: algo_chebfi,algo_new_lobpcg,algo_old_lobpcg,dtset_found,file_found,first_bpp,iam_master
@@ -1038,7 +1039,7 @@ end subroutine mpi_setup
  type(hdr_type) :: hdr0
 !arrays
  integer :: idum(1),idum3(3),ngmax(3),ngmin(3)
- integer,allocatable :: isort(:),jdtset_(:),my_distp(:,:)
+ integer,allocatable :: isort(:),jdtset_(:),my_distp(:,:),nproc_best(:)
  integer,pointer :: nkpt_rbz(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: weight(:)
@@ -1351,27 +1352,6 @@ end subroutine mpi_setup
    bpp_min=1; bpp_max=1
  end if
 
-!Print title
- if (iam_master) then
-   if (optdriver==RUNL_GSTATE) then
-     write(message, '(8(a12,a1),a,8(i4,a4,i4,a1))' )  &
-     'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|', ch10, &
-     npi_min,' -> ',npi_max,'|',npk_min,' -> ',npk_max,'|',nps_min,' -> ',nps_max,'|', &
-     npf_min,' -> ',npf_max,'|',npb_min,' -> ',npb_max,'|',bpp_min,' -> ',bpp_max,'|', &
-     nprocmin,' -> ',nproc,'|', 1 ,' -> ',nproc,'|'
-   end if
-   if (optdriver==RUNL_RESPFN) then
-     write(message, '(4(a12,a1),a,4(i4,a4,i4,a1))' )  &
-     'nppert','|','npkpt','|','nproc','|','weight','|', ch10, &
-     npp_min,' -> ',npp_max,'|',      npk_min,' -> ',npk_max,'|', &
-     nprocmin,' -> ',nproc,'|', 1 ,' -> ',nproc,'|'
-   end if
-   call wrtout(std_out,message,'COLL')
-   if(max_ncpus>0) then
-     call wrtout(ab_out,message,'COLL')
-   end if
- end if
-
 !Allocate lists
  ABI_ALLOCATE(my_distp,(10,MAXCOUNT))
  ABI_ALLOCATE(weight,(MAXCOUNT))
@@ -1426,7 +1406,7 @@ end subroutine mpi_setup
            if (modulo(mband,npb)>0) cycle
 
 !          Base speedup
-           acc_kgb_0=one;if (npb*npf>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf))
+           acc_kgb_0=one;if (npb*npf*nthreads>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf*nthreads))
 
            if (npb*npf>4.and.algo_old_lobpcg) then
 !            Promote npb=npf
@@ -1466,17 +1446,15 @@ end subroutine mpi_setup
                if (npb*npf>4.and.mband>30) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
              end if
 !            NEW LOBPCG: promote minimal number of blocks
-!                        promote bandpp=nthreads
 !                        promote block size <= BLOCKSIZE_MAX
              if (algo_new_lobpcg) then
-               acc_kgb=acc_kgb*(one-min(0.1_dp,0.001_dp*bpp/nthreads))
                acc_kgb=acc_kgb*(one-0.9_dp*dble(nblocks-1)/dble(mband-1))
-               if( blocksize>BLOCKSIZE_MAX) acc_kgb=acc_kgb*max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX))
-               write(77,*) npb,bpp,&
-               & (one-min(0.2_dp,0.02_dp*bpp/nthreads)),&
-               & (one-0.9_dp*dble(nblocks-1)/dble(mband-1)),&
-               & merge(one,max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX)),blocksize>BLOCKSIZE_MAX)
-               flush(77)
+               if (blocksize>BLOCKSIZE_MAX) acc_kgb=acc_kgb*max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX))
+               !acc_kgb=acc_kgb*(one-min(0.1_dp,0.001_dp*bpp/nthreads))
+               !write(77,*) npb,bpp,&
+               !& (one-0.9_dp*dble(nblocks-1)/dble(mband-1)),&
+               !& merge(one,max(0.1_dp,one-dble(blocksize)/dble(10*BLOCKSIZE_MAX)),blocksize>BLOCKSIZE_MAX)
+               !flush(77)
              end if
 
 !            Resulting speedup
@@ -1583,6 +1561,7 @@ end subroutine mpi_setup
  mcount_eff=icount
  mcount=min(mcount_eff,MAXCOUNT)
 
+!Stop if no solution found
  if (mcount==0) then
    write(message,'(a,i0,2a,i0,a)')  &
    'Your input dataset does not let Abinit find an appropriate process distribution with nproc=',nproc,ch10, &
@@ -1598,7 +1577,7 @@ end subroutine mpi_setup
    dtset%bandpp   = max(1,dtset%bandpp)
    ABI_DEALLOCATE(my_distp)
    ABI_DEALLOCATE(weight)
-   return
+   if (max_ncpus<=0) return
  end if
 
 !* HF or hybrid calculation: no use of the fonction "autoparal"
@@ -1615,13 +1594,34 @@ end subroutine mpi_setup
    dtset%bandpp   = max(1,dtset%bandpp)
    ABI_DEALLOCATE(my_distp)
    ABI_DEALLOCATE(weight)
-   return
+   if (max_ncpus<=0) return
  end if
 
 !Sort data by increasing weight
  ABI_ALLOCATE(isort,(mcount))
  isort=(/(ii,ii=1,mcount)/)
  call sort_dp(mcount,weight,isort,tol6)
+
+!Print title
+ if (iam_master) then
+   if (optdriver==RUNL_GSTATE) then
+     write(message, '(8(a12,a1),a,8(i4,a4,i4,a1))' )  &
+     'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|', ch10, &
+     npi_min,' -> ',npi_max,'|',npk_min,' -> ',npk_max,'|',nps_min,' -> ',nps_max,'|', &
+     npf_min,' -> ',npf_max,'|',npb_min,' -> ',npb_max,'|',bpp_min,' -> ',bpp_max,'|', &
+     nprocmin,' -> ',nproc,'|', 1 ,' -> ',nproc,'|'
+   end if
+   if (optdriver==RUNL_RESPFN) then
+     write(message, '(4(a12,a1),a,4(i4,a4,i4,a1))' )  &
+     'nppert','|','npkpt','|','nproc','|','weight','|', ch10, &
+     npp_min,' -> ',npp_max,'|',      npk_min,' -> ',npk_max,'|', &
+     nprocmin,' -> ',nproc,'|', 1 ,' -> ',nproc,'|'
+   end if
+   call wrtout(std_out,message,'COLL')
+   if(max_ncpus>0) then
+     call wrtout(ab_out,message,'COLL')
+   end if
+ end if
 
  ncount=mcount;if (dtset%paral_kgb>=0) ncount=min(mcount,5)
  if (iam_master) then
@@ -1649,6 +1649,40 @@ end subroutine mpi_setup
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
+
+!Determine an optimal number of bands
+ ib1=mband-int(mband*relative_nband_range)
+ ib2=mband+int(mband*relative_nband_range)
+ ABI_ALLOCATE(nproc_best,(ib1:ib2))
+ nproc_best(:)=1
+ do ii=ib1,ib2
+   do jj=1,nproc
+     ibest=1
+     do kk=1,jj
+       if (mod(jj,kk)/=0) cycle
+       if (mod(ii,kk*nthreads)==0) ibest=max(ibest,kk)
+     end do
+     nproc_best(ii)=max(nproc_best(ii),ibest)
+   end do
+ end do
+ write(message,'(2a)')  ch10," Possible (best) choices for nband are:"
+ call wrtout(std_out,message,'COLL')
+ if(max_ncpus>0) call wrtout(ab_out,message,'COLL')
+ icount=-1
+ do ii=ib1,ib2
+   if (nproc_best(ii)>=nproc-int(relative_nproc_range*nproc)) then
+     write(message,'(a,i6,a,i6,a)') " nband=",ii," using ",nproc_best(ii)*nthreads," CPUs"
+     call wrtout(std_out,message,'COLL')
+     if(max_ncpus>0) call wrtout(ab_out,message,'COLL')
+     if (ii==mband) icount=nproc_best(ii)
+   end if
+ end do
+ if (icount==maxval(nproc_best(ib1:ib2))) then
+   write(message,'(a,i6,a)') " The present nband value (",mband,") seems to be the best choice!"
+   call wrtout(std_out,message,'COLL')
+   if(max_ncpus>0) call wrtout(ab_out,message,'COLL')
+ end if
+ ABI_DEALLOCATE(nproc_best)
 
  !if (iam_master .and. dtset%paral_kgb<0) then
  if (iam_master .and. max_ncpus>0) then
@@ -1795,10 +1829,10 @@ end subroutine mpi_setup
 
 !Final advice in case max_ncpus > 0
  if (max_ncpus>0) then
-   write(message,'(6a)') ch10,&
+   write(message,'(7a)') ch10,&
 &   ' Launch a parallel version of ABINIT with a number of processors among the above list,',ch10,&
 &   ' and the associated input variables npkpt, npband, npfft and bandpp. ',ch10,&
-&   ' The optimal weight is close to nproc and the higher should be better.'
+&   ' The optimal weight is close to nproc and the higher should be better.',ch10
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
    iexit=iexit+1
