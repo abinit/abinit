@@ -43,6 +43,7 @@ module m_sigmaph
  use m_pawcprj
  use m_wfd
  use m_skw
+ use m_kptrank
  use m_lgroup
  use m_ephwg
  use m_nctk
@@ -209,6 +210,9 @@ module m_sigmaph
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
+  !real(dp) :: bsum_elow, bsum_ehigh
+   ! min and Max energy included in sum of bands.
+
   real(dp) :: wr_step
    ! Step of the linear mesh along the real axis (Ha units).
 
@@ -280,11 +284,11 @@ module m_sigmaph
 
   integer,allocatable:: indkk_kq(:, :)
    ! (6, %nqibz_k))
-   ! Mapping k+q --> initial IBZ
+   ! Mapping k+q --> initial IBZ. Depends on ikcalc.
 
   integer,allocatable :: indq2dvdb(:,:)
    ! (6, sigma%nqibz_k))
-   ! Mapping qibz_k --> IBZ found in DVDB file.
+   ! Mapping qibz_k --> IBZ found in DVDB file. Depends on ikcalc.
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
@@ -536,7 +540,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3) !g0ibz_kq(3),
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
  real(dp) :: vk(2, 3), tsec(2)
@@ -587,24 +591,26 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  ! Use __EPH_NORESTART__ to deactivate this feature. Useful when debugging.
  restart = 0; ierr = 1
- !if (my_rank == master .and. dtset%eph_restart == 1) then
- if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
+ if (my_rank == master .and. dtset%eph_restart == 1) then
+ !if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
     sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
  end if
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 
- if (ierr == 0 .and. my_rank == master) then
-    if (any(sigma_restart%qp_done /= 1)) then
-      call sigmaph_comp(sigma,sigma_restart)
-      sigma%qp_done = sigma_restart%qp_done
-      call sigmaph_free(sigma_restart)
-      restart = 1
-      call wrtout(std_out, "- Restarting from previous SIGEPH.nc file")
-      call wrtout(ab_out, "- Restarting from previous SIGEPH.nc file")
-    else
-      restart = 0; sigma%qp_done = 0
-      MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
-    end if
+ if (my_rank == master .and. dtset%eph_restart == 1) then
+   if (ierr == 0) then
+     if (any(sigma_restart%qp_done /= 1)) then
+       call sigmaph_comp(sigma, sigma_restart)
+       sigma%qp_done = sigma_restart%qp_done
+       restart = 1
+       call wrtout(std_out, "- Restarting from previous SIGEPH.nc file")
+       call wrtout(ab_out, "- Restarting from previous SIGEPH.nc file")
+     else
+       restart = 0; sigma%qp_done = 0
+       MSG_COMMENT("Found SIGEPH.nc file with all QP entries already computed. Will overwrite file.")
+     end if
+   end if
+   call sigmaph_free(sigma_restart)
  end if
 
  call xmpi_bcast(restart, master, comm, ierr)
@@ -648,22 +654,22 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do
 
  if (sigma%imag_only .and. sigma%qint_method == 1 .and. .not. sigma%use_doublegrid) then
- ! TODO: Still under testing --> SIGSEGV
-if (dtset%userie == 123) then
-   MSG_WARNING("Including limited set of states within energy window around bdgw states")
-   do spin=1,sigma%nsppol
-     do ik_ibz=1,ebands%nkpt
-       do band=sigma%my_bstart, sigma%my_bstop
-         eig0mk = ebands%eig(band, ik_ibz, spin)
-         if (eig0mk >= elow - ten * sigma%wmax .and. eig0mk <= ehigh + ten * sigma%wmax) then
-            bks_mask(band, ik_ibz ,spin) = .True.
-         end if
-       end do
-     end do
-   end do
-else
-   bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
-endif
+   ! TODO: Still under testing --> SIGSEGV
+   if (dtset%userie == 123) then
+      MSG_WARNING("Including limited set of states within energy window around bdgw states")
+      do spin=1,sigma%nsppol
+        do ik_ibz=1,ebands%nkpt
+          do band=sigma%my_bstart, sigma%my_bstop
+            eig0mk = ebands%eig(band, ik_ibz, spin)
+            if (eig0mk >= elow - ten * sigma%wmax .and. eig0mk <= ehigh + ten * sigma%wmax) then
+               bks_mask(band, ik_ibz ,spin) = .True.
+            end if
+          end do
+        end do
+      end do
+   else
+      bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
+   end if
  else
    bks_mask(sigma%my_bstart:sigma%my_bstop, : ,:) = .True.
  endif
@@ -794,6 +800,13 @@ endif
  !dvdb%symv1 = .False.
  if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
+ ABI_CALLOC(qselect, (dvdb%nqpt))
+ qselect = 1
+ !if (sigma%imag_only .and. sigma%qint_method == 1 .and. .not. sigma%use_doublegrid) then
+ if (sigma%imag_only .and. sigma%qint_method == 1) then
+   call qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
+ end if
+
  ! Set cache in Mb for q-points.
  ! When we ask for a qpt in the BZ the code checks whether the IBZ image is in the cache.
  ! and if we have a cache hit we "rotate" the qibz in the cache to return V(qbz) else the code reads qibz and rotates.
@@ -803,7 +816,9 @@ endif
  ! This is also the reason why we reorder the q-points in ibz_k to pack the points in *shells* to minimise cache misses.
  call dvdb%set_qcache_mb(ngfftf, dtset%dvdb_qcache_mb)
  call dvdb%print(prtvol=dtset%prtvol)
- call dvdb%qcache_read(nfftf, ngfftf, comm)
+ call dvdb%qcache_read(nfftf, ngfftf, qselect, comm)
+
+ ABI_FREE(qselect)
 
  ABI_MALLOC(displ_cart, (2,3,cryst%natom,3*cryst%natom))
  ABI_MALLOC(displ_red, (2,3,cryst%natom,3*cryst%natom))
@@ -2025,7 +2040,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! TODO: One should be consistent with tolerances when using tetra + q-point filtering.
  !if (new%qint_method == 1) new%wmax = new%wmax + five * dtset%zcut
  !new%wmax = new%wmax + five * dtset%zcut
- write(std_out,*)"wmax:", new%wmax * Ha_eV, " (eV)"
+ !write(std_out,*)"wmax:", new%wmax * Ha_eV, " (eV)"
 
  if (new%imag_only) then
 
@@ -2043,8 +2058,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      do ikcalc=1,new%nkcalc
        ik_ibz = new%kcalc2ibz(ikcalc, 1)
        do spin=1,new%nsppol
-         bstart = new%bstart_ks(ikcalc,spin)
-         bstop = new%bstart_ks(ikcalc,spin) + new%nbcalc_ks(ikcalc,spin) - 1
+         bstart = new%bstart_ks(ikcalc, spin)
+         bstop = new%bstart_ks(ikcalc, spin) + new%nbcalc_ks(ikcalc, spin) - 1
          ehigh = max(ehigh, maxval(ebands%eig(bstart:bstop, ik_ibz, spin)) + new%wmax)
          elow = min(elow, minval(ebands%eig(bstart:bstop, ik_ibz, spin)) - new%wmax)
        end do
@@ -2411,10 +2426,10 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
 
    ! Check if a previous netcdf file is present and restart the calculation
    if (restart == 1) then
-       NCF_CHECK(nctk_open_modify(self%ncid, path, xmpi_comm_self))
+     NCF_CHECK(nctk_open_modify(self%ncid, path, xmpi_comm_self))
    else
-       ! Master creates the netcdf file used to store the results of the calculation.
-       NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
+    ! Master creates the netcdf file used to store the results of the calculation.
+    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    endif
 
    ncid = self%ncid
@@ -2550,6 +2565,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
    if (self%gfw_nomega > 0) then
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gfw_mesh"), self%gfw_mesh))
    end if
+   !NCF_CHECK(nf90_sync(ncid))
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
@@ -2620,7 +2636,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  ierr = 0
 
  path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
- if (.not.file_exists(path)) then
+ if (.not. file_exists(path)) then
     ierr = 1; return
  end if
  NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
@@ -3183,6 +3199,10 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, spin, ikcalc, prtvol,
 
        ! Recompute weights with new q-point distribution.
        call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
+
+       ! TODO: make sure each node has the q-points we need.
+       ! Perform collective IO if needed.
+       !call dvdb%qcache_read(nfftf, ngfftf, qselect, comm)
      end if ! qfilter
    end if
 
@@ -4146,6 +4166,139 @@ subroutine eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  call cwtime_report(" Frohlich self-energy", cpu_fr, wall_fr, gflops_fr)
 
 end subroutine eval_sigfrohl
+!!***
+
+!!****f* m_sigmaph/qpoints_oracle
+!! NAME
+!!  qpoints_oracle
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
+
+!Arguments ------------------------------------
+ type(sigmaph_t),intent(in) :: sigma
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ type(dvdb_t),intent(in) :: dvdb
+ integer,intent(out) :: qselect(dvdb%nqpt)
+ integer,intent(in) :: comm
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: timrev1=1
+ integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
+ integer :: cnt, my_rank, nprocs, ib_k, band_ks !, nbcalc_ks, bstart_ks
+ integer :: nkibz, nkbz, kq_rank
+ real(dp) :: eig0nk, eig0mkq, dksqmax, ediff
+ !real(dp) :: cpu, wall, gflops
+ character(len=500) :: msg
+ type(kptrank_type) :: kptrank
+!arrays
+ integer,allocatable :: qbz_count(:), qbz2dvdb(:,:), bz2ibz(:,:)
+ real(dp) :: kq(3), kk(3) !, qpt(3)
+ real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ ! Get full BZ associated to ebands
+ call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
+   nkibz, kibz, wtk, nkbz, kbz)
+
+ ABI_FREE(wtk)
+ ABI_FREE(kibz)
+ ABI_CHECK(nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
+
+ !call getkgrid(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
+ !  cryst%nsym,0,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,cryst%symrel,vacuum0,wtk)
+
+ ! Build BZ --> IBZ mapping using symrec.
+ ABI_MALLOC(bz2ibz, (nkbz, 6))
+ call listkk(dksqmax, cryst%gmet, bz2ibz, ebands%kptns, kbz, ebands%nkpt, nkbz, cryst%nsym, &
+      1, cryst%symafm, cryst%symrec, sigma%timrev, comm, use_symrec=.True.)
+ if (dksqmax > tol12) then
+   write(msg, '(a,es16.6)' ) &
+    "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
+   MSG_ERROR(msg)
+ end if
+
+ ! Make full k-point rank arrays
+ call mkkptrank(kbz, nkbz, kptrank)
+ ABI_FREE(kbz)
+
+ ABI_ICALLOC(qbz_count, (sigma%nqbz))
+ cnt = 0
+ do spin=1,sigma%nsppol
+   do ikcalc=1,sigma%nkcalc
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism
+     kk = sigma%kcalc(:, ikcalc)
+     ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
+     !bstart = sigma%bstart_ks(ikcalc, spin)
+     !bstop = sigma%bstart_ks(ikcalc, spin) + sigma%nbcalc_ks(ikcalc, spin) - 1
+     do iq_bz=1,sigma%nqbz
+       ! No need to check this q-point again.
+       if (qbz_count(iq_bz) /= 0) cycle
+       kq = kk + sigma%qbz(:, iq_bz)
+       call get_rank_1kpt(kq, kq_rank, kptrank)
+       ikq_bz = kptrank%invrank(kq_rank)
+       if (ikq_bz < 1) then
+         MSG_ERROR(sjoin("Cannot find kq: ", ktoa(kq)))
+       end if
+       ikq_ibz = bz2ibz(ikq_bz, 1)
+       do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
+         band_ks = ib_k + sigma%bstart_ks(ikcalc, spin) - 1
+         eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+         do ibsum_kq=sigma%bsum_start, sigma%bsum_stop
+           eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
+           ediff = eig0nk - eig0mkq
+           ! Perform check on the energy difference to exclude this q-point.
+           !if (eig0mk >= sigma%elow - ten * sigma%wmax .and. eig0mk <= sigma%ehigh + ten * sigma%wmax) then
+           !  qbz_count(iq_bz) = qbz_count(iq_bz) + 1
+           !end if
+         end do
+       end do
+     end do
+   end do
+ end do
+
+ call destroy_kptrank(kptrank)
+
+ call xmpi_sum(qbz_count, comm, ierr)
+
+ ! Get mapping QBZ --> DVDB q-points.
+ ABI_MALLOC(qbz2dvdb, (sigma%nqbz, 6))
+ call listkk(dksqmax, cryst%gmet, qbz2dvdb, dvdb%qpts, sigma%qbz, dvdb%nqpt, sigma%nqbz, cryst%nsym, &
+      1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
+ if (dksqmax > tol12) then
+   write(msg, '(a,es16.6,2a)' )&
+     "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
+     'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
+   MSG_ERROR(msg)
+ end if
+
+ ! Compute qselect using qbz2dvdb.
+ qselect = 0
+ do iq_bz=1,sigma%nqbz
+   if (qbz_count(iq_bz) == 0) cycle
+   db_iqpt = qbz2dvdb(1, iq_bz)
+   qselect(db_iqpt) = qselect(db_iqpt) + 1
+ end do
+
+ ABI_FREE(qbz_count)
+ ABI_FREE(qbz2dvdb)
+ ABI_FREE(bz2ibz)
+
+ write(std_out, "(a, i0, a)")"qpoints_oracle: calculation of tau will need: ", count(qselect /= 0), " q-points."
+
+end subroutine qpoints_oracle
 !!***
 
 end module m_sigmaph

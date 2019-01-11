@@ -19584,4 +19584,20 @@ A q-point is considered in the sum if both the tetrahedron weight for phonon abs
 """,
 ),
 
+Variable(
+    abivarname="eph_restart",
+    varset="eph",
+    topics=['ElPhonInt_basic'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    mnemonics="EPH RESTART.",
+    text=r"""
+This variable can be used to restart an EPH calculation.
+At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4).
+In this case, the code will look for a pre-existing SIGEPH.nc file and will compute the remaining k-points
+provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
+""",
+),
+
 ]

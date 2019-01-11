@@ -428,7 +428,7 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
 !    Loop on the symmetries
 !    For each k-point and each symmetry transformation, a matching
-!    k-pointpt must be found, modulo time reversal if appropriate
+!    k-point must be found, modulo time reversal if appropriate
      do isym=1,nsym
 
 !      Get the symmetric of the vector
@@ -915,7 +915,7 @@ end subroutine listkk
 !! kptrlatt(3,3)=k-point lattice specification
 !! nshiftk=actual number of k-point shifts in shiftk
 !! shiftk(3,MAX_NSHIFTK)=shift vectors for k point generation
-!! [nkpthf = number of k points in the full BZ, for the Fock operator]
+!! [nkpthf] = number of k points in the full BZ, for the Fock operator.
 !!
 !! PARENTS
 !!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts

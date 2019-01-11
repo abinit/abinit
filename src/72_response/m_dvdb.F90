@@ -1431,8 +1431,7 @@ subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
 ! *************************************************************************
 
  if (abs(mbsize) < tol3) then
-   db%qcache_size = 0
-   return
+   db%qcache_size = 0; return
  end if
 
  onepot_mb = two * product(ngfftf(1:3)) * db%nspden * QCACHE_KIND * b2Mb
@@ -1444,9 +1443,9 @@ subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
 
- call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
- call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
@@ -1466,6 +1465,7 @@ end subroutine dvdb_set_qcache_mb
 !! INPUTS
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  qselect(%nqpt)=0 to ignore this q-point when reading.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -1476,18 +1476,18 @@ end subroutine dvdb_set_qcache_mb
 !!
 !! SOURCE
 
-subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
+subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,comm
  class(dvdb_t),intent(inout) :: db
 !arrays
- integer,intent(in) :: ngfft(18)
+ integer,intent(in) :: ngfft(18), qselect(db%nqpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex, ierr, imyp, ipc
+ integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -1504,8 +1504,17 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  do db_iqpt=1,db%nqpt
-   if (db_iqpt > db%qcache_size) exit
-   call cwtime(cpu, wall, gflops, "start")
+   if (qselect(db_iqpt) == 0) cycle
+
+   ! Exit when we reach qcache_size
+   qcnt = 0
+   do ii=1,db%nqpt
+     if (allocated(db%qcache(ii)%v1scf)) qcnt = qcnt + 1
+   end do
+   if (qcnt >= db%qcache_size) exit
+
+   !if (db_iqpt > db%qcache_size) exit
+   if (mod(db_iqpt, 10) == 1) call cwtime(cpu, wall, gflops, "start")
 
    ! Read all 3*natom potentials inside comm
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)

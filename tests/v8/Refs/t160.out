@@ -127,6 +127,7 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       eph_intmeth3          1
       eph_intmeth4          2
       eph_intmeth5          2
+      eph_restart           1
          eph_task1          4
          eph_task2          5
          eph_task3          4
@@ -1144,6 +1145,7 @@ Interpolation of the electron-phonon coupling potential completed
       eph_intmeth3          1
       eph_intmeth4          2
       eph_intmeth5          2
+      eph_restart           1
          eph_task1          4
          eph_task2          5
          eph_task3          4

@@ -36,6 +36,9 @@ nband      20
 symsigma  1
 tmesh 0 300 2
 
+# This just to test (part of) the restart code
+eph_restart 1
+
 ############
 # DATASET 1
 ############
