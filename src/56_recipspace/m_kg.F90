@@ -1040,8 +1040,6 @@ end subroutine mkkpg
 !! indkk_f2ibz(fnkpt,6)=information on folding from FBZ to IBZ (see initberry or initorbmag)
 !! ikpt=index of bra k pt in FBZ
 !! ikpt1=index of neighbour ket k pt in FBZ
-!! kg(3,dtset%mpw*dtset%mkmem)=planewave basis data
-!! kgindex(dtset%nkpt)= index of kg per kpt
 !! mpi_enreg=information about MPI parallelization
 !! npwarr(dtset%nkpt)=npw at each kpt
 !! symrec(3,3,nsym) = symmetries in reciprocal space in terms of
@@ -1065,7 +1063,7 @@ end subroutine mkkpg
 !! SOURCE
 
 subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
-& kg,kgindex,mpi_enreg,npwarr,pwind_k1,symrec)
+& mpi_enreg,npwarr,pwind_k1,symrec)
 
   !Arguments ------------------------------------
   !scalars
@@ -1074,7 +1072,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   type(MPI_type), intent(inout) :: mpi_enreg
 
   !arrays
-  integer,intent(in) :: indkk_f2ibz(fnkpt,6),kg(3,dtset%mpw*dtset%mkmem),kgindex(dtset%nkpt)
+  integer,intent(in) :: indkk_f2ibz(fnkpt,6)
   integer,intent(in) :: npwarr(dtset%nkpt)
   integer,intent(in) :: symrec(3,3,dtset%nsym)
   integer,intent(out) :: pwind_k1(dtset%mpw)
@@ -1086,8 +1084,8 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   real(dp) :: ecut_eff
 
   !arrays
-  integer,allocatable :: kg1_k(:,:)
-  real(dp) :: dg(3),dum33(3,3),kpt1(3),iadum(3),iadum1(3)
+  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
+  real(dp) :: dg(3),dum33(3,3),kpt(3),kpt1(3),iadum(3),iadum1(3)
 
   ! ***********************************************************************
 
@@ -1095,6 +1093,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   ikpt1i = indkk_f2ibz(ikpt1,1)
 
   ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
+  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
 
   ecut_eff = dtset%ecut*(dtset%dilatmx)**2
   exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
@@ -1104,6 +1103,10 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   kg1_k(:,:) = 0
   kpt1(:) = dtset%kptns(:,ikpt1i)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
+
+  kg_k(:,:) = 0
+  kpt(:) = dtset%kptns(:,ikpti)
+  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
   !
   !        Deal with symmetry transformations
@@ -1144,7 +1147,9 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 
      !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
      !          not for the FBZ k point
-     iadum(:) = kg(:,kgindex(ikpti) + ipw)
+
+     ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
+     iadum(:) = kg_k(:,ipw)
 
      !          to determine r.l.v. matchings, we transformed the bra vector
      !          Rotation
