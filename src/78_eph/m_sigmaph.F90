@@ -2566,13 +2566,13 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gfw_mesh"), self%gfw_mesh))
    end if
    !NCF_CHECK(nf90_sync(ncid))
-   NCF_CHECK(nf90_close(ncid))
+   !NCF_CHECK(nf90_close(ncid))
  end if ! master
 
- ! Now reopen the file (note xmpi_comm_self --> only master writes)
- call xmpi_barrier(comm)
- NCF_CHECK(nctk_open_modify(self%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
- NCF_CHECK(nctk_set_datamode(self%ncid))
+ ! Now reopen the file (note xmpi_comm_self)
+ !call xmpi_barrier(comm)
+ !NCF_CHECK(nctk_open_modify(self%ncid, strcat(dtfil%filnam_ds(4), "_SIGEPH.nc"), xmpi_comm_self))
+ !NCF_CHECK(nctk_set_datamode(self%ncid))
 #endif
 
  call edos%free()
@@ -2627,7 +2627,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 !arrays
  integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
  integer :: eph_ngqpt_fine(3), ddb_ngqpt(3), ph_ngqpt(3), sigma_ngkpt(3), frohl_params(4)
- !real(dp) :: sigma_erange(2)
+ real(dp) :: sigma_erange(2)
 
 ! *************************************************************************
 
@@ -2649,13 +2649,13 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  !NCF_CHECK(ebands_ncread(ebands, ncid))
 
  ! Read sigma_eph dimensions.
- NCF_CHECK(nctk_get_dim(ncid,"nkcalc",new%nkcalc))
- NCF_CHECK(nctk_get_dim(ncid,"max_nbcalc", new%max_nbcalc))
- NCF_CHECK(nctk_get_dim(ncid,"nsppol", new%nsppol))
- NCF_CHECK(nctk_get_dim(ncid,"ntemp", new%ntemp))
- !NCF_CHECK(nctk_get_dim(ncid,"natom3", natom3))
- NCF_CHECK(nctk_get_dim(ncid,"nqibz", new%nqibz))
- NCF_CHECK(nctk_get_dim(ncid,"nqbz", new%nqbz))
+ NCF_CHECK(nctk_get_dim(ncid, "nkcalc", new%nkcalc))
+ NCF_CHECK(nctk_get_dim(ncid, "max_nbcalc", new%max_nbcalc))
+ NCF_CHECK(nctk_get_dim(ncid, "nsppol", new%nsppol))
+ NCF_CHECK(nctk_get_dim(ncid, "ntemp", new%ntemp))
+ !NCF_CHECK(nctk_get_dim(ncid, "natom3", natom3))
+ NCF_CHECK(nctk_get_dim(ncid, "nqibz", new%nqibz))
+ NCF_CHECK(nctk_get_dim(ncid, "nqbz", new%nqbz))
 
  !NCF_CHECK(nctk_get_dim(ncid,"nwr", new%nwr))
  !NCF_CHECK(nctk_get_dim(ncid,"gfw_nomega", new%gfw_nomega))
@@ -2701,12 +2701,12 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  ! ============================================================
  ! Read and check consistency against dtset
  ! ============================================================
- NCF_CHECK(nf90_get_var(ncid, vid("eph_fsewin"),eph_fsewin))
- NCF_CHECK(nf90_get_var(ncid, vid("eph_fsmear"),eph_fsmear))
- NCF_CHECK(nf90_get_var(ncid, vid("eph_extrael"),eph_extrael))
- NCF_CHECK(nf90_get_var(ncid, vid("eph_fermie"),eph_fermie))
- NCF_CHECK(nf90_get_var(ncid, vid("ph_wstep"),ph_wstep))
- NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"),ph_smear))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_fsewin"), eph_fsewin))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_fsmear"), eph_fsmear))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_extrael"), eph_extrael))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_fermie"), eph_fermie))
+ NCF_CHECK(nf90_get_var(ncid, vid("ph_wstep"), ph_wstep))
+ NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"), ph_smear))
  ABI_CHECK(eph_fsewin  == dtset%eph_fsewin,  "netcdf eph_fsewin != input file")
  ABI_CHECK(eph_fsmear  == dtset%eph_fsmear,  "netcdf eph_fsmear != input file")
  ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
@@ -2714,11 +2714,11 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  ABI_CHECK(ph_wstep    == dtset%ph_wstep,    "netcdf ph_wstep != input file")
  ABI_CHECK(ph_smear    == dtset%ph_smear,    "netcdf ph_smear != input file")
 
- NCF_CHECK(nf90_get_var(ncid, vid("eph_task"),eph_task))
- NCF_CHECK(nf90_get_var(ncid, vid("symdynmat"),symdynmat))
- NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"),ph_intmeth))
- NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"),eph_intmeth))
- NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"),eph_transport))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_task"), eph_task))
+ NCF_CHECK(nf90_get_var(ncid, vid("symdynmat"), symdynmat))
+ NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"), ph_intmeth))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"), eph_intmeth))
+ NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"), eph_transport))
  ABI_CHECK(eph_task      == dtset%eph_task,     "netcdf eph_task != input file")
  ABI_CHECK(symdynmat     == dtset%symdynmat,    "netcdf symdynmat != input file")
  ABI_CHECK(ph_intmeth    == dtset%ph_intmeth,   "netcdf ph_intmeth != input file")
@@ -2730,17 +2730,15 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  NCF_CHECK(nf90_get_var(ncid, vid("ph_ngqpt"), ph_ngqpt))
  NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
  NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
+ NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
+ NCF_CHECK(nf90_close(ncid))
+
  ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),"netcdf eph_ngqpt_fine != input file")
  ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     "netcdf ddb_ngqpt != input file")
  ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      "netcdf ph_ngqpt != input file")
  ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
- ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6),  "netcdf frohl_params != input file")
-
- !NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
- ! This can lead SIGFPE if huge...
- !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
-
- NCF_CHECK(nf90_close(ncid))
+ ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6), "netcdf frohl_params != input file")
+ ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
 
 contains
  integer function vid(vname)
