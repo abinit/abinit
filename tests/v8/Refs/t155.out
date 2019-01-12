@@ -524,6 +524,7 @@ From bmin: 1 to bmax: 7
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: tetrahedron method
+Tolerance for integration weights <     3.703704E-14     3.703704E-14
 Using double grid technique with ndiv: 27
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]
@@ -936,6 +937,7 @@ From bmin: 1 to bmax: 7
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: tetrahedron method
+Tolerance for integration weights <     3.703704E-14     3.703704E-14
 Using double grid technique with ndiv: 27
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 0 , Step: 0.000 [eV]

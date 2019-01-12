@@ -300,7 +300,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 !scalars
  integer :: iat,indx,itypat,pinv,isym,nsym_noI
  real(dp) :: tolsym8,ucvol
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: symrec(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)

@@ -817,7 +817,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 !scalars
  integer,parameter :: nfft0=0,mpw0=0,ikg0=0
  integer :: ig,ik_ibz,spin,band,mpw,exchn2n3d,istwf_k,npw_k,iatom,itypat,iat !,how_manyb
- real(dp) :: ug_size,ur_size,cprj_size,gsq,g1,g2,g3
+ real(dp) :: ug_size,ur_size,cprj_size,gsq
  logical :: iscompatibleFFT
  character(len=500) :: msg
 !arrays

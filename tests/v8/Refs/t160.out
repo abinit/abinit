@@ -911,6 +911,7 @@ From bmin: 1 to bmax: 9
 Symsigma: 1 Timrev: 1
 Imaginary shift in the denominator (zcut): 0.100 [eV]
 Method for q-space integration: tetrahedron method
+Tolerance for integration weights <     1.000000E-12     1.000000E-12
 Only the Imaginary part of Sigma will be computed.
 Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
 Number of frequency in generalized Eliashberg functions: 841
