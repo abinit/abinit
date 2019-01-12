@@ -477,7 +477,7 @@ end subroutine gaps_free
 !!
 !! SOURCE
 
-subroutine gaps_print(gaps,header,unit,mode_paral)
+subroutine gaps_print(gaps, header, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars

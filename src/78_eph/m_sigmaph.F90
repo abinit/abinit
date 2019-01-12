@@ -4334,15 +4334,13 @@ subroutine find_kpoints(dtset, cryst, ebands, comm)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ii, my_rank, nprocs, nkibz_fine, nkbz_fine, spin, ikf_ibz, cnt, band, ierr, skw_cplex
- !integer :: onk
- real(dp) :: ee
+ integer :: ii, my_rank, nprocs, nkibz_fine, nkbz_fine, spin, ikf_ibz, cnt, band, ierr, skw_cplex !, onk
+ real(dp) :: cmin, vmax, ee
  !character(len=500) :: msg
  type(skw_t) :: skw
 !arrays
  integer :: kptrlatt_fine(3,3) !, skw_band_block(2)
  integer,allocatable :: kfine_imask(:), k2ibz(:)
- !real(dp) :: kq(3), kk(3)
  real(dp):: params(4)
  real(dp),allocatable :: wtk_fine(:), kibz_fine(:,:), kbz_fine(:,:)
 
@@ -4383,6 +4381,9 @@ subroutine find_kpoints(dtset, cryst, ebands, comm)
 
  cnt = 0
  do spin=1,ebands%nsppol
+   ! Get cmb and vbm with some tolerance
+   !vmax = gaps%vb_max(spin) + tol2 * eV_Ha
+   !cmin = gaps%cb_min(spin) - tol2 * eV_Ha
    do ikf_ibz=1,nkibz_fine
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
      do band=1,ebands%mband

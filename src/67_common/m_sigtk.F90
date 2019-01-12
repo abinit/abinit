@@ -31,6 +31,7 @@ module m_sigtk
  use m_errors
  use m_ebands
  use m_crystal
+ use m_xmpi
 
  use m_fstrings,     only : sjoin, ltoa
  use defs_datatypes, only : ebands_t
@@ -358,7 +359,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
 !Local variables ------------------------------
 !scalars
- integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz
+ integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz, my_rank
  logical :: found
  real(dp) :: cmin, vmax, ee, dksqmax
  character(len=500) :: msg
@@ -370,11 +371,17 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
 ! *************************************************************************
 
- call wrtout(std_out, " Selecting k-points and bands according to their position wrt band edges.")
+ my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
+ if (my_rank == 0) then
+   write(std_out, "(a)")" Selecting k-points and bands according to their position wrt band edges (sigma_erange)."
+   !call gaps%print()
+   write(std_out, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+ end if
+
  ABI_CHECK(maxval(gaps%ierr) == 0, "erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  if (any(dtset%sigma_ngkpt /= 0)) then
-    call wrtout(std_out, sjoin("Generating initial list of k-points from sigma_nkpt.", ltoa(dtset%sigma_ngkpt)))
+    call wrtout(std_out, sjoin(" Generating initial list of k-points from sigma_nkpt.", ltoa(dtset%sigma_ngkpt)))
     ! Get tentative tmp_nkpt and tmp_kcalc from sigma_ngkpt.
     kptrlatt = 0
     kptrlatt(1,1) = dtset%sigma_ngkpt(1); kptrlatt(2,2) = dtset%sigma_ngkpt(2); kptrlatt(3,3) = dtset%sigma_ngkpt(3)
@@ -402,11 +409,11 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     ABI_FREE(indkk)
  else
    ! Include all the k-points in the IBZ in the initial list.
-   call wrtout(std_out, "Generating initial list of k-points from input ebands%kptns.")
+   call wrtout(std_out, " Generating initial list of k-points from input ebands%kptns.")
    tmp_nkpt = ebands%nkpt
    ! Trivial map
    ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
-   sigmak2ebands = [ii, (ii, ii=1, ebands%nkpt)]
+   sigmak2ebands = [(ii, ii=1, ebands%nkpt)]
  end if
 
  nsppol = ebands%nsppol
@@ -417,24 +424,24 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    vmax = gaps%vb_max(spin) + tol2 * eV_Ha
    cmin = gaps%cb_min(spin) - tol2 * eV_Ha
    do ii=1,tmp_nkpt
-     ! Index in ebands.
+     ! Index of k-point in ebands.
      ik = sigmak2ebands(ii)
      ib_work(1, ii, spin) = huge(1)
      ib_work(2, ii, spin) = -huge(1)
-     do band=1,ebands%nband(ik+(spin-1)*ebands%nkpt)
+     do band=1,ebands%nband(ik + (spin-1) * ebands%nkpt)
         ee = ebands%eig(band, ik, spin)
         if (dtset%sigma_erange(1) > zero) then
           if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
             ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
             ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)
-            !write(std_out, *), "Adding valence", band
+            !write(std_out, *), "Adding valence band", band, " with ee [eV]: ", ee * Ha_eV
           end if
         end if
         if (dtset%sigma_erange(2) > zero) then
           if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
             ib_work(1, ii, spin) = min(ib_work(1, ii, spin), band)
             ib_work(2, ii, spin) = max(ib_work(2, ii, spin), band)
-            !write(std_out, *)"Adding conduction", band
+            !write(std_out, *)"Adding conduction band", band, " with ee [eV]: ", ee * Ha_eV
           end if
         end if
      end do
@@ -481,9 +488,11 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    end do
  end do
 
- write(msg, "(a, i0, a, 2(f6.3, 1x), a)")&
+ if (my_rank == 0) then
+   write(std_out, "(a, i0, a, 2(f6.3, 1x), a)")&
    " Found ", nkcalc, " k-points within erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
- call wrtout(std_out, msg)
+   write(std_out, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " MAX(nbcalc_ks): ", maxval(nbcalc_ks)
+ end if
 
  ABI_FREE(ib_work)
  ABI_FREE(sigmak2ebands)
