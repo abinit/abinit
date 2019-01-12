@@ -1,6 +1,6 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 5
+ndtset 6
 
 getwfk   20    # Read GS wavefunctions from DS20_WFK
 getddb   20    # Read DDB files from DS20_DDB
@@ -86,6 +86,17 @@ ph_qpath5
   0.25 0 0
   0.35 0 0
   0.5 0.0 0
+
+############
+# DATASET 6
+############
+# Test erange and tolerance on tetra weigts
+eph_task6 -4
+eph_intmeth6 2  
+sigma_erange6  0.5 0.5 eV
+eph_tols_idelta6 1e-6 1e-6
+getdvdb6  2
+eph_ngqpt_fine6 4 4 4
 
 ############################################################################################
 #                                         STRUCTURE
