@@ -595,7 +595,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  restart = 0; ierr = 1
  if (my_rank == master .and. dtset%eph_restart == 1) then
  !if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
-    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
+    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr)
  end if
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 
