@@ -773,7 +773,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  do iq1grad=1,nq1grad
 
    pertcase=q1grad(3,iq1grad)
-   call appdig(pertcase,dtfil%fnamewffddk,fiwfddk)
+!   call appdig(pertcase,dtfil%fnamewffddk,fiwfddk)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfddk)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
@@ -821,7 +822,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  do iq1q2grad=1,nq1q2grad
 
    pertcase=q1q2grad(4,iq1q2grad)
-   call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
+!   call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfdkdk)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
@@ -2234,7 +2236,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_ALLOCATE(wfk_t_ddk,(nq1grad))
  do iq1grad=1,nq1grad
    pertcase=q1grad(3,iq1grad)
-   call appdig(pertcase,dtfil%fnamewffddk,fiwfddk)
+!   call appdig(pertcase,dtfil%fnamewffddk,fiwfddk)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfddk)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
@@ -2307,7 +2310,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  do iq1q2grad=1,nq1q2grad
 
    pertcase=q1q2grad(4,iq1q2grad)
-   call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
+!   call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfdkdk)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase

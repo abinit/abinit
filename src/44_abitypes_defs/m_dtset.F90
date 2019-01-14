@@ -462,6 +462,9 @@ subroutine dtset_copy(dtout, dtin)
  dtout%d3e_pert1_phon     = dtin%d3e_pert1_phon
  dtout%d3e_pert2_elfd     = dtin%d3e_pert2_elfd
  dtout%d3e_pert2_phon     = dtin%d3e_pert2_phon
+#ifdef MR_DEV
+ dtout%d3e_pert2_strn     = dtin%d3e_pert2_strn
+#endif
  dtout%d3e_pert3_elfd     = dtin%d3e_pert3_elfd
  dtout%d3e_pert3_phon     = dtin%d3e_pert3_phon
  dtout%efmas              = dtin%efmas
@@ -650,6 +653,10 @@ subroutine dtset_copy(dtout, dtin)
  dtout%lotf_nneigx        = dtin%lotf_nneigx
  dtout%lotf_version       = dtin%lotf_version
 #endif
+#ifdef MR_DEV
+ dtout%lw_flexo           = dtin%lw_flexo
+ dtout%lw_qdrpl           = dtin%lw_qdrpl
+#endif
  dtout%magconon           = dtin%magconon
  dtout%maxnsym            = dtin%maxnsym
  dtout%max_ncpus          = dtin%max_ncpus
@@ -781,6 +788,9 @@ subroutine dtset_copy(dtout, dtin)
  dtout%positron           = dtin%positron
  dtout%posnstep           = dtin%posnstep
  dtout%ppmodel            = dtin%ppmodel
+#ifdef MR_DEV
+ dtout%prepalw            = dtin%prepalw
+#endif
  dtout%prepanl            = dtin%prepanl
  dtout%prepgkk            = dtin%prepgkk
  dtout%prtbbb             = dtin%prtbbb
@@ -2351,6 +2361,9 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
+#ifdef MR_DEV
+ list_vars=trim(list_vars)//' d3e_pert2_strn'
+#endif 
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
 !E
  list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass_free efmas'
@@ -2412,6 +2425,9 @@ subroutine chkvars (string)
 !L
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
+#ifdef MR_DEV
+ list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
+#endif
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
@@ -2452,6 +2468,9 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff ppmfrq ppmodel'
+#ifdef MR_DEV
+ list_vars=trim(list_vars)//' prepalw'
+#endif
  list_vars=trim(list_vars)//' prepanl prepgkk papiopt'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prtelf'

@@ -216,6 +216,9 @@ type dataset_type
  integer :: d3e_pert1_phon
  integer :: d3e_pert2_elfd
  integer :: d3e_pert2_phon
+#ifdef MR_DEV
+ integer :: d3e_pert2_strn
+#endif
  integer :: d3e_pert3_elfd
  integer :: d3e_pert3_phon
  integer :: efmas
@@ -350,6 +353,10 @@ type dataset_type
  integer :: lotf_nitex
  integer :: lotf_nneigx
  integer :: lotf_version
+#ifdef MR_DEV
+ integer :: lw_flexo
+ integer :: lw_qdrpl
+#endif
  integer :: magconon
  integer :: maxnsym
  integer :: max_ncpus
@@ -479,6 +486,9 @@ type dataset_type
  integer :: positron
  integer :: posnstep
  integer :: ppmodel
+#ifdef MR_DEV
+ integer :: prepalw
+#endif
  integer :: prepanl
  integer :: prepgkk
  integer :: prtbbb

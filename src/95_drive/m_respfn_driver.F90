@@ -1763,7 +1763,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 #ifdef MR_DEV
 !MR modi:
 !Calculate the quadrupole tensor
- if (dtset%useria==1.or.dtset%userib==1.or.dtset%userib==3) then
+ if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
    call dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 &   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
 &   mpert,mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
@@ -1772,7 +1772,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if 
 
 !Calculate the flexoelectric tensor
- if (dtset%userib==1.or.dtset%userib==2) then
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2) then
    call dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 &   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
 &   mpert,mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
