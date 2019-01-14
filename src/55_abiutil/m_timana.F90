@@ -847,9 +847,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1009)='initberry(MPI stuff)            '
 
  names(1021)='listkk                          '; basic(1021) = 1
- names(1022)='listkk_lensort                  '; basic(1022) = 1
- names(1023)='listkk_loops                  '; basic(1023) = 1
- names(1024)='listkk_xmpisum                  '; basic(1024) = 1
 
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
@@ -1006,6 +1003,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1804)='v1phq_rotate'; basic(1804) = 1
  names(1805)='dvdb_readsym_allv1'; basic(1805) = 1
  names(1806)='dvdb_xmpi_sum'; basic(1806) = 1
+ names(1807)='dvdb_qcache_update'; basic(1807) = 1
 
  ! SIGEPH
  names(1900)='sigph_pre_qloop'; basic(1900) = 1

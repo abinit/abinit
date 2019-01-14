@@ -489,7 +489,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  end do
 
  if (my_rank == 0) then
-   write(std_out, "(a, i0, a, 2(f6.3, 1x), a)")&
+   write(std_out, "(a, i0, a, 2(f6.3, 1x), a)") &
    " Found ", nkcalc, " k-points within erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
    write(std_out, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " MAX(nbcalc_ks): ", maxval(nbcalc_ks)
  end if

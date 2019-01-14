@@ -531,7 +531,9 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
                                              '      Bottom of conduction at: ',gaps%kpoints(:,ick)
    call wrtout(my_unt,msg,my_mode)
 
-   write(msg, "(2(a, f8.4))") "vmax:", gaps%vb_max(spin) * Ha_eV, " cmin", gaps%cb_min(spin) * Ha_eV
+   write(msg, "((a, f8.4, a))") " Valence MAX:", gaps%vb_max(spin) * Ha_eV, " (eV)"
+   call wrtout(my_unt,msg,my_mode)
+   write(msg, "((a, f8.4, a))") " Conduction min:", gaps%cb_min(spin) * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
  end do !spin
 

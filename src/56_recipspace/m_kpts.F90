@@ -590,7 +590,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  if(usesym==0)timrev_used=0
 
  ! Precompute the length of the kpt1 vectors, also taking into account possible umklapp vectors
- call timab(1022,1,tsec)
  l3 = (2*limit+1)**3
  ABI_CALLOC(lkpg1,(l3*nkpt1))
  ABI_CALLOC(lkpg1_sorted,(l3*nkpt1))
@@ -634,7 +633,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  end if
 
  call sort_dp(l3*nkpt1,lkpg1_sorted,isort,tol12)
- call timab(1022,2,tsec)
+ ! From "precompute" to "sort_dp" represents more thatn 50% of the overall wall time for large meshes.
 
  !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
  !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
@@ -643,7 +642,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
  !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
  !enddo
 
- call timab(1023,1,tsec)
  dksqmax = zero
  indkk = 0
  ! TODO: Should change API to use this shape.
@@ -768,7 +766,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
                if (sum(abs(kptns2(:,ikpt2)-kptns1(:,ikpt1)))<3*tol12) ikpt2_done = 1
 
                ! This line leads to a significant speedup for dense meshes but ~30 tests fail after this change.
-               !if (dksq < tol12) ikpt2_done = 1
+               if (dksq < tol12) ikpt2_done = 1
 
                ! Update in three cases: either if succeeded to have exactly the vector, or the distance is better,
                ! or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1,
@@ -854,13 +852,10 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
    end do ! ikpt2
  end do ! isppol
 
- call timab(1023,2,tsec)
-
  ABI_DEALLOCATE(isort)
  ABI_DEALLOCATE(lkpg1)
  ABI_DEALLOCATE(lkpg1_sorted)
 
- call timab(1024,1,tsec)
  indkk = transpose(tmp_indkk)
  ABI_FREE(tmp_indkk)
  if (nprocs > 1) then
@@ -868,9 +863,8 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,sppoldbl,sym
    dksqmn = dksqmax
    call xmpi_max(dksqmn, dksqmax, comm, ierr)
  end if
- call timab(1024,2,tsec)
 
- call timab(1021,2,tsec)
+ call timab(1021, 2, tsec)
 
 end subroutine listkk
 !!***
