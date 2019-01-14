@@ -2883,7 +2883,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
  character(len=500) :: msg
 
 !Local variables -----------------------------------------
- integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkpt, nsppol
+ integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
 #ifdef HAVE_NETCDF
  integer :: ncid, varid
@@ -2893,17 +2893,18 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
  real(dp) :: dksqmax
 
  !copy useful dimensions
- nsppol = ebands%nsppol
+ nsppol = self%nsppol
+ nkcalc = self%nkcalc
  nkpt = ebands%nkpt
 
- ABI_MALLOC(indkk,(nkpt,6))
+ ABI_MALLOC(indkk,(nkcalc,6))
  ! map ebands kpoints to sigmaph
- call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, nkpt, &
-             self%nkcalc, cryst%nsym, 1, cryst%symafm, cryst%symrec, &
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, &
+             nkcalc, cryst%nsym, 1, cryst%symafm, cryst%symrec, &
              self%timrev, comm, use_symrec=.True.)
 
  if (dksqmax > tol12) then
-    write(msg, '(4a)' ) &
+    write(msg, '(3a,es16.6,a)' ) &
      "Error mapping ebands to sigmaph",ch10,&
      "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
     MSG_ERROR(msg)
@@ -2911,7 +2912,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
 
  ! store mapping to return
  if (present(indq2ebands)) then
-   ABI_MALLOC(indq2ebands,(nkpt))
+   ABI_MALLOC(indq2ebands,(nkcalc))
    indq2ebands(:) = indkk(:,1)
  end if
 
@@ -2928,7 +2929,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
    ! read linewidths from sigmaph
    ABI_CALLOC(new%linewidth,(self%ntemp,mband,nkpt,nsppol))
    do spin=1,nsppol
-     do ikcalc=1,nkpt
+     do ikcalc=1,nkcalc
        bstart_ks = self%bstart_ks(ikcalc,spin)
        nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
        do iband=1,nbcalc_ks
@@ -2936,7 +2937,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
          ikpt = indkk(ikcalc,1)
          do itemp=1,self%ntemp
            ! read from netcdf file
-           NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), new%linewidth(itemp,band_ks,ikcalc,spin), start=[2,itemp,iband,ikcalc,spin]))
+           NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), new%linewidth(itemp,band_ks,ikpt,spin), start=[2,itemp,iband,ikcalc,spin]))
          end do
        end do
      end do
@@ -2952,14 +2953,14 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
    endif
    ABI_CALLOC(new%velocity,(3,mband,nkpt,nsppol))
    do spin=1,nsppol
-     do ikcalc=1,nkpt
+     do ikcalc=1,nkcalc
        bstart_ks = self%bstart_ks(ikcalc,spin)
        nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
        do iband=1,nbcalc_ks
          band_ks = iband + bstart_ks - 1
          ikpt = indkk(ikcalc,1)
          ! read from netcdf file
-         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"), new%velocity(:,band_ks,ikcalc,spin), start=[1,iband,ikcalc,spin]))
+         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"), new%velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin]))
        end do
      end do
    end do

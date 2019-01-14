@@ -268,10 +268,12 @@ subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
  type(crystal_t),intent(in) :: cryst
 
 !Local variables ------------------------------
+ type(gaps_t) :: gaps
  integer :: nsppol, nkpt, mband, ib, ik, spin, ii, jj, itemp
- integer :: ntens, nvecs, nvals, edos_intmeth
+ integer :: ntens, nvecs, nvals, edos_intmeth, ierr
  real(dp) :: eminmax_spin(2,transport_rta%ebands%nsppol), vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step
+ real(dp) :: linewidth
  real(dp),allocatable :: dummy_vals(:,:,:,:), dummy_vecs(:,:,:,:,:), vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
@@ -301,8 +303,9 @@ subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
        end do
        ! Multiply by the lifetime
        do itemp=1,transport_rta%ntemp
-         vv_tens(:, :, 1+itemp, ib, ik, spin) = vv_tens(:, :, 1, ib, ik, spin) / &
-                                                transport_rta%ebands%linewidth(itemp, ib, ik, spin)
+         linewidth = abs(transport_rta%ebands%linewidth(itemp, ib, ik, spin))
+         vv_tens(:, :, 1+itemp, ib, ik, spin) = 0
+         if (linewidth > tol12) vv_tens(:, :, 1+itemp, ib, ik, spin) = vv_tens(:, :, 1, ib, ik, spin) / linewidth
        end do
      end do
    end do
@@ -320,12 +323,19 @@ subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
  emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
  emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
+ ! If sigma_erange is set, get emin and emax
+ ierr = get_gaps(transport_rta%ebands,gaps)
+ do spin=1,transport_rta%ebands%nsppol
+   if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
+   if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
+ end do
+
  ! Compute dos and vvdos multiplied by lifetimes
  transport_rta%edos = ebands_get_dos_matrix_elements(transport_rta%ebands, cryst, &
                                        dummy_vals, nvals, dummy_vecs, nvecs, vv_tens, ntens, &
                                        edos_intmeth, edos_step, edos_broad, comm, &
                                        transport_rta%vvdos_mesh, &
-                                       dummy_dosvals, dummy_dosvecs, transport_rta%vvdos, emin, emax )
+                                       dummy_dosvals, dummy_dosvecs, transport_rta%vvdos, emin, emax)
 
  ! Free memory
  ABI_FREE(vv_tens)
