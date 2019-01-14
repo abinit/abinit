@@ -1092,23 +1092,23 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   ikpti = indkk_f2ibz(ikpt,1)
   ikpt1i = indkk_f2ibz(ikpt1,1)
 
-  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
-  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
 
   ecut_eff = dtset%ecut*(dtset%dilatmx)**2
   exchn2n3d = 0 ; istwf_k = 1 ; ikg1 = 0
 
-  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
-
-  kg1_k(:,:) = 0
-  kpt1(:) = dtset%kptns(:,ikpt1i)
-  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
-
+  ! Build basis sphere of plane waves for the k-point
+  ! we avoid using the global kg data because of difficulties in parallel-ism
+  ABI_ALLOCATE(kg_k,(3,dtset%mpw))
   kg_k(:,:) = 0
   kpt(:) = dtset%kptns(:,ikpti)
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
-  !
+  ! Build basis sphere of plane waves for the nearest neighbour of the k-point
+  ABI_ALLOCATE(kg1_k,(3,dtset%mpw))
+  kg1_k(:,:) = 0
+  kpt1(:) = dtset%kptns(:,ikpt1i)
+  call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg1_k,kpt1,1,mpi_enreg,dtset%mpw,npw_k1)
+
   !        Deal with symmetry transformations
   !
 
@@ -1148,7 +1148,9 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
      !          NOTE: the bra G vector is taken for the sym-related IBZ k point,
      !          not for the FBZ k point
 
+     ! original code from initberry
      ! iadum(:) = kg(:,kgindex(ikpti) + ipw)
+     
      iadum(:) = kg_k(:,ipw)
 
      !          to determine r.l.v. matchings, we transformed the bra vector
@@ -1172,6 +1174,7 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
      end do
   end do
 
+  ABI_DEALLOCATE(kg_k)
   ABI_DEALLOCATE(kg1_k)
 
 end subroutine mkpwind_k
