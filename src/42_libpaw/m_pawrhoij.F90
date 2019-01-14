@@ -2610,7 +2610,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      if (PRESENT(natinc)) my_natinc = natinc ! user-defined increment.
      LIBPAW_ALLOCATE(ibuffer,(0))
      if (my_qphase==2) then
-       LIBPAW_ALLOCATE(rhoij_tmp,(2*nselect))
+       LIBPAW_DATATYPE_ALLOCATE(rhoij_tmp,(2*nselect))
      end if
      do iatom=1,my_natom,my_natinc
        iatom_tot=iatom;if(paral_atom)iatom_tot=my_atmtab(iatom)
@@ -2648,7 +2648,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      end do
      LIBPAW_DEALLOCATE(ibuffer)
      if (my_qphase==2) then
-       LIBPAW_DEALLOCATE(rhoij_tmp)
+       LIBPAW_DATATYPE_DEALLOCATE(rhoij_tmp)
      end if
 
   case ("D","d") ! Debug
@@ -3131,7 +3131,7 @@ end subroutine pawrhoij_mpisum_unpacked_2D
 !!  rhoijselect(lmn2_size)=contains the indices of the selected (i,j) pairs
 !!                         rhoijselect(nselect+1:lmn2_size)=0
 !!
-!! SIDE EFFECTS   
+!! SIDE EFFECTS
 !!  rhoij(cplex*qphase*lmn2_size,nspden)=
 !!     * Input: the array is filled with all rhoij values (only if rhoij_input is not present)
 !!     * Output: the nselect first elements contain the non-zero rhoij values,
@@ -3210,7 +3210,7 @@ subroutine pawrhoij_filter(rhoij,rhoijselect,nselect,cplex,qphase,lmn2_size,nspd
    end if
 
  else ! cplex=2
- 
+
    if (qphase==1) then
      do klmn=1,lmn2_size
        klmn1=2*klmn
@@ -3435,14 +3435,14 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
  if (my_l_only<0) then
    l_index => idum
  else
-   LIBPAW_ALLOCATE(l_index,(my_lmn_size))
+   LIBPAW_POINTER_ALLOCATE(l_index,(my_lmn_size))
    do kk=1,my_lmn_size
      l_index(kk)=indlmn(1,kk)
    end do
  end if
 
  if (qphase==2) then
-   LIBPAW_ALLOCATE(rhoij_,(2*rhoij_size))
+   LIBPAW_DATATYPE_ALLOCATE(rhoij_,(2*rhoij_size))
  end if
 
 ! === Loop over Rho_ij components ===
@@ -3494,10 +3494,10 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
   end do !irhoij
 
  if (qphase==2) then
-   LIBPAW_DEALLOCATE(rhoij_)
+   LIBPAW_DATATYPE_DEALLOCATE(rhoij_)
  end if
  if (my_l_only>=0) then
-   LIBPAW_DEALLOCATE(l_index)
+   LIBPAW_POINTER_DEALLOCATE(l_index)
  end if
 
 end subroutine pawrhoij_print_rhoij
@@ -3960,7 +3960,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                        summaggr(1:cplex_eff,nu,mu,1)=summaggr(1:cplex_eff,nu,mu,1) &
 &                         +fact(1:cplex_eff)*zarot2*grad(nu,indexkc+1:indexkc+cplex_eff,1+mu)
                      end do
-                   end do 
+                   end do
                    if (qphase==2) then
                      do mu=1,3
                        do nu=1,ngrhoij
@@ -4009,7 +4009,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                  if (noncoll) then
                    do iplex=1,cplex_rhoij
                      do mu=1,3
-                       do nu=1,ngrhoij             
+                       do nu=1,ngrhoij
                          rhoijc(1)=summaggr(iplex,nu,mu,1)
                          rhoijc(2)=summaggr(iplex,nu,mu,2)
                          summaggr(iplex,nu,mu,1)=phase(1)*rhoijc(1)-phase(2)*rhoijc(2)
@@ -4026,7 +4026,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                do iq=1,qphase
                  rotrho(1:cplex_eff,iafm,iq)=rotrho(1:cplex_eff,iafm,iq) &
 &                                           +sumrho(1:cplex_eff,iafm,iq)
-               end do  
+               end do
              end if
 
 
@@ -4272,7 +4272,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
      msg=' In the antiferromagnetic case, nsym cannot be 1'
      MSG_BUG(msg)
    end if
-   
+
    if (optrhoij==1) then
 
      do iatm=1,nrhoij

@@ -1400,6 +1400,7 @@ end subroutine dvdb_readsym_qbz
 !! Allocate internal cache storing v1scf potentials.
 !!
 !! INPUTS
+!!  ngfftf(18)=information on 3D FFT for interpolated potential
 !!  mbsize: Cache size in megabytes.
 !!    < 0 to allocate all q-points.
 !!    0 has not effect.
@@ -1413,12 +1414,15 @@ end subroutine dvdb_readsym_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_set_qcache_mb(db, mbsize)
+subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
 
 !Arguments ------------------------------------
 !scalars
+ !integer,intent(in) :: nfftf
  real(dp),intent(in) :: mbsize
  class(dvdb_t),intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngfftf(18)
 
 !Local variables-------------------------------
 !scalars
@@ -1427,11 +1431,10 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
 ! *************************************************************************
 
  if (abs(mbsize) < tol3) then
-   db%qcache_size = 0
-   return
+   db%qcache_size = 0; return
  end if
 
- onepot_mb = two * product(db%ngfft3_v1(:, 1)) * db%nspden * QCACHE_KIND * b2Mb
+ onepot_mb = two * product(ngfftf(1:3)) * db%nspden * QCACHE_KIND * b2Mb
  if (mbsize < zero) then
    db%qcache_size = db%nqpt
  else
@@ -1440,9 +1443,9 @@ subroutine dvdb_set_qcache_mb(db, mbsize)
  db%qcache_size = min(db%qcache_size, db%nqpt)
  if (db%qcache_size == 0) db%qcache_size = 1
 
- call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
- call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.1"), " [Mb]"))
+ call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
@@ -1462,6 +1465,7 @@ end subroutine dvdb_set_qcache_mb
 !! INPUTS
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  qselect(%nqpt)=0 to ignore this q-point when reading.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -1472,18 +1476,18 @@ end subroutine dvdb_set_qcache_mb
 !!
 !! SOURCE
 
-subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
+subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,comm
  class(dvdb_t),intent(inout) :: db
 !arrays
- integer,intent(in) :: ngfft(18)
+ integer,intent(in) :: ngfft(18), qselect(db%nqpt)
 
 !Local variables-------------------------------
 !scalars
- integer :: db_iqpt, cplex, ierr, imyp, ipc
+ integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
 !arrays
@@ -1500,8 +1504,17 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  do db_iqpt=1,db%nqpt
-   if (db_iqpt > db%qcache_size) exit
-   call cwtime(cpu, wall, gflops, "start")
+   if (qselect(db_iqpt) == 0) cycle
+
+   ! Exit when we reach qcache_size
+   qcnt = 0
+   do ii=1,db%nqpt
+     if (allocated(db%qcache(ii)%v1scf)) qcnt = qcnt + 1
+   end do
+   if (qcnt >= db%qcache_size) exit
+
+   !if (db_iqpt > db%qcache_size) exit
+   if (mod(db_iqpt, 10) == 1) call cwtime(cpu, wall, gflops, "start")
 
    ! Read all 3*natom potentials inside comm
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
@@ -1528,7 +1541,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, comm)
    end if
  end do
 
- call cwtime_report("IO + symmetrization", cpu_all, wall_all, gflops_all)
+ call cwtime_report("Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
 end subroutine dvdb_qcache_read
@@ -1965,24 +1978,13 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  cnt = 0
  do mu=1,natom3
    do ispden=1,nspden
-     cnt = cnt + 1
-     root = mod(cnt, nproc)
-     !if (root /= my_rank) cycle ! MPI parallelism.
-     !call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
-     if (root == my_rank) then
+     cnt = cnt + 1; root = mod(cnt, nproc)
+     if (root == my_rank) then ! Non-blocking
        call fourdp(cplex,v1g_qibz(:,ispden,mu),v1r_qibz(:,ispden,mu),-1,mpi_enreg,nfft,1,ngfft,tim_fourdp0)
      end if
      call xmpi_ibcast(v1g_qibz(:,ispden,mu), root, comm, requests(ispden, mu), ierr)
    end do
  end do
- !if (nproc > 1) call xmpi_sum(v1g_qibz, comm, ierr)
-
- !do mu=1,natom3
- !  do ispden=1,nspden
- !    call xmpi_wait(requests(ispden, mu), ierr)
- !    requests_v1g_qibz_done(ispden, mu) = .True.
- !  end do
- !end do
 
  ABI_MALLOC(workg, (2*nfft,nspden))
  ABI_MALLOC(v1g_mu, (2*nfft,nspden))
@@ -1993,7 +1995,6 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  call mati3inv(symrec_eq, sm1); sm1 = transpose(sm1)
 
  !v1r_qbz = zero
-
  do mu=1,natom3
    root = mod(mu, nproc)
    ! MPI parallelism.
@@ -2018,6 +2019,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
        mu_eq = idir_eq + (ipert_eq-1)*3
        cnt = cnt + 1
 
+       ! Wait for request before operating on v1g_qibz
        if (.not. all(requests_v1g_qibz_done(:, mu_eq))) then
          do ispden=1,nspden
            call xmpi_wait(requests(ispden, mu_eq), ierr)
@@ -2045,8 +2047,9 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    call xmpi_ibcast(v1r_qbz(:,:,mu), root, comm, requests_v1r_qbz(mu), ierr)
  end do ! mu
 
+ ! Relase all requests
+ call xmpi_waitall(requests, ierr)
  call xmpi_waitall(requests_v1r_qbz, ierr)
- !call xmpi_sum(v1r_qbz, comm, ierr)
 
  ABI_FREE(workg)
  ABI_FREE(v1g_mu)

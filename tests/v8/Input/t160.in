@@ -1,6 +1,6 @@
 # LiF Very rough 2x2x2 q-point grid; low ecut.
 
-ndtset 5
+ndtset 6
 
 getwfk   20    # Read GS wavefunctions from DS20_WFK
 getddb   20    # Read DDB files from DS20_DDB
@@ -9,6 +9,8 @@ getddb   20    # Read DDB files from DS20_DDB
 ecut   35
 tolwfr 1e-16
 mixprec 1
+boxcutmin 1.1
+prtphdos 0
 
 # K-mesh (must equal the one used to produce the WFK file)
 ngkpt    4 4 4
@@ -33,6 +35,9 @@ nband      20
 
 symsigma  1
 tmesh 0 300 2
+
+# This just to test (part of) the restart code
+eph_restart 1
 
 ############
 # DATASET 1
@@ -82,6 +87,17 @@ ph_qpath5
   0.35 0 0
   0.5 0.0 0
 
+############
+# DATASET 6
+############
+# Test erange and tolerance on tetra weigts
+eph_task6 -4
+eph_intmeth6 2  
+sigma_erange6  0.5 0.5 eV
+eph_tols_idelta6 1e-6 1e-6
+getdvdb6  2
+eph_ngqpt_fine6 4 4 4
+
 ############################################################################################
 #                                         STRUCTURE
 ############################################################################################
@@ -105,7 +121,7 @@ ph_qpath5
 #%% test_chain = t157.in, t158.in, t159.in, t160.in
 #%% [files]
 #%% files_to_test = 
-#%%   t160.out, tolnlines = 30, tolabs = 0.4, tolrel = 2.0e-2
+#%%   t160.out, tolnlines = 30, tolabs = 0.4, tolrel = 5.0e-2
 #%% psp_files = 03-Li.psp, 09-F.psp
 #%% [paral_info]
 #%% max_nprocs = 10

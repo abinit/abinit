@@ -131,7 +131,7 @@ contains
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
  real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),sxred0(3)
- real(dp) :: symnucdipmom2(3)
+ !real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3),symspinat2(3),symxred2(3),trialnons(3)
  real(dp),allocatable :: local_nucdipmom(:,:,:),nucdipmomcl(:,:),nucdipmomred(:,:,:)
  real(dp),allocatable :: spinatcl(:,:),spinatred(:,:)
@@ -200,7 +200,7 @@ contains
 
  ! need rprimd later to transform back to cart coords
  call matr3inv(gprimd,rprimd)
- 
+
 !Initialise with the first atom
  nclass=1
  natomcl(1)=1

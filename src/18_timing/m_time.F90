@@ -188,11 +188,11 @@ pure function sec2str(time_s) result(str)
  seconds = MOD(time_s,60._dp)
 
  if (days > 0) then
-   write(str,'(i0,3(a,i0.2))')days,"-",hours,":",minutes,":",seconds
+   write(str,'(i0,3(a,i0.2),a)')days,"-",hours,":",minutes,":",seconds, " [days]"
  else if (hours > 0) then
-   write(str,'(i0.2,2(a,i0.2))')hours,":",minutes,":",seconds
+   write(str,'(i0.2,2(a,i0.2),a)')hours,":",minutes,":",seconds, " [hours]"
  else if (minutes > 0) then
-   write(str,'(i0.2,a,i0.2)')minutes,":",seconds
+   write(str,'(i0.2,a,i0.2,a)')minutes,":",seconds, " [minutes]"
  else
    write(str,'(f5.2,a)')time_s," [s]"
  end if
@@ -469,6 +469,7 @@ end function abi_wtime
 !!  start_or_stop=
 !!    "start" to start the timers
 !!    "stop" to stop the timers and return the final cpu_time and wall_time
+!!  [msg]: Optional message printed to std_out
 !!  [comm]: MPI communicator. If values averaged inside comm are wanted. Only for "stop"
 !!
 !! OUTPUT
@@ -498,13 +499,14 @@ end function abi_wtime
 !!
 !! SOURCE
 
-subroutine cwtime(cpu, wall, gflops, start_or_stop, comm)
+subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
 
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(inout) :: cpu,wall
  real(dp),intent(out) :: gflops
  character(len=*),intent(in) :: start_or_stop
+ character(len=*),intent(in),optional :: msg
  integer,intent(in),optional :: comm
 
 !Local variables-------------------------------
@@ -520,6 +522,8 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, comm)
  real(dp) :: vals(3)
 
 ! *************************************************************************
+
+ if (present(msg)) call wrtout(std_out, msg)
 
  SELECT CASE (start_or_stop)
  CASE ("start")

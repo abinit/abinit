@@ -241,7 +241,7 @@ subroutine herald(code_name,code_version,iout)
 
 !RELEASE TIME FROM ABIRULES
  year_rel=2018
- mm_rel=11
+ mm_rel=12
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -444,6 +444,7 @@ subroutine wrtout(unit,msg,mode_paral,do_flush)
 
  use m_xmpi,      only : xmpi_world, xmpi_comm_rank, xmpi_comm_size
  use m_io_tools,  only : flush_unit, write_lines
+
  implicit none
 
 !Arguments ------------------------------------

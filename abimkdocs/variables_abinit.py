@@ -1493,14 +1493,15 @@ Variable(
     text=r"""
 This variable governs the behaviour of the code when there are potential
 source of symmetry breaking, related e.g. to the k point grid or the presence
-of non-symmorphic translations which might not be coherent with the exchange-
-correlation grid.
+of non-symmorphic translations which might not be coherent with the exchange-correlation grid.
 
 When [[chksymbreak]] = 1, the code stops (or issue a warning) if:
 
   * (1) The k point grid is non-symmetric, in case [[kptopt]] =1, 2, or 4;
   * (2) The non-symmorphic translation part of the symmetry operations has components that are not zero,
     or simple fractions, with 2, 3, 4, 6, 8 or 12 as denominators.
+
+Note that the check is disabled when the number of k-points in the BZ is greater than 40 ** 3.
 
 When [[chksymbreak]] = 0, there is no such check.
 
@@ -19564,6 +19565,38 @@ A negative entry can be used to exclude either holes or electrons from the calcu
         sigma_erange 1 1 eV
 
     to specify the energy intervals in eV units.
+""",
+),
+
+Variable(
+    abivarname="eph_tols_idelta",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="real",
+    defaultval=[1e-12, 1e-12],
+    dimensions=[2],
+    mnemonics="EPH TOLeranceS on Integral of DELTA.",
+    text=r"""
+This variable can be used to introduce a cutoff on the q-points when computing the imaginary
+part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2)
+The first entry refers to phonon absorption while the second one is associated to phonon emission.
+A q-point is considered in the sum if both the tetrahedron weight for phonon absorption
+""",
+),
+
+Variable(
+    abivarname="eph_restart",
+    varset="eph",
+    topics=['ElPhonInt_basic'],
+    vartype="integer",
+    defaultval=0,
+    dimensions="scalar",
+    mnemonics="EPH RESTART.",
+    text=r"""
+This variable can be used to restart an EPH calculation.
+At present, this feature is supported only when computing the electron-phonon self-energy ([[eph_task]] = 4, -4).
+In this case, the code will look for a pre-existing SIGEPH.nc file and will compute the remaining k-points
+provided that the metadata found in the netcdf file is compatible with the input variables specified in the input file.
 """,
 ),
 

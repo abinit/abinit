@@ -479,12 +479,14 @@ subroutine dtset_copy(dtout, dtin)
 
  dtout%eph_mustar         = dtin%eph_mustar
  dtout%eph_intmeth        = dtin%eph_intmeth
+ dtout%eph_tols_idelta    = dtin%eph_tols_idelta
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
  dtout%eph_frohlichm      = dtin%eph_frohlichm
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
+ dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
  dtout%eph_transport      = dtin%eph_transport
 
@@ -1618,7 +1620,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
  integer :: rfdir(9),rf2dir(9),rf2_dir1(3),rf2_dir2(3)
  integer,allocatable :: indkpt1(:,:),indsym(:,:,:),pertsy(:,:),rfpert(:),symq(:,:,:),symrec(:,:,:)
  integer, allocatable :: pert_tmp(:,:), pert_calc(:,:)
- integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:)
+ integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:),symrl1_tmp(:,:,:), bz2ibz_smap(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: tnons1_tmp(:,:),wtk_folded(:)
 
@@ -1838,10 +1840,11 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
    ABI_DEALLOCATE(symrl1)
 
    ABI_ALLOCATE(wtk_folded,(dtset%nkpt))
+   ABI_ALLOCATE(bz2ibz_smap, (6, dtset%nkpt))
    timrev_pert=timrev
    if(dtset%ieig2rf>0) then
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
-&     1,symrc1,0,dtset%wtk,wtk_folded)
+&     1,symrc1,0,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    else
 !    For the time being, the time reversal symmetry is not used
 !    for ddk, elfd, mgfd perturbations.
@@ -1849,8 +1852,9 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 &     ipert==dtset%natom+2 .or. dtset%berryopt==4 .or. dtset%berryopt==6 .or. dtset%berryopt==7  &
 &     .or. dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17 )timrev_pert=0  !!HONG
      call symkpt(0,gmet,indkpt1(:,icase),std_out,dtset%kptns,dtset%nkpt,nkpt_rbz(icase),&
-     nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded)
+     nsym1,symrc1,timrev_pert,dtset%wtk,wtk_folded, bz2ibz_smap, xmpi_comm_self)
    end if
+   ABI_DEALLOCATE(bz2ibz_smap)
    ABI_DEALLOCATE(wtk_folded)
    ABI_DEALLOCATE(symrc1)
  end do
@@ -2348,8 +2352,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit eshift'
  list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm'
- list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
- list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_task eph_transport'
+ list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
+ list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_restart eph_task eph_transport'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'

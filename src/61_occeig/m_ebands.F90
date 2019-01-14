@@ -479,7 +479,7 @@ end subroutine gaps_free
 !!
 !! SOURCE
 
-subroutine gaps_print(gaps,header,unit,mode_paral)
+subroutine gaps_print(gaps, header, unit, mode_paral)
 
 !Arguments ------------------------------------
 !scalars
@@ -3004,7 +3004,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
-     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, msg, ierr)
+     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
    if (ierr /= 0) MSG_ERROR(msg)
 
    ! For each spin and band, interpolate over kpoints,
@@ -4280,7 +4280,7 @@ select case (intmeth)
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
-     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, msg, ierr)
+     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
    if (ierr /= 0) MSG_ERROR(msg)
 
    ! For each spin and band, interpolate over kpoints,
@@ -4553,7 +4553,7 @@ type(jdos_t) function ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm,
    if (ierr/=0) return
 
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
-     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, msg, ierr)
+     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, comm, msg, ierr)
    if (ierr/=0) then
      call destroy_tetra(tetra); return
    end if

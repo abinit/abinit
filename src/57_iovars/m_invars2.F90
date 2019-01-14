@@ -1214,11 +1214,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symdynmat',tread,'INT')
  if(tread==1) dtset%symdynmat=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
+ if(tread==1) dtset%eph_restart=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
  if(tread==1) dtset%eph_task=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_mustar',tread,'DPR')
  if(tread==1) dtset%eph_mustar=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_tols_idelta',tread,'DPR')
+ if (tread == 1) dtset%eph_tols_idelta = dprarr(1:2)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_intmeth',tread,'INT')
  if (tread == 1) then

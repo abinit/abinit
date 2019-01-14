@@ -212,7 +212,6 @@ MODULE m_wfd
 
  public :: wave_init
  public :: wave_free
- !public :: wave_bcast
  public :: wave_copy
 
  interface wave_init
@@ -223,10 +222,6 @@ MODULE m_wfd
    module procedure wave_free_0D
    module procedure wave_free_3D
  end interface wave_free
-
- !interface wave_bcast
- !  module procedure wave_bcast_0D
- !end interface wave_bcast
 
  interface wave_copy
    module procedure wave_copy_0D
@@ -822,7 +817,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 !scalars
  integer,parameter :: nfft0=0,mpw0=0,ikg0=0
  integer :: ig,ik_ibz,spin,band,mpw,exchn2n3d,istwf_k,npw_k,iatom,itypat,iat !,how_manyb
- real(dp) :: ug_size,ur_size,cprj_size,gsq,g1,g2,g3
+ real(dp) :: ug_size,ur_size,cprj_size,gsq
  logical :: iscompatibleFFT
  character(len=500) :: msg
 !arrays
@@ -4919,7 +4914,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
  comm = Wfd%comm; my_rank = Wfd%my_rank; master = Wfd%master
 
  tag_spin(:)=(/'      ','      '/); if (Wfd%nsppol==2) tag_spin(:)=(/' UP   ',' DOWN '/)
- call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, "with iomode:", iomode2str(iomode)))
+ call wrtout(std_out, sjoin(" wfd_read_wfk: reading", wfk_fname, "with iomode:", iomode2str(iomode)), do_flush=.True.)
 
  wfk_unt = get_unit()
  call wfk_open_read(Wfk,wfk_fname,formeig0,iomode,wfk_unt,Wfd%comm,Hdr_out=Hdr)
@@ -5124,12 +5119,8 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
       ABI_FREE(kg_k)
       ABI_FREE(cg_k)
       ABI_FREE(gf2wfd)
-      if (allocated(work)) then
-        ABI_FREE(work)
-      end if
-      if (allocated(out_cg)) then
-        ABI_FREE(out_cg)
-      end if
+      ABI_SFREE(work)
+      ABI_SFREE(out_cg)
     end do !ik_ibz
   end do !spin
 
@@ -5287,8 +5278,8 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
 
    ABI_FREE(phk_atm)
  end do !iatom
- !
- ! * Remove the phase e^{ikr}, u(r) is returned.
+
+ ! Remove the phase e^{ikr}, u(r) is returned.
  ur_ae = ur_ae * CONJG(ceikr)
  cnorm = xdotc(Wfd%nfft*Wfd%nspinor,ur_ae,1,ur_ae,1)/Wfd%nfft
  !write(std_out,*)" AE PAW norm: (b,k,s)",band,ik_ibz,spin,REAL(cnorm)

@@ -49,7 +49,7 @@ module m_ephwg
 
  use defs_datatypes,    only : ebands_t
  use defs_abitypes,     only : dataset_type
- use m_time,            only : cwtime, sec2str
+ use m_time,            only : cwtime, cwtime_report, sec2str
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
  use m_special_funcs,   only : dirac_delta
@@ -122,6 +122,8 @@ type, public :: ephwg_t
   integer,allocatable :: lgk2ibz(:)
   ! lgk2ibz(nq_k)
   ! Mapping Little-group IBZ_k --> initial IBZ
+  ! TODO: This should be generalized to have the symmetry indices as well so
+  ! that we can use it in sigmaph but then we have to implement similar algo for double grid.
 
   real(dp),allocatable :: phfrq_ibz(:,:)
   ! (nibz, natom3)
@@ -251,7 +253,7 @@ type(ephwg_t) function ephwg_new( &
    new%eigkbs_ibz(ik, :, :) = eig_ibz(:, ik, :)
  end do
 
- ! Fourier interpolate frequencies on the same mesh.
+ ! Fourier interpolate phonon frequencies on the same mesh.
  ABI_CALLOC(new%phfrq_ibz, (new%nibz, new%natom3))
  do ik=1,new%nibz
    if (mod(ik, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -337,7 +339,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 !scalars
  integer,parameter :: sppoldbl1=1
  integer :: ierr,ii
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, cpu, wall, gflops
  character(len=80) :: errorstring
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
@@ -347,17 +349,23 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 !----------------------------------------------------------------------
 
  cryst => self%cryst
+ call cwtime(cpu, wall, gflops, "start")
 
- ! Get little group of the kpoint.
+ ! Get little group of the (external) kpoint.
  call self%lgk%free()
  self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
  if (prtvol > 0) call self%lgk%print()
  self%nq_k = self%lgk%nibz
 
- ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
+ call cwtime_report(" lgroup_new", cpu, wall, gflops)
+
+ ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
     sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ !call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, self%lgk%nsym_lg,&
+ !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
 
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6)' ) &
@@ -367,6 +375,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
  ABI_SFREE(self%lgk2ibz)
  call alloc_copy(indkk(:, 1), self%lgk2ibz)
  ABI_FREE(indkk)
+ call cwtime_report(" listkk1", cpu, wall, gflops)
 
  ! Get mapping (k + q) --> initial IBZ.
  do ii=1,self%nq_k
@@ -382,6 +391,7 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
     "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
    MSG_ERROR(msg)
  end if
+ call cwtime_report(" listkk2", cpu, wall, gflops)
 
  ABI_SFREE(self%kq2ibz)
  call alloc_copy(indkk(:, 1), self%kq2ibz)
@@ -392,15 +402,35 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
  ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-    sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ ! Old version
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
+ !   sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, comm, use_symrec=.False.)
+
+ ! Use symmetries of the little group
+ ! This version should be OK but now we used the symmetry tables computed in symkpt
+ ! tetra integration depends on the indkk mapping.
+ !call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, self%lgk%nsym_lg,&
+ !   sppoldbl1, self%lgk%symafm_lg, self%lgk%symrec_lg, 0, comm, use_symrec=.True.)
+
+ !if (dksqmax > tol12) then
+ !  write(msg, '(a,es16.6)' ) &
+ !   "At least one of the points in BZ could not be generated from a symmetrical one. dksqmax: ",dksqmax
+ !  MSG_ERROR(msg)
+ !end if
+
+ !ABI_CHECK(all(self%lgk%bz2ibz_smap(1, :) == indkk(:, 1)), "bz2ibz_smap != indkk")
+ indkk(:, 1) = self%lgk%bz2ibz_smap(1, :)
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
  call destroy_tetra(self%tetra_k)
  call init_tetra(indkk(:, 1), cryst%gprimd, self%klatt, self%bz, self%nbz, self%tetra_k, ierr, errorstring)
+ !call tetra_write(self%tetra_k, self%lgk%nibz, self%lgk%ibz, strcat("tetrak_", ktoa(kpoint)))
  ABI_CHECK(ierr == 0, errorstring)
  ABI_FREE(indkk)
+
+ call cwtime_report(" init_tetra", cpu, wall, gflops)
 
 end subroutine ephwg_setup_kpoint
 !!***
@@ -452,7 +482,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
  cryst => self%cryst
 
- ! Get little group of the kpoint.
+ ! Get little group of the (external) kpoint.
  call self%lgk%free()
  self%lgk = lgroup_new(self%cryst, kpoint, self%timrev, self%nbz, self%bz, self%nibz, self%ibz)
  if (prtvol > 0) call self%lgk%print()
@@ -461,7 +491,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  ! get dg%bz --> self%lgrp%ibz
  ABI_SFREE(eph_doublegrid%bz2lgkibz)
  ABI_MALLOC(eph_doublegrid%bz2lgkibz,(eph_doublegrid%dense_nbz))
- call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
+ call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
                              cryst%symrel, cryst%nsym, &
                              eph_doublegrid%bz2lgkibz, has_timrev=1)
 
@@ -469,7 +499,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, eph_doublegrid%kpts_dense,&
                self%lgk%nibz, eph_doublegrid%dense_nbz, cryst%nsym,&
-               sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+               sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -526,7 +556,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -548,7 +578,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
  ! get dg%bz --> lgk%ibz (k+q)
  ABI_MALLOC(bz2lgkibzkq, (eph_doublegrid%dense_nbz))
- call eph_double_grid_bz2ibz(eph_doublegrid, self%lgk%ibz, self%lgk%nibz,&
+ call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
                              cryst%symrel, cryst%nsym, &
                              bz2lgkibzkq, has_timrev=1)
 
@@ -572,7 +602,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ! Get mapping (k + q) --> initial IBZ.
    ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -600,11 +630,11 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ABI_MALLOC(bz2bz, (self%nbz * sppoldbl1))
    call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,&
       eph_doublegrid%dense_nbz, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    do ii=1,self%nbz
       ! get self%bz --> self%bz
-      bz2bz(ii) = eph_double_grid_get_index(eph_doublegrid,self%bz(:,ii),2)
+      bz2bz(ii) = eph_doublegrid%get_index(self%bz(:,ii),2)
    end do
 
    !check if same results as listkk
@@ -617,7 +647,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
  do ii=1,self%nbz
     ! get self%bz --> dg%bz
-    ik_idx = eph_double_grid_get_index(eph_doublegrid,self%bz(:,ii),2)
+    ik_idx = eph_doublegrid%get_index(self%bz(:,ii),2)
     ! dg%bz --> self%lgrp%ibz
     bz2lgkibz(ii) = eph_doublegrid%bz2lgkibz(ik_idx)
  end do
@@ -626,7 +656,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
    ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
    ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
    call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, use_symrec=.False.)
+      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
 
    if (dksqmax > tol12) then
      write(msg, '(a,es16.6)' ) &
@@ -653,7 +683,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 end subroutine ephwg_double_grid_setup_kpoint
 !!***
 
-
 !----------------------------------------------------------------------
 
 !!****f* m_ephwg/ephwg_get_deltas
@@ -676,6 +705,7 @@ end subroutine ephwg_double_grid_setup_kpoint
 !!
 !! OUTPUT
 !!  deltaw_pm(nene, nq_k, 2)  (plus, minus) including the weights for BZ integration.
+!   These arrays have the same order as the little group used in sigmaph.
 !!
 !! PARENTS
 !!
@@ -692,7 +722,6 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
  class(ephwg_t),intent(in) :: self
  real(dp),optional,intent(in) :: broad
 !arrays
-! These arrays have the same order as the little group used in sigmaph.
  real(dp),intent(in) :: eminmax(2)
  real(dp),intent(out) :: deltaw_pm(nene, self%nq_k, 2)
 
@@ -708,7 +737,7 @@ subroutine ephwg_get_deltas(self, band, spin, nu, nene, eminmax, bcorr, deltaw_p
 
  ib = band - self%bstart + 1
 
- ! fill array for e_{k+q, b} +- w_{q,nu)
+ ! Fill array for e_{k+q, b} +- w_{q,nu)
  do iq=1,self%nq_k
    iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
    ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
@@ -758,10 +787,6 @@ end subroutine ephwg_get_deltas
 !! nw=number of energies for DOS
 !! bcorr=1 to include Blochl correction else 0.
 !! comm=MPI communicator
-!! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
-!!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
-!!   If use_bzsum is set to True, the Nstar(q) coefficient is removed so that the caller can
-!!   integrate over the BZ without using symmetries.
 !!
 !! OUTPUT
 !!  deltaw_pm(nw, nq_k, 2)  (plus, minus) including the weights for BZ integration.
@@ -882,10 +907,10 @@ end subroutine ephwg_get_dweights
 !!
 !! INPUTS
 !! qpt(3)
-!! band=band index (global index i.e. unshifted)
+!! iband_sum=band index in self-energy sum. (global index i.e. unshifted)
 !! spin=Spin index
 !! nu=Phonon branch.
-!! nbsigma
+!! nbcalc=Number of bands in self-energy matrix elements.
 !! zvals
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
@@ -894,7 +919,7 @@ end subroutine ephwg_get_dweights
 !!   integrate over the BZ without using symmetries.
 !!
 !! OUTPUT
-!!  cweights(nz, 2, nbsigma, %natom3)  (plus, minus)
+!!  cweights(nz, 2, nbcalc, %nq_k)  (plus, minus)
 !!  include weights for BZ integration.
 !!
 !! PARENTS
@@ -903,29 +928,29 @@ end subroutine ephwg_get_dweights
 !!
 !! SOURCE
 
-subroutine ephwg_get_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, cweights, comm, use_bzsum)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iqlk, band, spin, nz, nbsigma,comm
+ integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, comm
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arraye
- complex(dpc),intent(in) :: zvals(nz, nbsigma)
- complex(dpc),intent(out) :: cweights(nz, 2, nbsigma, self%natom3)
+ complex(dpc),intent(in) :: zvals(nz, nbcalc)
+ complex(dpc),intent(out) :: cweights(nz, 2, nbcalc, self%nq_k)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,nu,iq,nprocs, my_rank, ierr
+ integer :: iq_ibz,ikpq_ibz,ib,ii,jj,iz,itetra,iq,nprocs, my_rank, ierr, iqlk
  real(dp) :: volconst_mult
  logical :: use_bzsum_
 !arrays
  real(dp) :: ework(4, 2)
- real(dp),allocatable :: pme_k(:,:,:)
+ real(dp),allocatable :: pme_k(:,:)
  integer :: ind_ibz(4)
  !complex(dpc) :: SIM0, SIM0I
- complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(nz,4)
+ complex(dpc) :: VERM(4), VERL(4), VERLI(4),  cint(4,nz)
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -933,78 +958,72 @@ subroutine ephwg_get_zinv_weights(self, iqlk, nz, nbsigma, zvals, band, spin, cw
  use_bzsum_ = .False.; if (present(use_bzsum)) use_bzsum_ = use_bzsum
 
  ! Allocate array for e_{k+q, b} +- w_{q,nu)
- ABI_MALLOC(pme_k, (self%nq_k, 2, self%natom3))
+ ABI_MALLOC(pme_k, (self%nq_k, 2))
 
- ib = band - self%bstart + 1
- do nu=1,self%natom3
-   do iq=1,self%nq_k
-     iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
-     ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
-     pme_k(iq, 1, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
-     pme_k(iq, 2, nu) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
-   end do
+ ib = iband_sum - self%bstart + 1
+ do iq=1,self%nq_k
+   iq_ibz = self%lgk2ibz(iq)   ! IBZ_k --> IBZ
+   ikpq_ibz = self%kq2ibz(iq)  ! k + q --> IBZ
+   pme_k(iq, 1) = self%eigkbs_ibz(ikpq_ibz, ib, spin) - self%phfrq_ibz(iq_ibz, nu)
+   pme_k(iq, 2) = self%eigkbs_ibz(ikpq_ibz, ib, spin) + self%phfrq_ibz(iq_ibz, nu)
  end do
 
  cweights = zero
  do itetra = 1, self%tetra_k%ntetra
-   ! Here we need the original ordering to reference the correct irred kpoints
-   ! Cycle if this tetra does not contribute to this k-point.
-   ! See also tetra_get_onewk
-   if (all(self%tetra_k%tetra_full(:, 1, itetra) /= iqlk)) cycle
    if (mod(itetra, nprocs) /= my_rank) cycle ! MPI parallelism
+   ! Here we need the original ordering to reference the correct irred kpoints
+   ! See also tetra_get_onewk
+   !if (all(self%tetra_k%tetra_full(:, 1, itetra) /= iqlk)) cycle
    ind_ibz = self%tetra_k%tetra_full(:, 1, itetra)
    !volconst_mult = self%tetra_k%vv / 4.d0 !* dble(self%tetra_k%tetra_mult(itetra))
    volconst_mult = self%tetra_k%vv * dble(self%tetra_k%tetra_mult(itetra))
 
-   do nu=1,self%natom3
-     ework = pme_k(ind_ibz(:), :, nu)
-     do ib=1,nbsigma
-       do ii=1,2
-         ! Compute weights for nz points.
-         do iz=1,nz
-           verm = zvals(iz, ib) - ework(:, ii)
-           !verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii, nu)
-           !call SIM0ONEI(SIM0, SIM0I, VERM)
-           !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
-           call SIM0TWOI(VERL, VERLI, VERM)
-           cint(iz,:) = verl(:) * volconst_mult
-         end do
+   ework = pme_k(ind_ibz(:), :)
+   do ib=1,nbcalc
+     do ii=1,2
+       ! Compute weights for nz points.
+       ! TODO: This is slow if nz >> 1
+       do iz=1,nz
+         verm = zvals(iz, ib) - ework(:, ii)
+         !verm = zvals(iz, ib) - pme_k(ind_ibz(:), ii)
+         !call SIM0ONEI(SIM0, SIM0I, VERM)
+         !cint(iz,:) = SIM0I / 4.0_dp * volconst_mult
+         call SIM0TWOI(VERL, VERLI, VERM)
+         cint(:, iz) = verl(:) * volconst_mult
+       end do
 
-         ! TODO
-         ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
-         do jj=1,4
-           if (ind_ibz(jj) == iqlk) then
-             !weights(:,1) = weights(:,1) + dtweightde_tmp(:,jj)
-             cweights(:, ii, ib, nu) = cweights(:, ii, ib, nu) + cint(:, jj)
-           end if
-         end do
-       end do  ! +-
-     end do ! ib
-   end do  ! nu
+       ! TODO
+       ! Accumulate contributions to ik_ibz (there might be multiple vertexes that map onto ik_ibz)
+       do jj=1,4
+         iqlk = ind_ibz(jj)
+         cweights(:, ii, ib, iqlk) = cweights(:, ii, ib, iqlk) + cint(jj, :)
+       end do
+     end do  ! +-
+   end do ! ib
 
  end do ! itetra
 
  ! Rescale weights so that the caller can sum over the full BZ.
- if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
+ !if (use_bzsum_) cweights = cweights / ( self%lgk%weights(iqlk) * self%nbz )
 
  call xmpi_sum(cweights, comm, ierr)
 
  ! Compare results with naive one-point integration.
- if (.False. .and. my_rank == master) then
-   volconst_mult = one
-   volconst_mult = self%lgk%weights(iqlk)
-   do ib=1,nbsigma
-     do nu=1,self%natom3
-       write(std_out,*)"# naive vs tetra integration for band, nu", ib - 1 + self%bstart, nu
-       do iz=1,nz
-         write(std_out,"(5es16.8)") &
-           dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 1, nu)) * volconst_mult, cweights(iz, 1, ib, nu)
-         write(std_out,"(5es16.8)") &
-           dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 2, nu)) * volconst_mult, cweights(iz, 2, ib, nu)
-       end do
-     end do
-   end do
- end if
+ !if (.False. .and. my_rank == master) then
+ !  volconst_mult = one
+ !  volconst_mult = self%lgk%weights(iqlk)
+ !  do ib=1,nbcalc
+ !    !do nu=1,self%natom3
+ !      write(std_out,*)"# naive vs tetra integration for band, nu", ib - 1 + self%bstart, nu
+ !      do iz=1,nz
+ !        write(std_out,"(5es16.8)") &
+ !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 1)) * volconst_mult, cweights(iz, 1, ib, nu)
+ !        write(std_out,"(5es16.8)") &
+ !          dble(zvals(iz, ib)), one / (zvals(iz, ib) - pme_k(iqlk, 2)) * volconst_mult, cweights(iz, 2, ib, nu)
+ !      end do
+ !    !end do
+ !  end do
+ !end if
 
  ABI_FREE(pme_k)
 

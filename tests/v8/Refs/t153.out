@@ -101,6 +101,7 @@ P           mkmem           8
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+         prtphdos           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -212,13 +213,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -267,7 +261,6 @@ All the independent perturbations are available
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t153o_DS1_EDOS
 Number of bands in e-ph self-energy sum: 8
 From bmin: 1 to bmax: 8
 Symsigma: 0 Timrev: 1
@@ -440,13 +433,6 @@ Values initialized with zeros
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.5482446053E-02 (at units)
--                                   =          11.9939 [km/s]
-
- Debye frequency from partial sums:     0.5060325864E-02 (Ha)
--                                 =     0.3329534472E+02 (THz)
--Debye temperature from partial sums:     0.1597922629E+04 (K)
-
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -477,7 +463,6 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
-- Writing electron DOS to file: t153o_DS2_EDOS
 Number of bands in e-ph self-energy sum: 8
 From bmin: 1 to bmax: 8
 Symsigma: 1 Timrev: 1
@@ -659,6 +644,7 @@ P           mkmem           8
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+         prtphdos           0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

@@ -808,13 +808,9 @@ subroutine flush_unit(unit)
 
 !FLUSH on unconnected unit is illegal: F95 std., 9.3.5.
 #if defined HAVE_FC_FLUSH
- if (isopen) then
-   call flush(unit)
- endif
+ if (isopen) call flush(unit)
 #elif defined HAVE_FC_FLUSH_
- if (isopen) then
-   call flush_(unit)
-  end if
+ if (isopen) call flush_(unit)
 #endif
 
 end subroutine flush_unit
