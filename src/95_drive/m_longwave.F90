@@ -1,0 +1,270 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_longwave
+!! NAME
+!!  m_longwave
+!!
+!! FUNCTION
+!!  DFPT long-wave calculation of spatial dispersion properties
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2019 ABINIT group (MR, MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_longwave
+    
+ use defs_basis
+ use m_profiling_abi
+ use m_errors
+ use m_xmpi
+ use defs_datatypes
+ use defs_abitypes
+ use m_xcdata
+ use m_hdr
+
+ use m_pspini,      only : pspini
+ use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
+ use m_common,      only : setup1
+ use m_pawfgr,      only : pawfgr_type, pawfgr_init
+ use m_pawrhoij,    only : pawrhoij_type
+ use m_paw_dmft,    only : paw_dmft_type
+ use m_drivexc,     only : check_kxc
+ use m_rhotoxc,     only : rhotoxc
+ use m_ioarr,       only : read_rhor
+
+ implicit none
+
+ private
+!!***
+
+ public :: longwave
+!!***
+
+! *************************************************************************
+
+contains 
+!!***
+
+!!****f* ABINIT/longwave
+!! NAME
+!!  longwave
+!!
+!! FUNCTION
+!! Primary routine for conducting DFPT calculations of spatial dispersion properties
+!!
+!! INPUTS
+!!  codvsn = code version
+!!  dtfil <type(datafiles_type)> = variables related to files
+!!  dtset <type(dataset_type)> = all input variables for this dataset
+!!  etotal = new total energy (no meaning at output)
+!!  iexit= exit flag
+!!  mpi_enreg=informations about MPI pnarallelization
+!!  occ(mband*nkpt*nsppol) = occupation number for each band and k
+!!  xred(3,natom) = reduced atomic coordinates
+!!
+!! OUTPUT
+!!  npwtot(nkpt) = total number of plane waves at each k point
+!!
+!! SIDE EFFECTS
+!!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  driver
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
+&                    psps,xred)
+    
+
+ implicit none
+
+!Arguments ------------------------------------
+ !scalars
+ integer,intent(in) :: iexit
+ real(dp),intent(inout) :: etotal
+ character(len=6),intent(in) :: codvsn
+ type(MPI_type),intent(inout) :: mpi_enreg
+ type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(inout) :: dtset
+ type(pseudopotential_type),intent(inout) :: psps
+ !arrays
+ integer,intent(out) :: npwtot(dtset%nkpt)
+ real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol),xred(3,dtset%natom)
+
+!Local variables-------------------------------
+ !scalars
+ integer,parameter :: cplex1=1,response=1
+ integer :: bantot,iatom,indx,itypat,mgfftf,natom,nfftf,nhatdim,nhatgrdim
+ integer :: nkxc,nk3xc,ntypat,n3xccc,option,rdwrpaw,spaceworld,tim_mkrho
+ real(dp) :: ecutdg_eff,ecut_eff,enxc,gsqcut_eff,gsqcutc_eff,ucvol
+ logical :: non_magnetic_xc
+ character(len=500) :: msg
+ type(paw_dmft_type) :: paw_dmft
+ type(pawfgr_type) :: pawfgr
+ type(hdr_type) :: hdr,hdr_den
+ type(xcdata_type) :: xcdata
+ !arrays
+ integer :: ngfft(18),ngfftf(18)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6)
+ integer,allocatable :: atindx(:),atindx1(:)
+ integer,allocatable :: nattyp(:) 
+ real(dp),allocatable :: doccde(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:),rhor(:,:)
+ real(dp),allocatable :: xccc3d(:)
+ type(pawrhoij_type),allocatable :: pawrhoij_read(:)
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Not valid for PAW
+ if (psps%usepaw==1) then
+   msg='This routine cannot be used for PAW (use pawnst3 instead) !'
+   MSG_BUG(msg)
+ end if
+
+!Not valid for finite wave-vector perturbations
+ if (sqrt(sum(dtset%qptn**2))/=0_dp) then
+   msg='This routine cannot be used for q=/0.d0'
+   MSG_BUG(msg)
+ end if
+
+!Only usable with spherical harmonics
+ if (dtset%useylm/=1) then
+   msg='This routine cannot be used for uselim/=1'
+   MSG_BUG(msg)
+ end if
+
+!Not valid for spin-dependent calculations
+ if (dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1) then
+   msg='This routine cannot be used for spin-dependent calculations'
+   MSG_BUG(msg)
+ end if
+
+!Not usable with core electron density corrections
+ if (psps%n1xccc/=0) then
+   msg='This routine cannot be used for n1xccc/=0'
+   MSG_BUG(msg)
+ end if
+
+!Define some data 
+ ntypat=psps%ntypat
+ natom=dtset%natom
+
+!Init spaceworld
+ spaceworld=mpi_enreg%comm_cell
+
+!Define FFT grid(s) sizes (be careful !)
+!See NOTES in the comments at the beginning of this file.
+ call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfft,ngfftf)
+
+!Set up for iterations
+ call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
+& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+& natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
+
+!Generate an index table of atoms, in order for them to be used
+!type after type.
+ ABI_ALLOCATE(atindx,(natom))
+ ABI_ALLOCATE(atindx1,(natom))
+ ABI_ALLOCATE(nattyp,(ntypat))
+ indx=1
+ do itypat=1,ntypat
+   nattyp(itypat)=0
+   do iatom=1,natom
+     if(dtset%typat(iatom)==itypat)then
+       atindx(iatom)=indx
+       atindx1(indx)=iatom
+       indx=indx+1
+       nattyp(itypat)=nattyp(itypat)+1
+     end if
+   end do
+ end do
+
+!Derivative of occupations is always zero for non metallic systems
+ ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ doccde(:)=zero
+
+!Read ground-state charge density from diskfile in case getden /= 0
+!or compute it from wfs that were read previously : rhor 
+
+ ABI_ALLOCATE(rhor,(nfftf,dtset%nspden))
+
+ if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
+   ! Read rho1(r) from a disk file and broadcast data.
+   ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
+
+   rdwrpaw=psps%usepaw
+   ABI_DATATYPE_ALLOCATE(pawrhoij_read,(0))
+
+!  MT july 2013: Should we read rhoij from the density file ?
+   call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
+   hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
+   etotal = hdr_den%etot; call hdr_free(hdr_den)
+
+   ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
+ else
+!  Obtain the charge density from read wfs
+!  Be careful: in PAW, compensation density has to be added !
+   tim_mkrho=4
+   paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
+   paw_dmft%use_dmft=0 ! respfn with dmft not implemented
+
+!     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+!&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+ end if ! getden
+
+!Set up xc potential. Compute kxc here.
+ option=2 ; nk3xc=1
+ nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
+ call check_kxc(dtset%ixc,dtset%optdriver)
+ ABI_ALLOCATE(kxc,(nfftf,nkxc))
+ ABI_ALLOCATE(vxc,(nfftf,dtset%nspden))
+
+ call xcdata_init(xcdata,dtset=dtset)
+
+ nhatgrdim=0;nhatdim=0
+ ABI_ALLOCATE(nhat,(0,0))
+ ABI_ALLOCATE(nhatgr,(0,0,0))
+ n3xccc=0
+ ABI_ALLOCATE(xccc3d,(n3xccc))
+
+! call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+!& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
+!& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+
+!Deallocations
+ ABI_DEALLOCATE(atindx)
+ ABI_DEALLOCATE(atindx1)
+ ABI_DEALLOCATE(doccde)
+ ABI_DEALLOCATE(nattyp)
+ ABI_DEALLOCATE(kxc)
+ ABI_DEALLOCATE(vxc)
+ 
+
+ DBG_EXIT("COLL")
+
+end subroutine longwave
+!!***
+
+end module m_longwave
+!!***
