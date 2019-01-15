@@ -332,6 +332,7 @@ class Differ(object):
                 - tolerance_rel: float (default 1.01e-10)
                 - label: str (default None)
         '''
+        self.xml_mode = False  # this is the first dirty fix.
         self.options = default_options.get_dict()
         self.options.update(options)
         if 'tolerance' in options:
@@ -343,6 +344,9 @@ class Differ(object):
             Compute the diff of file 1 (reference) and file 2 (out)
             and return a Result instance.
         '''
+        if file1.endswith('.xml'):
+            self.xml_mode = True
+
         with open(file1, 'rt') as f:
             lines1 = f.readlines()
 
@@ -370,6 +374,10 @@ class Differ(object):
                     c = '-'
                 else:
                     c = '+'
+            # dirty fix for compatibility
+            # I think xml should mot be compared with the basic algorithm
+            elif self.xml_mode and 'timeInfo' in line:
+                c = '.'
         return c
 
     def __clean(self, lines):
