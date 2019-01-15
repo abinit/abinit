@@ -258,6 +258,9 @@ MODULE m_ebands
     ! fo_kpos(1:2,spin) ==> Indices of the k-points where the homo, lumo states are located (for each spin).
     ! fo_kpos(3,spin)   ==> the index of k-point where the direct gap is located (for each spin).
 
+   real(dp) :: fermie
+    ! Fermi energy taken from ebands.
+
    integer,allocatable :: ierr(:)
      ! The third index corresponds to a "status":
      !   0.0dp if gaps were not computed (because there are only valence bands);
@@ -321,7 +324,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-function get_gaps(ebands,gaps,kmask) result(retcode)
+function get_gaps(ebands, gaps, kmask) result(retcode)
 
 !Arguments ------------------------------------
 !scalars
@@ -360,6 +363,7 @@ function get_gaps(ebands,gaps,kmask) result(retcode)
  gaps%fo_values = zero
  gaps%vb_max = huge(one); gaps%cb_min = -huge(one)
  gaps%errmsg_spin(:) = ""
+ gaps%fermie = ebands%fermie
 
  my_kmask=.TRUE.; if (PRESENT(kmask)) my_kmask=kmask
 
@@ -497,14 +501,14 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
 
 ! *********************************************************************
 
- my_unt =std_out; if (PRESENT(unit      )) my_unt =unit
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
+ my_unt =std_out; if (present(unit)) my_unt =unit
+ my_mode='COLL'; if (present(mode_paral)) my_mode=mode_paral
 
  do spin=1,gaps%nsppol
 
-   if (spin==1) then
-     msg=ch10
-     if (PRESENT(header)) msg=ch10//' === '//TRIM(ADJUSTL(header))//' === '
+   if (spin == 1) then
+     msg = ch10
+     if (present(header)) msg = ch10//' === '//trim(adjustl(header))//' === '
      call wrtout(my_unt,msg,my_mode)
    end if
 
@@ -518,7 +522,7 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
    opt_gap = gaps%fo_values(2,spin)
 
    if (any(gaps%fo_kpos(:,spin) == 0)) then
-     call wrtout(my_unt,sjoin("Cannot detect gap for spin: ",itoa(spin)),"COLL")
+     call wrtout(my_unt,sjoin("Cannot detect gap for spin: ", itoa(spin)))
      cycle
    end if
 
@@ -533,7 +537,11 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
                                              '      Bottom of conduction at: ',gaps%kpoints(:,ick)
    call wrtout(my_unt,msg,my_mode)
 
-   write(msg, "(2(a, f8.4))") "vmax:", gaps%vb_max(spin) * Ha_eV, " cmin", gaps%cb_min(spin) * Ha_eV
+   write(msg, "((a, f8.4, a))") " Valence MAX:", gaps%vb_max(spin) * Ha_eV, " (eV)"
+   call wrtout(my_unt,msg,my_mode)
+   write(msg, "((a, f8.4, a))") " Conduction min:", gaps%cb_min(spin) * Ha_eV, " (eV)"
+   call wrtout(my_unt,msg,my_mode)
+   write(msg, "((a, f8.4, a))") " Fermi level:", gaps%fermie * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
  end do !spin
 

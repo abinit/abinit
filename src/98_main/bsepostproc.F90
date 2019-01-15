@@ -45,6 +45,7 @@
  use m_specialmsg,only : specialmsg_getcount, herald
  use m_io_tools,  only : get_unit, flush_unit
  use m_mpinfo,    only : destroy_mpi_enreg, nullify_mpi_enreg, initmpi_seq
+
  implicit none
 
 !Arguments ----------------------------

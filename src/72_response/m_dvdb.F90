@@ -318,7 +318,10 @@ module m_dvdb
    ! Allocate internal cache for potentials.
 
    procedure :: qcache_read => dvdb_qcache_read
-   ! Read potentials and store them in cache.
+   ! Read potentials and store them in cache (collective routine)
+
+   procedure :: qcache_update => dvdb_qcache_update
+   ! Read selected potentials and update cache (collective routine)
 
    procedure :: qcache_report => dvdb_qcache_report
    !  Print info on q-cache states and reset counters.
@@ -1445,8 +1448,8 @@ subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
 
  call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
- call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
+ call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
 
@@ -1460,12 +1463,13 @@ end subroutine dvdb_set_qcache_mb
 !!  dvdb_qcache_read
 !!
 !! FUNCTION
-!!  Read potentials and store them in cache
+!!  This function initializes the internal q-cache from file.
+!!  This is a collective routine that must be called by all procs in comm.
 !!
 !! INPUTS
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  qselect(%nqpt)=0 to ignore this q-point when reading.
+!!  qselect(%nqpt)=0 to ignore this q-point when reading (global array)
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -1488,7 +1492,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
 !Local variables-------------------------------
 !scalars
  integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
- real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, onepot_mb
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: v1scf(:,:,:,:)
@@ -1506,6 +1510,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
  do db_iqpt=1,db%nqpt
    if (qselect(db_iqpt) == 0) cycle
 
+   ! All procs are getting the same q-point.
    ! Exit when we reach qcache_size
    qcnt = 0
    do ii=1,db%nqpt
@@ -1513,8 +1518,9 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
    end do
    if (qcnt >= db%qcache_size) exit
 
-   !if (db_iqpt > db%qcache_size) exit
-   if (mod(db_iqpt, 10) == 1) call cwtime(cpu, wall, gflops, "start")
+   if (db_iqpt < 100 .or. (db_iqpt > 1000 .and. mod(db_iqpt, 200) == 1)) then
+     call cwtime(cpu, wall, gflops, "start")
+   end if
 
    ! Read all 3*natom potentials inside comm
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
@@ -1534,17 +1540,124 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
    ABI_FREE(v1scf)
 
    ! Print progress.
-   if (mod(db_iqpt, 10) == 1) then
+   if (db_iqpt < 100 .or. (db_iqpt > 1000 .and. mod(db_iqpt, 200) == 1)) then
      call cwtime(cpu, wall, gflops, "stop")
      write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
    end if
  end do
 
+ ! Compute cache size.
+ qcnt = 0
+ do db_iqpt=1,db%nqpt
+   if (allocated(db%qcache(db_iqpt)%v1scf)) qcnt = qcnt + 1
+ end do
+ onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
+ call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
+
  call cwtime_report("Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
 end subroutine dvdb_qcache_read
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_qcache_update
+!! NAME
+!!  dvdb_qcache_update
+!!
+!! FUNCTION
+!!  Read selected potentials and update the internal q-cache.
+!!  This is a collective routine that must be called by all procs in comm.
+!!
+!! INPUTS
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ineed_qpt(%nqpt)=1 if this MPI rank requires this q-point.
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,comm
+ class(dvdb_t),intent(inout) :: db
+!arrays
+ integer,intent(in) :: ngfft(18), ineed_qpt(db%nqpt)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
+ real(dp) :: cpu_all, wall_all, gflops_all, onepot_mb
+!arrays
+ integer :: qselect(db%nqpt)
+ real(dp),allocatable :: v1scf(:,:,:,:)
+ real(dp) :: tsec(2)
+
+! *************************************************************************
+
+ if (db%qcache_size == 0) return
+
+ ! Take the union of the q-points inside comm.
+ qselect = ineed_qpt
+ call xmpi_sum(qselect, comm, ierr)
+ qcnt = count(qselect > 0)
+ if (qcnt == 0) then
+   call wrtout(std_out, "All qpts in Vscf(q) already in cache. No need to perform IO", do_flush=.True.)
+   return
+ end if
+
+ call timab(1807, 1, tsec)
+
+ call wrtout(std_out, sjoin("Need to update Vscf(q) cache. Master node will read ", itoa(qcnt), "q-points..."), do_flush=.True.)
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
+
+ do db_iqpt=1,db%nqpt
+   if (qselect(db_iqpt) == 0) cycle
+
+   ! Read all 3*natom potentials inside comm
+   call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
+
+   ! Transfer to cache taking into account my_npert
+   if (ineed_qpt(db_iqpt) /= 0) then
+     ABI_STAT_MALLOC(db%qcache(db_iqpt)%v1scf, (cplex, nfft, db%nspden, db%my_npert), ierr)
+     ABI_CHECK(ierr == 0, 'out of memory in db%qcache')
+
+     if (db%my_npert == db%natom3) then
+       db%qcache(db_iqpt)%v1scf = real(v1scf, kind=QCACHE_KIND)
+     else
+       do imyp=1,db%my_npert
+         ipc = db%my_pinfo(3, imyp)
+         db%qcache(db_iqpt)%v1scf(:,:,:,imyp) = real(v1scf(:,:,:,ipc), kind=QCACHE_KIND)
+       end do
+     end if
+   end if
+
+   ABI_FREE(v1scf)
+ end do
+
+ ! Compute cache size.
+ qcnt = 0
+ do db_iqpt=1,db%nqpt
+   if (allocated(db%qcache(db_iqpt)%v1scf)) qcnt = qcnt + 1
+ end do
+ onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
+ call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
+
+ call cwtime_report("Qcache update", cpu_all, wall_all, gflops_all)
+ call timab(1807, 2, tsec)
+
+end subroutine dvdb_qcache_update
 !!***
 
 !----------------------------------------------------------------------
