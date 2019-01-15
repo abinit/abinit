@@ -1550,7 +1550,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
  ! Compute cache size.
  qcnt = 0
  do db_iqpt=1,db%nqpt
-   if (allocated(db%qcache(ii)%v1scf)) qcnt = qcnt + 1
+   if (allocated(db%qcache(db_iqpt)%v1scf)) qcnt = qcnt + 1
  end do
  onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
  call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
@@ -1612,7 +1612,10 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
  qselect = ineed_qpt
  call xmpi_sum(qselect, comm, ierr)
  qcnt = count(qselect > 0)
- if (qcnt == 0) return
+ if (qcnt == 0) then
+   call wrtout(std_out, "All qpts in Vscf(q) already in cache. No need to perform IO", do_flush=.True.)
+   return
+ end if
 
  call timab(1807, 1, tsec)
 
@@ -1646,7 +1649,7 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
  ! Compute cache size.
  qcnt = 0
  do db_iqpt=1,db%nqpt
-   if (allocated(db%qcache(ii)%v1scf)) qcnt = qcnt + 1
+   if (allocated(db%qcache(db_iqpt)%v1scf)) qcnt = qcnt + 1
  end do
  onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
  call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))

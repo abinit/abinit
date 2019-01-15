@@ -256,6 +256,9 @@ MODULE m_ebands
     ! fo_kpos(1:2,spin) ==> Indices of the k-points where the homo, lumo states are located (for each spin).
     ! fo_kpos(3,spin)   ==> the index of k-point where the direct gap is located (for each spin).
 
+   real(dp) :: fermie
+    ! Fermi energy taken from ebands.
+
    integer,allocatable :: ierr(:)
      ! The third index corresponds to a "status":
      !   0.0dp if gaps were not computed (because there are only valence bands);
@@ -319,7 +322,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-function get_gaps(ebands,gaps,kmask) result(retcode)
+function get_gaps(ebands, gaps, kmask) result(retcode)
 
 !Arguments ------------------------------------
 !scalars
@@ -358,6 +361,7 @@ function get_gaps(ebands,gaps,kmask) result(retcode)
  gaps%fo_values = zero
  gaps%vb_max = huge(one); gaps%cb_min = -huge(one)
  gaps%errmsg_spin(:) = ""
+ gaps%fermie = ebands%fermie
 
  my_kmask=.TRUE.; if (PRESENT(kmask)) my_kmask=kmask
 
@@ -534,6 +538,8 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
    write(msg, "((a, f8.4, a))") " Valence MAX:", gaps%vb_max(spin) * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
    write(msg, "((a, f8.4, a))") " Conduction min:", gaps%cb_min(spin) * Ha_eV, " (eV)"
+   call wrtout(my_unt,msg,my_mode)
+   write(msg, "((a, f8.4, a))") " Fermi level:", gaps%fermie * Ha_eV, " (eV)"
    call wrtout(my_unt,msg,my_mode)
  end do !spin
 
