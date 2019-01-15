@@ -7,6 +7,8 @@ these first characters MUST be identical in corresponding lines.
 By default, a floating point comparison with a tolerance of 1.01d-10 is done
 on all floating point strings and a character comparison is done on all other
 strings, disregarding multiple spaces.
+For compatibility reasons with historical fldiff.pl a float is must contains a dot
+and at least one digit after it to be recognized as float.
 In order for two numbers to be declared different, BOTH the absolute difference
 and the relative difference (difference divided by the sum of absolute values)
 must be bigger than the tolerance.
@@ -26,10 +28,6 @@ P	handle as + if ignoreP option is False and as - else
 
 Both files should have the same number of non - starting lines.
 
-# With -context option, save character strings for context and print it
-# with line number when floating difference is found.
-# I did not understood this sentence.
-
 The ignore options affects the treatment of the ','
 special character in the first column (see above)
 
@@ -41,13 +39,14 @@ The label option, if specified, is appended at the end of the summary
 the tolerance option set the tolerance for comparision of floats, the default
 is 1.01e-10.
 This modifications do not apply to the tolerance determined by the
-'%',and '.' first-column special signs
+'%',and '.' first-column special signs.
 '''
 
 from __future__ import print_function, division, unicode_literals
 import re
 
-# Match floats
+# Match floats. Minimal float is .0 for historical reasons.
+# In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
 
 
@@ -180,6 +179,19 @@ class Result(object):
         self.details = self.__analyse()
 
     def __analyse(self):
+        '''
+            Analyse a difference list and extract summary informations and details.
+            Sumary informations are 
+            - self.max_abs_err: maximum absolute difference
+            - self.max_rel_err: maximu relative difference
+            - self.max_abs_ln: line number where the maximum absolute
+                difference is reached for the first time
+            - self.max_rel_ln: line number where the maximum relative
+                difference is reached for the first time
+            - self.ndiff_lines: number of lines flagged as different
+                (excluding "silent" differences: line starting with '.' '+' and
+                depending of Diff options ',' and 'P')
+        '''
         details = []
         error_lines = set()
 
@@ -190,7 +202,7 @@ class Result(object):
                 details = str(diff)
 
             elif isinstance(diff, ForcedDifference):
-                pass
+                pass  # Silent differences: not counted as different line
 
             elif isinstance(diff, FloatDifference):
                 if diff.lines[0] not in error_lines:
@@ -250,7 +262,7 @@ class Result(object):
     def dump_details(self, file=None):
         '''
             Either return a string describing all detected differences
-            or write it into the given file.
+            or write it into the given file (expected to be a writable stream).
         '''
         if file is None:
             return ''.join(self.details) + self.get_summary()
@@ -443,6 +455,8 @@ class Differ(object):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    # Minimal command line interface for debugging
 
     parser.add_argument('ref_file', metavar='REF', help='File reference')
     parser.add_argument('test_file', metavar='TESTED', help='File to be compared')
