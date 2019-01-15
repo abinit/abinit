@@ -2070,6 +2070,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        ncpgr = 6 ; ctocprj_choice = 3
      end if
    end if
+   if (dtset%orbmag > 1) then
+      ncpgr=3; ctocprj_choice=5; idir=0
+   end if
    call pawcprj_alloc(cprj_local,ncpgr,dimcprj)
    cprj=> cprj_local
    iatom=0 ; iorder_cprj=1 ! cprj are not ordered

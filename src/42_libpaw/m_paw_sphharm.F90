@@ -768,34 +768,43 @@ subroutine ys(lp,mp,ll,mm,ys_val)
  complex(dpc),intent(out) :: ys_val
 
 !Local variables ---------------------------------------
-!scalars
- complex(dpc) :: dmpmm,dmpmmm,m1mm
+ !scalars
+ real(dp) :: d_lp_ll,d_mp_mm,d_mp_mbar,d_mp_am,d_mp_ambar,powm,powam
 
 ! *********************************************************************
 
 
  ys_val = czero
 
- if(lp==ll .AND. (mp==mm .OR. mp==-mm) ) then
-  ! (-1)**mm
-   m1mm=cone; if(abs(mod(mm,2))==1) m1mm=-m1mm
+ d_lp_ll = zero
+ if (lp .EQ. ll) d_lp_ll = one
 
-  ! delta(mp,mm)
-   dmpmm=czero; if(mp==mm) dmpmm=cone
+ d_mp_mm = zero
+ if (mp .EQ. mm) d_mp_mm = one
 
-  ! delta(mp,-mm)
-   dmpmmm=czero; if(mp==-mm) dmpmmm=cone
+ d_mp_mbar = zero
+ if (mp .EQ. -mm) d_mp_mbar = one
 
-   select case (mm)
-       case (0) ! case for S_l0
-         ys_val = dmpmm
-       case (:-1) ! case for S_lm with m < 0
-         ys_val = -(zero,one)*m1mm*sqrthalf*(dmpmmm-m1mm*dmpmm)
-       case (1:) ! case for S_lm with m > 0
-         ys_val = m1mm*sqrthalf*(dmpmm+m1mm*dmpmmm)
-   end select
+ d_mp_am = zero
+ if (mp .EQ. abs(mm)) d_mp_am = one
 
- end if
+ d_mp_ambar = zero
+ if (mp .EQ. -abs(mm)) d_mp_ambar = one
+
+ powm=-one
+ if (mod(mm,2) .EQ. 0) powm = one
+
+ powam=-one
+ if (mod(abs(mm),2) .EQ. 0) powam = one
+
+ select case (mm)
+ case (0) ! case for S_l0
+    ys_val = cone*d_lp_ll*d_mp_mm
+ case (:-1) ! case for S_lm with m < 0
+    ys_val = -j_dpc*sqrthalf*powm*d_lp_ll*d_mp_am+j_dpc*sqrthalf*powm*powam*d_lp_ll*d_mp_ambar
+ case (1:) ! case for S_lm with m > 0
+    ys_val = cone*sqrthalf*powm*d_lp_ll*d_mp_mm + cone*sqrthalf*d_lp_ll*d_mp_mbar
+ end select
 
 end subroutine ys
 !!***
