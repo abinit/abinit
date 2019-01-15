@@ -295,10 +295,15 @@ CONTAINS  !=====================================================================
 !!  mpi_enreg = information about MPI parallelization
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      kpgsph,listkk,setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -903,6 +908,12 @@ end subroutine initorbmag
 !! PARENTS
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1064,6 +1075,12 @@ end subroutine rho_norm_check
 !! PARENTS
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1521,8 +1538,15 @@ end subroutine chern_number
 !! Direct questions and comments to J Zwanziger
 !!
 !! PARENTS
+!!      m_afterscfloop
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -1715,8 +1739,15 @@ end subroutine mpi_chern_number
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2103,7 +2134,8 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
      ABI_ALLOCATE(buffer2,(countb))
      buffer1(1:countb) = reshape(smat_all(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,0:4),(/countb/))
      call xmpi_sum(buffer1,buffer2,countb,spaceComm,ierr)
-     smat_all(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,0:4) = reshape(buffer2(1:countb),(/2,nband_k,nband_k,dtorbmag%fnkpt,6,5/))
+     smat_all(1:2,1:nband_k,1:nband_k,1:dtorbmag%fnkpt,1:6,0:4) = &
+&     reshape(buffer2(1:countb),(/2,nband_k,nband_k,dtorbmag%fnkpt,6,5/))
      ABI_DEALLOCATE(buffer1)
      ABI_DEALLOCATE(buffer2)
   end if
@@ -2167,8 +2199,15 @@ end subroutine make_smat
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2258,8 +2297,15 @@ end subroutine make_onsite_l_k
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2349,8 +2395,15 @@ end subroutine make_S1trace_k
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2434,6 +2487,12 @@ end subroutine make_CCIV_k
 !! PARENTS
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2558,8 +2617,15 @@ end subroutine make_CCIV_k_FD
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2811,8 +2877,15 @@ end subroutine ctocprjb
 !! NOTES
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -2920,8 +2993,15 @@ end subroutine make_dsdk_FD
 !! where 0 entry is for k' = k and 1-6 entries are for k' = k + dk, with indexing as in berryphase_new
 !!
 !! PARENTS
+!!      m_orbmag
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
@@ -3106,8 +3186,15 @@ end subroutine make_dsdk
 !! Direct questions and comments to J Zwanziger
 !!
 !! PARENTS
+!!      m_afterscfloop
 !!
 !! CHILDREN
+!!      ctocprjb,destroy_hamiltonian,fftpac,getghc,init_hamiltonian
+!!      load_k_hamiltonian,load_spin_hamiltonian,make_cciv_k,make_dsdk
+!!      make_dsdk_fd,make_onsite_l_k,make_s1trace_k,metric,mkffnl,mkkin,mkkpg
+!!      mknucdipmom_k,mkpwind_k,overlap_k1k2_paw,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawcprj_get,pawcprj_getdim,pawcprj_symkn,smatrix,transgrid
+!!      wrtout
 !!
 !! SOURCE
 
