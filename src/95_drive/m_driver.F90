@@ -158,6 +158,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
 
+#ifdef MR_DEV
+ use m_longwave
+#endif
+
  !Arguments ------------------------------------
  !scalars
  integer,intent(in) :: ndtset,ndtset_alloc,npsp
@@ -743,6 +747,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case (RUNL_EPH)
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
+
+#ifdef MR_DEV
+   case(RUNL_LONGWAVE)
+
+     call longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enregs(idtset),npwtot,occ,&
+&     psps,xred)
+#endif
 
    case default
      ! Bad value for optdriver
