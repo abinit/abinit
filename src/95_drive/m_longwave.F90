@@ -46,6 +46,8 @@ module m_longwave
  use m_drivexc,     only : check_kxc
  use m_rhotoxc,     only : rhotoxc
  use m_ioarr,       only : read_rhor
+ use m_symtk,       only : matr3inv
+ use m_kg,          only : kpgio
 
  implicit none
 
@@ -114,7 +116,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,response=1
- integer :: bantot,iatom,indx,itypat,mgfftf,natom,nfftf,nhatdim,nhatgrdim
+ integer :: bantot,gscase,iatom,indx,itypat,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: nkxc,nk3xc,ntypat,n3xccc,option,rdwrpaw,spaceworld,tim_mkrho
  real(dp) :: ecutdg_eff,ecut_eff,enxc,gsqcut_eff,gsqcutc_eff,ucvol
  logical :: non_magnetic_xc
@@ -125,9 +127,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(xcdata_type) :: xcdata
  !arrays
  integer :: ngfft(18),ngfftf(18)
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6)
- integer,allocatable :: atindx(:),atindx1(:)
- integer,allocatable :: nattyp(:) 
+ real(dp) :: gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
+ real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
+ real(dp) :: strsxc(6)
+ integer,allocatable :: atindx(:),atindx1(:),kg(:,:)
+ integer,allocatable :: nattyp(:),npwarr(:) 
  real(dp),allocatable :: doccde(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:),rhor(:,:)
  real(dp),allocatable :: xccc3d(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
@@ -168,6 +172,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Define some data 
  ntypat=psps%ntypat
  natom=dtset%natom
+ nfftot=product(ngfft(1:3))
+ nfftotf=product(ngfftf(1:3))
 
 !Init spaceworld
  spaceworld=mpi_enreg%comm_cell
@@ -181,6 +187,25 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
+
+!In some cases (e.g. getcell/=0), the plane wave vectors have
+! to be generated from the original simulation cell
+ rprimd_for_kg=rprimd
+ if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=dtset%rprimd_orig(:,:,1)
+ call matr3inv(rprimd_for_kg,gprimd_for_kg)
+ gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
+
+!Set up the basis sphere of planewaves
+ ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
+ ABI_ALLOCATE(npwarr,(dtset%nkpt))
+ call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
+& dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
+& dtset%nsppol)
+
+!Initialize header
+ gscase=0
+! call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
+!& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -247,7 +272,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  ABI_ALLOCATE(nhatgr,(0,0,0))
  n3xccc=0
  ABI_ALLOCATE(xccc3d,(n3xccc))
-
+ non_magnetic_xc=.false.
+ 
 ! call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 !& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
 !& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
