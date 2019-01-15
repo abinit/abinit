@@ -214,7 +214,7 @@ module m_sigmaph
    ! min and Max KS energy treated in self-energy +- max phonon energy
    ! Used to select bands in self-energy sum if imag only and select q-points in qpoints_oracle
 
-  real(dp) :: winfact = two
+  real(dp) :: winfact = four
    ! winfact * wmax is used to define the energy window for filtering electronic states
    ! in the computation of electron lifetimes.
 
@@ -4227,7 +4227,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
- MSG_WARNING("Calling qpoints_oracle to predict list of q-points for tau")
+ call wrtout(std_out, sjoin("qpoints_oracle: predicting no. q-points for tau with winfact:", ftoa(sigma%winfact)))
 
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &

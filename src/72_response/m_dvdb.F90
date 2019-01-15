@@ -1448,8 +1448,8 @@ subroutine dvdb_set_qcache_mb(db, ngfftf, mbsize)
 
  call wrtout(std_out, sjoin(" Activating cache for Vscf(q) with MAX input size: ", ftoa(mbsize, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" Number of q-points stored in memory: ", itoa(db%qcache_size)))
- call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
  call wrtout(std_out, sjoin(" QCACHE_KIND: ", itoa(QCACHE_KIND)))
+ call wrtout(std_out, sjoin(" One DFPT potential requires: ", ftoa(onepot_mb, fmt="f9.2"), " [Mb]"))
 
  ABI_MALLOC(db%qcache, (db%nqpt))
 
@@ -1492,7 +1492,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
 !Local variables-------------------------------
 !scalars
  integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
- real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
+ real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all, onepot_mb
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: v1scf(:,:,:,:)
@@ -1547,6 +1547,14 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
    end if
  end do
 
+ ! Compute cache size.
+ qcnt = 0
+ do db_iqpt=1,db%nqpt
+   if (allocated(db%qcache(ii)%v1scf)) qcnt = qcnt + 1
+ end do
+ onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
+ call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
+
  call cwtime_report("Qcache IO + symmetrization", cpu_all, wall_all, gflops_all)
  call timab(1801, 2, tsec)
 
@@ -1590,7 +1598,7 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
 !scalars
  integer,parameter :: master = 0
  integer :: db_iqpt, cplex, ierr, imyp, ipc, qcnt, ii
- real(dp) :: cpu_all, wall_all, gflops_all
+ real(dp) :: cpu_all, wall_all, gflops_all, onepot_mb
 !arrays
  integer :: qselect(db%nqpt)
  real(dp),allocatable :: v1scf(:,:,:,:)
@@ -1608,7 +1616,7 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
 
  call timab(1807, 1, tsec)
 
- call wrtout(std_out, sjoin("Updating Vscf(q) cache. Master node will read ", itoa(qcnt), "q-points..."), do_flush=.True.)
+ call wrtout(std_out, sjoin("Need to update Vscf(q) cache. Master node will read ", itoa(qcnt), "q-points..."), do_flush=.True.)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  do db_iqpt=1,db%nqpt
@@ -1634,6 +1642,14 @@ subroutine dvdb_qcache_update(db, nfft, ngfft, ineed_qpt, comm)
 
    ABI_FREE(v1scf)
  end do
+
+ ! Compute cache size.
+ qcnt = 0
+ do db_iqpt=1,db%nqpt
+   if (allocated(db%qcache(ii)%v1scf)) qcnt = qcnt + 1
+ end do
+ onepot_mb = two * product(ngfft(1:3)) * db%nspden * QCACHE_KIND * b2Mb
+ call wrtout(std_out, sjoin("Memory allocated for cache: ", ftoa(onepot_mb * qcnt * db%my_npert, fmt="f12.1"), " [Mb]"))
 
  call cwtime_report("Qcache update", cpu_all, wall_all, gflops_all)
  call timab(1807, 2, tsec)
