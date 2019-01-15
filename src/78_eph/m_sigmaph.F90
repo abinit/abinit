@@ -214,7 +214,7 @@ module m_sigmaph
    ! min and Max KS energy treated in self-energy +- max phonon energy
    ! Used to select bands in self-energy sum if imag only and select q-points in qpoints_oracle
 
-  real(dp) :: winfact = ten
+  real(dp) :: winfact = two
    ! winfact * wmax is used to define the energy window for filtering electronic states
    ! in the computation of electron lifetimes.
 
@@ -654,7 +654,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    end do
  end do
 
- if (sigma%imag_only .and. sigma%qint_method == 1 .and. .not. sigma%use_doublegrid) then
+ if (sigma%imag_only .and. sigma%qint_method == 1) then
    ! TODO: Still under testing
    if (dtset%userie == 123) then
       MSG_WARNING("Including limited set of states within energy window around bdgw states")
@@ -662,7 +662,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
         do ik_ibz=1,ebands%nkpt
           do band=sigma%my_bstart, sigma%my_bstop
             eig0mk = ebands%eig(band, ik_ibz, spin)
-            if (eig0mk >= sigma%elow - sigma%winfact * sigma%wmax .and. &
+            if (eig0mk >= sigma%elow  - sigma%winfact * sigma%wmax .and. &
                 eig0mk <= sigma%ehigh + sigma%winfact * sigma%wmax) then
                bks_mask(band, ik_ibz ,spin) = .True.
             end if
@@ -2398,9 +2398,9 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
  my_rank = xmpi_comm_rank(comm)
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call cwtime(cpu, wall, gflops, "start")
 
  if (dtset%prtdos /= 0) then
+   call cwtime(cpu, wall, gflops, "start")
    ! Compute electron DOS.
    edos_intmeth = 2; if (self%bcorr == 1) edos_intmeth = 3
    if (dtset%prtdos == 1) edos_intmeth = 1
@@ -2415,9 +2415,8 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
      call edos%print(unit=std_out)
      !call edos%print(unit=ab_out)
    end if
+   call cwtime_report("sigmaph_new: ebands", cpu, wall, gflops)
  end if
-
- call cwtime_report("sigmaph_new: ebands", cpu, wall, gflops)
 
  ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
  ! This could create problems if MPI parallelism over (spin, nkptgw) ...
@@ -2578,7 +2577,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
 
  call edos%free()
 
- call cwtime_report("sigmaph_new: netcdf", cpu, wall, gflops)
+ call cwtime_report("sigmaph_new: netcdf", cpu_all, wall_all, gflops_all)
 
 end subroutine sigmaph_write
 !!***
@@ -4215,8 +4214,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
 !scalars
  integer,parameter :: timrev1=1
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
- integer :: cnt, my_rank, nprocs, ib_k, band_ks !, nbcalc_ks, bstart_ks
- integer :: nkibz, nkbz, kq_rank
+ integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
  real(dp) :: eig0nk, eig0mkq, dksqmax, ediff
  character(len=500) :: msg
  type(kptrank_type) :: kptrank
@@ -4276,8 +4274,9 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
            eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
            ediff = eig0nk - eig0mkq
            ! Perform check on the energy difference to exclude this q-point.
-           if (eig0mkq >= sigma%elow - sigma%winfact * sigma%wmax .and. &
-               eig0mkq <= sigma%ehigh + sigma%winfact * sigma%wmax) then
+           !if (eig0mkq >= sigma%elow - sigma%winfact * sigma%wmax .and. &
+           !    eig0mkq <= sigma%ehigh + sigma%winfact * sigma%wmax) then
+           if (abs(ediff) <= sigma%winfact * sigma%wmax) then
              qbz_count(iq_bz) = qbz_count(iq_bz) + 1
            end if
          end do
@@ -4313,7 +4312,9 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
  ABI_FREE(qbz2dvdb)
  ABI_FREE(bz2ibz)
 
- write(std_out, "(a, i0, a)")"qpoints_oracle: calculation of tau_eph will need: ", count(qselect /= 0), " q-points."
+ cnt = count(qselect /= 0)
+ write(std_out, "(a, i0, a, f5.1, a)")"qpoints_oracle: calculation of tau_eph will need: ", cnt, &
+   " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
  !qselect = 0
 
 end subroutine qpoints_oracle

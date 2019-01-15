@@ -495,14 +495,14 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
 
 ! *********************************************************************
 
- my_unt =std_out; if (PRESENT(unit      )) my_unt =unit
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode=mode_paral
+ my_unt =std_out; if (present(unit)) my_unt =unit
+ my_mode='COLL'; if (present(mode_paral)) my_mode=mode_paral
 
  do spin=1,gaps%nsppol
 
-   if (spin==1) then
-     msg=ch10
-     if (PRESENT(header)) msg=ch10//' === '//TRIM(ADJUSTL(header))//' === '
+   if (spin == 1) then
+     msg = ch10
+     if (present(header)) msg = ch10//' === '//trim(adjustl(header))//' === '
      call wrtout(my_unt,msg,my_mode)
    end if
 
@@ -516,7 +516,7 @@ subroutine gaps_print(gaps, header, unit, mode_paral)
    opt_gap = gaps%fo_values(2,spin)
 
    if (any(gaps%fo_kpos(:,spin) == 0)) then
-     call wrtout(my_unt,sjoin("Cannot detect gap for spin: ",itoa(spin)),"COLL")
+     call wrtout(my_unt,sjoin("Cannot detect gap for spin: ", itoa(spin)))
      cycle
    end if
 
