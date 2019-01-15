@@ -2611,7 +2611,7 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr) result(new)
+type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2619,6 +2619,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr) result(new)
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  character(len=500),intent(out) :: msg
+ type(logical),optional :: keep_open
 
 !Local variables ------------------------------
 !scalars
@@ -2644,9 +2645,6 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr) result(new)
     ierr = 1; return
  end if
  NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
- ! so that the structure is properly freed
- !new%ncid = nctk_noid
- new%ncid = ncid
 
  !TODO?
  !NCF_CHECK(cryst%ncread(ncid))
@@ -2737,7 +2735,14 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr) result(new)
  NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
  NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
  NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
- NCF_CHECK(nf90_close(ncid))
+
+ if (present(keep_open)) then
+   new%ncid = ncid
+ else
+   NCF_CHECK(nf90_close(ncid))
+   ! so that the structure is properly freed
+   new%ncid = nctk_noid
+ end if
 
  ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),"netcdf eph_ngqpt_fine != input file")
  ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     "netcdf ddb_ngqpt != input file")
@@ -2782,8 +2787,8 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
  integer,intent(in) :: comm
  integer,intent(in) :: opt(:)
  type(sigmaph_t),intent(in) :: self
- type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
  integer, intent(out) :: ierr
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
  character(len=500) :: msg
@@ -2794,11 +2799,12 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
 #ifdef HAVE_NETCDF
  integer :: ncid, varid
 #endif
+ character(len=fnlen) :: path
  integer,allocatable :: indkk(:,:), nband(:)
  real,allocatable :: linewidth(:,:,:,:)
  real(dp) :: dksqmax
 
- !copy useful dimensions
+ ! copy useful dimensions
  nsppol = self%nsppol
  nkcalc = self%nkcalc
  nkpt = ebands%nkpt

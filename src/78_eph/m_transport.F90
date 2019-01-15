@@ -81,6 +81,12 @@ module m_transport
    real(dp),allocatable :: kTmesh(:)
    ! a list of temperatures at which to compute the transport
 
+   real(dp),allocatable :: eminmax_spin(:,:)
+   ! min max energy of the of the original ebands object
+
+   type(gaps_t) :: gaps
+   ! get gaps of original ebands object
+
    !integer :: nmu
    ! number of dopings
 
@@ -156,11 +162,11 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
 
  write(*,*) 'Transport computation driver'
 
- sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr)
+ sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr,keep_open=.true.)
  if (ierr/=0) MSG_ERROR(msg)
 
 ! intialize transport
- transport_rta = transport_rta_new(sigmaph)
+ transport_rta = transport_rta_new(sigmaph,ebands)
 
 ! read lifetimes to ebands object
  transport_rta%ebands = sigmaph_ebands(sigmaph,cryst,ebands,[1,1],comm,ierr)
@@ -236,15 +242,25 @@ end subroutine transport
 !!
 !! SOURCE
 
-type(transport_rta_t) function transport_rta_new(sigmaph) result (transport)
+type(transport_rta_t) function transport_rta_new(sigmaph,ebands) result (new)
 
 !Arguments -------------------------------------
  type(sigmaph_t) :: sigmaph
+ type(ebands_t),intent(in) :: ebands
+
+!Local variables ------------------------------
+ integer :: ierr
 
  ! Allocate important arrays
- ABI_MALLOC(transport%kTmesh,(sigmaph%ntemp))
- transport%ntemp = sigmaph%ntemp
- transport%kTmesh = sigmaph%kTmesh
+ ABI_MALLOC(new%kTmesh,(sigmaph%ntemp))
+ new%ntemp = sigmaph%ntemp
+ new%kTmesh = sigmaph%kTmesh
+
+ new%nsppol = ebands%nsppol
+ ABI_MALLOC(new%eminmax_spin,(2,ebands%nsppol))
+ new%eminmax_spin = get_minmax(ebands, "eig")
+
+ ierr = get_gaps(ebands,new%gaps)
 
 end function transport_rta_new
 
@@ -259,19 +275,18 @@ end function transport_rta_new
 !!
 !! SOURCE
 
-subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
+subroutine transport_rta_compute(self, cryst, dtset, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
- type(transport_rta_t),intent(inout) :: transport_rta
+ type(transport_rta_t),intent(inout) :: self
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
 
 !Local variables ------------------------------
- type(gaps_t) :: gaps
  integer :: nsppol, nkpt, mband, ib, ik, spin, ii, jj, itemp
  integer :: ntens, nvecs, nvals, edos_intmeth, ierr
- real(dp) :: eminmax_spin(2,transport_rta%ebands%nsppol), vr(3)
+ real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step
  real(dp) :: linewidth
  real(dp),allocatable :: dummy_vals(:,:,:,:), dummy_vecs(:,:,:,:,:), vv_tens(:,:,:,:,:,:)
@@ -279,21 +294,21 @@ subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
 
  ! create alias for dimensions
- nsppol = transport_rta%ebands%nsppol
- nkpt   = transport_rta%ebands%nkpt
- mband  = transport_rta%ebands%mband
+ nsppol = self%ebands%nsppol
+ nkpt   = self%ebands%nkpt
+ mband  = self%ebands%mband
  nvals = 0; nvecs = 0
 
  ! Allocate vv tensors with and without the lifetimes
- ntens = 1+transport_rta%ntemp
+ ntens = 1+self%ntemp
  ABI_MALLOC(vv_tens, (3, 3, ntens, mband, nkpt, nsppol))
  do spin=1,nsppol
    do ik=1,nkpt
      do ib=1,mband
        ! Go to cartesian coordinates (same as pmat2cart routine).
-       vr = cryst%rprimd(:,1)*transport_rta%ebands%velocity(1,ib,ik,spin) &
-           +cryst%rprimd(:,2)*transport_rta%ebands%velocity(2,ib,ik,spin) &
-           +cryst%rprimd(:,3)*transport_rta%ebands%velocity(3,ib,ik,spin)
+       vr = cryst%rprimd(:,1)*self%ebands%velocity(1,ib,ik,spin) &
+           +cryst%rprimd(:,2)*self%ebands%velocity(2,ib,ik,spin) &
+           +cryst%rprimd(:,3)*self%ebands%velocity(3,ib,ik,spin)
        vr = vr / two_pi
        ! Store in vv_tens
        do ii=1,3
@@ -302,8 +317,8 @@ subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
          end do
        end do
        ! Multiply by the lifetime
-       do itemp=1,transport_rta%ntemp
-         linewidth = abs(transport_rta%ebands%linewidth(itemp, ib, ik, spin))
+       do itemp=1,self%ntemp
+         linewidth = abs(self%ebands%linewidth(itemp, ib, ik, spin))
          vv_tens(:, :, 1+itemp, ib, ik, spin) = 0
          if (linewidth > tol12) vv_tens(:, :, 1+itemp, ib, ik, spin) = vv_tens(:, :, 1, ib, ik, spin) / linewidth
        end do
@@ -319,23 +334,21 @@ subroutine transport_rta_compute(transport_rta, cryst, dtset, comm)
  if (edos_step == 0) edos_step = 0.001
 
  ! Set default erange
- eminmax_spin = get_minmax(transport_rta%ebands, "eig")
- emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
- emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
+ emin = minval(self%eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
+ emax = maxval(self%eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
  ! If sigma_erange is set, get emin and emax
- ierr = get_gaps(transport_rta%ebands,gaps)
- do spin=1,transport_rta%ebands%nsppol
-   if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
-   if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
+ do spin=1,self%ebands%nsppol
+   if (dtset%sigma_erange(1) >= zero) emin = self%gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
+   if (dtset%sigma_erange(2) >= zero) emax = self%gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
  end do
 
  ! Compute dos and vvdos multiplied by lifetimes
- transport_rta%edos = ebands_get_dos_matrix_elements(transport_rta%ebands, cryst, &
-                                       dummy_vals, nvals, dummy_vecs, nvecs, vv_tens, ntens, &
-                                       edos_intmeth, edos_step, edos_broad, comm, &
-                                       transport_rta%vvdos_mesh, &
-                                       dummy_dosvals, dummy_dosvecs, transport_rta%vvdos, emin, emax)
+ self%edos = ebands_get_dos_matrix_elements(self%ebands, cryst, &
+                                            dummy_vals, nvals, dummy_vecs, nvecs, vv_tens, ntens, &
+                                            edos_intmeth, edos_step, edos_broad, comm, &
+                                            self%vvdos_mesh, &
+                                            dummy_dosvals, dummy_dosvecs, self%vvdos, emin, emax)
 
  ! Free memory
  ABI_FREE(vv_tens)
@@ -402,6 +415,7 @@ subroutine transport_rta_free(transport_rta)
  ABI_SFREE(transport_rta%vvdos)
  ABI_SFREE(transport_rta%vvdos_mesh)
  ABI_SFREE(transport_rta%kTmesh)
+ ABI_SFREE(transport_rta%eminmax_spin)
 
 end subroutine transport_rta_free
 
