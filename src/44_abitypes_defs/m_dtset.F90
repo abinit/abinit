@@ -1679,11 +1679,13 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 #ifdef MR_DEV
 !MR modi:
 !Desactivate perturbation symmetries temporarily
- do ipert=1,dtset%natom+6
-   do idir=1,3
-     if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+ if (dtset%prepalw==1) then
+   do ipert=1,dtset%natom+6
+     do idir=1,3
+       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+     end do
    end do
- end do
+ end if
 !........
 #endif
 

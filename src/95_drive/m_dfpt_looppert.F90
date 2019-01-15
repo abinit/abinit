@@ -918,7 +918,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 #ifdef MR_DEV
 !MR modi:
      !To agree with quadrupole and flexoelectrics routines
-     if(dtset%useria==1.or.dtset%userib/=0) then
+!     if(dtset%lw_qdrpl==1.or.dtset%lw_flexo/=0) then
+     if(dtset%prepalw==1) then
        if (dtset%kptopt==2) timrev_pert=1
        if (dtset%kptopt==3) timrev_pert=0
 !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are 
