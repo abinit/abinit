@@ -50,6 +50,13 @@ import re
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
 
 
+def norm_spaces(s):
+    '''
+        Normalize all blanks ( \\n\\r\\t).
+    '''
+    return ' '.join(s.split())  # the join/split technic remove all blanks and put one space between non-blanks words
+
+
 class ConstDict(object):
     '''
         Represent an immutable dict.
@@ -181,7 +188,7 @@ class Result(object):
     def __analyse(self):
         '''
             Analyse a difference list and extract summary informations and details.
-            Sumary informations are 
+            Sumary informations are
             - self.max_abs_err: maximum absolute difference
             - self.max_rel_err: maximu relative difference
             - self.max_abs_ln: line number where the maximum absolute
@@ -408,11 +415,11 @@ class Differ(object):
                         differences.append(ForcedDifference(i1, i2, line1, line2))
 
                     elif meta1 == ':':  # do a character comparison
-                        if line1 != line2:
+                        if norm_spaces(line1) != norm_spaces(line2):
                             differences.append(TextDifference(i1, i2, line1, line2))
 
                     elif meta1 == '.':  # do a character comparison but keep it silent
-                        if line1 != line2:
+                        if norm_spaces(line1) != norm_spaces(line2):
                             differences.append(TextDifference(i1, i2, line1, line2, silent=True))
 
                     else:  # compare numerical values
@@ -446,7 +453,7 @@ class Differ(object):
                                         differences.append(FloatDifference(i1, i2, line1, line2, diff, diffrel))
 
                                 else:
-                                    if elem1.replace(' ', '') != elem2.replace(' ', ''):
+                                    if norm_spaces(elem1) != norm_spaces(elem2):
                                         differences.append(TextDifference(i1, i2, line1, line2))
                                 is_float = not is_float  # re.split always altern between separator and match (here floats)
         return differences

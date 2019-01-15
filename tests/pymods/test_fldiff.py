@@ -321,6 +321,24 @@ class TestDiffer(unittest.TestCase):
         )
         self.assertEqual(len(differences), 0)
 
+    def test_diff_ignore_blanks(self):
+        diff = Differ()
+        differences = diff._Differ__diff_lines(
+            [
+                ' One normal line\n',
+                '.One messy dot   \t line\n',
+                ':A colon line.\n',
+                ' And a last line\n'
+            ],
+            [
+                ' One  \tnormal line\n\r',
+                '.One messy\tdot line  \n',
+                ':A colon \t line.\n\r',
+                ' And a last line'
+            ]
+        )
+        self.assertEqual(len(differences), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
