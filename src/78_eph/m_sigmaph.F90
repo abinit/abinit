@@ -2619,7 +2619,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open) 
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  character(len=500),intent(out) :: msg
- type(logical),optional :: keep_open
+ logical,optional :: keep_open
 
 !Local variables ------------------------------
 !scalars
@@ -2749,7 +2749,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open) 
  ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      "netcdf ph_ngqpt != input file")
  ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
  ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6), "netcdf frohl_params != input file")
- ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
+ !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
 
 contains
  integer function vid(vname)
