@@ -4425,7 +4425,7 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdx,gdxstor,ikpt,isppol,istwf_k,my_nspinor,nband_k,ncpgr
+ integer :: adir,bdx,gdxstor,ikpt,isppol,istwf_k,my_nspinor,nband_k,ncpgr,ncpgrb
  real(dp) :: ucvol
  complex(dpc) :: onsite_l_dir
  character(len=500) :: message
@@ -4480,8 +4480,9 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
 
  ! compute the shifted cprj's <p_k+b|u_k>
+ ncpgrb = 0 ! no gradients in <p_k+b|u_k>
  call mpi_ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
-      & istwf_k,kg,mcg,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
+      & istwf_k,kg,mcg,mpi_enreg,nattyp,ncpgrb,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
 
  onsite_l(:,:) = zero
  do adir = 1, 3
