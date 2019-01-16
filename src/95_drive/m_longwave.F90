@@ -57,6 +57,7 @@ module m_longwave
  use m_inwffil,     only : inwffil
  use m_spacepar,    only : setsym
  use m_mkrho,       only : mkrho
+ use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
 
  implicit none
 
@@ -131,10 +132,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
- integer :: ask_accurate,bantot,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
+ integer :: ask_accurate,bantot,gscase,iatom,idir,ierr,indx,ipert,ireadwf0,iscf_eff,itypat
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim,mk1mem
  integer :: nkxc,nk3xc,ntypat,n3xccc
- integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,tim_mkrho,usexcnhat
+ integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho,usexcnhat
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
@@ -152,7 +153,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:),irrzon(:,:,:),kg(:,:)
- integer,allocatable :: nattyp(:),npwarr(:),symrec(:,:,:) 
+ integer,allocatable :: nattyp(:),npwarr(:), pertsy(:,:),symrec(:,:,:) 
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: doccde(:),eigen0(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:)
@@ -195,7 +196,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Define some data 
  ntypat=psps%ntypat
  natom=dtset%natom
-! mk1mem=mkmems(3)
+ timrev=1
 
 !Init spaceworld
  spaceworld=mpi_enreg%comm_cell
@@ -366,7 +367,33 @@ ecore=zero
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
-!Deallocations
+!Desactivate perturbation symmetries temporarily
+ ABI_ALLOCATE(pertsy,(3,natom+6))
+ pertsy(:,:)=1
+!TODO:Add perturbation symmetries. See m_respfn_driver.F90.
+!........
+
+!#############  SPATIAL-DISPERSION POPERTIES CALCULATION  ###########################
+
+!Calculate the quadrupole tensor
+ if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
+   call dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
+&   gmet,gprimd,kxc,&
+&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+&   timrev,ucvol,xred)
+ end if 
+
+!Calculate the flexoelectric tensor
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2) then
+   call dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
+&   gmet,gprimd,kxc,&
+&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
+&   timrev,ucvol,xred)
+ end if 
+
+!Deallocate arrays
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(doccde)
@@ -382,7 +409,6 @@ ecore=zero
  ABI_DEALLOCATE(rhor)
  ABI_DEALLOCATE(symrec)
  ABI_DEALLOCATE(vxc)
- 
 
  DBG_EXIT("COLL")
 

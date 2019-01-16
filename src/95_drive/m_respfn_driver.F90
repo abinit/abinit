@@ -98,9 +98,9 @@ module m_respfn_driver
  use m_dfpt_elt,   only : dfpt_eltfrxc, dfpt_eltfrloc, dfpt_eltfrkin, dfpt_eltfrhar, elt_ewald, dfpt_ewald
  use m_d2frnl,     only : d2frnl
 
-#ifdef MR_DEV
- use m_dfpt_lw,    only : dfpt_qdrpole, dfpt_flexo
-#endif
+!#ifdef MR_DEV
+! use m_dfpt_lw,    only : dfpt_qdrpole, dfpt_flexo
+!#endif
 
 #if defined HAVE_GPU_CUDA
  use m_alloc_hamilt_gpu, only : alloc_hamilt_gpu, dealloc_hamilt_gpu
@@ -1621,11 +1621,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(eigen1_pert)
  end if
 
-#ifndef MR_DEV
-!MR: Caution!! this is if NOT defined
  ABI_DEALLOCATE(doccde)
-#endif
-
 
  if(me==0)then
    if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
@@ -1761,31 +1757,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      ABI_DEALLOCATE(d2matr)
    end if ! End condition on if.not.
  end if ! master node
-
-#ifdef MR_DEV
-!MR modi:
-!Calculate the quadrupole tensor
- if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-   call dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
-&   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
-&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-&   timrev,ucvol,xred)
- end if 
-
-!Calculate the flexoelectric tensor
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==2) then
-   call dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
-&   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
-&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-&   timrev,ucvol,xred)
- end if 
-
- ABI_DEALLOCATE(doccde)
-!........
-#endif
-
 
 !Deallocate arrays
  if (allocated(displ)) then

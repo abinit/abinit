@@ -103,8 +103,6 @@ contains
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
-!!  mkmem =number of k points treated by this node (GS data)
-!!  mk1mem =number of k points treated by this node (RF data)
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this proc)
@@ -148,7 +146,7 @@ contains
 !! SOURCE
 
 subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
-&          gmet,gprimd,kxc,mkmem,mk1mem,&
+&          gmet,gprimd,kxc,&
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
@@ -164,7 +162,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mk1mem,mkmem,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(in) :: nfft,nkpt,nkxc,nspden,nsppol,timrev
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -395,7 +393,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
    pertcase=q2grad(3,iq2grad)
    
    !Reads a real first order density
-   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call appdig(pertcase,dtfil%fildens1in,fi1o)
    call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
     & hdr_den, pawrhoij_read, spaceworld)
 
@@ -437,7 +435,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
    pertcase=pert_atdis(3,iatpert)
 
    !Reads a real first order density
-   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call appdig(pertcase,dtfil%fildens1in,fi1o)
    call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
     & hdr_den, pawrhoij_read, spaceworld)
 
@@ -529,7 +527,6 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_DEALLOCATE(rhog1_tmp)
  ABI_DEALLOCATE(rhog1_atdis)
  ABI_DEALLOCATE(rhor1_efield)
-
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 
@@ -638,7 +635,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
  call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
  mkmem_rbz =my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
- ABI_UNUSED((/mkmem,mk1mem/))
  
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
@@ -702,6 +698,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 & dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 & dtfil%unwffgs,dtfil%fnamewffk,wvl)
  ABI_DEALLOCATE(eigen0)
+
 !Close wffgs%unwff, if it was ever opened (in inwffil)
  if (ireadwf0==1) then
    call WffClose(wffgs,ierr)
@@ -719,10 +716,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !==== Initialize response functions files and handlers ====
  !Atomic displacement files
  ABI_ALLOCATE(wfk_t_atdis,(natpert))
+
  do iatpert=1,natpert
 
    pertcase=pert_atdis(3,iatpert)
-   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfatdis)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfatdis)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
@@ -771,7 +769,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  do iq2grad=1,nq2grad
 
    pertcase=q2grad(3,iq2grad)
-   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfefield)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfefield)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
@@ -1536,8 +1534,6 @@ end subroutine dfpt_qdrpout
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
-!!  mkmem =number of k points treated by this node (GS data)
-!!  mk1mem =number of k points treated by this node (RF data)
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this proc)
@@ -1580,7 +1576,7 @@ end subroutine dfpt_qdrpout
 !! SOURCE
 
 subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
-&          gmet,gprimd,kxc,mkmem,mk1mem,&
+&          gmet,gprimd,kxc,&
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
@@ -1596,7 +1592,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mk1mem,mkmem,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(in) :: nfft,nkpt,nkxc,nspden,nsppol,timrev
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1859,7 +1855,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
    pertcase=pert_efield(3,iefipert)
    
    !Reads a real first order density
-   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call appdig(pertcase,dtfil%fildens1in,fi1o)
    call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
     & hdr_den, pawrhoij_read, spaceworld)
 
@@ -1901,7 +1897,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
    pertcase=pert_strain(5,istrpert)
 
    !Reads a real first order density
-   call appdig(pertcase,dtfil%fnameabo_den,fi1o)
+   call appdig(pertcase,dtfil%fildens1in,fi1o)
    call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
     & hdr_den, pawrhoij_read, spaceworld)
 
@@ -2101,7 +2097,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
  call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
  mkmem_rbz =my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
- ABI_UNUSED((/mkmem,mk1mem/))
  
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
@@ -2205,7 +2200,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_ALLOCATE(wfk_t_efield,(nefipert))
  do iefipert=1,nefipert
    pertcase=pert_efield(3,iefipert)
-   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfefield)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfefield)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
@@ -2229,7 +2224,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    pertcase=pert_strain(5,istrpert)
    ka=pert_strain(3,istrpert)
    kb=pert_strain(4,istrpert)
-   call appdig(pertcase,dtfil%fnameabo_1wf,fiwfstrain)
+   call appdig(pertcase,dtfil%fnamewff1,fiwfstrain)
 
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
