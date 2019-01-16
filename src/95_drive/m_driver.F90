@@ -752,7 +752,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_LONGWAVE)
 
      call longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enregs(idtset),npwtot,occ,&
-&     psps,xred)
+&     pawang,pawrad,pawtab,psps,xred)
 #endif
 
    case default

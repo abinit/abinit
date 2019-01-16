@@ -105,7 +105,6 @@ contains
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mkmem =number of k points treated by this node (GS data)
 !!  mk1mem =number of k points treated by this node (RF data)
-!!  mpert =maximum number of ipert
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this proc)
@@ -117,7 +116,7 @@ contains
 !!  occ(mband*nkpt*nsppol)=occup number for each band (often 2) at each k point
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data for the GS (DUMMY)
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data (DUMMY)
-!!  pertsy(3,mpert)=set of perturbations that form a basis for all other perturbations
+!!  pertsy(3,natom+6)=set of perturbations that form a basis for all other perturbations
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
@@ -150,7 +149,7 @@ contains
 
 subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 &          gmet,gprimd,kxc,mkmem,mk1mem,&
-&          mpert,mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
+&          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
 
@@ -165,7 +164,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mk1mem,mkmem,mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(in) :: mk1mem,mkmem,nfft,nkpt,nkxc,nspden,nsppol,timrev
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1245,7 +1244,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
          tmpim=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
          dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim/ucvol
          dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
-         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,tmpre/ucvol
+         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,0.0_dp
 
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
@@ -1539,7 +1538,6 @@ end subroutine dfpt_qdrpout
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mkmem =number of k points treated by this node (GS data)
 !!  mk1mem =number of k points treated by this node (RF data)
-!!  mpert =maximum number of ipert
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this proc)
@@ -1551,7 +1549,7 @@ end subroutine dfpt_qdrpout
 !!  occ(mband*nkpt*nsppol)=occup number for each band (often 2) at each k point
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data for the GS (DUMMY)
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data (DUMMY)
-!!  pertsy(3,mpert)=set of perturbations that form a basis for all other perturbations
+!!  pertsy(3,natom+6)=set of perturbations that form a basis for all other perturbations
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
@@ -1583,7 +1581,7 @@ end subroutine dfpt_qdrpout
 
 subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 &          gmet,gprimd,kxc,mkmem,mk1mem,&
-&          mpert,mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
+&          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
 
@@ -1598,7 +1596,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mk1mem,mkmem,mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(in) :: mk1mem,mkmem,nfft,nkpt,nkxc,nspden,nsppol,timrev
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg

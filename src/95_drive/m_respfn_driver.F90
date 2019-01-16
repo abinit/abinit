@@ -1768,7 +1768,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
    call dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 &   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
-&   mpert,mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &   timrev,ucvol,xred)
  end if 
@@ -1777,7 +1777,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2) then
    call dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 &   gmet,gprimd,kxc,dtset%mkmem,mk1mem,&
-&   mpert,mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
+&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &   timrev,ucvol,xred)
  end if 
