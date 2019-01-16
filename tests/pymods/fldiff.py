@@ -389,6 +389,10 @@ class Differ(object):
         '''
         if not line or line[0].isspace():
             c = ' '
+            # dirty fix for compatibility
+            # I think xml should mot be compared with the basic algorithm
+            if self.xml_mode and 'timeInfo' in line:
+                c = '.'
         else:
             c = line[0]
             if c == ',':
@@ -401,10 +405,6 @@ class Differ(object):
                     c = '-'
                 else:
                     c = '+'
-            # dirty fix for compatibility
-            # I think xml should mot be compared with the basic algorithm
-            elif self.xml_mode and 'timeInfo' in line:
-                c = '.'
         return c
 
     def __clean(self, lines):
