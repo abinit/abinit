@@ -231,6 +231,7 @@ class TestDiffer(unittest.TestCase):
     def test_get_metachar(self):
         class Dummy(Differ):
             def __init__(self, ignore=True, ignoreP=True):
+                self.xml_mode = False
                 self.options = {
                     'ignore': ignore,
                     'ignoreP': ignoreP,
@@ -249,9 +250,9 @@ class TestDiffer(unittest.TestCase):
         self.assertEqual(Differ._Differ__get_metachar(Dummy(), ''), ' ')
 
     def test_clean(self):
-        # __clean do not use self
         class Dummy(Differ):
             def __init__(self, ignore=True, ignoreP=True):
+                self.xml_mode = False
                 self.options = {
                     'ignore': ignore,
                     'ignoreP': ignoreP,
