@@ -57,6 +57,32 @@ def norm_spaces(s):
     return ' '.join(s.split())  # the join/split technic remove all blanks and put one space between non-blanks words
 
 
+def relative_truncate(f, n):
+    '''
+        >>> rel_truncate(1.8367387367, 2)
+        1.83
+        >>> rel_truncate(1.8367387367e-5, 5)
+        1.83673e-05
+        >>> rel_truncate(1.8367387367e+7, 4)
+        18367000.0
+    '''
+    ten_n = 10**n
+    if abs(f) >= 1:
+        ten_p = 10
+        while abs(f) > ten_p:
+            ten_p *= 10
+        fact = 10 * ten_n / ten_p
+        return int(f * fact) / fact
+    else:
+        ten_p = 0.1
+        p = -1
+        while abs(f) < ten_p:
+            ten_p /= 10
+            p -= 1
+        fact = ten_n / ten_p
+        return int(f * fact) / fact
+
+
 class ConstDict(object):
     '''
         Represent an immutable dict.
@@ -289,8 +315,9 @@ class Result(object):
             status = 'succeeded'
             msg = 'succeeded'
         else:
-            abs_error = self.max_abs_err
-            rel_error = self.max_rel_err
+            # truncate to prevent problem linked to machine precision
+            abs_error = relative_truncate(self.max_abs_err, 12)
+            rel_error = relative_truncate(self.max_rel_err, 12)
             ndiff_lines = self.ndiff_lines
             status = 'failed'
             fact = 1.0
