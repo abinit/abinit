@@ -270,7 +270,9 @@ subroutine eprenorms_from_epnc(Epren,filename)
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"eigenvalues"), Epren%eigens))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"occupations"), Epren%occs))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"zero_point_motion"), Epren%renorms))
- NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"linewidth"), Epren%linewidth))
+ ! TODO: This should be changed. What is stored is a linewidth, not a lifetime,
+ ! we postone the change so as to not break compatibility
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"lifetime"), Epren%linewidth))
 
 #endif
 
