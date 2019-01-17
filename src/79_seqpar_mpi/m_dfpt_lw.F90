@@ -215,7 +215,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
  integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
  integer,allocatable :: pert_atdis(:,:), pert_atdis_tmp(:,:)
- integer,allocatable :: q1grad(:,:),q1q2grad(:,:),q2grad(:,:),q2grad_tmp(:,:)
+ integer,allocatable :: q1grad(:,:),q1grad_tmp(:,:),q1q2grad(:,:),q2grad(:,:),q2grad_tmp(:,:)
  integer,allocatable :: qdrflg(:,:,:,:)
  integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
  real(dp) :: kpoint(3)
@@ -326,18 +326,24 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  end do
  ABI_DEALLOCATE(q2grad_tmp)
 
- !For the evaluation of the  first q-gradient, the three directios are activated because 
- !currently the program calculates by defect all the components of the d2_dkdk perturbation.
- !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
- !components of the d2_dkdk
  !The q1grad is related with the response to the ddk
- nq1grad=3
+ ABI_ALLOCATE(q1grad_tmp,(3,3))
+ q1grad_tmp=0
+ iq1grad_cnt=0
+ do iq1grad=1,3
+   if (pertsy(iq1grad,dtset%natom+1)==1) then
+     iq1grad_cnt=iq1grad_cnt+1
+     q1grad_tmp(1,iq1grad_cnt)=dtset%natom+1                         !ddk perturbation
+     q1grad_tmp(2,iq1grad_cnt)=iq1grad                               !ddk direction
+     q1grad_tmp(3,iq1grad_cnt)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
+   end if
+ end do
+ nq1grad=iq1grad_cnt
  ABI_ALLOCATE(q1grad,(3,nq1grad))
  do iq1grad=1,nq1grad
-   q1grad(1,iq1grad)=dtset%natom+1                         !ddk perturbation
-   q1grad(2,iq1grad)=iq1grad                               !ddk direction
-   q1grad(3,iq1grad)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
+   q1grad(:,iq1grad)=q1grad_tmp(:,iq1grad)
  end do
+ ABI_DEALLOCATE(q1grad_tmp)
 
  !For the evaluation of the 2nd order q-gradient, the 9 directios are activated because 
  !currently the program calculates by defect all the components of the d2_dkdk perturbation.
@@ -1749,9 +1755,11 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  nq1grad=3
  ABI_ALLOCATE(q1grad,(3,nq1grad))
  do iq1grad=1,nq1grad
-   q1grad(1,iq1grad)=dtset%natom+1                         !ddk perturbation
-   q1grad(2,iq1grad)=iq1grad                               !ddk direction
-   q1grad(3,iq1grad)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
+   if (pertsy(iq1grad,dtset%natom+1)==1) then
+     q1grad(1,iq1grad)=dtset%natom+1                         !ddk perturbation
+     q1grad(2,iq1grad)=iq1grad                               !ddk direction
+     q1grad(3,iq1grad)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
+   end if
  end do
 
 !d2_dkdk

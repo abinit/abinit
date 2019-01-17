@@ -372,20 +372,22 @@ ecore=zero
  ABI_ALLOCATE(rfpert,(mpert))
  rfpert(:)=0
  rfpert(natom+1)=1
- rfpert(natom+10)=1
- rfpert(natom+11)=1
- if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then 
+ if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4 &
+&.or.dtset%d3e_pert1_phon==1.or.dtset%d3e_pert2_phon==1) then 
    if (dtset%d3e_pert1_phon==1) rfpert(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
    if (dtset%d3e_pert2_phon==1) rfpert(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
  end if
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.&
-& dtset%d3e_pert1_elfd==1) rfpert(natom+2)=1
+& dtset%d3e_pert1_elfd==1) then 
+   rfpert(natom+2)=1
+   rfpert(natom+10)=1
+   rfpert(natom+11)=1
+ end if
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then 
    if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) rfpert(natom+3)=1
    if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) rfpert(natom+4)=1
  endif
    
-
 !Determine which directions treat for each type of perturbation
  ABI_ALLOCATE(pertsy,(3,natom+6))
  pertsy(:,:)=0
@@ -407,20 +409,21 @@ ecore=zero
    if (dtset%d3e_pert3_dir(idir)==1) pertsy(idir,natom+1)=1
  end do
  !electric field
- do idir=1,3
-   if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,natom+2)=1
- end do
+ if (rfpert(natom+2)==1) then
+   do idir=1,3
+     if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,natom+2)=1
+   end do
+ end if
  !strain
- if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) pertsy(:,natom+3)=1
- if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) pertsy(:,natom+4)=1
-
- do ipert=1,natom+6
-   write(100,*) pertsy(:,ipert)
- end do
- write(100,*)dtset%d3e_pert2_strs
+ if (rfpert(natom+3)==1) pertsy(:,natom+3)=1
+ if (rfpert(natom+4)==1) pertsy(:,natom+4)=1
 
 !TODO:Add perturbation symmetries. See m_respfn_driver.F90.
 !........
+
+do ipert=1,natom+6
+  write(100,*) pertsy(:,ipert)
+end do
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
