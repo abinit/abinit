@@ -463,7 +463,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%d3e_pert2_elfd     = dtin%d3e_pert2_elfd
  dtout%d3e_pert2_phon     = dtin%d3e_pert2_phon
 #ifdef MR_DEV
- dtout%d3e_pert2_strn     = dtin%d3e_pert2_strn
+ dtout%d3e_pert2_strs     = dtin%d3e_pert2_strs
 #endif
  dtout%d3e_pert3_elfd     = dtin%d3e_pert3_elfd
  dtout%d3e_pert3_phon     = dtin%d3e_pert3_phon
@@ -2364,7 +2364,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
 #ifdef MR_DEV
- list_vars=trim(list_vars)//' d3e_pert2_strn'
+ list_vars=trim(list_vars)//' d3e_pert2_strs'
 #endif 
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
 !E
@@ -2492,7 +2492,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' rfstrs rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rprim'
  !These input parameters are obsolete (keep them for compatibility)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
- list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon'
+ list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'

@@ -217,7 +217,7 @@ type dataset_type
  integer :: d3e_pert2_elfd
  integer :: d3e_pert2_phon
 #ifdef MR_DEV
- integer :: d3e_pert2_strn
+ integer :: d3e_pert2_strs
 #endif
  integer :: d3e_pert3_elfd
  integer :: d3e_pert3_phon

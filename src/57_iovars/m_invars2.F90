@@ -833,6 +833,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1.or.tread_alt==1) dtset%d3e_pert2_phon=intarr(1)
    if (tread_alt==1) tread_key=1
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_strs',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2strs',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_strs=intarr(1)
+   if (tread_alt==1) tread_key=1
+
    call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
    call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf3atpol',tread_alt,'INT')
    if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)

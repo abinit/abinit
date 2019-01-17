@@ -134,7 +134,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,parameter :: cplex1=1,formeig=0,response=1
  integer :: ask_accurate,bantot,gscase,iatom,idir,ierr,indx,ipert,ireadwf0,iscf_eff,itypat
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim,mk1mem
- integer :: nkxc,nk3xc,ntypat,n3xccc
+ integer :: mpert,nkxc,nk3xc,ntypat,n3xccc
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho,usexcnhat
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
@@ -153,7 +153,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:),irrzon(:,:,:),kg(:,:)
- integer,allocatable :: nattyp(:),npwarr(:), pertsy(:,:),symrec(:,:,:) 
+ integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),rfpert(:),symrec(:,:,:) 
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: doccde(:),eigen0(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:)
@@ -367,11 +367,65 @@ ecore=zero
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
-!Desactivate perturbation symmetries temporarily
+!Initialize the list of perturbations rfpert
+ mpert=natom+11
+ ABI_ALLOCATE(rfpert,(mpert))
+ rfpert(:)=0
+ rfpert(natom+1)=1
+ rfpert(natom+10)=1
+ rfpert(natom+11)=1
+ if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then 
+   if (dtset%d3e_pert1_phon==1) rfpert(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
+   if (dtset%d3e_pert2_phon==1) rfpert(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
+ end if
+ if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.&
+& dtset%d3e_pert1_elfd==1) rfpert(natom+2)=1
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then 
+   if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) rfpert(natom+3)=1
+   if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) rfpert(natom+4)=1
+ endif
+   
+
+!Determine which directions treat for each type of perturbation
  ABI_ALLOCATE(pertsy,(3,natom+6))
- pertsy(:,:)=1
+ pertsy(:,:)=0
+ !atomic displacement
+ do ipert=1,natom
+   if (rfpert(ipert)==1.and.dtset%d3e_pert1_phon==1) then
+     do idir=1,3
+       if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,ipert)=1
+     end do 
+   endif
+   if (rfpert(ipert)==1.and.dtset%d3e_pert2_phon==1) then
+     do idir=1,3
+       if (dtset%d3e_pert2_dir(idir)==1) pertsy(idir,ipert)=1
+     end do 
+   end if
+ end do
+ !ddk
+ do idir=1,3
+   if (dtset%d3e_pert3_dir(idir)==1) pertsy(idir,natom+1)=1
+ end do
+ !electric field
+ do idir=1,3
+   if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,natom+2)=1
+ end do
+ !strain
+ if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) pertsy(:,natom+3)=1
+ if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) pertsy(:,natom+4)=1
+
+ do ipert=1,natom+6
+   write(100,*) pertsy(:,ipert)
+ end do
+ write(100,*)dtset%d3e_pert2_strs
+
 !TODO:Add perturbation symmetries. See m_respfn_driver.F90.
 !........
+
+!Deallocate global proc_distrib
+ if(xmpi_paral==1) then
+   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+ end if
 
 !#############  SPATIAL-DISPERSION POPERTIES CALCULATION  ###########################
 

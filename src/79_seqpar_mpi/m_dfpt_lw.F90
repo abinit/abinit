@@ -1003,6 +1003,9 @@ qdrpwf_t5=zero
  ABI_DEALLOCATE(wtk_rbz)
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
+ if(xmpi_paral==1) then
+   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+ end if
 
  DBG_EXIT("COLL")
 
@@ -2461,6 +2464,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(elflexowf_t4_k)
  ABI_DEALLOCATE(elflexowf_t5)
  ABI_DEALLOCATE(elflexowf_t5_k)
+ if(xmpi_paral==1) then
+   ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+ end if
 
  DBG_EXIT("COLL")
 

@@ -2078,7 +2078,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%d3e_pert2_elfd=0
    dtsets(idtset)%d3e_pert2_phon=0
 #ifdef MR_DEV
-   dtsets(idtset)%d3e_pert2_strn=0
+   dtsets(idtset)%d3e_pert2_strs=0
 #endif
    dtsets(idtset)%d3e_pert3_atpol(1:2)=1
    dtsets(idtset)%d3e_pert3_dir(1:3)=0

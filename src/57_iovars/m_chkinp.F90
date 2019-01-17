@@ -2027,7 +2027,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,9,&
 &   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE, RUNL_GWLS, RUNL_WFK,RUNL_EPH],iout)
 #endif 
+#ifdef MR_DEV
+   if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
+#else
    if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR])) then
+#endif
      write(message,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
 &     'This is in conflict with the values of the other input variables,',ch10,&
