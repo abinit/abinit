@@ -237,6 +237,17 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'autoparal',tread0,'INT')
    if(tread0==1) dtsets(idtset)%autoparal=intarr(1)
 
+   wfoptalg_read=.false.
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfoptalg',tread0,'INT')
+   if(tread0==1) then
+     dtsets(idtset)%wfoptalg=intarr(1)
+     wfoptalg_read=.true.
+   else
+     if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
+     if (dtsets(idtset)%usepaw/=0) dtsets(idtset)%wfoptalg=10
+     if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114
+   end if
+
    ! Dump the list of irreducible perturbations and exit.
    if (dtsets(idtset)%paral_rf==-1.and.optdriver/=RUNL_NONLINEAR) then
      call get_npert_rbz(dtsets(idtset),nband_rbz,nkpt_rbz,npert)
@@ -260,13 +271,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      MSG_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1')
    end if
 
-!  Read again some input data to take into account a possible change of paral_kgb
-   wfoptalg_read=.false.
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfoptalg',tread0,'INT')
-   if(tread0==1) then
-     dtsets(idtset)%wfoptalg=intarr(1)
-     wfoptalg_read=.true.
-   else
+!  Take into account a possible change of paral_kgb (change of thwe default algorithm)
+   if (.not.wfoptalg_read) then
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
      if (dtsets(idtset)%usepaw/=0) dtsets(idtset)%wfoptalg=10
      if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114
