@@ -4,9 +4,9 @@
 
 ### A name for the project ?
 
-ABINEAT: ABInit NEw physics Aware Testing
-NEAT: New Abinit Testing
-NUTS: New Unit Testing System / New Unit Test Suite
+- ABINEAT: ABInit NEw physics Aware Testing
+- NEAT: New Abinit Testing
+- ABINUTS / NUTS: New Unit Testing System / New Unit Test Suite
 
 ### Principle
 
@@ -16,7 +16,7 @@ process it easily.
 
 ### Motivations
 
-#### Current situation
+__Current situation0__
 
 In its current state the Abinit testing system is based on inputs files and associated reference output files.
 A test consist in comparing the reference file with the outputfile of a fresh run in a pretty linear way,
@@ -30,7 +30,7 @@ test as succeded.
 Given the variaty of configurations of the test farm and the use of different parallelism configurations it may be
 hard to create a stable test with decent tolerances and a lot of current test are really weak because of this limitation.
 
-#### Solution concepts
+__Solution concepts__
 
 The proposal of this project is to allow stricter tests on pertinent quantities, ignoring the rest. This can be achieved
 by creating tests specialized for given physical quantities, taking in account there properties (Newton's Law,
