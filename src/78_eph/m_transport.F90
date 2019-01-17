@@ -57,7 +57,8 @@ module m_transport
  private
 !!****
 
- public transport !! main entry point for transport calculations
+ public :: transport !! main entry point for transport calculations
+
 !!****
 
 !!****t* m_sigmaph/sigmaph_t
@@ -69,7 +70,7 @@ module m_transport
 !!
 !! SOURCE
 
- type,private :: transport_rta_t
+type,public :: transport_rta_t
 
 
    integer :: nsppol
