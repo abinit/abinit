@@ -44,6 +44,7 @@ This modifications do not apply to the tolerance determined by the
 
 from __future__ import print_function, division, unicode_literals
 import re
+from math import floor
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
@@ -66,21 +67,22 @@ def relative_truncate(f, n):
         >>> rel_truncate(1.8367387367e+7, 4)
         18367000.0
     '''
-    from math import floor
-    ten_n = 10**n
-    if abs(f) >= 1:
-        ten_p = 10
+    ten_n = 10.0**n
+    if f == 0.0:
+        return 0.0
+    elif abs(f) >= 1:
+        ten_p = 10.0
         while abs(f) > ten_p:
-            ten_p *= 10
-        fact = 10 * float(ten_n) / float(ten_p)
+            ten_p *= 10.0
+        fact = 10 * ten_n / ten_p
         return floor(f * fact) / fact
     else:
         ten_p = 0.1
         p = -1
         while abs(f) < ten_p:
-            ten_p /= 10
+            ten_p *= 0.1
             p -= 1
-        fact = float(ten_n) / float(ten_p)
+        fact = ten_n / ten_p
         return floor(f * fact) / fact
 
 
