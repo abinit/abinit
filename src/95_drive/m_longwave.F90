@@ -451,7 +451,7 @@ ecore=zero
  end if 
 
 !Calculate the flexoelectric tensor
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==2) then
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
    call dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 &   gmet,gprimd,kxc,&
 &   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
