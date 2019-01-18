@@ -1628,7 +1628,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  integer :: ask_accurate,bantot_rbz,bdtot_index,bdtot1_index
  integer :: cplex,formeig,forunit,gscase,icg,icg1
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
- integer :: iq1dir,iq2dir,iq1grad,iq1q2grad,iq1q2grad_var
+ integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
  integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jj,ka,kb
  integer :: master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
  integer :: nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
@@ -1658,7 +1658,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
  integer,allocatable :: pert_efield(:,:),pert_efield_tmp(:,:)
  integer,allocatable :: pert_strain(:,:),pert_strain_tmp(:,:)
- integer,allocatable :: q1grad(:,:),q1q2grad(:,:)
+ integer,allocatable :: q1grad(:,:),q1grad_tmp(:,:),q1q2grad(:,:)
  integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
  real(dp) :: kpoint(3)
  real(dp),allocatable :: cg(:,:),doccde_rbz(:)
@@ -1747,20 +1747,24 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_DEALLOCATE(pert_efield_tmp)
 
 !ddk
- !For the evaluation of the  first q-gradient, the three directios are activated because 
- !currently the program calculates by defect all the components of the d2_dkdk perturbation.
- !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
- !components of the d2_dkdk
  !The q1grad is related with the response to the ddk
- nq1grad=3
- ABI_ALLOCATE(q1grad,(3,nq1grad))
- do iq1grad=1,nq1grad
+ ABI_ALLOCATE(q1grad_tmp,(3,3))
+ q1grad_tmp=0
+ iq1grad_cnt=0
+ do iq1grad=1,3
    if (pertsy(iq1grad,dtset%natom+1)==1) then
-     q1grad(1,iq1grad)=dtset%natom+1                         !ddk perturbation
-     q1grad(2,iq1grad)=iq1grad                               !ddk direction
-     q1grad(3,iq1grad)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
+     iq1grad_cnt=iq1grad_cnt+1
+     q1grad_tmp(1,iq1grad_cnt)=dtset%natom+1                         !ddk perturbation
+     q1grad_tmp(2,iq1grad_cnt)=iq1grad                               !ddk direction
+     q1grad_tmp(3,iq1grad_cnt)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
    end if
  end do
+ nq1grad=iq1grad_cnt
+ ABI_ALLOCATE(q1grad,(3,nq1grad))
+ do iq1grad=1,nq1grad
+   q1grad(:,iq1grad)=q1grad_tmp(:,iq1grad)
+ end do
+ ABI_DEALLOCATE(q1grad_tmp)
 
 !d2_dkdk
  !For the evaluation of the 2nd order q-gradient, the 9 directios are activated because 

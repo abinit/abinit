@@ -58,6 +58,7 @@ module m_longwave
  use m_spacepar,    only : setsym
  use m_mkrho,       only : mkrho
  use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
+ use m_fft,         only : fourdp
 
  implicit none
 
@@ -157,7 +158,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: doccde(:),eigen0(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:)
- real(dp),allocatable :: xccc3d(:)
+ real(dp),allocatable :: work(:),xccc3d(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
 
@@ -335,6 +336,12 @@ ecore=zero
    etotal = hdr_den%etot; call hdr_free(hdr_den)
 
    ABI_DATATYPE_DEALLOCATE(pawrhoij_read)
+
+!  Compute up+down rho(G) by fft
+   ABI_ALLOCATE(work,(nfftf))
+   work(:)=rhor(:,1)
+   call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+   ABI_DEALLOCATE(work)
  else
 !  Obtain the charge density from read wfs
 !  Be careful: in PAW, compensation density has to be added !
@@ -367,63 +374,65 @@ ecore=zero
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,dtset%paral_kgb,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
+!TODO: This part of the implementation does not work properly to select specific directions 
+!      for each perturbation. This development is temporarily frozen. 
 !Initialize the list of perturbations rfpert
- mpert=natom+11
- ABI_ALLOCATE(rfpert,(mpert))
- rfpert(:)=0
- rfpert(natom+1)=1
- if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4 &
-&.or.dtset%d3e_pert1_phon==1.or.dtset%d3e_pert2_phon==1) then 
-   if (dtset%d3e_pert1_phon==1) rfpert(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
-   if (dtset%d3e_pert2_phon==1) rfpert(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
- end if
- if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.&
-& dtset%d3e_pert1_elfd==1) then 
-   rfpert(natom+2)=1
-   rfpert(natom+10)=1
-   rfpert(natom+11)=1
- end if
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then 
-   if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) rfpert(natom+3)=1
-   if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) rfpert(natom+4)=1
- endif
-   
-!Determine which directions treat for each type of perturbation
- ABI_ALLOCATE(pertsy,(3,natom+6))
- pertsy(:,:)=0
- !atomic displacement
- do ipert=1,natom
-   if (rfpert(ipert)==1.and.dtset%d3e_pert1_phon==1) then
-     do idir=1,3
-       if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,ipert)=1
-     end do 
-   endif
-   if (rfpert(ipert)==1.and.dtset%d3e_pert2_phon==1) then
-     do idir=1,3
-       if (dtset%d3e_pert2_dir(idir)==1) pertsy(idir,ipert)=1
-     end do 
-   end if
- end do
- !ddk
- do idir=1,3
-   if (dtset%d3e_pert3_dir(idir)==1) pertsy(idir,natom+1)=1
- end do
- !electric field
- if (rfpert(natom+2)==1) then
-   do idir=1,3
-     if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,natom+2)=1
-   end do
- end if
- !strain
- if (rfpert(natom+3)==1) pertsy(:,natom+3)=1
- if (rfpert(natom+4)==1) pertsy(:,natom+4)=1
+! mpert=natom+11
+! ABI_ALLOCATE(rfpert,(mpert))
+! rfpert(:)=0
+! rfpert(natom+1)=1
+! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4 &
+!&.or.dtset%d3e_pert1_phon==1.or.dtset%d3e_pert2_phon==1) then 
+!   if (dtset%d3e_pert1_phon==1) rfpert(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
+!   if (dtset%d3e_pert2_phon==1) rfpert(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
+! end if
+! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.&
+!& dtset%d3e_pert1_elfd==1) then 
+!   rfpert(natom+2)=1
+!   rfpert(natom+10)=1
+!   rfpert(natom+11)=1
+! end if
+! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then 
+!   if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) rfpert(natom+3)=1
+!   if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) rfpert(natom+4)=1
+! endif
+!   
+!!Determine which directions treat for each type of perturbation
+! ABI_ALLOCATE(pertsy,(3,natom+6))
+! pertsy(:,:)=0
+! !atomic displacement
+! do ipert=1,natom
+!   if (rfpert(ipert)==1.and.dtset%d3e_pert1_phon==1) then
+!     do idir=1,3
+!       if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,ipert)=1
+!     end do 
+!   endif
+!   if (rfpert(ipert)==1.and.dtset%d3e_pert2_phon==1) then
+!     do idir=1,3
+!       if (dtset%d3e_pert2_dir(idir)==1) pertsy(idir,ipert)=1
+!     end do 
+!   end if
+! end do
+! !ddk
+! do idir=1,3
+!   if (dtset%d3e_pert3_dir(idir)==1) pertsy(idir,natom+1)=1
+! end do
+! !electric field
+! if (rfpert(natom+2)==1) then
+!   do idir=1,3
+!     if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,natom+2)=1
+!   end do
+! end if
+! !strain
+! if (rfpert(natom+3)==1) pertsy(:,natom+3)=1
+! if (rfpert(natom+4)==1) pertsy(:,natom+4)=1
 
 !TODO:Add perturbation symmetries. See m_respfn_driver.F90.
 !........
 
-do ipert=1,natom+6
-  write(100,*) pertsy(:,ipert)
-end do
+! All perturbations and directions are temporarily activated
+ ABI_ALLOCATE(pertsy,(3,natom+6))
+ pertsy(:,:)=1
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
