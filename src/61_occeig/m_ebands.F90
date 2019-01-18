@@ -4208,8 +4208,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  if (present(emin)) min_ene = emin
  if (present(emax)) max_ene = emax
 
- nw = nint((max_ene - min_ene) / step) + 1
- nw = nint((max_ene - min_ene)/edos%step) + 1; edos%nw = nw
+ nw = nint((max_ene - min_ene)/edos%step) + 1
+ edos%nw = nw
 
  ABI_MALLOC(out_mesh, (nw))
  ABI_MALLOC(edos%mesh, (nw))

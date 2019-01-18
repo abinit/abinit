@@ -349,7 +349,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  logical :: only_diago, is_kmesh
  type(wfd_t) :: wfd
  type(vkbr_t) :: vkbr
- type(ebands_t) :: ebands
+ type(ebands_t) :: ebands, ebands_tmp
  type(edos_t)  :: edos
  type(jdos_t)  :: jdos
  type(gaps_t)  :: gaps
@@ -658,7 +658,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    if (dtset%prtdos == -2) edos_intmeth = 3
    edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
    if (edos_step == 0) edos_step = 0.001
-   edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
+   !edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
    !jdos = ebands_get_jdos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
 
    ! Compute (v x v) DOS. Upper triangle in Voigt format.
@@ -693,6 +693,13 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
    ! If sigma_erange is set, get emin and emax
    ncerr = get_gaps(ebands,gaps)
+   write(*,*) ncerr, ebands%occopt
+   if (ncerr/=0.and.ebands%occopt.eq.1) then
+     call ebands_copy(ebands,ebands_tmp)
+     call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
+     ncerr = get_gaps(ebands_tmp,gaps)
+     call ebands_free(ebands_tmp)
+   end if
    do spin=1,ebands%nsppol
      if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
      if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
