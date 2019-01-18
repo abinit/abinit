@@ -318,9 +318,10 @@ class Result(object):
             status = 'succeeded'
             msg = 'succeeded'
         else:
-            # truncate to prevent problem linked to machine precision
-            abs_error = relative_truncate(self.max_abs_err, 12)
-            rel_error = relative_truncate(self.max_rel_err, 12)
+            # truncate to prevent fldiff from printing 1.000 < 1.000
+            # compatibility fix, this may be removed later
+            abs_error = relative_truncate(self.max_abs_err, 3)
+            rel_error = relative_truncate(self.max_rel_err, 3)
             ndiff_lines = self.ndiff_lines
             status = 'failed'
             fact = 1.0
