@@ -2281,7 +2281,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  character(len=fnlen),optional :: filename
 !Local variables-------------------------------
 !scalar
- integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh
+integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
 ! integer :: ifirst
  real(dp):: energy,energy_harm_tot,energy_ph_htot,energy_harm_short,energy_harm_ewald
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE., anh_opened
@@ -2290,8 +2290,8 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !Strings/Characters 
  character(len=fnlen) :: file_energy, file_stress, file_anh, name_file
  character(len=500) :: msg
-! type(abihist) :: hist_out
-! character(len=200) :: filename_hist
+ type(abihist) :: hist_out
+ character(len=200) :: filename_hist
 
 ! *************************************************************************
 
@@ -2318,7 +2318,8 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 
 
  if(need_print .and. present(filename))then
-!   call abihist_init(hist_out,natom,ntime,.false.,.false.)
+   !MS hist out uncommented for PHONOPY test
+   call abihist_init(hist_out,natom,ntime,.false.,.false.)
    file_energy=trim(name_file)//'_energy.dat'
    unit_energy = get_unit()
    if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
@@ -2365,19 +2366,20 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 &                                       abs(hist%etot(ii) - energy_harm_tot),abs(hist%etot(ii) - energy)
      WRITE(unit_stress,'(I10,12(F23.14))') ii,hist%strten(:,ii),strten(:)
    end if
-
-!    ifirst=merge(0,1,(ii>1))
-!    filename_hist = trim("test.nc")
-!    hist_out%fcart(:,:,hist_out%ihist) = hist%fcart(:,:,ii)
-!    hist_out%strten(:,hist_out%ihist)  = hist%strten(:,ii)
-!    hist_out%etot(hist_out%ihist)      = hist%etot(ii)
-!    hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
-!    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
-!    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
-!    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
-!    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
-! &                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
-! &                    real(100,dp),(/real(100,dp),real(100,dp)/))
+    
+    !MS Uncommented for abihist test 
+    ifirst=merge(0,1,(ii>1))
+    filename_hist = trim("test.nc")
+    hist_out%fcart(:,:,hist_out%ihist) = fcart(:,:)
+    hist_out%strten(:,hist_out%ihist)  = strten(:)
+    hist_out%etot(hist_out%ihist)      = energy
+    hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
+    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
+    !call vel2hist(ab_mover%amass,hist,vel,vel_cell)
+    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
+    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
+ &                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
+ &                    real(100,dp),(/real(100,dp),real(100,dp)/))
 
    mse  = mse  + abs(hist%etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
@@ -2399,7 +2401,8 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
    close(unit_stress)
  end if
 
-! call abihist_free(hist_out)
+ !MS uncommented for PHONOPY TEST
+ call abihist_free(hist_out)
 
 end subroutine fit_polynomial_coeff_computeMSD
 !!***

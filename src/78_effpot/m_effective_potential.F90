@@ -792,7 +792,6 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
        end do
      end do
    end do
-   write(*,*) "irpt_ref",irpt_ref 
 
    ifc_tmp%nrpt = irpt
    ABI_ALLOCATE(ifc_tmp%cell,(3,ifc_tmp%nrpt))
@@ -950,9 +949,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    !  end do
    !end if
 
-!TEST_MS Save Ewald part into effective Potential 
    
-
    !call xmpi_bcast(ifc_tmp%short_atmfrc, master, comm, ierr)
    ! Maybe useless
    call xmpi_bcast(eff_pot%harmonics_terms%ifcs%short_atmfrc, master, comm, ierr)
@@ -983,7 +980,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      end do
    end do
    ! Copy SR into total_atmfrc
-   do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! LR IRPT
+   do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
      do irpt2=1, full_nrpt
      if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
 &         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
@@ -1008,10 +1005,6 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !    are not needed for effective potential!!!
 !  Free ifc before copy
     
-   !ABI_ALLOCATE(wghatm,(natom_uc,natom_uc,27)) ! TODO MARCUS generalize! 
-   !write(*,*) "shape(wghatm_ifc_effpot:)", shape(eff_pot%harmonics_terms%ifcs%wghatm(:,:,:))
-   !wghatm(:,:,:) = eff_pot%harmonics_terms%ifcs%wghatm(:,:,:)
-
    call ifc_free(eff_pot%harmonics_terms%ifcs)
 
 !  Fill the effective potential with new atmfr
@@ -1053,6 +1046,12 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
 ! Free suppercell
  call destroy_supercell(supercell)
+
+ !Deallocate temporary arrays
+ ABI_DEALLOCATE(full_cell)
+ ABI_DEALLOCATE(full_cell_atmfrc) ! Allocate and set to 0
+ ABI_DEALLOCATE(full_cell_short_atmfrc) ! Allocate and set to 0
+ ABI_DEALLOCATE(full_cell_ewald_atmfrc) ! Allocate and set to 0
 
 end subroutine effective_potential_generateDipDip
 !!***
