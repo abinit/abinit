@@ -1627,11 +1627,12 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 !scalars
  integer :: ask_accurate,bantot_rbz,bdtot_index,bdtot1_index
  integer :: cplex,formeig,forunit,gscase,icg,icg1
+ integer :: iatpert,iatpert_cnt,iatpol,iatdir
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
  integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
  integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jj,ka,kb
- integer :: master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
- integer :: nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
+ integer :: lw_flexo,master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
+ integer :: natpert,nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
  integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
  integer :: nylmgr,optene,option,optorth,optres
  integer :: pawread,pertcase,qdir,spaceworld
@@ -1656,6 +1657,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:)
  integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
  integer,allocatable :: nband_rbz(:),npwarr(:),npwtot(:)
+ integer,allocatable :: pert_atdis(:,:),pert_atdis_tmp(:,:)
  integer,allocatable :: pert_efield(:,:),pert_efield_tmp(:,:)
  integer,allocatable :: pert_strain(:,:),pert_strain_tmp(:,:)
  integer,allocatable :: q1grad(:,:),q1grad_tmp(:,:),q1q2grad(:,:)
@@ -1674,10 +1676,10 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
  real(dp),allocatable :: ph1d(:,:),phnons1(:,:,:) 
- real(dp),allocatable :: rhog1_tmp(:,:)
- real(dp),allocatable :: rhog1_efield(:,:,:),rhor1_tmp(:,:),rhor1_real(:,:)
+ real(dp),allocatable :: rhog1_tmp(:,:),rhog1_atdis(:,:,:)
+ real(dp),allocatable :: rhog1_efield(:,:,:),rhor1_atdis(:,:,:),rhor1_tmp(:,:),rhor1_real(:,:)
  real(dp),allocatable :: rhor1_strain(:,:,:)
- real(dp),allocatable :: vhartr1(:),vhxc1_efield(:,:),vhxc1_strain(:,:)
+ real(dp),allocatable :: vhartr1(:),vhxc1_atdis(:,:),vhxc1_efield(:,:),vhxc1_strain(:,:)
  real(dp),allocatable :: vpsp1(:),vqgradhart(:),vresid1(:,:),vxc1(:,:)
  real(dp),allocatable :: dum_vxc(:,:)
  real(dp),allocatable :: wtk_folded(:), wtk_rbz(:)
@@ -1711,6 +1713,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  call getcut(boxcut,ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,ngfft)
 
 !Various initializations
+ lw_flexo=dtset%lw_flexo
  cplex=2-timrev
  matom=dtset%natom
  usexcnhat=0
@@ -1723,28 +1726,53 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
 !################# PERTURBATIONS AND q-GRADIENTS LABELLING ############################
 
-!Determine which electric field, strain and q-gradient directions have to be evaluated
-!taking into account the perturbation symmetries
+!Determine which atomic displacement, electric field, strain and q-gradient directions 
+!have to be evaluated taking into account the perturbation symmetries
  matpert=dtset%natom*3
 
+!Atomic displacement
+ if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
+   ABI_ALLOCATE(pert_atdis_tmp,(3,matpert))
+   pert_atdis_tmp=0
+   iatpert_cnt=0
+   do iatpol=1,matom 
+     do iatdir=1,3
+       if (pertsy(iatdir,iatpol)==1) then
+         iatpert_cnt=iatpert_cnt+1
+         pert_atdis_tmp(1,iatpert_cnt)=iatpol                !atom displaced
+         pert_atdis_tmp(2,iatpert_cnt)=iatdir                !direction of displacement
+         pert_atdis_tmp(3,iatpert_cnt)=(iatpol-1)*3+iatdir   !like pertcase in dfpt_loopert.f90
+       end if
+     end do
+   end do
+   natpert=iatpert_cnt
+   ABI_ALLOCATE(pert_atdis,(3,natpert))
+   do iatpert=1,natpert
+     pert_atdis(:,iatpert)=pert_atdis_tmp(:,iatpert)
+   end do
+   ABI_DEALLOCATE(pert_atdis_tmp)
+ end if
+
 !Electric field
- ABI_ALLOCATE(pert_efield_tmp,(3,3))
- pert_efield_tmp=0
- iefipert_cnt=0
- do iefipert=1,3
-   if (pertsy(iefipert,dtset%natom+2)==1) then
-     iefipert_cnt=iefipert_cnt+1
-     pert_efield_tmp(1,iefipert_cnt)=dtset%natom+2              !electric field pert
-     pert_efield_tmp(2,iefipert_cnt)=iefipert                     !electric field direction
-     pert_efield_tmp(3,iefipert_cnt)=matpert+3+iefipert           !like pertcase in dfpt_loopert.f90
-   end if
- end do
- nefipert=iefipert_cnt
- ABI_ALLOCATE(pert_efield,(3,nefipert))
- do iefipert=1,nefipert
-   pert_efield(:,iefipert)=pert_efield_tmp(:,iefipert)
- end do
- ABI_DEALLOCATE(pert_efield_tmp)
+ if (lw_flexo==1.or.lw_flexo==2) then
+   ABI_ALLOCATE(pert_efield_tmp,(3,3))
+   pert_efield_tmp=0
+   iefipert_cnt=0
+   do iefipert=1,3
+     if (pertsy(iefipert,dtset%natom+2)==1) then
+       iefipert_cnt=iefipert_cnt+1
+       pert_efield_tmp(1,iefipert_cnt)=dtset%natom+2              !electric field pert
+       pert_efield_tmp(2,iefipert_cnt)=iefipert                     !electric field direction
+       pert_efield_tmp(3,iefipert_cnt)=matpert+3+iefipert           !like pertcase in dfpt_loopert.f90
+     end if
+   end do
+   nefipert=iefipert_cnt
+   ABI_ALLOCATE(pert_efield,(3,nefipert))
+   do iefipert=1,nefipert
+     pert_efield(:,iefipert)=pert_efield_tmp(:,iefipert)
+   end do
+   ABI_DEALLOCATE(pert_efield_tmp)
+ end if
 
 !ddk
  !The q1grad is related with the response to the ddk
@@ -1771,70 +1799,74 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  !currently the program calculates by defect all the components of the d2_dkdk perturbation.
  !TODO: This will have to be modified in the future when ABINIT enables to calculate specific
  !components of the d2_dkdk
- nq1q2grad=9
- ABI_ALLOCATE(q1q2grad,(4,nq1q2grad))
- do iq1q2grad=1,nq1q2grad
-   call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
-   if (iq1dir==iq2dir) then
-     q1q2grad(1,iq1q2grad)=dtset%natom+10                    !dkdk perturbation diagonal elements
-   else
-     q1q2grad(1,iq1q2grad)=dtset%natom+11                    !dkdk perturbation off-diagonal elements
-   end if
-   q1q2grad(2,iq1q2grad)=iq1dir                              !dq1 direction 
-   q1q2grad(3,iq1q2grad)=iq2dir                              !dq2 direction 
-   iq1q2grad_var=iq1q2grad
-   if (iq1q2grad>6) iq1q2grad_var=iq1q2grad-3                !Lower=Upper diagonal triangle matrix
-   q1q2grad(4,iq1q2grad)=iq1q2grad_var+(dtset%natom+6)*3     !like pertcase in dfpt_loopert.f90
- end do
+ if (lw_flexo==1.or.lw_flexo==2) then
+   nq1q2grad=9
+   ABI_ALLOCATE(q1q2grad,(4,nq1q2grad))
+   do iq1q2grad=1,nq1q2grad
+     call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
+     if (iq1dir==iq2dir) then
+       q1q2grad(1,iq1q2grad)=dtset%natom+10                    !dkdk perturbation diagonal elements
+     else
+       q1q2grad(1,iq1q2grad)=dtset%natom+11                    !dkdk perturbation off-diagonal elements
+     end if
+     q1q2grad(2,iq1q2grad)=iq1dir                              !dq1 direction 
+     q1q2grad(3,iq1q2grad)=iq2dir                              !dq2 direction 
+     iq1q2grad_var=iq1q2grad
+     if (iq1q2grad>6) iq1q2grad_var=iq1q2grad-3                !Lower=Upper diagonal triangle matrix
+     q1q2grad(4,iq1q2grad)=iq1q2grad_var+(dtset%natom+6)*3     !like pertcase in dfpt_loopert.f90
+   end do
+ end if
 
 !Strain perturbation
- ABI_ALLOCATE(pert_strain_tmp,(6,9))
- pert_strain_tmp=0
- !tmp uniaxial components
- istrpert_cnt=0
- do istrdir=1,3
-   if (pertsy(istrdir,dtset%natom+3)==1) then 
-     istrpert_cnt=istrpert_cnt+1
-     ka=idx(2*istrdir-1);kb=idx(2*istrdir)
-     pert_strain_tmp(1,istrpert_cnt)=dtset%natom+3        !Uniaxial strain perturbation
-     pert_strain_tmp(2,istrpert_cnt)=istrdir              !Uniaxial strain case 
-     pert_strain_tmp(3,istrpert_cnt)=ka                   !Strain direction 1
-     pert_strain_tmp(4,istrpert_cnt)=kb                   !Strain direction 2
-     pert_strain_tmp(5,istrpert_cnt)=matpert+6+istrdir    !like pertcase in dfpt_loopert.f90
-     pert_strain_tmp(6,istrpert_cnt)=istrdir              !Indexing for the second q-gradient of the metric Hamiltonian
-   end if
- end do
- !tmp shear components
- do istrdir=1,3
-   if (pertsy(istrdir,dtset%natom+4)==1) then 
-     istrpert_cnt=istrpert_cnt+1
-     ka=idx(2*(istrdir+3)-1);kb=idx(2*(istrdir+3))
-     pert_strain_tmp(1,istrpert_cnt)=dtset%natom+4        !Shear strain perturbation
-     pert_strain_tmp(2,istrpert_cnt)=istrdir              !Shear strain case
-     pert_strain_tmp(3,istrpert_cnt)=ka                   !Strain direction 1
-     pert_strain_tmp(4,istrpert_cnt)=kb                   !Strain direction 2
-     pert_strain_tmp(5,istrpert_cnt)=matpert+9+istrdir    !like pertcase in dfpt_loopert.f90
-     pert_strain_tmp(6,istrpert_cnt)=3+istrdir            !Indexing for the second q-gradient of the metric Hamiltonian
-   end if
- end do
- do istrdir=1,3
-   if (pertsy(istrdir,dtset%natom+4)==1) then 
-     istrpert_cnt=istrpert_cnt+1
-     ka=idx(2*(istrdir+3)-1);kb=idx(2*(istrdir+3))
-     pert_strain_tmp(1,istrpert_cnt)=dtset%natom+4        !Shear strain perturbation
-     pert_strain_tmp(2,istrpert_cnt)=istrdir              !Shear strain case
-     pert_strain_tmp(3,istrpert_cnt)=kb                   !Strain direction 1
-     pert_strain_tmp(4,istrpert_cnt)=ka                   !Strain direction 2
-     pert_strain_tmp(5,istrpert_cnt)=matpert+9+istrdir    !like pertcase in dfpt_loopert.f90
-     pert_strain_tmp(6,istrpert_cnt)=6+istrdir            !Indexing for the second q-gradient of the metric Hamiltonian
-   end if
- end do
- nstrpert=istrpert_cnt
- ABI_ALLOCATE(pert_strain,(6,nstrpert))
- do istrpert=1,nstrpert
-   pert_strain(:,istrpert)=pert_strain_tmp(:,istrpert)
- end do
- ABI_DEALLOCATE(pert_strain_tmp)
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
+   ABI_ALLOCATE(pert_strain_tmp,(6,9))
+   pert_strain_tmp=0
+   !tmp uniaxial components
+   istrpert_cnt=0
+   do istrdir=1,3
+     if (pertsy(istrdir,dtset%natom+3)==1) then 
+       istrpert_cnt=istrpert_cnt+1
+       ka=idx(2*istrdir-1);kb=idx(2*istrdir)
+       pert_strain_tmp(1,istrpert_cnt)=dtset%natom+3        !Uniaxial strain perturbation
+       pert_strain_tmp(2,istrpert_cnt)=istrdir              !Uniaxial strain case 
+       pert_strain_tmp(3,istrpert_cnt)=ka                   !Strain direction 1
+       pert_strain_tmp(4,istrpert_cnt)=kb                   !Strain direction 2
+       pert_strain_tmp(5,istrpert_cnt)=matpert+6+istrdir    !like pertcase in dfpt_loopert.f90
+       pert_strain_tmp(6,istrpert_cnt)=istrdir              !Indexing for the second q-gradient of the metric Hamiltonian
+     end if
+   end do
+   !tmp shear components
+   do istrdir=1,3
+     if (pertsy(istrdir,dtset%natom+4)==1) then 
+       istrpert_cnt=istrpert_cnt+1
+       ka=idx(2*(istrdir+3)-1);kb=idx(2*(istrdir+3))
+       pert_strain_tmp(1,istrpert_cnt)=dtset%natom+4        !Shear strain perturbation
+       pert_strain_tmp(2,istrpert_cnt)=istrdir              !Shear strain case
+       pert_strain_tmp(3,istrpert_cnt)=ka                   !Strain direction 1
+       pert_strain_tmp(4,istrpert_cnt)=kb                   !Strain direction 2
+       pert_strain_tmp(5,istrpert_cnt)=matpert+9+istrdir    !like pertcase in dfpt_loopert.f90
+       pert_strain_tmp(6,istrpert_cnt)=3+istrdir            !Indexing for the second q-gradient of the metric Hamiltonian
+     end if
+   end do
+   do istrdir=1,3
+     if (pertsy(istrdir,dtset%natom+4)==1) then 
+       istrpert_cnt=istrpert_cnt+1
+       ka=idx(2*(istrdir+3)-1);kb=idx(2*(istrdir+3))
+       pert_strain_tmp(1,istrpert_cnt)=dtset%natom+4        !Shear strain perturbation
+       pert_strain_tmp(2,istrpert_cnt)=istrdir              !Shear strain case
+       pert_strain_tmp(3,istrpert_cnt)=kb                   !Strain direction 1
+       pert_strain_tmp(4,istrpert_cnt)=ka                   !Strain direction 2
+       pert_strain_tmp(5,istrpert_cnt)=matpert+9+istrdir    !like pertcase in dfpt_loopert.f90
+       pert_strain_tmp(6,istrpert_cnt)=6+istrdir            !Indexing for the second q-gradient of the metric Hamiltonian
+     end if
+   end do
+   nstrpert=istrpert_cnt
+   ABI_ALLOCATE(pert_strain,(6,nstrpert))
+   do istrpert=1,nstrpert
+     pert_strain(:,istrpert)=pert_strain_tmp(:,istrpert)
+   end do
+   ABI_DEALLOCATE(pert_strain_tmp)
+end if
 
 !################# ELECTROSTATIC CONTRIBUTIONS  #######################################
 
@@ -1848,100 +1880,151 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_ALLOCATE(nhat1,(cplex*nfft,nspden))
  nhat1=zero
 
-!Read the electric field density response from a disk file, calculates the FFT 
-!(rhog1_tmp) and the first order Hartree and xc potentials(vhxc1_efield). 
+!Read the first order densities response from a disk file, calculates the FFT 
+!(rhog1_tmp) and the first order Hartree and xc potentials(vhxc1_pert). 
 !TODO: In the call to read_rhor there is a security option that compares with the header
 !hdr. Not activated at this moment.
  ABI_ALLOCATE(rhog1_tmp,(2,nfft))
- ABI_ALLOCATE(rhog1_efield,(nefipert,2,nfft))
  ABI_ALLOCATE(rhor1_tmp,(cplex*nfft,nspden))
  ABI_ALLOCATE(rhor1_real,(1*nfft,nspden))
  ABI_ALLOCATE(vhartr1,(cplex*nfft))
- ABI_ALLOCATE(vhxc1_efield,(nefipert,cplex*nfft))
  ABI_ALLOCATE(vpsp1,(cplex*nfft))
  ABI_ALLOCATE(vtrial1,(cplex*nfft,nspden))
  ABI_ALLOCATE(vresid1,(cplex*nfft,nspden))
  ABI_ALLOCATE(vxc1,(cplex*nfft,nspden))
  ABI_ALLOCATE(dum_vxc,(nfft,nspden))
  ABI_ALLOCATE(xccc3d1,(cplex*n3xccc))
- vpsp1=zero; vtrial1=zero; dum_vxc=zero
+ vpsp1=zero; dum_vxc=zero
  optene=0; optres=1 
- do iefipert=1,nefipert
-   pertcase=pert_efield(3,iefipert)
+
+!Atomic displacement
+ if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
+   ABI_ALLOCATE(rhor1_atdis,(natpert,cplex*nfft,nspden))
+   ABI_ALLOCATE(rhog1_atdis,(natpert,2,nfft))
+   ABI_ALLOCATE(vhxc1_atdis,(natpert,cplex*nfft))
+   vtrial1=zero
+   do iatpert= 1, natpert
+     iatpol=pert_atdis(1,iatpert)
+     iatdir=pert_atdis(2,iatpert)
+     pertcase=pert_atdis(3,iatpert)
+
+     !Reads a real first order density
+     call appdig(pertcase,dtfil%fildens1in,fi1o)
+     call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
+      & hdr_den, pawrhoij_read, spaceworld)
+
+     !Perform FFT rhor1 to rhog1
+     call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
+
+     !Accumulate density in meaningful complex arrays
+     if (timrev==0) then
+       do ii=1,nfft
+         jj=ii*2
+         rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+       end do
+     else if (timrev==1) then
+       rhor1_tmp(:,:)=rhor1_real(:,:)
+     end if
+     rhog1_atdis(iatpert,:,:)=rhog1_tmp(:,:)
+     rhor1_atdis(iatpert,:,:)=rhor1_tmp(:,:)
+
+     !Calculate first order Hartree and xc potentials
+     call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+      & gsqcut,iatdir,iatpol,&
+      & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+      & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+      & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
+      & xccc3d1,dtset%ixcrot)
+
+     !Accumulate the potential in meaningful arrays
+     vhxc1_atdis(iatpert,:)=vtrial1(:,nspden)
+
+   end do
+ end if
+
+!Electric field
+ if (lw_flexo==1.or.lw_flexo==2) then
+   ABI_ALLOCATE(rhog1_efield,(nefipert,2,nfft))
+   ABI_ALLOCATE(vhxc1_efield,(nefipert,cplex*nfft))
+   vtrial1=zero
+   do iefipert=1,nefipert
+     pertcase=pert_efield(3,iefipert)
    
-   !Reads a real first order density
-   call appdig(pertcase,dtfil%fildens1in,fi1o)
-   call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
-    & hdr_den, pawrhoij_read, spaceworld)
+     !Reads a real first order density
+     call appdig(pertcase,dtfil%fildens1in,fi1o)
+     call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
+      & hdr_den, pawrhoij_read, spaceworld)
 
-   !Perform FFT rhor1 to rhog1
-   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
+     !Perform FFT rhor1 to rhog1
+     call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
 
-   !Accumulate density in meaningful complex arrays
-   if (timrev==0) then
-     do ii=1,nfft
-       jj=ii*2
-       rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
-     end do
-   else if (timrev==1) then
-     rhor1_tmp(:,:)=rhor1_real(:,:)
-   end if
-   rhog1_efield(iefipert,:,:)=rhog1_tmp(:,:)
+     !Accumulate density in meaningful complex arrays
+     if (timrev==0) then
+       do ii=1,nfft
+         jj=ii*2
+         rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+       end do
+     else if (timrev==1) then
+       rhor1_tmp(:,:)=rhor1_real(:,:)
+     end if
+     rhog1_efield(iefipert,:,:)=rhog1_tmp(:,:)
 
-   !Calculate first order Hartree and xc potentials
-   call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
-    & gsqcut,pert_efield(2,iefipert),dtset%natom+2,&
-    & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
-    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
-    & xccc3d1,dtset%ixcrot)
+     !Calculate first order Hartree and xc potentials
+     call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+      & gsqcut,pert_efield(2,iefipert),dtset%natom+2,&
+      & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+      & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+      & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
+      & xccc3d1,dtset%ixcrot)
 
-   !Accumulate the potential in meaningful arrays
-   vhxc1_efield(iefipert,:)=vtrial1(:,nspden)
+     !Accumulate the potential in meaningful arrays
+     vhxc1_efield(iefipert,:)=vtrial1(:,nspden)
 
- end do
+   end do
+endif
 
-!Read the strain density response from a disk file(rhor1_strain), calculate the FFT 
-!and the first order Hartree and xc potentials (vhxc1_strain). 
- ABI_ALLOCATE(rhor1_strain,(nstrpert,cplex*nfft,nspden))
- ABI_ALLOCATE(vhxc1_strain,(nstrpert,cplex*nfft))
- vtrial1=zero
- do istrpert= 1, nstrpert
-   istrtype=pert_strain(1,istrpert)
-   istrdir=pert_strain(2,istrpert)
-   pertcase=pert_strain(5,istrpert)
+!Strain 
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
+   ABI_ALLOCATE(rhor1_strain,(nstrpert,cplex*nfft,nspden))
+   ABI_ALLOCATE(vhxc1_strain,(nstrpert,cplex*nfft))
+   vtrial1=zero
+   do istrpert= 1, nstrpert
+     istrtype=pert_strain(1,istrpert)
+     istrdir=pert_strain(2,istrpert)
+     pertcase=pert_strain(5,istrpert)
 
-   !Reads a real first order density
-   call appdig(pertcase,dtfil%fildens1in,fi1o)
-   call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
-    & hdr_den, pawrhoij_read, spaceworld)
+     !Reads a real first order density
+     call appdig(pertcase,dtfil%fildens1in,fi1o)
+     call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
+      & hdr_den, pawrhoij_read, spaceworld)
 
-   !Perform FFT rhor1 to rhog1
-   call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
+     !Perform FFT rhor1 to rhog1
+     call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
 
-   !Accumulate density in meaningful complex arrays
-   if (timrev==0) then
-     do ii=1,nfft
-       jj=ii*2
-       rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
-     end do
-   else if (timrev==1) then
-     rhor1_tmp(:,:)=rhor1_real(:,:)
-   end if
-   rhor1_strain(istrpert,:,:)=rhor1_tmp(:,:)
+     !Accumulate density in meaningful complex arrays
+     if (timrev==0) then
+       do ii=1,nfft
+         jj=ii*2
+         rhor1_tmp(jj-1,:)=rhor1_real(ii,:)
+       end do
+     else if (timrev==1) then
+       rhor1_tmp(:,:)=rhor1_real(:,:)
+     end if
+     rhor1_strain(istrpert,:,:)=rhor1_tmp(:,:)
 
-   !Calculate first order Hartree and xc potentials
-   call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
-    & gsqcut,istrdir,istrtype,&
-    & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-    & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
-    & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
-    & xccc3d1,dtset%ixcrot)
+     !Calculate first order Hartree and xc potentials
+     call dfpt_rhotov(cplex,dum_scl,dum_scl,dum_scl,dum_scl,dum_scl, &
+      & gsqcut,istrdir,istrtype,&
+      & dtset%ixc,kxc,mpi_enreg,dtset%natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+      & nspden,n3xccc,optene,optres,dtset%paral_kgb,dtset%qptn,rhog,rhog1_tmp,rhor,rhor1_tmp,&
+      & rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,dum_vxc,vxc1,&
+      & xccc3d1,dtset%ixcrot)
 
-   !Accumulate the potential in meaningful arrays
-   vhxc1_strain(istrpert,:)=vtrial1(:,nspden)
+     !Accumulate the potential in meaningful arrays
+     vhxc1_strain(istrpert,:)=vtrial1(:,nspden)
 
- end do
+   end do
+end if
 
  !These arrays will not be used anymore (for the moment)
  ABI_DEALLOCATE(rhor1_real)
@@ -2002,8 +2085,12 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
  ABI_DEALLOCATE(rhor1_tmp)
  ABI_DEALLOCATE(rhog1_tmp)
- ABI_DEALLOCATE(rhor1_strain)
- ABI_DEALLOCATE(rhog1_efield)
+ if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then 
+   ABI_DEALLOCATE(rhog1_atdis)
+   ABI_DEALLOCATE(rhor1_atdis)
+ end if
+ if (lw_flexo==1.or.lw_flexo==2) ABI_DEALLOCATE(rhog1_efield)
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) ABI_DEALLOCATE(rhor1_strain)
 
 !################# WAVE FUNCTION CONTRIBUTIONS  #######################################
 
@@ -2437,13 +2524,21 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
 
 !Deallocattions
- ABI_DEALLOCATE(pert_efield)
- ABI_DEALLOCATE(pert_strain)
+ if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
+   ABI_DEALLOCATE(pert_atdis)
+   ABI_DEALLOCATE(vhxc1_atdis)
+ end if
+ if (lw_flexo==1.or.lw_flexo==2) then
+   ABI_DEALLOCATE(pert_efield)
+   ABI_DEALLOCATE(q1q2grad)
+   ABI_DEALLOCATE(vhxc1_efield)
+ end if
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
+   ABI_DEALLOCATE(pert_strain)
+   ABI_DEALLOCATE(vhxc1_strain)
+ end if
  ABI_DEALLOCATE(q1grad)
- ABI_DEALLOCATE(q1q2grad)
  ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(vhxc1_efield)
- ABI_DEALLOCATE(vhxc1_strain)
  ABI_DEALLOCATE(vqgradhart)
  ABI_DEALLOCATE(elqgradhart)
  ABI_DEALLOCATE(elflexoflg)
