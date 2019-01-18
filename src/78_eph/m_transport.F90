@@ -57,7 +57,8 @@ module m_transport
  private
 !!****
 
- public transport !! main entry point for transport calculations
+ public :: transport !! main entry point for transport calculations
+
 !!****
 
 !!****t* m_sigmaph/sigmaph_t
@@ -69,7 +70,7 @@ module m_transport
 !!
 !! SOURCE
 
- type,private :: transport_rta_t
+type,public :: transport_rta_t
 
 
    integer :: nsppol
@@ -214,14 +215,12 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
    !TODO: actually compute velocities
  end if
 
+ ! Compute transport
  call transport_rta_compute(transport_rta,cryst,dtset,comm)
 
- ! write netcdf file
- path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
-
  ! Master creates the netcdf file used to store the results of the calculation.
+ path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-
  call transport_rta_ncwrite(transport_rta, cryst, ncid)
 
  ! Close the netcdf file

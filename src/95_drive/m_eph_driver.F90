@@ -634,6 +634,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
    !call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
+   if (dtset%useria==345) then
+     call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,cryst,pawfgr,pawang,pawrad,pawtab,psps,ebands,comm)
+   end if
 
  case (5, -5)
    ! Interpolate the phonon potential
@@ -645,7 +648,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 
  case (7)
-   ! Compute phonon liminited transport properties from WFK a SIGEPH file
+   ! Compute phonon limited transport from WFK and a SIGEPH file
    call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,cryst,pawfgr,pawang,pawrad,pawtab,psps,ebands,comm)
 
  case default

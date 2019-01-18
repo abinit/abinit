@@ -2823,6 +2823,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
  character(len=500) :: msg
 
 !Local variables -----------------------------------------
+ integer,parameter :: timrev1 = 1
  integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
 #ifdef HAVE_NETCDF
@@ -2840,9 +2841,8 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
 
  ABI_MALLOC(indkk,(nkcalc,6))
  ! map ebands kpoints to sigmaph
- call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, &
-             nkcalc, cryst%nsym, 1, cryst%symafm, cryst%symrec, &
-             self%timrev, comm, use_symrec=.True.)
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, nkcalc, cryst%nsym, &
+             1, cryst%symafm, cryst%symrec, timrev1, xmpi_comm_self, use_symrec=.True.)
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6,a)' ) &
@@ -2865,6 +2865,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
  new = ebands_chop(ebands, nband)
  ABI_FREE(nband)
 
+ write(*,*) 'reading netcdf file'
 #ifdef HAVE_NETCDF
  if (opt(1)==1) then
    ! read linewidths from sigmaph
