@@ -5,7 +5,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release ABINITv8.11.2 is for development
+The present release ABINITv8.11.3 is for development
 
 0. List of platforms
 1. Batteries of tests
@@ -14,7 +14,7 @@ The present release ABINITv8.11.2 is for development
 ================================================================
 0. Platforms
 
-For ABINITv8.11.2, list closed on 2018 12 19
+For ABINITv8.11.3, list closed on 2019 01 22
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
 https://bbportal.abinit.org/#/status
@@ -36,7 +36,7 @@ gnu 8.2+openmpi : the reading of WFK files using MPIIO is not correct for test m
 all gnu : bigdft#14 is disactivated
 
 Intel ifort compiler (presently tested : 13.1, 15.0, 16.0, 17.0, 18.0, 19.0)
-Ifort 13.1, mpiio#25, mpiio#26, paral#25, paral#29i, paral#93, paral#94 are disactivated (MPI IO, KGB, or calculations with exact exchange)
+Ifort 13.1, mpiio#25, mpiio#26, paral#25, paral#29, paral#93, paral#94 are disactivated (MPI IO, KGB, or calculations with exact exchange)
 Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 16.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
 Ifort 17.0 is mostly OK, except for bigdft#06, bigdft#07.
