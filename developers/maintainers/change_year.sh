@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2017 ABINIT group (XG)
+# Copyright (C) 1998-2019 ABINIT group (XG)
 # 
 # The purpose of this script is to change the copyright year
 # in nearly all files in the ABINIT package. 
 # First you should reapply the present script without changing it, because it has been seen that some people bring
 # routines with erroneous date during a few months after the beginning of a new one ... !
 #
-# Then one should update the present script to put the current year (at present, valid for going from 2017 to 2018 !) !
+# Then one should update the present script to put the current year (at present, valid for going from 2018 to 2019 !) !
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.am */*/*.bat */*/*/*.bat */*/*.c */*/*/*.c */*/*.cf */*/*.cnf */*/*.com */*/*.conf */*/*.cu */*/*.csh 
@@ -24,7 +24,7 @@
 # Also config/scripts/abilint cannot be treated automatically ...
 #
 # So, also issue, one after the other (cut and paste the following):
-# developers/maintainers/change_year.sh autom4te.cache/tr* config/scripts/a* config/scripts/clean* config/scripts/u* config/wrappers/wrap-fc
+# developers/maintainers/change_year.sh autom4te.cache/tr* config/scripts/a* config/scripts/clean* config/scripts/u* 
 # developers/maintainers/change_year.sh developers/bzr_helpers/abinit-forge-branch developers/bzr_helpers/bzr-make-patch 
 # developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/change_perl.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* doc/manpages/abinit.1 fallbacks/config/scripts/make* INSTALL 
