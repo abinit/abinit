@@ -10,7 +10,7 @@
 !! Contain also routine to evaluate the energy,forces and stresses
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2018 ABINIT group (AM)
+!! Copyright (C) 2010-2019 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1665,7 +1665,7 @@ end subroutine effective_potential_printSupercell
 !! Several options are available
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (AM)
+!! Copyright (C) 2000-2019 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2007,7 +2007,7 @@ end subroutine effective_potential_writeXML
 !! We can also apply a strain to the structure
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (AM)
+!! Copyright (C) 2000-2019 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3534,7 +3534,7 @@ end subroutine effective_potential_checkDEV
 !! Several options are available
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (AM)
+!! Copyright (C) 2000-2019 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

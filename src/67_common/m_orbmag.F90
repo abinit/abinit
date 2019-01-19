@@ -8,7 +8,7 @@
 !!  used to handle orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (JWZ)
+!! Copyright (C) 2011-2019 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -268,7 +268,7 @@ CONTAINS  !=====================================================================
 !! Initialization of orbital magnetization calculation; similar to initberry
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2018 ABINIT group.
+!! Copyright (C) 2004-2019 ABINIT group.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -888,7 +888,7 @@ end subroutine initorbmag
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2019 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1020,7 +1020,7 @@ end subroutine rho_norm_check
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2019 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1485,7 +1485,7 @@ end subroutine chern_number
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2019 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1722,7 +1722,7 @@ end subroutine mpi_chern_number
 !! filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2019 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2182,7 +2182,7 @@ end subroutine make_smat
 !! Compute 1/2 <L_R> onsite contribution to orbital magnetization at given k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2280,7 +2280,7 @@ end subroutine make_onsite_l_k
 !! Compute Trace[\rho_0 S^{(1)} \rho_0] in orbital magnetism context
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2378,7 +2378,7 @@ end subroutine make_S1trace_k
 !! Compute Trace[dS_k/db * dS_k/dg * H_k] arising in orbital magnetism context
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2468,7 +2468,7 @@ end subroutine make_CCIV_k
 !! finite difference approximation for the derivatives
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2600,7 +2600,7 @@ end subroutine make_CCIV_k_FD
 !! at all k points and all bands
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2855,7 +2855,7 @@ end subroutine ctocprjb
 !! Compute <u_n'k|dS/dk_idir|u_nk> by finite differences
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2969,7 +2969,7 @@ end subroutine make_dsdk_FD
 !! Compute <u_n'k'|dS/dk_idir|u_nk>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3129,7 +3129,7 @@ end subroutine make_dsdk
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2018 ABINIT  group
+!! Copyright (C) 2003-2019 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
