@@ -79,4 +79,4 @@ rm -f tmp.yr*
 #chmod 755 */*/*.sh */*/*.py */*/*.pl */*/*.com config/*/make* developers/*/make*  */config/scripts/* */*.sh
 # Please do not change the permission of py files. Not all py modules must be executable!
 chmod 755 */*/*.sh */*/*.pl config/*/make* */config/scripts/* */*.sh
-chmod 755 config/scripts/* developers/bzr_helpers/* developers/*/* tests/cpu/Refs/changeref
+chmod 755 config/scripts/* developers/*/* tests/cpu/Refs/changeref

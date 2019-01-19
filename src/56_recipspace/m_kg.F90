@@ -1025,7 +1025,7 @@ end subroutine mkkpg
 !! as appear in Berry phase derived quantities
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2018 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
