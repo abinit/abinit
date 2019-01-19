@@ -15,16 +15,16 @@
 # developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/Makefile */*/*/*.out */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
 # developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*_ 
 
-# Please do not change the permission of py files. Not all py modules must be executable! So, the following command should be used simply to see whether the copyright date has to be changed ... and if not,
-# please, restart from the previous version, and if yes, do it by hand !
-# developers/maintainers/change_year.sh */*/*.py */*/*/*.py 
+# Please do not change the permission of py files. Not all py modules must be executable! 
+# Simply issue the in-place command
+# sed -i 's!2018 ABINIT!2019 ABINIT!' */*/*.py */*/*/*.py
 #
 # In the previous list, files without an extension are not treated (except the Makefile and README files - warning some README are only links ...), 
 # and */*/*.sh are not treated (except tests/*/*.sh), because of conflict with the present script file extension !!
 # Also config/scripts/abilint cannot be treated automatically ...
 #
 # So, also issue, one after the other (cut and paste the following):
-# developers/maintainers/change_year.sh autom4te.cache/tr* config/scripts/a* config/scripts/clean* config/scripts/u* 
+# developers/maintainers/change_year.sh config/scripts/a* config/scripts/clean* config/scripts/u* 
 # developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* fallbacks/config/scripts/make* INSTALL 
 # developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
