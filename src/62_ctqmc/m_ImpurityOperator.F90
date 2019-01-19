@@ -978,7 +978,7 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !!  Get the sign of the ratio of impurity traces
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2014 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2018 ABINIT group (B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -68,7 +68,7 @@ IMPLICIT NONE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -209,7 +209,7 @@ CONTAINS
 !!  Initialize and allocate data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -297,7 +297,7 @@ END SUBROUTINE BathOperatoroffdiag_init
 !!  Reset all internal variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -360,7 +360,7 @@ END SUBROUTINE BathOperatoroffdiag_reset
 !!  It is better to use the macro defined in defs.h
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -411,7 +411,7 @@ END SUBROUTINE BathOperatoroffdiag_activateParticle
 !!  is trying to be added and store some array for setMAdd
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -673,7 +673,7 @@ END FUNCTION BathOperatoroffdiag_getDetAdd
 !!  is trying to be removed 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -762,7 +762,7 @@ END FUNCTION BathOperatoroffdiag_getDetRemove
 !!  used for Gloval moves only
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -869,7 +869,7 @@ END FUNCTION BathOperatoroffdiag_getDetF
 !!  Update de M matrix inserting a row and a column
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1283,7 +1283,7 @@ END SUBROUTINE BathOperatoroffdiag_setMAdd
 !!  delete one row and one column of the M matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1492,7 +1492,7 @@ END SUBROUTINE BathOperatoroffdiag_setMRemove
 !!  Recompute 2 M matrix swaping the segments (used for Global moves)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1617,7 +1617,7 @@ END SUBROUTINE BathOperatoroffdiag_swap
 !!  Copy input hybridization functions from a file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1672,7 +1672,7 @@ END SUBROUTINE BathOperatoroffdiag_initF
 !!  Copy F from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1731,7 +1731,7 @@ END SUBROUTINE BathOperatoroffdiag_setF
 !!  print F function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1796,7 +1796,7 @@ END SUBROUTINE BathOperatoroffdiag_printF
 !!  print M =F^{-1} matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1844,7 +1844,7 @@ END SUBROUTINE BathOperatoroffdiag_printM
 !!  print M =F^{-1} matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1907,7 +1907,7 @@ END SUBROUTINE BathOperatoroffdiag_printM_matrix
 !!  Deallocate and reset every thing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1967,7 +1967,7 @@ END SUBROUTINE BathOperatoroffdiag_destroy
 !!  Just store if we perfom check for updates of M
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2010,7 +2010,7 @@ END SUBROUTINE BathOperatoroffdiag_doCheck
 !!  with the already computed M matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2170,7 +2170,7 @@ END SUBROUTINE BathOperatoroffdiag_checkM
 !!  compute from scratch the M matrix 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2018 ABINIT group (B. Amadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2302,7 +2302,7 @@ END SUBROUTINE BathOperatoroffdiag_recomputeM
 !!  compute a percentage error / checkM
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2018 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
