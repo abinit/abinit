@@ -25,8 +25,7 @@
 #
 # So, also issue, one after the other (cut and paste the following):
 # developers/maintainers/change_year.sh autom4te.cache/tr* config/scripts/a* config/scripts/clean* config/scripts/u* 
-# developers/maintainers/change_year.sh developers/bzr_helpers/abinit-forge-branch developers/bzr_helpers/bzr-make-patch 
-# developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/change_perl.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
+# developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* doc/manpages/abinit.1 fallbacks/config/scripts/make* INSTALL 
 # developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
 # 
