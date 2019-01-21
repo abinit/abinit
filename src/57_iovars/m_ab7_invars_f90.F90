@@ -202,13 +202,10 @@ end subroutine ab7_invars_set_flags
 
  type(dtsets_list), pointer :: token
 
- !print *, "TOKEN ID", dtsetsId
  call get_token(token, dtsetsId)
 
  if (associated(token)) then
-    !print *, "ortalg DTSETS: ", dtsets(:)%ortalg 
     dtsets        => token%dtsets
-    !print *, "ortalg DTSETS: ", dtsets(:)%ortalg 
     pspheads      => token%pspheads
 
     mxvals%ga_n_rules  = token%mxga_n_rules
@@ -294,7 +291,6 @@ type(dtsets_list), pointer :: token
  nullify(token%prev)
 
  my_dtsets => token
- !print *, "ortalg my_dtsets: ", my_dtsets%dtsets(:)%ortalg 
  if (AB_DBG) write(std_err,*) "AB module: creation OK with id ", token%id
 
 end subroutine new_token
@@ -402,28 +398,20 @@ end subroutine free_token
  integer, intent(in) :: id
 
  type(dtsets_list), pointer :: tmpLst
- !print *, "AAAAAAAAAAAAAAAAAAAAAA"
  if (AB_DBG) write(std_err,*) "AB module: request list element ", id
  nullify(token)
  ! List element are prepended so element id is at (nb - id) position.
  tmpLst => my_dtsets
- !print *, "ortalg my_dtsets: ", my_dtsets%dtsets(:)%ortalg 
  do
-    !print *, "LOOOOOOOOP"
     if (.not. associated(tmpLst)) then
-       !print *, "NOT ASSOCIATED"
        exit
     end if
     if (tmpLst%id == id .and. associated(tmpLst%dtsets)) then
        token => tmpLst
-       !print *, "ortalg tmpLst: ", tmpLst%dtsets(:)%ortalg 
-       !print *, "RETURN CALL"
        return
     end if
     tmpLst => tmpLst%next
  end do
- !print *, "AAAAAAAAAAAAAAAAAAAAAA"
- !print *, "ortalg DTSETS: ", tmpLst%dtsets(:)%ortalg 
 end subroutine get_token
 !!***
 
@@ -631,7 +619,7 @@ end subroutine ab7_invars_new_from_file
  if (AB_DBG) write(std_err,*) "AB module: call invars0()."
  token%timopt = 1
  if(xmpi_paral==1) token%timopt = 0
- !print *, "ortalg token: ", token%dtsets(:)%ortalg 
+
  !7) Continue to analyze the input string, get upper dimensions,
  !and allocate the remaining arrays.
  call invars0(token%dtsets,token%istatr,token%istatshft,lenstr,&
@@ -640,7 +628,7 @@ end subroutine ab7_invars_new_from_file
  token%dtsets(:)%timopt=token%timopt
  token%dtsets(0)%timopt = 1
  if(xmpi_paral==1) token%dtsets(0)%timopt = 0
- !print *, "ortalg token: ", token%dtsets(:)%ortalg 
+
  !Be careful : at these fourth and fifth calls of status, istatr and istatshft taken
  !from the input variables will be saved definitively.
  if (call_status) then
@@ -673,7 +661,7 @@ end subroutine ab7_invars_new_from_file
     MSG_BUG('ecut_tmp is not well defined.')
  end if
  ecut_tmp=-one
- !print *, "ortalg token: ", token%dtsets(:)%ortalg 
+ 
  token%pspheads(:)%usewvl=token%dtsets(1)%usewvl
  if (with_psp) then
     if (AB_DBG) write(std_err,*) "AB module: call iofn2()."
@@ -700,7 +688,6 @@ end subroutine ab7_invars_new_from_file
     token%pspheads(:)%pspso   = 0
     token%pspheads(:)%xccc    = 0
  end if
- !print *, "ortalg token: ", token%dtsets(:)%ortalg 
  !If (all) pspcod are 7 then this is a PAW calculation. Initialize (default) the value of ratsph
  do idtset=0,ndtset_alloc
     token%dtsets(idtset)%usepaw=usepaw
@@ -735,7 +722,6 @@ end subroutine ab7_invars_new_from_file
  if (AB_DBG) write(std_err,*) "AB module: call invars1m()."
 
 ! write(std_out,*)' ab7_invars_f90 , before invars1m : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
- !print *, "ortalg token: ", token%dtsets(:)%ortalg 
  call invars1m(token%dmatpuflag,token%dtsets,ab_out,lenstr,mband_upper_,&
    & msym,token%mxga_n_rules,token%mxgw_nqlwl,token%mxlpawu,&
    & token%mxmband_upper,&
@@ -782,7 +768,6 @@ end subroutine ab7_invars_new_from_file
  if(with_psp .and. minval(abs((token%pspheads(1:npsp)%pspxc-token%pspheads(1)%pspxc)))==0)then
     token%dtsets(1:ndtset_alloc)%ixc=token%pspheads(1)%pspxc
  end if
- !print *, "ortalg token: ", token%dtsets(:)%ortalg 
  !11) Call the main input routine.
  if (AB_DBG) write(std_err,*) "AB module: call invars2()."
 
@@ -792,9 +777,7 @@ end subroutine ab7_invars_new_from_file
 
  if (with_mem) then
    !write(std_out,*)' ab7_invars_f90 : token%pspheads(1)%nproj(0:3)=',token%pspheads(1)%nproj(0:3)
-   !print *, "ortalg token: ", token%dtsets(:)%ortalg 
    call invars2m(token%dtsets,ab_out,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,token%pspheads,string) !OVDE
-   !print *, "ortalg token: ", token%dtsets(:)%ortalg 
  else
    do idtset = 1, ndtset_alloc, 1
       jdtset=token%dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
