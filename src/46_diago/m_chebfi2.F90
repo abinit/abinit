@@ -22,8 +22,6 @@ module m_chebfi2
 
   implicit none
 
-  private
-
   type, public :: chebfi_t
     integer :: space
     integer :: spacedim                      ! Space dimension for one vector
@@ -203,7 +201,8 @@ module m_chebfi2
     integer :: shift
     double precision :: tolerance
     double precision :: ecut
-    double precision :: maxeig, mineig
+    double precision :: maxeig
+    double precision :: mineig
     double precision :: ampfactor
     
     type(xg_t)::DivResults
@@ -269,15 +268,15 @@ module m_chebfi2
     lambda_minus = maxeig
     lambda_plus = 1000 * maxeig
     
-    nline_max = cheb_oracle(mineig, lambda_minus, chebfi%ecut, 1D-16, 40)
+    nline_max = cheb_oracle1(mineig, lambda_minus, chebfi%ecut, 1D-16, 40)
 
     call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
     
     do iband=1, neigenpairs !TODO
 !      ! nline necessary to converge to tolerance
-!      !nline_tolwfr = cheb_oracle(dble(eig(iband*2-1,1)), lambda_minus, ecut, tolerance / resids_filter(iband), nline)
+!      !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, ecut, tolerance / resids_filter(iband), nline)
 !      ! nline necessary to decrease residual by a constant factor
-!      !nline_decrease = cheb_oracle(dble(eig(iband*2-1,1)), lambda_minus, chebfi%ecut, 0.1D, dtset%nline)
+!      !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, chebfi%ecut, 0.1D, dtset%nline)
 !      !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
       nline_bands(iband) = nline ! fiddle with this to use locking
     end do
@@ -348,10 +347,10 @@ module m_chebfi2
 !End of the abilint section
 
     type(chebfi_t) , intent(inout) :: chebfi
-    type(integer) , intent(in) :: neigenpairs
-    type (double precision) , intent(inout) :: maxeig
-    type (double precision) , intent(inout) :: mineig
-    type (xgBlock_t), intent(inout) :: DivResults
+    integer, intent(in) :: neigenpairs
+    double precision, intent(inout) :: maxeig
+    double precision, intent(inout) :: mineig
+    type(xgBlock_t) , intent(inout) :: DivResults
 
     integer :: maxeig_pos(2)
     integer :: mineig_pos(2)
@@ -552,6 +551,7 @@ module m_chebfi2
   
   subroutine chebfi_ampfactor(chebfi, eig, lambda_minus, nline_bands)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -572,7 +572,7 @@ module m_chebfi2
     
     !ampfactor
     do iband = 1, chebfi%neigenpairs
-      ampfactor = cheb_poly(dble(eig(iband*2-1,1)), nline_bands(iband), lambda_minus, chebfi%ecut) !OK
+      ampfactor = cheb_poly1(dble(eig(iband*2-1,1)), nline_bands(iband), lambda_minus, chebfi%ecut) !OK
 
       if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
       shift = chebfi%spacedim*(iband-1)
@@ -589,13 +589,13 @@ module m_chebfi2
     
   end subroutine chebfi_ampfactor
 
-  function cheb_oracle(x, a, b, tol, nmax) result(n)
+  function cheb_oracle1(x, a, b, tol, nmax) result(n)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'cheb_oracle'
+#define ABI_FUNC 'cheb_oracle1'
 !End of the abilint section
 
    implicit none
@@ -629,16 +629,16 @@ module m_chebfi2
      end do
    end if
 
-  end function cheb_oracle
+  end function cheb_oracle1
   !!***
   
-  function cheb_poly(x, n, a, b) result(y)
+  function cheb_poly1(x, n, a, b) result(y)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'cheb_poly'
+#define ABI_FUNC 'cheb_poly1'
 !End of the abilint section
 
    implicit none
@@ -660,7 +660,7 @@ module m_chebfi2
      yim1 = temp
    end do
 
-  end function cheb_poly
+  end function cheb_poly1
   
 end module m_chebfi2
 

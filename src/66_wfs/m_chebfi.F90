@@ -43,9 +43,6 @@ module m_chebfi
  use m_getghc,        only : getghc
  use m_prep_kgb,      only : prep_getghc, prep_index_wavef_bandpp
  
- !DUMMY
- use m_xg
- USE, INTRINSIC :: IEEE_ARITHMETIC
 
  implicit none
 
@@ -172,12 +169,8 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  type(pawcprj_type), allocatable :: cwaveprj(:,:), cwaveprj_next(:,:), cwaveprj_prev(:,:)
  ! integer :: nline_total
  !DUMMY
- type(xgBlock_t) :: xgx0
- type(xgBlock_t) :: AX
- type(xgBlock_t) :: BX
- type(xgBlock_t) :: Results1
- double precision :: dummy_helper
- integer :: dummy_counter
+ !double precision :: dummy_helper
+ !integer :: dummy_counter
  
  ! timers
  integer, parameter :: timer_chebfi = 1600, timer_alltoall = 1601, timer_apply_inv_ovl = 1602, timer_rotation = 1603
@@ -197,11 +190,11 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  
  ! Init pcon
  pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16*kinpw**4)
-  do dummy_counter = 1, npw
-    if (ieee_is_nan(pcon(dummy_counter))) then
-      pcon(dummy_counter) = 0
-    end if
- end do
+!  do dummy_counter = 1, npw
+!    if (ieee_is_nan(pcon(dummy_counter))) then
+!      pcon(dummy_counter) = 0
+!    end if
+! end do
 
  ghc=zero; gvnlc=zero
 
