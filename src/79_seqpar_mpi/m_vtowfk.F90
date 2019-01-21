@@ -44,11 +44,14 @@ module m_vtowfk
  use m_cgwf,        only : cgwf
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
+ use m_chebfiwf,    only : chebfiwf2
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
+
+ use m_xg !DUMMY
 
  implicit none
 
@@ -140,7 +143,7 @@ contains
 !!      vtorho
 !!
 !! CHILDREN
-!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,meanvalue_g
+!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,chebfiwf2, meanvalue_g
 !!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
 !!      prep_nonlop,pw_orthon,subdiago,timab,wrtout,xmpi_sum,zhemm
 !!
@@ -193,6 +196,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Local variables-------------------------------
  logical :: newlobpcg
+ logical :: newchebfi
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -214,10 +218,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ 
+ !DUMMY
+ type(xgBlock_t) :: xgx0
 
 ! **********************************************************************
 
  DBG_ENTER("COLL")
+
 
  call timab(28,1,tsec) ! Keep track of total time spent in "vtowfk"
 
@@ -236,6 +244,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
+ newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) !is 111 ok?
  istwf_k=gs_hamk%istwf_k
  quit=0
 
@@ -277,7 +286,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_CHECK(ierr==0, "out of memory in gsc")
    gsc=zero
  end if
-
+ 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
@@ -323,6 +332,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
+ !print *, "NON SELF", nnsclo_now
  do inonsc=1,nnsclo_now
 
 !  This initialisation is needed for the MPI-parallelisation (gathering using sum)
@@ -394,9 +404,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
-       else if (wfopta10 == 1) then
-         call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
-&         mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+       else if (wfopta10 == 1) then         
+         if ( .not. newchebfi) then
+           call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+         else
+           call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,mpi_enreg,&
+&           nband_k,npw_k,my_nspinor,prtvol,resid_k)
+         end if
        end if
 
 !      =========================================================================

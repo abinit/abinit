@@ -54,6 +54,8 @@ module m_inwffil
  use m_occ,      only : pareigocc
  use m_rwwf,     only : rwwf, WffReadSkipK
  use m_wvl_wfsinp, only : wvl_wfsinp_disk, wvl_wfsinp_scratch
+ 
+ use m_xg !DUMMY
 
  implicit none
 
@@ -233,6 +235,9 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  real(dp),allocatable :: cg_disk(:,:),kptns0(:,:)
  real(dp),pointer :: cg_eff(:,:),eigen_eff(:)
  type(MPI_type),pointer :: mpi_enreg0
+ 
+ !DUMMY
+ type(xgBlock_t) :: xgx0
 
 ! *************************************************************************
 
@@ -263,7 +268,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  headform0=0 !Default value for headform0 (will be needed later, to read wf blocks)
 
 !Chebyshev is more sensitive to the quality of input random numbers, so use a new algorithm
- if(dtset%wfoptalg == 1) then
+ if(dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) then
    randalg = 1
  else
    ! Otherwise, use compatibility mode
@@ -963,6 +968,10 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      MSG_BUG('unable to interchange nsppol and nspinor when mkmem=0')
    end if
  end if
+ 
+ !print *, "OVDEEEEEEEEEEEEEEEEEEE"
+ !call xgBlock_map(xgx0,cg,SPACE_C,1*npwarr(1)*my_nspinor,dtset%nband(1),mpi_enreg%comm_bandspinorfft) 
+ !call xgBlock_print(xgx0, 6)
 
 !Clean hdr0
  !if (ireadwf==1)then
@@ -996,6 +1005,9 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 
  end if ! dtset%usewvl == 0
 
+ !print *, "OVDEEEEEEEEEEEEEEEEEEE"
+ !call xgBlock_map(xgx0,cg,SPACE_C,1*npwarr(1)*my_nspinor,dtset%nband(1),mpi_enreg%comm_bandspinorfft) 
+ !call xgBlock_print(xgx0, 6)
 !****************************************************************************
 
  ABI_DEALLOCATE(indkk)
@@ -2154,6 +2166,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  integer,allocatable :: kg1(:,:),kg2_k(:,:),kg_dum(:,:)
  real(dp) :: kpoint(3),tsec(2)
  real(dp),allocatable :: cg_aux(:,:),eig_k(:),occ_k(:)
+ 
+ type(xgBlock_t) :: xgx0
 
 ! *************************************************************************
 
@@ -2497,8 +2511,20 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
 !    Note the use of mband2, while mband is used inside
 !    write(std_out,*) 'in newkpt,before wfconv,npw1,npw2',npw1,npw2
+!     print *, "OVDEEEEEEEEEEEEEEEEEEE 2222"
+!     print *, "NBANDS: ", nband2(1)
+!     print *, "NPW: ", npwarr1(1)
+!     print *, "ICPLX: ", 1
+!     print *, "NSPINOR: ", my_nspinor1
+!     print *, "comm_bandspinorfft: ", mpi_enreg2%comm_bandspinorfft
+     
+     !call xgBlock_map(xgx0,cg,SPACE_C,1*npwarr1(1)*my_nspinor1,nband2(1),mpi_enreg2%comm_bandspinorfft) 
+     !call xgBlock_print(xgx0, 6)
+
+
      inplace=1
      if(aux_stor==0)then
+       !print *,"AUX 1"
        call wfconv(ceksp2,cg,cg,debug,ecut1,ecut2,ecut2_eff,&
 &       eig_k,eig_k,exchn2n3d,formeig,gmet1,gmet2,icg,icg,&
 &       ikpt1,ikpt10,ikpt2,indkk,inplace,isppol2,istwfk1,istwfk2,&
@@ -2507,6 +2533,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &       ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,nsym,&
 &       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons)
      else
+       !print *,"AUX 2"
        call wfconv(ceksp2,cg_aux,cg_aux,debug,ecut1,ecut2,ecut2_eff,&
 &       eig_k,eig_k,exchn2n3d,formeig,gmet1,gmet2,icg_aux,icg_aux,&
 &       ikpt1,ikpt10,ikpt2,indkk,inplace,isppol2,istwfk1,istwfk2,&
@@ -2515,6 +2542,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &       ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,nsym,&
 &       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons)
      end if
+     
+     !call xgBlock_print(xgx0, 6)
 
      call timab(784,2,tsec)
 
@@ -2761,6 +2790,9 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  real(dp) :: kpoint1(3),kpoint2_sph(3),phktnons(2,1),spinrot(4),tnons_conv(3),tsec(2)
  real(dp),allocatable :: cfft(:,:,:,:),dum(:,:),phase1d(:,:),phase3d(:,:)
  real(dp),allocatable :: wavef1(:,:),wavef2(:,:),wavefspinor(:,:)
+ 
+ !DUMMY
+ type(xgBlock_t) :: xgx0
 
 ! *************************************************************************
 
@@ -2975,6 +3007,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      do ispinor1=ispinor_first,ispinor_last,order
        ispinor=ispinor1
        if (mpi_enreg1%paral_spinor==1) then
+         !print *, "JEBEM TI MAMICU"
          if (ispinor1==nspinor_index) then
            ispinor=1
          else
@@ -3031,6 +3064,10 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
        call sphere(wavef2,1,npw2,cfft,n1,n2,n3,n4,n5,n6,kg2,istwf2_k,tosph,&
 &       mpi_enreg2%me_g0,shiftg,symm,one)
 
+       !print *, "WFCONV"
+       !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+       !call xgBlock_print(xgx0, 6)
+
        if(nspinor2==1 )then
          i2=(ispinor-1)*npw2+(iband-1)*nspinor2_this_proc*npw2+icg2
          cg2(:,i2+1:i2+npw2)=wavef2(:,1:npw2)
@@ -3059,6 +3096,10 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
          end if
        end if
      end do ! ispinor=ispinor_first,ispinor_last,order
+     
+     !print *,  "CCCCCCCCCCCCCCCC"
+     !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+     !call xgBlock_print(xgx0, 6)
 
      if(nspinor1==2.and.nspinor2==2)then
 !      Take care of possible parallelization over spinors
@@ -3118,6 +3159,10 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      end if ! nspinor1==2 .and. nspinor2==2
 
    end do
+   
+   !print *, "GRANA"
+   !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+   !call xgBlock_print(xgx0, 6)
 
 !  Take care of copying eig and occ when nspinor increases or decreases
    if(nspinor1==1.and.nspinor2==2)then
@@ -3156,18 +3201,25 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    if(nspinor1==2 .and. nspinor2==2) then
      ABI_DEALLOCATE(wavefspinor)
    end if
-
+   print *, "KRAJ GRANE 1"
  else if(convert==0)then
-
+   print *, "POCETAK GRANE 2"
    if(inplace==0)then
 !    Must copy cg, eig and occ if not in-place while convert==0
 !    Note that npw1=npw2, nspinor1=nspinor2
+     !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+     !call xgBlock_print(xgx0, 6)
+     !print *, "BUDALA"
      cg2(:,1+icg2:npw1*nspinor1_this_proc*nbd1+icg2)=&
 &     cg1(:,1+icg1:npw1*nspinor1_this_proc*nbd1+icg1)
      eig_k2(:)=eig_k1(:)
 !    occ_k2(:)=occ_k1(:)
-   end if
 
+     !print *, "KAO NEKI ISPIS"
+     !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+     !call xgBlock_print(xgx0, 6)
+   end if
+   print *, "AFTER INPLACE"
  end if ! End of if convert/=0
 
  if(conv_tnons==1) then
@@ -3197,6 +3249,9 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
        call timab(539,2,tsec)
      end if
 
+     !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+     !call xgBlock_print(xgx0, 6)
+
      do iband=(nbd1/nspinor1)*nspinor2+1,nbd2
        do ispinor2=1,nspinor2_this_proc
          ispinor=ispinor2;if (nspinor2_this_proc/=nspinor2) ispinor=mpi_enreg2%me_spinor+1
@@ -3214,8 +3269,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
            else
              seed=jsign*(iband*(kg2(1,ipw)*npwtot*npwtot + kg2(2,ipw)*npwtot + kg2(3,ipw)))
            end if
-
+           !OVDE NASTAJE RAZLIKA
+           !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+           !call xgBlock_print(xgx0, 6)
            if(randalg == 0) then
+             !print *, "RNG 1"
 !            For portability, use only integer numbers
 !            The series of couples (fold1,fold2) is periodic with a period of
 !            3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
@@ -3230,6 +3288,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
              cg2(1,index+icg2)=dble(foldre)
              cg2(2,index+icg2)=dble(foldim)
            else
+             !print *, "RNG 2"
              ! (AL) Simple linear congruential generator from
              ! numerical recipes, modulo'ed and 64bit'ed to avoid
              ! overflows (NAG doesn't like overflows, even though
@@ -3260,6 +3319,9 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
          cg2(2,1+(iband-1)*npw2*nspinor2_this_proc+icg2)=zero
        end if
      end do
+
+     !call xgBlock_map(xgx0,cg2,SPACE_C,1*90*1,3,0) 
+     !call xgBlock_print(xgx0, 6)
 
 !    Multiply with envelope function to reduce kinetic energy
      icgmod=icg2+npw2*nspinor2_this_proc*(nbd1/nspinor1)

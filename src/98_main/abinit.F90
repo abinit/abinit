@@ -295,6 +295,7 @@ program abinit
  call timab(44,1,tsec)
 
  call ab7_invars_get_abinit_vars(dtsetsId, dtsets, pspheads,mxvals, papiopt, timopt, dmatpuflag)
+ 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
 
@@ -308,8 +309,7 @@ program abinit
  call time_set_papiopt(papiopt)
 
  ABI_DATATYPE_ALLOCATE(mpi_enregs,(0:max(1,ndtset)))
- call mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
-
+ call mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string) 
  call memory_eval(dtsets,ab_out,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !------------------------------------------------------------------------------
@@ -322,7 +322,6 @@ program abinit
  ABI_DATATYPE_ALLOCATE(results_out,(0:ndtset_alloc))
 
 !Initialize results_out datastructure
-
  call init_results_out(dtsets,1,1,mpi_enregs,&
 & mxvals%natom,&
 & mxvals%mband_upper,&
@@ -355,7 +354,6 @@ program abinit
    do ii=1,2
      if(ii==1)iounit=ab_out
      if(ii==2)iounit=std_out
-
      call outvars (choice,dmatpuflag,dtsets,trim(filnam(4)),&
 &     iounit, mxvals,  ndtset,ndtset_alloc,npsp,results_out_all,timopt)
    end do

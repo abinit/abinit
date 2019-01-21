@@ -87,6 +87,8 @@ module m_vtorho
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
+ use m_xg !DUMMY
+
  implicit none
 
  private
@@ -387,6 +389,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
+ 
+ !DUMMY
+ type(xgBlock_t) :: xgx0
 
 !Variables for BigDFT
 #if defined HAVE_BIGDFT

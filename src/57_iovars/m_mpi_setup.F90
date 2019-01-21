@@ -271,6 +271,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  Read again some input data to take into account a possible change of paral_kgb
    wfoptalg_read=.false.
+   !print *, "wfoptalg_read before DTSETS", dtsets(:)%bandpp
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfoptalg',tread0,'INT')
    if(tread0==1) then
      dtsets(idtset)%wfoptalg=intarr(1)
@@ -278,13 +279,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else
      if (dtsets(idtset)%usepaw==0) dtsets(idtset)%wfoptalg=0
      if (dtsets(idtset)%usepaw/=0) dtsets(idtset)%wfoptalg=10
-     if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114
+     if ((optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS).and.dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%wfoptalg=114 
      if (mod(dtsets(idtset)%wfoptalg,10)==4) then
        do iikpt=1,dtsets(idtset)%nkpt
          if (any(abs(dtsets(idtset)%kpt(:,iikpt))>tol8)) dtsets(idtset)%istwfk(iikpt)=1
        end do
      end if
    end if
+   !print *, "wfoptalg_read after DTSETS", dtsets(:)%bandpp
 
    dtsets(idtset)%densfor_pred=2
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'densfor_pred',tread0,'INT')
@@ -306,7 +308,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  LOTF need densfor_pred=2
    if(dtsets(idtset)%ionmov==23) dtsets(idtset)%densfor_pred=2
 #endif
-
+   !print *, "USEPAW before ortalg", dtsets(:)%ortalg
    if (usepaw==0) then
      dtsets(idtset)%ortalg=2
    else
@@ -320,7 +322,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%wfoptalg>=10 .and. dtsets(idtset)%ortalg>0) then
      dtsets(idtset)%ortalg=-dtsets(idtset)%ortalg
    end if
-
+   !print *, "USEPAW after ortalg", dtsets(:)%ortalg
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iomode',tread0,'INT')
    if(tread0==1) then
      dtsets(idtset)%iomode=intarr(1)
@@ -354,12 +356,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 &   dtsets(idtset)%rfuser/=0 .or. dtsets(idtset)%rfmagn/=0) response=1
 
 !  If no MPI, set all npxxx variables to 1
+   !print *, "no MPI, before DTSETS", dtsets(:)%bandpp
    if (nproc==1) then
      dtsets(idtset)%npkpt    = 1 ; dtsets(idtset)%npband   = 1
      dtsets(idtset)%npfft    = 1 ; dtsets(idtset)%npspinor = 1
      dtsets(idtset)%nphf     = 1
    end if
-
+   !print *, "no MPI, after DTSETS", dtsets(:)%bandpp
 !    --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
    if(dtsets(idtset)%tfkinfunc==2 .and. nproc/=1)then
      dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%npkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
@@ -421,13 +424,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        MSG_ERROR(message)
      end if
    end if
-
+   !print *, "LOBPCG and ChebFi before DTSETS", dtsets(:)%bandpp
 !  LOBPCG and ChebFi need paral_kgb=1 in parallel
    if ((dtsets(idtset)%npband*dtsets(idtset)%npfft>1).and. &
 &   (mod(dtsets(idtset)%wfoptalg,10)==1.or.mod(dtsets(idtset)%wfoptalg,10)==4)) then
      dtsets(idtset)%paral_kgb=1
    end if
-
+   !print *, "LOBPCG and ChebFi before DTSETS", dtsets(:)%bandpp
 !  Check size of Scalapack communicator
 #ifdef HAVE_LINALG_ELPA
    if(dtsets(idtset)%paral_kgb>0.and.dtsets(idtset)%np_slk>0) then
@@ -483,13 +486,15 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if ! Fock
 
    !When using chebfi, the number of blocks is equal to the number of processors
-   if((dtsets(idtset)%wfoptalg == 1)) then
+   !print *, "ChebFi before DTSETS", dtsets(:)%bandpp
+   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then   !new Chebfi == 111
      !Nband might have different values for different kpoint, but not bandpp.
      !In this case, we just use the largest nband, andthe input will probably fail
      !at the bandpp check later on
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
    end if
-
+   !print *, "ChebFi after DTSETS", dtsets(:)%bandpp
+   
 !  Set mpi_enreg
    mpi_enregs(idtset)%paral_kgb=dtsets(idtset)%paral_kgb
    if(dtsets(idtset)%paral_kgb/=0)then

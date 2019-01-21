@@ -121,6 +121,8 @@ module m_gstate
  use defs_param_lotf,    only : lotfparam_init
 #endif
 
+ use m_xg !DUMMY
+
  implicit none
 
  private
@@ -324,6 +326,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
  type(pawcprj_type),allocatable :: cprj(:,:)
+ 
 
 ! ***********************************************************************
 
@@ -715,6 +718,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_CHECK(ierr==0, "out of memory in cg")
    ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
+ 
 
  ABI_ALLOCATE(resid,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen(:)=zero ; resid(:)=zero
@@ -760,6 +764,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
+
 !Initialize wavefunctions.
  if(dtset%imgwfstor==1 .and. initialized==1)then
    cg(:,:)=scf_history%cg(:,:,1) 
@@ -779,7 +784,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtfil%fnamewffk,wvl)
    hdr%rprimd=rprimd
  end if
-
+ 
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 !  Has to update header again (because pawrhoij has changed)  -  MT 2007-10-22: Why ?
@@ -1305,7 +1310,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  call move, pawuj_drive or brdmin which in turn calls scfcv.
 
    call timab(35,3,tsec)
-
+   
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&

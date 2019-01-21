@@ -116,7 +116,7 @@ module m_scfcv_core
  use m_cgprj,            only : ctocprj
  use m_psolver,          only : psolver_rhohxc
  use m_paw2wvl,          only : paw2wvl_ij, wvl_cprjreorder
-
+ 
  implicit none
 
  private
@@ -423,7 +423,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  type(pawrhoij_type),pointer :: pawrhoij_ep(:)
  type(fock_type),pointer :: fock
  type(pawcprj_type),allocatable, target :: cprj_local(:,:)
-
+ 
 ! *********************************************************************
 
  _IBM6("Hello, I'm running on IBM6")
@@ -1532,12 +1532,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
    call timab(242,1,tsec)
 !  Compute the density from the trial potential
+
    if (dtset%tfkinfunc==0) then
 
      if(VERBOSE)then
        call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
      end if
-
+     
      call vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dielop,dielstrt,dmatpawu,dphase,dtefield,dtfil,dtset,&
 &     eigen,electronpositron,energies,etotal,gbound_diel,&
