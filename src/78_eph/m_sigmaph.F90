@@ -251,6 +251,9 @@ module m_sigmaph
   logical :: imag_only
    ! True if only the imaginary part of the self-energy must be computed
 
+  logical :: calc_mrta
+   ! True if the self-energy in the energy-momentum relaxation time approximation should be computed
+
   integer :: gmax(3)
 
   integer :: ngqpt(3)
@@ -338,7 +341,7 @@ module m_sigmaph
   ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
   ! Diagonal elements of velocity operator for all states in Sigma_nk.
 
-  !real(dp),allocatable :: tau_mrta(:,:)
+  real(dp),allocatable :: tau_mrta(:,:)
    ! tau_mrta(ntemp, max_nbcalc)
    ! Lifetimes computed withing the momentum relaxation time approximation
    ! for fixed (kcalc, spin). Only if imag_only
@@ -540,6 +543,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag
+ real(dp) :: vkk_norm2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -554,7 +558,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
- real(dp) :: vk(2, 3), tsec(2)
+ real(dp) :: vk(2, 3), vkq(2,3), tsec(2)
+ !real(dp) :: vk(3), vkq(3), tsec(2)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -567,7 +572,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
- real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:)
+ real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:),alpha_mrta(:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -767,7 +772,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ABI_FREE(cgwork)
 
- call ddkop%free()
  !end if ! calc_velocity
 
  ! Prepare call to getgh1c
@@ -877,9 +881,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
-     !if (sigma%imag_only) then
-     !  sigma%tau_mrta = zero
-     !end if
+     if (sigma%calc_mrta) then
+       sigma%tau_mrta = zero
+       ABI_MALLOC(alpha_mrta, (nbcalc_ks))
+     end if
 
      ! Prepare computation of Sigma_{nk}(w) and spectral function.
      if (sigma%nwr > 0) then
@@ -1048,9 +1053,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !     [npw_kq],dtset%nsppol,optder,cryst%rprimd,ylm_kq,ylmgr_kq)
        !end if
 
-       !if (mrta) then
-       ! call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
-       !end if
+       if (sigma%calc_mrta) then
+        call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+       end if
 
        ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
        ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
@@ -1165,18 +1170,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! q-weight for naive integration
          weight_q = sigma%wtq_k(iq_ibz)
 
-         !if (mrta) then
-         !  call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
-         !  vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
-         !  ABI_MALLOC(alpha_mrta, (nbcalc_ks))
-         !  do ib_k=1,nbcalc_ks
-         !    vk = sigma%vred_calc(:, ib_k, ikcalc, spin)
-         !    vkk_norm2 = dot_product(vk, vk)
-         !    alpha_mrta(ib_k) = zero
-         !    if (vkk_norm2 > tol16) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vk_norm**2
-         !  end do
-         !  ABI_FREE(alpha_mrta)
-         !end if
+         if (sigma%calc_mrta) then
+           call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
+           vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
+           do ib_k=1,nbcalc_ks
+             vk(1,:) = sigma%vred_calc(:, ib_k, ikcalc, spin)
+             vkk_norm2 = dot_product(vk(1,:),vk(1,:))
+             alpha_mrta(ib_k) = zero
+             if (vkk_norm2 > tol16) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
+           end do
+           !ABI_FREE(alpha_mrta)
+         end if
 
          do imyp=1,my_npert
            ! Ignore acoustic or unstable modes.
@@ -1261,7 +1265,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  if (sigma%imag_only) then
                    simag = gkq2 * aimag(cfact)
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                   !sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                   if (sigma%calc_mrta) sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                  else
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * cfact
                  end if
@@ -1296,7 +1300,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                          (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
                          (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, jj) ) * weight
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                       !sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                       if (sigma%calc_mrta) sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
                          (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
@@ -1311,7 +1315,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, 1) )
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                     !sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                     if (sigma%calc_mrta) sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                    else
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
                        (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
@@ -1549,6 +1553,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
+   if (sigma%calc_mrta) ABI_FREE(alpha_mrta)
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
@@ -1567,12 +1572,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
  ABI_SFREE(cfact_wr)
+ ABI_SFREE(alpha_mrta)
 
  call destroy_hamiltonian(gs_hamkq)
  call sigmaph_free(sigma)
  call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
+ call ddkop%free()
 
 end subroutine sigmaph
 !!***
@@ -1724,6 +1731,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
+
+ ! Compute lifetimes in the MRTA approximation
+ new%calc_mrta = .False.; if (dtset%userib == 11) new%calc_mrta = .True.
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)
@@ -2361,9 +2371,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
  end if
 
- !if (new%imag_only) then
- !  ABI_CALLOC(new%tau_mrta, (new%ntemp, new%max_nbcalc))
- !end if
+ if (new%calc_mrta) then
+   ABI_CALLOC(new%tau_mrta, (new%ntemp, new%max_nbcalc))
+ end if
 
  call cwtime_report("sigmaph_new: all", cpu_all, wall_all, gflops_all)
 
@@ -2521,12 +2531,12 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
    ])
    NCF_CHECK(ncerr)
 
-   !if (self%imag_only) then
-   !  ncerr = nctk_def_arrays(ncid, [ &
-   !    nctkarr_t("tau_mrta", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol") &
-   !  ])
-   !  NCF_CHECK(ncerr)
-   !end if
+   if (self%calc_mrta) then
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("tau_mrta", "dp", "ntemp, max_nbcalc, nkcalc, nsppol") &
+     ])
+     NCF_CHECK(ncerr)
+   end if
 
    if (self%frohl_model == 1) then
      ! Arrays storing the Frohlich self-energy.
@@ -3011,7 +3021,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%mu_e)
  ABI_SFREE(self%e0vals)
  ABI_SFREE(self%vred_calc)
- !ABI_SFREE(self%tau_mrta)
+ ABI_SFREE(self%tau_mrta)
  ABI_SFREE(self%cweights)
  ABI_SFREE(self%deltaw_pm)
  ABI_SFREE(self%wrmesh_b)
@@ -3456,9 +3466,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- !if (self%imag_only) then
- !  call xmpi_sum_master(self%tau_mrta, master, comm, ierr)
- !end if
+ if (self%calc_mrta) then
+   call xmpi_sum_master(self%tau_mrta, master, comm, ierr)
+ end if
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
  ! Only master writes
  if (my_rank /= master) return
@@ -3501,12 +3511,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
        end do
 
        ! Average TAU_MRTA
-       !if (self%imag_only) then
-       !  ravg = sum(self%tau_mrta(it, bids(:))) / nstates
-       !  do ii=1,nstates
-       !    self%tau_mrta(it, bids(ii)) = ravg
-       !  end do
-       !end if
+       if (self%calc_mrta) then
+         ravg = sum(self%tau_mrta(it, bids(:))) / nstates
+         do ii=1,nstates
+           self%tau_mrta(it, bids(ii)) = ravg
+         end do
+       end if
 
        if (self%nwr > 0) then
          ! Average Sigma(omega, T)
@@ -3728,9 +3738,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpoms_gaps"), qpoms_gaps, start=[1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), qp_gaps, start=[1,ikcalc,spin]))
 
- !if (self%imag_only) then
- !  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "tau_mrta"), self%tau_mrta, start=[1,1,1,ikcalc,spin]))
- !end if
+ if (self%calc_mrta) then
+   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "tau_mrta"), self%tau_mrta, start=[1,1,ikcalc,spin]))
+ end if
 
  if (self%frohl_model == 1) then
    ! Write Frohlich self-energy to file.
