@@ -2884,9 +2884,11 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
   if(need_displacement)then
     displacement(:,:) = zero
     do ii = 1, natom
-      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii) 
+      displacement(:,ii) = xcart_hist_tmp(:,ii) - xcart_ref_tmp(:,ii)
     end do
   end if
+
+
 
 ! Get also the variation of the displacmeent wr to strain
   if(has_strain.and.need_duDelta) then
