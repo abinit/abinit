@@ -1175,9 +1175,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
            do ib_k=1,nbcalc_ks
              vk(1,:) = sigma%vred_calc(:, ib_k, ikcalc, spin)
-             vkk_norm2 = dot_product(vk(1,:),vk(1,:))
+             !vkk_norm2 = dot_product(vk(1,:),vk(1,:))
+             vkk_norm2 = norm2(vk(1,:))*norm2(vkq(1,:))
              alpha_mrta(ib_k) = zero
-             if (vkk_norm2 > tol16) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
+             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
            end do
            !ABI_FREE(alpha_mrta)
          end if
