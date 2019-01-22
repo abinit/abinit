@@ -2155,20 +2155,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
   ! only values of 0 (default) 1, 2, 3 are allowed
   call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
-   if(dt%orbmag .NE. 0) then
+  if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
-   end if
+  end if
   ! only kptopt 4 and 3 are allowed
-   if(dt%orbmag .NE. 0) then
+  if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
-   end if
-  ! ! nproc > 1 implementation for chern_number but not for orbmag yet
-  !  if(dt%orbmag .GT. 1) then
-  !    cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-  !    call chkint_eq(1,1,cond_string,cond_values,ierr,'nproc',nproc,1,(/1/),iout)
-  !  end if
+  end if
+  ! only kpt parallelism is allowed at present
+  if(dt%orbmag .GT. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
+  end if
+  if(dt%orbmag .GT. 0) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
+  end if
   ! require usexcnhat 0
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
