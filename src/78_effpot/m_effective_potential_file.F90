@@ -3623,13 +3623,14 @@ end do  ! ia
    call wrtout(ab_out,msg,'COLL')
  end if
 
- if(.not.any(list_map(:)==ia))then
-     write(msg, '(5a)' )&
+ 
+   if(any(list_map(:)==0))then
+       write(msg, '(5a)' )&
 &         'Unable to map the molecular dynamic file  ',ch10,&
 &         'on the reference supercell structure',ch10,&
 &         'Action: change the MD file'
-     MSG_ERROR(msg)
- end if
+       MSG_ERROR(msg)
+   end if
 
  need_map = .FALSE.
  do ia=1,natom_hist
