@@ -337,7 +337,7 @@ module m_sigmaph
   ! KS energies where QP corrections are wantend
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  real(dp),allocatable :: vred_calc(:,:,:,:)
+  real(dp),allocatable :: vcar_calc(:,:,:,:)
   ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
   ! Diagonal elements of velocity operator for all states in Sigma_nk.
 
@@ -558,8 +558,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
- real(dp) :: vk(2, 3), vkq(2,3), tsec(2)
- !real(dp) :: vk(3), vkq(3), tsec(2)
+ real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -730,7 +729,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
      msg=" Computing diagonal elements of velocity operator for all states in Sigma_nk...")
  ABI_MALLOC(cgwork,   (2, mpw*wfd%nspinor))
- ABI_CALLOC(sigma%vred_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+ ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  !if (my_rank == master) call ddkop%print(ab_out)
@@ -750,23 +749,24 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
        call ddkop%apply(eig0nk, mpw, npw_k, wfd%nspinor, cgwork, cwaveprj0, wfd%mpi_enreg)
-       vk = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
-       sigma%vred_calc(:, ib_k, ikcalc, spin) = vk(1, :)
+       vk_red = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
+       call ddk_red2car(cryst%rprimd,vk_red,vk)
+       sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk(1, :)
      end do
 
    end do
  end do
 
- call xmpi_sum(sigma%vred_calc, comm, ierr)
+ call xmpi_sum(sigma%vcar_calc, comm, ierr)
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
  ! Write results to disk.
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nctk_set_defmode(sigma%ncid))
-   NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vred_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
+   NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
    NCF_CHECK(nctk_set_datamode(sigma%ncid))
-   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vred_calc"), sigma%vred_calc))
+   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_calc"), sigma%vcar_calc))
  end if
 #endif
 
@@ -1172,11 +1172,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          if (sigma%calc_mrta) then
            call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
-           vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
+           vkq_red = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
+           call ddk_red2car(cryst%rprimd,vkq_red,vkq)
            do ib_k=1,nbcalc_ks
-             vk(1,:) = sigma%vred_calc(:, ib_k, ikcalc, spin)
-             !vkk_norm2 = dot_product(vk(1,:),vk(1,:))
-             vkk_norm2 = norm2(vk(1,:))*norm2(vkq(1,:))
+             vk(1,:) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+             vkk_norm2 = dot_product(vk(1,:),vk(1,:))
+             !vkk_norm2 = norm2(vk(1,:))*norm2(vkq(1,:))
              alpha_mrta(ib_k) = zero
              if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
            end do
@@ -2821,15 +2822,16 @@ end function sigmaph_read
 !!
 !! SOURCE
 
-type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, indq2ebands) result(new)
+type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, linewidth_mrta, &
+                                       velocity, comm, ierr, indq2ebands) result(new)
 
 !Arguments -----------------------------------------------
  integer,intent(in) :: comm
- integer,intent(in) :: opt(:)
  type(sigmaph_t),intent(in) :: self
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  integer, intent(out) :: ierr
+ real(dp), allocatable, intent(out) :: linewidth_serta(:,:,:,:), linewidth_mrta(:,:,:,:), velocity(:,:,:,:)
  integer, allocatable, optional, intent(out) :: indq2ebands(:)
  character(len=500) :: msg
 
@@ -2842,7 +2844,6 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
 #endif
  character(len=fnlen) :: path
  integer,allocatable :: indkk(:,:), nband(:)
- real,allocatable :: linewidth(:,:,:,:)
  real(dp) :: dksqmax
 
  ! copy useful dimensions
@@ -2853,7 +2854,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
  ABI_MALLOC(indkk,(nkcalc,6))
  ! map ebands kpoints to sigmaph
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, nkcalc, cryst%nsym, &
-             1, cryst%symafm, cryst%symrec, timrev1, xmpi_comm_self, use_symrec=.True.)
+             1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6,a)' ) &
@@ -2878,46 +2879,44 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, opt, comm, ierr, ind
 
  write(*,*) 'reading netcdf file'
 #ifdef HAVE_NETCDF
- if (opt(1)==1) then
-   ! read linewidths from sigmaph
-   ABI_CALLOC(new%linewidth,(self%ntemp,mband,nkpt,nsppol))
-   do spin=1,nsppol
-     do ikcalc=1,nkcalc
-       bstart_ks = self%bstart_ks(ikcalc,spin)
-       nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
-       do iband=1,nbcalc_ks
-         band_ks = iband + bstart_ks - 1
-         ikpt = indkk(ikcalc,1)
-         do itemp=1,self%ntemp
-           ! read from netcdf file
-           NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), new%linewidth(itemp,band_ks,ikpt,spin), start=[2,itemp,iband,ikcalc,spin]))
-         end do
+ ! read linewidths from sigmaph
+ ABI_CALLOC(linewidth_serta,(self%ntemp,mband,nkpt,nsppol))
+ ABI_CALLOC(linewidth_mrta,(self%ntemp,mband,nkpt,nsppol))
+ do spin=1,nsppol
+   do ikcalc=1,nkcalc
+     bstart_ks = self%bstart_ks(ikcalc,spin)
+     nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
+     do iband=1,nbcalc_ks
+       band_ks = iband + bstart_ks - 1
+       ikpt = indkk(ikcalc,1)
+       do itemp=1,self%ntemp
+         ! read from netcdf file
+         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), linewidth_serta(itemp,band_ks,ikpt,spin), start=[2,itemp,iband,ikcalc,spin]))
+         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "tau_mrta"), linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp,iband,ikcalc,spin]))
        end do
      end do
    end do
- end if
+ end do
 
  ! read band velocities
- if (opt(2)==1) then
-   ierr = nf90_inq_varid(self%ncid, "vred_calc", varid)
-   if (ierr /= nf90_noerr) then
-     ierr = 99
-     return
-   endif
-   ABI_CALLOC(new%velocity,(3,mband,nkpt,nsppol))
-   do spin=1,nsppol
-     do ikcalc=1,nkcalc
-       bstart_ks = self%bstart_ks(ikcalc,spin)
-       nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
-       do iband=1,nbcalc_ks
-         band_ks = iband + bstart_ks - 1
-         ikpt = indkk(ikcalc,1)
-         ! read from netcdf file
-         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"), new%velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin]))
-       end do
+ ierr = nf90_inq_varid(self%ncid, "vcar_calc", varid)
+ if (ierr /= nf90_noerr) then
+   ierr = 99
+   return
+ endif
+ ABI_CALLOC(velocity,(3,mband,nkpt,nsppol))
+ do spin=1,nsppol
+   do ikcalc=1,nkcalc
+     bstart_ks = self%bstart_ks(ikcalc,spin)
+     nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
+     do iband=1,nbcalc_ks
+       band_ks = iband + bstart_ks - 1
+       ikpt = indkk(ikcalc,1)
+       ! read from netcdf file
+       NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin]))
      end do
    end do
- end if
+ end do
 #endif
 
  ABI_FREE(indkk)
@@ -3021,7 +3020,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%mu_e)
  ABI_SFREE(self%e0vals)
- ABI_SFREE(self%vred_calc)
+ ABI_SFREE(self%vcar_calc)
  ABI_SFREE(self%tau_mrta)
  ABI_SFREE(self%cweights)
  ABI_SFREE(self%deltaw_pm)

@@ -148,6 +148,7 @@ MODULE m_ddk
  public :: ddk_fs_average_veloc  ! find FS average of velocity squared
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
+ public :: ddk_red2car           ! Convert band velocities from cartesian to reduced coordinates
  public :: ddk_compute           ! Calculate ddk matrix elements. Save result on disk.
 !!***
 
@@ -1058,6 +1059,46 @@ subroutine ddk_free(ddk)
 
 end subroutine ddk_free
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddk_red2car
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ddk_red2car(rprimd, vred, vcar)
+
+!Arguments -------------------------------------
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: vred(2,3)
+ real(dp),intent(out) :: vcar(2,3)
+
+!Local variables -------------------------------
+ real(dp) :: vtmp(2,3)
+
+ ! Go to cartesian coordinates (same as pmat2cart routine)
+ vtmp(1,:) = rprimd(:,1)*vred(1,1) &
+            +rprimd(:,2)*vred(1,2) &
+            +rprimd(:,3)*vred(1,3)
+ vtmp(2,:) = rprimd(:,1)*vred(2,1) &
+            +rprimd(:,2)*vred(2,2) &
+            +rprimd(:,3)*vred(2,3)
+ vcar = vtmp / two_pi
+
+end subroutine
+!!***
+
 
 !----------------------------------------------------------------------
 

@@ -85,6 +85,15 @@ type,public :: transport_rta_t
    real(dp),allocatable :: eminmax_spin(:,:)
    ! min max energy of the of the original ebands object
 
+   real(dp),allocatable :: linewidth_serta(:,:,:,:)
+   ! Linewidth computed in the self-energy relaxation time aproximation
+
+   real(dp),allocatable :: linewidth_mrta(:,:,:,:)
+   ! Linewidth computed in the momentum relaxation time approximation
+
+   real(dp),allocatable :: velocity(:,:,:,:)
+   ! band velocity
+
    type(gaps_t) :: gaps
    ! get gaps of original ebands object
 
@@ -167,53 +176,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
  if (ierr/=0) MSG_ERROR(msg)
 
 ! intialize transport
- transport_rta = transport_rta_new(sigmaph,ebands)
-
-! read lifetimes to ebands object
- transport_rta%ebands = sigmaph_ebands(sigmaph,cryst,ebands,[1,1],comm,ierr)
-
- if (ierr == 99) then
-   ! compute velocities if not present in the SIGEPH.nc file
-   ! initialize important dimensions
-   nsppol = ebands%nsppol; nspinor = ebands%nspinor
-   nspden = dtset%nspden; nkpt = ebands%nkpt
-
-   ! Initialize the wave function descriptor.
-   ! Each node has all k-points and spins and bands between my_bstart and my_bstop
-   ABI_MALLOC(nband, (nkpt, nsppol))
-   ABI_MALLOC(bks_mask, (dtset%mband, nkpt, nsppol))
-   ABI_MALLOC(keep_ur, (dtset%mband, nkpt ,nsppol))
-
-   nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
-
-   write(*,*) 'mband', dtset%mband
-   write(*,*) 'nkpt', nkpt
-   write(*,*) 'nspinor', nspinor
-   write(*,*) 'nspden', nspden
-   write(*,*) 'nsppol', nsppol
-
-   bks_mask = .True.
-
-   ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
-   ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
-   ABI_MALLOC(wfd_istwfk, (nkpt))
-   wfd_istwfk = 1
-
-   call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%mband,nband,nkpt,nsppol,bks_mask,&
-     nspden,nspinor,ecut,dtset%ecutsm,dtset%dilatmx,wfd_istwfk,ebands%kptns,ngfft,&
-     dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
-
-   call wfd%print(header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
-
-   ABI_FREE(nband)
-   ABI_FREE(bks_mask)
-   ABI_FREE(keep_ur)
-   ABI_FREE(wfd_istwfk)
-
-   call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
-
-   !TODO: actually compute velocities
- end if
+ transport_rta = transport_rta_new(sigmaph,cryst,ebands)
 
  ! Compute transport
  call transport_rta_compute(transport_rta,cryst,dtset,comm)
@@ -241,14 +204,16 @@ end subroutine transport
 !!
 !! SOURCE
 
-type(transport_rta_t) function transport_rta_new(sigmaph,ebands) result (new)
+type(transport_rta_t) function transport_rta_new(sigmaph,cryst,ebands) result (new)
 
 !Arguments -------------------------------------
  type(sigmaph_t) :: sigmaph
+ type(crystal_t) :: cryst
  type(ebands_t),intent(in) :: ebands
 
 !Local variables ------------------------------
  integer :: ierr
+ integer,allocatable :: indq2ebands(:)
 
  ! Allocate important arrays
  ABI_MALLOC(new%kTmesh,(sigmaph%ntemp))
@@ -260,6 +225,9 @@ type(transport_rta_t) function transport_rta_new(sigmaph,ebands) result (new)
  new%eminmax_spin = get_minmax(ebands, "eig")
 
  ierr = get_gaps(ebands,new%gaps)
+
+! read lifetimes to ebands object
+ new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
 
 end function transport_rta_new
 
@@ -305,9 +273,10 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
    do ik=1,nkpt
      do ib=1,mband
        ! Go to cartesian coordinates (same as pmat2cart routine).
-       vr = cryst%rprimd(:,1)*self%ebands%velocity(1,ib,ik,spin) &
-           +cryst%rprimd(:,2)*self%ebands%velocity(2,ib,ik,spin) &
-           +cryst%rprimd(:,3)*self%ebands%velocity(3,ib,ik,spin)
+       !vr = cryst%rprimd(:,1)*self%ebands%velocity(1,ib,ik,spin) &
+       !    +cryst%rprimd(:,2)*self%ebands%velocity(2,ib,ik,spin) &
+       !    +cryst%rprimd(:,3)*self%ebands%velocity(3,ib,ik,spin)
+       vr(:) = self%velocity(:,ib,ik,spin)
        vr = vr / two_pi
        ! Store in vv_tens
        do ii=1,3
@@ -317,7 +286,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
        end do
        ! Multiply by the lifetime
        do itemp=1,self%ntemp
-         linewidth = abs(self%ebands%linewidth(itemp, ib, ik, spin))
+         linewidth = abs(self%linewidth_serta(itemp, ib, ik, spin))
          vv_tens(:, :, 1+itemp, ib, ik, spin) = 0
          if (linewidth > tol12) vv_tens(:, :, 1+itemp, ib, ik, spin) = vv_tens(:, :, 1, ib, ik, spin) / linewidth
        end do
