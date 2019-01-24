@@ -303,7 +303,7 @@ extra_javascript:
     - extra_javascript/jquery.dialogextend.min.js
     - extra_javascript/abidocs.js
 
-copyright: Copyright &copy; 2018 The Abinit Group
+copyright: Copyright &copy; 2018-2019 The Abinit Group
 
 # Google Analytics
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']

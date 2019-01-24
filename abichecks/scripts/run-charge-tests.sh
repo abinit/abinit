@@ -1,7 +1,7 @@
 # Script for testing abinit in charge (TC = Test Charge)
 # Before running this script, read README in this directory.
 
-# Copyright (C) 2000-2016 ABINIT group (XG,LSi)
+# Copyright (C) 2000-2019 ABINIT group (XG,LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

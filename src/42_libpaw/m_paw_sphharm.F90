@@ -8,7 +8,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2018 ABINIT group (MT, FJ, NH, TRangel)
+!! Copyright (C) 2013-2019 ABINIT group (MT, FJ, NH, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -248,7 +248,6 @@ end function ylmc
 !!      m_vkbr
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -390,10 +389,9 @@ end subroutine ylmcd
 !!  We are supressing the so-called Condon-Shortley phase
 !!
 !! PARENTS
-!!      mlwfovlp_proj,mlwfovlp_ylmfac
+!!      m_mlwfovlp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -541,11 +539,10 @@ end subroutine ylm_cmplx
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
 !!
 !! PARENTS
-!!      debug_tools,denfgr,m_paw_finegrid,m_paw_pwaves_lmn,m_pawang
-!!      mlwfovlp_ylmfar,posdoppler,pspnl_operat_rec,qijb_kk,smatrix_pawinit
+!!      m_mlwfovlp,m_paw_finegrid,m_paw_mkrho,m_paw_overlap,m_paw_pwaves_lmn
+!!      m_pawang,m_positron,m_rec
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -754,7 +751,6 @@ end subroutine initylmr
 !!      m_epjdos,m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -801,9 +797,9 @@ subroutine ys(lp,mp,ll,mm,ys_val)
  case (0) ! case for S_l0
     ys_val = cone*d_lp_ll*d_mp_mm
  case (:-1) ! case for S_lm with m < 0
-    ys_val = -j_dpc*sqrthalf*powm*d_lp_ll*d_mp_am+j_dpc*sqrthalf*powm*powam*d_lp_ll*d_mp_ambar
+    ys_val = (zero,one)*sqrthalf*powm*d_lp_ll*(-d_mp_am+powam*d_mp_ambar)
  case (1:) ! case for S_lm with m > 0
-    ys_val = cone*sqrthalf*powm*d_lp_ll*d_mp_mm + cone*sqrthalf*d_lp_ll*d_mp_mbar
+    ys_val = cone*sqrthalf*d_lp_ll*(powm*d_mp_mm+d_mp_mbar)
  end select
 
 end subroutine ys
@@ -832,7 +828,6 @@ end subroutine ys
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -893,10 +888,9 @@ end subroutine lxyz
 !! The subroutine computes <S_l'm'|L_idir|S_lm>
 !!
 !! PARENTS
-!!      m_pawdij
+!!      m_orbmag,m_paw_nmr,m_pawdij
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -952,10 +946,9 @@ end subroutine slxyzs
 !!  blm(5,mpsang*mpsang)=coefficients depending on Plm and its derivatives where P_lm is a legendre polynome
 !!
 !! PARENTS
-!!      initylmg,m_paw_sphharm
+!!      m_initylmg,m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1140,7 +1133,6 @@ end function ass_leg_pol
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1404,7 +1396,6 @@ end function plm_dtheta
 !!      m_paw_sphharm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1772,10 +1763,9 @@ pure function phim(costheta,sintheta,mm)
 !!  usefull only in ndij==4
 !!
 !! PARENTS
-!!      m_pawang,pawprt,setnoccmmp
+!!      m_paw_correlations,m_paw_tools,m_pawang
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2040,10 +2030,9 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 !!  usefull only in ndij==4
 !!
 !! PARENTS
-!!      m_pawang,pawprt,setnoccmmp
+!!      m_paw_correlations,m_paw_tools,m_pawang
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2199,7 +2188,6 @@ end subroutine mat_slm2ylm
 !!  useful only in ndij==4
 !!
 !! PARENTS
-!!      m_paw_sphharm
 !!
 !! CHILDREN
 !!
@@ -2261,7 +2249,6 @@ end subroutine create_slm2ylm
 !!  mlms2jmj= rotation matrix
 !!
 !! PARENTS
-!!      m_paw_sphharm
 !!
 !! CHILDREN
 !!
@@ -2381,6 +2368,9 @@ end subroutine create_mlms2jmj
 !!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
 !!
 !! PARENTS
+!!      m_berryphase_new,m_bethe_salpeter,m_dfpt_looppert,m_gstate,m_nonlinear
+!!      m_orbmag,m_respfn_driver,m_screening_driver,m_sigma_driver
+!!      m_wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -2534,6 +2524,7 @@ end subroutine setsym_ylm
 !!   See : Mazevet, S., Torrent, M., Recoules, V. and Jollet, F., High Energy Density Physics, 6, 84-88 (2010)
 !!         Calculations of the Transport Properties within the PAW Formalism
 !! PARENTS
+!!      m_paw_onsite
 !!
 !! CHILDREN
 !!
