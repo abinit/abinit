@@ -81,7 +81,7 @@ The perturbations of the **electric field** type are
 
   * the application of the homogeneous electric field along the axes of the reciprocal lattice 
   * the derivative of the Hamiltonian with respect to the electronic wavevector along 
-    the axes of the Brillouin zone (which gives derivatives of wavefunctions with respect to their wavevector), 
+    the axes of the reciprocal lattice (which allows to compute derivatives of wavefunctions with respect to their wavevector), 
     an **auxiliary** quantity needed **before** the application of the homogeneous electric field. 
     The perturbation is the change of wavevector by dk in the Hamiltonian, hence the perturbation 
     is referred to as the derivative dk perturbation ("ddk" perturbation). 
