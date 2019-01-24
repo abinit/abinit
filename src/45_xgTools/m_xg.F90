@@ -108,6 +108,11 @@ module m_xg
     module procedure xgBlock_gemmR
     module procedure xgBlock_gemmC
   end interface
+  
+  interface xgBlock_saxpy
+    module procedure xgBlock_saxpyR
+    module procedure xgBlock_saxpyC
+  end interface
 
   interface xgBlock_colwiseMul
     module procedure xgBlock_colwiseMulR
@@ -175,7 +180,7 @@ module m_xg
   public :: xgBlock_colwiseDotProduct
   public :: xgBlock_colwiseDivision 
   public :: xgBlock_colwiseCaxmy
-  public :: xgBlock_Saxpy
+  public :: xgBlock_saxpy
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
 
@@ -2105,40 +2110,76 @@ module m_xg
   end subroutine xgBlock_colwiseMulC
 !!***
 
- subroutine xgBlock_Saxpy(xgBlock1, da, xgBlock2)
+ subroutine xgBlock_saxpyR(xgBlock1, da, xgBlock2)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'xgBlock_Saxpy'
+#define ABI_FUNC 'xgBlock_saxpyR'
 !End of the abilint section
 
     type(xgBlock_t), intent(inout) :: xgBlock1
-    type(double complex), intent(in   ) :: da
+    double precision, intent(in   ) :: da
     type(xgBlock_t), intent(in   ) :: xgBlock2
 
     if ( xgBlock1%space /= xgBlock2%space ) then
-      write(std_err,*) "Must be same space for Saxpy"
+      MSG_ERROR("Must be same space for saxpy")
       stop
     end if
     if ( xgBlock1%LDim /= xgBlock2%LDim ) then
-      write(std_err,*) "Must have same LDim for Saxpy"
+      MSG_ERROR("Must have same LDim for saxpy")
       stop
     end if
     if ( xgBlock1%cols /= xgBlock2%cols ) then
-      write(std_err,*) "Must have same cols for Saxpy"
+      MSG_ERROR("Must have same cols for saxpy")
       stop
     end if
  
     select case(xgBlock1%space)
     case (SPACE_R,SPACE_CR)
-      call daxpy(xgBlock1%cols*xgBlock1%LDim,dble(da),xgBlock2%vecR,1,xgBlock1%vecR,1)   
+      call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)   
     case (SPACE_C)
-      call zaxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecC,1,xgBlock1%vecC,1)
+      call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
     end select
 
-  end subroutine xgBlock_Saxpy
+  end subroutine xgBlock_saxpyR
+  
+  
+  subroutine xgBlock_saxpyC(xgBlock1, da, xgBlock2)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'xgBlock_saxpyC'
+!End of the abilint section
+
+    type(xgBlock_t), intent(inout) :: xgBlock1
+    double complex, intent(in   ) :: da
+    type(xgBlock_t), intent(in   ) :: xgBlock2
+
+    if ( xgBlock1%space /= xgBlock2%space ) then
+      MSG_ERROR("Must be same space for Saxpy")
+      stop
+    end if
+    if ( xgBlock1%LDim /= xgBlock2%LDim ) then
+      MSG_ERROR("Must have same LDim for Saxpy")
+      stop
+    end if
+    if ( xgBlock1%cols /= xgBlock2%cols ) then
+      MSG_ERROR("Must have same cols for Saxpy")
+      stop
+    end if
+    if ( xgBlock1%space /= SPACE_C ) then
+      MSG_ERROR("Not correct space")
+      stop
+    end if
+
+    call zaxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecC,1,xgBlock1%vecC,1)
+
+  end subroutine xgBlock_saxpyC
+  
 
 !!****f* m_xg/xgBlock_add
 !!
@@ -2307,7 +2348,6 @@ module m_xg
     integer :: icol, irow
     double precision,external :: ddot
     double complex,external :: zdotc		!conjugated dot product
-    double complex,external :: zdotu		!regular dot product
     integer :: I, X
 
     select case(xgBlockA%space)
@@ -2315,10 +2355,10 @@ module m_xg
       !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
       !$omp& schedule(static)
       do icol = 1, xgBlockA%cols
-        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1)
+        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1) !OVDE JE PROBLEM
       end do
       !$omp end parallel do
-      
+
       if ( present(max_val) ) then
         max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
       end if
@@ -2336,7 +2376,6 @@ module m_xg
       !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
       !$omp& schedule(static)
       do icol = 1, xgBlockA%cols
-        !dot%vecC(icol,1) = zdotu(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
         dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
       end do
       !$omp end parallel do

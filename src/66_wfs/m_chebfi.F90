@@ -260,6 +260,8 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    ghc_filter => ghc
    gvnlc_filter => gvnlc
  end if
+ 
+ 
  ! from here to the next alltoall, all computation is done on _filter variables, agnostic
  ! to whether it's nband x npw (paral_kgb == 0) or ndatarecv*bandpp (paral_kgb = 1)
 
@@ -292,6 +294,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  !======================================================================================================
  !write(message, *) 'First getghc'
  ! get_ghc on cg
+
  call timab(timer_getghc, 1, tsec)
  if (dtset%paral_kgb == 0) then
    call getghc(cpopt,cg_filter,cwaveprj,ghc_filter,gsc_filter,gs_hamk,gvnlc_filter,&
@@ -300,6 +303,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    call prep_getghc(cg_filter,gs_hamk,gvnlc_filter,ghc_filter,gsc_filter,eval,nband,mpi_enreg,&
 &   prtvol,sij_opt,cpopt,cwaveprj,already_transposed=.true.)
  end if
+ 
   
  call timab(timer_getghc, 2, tsec)
 
@@ -338,6 +342,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    resids_filter(iband) = SUM(residvec_filter**2)
  end do
   
+  
  call xmpi_sum(resids_filter,mpi_enreg%comm_fft,ierr)
  call xmpi_max(MAXVAL(eig(1:nband_filter)),maxeig,mpi_enreg%comm_band,ierr)
  call xmpi_min(MINVAL(eig(1:nband_filter)),mineig,mpi_enreg%comm_band,ierr)
@@ -370,6 +375,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 
  ABI_DEALLOCATE(resids_filter)
  ABI_DEALLOCATE(residvec_filter)
+
 
  !======================================================================================================
  ! Chebyshev polynomial application

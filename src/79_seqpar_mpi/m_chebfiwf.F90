@@ -176,6 +176,7 @@ module m_chebfiwf
     space = SPACE_C
     l_icplx = 1
   end if
+    
  
   ! Memory info
   if ( prtvol >= 3 ) then
@@ -215,6 +216,7 @@ module m_chebfiwf
     ! Don't know yet how to deal with this with xgBlock
     if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2 
   end if
+  
  
   !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
   ! Trick with C is to change rank of arrays (:) to (:,:)
@@ -230,12 +232,12 @@ module m_chebfiwf
  
   ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*l_nband_filter)) !*blockdim
  
-  call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, nline, space, l_mpi_enreg%comm_bandspinorfft) !blockdim
+  call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft) !blockdim
  
   !###########################################################################
   !################    RUUUUUUUN    ##########################################
   !###########################################################################
-
+  
   ! Run chebfi
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
  
@@ -339,8 +341,6 @@ module m_chebfiwf
     call xgBlock_getSize(X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
     
-    !print *, "l_icplx", l_icplx
-  
     !call xgBlock_get(X,cg(:,1:blockdim*spacedim),0,spacedim)
     call xgBlock_reverseMap(X,cg,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)

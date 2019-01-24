@@ -51,8 +51,6 @@ module m_vtowfk
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
 
- use m_xg !DUMMY
-
  implicit none
 
  private
@@ -219,8 +217,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  
- !DUMMY
- type(xgBlock_t) :: xgx0
 
 ! **********************************************************************
 
@@ -246,6 +242,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
  newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) !is 111 ok?
  istwf_k=gs_hamk%istwf_k
+ print *, "istwf_k", gs_hamk%istwf_k
+ !print *, "wfoptalg", wfoptalg
+ !print *, "wfopta10", wfopta10
+ !print *, "newchebfi", newchebfi
  quit=0
 
 !Parallelization over spinors management
@@ -404,7 +404,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
-       else if (wfopta10 == 1) then         
+       else if (wfopta10 == 1) then  
+       
+         print *, "BEFORE CHEBFI"
          if ( .not. newchebfi) then
            call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
@@ -454,6 +456,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
      call timab(585,2,tsec)
    end if
+   
 
 !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
@@ -491,6 +494,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
    call timab(583,2,tsec)
+   
 
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
@@ -506,6 +510,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
  end do !  End loop over inonsc (NON SELF-CONSISTENT LOOP)
+
 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
@@ -837,6 +842,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,message,'PERS')
  end if
 
+
+
 !Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
  if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
@@ -894,6 +901,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(mat1)
    call timab(586,2,tsec)
  end if
+ 
 
 !###################################################################
 

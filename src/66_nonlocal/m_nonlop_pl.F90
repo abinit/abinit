@@ -318,6 +318,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
    ABI_ALLOCATE(gxa_s,(0,0,0,0))
  end if
 
+ print *, "GXAFAC SIZE:", mlang3, mincat, mproj
  ABI_ALLOCATE(gxafac,(2,mlang3,mincat,mproj))
  gxa(:,:,:,:,:)=zero
 
@@ -422,7 +423,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  if(istwf_k/=1) then
    call scalewf_nonlop(istwf_k,mpi_enreg,npwin,1,vectin)
  end if
-
+ print *, "NONLOP istwf_k", istwf_k
 
 !Big loop on atom types.
  ia1=1
@@ -1207,11 +1208,15 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 !  End atom type loop, over itypat:
    ia1=ia2+1
  end do
+ 
+ print *, "END NONLOP LOOP"
 
 !De-allocate temporary space.
  ABI_DEALLOCATE(ekb_s)
  ABI_DEALLOCATE(gxa)
+ print *, "MIDDLE DEALLOCATE"
  ABI_DEALLOCATE(gxafac)
+ print *, "SRANJE"
  ABI_DEALLOCATE(dgxds)
  ABI_DEALLOCATE(dgxdt)
  ABI_DEALLOCATE(dgxdtfac)
@@ -1221,6 +1226,7 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
  ABI_DEALLOCATE(tmpfac)
  ABI_DEALLOCATE(dgxdsfac)
  ABI_DEALLOCATE(indlmn_s)
+ 
  !if(choice==6)  then
  ABI_DEALLOCATE(dgxdis)
  ABI_DEALLOCATE(d2gxdis)
@@ -1242,10 +1248,11 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
 
 !Restore the original content of the vectin array.
 !Note that only the first part was modified
+ print *, "BEFORE NONLOP IF"
  if(istwf_k/=1) then
    call scalewf_nonlop(istwf_k,mpi_enreg,npwin,2,vectin)
  end if
-
+ print *, "AFTER NONLOP IF"
  if (nspinor==2)  then
    ABI_DEALLOCATE(vectin_s)
    ABI_DEALLOCATE(vectout_s)
@@ -1283,6 +1290,8 @@ subroutine nonlop_pl(choice,dimekb1,dimekb2,dimffnlin,dimffnlout,ekb,enlout,&
      enlout(1:6)=enlout(1:6)+strssoc(:)
    end if
  end if
+ 
+ print *, "END NONLOP FUNC"
 
 !DEBUG
 !write(std_out,*)' nonlop_pl: exit '

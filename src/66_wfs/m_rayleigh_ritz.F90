@@ -138,9 +138,14 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  call timab(timer_subham, 1, tsec)
 
  ! Transform cg, ghc and maybe gsc, according to istwf_k
+
  if(istwf_k == 2) then
    cg = cg * sqrt2
+   call xgBlock_map(HELPER,cg,SPACE_CR,npw,2*nspinor*nband,mpi_enreg%comm_bandspinorfft) 
+   !call xgBlock_print(HELPER, 6) 
+   !print *, "STOPPPP"
    if(mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) / sqrt2
+   !call xgBlock_print(HELPER, 6) 
    ghc = ghc * sqrt2
    if(mpi_enreg%me_g0 == 1) ghc(:, 1:npw*nspinor*nband:npw) = ghc(:, 1:npw*nspinor*nband:npw) / sqrt2
    if(usepaw == 1) then

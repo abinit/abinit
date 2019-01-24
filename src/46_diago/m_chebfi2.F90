@@ -21,6 +21,17 @@ module m_chebfi2
   use m_time, only : timab
 
   implicit none
+  
+  private
+  
+  integer, parameter :: EIGENV = 1
+  integer, parameter :: EIGENVD = 2
+  
+#ifdef HAVE_OPENMP 
+  integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
+#else
+  integer, save :: eigenSolver = EIGENV     ! Type of eigen solver to use
+#endif
 
   type, public :: chebfi_t
     integer :: space
@@ -32,6 +43,8 @@ module m_chebfi2
     double precision :: ecut                 ! Ecut for Chebfi oracle
     
     logical :: paw
+    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
+    integer :: istwf_k
 
     !ARRAYS
     type(xgBlock_t) :: X 
@@ -57,7 +70,7 @@ module m_chebfi2
 
   contains
 
-  subroutine chebfi_init(chebfi, neigenpairs, spacedim, tolerance, ecut, nline, space, spacecom)
+  subroutine chebfi_init(chebfi, neigenpairs, spacedim, tolerance, ecut, nline, space, eigenProblem, istwf_k, spacecom)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -73,6 +86,8 @@ module m_chebfi2
     double precision, intent(in   ) :: ecut
     integer         , intent(in   ) :: nline
     integer         , intent(in   ) :: space
+    integer         , intent(in   ) :: eigenProblem
+    integer         , intent(in   ) :: istwf_k
     integer         , intent(in   ) :: spacecom
     integer :: nthread
 
@@ -84,6 +99,8 @@ module m_chebfi2
     chebfi%nline       = nline
     chebfi%spacecom    = spacecom
     chebfi%paw = .false.
+    chebfi%eigenProblem = eigenProblem
+    chebfi%istwf_k = istwf_k
 
     nthread = 16
 
@@ -200,7 +217,7 @@ module m_chebfi2
     integer :: nline, nline_max, nline_decrease, nline_tolwfr 
     integer :: shift
     double precision :: tolerance
-    double precision :: ecut
+    !double precision :: ecut
     double precision :: maxeig
     double precision :: mineig
     double precision :: ampfactor
@@ -212,7 +229,6 @@ module m_chebfi2
     !Pointers similar to old Chebfi    
     integer, allocatable :: nline_bands(:)      !Oracle variable
     double precision, pointer :: eig(:,:)
-    double precision, pointer, dimension(:,:) :: cg_filter, ghc_filter
     
     double precision :: lambda_minus
     double precision :: lambda_plus
@@ -253,10 +269,10 @@ module m_chebfi2
     
     allocate(nline_bands(neigenpairs))
     
-    call xg_init(DivResults, SPACE_C, neigenpairs, 1)
+    call xg_init(DivResults, chebfi%space, neigenpairs, 1)
         
     tolerance = chebfi%tolerance
-    ecut = chebfi%ecut
+    lambda_plus = chebfi%ecut
     chebfi%X = X0
     
     call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
@@ -266,23 +282,22 @@ module m_chebfi2
     call chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults%self) !OK
         
     lambda_minus = maxeig
-    lambda_plus = 1000 * maxeig
     
-    nline_max = cheb_oracle1(mineig, lambda_minus, chebfi%ecut, 1D-16, 40)
+    nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
 
     call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
     
     do iband=1, neigenpairs !TODO
 !      ! nline necessary to converge to tolerance
-!      !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, ecut, tolerance / resids_filter(iband), nline)
+!      !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
 !      ! nline necessary to decrease residual by a constant factor
-!      !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, chebfi%ecut, 0.1D, dtset%nline)
+!      !nline_decrease = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, 0.1D, dtset%nline)
 !      !nline_bands(iband) = MAX(MIN(nline_tolwfr, nline_decrease, nline_max, chebfi%nline), 1)
       nline_bands(iband) = nline ! fiddle with this to use locking
     end do
 
-    center = (ecut + lambda_minus)*0.5  
-    radius = (ecut - lambda_minus)*0.5
+    center = (lambda_plus + lambda_minus)*0.5  
+    radius = (lambda_plus - lambda_minus)*0.5
         
     one_over_r = 1/radius
     two_over_r = 2/radius
@@ -297,19 +312,14 @@ module m_chebfi2
       call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
            
     end do
-    
-    call xgBlock_reverseMap(chebfi%X,cg_filter,1,spacedim*neigenpairs)
-    call xgBlock_reverseMap(chebfi%AX%self,ghc_filter,1,spacedim*neigenpairs)
-    
-    call chebfi_ampfactor(chebfi, eig, lambda_minus, nline_bands)    !ampfactor
+        
+    call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)    !ampfactor
         
     call chebfi_rayleightRitz(chebfi)
 
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
        
-    call xgBlock_copy(chebfi%X,chebfi%X_prev, 1, 1) !copy back to X_prev (original CG address for big loop)
-    
-    call xgBlock_reverseMap(chebfi%X_prev,cg_filter,1,spacedim*neigenpairs)
+    call xgBlock_copy(chebfi%X,chebfi%X_prev, 1, 1) !copy back to X_prev (has to be done otherwise CG in big loop has bad data)
         
     deallocate(nline_bands)
     
@@ -359,9 +369,9 @@ module m_chebfi2
     type(xg_t)::Results1
     type(xg_t)::Results2
 
-    call xg_init(Results1, SPACE_C, neigenpairs, 1)
-    call xg_init(Results2, SPACE_C, neigenpairs, 1)
-
+    call xg_init(Results1, chebfi%space, neigenpairs, 1)
+    call xg_init(Results2, chebfi%space, neigenpairs, 1)
+    
     call xgBlock_colwiseDotProduct(chebfi%X,chebfi%AX%self,Results1%self)
         
     !PAW
@@ -389,9 +399,7 @@ module m_chebfi2
     type(double precision ) , intent(in) :: center
     type(double precision ) , intent(in) :: one_over_r
     type(double precision ) , intent(in) :: two_over_r
-    
-    double precision, pointer, dimension(:,:) :: cg_filter
-    
+        
     interface
       subroutine getBm1X(X,Bm1X)
         use m_xg, only : xgBlock_t
@@ -412,17 +420,17 @@ module m_chebfi2
     call xgBlock_scale(chebfi%X, center, 1) !scale by c
             
     !(B-1 * A * ψi-1 - c * ψi-1)
-    call xgBlock_Saxpy(chebfi%X_next, dcmplx(-1.0), chebfi%X)
+    call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X)
         
     !ψi-1  = 1/c * ψi-1 
     call xgBlock_scale(chebfi%X, 1/center, 1) !counter scale by c
-
+    
     if (iline == 0) then  
       call xgBlock_scale(chebfi%X_next, one_over_r, 1) !scale by one_over_r
     else
       call xgBlock_scale(chebfi%X_next, two_over_r, 1) !scale by two_over_r
       
-      call xgBlock_Saxpy(chebfi%X_next, dcmplx(-1.0), chebfi%X_prev)
+      call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev)
     end if
         
   end subroutine chebfi_computeNextOrderChebfiPolynom
@@ -470,8 +478,10 @@ module m_chebfi2
     integer :: i
     integer :: info
     integer :: space
+    integer :: eigenProblem
 
     space = chebfi%space
+    eigenProblem = chebfi%eigenProblem
     
     spacedim = chebfi%spacedim
     neigenpairs = chebfi%neigenpairs
@@ -479,23 +489,34 @@ module m_chebfi2
     call xg_init(A_und_X,space,neigenpairs,neigenpairs)
     call xg_init(B_und_X,space,neigenpairs,neigenpairs)
     
-    ! if(istwf_k == 2) MISSING HERE ADD LATER
+    !if(chebfi%istwf_k == 2) then
+       !call xgBlock_print(chebfi%X, 6)
+    !end if
         
-    call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self)
+    !call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self)
+    
+    call xgBlock_gemm(chebfi%X%trans, chebfi%AX%self%normal, 1.0d0, chebfi%X, chebfi%AX%self, 0.d0, A_und_X%self)
         
     call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self) !changed from original
       
-    ! if(istwf_k == 2) MISSING HERE ADD LATER
+    ! if(chebfi%istwf_k == 2) MISSING HERE ADD LATER
     
     !*********************************** EIGENVALUE A Ψ X = B Ψ XΛ **********************************************!
     
-    call xgBlock_hegvd(1, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info) !l changed to u
+    select case (eigenSolver)
+    case (EIGENVD) 
+      call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
+    case (EIGENV)
+      call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
+    case default
+       MSG_ERROR("Error for Eigen Solver HEGV")
+    end select
         
     call xgBlock_reverseMap(A_und_X%self,evec,1,neigenpairs*neigenpairs)
     
-    ABI_ALLOCATE(edummy, (2*neigenpairs, neigenpairs)) !2 = cplx
-    call fxphas_seq(evec,edummy,0,0,1,neigenpairs*neigenpairs,neigenpairs*neigenpairs,neigenpairs,neigenpairs,0)  
-    ABI_DEALLOCATE(edummy)
+    !ABI_ALLOCATE(edummy, (2*neigenpairs, neigenpairs)) !2 = cplx
+    !call fxphas_seq(evec,edummy,0,0,1,neigenpairs*neigenpairs,neigenpairs*neigenpairs,neigenpairs,neigenpairs,0)  
+    !ABI_DEALLOCATE(edummy)
                               
     call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, & 
                       chebfi%AX%self, A_und_X%self, 0.d0, chebfi%X_prev)
@@ -535,9 +556,9 @@ module m_chebfi2
     end interface
   
     !PAW
-    !call xgBlock_colwiseCaxmy(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
+    call xgBlock_colwiseCaxmy(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
     
-    call xgBlock_colwiseCaxmy(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
+    !call xgBlock_colwiseCaxmy(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
         
     !pcond call
     call pcond(chebfi%AX%self)
@@ -549,7 +570,7 @@ module m_chebfi2
 
   end function chebfi_computeResidue  
   
-  subroutine chebfi_ampfactor(chebfi, eig, lambda_minus, nline_bands)
+  subroutine chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -561,24 +582,30 @@ module m_chebfi2
     type(chebfi_t) , intent(inout) :: chebfi
     double precision, pointer , intent(in) :: eig(:,:)
     double precision, intent(in) :: lambda_minus
+    double precision, intent(in) :: lambda_plus
     integer, intent(in) :: nline_bands(:) 
     
-    double precision, pointer, dimension(:,:) :: cg_filter, ghc_filter
+    type(xgBlock_t) :: X_part
+    type(xgBlock_t) :: AX_part
+    
     integer :: iband, shift
     double precision :: ampfactor
 
-    call xgBlock_reverseMap(chebfi%X,cg_filter,1,chebfi%spacedim*chebfi%neigenpairs)
-    call xgBlock_reverseMap(chebfi%AX%self,ghc_filter,1,chebfi%spacedim*chebfi%neigenpairs)
+    !call xgBlock_reverseMap(chebfi%X,cg_filter,1,chebfi%spacedim*chebfi%neigenpairs)
+    !call xgBlock_reverseMap(chebfi%AX%self,ghc_filter,1,chebfi%spacedim*chebfi%neigenpairs)
     
     !ampfactor
     do iband = 1, chebfi%neigenpairs
-      ampfactor = cheb_poly1(dble(eig(iband*2-1,1)), nline_bands(iband), lambda_minus, chebfi%ecut) !OK
+      ampfactor = cheb_poly1(dble(eig(iband*2-1,1)), nline_bands(iband), lambda_minus, lambda_plus) !OK
 
       if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
-      shift = chebfi%spacedim*(iband-1)
-      !TRIED XG DOESN'T WORK
-      cg_filter(:, shift+1:shift+chebfi%spacedim) = cg_filter(:, shift+1:shift+chebfi%spacedim) / ampfactor
-      ghc_filter(:, shift+1:shift+chebfi%spacedim) = ghc_filter(:, shift+1:shift+chebfi%spacedim) / ampfactor     
+      !shift = chebfi%spacedim*(iband-1)
+      
+      call xgBlock_setBlock(chebfi%X, X_part, iband, chebfi%spacedim, 1)
+      call xgBlock_setBlock(chebfi%AX%self, AX_part, iband, chebfi%spacedim, 1) 
+      
+      call xgBlock_scale(X_part, 1/ampfactor, 1)
+      call xgBlock_scale(AX_part, 1/ampfactor, 1)	 	 
       
 !   if(paw) then
 !     gsc_filter(:, shift+1:shift+npw_filter*nspinor) = gsc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor

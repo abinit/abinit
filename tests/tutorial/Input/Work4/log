@@ -1,0 +1,566 @@
+  ABINIT 8.9.4
+  
+  Give name for formatted input file: 
+  ABINIT 8.9.4
+  
+  Give name for formatted input file: 
+tbase4_1.in
+  Give name for formatted output file:
+tbase4_x.out
+  Give root name for generic input files:
+tbase4_xi
+  Give root name for generic output files:
+tbase4_xo
+  Give root name for generic temporary files:
+tbase4_x
+
+--- !COMMENT
+src_file: m_dtfil.F90
+src_line: 1157
+message: |
+    Output file tbase4_x.out
+     already exists.
+...
+
+
+--- !COMMENT
+src_file: m_dtfil.F90
+src_line: 1181
+message: |
+    Renaming old tbase4_x.out to tbase4_x.out0485
+...
+
+
+.Version 8.9.4 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu7.3 computer) 
+
+.Copyright (C) 1998-2018 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Thu 24 Jan 2019.
+- ( at 14h52 )
+  
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ === Build Information === 
+  Version       : 8.9.4
+  Build target  : x86_64_linux_gnu7.3
+  Build date    : 20190122
+
+ === Compiler Suite === 
+  C compiler       : gnu7.3
+  C++ compiler     : gnu7.3
+  Fortran compiler : gnu7.3
+  CFLAGS           :  -g -O2 -mtune=native -march=native
+  CXXFLAGS         :  -g -O2 -mtune=native -march=native
+  FCFLAGS          :  -g -ffree-line-length-none
+  FC_LDFLAGS       : 
+
+ === Optimizations === 
+  Debug level        : basic
+  Optimization level : standard
+  Architecture       : intel_xeon
+
+ === Multicore === 
+  Parallel build : no
+  Parallel I/O   : no
+  openMP support : no
+  GPU support    : no
+
+ === Connectors / Fallbacks === 
+  Connectors on : yes
+  Fallbacks on  : yes
+  DFT flavor    : none
+  FFT flavor    : none
+  LINALG flavor : netlib
+  MATH flavor   : none
+  TIMER flavor  : abinit
+  TRIO flavor   : none
+
+ === Experimental features === 
+  Bindings            : @enable_bindings@
+  Exports             : no
+  GW double-precision : no
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Default optimizations:
+   -O2 -mtune=native -march=native
+
+
+ Optimizations for 43_ptgroups:
+   -O0
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ CPP options activated during the build:
+
+                    CC_GNU                   CXX_GNU                    FC_GNU
+ 
+ HAVE_FC_ALLOCATABLE_DT...             HAVE_FC_ASYNC         HAVE_FC_BACKTRACE
+ 
+  HAVE_FC_COMMAND_ARGUMENT      HAVE_FC_COMMAND_LINE        HAVE_FC_CONTIGUOUS
+ 
+           HAVE_FC_CPUTIME              HAVE_FC_EXIT             HAVE_FC_FLUSH
+ 
+             HAVE_FC_GAMMA            HAVE_FC_GETENV   HAVE_FC_IEEE_EXCEPTIONS
+ 
+          HAVE_FC_INT_QUAD             HAVE_FC_IOMSG     HAVE_FC_ISO_C_BINDING
+ 
+  HAVE_FC_ISO_FORTRAN_2008        HAVE_FC_LONG_LINES        HAVE_FC_MOVE_ALLOC
+ 
+           HAVE_FC_PRIVATE         HAVE_FC_PROTECTED         HAVE_FC_STREAM_IO
+ 
+            HAVE_FC_SYSTEM          HAVE_FORTRAN2003        HAVE_LIBPAW_ABINIT
+ 
+      HAVE_LIBTETRA_ABINIT               HAVE_LINALG        HAVE_LINALG_SERIAL
+ 
+             HAVE_OS_LINUX         HAVE_TIMER_ABINIT              USE_MACROAVE
+ 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+- input  file    -> tbase4_1.in
+- output file    -> tbase4_x.out
+- root for input  files -> tbase4_xi
+- root for output files -> tbase4_xo
+
+-instrng: 79 lines of input have been read from file tbase4_1.in
+
+
+ Please give name of formatted atomic psp file
+ iofn2 : for atom type 1, psp file is ../../../Psps_for_tests/13al.981214.fhi
+  read the values zionpsp=  3.0 , pspcod=   6 , lmax=   2
+
+ inpspheads: deduce mpsang = 3, n1xccc = 0.
+ invars1 : treat image number: 1
+
+ symlatt : the Bravais lattice is cF (face-centered cubic)
+  xred   is defined in input file
+ ingeo: takes atomic coordinates from input array xred
+
+ symlatt : the Bravais lattice is cF (face-centered cubic)
+
+ symlatt : the Bravais lattice is cF (face-centered cubic)
+ symspgr : spgroup= 225  Fm -3 m   (=Oh^5)
+ symspgr : optical characteristics = isotropic
+ ingeo: angdeg(1:3)=   60.00000000   60.00000000   60.00000000
+ invars2: take the default value of fband=  5.00000000E-01
+ chkneu : initialized the occupation numbers for occopt=    4, spin-unpolarized or antiferromagnetic case :
+  2.00  1.00  0.00
+mpi_setup: mkmem  undefined in the input file.Use default mkmem  = nkpt
+ mpi_setup: With nkpt_me=2 and mkmem  = 2, ground state wf handled in core.
+mpi_setup: mkqmem undefined in the input file.Use default mkqmem = nkpt
+ mpi_setup: With nkpt_me=2 and mkqmem = 2, ground state wf handled in core.
+mpi_setup: mk1mem undefined in the input file.Use default mk1mem = nkpt
+ mpi_setup: With nkpt_me=2 and mk1mem = 2, ground state wf handled in core.
+ For input ecut=  6.615000E+00 best grid ngfft=      15      15      15
+       max ecut=  8.458196E+00
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    15   15   15
+  Augmented FFT divisions ...................    15   15   15
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+ getmpw: optimal value of mpw= 44
+
+ Symmetries : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+
+ getdim_nloc : deduce lmnmax  =   9, lnmax  =   3,
+                      lmnmaxso=   9, lnmaxso=   3.
+memory : analysis of memory needs
+================================================================================
+ Values of the parameters that define the memory need of the present run
+     intxc =       0    ionmov =       2      iscf =       7    lmnmax =       3
+     lnmax =       3     mgfft =      15  mpssoang =       3    mqgrid =    3001
+     natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
+    occopt =       4   xclevel =       1
+-    mband =           3        mffmem =           1         mkmem =           2
+       mpw =          44          nfft =        3375          nkpt =           2
+================================================================================
+P This job should need less than                       2.116 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+================================================================================
+
+ Biggest array : f_fftgr(disk), with      0.4140 MBytes.
+ memana : allocated an array of      0.414 Mbytes, for testing purposes.
+ memana: allocated       2.116Mbytes, for testing purposes. 
+ The job will continue.
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
+              amu      2.69815390E+01
+           bandpp           3
+          dilatmx      1.05000000E+00
+             ecut      6.00000000E+00 Hartree
+-          fftalg         112
+           ionmov           2
+              kpt     -2.50000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  0.00000000E+00
+         kptrlatt        2   -2    2     -2    2    2     -2   -2    2
+          kptrlen      1.52000000E+01
+P           mkmem           2
+            natom           1
+            nband           3
+            ngfft          15      15      15
+             nkpt           2
+            nstep          10
+             nsym          48
+            ntime          10
+           ntypat           1
+              occ      2.000000  1.000000  0.000000
+                       2.000000  1.000000  0.000000
+           occopt           4
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup         225
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           toldfe      1.00000000E-06 Hartree
+           tsmear      5.00000000E-02 Hartree
+            typat      1
+         wfoptalg           1
+              wtk        0.75000    0.25000
+            znucl       13.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency.
+ DATA TYPE INFORMATION: 
+ REAL:      Data type name: REAL(DP) 
+            Kind value:      8
+            Precision:      15
+            Smallest nonnegligible quantity relative to 1:  0.22204460E-15
+            Smallest positive number:                       0.22250739-307
+            Largest representable number:                   0.17976931+309
+ INTEGER:   Data type name: INTEGER(default) 
+            Kind value: 4
+            Bit size:   32
+            Largest representable number: 2147483647
+ LOGICAL:   Data type name: LOGICAL 
+            Kind value: 4
+ CHARACTER: Data type name: CHARACTER             Kind value: 1
+
+  ==== OpenMP parallelism is OFF ====
+ 
+  MPI-IO support is OFF
+
+================================================================================
+== DATASET  1 ==================================================================
+-   nproc =    1
+
+
+--- !COMMENT
+src_file: m_xgScalapack.F90
+src_line: 244
+message: |
+    xgScalapack in auto mode
+...
+
+
+ getdim_nloc : deduce lmnmax  =   9, lnmax  =   3,
+                      lmnmaxso=   9, lnmaxso=   3.
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Unit cell volume ucvol=  1.0974400E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
+         ecut(hartree)=      6.615   => boxcut(ratio)=   2.26154
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    8.458196 Hartrees makes boxcut=2
+
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/13al.981214.fhi
+- Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
+- 13.00000   3.00000    981214                znucl, zion, pspdat
+    6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+
+--- !WARNING
+src_file: m_pspini.F90
+src_line: 1094
+message: |
+    Pseudopotential file pspxc= 7,
+    not equal to input ixc= 1.
+    These parameters must agree to get the same xc 
+    in ABINIT code as in psp construction.
+    Action: check psp design or input file.
+    Assume experienced user. Execution will continue.
+...
+
+  No XC core correction.
+  1.024700          amesh (Hamman grid)
+  pspatm : epsatm=    1.36305739
+         --- l  ekb(1:nproj) -->
+             0    1.768744
+             1    0.900554
+ pspatm: atomic psp has been read  and splines computed
+
+   4.08917216E+00                                ecore*ucvol(ha*bohr**3)
+ ==== Info on pseudopotentials ====
+  Norm-conserving pseudopotentials
+  Number of pseudopotentials ..    1
+  Number of types of atoms   ..    1
+  Scalar calculation (no spin-orbit term)
+  Nonlocal part applied using Legendre polynomials
+  Max number of non-local projectors over l and type   1
+  Highest angular momentum +1 .......   3
+  Max number of (l,n)   components ..   3
+  Max number of (l,m,n) components ..   3
+
+ Info on the Q-grid used for form factors in spline form: 
+   Number of q-points for radial functions ffspl ..   3001
+   Number of q-points for vlspl ...................   3001
+   vloc is computed in Reciprocal Space
+   model core charge treated in real-space
+
+  XC functional for type 1 is 7
+  Pseudo valence available: no
+
+ wfconv:     3 bands initialized randomly with npw=    36, for ikpt=     1
+ wfconv:     3 bands initialized randomly with npw=    44, for ikpt=     2
+_setup2: Arith. and geom. avg. npw (full set) are      75.000      74.701
+ initro: for itypat=  1, take decay length=      1.2500,
+ initro: indeed, coreel=     10.0000, nval=  3 and densty=  0.0000E+00.
+
+================================================================================
+
+=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+================================================================================
+
+--- Iteration: ( 1/10) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+ Cartesian coordinates (xcart) [bohr]
+  0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
+ Reduced coordinates (xred)
+  0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
+         ecut(hartree)=      6.000   => boxcut(ratio)=   2.37462
+
+ getcut : COMMENT -
+  Note that boxcut > 2.2 ; recall that boxcut=Gcut(box)/Gcut(sphere) = 2
+  is sufficient for exact treatment of convolution.
+  Such a large boxcut is a waste : you could raise ecut
+  e.g. ecut=    8.458196 Hartrees makes boxcut=2
+
+
+ ITER STEP NUMBER     1
+ vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
+ istwf_k           2
+ non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ BEFORE CHEBFI
+ SCALAR POTENTIALS
+ FFT DISTRIB
+ APPLICATION NON LOCAL
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ ASSEMBLE KINETIC
+ FOCK
+ SCALAR POTENTIALS
+ FFT DISTRIB
+ APPLICATION NON LOCAL
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ ASSEMBLE KINETIC
+ FOCK
+ SCALAR POTENTIALS
+ FFT DISTRIB
+ APPLICATION NON LOCAL
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ ASSEMBLE KINETIC
+ FOCK
+ SCALAR POTENTIALS
+ FFT DISTRIB
+ APPLICATION NON LOCAL
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ ASSEMBLE KINETIC
+ FOCK
+ SCALAR POTENTIALS
+ FFT DISTRIB
+ APPLICATION NON LOCAL
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
+ SRANJE
+ BEFORE NONLOP IF
+ AFTER NONLOP IF
+ END NONLOP FUNC
+ ASSEMBLE KINETIC
+ FOCK
+ res:       NaN       NaN       NaN
+ ene:  1.82E-01  2.87E-01  4.29E-01
+ BEFORE CHEBFI
+ SCALAR POTENTIALS
+ FFT DISTRIB
+ APPLICATION NON LOCAL
+ GXAFAC SIZE:          20           1           1
+ NONLOP istwf_k           2
+ END NONLOP LOOP
+ MIDDLE DEALLOCATE
