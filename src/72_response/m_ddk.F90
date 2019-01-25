@@ -1096,7 +1096,7 @@ subroutine ddk_red2car(rprimd, vred, vcar)
             +rprimd(:,3)*vred(2,3)
  vcar = vtmp / two_pi
 
-end subroutine
+end subroutine ddk_red2car
 !!***
 
 
