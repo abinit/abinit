@@ -971,7 +971,7 @@ with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/2.0.1.1/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L${FALLBACKS_PATH}wannier90/2.0.1.1/lib -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/2.0.1.1/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
