@@ -9678,10 +9678,10 @@ real space, especially when derivatives of the model core charge are needed,
 e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum
 rule is reduced when [[nc_xccc_gspace]] == 1, especially for LDA. It is worth
 stressing, however, that [[nc_xccc_gspace]] == 1 should be used only in
-conjunction with NC pseudos whose model core charge that decays quickly in
+conjunction with NC pseudos with a model core charge that decays quickly in
 G-space. Several NC pseudos available in the Abinit table are not optimized
 for the G-space formalism and users are strongly invited to perform
-convergence studies with respect to ecut before using this option.
+convergence studies with respect to [[ecut]] before activating this option in production runs.
 """,
 ),
 
