@@ -356,12 +356,12 @@ class FileToTest(object):
         try:
             fld_result = differ.diff(ref_fname, out_fname)
             fld_result.dump_details(outf)
+            isok, status, msg = fld_result.passed_within_tols(self.tolnlines, self.tolabs, self.tolrel)
+            msg += ' [file={}]'.format(os.path.basename(ref_fname))
+
         except Exception as e:
             warnings.warn('[{}] Something went wrong with this test:\n{}\n'.format(self.name, str(e)))
-            return False, 'failed', 'internal error'
-
-        isok, status, msg = fld_result.passed_within_tols(self.tolnlines, self.tolabs, self.tolrel)
-        msg += ' [file={}]'.format(os.path.basename(ref_fname))
+            isok, status, msg = False, 'failed', 'internal error:\n' + str(e)
 
         # Save comparison results.
         self.fld_isok = isok
