@@ -45,10 +45,13 @@ This modifications do not apply to the tolerance determined by the
 from __future__ import print_function, division, unicode_literals
 import re
 from math import floor
+from yaml import load as yaml_parse
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
+docstart_re = re.compile(r'--- (!.*)?')
+docend_re = re.compile(r'...')
 
 
 def norm_spaces(s):
@@ -112,7 +115,7 @@ default_options = ConstDict({
 })
 
 
-class Difference(object):
+class LineDifference(object):
     '''
         Base class for representing a difference.
     '''
@@ -139,7 +142,7 @@ class Difference(object):
         )
 
 
-class LineCountDifference(Difference):
+class LineCountDifference(LineDifference):
     '''
         Represent a difference between line counts.
     '''
@@ -148,7 +151,7 @@ class LineCountDifference(Difference):
             more: the name of the file with more lines
             less: the name of the file with less lines
         '''
-        Difference.__init__(self, 0, 0, '', '')
+        LineDifference.__init__(self, 0, 0, '', '')
         self.more = more
         self.less = less
 
@@ -156,38 +159,38 @@ class LineCountDifference(Difference):
         return '{} have more significant lines than {}.\n'.format(self.more, self.less)
 
 
-class MetaCharDifference(Difference):
+class MetaCharDifference(LineDifference):
     '''
         Represent a difference between themetacharacters of lines.
     '''
     def __init__(self, p1, p2, m1, m2):
-        Difference.__init__(self, p1, p2, '', '')
+        LineDifference.__init__(self, p1, p2, '', '')
         self.metas = (m1, m2)
 
     def __repr__(self):
         return 'At line {} (in file 1), line {} (in file 2), the leading characters where differents: {} and {}.\n'.format(*(self.lines + self.metas))
 
 
-class FloatDifference(Difference):
+class FloatDifference(LineDifference):
     '''
         Represent a difference between floating point values.
     '''
     def __init__(self, p1, p2, line1, line2, abs_err, rel_err):
-        Difference.__init__(self, p1, p2, line1, line2)
+        LineDifference.__init__(self, p1, p2, line1, line2)
         self.abs_err = abs_err
         self.rel_err = rel_err
 
 
-class TextDifference(Difference):
+class TextDifference(LineDifference):
     '''
         Represent a difference between text parts of a lines.
     '''
     def __init__(self, p1, p2, line1, line2, silent=False):
-        Difference.__init__(self, p1, p2, line1, line2)
+        LineDifference.__init__(self, p1, p2, line1, line2)
         self.silent = silent
 
 
-class ForcedDifference(Difference):
+class ForcedDifference(LineDifference):
     '''
         A difference is arbitrarly declared.
     '''
@@ -258,7 +261,7 @@ class Result(object):
                     self.success = False
 
             else:  # any other Difference
-                assert isinstance(diff, Difference), 'Unknown type of Difference.'
+                assert isinstance(diff, LineDifference), 'Unknown type of Difference.'
                 if diff.lines[0] not in error_lines:
                     self.ndiff_lines += 1
                 self.success = False
@@ -351,6 +354,13 @@ class Result(object):
         return isok, status, msg
 
 
+def parse_doc(doc):
+    if doc['type'] == 'yaml':
+        obj = yaml_parse(''.join(doc['lines']))
+        doc['obj'] = obj
+    return doc
+
+
 class Differ(object):
     def __init__(self, **options):
         '''
@@ -384,8 +394,16 @@ class Differ(object):
         with open(file2, 'rt') as f:
             lines2 = f.readlines()
 
-        differences = self.__diff_lines(lines1, lines2)
-        return Result(differences, label=self.options['label'])
+        lines1, documents1, ignored1 = self.__extract(lines1)
+        lines2, documents2, ignored2 = self.__extract(lines2)
+        lines_differences = self.__diff_lines(lines1, lines2)
+        return Result(lines_differences, label=self.options['label']), self.__test_doc(documents1, documents2)
+
+    def __test_doc(self, docs1, docs2):
+        '''
+            Compare docs2 to docs1 and apply tests on docs2.
+        '''
+        return None
 
     def __get_metachar(self, line):
         '''
@@ -394,7 +412,7 @@ class Differ(object):
         if not line or line[0].isspace():
             c = ' '
             # dirty fix for compatibility
-            # I think xml should mot be compared with the basic algorithm
+            # I think xml should not be compared with the basic algorithm
             if self.xml_mode and 'timeInfo' in line:
                 c = '.'
         else:
@@ -411,29 +429,42 @@ class Differ(object):
                     c = '+'
         return c
 
-    def __clean(self, lines):
+    def __extract(self, src_lines):
         '''
             Split lines into two groups: ignored and analysed
         '''
-        keeped, ignored = [], []
+        lines, documents, ignored = [], [], []
 
-        for i, line in enumerate(lines):
-            if self.__get_metachar(line) == '-':
-                ignored.append((i, line))
+        docmode = False
+        current_document = None
+        for i, line in enumerate(src_lines):
+            if docmode:
+                current_document['lines'].append(line)
+                if docend_re.match(line):
+                    current_document['end'] = i
+                    parse_doc(current_document)
             else:
-                keeped.append((i, line))
+                if self.__get_metachar(line) == '-':
+                    if docstart_re.match(line):
+                        current_document = {
+                            'start': i,
+                            'lines': [line],
+                            'type': 'yaml'
+                        }
+                    else:
+                        ignored.append((i, line))
+                else:
+                    lines.append((i, line))
 
-        return keeped, ignored
+        return lines, documents, ignored
 
-    def __diff_lines(self, l1, l2):
+    def __diff_lines(self, lines1, lines2):
         '''
             Compute the effective comparision between two set of lines.
             LineCountDifference and MetaCharDifference are both fatal so
             they are returned alone if encountered.
         '''
         differences = []
-        lines1, ignored1 = self.__clean(l1)
-        lines2, ignored2 = self.__clean(l2)
         if len(lines1) > len(lines2):
             return [LineCountDifference('file 1', 'file 2')]
         elif len(lines1) < len(lines2):
