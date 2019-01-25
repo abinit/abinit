@@ -2319,7 +2319,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
 
  if(need_print .and. present(filename))then
    !MS hist out uncommented for PHONOPY test
-   call abihist_init(hist_out,natom,ntime,.false.,.false.)
+   !call abihist_init(hist_out,natom,ntime,.false.,.false.)
    file_energy=trim(name_file)//'_energy.dat'
    unit_energy = get_unit()
    if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
@@ -2368,18 +2368,18 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
    end if
     
     !MS Uncommented for abihist test 
-    ifirst=merge(0,1,(ii>1))
-    filename_hist = trim("test.nc")
-    hist_out%fcart(:,:,hist_out%ihist) = fcart(:,:)
-    hist_out%strten(:,hist_out%ihist)  = strten(:)
-    hist_out%etot(hist_out%ihist)      = energy
-    hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
-    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
+    !ifirst=merge(0,1,(ii>1))
+    !filename_hist = trim("test.nc")
+    !hist_out%fcart(:,:,hist_out%ihist) = fcart(:,:)
+    !hist_out%strten(:,hist_out%ihist)  = strten(:)
+    !hist_out%etot(hist_out%ihist)      = energy
+    !hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
+    !hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
     !call vel2hist(ab_mover%amass,hist,vel,vel_cell)
-    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
-    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
- &                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
- &                    real(100,dp),(/real(100,dp),real(100,dp)/))
+    !call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
+    !call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
+ !&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
+ !&                    real(100,dp),(/real(100,dp),real(100,dp)/))
 
    mse  = mse  + abs(hist%etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
@@ -2402,7 +2402,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
  end if
 
  !MS uncommented for PHONOPY TEST
- call abihist_free(hist_out)
+ !call abihist_free(hist_out)
 
 end subroutine fit_polynomial_coeff_computeMSD
 !!***
