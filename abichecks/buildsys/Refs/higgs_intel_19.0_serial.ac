@@ -957,7 +957,7 @@ with_libxc_incs="-I${FALLBACKS_PATH}/libxc/3.0.1/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.1/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.1/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 

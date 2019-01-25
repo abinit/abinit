@@ -8,7 +8,7 @@
 !!  electric field gradient and Fermi contact
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (MT, JWZ)
+!! Copyright (C) 1998-2019 ABINIT group (MT, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,7 +69,7 @@ contains
 !! calculation and output of electric field gradient tensor at each atomic site
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (JZ,MT)
+!! Copyright (C) 2005-2019 ABINIT group (JZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -355,7 +355,7 @@ contains
 !! calculation and output of Fermi-contact term at each atomic site
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (JWZ,MT)
+!! Copyright (C) 2009-2019 ABINIT group (JWZ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -479,7 +479,7 @@ contains
 !! compute the electric field gradient due to ionic cores
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (JWZ)
+!! Copyright (C) 2005-2019 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -714,7 +714,7 @@ end subroutine make_efg_ion
 !! compute the electric field gradient due to electron density
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2018 ABINIT group (JWZ)
+!! Copyright (C) 2005-2019 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

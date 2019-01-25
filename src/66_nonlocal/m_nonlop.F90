@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2018 ABINIT group (MT)
+!!  Copyright (C) 1998-2019 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -644,10 +644,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
+
+! use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
+!& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+!& cpopt < 3 .and. hamk%useylm /= 0 .and. &
+!& (choice < 2 .or. choice == 7) )
+
  use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
+& signs == 2 .and. paw_opt /= 2 .and. &
 & cpopt < 3 .and. hamk%useylm /= 0 .and. &
 & (choice < 2 .or. choice == 7) )
+
  if(use_gemm_nonlop) then
    call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
 &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
@@ -784,7 +791,7 @@ end subroutine nonlop
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2018 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2019 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -2448,6 +2448,19 @@ Relevant values are:
 ),
 
 Variable(
+    abivarname="dmft_charge_prec",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: charge density precision",
+    text=r"""
+Precision to achieve in determining the charge density in the computation of the fermi level.
+""",
+),
+
+Variable(
     abivarname="dmft_dc",
     varset="dmft",
     vartype="integer",
@@ -2550,6 +2563,20 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     text=r"""
 Number of frequencies in the log mesh.
+""",
+),
+
+Variable(
+    abivarname="dmft_occnd_imag",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: Occupation non-diagonal imaginary part",
+    characteristics=['[[DEVELOP]]'],
+    text=r"""
+When 0 force non-diagonal occupations imaginary parts to be null. Do not use this, it is only for compatibility with old tests.
 """,
 ),
 

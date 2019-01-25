@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -53,7 +53,7 @@ contains
 !! of thermodynamical properties (from the routine thm9).
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (XG,LSI)
+!! Copyright (C) 1999-2019 ABINIT group (XG,LSI)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

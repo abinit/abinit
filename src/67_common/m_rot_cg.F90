@@ -8,7 +8,7 @@
 !!  diagonalisation of the non-diagonal occupation matrix produced by DMFT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TCavignac)
+!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,7 @@ module m_rot_cg
 !! with descending occupation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TCavignac)
+!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -174,7 +174,7 @@ end subroutine diag_occ
 !! and use the resulting base to represent the wave functions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (TCavignac)
+!! Copyright (C) 1998-2019 ABINIT group (TCavignac)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2018 ABINIT group (MG, MM, GZ, MT, MF, XG)
+!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2207,7 +2207,7 @@ end function fftu_mpi_utests
 !! and for zeroing arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG, GMR, FF)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2907,7 +2907,7 @@ end subroutine fourwf
 !!  The only real-to-complex FFT available is from SGoedecker library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2019 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3295,7 +3295,7 @@ end subroutine fourdp
 !! Include machine-dependent F90 routines used with fftalg=200.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group (PT, XG, FF)
+!! Copyright (C) 2000-2019 ABINIT group (PT, XG, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
