@@ -8,7 +8,7 @@ authors: XG, RC
 
 In this tutorial you will learn how to get the following physical properties (of an insulator) from density-functional perturbation theory (DFPT):
 
-  * the phonon frequencies and eigenvectors at Gamma 
+  * the phonon frequencies and eigenvectors at $\Gamma$ 
   * the dielectric constant 
   * the Born effective charges 
   * the LO-TO splitting 
@@ -303,7 +303,7 @@ DFPT approach calls for some accuracy considerations. These can be found in
 
     ![](rf1_assets/abiopen_trf1_3.out.png)
 
-## 4 DFPT calculation of the dynamical matrix at Gamma
+## 4 DFPT calculation of the dynamical matrix at $\Gamma$
   
 We are now in the position to compute the full dynamical matrix at the $\Gamma$ point (q=0). 
 You can copy the file *\$ABI_TUTORESPFN/Input/trf1_4.in* in *Work_rf1*. 
@@ -396,7 +396,7 @@ section of the present tutorial. The sections to be read are:
   * [[help:respfn#4|section 4]] 
   * and, for completeness, [[help:respfn#5|section 5]]
 
-You are now in the position to compute the full dynamical matrix at Gamma (q=0), 
+You are now in the position to compute the full dynamical matrix at $\Gamma$ (q=0), 
 including the coupling with an homogeneous electric field. 
 You can copy *\$ABI_TUTORESPFN/Input/trf1_5.in* in *Work_rf1*.
 This is your input file. 
@@ -481,7 +481,7 @@ and
       ...
 
 Namely, the Born effective charge of the Al atom is 2.104, and the one of the
-As atom is -2.127 . The charge neutrality sum rule is not fulfilled exactly.
+As atom is -2.127. The charge neutrality sum rule is not fulfilled exactly.
 When [[ecut]] is increased, and the sampling of k points is improved, the sum
 of the two charges goes closer to zero.
 
@@ -523,8 +523,8 @@ Finally, the phonon frequencies are computed:
     -  3.795979E+02
     
 
-The first few lines discard any effect of the homogeneous electric field,
-while the next sections consider it along the three cartesian coordinates.
+There are four sections. In the first one, any effect of the homogeneous electric field is simply discarded,
+while the three next sections the electric field is considered along the three cartesian coordinates.
 
 In the present material, the directionality of the electric field has no
 influence. We note that there are still three acoustic mode, below 1 cm$^{-1}$,
@@ -545,7 +545,7 @@ Increasing [[ecut]] to 6 Hartree in ABINIT gives 2.168.
 
 For the dielectric tensor, it is more delicate. The value from Gianozzi et al
 is 9.2, while the experimental value is 8.2 . The agreement is not very good,
-a fact that can be attributed to the LDA lack of polarization-dependence [[cite:Gonze1995a]].
+a fact that can be attributed to the DFT lack of polarization-dependence [[cite:Gonze1995a]].
 Still, the agreement of our calculation with the theoretical result is not very good. With
 [[ecut]] = 3 Hartree, we have 9.76. Changing it to 6 Hartree gives 10.40 . A
 better k point sampling (8x8x8), with [[ecut]] = 6 Hartree, reduces the value to 9.89.
@@ -556,7 +556,7 @@ This illustrates that the dielectric tensor is a much more sensitive quantity th
 
 ## 6 DFPT calculation of phonon frequencies at non-zero q
   
-The computation of phonon frequencies at non-zero q is actually simpler than the one at Gamma. 
+The computation of phonon frequencies at non-zero q is actually simpler than the one at $\Gamma$. 
 One must distinguish two cases. Either the q wavevector connects k points that belong 
 to the same grid, or the wavevector q is general. 
 In any case, the computation within the reciprocal space DFPT formalism is more
@@ -572,9 +572,9 @@ As for the other RF tests, the changes with respect to *trf1_1.in* are
 all gathered in the first part of this file.
 The multi-dataset mode is used, computing from scratch the ground-state wave functions, then computing different
 dynamical matrices with DFPT.
-The run is about 2 minutes on a 2.8 GHz machine.
-So, you would better leave your computer running, and either read more of the ABINIT documentation
-(why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]), or make a walk).
+The run is about 1...2 minutes on a 2.8 GHz machine.
+In the mean time, you might read more of the ABINIT documentation
+(why not the [[help:mrgddb|mrgddb_help]] and the [[help:anaddb|anaddb_help]]).
 
 The results of this simulation can be compared to those provided in the Gianozzi *et al* paper. 
 The agreement is rather good, despite the low cut-off energy, and different pseudopotentials.
@@ -589,7 +589,7 @@ get 68.1 cm$^{-1}$, 208.5 cm$^{-1}$, 346.7 cm$^{-1}$ and 362.6 cm$^{-1}$.
 
 At q=(0.1 0 0), we get 31.6 cm$^{-1}$, 63.6 cm$^{-1}$, 342.0 cm$^{-1}$ and 379.7 cm$^{-1}$. The
 acoustic modes tends (nearly-)linearly to zero, while the optic modes are
-close to their values at Gamma : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
+close to their values at $\Gamma$ : 344.3 cm$^{-1}$ and 379.6 cm$^{-1}$.
 
 * * *
 

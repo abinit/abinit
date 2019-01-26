@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2018 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -174,7 +174,7 @@ AC_DEFUN([_ABI_DFT_CHECK_LIBXC],[
     fi
     LIBS="${abi_dft_libxc_libs} ${LIBS}"
   else
-    AC_CHECK_LIB([m], [pow],abi_has_libm="yes",abi_has_libm="no")
+    AC_CHECK_LIB([m],[main],abi_has_libm="yes",abi_has_libm="no")
     if test "${abi_has_libm}" = "yes"; then
       abi_dft_libxc_libs="${abi_dft_libxc_libs} -lm"
       with_libxc_libs="${with_libxc_libs} -lm"

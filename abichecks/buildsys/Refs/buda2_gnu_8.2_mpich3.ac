@@ -929,15 +929,15 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="${FALLBACKS_PATH}/atompaw/4.0.1.0/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/4.1.0.5/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/4.0.1.0/include"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/4.1.0.5/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.0.1.0/lib -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.1.0.5/lib -latompaw"
 
                        # ------------------------------ #
 
@@ -953,11 +953,11 @@ with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.0.1.0/lib -latompaw"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I${FALLBACKS_PATH}/libxc/3.0.1/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.1/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 

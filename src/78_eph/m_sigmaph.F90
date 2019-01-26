@@ -7,7 +7,7 @@
 !!  Compute the matrix elements of the Fan-Migdal Debye-Waller self-energy in the KS basis set.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2019 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -528,7 +528,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !scalars
  integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,sppoldbl1=1,timrev1=1
- integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert
+ integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert, nqeff
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
@@ -1559,6 +1559,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
+
+ nqeff = count(dvdb%count_qused /= 0)
+ call wrtout(std_out, sjoin("Number of qpts in IBZ used by this rank:", itoa(nqeff), &
+           " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+ call xmpi_sum(dvdb%count_qused, comm, ierr)
+ nqeff = count(dvdb%count_qused /= 0)
+ call wrtout(std_out, sjoin("Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
+           " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
@@ -4564,7 +4572,7 @@ subroutine find_kpoints(dtset, cryst, ebands, comm)
    !call ebands_print(ebands,header,unit,prtvol,mode_paral)
  end if
 
- ! Compute dense BZ and IBZ
+ ! Compute dense BZ and IBZ from sigma_ngkpt and other related variables.
  kptrlatt_fine = 0
  do ii=1,3
    kptrlatt_fine(ii, ii) = dtset%sigma_ngkpt(ii)
@@ -4583,13 +4591,14 @@ subroutine find_kpoints(dtset, cryst, ebands, comm)
    ebands%kptns, ebands%eig, skw_band_block, comm)
  call skw%print(std_out)
 
- ! Compute gaps
+ ! Compute gaps.
  gap_err = get_gaps(ebands, gaps)
  if (gap_err /= 0) then
    MSG_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
  end if
  call gaps%print(unit=std_out)
 
+ ! Find k-points in energy region.
  ABI_ICALLOC(kfine_imask, (nkibz_fine))
 
  cnt = 0

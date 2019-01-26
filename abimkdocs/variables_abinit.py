@@ -2448,6 +2448,19 @@ Relevant values are:
 ),
 
 Variable(
+    abivarname="dmft_charge_prec",
+    varset="dmft",
+    vartype="real",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: charge density precision",
+    text=r"""
+Precision to achieve in determining the charge density in the computation of the fermi level.
+""",
+),
+
+Variable(
     abivarname="dmft_dc",
     varset="dmft",
     vartype="integer",
@@ -2550,6 +2563,20 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     text=r"""
 Number of frequencies in the log mesh.
+""",
+),
+
+Variable(
+    abivarname="dmft_occnd_imag",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Dynamical Mean Field Theory: Occupation non-diagonal imaginary part",
+    characteristics=['[[DEVELOP]]'],
+    text=r"""
+When 0 force non-diagonal occupations imaginary parts to be null. Do not use this, it is only for compatibility with old tests.
 """,
 ),
 
@@ -9651,10 +9678,10 @@ real space, especially when derivatives of the model core charge are needed,
 e.g. DFPT. Preliminary tests showed that the violation of the acoustic sum
 rule is reduced when [[nc_xccc_gspace]] == 1, especially for LDA. It is worth
 stressing, however, that [[nc_xccc_gspace]] == 1 should be used only in
-conjunction with NC pseudos whose model core charge that decays quickly in
+conjunction with NC pseudos with a model core charge that decays quickly in
 G-space. Several NC pseudos available in the Abinit table are not optimized
 for the G-space formalism and users are strongly invited to perform
-convergence studies with respect to ecut before using this option.
+convergence studies with respect to [[ecut]] before activating this option in production runs.
 """,
 ),
 
