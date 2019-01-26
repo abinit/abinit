@@ -253,6 +253,10 @@ module m_dvdb
    ! ngfft3_v1(3, numv1)
    ! The FFT mesh used for each v1 potential (the one used to store data in the file).
 
+  integer,allocatable :: count_qused(:)
+   ! count_qused(nqpt)
+   ! Number of times this q-point has been used in dvdb_readsym_qbz
+
   real(dp),allocatable :: qpts(:,:)
    ! qpts(3,nqpt)
    ! List of q-points in reduced coordinates.
@@ -568,6 +572,8 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  end do
  call xmpi_sum(new%symq_table, comm, ierr)
 
+ ABI_ICALLOC(new%count_qused, (new%nqpt))
+
  call cwtime_report("- dvdb_new", cpu, wall, gflops)
  call timab(1800, 2, tsec)
 
@@ -725,6 +731,7 @@ subroutine dvdb_free(db)
  ABI_SFREE(db%symq_table)
  ABI_SFREE(db%iv_pinfoq)
  ABI_SFREE(db%ngfft3_v1)
+ ABI_SFREE(db%count_qused)
 
  ! real arrays
  ABI_SFREE(db%qpts)
@@ -1238,6 +1245,7 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  call timab(1802, 1, tsec)
 
  db_iqpt = indq2db(1)
+ db%count_qused(db_iqpt) = db%count_qused(db_iqpt) + 1
 
  ! IS(q_dvdb) + g0q = q_bz
  isym = indq2db(2); itimrev = indq2db(6) + 1; g0q = indq2db(3:5)
