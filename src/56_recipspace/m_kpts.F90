@@ -253,7 +253,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  character(len=80) :: errorstring
 !arrays
  integer :: new_kptrlatt(3,3)
- integer,allocatable :: indkk(:,:), bz2ibz(:)
+ integer,allocatable :: indkk(:,:)
  real(dp) :: rlatt(3,3),klatt(3,3)
  real(dp),allocatable :: kfull(:,:),my_kibz(:,:),my_wtk(:),new_shiftk(:,:)
 
@@ -300,12 +300,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    ierr = 2; goto 10
  end if
 
- ! HM: listkk is slow when mapping large lists of k-points
- ! this is probably due to the sorting with the norm.
- ! A better solution should be used when mapping BZ->IBZ
- ! for the moment I prefer get_gull_kgrid.
-#if 0
- ! Construct full BZ and create mapping BZ --> IBZ
+ ! Cosntruct full BZ and create mapping BZ --> IBZ
  ! Note:
  !   - we don't change the value of nsppol hence sppoldbl is set to 1
  !   - we use symrec (operations in reciprocal space)
@@ -327,22 +322,12 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  end if
 
  rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
+
  call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
  if (ierr /= 0) msg = errorstring
-#else
- ABI_MALLOC(bz2ibz,(nkfull))
- ! Make full kpoint grid and get equivalence to irred kpoints.
- call get_full_kgrid(bz2ibz, kibz, kfull, new_kptrlatt, nkibz, &
-     nkfull, size(new_shiftk, dim=2), cryst%nsym, new_shiftk, cryst%symrel)
-
- rlatt = new_kptrlatt; call matr3inv(rlatt, klatt)
- call init_tetra(bz2ibz, cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
- if (ierr /= 0) msg = errorstring
-#endif
 
  10 continue
  ABI_SFREE(indkk)
- ABI_SFREE(bz2ibz)
  ABI_SFREE(kfull)
  ABI_SFREE(new_shiftk)
 
