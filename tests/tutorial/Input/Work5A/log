@@ -1,0 +1,541 @@
+  ABINIT 8.9.4
+  
+  Give name for formatted input file: 
+t03.in
+  Give name for formatted output file:
+t03_x.out
+  Give root name for generic input files:
+t03_xi
+  Give root name for generic output files:
+t03_xo
+  Give root name for generic temporary files:
+t03_x
+
+--- !COMMENT
+src_file: m_dtfil.F90
+src_line: 1157
+message: |
+    Output file t03_x.out
+     already exists.
+...
+
+
+--- !COMMENT
+src_file: m_dtfil.F90
+src_line: 1181
+message: |
+    Renaming old t03_x.out to t03_x.out0002
+...
+
+
+.Version 8.9.4 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu7.3 computer) 
+
+.Copyright (C) 1998-2018 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Mon 28 Jan 2019.
+- ( at 14h38 )
+  
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ === Build Information === 
+  Version       : 8.9.4
+  Build target  : x86_64_linux_gnu7.3
+  Build date    : 20190125
+
+ === Compiler Suite === 
+  C compiler       : gnu7.3
+  C++ compiler     : gnu7.3
+  Fortran compiler : gnu7.3
+  CFLAGS           :  -g -O2 -mtune=native -march=native
+  CXXFLAGS         :  -g -O2 -mtune=native -march=native
+  FCFLAGS          :  -g -ffree-line-length-none
+  FC_LDFLAGS       : 
+
+ === Optimizations === 
+  Debug level        : basic
+  Optimization level : standard
+  Architecture       : intel_xeon
+
+ === Multicore === 
+  Parallel build : no
+  Parallel I/O   : no
+  openMP support : no
+  GPU support    : no
+
+ === Connectors / Fallbacks === 
+  Connectors on : yes
+  Fallbacks on  : yes
+  DFT flavor    : none
+  FFT flavor    : none
+  LINALG flavor : netlib
+  MATH flavor   : none
+  TIMER flavor  : abinit
+  TRIO flavor   : none
+
+ === Experimental features === 
+  Bindings            : @enable_bindings@
+  Exports             : no
+  GW double-precision : no
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Default optimizations:
+   -O2 -mtune=native -march=native
+
+
+ Optimizations for 43_ptgroups:
+   -O0
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ CPP options activated during the build:
+
+                    CC_GNU                   CXX_GNU                    FC_GNU
+ 
+ HAVE_FC_ALLOCATABLE_DT...             HAVE_FC_ASYNC         HAVE_FC_BACKTRACE
+ 
+  HAVE_FC_COMMAND_ARGUMENT      HAVE_FC_COMMAND_LINE        HAVE_FC_CONTIGUOUS
+ 
+           HAVE_FC_CPUTIME              HAVE_FC_EXIT             HAVE_FC_FLUSH
+ 
+             HAVE_FC_GAMMA            HAVE_FC_GETENV   HAVE_FC_IEEE_EXCEPTIONS
+ 
+          HAVE_FC_INT_QUAD             HAVE_FC_IOMSG     HAVE_FC_ISO_C_BINDING
+ 
+  HAVE_FC_ISO_FORTRAN_2008        HAVE_FC_LONG_LINES        HAVE_FC_MOVE_ALLOC
+ 
+           HAVE_FC_PRIVATE         HAVE_FC_PROTECTED         HAVE_FC_STREAM_IO
+ 
+            HAVE_FC_SYSTEM          HAVE_FORTRAN2003        HAVE_LIBPAW_ABINIT
+ 
+      HAVE_LIBTETRA_ABINIT               HAVE_LINALG        HAVE_LINALG_SERIAL
+ 
+             HAVE_OS_LINUX         HAVE_TIMER_ABINIT              USE_MACROAVE
+ 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+- input  file    -> t03.in
+- output file    -> t03_x.out
+- root for input  files -> t03_xi
+- root for output files -> t03_xo
+
+-instrng: 124 lines of input have been read from file t03.in
+
+
+ Please give name of formatted atomic psp file
+ iofn2 : for atom type 1, psp file is ../../../Psps_for_tests/ba.hpc.paw.xml
+
+ Please give name of formatted atomic psp file
+ iofn2 : for atom type 2, psp file is ../../../Psps_for_tests/ti.hpc.paw.xml
+
+ Please give name of formatted atomic psp file
+ iofn2 : for atom type 3, psp file is ../../../Psps_for_tests/o.hpc.paw.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ba.hpc.paw.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ti.hpc.paw.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/o.hpc.paw.xml
+
+ inpspheads: deduce mpsang = 3, n1xccc = 1.
+ invars1 : treat image number: 1
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+  xred   is defined in input file
+ ingeo: takes atomic coordinates from input array xred
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+ symspgr : spgroup=  47  Pm m m   (=D2h^1)
+ ingeo: angdeg(1:3)=   90.00000000   90.00000000   90.00000000
+ invars1 : treat image number: 1
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+  xred   is defined in input file
+ ingeo: takes atomic coordinates from input array xred
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+ symspgr : spgroup=  47  Pm m m   (=D2h^1)
+ ingeo: angdeg(1:3)=   90.00000000   90.00000000   90.00000000
+ chkneu : initialized the occupation numbers for occopt=    1, spin-unpolarized or antiferromagnetic case :
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+ chkneu : initialized the occupation numbers for occopt=    1, spin-unpolarized or antiferromagnetic case :
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+
+--- !WARNING
+src_file: m_mpi_setup.F90
+src_line: 181
+message: |
+    When ABINIT is compiled without MPI flag,
+    setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.
+    Action : modify compilation option or paral_kgb in the input file.
+...
+
+mpi_setup: mkmem  undefined in the input file.Use default mkmem  = nkpt
+ mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
+mpi_setup: mkqmem undefined in the input file.Use default mkqmem = nkpt
+ mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
+mpi_setup: mk1mem undefined in the input file.Use default mk1mem = nkpt
+ mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
+getng is called for the coarse grid:
+ For input ecut=  8.000000E+00 best grid ngfft=      60      40      20
+       max ecut=  8.636783E+00
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    60   40   20
+  Augmented FFT divisions ...................    61   41   20
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+ getmpw: optimal value of mpw= 2816
+getng is called for the fine grid:
+ Using supplied coarse mesh as initial guess.
+ For input ecut=  1.000000E+01 best grid ngfft=      72      45      24
+       max ecut=  1.045051E+01
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    72   45   24
+  Augmented FFT divisions ...................    73   45   24
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+
+--- !WARNING
+src_file: m_mpi_setup.F90
+src_line: 269
+message: |
+    For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1
+...
+
+mpi_setup: mkmem  undefined in the input file.Use default mkmem  = nkpt
+ mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
+mpi_setup: mkqmem undefined in the input file.Use default mkqmem = nkpt
+ mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
+mpi_setup: mk1mem undefined in the input file.Use default mk1mem = nkpt
+ mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
+getng is called for the coarse grid:
+ For input ecut=  8.000000E+00 best grid ngfft=      60      40      20
+       max ecut=  8.315940E+00
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    60   40   20
+  Augmented FFT divisions ...................    61   41   20
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+ getmpw: optimal value of mpw= 2816
+ getmpw: optimal value of mpw= 2824
+getng is called for the fine grid:
+ Using supplied coarse mesh as initial guess.
+ For input ecut=  1.000000E+01 best grid ngfft=      72      45      24
+       max ecut=  1.009728E+01
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    72   45   24
+  Augmented FFT divisions ...................    73   45   24
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+
+ DATASET    1 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
+
+ getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
+                      lmnmaxso=  18, lnmaxso=   6.
+memory : analysis of memory needs
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =      17    lmnmax =      18
+     lnmax =       6     mgfft =      60  mpssoang =       3    mqgrid =    3229
+     natom =      29  nloc_mem =       2    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       8    n1xccc =       1    ntypat =       3
+    occopt =       1   xclevel =       1
+-    mband =         128        mffmem =           1         mkmem =           1
+       mpw =        2816          nfft =       48000          nkpt =           1
+ PAW method is used; the additional fine FFT grid is defined by:
+   mgfftf=        72    nfftf =     77760
+================================================================================
+P This job should need less than                      53.570 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      5.502 Mbytes ; DEN or POT disk file :      0.595 Mbytes.
+================================================================================
+
+ Biggest array : pawfgrtab%gylm(gr), with     10.8697 MBytes.
+ memana : allocated an array of     10.870 Mbytes, for testing purposes.
+ memana: allocated      53.570Mbytes, for testing purposes. 
+ The job will continue.
+
+ DATASET    2 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
+
+ getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
+                      lmnmaxso=  18, lnmaxso=   6.
+ memorf : analysis of memory needs
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2 (RF).
+     intxc =       0      iscf =       7    lmnmax =      18     lnmax =       6
+     mgfft =      60  mpssoang =       3    mqgrid =    3001     natom =      29
+  nloc_mem =       2    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =       8    n1xccc =       1    ntypat =       3    occopt =       1
+   xclevel =       1
+-    mband =         128        mffmem =           1         mkmem =           1
+-   mkqmem =           1        mk1mem =           1           mpw =        2824
+      nfft =       48000          nkpt =           1
+================================================================================
+P This job should need less than                     144.613 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      5.518 Mbytes ; DEN or POT disk file :      0.368 Mbytes.
+================================================================================
+
+ Biggest array : cg(disk), with      5.5176 MBytes.
+ memana : allocated an array of      5.518 Mbytes, for testing purposes.
+ memana: allocated     144.613Mbytes, for testing purposes. 
+ The job will continue.
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =112 , wfoptalg0 = 10
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      2.2676713595E+01  1.5117809063E+01  7.5589045315E+00 Bohr
+              amu      1.37327000E+02  4.78800000E+01  1.59994000E+01
+           bandpp         128
+      chksymbreak           0
+           diemac      3.00000000E+01
+             ecut      8.00000000E+00 Hartree
+-          fftalg         112
+           getwfk1          0
+           getwfk2          1
+             iscf1         17
+             iscf2          7
+           istwfk        1
+              ixc           7
+           jdtset        1    2
+              kpt      5.00000000E-01  5.00000000E-01  5.00000000E-01
+           kptopt1          1
+           kptopt2          3
+         kptrlatt        1    0    0      0    1    0      0    0    1
+          kptrlen      7.55890453E+00
+P           mkmem           1
+P          mkqmem           1
+P          mk1mem           1
+            natom          29
+            nband         128
+           nbdbuf          11
+           ndtset           2
+            ngfft          60      40      20
+          ngfftdg          72      45      24
+             nkpt           1
+             nqpt1          0
+             nqpt2          1
+            nstep          50
+             nsym           8
+           ntypat           3
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver1          0
+        optdriver2          1
+        pawecutdg      1.00000000E+01 Hartree
+           prtden           0
+           prteig           0
+            prtwf1          1
+            prtwf2          0
+              qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+              qpt2     0.00000000E+00  3.75000000E-01  0.00000000E+00
+            rfdir1          0       0       0
+            rfdir2          0       0       1
+           rfphon1          0
+           rfphon2          1
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup          47
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+           timopt           0
+            tnons      0.0000000  0.0000000  0.0000000     0.3333333  0.5000000  0.0000000
+                       0.3333333  0.0000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.3333333  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.3333333  0.0000000  0.0000000
+           toldfe1     0.00000000E+00 Hartree
+           toldfe2     1.00000000E-08 Hartree
+           tolwfr1     1.00000000E-12
+           tolwfr2     0.00000000E+00
+            typat      1  2  3  3  3  1  2  3  3  3  1  2  3  3  3  1  2  3  3  3
+                       1  2  3  3  3  1  2  3  3
+           useylm           1
+         wfoptalg         111
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       2.0000000000E+00  2.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  0.0000000000E+00  2.0000000000E+00
+                       0.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       0.0000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       2.0000000000E+00  6.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  4.0000000000E+00  2.0000000000E+00
+                       0.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       6.0000000000E+00  2.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  0.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       6.0000000000E+00  6.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  4.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       8.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  2.0000000000E+00  2.0000000000E+00
+                       1.0000000000E+01  2.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  0.0000000000E+00  2.0000000000E+00
+                       8.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       8.0000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  6.0000000000E+00  2.0000000000E+00
+                       1.0000000000E+01  6.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  4.0000000000E+00  2.0000000000E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.7794522658E+00  3.7794522658E+00  3.7794522658E+00
+                       3.7794522658E+00  3.7794522658E+00  0.0000000000E+00
+                       3.7794522658E+00  0.0000000000E+00  3.7794522658E+00
+                       0.0000000000E+00  3.7794522658E+00  3.7794522658E+00
+                       0.0000000000E+00  7.5589045315E+00  0.0000000000E+00
+                       3.7794522658E+00  1.1338356797E+01  3.7794522658E+00
+                       3.7794522658E+00  1.1338356797E+01  0.0000000000E+00
+                       3.7794522658E+00  7.5589045315E+00  3.7794522658E+00
+                       0.0000000000E+00  1.1338356797E+01  3.7794522658E+00
+                       7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
+                       1.1338356797E+01  3.7794522658E+00  3.7794522658E+00
+                       1.1338356797E+01  3.7794522658E+00  0.0000000000E+00
+                       1.1338356797E+01  0.0000000000E+00  3.7794522658E+00
+                       7.5589045315E+00  3.7794522658E+00  3.7794522658E+00
+                       7.5589045315E+00  7.5589045315E+00  0.0000000000E+00
+                       1.1338356797E+01  1.1338356797E+01  3.7794522658E+00
+                       1.1338356797E+01  1.1338356797E+01  0.0000000000E+00
+                       1.1338356797E+01  7.5589045315E+00  3.7794522658E+00
+                       7.5589045315E+00  1.1338356797E+01  3.7794522658E+00
+                       1.5117809063E+01  0.0000000000E+00  0.0000000000E+00
+                       1.8897261329E+01  3.7794522658E+00  3.7794522658E+00
+                       1.8897261329E+01  3.7794522658E+00  0.0000000000E+00
+                       1.8897261329E+01  0.0000000000E+00  3.7794522658E+00
+                       1.5117809063E+01  3.7794522658E+00  3.7794522658E+00
+                       1.5117809063E+01  7.5589045315E+00  0.0000000000E+00
+                       1.8897261329E+01  1.1338356797E+01  3.7794522658E+00
+                       1.8897261329E+01  1.1338356797E+01  0.0000000000E+00
+                       1.8897261329E+01  7.5589045315E+00  3.7794522658E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.6666666667E-01  2.5000000000E-01  5.0000000000E-01
+                       1.6666666667E-01  2.5000000000E-01  0.0000000000E+00
+                       1.6666666667E-01  0.0000000000E+00  5.0000000000E-01
+                       0.0000000000E+00  2.5000000000E-01  5.0000000000E-01
+                       0.0000000000E+00  5.0000000000E-01  0.0000000000E+00
+                       1.6666666667E-01  7.5000000000E-01  5.0000000000E-01
+                       1.6666666667E-01  7.5000000000E-01  0.0000000000E+00
+                       1.6666666667E-01  5.0000000000E-01  5.0000000000E-01
+                       0.0000000000E+00  7.5000000000E-01  5.0000000000E-01
+                       3.3333333333E-01  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  2.5000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  2.5000000000E-01  0.0000000000E+00
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       3.3333333333E-01  2.5000000000E-01  5.0000000000E-01
+                       3.3333333333E-01  5.0000000000E-01  0.0000000000E+00
+                       5.0000000000E-01  7.5000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  7.5000000000E-01  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       3.3333333333E-01  7.5000000000E-01  5.0000000000E-01
+                       6.6666666667E-01  0.0000000000E+00  0.0000000000E+00
+                       8.3333333333E-01  2.5000000000E-01  5.0000000000E-01
+                       8.3333333333E-01  2.5000000000E-01  0.0000000000E+00
+                       8.3333333333E-01  0.0000000000E+00  5.0000000000E-01
+                       6.6666666667E-01  2.5000000000E-01  5.0000000000E-01
+                       6.6666666667E-01  5.0000000000E-01  0.0000000000E+00
+                       8.3333333333E-01  7.5000000000E-01  5.0000000000E-01
+                       8.3333333333E-01  7.5000000000E-01  0.0000000000E+00
+                       8.3333333333E-01  5.0000000000E-01  5.0000000000E-01
+            znucl       56.00000   22.00000    8.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkint_prt: ERROR -
+ Context: the value of the variable usepaw is 1.
+  The value of the input variable wfoptalg is 111, while it must be
+  equal to one of the following: 0 1 4 10 14 114
+  Action: you should change the input variable wfoptalg.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkint_prt: ERROR -
+ Context: the value of the variable usepaw is 1.
+  The value of the input variable wfoptalg is 111, while it must be
+  equal to one of the following: 0 1 4 10 14 114
+  Action: you should change the input variable wfoptalg.
+
+--- !ERROR
+src_file: m_chkinp.F90
+src_line: 3625
+mpi_rank: 0
+message: |
+    Checking consistency of input data against itself gave 2 inconsistencies.
+    The details of the problems can be found above.
+...
+
+
+ abi_abort: decision taken to exit ...

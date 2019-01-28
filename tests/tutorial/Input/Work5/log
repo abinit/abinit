@@ -1,0 +1,2947 @@
+  ABINIT 8.9.4
+  
+  Give name for formatted input file: 
+t03.in
+  Give name for formatted output file:
+t03_x.out
+  Give root name for generic input files:
+t03_xi
+  Give root name for generic output files:
+t03_xo
+  Give root name for generic temporary files:
+t03_x
+
+--- !COMMENT
+src_file: m_dtfil.F90
+src_line: 1157
+message: |
+    Output file t03_x.out
+     already exists.
+...
+
+
+--- !COMMENT
+src_file: m_dtfil.F90
+src_line: 1181
+message: |
+    Renaming old t03_x.out to t03_x.out0006
+...
+
+
+.Version 8.9.4 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu7.3 computer) 
+
+.Copyright (C) 1998-2018 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Mon 28 Jan 2019.
+- ( at 14h25 )
+  
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ === Build Information === 
+  Version       : 8.9.4
+  Build target  : x86_64_linux_gnu7.3
+  Build date    : 20190125
+
+ === Compiler Suite === 
+  C compiler       : gnu7.3
+  C++ compiler     : gnu7.3
+  Fortran compiler : gnu7.3
+  CFLAGS           :  -g -O2 -mtune=native -march=native
+  CXXFLAGS         :  -g -O2 -mtune=native -march=native
+  FCFLAGS          :  -g -ffree-line-length-none
+  FC_LDFLAGS       : 
+
+ === Optimizations === 
+  Debug level        : basic
+  Optimization level : standard
+  Architecture       : intel_xeon
+
+ === Multicore === 
+  Parallel build : no
+  Parallel I/O   : no
+  openMP support : no
+  GPU support    : no
+
+ === Connectors / Fallbacks === 
+  Connectors on : yes
+  Fallbacks on  : yes
+  DFT flavor    : none
+  FFT flavor    : none
+  LINALG flavor : netlib
+  MATH flavor   : none
+  TIMER flavor  : abinit
+  TRIO flavor   : none
+
+ === Experimental features === 
+  Bindings            : @enable_bindings@
+  Exports             : no
+  GW double-precision : no
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Default optimizations:
+   -O2 -mtune=native -march=native
+
+
+ Optimizations for 43_ptgroups:
+   -O0
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ CPP options activated during the build:
+
+                    CC_GNU                   CXX_GNU                    FC_GNU
+ 
+ HAVE_FC_ALLOCATABLE_DT...             HAVE_FC_ASYNC         HAVE_FC_BACKTRACE
+ 
+  HAVE_FC_COMMAND_ARGUMENT      HAVE_FC_COMMAND_LINE        HAVE_FC_CONTIGUOUS
+ 
+           HAVE_FC_CPUTIME              HAVE_FC_EXIT             HAVE_FC_FLUSH
+ 
+             HAVE_FC_GAMMA            HAVE_FC_GETENV   HAVE_FC_IEEE_EXCEPTIONS
+ 
+          HAVE_FC_INT_QUAD             HAVE_FC_IOMSG     HAVE_FC_ISO_C_BINDING
+ 
+  HAVE_FC_ISO_FORTRAN_2008        HAVE_FC_LONG_LINES        HAVE_FC_MOVE_ALLOC
+ 
+           HAVE_FC_PRIVATE         HAVE_FC_PROTECTED         HAVE_FC_STREAM_IO
+ 
+            HAVE_FC_SYSTEM          HAVE_FORTRAN2003        HAVE_LIBPAW_ABINIT
+ 
+      HAVE_LIBTETRA_ABINIT               HAVE_LINALG        HAVE_LINALG_SERIAL
+ 
+             HAVE_OS_LINUX         HAVE_TIMER_ABINIT              USE_MACROAVE
+ 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+- input  file    -> t03.in
+- output file    -> t03_x.out
+- root for input  files -> t03_xi
+- root for output files -> t03_xo
+
+-instrng: 123 lines of input have been read from file t03.in
+
+
+ Please give name of formatted atomic psp file
+ iofn2 : for atom type 1, psp file is ../../../Psps_for_tests/ba.hpc.paw.xml
+
+ Please give name of formatted atomic psp file
+ iofn2 : for atom type 2, psp file is ../../../Psps_for_tests/ti.hpc.paw.xml
+
+ Please give name of formatted atomic psp file
+ iofn2 : for atom type 3, psp file is ../../../Psps_for_tests/o.hpc.paw.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ba.hpc.paw.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ti.hpc.paw.xml
+- inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/o.hpc.paw.xml
+
+ inpspheads: deduce mpsang = 3, n1xccc = 1.
+ invars1 : treat image number: 1
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+  xred   is defined in input file
+ ingeo: takes atomic coordinates from input array xred
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+ symspgr : spgroup=  47  Pm m m   (=D2h^1)
+ ingeo: angdeg(1:3)=   90.00000000   90.00000000   90.00000000
+ invars1 : treat image number: 1
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+  xred   is defined in input file
+ ingeo: takes atomic coordinates from input array xred
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+
+ symlatt : the Bravais lattice is oP (primitive orthorhombic)
+ symspgr : spgroup=  47  Pm m m   (=D2h^1)
+ ingeo: angdeg(1:3)=   90.00000000   90.00000000   90.00000000
+ chkneu : initialized the occupation numbers for occopt=    1, spin-unpolarized or antiferromagnetic case :
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+ chkneu : initialized the occupation numbers for occopt=    1, spin-unpolarized or antiferromagnetic case :
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
+  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  0.00  0.00  0.00
+  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+
+--- !WARNING
+src_file: m_mpi_setup.F90
+src_line: 181
+message: |
+    When ABINIT is compiled without MPI flag,
+    setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.
+    Action : modify compilation option or paral_kgb in the input file.
+...
+
+mpi_setup: mkmem  undefined in the input file.Use default mkmem  = nkpt
+ mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
+mpi_setup: mkqmem undefined in the input file.Use default mkqmem = nkpt
+ mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
+mpi_setup: mk1mem undefined in the input file.Use default mk1mem = nkpt
+ mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
+getng is called for the coarse grid:
+ For input ecut=  8.000000E+00 best grid ngfft=      60      40      20
+       max ecut=  8.636783E+00
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    60   40   20
+  Augmented FFT divisions ...................    61   41   20
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+ getmpw: optimal value of mpw= 2816
+getng is called for the fine grid:
+ Using supplied coarse mesh as initial guess.
+ For input ecut=  1.000000E+01 best grid ngfft=      72      45      24
+       max ecut=  1.045051E+01
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    72   45   24
+  Augmented FFT divisions ...................    73   45   24
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+
+--- !WARNING
+src_file: m_mpi_setup.F90
+src_line: 269
+message: |
+    For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1
+...
+
+mpi_setup: mkmem  undefined in the input file.Use default mkmem  = nkpt
+ mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
+mpi_setup: mkqmem undefined in the input file.Use default mkqmem = nkpt
+ mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
+mpi_setup: mk1mem undefined in the input file.Use default mk1mem = nkpt
+ mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
+getng is called for the coarse grid:
+ For input ecut=  8.000000E+00 best grid ngfft=      60      40      20
+       max ecut=  8.315940E+00
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    60   40   20
+  Augmented FFT divisions ...................    61   41   20
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+ getmpw: optimal value of mpw= 2816
+ getmpw: optimal value of mpw= 2824
+getng is called for the fine grid:
+ Using supplied coarse mesh as initial guess.
+ For input ecut=  1.000000E+01 best grid ngfft=      72      45      24
+       max ecut=  1.009728E+01
+
+ ==== FFT mesh ====
+  FFT mesh divisions ........................    72   45   24
+  Augmented FFT divisions ...................    73   45   24
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+
+ DATASET    1 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
+
+ getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
+                      lmnmaxso=  18, lnmaxso=   6.
+memory : analysis of memory needs
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =      17    lmnmax =      18
+     lnmax =       6     mgfft =      60  mpssoang =       3    mqgrid =    3229
+     natom =      29  nloc_mem =       2    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       8    n1xccc =       1    ntypat =       3
+    occopt =       1   xclevel =       1
+-    mband =         128        mffmem =           1         mkmem =           1
+       mpw =        2816          nfft =       48000          nkpt =           1
+ PAW method is used; the additional fine FFT grid is defined by:
+   mgfftf=        72    nfftf =     77760
+================================================================================
+P This job should need less than                      53.570 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      5.502 Mbytes ; DEN or POT disk file :      0.595 Mbytes.
+================================================================================
+
+ Biggest array : pawfgrtab%gylm(gr), with     10.8697 MBytes.
+ memana : allocated an array of     10.870 Mbytes, for testing purposes.
+ memana: allocated      53.570Mbytes, for testing purposes. 
+ The job will continue.
+
+ DATASET    2 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
+
+ getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
+                      lmnmaxso=  18, lnmaxso=   6.
+ memorf : analysis of memory needs
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2 (RF).
+     intxc =       0      iscf =       7    lmnmax =      18     lnmax =       6
+     mgfft =      60  mpssoang =       3    mqgrid =    3001     natom =      29
+  nloc_mem =       2    nspden =       1   nspinor =       1    nsppol =       1
+      nsym =       8    n1xccc =       1    ntypat =       3    occopt =       1
+   xclevel =       1
+-    mband =         128        mffmem =           1         mkmem =           1
+-   mkqmem =           1        mk1mem =           1           mpw =        2824
+      nfft =       48000          nkpt =           1
+================================================================================
+P This job should need less than                     144.613 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      5.518 Mbytes ; DEN or POT disk file :      0.368 Mbytes.
+================================================================================
+
+ Biggest array : cg(disk), with      5.5176 MBytes.
+ memana : allocated an array of      5.518 Mbytes, for testing purposes.
+ memana: allocated     144.613Mbytes, for testing purposes. 
+ The job will continue.
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =112 , wfoptalg0 = 10
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      2.2676713595E+01  1.5117809063E+01  7.5589045315E+00 Bohr
+              amu      1.37327000E+02  4.78800000E+01  1.59994000E+01
+           bandpp         128
+      chksymbreak           0
+           diemac      3.00000000E+01
+             ecut      8.00000000E+00 Hartree
+-          fftalg         112
+           getwfk1          0
+           getwfk2          1
+             iscf1         17
+             iscf2          7
+           istwfk        1
+              ixc           7
+           jdtset        1    2
+              kpt      5.00000000E-01  5.00000000E-01  5.00000000E-01
+           kptopt1          1
+           kptopt2          3
+         kptrlatt        1    0    0      0    1    0      0    0    1
+          kptrlen      7.55890453E+00
+P           mkmem           1
+P          mkqmem           1
+P          mk1mem           1
+            natom          29
+            nband         128
+           nbdbuf          11
+           ndtset           2
+            ngfft          60      40      20
+          ngfftdg          72      45      24
+             nkpt           1
+             nqpt1          0
+             nqpt2          1
+            nstep          50
+             nsym           8
+           ntypat           3
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000  2.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver1          0
+        optdriver2          1
+        pawecutdg      1.00000000E+01 Hartree
+           prtden           0
+           prteig           0
+            prtwf1          1
+            prtwf2          0
+              qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
+              qpt2     0.00000000E+00  3.75000000E-01  0.00000000E+00
+            rfdir1          0       0       0
+            rfdir2          0       0       1
+           rfphon1          0
+           rfphon2          1
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+          spgroup          47
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                      -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+                      -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+                       1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+           timopt           0
+            tnons      0.0000000  0.0000000  0.0000000     0.3333333  0.5000000  0.0000000
+                       0.3333333  0.0000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.3333333  0.5000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.3333333  0.0000000  0.0000000
+           toldfe1     0.00000000E+00 Hartree
+           toldfe2     1.00000000E-08 Hartree
+           tolwfr1     1.00000000E-12
+           tolwfr2     0.00000000E+00
+            typat      1  2  3  3  3  1  2  3  3  3  1  2  3  3  3  1  2  3  3  3
+                       1  2  3  3  3  1  2  3  3
+           useylm           1
+         wfoptalg           1
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       2.0000000000E+00  2.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  0.0000000000E+00  2.0000000000E+00
+                       0.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       0.0000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       2.0000000000E+00  6.0000000000E+00  0.0000000000E+00
+                       2.0000000000E+00  4.0000000000E+00  2.0000000000E+00
+                       0.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       6.0000000000E+00  2.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  0.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       6.0000000000E+00  6.0000000000E+00  0.0000000000E+00
+                       6.0000000000E+00  4.0000000000E+00  2.0000000000E+00
+                       4.0000000000E+00  6.0000000000E+00  2.0000000000E+00
+                       8.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  2.0000000000E+00  2.0000000000E+00
+                       1.0000000000E+01  2.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  0.0000000000E+00  2.0000000000E+00
+                       8.0000000000E+00  2.0000000000E+00  2.0000000000E+00
+                       8.0000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  6.0000000000E+00  2.0000000000E+00
+                       1.0000000000E+01  6.0000000000E+00  0.0000000000E+00
+                       1.0000000000E+01  4.0000000000E+00  2.0000000000E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       3.7794522658E+00  3.7794522658E+00  3.7794522658E+00
+                       3.7794522658E+00  3.7794522658E+00  0.0000000000E+00
+                       3.7794522658E+00  0.0000000000E+00  3.7794522658E+00
+                       0.0000000000E+00  3.7794522658E+00  3.7794522658E+00
+                       0.0000000000E+00  7.5589045315E+00  0.0000000000E+00
+                       3.7794522658E+00  1.1338356797E+01  3.7794522658E+00
+                       3.7794522658E+00  1.1338356797E+01  0.0000000000E+00
+                       3.7794522658E+00  7.5589045315E+00  3.7794522658E+00
+                       0.0000000000E+00  1.1338356797E+01  3.7794522658E+00
+                       7.5589045315E+00  0.0000000000E+00  0.0000000000E+00
+                       1.1338356797E+01  3.7794522658E+00  3.7794522658E+00
+                       1.1338356797E+01  3.7794522658E+00  0.0000000000E+00
+                       1.1338356797E+01  0.0000000000E+00  3.7794522658E+00
+                       7.5589045315E+00  3.7794522658E+00  3.7794522658E+00
+                       7.5589045315E+00  7.5589045315E+00  0.0000000000E+00
+                       1.1338356797E+01  1.1338356797E+01  3.7794522658E+00
+                       1.1338356797E+01  1.1338356797E+01  0.0000000000E+00
+                       1.1338356797E+01  7.5589045315E+00  3.7794522658E+00
+                       7.5589045315E+00  1.1338356797E+01  3.7794522658E+00
+                       1.5117809063E+01  0.0000000000E+00  0.0000000000E+00
+                       1.8897261329E+01  3.7794522658E+00  3.7794522658E+00
+                       1.8897261329E+01  3.7794522658E+00  0.0000000000E+00
+                       1.8897261329E+01  0.0000000000E+00  3.7794522658E+00
+                       1.5117809063E+01  3.7794522658E+00  3.7794522658E+00
+                       1.5117809063E+01  7.5589045315E+00  0.0000000000E+00
+                       1.8897261329E+01  1.1338356797E+01  3.7794522658E+00
+                       1.8897261329E+01  1.1338356797E+01  0.0000000000E+00
+                       1.8897261329E+01  7.5589045315E+00  3.7794522658E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.6666666667E-01  2.5000000000E-01  5.0000000000E-01
+                       1.6666666667E-01  2.5000000000E-01  0.0000000000E+00
+                       1.6666666667E-01  0.0000000000E+00  5.0000000000E-01
+                       0.0000000000E+00  2.5000000000E-01  5.0000000000E-01
+                       0.0000000000E+00  5.0000000000E-01  0.0000000000E+00
+                       1.6666666667E-01  7.5000000000E-01  5.0000000000E-01
+                       1.6666666667E-01  7.5000000000E-01  0.0000000000E+00
+                       1.6666666667E-01  5.0000000000E-01  5.0000000000E-01
+                       0.0000000000E+00  7.5000000000E-01  5.0000000000E-01
+                       3.3333333333E-01  0.0000000000E+00  0.0000000000E+00
+                       5.0000000000E-01  2.5000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  2.5000000000E-01  0.0000000000E+00
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       3.3333333333E-01  2.5000000000E-01  5.0000000000E-01
+                       3.3333333333E-01  5.0000000000E-01  0.0000000000E+00
+                       5.0000000000E-01  7.5000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  7.5000000000E-01  0.0000000000E+00
+                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       3.3333333333E-01  7.5000000000E-01  5.0000000000E-01
+                       6.6666666667E-01  0.0000000000E+00  0.0000000000E+00
+                       8.3333333333E-01  2.5000000000E-01  5.0000000000E-01
+                       8.3333333333E-01  2.5000000000E-01  0.0000000000E+00
+                       8.3333333333E-01  0.0000000000E+00  5.0000000000E-01
+                       6.6666666667E-01  2.5000000000E-01  5.0000000000E-01
+                       6.6666666667E-01  5.0000000000E-01  0.0000000000E+00
+                       8.3333333333E-01  7.5000000000E-01  5.0000000000E-01
+                       8.3333333333E-01  7.5000000000E-01  0.0000000000E+00
+                       8.3333333333E-01  5.0000000000E-01  5.0000000000E-01
+            znucl       56.00000   22.00000    8.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+ DATA TYPE INFORMATION: 
+ REAL:      Data type name: REAL(DP) 
+            Kind value:      8
+            Precision:      15
+            Smallest nonnegligible quantity relative to 1:  0.22204460E-15
+            Smallest positive number:                       0.22250739-307
+            Largest representable number:                   0.17976931+309
+ INTEGER:   Data type name: INTEGER(default) 
+            Kind value: 4
+            Bit size:   32
+            Largest representable number: 2147483647
+ LOGICAL:   Data type name: LOGICAL 
+            Kind value: 4
+ CHARACTER: Data type name: CHARACTER             Kind value: 1
+
+  ==== OpenMP parallelism is OFF ====
+ 
+  MPI-IO support is OFF
+
+================================================================================
+== DATASET  1 ==================================================================
+-   nproc =    1
+
+
+--- !COMMENT
+src_file: m_xgScalapack.F90
+src_line: 244
+message: |
+    xgScalapack in auto mode
+...
+
+
+ getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
+                      lmnmaxso=  18, lnmaxso=   6.
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ Unit cell volume ucvol=  2.5913605E+03 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  60  40  20
+         ecut(hartree)=      8.000   => boxcut(ratio)=   2.07807
+
+ Fine grid specifications (used for densities):
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  72  45  24
+         ecut(hartree)=     10.000   => boxcut(ratio)=   2.04455
+- pspini: atom type   1  psp file is ../../../Psps_for_tests/ba.hpc.paw.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/ba.hpc.paw.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ba.hpc.paw.xml
+ Pseudopotential format is: paw10
+ basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
+ Spheres core radius: rc_sph= 2.31518568
+ 1 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1500 , AA= 0.15658E-03 BB= 0.87685E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions =  2.01210979
+ mmax= 1500
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid 1
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 1
+ Radial grid used for pseudo valence density is grid 1
+ Mesh size for Vloc has been set to 1341 to avoid numerical noise.
+ Compensation charge density is not taken into account in XC energy/potential
+ beta integral value:      -0.881134E+02
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is ../../../Psps_for_tests/ti.hpc.paw.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/ti.hpc.paw.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ti.hpc.paw.xml
+ Pseudopotential format is: paw10
+ basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
+ Spheres core radius: rc_sph= 2.30000000
+ 1 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size= 899 , AA= 0.64047E-03 BB= 0.14090E-01
+ Shapefunction is BESSEL type: shapef(r,l)=aa(1,l)*jl(q(1,l)*r)+aa(2,l)*jl(q(2,l)*r)
+ Radius for shape functions =  2.02598965
+ mmax=  899
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid 1
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 1
+ Radial grid used for pseudo valence density is grid 1
+ Mesh size for Vloc has been set to  735 to avoid numerical noise.
+ Compensation charge density is not taken into account in XC energy/potential
+ beta integral value:      -0.271282E+02
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   3  psp file is ../../../Psps_for_tests/o.hpc.paw.xml
+- pspatm: opening atomic psp file    ../../../Psps_for_tests/o.hpc.paw.xml
+- pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/o.hpc.paw.xml
+ Pseudopotential format is: paw10
+ basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
+ Spheres core radius: rc_sph= 1.41465230
+ 1 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=2001 , AA= 0.72565E-03 BB= 0.58052E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions =  1.20231231
+ mmax= 2001
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid 1
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 1
+ Radial grid used for pseudo valence density is grid 1
+ Mesh size for Vloc has been set to 1762 to avoid numerical noise.
+ Compensation charge density is not taken into account in XC energy/potential
+ beta integral value:      -0.477232E+01
+ pspatm: atomic psp has been read  and splines computed
+
+   1.36968617E+05                                ecore*ucvol(ha*bohr**3)
+ ==== Info on pseudopotentials ====
+  PAW calculation
+  Number of pseudopotentials ..    3
+  Number of types of atoms   ..    3
+  Scalar calculation (no spin-orbit term)
+  Nonlocal part applied using real spherical harmonics
+  Max number of non-local projectors over l and type   2
+  Highest angular momentum +1 .......   3
+  Max number of (l,n)   components ..   6
+  Max number of (l,m,n) components ..  18
+
+ Pseudo-Core Charge Info: 
+   Number of radial points for pseudo-core charge ..    1
+   XC core-correction treatment (optnlxccc) ........    1
+   Radius for pseudo-core charge for each type ..... 
+
+  - Atom type    1 has pseudo-core radius .. 80.0000
+  - Atom type    2 has pseudo-core radius .. *******
+  - Atom type    3 has pseudo-core radius .. 80.0000
+
+ Info on the Q-grid used for form factors in spline form: 
+   Number of q-points for radial functions ffspl ..   3001
+   Number of q-points for vlspl ...................   3229
+   vloc is computed in Reciprocal Space
+
+  XC functional for type 1 is 7
+  XC functional for type 2 is 7
+  XC functional for type 3 is 7
+
+ wfconv:   128 bands initialized randomly with npw=  2816, for ikpt=     1
+_setup2: Arith. and geom. avg. npw (full set) are    2816.000    2816.000
+ initro: for itypat=  1, take pseudo charge density from pp file
+ initro: for itypat=  2, take pseudo charge density from pp file
+ initro: for itypat=  3, take pseudo charge density from pp file
+
+================================================================================
+ FFT (fine) grid used in SCF cycle:
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  72  45  24
+         ecut(hartree)=     10.000   => boxcut(ratio)=   2.04455
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   0.46421   0.07000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00001  -0.00000 ...
+   0.07000   0.00987  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
+  -0.00000  -0.00000  -0.16085  -0.00000  -0.00000  -0.00497  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+  -0.00000  -0.00000  -0.00000  -0.16088  -0.00000  -0.00000  -0.00499  -0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.00000  -0.16088  -0.00000  -0.00000  -0.00499  -0.00000   0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00497  -0.00000  -0.00000  -1.13582  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00499  -0.00000  -0.00000  -1.13586  -0.00000   0.00000   0.00000  -0.00000   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.00000  -0.00499  -0.00000  -0.00000  -1.13586  -0.00000   0.00000  -0.00000  -0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.03005  -0.00000   0.00000  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.03005  -0.00000  -0.00000 ...
+  -0.00001  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.03006   0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.03004 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.61848  -1.82364   0.00000   0.00000  -0.00000  -0.00001  -0.00000   0.00001
+  -1.82364   5.44702  -0.00000  -0.00000   0.00000   0.00003   0.00000  -0.00003
+   0.00000  -0.00000  -0.33606   0.00000  -0.00000   1.05588  -0.00000   0.00001
+   0.00000  -0.00000   0.00000  -0.33457  -0.00000  -0.00000   1.04844   0.00000
+  -0.00000   0.00000  -0.00000  -0.00000  -0.33456   0.00001   0.00000   1.04843
+  -0.00001   0.00003   1.05588  -0.00000   0.00001  -0.81061   0.00000  -0.00004
+  -0.00000   0.00000  -0.00000   1.04844   0.00000   0.00000  -0.77505  -0.00000
+   0.00001  -0.00003   0.00001   0.00000   1.04843  -0.00004  -0.00000  -0.77501
+
+
+ ITER STEP NUMBER     1
+ vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
+ Invovl built
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  8.29E-04  1.26E-03  1.72E-03  2.30E-03  1.38E-03  2.45E-03  4.62E-03  6.37E-03
+ res:  6.86E-03  7.74E-03  1.11E-02  1.32E-02  1.31E-02  1.51E-02  1.87E-02  1.88E-02
+ res:  2.01E-02  2.19E-02  2.88E-02  2.76E-02  2.78E-02  3.10E-02  3.56E-02  3.82E-02
+ res:  1.74E-03  2.35E-03  3.29E-03  5.81E-03  4.39E-03  8.77E-03  3.72E-03  4.81E-03
+ res:  6.28E-03  3.97E-03  3.74E-03  4.81E-03  5.16E-03  6.16E-03  6.89E-03  5.78E-03
+ res:  6.36E-03  8.73E-03  1.03E-02  1.21E-02  1.41E-02  1.58E-02  2.26E-02  2.70E-03
+ res:  2.65E-03  3.16E-03  4.08E-03  2.88E-03  2.93E-03  3.78E-03  4.37E-03  4.42E-03
+ res:  5.34E-03  4.85E-03  5.54E-03  6.96E-03  6.42E-03  6.56E-03  9.24E-03  1.00E-02
+ res:  1.19E-02  6.06E-03  7.07E-03  6.99E-03  6.65E-03  7.33E-03  7.39E-03  8.11E-03
+ res:  9.99E-03  8.97E-03  1.00E-02  9.81E-03  1.03E-02  1.20E-02  1.04E-02  1.10E-02
+ res:  1.18E-02  1.11E-02  1.24E-02  1.31E-02  1.25E-02  1.31E-02  1.36E-02  1.52E-02
+ res:  1.79E-02  1.80E-02  1.80E-02  1.98E-02  1.93E-02  2.12E-02  2.04E-02  2.10E-02
+ res:  2.42E-02  2.48E-02  2.49E-02  2.60E-02  2.84E-02  2.91E-02  3.65E-02  3.36E-02
+ res:  3.66E-02  3.27E-02  4.01E-02  3.73E-02  4.38E-02  4.46E-02  4.80E-02  3.96E-02
+ res:  3.81E-02  3.63E-02  3.32E-02  2.78E-02  2.99E-02  3.26E-02  3.44E-02  4.04E-02
+ res:  3.49E-02  4.34E-02  4.08E-02  5.17E-02  5.31E-02  5.75E-02  6.51E-02  6.55E-02
+ ene: -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -8.54E-01 -8.51E-01
+ ene: -8.49E-01 -8.47E-01 -8.40E-01 -8.37E-01 -8.33E-01 -8.27E-01 -8.25E-01 -8.22E-01
+ ene: -8.18E-01 -8.12E-01 -8.03E-01 -7.94E-01 -7.89E-01 -7.82E-01 -7.67E-01 -7.51E-01
+ ene: -7.39E-01 -7.36E-01 -7.35E-01 -7.34E-01 -7.32E-01 -7.28E-01 -5.40E-01 -5.37E-01
+ ene: -5.33E-01 -5.29E-01 -5.22E-01 -5.21E-01 -5.18E-01 -5.17E-01 -5.14E-01 -5.11E-01
+ ene: -5.09E-01 -5.04E-01 -5.02E-01 -4.98E-01 -4.91E-01 -4.83E-01 -4.71E-01 -2.26E-01
+ ene: -2.23E-01 -2.20E-01 -2.18E-01 -2.16E-01 -2.15E-01 -2.11E-01 -2.08E-01 -2.07E-01
+ ene: -2.04E-01 -2.03E-01 -2.01E-01 -1.96E-01 -1.93E-01 -1.88E-01 -1.78E-01 -1.71E-01
+ ene: -1.64E-01  1.60E-02  2.48E-02  3.07E-02  3.67E-02  3.95E-02  4.09E-02  4.58E-02
+ ene:  4.88E-02  5.76E-02  6.27E-02  6.65E-02  7.12E-02  7.26E-02  7.84E-02  8.17E-02
+ ene:  8.62E-02  8.75E-02  9.26E-02  9.62E-02  9.98E-02  1.03E-01  1.11E-01  1.13E-01
+ ene:  1.20E-01  1.28E-01  1.31E-01  1.35E-01  1.42E-01  1.47E-01  1.51E-01  1.54E-01
+ ene:  1.64E-01  1.72E-01  1.79E-01  1.90E-01  2.04E-01  2.11E-01  2.22E-01  2.34E-01
+ ene:  2.53E-01  2.76E-01  2.86E-01  3.03E-01  3.19E-01  3.38E-01  3.60E-01  4.02E-01
+ ene:  4.24E-01  4.40E-01  4.47E-01  4.68E-01  4.96E-01  5.07E-01  5.24E-01  5.50E-01
+ ene:  5.52E-01  5.70E-01  5.95E-01  6.21E-01  6.48E-01  6.59E-01  7.02E-01  7.61E-01
+ res:  8.37E-06  1.45E-05  1.72E-05  1.64E-05  1.06E-05  8.55E-06  2.00E-04  2.17E-04
+ res:  3.96E-04  4.74E-04  6.56E-04  3.05E-04  7.31E-04  5.64E-04  6.17E-04  6.75E-04
+ res:  8.57E-04  1.19E-03  5.76E-04  1.17E-03  1.85E-03  2.62E-03  7.48E-04  1.56E-03
+ res:  1.41E-04  1.68E-04  1.36E-04  1.81E-04  1.59E-04  2.13E-04  2.16E-04  2.90E-04
+ res:  4.81E-04  3.65E-04  3.28E-04  5.32E-04  2.58E-04  3.27E-04  3.75E-04  7.53E-04
+ res:  2.04E-04  4.24E-04  3.65E-04  2.73E-04  5.12E-04  8.22E-04  1.25E-03  4.28E-04
+ res:  4.78E-04  6.15E-04  6.05E-04  2.21E-04  3.56E-04  3.47E-04  4.93E-04  5.90E-04
+ res:  6.37E-04  3.98E-04  7.47E-04  6.92E-04  5.70E-04  4.90E-04  8.04E-04  1.42E-03
+ res:  1.49E-03  9.42E-04  1.06E-03  1.10E-03  1.13E-03  1.54E-03  1.52E-03  1.11E-03
+ res:  1.06E-03  1.61E-03  2.44E-03  1.95E-03  1.65E-03  1.83E-03  1.51E-03  1.57E-03
+ res:  1.56E-03  1.42E-03  1.75E-03  1.95E-03  2.20E-03  2.59E-03  2.10E-03  2.00E-03
+ res:  2.37E-03  2.54E-03  3.20E-03  3.20E-03  3.93E-03  3.61E-03  3.32E-03  3.23E-03
+ res:  2.77E-03  3.20E-03  2.45E-03  2.30E-03  2.60E-03  4.30E-03  3.46E-03  3.70E-03
+ res:  4.70E-03  5.12E-03  7.50E-03  8.07E-03  8.90E-03  1.08E-02  1.10E-02  1.74E-02
+ res:  1.81E-02  1.72E-02  2.28E-02  1.59E-02  1.04E-02  3.55E-03  3.77E-03  4.57E-03
+ res:  4.34E-03  5.83E-03  6.66E-03  7.04E-03  8.08E-03  1.12E-02  1.92E-02  3.10E-02
+ ene: -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -8.63E-01 -8.63E-01
+ ene: -8.63E-01 -8.62E-01 -8.62E-01 -8.61E-01 -8.60E-01 -8.59E-01 -8.59E-01 -8.58E-01
+ ene: -8.58E-01 -8.57E-01 -8.57E-01 -8.56E-01 -8.54E-01 -8.53E-01 -8.46E-01 -8.45E-01
+ ene: -7.43E-01 -7.43E-01 -7.42E-01 -7.42E-01 -7.40E-01 -7.40E-01 -5.49E-01 -5.49E-01
+ ene: -5.48E-01 -5.39E-01 -5.35E-01 -5.34E-01 -5.31E-01 -5.31E-01 -5.31E-01 -5.26E-01
+ ene: -5.23E-01 -5.22E-01 -5.22E-01 -5.21E-01 -5.20E-01 -5.20E-01 -5.19E-01 -2.35E-01
+ ene: -2.33E-01 -2.32E-01 -2.31E-01 -2.24E-01 -2.23E-01 -2.22E-01 -2.21E-01 -2.20E-01
+ ene: -2.19E-01 -2.18E-01 -2.17E-01 -2.15E-01 -2.12E-01 -2.04E-01 -2.03E-01 -2.01E-01
+ ene: -2.00E-01 -9.01E-03 -3.87E-04  4.02E-03  6.20E-03  1.01E-02  1.17E-02  1.50E-02
+ ene:  1.64E-02  1.92E-02  2.09E-02  2.46E-02  3.06E-02  3.35E-02  3.63E-02  4.19E-02
+ ene:  4.36E-02  4.60E-02  4.91E-02  5.02E-02  5.14E-02  5.22E-02  5.51E-02  5.69E-02
+ ene:  5.84E-02  6.07E-02  6.46E-02  6.59E-02  6.89E-02  7.29E-02  7.77E-02  8.39E-02
+ ene:  8.64E-02  9.04E-02  9.54E-02  1.00E-01  1.03E-01  1.04E-01  1.08E-01  1.11E-01
+ ene:  1.13E-01  1.16E-01  1.26E-01  1.29E-01  1.36E-01  1.45E-01  1.61E-01  1.89E-01
+ ene:  2.01E-01  2.26E-01  2.72E-01  3.04E-01  3.56E-01  3.83E-01  4.25E-01  4.31E-01
+ ene:  4.38E-01  4.50E-01  4.60E-01  4.75E-01  4.89E-01  5.17E-01  5.64E-01  6.33E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    3 non-SCF iterations with    4 CG line minimizations
+ -1.7006E+00 -1.7006E+00 -1.7006E+00 -1.7006E+00 -1.6975E+00 -1.6975E+00
+ -8.6312E-01 -8.6303E-01 -8.6277E-01 -8.6245E-01 -8.6202E-01 -8.6087E-01
+ -8.5984E-01 -8.5871E-01 -8.5852E-01 -8.5811E-01 -8.5791E-01 -8.5703E-01
+ -8.5651E-01 -8.5551E-01 -8.5431E-01 -8.5312E-01 -8.4625E-01 -8.4474E-01
+ -7.4303E-01 -7.4280E-01 -7.4242E-01 -7.4227E-01 -7.4013E-01 -7.3995E-01
+ -5.4899E-01 -5.4871E-01 -5.4820E-01 -5.3908E-01 -5.3472E-01 -5.3431E-01
+ -5.3103E-01 -5.3078E-01 -5.3063E-01 -5.2562E-01 -5.2253E-01 -5.2213E-01
+ -5.2164E-01 -5.2096E-01 -5.2032E-01 -5.1968E-01 -5.1887E-01 -2.3538E-01
+ -2.3315E-01 -2.3224E-01 -2.3058E-01 -2.2400E-01 -2.2302E-01 -2.2151E-01
+ -2.2055E-01 -2.1995E-01 -2.1901E-01 -2.1805E-01 -2.1697E-01 -2.1538E-01
+ -2.1164E-01 -2.0450E-01 -2.0331E-01 -2.0091E-01 -2.0018E-01 -9.0130E-03
+ -3.8688E-04  4.0196E-03  6.2011E-03  1.0066E-02  1.1712E-02  1.4976E-02
+  1.6390E-02  1.9223E-02  2.0938E-02  2.4573E-02  3.0619E-02  3.3500E-02
+  3.6296E-02  4.1918E-02  4.3581E-02  4.5986E-02  4.9124E-02  5.0243E-02
+  5.1378E-02  5.2234E-02  5.5140E-02  5.6877E-02  5.8424E-02  6.0727E-02
+  6.4557E-02  6.5870E-02  6.8893E-02  7.2919E-02  7.7667E-02  8.3888E-02
+  8.6446E-02  9.0389E-02  9.5393E-02  1.0026E-01  1.0314E-01  1.0450E-01
+  1.0818E-01  1.1079E-01  1.1304E-01  1.1572E-01  1.2573E-01  1.2902E-01
+  1.3647E-01  1.4527E-01  1.6072E-01  1.8936E-01  2.0121E-01  2.2567E-01
+  2.7162E-01  3.0411E-01  3.5589E-01  3.8326E-01  4.2506E-01  4.3147E-01
+  4.3821E-01  4.5043E-01  4.6014E-01  4.7488E-01  4.8851E-01  5.1726E-01
+  5.6352E-01  6.3342E-01
+
+ *********** RHOIJ (atom   1) **********
+   1.85353   0.26893  -0.01291   0.00000   0.00179   0.00051   0.00000  -0.00011  -0.01392   0.00000   0.03118   0.00000 ...
+   0.26893   1.18946   0.02234   0.00000  -0.00124  -0.00138   0.00000   0.00075   0.04799   0.00000  -0.04632   0.00000 ...
+  -0.01291   0.02234   1.97711   0.00000  -0.01047   0.00154   0.00000   0.00022  -0.01298   0.00000   0.00068   0.00000 ...
+   0.00000   0.00000   0.00000   1.92702   0.00000   0.00000   0.00127   0.00000   0.00000   0.02643   0.00000   0.02337 ...
+   0.00179  -0.00124  -0.01047   0.00000   1.93964   0.00068   0.00000   0.00247   0.00032   0.00000   0.03232   0.00000 ...
+   0.00051  -0.00138   0.00154   0.00000   0.00068   0.00113   0.00000  -0.00001   0.00027   0.00000  -0.00005   0.00000 ...
+   0.00000   0.00000   0.00000   0.00127   0.00000   0.00000   0.00178   0.00000   0.00000  -0.00244   0.00000  -0.00152 ...
+  -0.00011   0.00075   0.00022   0.00000   0.00247  -0.00001   0.00000   0.00119   0.00011   0.00000  -0.00051   0.00000 ...
+  -0.01392   0.04799  -0.01298   0.00000   0.00032   0.00027   0.00000   0.00011   0.26795   0.00000  -0.01286   0.00000 ...
+   0.00000   0.00000   0.00000   0.02643   0.00000   0.00000  -0.00244   0.00000   0.00000   0.31387   0.00000   0.04283 ...
+   0.03118  -0.04632   0.00068   0.00000   0.03232  -0.00005   0.00000  -0.00051  -0.01286   0.00000   0.26118   0.00000 ...
+   0.00000   0.00000   0.00000   0.02337   0.00000   0.00000  -0.00152   0.00000   0.00000   0.04283   0.00000   0.28346 ...
+   ...  only 12  components have been written...
+
+ *********** RHOIJ (atom  29) **********
+   2.13546   0.04364  -0.00663   0.00000   0.00111  -0.00053   0.00000   0.00002
+   0.04364   0.00198   0.00120   0.00000   0.00054   0.00009   0.00000   0.00004
+  -0.00663   0.00120   2.32397   0.00000  -0.06584   0.16287   0.00000  -0.00421
+   0.00000   0.00000   0.00000   2.40185   0.00000   0.00000   0.16605   0.00000
+   0.00111   0.00054  -0.06584   0.00000   2.23204  -0.00406   0.00000   0.15529
+  -0.00053   0.00009   0.16287   0.00000  -0.00406   0.01154   0.00000  -0.00026
+   0.00000   0.00000   0.00000   0.16605   0.00000   0.00000   0.01160   0.00000
+   0.00002   0.00004  -0.00421   0.00000   0.15529  -0.00026   0.00000   0.01091
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.2335E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -5.1036E-01  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=    1.8362E+01
+ ETOT  1  -776.97423066191    -7.770E+02 2.281E-02 1.637E+03
+ scprqt: <Vxc>= -4.2844501E-01 hartree
+
+Simple mixing update:
+  residual square of the potential :   1.0996224855469347E-002
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 54372 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.58E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 17 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   1.07638   0.15577  -0.00024  -0.00000   0.00055  -0.00006   0.00000  -0.00002  -0.00003  -0.00000  -0.00002  -0.00000 ...
+   0.15577   0.02465  -0.00005  -0.00000   0.00011  -0.00004  -0.00000   0.00005  -0.00001  -0.00000  -0.00001  -0.00000 ...
+  -0.00024  -0.00005   0.03036  -0.00000  -0.00003  -0.02676  -0.00000  -0.00000   0.00007   0.00000   0.00007  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.03014  -0.00000  -0.00000  -0.02694  -0.00000  -0.00000  -0.00003  -0.00000   0.00020 ...
+   0.00055   0.00011  -0.00003  -0.00000   0.03004  -0.00000  -0.00000  -0.02697  -0.00005  -0.00000  -0.00001   0.00000 ...
+  -0.00006  -0.00004  -0.02676  -0.00000  -0.00000  -0.97273  -0.00000  -0.00001   0.00001   0.00000   0.00007  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.02694  -0.00000  -0.00000  -0.97310  -0.00000  -0.00000  -0.00001  -0.00000   0.00015 ...
+  -0.00002   0.00005  -0.00000  -0.00000  -0.02697  -0.00001  -0.00000  -0.97316  -0.00003  -0.00000   0.00004   0.00000 ...
+  -0.00003  -0.00001   0.00007  -0.00000  -0.00005   0.00001  -0.00000  -0.00003  -0.01148   0.00000   0.00001   0.00000 ...
+  -0.00000  -0.00000   0.00000  -0.00003  -0.00000   0.00000  -0.00001  -0.00000   0.00000  -0.01145  -0.00000   0.00000 ...
+  -0.00002  -0.00001   0.00007  -0.00000  -0.00001   0.00007  -0.00000   0.00004   0.00001  -0.00000  -0.01155  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00020   0.00000  -0.00000   0.00015   0.00000   0.00000   0.00000  -0.00000  -0.01148 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.72414  -2.17987   0.00018  -0.00000  -0.00022  -0.00118   0.00000   0.00143
+  -2.17987   6.65583  -0.00047   0.00000   0.00058   0.00314  -0.00000  -0.00386
+   0.00018  -0.00047  -0.53163   0.00000  -0.00002   2.07284  -0.00000   0.00015
+  -0.00000   0.00000   0.00000  -0.52828   0.00000  -0.00000   2.05608  -0.00000
+  -0.00022   0.00058  -0.00002   0.00000  -0.52803   0.00015  -0.00000   2.05496
+  -0.00118   0.00314   2.07284  -0.00000   0.00015  -5.99020   0.00000  -0.00097
+   0.00000  -0.00000  -0.00000   2.05608  -0.00000   0.00000  -5.90979   0.00000
+   0.00143  -0.00386   0.00015  -0.00000   2.05496  -0.00097   0.00000  -5.90505
+
+
+ ITER STEP NUMBER     2
+ vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 2
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  5.14E-06  4.71E-06  4.59E-06  4.13E-06  4.38E-06  3.96E-06  2.89E-05  4.36E-05
+ res:  4.65E-05  2.42E-05  2.81E-05  2.80E-05  2.58E-05  3.46E-05  5.43E-05  2.31E-05
+ res:  3.29E-05  2.70E-05  3.96E-05  2.73E-05  3.77E-05  3.95E-05  5.82E-05  4.42E-05
+ res:  1.42E-04  1.43E-04  1.44E-04  1.18E-04  1.53E-04  1.16E-04  1.50E-04  1.53E-04
+ res:  1.57E-04  1.35E-04  1.38E-04  1.49E-04  1.52E-04  1.21E-04  1.34E-04  1.15E-04
+ res:  1.18E-04  7.04E-05  8.45E-05  6.90E-05  7.86E-05  8.57E-05  7.97E-05  1.14E-03
+ res:  1.03E-03  1.05E-03  1.61E-03  1.05E-03  1.16E-03  1.02E-03  1.77E-03  1.37E-03
+ res:  1.67E-03  2.42E-03  1.49E-03  1.67E-03  1.21E-03  1.48E-03  2.22E-03  2.83E-03
+ res:  1.68E-03  2.02E-03  2.13E-03  1.95E-03  1.36E-03  1.62E-03  1.56E-03  1.35E-03
+ res:  1.60E-03  1.74E-03  1.56E-03  2.20E-03  2.01E-03  2.16E-03  1.74E-03  1.59E-03
+ res:  1.53E-03  2.37E-03  2.53E-03  2.59E-03  1.50E-03  1.52E-03  1.70E-03  1.97E-03
+ res:  2.08E-03  2.25E-03  1.99E-03  2.39E-03  2.21E-03  2.68E-03  3.10E-03  2.67E-03
+ res:  3.01E-03  7.24E-03  4.65E-04  5.17E-04  4.25E-04  4.19E-04  4.58E-04  4.48E-04
+ res:  8.06E-04  6.05E-04  9.03E-04  9.92E-04  1.61E-03  3.25E-03  5.97E-04  7.68E-04
+ res:  7.18E-04  6.07E-04  7.27E-04  1.72E-03  1.04E-02  1.39E-02  1.72E-02  2.12E-02
+ res:  2.15E-02  2.78E-02  2.76E-02  2.80E-02  3.09E-02  2.97E-02  3.70E-02  4.16E-02
+ ene: -2.26E+00 -2.22E+00 -2.22E+00 -2.18E+00 -2.18E+00 -2.15E+00 -1.34E+00 -1.34E+00
+ ene: -1.34E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.26E+00
+ ene: -1.26E+00 -1.26E+00 -1.26E+00 -1.24E+00 -1.24E+00 -1.24E+00 -1.23E+00 -1.23E+00
+ ene: -9.81E-01 -9.70E-01 -9.69E-01 -9.69E-01 -9.65E-01 -9.64E-01 -9.64E-01 -9.63E-01
+ ene: -9.61E-01 -9.60E-01 -9.47E-01 -9.42E-01 -9.42E-01 -9.42E-01 -9.41E-01 -9.31E-01
+ ene: -9.31E-01 -9.14E-01 -9.13E-01 -9.13E-01 -9.13E-01 -8.67E-01 -8.66E-01 -4.16E-01
+ ene: -4.10E-01 -3.99E-01 -3.95E-01 -3.92E-01 -3.91E-01 -3.78E-01 -3.74E-01 -3.69E-01
+ ene: -3.68E-01 -3.64E-01 -3.61E-01 -3.59E-01 -3.53E-01 -3.51E-01 -3.44E-01 -3.41E-01
+ ene: -3.25E-01 -3.22E-01 -3.19E-01 -3.16E-01 -3.13E-01 -3.13E-01 -3.12E-01 -3.11E-01
+ ene: -3.10E-01 -3.08E-01 -3.07E-01 -3.06E-01 -3.04E-01 -3.01E-01 -3.00E-01 -2.99E-01
+ ene: -2.97E-01 -2.94E-01 -2.93E-01 -2.91E-01 -2.86E-01 -2.85E-01 -2.84E-01 -2.81E-01
+ ene: -2.80E-01 -2.78E-01 -2.77E-01 -2.76E-01 -2.74E-01 -2.73E-01 -2.71E-01 -2.66E-01
+ ene: -2.65E-01 -2.52E-01 -2.03E-01 -2.03E-01 -2.02E-01 -2.02E-01 -2.01E-01 -2.01E-01
+ ene: -2.00E-01 -1.99E-01 -1.99E-01 -1.98E-01 -1.94E-01 -1.91E-01 -1.60E-01 -1.60E-01
+ ene: -1.52E-01 -1.50E-01 -1.47E-01 -1.47E-01  1.41E-01  1.53E-01  2.03E-01  2.20E-01
+ ene:  2.36E-01  2.83E-01  3.15E-01  3.32E-01  3.51E-01  4.09E-01  5.20E-01  6.54E-01
+ res:  1.83E-09  2.10E-09  1.60E-09  2.59E-09  1.51E-09  1.55E-09  1.22E-07  2.56E-07
+ res:  4.97E-07  5.14E-08  1.55E-07  1.69E-07  1.50E-07  3.16E-07  4.24E-07  1.53E-07
+ res:  1.82E-07  3.00E-07  4.32E-07  1.11E-07  2.27E-07  3.64E-07  5.55E-07  5.29E-07
+ res:  6.29E-07  1.22E-06  1.46E-06  4.67E-07  2.28E-06  3.86E-07  5.86E-07  1.84E-06
+ res:  9.84E-07  1.22E-06  1.34E-06  1.62E-06  1.41E-06  1.22E-06  1.39E-06  4.26E-07
+ res:  4.28E-07  4.63E-07  4.16E-07  4.66E-07  4.53E-07  8.27E-07  6.94E-07  9.54E-05
+ res:  8.26E-05  9.06E-05  1.56E-04  6.67E-05  7.92E-05  4.60E-05  1.07E-04  1.87E-04
+ res:  1.53E-04  1.09E-04  1.47E-04  1.25E-04  3.69E-05  6.32E-05  1.60E-04  7.88E-05
+ res:  1.23E-04  1.47E-04  1.90E-04  1.31E-04  1.15E-04  6.16E-05  6.93E-05  1.10E-04
+ res:  9.50E-05  9.99E-05  9.70E-05  6.17E-05  1.26E-04  2.27E-04  1.70E-04  2.05E-04
+ res:  8.15E-05  5.91E-05  1.06E-04  1.05E-04  6.62E-05  6.46E-05  8.00E-05  9.47E-05
+ res:  1.15E-04  1.46E-04  1.84E-04  8.95E-05  8.58E-05  1.11E-04  1.29E-04  1.63E-04
+ res:  1.45E-04  1.94E-04  2.25E-05  2.11E-05  2.15E-05  1.74E-05  2.85E-05  3.79E-05
+ res:  2.01E-05  4.64E-05  4.42E-05  7.17E-05  7.14E-05  1.00E-04  3.75E-05  3.22E-05
+ res:  2.37E-05  2.09E-05  6.39E-05  3.49E-05  2.88E-03  2.28E-03  3.37E-03  4.71E-03
+ res:  5.17E-03  5.01E-03  3.38E-03  6.64E-03  6.01E-03  6.52E-03  1.56E-02  2.72E-02
+ ene: -2.26E+00 -2.22E+00 -2.22E+00 -2.18E+00 -2.18E+00 -2.15E+00 -1.34E+00 -1.34E+00
+ ene: -1.34E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.30E+00 -1.26E+00
+ ene: -1.26E+00 -1.26E+00 -1.26E+00 -1.24E+00 -1.24E+00 -1.24E+00 -1.23E+00 -1.23E+00
+ ene: -9.81E-01 -9.70E-01 -9.70E-01 -9.69E-01 -9.65E-01 -9.65E-01 -9.64E-01 -9.64E-01
+ ene: -9.61E-01 -9.60E-01 -9.47E-01 -9.42E-01 -9.42E-01 -9.42E-01 -9.42E-01 -9.31E-01
+ ene: -9.31E-01 -9.14E-01 -9.14E-01 -9.13E-01 -9.13E-01 -8.67E-01 -8.67E-01 -4.22E-01
+ ene: -4.15E-01 -4.04E-01 -4.03E-01 -3.97E-01 -3.96E-01 -3.81E-01 -3.80E-01 -3.77E-01
+ ene: -3.75E-01 -3.74E-01 -3.68E-01 -3.66E-01 -3.56E-01 -3.55E-01 -3.54E-01 -3.49E-01
+ ene: -3.31E-01 -3.29E-01 -3.28E-01 -3.24E-01 -3.18E-01 -3.17E-01 -3.16E-01 -3.16E-01
+ ene: -3.15E-01 -3.15E-01 -3.12E-01 -3.12E-01 -3.11E-01 -3.10E-01 -3.07E-01 -3.06E-01
+ ene: -3.03E-01 -3.02E-01 -3.01E-01 -2.99E-01 -2.90E-01 -2.89E-01 -2.88E-01 -2.88E-01
+ ene: -2.87E-01 -2.87E-01 -2.86E-01 -2.81E-01 -2.81E-01 -2.80E-01 -2.80E-01 -2.78E-01
+ ene: -2.75E-01 -2.71E-01 -2.04E-01 -2.04E-01 -2.03E-01 -2.03E-01 -2.03E-01 -2.02E-01
+ ene: -2.02E-01 -2.01E-01 -2.01E-01 -2.01E-01 -2.00E-01 -1.99E-01 -1.62E-01 -1.62E-01
+ ene: -1.53E-01 -1.51E-01 -1.51E-01 -1.49E-01  7.41E-02  8.98E-02  1.04E-01  1.14E-01
+ ene:  1.32E-01  1.37E-01  1.42E-01  1.54E-01  1.73E-01  1.87E-01  2.75E-01  3.90E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    3 non-SCF iterations with    4 CG line minimizations
+ -2.2601E+00 -2.2182E+00 -2.2182E+00 -2.1762E+00 -2.1762E+00 -2.1518E+00
+ -1.3431E+00 -1.3407E+00 -1.3398E+00 -1.3039E+00 -1.3033E+00 -1.3012E+00
+ -1.3005E+00 -1.2998E+00 -1.2996E+00 -1.2641E+00 -1.2634E+00 -1.2608E+00
+ -1.2600E+00 -1.2445E+00 -1.2408E+00 -1.2407E+00 -1.2334E+00 -1.2330E+00
+ -9.8145E-01 -9.7039E-01 -9.6952E-01 -9.6887E-01 -9.6485E-01 -9.6452E-01
+ -9.6417E-01 -9.6351E-01 -9.6145E-01 -9.5977E-01 -9.4697E-01 -9.4244E-01
+ -9.4221E-01 -9.4189E-01 -9.4165E-01 -9.3127E-01 -9.3089E-01 -9.1372E-01
+ -9.1366E-01 -9.1336E-01 -9.1333E-01 -8.6719E-01 -8.6671E-01 -4.2165E-01
+ -4.1517E-01 -4.0376E-01 -4.0282E-01 -3.9672E-01 -3.9629E-01 -3.8145E-01
+ -3.8013E-01 -3.7698E-01 -3.7460E-01 -3.7403E-01 -3.6789E-01 -3.6554E-01
+ -3.5627E-01 -3.5528E-01 -3.5383E-01 -3.4880E-01 -3.3112E-01 -3.2861E-01
+ -3.2762E-01 -3.2352E-01 -3.1766E-01 -3.1685E-01 -3.1641E-01 -3.1569E-01
+ -3.1492E-01 -3.1468E-01 -3.1238E-01 -3.1170E-01 -3.1103E-01 -3.1029E-01
+ -3.0703E-01 -3.0642E-01 -3.0288E-01 -3.0194E-01 -3.0062E-01 -2.9934E-01
+ -2.8973E-01 -2.8896E-01 -2.8822E-01 -2.8762E-01 -2.8733E-01 -2.8700E-01
+ -2.8631E-01 -2.8142E-01 -2.8105E-01 -2.8044E-01 -2.8013E-01 -2.7764E-01
+ -2.7547E-01 -2.7065E-01 -2.0413E-01 -2.0398E-01 -2.0322E-01 -2.0300E-01
+ -2.0255E-01 -2.0242E-01 -2.0205E-01 -2.0144E-01 -2.0112E-01 -2.0080E-01
+ -1.9976E-01 -1.9929E-01 -1.6228E-01 -1.6192E-01 -1.5349E-01 -1.5135E-01
+ -1.5094E-01 -1.4909E-01  7.4148E-02  8.9847E-02  1.0381E-01  1.1432E-01
+  1.3174E-01  1.3712E-01  1.4240E-01  1.5368E-01  1.7275E-01  1.8675E-01
+  2.7459E-01  3.8992E-01
+
+ *********** RHOIJ (atom   1) **********
+   3.39271  -2.42680  -0.00248   0.00000  -0.00414   0.00038   0.00000   0.00047  -0.00189   0.00000  -0.00385   0.00000 ...
+  -2.42680   1.84176   0.00921   0.00000   0.01321  -0.00087   0.00000  -0.00137   0.00086   0.00000   0.01561   0.00000 ...
+  -0.00248   0.00921   3.20249   0.00000   0.00061  -0.24149   0.00000  -0.00022   0.01215   0.00000   0.00117   0.00000 ...
+   0.00000   0.00000   0.00000   3.17795   0.00000   0.00000  -0.23750   0.00000   0.00000  -0.00146   0.00000   0.01350 ...
+  -0.00414   0.01321   0.00061   0.00000   3.20089  -0.00019   0.00000  -0.24117  -0.00094   0.00000  -0.00614   0.00000 ...
+   0.00038  -0.00087  -0.24149   0.00000  -0.00019   0.01837   0.00000   0.00003  -0.00095   0.00000  -0.00005   0.00000 ...
+   0.00000   0.00000   0.00000  -0.23750   0.00000   0.00000   0.01797   0.00000   0.00000   0.00014   0.00000  -0.00106 ...
+   0.00047  -0.00137  -0.00022   0.00000  -0.24117   0.00003   0.00000   0.01839   0.00009   0.00000   0.00041   0.00000 ...
+  -0.00189   0.00086   0.01215   0.00000  -0.00094  -0.00095   0.00000   0.00009   0.01135   0.00000  -0.00090   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00146   0.00000   0.00000   0.00014   0.00000   0.00000   0.01811   0.00000   0.00046 ...
+  -0.00385   0.01561   0.00117   0.00000  -0.00614  -0.00005   0.00000   0.00041  -0.00090   0.00000   0.00768   0.00000 ...
+   0.00000   0.00000   0.00000   0.01350   0.00000   0.00000  -0.00106   0.00000   0.00000   0.00046   0.00000   0.01357 ...
+   ...  only 12  components have been written...
+
+ *********** RHOIJ (atom  29) **********
+   1.96166  -0.09379  -0.00153   0.00000   0.00289  -0.00046   0.00000   0.00058
+  -0.09379   0.00506  -0.00257   0.00000   0.00262  -0.00008   0.00000   0.00008
+  -0.00153  -0.00257   3.03464   0.00000  -0.00415   0.10820   0.00000   0.00030
+   0.00000   0.00000   0.00000   3.12193   0.00000   0.00000   0.09869   0.00000
+   0.00289   0.00262  -0.00415   0.00000   3.12152   0.00025   0.00000   0.09770
+  -0.00046  -0.00008   0.10820   0.00000   0.00025   0.00397   0.00000   0.00003
+   0.00000   0.00000   0.00000   0.09869   0.00000   0.00000   0.00319   0.00000
+   0.00058   0.00008   0.00030   0.00000   0.09770   0.00003   0.00000   0.00313
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.6263E+00  at reduced coord.    0.1667    0.7556    0.5000
+      Minimum=   -7.7751E-01  at reduced coord.    0.6667    0.0000    0.0000
+   Integrated=    2.3021E+01
+ ETOT  2  -800.82797754282    -2.385E+01 2.883E-03 2.574E+02
+ scprqt: <Vxc>= -1.2188777E-01 hartree
+
+ Pulay update with  1 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=   1.03     -0.278E-01
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 50941 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.43E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 11 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   1.68935   0.24432   0.00039  -0.00000   0.00096  -0.00006   0.00000   0.00002  -0.00001  -0.00000  -0.00005   0.00000 ...
+   0.24432   0.04039   0.00007  -0.00000   0.00019   0.00002  -0.00000   0.00010  -0.00000  -0.00000  -0.00001   0.00000 ...
+   0.00039   0.00007   0.23666  -0.00000  -0.00002  -0.03218  -0.00000  -0.00001   0.00020  -0.00000  -0.00003  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.23644   0.00000  -0.00000  -0.03236   0.00000  -0.00000   0.00009  -0.00000   0.00023 ...
+   0.00096   0.00019  -0.00002   0.00000   0.23644  -0.00001   0.00000  -0.03231   0.00009  -0.00000  -0.00011  -0.00000 ...
+  -0.00006   0.00002  -0.03218  -0.00000  -0.00001  -0.79305  -0.00000  -0.00002   0.00011   0.00000  -0.00000  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.03236   0.00000  -0.00000  -0.79343   0.00000  -0.00000   0.00005  -0.00000   0.00016 ...
+   0.00002   0.00010  -0.00001   0.00000  -0.03231  -0.00002   0.00000  -0.79337   0.00004  -0.00000  -0.00006   0.00000 ...
+  -0.00001  -0.00000   0.00020  -0.00000   0.00009   0.00011  -0.00000   0.00004   0.01252   0.00000   0.00001   0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00009  -0.00000   0.00000   0.00005  -0.00000   0.00000   0.01252  -0.00000  -0.00000 ...
+  -0.00005  -0.00001  -0.00003  -0.00000  -0.00011  -0.00000  -0.00000  -0.00006   0.00001  -0.00000   0.01240  -0.00000 ...
+   0.00000   0.00000  -0.00000   0.00023  -0.00000  -0.00000   0.00016   0.00000   0.00000  -0.00000  -0.00000   0.01251 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.73463  -2.21239   0.00038   0.00000  -0.00044  -0.00255  -0.00000   0.00294
+  -2.21239   6.75730  -0.00103  -0.00000   0.00119   0.00694   0.00000  -0.00800
+   0.00038  -0.00103  -0.57533   0.00000  -0.00018   2.28398  -0.00000   0.00092
+   0.00000  -0.00000   0.00000  -0.57068   0.00000  -0.00000   2.26065  -0.00000
+  -0.00044   0.00119  -0.00018   0.00000  -0.57052   0.00092  -0.00000   2.25985
+  -0.00255   0.00694   2.28398  -0.00000   0.00092  -6.96794   0.00000  -0.00453
+  -0.00000   0.00000  -0.00000   2.26065  -0.00000   0.00000  -6.85525   0.00000
+   0.00294  -0.00800   0.00092  -0.00000   2.25985  -0.00453   0.00000  -6.85156
+
+
+ ITER STEP NUMBER     3
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 3
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  1.70E-07  9.49E-08  1.00E-07  3.22E-07  3.41E-07  5.12E-07  1.32E-06  1.40E-06
+ res:  1.39E-06  6.78E-07  7.52E-07  6.97E-07  7.87E-07  7.49E-07  7.69E-07  5.75E-05
+ res:  5.61E-05  5.77E-05  5.64E-05  1.96E-06  1.84E-06  1.74E-06  1.65E-06  9.17E-05
+ res:  9.11E-05  4.27E-06  5.12E-06  4.23E-06  4.18E-06  4.30E-06  1.76E-06  1.40E-06
+ res:  1.43E-06  1.51E-06  1.42E-06  1.12E-06  1.08E-06  8.30E-07  1.45E-06  9.85E-07
+ res:  9.65E-07  1.35E-06  1.34E-06  1.35E-06  1.38E-06  1.62E-06  1.54E-06  1.95E-05
+ res:  2.56E-04  2.25E-04  2.27E-04  2.56E-04  2.52E-04  2.50E-04  2.44E-04  2.20E-04
+ res:  2.20E-04  2.50E-04  2.74E-04  2.73E-04  2.32E-05  1.96E-05  1.55E-05  1.77E-05
+ res:  4.17E-05  3.98E-05  3.46E-05  2.28E-05  4.04E-05  2.22E-05  3.29E-05  3.58E-04
+ res:  3.61E-04  1.74E-05  2.95E-05  2.80E-05  4.31E-04  4.59E-04  4.31E-04  4.74E-04
+ res:  2.32E-05  2.71E-05  3.92E-05  4.13E-05  4.22E-05  3.34E-05  4.23E-05  4.55E-05
+ res:  4.41E-05  3.86E-05  4.99E-05  3.91E-05  3.63E-05  4.60E-05  3.75E-05  3.36E-05
+ res:  3.97E-05  4.45E-05  3.85E-05  4.09E-05  4.44E-05  4.51E-05  4.15E-05  4.50E-05
+ res:  4.13E-05  3.49E-05  4.41E-05  5.16E-05  4.31E-05  4.50E-05  5.96E-05  6.54E-05
+ res:  5.23E-05  5.92E-05  6.67E-05  7.89E-05  4.47E-04  5.83E-04  1.19E-03  1.46E-03
+ res:  1.46E-03  2.39E-03  3.84E-03  2.48E-03  1.31E-03  2.64E-03  5.23E-03  6.27E-03
+ ene: -2.42E+00 -2.42E+00 -2.42E+00 -2.30E+00 -2.30E+00 -2.01E+00 -1.49E+00 -1.49E+00
+ ene: -1.49E+00 -1.48E+00 -1.48E+00 -1.48E+00 -1.48E+00 -1.48E+00 -1.48E+00 -1.42E+00
+ ene: -1.42E+00 -1.42E+00 -1.42E+00 -1.37E+00 -1.37E+00 -1.37E+00 -1.37E+00 -1.34E+00
+ ene: -1.33E+00 -1.33E+00 -1.33E+00 -1.11E+00 -1.10E+00 -1.09E+00 -9.86E-01 -9.77E-01
+ ene: -9.74E-01 -9.74E-01 -9.74E-01 -9.63E-01 -9.57E-01 -9.52E-01 -9.51E-01 -9.46E-01
+ ene: -9.43E-01 -9.30E-01 -9.29E-01 -9.29E-01 -9.28E-01 -9.02E-01 -9.01E-01 -5.19E-01
+ ene: -5.15E-01 -5.15E-01 -5.15E-01 -5.15E-01 -5.14E-01 -5.14E-01 -5.14E-01 -5.14E-01
+ ene: -5.14E-01 -5.14E-01 -5.12E-01 -5.12E-01 -4.99E-01 -4.94E-01 -4.93E-01 -4.71E-01
+ ene: -4.68E-01 -4.64E-01 -4.60E-01 -4.54E-01 -4.41E-01 -4.40E-01 -4.38E-01 -4.36E-01
+ ene: -4.35E-01 -4.30E-01 -4.30E-01 -4.27E-01 -4.17E-01 -4.16E-01 -4.15E-01 -4.15E-01
+ ene: -4.11E-01 -4.04E-01 -3.99E-01 -3.95E-01 -3.88E-01 -3.82E-01 -3.80E-01 -3.78E-01
+ ene: -3.75E-01 -3.74E-01 -3.73E-01 -3.71E-01 -3.70E-01 -3.68E-01 -3.68E-01 -3.66E-01
+ ene: -3.65E-01 -3.61E-01 -3.59E-01 -3.56E-01 -3.50E-01 -3.48E-01 -3.47E-01 -3.46E-01
+ ene: -3.33E-01 -3.33E-01 -3.29E-01 -3.29E-01 -3.25E-01 -3.24E-01 -3.22E-01 -3.21E-01
+ ene: -3.16E-01 -3.05E-01 -3.03E-01 -2.94E-01 -8.40E-02 -7.97E-02 -7.36E-02 -6.69E-02
+ ene: -5.82E-02 -3.02E-02 -2.02E-02  8.43E-03  4.04E-02  5.87E-02  8.85E-02  1.90E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -2.4226E+00 -2.4159E+00 -2.4158E+00 -2.3044E+00 -2.3044E+00 -2.0136E+00
+ -1.4882E+00 -1.4870E+00 -1.4866E+00 -1.4788E+00 -1.4783E+00 -1.4781E+00
+ -1.4774E+00 -1.4764E+00 -1.4756E+00 -1.4199E+00 -1.4198E+00 -1.4198E+00
+ -1.4196E+00 -1.3711E+00 -1.3708E+00 -1.3703E+00 -1.3698E+00 -1.3351E+00
+ -1.3350E+00 -1.3292E+00 -1.3287E+00 -1.1057E+00 -1.0963E+00 -1.0913E+00
+ -9.8618E-01 -9.7706E-01 -9.7441E-01 -9.7415E-01 -9.7397E-01 -9.6265E-01
+ -9.5716E-01 -9.5184E-01 -9.5117E-01 -9.4624E-01 -9.4327E-01 -9.2961E-01
+ -9.2921E-01 -9.2896E-01 -9.2838E-01 -9.0160E-01 -9.0104E-01 -5.1857E-01
+ -5.1485E-01 -5.1474E-01 -5.1458E-01 -5.1454E-01 -5.1444E-01 -5.1414E-01
+ -5.1384E-01 -5.1379E-01 -5.1366E-01 -5.1354E-01 -5.1224E-01 -5.1209E-01
+ -4.9924E-01 -4.9352E-01 -4.9308E-01 -4.7133E-01 -4.6821E-01 -4.6422E-01
+ -4.5989E-01 -4.5351E-01 -4.4079E-01 -4.4022E-01 -4.3839E-01 -4.3577E-01
+ -4.3548E-01 -4.2994E-01 -4.2979E-01 -4.2695E-01 -4.1660E-01 -4.1635E-01
+ -4.1500E-01 -4.1452E-01 -4.1054E-01 -4.0377E-01 -3.9946E-01 -3.9508E-01
+ -3.8798E-01 -3.8187E-01 -3.7959E-01 -3.7816E-01 -3.7526E-01 -3.7365E-01
+ -3.7307E-01 -3.7073E-01 -3.6988E-01 -3.6799E-01 -3.6765E-01 -3.6580E-01
+ -3.6505E-01 -3.6130E-01 -3.5879E-01 -3.5646E-01 -3.4987E-01 -3.4771E-01
+ -3.4683E-01 -3.4644E-01 -3.3321E-01 -3.3290E-01 -3.2883E-01 -3.2875E-01
+ -3.2503E-01 -3.2379E-01 -3.2173E-01 -3.2140E-01 -3.1572E-01 -3.0458E-01
+ -3.0332E-01 -2.9393E-01 -8.3990E-02 -7.9686E-02 -7.3564E-02 -6.6862E-02
+ -5.8166E-02 -3.0236E-02 -2.0169E-02  8.4263E-03  4.0425E-02  5.8684E-02
+  8.8532E-02  1.8973E-01
+
+ *********** RHOIJ (atom   1) **********
+   5.57633  -7.98441  -0.00650   0.00000  -0.00430   0.00120   0.00000   0.00049  -0.00121   0.00000  -0.00187   0.00000 ...
+  -7.98441  11.47574   0.01954   0.00000   0.01442  -0.00292   0.00000  -0.00163   0.00217   0.00000   0.01627   0.00000 ...
+  -0.00650   0.01954   3.89832   0.00000  -0.00011  -0.44289   0.00000   0.00001   0.01895   0.00000  -0.00763   0.00000 ...
+   0.00000   0.00000   0.00000   3.88463   0.00000   0.00000  -0.43901   0.00000   0.00000   0.01408   0.00000   0.01936 ...
+  -0.00430   0.01442  -0.00011   0.00000   3.90085   0.00002   0.00000  -0.44354   0.01548   0.00000  -0.01175   0.00000 ...
+   0.00120  -0.00292  -0.44289   0.00000   0.00002   0.05052   0.00000  -0.00000  -0.00217   0.00000   0.00085   0.00000 ...
+   0.00000   0.00000   0.00000  -0.43901   0.00000   0.00000   0.04988   0.00000   0.00000  -0.00161   0.00000  -0.00222 ...
+   0.00049  -0.00163   0.00001   0.00000  -0.44354  -0.00000   0.00000   0.05071  -0.00183   0.00000   0.00134   0.00000 ...
+  -0.00121   0.00217   0.01895   0.00000   0.01548  -0.00217   0.00000  -0.00183   0.01773   0.00000  -0.00014   0.00000 ...
+   0.00000   0.00000   0.00000   0.01408   0.00000   0.00000  -0.00161   0.00000   0.00000   0.02880   0.00000  -0.00001 ...
+  -0.00187   0.01627  -0.00763   0.00000  -0.01175   0.00085   0.00000   0.00134  -0.00014   0.00000   0.01141   0.00000 ...
+   0.00000   0.00000   0.00000   0.01936   0.00000   0.00000  -0.00222   0.00000   0.00000  -0.00001   0.00000   0.02177 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  1 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   1.99278  -0.08451  -0.00346   0.00000   0.00671  -0.00124   0.00000   0.00133
+  -0.08451   0.00414  -0.00582   0.00000   0.00475  -0.00015   0.00000   0.00010
+  -0.00346  -0.00582   3.01833   0.00000  -0.00078   0.09902   0.00000   0.00074
+   0.00000   0.00000   0.00000   3.09970   0.00000   0.00000   0.08501   0.00000
+   0.00671   0.00475  -0.00078   0.00000   3.10436   0.00069   0.00000   0.08374
+  -0.00124  -0.00015   0.09902   0.00000   0.00069   0.00337   0.00000   0.00005
+   0.00000   0.00000   0.00000   0.08501   0.00000   0.00000   0.00240   0.00000
+   0.00133   0.00010   0.00074   0.00000   0.08374   0.00005   0.00000   0.00233
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.4869E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -9.9596E-01  at reduced coord.    0.6667    0.0000    0.0000
+   Integrated=    1.7573E+01
+ ETOT  3  -825.78032354155    -2.495E+01 4.740E-04 1.342E+02
+ scprqt: <Vxc>= -1.1026265E-01 hartree
+
+ Pulay update with  2 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=   1.42     -0.379     -0.451E-01
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 59537 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.29E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 05 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   2.41241   0.35120   0.00083  -0.00000   0.00181   0.00003   0.00000   0.00004  -0.00006  -0.00000  -0.00003  -0.00000 ...
+   0.35120   0.05976   0.00017  -0.00000   0.00036   0.00010  -0.00000   0.00020  -0.00001  -0.00000  -0.00001  -0.00000 ...
+   0.00083   0.00017   0.48669  -0.00000  -0.00008  -0.03191  -0.00000  -0.00004   0.00041  -0.00000  -0.00011  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.48650  -0.00000  -0.00000  -0.03206  -0.00000  -0.00000   0.00019   0.00000   0.00041 ...
+   0.00181   0.00036  -0.00008  -0.00000   0.48642  -0.00004  -0.00000  -0.03204   0.00020  -0.00000  -0.00025  -0.00000 ...
+   0.00003   0.00010  -0.03191  -0.00000  -0.00004  -0.57083  -0.00000  -0.00011   0.00026  -0.00000  -0.00008  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.03206  -0.00000  -0.00000  -0.57116  -0.00000  -0.00000   0.00013   0.00000   0.00025 ...
+   0.00004   0.00020  -0.00004  -0.00000  -0.03204  -0.00011  -0.00000  -0.57118   0.00014  -0.00000  -0.00016  -0.00000 ...
+  -0.00006  -0.00001   0.00041  -0.00000   0.00020   0.00026  -0.00000   0.00014   0.04255   0.00000   0.00001   0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00019  -0.00000  -0.00000   0.00013  -0.00000   0.00000   0.04255  -0.00000  -0.00001 ...
+  -0.00003  -0.00001  -0.00011   0.00000  -0.00025  -0.00008   0.00000  -0.00016   0.00001  -0.00000   0.04240  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00041  -0.00000  -0.00000   0.00025  -0.00000   0.00000  -0.00001  -0.00000   0.04256 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.73400  -2.20847   0.00059   0.00000  -0.00080  -0.00395  -0.00000   0.00533
+  -2.20847   6.73860  -0.00162  -0.00000   0.00217   0.01091   0.00000  -0.01458
+   0.00059  -0.00162  -0.58571   0.00000  -0.00031   2.33030  -0.00000   0.00157
+   0.00000  -0.00000   0.00000  -0.58005   0.00000  -0.00000   2.30185  -0.00000
+  -0.00080   0.00217  -0.00031   0.00000  -0.57975   0.00157  -0.00000   2.30032
+  -0.00395   0.01091   2.33030  -0.00000   0.00157  -7.15583   0.00000  -0.00755
+  -0.00000   0.00000  -0.00000   2.30185  -0.00000   0.00000  -7.01803   0.00000
+   0.00533  -0.01458   0.00157  -0.00000   2.30032  -0.00755   0.00000  -7.01056
+
+
+ ITER STEP NUMBER     4
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 4
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  2.21E-06  3.92E-05  3.93E-05  4.06E-05  4.07E-05  5.56E-07  5.57E-07  1.60E-06
+ res:  1.58E-06  9.59E-05  9.35E-05  4.74E-08  1.90E-05  1.80E-05  1.84E-05  1.85E-06
+ res:  1.85E-06  2.13E-06  2.12E-06  2.04E-06  2.18E-06  7.23E-06  7.25E-06  8.29E-06
+ res:  8.12E-06  9.45E-06  1.02E-05  4.67E-07  5.66E-07  5.59E-07  1.64E-04  1.64E-04
+ res:  1.59E-04  1.49E-04  1.49E-04  1.57E-04  1.63E-04  1.48E-04  1.48E-04  1.61E-04
+ res:  1.72E-04  1.71E-04  2.64E-04  2.64E-04  2.93E-04  2.91E-04  3.38E-04  3.40E-04
+ res:  1.93E-04  1.53E-04  1.58E-04  1.20E-04  1.27E-04  1.24E-04  1.32E-04  1.21E-04
+ res:  1.54E-04  1.69E-04  1.45E-04  1.65E-04  1.72E-04  1.68E-04  1.74E-04  2.30E-04
+ res:  2.25E-04  5.55E-04  4.49E-04  1.27E-05  2.06E-05  6.79E-05  2.89E-05  1.38E-04
+ res:  1.72E-04  2.17E-05  1.05E-04  3.27E-05  6.70E-05  6.51E-05  5.75E-05  7.67E-05
+ res:  1.74E-03  4.89E-05  4.12E-05  5.06E-04  5.37E-05  3.47E-04  2.84E-04  1.08E-04
+ res:  7.82E-05  9.24E-05  1.06E-04  6.74E-05  1.12E-04  1.44E-04  9.86E-05  7.97E-05
+ res:  8.84E-05  1.18E-04  8.86E-05  9.57E-05  1.09E-04  1.13E-04  3.74E-03  1.65E-04
+ res:  7.03E-05  1.23E-04  1.74E-04  1.34E-04  1.46E-04  1.35E-04  1.17E-04  9.83E-05
+ res:  9.44E-05  4.16E-04  5.94E-03  4.98E-04  4.09E-04  1.82E-04  4.31E-03  3.88E-04
+ res:  5.28E-04  7.90E-04  1.07E-03  9.45E-04  1.24E-03  1.69E-03  1.63E-03  7.29E-03
+ ene: -2.53E+00 -2.33E+00 -2.33E+00 -2.33E+00 -2.33E+00 -2.31E+00 -2.31E+00 -2.29E+00
+ ene: -2.29E+00 -2.20E+00 -2.20E+00 -2.20E+00 -1.58E+00 -1.58E+00 -1.58E+00 -1.33E+00
+ ene: -1.33E+00 -1.32E+00 -1.32E+00 -1.32E+00 -1.32E+00 -1.32E+00 -1.32E+00 -1.31E+00
+ ene: -1.31E+00 -1.27E+00 -1.27E+00 -1.26E+00 -1.25E+00 -1.24E+00 -9.68E-01 -9.67E-01
+ ene: -9.66E-01 -9.66E-01 -9.66E-01 -9.66E-01 -9.65E-01 -9.65E-01 -9.65E-01 -9.64E-01
+ ene: -9.64E-01 -9.64E-01 -8.32E-01 -8.31E-01 -8.04E-01 -8.04E-01 -8.02E-01 -8.02E-01
+ ene: -6.11E-01 -6.02E-01 -6.02E-01 -6.00E-01 -6.00E-01 -6.00E-01 -6.00E-01 -5.96E-01
+ ene: -5.96E-01 -5.95E-01 -5.63E-01 -5.29E-01 -5.29E-01 -5.26E-01 -5.25E-01 -4.76E-01
+ ene: -4.75E-01 -3.49E-01 -3.12E-01 -3.11E-01 -2.95E-01 -2.84E-01 -2.80E-01 -2.69E-01
+ ene: -2.61E-01 -2.54E-01 -2.50E-01 -2.33E-01 -2.06E-01 -1.95E-01 -1.91E-01 -1.86E-01
+ ene: -1.81E-01 -1.72E-01 -1.67E-01 -1.65E-01 -1.62E-01 -1.56E-01 -1.56E-01 -1.54E-01
+ ene: -1.52E-01 -1.51E-01 -1.50E-01 -1.50E-01 -1.50E-01 -1.47E-01 -1.44E-01 -1.44E-01
+ ene: -1.43E-01 -1.42E-01 -1.42E-01 -1.40E-01 -1.33E-01 -1.30E-01 -1.12E-01 -1.09E-01
+ ene: -1.07E-01 -8.39E-02 -8.27E-02 -7.81E-02 -7.59E-02 -7.44E-02 -7.30E-02 -6.84E-02
+ ene: -6.78E-02 -4.81E-02 -3.49E-02 -3.38E-02 -2.73E-02 -1.59E-02  3.27E-02  5.68E-02
+ ene:  6.03E-02  6.49E-02  7.30E-02  8.64E-02  9.68E-02  1.09E-01  1.21E-01  1.94E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -2.5292E+00 -2.3294E+00 -2.3291E+00 -2.3278E+00 -2.3275E+00 -2.3075E+00
+ -2.3074E+00 -2.2892E+00 -2.2892E+00 -2.2030E+00 -2.2026E+00 -2.1957E+00
+ -1.5794E+00 -1.5792E+00 -1.5789E+00 -1.3325E+00 -1.3315E+00 -1.3240E+00
+ -1.3229E+00 -1.3191E+00 -1.3182E+00 -1.3173E+00 -1.3161E+00 -1.3139E+00
+ -1.3129E+00 -1.2659E+00 -1.2650E+00 -1.2605E+00 -1.2467E+00 -1.2447E+00
+ -9.6767E-01 -9.6735E-01 -9.6634E-01 -9.6633E-01 -9.6618E-01 -9.6584E-01
+ -9.6484E-01 -9.6467E-01 -9.6453E-01 -9.6440E-01 -9.6384E-01 -9.6365E-01
+ -8.3153E-01 -8.3121E-01 -8.0398E-01 -8.0377E-01 -8.0246E-01 -8.0183E-01
+ -6.1129E-01 -6.0228E-01 -6.0158E-01 -6.0006E-01 -5.9992E-01 -5.9966E-01
+ -5.9954E-01 -5.9649E-01 -5.9608E-01 -5.9502E-01 -5.6302E-01 -5.2902E-01
+ -5.2858E-01 -5.2607E-01 -5.2540E-01 -4.7568E-01 -4.7527E-01 -3.4917E-01
+ -3.1248E-01 -3.1067E-01 -2.9539E-01 -2.8354E-01 -2.7998E-01 -2.6873E-01
+ -2.6125E-01 -2.5375E-01 -2.5022E-01 -2.3339E-01 -2.0618E-01 -1.9489E-01
+ -1.9120E-01 -1.8615E-01 -1.8100E-01 -1.7184E-01 -1.6658E-01 -1.6504E-01
+ -1.6222E-01 -1.5613E-01 -1.5594E-01 -1.5432E-01 -1.5172E-01 -1.5081E-01
+ -1.5045E-01 -1.5005E-01 -1.4961E-01 -1.4707E-01 -1.4437E-01 -1.4392E-01
+ -1.4270E-01 -1.4203E-01 -1.4181E-01 -1.4013E-01 -1.3315E-01 -1.2993E-01
+ -1.1178E-01 -1.0915E-01 -1.0714E-01 -8.3890E-02 -8.2663E-02 -7.8146E-02
+ -7.5939E-02 -7.4402E-02 -7.3044E-02 -6.8369E-02 -6.7781E-02 -4.8148E-02
+ -3.4887E-02 -3.3823E-02 -2.7278E-02 -1.5869E-02  3.2671E-02  5.6764E-02
+  6.0325E-02  6.4865E-02  7.3049E-02  8.6407E-02  9.6814E-02  1.0877E-01
+  1.2087E-01  1.9381E-01
+
+ *********** RHOIJ (atom   1) **********
+  10.34521 -22.83891  -0.00490   0.00000  -0.01108   0.00067   0.00000   0.00166  -0.00561   0.00000  -0.00192   0.00000 ...
+ -22.83891  50.51624   0.01977   0.00000   0.04499  -0.00282   0.00000  -0.00715   0.01566   0.00000   0.04742   0.00000 ...
+  -0.00490   0.01977   4.70297   0.00000   0.00202  -0.74213   0.00000  -0.00062   0.04072   0.00000  -0.01151   0.00000 ...
+   0.00000   0.00000   0.00000   4.69135   0.00000   0.00000  -0.73682   0.00000   0.00000   0.01831   0.00000   0.04206 ...
+  -0.01108   0.04499   0.00202   0.00000   4.70517  -0.00059   0.00000  -0.74265   0.02157   0.00000  -0.02475   0.00000 ...
+   0.00067  -0.00282  -0.74213   0.00000  -0.00059   0.11768   0.00000   0.00012  -0.00627   0.00000   0.00187   0.00000 ...
+   0.00000   0.00000   0.00000  -0.73682   0.00000   0.00000   0.11655   0.00000   0.00000  -0.00290   0.00000  -0.00721 ...
+   0.00166  -0.00715  -0.00062   0.00000  -0.74265   0.00012   0.00000   0.11804  -0.00359   0.00000   0.00384   0.00000 ...
+  -0.00561   0.01566   0.04072   0.00000   0.02157  -0.00627   0.00000  -0.00359   0.08803   0.00000  -0.00292   0.00000 ...
+   0.00000   0.00000   0.00000   0.01831   0.00000   0.00000  -0.00290   0.00000   0.00000   0.13485   0.00000   0.00086 ...
+  -0.00192   0.04742  -0.01151   0.00000  -0.02475   0.00187   0.00000   0.00384  -0.00292   0.00000   0.05734   0.00000 ...
+   0.00000   0.00000   0.00000   0.04206   0.00000   0.00000  -0.00721   0.00000   0.00000   0.00086   0.00000   0.11403 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  4 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.11232  -0.02464  -0.00793   0.00000   0.00684  -0.00203   0.00000   0.00206
+  -0.02464   0.00073  -0.00592   0.00000   0.00483  -0.00018   0.00000   0.00013
+  -0.00793  -0.00592   2.90357   0.00000   0.00200   0.09353   0.00000   0.00083
+   0.00000   0.00000   0.00000   2.99758   0.00000   0.00000   0.08204   0.00000
+   0.00684   0.00483   0.00200   0.00000   3.01785   0.00075   0.00000   0.08145
+  -0.00203  -0.00018   0.09353   0.00000   0.00075   0.00314   0.00000   0.00005
+   0.00000   0.00000   0.00000   0.08204   0.00000   0.00000   0.00232   0.00000
+   0.00206   0.00013   0.00083   0.00000   0.08145   0.00005   0.00000   0.00228
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.9360E+00  at reduced coord.    0.1667    0.7556    0.5000
+      Minimum=   -1.3297E+00  at reduced coord.    0.6667    0.0000    0.0000
+   Integrated=    9.8509E+00
+ ETOT  4  -832.67326507743    -6.893E+00 5.937E-03 1.119E+02
+ scprqt: <Vxc>= -6.1970099E-02 hartree
+
+ Pulay update with  3 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=  0.708      0.857     -0.531     -0.340E-01
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 53092 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.38E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 05 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   2.93140   0.42995   0.00144   0.00000   0.00232   0.00006  -0.00000   0.00010  -0.00005  -0.00000  -0.00001  -0.00000 ...
+   0.42995   0.07436   0.00029   0.00000   0.00047   0.00017   0.00000   0.00027  -0.00001  -0.00000  -0.00001  -0.00000 ...
+   0.00144   0.00029   0.67125  -0.00000  -0.00007  -0.02630  -0.00000  -0.00003   0.00053  -0.00000  -0.00019   0.00000 ...
+   0.00000   0.00000  -0.00000   0.67105  -0.00000  -0.00000  -0.02643  -0.00000   0.00000   0.00033   0.00000   0.00052 ...
+   0.00232   0.00047  -0.00007  -0.00000   0.67091  -0.00003  -0.00000  -0.02645   0.00035   0.00000  -0.00033  -0.00000 ...
+   0.00006   0.00017  -0.02630  -0.00000  -0.00003  -0.40051  -0.00000  -0.00009   0.00035  -0.00000  -0.00013   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.02643  -0.00000  -0.00000  -0.40081  -0.00000   0.00000   0.00022   0.00000   0.00034 ...
+   0.00010   0.00027  -0.00003  -0.00000  -0.02645  -0.00009  -0.00000  -0.40093   0.00024   0.00000  -0.00023  -0.00000 ...
+  -0.00005  -0.00001   0.00053   0.00000   0.00035   0.00035   0.00000   0.00024   0.06521  -0.00000   0.00001   0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00033   0.00000  -0.00000   0.00022   0.00000  -0.00000   0.06523  -0.00000  -0.00001 ...
+  -0.00001  -0.00001  -0.00019   0.00000  -0.00033  -0.00013   0.00000  -0.00023   0.00001  -0.00000   0.06505  -0.00000 ...
+  -0.00000  -0.00000   0.00000   0.00052  -0.00000   0.00000   0.00034  -0.00000   0.00000  -0.00001  -0.00000   0.06523 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.73074  -2.19737   0.00083   0.00000  -0.00107  -0.00554  -0.00000   0.00712
+  -2.19737   6.70059  -0.00227  -0.00000   0.00289   0.01526   0.00000  -0.01945
+   0.00083  -0.00227  -0.58271   0.00000  -0.00040   2.31358  -0.00000   0.00198
+   0.00000  -0.00000   0.00000  -0.57681   0.00000  -0.00000   2.28395  -0.00000
+  -0.00107   0.00289  -0.00040   0.00000  -0.57641   0.00198  -0.00000   2.28189
+  -0.00554   0.01526   2.31358  -0.00000   0.00198  -7.06427   0.00000  -0.00950
+  -0.00000   0.00000  -0.00000   2.28395  -0.00000   0.00000  -6.92064   0.00000
+   0.00712  -0.01945   0.00198  -0.00000   2.28189  -0.00950   0.00000  -6.91048
+
+
+ ITER STEP NUMBER     5
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 5
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  2.73E-05  2.72E-05  2.70E-05  2.70E-05  1.07E-05  1.01E-05  9.38E-10  1.02E-09
+ res:  2.25E-07  1.00E-08  9.88E-09  1.06E-07  1.51E-05  1.52E-05  1.60E-05  1.60E-05
+ res:  1.59E-05  1.61E-05  1.56E-05  1.60E-05  1.57E-05  1.57E-05  1.56E-05  1.56E-05
+ res:  5.04E-08  8.00E-08  4.95E-08  8.80E-08  6.81E-08  4.86E-08  1.12E-06  1.12E-06
+ res:  1.19E-06  3.53E-05  3.52E-05  5.12E-05  4.23E-05  4.32E-05  5.41E-05  3.34E-07
+ res:  9.77E-07  3.86E-07  1.00E-06  2.43E-06  6.46E-07  2.42E-06  3.19E-07  2.16E-06
+ res:  5.10E-06  7.23E-06  6.81E-06  8.35E-06  8.36E-06  1.75E-05  1.54E-05  4.28E-05
+ res:  1.80E-05  2.61E-05  6.96E-06  1.34E-05  1.14E-05  1.24E-05  1.12E-05  3.01E-05
+ res:  2.98E-05  5.20E-06  2.86E-05  1.29E-05  2.41E-05  6.75E-05  4.98E-05  1.37E-05
+ res:  9.70E-05  2.04E-04  1.11E-04  1.33E-05  2.38E-04  5.07E-05  1.10E-04  3.07E-04
+ res:  5.79E-05  1.94E-05  1.26E-04  1.07E-04  1.05E-04  3.21E-04  2.36E-04  1.66E-04
+ res:  3.07E-04  2.26E-04  2.55E-04  1.16E-04  2.14E-04  8.49E-05  1.34E-04  4.10E-04
+ res:  4.67E-05  1.35E-04  9.97E-05  1.68E-04  4.54E-04  2.69E-04  8.26E-05  1.31E-04
+ res:  2.32E-04  1.98E-04  3.58E-04  3.31E-04  2.85E-04  3.45E-04  2.74E-04  5.25E-04
+ res:  4.97E-04  2.03E-04  3.71E-04  4.08E-04  2.48E-04  3.43E-04  5.68E-04  6.96E-04
+ res:  1.05E-03  1.76E-03  2.64E-03  2.30E-03  3.49E-03  3.71E-03  7.06E-03  1.68E-01
+ ene: -3.38E+00 -3.38E+00 -3.38E+00 -3.38E+00 -3.25E+00 -3.25E+00 -2.26E+00 -2.26E+00
+ ene: -2.22E+00 -2.15E+00 -2.15E+00 -2.09E+00 -1.38E+00 -1.38E+00 -1.38E+00 -1.38E+00
+ ene: -1.38E+00 -1.38E+00 -1.38E+00 -1.38E+00 -1.38E+00 -1.38E+00 -1.38E+00 -1.38E+00
+ ene: -1.28E+00 -1.28E+00 -1.27E+00 -1.27E+00 -1.27E+00 -1.27E+00 -1.26E+00 -1.25E+00
+ ene: -1.25E+00 -1.21E+00 -1.21E+00 -1.18E+00 -1.18E+00 -1.18E+00 -1.18E+00 -1.17E+00
+ ene: -1.17E+00 -1.17E+00 -1.17E+00 -1.11E+00 -1.11E+00 -1.11E+00 -1.11E+00 -1.11E+00
+ ene: -6.02E-01 -5.94E-01 -5.90E-01 -5.82E-01 -5.82E-01 -5.79E-01 -5.79E-01 -5.72E-01
+ ene: -5.65E-01 -5.61E-01 -5.42E-01 -5.03E-01 -5.03E-01 -5.01E-01 -5.00E-01 -4.86E-01
+ ene: -4.86E-01 -2.86E-01 -2.66E-01 -2.58E-01 -2.58E-01 -2.44E-01 -2.38E-01 -2.36E-01
+ ene: -2.24E-01 -2.07E-01 -2.06E-01 -2.03E-01 -1.74E-01 -1.72E-01 -1.68E-01 -1.67E-01
+ ene: -1.58E-01 -1.58E-01 -1.56E-01 -1.55E-01 -1.47E-01 -1.47E-01 -1.46E-01 -1.46E-01
+ ene: -1.44E-01 -1.42E-01 -1.42E-01 -1.41E-01 -1.41E-01 -1.40E-01 -1.37E-01 -1.34E-01
+ ene: -1.33E-01 -1.32E-01 -1.29E-01 -1.26E-01 -1.22E-01 -1.16E-01 -9.64E-02 -9.42E-02
+ ene: -6.39E-02 -6.35E-02 -5.72E-02 -5.60E-02 -5.51E-02 -5.43E-02 -5.29E-02 -4.90E-02
+ ene: -4.86E-02 -4.10E-02 -3.72E-02 -2.57E-02  1.04E-01  1.07E-01  1.11E-01  1.15E-01
+ ene:  1.28E-01  1.59E-01  1.81E-01  2.08E-01  2.50E-01  2.54E-01  2.92E-01  1.10E+00
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -3.3826E+00 -3.3821E+00 -3.3775E+00 -3.3770E+00 -3.2541E+00 -3.2533E+00
+ -2.2587E+00 -2.2587E+00 -2.2190E+00 -2.1487E+00 -2.1487E+00 -2.0899E+00
+ -1.3841E+00 -1.3838E+00 -1.3815E+00 -1.3813E+00 -1.3812E+00 -1.3805E+00
+ -1.3796E+00 -1.3790E+00 -1.3782E+00 -1.3779E+00 -1.3779E+00 -1.3776E+00
+ -1.2767E+00 -1.2758E+00 -1.2701E+00 -1.2690E+00 -1.2676E+00 -1.2667E+00
+ -1.2605E+00 -1.2489E+00 -1.2485E+00 -1.2147E+00 -1.2141E+00 -1.1842E+00
+ -1.1835E+00 -1.1828E+00 -1.1818E+00 -1.1694E+00 -1.1678E+00 -1.1664E+00
+ -1.1651E+00 -1.1149E+00 -1.1137E+00 -1.1133E+00 -1.1124E+00 -1.1117E+00
+ -6.0193E-01 -5.9403E-01 -5.9029E-01 -5.8213E-01 -5.8187E-01 -5.7928E-01
+ -5.7879E-01 -5.7157E-01 -5.6480E-01 -5.6098E-01 -5.4162E-01 -5.0332E-01
+ -5.0292E-01 -5.0066E-01 -5.0002E-01 -4.8605E-01 -4.8556E-01 -2.8611E-01
+ -2.6603E-01 -2.5840E-01 -2.5755E-01 -2.4389E-01 -2.3768E-01 -2.3645E-01
+ -2.2383E-01 -2.0684E-01 -2.0635E-01 -2.0314E-01 -1.7435E-01 -1.7235E-01
+ -1.6775E-01 -1.6664E-01 -1.5847E-01 -1.5757E-01 -1.5637E-01 -1.5481E-01
+ -1.4738E-01 -1.4712E-01 -1.4636E-01 -1.4611E-01 -1.4371E-01 -1.4193E-01
+ -1.4175E-01 -1.4135E-01 -1.4053E-01 -1.4047E-01 -1.3675E-01 -1.3403E-01
+ -1.3296E-01 -1.3163E-01 -1.2915E-01 -1.2625E-01 -1.2191E-01 -1.1586E-01
+ -9.6432E-02 -9.4194E-02 -6.3921E-02 -6.3504E-02 -5.7234E-02 -5.5961E-02
+ -5.5059E-02 -5.4292E-02 -5.2901E-02 -4.8991E-02 -4.8586E-02 -4.0971E-02
+ -3.7153E-02 -2.5728E-02  1.0358E-01  1.0654E-01  1.1074E-01  1.1488E-01
+  1.2795E-01  1.5942E-01  1.8072E-01  2.0754E-01  2.4971E-01  2.5447E-01
+  2.9181E-01  1.1010E+00
+
+ *********** RHOIJ (atom   1) **********
+  15.88670 -42.72960  -0.00963   0.00000  -0.01325   0.00161   0.00000   0.00217  -0.01609   0.00000  -0.01667   0.00000 ...
+ -42.72960 115.13959   0.04465   0.00000   0.06258  -0.00838   0.00000  -0.01210   0.06839   0.00000   0.16175   0.00000 ...
+  -0.00963   0.04465   5.37606   0.00000   0.00092  -1.03545   0.00000  -0.00034   0.05644   0.00000  -0.02069   0.00000 ...
+   0.00000   0.00000   0.00000   5.36083   0.00000   0.00000  -1.02713   0.00000   0.00000   0.03386   0.00000   0.05876 ...
+  -0.01325   0.06258   0.00092   0.00000   5.37734  -0.00033   0.00000  -1.03533   0.04131   0.00000  -0.03162   0.00000 ...
+   0.00161  -0.00838  -1.03545   0.00000  -0.00033   0.20040   0.00000   0.00009  -0.01222   0.00000   0.00432   0.00000 ...
+   0.00000   0.00000   0.00000  -1.02713   0.00000   0.00000   0.19806   0.00000   0.00000  -0.00695   0.00000  -0.01401 ...
+   0.00217  -0.01210  -0.00034   0.00000  -1.03533   0.00009   0.00000   0.20062  -0.01027   0.00000   0.00572   0.00000 ...
+  -0.01609   0.06839   0.05644   0.00000   0.04131  -0.01222   0.00000  -0.01027   0.48927   0.00000  -0.02723   0.00000 ...
+   0.00000   0.00000   0.00000   0.03386   0.00000   0.00000  -0.00695   0.00000   0.00000   0.60161   0.00000  -0.00176 ...
+  -0.01667   0.16175  -0.02069   0.00000  -0.03162   0.00432   0.00000   0.00572  -0.02723   0.00000   0.24763   0.00000 ...
+   0.00000   0.00000   0.00000   0.05876   0.00000   0.00000  -0.01401   0.00000   0.00000  -0.00176   0.00000   0.60608 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  4 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.10886  -0.03294  -0.00316   0.00000   0.00651  -0.00206   0.00000   0.00250
+  -0.03294   0.00102  -0.00708   0.00000   0.00681  -0.00019   0.00000   0.00015
+  -0.00316  -0.00708   2.91156   0.00000   0.00191   0.08854   0.00000   0.00104
+   0.00000   0.00000   0.00000   2.98790   0.00000   0.00000   0.07642   0.00000
+   0.00651   0.00681   0.00191   0.00000   2.97746   0.00089   0.00000   0.07472
+  -0.00206  -0.00019   0.08854   0.00000   0.00089   0.00282   0.00000   0.00006
+   0.00000   0.00000   0.00000   0.07642   0.00000   0.00000   0.00204   0.00000
+   0.00250   0.00015   0.00104   0.00000   0.07472   0.00006   0.00000   0.00196
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.4827E+00  at reduced coord.    0.8333    0.2444    0.5000
+      Minimum=   -1.6398E+00  at reduced coord.    0.6667    0.0000    0.0000
+   Integrated=    5.3114E+00
+ ETOT  5  -876.08296360817    -4.341E+01 5.246E-04 4.885E+01
+ scprqt: <Vxc>= -7.5248072E-02 hartree
+
+ Pulay update with  4 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=  0.727      0.302      0.145     -0.154     -0.194E-01
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 48630 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.30E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 05 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   3.08098   0.45790   0.00167  -0.00000   0.00284   0.00008   0.00000   0.00014  -0.00005  -0.00000  -0.00001   0.00000 ...
+   0.45790   0.08042   0.00034  -0.00000   0.00058   0.00019  -0.00000   0.00033  -0.00001  -0.00000  -0.00000   0.00000 ...
+   0.00167   0.00034   0.74210  -0.00000  -0.00007  -0.00488  -0.00000  -0.00003   0.00066  -0.00000  -0.00023  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.74190   0.00000  -0.00000  -0.00501   0.00000  -0.00000   0.00039  -0.00000   0.00066 ...
+   0.00284   0.00058  -0.00007   0.00000   0.74172  -0.00003   0.00000  -0.00505   0.00041  -0.00000  -0.00040  -0.00000 ...
+   0.00008   0.00019  -0.00488  -0.00000  -0.00003  -0.31996  -0.00000  -0.00008   0.00044  -0.00000  -0.00015  -0.00000 ...
+   0.00000  -0.00000  -0.00000  -0.00501   0.00000  -0.00000  -0.32023   0.00000  -0.00000   0.00026  -0.00000   0.00043 ...
+   0.00014   0.00033  -0.00003   0.00000  -0.00505  -0.00008   0.00000  -0.32043   0.00029  -0.00000  -0.00027   0.00000 ...
+  -0.00005  -0.00001   0.00066  -0.00000   0.00041   0.00044  -0.00000   0.00029   0.07671   0.00000   0.00001   0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00039  -0.00000  -0.00000   0.00026  -0.00000   0.00000   0.07674  -0.00000  -0.00001 ...
+  -0.00001  -0.00000  -0.00023  -0.00000  -0.00040  -0.00015  -0.00000  -0.00027   0.00001  -0.00000   0.07654   0.00000 ...
+   0.00000   0.00000  -0.00000   0.00066  -0.00000  -0.00000   0.00043   0.00000   0.00000  -0.00001   0.00000   0.07674 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.72531  -2.17951   0.00094  -0.00000  -0.00119  -0.00626   0.00000   0.00791
+  -2.17951   6.64131  -0.00256   0.00000   0.00321   0.01724  -0.00000  -0.02164
+   0.00094  -0.00256  -0.57126   0.00000  -0.00045   2.25552  -0.00000   0.00224
+  -0.00000   0.00000   0.00000  -0.56567   0.00000  -0.00000   2.22742  -0.00000
+  -0.00119   0.00321  -0.00045   0.00000  -0.56524   0.00224  -0.00000   2.22525
+  -0.00626   0.01724   2.25552  -0.00000   0.00224  -6.77807   0.00000  -0.01075
+   0.00000  -0.00000  -0.00000   2.22742  -0.00000   0.00000  -6.64194   0.00000
+   0.00791  -0.02164   0.00224  -0.00000   2.22525  -0.01075   0.00000  -6.63139
+
+
+ ITER STEP NUMBER     6
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 6
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  1.35E-04  1.38E-04  1.64E-04  1.64E-04  1.59E-04  1.59E-04  1.30E-07  5.97E-08
+ res:  1.13E-07  1.03E-07  5.08E-09  5.23E-09  5.09E-05  5.06E-05  5.09E-05  5.03E-05
+ res:  5.09E-05  4.94E-05  4.81E-05  4.74E-05  4.60E-05  4.60E-05  4.99E-05  4.99E-05
+ res:  4.46E-05  4.43E-05  3.58E-05  3.69E-05  3.71E-05  3.51E-05  1.91E-07  2.69E-07
+ res:  2.42E-07  1.79E-07  2.49E-07  2.78E-07  3.44E-07  3.33E-07  3.61E-07  2.14E-07
+ res:  3.61E-07  2.56E-07  4.12E-07  3.33E-07  4.42E-07  2.24E-07  5.23E-07  6.83E-07
+ res:  8.87E-06  1.10E-05  1.00E-05  1.11E-05  1.07E-05  1.06E-05  9.32E-06  1.00E-05
+ res:  1.23E-05  1.19E-05  1.07E-05  1.88E-05  1.22E-05  1.63E-05  1.31E-05  1.74E-05
+ res:  1.86E-05  5.39E-05  6.78E-05  6.83E-05  6.35E-05  5.87E-05  1.23E-05  6.80E-05
+ res:  1.36E-05  4.47E-05  3.56E-05  6.26E-05  1.06E-03  1.40E-03  6.04E-04  1.46E-03
+ res:  5.83E-04  1.50E-03  1.63E-03  1.22E-03  8.55E-04  9.32E-04  8.51E-04  1.08E-03
+ res:  1.75E-03  7.33E-04  1.51E-04  3.75E-04  1.29E-03  5.14E-04  5.56E-04  5.19E-04
+ res:  1.21E-04  4.96E-04  1.41E-05  1.15E-03  1.06E-03  2.66E-04  6.89E-04  2.89E-05
+ res:  3.01E-03  2.69E-03  8.42E-04  8.93E-04  1.35E-03  1.71E-03  1.59E-03  1.24E-03
+ res:  1.86E-03  7.53E-04  1.85E-03  1.96E-03  1.58E-03  1.75E-03  1.79E-03  7.03E-04
+ res:  5.51E-04  5.37E-04  8.19E-04  1.24E-03  2.35E-03  2.25E-03  2.30E-03  1.27E-01
+ ene: -4.57E+00 -4.57E+00 -4.48E+00 -4.48E+00 -4.47E+00 -4.47E+00 -2.29E+00 -2.14E+00
+ ene: -2.13E+00 -2.13E+00 -2.05E+00 -2.05E+00 -1.67E+00 -1.67E+00 -1.67E+00 -1.67E+00
+ ene: -1.67E+00 -1.67E+00 -1.67E+00 -1.67E+00 -1.67E+00 -1.66E+00 -1.66E+00 -1.66E+00
+ ene: -1.62E+00 -1.62E+00 -1.60E+00 -1.59E+00 -1.59E+00 -1.59E+00 -1.31E+00 -1.31E+00
+ ene: -1.31E+00 -1.16E+00 -1.16E+00 -1.16E+00 -1.15E+00 -1.15E+00 -1.15E+00 -1.15E+00
+ ene: -1.15E+00 -1.15E+00 -1.07E+00 -1.07E+00 -1.07E+00 -1.07E+00 -1.01E+00 -1.01E+00
+ ene: -5.70E-01 -5.56E-01 -5.52E-01 -5.46E-01 -5.46E-01 -5.38E-01 -5.36E-01 -5.36E-01
+ ene: -5.23E-01 -5.19E-01 -4.97E-01 -4.48E-01 -4.48E-01 -4.45E-01 -4.45E-01 -4.05E-01
+ ene: -4.05E-01 -2.55E-01 -2.29E-01 -2.13E-01 -2.10E-01 -2.06E-01 -2.01E-01 -1.92E-01
+ ene: -1.88E-01 -1.68E-01 -1.61E-01 -1.52E-01 -1.51E-01 -1.42E-01 -1.40E-01 -1.26E-01
+ ene: -1.25E-01 -1.23E-01 -1.23E-01 -1.21E-01 -1.18E-01 -1.14E-01 -1.13E-01 -1.13E-01
+ ene: -1.13E-01 -1.11E-01 -1.05E-01 -1.04E-01 -1.00E-01 -9.77E-02 -9.53E-02 -9.41E-02
+ ene: -9.31E-02 -9.19E-02 -8.96E-02 -8.55E-02 -6.47E-02 -6.33E-02 -6.24E-02 -5.25E-02
+ ene: -2.32E-02 -2.01E-02 -1.74E-02 -1.67E-02 -1.56E-02 -1.52E-02 -1.46E-02 -1.16E-02
+ ene:  3.81E-03  3.18E-02  3.23E-02  4.25E-02  1.11E-01  1.30E-01  1.85E-01  2.09E-01
+ ene:  2.11E-01  2.16E-01  2.21E-01  2.36E-01  2.46E-01  2.79E-01  3.01E-01  9.91E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -4.5711E+00 -4.5699E+00 -4.4794E+00 -4.4787E+00 -4.4700E+00 -4.4693E+00
+ -2.2872E+00 -2.1362E+00 -2.1335E+00 -2.1335E+00 -2.0508E+00 -2.0508E+00
+ -1.6736E+00 -1.6731E+00 -1.6696E+00 -1.6695E+00 -1.6692E+00 -1.6688E+00
+ -1.6662E+00 -1.6658E+00 -1.6650E+00 -1.6647E+00 -1.6634E+00 -1.6631E+00
+ -1.6246E+00 -1.6234E+00 -1.5964E+00 -1.5927E+00 -1.5926E+00 -1.5922E+00
+ -1.3145E+00 -1.3116E+00 -1.3111E+00 -1.1573E+00 -1.1566E+00 -1.1555E+00
+ -1.1525E+00 -1.1515E+00 -1.1506E+00 -1.1497E+00 -1.1470E+00 -1.1459E+00
+ -1.0735E+00 -1.0722E+00 -1.0693E+00 -1.0683E+00 -1.0148E+00 -1.0139E+00
+ -5.7029E-01 -5.5605E-01 -5.5206E-01 -5.4639E-01 -5.4569E-01 -5.3762E-01
+ -5.3647E-01 -5.3623E-01 -5.2333E-01 -5.1949E-01 -4.9664E-01 -4.4822E-01
+ -4.4776E-01 -4.4537E-01 -4.4471E-01 -4.0514E-01 -4.0468E-01 -2.5452E-01
+ -2.2909E-01 -2.1305E-01 -2.0983E-01 -2.0615E-01 -2.0141E-01 -1.9184E-01
+ -1.8836E-01 -1.6756E-01 -1.6143E-01 -1.5167E-01 -1.5055E-01 -1.4191E-01
+ -1.4017E-01 -1.2598E-01 -1.2472E-01 -1.2320E-01 -1.2255E-01 -1.2107E-01
+ -1.1832E-01 -1.1357E-01 -1.1270E-01 -1.1267E-01 -1.1258E-01 -1.1094E-01
+ -1.0460E-01 -1.0361E-01 -1.0023E-01 -9.7711E-02 -9.5349E-02 -9.4112E-02
+ -9.3098E-02 -9.1852E-02 -8.9648E-02 -8.5511E-02 -6.4667E-02 -6.3286E-02
+ -6.2359E-02 -5.2532E-02 -2.3224E-02 -2.0104E-02 -1.7435E-02 -1.6677E-02
+ -1.5642E-02 -1.5215E-02 -1.4627E-02 -1.1619E-02  3.8146E-03  3.1790E-02
+  3.2287E-02  4.2535E-02  1.1076E-01  1.3042E-01  1.8539E-01  2.0925E-01
+  2.1093E-01  2.1559E-01  2.2134E-01  2.3576E-01  2.4572E-01  2.7901E-01
+  3.0088E-01  9.9135E-01
+
+ *********** RHOIJ (atom   1) **********
+  20.96001 -62.70916  -0.01138   0.00000  -0.01801   0.00202   0.00000   0.00352  -0.03818   0.00000  -0.05851   0.00000 ...
+ -62.70916 188.00170   0.05844   0.00000   0.09298  -0.01217   0.00000  -0.02117   0.18245   0.00000   0.42540   0.00000 ...
+  -0.01138   0.05844   5.93091   0.00000   0.00104  -1.29922   0.00000  -0.00043   0.07294   0.00000  -0.02642   0.00000 ...
+   0.00000   0.00000   0.00000   5.91262   0.00000   0.00000  -1.28827   0.00000   0.00000   0.04115   0.00000   0.07871 ...
+  -0.01801   0.09298   0.00104   0.00000   5.93135  -0.00043   0.00000  -1.29859   0.05462   0.00000  -0.03728   0.00000 ...
+   0.00202  -0.01217  -1.29922   0.00000  -0.00043   0.28593   0.00000   0.00017  -0.01972   0.00000   0.00673   0.00000 ...
+   0.00000   0.00000   0.00000  -1.28827   0.00000   0.00000   0.28234   0.00000   0.00000  -0.00987   0.00000  -0.02464 ...
+   0.00352  -0.02117  -0.00043   0.00000  -1.29859   0.00017   0.00000   0.28602  -0.01743   0.00000   0.00704   0.00000 ...
+  -0.03818   0.18245   0.07294   0.00000   0.05462  -0.01972   0.00000  -0.01743   1.49317   0.00000  -0.11344   0.00000 ...
+   0.00000   0.00000   0.00000   0.04115   0.00000   0.00000  -0.00987   0.00000   0.00000   1.64655   0.00000  -0.01152 ...
+  -0.05851   0.42540  -0.02642   0.00000  -0.03728   0.00673   0.00000   0.00704  -0.11344   0.00000   0.71088   0.00000 ...
+   0.00000   0.00000   0.00000   0.07871   0.00000   0.00000  -0.02464   0.00000   0.00000  -0.01152   0.00000   1.85792 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  4 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.11111  -0.03054  -0.00413   0.00000   0.00865  -0.00223   0.00000   0.00278
+  -0.03054   0.00098  -0.00733   0.00000   0.00695  -0.00020   0.00000   0.00015
+  -0.00413  -0.00733   2.92534   0.00000   0.00177   0.08918   0.00000   0.00114
+   0.00000   0.00000   0.00000   2.91466   0.00000   0.00000   0.07488   0.00000
+   0.00865   0.00695   0.00177   0.00000   2.85071   0.00097   0.00000   0.07118
+  -0.00223  -0.00020   0.08918   0.00000   0.00097   0.00285   0.00000   0.00006
+   0.00000   0.00000   0.00000   0.07488   0.00000   0.00000   0.00202   0.00000
+   0.00278   0.00015   0.00114   0.00000   0.07118   0.00006   0.00000   0.00186
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.5803E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -1.8658E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -2.3631E+00
+ ETOT  6  -907.38084916289    -3.130E+01 3.012E-03 1.923E+02
+ scprqt: <Vxc>= -8.4307332E-02 hartree
+
+ Pulay update with  5 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=  0.309      0.912      0.351E-01 -0.330      0.890E-01
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 44911 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.29E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 05 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   3.39016   0.50884   0.00196  -0.00000   0.00366   0.00011   0.00000   0.00016  -0.00006  -0.00000   0.00001   0.00000 ...
+   0.50884   0.09055   0.00040  -0.00000   0.00075   0.00023  -0.00000   0.00042  -0.00001  -0.00000   0.00000   0.00000 ...
+   0.00196   0.00040   0.86479  -0.00000  -0.00008   0.01310  -0.00000  -0.00003   0.00085  -0.00000  -0.00027   0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.86461   0.00000  -0.00000   0.01299   0.00000   0.00000   0.00046   0.00000   0.00085 ...
+   0.00366   0.00075  -0.00008   0.00000   0.86434  -0.00003   0.00000   0.01290   0.00049   0.00000  -0.00051  -0.00000 ...
+   0.00011   0.00023   0.01310  -0.00000  -0.00003  -0.19415  -0.00000  -0.00008   0.00056  -0.00000  -0.00018   0.00000 ...
+   0.00000  -0.00000  -0.00000   0.01299   0.00000  -0.00000  -0.19436   0.00000   0.00000   0.00031   0.00000   0.00056 ...
+   0.00016   0.00042  -0.00003   0.00000   0.01290  -0.00008   0.00000  -0.19469   0.00034   0.00000  -0.00034  -0.00000 ...
+  -0.00006  -0.00001   0.00085   0.00000   0.00049   0.00056   0.00000   0.00034   0.09357   0.00000   0.00001  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00046   0.00000  -0.00000   0.00031   0.00000   0.00000   0.09362  -0.00000  -0.00001 ...
+   0.00001   0.00000  -0.00027   0.00000  -0.00051  -0.00018   0.00000  -0.00034   0.00001  -0.00000   0.09339   0.00000 ...
+   0.00000   0.00000   0.00000   0.00085  -0.00000   0.00000   0.00056  -0.00000  -0.00000  -0.00001   0.00000   0.09363 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.71987  -2.16152   0.00109   0.00000  -0.00141  -0.00727  -0.00000   0.00938
+  -2.16152   6.58132  -0.00297  -0.00000   0.00381   0.02000   0.00000  -0.02566
+   0.00109  -0.00297  -0.56006   0.00000  -0.00050   2.19847  -0.00000   0.00250
+   0.00000  -0.00000   0.00000  -0.55473   0.00000  -0.00000   2.17171  -0.00000
+  -0.00141   0.00381  -0.00050   0.00000  -0.55428   0.00250  -0.00000   2.16946
+  -0.00727   0.02000   2.19847  -0.00000   0.00250  -6.49504   0.00000  -0.01199
+  -0.00000   0.00000  -0.00000   2.17171  -0.00000   0.00000  -6.36558   0.00000
+   0.00938  -0.02566   0.00250  -0.00000   2.16946  -0.01199   0.00000  -6.35481
+
+
+ ITER STEP NUMBER     7
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 7
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  5.52E-05  5.71E-05  8.74E-05  8.69E-05  8.49E-05  8.49E-05  3.53E-08  1.47E-08
+ res:  7.43E-05  7.41E-05  7.16E-05  7.16E-05  7.15E-05  7.04E-05  4.37E-08  1.67E-08
+ res:  6.90E-05  6.81E-05  6.77E-05  6.77E-05  6.98E-05  6.97E-05  3.62E-09  4.37E-09
+ res:  4.52E-05  4.56E-05  3.86E-05  3.78E-05  3.60E-05  3.35E-05  4.25E-07  5.47E-07
+ res:  2.50E-07  2.77E-07  4.53E-07  6.24E-07  7.20E-07  5.62E-07  5.50E-07  1.43E-07
+ res:  5.79E-07  2.90E-07  1.37E-06  9.87E-07  1.28E-06  5.19E-07  2.14E-06  2.13E-06
+ res:  6.07E-05  8.50E-05  9.07E-05  7.55E-05  7.71E-05  6.87E-05  6.15E-05  4.75E-05
+ res:  1.00E-04  9.93E-05  2.90E-05  1.66E-04  2.71E-04  4.19E-04  1.44E-04  3.93E-04
+ res:  3.27E-04  2.02E-02  1.81E-02  5.02E-03  1.20E-02  1.31E-02  1.20E-02  5.01E-03
+ res:  1.18E-02  1.52E-02  4.70E-03  2.81E-03  1.15E-03  1.14E-02  1.19E-02  1.16E-02
+ res:  3.55E-04  3.09E-03  1.18E-02  1.57E-03  4.07E-03  9.09E-03  8.88E-03  9.01E-03
+ res:  1.24E-02  4.76E-03  1.16E-04  8.82E-03  8.73E-03  6.72E-03  2.96E-04  9.71E-03
+ res:  2.76E-03  3.47E-03  5.92E-03  1.01E-02  4.73E-03  6.36E-04  7.74E-05  4.69E-03
+ res:  8.74E-04  5.73E-04  7.63E-03  3.06E-03  4.24E-03  3.08E-03  4.11E-03  1.27E-02
+ res:  1.23E-02  3.03E-04  1.48E-04  5.84E-03  2.46E-03  2.61E-03  4.73E-03  5.07E-03
+ res:  6.66E-03  5.62E-03  4.78E-03  4.89E-03  5.08E-03  4.49E-03  9.94E-03  3.90E-01
+ ene: -5.96E+00 -5.96E+00 -5.87E+00 -5.87E+00 -5.86E+00 -5.86E+00 -2.23E+00 -2.16E+00
+ ene: -2.08E+00 -2.08E+00 -2.08E+00 -2.08E+00 -2.07E+00 -2.07E+00 -2.07E+00 -2.07E+00
+ ene: -2.07E+00 -2.07E+00 -2.07E+00 -2.07E+00 -2.07E+00 -2.07E+00 -1.95E+00 -1.95E+00
+ ene: -1.94E+00 -1.94E+00 -1.92E+00 -1.91E+00 -1.91E+00 -1.91E+00 -1.25E+00 -1.25E+00
+ ene: -1.24E+00 -1.18E+00 -1.18E+00 -1.18E+00 -1.10E+00 -1.10E+00 -1.09E+00 -1.09E+00
+ ene: -1.09E+00 -1.09E+00 -9.71E-01 -9.69E-01 -9.65E-01 -9.64E-01 -9.09E-01 -9.08E-01
+ ene: -5.41E-01 -5.25E-01 -5.20E-01 -5.20E-01 -5.19E-01 -5.13E-01 -4.92E-01 -4.91E-01
+ ene: -4.90E-01 -4.86E-01 -4.44E-01 -3.94E-01 -3.94E-01 -3.91E-01 -3.91E-01 -3.27E-01
+ ene: -3.27E-01 -2.52E-01 -2.39E-01 -2.28E-01 -2.19E-01 -2.03E-01 -2.01E-01 -2.00E-01
+ ene: -1.98E-01 -1.94E-01 -1.83E-01 -1.75E-01 -1.72E-01 -1.67E-01 -1.65E-01 -1.64E-01
+ ene: -1.63E-01 -1.59E-01 -1.58E-01 -1.51E-01 -1.45E-01 -1.43E-01 -1.35E-01 -1.34E-01
+ ene: -1.32E-01 -1.27E-01 -1.23E-01 -1.20E-01 -1.14E-01 -1.11E-01 -9.44E-02 -8.67E-02
+ ene: -8.43E-02 -8.21E-02 -7.07E-02 -5.69E-02 -3.93E-02 -3.77E-02 -3.66E-02 -3.39E-02
+ ene: -3.33E-02 -2.82E-02 -1.92E-02 -1.34E-02 -2.72E-03 -9.29E-05  2.53E-03  8.62E-03
+ ene:  1.14E-02  2.24E-02  2.94E-02  6.29E-02  1.36E-01  1.48E-01  1.80E-01  1.89E-01
+ ene:  2.16E-01  2.30E-01  2.40E-01  2.47E-01  2.62E-01  2.64E-01  2.93E-01  1.64E+00
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -5.9650E+00 -5.9634E+00 -5.8723E+00 -5.8713E+00 -5.8571E+00 -5.8561E+00
+ -2.2318E+00 -2.1601E+00 -2.0814E+00 -2.0808E+00 -2.0757E+00 -2.0754E+00
+ -2.0749E+00 -2.0748E+00 -2.0738E+00 -2.0738E+00 -2.0701E+00 -2.0696E+00
+ -2.0691E+00 -2.0687E+00 -2.0659E+00 -2.0655E+00 -1.9464E+00 -1.9464E+00
+ -1.9432E+00 -1.9415E+00 -1.9161E+00 -1.9107E+00 -1.9096E+00 -1.9089E+00
+ -1.2487E+00 -1.2481E+00 -1.2437E+00 -1.1788E+00 -1.1785E+00 -1.1772E+00
+ -1.0969E+00 -1.0960E+00 -1.0893E+00 -1.0884E+00 -1.0880E+00 -1.0869E+00
+ -9.7063E-01 -9.6932E-01 -9.6548E-01 -9.6447E-01 -9.0905E-01 -9.0815E-01
+ -5.4101E-01 -5.2462E-01 -5.2046E-01 -5.1988E-01 -5.1932E-01 -5.1277E-01
+ -4.9156E-01 -4.9123E-01 -4.9011E-01 -4.8608E-01 -4.4376E-01 -3.9400E-01
+ -3.9385E-01 -3.9109E-01 -3.9073E-01 -3.2739E-01 -3.2673E-01 -2.5209E-01
+ -2.3915E-01 -2.2809E-01 -2.1914E-01 -2.0268E-01 -2.0132E-01 -1.9963E-01
+ -1.9804E-01 -1.9450E-01 -1.8340E-01 -1.7491E-01 -1.7151E-01 -1.6731E-01
+ -1.6522E-01 -1.6391E-01 -1.6309E-01 -1.5904E-01 -1.5771E-01 -1.5143E-01
+ -1.4465E-01 -1.4319E-01 -1.3479E-01 -1.3352E-01 -1.3249E-01 -1.2722E-01
+ -1.2268E-01 -1.1955E-01 -1.1387E-01 -1.1126E-01 -9.4360E-02 -8.6745E-02
+ -8.4347E-02 -8.2108E-02 -7.0742E-02 -5.6926E-02 -3.9286E-02 -3.7677E-02
+ -3.6622E-02 -3.3904E-02 -3.3313E-02 -2.8213E-02 -1.9202E-02 -1.3412E-02
+ -2.7228E-03 -9.2923E-05  2.5342E-03  8.6214E-03  1.1405E-02  2.2431E-02
+  2.9429E-02  6.2947E-02  1.3581E-01  1.4813E-01  1.7982E-01  1.8899E-01
+  2.1588E-01  2.3014E-01  2.3996E-01  2.4663E-01  2.6197E-01  2.6436E-01
+  2.9315E-01  1.6367E+00
+
+ *********** RHOIJ (atom   1) **********
+  25.48234 -81.92406  -0.01297   0.00000  -0.02617   0.00304   0.00000   0.00765  -0.19607   0.00000  -0.29395   0.00000 ...
+ -81.92406 264.45306   0.07203   0.00000   0.14434  -0.01938   0.00000  -0.04616   1.02956   0.00000   1.75324   0.00000 ...
+  -0.01297   0.07203   6.50960   0.00000   0.00117  -1.60052   0.00000  -0.00057   0.10071   0.00000  -0.03418   0.00000 ...
+   0.00000   0.00000   0.00000   6.48801   0.00000   0.00000  -1.58630   0.00000   0.00000   0.04139   0.00000   0.11760 ...
+  -0.02617   0.14434   0.00117   0.00000   6.50989  -0.00057   0.00000  -1.59967   0.07853   0.00000  -0.04015   0.00000 ...
+   0.00304  -0.01938  -1.60052   0.00000  -0.00057   0.39587   0.00000   0.00029  -0.04106   0.00000   0.01277   0.00000 ...
+   0.00000   0.00000   0.00000  -1.58630   0.00000   0.00000   0.39062   0.00000   0.00000  -0.01025   0.00000  -0.05761 ...
+   0.00765  -0.04616  -0.00057   0.00000  -1.59967   0.00029   0.00000   0.39606  -0.03757   0.00000   0.00456   0.00000 ...
+  -0.19607   1.02956   0.10071   0.00000   0.07853  -0.04106   0.00000  -0.03757   7.87223   0.00000  -0.83806   0.00000 ...
+   0.00000   0.00000   0.00000   0.04139   0.00000   0.00000  -0.01025   0.00000   0.00000   7.27816   0.00000  -0.17773 ...
+  -0.29395   1.75324  -0.03418   0.00000  -0.04015   0.01277   0.00000   0.00456  -0.83806   0.00000   3.56306   0.00000 ...
+   0.00000   0.00000   0.00000   0.11760   0.00000   0.00000  -0.05761   0.00000   0.00000  -0.17773   0.00000   9.38932 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  4 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.10699  -0.03018  -0.00550   0.00000   0.03681  -0.00260   0.00000   0.00413
+  -0.03018   0.00104  -0.00830   0.00000   0.00695  -0.00022   0.00000   0.00013
+  -0.00550  -0.00830   2.93204   0.00000   0.02382   0.08894   0.00000   0.00193
+   0.00000   0.00000   0.00000   2.52943   0.00000   0.00000   0.06360   0.00000
+   0.03681   0.00695   0.02382   0.00000   2.10241   0.00146   0.00000   0.04966
+  -0.00260  -0.00022   0.08894   0.00000   0.00146   0.00284   0.00000   0.00008
+   0.00000   0.00000   0.00000   0.06360   0.00000   0.00000   0.00170   0.00000
+   0.00413   0.00013   0.00193   0.00000   0.04966   0.00008   0.00000   0.00125
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.6152E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -2.1110E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -1.0928E+01
+ ETOT  7  -949.72434031148    -4.234E+01 2.022E-02 2.234E+02
+ scprqt: <Vxc>= -9.4754982E-02 hartree
+
+ Pulay update with  6 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)= -0.652      0.943      0.774      0.160     -0.240
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 45478 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.31E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 06 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   3.09460   0.46033   0.00179   0.00000   0.00296   0.00012  -0.00000   0.00019  -0.00017  -0.00000  -0.00001   0.00000 ...
+   0.46033   0.08081   0.00037   0.00000   0.00061   0.00022   0.00000   0.00036  -0.00005  -0.00000   0.00000   0.00000 ...
+   0.00179   0.00037   0.74478  -0.00000  -0.00025  -0.01024  -0.00000  -0.00021   0.00069  -0.00000  -0.00025   0.00000 ...
+   0.00000   0.00000  -0.00000   0.74444   0.00000  -0.00000  -0.01039   0.00000   0.00000   0.00042   0.00000   0.00069 ...
+   0.00296   0.00061  -0.00025   0.00000   0.74417  -0.00021   0.00000  -0.01064   0.00045   0.00000  -0.00041  -0.00000 ...
+   0.00012   0.00022  -0.01024  -0.00000  -0.00021  -0.32282  -0.00000  -0.00047   0.00047  -0.00000  -0.00017   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.01039   0.00000  -0.00000  -0.32333   0.00000   0.00000   0.00029   0.00000   0.00047 ...
+   0.00019   0.00036  -0.00021   0.00000  -0.01064  -0.00047   0.00000  -0.32378   0.00032   0.00000  -0.00028  -0.00000 ...
+  -0.00017  -0.00005   0.00069   0.00000   0.00045   0.00047   0.00000   0.00032   0.07576  -0.00000   0.00006  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00042   0.00000  -0.00000   0.00029   0.00000  -0.00000   0.07582   0.00000  -0.00003 ...
+  -0.00001   0.00000  -0.00025   0.00000  -0.00041  -0.00017   0.00000  -0.00028   0.00006   0.00000   0.07569   0.00000 ...
+   0.00000   0.00000   0.00000   0.00069  -0.00000   0.00000   0.00047  -0.00000  -0.00000  -0.00003   0.00000   0.07573 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.71879  -2.15733   0.00099   0.00000  -0.00121  -0.00659  -0.00000   0.00806
+  -2.15733   6.56552  -0.00269  -0.00000   0.00330   0.01812   0.00000  -0.02220
+   0.00099  -0.00269  -0.56177   0.00000  -0.00047   2.20531  -0.00000   0.00237
+   0.00000  -0.00000   0.00000  -0.55599   0.00000  -0.00000   2.17609  -0.00000
+  -0.00121   0.00330  -0.00047   0.00000  -0.55538   0.00237  -0.00000   2.17289
+  -0.00659   0.01812   2.20531  -0.00000   0.00237  -6.51701   0.00000  -0.01146
+  -0.00000   0.00000  -0.00000   2.17609  -0.00000   0.00000  -6.37432   0.00000
+   0.00806  -0.02220   0.00237  -0.00000   2.17289  -0.01146   0.00000  -6.35768
+
+
+ ITER STEP NUMBER     8
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 8
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  5.66E-05  5.85E-05  9.30E-05  9.26E-05  8.95E-05  8.94E-05  1.35E-08  3.90E-08
+ res:  2.07E-08  1.90E-08  3.20E-09  3.27E-09  7.14E-05  7.13E-05  6.69E-05  6.68E-05
+ res:  6.86E-05  6.74E-05  6.77E-05  6.68E-05  6.76E-05  6.75E-05  6.67E-05  6.66E-05
+ res:  4.65E-05  4.66E-05  4.02E-05  3.96E-05  3.75E-05  3.81E-05  7.53E-08  3.97E-08
+ res:  5.55E-08  1.12E-07  1.35E-07  1.32E-07  7.26E-08  7.10E-08  8.34E-08  7.03E-08
+ res:  7.82E-08  5.87E-08  1.77E-07  1.44E-07  1.95E-07  1.70E-07  2.14E-07  2.17E-07
+ res:  2.51E-06  5.88E-06  6.12E-06  5.99E-06  5.69E-06  3.21E-06  2.42E-06  4.23E-06
+ res:  9.46E-06  1.02E-05  2.36E-06  2.63E-05  2.54E-05  2.46E-05  3.15E-05  4.33E-05
+ res:  4.26E-05  7.35E-03  1.20E-03  6.76E-03  5.56E-03  1.47E-03  7.28E-03  6.17E-03
+ res:  5.54E-03  4.74E-03  1.92E-03  8.50E-04  2.60E-03  5.04E-03  1.56E-03  6.08E-03
+ res:  5.13E-03  6.43E-03  3.14E-03  5.29E-03  9.85E-04  6.24E-03  6.40E-03  5.33E-03
+ res:  4.14E-04  3.05E-03  3.13E-03  7.41E-05  6.06E-04  5.78E-03  4.09E-03  6.12E-03
+ res:  2.42E-03  2.26E-03  2.60E-03  3.61E-03  2.14E-03  3.04E-03  2.86E-04  3.36E-05
+ res:  1.98E-03  3.28E-03  1.41E-03  2.99E-03  1.85E-03  4.19E-03  1.93E-03  2.20E-03
+ res:  2.26E-03  1.96E-04  8.35E-05  4.24E-03  2.05E-03  1.47E-03  4.89E-03  5.11E-03
+ res:  5.24E-03  4.28E-03  3.78E-03  4.77E-03  3.45E-03  2.51E-03  2.39E-03  6.60E-02
+ ene: -4.83E+00 -4.83E+00 -4.66E+00 -4.66E+00 -4.65E+00 -4.65E+00 -2.29E+00 -2.16E+00
+ ene: -2.15E+00 -2.15E+00 -2.03E+00 -2.03E+00 -1.73E+00 -1.73E+00 -1.73E+00 -1.73E+00
+ ene: -1.73E+00 -1.73E+00 -1.72E+00 -1.72E+00 -1.72E+00 -1.72E+00 -1.72E+00 -1.72E+00
+ ene: -1.67E+00 -1.67E+00 -1.64E+00 -1.64E+00 -1.64E+00 -1.63E+00 -1.31E+00 -1.31E+00
+ ene: -1.31E+00 -1.18E+00 -1.18E+00 -1.18E+00 -1.17E+00 -1.17E+00 -1.17E+00 -1.17E+00
+ ene: -1.17E+00 -1.16E+00 -1.05E+00 -1.05E+00 -1.05E+00 -1.05E+00 -9.94E-01 -9.93E-01
+ ene: -5.64E-01 -5.41E-01 -5.37E-01 -5.35E-01 -5.34E-01 -5.29E-01 -5.28E-01 -5.28E-01
+ ene: -5.02E-01 -4.98E-01 -4.86E-01 -4.18E-01 -4.17E-01 -4.15E-01 -4.14E-01 -3.68E-01
+ ene: -3.68E-01 -2.56E-01 -2.51E-01 -2.45E-01 -2.28E-01 -2.24E-01 -2.21E-01 -2.19E-01
+ ene: -2.13E-01 -2.09E-01 -2.08E-01 -1.95E-01 -1.93E-01 -1.90E-01 -1.89E-01 -1.86E-01
+ ene: -1.85E-01 -1.83E-01 -1.80E-01 -1.80E-01 -1.78E-01 -1.72E-01 -1.67E-01 -1.54E-01
+ ene: -1.48E-01 -1.43E-01 -1.41E-01 -1.40E-01 -1.38E-01 -1.36E-01 -1.29E-01 -1.20E-01
+ ene: -1.17E-01 -1.15E-01 -1.07E-01 -9.28E-02 -7.58E-02 -7.50E-02 -7.25E-02 -6.95E-02
+ ene: -6.32E-02 -6.26E-02 -6.01E-02 -5.83E-02 -4.42E-02 -3.73E-02 -3.23E-02 -2.90E-02
+ ene: -2.70E-02 -2.60E-02 -1.95E-02  4.87E-03  6.84E-02  7.76E-02  9.47E-02  1.06E-01
+ ene:  1.34E-01  1.45E-01  1.54E-01  1.62E-01  1.69E-01  1.73E-01  1.89E-01  5.43E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -4.8328E+00 -4.8314E+00 -4.6575E+00 -4.6567E+00 -4.6470E+00 -4.6463E+00
+ -2.2931E+00 -2.1598E+00 -2.1523E+00 -2.1523E+00 -2.0295E+00 -2.0295E+00
+ -1.7304E+00 -1.7299E+00 -1.7269E+00 -1.7265E+00 -1.7261E+00 -1.7253E+00
+ -1.7227E+00 -1.7221E+00 -1.7214E+00 -1.7211E+00 -1.7204E+00 -1.7201E+00
+ -1.6673E+00 -1.6661E+00 -1.6391E+00 -1.6355E+00 -1.6351E+00 -1.6350E+00
+ -1.3150E+00 -1.3126E+00 -1.3057E+00 -1.1814E+00 -1.1810E+00 -1.1795E+00
+ -1.1726E+00 -1.1717E+00 -1.1680E+00 -1.1670E+00 -1.1653E+00 -1.1642E+00
+ -1.0533E+00 -1.0519E+00 -1.0480E+00 -1.0470E+00 -9.9354E-01 -9.9265E-01
+ -5.6363E-01 -5.4150E-01 -5.3735E-01 -5.3514E-01 -5.3444E-01 -5.2874E-01
+ -5.2848E-01 -5.2835E-01 -5.0185E-01 -4.9782E-01 -4.8563E-01 -4.1787E-01
+ -4.1737E-01 -4.1468E-01 -4.1418E-01 -3.6823E-01 -3.6774E-01 -2.5642E-01
+ -2.5070E-01 -2.4543E-01 -2.2796E-01 -2.2377E-01 -2.2087E-01 -2.1889E-01
+ -2.1270E-01 -2.0907E-01 -2.0753E-01 -1.9476E-01 -1.9297E-01 -1.8963E-01
+ -1.8853E-01 -1.8643E-01 -1.8480E-01 -1.8349E-01 -1.8017E-01 -1.7950E-01
+ -1.7757E-01 -1.7180E-01 -1.6748E-01 -1.5429E-01 -1.4792E-01 -1.4337E-01
+ -1.4133E-01 -1.3970E-01 -1.3772E-01 -1.3554E-01 -1.2875E-01 -1.2001E-01
+ -1.1717E-01 -1.1519E-01 -1.0686E-01 -9.2819E-02 -7.5755E-02 -7.5026E-02
+ -7.2549E-02 -6.9490E-02 -6.3202E-02 -6.2646E-02 -6.0142E-02 -5.8325E-02
+ -4.4225E-02 -3.7276E-02 -3.2320E-02 -2.9048E-02 -2.7002E-02 -2.5962E-02
+ -1.9530E-02  4.8729E-03  6.8384E-02  7.7616E-02  9.4657E-02  1.0581E-01
+  1.3362E-01  1.4509E-01  1.5441E-01  1.6235E-01  1.6877E-01  1.7293E-01
+  1.8853E-01  5.4321E-01
+
+ *********** RHOIJ (atom   1) **********
+  21.97758 -67.03439  -0.01164   0.00000  -0.02167   0.00234   0.00000   0.00589  -0.30631   0.00000  -0.44010   0.00000 ...
+ -67.03439 205.57638   0.06090   0.00000   0.11228  -0.01414   0.00000  -0.03301   1.51161   0.00000   2.34097   0.00000 ...
+  -0.01164   0.06090   6.05968   0.00000   0.00063  -1.35927   0.00000  -0.00023   0.07629   0.00000  -0.02934   0.00000 ...
+   0.00000   0.00000   0.00000   6.04155   0.00000   0.00000  -1.34800   0.00000   0.00000   0.02714   0.00000   0.09888 ...
+  -0.02167   0.11228   0.00063   0.00000   6.05955  -0.00024   0.00000  -1.35836   0.06566   0.00000  -0.02330   0.00000 ...
+   0.00234  -0.01414  -1.35927   0.00000  -0.00024   0.30664   0.00000   0.00009  -0.03166   0.00000   0.01090   0.00000 ...
+   0.00000   0.00000   0.00000  -1.34800   0.00000   0.00000   0.30278   0.00000   0.00000  -0.00326   0.00000  -0.05065 ...
+   0.00589  -0.03301  -0.00023   0.00000  -1.35836   0.00009   0.00000   0.30663  -0.03024   0.00000  -0.00326   0.00000 ...
+  -0.30631   1.51161   0.07629   0.00000   0.06566  -0.03166   0.00000  -0.03024  12.98802   0.00000  -1.52221   0.00000 ...
+   0.00000   0.00000   0.00000   0.02714   0.00000   0.00000  -0.00326   0.00000   0.00000  11.41909   0.00000  -0.31438 ...
+  -0.44010   2.34097  -0.02934   0.00000  -0.02330   0.01090   0.00000  -0.00326  -1.52221   0.00000   6.20268   0.00000 ...
+   0.00000   0.00000   0.00000   0.09888   0.00000   0.00000  -0.05065   0.00000   0.00000  -0.31438   0.00000  14.35087 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  7 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.11844  -0.02405  -0.00566   0.00000   0.06520  -0.00240   0.00000   0.00457
+  -0.02405   0.00081  -0.00786   0.00000   0.00428  -0.00023   0.00000   0.00008
+  -0.00566  -0.00786   2.92380   0.00000   0.05240   0.09198   0.00000   0.00266
+   0.00000   0.00000   0.00000   2.11847   0.00000   0.00000   0.05485   0.00000
+   0.06520   0.00428   0.05240   0.00000   1.48275   0.00201   0.00000   0.03592
+  -0.00240  -0.00023   0.09198   0.00000   0.00201   0.00303   0.00000   0.00010
+   0.00000   0.00000   0.00000   0.05485   0.00000   0.00000   0.00151   0.00000
+   0.00457   0.00008   0.00266   0.00000   0.03592   0.00010   0.00000   0.00094
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.6110E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -1.9962E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -8.6158E+00
+ ETOT  8  -914.28367287679     3.544E+01 7.354E-03 2.418E+02
+ scprqt: <Vxc>= -9.1882737E-02 hartree
+
+ Pulay update with  7 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=  0.210E-01 -0.699      0.968      0.770      0.164
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 45515 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.31E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 06 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   3.07845   0.45770   0.00178   0.00000   0.00291   0.00012  -0.00000   0.00019  -0.00017  -0.00000  -0.00001   0.00000 ...
+   0.45770   0.08029   0.00037   0.00000   0.00060   0.00022   0.00000   0.00036  -0.00005  -0.00000  -0.00000   0.00000 ...
+   0.00178   0.00037   0.73843  -0.00000  -0.00025  -0.01128  -0.00000  -0.00021   0.00068  -0.00000  -0.00024   0.00000 ...
+   0.00000   0.00000  -0.00000   0.73807   0.00000  -0.00000  -0.01145   0.00000   0.00000   0.00042   0.00000   0.00068 ...
+   0.00291   0.00060  -0.00025   0.00000   0.73781  -0.00021   0.00000  -0.01170   0.00044   0.00000  -0.00040  -0.00000 ...
+   0.00012   0.00022  -0.01128  -0.00000  -0.00021  -0.32977  -0.00000  -0.00048   0.00047  -0.00000  -0.00017   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.01145   0.00000  -0.00000  -0.33033   0.00000   0.00000   0.00029   0.00000   0.00047 ...
+   0.00019   0.00036  -0.00021   0.00000  -0.01170  -0.00048   0.00000  -0.33076   0.00032   0.00000  -0.00028  -0.00000 ...
+  -0.00017  -0.00005   0.00068   0.00000   0.00044   0.00047   0.00000   0.00032   0.07487  -0.00000   0.00006  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00042   0.00000  -0.00000   0.00029   0.00000  -0.00000   0.07493   0.00000  -0.00003 ...
+  -0.00001  -0.00000  -0.00024   0.00000  -0.00040  -0.00017   0.00000  -0.00028   0.00006   0.00000   0.07480   0.00000 ...
+   0.00000   0.00000   0.00000   0.00068  -0.00000   0.00000   0.00047  -0.00000  -0.00000  -0.00003   0.00000   0.07484 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.71900  -2.15804   0.00098   0.00000  -0.00120  -0.00655  -0.00000   0.00798
+  -2.15804   6.56791  -0.00268  -0.00000   0.00327   0.01801   0.00000  -0.02201
+   0.00098  -0.00268  -0.56225   0.00000  -0.00047   2.20774  -0.00000   0.00236
+   0.00000  -0.00000   0.00000  -0.55644   0.00000  -0.00000   2.17842  -0.00000
+  -0.00120   0.00327  -0.00047   0.00000  -0.55584   0.00236  -0.00000   2.17520
+  -0.00655   0.01801   2.20774  -0.00000   0.00236  -6.52909   0.00000  -0.01141
+  -0.00000   0.00000  -0.00000   2.17842  -0.00000   0.00000  -6.38594   0.00000
+   0.00798  -0.02201   0.00236  -0.00000   2.17520  -0.01141   0.00000  -6.36914
+
+
+ ITER STEP NUMBER     9
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 9
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  9.53E-08  9.82E-08  2.12E-07  2.11E-07  2.08E-07  2.08E-07  1.74E-10  3.50E-11
+ res:  3.72E-11  3.29E-11  9.54E-12  1.01E-11  8.22E-08  8.45E-08  1.04E-07  9.99E-08
+ res:  9.10E-08  9.11E-08  9.20E-08  8.20E-08  6.91E-08  6.61E-08  1.08E-07  1.06E-07
+ res:  3.73E-08  3.80E-08  7.96E-08  4.35E-08  1.07E-07  2.57E-08  4.26E-09  2.95E-09
+ res:  1.31E-09  2.65E-09  4.39E-09  4.21E-09  2.82E-09  2.42E-09  2.82E-09  1.16E-09
+ res:  5.28E-09  1.60E-09  1.01E-08  7.94E-09  8.10E-09  4.46E-09  8.54E-09  7.58E-09
+ res:  6.44E-07  1.72E-06  1.78E-06  2.03E-06  1.90E-06  1.04E-06  7.35E-07  1.60E-06
+ res:  3.79E-06  4.75E-06  6.72E-07  1.70E-05  1.70E-05  1.63E-05  1.86E-05  6.91E-05
+ res:  6.64E-05  2.80E-03  3.23E-03  4.32E-03  4.95E-03  5.73E-03  5.74E-03  4.70E-03
+ res:  5.22E-03  4.86E-03  5.61E-03  5.68E-03  5.30E-03  5.82E-03  5.01E-03  1.05E-03
+ res:  6.39E-03  6.99E-03  4.24E-04  2.70E-04  3.03E-04  1.29E-04  6.00E-03  1.09E-04
+ res:  5.29E-03  5.51E-03  5.02E-03  8.76E-05  3.29E-05  3.97E-03  3.02E-03  3.16E-05
+ res:  1.91E-03  6.52E-05  6.75E-04  1.41E-03  3.04E-03  9.54E-04  9.06E-04  9.05E-04
+ res:  5.21E-04  1.91E-03  4.98E-05  6.04E-04  1.45E-04  2.76E-04  1.46E-03  1.50E-03
+ res:  1.35E-03  2.29E-03  4.70E-04  1.15E-04  3.80E-03  4.02E-03  3.72E-03  2.74E-03
+ res:  2.30E-03  3.78E-03  3.38E-03  3.42E-03  3.54E-03  3.37E-03  3.45E-03  6.04E-01
+ ene: -4.77E+00 -4.77E+00 -4.59E+00 -4.59E+00 -4.58E+00 -4.58E+00 -2.30E+00 -2.16E+00
+ ene: -2.16E+00 -2.16E+00 -2.03E+00 -2.03E+00 -1.71E+00 -1.71E+00 -1.71E+00 -1.71E+00
+ ene: -1.71E+00 -1.71E+00 -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00 -1.70E+00
+ ene: -1.65E+00 -1.65E+00 -1.62E+00 -1.62E+00 -1.62E+00 -1.62E+00 -1.32E+00 -1.32E+00
+ ene: -1.31E+00 -1.18E+00 -1.18E+00 -1.18E+00 -1.18E+00 -1.18E+00 -1.17E+00 -1.17E+00
+ ene: -1.17E+00 -1.17E+00 -1.06E+00 -1.06E+00 -1.05E+00 -1.05E+00 -9.98E-01 -9.97E-01
+ ene: -5.65E-01 -5.43E-01 -5.39E-01 -5.36E-01 -5.36E-01 -5.31E-01 -5.31E-01 -5.30E-01
+ ene: -5.03E-01 -4.99E-01 -4.89E-01 -4.21E-01 -4.20E-01 -4.17E-01 -4.17E-01 -3.72E-01
+ ene: -3.72E-01 -3.29E-01 -3.21E-01 -3.09E-01 -2.99E-01 -2.94E-01 -2.87E-01 -2.81E-01
+ ene: -2.79E-01 -2.75E-01 -2.68E-01 -2.61E-01 -2.58E-01 -2.55E-01 -2.47E-01 -2.44E-01
+ ene: -2.35E-01 -2.19E-01 -2.18E-01 -2.03E-01 -2.02E-01 -2.00E-01 -1.93E-01 -1.91E-01
+ ene: -1.88E-01 -1.87E-01 -1.85E-01 -1.82E-01 -1.79E-01 -1.64E-01 -1.58E-01 -1.51E-01
+ ene: -1.48E-01 -1.42E-01 -1.39E-01 -1.24E-01 -1.13E-01 -1.04E-01 -9.02E-02 -8.09E-02
+ ene: -7.92E-02 -7.82E-02 -7.29E-02 -6.95E-02 -6.67E-02 -6.11E-02 -5.72E-02 -5.59E-02
+ ene: -5.18E-02 -4.94E-02 -3.26E-02 -2.44E-02 -9.79E-03  2.57E-02  4.07E-02  4.70E-02
+ ene:  5.75E-02  7.01E-02  8.83E-02  9.77E-02  1.13E-01  1.26E-01  1.45E-01  1.69E+00
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -4.7721E+00 -4.7706E+00 -4.5945E+00 -4.5938E+00 -4.5843E+00 -4.5836E+00
+ -2.2970E+00 -2.1608E+00 -2.1562E+00 -2.1562E+00 -2.0342E+00 -2.0342E+00
+ -1.7115E+00 -1.7110E+00 -1.7080E+00 -1.7076E+00 -1.7072E+00 -1.7064E+00
+ -1.7039E+00 -1.7033E+00 -1.7026E+00 -1.7023E+00 -1.7017E+00 -1.7014E+00
+ -1.6528E+00 -1.6515E+00 -1.6245E+00 -1.6210E+00 -1.6205E+00 -1.6205E+00
+ -1.3196E+00 -1.3170E+00 -1.3097E+00 -1.1826E+00 -1.1821E+00 -1.1808E+00
+ -1.1764E+00 -1.1755E+00 -1.1719E+00 -1.1710E+00 -1.1693E+00 -1.1681E+00
+ -1.0579E+00 -1.0566E+00 -1.0528E+00 -1.0517E+00 -9.9833E-01 -9.9744E-01
+ -5.6522E-01 -5.4315E-01 -5.3901E-01 -5.3640E-01 -5.3568E-01 -5.3125E-01
+ -5.3099E-01 -5.2963E-01 -5.0345E-01 -4.9944E-01 -4.8855E-01 -4.2066E-01
+ -4.2018E-01 -4.1748E-01 -4.1705E-01 -3.7237E-01 -3.7187E-01 -3.2909E-01
+ -3.2134E-01 -3.0920E-01 -2.9900E-01 -2.9447E-01 -2.8723E-01 -2.8116E-01
+ -2.7875E-01 -2.7530E-01 -2.6780E-01 -2.6125E-01 -2.5764E-01 -2.5479E-01
+ -2.4711E-01 -2.4435E-01 -2.3467E-01 -2.1915E-01 -2.1835E-01 -2.0332E-01
+ -2.0190E-01 -1.9972E-01 -1.9326E-01 -1.9065E-01 -1.8845E-01 -1.8651E-01
+ -1.8533E-01 -1.8151E-01 -1.7891E-01 -1.6432E-01 -1.5763E-01 -1.5093E-01
+ -1.4755E-01 -1.4248E-01 -1.3889E-01 -1.2358E-01 -1.1293E-01 -1.0384E-01
+ -9.0205E-02 -8.0864E-02 -7.9210E-02 -7.8205E-02 -7.2932E-02 -6.9524E-02
+ -6.6651E-02 -6.1144E-02 -5.7185E-02 -5.5901E-02 -5.1781E-02 -4.9405E-02
+ -3.2629E-02 -2.4382E-02 -9.7899E-03  2.5683E-02  4.0729E-02  4.6981E-02
+  5.7512E-02  7.0139E-02  8.8287E-02  9.7742E-02  1.1256E-01  1.2562E-01
+  1.4466E-01  1.6922E+00
+
+ *********** RHOIJ (atom   1) **********
+  21.71486 -65.96300  -0.00990   0.00000  -0.01682   0.00120   0.00000   0.00269  -0.37190   0.00000  -0.61362   0.00000 ...
+ -65.96300 201.51625   0.05173   0.00000   0.08744  -0.00829   0.00000  -0.01680   1.82442   0.00000   3.16711   0.00000 ...
+  -0.00990   0.05173   5.99868   0.00000   0.00052  -1.33011   0.00000  -0.00011   0.03311   0.00000  -0.02019   0.00000 ...
+   0.00000   0.00000   0.00000   5.98138   0.00000   0.00000  -1.31939   0.00000   0.00000  -0.00179   0.00000   0.06041 ...
+  -0.01682   0.08744   0.00052   0.00000   5.99885  -0.00014   0.00000  -1.32930   0.03381   0.00000  -0.00245   0.00000 ...
+   0.00120  -0.00829  -1.33011   0.00000  -0.00014   0.29626   0.00000  -0.00001  -0.01249   0.00000   0.00645   0.00000 ...
+   0.00000   0.00000   0.00000  -1.31939   0.00000   0.00000   0.29264   0.00000   0.00000   0.01192   0.00000  -0.03208 ...
+   0.00269  -0.01680  -0.00011   0.00000  -1.32930  -0.00001   0.00000   0.29625  -0.01430   0.00000  -0.01427   0.00000 ...
+  -0.37190   1.82442   0.03311   0.00000   0.03381  -0.01249   0.00000  -0.01430  22.03039   0.00000  -2.10028   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00179   0.00000   0.00000   0.01192   0.00000   0.00000  19.31442   0.00000  -0.35938 ...
+  -0.61362   3.16711  -0.02019   0.00000  -0.00245   0.00645   0.00000  -0.01427  -2.10028   0.00000  12.94531   0.00000 ...
+   0.00000   0.00000   0.00000   0.06041   0.00000   0.00000  -0.03208   0.00000   0.00000  -0.35938   0.00000  21.57127 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  8 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.11491  -0.02362  -0.00999   0.00000   0.11729  -0.00249   0.00000   0.00591
+  -0.02362   0.00077  -0.00775   0.00000   0.00086  -0.00023   0.00000  -0.00001
+  -0.00999  -0.00775   2.90242   0.00000   0.11226   0.09165   0.00000   0.00425
+   0.00000   0.00000   0.00000   1.33394   0.00000   0.00000   0.03311   0.00000
+   0.11729   0.00086   0.11226   0.00000   0.75812   0.00347   0.00000   0.01785
+  -0.00249  -0.00023   0.09165   0.00000   0.00347   0.00303   0.00000   0.00014
+   0.00000   0.00000   0.00000   0.03311   0.00000   0.00000   0.00090   0.00000
+   0.00591  -0.00001   0.00425   0.00000   0.01785   0.00014   0.00000   0.00049
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.4113E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -2.0430E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -1.2735E+01
+ ETOT  9  -916.46081449717    -2.177E+00 6.995E-03 2.797E+02
+ scprqt: <Vxc>= -9.1684583E-02 hartree
+
+ Pulay update with  7 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)= -0.347      0.712      -1.06      0.992      0.762
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 45617 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.33E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 06 [s]
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   2.97302   0.44061   0.00175   0.00000   0.00273   0.00016  -0.00000   0.00025  -0.00018  -0.00000   0.00001   0.00000 ...
+   0.44061   0.07683   0.00037   0.00000   0.00057   0.00023   0.00000   0.00037  -0.00006  -0.00000   0.00001   0.00000 ...
+   0.00175   0.00037   0.69565  -0.00000  -0.00027  -0.02074  -0.00000  -0.00025   0.00065  -0.00000  -0.00024   0.00000 ...
+   0.00000   0.00000  -0.00000   0.69544   0.00000  -0.00000  -0.02074   0.00000   0.00000   0.00042   0.00000   0.00065 ...
+   0.00273   0.00057  -0.00027   0.00000   0.69523  -0.00025   0.00000  -0.02095   0.00044   0.00000  -0.00038  -0.00000 ...
+   0.00016   0.00023  -0.02074  -0.00000  -0.00025  -0.37874  -0.00000  -0.00056   0.00047  -0.00000  -0.00018   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.02074   0.00000  -0.00000  -0.37904   0.00000   0.00000   0.00030   0.00000   0.00047 ...
+   0.00025   0.00037  -0.00025   0.00000  -0.02095  -0.00056   0.00000  -0.37930   0.00033   0.00000  -0.00028  -0.00000 ...
+  -0.00018  -0.00006   0.00065   0.00000   0.00044   0.00047   0.00000   0.00033   0.06838  -0.00000   0.00007  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00042   0.00000  -0.00000   0.00030   0.00000  -0.00000   0.06843   0.00000  -0.00003 ...
+   0.00001   0.00001  -0.00024   0.00000  -0.00038  -0.00018   0.00000  -0.00028   0.00007   0.00000   0.06832   0.00000 ...
+   0.00000   0.00000   0.00000   0.00065  -0.00000   0.00000   0.00047  -0.00000  -0.00000  -0.00003   0.00000   0.06838 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.71857  -2.15645   0.00096   0.00000  -0.00113  -0.00638  -0.00000   0.00750
+  -2.15645   6.56216  -0.00261  -0.00000   0.00309   0.01755   0.00000  -0.02080
+   0.00096  -0.00261  -0.56265   0.00000  -0.00047   2.20930  -0.00000   0.00238
+   0.00000  -0.00000   0.00000  -0.55662   0.00000  -0.00000   2.17875  -0.00000
+  -0.00113   0.00309  -0.00047   0.00000  -0.55605   0.00238  -0.00000   2.17575
+  -0.00638   0.01755   2.20930  -0.00000   0.00238  -6.53378   0.00000  -0.01154
+  -0.00000   0.00000  -0.00000   2.17875  -0.00000   0.00000  -6.38386   0.00000
+   0.00750  -0.02080   0.00238  -0.00000   2.17575  -0.01154   0.00000  -6.36844
+
+
+ ITER STEP NUMBER    10
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 10
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  9.84E-06  1.01E-05  1.48E-05  1.48E-05  1.47E-05  1.47E-05  1.13E-07  1.81E-09
+ res:  1.74E-09  1.84E-08  8.17E-10  7.75E-10  9.62E-06  9.61E-06  9.17E-06  9.06E-06
+ res:  9.24E-06  9.10E-06  9.30E-06  9.14E-06  9.05E-06  8.97E-06  9.26E-06  9.25E-06
+ res:  5.61E-06  5.66E-06  4.78E-06  4.81E-06  4.47E-06  4.56E-06  4.00E-07  3.33E-07
+ res:  3.83E-07  1.44E-08  1.39E-08  1.52E-08  1.24E-08  2.71E-08  1.06E-08  5.36E-08
+ res:  5.91E-08  5.91E-08  6.54E-08  5.37E-08  6.03E-08  4.47E-08  6.55E-08  6.02E-08
+ res:  9.80E-07  5.33E-07  3.24E-07  4.69E-07  4.56E-07  6.07E-07  1.88E-07  7.67E-07
+ res:  1.79E-07  1.17E-07  1.78E-07  1.74E-06  8.20E-07  1.51E-06  5.69E-07  4.10E-06
+ res:  3.76E-06  8.56E-04  9.40E-04  1.46E-03  1.94E-03  1.80E-03  1.89E-03  1.19E-03
+ res:  2.06E-03  1.75E-03  2.24E-03  1.47E-03  1.80E-03  2.23E-03  2.50E-03  2.41E-03
+ res:  2.87E-03  4.87E-04  2.71E-03  5.66E-04  5.99E-04  3.33E-04  9.15E-05  3.39E-03
+ res:  3.26E-03  3.13E-03  2.86E-03  1.05E-04  6.12E-05  2.68E-03  2.05E-03  2.07E-05
+ res:  5.11E-05  5.65E-04  7.80E-04  1.34E-03  1.91E-03  4.97E-04  7.14E-04  4.99E-04
+ res:  9.27E-04  1.04E-03  5.05E-05  5.45E-04  1.79E-04  1.22E-03  5.32E-04  7.76E-04
+ res:  1.28E-03  1.11E-03  1.36E-03  9.99E-04  6.64E-04  3.37E-03  3.42E-03  3.44E-03
+ res:  3.82E-03  3.61E-03  2.75E-03  2.69E-03  2.57E-03  1.75E-03  2.44E-03  3.40E-02
+ ene: -4.45E+00 -4.45E+00 -4.25E+00 -4.25E+00 -4.24E+00 -4.24E+00 -2.24E+00 -2.18E+00
+ ene: -2.18E+00 -2.16E+00 -2.06E+00 -2.06E+00 -1.61E+00 -1.61E+00 -1.60E+00 -1.60E+00
+ ene: -1.60E+00 -1.60E+00 -1.60E+00 -1.60E+00 -1.60E+00 -1.60E+00 -1.60E+00 -1.60E+00
+ ene: -1.58E+00 -1.58E+00 -1.55E+00 -1.55E+00 -1.55E+00 -1.55E+00 -1.26E+00 -1.26E+00
+ ene: -1.26E+00 -1.20E+00 -1.20E+00 -1.20E+00 -1.20E+00 -1.20E+00 -1.20E+00 -1.18E+00
+ ene: -1.18E+00 -1.18E+00 -1.08E+00 -1.08E+00 -1.07E+00 -1.07E+00 -1.02E+00 -1.02E+00
+ ene: -5.71E-01 -5.45E-01 -5.44E-01 -5.43E-01 -5.42E-01 -5.42E-01 -5.40E-01 -5.35E-01
+ ene: -5.10E-01 -5.06E-01 -5.01E-01 -4.29E-01 -4.28E-01 -4.26E-01 -4.25E-01 -3.82E-01
+ ene: -3.82E-01 -2.81E-01 -2.76E-01 -2.72E-01 -2.67E-01 -2.65E-01 -2.60E-01 -2.58E-01
+ ene: -2.56E-01 -2.52E-01 -2.49E-01 -2.44E-01 -2.42E-01 -2.40E-01 -2.37E-01 -2.32E-01
+ ene: -2.24E-01 -2.19E-01 -2.14E-01 -2.13E-01 -2.11E-01 -2.08E-01 -1.98E-01 -1.96E-01
+ ene: -1.89E-01 -1.88E-01 -1.87E-01 -1.85E-01 -1.85E-01 -1.71E-01 -1.66E-01 -1.59E-01
+ ene: -1.55E-01 -1.52E-01 -1.46E-01 -1.29E-01 -1.26E-01 -1.13E-01 -1.01E-01 -9.13E-02
+ ene: -8.79E-02 -8.66E-02 -8.42E-02 -8.11E-02 -7.76E-02 -7.48E-02 -7.24E-02 -7.15E-02
+ ene: -6.74E-02 -6.56E-02 -4.89E-02 -3.88E-02 -3.62E-02 -9.86E-03  1.21E-03  2.19E-02
+ ene:  3.89E-02  4.81E-02  7.18E-02  8.40E-02  8.82E-02  1.03E-01  1.09E-01  2.72E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -4.4509E+00 -4.4495E+00 -4.2464E+00 -4.2457E+00 -4.2377E+00 -4.2371E+00
+ -2.2391E+00 -2.1845E+00 -2.1845E+00 -2.1602E+00 -2.0553E+00 -2.0553E+00
+ -1.6066E+00 -1.6061E+00 -1.6040E+00 -1.6036E+00 -1.6031E+00 -1.6022E+00
+ -1.5999E+00 -1.5994E+00 -1.5988E+00 -1.5985E+00 -1.5984E+00 -1.5981E+00
+ -1.5797E+00 -1.5785E+00 -1.5506E+00 -1.5488E+00 -1.5483E+00 -1.5470E+00
+ -1.2577E+00 -1.2558E+00 -1.2555E+00 -1.2045E+00 -1.2036E+00 -1.2001E+00
+ -1.1991E+00 -1.1969E+00 -1.1957E+00 -1.1839E+00 -1.1837E+00 -1.1827E+00
+ -1.0790E+00 -1.0777E+00 -1.0741E+00 -1.0731E+00 -1.0202E+00 -1.0193E+00
+ -5.7105E-01 -5.4532E-01 -5.4406E-01 -5.4312E-01 -5.4230E-01 -5.4207E-01
+ -5.4005E-01 -5.3475E-01 -5.1026E-01 -5.0623E-01 -5.0071E-01 -4.2888E-01
+ -4.2830E-01 -4.2568E-01 -4.2497E-01 -3.8212E-01 -3.8165E-01 -2.8102E-01
+ -2.7617E-01 -2.7202E-01 -2.6730E-01 -2.6514E-01 -2.6034E-01 -2.5774E-01
+ -2.5569E-01 -2.5185E-01 -2.4889E-01 -2.4384E-01 -2.4208E-01 -2.4013E-01
+ -2.3653E-01 -2.3162E-01 -2.2447E-01 -2.1911E-01 -2.1382E-01 -2.1304E-01
+ -2.1142E-01 -2.0792E-01 -1.9822E-01 -1.9598E-01 -1.8924E-01 -1.8806E-01
+ -1.8665E-01 -1.8523E-01 -1.8517E-01 -1.7143E-01 -1.6594E-01 -1.5894E-01
+ -1.5488E-01 -1.5232E-01 -1.4561E-01 -1.2889E-01 -1.2580E-01 -1.1300E-01
+ -1.0117E-01 -9.1345E-02 -8.7913E-02 -8.6557E-02 -8.4156E-02 -8.1139E-02
+ -7.7557E-02 -7.4839E-02 -7.2424E-02 -7.1500E-02 -6.7409E-02 -6.5636E-02
+ -4.8913E-02 -3.8762E-02 -3.6243E-02 -9.8645E-03  1.2071E-03  2.1944E-02
+  3.8874E-02  4.8062E-02  7.1757E-02  8.4007E-02  8.8177E-02  1.0252E-01
+  1.0900E-01  2.7205E-01
+
+ *********** RHOIJ (atom   1) **********
+  20.41236 -60.59046  -0.00798   0.00000  -0.01202   0.00025   0.00000   0.00022  -0.31913   0.00000  -0.60797   0.00000 ...
+ -60.59046 180.79762   0.04151   0.00000   0.06235  -0.00359   0.00000  -0.00443   1.53253   0.00000   3.05971   0.00000 ...
+  -0.00798   0.04151   5.83928   0.00000   0.00049  -1.25028   0.00000  -0.00009   0.01544   0.00000  -0.01667   0.00000 ...
+   0.00000   0.00000   0.00000   5.82373   0.00000   0.00000  -1.24076   0.00000   0.00000  -0.01103   0.00000   0.04456 ...
+  -0.01202   0.06235   0.00049   0.00000   5.83987  -0.00013   0.00000  -1.24974   0.01801   0.00000   0.00727   0.00000 ...
+   0.00025  -0.00359  -1.25028   0.00000  -0.00013   0.26880   0.00000  -0.00001  -0.00326   0.00000   0.00483   0.00000 ...
+   0.00000   0.00000   0.00000  -1.24076   0.00000   0.00000   0.26569   0.00000   0.00000   0.01491   0.00000  -0.02304 ...
+   0.00022  -0.00443  -0.00009   0.00000  -1.24974  -0.00001   0.00000   0.26887  -0.00583   0.00000  -0.01707   0.00000 ...
+  -0.31913   1.53253   0.01544   0.00000   0.01801  -0.00326   0.00000  -0.00583  24.32458   0.00000  -1.86426   0.00000 ...
+   0.00000   0.00000   0.00000  -0.01103   0.00000   0.00000   0.01491   0.00000   0.00000  21.50866   0.00000  -0.21417 ...
+  -0.60797   3.05971  -0.01667   0.00000   0.00727   0.00483   0.00000  -0.01707  -1.86426   0.00000  16.11831   0.00000 ...
+   0.00000   0.00000   0.00000   0.04456   0.00000   0.00000  -0.02304   0.00000   0.00000  -0.21417   0.00000  23.02247 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  8 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.11885  -0.02137  -0.01095   0.00000   0.13376  -0.00249   0.00000   0.00624
+  -0.02137   0.00070  -0.00773   0.00000  -0.00035  -0.00024   0.00000  -0.00003
+  -0.01095  -0.00773   2.88941   0.00000   0.13514   0.09250   0.00000   0.00486
+   0.00000   0.00000   0.00000   1.00313   0.00000   0.00000   0.02474   0.00000
+   0.13376  -0.00035   0.13514   0.00000   0.53673   0.00421   0.00000   0.01263
+  -0.00249  -0.00024   0.09250   0.00000   0.00421   0.00309   0.00000   0.00016
+   0.00000   0.00000   0.00000   0.02474   0.00000   0.00000   0.00068   0.00000
+   0.00624  -0.00003   0.00486   0.00000   0.01263   0.00016   0.00000   0.00036
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.3613E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -2.0029E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -1.2923E+01
+ ETOT 10  -904.55679653685     1.190E+01 3.394E-03 2.973E+02
+ scprqt: <Vxc>= -9.1303477E-02 hartree
+
+ Pulay update with  7 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=   1.10      -1.97       1.28      -1.29       1.17
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 45571 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.62E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 05 [s]
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.26E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.27E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.26E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.27E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.26E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.27E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.26E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.27E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 22 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 22 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 22 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 22 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   2.78243   0.40875   0.00175   0.00000   0.00246   0.00055  -0.00000   0.00095  -0.00063  -0.00000  -0.00012   0.00000 ...
+   0.40875   0.07009   0.00042   0.00000   0.00062   0.00043   0.00000   0.00069  -0.00027  -0.00000  -0.00009   0.00000 ...
+   0.00175   0.00042   0.61645  -0.00000  -0.00091  -0.04398  -0.00000  -0.00150   0.00065  -0.00000  -0.00028   0.00000 ...
+   0.00000   0.00000  -0.00000   0.61569   0.00000  -0.00000  -0.04539   0.00000   0.00000   0.00044   0.00000   0.00067 ...
+   0.00246   0.00062  -0.00091   0.00000   0.61564  -0.00150   0.00000  -0.04505   0.00049   0.00000  -0.00038  -0.00000 ...
+   0.00055   0.00043  -0.04398  -0.00000  -0.00150  -0.48539  -0.00000  -0.00354   0.00070  -0.00000  -0.00029   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.04539   0.00000  -0.00000  -0.48960   0.00000   0.00000   0.00043   0.00000   0.00074 ...
+   0.00095   0.00069  -0.00150   0.00000  -0.04505  -0.00354   0.00000  -0.48817   0.00051   0.00000  -0.00040  -0.00000 ...
+  -0.00063  -0.00027   0.00065   0.00000   0.00049   0.00070   0.00000   0.00051   0.05578  -0.00000   0.00029  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00044   0.00000  -0.00000   0.00043   0.00000  -0.00000   0.05575   0.00000  -0.00011 ...
+  -0.00012  -0.00009  -0.00028   0.00000  -0.00038  -0.00029   0.00000  -0.00040   0.00029   0.00000   0.05585   0.00000 ...
+   0.00000   0.00000   0.00000   0.00067  -0.00000   0.00000   0.00074  -0.00000  -0.00000  -0.00011   0.00000   0.05550 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.71876  -2.15684   0.00092   0.00000  -0.00099  -0.00610  -0.00000   0.00661
+  -2.15684   6.56266  -0.00250  -0.00000   0.00275   0.01681   0.00000  -0.01851
+   0.00092  -0.00250  -0.56520   0.00000  -0.00047   2.22147  -0.00000   0.00237
+   0.00000  -0.00000   0.00000  -0.55879   0.00000  -0.00000   2.18892  -0.00000
+  -0.00099   0.00275  -0.00047   0.00000  -0.55810   0.00237  -0.00000   2.18521
+  -0.00610   0.01681   2.22147  -0.00000   0.00237  -6.58890   0.00000  -0.01159
+  -0.00000   0.00000  -0.00000   2.18892  -0.00000   0.00000  -6.42860   0.00000
+   0.00661  -0.01851   0.00237  -0.00000   2.18521  -0.01159   0.00000  -6.40905
+
+
+ ITER STEP NUMBER    11
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 11
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  2.56E-03  2.56E-03  6.71E-06  6.63E-06  5.02E-06  5.00E-06  1.86E-01  7.19E-09
+ res:  7.13E-09  2.92E-01  8.52E-09  7.29E-08  9.20E-10  8.99E-10  1.47E-05  1.48E-05
+ res:  1.85E-05  1.89E-05  9.68E-03  2.86E-03  2.90E-05  5.49E-06  5.44E-06  5.30E-06
+ res:  5.46E-06  5.41E-06  5.40E-06  5.46E-06  3.06E-04  5.63E-06  1.67E-04  2.65E-02
+ res:  8.23E-08  7.65E-08  7.62E-08  1.63E-05  9.31E-08  7.79E-08  3.66E-08  3.57E-08
+ res:  4.32E-08  5.75E-07  6.37E-07  6.87E-07  7.66E-08  5.29E-08  4.42E-08  1.24E-04
+ res:  4.76E-08  5.00E-08  1.07E-06  2.10E-04  1.13E-06  1.52E-06  1.61E-06  1.00E-06
+ res:  1.53E-06  1.86E-06  8.17E-07  1.75E-06  1.68E-06  3.49E-06  7.71E-07  2.60E-06
+ res:  5.98E-07  3.10E-06  1.55E-04  6.34E-06  1.27E-05  2.14E-05  1.24E-05  6.67E-06
+ res:  1.11E-05  8.92E-04  2.71E-05  9.55E-04  2.13E-05  3.50E-06  3.34E-04  6.45E-04
+ res:  5.18E-04  1.47E-04  4.32E-04  6.48E-04  4.68E-04  1.48E-04  1.73E-04  2.55E-04
+ res:  2.28E-04  1.36E-04  1.57E-04  2.78E-04  1.35E-04  4.43E-04  1.54E-04  1.83E-04
+ res:  1.87E-04  3.55E-04  5.16E-04  3.04E-04  3.72E-04  5.02E-04  2.67E-04  2.52E-04
+ res:  8.47E-04  2.48E-05  5.15E-04  1.31E-04  2.60E-04  1.01E-03  7.94E-04  1.10E-03
+ res:  7.02E-04  7.14E-04  7.35E-04  5.71E-04  1.49E-04  7.89E-04  6.51E-04  1.75E-03
+ res:  2.50E-03  2.34E-03  2.29E-03  2.25E-03  1.72E-03  3.40E-03  3.99E-03  6.59E-01
+ ene: -1.48E+01 -1.47E+01 -3.60E+00 -3.60E+00 -3.59E+00 -3.59E+00 -2.40E+00 -2.26E+00
+ ene: -2.26E+00 -2.23E+00 -2.19E+00 -2.17E+00 -2.11E+00 -2.11E+00 -1.48E+00 -1.48E+00
+ ene: -1.45E+00 -1.45E+00 -1.42E+00 -1.41E+00 -1.41E+00 -1.41E+00 -1.41E+00 -1.41E+00
+ ene: -1.40E+00 -1.40E+00 -1.40E+00 -1.40E+00 -1.40E+00 -1.40E+00 -1.40E+00 -1.39E+00
+ ene: -1.27E+00 -1.27E+00 -1.27E+00 -1.27E+00 -1.27E+00 -1.26E+00 -1.21E+00 -1.21E+00
+ ene: -1.21E+00 -1.20E+00 -1.19E+00 -1.19E+00 -1.14E+00 -1.14E+00 -1.13E+00 -1.13E+00
+ ene: -1.08E+00 -1.08E+00 -5.77E-01 -5.75E-01 -5.74E-01 -5.55E-01 -5.52E-01 -5.52E-01
+ ene: -5.52E-01 -5.50E-01 -5.42E-01 -5.33E-01 -5.29E-01 -4.51E-01 -4.51E-01 -4.48E-01
+ ene: -4.47E-01 -4.11E-01 -4.09E-01 -2.67E-01 -2.51E-01 -2.44E-01 -2.30E-01 -2.30E-01
+ ene: -2.15E-01 -2.05E-01 -2.04E-01 -2.02E-01 -2.01E-01 -1.89E-01 -1.83E-01 -1.79E-01
+ ene: -1.77E-01 -1.76E-01 -1.75E-01 -1.74E-01 -1.70E-01 -1.68E-01 -1.67E-01 -1.65E-01
+ ene: -1.63E-01 -1.63E-01 -1.62E-01 -1.59E-01 -1.58E-01 -1.56E-01 -1.54E-01 -1.47E-01
+ ene: -1.46E-01 -1.38E-01 -1.37E-01 -1.34E-01 -1.31E-01 -1.27E-01 -1.20E-01 -1.18E-01
+ ene: -1.17E-01 -1.13E-01 -1.06E-01 -1.05E-01 -1.04E-01 -1.02E-01 -9.73E-02 -9.38E-02
+ ene: -8.69E-02 -8.49E-02 -8.17E-02 -7.78E-02 -7.56E-02 -7.04E-02 -6.96E-02 -5.21E-02
+ ene: -3.05E-02 -2.56E-02 -5.11E-03  1.00E-02  2.66E-02  4.82E-02  7.45E-02  1.56E+00
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -1.4795E+01 -1.4746E+01 -3.5988E+00 -3.5983E+00 -3.5928E+00 -3.5922E+00
+ -2.3964E+00 -2.2550E+00 -2.2550E+00 -2.2281E+00 -2.1855E+00 -2.1734E+00
+ -2.1137E+00 -2.1137E+00 -1.4789E+00 -1.4771E+00 -1.4477E+00 -1.4460E+00
+ -1.4212E+00 -1.4090E+00 -1.4071E+00 -1.4070E+00 -1.4068E+00 -1.4051E+00
+ -1.4045E+00 -1.4033E+00 -1.4031E+00 -1.4026E+00 -1.4021E+00 -1.4021E+00
+ -1.4016E+00 -1.3930E+00 -1.2735E+00 -1.2726E+00 -1.2697E+00 -1.2687E+00
+ -1.2659E+00 -1.2647E+00 -1.2138E+00 -1.2133E+00 -1.2113E+00 -1.1957E+00
+ -1.1938E+00 -1.1917E+00 -1.1371E+00 -1.1358E+00 -1.1321E+00 -1.1308E+00
+ -1.0790E+00 -1.0781E+00 -5.7661E-01 -5.7522E-01 -5.7374E-01 -5.5515E-01
+ -5.5214E-01 -5.5185E-01 -5.5175E-01 -5.5044E-01 -5.4202E-01 -5.3280E-01
+ -5.2881E-01 -4.5141E-01 -4.5073E-01 -4.4810E-01 -4.4719E-01 -4.1075E-01
+ -4.0917E-01 -2.6712E-01 -2.5087E-01 -2.4369E-01 -2.2986E-01 -2.2953E-01
+ -2.1506E-01 -2.0460E-01 -2.0382E-01 -2.0182E-01 -2.0085E-01 -1.8902E-01
+ -1.8256E-01 -1.7851E-01 -1.7697E-01 -1.7596E-01 -1.7486E-01 -1.7415E-01
+ -1.7044E-01 -1.6764E-01 -1.6670E-01 -1.6476E-01 -1.6327E-01 -1.6258E-01
+ -1.6215E-01 -1.5931E-01 -1.5815E-01 -1.5554E-01 -1.5396E-01 -1.4690E-01
+ -1.4641E-01 -1.3848E-01 -1.3733E-01 -1.3402E-01 -1.3092E-01 -1.2687E-01
+ -1.2035E-01 -1.1839E-01 -1.1653E-01 -1.1303E-01 -1.0567E-01 -1.0459E-01
+ -1.0418E-01 -1.0186E-01 -9.7276E-02 -9.3791E-02 -8.6859E-02 -8.4894E-02
+ -8.1736E-02 -7.7801E-02 -7.5589E-02 -7.0423E-02 -6.9642E-02 -5.2052E-02
+ -3.0454E-02 -2.5604E-02 -5.1054E-03  1.0024E-02  2.6563E-02  4.8191E-02
+  7.4506E-02  1.5631E+00
+
+ *********** RHOIJ (atom   1) **********
+  17.56045 -49.16681  -0.00363   0.00000   0.00059  -0.00041   0.00000  -0.00291  -0.17366   0.00000  -0.31407   0.00000 ...
+ -49.16681 138.05290   0.01804   0.00000  -0.00235   0.00036   0.00000   0.01249   0.81126   0.00000   1.56350   0.00000 ...
+  -0.00363   0.01804   5.46713   0.00000  -0.00055  -1.07566   0.00000   0.00050   0.00885   0.00000  -0.02320   0.00000 ...
+   0.00000   0.00000   0.00000   5.45480   0.00000   0.00000  -1.06806   0.00000   0.00000  -0.01436   0.00000   0.02686 ...
+   0.00059  -0.00235  -0.00055   0.00000   5.46668   0.00042   0.00000  -1.07453   0.00003   0.00000  -0.02349   0.00000 ...
+  -0.00041   0.00036  -1.07566   0.00000   0.00042   0.21236   0.00000  -0.00019   0.00371   0.00000   0.00530   0.00000 ...
+   0.00000   0.00000   0.00000  -1.06806   0.00000   0.00000   0.20993   0.00000   0.00000   0.01380   0.00000  -0.01214 ...
+  -0.00291   0.01249   0.00050   0.00000  -1.07453  -0.00019   0.00000   0.21204   0.00345   0.00000   0.00494   0.00000 ...
+  -0.17366   0.81126   0.00885   0.00000   0.00003   0.00371   0.00000   0.00345  22.15417   0.00000  -1.93133   0.00000 ...
+   0.00000   0.00000   0.00000  -0.01436   0.00000   0.00000   0.01380   0.00000   0.00000  19.73421   0.00000  -0.18889 ...
+  -0.31407   1.56350  -0.02320   0.00000  -0.02349   0.00530   0.00000   0.00494  -1.93133   0.00000  15.60330   0.00000 ...
+   0.00000   0.00000   0.00000   0.02686   0.00000   0.00000  -0.01214   0.00000   0.00000  -0.18889   0.00000  20.58286 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  8 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.12161  -0.01854  -0.02314   0.00000   0.15327  -0.00290   0.00000   0.00642
+  -0.01854   0.00060  -0.00863   0.00000  -0.00014  -0.00028   0.00000  -0.00001
+  -0.02314  -0.00863   2.71931   0.00000   0.18139   0.08868   0.00000   0.00543
+   0.00000   0.00000   0.00000   0.55703   0.00000   0.00000   0.01347   0.00000
+   0.15327  -0.00014   0.18139   0.00000   0.30273   0.00585   0.00000   0.00761
+  -0.00290  -0.00028   0.08868   0.00000   0.00585   0.00301   0.00000   0.00018
+   0.00000   0.00000   0.00000   0.01347   0.00000   0.00000   0.00044   0.00000
+   0.00642  -0.00001   0.00543   0.00000   0.00761   0.00018   0.00000   0.00024
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.5919E+00  at reduced coord.    0.6667    0.0000    0.0000
+      Minimum=   -1.8511E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -1.3688E+01
+ ETOT 11  -935.38522335157    -3.083E+01 2.917E-01 4.303E+02
+ scprqt: <Vxc>= -9.0777717E-02 hartree
+
+ Pulay update with  7 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)= -0.149     -0.991       1.76     -0.587     -0.755
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 52002 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.27E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 05 [s]
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.33E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.33E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.33E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 33 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.33E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   3.05921   0.45527   0.00172   0.00000   0.00314   0.00006  -0.00000   0.00008  -0.00002  -0.00000  -0.00011   0.00000 ...
+   0.45527   0.08000   0.00035   0.00000   0.00063   0.00020   0.00000   0.00035  -0.00000  -0.00000  -0.00004   0.00000 ...
+   0.00172   0.00035   0.73541  -0.00000  -0.00003  -0.00498  -0.00000   0.00001   0.00071  -0.00000  -0.00023   0.00000 ...
+   0.00000   0.00000  -0.00000   0.73485   0.00000  -0.00000  -0.00564   0.00000   0.00000   0.00040   0.00000   0.00071 ...
+   0.00314   0.00063  -0.00003   0.00000   0.73478   0.00001   0.00000  -0.00550   0.00042   0.00000  -0.00042  -0.00000 ...
+   0.00006   0.00020  -0.00498  -0.00000   0.00001  -0.32573  -0.00000   0.00000   0.00045  -0.00000  -0.00015   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.00564   0.00000  -0.00000  -0.32686   0.00000   0.00000   0.00027   0.00000   0.00045 ...
+   0.00008   0.00035   0.00001   0.00000  -0.00550   0.00000   0.00000  -0.32676   0.00029   0.00000  -0.00028  -0.00000 ...
+  -0.00002  -0.00000   0.00071   0.00000   0.00042   0.00045   0.00000   0.00029   0.07568  -0.00000  -0.00000  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00040   0.00000  -0.00000   0.00027   0.00000  -0.00000   0.07569   0.00000  -0.00001 ...
+  -0.00011  -0.00004  -0.00023   0.00000  -0.00042  -0.00015   0.00000  -0.00028  -0.00000   0.00000   0.07544   0.00000 ...
+   0.00000   0.00000   0.00000   0.00071  -0.00000   0.00000   0.00045  -0.00000  -0.00000  -0.00001   0.00000   0.07561 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.72049  -2.16315   0.00092   0.00000  -0.00123  -0.00612  -0.00000   0.00819
+  -2.16315   6.58555  -0.00250  -0.00000   0.00333   0.01684   0.00000  -0.02240
+   0.00092  -0.00250  -0.56302   0.00000  -0.00044   2.21243  -0.00000   0.00221
+   0.00000  -0.00000   0.00000  -0.55748   0.00000  -0.00000   2.18450  -0.00000
+  -0.00123   0.00333  -0.00044   0.00000  -0.55698   0.00221  -0.00000   2.18191
+  -0.00612   0.01684   2.21243  -0.00000   0.00221  -6.55696   0.00000  -0.01062
+  -0.00000   0.00000  -0.00000   2.18450  -0.00000   0.00000  -6.42112   0.00000
+   0.00819  -0.02240   0.00221  -0.00000   2.18191  -0.01062   0.00000  -6.40792
+
+
+ ITER STEP NUMBER    12
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 12
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  5.46E-05  9.58E-05  1.22E-04  1.22E-04  1.20E-04  1.19E-04  6.91E-07  6.80E-08
+ res:  4.33E-08  4.28E-08  3.46E-09  3.58E-09  3.03E-03  6.22E-03  7.12E-05  7.24E-05
+ res:  6.60E-05  6.45E-05  6.39E-05  6.56E-05  6.58E-05  6.59E-05  7.36E-05  7.97E-05
+ res:  6.47E-05  6.46E-05  7.01E-05  7.04E-05  5.97E-05  5.76E-05  9.29E-04  2.40E-03
+ res:  2.66E-06  2.62E-06  2.40E-06  3.45E-07  3.11E-07  3.21E-07  2.27E-07  2.71E-07
+ res:  2.53E-07  1.78E-06  2.27E-07  2.57E-07  1.22E-07  1.06E-07  1.30E-07  8.74E-06
+ res:  8.34E-08  7.10E-08  2.07E-06  6.64E-06  1.64E-06  1.03E-05  3.61E-06  3.51E-06
+ res:  2.38E-06  3.04E-05  5.19E-06  4.82E-06  4.02E-07  9.26E-06  6.34E-06  7.60E-06
+ res:  4.28E-06  7.92E-05  3.81E-05  5.05E-04  7.86E-04  5.09E-04  1.02E-03  1.05E-03
+ res:  1.13E-03  1.38E-03  1.59E-03  1.51E-03  1.82E-03  2.25E-03  1.97E-03  2.25E-03
+ res:  2.54E-03  2.43E-03  3.32E-03  2.69E-03  1.63E-03  3.78E-03  4.29E-03  5.20E-03
+ res:  2.34E-04  6.52E-05  1.03E-04  1.07E-03  2.46E-05  5.96E-05  1.26E-03  3.67E-05
+ res:  4.23E-05  1.54E-03  4.41E-04  9.36E-04  6.50E-04  5.75E-05  7.79E-04  1.45E-04
+ res:  1.93E-03  1.22E-03  3.79E-04  7.01E-04  5.63E-04  1.11E-03  7.76E-04  6.79E-04
+ res:  1.18E-03  5.42E-04  4.21E-04  1.23E-03  1.11E-04  8.77E-05  1.13E-03  1.77E-03
+ res:  2.40E-03  4.21E-04  1.22E-03  1.00E-03  2.06E-03  2.73E-03  2.49E-03  3.83E-02
+ ene: -7.34E+00 -7.34E+00 -4.53E+00 -4.52E+00 -4.52E+00 -4.51E+00 -2.41E+00 -2.25E+00
+ ene: -2.13E+00 -2.13E+00 -2.04E+00 -2.04E+00 -1.92E+00 -1.92E+00 -1.69E+00 -1.69E+00
+ ene: -1.68E+00 -1.68E+00 -1.68E+00 -1.68E+00 -1.68E+00 -1.68E+00 -1.68E+00 -1.68E+00
+ ene: -1.68E+00 -1.68E+00 -1.55E+00 -1.55E+00 -1.51E+00 -1.51E+00 -1.49E+00 -1.49E+00
+ ene: -1.44E+00 -1.44E+00 -1.44E+00 -1.28E+00 -1.28E+00 -1.28E+00 -1.15E+00 -1.15E+00
+ ene: -1.15E+00 -1.15E+00 -1.14E+00 -1.14E+00 -1.06E+00 -1.06E+00 -1.06E+00 -1.06E+00
+ ene: -1.01E+00 -1.01E+00 -5.79E-01 -5.50E-01 -5.45E-01 -5.42E-01 -5.41E-01 -5.31E-01
+ ene: -5.14E-01 -5.14E-01 -4.98E-01 -4.93E-01 -4.60E-01 -4.19E-01 -4.18E-01 -4.16E-01
+ ene: -4.15E-01 -3.65E-01 -3.64E-01 -3.43E-01 -3.40E-01 -3.36E-01 -3.35E-01 -3.32E-01
+ ene: -3.30E-01 -3.27E-01 -3.22E-01 -3.19E-01 -3.15E-01 -3.09E-01 -3.08E-01 -3.05E-01
+ ene: -2.98E-01 -2.92E-01 -2.83E-01 -2.71E-01 -2.70E-01 -2.65E-01 -2.52E-01 -2.41E-01
+ ene: -2.32E-01 -2.15E-01 -1.98E-01 -1.94E-01 -1.93E-01 -1.93E-01 -1.89E-01 -1.82E-01
+ ene: -1.76E-01 -1.57E-01 -1.49E-01 -1.49E-01 -1.42E-01 -1.35E-01 -1.24E-01 -1.18E-01
+ ene: -1.16E-01 -1.04E-01 -9.45E-02 -9.11E-02 -8.88E-02 -8.71E-02 -8.47E-02 -7.72E-02
+ ene: -7.48E-02 -7.19E-02 -6.96E-02 -6.39E-02 -6.06E-02 -6.01E-02 -5.42E-02 -3.74E-02
+ ene: -3.39E-02 -2.31E-02 -1.68E-02 -1.32E-02  6.18E-03  1.54E-02  4.66E-02  2.15E-01
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -7.3428E+00 -7.3407E+00 -4.5256E+00 -4.5249E+00 -4.5156E+00 -4.5149E+00
+ -2.4068E+00 -2.2468E+00 -2.1298E+00 -2.1298E+00 -2.0416E+00 -2.0415E+00
+ -1.9227E+00 -1.9191E+00 -1.6874E+00 -1.6870E+00 -1.6828E+00 -1.6825E+00
+ -1.6821E+00 -1.6821E+00 -1.6805E+00 -1.6800E+00 -1.6784E+00 -1.6780E+00
+ -1.6765E+00 -1.6762E+00 -1.5468E+00 -1.5460E+00 -1.5142E+00 -1.5138E+00
+ -1.4943E+00 -1.4887E+00 -1.4449E+00 -1.4395E+00 -1.4353E+00 -1.2813E+00
+ -1.2799E+00 -1.2783E+00 -1.1496E+00 -1.1487E+00 -1.1470E+00 -1.1461E+00
+ -1.1438E+00 -1.1426E+00 -1.0645E+00 -1.0632E+00 -1.0603E+00 -1.0592E+00
+ -1.0074E+00 -1.0065E+00 -5.7926E-01 -5.4993E-01 -5.4523E-01 -5.4200E-01
+ -5.4073E-01 -5.3125E-01 -5.1442E-01 -5.1380E-01 -4.9767E-01 -4.9334E-01
+ -4.5997E-01 -4.1864E-01 -4.1815E-01 -4.1577E-01 -4.1523E-01 -3.6507E-01
+ -3.6446E-01 -3.4280E-01 -3.4010E-01 -3.3601E-01 -3.3456E-01 -3.3247E-01
+ -3.2994E-01 -3.2657E-01 -3.2196E-01 -3.1907E-01 -3.1523E-01 -3.0935E-01
+ -3.0755E-01 -3.0545E-01 -2.9825E-01 -2.9174E-01 -2.8301E-01 -2.7113E-01
+ -2.6997E-01 -2.6518E-01 -2.5240E-01 -2.4123E-01 -2.3154E-01 -2.1480E-01
+ -1.9802E-01 -1.9449E-01 -1.9319E-01 -1.9305E-01 -1.8912E-01 -1.8230E-01
+ -1.7583E-01 -1.5738E-01 -1.4935E-01 -1.4858E-01 -1.4230E-01 -1.3512E-01
+ -1.2410E-01 -1.1807E-01 -1.1623E-01 -1.0429E-01 -9.4470E-02 -9.1114E-02
+ -8.8821E-02 -8.7140E-02 -8.4704E-02 -7.7240E-02 -7.4763E-02 -7.1920E-02
+ -6.9619E-02 -6.3870E-02 -6.0617E-02 -6.0106E-02 -5.4248E-02 -3.7424E-02
+ -3.3886E-02 -2.3135E-02 -1.6819E-02 -1.3176E-02  6.1752E-03  1.5401E-02
+  4.6582E-02  2.1502E-01
+
+ *********** RHOIJ (atom   1) **********
+  21.17080 -63.58698  -0.01017   0.00000  -0.01379   0.00099   0.00000  -0.00130  -0.12751   0.00000  -0.31105   0.00000 ...
+ -63.58698 191.45912   0.05163   0.00000   0.07099  -0.00630   0.00000   0.00378   0.62399   0.00000   1.63785   0.00000 ...
+  -0.01017   0.05163   5.92658   0.00000   0.00045  -1.29595   0.00000  -0.00006  -0.02666   0.00000  -0.01668   0.00000 ...
+   0.00000   0.00000   0.00000   5.90580   0.00000   0.00000  -1.28357   0.00000   0.00000  -0.01006   0.00000   0.01753 ...
+  -0.01379   0.07099   0.00045   0.00000   5.92561  -0.00017   0.00000  -1.29439  -0.00829   0.00000  -0.00427   0.00000 ...
+   0.00099  -0.00630  -1.29595   0.00000  -0.00017   0.28436   0.00000  -0.00001   0.02372   0.00000   0.00448   0.00000 ...
+   0.00000   0.00000   0.00000  -1.28357   0.00000   0.00000   0.28003   0.00000   0.00000   0.01122   0.00000  -0.00642 ...
+  -0.00130   0.00378  -0.00006   0.00000  -1.29439  -0.00001   0.00000   0.28394   0.00715   0.00000  -0.00350   0.00000 ...
+  -0.12751   0.62399  -0.02666   0.00000  -0.00829   0.02372   0.00000   0.00715  28.22896   0.00000  -0.96868   0.00000 ...
+   0.00000   0.00000   0.00000  -0.01006   0.00000   0.00000   0.01122   0.00000   0.00000  25.90971   0.00000   0.04628 ...
+  -0.31105   1.63785  -0.01668   0.00000  -0.00427   0.00448   0.00000  -0.00350  -0.96868   0.00000  22.99808   0.00000 ...
+   0.00000   0.00000   0.00000   0.01753   0.00000   0.00000  -0.00642   0.00000   0.00000   0.04628   0.00000  26.35523 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  8 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.10386  -0.02463  -0.07346   0.00000   0.16929  -0.00449   0.00000   0.00716
+  -0.02463   0.00075  -0.00663   0.00000  -0.00158  -0.00021   0.00000  -0.00006
+  -0.07346  -0.00663   1.98504   0.00000   0.16815   0.06070   0.00000   0.00518
+   0.00000   0.00000   0.00000   0.47622   0.00000   0.00000   0.01031   0.00000
+   0.16929  -0.00158   0.16815   0.00000   0.30124   0.00511   0.00000   0.00695
+  -0.00449  -0.00021   0.06070   0.00000   0.00511   0.00198   0.00000   0.00016
+   0.00000   0.00000   0.00000   0.01031   0.00000   0.00000   0.00033   0.00000
+   0.00716  -0.00006   0.00518   0.00000   0.00695   0.00016   0.00000   0.00022
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.4854E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -2.0762E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -1.9930E+01
+ ETOT 12  -932.53777761833     2.847E+00 6.218E-03 4.585E+02
+ scprqt: <Vxc>= -7.7819148E-02 hartree
+
+ Pulay update with  7 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=  0.109     -0.239      -1.29       2.26     -0.896
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 52099 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.27E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 06 [s]
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 21 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.16E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 21 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.16E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 21 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.16E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 21 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.16E-01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+   3.12994   0.46674   0.00176   0.00000   0.00329   0.00003  -0.00000   0.00003  -0.00001  -0.00000  -0.00013   0.00000 ...
+   0.46674   0.08229   0.00035   0.00000   0.00066   0.00019   0.00000   0.00035  -0.00000  -0.00000  -0.00005   0.00000 ...
+   0.00176   0.00035   0.76425  -0.00000  -0.00001   0.00102  -0.00000   0.00002   0.00074  -0.00000  -0.00023   0.00000 ...
+   0.00000   0.00000  -0.00000   0.76363   0.00000  -0.00000   0.00022   0.00000   0.00000   0.00040   0.00000   0.00074 ...
+   0.00329   0.00066  -0.00001   0.00000   0.76355   0.00002   0.00000   0.00042   0.00042   0.00000  -0.00044  -0.00000 ...
+   0.00003   0.00019   0.00102  -0.00000   0.00002  -0.29454  -0.00000   0.00003   0.00046  -0.00000  -0.00015   0.00000 ...
+  -0.00000   0.00000  -0.00000   0.00022   0.00000  -0.00000  -0.29588   0.00000   0.00000   0.00026   0.00000   0.00046 ...
+   0.00003   0.00035   0.00002   0.00000   0.00042   0.00003   0.00000  -0.29574   0.00028   0.00000  -0.00028  -0.00000 ...
+  -0.00001  -0.00000   0.00074   0.00000   0.00042   0.00046   0.00000   0.00028   0.08008  -0.00000  -0.00001  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00040   0.00000  -0.00000   0.00026   0.00000  -0.00000   0.08009   0.00000  -0.00001 ...
+  -0.00013  -0.00005  -0.00023   0.00000  -0.00044  -0.00015   0.00000  -0.00028  -0.00001   0.00000   0.07983   0.00000 ...
+   0.00000   0.00000   0.00000   0.00074  -0.00000   0.00000   0.00046  -0.00000  -0.00000  -0.00001   0.00000   0.08000 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.72110  -2.16533   0.00093   0.00000  -0.00129  -0.00618  -0.00000   0.00855
+  -2.16533   6.59322  -0.00252  -0.00000   0.00347   0.01695   0.00000  -0.02333
+   0.00093  -0.00252  -0.56313   0.00000  -0.00044   2.21350  -0.00000   0.00220
+   0.00000  -0.00000   0.00000  -0.55768   0.00000  -0.00000   2.18603  -0.00000
+  -0.00129   0.00347  -0.00044   0.00000  -0.55717   0.00220  -0.00000   2.18340
+  -0.00618   0.01695   2.21350  -0.00000   0.00220  -6.56564   0.00000  -0.01054
+  -0.00000   0.00000  -0.00000   2.18603  -0.00000   0.00000  -6.43202   0.00000
+   0.00855  -0.02333   0.00220  -0.00000   2.18340  -0.01054   0.00000  -6.41852
+
+
+ ITER STEP NUMBER    13
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 13
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+ res:  1.98E-09  2.33E-09  7.85E-07  7.89E-07  7.78E-07  7.72E-07  9.18E-09  2.83E-09
+ res:  1.16E-09  1.12E-09  6.23E-05  2.19E-05  1.96E-10  1.86E-10  3.78E-07  3.71E-07
+ res:  3.57E-07  3.84E-07  3.74E-07  3.75E-07  4.10E-07  4.11E-07  4.92E-07  5.87E-07
+ res:  3.91E-07  3.88E-07  1.95E-07  1.91E-07  2.72E-07  2.54E-07  1.30E-05  4.44E-05
+ res:  8.08E-08  8.95E-08  7.74E-08  1.05E-08  1.38E-08  1.40E-08  1.54E-08  1.50E-08
+ res:  1.61E-08  5.76E-08  1.91E-08  1.52E-08  1.20E-08  3.68E-09  4.87E-09  4.66E-07
+ res:  7.01E-09  5.45E-09  6.98E-07  2.41E-06  8.61E-07  4.41E-06  2.38E-06  1.89E-06
+ res:  1.88E-06  3.63E-06  4.43E-06  6.09E-06  7.64E-07  1.65E-05  4.52E-05  1.31E-05
+ res:  5.02E-05  2.37E-04  3.06E-04  2.23E-04  4.15E-04  4.54E-04  6.37E-04  2.83E-04
+ res:  1.65E-04  4.36E-04  7.85E-04  5.45E-04  1.01E-03  8.39E-04  1.17E-03  1.56E-03
+ res:  1.37E-03  1.16E-03  9.92E-04  1.01E-03  2.25E-03  1.83E-03  3.19E-03  1.07E-04
+ res:  5.62E-04  9.31E-04  1.56E-04  1.46E-03  4.17E-04  1.19E-03  6.71E-04  6.64E-06
+ res:  8.05E-05  1.34E-03  1.07E-04  4.51E-04  9.77E-04  2.17E-03  8.67E-04  1.01E-03
+ res:  5.91E-04  5.94E-05  1.49E-03  6.54E-04  7.32E-04  4.04E-04  5.39E-04  4.89E-04
+ res:  5.02E-04  5.92E-04  5.51E-04  5.25E-04  2.18E-04  1.90E-04  4.05E-04  9.48E-05
+ res:  1.28E-04  8.59E-04  1.07E-03  7.23E-04  5.40E-04  1.22E-04  1.44E-03  9.68E-01
+ ene: -7.52E+00 -7.52E+00 -4.78E+00 -4.77E+00 -4.76E+00 -4.76E+00 -2.44E+00 -2.23E+00
+ ene: -2.11E+00 -2.11E+00 -2.05E+00 -2.04E+00 -2.03E+00 -2.03E+00 -1.76E+00 -1.76E+00
+ ene: -1.76E+00 -1.76E+00 -1.76E+00 -1.76E+00 -1.75E+00 -1.75E+00 -1.75E+00 -1.75E+00
+ ene: -1.75E+00 -1.75E+00 -1.60E+00 -1.60E+00 -1.57E+00 -1.57E+00 -1.55E+00 -1.55E+00
+ ene: -1.48E+00 -1.47E+00 -1.47E+00 -1.27E+00 -1.26E+00 -1.26E+00 -1.13E+00 -1.12E+00
+ ene: -1.12E+00 -1.12E+00 -1.12E+00 -1.12E+00 -1.05E+00 -1.05E+00 -1.04E+00 -1.04E+00
+ ene: -9.91E-01 -9.90E-01 -5.78E-01 -5.50E-01 -5.45E-01 -5.37E-01 -5.35E-01 -5.27E-01
+ ene: -5.07E-01 -5.07E-01 -4.91E-01 -4.87E-01 -4.48E-01 -4.15E-01 -4.15E-01 -4.13E-01
+ ene: -4.12E-01 -3.99E-01 -3.99E-01 -3.96E-01 -3.95E-01 -3.93E-01 -3.89E-01 -3.86E-01
+ ene: -3.85E-01 -3.84E-01 -3.80E-01 -3.79E-01 -3.77E-01 -3.76E-01 -3.75E-01 -3.69E-01
+ ene: -3.64E-01 -3.62E-01 -3.59E-01 -3.58E-01 -3.56E-01 -3.52E-01 -3.42E-01 -2.80E-01
+ ene: -2.46E-01 -2.40E-01 -2.37E-01 -2.17E-01 -2.11E-01 -2.04E-01 -1.94E-01 -1.91E-01
+ ene: -1.88E-01 -1.86E-01 -1.77E-01 -1.72E-01 -1.65E-01 -1.57E-01 -1.42E-01 -1.41E-01
+ ene: -1.30E-01 -1.28E-01 -1.25E-01 -1.10E-01 -1.03E-01 -9.73E-02 -9.59E-02 -9.20E-02
+ ene: -8.43E-02 -8.07E-02 -7.76E-02 -7.31E-02 -6.71E-02 -6.16E-02 -5.73E-02 -5.43E-02
+ ene: -5.37E-02 -4.70E-02 -4.06E-02 -2.42E-02 -1.58E-02 -1.12E-02  1.12E-03  1.93E+00
+ vtowfk : number of one-way 3D ffts skipped in vtowfk until now =0
+     eigenvalues (hartree) for  128  bands
+              after    2 non-SCF iterations with    4 CG line minimizations
+ -7.5208E+00 -7.5189E+00 -4.7752E+00 -4.7744E+00 -4.7639E+00 -4.7632E+00
+ -2.4385E+00 -2.2338E+00 -2.1055E+00 -2.1055E+00 -2.0454E+00 -2.0430E+00
+ -2.0255E+00 -2.0255E+00 -1.7615E+00 -1.7611E+00 -1.7563E+00 -1.7557E+00
+ -1.7556E+00 -1.7553E+00 -1.7538E+00 -1.7534E+00 -1.7516E+00 -1.7512E+00
+ -1.7492E+00 -1.7489E+00 -1.5992E+00 -1.5984E+00 -1.5658E+00 -1.5654E+00
+ -1.5527E+00 -1.5511E+00 -1.4772E+00 -1.4716E+00 -1.4657E+00 -1.2667E+00
+ -1.2640E+00 -1.2625E+00 -1.1258E+00 -1.1249E+00 -1.1232E+00 -1.1222E+00
+ -1.1199E+00 -1.1187E+00 -1.0484E+00 -1.0471E+00 -1.0443E+00 -1.0432E+00
+ -9.9103E-01 -9.9012E-01 -5.7841E-01 -5.5044E-01 -5.4550E-01 -5.3704E-01
+ -5.3529E-01 -5.2661E-01 -5.0724E-01 -5.0674E-01 -4.9130E-01 -4.8705E-01
+ -4.4832E-01 -4.1535E-01 -4.1492E-01 -4.1305E-01 -4.1249E-01 -3.9937E-01
+ -3.9874E-01 -3.9637E-01 -3.9451E-01 -3.9266E-01 -3.8885E-01 -3.8581E-01
+ -3.8470E-01 -3.8435E-01 -3.8039E-01 -3.7913E-01 -3.7736E-01 -3.7605E-01
+ -3.7516E-01 -3.6889E-01 -3.6397E-01 -3.6246E-01 -3.5913E-01 -3.5780E-01
+ -3.5551E-01 -3.5160E-01 -3.4237E-01 -2.7988E-01 -2.4591E-01 -2.3964E-01
+ -2.3699E-01 -2.1747E-01 -2.1094E-01 -2.0373E-01 -1.9352E-01 -1.9117E-01
+ -1.8800E-01 -1.8591E-01 -1.7693E-01 -1.7195E-01 -1.6483E-01 -1.5749E-01
+ -1.4223E-01 -1.4078E-01 -1.2994E-01 -1.2773E-01 -1.2531E-01 -1.0993E-01
+ -1.0257E-01 -9.7275E-02 -9.5906E-02 -9.1972E-02 -8.4325E-02 -8.0746E-02
+ -7.7561E-02 -7.3079E-02 -6.7107E-02 -6.1568E-02 -5.7333E-02 -5.4340E-02
+ -5.3676E-02 -4.6966E-02 -4.0594E-02 -2.4206E-02 -1.5822E-02 -1.1180E-02
+  1.1194E-03  1.9277E+00
+
+ *********** RHOIJ (atom   1) **********
+  22.15905 -67.69838  -0.01097   0.00000  -0.01297   0.00091   0.00000  -0.00376  -0.06572   0.00000  -0.22110   0.00000 ...
+ -67.69838 207.50653   0.05633   0.00000   0.06803  -0.00593   0.00000   0.01611   0.32702   0.00000   1.20209   0.00000 ...
+  -0.01097   0.05633   6.07399   0.00000   0.00041  -1.36800   0.00000  -0.00005  -0.04859   0.00000  -0.00250   0.00000 ...
+   0.00000   0.00000   0.00000   6.05109   0.00000   0.00000  -1.35424   0.00000   0.00000  -0.00836   0.00000  -0.00114 ...
+  -0.01297   0.06803   0.00041   0.00000   6.07305  -0.00018   0.00000  -1.36653  -0.01825   0.00000   0.01581   0.00000 ...
+   0.00091  -0.00593  -1.36800   0.00000  -0.00018   0.30919   0.00000   0.00000   0.03707   0.00000  -0.00067   0.00000 ...
+   0.00000   0.00000   0.00000  -1.35424   0.00000   0.00000   0.30430   0.00000   0.00000   0.00787   0.00000   0.00415 ...
+  -0.00376   0.01611  -0.00005   0.00000  -1.36653   0.00000   0.00000   0.30897   0.01242   0.00000  -0.01340   0.00000 ...
+  -0.06572   0.32702  -0.04859   0.00000  -0.01825   0.03707   0.00000   0.01242  31.32769   0.00000  -0.35949   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00836   0.00000   0.00000   0.00787   0.00000   0.00000  30.05790   0.00000   0.09119 ...
+  -0.22110   1.20209  -0.00250   0.00000   0.01581  -0.00067   0.00000  -0.01340  -0.35949   0.00000  29.63556   0.00000 ...
+   0.00000   0.00000   0.00000  -0.00114   0.00000   0.00000   0.00415   0.00000   0.00000   0.09119   0.00000  29.81906 ...
+   ...  only 12  components have been written...
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  8 components have a value greater than   10.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+
+ *********** RHOIJ (atom  29) **********
+   2.09332  -0.02635  -0.15543   0.00000   0.17656  -0.00701   0.00000   0.00732
+  -0.02635   0.00076   0.00103   0.00000  -0.00205   0.00003   0.00000  -0.00006
+  -0.15543   0.00103   0.76495   0.00000   0.05928   0.02104   0.00000   0.00087
+   0.00000   0.00000   0.00000   0.27027   0.00000   0.00000   0.00535   0.00000
+   0.17656  -0.00205   0.05928   0.00000   0.22567   0.00149   0.00000   0.00498
+  -0.00701   0.00003   0.02104   0.00000   0.00149   0.00069   0.00000   0.00002
+   0.00000   0.00000   0.00000   0.00535   0.00000   0.00000   0.00021   0.00000
+   0.00732  -0.00006   0.00087   0.00000   0.00498   0.00002   0.00000   0.00016
+
+ Total charge density [el/Bohr^3]
+      Maximum=    1.5658E+00  at reduced coord.    0.1667    0.2444    0.5000
+      Minimum=   -2.1588E+00  at reduced coord.    0.0000    0.0000    0.0000
+   Integrated=   -2.3747E+01
+ ETOT 13  -944.51642811758    -1.198E+01 3.195E-03 4.996E+02
+ scprqt: <Vxc>= -7.7736269E-02 hartree
+
+ Pulay update with  7 previous iterations:
+ mixing of old trial potential : alpha(m:m-4)=  -1.11     -0.889       1.25       11.9      -17.9
+  rhotov : is_hybrid_ncpp= F
+  rhotov : n3xccc=       77760
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 44864 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.15E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ scfcv_core: previous iteration took 06 [s]
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 51 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 1054 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 51 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 1054 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 51 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 1054 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 51 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 1054 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.12E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 51 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.17E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 1024 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.17E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 51 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.17E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+
+--- !WARNING
+src_file: m_drivexc.F90
+src_line: 1076
+message: |
+    Density went too small (lower than xc_denpos) at 1024 points
+    and was set to xc_denpos =   1.00E-14. Lowest was  -0.17E+01.
+    Likely due to too low boxcut or too low ecut for pseudopotential core charge.
+...
+
+ average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
+
+ ****** Psp strength Dij in Ha (atom      1) *****
+  -0.30627  -0.02920   0.00256   0.00000   0.00163   0.00121  -0.00000   0.00188  -0.00299  -0.00000   0.00402   0.00000 ...
+  -0.02920  -0.00613   0.00055   0.00000   0.00038   0.00036   0.00000   0.00034  -0.00082  -0.00000   0.00083   0.00000 ...
+   0.00256   0.00055  -0.48426  -0.00000  -0.00455  -0.02775  -0.00000  -0.00393   0.00064  -0.00000  -0.00044   0.00000 ...
+   0.00000   0.00000  -0.00000  -0.47098   0.00000  -0.00000  -0.02281   0.00000   0.00000   0.00060   0.00000   0.00060 ...
+   0.00163   0.00038  -0.00455   0.00000  -0.47925  -0.00393   0.00000  -0.02566   0.00072   0.00000  -0.00024  -0.00000 ...
+   0.00121   0.00036  -0.02775  -0.00000  -0.00393  -1.41369  -0.00000  -0.00577   0.00040  -0.00000  -0.00032   0.00000 ...
+  -0.00000   0.00000  -0.00000  -0.02281   0.00000  -0.00000  -1.40710   0.00000   0.00000   0.00034   0.00000   0.00046 ...
+   0.00188   0.00034  -0.00393   0.00000  -0.02566  -0.00577   0.00000  -1.41069   0.00048   0.00000  -0.00014  -0.00000 ...
+  -0.00299  -0.00082   0.00064   0.00000   0.00072   0.00040   0.00000   0.00048  -0.08364  -0.00000   0.00125  -0.00000 ...
+  -0.00000  -0.00000  -0.00000   0.00060   0.00000  -0.00000   0.00034   0.00000  -0.00000  -0.08358   0.00000  -0.00006 ...
+   0.00402   0.00083  -0.00044   0.00000  -0.00024  -0.00032   0.00000  -0.00014   0.00125   0.00000  -0.08057   0.00000 ...
+   0.00000   0.00000   0.00000   0.00060  -0.00000   0.00000   0.00046  -0.00000  -0.00000  -0.00006   0.00000  -0.08336 ...
+   ...  only 12  components have been written...
+
+ ****** Psp strength Dij in Ha (atom     29) *****
+   0.69909  -2.08687   0.00068   0.00000   0.00019  -0.00441  -0.00000  -0.00138
+  -2.08687   6.31485  -0.00221  -0.00000  -0.00013   0.01437   0.00000   0.00134
+   0.00068  -0.00221  -0.55195   0.00000  -0.00046   2.13880  -0.00000   0.00233
+   0.00000  -0.00000   0.00000  -0.54429   0.00000  -0.00000   2.10067  -0.00000
+   0.00019  -0.00013  -0.00046   0.00000  -0.54364   0.00233  -0.00000   2.09734
+  -0.00441   0.01437   2.13880  -0.00000   0.00233  -6.07868   0.00000  -0.01158
+  -0.00000   0.00000  -0.00000   2.10067  -0.00000   0.00000  -5.89631   0.00000
+  -0.00138   0.00134   0.00233  -0.00000   2.09734  -0.01158   0.00000  -5.87959
+
+
+ ITER STEP NUMBER    14
+ vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 14
+ istwf_k           1
+ non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
+
+--- !ERROR
+src_file: abi_xhpgv.f90
+src_line: 72
+mpi_rank: 0
+message: |
+    [z,d]hpgv returned info !=0
+...
+
+
+ abi_abort: decision taken to exit ...

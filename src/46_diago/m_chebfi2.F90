@@ -10,6 +10,7 @@ module m_chebfi2
   use m_xg
   use m_xgScalapack
   use defs_basis, only : std_err, std_out
+  use defs_abitypes
   use m_abicore
   use m_errors
   use m_xomp
@@ -45,6 +46,7 @@ module m_chebfi2
     logical :: paw
     integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
     integer :: istwf_k
+    integer :: me_g0
 
     !ARRAYS
     type(xgBlock_t) :: X 
@@ -70,7 +72,7 @@ module m_chebfi2
 
   contains
 
-  subroutine chebfi_init(chebfi, neigenpairs, spacedim, tolerance, ecut, nline, space, eigenProblem, istwf_k, spacecom)
+  subroutine chebfi_init(chebfi, neigenpairs, spacedim, tolerance, ecut, nline, space, eigenProblem, istwf_k, spacecom, me_g0)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -89,6 +91,7 @@ module m_chebfi2
     integer         , intent(in   ) :: eigenProblem
     integer         , intent(in   ) :: istwf_k
     integer         , intent(in   ) :: spacecom
+    integer         , intent(in   ) :: me_g0
     integer :: nthread
 
     chebfi%space = space
@@ -101,6 +104,7 @@ module m_chebfi2
     chebfi%paw = .false.
     chebfi%eigenProblem = eigenProblem
     chebfi%istwf_k = istwf_k
+    chebfi%me_g0 = me_g0
 
     nthread = 16
 
@@ -470,6 +474,9 @@ module m_chebfi2
     type(xg_t) :: A_und_X !H_UND_PSI
     type(xg_t) :: B_und_X !S_UND_PSI
     
+    type(xgBlock_t) :: X_first_row
+    type(xgBlock_t) :: AX_first_row
+    
     double precision, pointer :: evec(:,:)
     double precision, allocatable :: edummy(:,:)
     
@@ -479,9 +486,11 @@ module m_chebfi2
     integer :: info
     integer :: space
     integer :: eigenProblem
+    integer :: me_g0
 
     space = chebfi%space
     eigenProblem = chebfi%eigenProblem
+    me_g0 = chebfi%me_g0
     
     spacedim = chebfi%spacedim
     neigenpairs = chebfi%neigenpairs
@@ -489,9 +498,18 @@ module m_chebfi2
     call xg_init(A_und_X,space,neigenpairs,neigenpairs)
     call xg_init(B_und_X,space,neigenpairs,neigenpairs)
     
-    !if(chebfi%istwf_k == 2) then
-       !call xgBlock_print(chebfi%X, 6)
-    !end if
+    if(chebfi%istwf_k == 2) then
+       call xgBlock_scale(chebfi%X, sqrt2, 1)
+       if (me_g0 == 1)  then 
+         call xgBlock_setBlock(chebfi%X, X_first_row, 1, 1, neigenpairs)
+         call xgBlock_scale(X_first_row, 1/sqrt2, 1)
+       end if
+       call xgBlock_scale(chebfi%AX%self, sqrt2, 1)
+       if (me_g0 == 1)  then 
+         call xgBlock_setBlock(chebfi%AX%self, AX_first_row, 1, 1, neigenpairs)
+         call xgBlock_scale(AX_first_row, 1/sqrt2, 1)
+       end if  
+    end if
         
     !call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self)
     
@@ -499,8 +517,18 @@ module m_chebfi2
         
     call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self) !changed from original
       
-    ! if(chebfi%istwf_k == 2) MISSING HERE ADD LATER
-    
+     if(chebfi%istwf_k == 2) then
+       call xgBlock_scale(chebfi%X, 1/sqrt2, 1)
+       if (me_g0 == 1)  then 
+         call xgBlock_setBlock(chebfi%X, X_first_row, 1, 1, neigenpairs)
+         call xgBlock_scale(X_first_row, sqrt2, 1)
+       end if
+       call xgBlock_scale(chebfi%AX%self, 1/sqrt2, 1)
+       if (me_g0 == 1)  then 
+         call xgBlock_setBlock(chebfi%AX%self, AX_first_row, 1, 1, neigenpairs)
+         call xgBlock_scale(AX_first_row, sqrt2, 1)
+       end if  
+    end if
     !*********************************** EIGENVALUE A Ψ X = B Ψ XΛ **********************************************!
     
     select case (eigenSolver)
@@ -590,9 +618,6 @@ module m_chebfi2
     
     integer :: iband, shift
     double precision :: ampfactor
-
-    !call xgBlock_reverseMap(chebfi%X,cg_filter,1,chebfi%spacedim*chebfi%neigenpairs)
-    !call xgBlock_reverseMap(chebfi%AX%self,ghc_filter,1,chebfi%spacedim*chebfi%neigenpairs)
     
     !ampfactor
     do iband = 1, chebfi%neigenpairs

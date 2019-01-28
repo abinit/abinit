@@ -360,7 +360,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
    end if
 
 !  Treat scalar local potentials
-   print *, "SCALAR POTENTIALS"
    if (gs_ham%nvloc==1) then
 
      if (nspinortot==1) then
@@ -504,7 +503,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
      ABI_DEALLOCATE(cwavef2)
    end if
    ABI_DEALLOCATE(work)
-   print *, "FFT DISTRIB"
 !  Retrieve eventually original FFT distrib
    if(have_to_reequilibrate) then
      if(ndat > 1 ) then
@@ -563,7 +561,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 
  end if ! type_calc
 
- print *, "APPLICATION NON LOCAL"
  if ((type_calc==0).or.(type_calc==2).or.(type_calc==3)) then
 
 !============================================================
@@ -609,7 +606,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 !============================================================
 ! Assemble kinetic, local, nonlocal and Fock contributions
 !============================================================
- print *, "ASSEMBLE KINETIC"
 !  Assemble modified kinetic, local and nonlocal contributions
 !  to <G|H|C(n,k)>. Take also into account build-in debugging.
    if(prtvol/=-level)then
@@ -701,7 +697,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
        end do ! ispinor
      end do ! idat
    end if
-   print *, "FOCK"
 !  Calculation of the Fock exact exchange term
    if (has_fock) then
      if (fock_get_getghc_call(fock)==1) then
