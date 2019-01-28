@@ -5,7 +5,7 @@
 
 #include "abi_common.h"
 !
-! Copyright (c) 2014 Mitsuaki Kawamura
+! Copyright (C) 2014 Mitsuaki Kawamura
 !
 ! Permission is hereby granted, free of charge, to any person obtaining a
 ! copy of this software and associated documentation files (the

@@ -7,7 +7,7 @@
 !! Several definitions used in libPAW: named constants, physical constants, datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2018 ABINIT group
+!! Copyright (C) 2000-2019 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -103,6 +103,7 @@ module m_libpaw_defs
   module procedure to_array3
   module procedure to_array4
   module procedure to_array5
+  module procedure to_array6
  end interface to_array
 
  contains
@@ -136,6 +137,12 @@ module m_libpaw_defs
   integer :: i1,i2,i3,i4,i5,arr(5)
   arr=(/i1,i2,i3,i4,i5/)
  end function to_array5
+
+ function to_array6(i1,i2,i3,i4,i5,i6) result(arr)
+
+  integer :: i1,i2,i3,i4,i5,i6,arr(6)
+  arr=(/i1,i2,i3,i4,i5,i6/)
+ end function to_array6
 
 end module m_libpaw_defs
 !!***

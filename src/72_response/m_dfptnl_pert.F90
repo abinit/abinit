@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ contains
 !!   - 1st-order WFs DDK,DDE and 2nd-order WF DKDE (ddk_f)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2018 ABINIT group (LB)
+!! Copyright (C) 2018-2019 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
