@@ -45,13 +45,12 @@ This modifications do not apply to the tolerance determined by the
 from __future__ import print_function, division, unicode_literals
 import re
 from math import floor
-from yaml import load as yaml_parse
+
+from data_extractor import DataExtractor
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
-docstart_re = re.compile(r'--- (!.*)?')
-docend_re = re.compile(r'...')
 
 
 def norm_spaces(s):
@@ -354,13 +353,6 @@ class Result(object):
         return isok, status, msg
 
 
-def parse_doc(doc):
-    if doc['type'] == 'yaml':
-        obj = yaml_parse(''.join(doc['lines']))
-        doc['obj'] = obj
-    return doc
-
-
 class Differ(object):
     def __init__(self, **options):
         '''
@@ -394,8 +386,9 @@ class Differ(object):
         with open(file2, 'rt') as f:
             lines2 = f.readlines()
 
-        lines1, documents1, ignored1 = self.__extract(lines1)
-        lines2, documents2, ignored2 = self.__extract(lines2)
+        dext = DataExtractor(self.options)
+        lines1, documents1, ignored1 = dext.extract(lines1)
+        lines2, documents2, ignored2 = dext.extract(lines2)
         lines_differences = self.__diff_lines(lines1, lines2)
         return Result(lines_differences, label=self.options['label']), self.__test_doc(documents1, documents2)
 
@@ -404,59 +397,6 @@ class Differ(object):
             Compare docs2 to docs1 and apply tests on docs2.
         '''
         return None
-
-    def __get_metachar(self, line):
-        '''
-            Return a metacharacter wich give the behaviour of the line independently from options.
-        '''
-        if not line or line[0].isspace():
-            c = ' '
-            # dirty fix for compatibility
-            # I think xml should not be compared with the basic algorithm
-            if self.xml_mode and 'timeInfo' in line:
-                c = '.'
-        else:
-            c = line[0]
-            if c == ',':
-                if self.options['ignore']:
-                    c = '-'
-                else:
-                    c = '+'
-            elif c == 'P':
-                if self.options['ignoreP']:
-                    c = '-'
-                else:
-                    c = '+'
-        return c
-
-    def __extract(self, src_lines):
-        '''
-            Split lines into two groups: ignored and analysed
-        '''
-        lines, documents, ignored = [], [], []
-
-        docmode = False
-        current_document = None
-        for i, line in enumerate(src_lines):
-            if docmode:
-                current_document['lines'].append(line)
-                if docend_re.match(line):
-                    current_document['end'] = i
-                    parse_doc(current_document)
-            else:
-                if self.__get_metachar(line) == '-':
-                    if docstart_re.match(line):
-                        current_document = {
-                            'start': i,
-                            'lines': [line],
-                            'type': 'yaml'
-                        }
-                    else:
-                        ignored.append((i, line))
-                else:
-                    lines.append((i, line))
-
-        return lines, documents, ignored
 
     def __diff_lines(self, lines1, lines2):
         '''
@@ -470,10 +410,7 @@ class Differ(object):
         elif len(lines1) < len(lines2):
             return [LineCountDifference('file 2', 'file 1')]
         else:
-            for (i1, line1), (i2, line2) in zip(lines1, lines2):
-                meta1 = self.__get_metachar(line1)
-                meta2 = self.__get_metachar(line2)
-
+            for (i1, meta1, line1), (i2, meta2, line2) in zip(lines1, lines2):
                 if meta1 != meta2:
                     if meta1 != '_' and meta2 != '_':
                         return [MetaCharDifference(i1, i2, meta1, meta2)]
