@@ -184,7 +184,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
 
  ! Master creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
- if (my_rank == 1) then
+ if (my_rank == 0) then
    path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    call transport_rta_ncwrite(transport_rta, cryst, ncid)
@@ -193,6 +193,9 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
+
+ ! Free memory
+ call transport_rta_free(transport_rta)
 
 end subroutine transport
 
@@ -389,6 +392,10 @@ subroutine transport_rta_free(transport_rta)
  ABI_SFREE(transport_rta%vvdos_mesh)
  ABI_SFREE(transport_rta%kTmesh)
  ABI_SFREE(transport_rta%eminmax_spin)
+
+ ABI_SFREE(transport_rta%velocity)
+ ABI_SFREE(transport_rta%linewidth_mrta)
+ ABI_SFREE(transport_rta%linewidth_serta)
 
 end subroutine transport_rta_free
 

@@ -341,9 +341,9 @@ module m_sigmaph
   ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
   ! Diagonal elements of velocity operator for all states in Sigma_nk.
 
-  real(dp),allocatable :: tau_mrta(:,:)
-   ! tau_mrta(ntemp, max_nbcalc)
-   ! Lifetimes computed withing the momentum relaxation time approximation
+  real(dp),allocatable :: linewidth_mrta(:,:)
+   ! linewidth_mrta(ntemp, max_nbcalc)
+   ! Linewidths computed withing the momentum relaxation time approximation
    ! for fixed (kcalc, spin). Only if imag_only
 
   complex(dpc),allocatable :: cweights(:,:,:,:,:,:,:)
@@ -882,7 +882,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
      if (sigma%calc_mrta) then
-       sigma%tau_mrta = zero
+       sigma%linewidth_mrta = zero
        ABI_MALLOC(alpha_mrta, (nbcalc_ks))
      end if
 
@@ -1267,7 +1267,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  if (sigma%imag_only) then
                    simag = gkq2 * aimag(cfact)
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                   if (sigma%calc_mrta) sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                   if (sigma%calc_mrta) sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                  else
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * cfact
                  end if
@@ -1302,7 +1302,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                          (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
                          (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, jj) ) * weight
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                       if (sigma%calc_mrta) sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                       if (sigma%calc_mrta) sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
                          (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
@@ -1317,7 +1317,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, 1) )
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                     if (sigma%calc_mrta) sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                     if (sigma%calc_mrta) sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                    else
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
                        (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
@@ -2382,7 +2382,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  if (new%calc_mrta) then
-   ABI_CALLOC(new%tau_mrta, (new%ntemp, new%max_nbcalc))
+   ABI_CALLOC(new%linewidth_mrta, (new%ntemp, new%max_nbcalc))
  end if
 
  call cwtime_report("sigmaph_new: all", cpu_all, wall_all, gflops_all)
@@ -2543,7 +2543,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
 
    if (self%calc_mrta) then
      ncerr = nctk_def_arrays(ncid, [ &
-       nctkarr_t("tau_mrta", "dp", "ntemp, max_nbcalc, nkcalc, nsppol") &
+       nctkarr_t("linewidth_mrta", "dp", "ntemp, max_nbcalc, nkcalc, nsppol") &
      ])
      NCF_CHECK(ncerr)
    end if
@@ -2847,8 +2847,9 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  integer,parameter :: timrev1 = 1
  integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
+ logical :: has_mrta, has_vel
 #ifdef HAVE_NETCDF
- integer :: ncid, varid
+ integer :: ncerr, ncid, varid
 #endif
  character(len=fnlen) :: path
  integer,allocatable :: indkk(:,:), nband(:)
@@ -2885,34 +2886,24 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  new = ebands_chop(ebands, nband)
  ABI_FREE(nband)
 
- write(*,*) 'reading netcdf file'
 #ifdef HAVE_NETCDF
- ! read linewidths from sigmaph
- ABI_CALLOC(linewidth_serta,(self%ntemp,mband,nkpt,nsppol))
- ABI_CALLOC(linewidth_mrta,(self%ntemp,mband,nkpt,nsppol))
- do spin=1,nsppol
-   do ikcalc=1,nkcalc
-     bstart_ks = self%bstart_ks(ikcalc,spin)
-     nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
-     do iband=1,nbcalc_ks
-       band_ks = iband + bstart_ks - 1
-       ikpt = indkk(ikcalc,1)
-       do itemp=1,self%ntemp
-         ! read from netcdf file
-         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), linewidth_serta(itemp,band_ks,ikpt,spin), start=[2,itemp,iband,ikcalc,spin]))
-         NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "tau_mrta"), linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp,iband,ikcalc,spin]))
-       end do
-     end do
-   end do
- end do
+ has_mrta = .true.
+ ierr = nf90_inq_varid(self%ncid, "vals_e0k", varid)
+ if (ierr /= nf90_noerr) has_mrta = .false.
 
- ! read band velocities
+ has_vel = .true.
  ierr = nf90_inq_varid(self%ncid, "vcar_calc", varid)
- if (ierr /= nf90_noerr) then
-   ierr = 99
-   return
- endif
- ABI_CALLOC(velocity,(3,mband,nkpt,nsppol))
+ if (ierr /= nf90_noerr) has_vel = .false.
+
+ ! Read linewidths from sigmaph
+ ABI_CALLOC(linewidth_serta,(self%ntemp,mband,nkpt,nsppol))
+ if (has_mrta) then
+   ABI_CALLOC(linewidth_mrta,(self%ntemp,mband,nkpt,nsppol))
+ end if
+ if (has_vel) then
+   ABI_CALLOC(velocity,(3,mband,nkpt,nsppol))
+ end if
+
  do spin=1,nsppol
    do ikcalc=1,nkcalc
      bstart_ks = self%bstart_ks(ikcalc,spin)
@@ -2920,8 +2911,27 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
      do iband=1,nbcalc_ks
        band_ks = iband + bstart_ks - 1
        ikpt = indkk(ikcalc,1)
-       ! read from netcdf file
-       NCF_CHECK(nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"), velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin]))
+
+       do itemp=1,self%ntemp
+         ! Read SERTA lifetimes
+         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"),&
+                 linewidth_serta(itemp,band_ks,ikpt,spin), start=[2,itemp,iband,ikcalc,spin])
+         NCF_CHECK(ncerr)
+         ! Read MRTA lifetimes
+         if (has_mrta) then
+            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"),&
+                                 linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp,iband,ikcalc,spin])
+            NCF_CHECK(ncerr)
+         end if
+       end do
+
+       ! Read band velocities
+       if (has_vel) then
+         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"),&
+                              velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin])
+         NCF_CHECK(ncerr)
+       end if
+
      end do
    end do
  end do
@@ -3029,7 +3039,7 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%mu_e)
  ABI_SFREE(self%e0vals)
  ABI_SFREE(self%vcar_calc)
- ABI_SFREE(self%tau_mrta)
+ ABI_SFREE(self%linewidth_mrta)
  ABI_SFREE(self%cweights)
  ABI_SFREE(self%deltaw_pm)
  ABI_SFREE(self%wrmesh_b)
@@ -3475,7 +3485,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  if (self%calc_mrta) then
-   call xmpi_sum_master(self%tau_mrta, master, comm, ierr)
+   call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
  end if
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
  ! Only master writes
@@ -3520,9 +3530,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
        ! Average TAU_MRTA
        if (self%calc_mrta) then
-         ravg = sum(self%tau_mrta(it, bids(:))) / nstates
+         ravg = sum(self%linewidth_mrta(it, bids(:))) / nstates
          do ii=1,nstates
-           self%tau_mrta(it, bids(ii)) = ravg
+           self%linewidth_mrta(it, bids(ii)) = ravg
          end do
        end if
 
@@ -3747,7 +3757,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), qp_gaps, start=[1,ikcalc,spin]))
 
  if (self%calc_mrta) then
-   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "tau_mrta"), self%tau_mrta, start=[1,1,ikcalc,spin]))
+   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), self%linewidth_mrta, start=[1,1,ikcalc,spin]))
  end if
 
  if (self%frohl_model == 1) then
