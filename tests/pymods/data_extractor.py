@@ -4,40 +4,12 @@ Implement the steps to extract data from an Abinit output file.
 
 from __future__ import print_function, division, unicode_literals
 import re
-from yaml_tools import yaml_parse, yaml_object
-
+from yaml_tools import yaml_parse
+from abinit_metadata import ITERATOR_RANKS
+from yaml_structures import IterStart
 
 docstart_re = re.compile(r'--- (!.*)?')
 docend_re = re.compile(r'...')
-
-iterator_ranks = {  # associate an iterator with its deepness in the global computation
-    key: i for i, key in enumerate([
-        'idtset',
-        'itimimage',
-        'iimage',
-        'itime',
-        'istep'
-    ])
-}
-
-
-# this decorator makes IterStart a suitable object for the !IterStart tag and
-# defines defaults values for attributes corresponding to the keys of iterator_ranks
-@yaml_object(**{key: -1 for key in iterator_ranks})
-class IterStart(object):
-    @property  # define a getter for self.iterator
-    def iterator(self):
-        for key in iterator_ranks:
-            if self.__getattr__(key) != -1:
-                return key
-        # I probably should raise an error.
-
-    @property
-    def iteration(self):  # define a getter for self.iteration
-        for key in iterator_ranks:
-            if self.__getattr__(key) != -1:
-                return self.__getattr__(key)
-        # I probably should raise an error.
 
 
 def parse_doc(doc):
@@ -94,7 +66,7 @@ class DataExtractor:
                     parse_doc(current_document)
                     if isinstance(current_document['obj'], IterStart):
                         for iterator in self.iterators_state:
-                            if iterator_ranks[current_document['obj'].iterator] < iterator_ranks[iterator]:
+                            if ITERATOR_RANKS[current_document['obj'].iterator] < ITERATOR_RANKS[iterator]:
                                 del self.iterators_state[iterator]
                         self.iterators_state[current_document['obj'].iterator] = current_document['obj'].iteration
                     documents.append(current_document)
