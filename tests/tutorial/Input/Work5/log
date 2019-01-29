@@ -24,7 +24,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1181
 message: |
-    Renaming old t03_x.out to t03_x.out0006
+    Renaming old t03_x.out to t03_x.out0007
 ...
 
 
@@ -44,7 +44,7 @@ message: |
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 28 Jan 2019.
-- ( at 14h25 )
+- ( at 16h55 )
   
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -839,7 +839,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 17 [s]
+ scfcv_core: previous iteration took 16 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1008,7 +1008,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 11 [s]
+ scfcv_core: previous iteration took 10 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1294,7 +1294,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 05 [s]
+ scfcv_core: previous iteration took 06 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1723,7 +1723,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 06 [s]
+ scfcv_core: previous iteration took 05 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -1866,7 +1866,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 06 [s]
+ scfcv_core: previous iteration took 05 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -2009,7 +2009,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 06 [s]
+ scfcv_core: previous iteration took 05 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
 
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -2598,7 +2598,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 06 [s]
+ scfcv_core: previous iteration took 05 [s]
 
 --- !WARNING
 src_file: m_drivexc.F90
@@ -2781,7 +2781,7 @@ message: |
     Likely due to too low boxcut or too low ecut for pseudopotential core charge.
 ...
 
- scfcv_core: previous iteration took 06 [s]
+ scfcv_core: previous iteration took 05 [s]
 
 --- !WARNING
 src_file: m_drivexc.F90

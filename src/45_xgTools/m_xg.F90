@@ -354,7 +354,6 @@ module m_xg
     if ( cols < 1 ) then
       MSG_ERROR("cols < 1 ")
     end if
-
     select case (space)
     case (SPACE_R,SPACE_CR)
       if ( allocated(xg%vecR) ) then
@@ -577,6 +576,15 @@ module m_xg
 
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
+      print *, "USAO OVDE NE ZNAM ZASTO"
+      print *, "SPACE_R", SPACE_R
+      print *, "SPACE_CR", SPACE_CR
+      print *, "xgBlock%space", xgBlock%space
+      print *, "xgBlock%rows", xgBlock%rows
+      print *, "xgBlock%cols", xgBlock%cols
+      print *, "xgBlock%Ldim", xgBlock%Ldim
+      print *, "rows", rows
+      print *, "cols", cols
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
           MSG_ERROR("Bad reverseMapping")
       end if
@@ -2411,12 +2419,12 @@ module m_xg
     type(xgBlock_t) , intent(in   ) :: xgBlockA
     type(xgBlock_t) , intent(in   ) :: xgBlockB
     type(xgBlock_t) , intent(inout) :: divResult
-    double precision, intent(  out), optional :: max_val
-    integer, dimension(2)      , intent(  out), optional :: max_elt
-    double precision, intent(  out), optional :: min_val
-    integer, dimension(2)      , intent(  out), optional :: min_elt 
+    double precision, intent(inout), optional :: max_val
+    integer, dimension(2)      , intent(inout), optional :: max_elt
+    double precision, intent(inout), optional :: min_val
+    integer, dimension(2)      , intent(inout), optional :: min_elt 
     integer :: icol, irow
-
+    
 
     select case(xgBlockA%space)
     case(SPACE_R,SPACE_CR)
@@ -2434,13 +2442,14 @@ module m_xg
         min_val = minval(dble(divResult%vecR))
       end if
       if ( present(max_elt) ) then
-        max_elt = maxloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)),dim=2)
+        max_elt = maxloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
       end if
       if ( present(min_elt) ) then
-        min_elt = minloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)),dim=2)
+        min_elt = minloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
       end if
       
     case(SPACE_C)
+      
       !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
       !$omp& schedule(static)
       do irow = 1, xgBlockA%rows
@@ -2455,14 +2464,13 @@ module m_xg
         min_val = minval(dble(divResult%vecC))
       end if
       if ( present(max_elt) ) then
-        max_elt = maxloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)),dim=2)
+        max_elt = maxloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
       end if
       if ( present(min_elt) ) then
-        min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)),dim=2)
+        min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols))) 
       end if
-      
     end select
-		
+    		
   end subroutine xgBlock_colwiseDivision
 
 

@@ -273,6 +273,7 @@ module m_chebfi2
     
     allocate(nline_bands(neigenpairs))
     
+
     call xg_init(DivResults, chebfi%space, neigenpairs, 1)
         
     tolerance = chebfi%tolerance
@@ -290,7 +291,7 @@ module m_chebfi2
     nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
 
     call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
-    
+
     do iband=1, neigenpairs !TODO
 !      ! nline necessary to converge to tolerance
 !      !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
@@ -540,7 +541,9 @@ module m_chebfi2
        MSG_ERROR("Error for Eigen Solver HEGV")
     end select
         
+    !print *, "SECOND REVERSEMAP START"
     call xgBlock_reverseMap(A_und_X%self,evec,1,neigenpairs*neigenpairs)
+    !print *, "SECOND REVERSEMAP END"
     
     !ABI_ALLOCATE(edummy, (2*neigenpairs, neigenpairs)) !2 = cplx
     !call fxphas_seq(evec,edummy,0,0,1,neigenpairs*neigenpairs,neigenpairs*neigenpairs,neigenpairs,neigenpairs,0)  

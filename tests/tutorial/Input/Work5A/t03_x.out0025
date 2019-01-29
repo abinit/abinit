@@ -1,32 +1,3 @@
-  ABINIT 8.9.4
-  
-  Give name for formatted input file: 
-t03.in
-  Give name for formatted output file:
-t03_x.out
-  Give root name for generic input files:
-t03_xi
-  Give root name for generic output files:
-t03_xo
-  Give root name for generic temporary files:
-t03_x
-
---- !COMMENT
-src_file: m_dtfil.F90
-src_line: 1157
-message: |
-    Output file t03_x.out
-     already exists.
-...
-
-
---- !COMMENT
-src_file: m_dtfil.F90
-src_line: 1181
-message: |
-    Renaming old t03_x.out to t03_x.out0045
-...
-
 
 .Version 8.9.4 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu7.3 computer) 
@@ -44,237 +15,18 @@ message: |
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 29 Jan 2019.
-- ( at 15h31 )
+- ( at 13h57 )
   
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
- === Build Information === 
-  Version       : 8.9.4
-  Build target  : x86_64_linux_gnu7.3
-  Build date    : 20190125
-
- === Compiler Suite === 
-  C compiler       : gnu7.3
-  C++ compiler     : gnu7.3
-  Fortran compiler : gnu7.3
-  CFLAGS           :  -g -O2 -mtune=native -march=native
-  CXXFLAGS         :  -g -O2 -mtune=native -march=native
-  FCFLAGS          :  -g -ffree-line-length-none
-  FC_LDFLAGS       : 
-
- === Optimizations === 
-  Debug level        : basic
-  Optimization level : standard
-  Architecture       : intel_xeon
-
- === Multicore === 
-  Parallel build : no
-  Parallel I/O   : no
-  openMP support : no
-  GPU support    : no
-
- === Connectors / Fallbacks === 
-  Connectors on : yes
-  Fallbacks on  : yes
-  DFT flavor    : none
-  FFT flavor    : none
-  LINALG flavor : netlib
-  MATH flavor   : none
-  TIMER flavor  : abinit
-  TRIO flavor   : none
-
- === Experimental features === 
-  Bindings            : @enable_bindings@
-  Exports             : no
-  GW double-precision : no
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- Default optimizations:
-   -O2 -mtune=native -march=native
-
-
- Optimizations for 43_ptgroups:
-   -O0
-
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- CPP options activated during the build:
-
-                    CC_GNU                   CXX_GNU                    FC_GNU
- 
- HAVE_FC_ALLOCATABLE_DT...             HAVE_FC_ASYNC         HAVE_FC_BACKTRACE
- 
-  HAVE_FC_COMMAND_ARGUMENT      HAVE_FC_COMMAND_LINE        HAVE_FC_CONTIGUOUS
- 
-           HAVE_FC_CPUTIME              HAVE_FC_EXIT             HAVE_FC_FLUSH
- 
-             HAVE_FC_GAMMA            HAVE_FC_GETENV   HAVE_FC_IEEE_EXCEPTIONS
- 
-          HAVE_FC_INT_QUAD             HAVE_FC_IOMSG     HAVE_FC_ISO_C_BINDING
- 
-  HAVE_FC_ISO_FORTRAN_2008        HAVE_FC_LONG_LINES        HAVE_FC_MOVE_ALLOC
- 
-           HAVE_FC_PRIVATE         HAVE_FC_PROTECTED         HAVE_FC_STREAM_IO
- 
-            HAVE_FC_SYSTEM          HAVE_FORTRAN2003        HAVE_LIBPAW_ABINIT
- 
-      HAVE_LIBTETRA_ABINIT               HAVE_LINALG        HAVE_LINALG_SERIAL
- 
-             HAVE_OS_LINUX         HAVE_TIMER_ABINIT              USE_MACROAVE
- 
- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 - input  file    -> t03.in
 - output file    -> t03_x.out
 - root for input  files -> t03_xi
 - root for output files -> t03_xo
 
--instrng: 123 lines of input have been read from file t03.in
-
-
- Please give name of formatted atomic psp file
- iofn2 : for atom type 1, psp file is ../../../Psps_for_tests/ba.hpc.paw.xml
-
- Please give name of formatted atomic psp file
- iofn2 : for atom type 2, psp file is ../../../Psps_for_tests/ti.hpc.paw.xml
-
- Please give name of formatted atomic psp file
- iofn2 : for atom type 3, psp file is ../../../Psps_for_tests/o.hpc.paw.xml
 - inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ba.hpc.paw.xml
 - inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ti.hpc.paw.xml
 - inpspheads : Reading pseudopotential header in XML form from ../../../Psps_for_tests/o.hpc.paw.xml
 
- inpspheads: deduce mpsang = 3, n1xccc = 1.
- invars1 : treat image number: 1
-
- symlatt : the Bravais lattice is oP (primitive orthorhombic)
-  xred   is defined in input file
- ingeo: takes atomic coordinates from input array xred
-
- symlatt : the Bravais lattice is oP (primitive orthorhombic)
-
- symlatt : the Bravais lattice is oP (primitive orthorhombic)
- symspgr : spgroup=  47  Pm m m   (=D2h^1)
- ingeo: angdeg(1:3)=   90.00000000   90.00000000   90.00000000
- invars1 : treat image number: 1
-
- symlatt : the Bravais lattice is oP (primitive orthorhombic)
-  xred   is defined in input file
- ingeo: takes atomic coordinates from input array xred
-
- symlatt : the Bravais lattice is oP (primitive orthorhombic)
-
- symlatt : the Bravais lattice is oP (primitive orthorhombic)
- symspgr : spgroup=  47  Pm m m   (=D2h^1)
- ingeo: angdeg(1:3)=   90.00000000   90.00000000   90.00000000
- chkneu : initialized the occupation numbers for occopt=    1, spin-unpolarized or antiferromagnetic case :
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  0.00  0.00  0.00
-  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
- chkneu : initialized the occupation numbers for occopt=    1, spin-unpolarized or antiferromagnetic case :
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00
-  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  2.00  0.00  0.00  0.00
-  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
-
---- !WARNING
-src_file: m_mpi_setup.F90
-src_line: 181
-message: |
-    When ABINIT is compiled without MPI flag,
-    setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.
-    Action : modify compilation option or paral_kgb in the input file.
-...
-
-mpi_setup: mkmem  undefined in the input file.Use default mkmem  = nkpt
- mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
-mpi_setup: mkqmem undefined in the input file.Use default mkqmem = nkpt
- mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
-mpi_setup: mk1mem undefined in the input file.Use default mk1mem = nkpt
- mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
-getng is called for the coarse grid:
- For input ecut=  8.000000E+00 best grid ngfft=      60      40      20
-       max ecut=  8.636783E+00
-
- ==== FFT mesh ====
-  FFT mesh divisions ........................    60   40   20
-  Augmented FFT divisions ...................    61   41   20
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
- getmpw: optimal value of mpw= 2816
-getng is called for the fine grid:
- Using supplied coarse mesh as initial guess.
- For input ecut=  1.000000E+01 best grid ngfft=      72      45      24
-       max ecut=  1.045051E+01
-
- ==== FFT mesh ====
-  FFT mesh divisions ........................    72   45   24
-  Augmented FFT divisions ...................    73   45   24
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
-
---- !WARNING
-src_file: m_mpi_setup.F90
-src_line: 269
-message: |
-    For non ground state calculation, set bandpp, npfft, npband, npspinor npkpt and nphf to 1
-...
-
-mpi_setup: mkmem  undefined in the input file.Use default mkmem  = nkpt
- mpi_setup: With nkpt_me=1 and mkmem  = 1, ground state wf handled in core.
-mpi_setup: mkqmem undefined in the input file.Use default mkqmem = nkpt
- mpi_setup: With nkpt_me=1 and mkqmem = 1, ground state wf handled in core.
-mpi_setup: mk1mem undefined in the input file.Use default mk1mem = nkpt
- mpi_setup: With nkpt_me=1 and mk1mem = 1, ground state wf handled in core.
-getng is called for the coarse grid:
- For input ecut=  8.000000E+00 best grid ngfft=      60      40      20
-       max ecut=  8.315940E+00
-
- ==== FFT mesh ====
-  FFT mesh divisions ........................    60   40   20
-  Augmented FFT divisions ...................    61   41   20
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
- getmpw: optimal value of mpw= 2816
- getmpw: optimal value of mpw= 2824
-getng is called for the fine grid:
- Using supplied coarse mesh as initial guess.
- For input ecut=  1.000000E+01 best grid ngfft=      72      45      24
-       max ecut=  1.009728E+01
-
- ==== FFT mesh ====
-  FFT mesh divisions ........................    72   45   24
-  Augmented FFT divisions ...................    73   45   24
-  FFT algorithm .............................   112
-  FFT cache size ............................    16
-
  DATASET    1 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
-
- getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
-                      lmnmaxso=  18, lnmaxso=   6.
-memory : analysis of memory needs
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       0    ionmov =       0      iscf =      17    lmnmax =      18
@@ -292,16 +44,8 @@ P This job should need less than                      53.570 Mbytes of memory.
 _ WF disk file :      5.502 Mbytes ; DEN or POT disk file :      0.595 Mbytes.
 ================================================================================
 
- Biggest array : pawfgrtab%gylm(gr), with     10.8697 MBytes.
- memana : allocated an array of     10.870 Mbytes, for testing purposes.
- memana: allocated      53.570Mbytes, for testing purposes. 
- The job will continue.
 
  DATASET    2 : space group Pm m m (# 47); Bravais oP (primitive ortho.)
-
- getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
-                      lmnmaxso=  18, lnmaxso=   6.
- memorf : analysis of memory needs
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (RF).
      intxc =       0      iscf =       7    lmnmax =      18     lnmax =       6
@@ -318,10 +62,6 @@ P This job should need less than                     144.613 Mbytes of memory.
 _ WF disk file :      5.518 Mbytes ; DEN or POT disk file :      0.368 Mbytes.
 ================================================================================
 
- Biggest array : cg(disk), with      5.5176 MBytes.
- memana : allocated an array of      5.518 Mbytes, for testing purposes.
- memana: allocated     144.613Mbytes, for testing purposes. 
- The job will continue.
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -515,45 +255,20 @@ P          mk1mem           1
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
  chkinp: Checking input parameters for consistency, jdtset=   2.
- DATA TYPE INFORMATION: 
- REAL:      Data type name: REAL(DP) 
-            Kind value:      8
-            Precision:      15
-            Smallest nonnegligible quantity relative to 1:  0.22204460E-15
-            Smallest positive number:                       0.22250739-307
-            Largest representable number:                   0.17976931+309
- INTEGER:   Data type name: INTEGER(default) 
-            Kind value: 4
-            Bit size:   32
-            Largest representable number: 2147483647
- LOGICAL:   Data type name: LOGICAL 
-            Kind value: 4
- CHARACTER: Data type name: CHARACTER             Kind value: 1
-
-  ==== OpenMP parallelism is OFF ====
- 
-  MPI-IO support is OFF
 
 ================================================================================
 == DATASET  1 ==================================================================
 -   nproc =    1
 
-
---- !COMMENT
-src_file: m_xgScalapack.F90
-src_line: 244
-message: |
-    xgScalapack in auto mode
-...
-
-
- getdim_nloc : deduce lmnmax  =  18, lnmax  =   6,
-                      lmnmaxso=  18, lnmaxso=   6.
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
 
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 22.6767136  0.0000000  0.0000000  G(1)=  0.0440981  0.0000000  0.0000000
+ R(2)=  0.0000000 15.1178091  0.0000000  G(2)=  0.0000000  0.0661472  0.0000000
+ R(3)=  0.0000000  0.0000000  7.5589045  G(3)=  0.0000000  0.0000000  0.1322943
  Unit cell volume ucvol=  2.5913605E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
@@ -566,6 +281,8 @@ message: |
 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  72  45  24
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.04455
+
+--- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is ../../../Psps_for_tests/ba.hpc.paw.xml
 - pspatm: opening atomic psp file    ../../../Psps_for_tests/ba.hpc.paw.xml
 - pspatm : Reading pseudopotential header in XML form from ../../../Psps_for_tests/ba.hpc.paw.xml
@@ -584,7 +301,6 @@ message: |
  Radial grid used for pseudo valence density is grid 1
  Mesh size for Vloc has been set to 1341 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
- beta integral value:      -0.881134E+02
  pspatm: atomic psp has been read  and splines computed
 
 - pspini: atom type   2  psp file is ../../../Psps_for_tests/ti.hpc.paw.xml
@@ -605,7 +321,6 @@ message: |
  Radial grid used for pseudo valence density is grid 1
  Mesh size for Vloc has been set to  735 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
- beta integral value:      -0.271282E+02
  pspatm: atomic psp has been read  and splines computed
 
 - pspini: atom type   3  psp file is ../../../Psps_for_tests/o.hpc.paw.xml
@@ -626,124 +341,13 @@ message: |
  Radial grid used for pseudo valence density is grid 1
  Mesh size for Vloc has been set to 1762 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
- beta integral value:      -0.477232E+01
  pspatm: atomic psp has been read  and splines computed
 
    1.36968617E+05                                ecore*ucvol(ha*bohr**3)
- ==== Info on pseudopotentials ====
-  PAW calculation
-  Number of pseudopotentials ..    3
-  Number of types of atoms   ..    3
-  Scalar calculation (no spin-orbit term)
-  Nonlocal part applied using real spherical harmonics
-  Max number of non-local projectors over l and type   2
-  Highest angular momentum +1 .......   3
-  Max number of (l,n)   components ..   6
-  Max number of (l,m,n) components ..  18
+--------------------------------------------------------------------------------
 
- Pseudo-Core Charge Info: 
-   Number of radial points for pseudo-core charge ..    1
-   XC core-correction treatment (optnlxccc) ........    1
-   Radius for pseudo-core charge for each type ..... 
-
-  - Atom type    1 has pseudo-core radius .. 80.0000
-  - Atom type    2 has pseudo-core radius .. *******
-  - Atom type    3 has pseudo-core radius .. 80.0000
-
- Info on the Q-grid used for form factors in spline form: 
-   Number of q-points for radial functions ffspl ..   3001
-   Number of q-points for vlspl ...................   3229
-   vloc is computed in Reciprocal Space
-
-  XC functional for type 1 is 7
-  XC functional for type 2 is 7
-  XC functional for type 3 is 7
-
- wfconv:   128 bands initialized randomly with npw=  2816, for ikpt=     1
 _setup2: Arith. and geom. avg. npw (full set) are    2816.000    2816.000
- initro: for itypat=  1, take pseudo charge density from pp file
- initro: for itypat=  2, take pseudo charge density from pp file
- initro: for itypat=  3, take pseudo charge density from pp file
 
 ================================================================================
- FFT (fine) grid used in SCF cycle:
 
- getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  72  45  24
-         ecut(hartree)=     10.000   => boxcut(ratio)=   2.04455
- average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
-
- ****** Psp strength Dij in Ha (atom      1) *****
-   0.46421   0.07000  -0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00001  -0.00000 ...
-   0.07000   0.00987  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000 ...
-  -0.00000  -0.00000  -0.16085  -0.00000  -0.00000  -0.00497  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-  -0.00000  -0.00000  -0.00000  -0.16088  -0.00000  -0.00000  -0.00499  -0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-   0.00000   0.00000  -0.00000  -0.00000  -0.16088  -0.00000  -0.00000  -0.00499  -0.00000   0.00000  -0.00000  -0.00000 ...
-   0.00000  -0.00000  -0.00497  -0.00000  -0.00000  -1.13582  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000 ...
-   0.00000  -0.00000  -0.00000  -0.00499  -0.00000  -0.00000  -1.13586  -0.00000   0.00000   0.00000  -0.00000   0.00000 ...
-  -0.00000   0.00000  -0.00000  -0.00000  -0.00499  -0.00000  -0.00000  -1.13586  -0.00000   0.00000  -0.00000  -0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.03005  -0.00000   0.00000  -0.00000 ...
-  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.03005  -0.00000  -0.00000 ...
-  -0.00001  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.03006   0.00000 ...
-  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.03004 ...
-   ...  only 12  components have been written...
-
- ****** Psp strength Dij in Ha (atom     29) *****
-   0.61848  -1.82364   0.00000   0.00000  -0.00000  -0.00001  -0.00000   0.00001
-  -1.82364   5.44702  -0.00000  -0.00000   0.00000   0.00003   0.00000  -0.00003
-   0.00000  -0.00000  -0.33606   0.00000  -0.00000   1.05588  -0.00000   0.00001
-   0.00000  -0.00000   0.00000  -0.33457  -0.00000  -0.00000   1.04844   0.00000
-  -0.00000   0.00000  -0.00000  -0.00000  -0.33456   0.00001   0.00000   1.04843
-  -0.00001   0.00003   1.05588  -0.00000   0.00001  -0.81061   0.00000  -0.00004
-  -0.00000   0.00000  -0.00000   1.04844   0.00000   0.00000  -0.77505  -0.00000
-   0.00001  -0.00003   0.00001   0.00000   1.04843  -0.00004  -0.00000  -0.77501
-
-
- ITER STEP NUMBER     1
- vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
- istwf_k           1
- non-scf iterations; kpt #     1  , k= (  0.50000  0.50000  0.50000  ), band residuals:
- res:  1.42E+07  1.45E+07  1.89E+07  1.22E+07  1.68E+07  7.26E+06  5.93E+05  7.52E+05
- res:  5.06E+05  1.04E+06  5.61E+05  1.41E+06  5.86E+05  7.80E+05  6.72E+05  6.73E+05
- res:  1.06E+06  5.44E+05  5.39E+05  6.49E+05  4.32E+05  5.13E+05  4.99E+05  6.70E+05
- res:  2.13E+04  3.56E+04  6.14E+04  5.39E+04  2.95E+04  2.92E+04  4.47E+04  3.69E+04
- res:  3.56E+04  2.47E+04  4.08E+04  1.82E+04  3.78E+04  2.19E+04  3.96E+04  3.46E+04
- res:  3.07E+04  3.17E+04  2.53E+04  3.75E+04  1.62E+04  2.33E+04  3.74E+04  6.81E+03
- res:  8.71E+03  7.05E+03  7.04E+03  5.07E+03  3.92E+03  1.62E+03  7.43E+03  5.00E+03
- res:  4.15E+03  4.26E+03  1.65E+03  3.97E+03  3.01E+03  2.41E+03  3.89E+03  2.42E+03
- res:  1.22E+03  3.47E+02  6.96E+02  6.95E+02  7.82E+02  7.37E+02  1.52E+03  1.20E+03
- res:  1.66E+03  1.42E+03  9.64E+02  2.03E+03  3.64E+03  1.76E+03  2.42E+03  3.39E+03
- res:  3.99E+03  4.34E+03  5.76E+03  3.71E+03  6.09E+03  3.63E+03  1.13E+04  9.02E+03
- res:  8.03E+03  4.35E+03  1.18E+04  1.25E+04  2.24E+04  1.41E+04  2.74E+04  2.21E+04
- res:  2.08E+04  3.62E+04  9.86E+04  2.11E+05  2.21E+05  2.03E+05  2.23E+05  2.87E+05
- res:  4.07E+05  1.05E+06  8.99E+05  8.36E+05  1.61E+06  5.89E+05  9.37E+05  2.64E+06
- res:  1.32E+06  1.33E+06  2.97E+06  2.70E+06  3.05E+06  3.03E+06  3.90E+06  7.26E+06
- res:  5.91E+06  4.43E+06  6.04E+06  5.42E+06  9.79E+06  1.03E+07  1.21E+07  1.54E+07
- ene: -8.54E+00 -8.54E+00 -8.54E+00 -8.54E+00 -8.53E+00 -8.53E+00 -2.09E+00 -2.09E+00
- ene: -2.09E+00 -2.09E+00 -2.09E+00 -2.08E+00 -2.08E+00 -2.08E+00 -2.08E+00 -2.07E+00
- ene: -2.07E+00 -2.07E+00 -2.06E+00 -2.06E+00 -2.05E+00 -2.04E+00 -2.03E+00 -2.02E+00
- ene: -5.04E-01 -5.03E-01 -5.01E-01 -5.00E-01 -4.96E-01 -4.94E-01 -4.90E-01 -4.85E-01
- ene: -4.84E-01 -4.81E-01 -4.79E-01 -4.76E-01 -4.73E-01 -4.69E-01 -4.68E-01 -4.61E-01
- ene: -4.57E-01 -4.53E-01 -4.47E-01 -4.45E-01 -4.35E-01 -4.28E-01 -3.95E-01 -1.94E-01
- ene: -1.88E-01 -1.86E-01 -1.83E-01 -1.81E-01 -1.78E-01 -1.71E-01 -1.69E-01 -1.67E-01
- ene: -1.62E-01 -1.54E-01 -1.51E-01 -1.47E-01 -1.36E-01 -1.27E-01 -1.23E-01 -1.11E-01
- ene: -8.54E-02  4.45E-02  5.73E-02  7.12E-02  7.32E-02  8.14E-02  8.80E-02  9.61E-02
- ene:  1.01E-01  1.06E-01  1.16E-01  1.21E-01  1.27E-01  1.28E-01  1.33E-01  1.44E-01
- ene:  1.52E-01  1.64E-01  1.76E-01  1.79E-01  1.88E-01  2.03E-01  2.19E-01  2.36E-01
- ene:  2.44E-01  2.60E-01  2.84E-01  3.09E-01  3.29E-01  3.52E-01  3.92E-01  4.16E-01
- ene:  4.33E-01  4.72E-01  9.93E-01  1.08E+00  1.24E+00  1.35E+00  1.53E+00  1.85E+00
- ene:  2.07E+00  2.32E+00  2.53E+00  2.73E+00  2.94E+00  3.25E+00  3.40E+00  3.78E+00
- ene:  3.90E+00  4.40E+00  4.65E+00  4.93E+00  5.44E+00  5.91E+00  6.02E+00  6.42E+00
- ene:  6.50E+00  6.87E+00  7.39E+00  7.47E+00  7.74E+00  8.24E+00  8.47E+00  8.83E+00
-
---- !ERROR
-src_file: m_vtowfk.F90
-src_line: 1159
-mpi_rank: 0
-message: |
-    The eigenvector with band 2 has zero norm.
-    This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)
-    Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut
-...
-
-
- abi_abort: decision taken to exit ...
+     iter   Etot(hartree)      deltaE(h)  residm     nres2

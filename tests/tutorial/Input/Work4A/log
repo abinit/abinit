@@ -24,7 +24,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1181
 message: |
-    Renaming old tbase4_x.out to tbase4_x.out0619
+    Renaming old tbase4_x.out to tbase4_x.out0621
 ...
 
 
@@ -43,8 +43,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 28 Jan 2019.
-- ( at 10h28 )
+.Starting date : Tue 29 Jan 2019.
+- ( at 13h50 )
   
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -406,8 +406,64 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
  istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  2.71E-02  6.88E-01  1.04E+00
  ene:  9.18E-02  2.59E-01  4.77E-01
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  2.07E-01  1.54E-01  2.90E-02
  ene:  9.02E-02  2.50E-01  4.35E-01
      eigenvalues (hartree) for    3  bands
@@ -415,8 +471,64 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
   9.0194E-02  2.4997E-01  4.3533E-01
  istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  8.60E-01  7.59E+00  1.52E+00
  ene: -7.27E-02  4.16E-01  7.37E-01
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  6.72E-01  1.07E+00  2.18E-02
  ene: -7.29E-02  4.05E-01  7.03E-01
      eigenvalues (hartree) for    3  bands
@@ -449,8 +561,64 @@ Simple mixing update:
  vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 2
  istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  1.75E-01  9.53E-02  6.91E-03
  ene:  9.02E-02  2.49E-01  4.25E-01
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  1.65E-01  8.38E-02  3.59E-03
  ene:  9.02E-02  2.49E-01  4.22E-01
      eigenvalues (hartree) for    3  bands
@@ -458,8 +626,64 @@ Simple mixing update:
   9.0229E-02  2.4888E-01  4.2165E-01
  istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  5.83E-01  8.28E-01  7.25E-03
  ene: -7.28E-02  4.04E-01  6.91E-01
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  6.04E-01  7.48E-01  4.16E-03
  ene: -7.28E-02  4.04E-01  6.88E-01
      eigenvalues (hartree) for    3  bands
@@ -492,6 +716,34 @@ mkrho: echo density (plane-wave part only)
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 3
  istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  1.63E-01  7.93E-02  2.63E-03
  ene:  9.01E-02  2.49E-01  4.19E-01
      eigenvalues (hartree) for    3  bands
@@ -499,6 +751,34 @@ mkrho: echo density (plane-wave part only)
   9.0145E-02  2.4873E-01  4.1945E-01
  istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  5.65E-01  2.60E+00  3.33E-03
  ene: -7.29E-02  4.04E-01  6.86E-01
      eigenvalues (hartree) for    3  bands
@@ -531,6 +811,34 @@ mkrho: echo density (plane-wave part only)
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 4
  istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  1.58E-01  7.71E-02  2.01E-03
  ene:  9.02E-02  2.49E-01  4.18E-01
      eigenvalues (hartree) for    3  bands
@@ -538,6 +846,34 @@ mkrho: echo density (plane-wave part only)
   9.0159E-02  2.4874E-01  4.1820E-01
  istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  5.92E-01  8.31E-01  2.62E-03
  ene: -7.29E-02  4.04E-01  6.85E-01
      eigenvalues (hartree) for    3  bands
@@ -570,6 +906,34 @@ mkrho: echo density (plane-wave part only)
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 5
  istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  1.57E-01  7.70E-02  1.70E-03
  ene:  9.02E-02  2.49E-01  4.17E-01
      eigenvalues (hartree) for    3  bands
@@ -577,6 +941,34 @@ mkrho: echo density (plane-wave part only)
   9.0158E-02  2.4874E-01  4.1730E-01
  istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  5.65E-01  2.55E+00  2.32E-03
  ene: -7.29E-02  4.04E-01  6.85E-01
      eigenvalues (hartree) for    3  bands
@@ -609,6 +1001,34 @@ mkrho: echo density (plane-wave part only)
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 6
  istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          90
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  1.52E-01  8.02E-02  1.43E-03
  ene:  9.02E-02  2.49E-01  4.17E-01
      eigenvalues (hartree) for    3  bands
@@ -616,6 +1036,34 @@ mkrho: echo density (plane-wave part only)
   9.0159E-02  2.4874E-01  4.1663E-01
  istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           6
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:          89
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           1
+ divResult rows:           3
+ divResult cols:           1
+ divResult space:           2
+ NEIGENPAIRS:            3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
+ XG INIT SPACE:           2
+ XG INIT ROWS:           3
+ XG INIT COLS:           3
  res:  4.16E-01  7.56E-01  1.94E-03
  ene: -7.29E-02  4.04E-01  6.84E-01
      eigenvalues (hartree) for    3  bands
@@ -649,7 +1097,7 @@ mkrho: echo density (plane-wave part only)
   sigma(3 3)=  5.60983939E-05  sigma(2 1)=  0.00000000E+00
 
  fftdatar_write: About to write data to: tbase4_xo_TIM1_DEN with iomode IO_MODE_FORTRAN
- IO operation completed. cpu_time:       0.1 [s], walltime:       0.0 [s]
+ IO operation completed. cpu_time:       0.0 [s], walltime:       0.0 [s]
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -677,7 +1125,7 @@ mkrho: echo density (plane-wave part only)
   4.16E-01 7.56E-01 1.94E-03
 
  outwf: write wavefunction to file tbase4_xo_WFK, with iomode -1
- outwf with iomode: -1, cpu_time:     0.32[s], walltime:     0.03 [s]
+ outwf with iomode: -1, cpu_time:     0.00[s], walltime:     0.00 [s]
  prteigrs : about to open file tbase4_xo_EIG
  Fermi (or HOMO) energy (hartree) =   0.26283   Average Vxc (hartree)=  -0.34575
  Eigenvalues (hartree) for nkpt=   2  k points:
@@ -780,7 +1228,7 @@ P           mkmem           2
  timana : WARNING -
   One among cpu, wall and ncount is negative.
   Timing section # 140, name :  dfpt_cgwf-O(npw)                
-  CPU =   -3.317833E-03, Wall=   -9.999997E-04 ncount=    -1 flops=    0.000000E+00
+  CPU =   -3.912210E-03, Wall=    0.000000E+00 ncount=    -1 flops=    0.000000E+00
 
 ================================================================================
 
@@ -862,9 +1310,9 @@ P           mkmem           2
 --- !FinalSummary
 program: abinit
 version: 8.9.4
-start_datetime: Mon Jan 28 10:28:37 2019
-end_datetime: Mon Jan 28 10:28:37 2019
-overall_cpu_time:           3.0
+start_datetime: Tue Jan 29 13:50:10 2019
+end_datetime: Tue Jan 29 13:50:11 2019
+overall_cpu_time:           3.6
 overall_wall_time:           0.5
 exit_requested_by_user: no 
 timelimit: 0

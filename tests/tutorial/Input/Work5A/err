@@ -1,22 +1,11 @@
 
- chkint_prt: ERROR -
- Context: the value of the variable usepaw is 1.
-  The value of the input variable wfoptalg is 111, while it must be
-  equal to one of the following: 0 1 4 10 14 114
-  Action: you should change the input variable wfoptalg.
-
- chkint_prt: ERROR -
- Context: the value of the variable usepaw is 1.
-  The value of the input variable wfoptalg is 111, while it must be
-  equal to one of the following: 0 1 4 10 14 114
-  Action: you should change the input variable wfoptalg.
-
 --- !ERROR
-src_file: m_chkinp.F90
-src_line: 3625
+src_file: m_vtowfk.F90
+src_line: 1159
 mpi_rank: 0
 message: |
-    Checking consistency of input data against itself gave 2 inconsistencies.
-    The details of the problems can be found above.
+    The eigenvector with band 2 has zero norm.
+    This usually happens when the number of bands (nband) is comparable to the number of planewaves (mpw)
+    Action: Check the parameters of the calculation. If nband ~ mpw, then decrease nband or, alternatively, increase ecut
 ...
 
