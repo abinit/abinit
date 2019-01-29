@@ -160,7 +160,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
  type(transport_rta_t) :: transport_rta
  type(wfd_t) :: wfd
  real(dp) :: ecut
- integer :: ierr
+ integer :: ierr, my_rank
  integer :: nsppol, nspinor, nkpt, nspden
 #ifdef HAVE_NETCDF
  integer :: ncid
@@ -170,6 +170,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
+ my_rank = xmpi_comm_rank(comm)
  write(*,*) 'Transport computation driver'
 
  sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr,keep_open=.true.)
@@ -182,12 +183,16 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
  call transport_rta_compute(transport_rta,cryst,dtset,comm)
 
  ! Master creates the netcdf file used to store the results of the calculation.
- path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
- NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
- call transport_rta_ncwrite(transport_rta, cryst, ncid)
+#ifdef HAVE_NETCDF
+ if (my_rank == 1) then
+   path = strcat(dtfil%filnam_ds(4), "_TRANSPORT.nc")
+   NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+   call transport_rta_ncwrite(transport_rta, cryst, ncid)
 
- ! Close the netcdf file
- NCF_CHECK(nf90_close(ncid))
+   ! Close the netcdf file
+   NCF_CHECK(nf90_close(ncid))
+ end if
+#endif
 
 end subroutine transport
 
