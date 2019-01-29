@@ -4223,8 +4223,8 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  ABI_CALLOC(out_vecsdos,  (nw, 2, 0:ebands%nsppol, 3, nvecs))
  ABI_CALLOC(out_tensdos,  (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
 
- call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout(std_out, "Computing DOS weighted by matrix elements.")
+! call cwtime(cpu_all, wall_all, gflops_all, "start")
+! call wrtout(std_out, "Computing DOS weighted by matrix elements.")
 
 select case (intmeth)
  case (1)
@@ -4306,7 +4306,6 @@ select case (intmeth)
        if (present(emin) .and. all(tmp_eigen<emin)) cycle
        if (present(emax) .and. all(tmp_eigen>emax)) cycle
 
-       write(*,*) band,'\',ebands%nband(1)
        call tetra_blochl_weights(tetra, tmp_eigen, min_ene, max_ene, max_occ1, nw, ebands%nkpt, &
          bcorr, wdt(:,:,2), wdt(:,:,1), comm)
 
@@ -4365,9 +4364,9 @@ select case (intmeth)
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
  end select
 
- call cwtime(cpu_all, wall_all, gflops_all, "stop")
- call wrtout(std_out, sjoin("Computation of DOS weighted by matrix elements completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
-   sec2str(wall_all)), do_flush=.True.)
+! call cwtime(cpu_all, wall_all, gflops_all, "stop")
+! call wrtout(std_out, sjoin("Computation of DOS weighted by matrix elements completed. cpu-time:", sec2str(cpu_all), ",wall-time:", &
+!   sec2str(wall_all)), do_flush=.True.)
 
  ! Compute total DOS and IDOS
  !max_occ = two / (ebands%nspinor*ebands%nsppol)
