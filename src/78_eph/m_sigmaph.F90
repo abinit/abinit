@@ -1548,6 +1548,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
      call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, dtset%prtvol, comm)
+
+     if (sigma%calc_mrta) then
+       ABI_FREE(alpha_mrta)
+     end if
+
    end do ! spin
 
    ABI_FREE(kg_k)
@@ -1555,9 +1560,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
-   if (sigma%calc_mrta) then
-     ABI_FREE(alpha_mrta)
-   end if
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
