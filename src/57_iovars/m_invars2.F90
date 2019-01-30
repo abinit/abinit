@@ -3261,7 +3261,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(rmquotes(key_value)))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
-   MSG_ERROR(sjoin("wfk_task must be specified when optdriver=",itoa(dtset%optdriver)))
+   MSG_ERROR(sjoin("A valida wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
 
  ABI_DEALLOCATE(intarr)

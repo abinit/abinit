@@ -282,6 +282,7 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_EINTERP   = 4
  integer,public,parameter :: WFK_TASK_DDK       = 5
  integer,public,parameter :: WFK_TASK_DDK_DIAGO = 6
+ integer,public,parameter :: WFK_TASK_KLIST2MESH= 7
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -391,8 +392,6 @@ CONTAINS  !=====================================================================
 
  subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
@@ -433,8 +432,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -528,10 +525,7 @@ end subroutine print_kinds
 
  integer pure function str2wfktask(str) result(wfk_task)
 
- implicit none
-
 !Arguments ------------------------------------
-!scalars
  character(len=*),intent(in) :: str
 
 !************************************************************************
@@ -549,6 +543,8 @@ end subroutine print_kinds
    wfk_task = WFK_TASK_DDK
  case ("wfk_ddk_diago")
    wfk_task = WFK_TASK_DDK_DIAGO
+ case ("wfk_klist2mesh")
+   wfk_task = WFK_TASK_KLIST2MESH
  case default
    wfk_task = WFK_TASK_NONE
  end select

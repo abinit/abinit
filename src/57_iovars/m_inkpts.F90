@@ -458,9 +458,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 !The k point number has been computed, and, if nkpt/=0, also the list of k points.
 !Also nkpthf has been computed, and, if nkpt/=0, also the list kpthf.
 
-! Now read kptrlatt_fine, shiftk_fine and nshiftk_fine
-
 #if 0
+ ! Now read kptrlatt_fine, shiftk_fine and nshiftk_fine
  ! Read ngkpt_fine
  ngkpt_fine = 0; nshiftk_fine = 1; shiftk_fine = zero
 
@@ -515,7 +514,8 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    call intagm(dprarr,intarr,jdtset,marr,nkpt,string(1:lenstr),'istwfk',tread,'INT')
    if(tread==1) istwfk(1:nkpt)=intarr(1:nkpt)
 
-   if(response==1)istwfk(1:nkpt)=1 !  Impose istwfk=1 for RF calculations
+!  Impose istwfk=1 for RF calculations
+   if(response==1)istwfk(1:nkpt)=1
 
 !  Also impose istwfk=1 for spinor calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nspinor',tread,'INT')

@@ -2161,7 +2161,7 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
  stmbias_local=zero; if (PRESENT(stmbias)) stmbias_local=stmbias
 
  if (ebands_has_metal_scheme(ebands)) then
-   !  If occupation is metallic have to compute new occupation numbers.
+   ! If occupation is metallic have to compute new occupation numbers.
    if (my_prtvol > 10) then
      write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
      call wrtout(std_out,msg,'COLL')
