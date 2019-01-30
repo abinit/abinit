@@ -3762,45 +3762,37 @@ end function ebands_downsample
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_chop(self, nband) result(new)
+type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
 
 !Arguments ------------------------------------
 !scalars
- type(ebands_t),intent(in) :: self
- integer,intent(in) :: nband(self%nkpt*self%nsppol)
+ class(ebands_t),intent(in)  :: self
+ integer :: bstart, bstop
 
-!Local variables-------------------------------
-!scalars
- integer :: nkpt, nsppol, bantot
- character(len=500) :: msg
-!arrays
- real(dp),allocatable :: doccde(:), eig(:), occ(:)
+!Local variables ------------------------------
+ integer :: mband, nkpt, nsppol
 
-! *********************************************************************
+! First copy the bands
+ call ebands_copy(self,new)
 
- ! Copy important dimensions
- nkpt = self%nkpt
+! Now chop them
+ ABI_FREE(new%eig)
+ ABI_FREE(new%occ)
+ ABI_FREE(new%doccde)
+
+ mband  = bstop-bstart+1
+ write(*,*) mband
+ nkpt   = self%nkpt
  nsppol = self%nsppol
- bantot = sum(nband)
+ ABI_MALLOC(new%eig,(mband,nkpt,nsppol))
+ ABI_MALLOC(new%occ,(mband,nkpt,nsppol))
+ ABI_MALLOC(new%doccde,(mband,nkpt,nsppol))
 
- ! Have to pack data to call ebands_init (I wonder who decided to use vectors!)
- ABI_MALLOC(doccde, (bantot))
- ABI_MALLOC(eig, (bantot))
- ABI_MALLOC(occ, (bantot))
-
- call pack_eneocc(nkpt, nsppol, self%mband, nband, bantot, self%doccde, doccde)
- call pack_eneocc(nkpt, nsppol, self%mband, nband, bantot, self%eig, eig)
- call pack_eneocc(nkpt, nsppol, self%mband, nband, bantot, self%occ, occ)
-
- ! This is basically a copy of the ebands structure
- bantot = sum(nband)
- call ebands_init(bantot,new,self%nelect,doccde,eig,self%istwfk,self%kptns,&
-   nband,nkpt,self%npwarr,self%nsppol,self%nspinor,self%tphysel,self%tsmear,&
-   self%occopt,occ,self%wtk,self%charge, self%kptopt, self%kptrlatt_orig, &
-   self%nshiftk_orig, self%shiftk_orig, &
-   self%kptrlatt, self%nshiftk, self%shiftk)
-
- new%fermie = self%fermie
+ new%mband  = mband
+ new%nband  = mband
+ new%eig    = self%eig(bstart:bstop,:,:)
+ new%occ    = self%occ(bstart:bstop,:,:)
+ new%doccde = self%doccde(bstart:bstop,:,:)
 
 end function ebands_chop
 !!***

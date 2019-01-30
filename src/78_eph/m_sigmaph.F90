@@ -2884,11 +2884,8 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
 
  ! Allocate using only the relevant bands for transport
  ! includin valence states to allow to compute different doping
- ABI_MALLOC(nband,(nkpt*nsppol))
  mband = maxval(self%bstop_ks)
- nband = mband
- new = ebands_chop(ebands, nband)
- ABI_FREE(nband)
+ new = ebands_chop(ebands, 1, mband)
 
 #ifdef HAVE_NETCDF
  has_mrta = .true.
