@@ -823,24 +823,24 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do
  
 !Allocate the quadrupole tensor part depending on the wave functions
-ABI_ALLOCATE(qdrpwf,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_k,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t1,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t1_k,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t2,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t2_k,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t3,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t3_k,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t4,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t4_k,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t5,(2,natpert,nq2grad,nq1grad))
-ABI_ALLOCATE(qdrpwf_t5_k,(2,natpert,nq2grad,nq1grad))
-qdrpwf=zero
-qdrpwf_t1=zero
-qdrpwf_t2=zero
-qdrpwf_t3=zero
-qdrpwf_t4=zero
-qdrpwf_t5=zero
+ ABI_ALLOCATE(qdrpwf,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_k,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t1,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t1_k,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t2,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t2_k,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t3,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t3_k,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t4,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t4_k,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t5,(2,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(qdrpwf_t5_k,(2,natpert,nq2grad,nq1grad))
+ qdrpwf=zero
+ qdrpwf_t1=zero
+ qdrpwf_t2=zero
+ qdrpwf_t3=zero
+ qdrpwf_t4=zero
+ qdrpwf_t5=zero
 
 !LOOP OVER SPINS
  bdtot_index=0
@@ -1664,6 +1664,12 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp) :: kpoint(3)
  real(dp),allocatable :: cg(:,:),doccde_rbz(:)
  real(dp),allocatable :: ddmdq_qgradhart(:,:,:,:)
+ real(dp),allocatable :: ddmdqwf(:,:,:,:),ddmdqwf_k(:,:,:,:)
+ real(dp),allocatable :: ddmdqwf_t1(:,:,:,:),ddmdqwf_t1_k(:,:,:,:)
+ real(dp),allocatable :: ddmdqwf_t2(:,:,:,:),ddmdqwf_t2_k(:,:,:,:)
+ real(dp),allocatable :: ddmdqwf_t3(:,:,:,:),ddmdqwf_t3_k(:,:,:,:)
+ real(dp),allocatable :: ddmdqwf_t4(:,:,:,:),ddmdqwf_t4_k(:,:,:,:)
+ real(dp),allocatable :: ddmdqwf_t5(:,:,:,:),ddmdqwf_t5_k(:,:,:,:)
  real(dp),allocatable :: eigen0(:)
  real(dp),allocatable :: elflexowf(:,:,:,:,:),elflexowf_k(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_t1(:,:,:,:,:),elflexowf_t1_k(:,:,:,:,:)
@@ -2447,25 +2453,49 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    end do
  end if
 
-!Allocate the flexoelectric tensor part depending on the wave functions
- ABI_ALLOCATE(elflexowf,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_k,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t1,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t1_k,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t2,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t2_k,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t3,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t3_k,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t4,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t4_k,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t5,(2,3,3,3,3))
- ABI_ALLOCATE(elflexowf_t5_k,(2,3,3,3,3))
- elflexowf=zero
- elflexowf_t1=zero
- elflexowf_t2=zero
- elflexowf_t3=zero
- elflexowf_t4=zero
- elflexowf_t5=zero
+!Allocate the electronic flexoelectric tensor part depending on the wave functions
+ if (lw_flexo==1.or.lw_flexo==2) then
+   ABI_ALLOCATE(elflexowf,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_k,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t1,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t1_k,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t2,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t2_k,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t3,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t3_k,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t4,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t4_k,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t5,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexowf_t5_k,(2,3,3,3,3))
+   elflexowf=zero
+   elflexowf_t1=zero
+   elflexowf_t2=zero
+   elflexowf_t3=zero
+   elflexowf_t4=zero
+   elflexowf_t5=zero
+ end if
+
+!Allocate arrays for wf contributions to the first q-gradient of the dynamical matrix
+ if (lw_flexo==1.or.lw_flexo==3) then 
+   ABI_ALLOCATE(ddmdqwf,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_k,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t1,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t1_k,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t2,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t2_k,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t3,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t3_k,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t4,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t4_k,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t5,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdqwf_t5_k,(2,natpert,natpert,nq1grad))
+   ddmdqwf=zero
+   ddmdqwf_t1=zero
+   ddmdqwf_t2=zero
+   ddmdqwf_t3=zero
+   ddmdqwf_t4=zero
+   ddmdqwf_t5=zero
+ end if
 
 !LOOP OVER SPINS
  bdtot_index=0
@@ -2512,24 +2542,47 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        end if
      end if
 
-     call dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
-     &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
-     &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
-     &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
-     &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz, &
-     &  npw_k,nq1grad, &
-     &  nq1q2grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
-     &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
-     &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
-     &  wfk_t_dkdk,wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
+!    Compute the wf contributions to the electronic flexoelectric tensor
+     if (lw_flexo==1.or.lw_flexo==2) then
+       call dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
+       &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
+       &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
+       &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
+       &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz, &
+       &  npw_k,nq1grad,nq1q2grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
+       &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
+       &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
+       &  wfk_t_dkdk,wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
 
-!    Add the contribution from each k-point
-     elflexowf=elflexowf + elflexowf_k
-     elflexowf_t1=elflexowf_t1 + elflexowf_t1_k
-     elflexowf_t2=elflexowf_t2 + elflexowf_t2_k
-     elflexowf_t3=elflexowf_t3 + elflexowf_t3_k
-     elflexowf_t4=elflexowf_t4 + elflexowf_t4_k
-     elflexowf_t5=elflexowf_t5 + elflexowf_t5_k
+!      Add the contribution from each k-point
+       elflexowf=elflexowf + elflexowf_k
+       elflexowf_t1=elflexowf_t1 + elflexowf_t1_k
+       elflexowf_t2=elflexowf_t2 + elflexowf_t2_k
+       elflexowf_t3=elflexowf_t3 + elflexowf_t3_k
+       elflexowf_t4=elflexowf_t4 + elflexowf_t4_k
+       elflexowf_t5=elflexowf_t5 + elflexowf_t5_k
+     end if
+
+!    Compute the wf contributions to the first q-gradient of the dynamical matrix
+     if (lw_flexo==1.or.lw_flexo==3) then
+       call dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k, &
+       &  ddmdqwf_t3_k,ddmdqwf_t4_k,ddmdqwf_t5_k,dtset, &
+       &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
+       &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
+       &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
+       &  npw_k,nq1grad,nspden,nsppol,nylmgr,occ_k, &
+       &  pert_atdis,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
+       &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk, &
+       &  wtk_k,xred,ylm_k,ylmgr_k)
+     end if
+
+!      Add the contribution from each k-point
+       ddmdqwf=ddmdqwf + ddmdqwf_k
+       ddmdqwf_t1=ddmdqwf_t1 + ddmdqwf_t1_k
+       ddmdqwf_t2=ddmdqwf_t2 + ddmdqwf_t2_k
+       ddmdqwf_t3=ddmdqwf_t3 + ddmdqwf_t3_k
+       ddmdqwf_t4=ddmdqwf_t4 + ddmdqwf_t4_k
+       ddmdqwf_t5=ddmdqwf_t5 + ddmdqwf_t5_k
 
 !    Keep track of total number of bands
      bdtot_index=bdtot_index+nband_k
@@ -2588,11 +2641,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Gather the different terms in the flexoelectric tensor and print them out
  if (me==0) then
- filnam=dtfil%filnam_ds(4)
- call dfpt_flexoout(elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
-    & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-    & elqgradhart,gprimd,dtset%kptopt,matom,nefipert, &
-    & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
+   if (lw_flexo==1.or.lw_flexo==2) then
+   call dfpt_flexoout(elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+      & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
+      & elqgradhart,gprimd,dtset%kptopt,lw_flexo,matom,nefipert, &
+      & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
+   end if
  end if
 
 !Deallocattions
@@ -2609,10 +2663,34 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_DEALLOCATE(elflexoflg)
    ABI_DEALLOCATE(wfk_t_efield)
    ABI_DEALLOCATE(wfk_t_dkdk)
+   ABI_DEALLOCATE(elflexowf)
+   ABI_DEALLOCATE(elflexowf_k)
+   ABI_DEALLOCATE(elflexowf_t1)
+   ABI_DEALLOCATE(elflexowf_t1_k)
+   ABI_DEALLOCATE(elflexowf_t2)
+   ABI_DEALLOCATE(elflexowf_t2_k)
+   ABI_DEALLOCATE(elflexowf_t3)
+   ABI_DEALLOCATE(elflexowf_t3_k)
+   ABI_DEALLOCATE(elflexowf_t4)
+   ABI_DEALLOCATE(elflexowf_t4_k)
+   ABI_DEALLOCATE(elflexowf_t5)
+   ABI_DEALLOCATE(elflexowf_t5_k)
  end if
  if (lw_flexo==1.or.lw_flexo==3) then 
    ABI_DEALLOCATE(ddmdq_qgradhart)
    ABI_DEALLOCATE(ddmdq_flg)
+   ABI_DEALLOCATE(ddmdqwf)
+   ABI_DEALLOCATE(ddmdqwf_k)
+   ABI_DEALLOCATE(ddmdqwf_t1)
+   ABI_DEALLOCATE(ddmdqwf_t1_k)
+   ABI_DEALLOCATE(ddmdqwf_t2)
+   ABI_DEALLOCATE(ddmdqwf_t2_k)
+   ABI_DEALLOCATE(ddmdqwf_t3)
+   ABI_DEALLOCATE(ddmdqwf_t3_k)
+   ABI_DEALLOCATE(ddmdqwf_t4)
+   ABI_DEALLOCATE(ddmdqwf_t4_k)
+   ABI_DEALLOCATE(ddmdqwf_t5)
+   ABI_DEALLOCATE(ddmdqwf_t5_k)
  end if 
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
    ABI_DEALLOCATE(pert_strain)
@@ -2635,18 +2713,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
  ABI_DEALLOCATE(wfk_t_ddk)
- ABI_DEALLOCATE(elflexowf)
- ABI_DEALLOCATE(elflexowf_k)
- ABI_DEALLOCATE(elflexowf_t1)
- ABI_DEALLOCATE(elflexowf_t1_k)
- ABI_DEALLOCATE(elflexowf_t2)
- ABI_DEALLOCATE(elflexowf_t2_k)
- ABI_DEALLOCATE(elflexowf_t3)
- ABI_DEALLOCATE(elflexowf_t3_k)
- ABI_DEALLOCATE(elflexowf_t4)
- ABI_DEALLOCATE(elflexowf_t4_k)
- ABI_DEALLOCATE(elflexowf_t5)
- ABI_DEALLOCATE(elflexowf_t5_k)
  if(xmpi_paral==1) then
    ABI_DEALLOCATE(mpi_enreg%proc_distrb)
  end if
@@ -2684,6 +2750,7 @@ end subroutine dfpt_flexo
 !!  elflexowf_t5(2,3,3,3,3)=term 5 of the wave function contribution 
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
+!!  lw_flexo= parameter that selects which lw magnitudes are calculated
 !!  matom=number of atoms 
 !!  nefipert=number of electric field perturbations
 !!  nstrpert=number of strain perturbations
@@ -2713,7 +2780,7 @@ end subroutine dfpt_flexo
 
  subroutine dfpt_flexoout(elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
     & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-    & elqgradhart,gprimd,kptopt,matom,nefipert,&
+    & elqgradhart,gprimd,kptopt,lw_flexo,matom,nefipert,&
     & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
 
 
@@ -2727,7 +2794,7 @@ end subroutine dfpt_flexo
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,matom,nefipert,nstrpert,nq1grad,prtvol
+ integer,intent(in) :: kptopt,lw_flexo,matom,nefipert,nstrpert,nq1grad,prtvol
  real(dp),intent(in) :: ucvol
 
 !arrays
