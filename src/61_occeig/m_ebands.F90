@@ -3781,7 +3781,6 @@ type(ebands_t) function ebands_chop(self, bstart, bstop) result(new)
  ABI_FREE(new%doccde)
 
  mband  = bstop-bstart+1
- write(*,*) mband
  nkpt   = self%nkpt
  nsppol = self%nsppol
  ABI_MALLOC(new%eig,(mband,nkpt,nsppol))
