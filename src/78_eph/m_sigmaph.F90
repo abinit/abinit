@@ -1555,7 +1555,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
-   if (sigma%calc_mrta) ABI_FREE(alpha_mrta)
+   if (sigma%calc_mrta) then
+     ABI_FREE(alpha_mrta)
+   end if
 
    call cwtime_report(" One ikcalc k-point", cpu_ks, wall_ks, gflops_ks)
  end do ! ikcalc
