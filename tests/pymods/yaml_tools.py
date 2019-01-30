@@ -13,6 +13,10 @@ def yaml_map(Cls):
     '''
         Register a class as a known tag for YAML.
         The class must expose methods from_map and to_map.
+        from_map must return a valid instance of Cls.
+        It can be a classmethod, a staticmethod or a normal
+        method but in the last case 'Cls()' must be a valid
+        initialisation.
     '''
     tag = '!' + getattr(Cls, Cls.__name__ + '_yaml_tag', Cls.__name__)
 
@@ -36,6 +40,10 @@ def yaml_seq(Cls):
     '''
         Register a class as a known tag for YAML.
         The class must expose methods from_seq and to_seq.
+        from_seq must return a valid instance of Cls.
+        It can be a classmethod, a staticmethod or a normal
+        method but in the last case 'Cls()' must be a valid
+        initialisation.
     '''
     tag = '!' + getattr(Cls, Cls.__name__ + '_yaml_tag', Cls.__name__)
 
@@ -59,6 +67,10 @@ def yaml_scalar(Cls):
     '''
         Register a class as a known tag for YAML.
         The class must expose methods from_scalar to_scalar.
+        from_scalar must return a valid instance of Cls.
+        It can be a classmethod, a staticmethod or a normal
+        method but in the last case 'Cls()' must be a valid
+        initialisation.
     '''
     tag = '!' + getattr(Cls, Cls.__name__ + '_yaml_tag', Cls.__name__)
 

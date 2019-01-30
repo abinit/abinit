@@ -129,3 +129,17 @@ class SelfTolerenced(float):
 
     def to_scalar(self):
         return str(self) + '~' + str(self.tol)
+
+    def __add__(self, other):
+        val = self.real + other.real
+        tol = self.tol
+        if hasattr(other, 'tol'):
+            tol += other.tol
+        return SelfTolerenced(val, tol)
+
+    def __radd__(self, other):
+        val = self.real + other.real
+        tol = self.tol
+        if hasattr(other, 'tol'):
+            tol += other.tol
+        return SelfTolerenced(val, tol)
