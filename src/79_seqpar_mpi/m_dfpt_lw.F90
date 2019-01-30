@@ -188,8 +188,8 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 !scalars
  integer :: ask_accurate,bdtot_index,bdtot1_index,bantot_rbz
  integer :: cplex,formeig,forunit,gscase,iatpert,iatpert_cnt,iatpol
- integer :: iatdir,icg,icg1,ierr,ii,ikg,ikpt,ikpt1,ilm,iq1dir,iiq1grad,iq1grad,iq1grad_cnt
- integer :: iq1q2grad,iq1q2grad_var,iq2dir,iiq2grad,iq2grad,iq2grad_cnt,ireadwf0,isppol,istwf_k,i1,i2,i3
+ integer :: iatdir,icg,icg1,ierr,ii,ikg,ikpt,ikpt1,ilm,iq1dir,iq1grad,iq1grad_cnt
+ integer :: iq1q2grad,iq1q2grad_var,iq2dir,iq2grad,iq2grad_cnt,ireadwf0,isppol,istwf_k
  integer :: jj,master,matom,matpert,mcg,me,mgfft
  integer :: mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
  integer :: natpert,nband_k,nfftot,nhat1grdim,nkpt_rbz,npw_k,npw1_k
@@ -199,8 +199,8 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  integer :: usexcnhat,useylmgr
  integer,parameter :: formeig1=1
  integer,parameter :: re=1,im=2
- real(dp) :: boxcut,doti,dotr,dnrm2,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
- real(dp) :: tmpre,tmpim,vres2, wtk_k
+ real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
+ real(dp) :: vres2, wtk_k
  logical :: t_exist 
  character(len=500) :: msg                   
  character(len=fnlen) :: filnam,fi1o,fiwfatdis,fiwfefield,fiwfddk,fiwfdkdk
@@ -221,7 +221,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp) :: kpoint(3)
  real(dp),allocatable :: cg(:,:),doccde_rbz(:)
  real(dp),allocatable :: eigen0(:),eqgradhart(:,:,:,:)
- real(dp),allocatable :: kpq(:,:),kpt_rbz(:,:)
+ real(dp),allocatable :: kpt_rbz(:,:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
  real(dp),allocatable :: ph1d(:,:),phnons1(:,:,:) 
@@ -494,7 +494,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  ABI_ALLOCATE(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_ALLOCATE(qdrflg,(matom,3,3,3))
  qdrflg=0
- rhor1_tmp=zero
+ !rhor1_tmp=zero
  do iq1grad=1,nq1grad
    qdir=q1grad(2,iq1grad)
    do iatpert=1,natpert
@@ -964,8 +964,8 @@ qdrpwf_t5=zero
 !Gather the different terms in the quadrupole tensor and print them out
  if (me==0) then
  filnam=dtfil%filnam_ds(4)
- call dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,dtset%kptopt,matom,natpert,& 
-    & nq1grad,nq2grad,pert_atdis, dtset%prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, &
+ call dfpt_qdrpout(eqgradhart,filnam,gprimd,dtset%kptopt,matom,natpert,& 
+    & nq1grad,nq2grad,pert_atdis,dtset%prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, &
     & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
  end if
 
@@ -1035,7 +1035,6 @@ end subroutine dfpt_qdrpole
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
 !!  eqgradhart(2,natpert,nq2grad,nq1grad)=electrostatic contribution from the 
 !!                                             q-gradient of the Hartree potential
 !!  filnam=name of the root for the output file
@@ -1077,7 +1076,7 @@ end subroutine dfpt_qdrpole
 !!
 !! SOURCE
 
-subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, & 
+subroutine dfpt_qdrpout(eqgradhart,filnam,gprimd,kptopt,matom,natpert, & 
          & nq1grad,nq2grad,pert_atdis,prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, & 
          & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
 
@@ -1092,7 +1091,7 @@ subroutine dfpt_qdrpout(cplex,eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,kptopt,matom,natpert,nq1grad,nq2grad,prtvol
+ integer,intent(in) :: kptopt,matom,natpert,nq1grad,nq2grad,prtvol
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -1639,7 +1638,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  integer :: usexcnhat,useylmgr
  integer,parameter :: formeig1=1
  integer,parameter :: re=1,im=2
- real(dp) :: boxcut,dnrm2,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
+ real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
  real(dp) :: vres2,wtk_k
  logical :: t_exist 
  character(len=500) :: msg                   
@@ -1672,7 +1671,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp),allocatable :: elflexowf_t4(:,:,:,:,:),elflexowf_t4_k(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_t5(:,:,:,:,:),elflexowf_t5_k(:,:,:,:,:)
  real(dp),allocatable :: elqgradhart(:,:,:,:,:)
- real(dp),allocatable :: kpq(:,:),kpt_rbz(:,:)
+ real(dp),allocatable :: kpt_rbz(:,:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:) 
  real(dp),allocatable :: occ_k(:),occ_rbz(:)
  real(dp),allocatable :: ph1d(:,:),phnons1(:,:,:) 
@@ -2042,49 +2041,55 @@ end if
  ABI_DEALLOCATE(nhat)
  ABI_DEALLOCATE(nhat1)
 
-!Calculate the electrostatic contribution from the q-gradient of the Hartree potential
+!!Calculate the electrostatic term from the q-gradient of the Hartree potential
  ABI_ALLOCATE(vqgradhart,(2*nfft))
  ABI_ALLOCATE(rhor1_tmp,(2*nfft,nspden))
- ABI_ALLOCATE(elqgradhart,(2,3,3,3,3))
- ABI_ALLOCATE(elflexoflg,(3,3,3,3))
- elflexoflg=0
- rhor1_tmp=zero
- do iq1grad=1,nq1grad
-   qdir=q1grad(2,iq1grad)
-   do iefipert=1,nefipert
 
-     !Calculate the gradient of the potential generated by the first order electric field density
-     rhog1_tmp(:,:)=rhog1_efield(iefipert,:,:)
-     call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
+!Electronic contribution 
+ if (lw_flexo==1.or.lw_flexo==2) then
+   ABI_ALLOCATE(elqgradhart,(2,3,3,3,3))
+   ABI_ALLOCATE(elflexoflg,(3,3,3,3))
+   elflexoflg=0
+   !rhor1_tmp=zero
+   do iq1grad=1,nq1grad
+     qdir=q1grad(2,iq1grad)
+     do iefipert=1,nefipert
 
-     !To ckeck
-     !call appdig(pert_efield(3,iefipert)+q1grad(3,iq1grad),"Gradient_Hartree_potential",fi1o)
-     !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
-     ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
+       !Calculate the gradient of the potential generated by the first order electric field density
+       rhog1_tmp(:,:)=rhog1_efield(iefipert,:,:)
+       call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
 
-     do istrpert=1,nstrpert
+       !To ckeck
+       !call appdig(pert_efield(3,iefipert)+q1grad(3,iq1grad),"Gradient_Hartree_potential",fi1o)
+       !call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr_den,&
+       ! & ngfft,cplex,nfft,nspden,vqgradhart,mpi_enreg)
 
-       !Calculate the electrostatic energy term with the first order strain density 
-       if (timrev==1) then
-         do ii=1,nfft
-           jj=ii*2
-           rhor1_tmp(jj-1,:)=rhor1_strain(istrpert,ii,:)
-         end do
-       else if (timrev==0) then
-         rhor1_tmp(:,:)=rhor1_strain(istrpert,:,:)
-       end if
+       do istrpert=1,nstrpert
+
+         !Calculate the electrostatic energy term with the first order strain density 
+         if (timrev==1) then
+           do ii=1,nfft
+             jj=ii*2
+             rhor1_tmp(jj-1,:)=rhor1_strain(istrpert,ii,:)
+           end do
+         else if (timrev==0) then
+           rhor1_tmp(:,:)=rhor1_strain(istrpert,:,:)
+         end if
        
-       call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
-       elqgradhart(re,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
-       elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
-       elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
+         call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+         elqgradhart(re,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
+         elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
+         elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
 
+       end do
      end do
-   end do
- end do 
+   end do 
+ end if
+
 
  ABI_DEALLOCATE(rhor1_tmp)
  ABI_DEALLOCATE(rhog1_tmp)
+ ABI_DEALLOCATE(vqgradhart)
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then 
    ABI_DEALLOCATE(rhog1_atdis)
    ABI_DEALLOCATE(rhor1_atdis)
@@ -2517,9 +2522,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Gather the different terms in the flexoelectric tensor and print them out
  if (me==0) then
  filnam=dtfil%filnam_ds(4)
- call dfpt_flexoout(cplex,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+ call dfpt_flexoout(elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
     & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-    & elqgradhart,filnam,gprimd,dtset%kptopt,matom,nefipert, &
+    & elqgradhart,gprimd,dtset%kptopt,matom,nefipert, &
     & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
  end if
 
@@ -2532,6 +2537,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_DEALLOCATE(pert_efield)
    ABI_DEALLOCATE(q1q2grad)
    ABI_DEALLOCATE(vhxc1_efield)
+   ABI_DEALLOCATE(elqgradhart)
+   ABI_DEALLOCATE(elflexoflg)
  end if
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
    ABI_DEALLOCATE(pert_strain)
@@ -2539,9 +2546,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
  ABI_DEALLOCATE(q1grad)
  ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(vqgradhart)
- ABI_DEALLOCATE(elqgradhart)
- ABI_DEALLOCATE(elflexoflg)
  ABI_DEALLOCATE(indkpt1)
  ABI_DEALLOCATE(istwfk_rbz)
  ABI_DEALLOCATE(kpt_rbz)
@@ -2596,7 +2600,6 @@ end subroutine dfpt_flexo
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
 !!  elqgradhart(2,3,3,3,3)=electronic electrostatic contribution from the 
 !!                                             q-gradient of the Hartree potential
 !!  elflexoflg(3,3,3,3)=array that indicates which elements of the electronic contribution to the
@@ -2607,7 +2610,6 @@ end subroutine dfpt_flexo
 !!  elflexowf_t3(2,3,3,3,3)=term 3 of the wave function contribution 
 !!  elflexowf_t4(2,3,3,3,3)=term 3 of the wave function contribution 
 !!  elflexowf_t5(2,3,3,3,3)=term 5 of the wave function contribution 
-!!  filnam=name of the root for the output file
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
 !!  matom=number of atoms 
@@ -2637,9 +2639,9 @@ end subroutine dfpt_flexo
 !!
 !! SOURCE
 
- subroutine dfpt_flexoout(cplex,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+ subroutine dfpt_flexoout(elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
     & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-    & elqgradhart,filnam,gprimd,kptopt,matom,nefipert,&
+    & elqgradhart,gprimd,kptopt,matom,nefipert,&
     & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
 
 
@@ -2653,7 +2655,7 @@ end subroutine dfpt_flexo
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,kptopt,matom,nefipert,nstrpert,nq1grad,prtvol
+ integer,intent(in) :: kptopt,matom,nefipert,nstrpert,nq1grad,prtvol
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -2670,7 +2672,6 @@ end subroutine dfpt_flexo
  real(dp),intent(inout) :: elqgradhart(2,3,3,3,3)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: rprimd(3,3)
- character(len=fnlen), intent(in) :: filnam
  
 !Local variables-------------------------------
 !scalars
