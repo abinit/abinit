@@ -7,6 +7,8 @@ these first characters MUST be identical in corresponding lines.
 By default, a floating point comparison with a tolerance of 1.01d-10 is done
 on all floating point strings and a character comparison is done on all other
 strings, disregarding multiple spaces.
+For compatibility reasons with historical fldiff.pl a float is must contains a dot
+and at least one digit after it to be recognized as float.
 In order for two numbers to be declared different, BOTH the absolute difference
 and the relative difference (difference divided by the sum of absolute values)
 must be bigger than the tolerance.
@@ -26,10 +28,6 @@ P	handle as + if ignoreP option is False and as - else
 
 Both files should have the same number of non - starting lines.
 
-# With -context option, save character strings for context and print it
-# with line number when floating difference is found.
-# I did not understood this sentence.
-
 The ignore options affects the treatment of the ','
 special character in the first column (see above)
 
@@ -41,14 +39,53 @@ The label option, if specified, is appended at the end of the summary
 the tolerance option set the tolerance for comparision of floats, the default
 is 1.01e-10.
 This modifications do not apply to the tolerance determined by the
-'%',and '.' first-column special signs
+'%',and '.' first-column special signs.
 '''
 
 from __future__ import print_function, division, unicode_literals
 import re
+from math import floor
 
-# Match floats
+from data_extractor import DataExtractor
+
+# Match floats. Minimal float is .0 for historical reasons.
+# In consequence integers will be compared as strings
 float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
+
+
+def norm_spaces(s):
+    '''
+        Normalize all blanks ( \\n\\r\\t).
+    '''
+    return ' '.join(s.split())  # the join/split technic remove all blanks and put one space between non-blanks words
+
+
+def relative_truncate(f, n):
+    '''
+        >>> rel_truncate(1.8367387367, 2)
+        1.83
+        >>> rel_truncate(1.8367387367e-5, 5)
+        1.83673e-05
+        >>> rel_truncate(1.8367387367e+7, 4)
+        18367000.0
+    '''
+    ten_n = 10.0**n
+    if f == 0.0:
+        return 0.0
+    elif abs(f) >= 1:
+        ten_p = 10.0
+        while abs(f) > ten_p:
+            ten_p *= 10.0
+        fact = 10 * ten_n / ten_p
+        return floor(f * fact) / fact
+    else:
+        ten_p = 0.1
+        p = -1
+        while abs(f) < ten_p:
+            ten_p *= 0.1
+            p -= 1
+        fact = ten_n / ten_p
+        return floor(f * fact) / fact
 
 
 class ConstDict(object):
@@ -77,7 +114,7 @@ default_options = ConstDict({
 })
 
 
-class Difference(object):
+class LineDifference(object):
     '''
         Base class for representing a difference.
     '''
@@ -104,7 +141,7 @@ class Difference(object):
         )
 
 
-class LineCountDifference(Difference):
+class LineCountDifference(LineDifference):
     '''
         Represent a difference between line counts.
     '''
@@ -113,7 +150,7 @@ class LineCountDifference(Difference):
             more: the name of the file with more lines
             less: the name of the file with less lines
         '''
-        Difference.__init__(self, 0, 0, '', '')
+        LineDifference.__init__(self, 0, 0, '', '')
         self.more = more
         self.less = less
 
@@ -121,38 +158,38 @@ class LineCountDifference(Difference):
         return '{} have more significant lines than {}.\n'.format(self.more, self.less)
 
 
-class MetaCharDifference(Difference):
+class MetaCharDifference(LineDifference):
     '''
         Represent a difference between themetacharacters of lines.
     '''
     def __init__(self, p1, p2, m1, m2):
-        Difference.__init__(self, p1, p2, '', '')
+        LineDifference.__init__(self, p1, p2, '', '')
         self.metas = (m1, m2)
 
     def __repr__(self):
         return 'At line {} (in file 1), line {} (in file 2), the leading characters where differents: {} and {}.\n'.format(*(self.lines + self.metas))
 
 
-class FloatDifference(Difference):
+class FloatDifference(LineDifference):
     '''
         Represent a difference between floating point values.
     '''
     def __init__(self, p1, p2, line1, line2, abs_err, rel_err):
-        Difference.__init__(self, p1, p2, line1, line2)
+        LineDifference.__init__(self, p1, p2, line1, line2)
         self.abs_err = abs_err
         self.rel_err = rel_err
 
 
-class TextDifference(Difference):
+class TextDifference(LineDifference):
     '''
         Represent a difference between text parts of a lines.
     '''
     def __init__(self, p1, p2, line1, line2, silent=False):
-        Difference.__init__(self, p1, p2, line1, line2)
+        LineDifference.__init__(self, p1, p2, line1, line2)
         self.silent = silent
 
 
-class ForcedDifference(Difference):
+class ForcedDifference(LineDifference):
     '''
         A difference is arbitrarly declared.
     '''
@@ -180,6 +217,19 @@ class Result(object):
         self.details = self.__analyse()
 
     def __analyse(self):
+        '''
+            Analyse a difference list and extract summary informations and details.
+            Sumary informations are
+            - self.max_abs_err: maximum absolute difference
+            - self.max_rel_err: maximu relative difference
+            - self.max_abs_ln: line number where the maximum absolute
+                difference is reached for the first time
+            - self.max_rel_ln: line number where the maximum relative
+                difference is reached for the first time
+            - self.ndiff_lines: number of lines flagged as different
+                (excluding "silent" differences: line starting with '.' '+' and
+                depending of Diff options ',' and 'P')
+        '''
         details = []
         error_lines = set()
 
@@ -190,7 +240,7 @@ class Result(object):
                 details = str(diff)
 
             elif isinstance(diff, ForcedDifference):
-                pass
+                pass  # Silent differences: not counted as different line
 
             elif isinstance(diff, FloatDifference):
                 if diff.lines[0] not in error_lines:
@@ -210,7 +260,7 @@ class Result(object):
                     self.success = False
 
             else:  # any other Difference
-                assert isinstance(diff, Difference), 'Unknown type of Difference.'
+                assert isinstance(diff, LineDifference), 'Unknown type of Difference.'
                 if diff.lines[0] not in error_lines:
                     self.ndiff_lines += 1
                 self.success = False
@@ -250,7 +300,7 @@ class Result(object):
     def dump_details(self, file=None):
         '''
             Either return a string describing all detected differences
-            or write it into the given file.
+            or write it into the given file (expected to be a writable stream).
         '''
         if file is None:
             return ''.join(self.details) + self.get_summary()
@@ -270,8 +320,10 @@ class Result(object):
             status = 'succeeded'
             msg = 'succeeded'
         else:
-            abs_error = self.max_abs_err
-            rel_error = self.max_rel_err
+            # truncate to prevent fldiff from printing 1.000 < 1.000
+            # compatibility fix, this may be removed later
+            abs_error = relative_truncate(self.max_abs_err, 3)
+            rel_error = relative_truncate(self.max_rel_err, 3)
             ndiff_lines = self.ndiff_lines
             status = 'failed'
             fact = 1.0
@@ -313,6 +365,7 @@ class Differ(object):
                 - tolerance_rel: float (default 1.01e-10)
                 - label: str (default None)
         '''
+        self.xml_mode = False  # this is the first dirty fix.
         self.options = default_options.get_dict()
         self.options.update(options)
         if 'tolerance' in options:
@@ -324,67 +377,40 @@ class Differ(object):
             Compute the diff of file 1 (reference) and file 2 (out)
             and return a Result instance.
         '''
+        if file1.endswith('.xml'):
+            self.xml_mode = True
+
         with open(file1, 'rt') as f:
             lines1 = f.readlines()
 
         with open(file2, 'rt') as f:
             lines2 = f.readlines()
 
-        differences = self.__diff_lines(lines1, lines2)
-        return Result(differences, label=self.options['label'])
+        dext = DataExtractor(self.options)
+        lines1, documents1, ignored1 = dext.extract(lines1)
+        lines2, documents2, ignored2 = dext.extract(lines2)
+        lines_differences = self.__diff_lines(lines1, lines2)
+        return Result(lines_differences, label=self.options['label']), self.__test_doc(documents1, documents2)
 
-    def __get_metachar(self, line):
+    def __test_doc(self, docs1, docs2):
         '''
-            Return a metacharacter wich give the behaviour of the line independently from options.
+            Compare docs2 to docs1 and apply tests on docs2.
         '''
-        if not line or line[0].isspace():
-            c = ' '
-        else:
-            c = line[0]
-            if c == ',':
-                if self.options['ignore']:
-                    c = '-'
-                else:
-                    c = '+'
-            elif c == 'P':
-                if self.options['ignoreP']:
-                    c = '-'
-                else:
-                    c = '+'
-        return c
+        return None
 
-    def __clean(self, lines):
-        '''
-            Split lines into two groups: ignored and analysed
-        '''
-        keeped, ignored = [], []
-
-        for i, line in enumerate(lines):
-            if self.__get_metachar(line) == '-':
-                ignored.append((i, line))
-            else:
-                keeped.append((i, line))
-
-        return keeped, ignored
-
-    def __diff_lines(self, l1, l2):
+    def __diff_lines(self, lines1, lines2):
         '''
             Compute the effective comparision between two set of lines.
             LineCountDifference and MetaCharDifference are both fatal so
             they are returned alone if encountered.
         '''
         differences = []
-        lines1, ignored1 = self.__clean(l1)
-        lines2, ignored2 = self.__clean(l2)
         if len(lines1) > len(lines2):
             return [LineCountDifference('file 1', 'file 2')]
         elif len(lines1) < len(lines2):
             return [LineCountDifference('file 2', 'file 1')]
         else:
-            for (i1, line1), (i2, line2) in zip(lines1, lines2):
-                meta1 = self.__get_metachar(line1)
-                meta2 = self.__get_metachar(line2)
-
+            for (i1, meta1, line1), (i2, meta2, line2) in zip(lines1, lines2):
                 if meta1 != meta2:
                     if meta1 != '_' and meta2 != '_':
                         return [MetaCharDifference(i1, i2, meta1, meta2)]
@@ -396,11 +422,11 @@ class Differ(object):
                         differences.append(ForcedDifference(i1, i2, line1, line2))
 
                     elif meta1 == ':':  # do a character comparison
-                        if line1 != line2:
+                        if norm_spaces(line1) != norm_spaces(line2):
                             differences.append(TextDifference(i1, i2, line1, line2))
 
                     elif meta1 == '.':  # do a character comparison but keep it silent
-                        if line1 != line2:
+                        if norm_spaces(line1) != norm_spaces(line2):
                             differences.append(TextDifference(i1, i2, line1, line2, silent=True))
 
                     else:  # compare numerical values
@@ -434,7 +460,7 @@ class Differ(object):
                                         differences.append(FloatDifference(i1, i2, line1, line2, diff, diffrel))
 
                                 else:
-                                    if elem1.replace(' ', '') != elem2.replace(' ', ''):
+                                    if norm_spaces(elem1) != norm_spaces(elem2):
                                         differences.append(TextDifference(i1, i2, line1, line2))
                                 is_float = not is_float  # re.split always altern between separator and match (here floats)
         return differences
@@ -443,6 +469,8 @@ class Differ(object):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    # Minimal command line interface for debugging
 
     parser.add_argument('ref_file', metavar='REF', help='File reference')
     parser.add_argument('test_file', metavar='TESTED', help='File to be compared')

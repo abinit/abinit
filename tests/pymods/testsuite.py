@@ -358,6 +358,7 @@ class FileToTest(object):
             fld_result.dump_details(outf)
         except Exception as e:
             warnings.warn('[{}] Something went wrong with this test:\n{}\n'.format(self.name, str(e)))
+            return False, 'failed', 'internal error'
 
         isok, status, msg = fld_result.passed_within_tols(self.tolnlines, self.tolabs, self.tolrel)
         msg += ' [file={}]'.format(os.path.basename(ref_fname))

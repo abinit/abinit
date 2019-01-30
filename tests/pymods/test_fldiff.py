@@ -231,6 +231,7 @@ class TestDiffer(unittest.TestCase):
     def test_get_metachar(self):
         class Dummy(Differ):
             def __init__(self, ignore=True, ignoreP=True):
+                self.xml_mode = False
                 self.options = {
                     'ignore': ignore,
                     'ignoreP': ignoreP,
@@ -249,9 +250,9 @@ class TestDiffer(unittest.TestCase):
         self.assertEqual(Differ._Differ__get_metachar(Dummy(), ''), ' ')
 
     def test_clean(self):
-        # __clean do not use self
         class Dummy(Differ):
             def __init__(self, ignore=True, ignoreP=True):
+                self.xml_mode = False
                 self.options = {
                     'ignore': ignore,
                     'ignoreP': ignoreP,
@@ -318,6 +319,24 @@ class TestDiffer(unittest.TestCase):
         differences = diff._Differ__diff_lines(
             [' .0007  564.5e-3  7000.0\n'],
             [' 7.0e-4  5.645D-1  7.0f3\n']
+        )
+        self.assertEqual(len(differences), 0)
+
+    def test_diff_ignore_blanks(self):
+        diff = Differ()
+        differences = diff._Differ__diff_lines(
+            [
+                ' One normal line\n',
+                '.One messy dot   \t line\n',
+                ':A colon line.\n',
+                ' And a last line\n'
+            ],
+            [
+                ' One  \tnormal line\n\r',
+                '.One messy\tdot line  \n',
+                ':A colon \t line.\n\r',
+                ' And a last line'
+            ]
         )
         self.assertEqual(len(differences), 0)
 
