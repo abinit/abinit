@@ -1629,7 +1629,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  integer :: iatpert,iatpert_cnt,iatpol,iatdir
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
  integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
- integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jj,ka,kb
+ integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
  integer :: lw_flexo,master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
  integer :: natpert,nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
  integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
@@ -1651,7 +1651,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
 !arrays
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
- integer,allocatable :: elflexoflg(:,:,:,:)
+ integer,allocatable :: ddmdq_flg(:,:,:,:,:),elflexoflg(:,:,:,:)
  integer,allocatable :: indkpt1(:), indkpt1_tmp(:)
  integer,allocatable :: indsy1(:,:,:),irrzon1(:,:,:)
  integer,allocatable :: istwfk_rbz(:),kg(:,:),kg_k(:,:)
@@ -1663,6 +1663,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  integer,allocatable :: symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
  real(dp) :: kpoint(3)
  real(dp),allocatable :: cg(:,:),doccde_rbz(:)
+ real(dp),allocatable :: ddmdq_qgradhart(:,:,:,:)
  real(dp),allocatable :: eigen0(:)
  real(dp),allocatable :: elflexowf(:,:,:,:,:),elflexowf_k(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_t1(:,:,:,:,:),elflexowf_t1_k(:,:,:,:,:)
@@ -2086,6 +2087,41 @@ end if
    end do 
  end if
 
+!1st q-gradient of DM contribution
+ if (lw_flexo==1.or.lw_flexo==3) then 
+   ABI_ALLOCATE(ddmdq_qgradhart,(2,natpert,natpert,nq1grad))
+   ABI_ALLOCATE(ddmdq_flg,(matom,3,matom,3,3))
+   ddmdq_flg=0
+   do iq1grad=1,nq1grad
+     qdir=q1grad(2,iq1grad)
+     do jatpert=1,natpert
+
+       rhog1_tmp(:,:)=rhog1_atdis(jatpert,:,:)
+       call hartredq(2,gmet,gsqcut,mpi_enreg,nfft,ngfft,dtset%paral_kgb,qdir,rhog1_tmp,vqgradhart) 
+
+       !TODO:Maybe it is only necessary to compute half of these elements by symmetry
+       do iatpert=1,natpert
+
+         !Calculate the electrostatic energy term with the first order electric field density 
+         if (timrev==1) then
+           do ii=1,nfft
+             jj=ii*2
+             rhor1_tmp(jj-1,:)=rhor1_atdis(iatpert,ii,:)
+           end do
+         else if (timrev==0) then
+           rhor1_tmp(:,:)=rhor1_atdis(iatpert,:,:)
+         end if
+       
+         call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
+         ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)=dotr*half
+         ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)=doti*half
+         ddmdq_flg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),&
+                 & pert_atdis(1,jatpert),pert_atdis(2,jatpert),q1grad(2,iq1grad))=1
+
+       end do
+     end do
+   end do
+ end if 
 
  ABI_DEALLOCATE(rhor1_tmp)
  ABI_DEALLOCATE(rhog1_tmp)
