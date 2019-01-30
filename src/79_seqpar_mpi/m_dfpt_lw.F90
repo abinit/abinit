@@ -354,9 +354,9 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  do iq1q2grad=1,nq1q2grad
    call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
    if (iq1dir==iq2dir) then
-     q1q2grad(1,iq1q2grad)=dtset%natom+10                    !dkdk perturbation diagonal elements
+     q1q2grad(1,iq1q2grad)=dtset%natom+10                    !d2_dkdk perturbation diagonal elements
    else
-     q1q2grad(1,iq1q2grad)=dtset%natom+11                    !dkdk perturbation off-diagonal elements
+     q1q2grad(1,iq1q2grad)=dtset%natom+11                    !d2_dkdk perturbation off-diagonal elements
    end if
    q1q2grad(2,iq1q2grad)=iq1dir                              !dq1 direction 
    q1q2grad(3,iq1q2grad)=iq2dir                              !dq2 direction 
@@ -794,7 +794,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
  end do
 
- !dkdk
+ !d2_dkdk
  ABI_ALLOCATE(wfk_t_dkdk,(nq1q2grad))
  do iq1q2grad=1,nq1q2grad
 
@@ -1642,7 +1642,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp) :: vres2,wtk_k
  logical :: t_exist 
  character(len=500) :: msg                   
- character(len=fnlen) :: filnam,fi1o,fiwfstrain,fiwfefield,fiwfddk,fiwfdkdk
+ character(len=fnlen) :: filnam,fi1o,fiwfatdis,fiwfstrain,fiwfefield,fiwfddk,fiwfdkdk
  type(ebands_t) :: bs_rbz
  type(hdr_type) :: hdr0
  type(wvl_data) :: wvl 
@@ -1688,7 +1688,8 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp),allocatable :: xccc3d1(:)
  real(dp),allocatable :: ylm(:,:),ylm_k(:,:),ylmgr(:,:,:),ylmgr_k(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
- type(wfk_t),allocatable :: wfk_t_efield(:),wfk_t_ddk(:),wfk_t_dkdk(:),wfk_t_strain(:,:)
+ type(wfk_t),allocatable :: wfk_t_atdis(:),wfk_t_efield(:),wfk_t_ddk(:)
+ type(wfk_t),allocatable :: wfk_t_dkdk(:),wfk_t_strain(:,:)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -1805,9 +1806,9 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
    do iq1q2grad=1,nq1q2grad
      call rf2_getidirs(iq1q2grad,iq1dir,iq2dir)
      if (iq1dir==iq2dir) then
-       q1q2grad(1,iq1q2grad)=dtset%natom+10                    !dkdk perturbation diagonal elements
+       q1q2grad(1,iq1q2grad)=dtset%natom+10                    !d2_dkdk perturbation diagonal elements
      else
-       q1q2grad(1,iq1q2grad)=dtset%natom+11                    !dkdk perturbation off-diagonal elements
+       q1q2grad(1,iq1q2grad)=dtset%natom+11                    !d2_dkdk perturbation off-diagonal elements
      end if
      q1q2grad(2,iq1q2grad)=iq1dir                              !dq1 direction 
      q1q2grad(3,iq1q2grad)=iq2dir                              !dq2 direction 
@@ -2317,6 +2318,30 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 
 !==== Initialize response functions files and handlers ====
+ !Atomic displacement
+ if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
+   ABI_ALLOCATE(wfk_t_atdis,(natpert))
+   do iatpert=1,natpert
+     pertcase=pert_atdis(3,iatpert)
+     call appdig(pertcase,dtfil%fnamewff1,fiwfatdis)
+  
+     !The value 20 is taken arbitrarily I would say
+     forunit=20+pertcase
+  
+     !Check that ddk file exists and open it
+     t_exist=file_exists(fiwfatdis)
+     if (.not. t_exist) then
+       write(msg,"(3a)")"- File: ",trim(fiwfatdis)," does not exist."
+       MSG_BUG(msg)
+     else
+       write(msg, '(a,a)') '-open atomic displacement wf1 file :',trim(fiwfatdis)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wfk_open_read(wfk_t_atdis(iatpert),fiwfatdis,formeig1,dtset%iomode,forunit,spaceworld)
+     end if
+   end do 
+ end if
+
  !ddk files
  ABI_ALLOCATE(wfk_t_ddk,(nq1grad))
  do iq1grad=1,nq1grad
@@ -2340,81 +2365,87 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do 
 
  !Electric field files
- ABI_ALLOCATE(wfk_t_efield,(nefipert))
- do iefipert=1,nefipert
-   pertcase=pert_efield(3,iefipert)
-   call appdig(pertcase,dtfil%fnamewff1,fiwfefield)
+ if (lw_flexo==1.or.lw_flexo==2) then
+   ABI_ALLOCATE(wfk_t_efield,(nefipert))
+   do iefipert=1,nefipert
+     pertcase=pert_efield(3,iefipert)
+     call appdig(pertcase,dtfil%fnamewff1,fiwfefield)
 
-   !The value 20 is taken arbitrarily I would say
-   forunit=20+pertcase
+     !The value 20 is taken arbitrarily I would say
+     forunit=20+pertcase
 
-   !Check that ddk file exists and open it
-   t_exist=file_exists(fiwfefield)
-   if (.not. t_exist) then
-     write(msg,"(3a)")"- File: ",trim(fiwfefield)," does not exist."
-     MSG_BUG(msg)
-   else
-     write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     call wfk_open_read(wfk_t_efield(iefipert),fiwfefield,formeig1,dtset%iomode,forunit,spaceworld)
-   end if
- end do
+     !Check that ddk file exists and open it
+     t_exist=file_exists(fiwfefield)
+     if (.not. t_exist) then
+       write(msg,"(3a)")"- File: ",trim(fiwfefield)," does not exist."
+       MSG_BUG(msg)
+     else
+       write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       call wfk_open_read(wfk_t_efield(iefipert),fiwfefield,formeig1,dtset%iomode,forunit,spaceworld)
+     end if
+   end do
+ end if
 
  !Strain files
- ABI_ALLOCATE(wfk_t_strain,(3,3))
- do istrpert=1,nstrpert
-   pertcase=pert_strain(5,istrpert)
-   ka=pert_strain(3,istrpert)
-   kb=pert_strain(4,istrpert)
-   call appdig(pertcase,dtfil%fnamewff1,fiwfstrain)
-
-   !The value 20 is taken arbitrarily I would say
-   forunit=20+pertcase
-
-   !Check that ddk file exists and open it
-   t_exist=file_exists(fiwfstrain)
-   if (.not. t_exist) then
-     write(msg,"(3a)")"- File: ",trim(fiwfstrain)," does not exist."
-     MSG_BUG(msg)
-   else
-     if (ka>=kb) then
-       write(msg, '(a,a)') '-open strain wf1 file :',trim(fiwfstrain)
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       call wfk_open_read(wfk_t_strain(ka,kb),fiwfstrain,formeig1,dtset%iomode,forunit,spaceworld)
-     else 
-       wfk_t_strain(ka,kb)=wfk_t_strain(kb,ka)
-     end if
-   end if
- end do
-
- !dkdk
- ABI_ALLOCATE(wfk_t_dkdk,(nq1q2grad))
- do iq1q2grad=1,nq1q2grad
-
-   pertcase=q1q2grad(4,iq1q2grad)
-   call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
-
-   !The value 20 is taken arbitrarily I would say
-   forunit=20+pertcase
-
-   !Check that ddk file exists and open it
-   t_exist=file_exists(fiwfdkdk)
-   if (.not. t_exist) then
-     write(msg,"(3a)")"- File: ",trim(fiwfdkdk)," does not exist."
-     MSG_BUG(msg)
-   else
-     if (iq1q2grad <= 6) then
-       write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
+   ABI_ALLOCATE(wfk_t_strain,(3,3))
+   do istrpert=1,nstrpert
+     pertcase=pert_strain(5,istrpert)
+     ka=pert_strain(3,istrpert)
+     kb=pert_strain(4,istrpert)
+     call appdig(pertcase,dtfil%fnamewff1,fiwfstrain)
+  
+     !The value 20 is taken arbitrarily I would say
+     forunit=20+pertcase
+  
+     !Check that ddk file exists and open it
+     t_exist=file_exists(fiwfstrain)
+     if (.not. t_exist) then
+       write(msg,"(3a)")"- File: ",trim(fiwfstrain)," does not exist."
+       MSG_BUG(msg)
      else
-       wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+       if (ka>=kb) then
+         write(msg, '(a,a)') '-open strain wf1 file :',trim(fiwfstrain)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+         call wfk_open_read(wfk_t_strain(ka,kb),fiwfstrain,formeig1,dtset%iomode,forunit,spaceworld)
+       else 
+         wfk_t_strain(ka,kb)=wfk_t_strain(kb,ka)
+       end if
      end if
-   end if
- end do
+   end do
+ end if
+
+ !d2_dkdk
+ if (lw_flexo==1.or.lw_flexo==2) then
+   ABI_ALLOCATE(wfk_t_dkdk,(nq1q2grad))
+   do iq1q2grad=1,nq1q2grad
+  
+     pertcase=q1q2grad(4,iq1q2grad)
+     call appdig(pertcase,dtfil%fnamewffdkdk,fiwfdkdk)
+  
+     !The value 20 is taken arbitrarily I would say
+     forunit=20+pertcase
+  
+     !Check that ddk file exists and open it
+     t_exist=file_exists(fiwfdkdk)
+     if (.not. t_exist) then
+       write(msg,"(3a)")"- File: ",trim(fiwfdkdk)," does not exist."
+       MSG_BUG(msg)
+     else
+       if (iq1q2grad <= 6) then
+         write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+         call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+       else
+         wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+       end if
+     end if
+   end do
+ end if
 
 !Allocate the flexoelectric tensor part depending on the wave functions
  ABI_ALLOCATE(elflexowf,(2,3,3,3,3))
@@ -2568,6 +2599,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
    ABI_DEALLOCATE(pert_atdis)
    ABI_DEALLOCATE(vhxc1_atdis)
+   ABI_DEALLOCATE(wfk_t_atdis)
  end if
  if (lw_flexo==1.or.lw_flexo==2) then
    ABI_DEALLOCATE(pert_efield)
@@ -2575,10 +2607,17 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_DEALLOCATE(vhxc1_efield)
    ABI_DEALLOCATE(elqgradhart)
    ABI_DEALLOCATE(elflexoflg)
+   ABI_DEALLOCATE(wfk_t_efield)
+   ABI_DEALLOCATE(wfk_t_dkdk)
  end if
+ if (lw_flexo==1.or.lw_flexo==3) then 
+   ABI_DEALLOCATE(ddmdq_qgradhart)
+   ABI_DEALLOCATE(ddmdq_flg)
+ end if 
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
    ABI_DEALLOCATE(pert_strain)
    ABI_DEALLOCATE(vhxc1_strain)
+   ABI_DEALLOCATE(wfk_t_strain)
  end if
  ABI_DEALLOCATE(q1grad)
  ABI_DEALLOCATE(ph1d)
@@ -2596,9 +2635,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
  ABI_DEALLOCATE(wfk_t_ddk)
- ABI_DEALLOCATE(wfk_t_efield)
- ABI_DEALLOCATE(wfk_t_strain)
- ABI_DEALLOCATE(wfk_t_dkdk)
  ABI_DEALLOCATE(elflexowf)
  ABI_DEALLOCATE(elflexowf_k)
  ABI_DEALLOCATE(elflexowf_t1)
