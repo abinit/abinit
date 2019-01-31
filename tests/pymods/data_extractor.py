@@ -4,16 +4,23 @@
 
 from __future__ import print_function, division, unicode_literals
 import re
-from yaml_tools import yaml_parse
-from abinit_metadata import ITERATOR_RANKS
-from yaml_structures import IterStart
+from yaml_tools import is_available as has_yaml
+from yaml_tools.abinit_metadata import ITERATOR_RANKS
+if has_yaml:
+    from yaml_tools.structures import IterStart
+    from yaml_tools import yaml_parse
+else:
+    IterStart = object
 
-docstart_re = re.compile(r'--- (!.*)?')
-docend_re = re.compile(r'...')
+    def yaml_parse(x):
+        pass
+
+doc_start_re = re.compile(r'--- (!.*)?')
+doc_end_re = re.compile(r'...')
 
 
 def parse_doc(doc):
-    if doc['type'] == 'yaml':
+    if has_yaml and doc['type'] == 'yaml':
         obj = yaml_parse(''.join(doc['lines']))
         doc['obj'] = obj
     return doc
@@ -64,7 +71,7 @@ class DataExtractor:
         for i, line in enumerate(src_lines):
             if docmode:
                 current_document['lines'].append(line)  # accumulate source lines
-                if docend_re.match(line):  # reached the end of the document
+                if doc_end_re.match(line):  # reached the end of the document
                     current_document['end'] = i
                     # parse source
                     parse_doc(current_document)
@@ -80,7 +87,7 @@ class DataExtractor:
                     documents.append(current_document)
             else:
                 if self.__get_metachar(line) == '-':
-                    if docstart_re.match(line):  # starting a yaml document
+                    if doc_start_re.match(line):  # starting a yaml document
                         current_document = {
                             'type': 'yaml',
                             'iterators': self.iterators_state.copy(),  # save iterations states

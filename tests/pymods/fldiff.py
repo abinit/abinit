@@ -46,7 +46,7 @@ from __future__ import print_function, division, unicode_literals
 import re
 from math import floor
 
-from data_extractor import DataExtractor
+from .data_extractor import DataExtractor
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
