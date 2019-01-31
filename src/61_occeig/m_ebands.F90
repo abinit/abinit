@@ -113,6 +113,8 @@ MODULE m_ebands
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
  public :: ebands_write               ! Driver routine to write bands in different (txt) formats.
+
+ public :: edos_free               ! Free DOS object
 !!***
 
 !----------------------------------------------------------------------
@@ -4210,9 +4212,15 @@ type(edos_t) function ebands_get_dos_matrix_elements(ebands, cryst, &
  ABI_CALLOC(edos%gef, (0:edos%nsppol))
  ABI_CALLOC(edos%dos,  (nw, 0:edos%nsppol))
  ABI_CALLOC(edos%idos, (nw, 0:edos%nsppol))
- ABI_CALLOC(out_valsdos,  (nw, 2, 0:ebands%nsppol, nvals))
- ABI_CALLOC(out_vecsdos,  (nw, 2, 0:ebands%nsppol, 3, nvecs))
- ABI_CALLOC(out_tensdos,  (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
+ if (nvals > 0) then
+   ABI_CALLOC(out_valsdos,  (nw, 2, 0:ebands%nsppol, nvals))
+ endif
+ if (nvecs > 0) then
+   ABI_CALLOC(out_vecsdos,  (nw, 2, 0:ebands%nsppol, 3, nvecs))
+ end if
+ if (ntens > 0) then
+   ABI_CALLOC(out_tensdos,  (nw, 2, 0:ebands%nsppol, 3, 3, ntens))
+ end if
 
 ! call cwtime(cpu_all, wall_all, gflops_all, "start")
 ! call wrtout(std_out, "Computing DOS weighted by matrix elements.")
@@ -5516,7 +5524,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
  integer,parameter :: master=0,intp_nshiftk1=1
  integer :: my_rank,ndivsm,nbounds,itype
  integer :: nb,spin,ik,ib,ii,jj
- integer :: edos_intmeth
+ integer :: edos_intmeth, ierr
  real(dp) :: edos_step,edos_broad,emin,emax
 #ifdef HAVE_NETCDF
  integer :: ncid, ncerr
@@ -5608,7 +5616,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
    ! If sigma_erange is set, get emin and emax
-   ncerr = get_gaps(ebands_kmesh,gaps)
+   ierr = get_gaps(ebands_kmesh,gaps)
    do spin=1,ebands%nsppol
      if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
      if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)

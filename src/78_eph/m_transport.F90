@@ -264,8 +264,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  real(dp) :: vr(3)
  real(dp) :: emin, emax, edos_broad, edos_step
  real(dp) :: linewidth
- real(dp),allocatable :: dummy_vals(:,:,:,:), dummy_vecs(:,:,:,:,:), vv_tens(:,:,:,:,:,:)
- real(dp),allocatable :: vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:)
+ real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
+ real(dp),allocatable :: vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:), vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
 
  ! create alias for dimensions
@@ -386,6 +386,7 @@ subroutine transport_rta_free(transport_rta)
  type(transport_rta_t),intent(inout) :: transport_rta
 
  call ebands_free(transport_rta%ebands)
+ call edos_free(transport_rta%edos)
 
  ! free the allocated arrays and datastructure
  ABI_SFREE(transport_rta%vvdos)

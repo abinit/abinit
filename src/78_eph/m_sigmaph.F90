@@ -1586,7 +1586,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
  ABI_SFREE(cfact_wr)
- ABI_SFREE(alpha_mrta)
 
  call destroy_hamiltonian(gs_hamkq)
  call sigmaph_free(sigma)
