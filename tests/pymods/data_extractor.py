@@ -31,10 +31,11 @@ class DataExtractor:
         Setup extraction of formated documents and significant lines.
     '''
 
-    def __init__(self, ignore=True, ignoreP=True):
+    def __init__(self, ignore=True, ignoreP=True, xml_mode=False):
         self.ignore = ignore
         self.ignoreP = ignoreP
         self.iterators_state = {}
+        self.xml_mode = xml_mode
 
     def __get_metachar(self, line):
         '''

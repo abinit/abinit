@@ -354,7 +354,7 @@ class FileToTest(object):
         differ = FlDiffer(**opts)
 
         try:
-            fld_result = differ.diff(ref_fname, out_fname)
+            fld_result, doc_results = differ.diff(ref_fname, out_fname)
             fld_result.dump_details(outf)
         except Exception as e:
             warnings.warn('[{}] Something went wrong with this test:\n{}\n'.format(self.name, str(e)))
