@@ -4923,23 +4923,23 @@ end subroutine wfk_diff
 !!  wfk_klist2mesh
 !!
 !! FUNCTION
-!! This routine is used to prepare the computation of electron mobilities
-!! whose convergence with the k-point sampling is notoriously slow.
-!! Since only the electron/hole states close to the band edges contribute (say ~0.5 eV),
-!! one can reduce significantly the computational cost of the NSCF path by computing
-!! a WFK generate with kptopt == 0 and the explicit list of k-points inside the pockets
-!! instead of computing all the k-points in the dense IBZ.
-!! Unfortunately, the EPH code expects a WFK on a k-mesh so we need to "convert" the initial WFK
-!! with the list of k-points to a new WFK file.
-!! Eigenvalues are interpolated with star-functions using the IBZ provided by another WFK file.
-!!
 !! This routine receives a WFK file with wavefunctions given on a subset of k-points
 !! Generate new WFK file on a dense K-mesh starting from an input WFK file containing
 !! included in the dense k-mesh.
 !!
+!! This routine is mainly used to prepare the computation of electron mobilities
+!! whose convergence with the k-point sampling is notoriously slow.
+!! Since only the electron/hole states close to the band edges contribute (say ~0.5 eV),
+!! one can reduce significantly the computational cost of the NSCF run by computing
+!! a WFK file with kptopt == 0 and the explicit list of k-points located inside the pockets
+!! instead of computing all the k-points of the dense IBZ.
+!! Unfortunately, the EPH code expects a WFK on a k-mesh so we need to "convert" the initial WFK
+!! with the list of k-points to a new WFK file with k-points on the dense kmesh.
+!! Eigenvalues are interpolated with star-functions using the IBZ provided by another WFK file.
+!!
 !! INPUTS
 !!  in_wfkpath = Input WFK file with k-point list.
-!!  in_wfkemesh = WFK file with eigenvalues on the IBZ
+!!  in_wfkskw = WFK file with eigenvalues in the IBZ, used to interpolate energies with SKW.
 !!  dtset <dataset_type>=all input variables for this dataset
 !!  psps <pseudopotential_type>=all the information about psps
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -4953,17 +4953,17 @@ end subroutine wfk_diff
 !!  - Only GS WFK files are supported (formeig==0)
 !!
 !! PARENTS
-!!      gstate,wfk_analyze
+!!      wfk_analyze
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkpath, comm)
+subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpath, comm)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: in_wfkpath, in_wfkemesh, out_wfkpath
+ character(len=*),intent(in) :: in_wfkpath, in_wfkskw, out_wfkpath
  type(pseudopotential_type),intent(in) :: psps
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
@@ -4973,11 +4973,11 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0 = 0, master = 0
- integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor
+ integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor, ierr
  integer :: nsppol, out_iomode, kf_rank, npw_k, ii, my_rank, nprocs
  real(dp) :: cpu, wall, gflops !, dksqmax
  character(len=500) :: msg
- character(len=fnlen) :: my_inpath, my_emesh
+ character(len=fnlen) :: my_inpath, my_skwpath
  type(wfk_t),target :: in_wfk
  type(wfk_t) :: out_wfk
  type(crystal_t) :: cryst, cryst_skw
@@ -4987,8 +4987,8 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
  type(wvl_internal_type) :: dummy_wvl
  type(kptrank_type) :: kptrank
 !arrays
- integer,allocatable :: kf2kin(:),kg_k(:,:)
  integer :: fine_kptrlatt(3,3), band_block(2)
+ integer,allocatable :: kf2kin(:),kg_k(:,:)
  real(dp):: params(4)
  real(dp),allocatable :: cg_k(:,:),eig_k(:),occ_k(:)
 
@@ -4997,37 +4997,37 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  if (my_rank == master) then
-   !write(std_out,*)"kptrlatt:", dtset%kptrlatt
-   !write(std_out,*)"shiftk:", dtset%shiftk(:, 1:dtset%nshiftk)
-   write(std_out, *)"Reading wavefunctions with k-point lists from: ", trim(in_wfkpath)
-   write(std_out, *)"Reading eigenvalues for SKW interpolation from: ", trim(in_wfkemesh)
-   write(std_out,*)"Will produce WKF file with dense k-mesh:"
-   write(std_out,*)"  sigma_ngkpt:", dtset%sigma_ngkpt
-   write(std_out,*)"  sigma_shiftk:", dtset%sigma_shiftk(:, 1:dtset%sigma_nshiftk)
+   write(std_out, "(a)")" Will produce WKF file with dense k-mesh:"
+   write(std_out, "(a, 3(i0, 1x))")"   sigma_ngkpt:", dtset%sigma_ngkpt
+   do ii=1,dtset%sigma_nshiftk
+     write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
+   end do
+   write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
+   write(std_out, "(2a)")" Take eigenvalues for SKW interpolation from: ", trim(in_wfkskw)
    if (all(dtset%sigma_ngkpt == 0)) then
-     write(msg,"(3a)")&
-       "Cannot produce fine WFK file because sigma_ngkpt == 0",ch10,&
-       "Use sigma_nkgpt sigma_nshiftk and sigma_shiftk to define the homogeneous k-mesh for the output fine WFK file."
+     write(msg,"(3a)") &
+       "Cannot produce fine WFK file because sigma_ngkpt == 0.",ch10,&
+       "Use sigma_nkgpt, sigma_nshiftk and sigma_shiftk to define the homogeneous k-mesh to produce the fine WFK file."
      MSG_ERROR(msg)
    end if
  end if
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! Read in_wfkemesh and interpolate energies to the dense k-mesh.
- my_emesh = in_wfkemesh
- if (nctk_try_fort_or_ncfile(my_emesh, msg) /= 0) then
+ ! Read in_wfkskw and interpolate energies to the dense k-mesh.
+ my_skwpath = in_wfkskw
+ if (nctk_try_fort_or_ncfile(my_skwpath, msg) /= 0) then
    MSG_ERROR(msg)
  end if
- call wrtout(std_out, sjoin("Reading eigenvalues for star-function interpolation from WFK file:", my_emesh))
+ call wrtout(std_out, sjoin(" Reading eigenvalues for star-function interpolation from WFK file:", my_skwpath))
 
- skw_ebands = wfk_read_ebands(my_emesh, comm, out_hdr=hdr_skw)
+ skw_ebands = wfk_read_ebands(my_skwpath, comm, out_hdr=hdr_skw)
  cryst_skw = hdr_get_crystal(hdr_skw, 2)
 
- call wrtout(std_out,"Interpolating band energies with star-functions")
+ call wrtout(std_out, " Interpolating band energies with star-functions")
  params = 0; params(1) = 1; params(2) = 5
  if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
- write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters:", params
+ !write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters:", params
 
  ! TODO: Recheck reading of sigma_shiftk at the level of the parser
  band_block = [1, skw_ebands%mband]
@@ -5071,7 +5071,7 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
    call get_rank_1kpt(fine_ebands%kptns(:, ikf), kf_rank, kptrank)
    ii = kptrank%invrank(kf_rank)
    if (ii > 0) then
-     write(std_out, *)trim(ktoa(fine_ebands%kptns(:, ikf))), " --> ", trim(ktoa(in_ebands%kptns(:, ii)))
+     !write(std_out, *)trim(ktoa(fine_ebands%kptns(:, ikf))), " --> ", trim(ktoa(in_ebands%kptns(:, ii)))
      ! FIXME This does not work as expected!
      if (all(abs(fine_ebands%kptns(:, ikf)) - in_ebands%kptns(:, ii) < tol12)) then
        kf2kin(ikf) = ii
@@ -5081,18 +5081,30 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
  call destroy_kptrank(kptrank)
 
  if (count(kf2kin /= -1) /= in_ebands%nkpt) then
-   write(msg, "(2a, 2(a,i0))")"Something wrong in computation of fine_mesh --> input_mesh mapping.",ch10, &
+   write(msg, "(2a, 2(a,i0))")"Something wrong in the computation of fine_mesh --> input_mesh table.",ch10, &
     "Expecting: ", in_ebands%nkpt, " matches, got: ", count(kf2kin /= -1)
    MSG_ERROR(msg)
  end if
 
+ ! Check weights (the list of k-points should be a subset of the kmesh specified by sigma_ngkpt.
+ ierr = 0
  do ikf=1,fine_ebands%nkpt
    ikin = kf2kin(ikf)
+   if (ikin == -1) cycle
+   if (abs(ihdr%wtk(ikin) - fine_ebands%wtk(ikf)) > tol12) then
+     write(std_out, *) "ihdr%wtk:", ihdr%wtk(ikin), "fine_ebands%wtk", fine_ebands%wtk(ikf)
+     ierr = ierr + 1
+   end if
  end do
+ if (ierr /= 0) then
+   write(msg, "(3a)") &
+     "Mismatch between input k-weights and weigths associated to the fine mesh. ", ch10, &
+     "Possible incosistency between k-mesh defined by sigma_nshiftk and the list of k-points found in file."
+   MSG_ERROR(msg)
+ end if
 
  ! Build new header for output WFK. This is the most delicate part since all the arrays in hdr_kfine
  ! that depend on k-points must be consistent with the fine k-mesh.
-
  do ikf=1,fine_ebands%nkpt
    ikin = kf2kin(ikf)
    if (ikin == -1) then
@@ -5132,9 +5144,7 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
  ABI_MALLOC(eig_k, ((2*mband)**in_wfk%formeig * mband) )
  ABI_MALLOC(occ_k, (mband))
 
- !call wrtout(std_out,"Using (slow) Fortran IO version to generate full WFK file", do_flush=.True.)
-
- write(std_out, *)"mpw:", mpw
+ !write(std_out, *)"mpw:", mpw
  do spin=1,nsppol
    do ikf=1,fine_ebands%nkpt
      ikin = kf2kin(ikf)
@@ -5152,7 +5162,7 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
        eig_k(1:nband_k) = fine_ebands%eig(1:nband_k, ikf, spin)
        occ_k(1:nband_k) = fine_ebands%occ(1:nband_k, ikf, spin)
      end if
-     write(std_out,*)"npw_k:", npw_k, ", ikf:", ikf, ", ikin:", ikin
+     !write(std_out,*)"npw_k:", npw_k, ", ikf:", ikf, ", ikin:", ikin
 
      ! Write (kpt, spin) block
      call wfk_write_band_block(out_wfk, [1, nband_k], ikf, spin, xmpio_single, &
@@ -5174,8 +5184,7 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkemesh, dtset, psps, pawtab, out_wfkp
 100 call ebands_free(fine_ebands)
  call xmpi_barrier(comm)
 
- call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f8.2))")" WFK with fine k-mesh written to file. cpu: ",cpu,", wall:",wall
+ call cwtime_report(" WFK with fine k-mesh written to file.", cpu, wall, gflops)
 
 end subroutine wfk_klist2mesh
 !!***

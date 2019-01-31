@@ -4400,7 +4400,6 @@ subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
  character(len=*),intent(in) :: prefix
  integer,intent(in) :: comm
 !arrays
- !real(dp), allocatable, intent(out) :: okpts(:,:)
 
 !Local variables ------------------------------
 !scalars
@@ -4424,17 +4423,17 @@ subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  if (.not. any(dtset%sigma_erange > zero)) then
-   MSG_ERROR("sigma_erange must be specified in input")
+   MSG_ERROR("sigma_erange must be specified in input.")
  end if
 
  if (my_rank == master) then
-   write(std_out, "(a)") " Finding k-points "
+   write(std_out, "(a)") " Finding k-points in pockets."
    write(std_out, "(2a)") " K-mesh divisions: ", trim(ltoa(dtset%sigma_ngkpt))
    write(std_out, "(2a)") " Shiftk:"
-   !do ii=1,dtset%nshiftk
-   !  write(std_out, "()") dtset%sigma_shiftk(:, ii)
-   !end do
-   !call ebands_print(ebands,header,unit,prtvol,mode_paral)
+   do ii=1,dtset%nshiftk
+     write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
+   end do
+   !call ebands_print(ebands, header, unit, prtvol, mode_paral)
  end if
 
  ! Compute dense BZ and IBZ from sigma_ngkpt and other related variables.
@@ -4451,7 +4450,7 @@ subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
  skw_band_block = [1, ebands%nband]
  params = 0; params(1) = 1; params(2) = 5
  if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
- write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters used to interpolate input ebands:", params
+ !write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters used to interpolate input ebands:", params
  skw = skw_new(cryst, params, skw_cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
    ebands%kptns, ebands%eig, skw_band_block, comm)
  call skw%print(std_out)
@@ -4463,7 +4462,7 @@ subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
  end if
  call gaps%print(unit=std_out)
 
- ! Find k-points in energy region.
+ ! Find k-points inside energy region.
  ABI_ICALLOC(kfine_imask, (nkibz_fine, ebands%nsppol))
 
  cnt = 0
@@ -4509,9 +4508,10 @@ subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
 
  ! Find points in the BZ.
 
+ ! Write output files with k-point list.
  if (my_rank == master .and. len_trim(prefix) /= 0) then
    ! read directly nkpt, kpt, kptnrm and wtk.
-   path = strcat(prefix, "_KPTS")
+   path = strcat(prefix, "_KLIST")
    if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
      MSG_ERROR(msg)
    end if
@@ -4528,8 +4528,8 @@ subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
    end do
    close(unt)
 
-   !path = strcat(dtfil%filnam_ds(4), "_KPTS.nc")
-   path = strcat(prefix, "_KPTS.nc")
+   path = strcat(prefix, "_KLIST.nc")
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    !NCF_CHECK(ebands_ncwrite(ebands, ncid))
@@ -4563,6 +4563,7 @@ subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz_fine"), kibz_fine))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wtk_fine"), wtk_fine))
    NCF_CHECK(nf90_close(ncid))
+#endif
  end if
 
  ABI_FREE(wtk_fine)

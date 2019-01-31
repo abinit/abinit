@@ -415,6 +415,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
     call wfk_klist2mesh(wfk0_path, dtfil%fnameabi_wfkfine, dtset, psps, pawtab, wfkfull_path, comm)
 
+ !case (WFK_TASK_FINDK)
+ !  call find_kpoints_in_pockets(dtset, cryst, ebands, dtfil%filnam_ds(4), comm)
+
  !case (WFK_TASK_EBANDS)
    !call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
  !case (WFK_TASK_PJDOS)

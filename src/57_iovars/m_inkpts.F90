@@ -62,8 +62,7 @@ contains
 !! INPUTS
 !! bravais(11): bravais(1)=iholohedry
 !!              bravais(2)=center
-!!              bravais(3:11)=coordinates of rprim in the axes
-!!               of the conventional bravais lattice (*2 if center/=0)
+!!              bravais(3:11)=coordinates of rprim in the axes of the conventional bravais lattice (*2 if center/=0)
 !! chksymbreak= if 1, will check whether the k point grid is symmetric, and stop if not.
 !! impose_istwf_1= (optional argument):
 !!                 0: no restriction on istwfk
@@ -116,8 +115,7 @@ contains
 !! NOTES
 !! Warning: this routine can be called with nkpt=0 (in which
 !! case it returns the true value of nkpt), which can lead
-!! to strange bugs in the debugging procedure, if
-!! one tries to print wtk or istwfk, in this case !
+!! to strange bugs in the debugging procedure, if one tries to print wtk or istwfk, in this case!
 !!
 !! PARENTS
 !!      invars1,invars2
@@ -132,8 +130,6 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
 & nkpt,nkpthf,nqpt,ngkpt,nshiftk,nshiftk_orig,shiftk_orig,nsym,&
 & occopt,qptn,response,rprimd,shiftk,string,symafm,symrel,vacuum,wtk,&
 & impose_istwf_1) ! Optional argument
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -218,7 +214,7 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
      call wrtout(std_out,message,'COLL')
 
      if (wtksum<1.d-6) then
-       write(message, '(6a)' )&
+       write(message, '(3a)' )&
 &       'This sum is too close to zero. ',ch10,&
 &       'Action: correct the array wtk in the input file.'
        MSG_ERROR(message)
@@ -588,8 +584,6 @@ end subroutine inkpts
 !! SOURCE
 
 subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spinat,string,typat,vacuum,xred,qptrlatt)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

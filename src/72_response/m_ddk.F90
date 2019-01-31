@@ -487,6 +487,8 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    ABI_MALLOC(cg_v, (2,mpw*nspinor))
  end if
 
+ ABI_DT_MALLOC(cwaveprj, (0, 0))
+
  ABI_CALLOC(dipoles, (3,2,mband,mband,nkpt,nsppol))
  ABI_MALLOC(ihrc,    (3, nspinor**2))
 
@@ -624,6 +626,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_FREE(ug_v)
  ABI_FREE(kg_k)
  ABI_FREE(ihrc)
+ ABI_DT_FREE(cwaveprj)
 
  ABI_SFREE(distrib_mat)
  ABI_SFREE(distrib_diago)

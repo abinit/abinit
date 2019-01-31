@@ -3988,8 +3988,8 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  ABI_CALLOC(new_occ, (new_bantot))
  ABI_CALLOC(new_wtk, (new_nkibz))
 
- ! Needed by AbiPt to understand that we have a k-path instead of a mesh.
- new_kptopt = - kpath%nbounds
+ ! Needed by AbiPy to understand that we have a k-path instead of a mesh.
+ new_kptopt = -kpath%nbounds
 
  call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,kpath%points,&
    new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
