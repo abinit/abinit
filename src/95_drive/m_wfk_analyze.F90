@@ -65,6 +65,7 @@ module m_wfk_analyze
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_classify_bands,  only : classify_bands
  use m_pspini,          only : pspini
+ use m_sigtk,           only : sigtk_kpts_in_erange
 
  implicit none
 
@@ -415,8 +416,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
     call wfk_klist2mesh(wfk0_path, dtfil%fnameabi_wfkfine, dtset, psps, pawtab, wfkfull_path, comm)
 
- !case (WFK_TASK_FINDK)
- !  call find_kpoints_in_pockets(dtset, cryst, ebands, dtfil%filnam_ds(4), comm)
+ case (WFK_TASK_KPTS_ERANGE)
+   call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
 
  !case (WFK_TASK_EBANDS)
    !call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))

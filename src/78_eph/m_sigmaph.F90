@@ -46,19 +46,19 @@ module m_sigmaph
  use m_kptrank
  use m_lgroup
  use m_ephwg
- use m_nctk
  use m_hdr
  use m_sigtk
  use m_eph_double_grid
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+ use m_nctk
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
- use m_io_tools,       only : iomode_from_fname, file_exists, open_file
+ use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq
  use m_cgtk,           only : cgtk_rotate
@@ -2352,8 +2352,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ! TODO: check band_block because I got weird results (don't remember if with AbiPy or Abinit)
    skw_cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) skw_cplex = 2
    skw_band_block = [minval(new%bstart_ks), maxval(new%bstart_ks + new%nbcalc_ks - 1)]
-   params = 0; params(1) = 1; params(2) = 5
-   if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
+   params = 0; params(1) = 5
+   if (nint(dtset%einterp(1)) == 1) params(1:3) = dtset%einterp(2:4)
    write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters used to interpolate e_{nk+q} in Frohlich self-energy:", params
    new%frohl_skw = skw_new(cryst, params(2:), skw_cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
      ebands%kptns, ebands%eig, skw_band_block, comm)
@@ -4376,206 +4376,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
  !qselect = 0
 
 end subroutine qpoints_oracle
-!!***
-
-!!****f* m_sigmaph/find_kpoints_in_pockets
-!! NAME
-!!  find_kpoints_in_pockets
-!!
-!! FUNCTION
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine find_kpoints_in_pockets(dtset, cryst, ebands, prefix, comm)
-
-!Arguments ------------------------------------
-!scalars
- type(dataset_type),intent(in) :: dtset
- type(crystal_t),intent(in) :: cryst
- type(ebands_t),intent(in) :: ebands
- character(len=*),intent(in) :: prefix
- integer,intent(in) :: comm
-!arrays
-
-!Local variables ------------------------------
-!scalars
- integer,parameter :: master = 0
- integer :: ii, my_rank, nprocs, nkibz_fine, nkbz_fine, spin, ikf_ibz, cnt, band, ierr, skw_cplex, onkpt
- integer :: gap_err, unt, ncid
- real(dp) :: ee, cmin, vmax
- character(len=500) :: msg
- character(len=fnlen) :: path
- type(skw_t) :: skw
- type(gaps_t) :: gaps
-!arrays
- integer :: kptrlatt_fine(3,3), skw_band_block(2)
- integer,allocatable :: kfine_imask(:,:), ok2ibz(:)
- real(dp), allocatable :: okpts(:,:)
- real(dp) :: params(4)
- real(dp),allocatable :: wtk_fine(:), kibz_fine(:,:), kbz_fine(:,:)
-
-! *************************************************************************
-
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
-
- if (.not. any(dtset%sigma_erange > zero)) then
-   MSG_ERROR("sigma_erange must be specified in input.")
- end if
-
- if (my_rank == master) then
-   write(std_out, "(a)") " Finding k-points in pockets."
-   write(std_out, "(2a)") " K-mesh divisions: ", trim(ltoa(dtset%sigma_ngkpt))
-   write(std_out, "(2a)") " Shiftk:"
-   do ii=1,dtset%nshiftk
-     write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
-   end do
-   !call ebands_print(ebands, header, unit, prtvol, mode_paral)
- end if
-
- ! Compute dense BZ and IBZ from sigma_ngkpt and other related variables.
- kptrlatt_fine = 0
- do ii=1,3
-   kptrlatt_fine(ii, ii) = dtset%sigma_ngkpt(ii)
- end do
- call kpts_ibz_from_kptrlatt(cryst, kptrlatt_fine, ebands%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
-   nkibz_fine, kibz_fine, wtk_fine, nkbz_fine, kbz_fine)
-
- ! Build star functions interpolator from input ebands.
- ! TODO: check band_block because I got weird results (don't remember if with AbiPy or Abinit)
- skw_cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) skw_cplex = 2
- skw_band_block = [1, ebands%nband]
- params = 0; params(1) = 1; params(2) = 5
- if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
- !write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters used to interpolate input ebands:", params
- skw = skw_new(cryst, params, skw_cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
-   ebands%kptns, ebands%eig, skw_band_block, comm)
- call skw%print(std_out)
-
- ! Compute gaps.
- gap_err = get_gaps(ebands, gaps)
- if (gap_err /= 0) then
-   MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
- end if
- call gaps%print(unit=std_out)
-
- ! Find k-points inside energy region.
- ABI_ICALLOC(kfine_imask, (nkibz_fine, ebands%nsppol))
-
- cnt = 0
- do spin=1,ebands%nsppol
-   ! Get cmb and vbm with some tolerance
-   vmax = gaps%vb_max(spin) + tol2 * eV_Ha
-   cmin = gaps%cb_min(spin) - tol2 * eV_Ha
-   do ikf_ibz=1,nkibz_fine
-     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-     do band=1,ebands%mband
-       call skw%eval_bks(band, kibz_fine(:, ikf_ibz), spin, ee)
-       ! Check whether the interpolated eigenvalue is inside the energy regions.
-       if (dtset%sigma_erange(1) > zero) then
-         if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
-           kfine_imask(ikf_ibz, spin) = kfine_imask(ikf_ibz, spin)  + 1
-           exit
-         end if
-       end if
-       if (dtset%sigma_erange(2) > zero) then
-         if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
-           kfine_imask(ikf_ibz, spin) = kfine_imask(ikf_ibz, spin)  + 1
-           exit
-         end if
-       end if
-     end do
-   end do
- end do
-
- call xmpi_sum(kfine_imask, comm, ierr)
-
- ! Build list of k-points inside pockets.
- onkpt = count(kfine_imask /= 0)
- ABI_MALLOC(okpts, (3, onkpt))
- ABI_MALLOC(ok2ibz, (onkpt))
- cnt = 0
- do ikf_ibz=1,nkibz_fine
-   if (any(kfine_imask(ikf_ibz,:) /= 0)) then
-     cnt = cnt + 1
-     okpts(:, cnt) = kibz_fine(:, ikf_ibz)
-     ok2ibz(cnt) = ikf_ibz
-   end if
- end do
-
- ! Find points in the BZ.
-
- ! Write output files with k-point list.
- if (my_rank == master .and. len_trim(prefix) /= 0) then
-   ! read directly nkpt, kpt, kptnrm and wtk.
-   path = strcat(prefix, "_KLIST")
-   if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
-     MSG_ERROR(msg)
-   end if
-   write(unt, "(a)")"kptopt 0"
-   write(unt, "(a, i0)")"nkpt ", onkpt
-   write(unt, "(a)")"kptnrm *1.0"
-   write(unt, "(a)")"kpt"
-   do ii=1,onkpt
-     write(unt, "(3(es16.6,1x))")kibz_fine(:, ok2ibz(ii))
-   end do
-   write(unt, "(a, i0)")"wtk"
-   do ii=1,onkpt
-     write(unt, "(es16.6)")wtk_fine(ok2ibz(ii))
-   end do
-   close(unt)
-
-   path = strcat(prefix, "_KLIST.nc")
-#ifdef HAVE_NETCDF
-   NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-   NCF_CHECK(cryst%ncwrite(ncid))
-   !NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   !! Add dimensions.
-   !ncerr = nctk_def_dims(ncid, [ &
-   !  nctkdim_t("onkpt", onkpt), nctkdim_t("max_nbcalc", self%max_nbcalc), &
-   !  nctkdim_t("nqibz", self%nqibz), nctkdim_t("nqbz", self%nqbz)], &
-   !  defmode=.True.)
-   !NCF_CHECK(ncerr)
-   !ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-   !  "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
-   !  "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
-   !  "imag_only", "frohl_model"])
-   !NCF_CHECK(ncerr)
-   !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   !  "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"])
-   !NCF_CHECK(ncerr)
-   !! Define arrays for results.
-   !ncerr = nctk_def_arrays(ncid, [ &
-   !  nctkarr_t("kibz_fine", "dp", "three, onkpt"), &
-   !  nctkarr_t("wtk_fine", "dp", "onkpt"), &
-   !])
-   !NCF_CHECK(ncerr)
-   ! Write data
-   NCF_CHECK(nctk_set_datamode(ncid))
-   !ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-   !  "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear"], &
-   !  [aimag(self%ieta), self%wr_step, dtset%eph_fsewin, dtset%eph_fsmear, dtset%eph_extrael, dtset%eph_fermie, &
-   !  dtset%ph_wstep, dtset%ph_smear])
-   !NCF_CHECK(ncerr)
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz_fine"), kibz_fine))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wtk_fine"), wtk_fine))
-   NCF_CHECK(nf90_close(ncid))
-#endif
- end if
-
- ABI_FREE(wtk_fine)
- ABI_FREE(kibz_fine)
- ABI_FREE(kbz_fine)
- ABI_FREE(kfine_imask)
- ABI_FREE(ok2ibz)
-
- call skw%free()
- call gaps%free()
-
-end subroutine find_kpoints_in_pockets
 !!***
 
 end module m_sigmaph

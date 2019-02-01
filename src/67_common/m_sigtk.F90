@@ -32,10 +32,18 @@ module m_sigtk
  use m_ebands
  use m_crystal
  use m_xmpi
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
+ use m_hdr
 
- use m_fstrings,     only : sjoin, ltoa
- use defs_datatypes, only : ebands_t
- use defs_abitypes,  only : dataset_type
+ use m_fstrings,     only : sjoin, ltoa, strcat
+ use m_io_tools,     only : open_file
+ use defs_datatypes, only : ebands_t, pseudopotential_type
+ use defs_abitypes,  only : dataset_type, hdr_type
+ use defs_wvltypes,  only : wvl_internal_type
+ use m_pawtab,       only : pawtab_type
  use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
 
  implicit none
@@ -46,6 +54,7 @@ module m_sigtk
  public :: sigtk_kcalc_from_qprange
  public :: sigtk_kcalc_from_gaps
  public :: sigtk_kcalc_from_erange
+ public :: sigtk_kpts_in_erange
 !!***
 
 contains  !=====================================================
@@ -498,6 +507,200 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  ABI_FREE(sigmak2ebands)
 
 end subroutine sigtk_kcalc_from_erange
+!!***
+
+!!****f* m_sigmaph/sigtk_kpts_in_erange
+!! NAME
+!!  sigtk_kpts_in_erange
+!!
+!! FUNCTION
+
+!! INPUTS
+!!  dtset <dataset_type>=all input variables for this dataset
+!!  psps <pseudopotential_type>=all the information about psps
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm)
+
+!Arguments ------------------------------------
+!scalars
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ type(pseudopotential_type),intent(in) :: psps
+ character(len=*),intent(in) :: prefix
+ integer,intent(in) :: comm
+!arrays
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: master = 0, pertcase0 = 0
+ integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, onkpt, gap_err, unt, ncid, cnt, ncerr, image
+ real(dp) :: ee, cmin, vmax
+ character(len=500) :: msg
+ character(len=fnlen) :: path
+ type(ebands_t) :: fine_ebands
+ type(gaps_t) :: gaps
+ type(wvl_internal_type) :: dummy_wvl
+ type(hdr_type) :: fine_hdr
+!arrays
+ integer :: fine_kptrlatt(3,3), band_block(2)
+ integer,allocatable :: kshe_mask(:,:,:), ok2ibz(:)
+ real(dp) :: params(4)
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ if (my_rank == master) then
+   write(std_out, "(2a)")ch10, repeat("=", 92)
+   write(std_out, "(a)") " Finding k-points inside pockets."
+   write(std_out, "(2a)") " Interpolating eigenvalues onto K-mesh with sigma_nktp: ", trim(ltoa(dtset%sigma_ngkpt))
+   write(std_out, "(2a)") " and sigma_shiftk:"
+   do ii=1,dtset%nshiftk
+     write(std_out, "(a, 3(f2.1, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
+   end do
+   !call ebands_print(ebands, header, unit, prtvol, mode_paral)
+   write(std_out, "(2a)")repeat("=", 92),ch10
+
+   ! Consistency check.
+   if (.not. any(dtset%sigma_erange > zero)) then
+     MSG_ERROR("sigma_erange must be specified in input when calling sigtk_kpts_in_erange.")
+   end if
+   if (all(dtset%sigma_ngkpt == 0)) then
+     MSG_ERROR("sigma_ngkpt must be specified in input when calling sigtk_kpts_in_erange.")
+   end if
+ end if
+
+ ! Compute gaps using input ebands
+ gap_err = get_gaps(ebands, gaps)
+ if (gap_err /= 0) then
+   MSG_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+ end if
+ call gaps%print(unit=std_out)
+
+ ! Interpolate band energies with star-functions.
+ fine_kptrlatt = 0
+ do ii=1,3
+   fine_kptrlatt(ii, ii) = dtset%sigma_ngkpt(ii)
+ end do
+ band_block = [1, ebands%nband]
+ params = 0; params(1) = 1; params(2) = 5; if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
+
+ fine_ebands = ebands_interp_kmesh(ebands, cryst, params, fine_kptrlatt, &
+                                   dtset%sigma_nshiftk, dtset%sigma_shiftk, band_block, comm)
+
+ ! Build new header with fine k-mesh
+ image = 1
+ call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, ABINIT_VERSION, pertcase0, &
+   dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
+   dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
+   dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
+   dtset%amu_orig(:, image), dtset%icoulomb,&
+   ! TODO _origin
+   dtset%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt,&
+   dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
+
+ ! Find k-points inside energy region.
+ ABI_ICALLOC(kshe_mask, (fine_ebands%nkpt, ebands%nsppol, 2))
+
+ do spin=1,ebands%nsppol
+   ! Get CBM and VBM with some tolerance
+   vmax = gaps%vb_max(spin) + tol2 * eV_Ha
+   cmin = gaps%cb_min(spin) - tol2 * eV_Ha
+   do ikf_ibz=1,fine_ebands%nkpt
+     do band=1,ebands%mband
+       ee = fine_ebands%eig(band, ikf_ibz, spin)
+       ! Check whether the interpolated eigenvalue is inside the energy regions.
+       if (dtset%sigma_erange(1) > zero) then
+         if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
+           kshe_mask(ikf_ibz, spin, 1) = kshe_mask(ikf_ibz, spin, 1)  + 1
+           exit
+         end if
+       end if
+       if (dtset%sigma_erange(2) > zero) then
+         if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
+           kshe_mask(ikf_ibz, spin, 2) = kshe_mask(ikf_ibz, spin, 2)  + 1
+           exit
+         end if
+       end if
+     end do
+   end do
+ end do
+
+ ! Build list of k-points inside pockets.
+ onkpt = count(kshe_mask /= 0)
+ ABI_MALLOC(ok2ibz, (onkpt))
+ cnt = 0
+ do ikf_ibz=1,fine_ebands%nkpt
+   if (any(kshe_mask(ikf_ibz,:,:) /= 0)) then
+     cnt = cnt + 1
+     ok2ibz(cnt) = ikf_ibz
+   end if
+ end do
+
+ ! Find points in the BZ?
+
+ ! Write output files with k-point list.
+ if (my_rank == master .and. len_trim(prefix) /= 0) then
+   write(std_out, "(a,i0,a,f5.1,a)")"Found: ",  onkpt, " kpoints in erange. (nkeff / nkibz): ", &
+       (100.0_dp * onkpt) / fine_ebands%nkpt, " [%]"
+
+   path = strcat(prefix, "_KERANGE")
+   if (open_file(path, msg, newunit=unt, form="formatted") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   write(unt, "(a)")"kptopt 0"
+   write(unt, "(a, i0)")"nkpt ", onkpt
+   write(unt, "(a)")"kpt"
+   do ii=1,onkpt
+     write(unt, "(3(es16.6,1x))")fine_ebands%kptns(:, ok2ibz(ii))
+   end do
+   write(unt, "(a, i0)")"wtk"
+   do ii=1,onkpt
+     write(unt, "(es16.6)")fine_ebands%wtk(ok2ibz(ii))
+   end do
+   close(unt)
+
+   path = strcat(prefix, "_KERANGE.nc")
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+   ! Write crystalline structure and bands in fine k-mesh.
+   NCF_CHECK(cryst%ncwrite(ncid))
+   !NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform))
+   NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
+   NCF_CHECK(nctk_set_datamode(ncid))
+   ! Define extra arrays.
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("kshe_mask", "int", "number_of_kpoints, number_of_spins, two"), &
+     nctkarr_t("sigma_erange", "dp", "two"), &
+     nctkarr_t("einterp", "dp", "four") &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+   ! Write extra arrays
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
+   NCF_CHECK(nf90_close(ncid))
+#endif
+ end if
+
+ ABI_FREE(kshe_mask)
+ ABI_FREE(ok2ibz)
+
+ call gaps%free()
+ call ebands_free(fine_ebands)
+ call hdr_free(fine_hdr)
+
+end subroutine sigtk_kpts_in_erange
 !!***
 
 end module m_sigtk

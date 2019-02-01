@@ -1715,9 +1715,7 @@ subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
    call hdr_io_int(fform,hdr,rdwr,wff%unwff)
    ! Master node **MUST** flush the output buffer so that the
    ! other nodes can read headform and therefore the Fortran marker length when MPI-IO is used
-   if (rdwr == 2) then
-     call flush_unit(wff%unwff)
-   end if
+   if (rdwr == 2) call flush_unit(wff%unwff)
  end if
 
 #if defined HAVE_MPI
@@ -2772,7 +2770,7 @@ end subroutine hdr_fort_read
 !!
 !! SOURCE
 
-subroutine hdr_ncread(Hdr,ncid,fform)
+subroutine hdr_ncread(Hdr, ncid, fform)
 
 !Arguments ------------------------------------
 !scalars
