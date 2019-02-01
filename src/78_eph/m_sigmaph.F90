@@ -83,6 +83,7 @@ module m_sigmaph
  public :: sigmaph   ! Main entry point to compute self-energy matrix elements
  public :: sigmaph_read    ! Read main dimensions and header of sigmaph from a netcdf file.
  public :: sigmaph_ebands  ! Fill in values in ebands from the sigmaph structure and netcdf file
+ public :: sigmaph_free    ! Free sigmaph object
 !!***
 
  ! Tables for degenerated KS states.
@@ -456,7 +457,6 @@ module m_sigmaph
  private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
  private :: sigmaph_write             ! Write main dimensions and header of sigmaph on a netcdf file.
  private :: sigmaph_comp              ! Compare two instances of sigmaph raise error if different
- private :: sigmaph_free              ! Free memory.
  private :: sigmaph_setup_kcalc       ! Return tables used to perform the sum over q-points for given k-point.
  private :: sigmaph_gather_and_write  ! Compute the QP corrections.
  private :: sigmaph_print             ! Print results to main output file.
@@ -772,6 +772,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  ABI_FREE(cgwork)
 
+ if (.not.sigma%calc_mrta) call ddkop%free()
  !end if ! calc_velocity
 
  ! Prepare call to getgh1c
@@ -1592,7 +1593,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
- call ddkop%free()
+ if (sigma%calc_mrta) call ddkop%free()
 
 end subroutine sigmaph
 !!***

@@ -295,7 +295,7 @@ MODULE m_ebands
 
  end type gaps_t
 
- public :: get_gaps      ! Build the object from a bandstructure.
+ public :: get_gaps      ! Build the gaps object from a bandstructure.
 !!***
 
 !----------------------------------------------------------------------
@@ -4277,9 +4277,9 @@ select case (intmeth)
      end do !ikpt
    end do !spin
    ABI_FREE(wme0)
-   call xmpi_sum(out_valsdos, comm, ierr)
-   call xmpi_sum(out_vecsdos, comm, ierr)
-   call xmpi_sum(out_tensdos, comm, ierr)
+   if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
+   if (nvecs > 0) call xmpi_sum(out_vecsdos, comm, ierr)
+   if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
 
  case (2, 3)
    ! Consistency test
@@ -4350,9 +4350,9 @@ select case (intmeth)
      end do ! band
    end do ! spin
 
-   call xmpi_sum(out_valsdos, comm, ierr)
-   call xmpi_sum(out_vecsdos, comm, ierr)
-   call xmpi_sum(out_tensdos, comm, ierr)
+   if (nvals > 0) call xmpi_sum(out_valsdos, comm, ierr)
+   if (nvecs > 0) call xmpi_sum(out_vecsdos, comm, ierr)
+   if (ntens > 0) call xmpi_sum(out_tensdos, comm, ierr)
 
    ! Free memory
    ABI_FREE(tmp_eigen)

@@ -178,6 +178,8 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
 
 ! intialize transport
  transport_rta = transport_rta_new(sigmaph,cryst,ebands)
+ sigmaph%ncid = nctk_noid
+ call sigmaph_free(sigmaph)
 
  ! Compute transport
  call transport_rta_compute(transport_rta,cryst,dtset,comm)
@@ -386,6 +388,7 @@ subroutine transport_rta_free(transport_rta)
  type(transport_rta_t),intent(inout) :: transport_rta
 
  call ebands_free(transport_rta%ebands)
+ call transport_rta%gaps%free()
  call edos_free(transport_rta%edos)
 
  ! free the allocated arrays and datastructure
