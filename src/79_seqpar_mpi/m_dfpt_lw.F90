@@ -188,10 +188,10 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 !scalars
  integer :: ask_accurate,bdtot_index,bdtot1_index,bantot_rbz
  integer :: cplex,formeig,forunit,gscase,iatpert,iatpert_cnt,iatpol
- integer :: iatdir,icg,icg1,ierr,ii,ikg,ikpt,ikpt1,ilm,iq1dir,iq1grad,iq1grad_cnt
+ integer :: iatdir,icg,ierr,ii,ikg,ikpt,ikpt1,ilm,iq1dir,iq1grad,iq1grad_cnt
  integer :: iq1q2grad,iq1q2grad_var,iq2dir,iq2grad,iq2grad_cnt,ireadwf0,isppol,istwf_k
  integer :: jj,master,matom,matpert,mcg,me,mgfft
- integer :: mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
+ integer :: mkmem_rbz,mpw,my_nkpt_rbz
  integer :: natpert,nband_k,nfftot,nhat1grdim,nkpt_rbz,npw_k,npw1_k
  integer :: nq1grad,nq1q2grad,nq2grad,nsym1,nylmgr,n3xccc
  integer :: optorth,optene,option,optres
@@ -640,7 +640,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
  call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
- mkmem_rbz =my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
+ mkmem_rbz =my_nkpt_rbz 
  
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
@@ -844,7 +844,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !LOOP OVER SPINS
  bdtot_index=0
- icg=0;icg1=0
+ icg=0
  do isppol=1,nsppol
    ikg=0
 
@@ -888,8 +888,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      end if
 
      call dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut, &
-     &  icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
-     &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
+     &  icg,ikpt,indkpt1,isppol,istwf_k, &
+     &  kg_k,kpoint,mkmem_rbz, &
      &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
      &  npw_k,nq1grad, &
      &  nq2grad,nq1q2grad,nspden,nsppol,nylmgr,occ_k, &
@@ -914,9 +914,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      if (mkmem_rbz/=0) then
        icg=icg+npw_k*dtset%nspinor*nband_k
        ikg=ikg+npw_k
-     end if
-     if (mk1mem_rbz/=0) then
-       icg1=icg1+npw1_k*dtset%nspinor*nband_k
      end if
 
      ABI_DEALLOCATE(occ_k)
@@ -1625,12 +1622,12 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 !Local variables-------------------------------
 !scalars
  integer :: ask_accurate,bantot_rbz,bdtot_index,bdtot1_index
- integer :: cplex,formeig,forunit,gscase,icg,icg1
+ integer :: cplex,formeig,forunit,gscase,icg
  integer :: iatpert,iatpert_cnt,iatpol,iatdir
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
  integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
  integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
- integer :: lw_flexo,master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mk1mem_rbz,mpw,my_nkpt_rbz
+ integer :: lw_flexo,master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mpw,my_nkpt_rbz
  integer :: natpert,nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
  integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
  integer :: nylmgr,optene,option,optorth,optres
@@ -2244,7 +2241,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
  call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
- mkmem_rbz =my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
+ mkmem_rbz =my_nkpt_rbz 
  
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
@@ -2491,7 +2488,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !LOOP OVER SPINS
  bdtot_index=0
- icg=0;icg1=0
+ icg=0
  do isppol=1,nsppol
    ikg=0
 
@@ -2536,15 +2533,15 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !    Compute the wf contributions to the electronic flexoelectric tensor
      if (lw_flexo==1.or.lw_flexo==2) then
-       call dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
+       call dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k, &
        &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
-       &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
-       &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
+       &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
+       &  kg_k,kpoint,mkmem_rbz, &
        &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz, &
        &  npw_k,nq1grad,nq1q2grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
        &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
        &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
-       &  wfk_t_dkdk,wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
+       &  wfk_t_dkdk,wfk_t_strain,wtk_k,ylm_k,ylmgr_k)
 
 !      Add the contribution from each k-point
        elflexowf=elflexowf + elflexowf_k
@@ -2559,11 +2556,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      if (lw_flexo==1.or.lw_flexo==3) then
        call dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k, &
        &  ddmdqwf_t3_k,dtset, &
-       &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
-       &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
+       &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
+       &  kg_k,kpoint,mkmem_rbz, &
        &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
        &  npw_k,nq1grad,nspden,nsppol,nylmgr,occ_k, &
-       &  pert_atdis,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
+       &  pert_atdis,ph1d,psps,q1grad,rmet,ucvol,useylmgr, &
        &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk, &
        &  wtk_k,xred,ylm_k,ylmgr_k)
      end if
@@ -2581,9 +2578,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      if (mkmem_rbz/=0) then
        icg=icg+npw_k*dtset%nspinor*nband_k
        ikg=ikg+npw_k
-     end if
-     if (mk1mem_rbz/=0) then
-       icg1=icg1+npw1_k*dtset%nspinor*nband_k
      end if
 
      ABI_DEALLOCATE(occ_k)

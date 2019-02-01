@@ -80,8 +80,6 @@ contains
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
-!!  icg1=shift to be applied on the location of data in the arrays of the first order 
-!!       response functions (TO CHECK IF IS THE SAME FOR ALL INVOLVED PERTURBATIONS!!!)
 !!  ikpt=number of the k-point
 !!  indkpt1(nkpt_rbz)=non-symmetrized indices of the k-points
 !!  isppol=1 for unpolarized, 2 for spin-polarized
@@ -89,7 +87,6 @@ contains
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
 !!  mkmem =number of k points treated by this node
-!!  mk1mem =number of k points treated by this node (RF data)
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  natpert=number of atomic displacement perturbations
@@ -154,8 +151,8 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
-&               kg_k,kpt,mkmem,mk1mem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz,    &
+subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
+&               kg_k,kpt,mkmem,mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz,    &
 &               npw_k,nq1grad,nq2grad,nq1q2grad,nspden,nsppol,nylmgr,occ_k,pert_atdis,ph1d,psps,qdrpwf_k, &
 &               qdrpwf_t1_k,qdrpwf_t2_k,qdrpwf_t3_k,qdrpwf_t4_k,qdrpwf_t5_k,q1grad,q2grad,q1q2grad,&
 &               rmet,ucvol,useylmgr,vhxc1_atdis,vhxc1_efield,wfk_t_atdis,wfk_t_efield,wfk_t_ddk,   &
@@ -172,8 +169,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,icg,icg1,ikpt,isppol,istwf_k
- integer,intent(in) :: mkmem,mk1mem,mpw,natpert,nband_k,nfft
+ integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
+ integer,intent(in) :: mkmem,mpw,natpert,nband_k,nfft
  integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nq2grad,nq1q2grad,nspden,nsppol,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
@@ -207,8 +204,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,dimffnl,dimph3d,iatpert,iband,ider,idir,idirq1,idirq2,ii,ipert
- integer :: iq1grad,iq2grad,iq1q2grad,i1,i2,i3
+ integer :: berryopt,iatpert,iband,idir,idirq1,idirq2,ii,ipert
+ integer :: iq1grad,iq2grad,iq1q2grad
  integer :: jband,nkpg,npw_disk,nq2grad_3d,sij_opt,opt_gvnl1,optlocal,optnl
  integer :: tim_getgh1c,usevnl
  integer :: useylmgr1
@@ -234,7 +231,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1(:,:,:,:),vlocal1dq(:,:,:,:), dum_vpsp(:)
  real(dp),allocatable :: vpsp1(:),vpsp1dq(:)
- real(dp),allocatable :: work0(:,:),work1(:,:), dum_ylmgr1_k(:,:,:)
+ real(dp),allocatable :: dum_ylmgr1_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
  
 ! *************************************************************************
@@ -965,15 +962,12 @@ end subroutine dfpt_qdrpwf
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
 !!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
-!!  icg1=shift to be applied on the location of data in the arrays of the first order 
-!!       response functions (TO CHECK IF IS THE SAME FOR ALL INVOLVED PERTURBATIONS!!!)
 !!  ikpt=number of the k-point
 !!  indkpt1(nkpt_rbz)=non-symmetrized indices of the k-points
 !!  isppol=1 for unpolarized, 2 for spin-polarized
@@ -981,7 +975,6 @@ end subroutine dfpt_qdrpwf
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
 !!  mkmem =number of k points treated by this node
-!!  mk1mem =number of k points treated by this node (RF data)
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  nattyp(ntypat)= # atoms of each type.
@@ -1017,7 +1010,6 @@ end subroutine dfpt_qdrpwf
 !!  wfk_t_efield(nefipert)=unit numbers for the electric field wf1 files 
 !!  wfk_t_strain(3,3)=unit numbers for the strain displacement wf1 files 
 !!  wtk_k=weight assigned to the k point.
-!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics for the k point
 !!  ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical
 !!                                                                      harmonics for the k point
@@ -1042,16 +1034,16 @@ end subroutine dfpt_qdrpwf
 !!
 !! SOURCE
 
-subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k,& 
+subroutine dfpt_flexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2_k,& 
      &  elflexowf_t3_k,elflexowf_t4_k,elflexowf_t5_k, &
-     &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
-     &  kg_k,kpt,mkmem,mk1mem, &
+     &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
+     &  kg_k,kpt,mkmem, &
      &  mpi_enreg,mpw,nattyp,nband_k,nefipert,nfft,ngfft,nkpt_rbz, &
      &  npw_k,nq1grad, &
      &  nq1q2grad,nspden,nsppol,nstrpert,nylmgr,occ_k, &
      &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
      &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
-     &  wfk_t_dkdk,wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
+     &  wfk_t_dkdk,wfk_t_strain,wtk_k,ylm_k,ylmgr_k)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1064,8 +1056,8 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,icg,icg1,ikpt,isppol,istwf_k
- integer,intent(in) :: mkmem,mk1mem,mpw,nband_k,nefipert,nfft
+ integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
+ integer,intent(in) :: mkmem,mpw,nband_k,nefipert,nfft
  integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nq1q2grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
@@ -1075,7 +1067,6 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
  type(pseudopotential_type),intent(in) :: psps
 
 !arrays
- integer,intent(in) :: atindx(dtset%natom)
  integer,intent(in) :: indkpt1(nkpt_rbz),kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
  integer,intent(in) :: pert_efield(3,nefipert),pert_strain(6,nstrpert)
  integer,intent(in) :: q1grad(3,nq1grad),q1q2grad(4,nq1q2grad)
@@ -1089,7 +1080,6 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
  real(dp),intent(in) :: rhog(2,nfft),rmet(3,3)
  real(dp),intent(in) :: vhxc1_strain(nstrpert,cplex*nfft)
  real(dp),intent(in) :: vhxc1_efield(nefipert,cplex*nfft)
- real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
  type(wfk_t),intent(inout) ::  wfk_t_ddk(nq1grad),wfk_t_dkdk(nq1q2grad)
@@ -1879,8 +1869,6 @@ end subroutine dfpt_flexowf
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
-!!  icg1=shift to be applied on the location of data in the arrays of the first order 
-!!       response functions (TO CHECK IF IS THE SAME FOR ALL INVOLVED PERTURBATIONS!!!)
 !!  ikpt=number of the k-point
 !!  indkpt1(nkpt_rbz)=non-symmetrized indices of the k-points
 !!  isppol=1 for unpolarized, 2 for spin-polarized
@@ -1888,7 +1876,6 @@ end subroutine dfpt_flexowf
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
 !!  mkmem =number of k points treated by this node
-!!  mk1mem =number of k points treated by this node (RF data)
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  natpert=number of atomic displacement perturbations
@@ -1907,7 +1894,6 @@ end subroutine dfpt_flexowf
 !!  ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)=1-dimensional phases
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
-!!  rhog(2,nfftf)=array for Fourier transform of GS electron density
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
@@ -1943,11 +1929,11 @@ end subroutine dfpt_flexowf
 
 subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      &  ddmdqwf_t3_k,dtset, &
-     &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
-     &  kg_k,kpt,mkmem,mk1mem, &
+     &  gs_hamkq,gsqcut,icg,ikpt,indkpt1,isppol,istwf_k, &
+     &  kg_k,kpt,mkmem, &
      &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
      &  npw_k,nq1grad,nspden,nsppol,nylmgr,occ_k, &
-     &  pert_atdis,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
+     &  pert_atdis,ph1d,psps,q1grad,rmet,ucvol,useylmgr, &
      &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk, &
      &  wtk_k,xred,ylm_k,ylmgr_k)
 
@@ -1962,8 +1948,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,icg,icg1,ikpt,isppol,istwf_k
- integer,intent(in) :: mkmem,mk1mem,mpw,natpert,nband_k,nfft
+ integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
+ integer,intent(in) :: mkmem,mpw,natpert,nband_k,nfft
  integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
@@ -1984,7 +1970,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  real(dp),intent(out) :: ddmdqwf_t3_k(2,natpert,natpert,nq1grad)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
- real(dp),intent(in) :: rhog(2,nfft),rmet(3,3)
+ real(dp),intent(in) :: rmet(3,3) 
  real(dp),intent(in) :: vhxc1_atdis(natpert,cplex*nfft)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
@@ -1993,7 +1979,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,iatpert,iband,idir,ii,ipert,iq1grad,jatpert,jband,jdir,jpert,nkpg,npw_disk
+ integer :: berryopt,iatpert,iband,idir,ii,ipert,iq1grad
+ integer :: jatpert,jband,jdir,jpert,nkpg,npw_disk
  integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,cpu,doti,dotr,dum_lambda,gflops,wall
  character(len=500) :: msg                   
@@ -2129,9 +2116,9 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 ! Terms that involve first order response functions
 !----------------------------------------------------------------------------------------
 !Allocation of bks (band, k-point and spin) dependent terms 
- ABI_ALLOCATE(c1atdis_q1gradH0_c1atdis_bks,(2,nband_k,natpert,nq1grad,natpert))
- ABI_ALLOCATE(c1atdis_dQHatdis_c0_bks,(2,nband_k,natpert,nq1grad,natpert))
- ABI_ALLOCATE(c1atdis_Hatdisdq_c0_bks,(2,nband_k,natpert,nq1grad,natpert))
+ ABI_ALLOCATE(c1atdis_q1gradH0_c1atdis_bks,(2,nband_k,natpert,natpert,nq1grad))
+ ABI_ALLOCATE(c1atdis_dQHatdis_c0_bks,(2,nband_k,natpert,natpert,nq1grad))
+ ABI_ALLOCATE(c1atdis_Hatdisdq_c0_bks,(2,nband_k,natpert,natpert,nq1grad))
  c1atdis_dQHatdis_c0_bks=zero
 
 !Allocation of wf1s
@@ -2234,8 +2221,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_iatdis,gv1c, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1atdis_q1gradH0_c1atdis_bks(1,iband,jatpert,iq1grad,iatpert)= dotr
-         c1atdis_q1gradH0_c1atdis_bks(2,iband,jatpert,iq1grad,iatpert)= doti
+         c1atdis_q1gradH0_c1atdis_bks(1,iband,iatpert,jatpert,iq1grad)= dotr
+         c1atdis_q1gradH0_c1atdis_bks(2,iband,iatpert,jatpert,iq1grad)= doti
 
        end do !iatpert
 
@@ -2302,10 +2289,10 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
            cprodi=dotr*ci_h1vatdis_cj(2,jatpert,jband,iband) + &
          &        doti*ci_h1vatdis_cj(1,jatpert,jband,iband)
 
-           c1atdis_dQHatdis_c0_bks(1,iband,jatpert,iq1grad,iatpert)= &
-         & c1atdis_dQHatdis_c0_bks(1,iband,jatpert,iq1grad,iatpert)-cprodr
-           c1atdis_dQHatdis_c0_bks(2,iband,jatpert,iq1grad,iatpert)= &
-         & c1atdis_dQHatdis_c0_bks(2,iband,jatpert,iq1grad,iatpert)-cprodi
+           c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)= &
+         & c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)-cprodr
+           c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad)= &
+         & c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad)-cprodi
 
          end do !jatpert
 
@@ -2385,8 +2372,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_iatdis,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1atdis_Hatdisdq_c0_bks(1,iband,jatpert,iq1grad,iatpert)= dotr
-         c1atdis_Hatdisdq_c0_bks(2,iband,jatpert,iq1grad,iatpert)= doti
+         c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)= dotr
+         c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)= doti
 
        end do !iatpert
 
@@ -2426,11 +2413,61 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  ddmdqwf_t2_k=zero
  ddmdqwf_t3_k=zero
 
+ do iq1grad=1,nq1grad
+   do jatpert=1,natpert
+     do iatpert=1,natpert
+       do iband=1,nband_k
 
+         if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
 
+         !All terms toghether (Terms 4 and 5 are computed as cc of 2 and 3)
+         ddmdqwf_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_k(1,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                              &
+       &       ( c1atdis_q1gradH0_c1atdis_bks(1,iband,iatpert,jatpert,iq1grad)     + &
+       &         two*c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)      + &
+       &         two*c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)      )
 
+         ddmdqwf_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_k(2,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                              &
+       &         c1atdis_q1gradH0_c1atdis_bks(2,iband,iatpert,jatpert,iq1grad)     
 
+         !Separate them
+         !T1
+         ddmdqwf_t1_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t1_k(1,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                                    &
+       &         c1atdis_q1gradH0_c1atdis_bks(1,iband,iatpert,jatpert,iq1grad)     
 
+         ddmdqwf_t1_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_t1_k(2,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                                    &
+       &         c1atdis_q1gradH0_c1atdis_bks(2,iband,iatpert,jatpert,iq1grad)     
+
+         !T2
+         ddmdqwf_t2_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t2_k(1,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                                    &
+       &         two*c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
+
+         ddmdqwf_t2_k(2,iatpert,jatpert,iq1grad)=zero
+
+         !T3
+         ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                                    &
+       &         two*c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
+
+         ddmdqwf_t3_k(2,iatpert,jatpert,iq1grad)=zero
+
+       end do
+     end do
+   end do
+ end do
+
+!Deallocations
+ ABI_DEALLOCATE(ci_h1vatdis_cj)
+ ABI_DEALLOCATE(c1atdis_q1gradH0_c1atdis_bks)
+ ABI_DEALLOCATE(c1atdis_dQHatdis_c0_bks)
+ ABI_DEALLOCATE(c1atdis_Hatdisdq_c0_bks)
+ ABI_DEALLOCATE(cwave0i)
+ ABI_DEALLOCATE(cg1_iatdis)
+ ABI_DEALLOCATE(cg1_ddk)
 
  DBG_EXIT("COLL")
 
