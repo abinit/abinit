@@ -445,15 +445,15 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
 !----------------------------------------------------------------------------------------
 
 !Allocation of bks (band, k-point and spin) dependent terms 
- ABI_ALLOCATE(c1atdis_dQVefield_c0_bks,(2,nq2grad,nq1grad,natpert,nband_k))
+ ABI_ALLOCATE(c1atdis_dQVefield_c0_bks,(2,nband_k,natpert,nq2grad,nq1grad))
 !TODO:For the moment c1atdis_c1dkdk_bks is allocated for all three directions, i.e.,
 !nq2grad=3. This will have to be modified in the future when ABINIT enables to calculate specific
 !components of the d2_dkdk 
  nq2grad_3d=3
- ABI_ALLOCATE(c1atdis_c1dkdk_bks,(2,nq2grad_3d,nq1grad,natpert,nband_k))
- ABI_ALLOCATE(c0_calHatdisdagdQ_c1efield_bks,(2,nq2grad,nq1grad,natpert,nband_k))
- ABI_ALLOCATE(c1atdis_q1gradH0_c1efield_bks,(2,nq2grad,nq1grad,natpert,nband_k))
- ABI_ALLOCATE(c0_Hatdisdq_c1efield_bks,(2,nq2grad,nq1grad,natpert,nband_k))
+ ABI_ALLOCATE(c1atdis_c1dkdk_bks,(2,nband_k,natpert,nq2grad_3d,nq1grad))
+ ABI_ALLOCATE(c0_calHatdisdagdQ_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(c1atdis_q1gradH0_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
+ ABI_ALLOCATE(c0_Hatdisdq_c1efield_bks,(2,nband_k,natpert,nq2grad,nq1grad))
  c1atdis_dQVefield_c0_bks=zero
  c0_calHatdisdagdQ_c1efield_bks=zero
 
@@ -588,8 +588,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_atdis,gv1c, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1atdis_q1gradH0_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)= dotr
-         c1atdis_q1gradH0_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)= doti
+         c1atdis_q1gradH0_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)= dotr
+         c1atdis_q1gradH0_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)= doti
 
        end do !iatpert
 
@@ -656,10 +656,10 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
            cprodi= dotr*cj_vefield_ci(2,iq2grad,jband,iband) + & 
          &         doti*cj_vefield_ci(1,iq2grad,jband,iband) 
 
-           c1atdis_dQVefield_c0_bks(1,iq2grad,iq1grad,iatpert,iband)= &
-         & c1atdis_dQVefield_c0_bks(1,iq2grad,iq1grad,iatpert,iband)-cprodr
-           c1atdis_dQVefield_c0_bks(2,iq2grad,iq1grad,iatpert,iband)= &
-         & c1atdis_dQVefield_c0_bks(2,iq2grad,iq1grad,iatpert,iband)-cprodi
+           c1atdis_dQVefield_c0_bks(1,iband,iatpert,iq2grad,iq1grad)= &
+         & c1atdis_dQVefield_c0_bks(1,iband,iatpert,iq2grad,iq1grad)-cprodr
+           c1atdis_dQVefield_c0_bks(2,iband,iatpert,iq2grad,iq1grad)= &
+         & c1atdis_dQVefield_c0_bks(2,iband,iatpert,iq2grad,iq1grad)-cprodi
 
 
          end do !iq2grad
@@ -686,8 +686,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
 
        idirq1=q1q2grad(2,iq1q2grad)
        idirq2=q1q2grad(3,iq1q2grad)
-       c1atdis_c1dkdk_bks(1,idirq2,idirq1,iatpert,iband)= -half*doti
-       c1atdis_c1dkdk_bks(2,idirq2,idirq1,iatpert,iband)= half*dotr
+       c1atdis_c1dkdk_bks(1,iband,iatpert,idirq2,idirq1)= -half*doti
+       c1atdis_c1dkdk_bks(2,iband,iatpert,idirq2,idirq1)= half*dotr
 
      end do !iq1q2grad
 
@@ -725,10 +725,10 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
            cprodi=dotr*ci_h1vatdisdag_cj(2,iatpert,jband,iband) + &
          &        doti*ci_h1vatdisdag_cj(1,iatpert,jband,iband)
 
-           c0_calHatdisdagdQ_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)= &
-         & c0_calHatdisdagdQ_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)-cprodr
-           c0_calHatdisdagdQ_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)= &
-         & c0_calHatdisdagdQ_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)-cprodi
+           c0_calHatdisdagdQ_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)= &
+         & c0_calHatdisdagdQ_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)-cprodr
+           c0_calHatdisdagdQ_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)= &
+         & c0_calHatdisdagdQ_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)-cprodi
 
          end do !iatpert
 
@@ -811,8 +811,8 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_efield,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c0_Hatdisdq_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)= dotr
-         c0_Hatdisdq_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)= -doti
+         c0_Hatdisdq_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)= dotr
+         c0_Hatdisdq_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)= -doti
 
        end do !iq2grad
 
@@ -854,10 +854,10 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
  qdrpwf_t3_k=zero
  qdrpwf_t4_k=zero
  qdrpwf_t5_k=zero
- do iq2grad=1,nq2grad
-   idirq2=q2grad(2,iq2grad)
-   do iq1grad=1,nq1grad
-     idirq1=q1grad(2,iq1grad)
+ do iq1grad=1,nq1grad
+   idirq1=q1grad(2,iq1grad)
+   do iq2grad=1,nq2grad
+     idirq2=q2grad(2,iq2grad)
      do iatpert=1,natpert
        do iband=1,nband_k
 
@@ -866,63 +866,63 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,icg1,ikpt,indkp
          !All terms toghether
          qdrpwf_k(1,iatpert,iq2grad,iq1grad)=qdrpwf_k(1,iatpert,iq2grad,iq1grad) + & 
        &        wtk_k * occ_k(iband) *                                             &
-       &      ( c1atdis_q1gradH0_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)   + & !T1
-       &        c1atdis_dQVefield_c0_bks(1,iq2grad,iq1grad,iatpert,iband)        + & !T2
-       &        c0_calHatdisdagdQ_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)  + & !T3
-       &        c0_Hatdisdq_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)        + & !T4
-       &        c1atdis_c1dkdk_bks(1,idirq2,idirq1,iatpert,iband)                )   !T5
+       &      ( c1atdis_q1gradH0_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)   + & !T1
+       &        c1atdis_dQVefield_c0_bks(1,iband,iatpert,iq2grad,iq1grad)        + & !T2
+       &        c0_calHatdisdagdQ_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)  + & !T3
+       &        c0_Hatdisdq_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)        + & !T4
+       &        c1atdis_c1dkdk_bks(1,iband,iatpert,idirq2,idirq1)                )   !T5
 
          qdrpwf_k(2,iatpert,iq2grad,iq1grad)=qdrpwf_k(2,iatpert,iq2grad,iq1grad) + &
        &        wtk_k * occ_k(iband) *                                             &
-       &      ( c1atdis_q1gradH0_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)   + & !T1 
-       &        c1atdis_dQVefield_c0_bks(2,iq2grad,iq1grad,iatpert,iband)        + & !T2
-       &        c0_calHatdisdagdQ_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)  + & !T3
-       &        c0_Hatdisdq_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)        + & !T4
-       &        c1atdis_c1dkdk_bks(2,idirq2,idirq1,iatpert,iband)                )   !T5
+       &      ( c1atdis_q1gradH0_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)   + & !T1 
+       &        c1atdis_dQVefield_c0_bks(2,iband,iatpert,iq2grad,iq1grad)        + & !T2
+       &        c0_calHatdisdagdQ_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)  + & !T3
+       &        c0_Hatdisdq_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)        + & !T4
+       &        c1atdis_c1dkdk_bks(2,iband,iatpert,idirq2,idirq1)                )   !T5
 
          !Separate them
          !T1
          qdrpwf_t1_k(1,iatpert,iq2grad,iq1grad)=qdrpwf_t1_k(1,iatpert,iq2grad,iq1grad) + & 
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c1atdis_q1gradH0_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)
+       &        c1atdis_q1gradH0_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)
 
          qdrpwf_t1_k(2,iatpert,iq2grad,iq1grad)=qdrpwf_t1_k(2,iatpert,iq2grad,iq1grad) + & 
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c1atdis_q1gradH0_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)
+       &        c1atdis_q1gradH0_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)
 
          !T2
          qdrpwf_t2_k(1,iatpert,iq2grad,iq1grad)=qdrpwf_t2_k(1,iatpert,iq2grad,iq1grad) + & 
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c1atdis_dQVefield_c0_bks(1,iq2grad,iq1grad,iatpert,iband) 
+       &        c1atdis_dQVefield_c0_bks(1,iband,iatpert,iq2grad,iq1grad) 
 
          qdrpwf_t2_k(2,iatpert,iq2grad,iq1grad)=qdrpwf_t2_k(2,iatpert,iq2grad,iq1grad) + &
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c1atdis_dQVefield_c0_bks(2,iq2grad,iq1grad,iatpert,iband)  
+       &        c1atdis_dQVefield_c0_bks(2,iband,iatpert,iq2grad,iq1grad)  
 
          !T3
          qdrpwf_t3_k(1,iatpert,iq2grad,iq1grad)=qdrpwf_t3_k(1,iatpert,iq2grad,iq1grad) + &
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c0_calHatdisdagdQ_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)
+       &        c0_calHatdisdagdQ_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)
         
          qdrpwf_t3_k(2,iatpert,iq2grad,iq1grad)=qdrpwf_t3_k(2,iatpert,iq2grad,iq1grad) + &
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c0_calHatdisdagdQ_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)
+       &        c0_calHatdisdagdQ_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)
 
          !T4
          qdrpwf_t4_k(1,iatpert,iq2grad,iq1grad)=qdrpwf_t4_k(1,iatpert,iq2grad,iq1grad) + &
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c0_Hatdisdq_c1efield_bks(1,iq2grad,iq1grad,iatpert,iband)
+       &        c0_Hatdisdq_c1efield_bks(1,iband,iatpert,iq2grad,iq1grad)
         
          qdrpwf_t4_k(2,iatpert,iq2grad,iq1grad)=qdrpwf_t4_k(2,iatpert,iq2grad,iq1grad) + &
        &        wtk_k * occ_k(iband) *                                                   &
-       &        c0_Hatdisdq_c1efield_bks(2,iq2grad,iq1grad,iatpert,iband)
+       &        c0_Hatdisdq_c1efield_bks(2,iband,iatpert,iq2grad,iq1grad)
 
          !T5
          qdrpwf_t5_k(1,iatpert,iq2grad,iq1grad)=qdrpwf_t5_k(1,iatpert,iq2grad,iq1grad) + &
-       &        wtk_k * occ_k(iband) * c1atdis_c1dkdk_bks(1,idirq2,idirq1,iatpert,iband) 
+       &        wtk_k * occ_k(iband) * c1atdis_c1dkdk_bks(1,iband,iatpert,idirq2,idirq1) 
          
          qdrpwf_t5_k(2,iatpert,iq2grad,iq1grad)=qdrpwf_t5_k(2,iatpert,iq2grad,iq1grad) + &
-       &        wtk_k * occ_k(iband) * c1atdis_c1dkdk_bks(2,idirq2,idirq1,iatpert,iband) 
+       &        wtk_k * occ_k(iband) * c1atdis_c1dkdk_bks(2,iband,iatpert,idirq2,idirq1) 
 
        end do
      end do
@@ -1337,11 +1337,11 @@ subroutine dfpt_flexowf(atindx,cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexo
 !----------------------------------------------------------------------------------------
 
 !Allocation of bks (band, k-point and spin) dependent terms 
-ABI_ALLOCATE(c1efield_q1gradH0_c1strain_bks,(nband_k,2,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1efield_dQcalHstrain_c0_bks,(nband_k,2,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c0_VefielddQ_c1strain_bks,(nband_k,2,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1dkdk_c1strain_bks,(nband_k,2,nefipert,nq1grad,nstrpert))
-ABI_ALLOCATE(c1efield_Hmetricdqdq_c0_bks,(nband_k,2,nefipert,nq1grad,nstrpert))
+ABI_ALLOCATE(c1efield_q1gradH0_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_ALLOCATE(c1efield_dQcalHstrain_c0_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_ALLOCATE(c0_VefielddQ_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_ALLOCATE(c1dkdk_c1strain_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
+ABI_ALLOCATE(c1efield_Hmetricdqdq_c0_bks,(2,nband_k,nefipert,nq1grad,nstrpert))
 c1efield_dQcalHstrain_c0_bks=zero
 c0_VefielddQ_c1strain_bks=zero
 
@@ -1487,8 +1487,8 @@ c0_VefielddQ_c1strain_bks=zero
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_efield,gv1c, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1efield_q1gradH0_c1strain_bks(iband,1,iefipert,iq1grad,istrpert)=dotr
-         c1efield_q1gradH0_c1strain_bks(iband,2,iefipert,iq1grad,istrpert)=doti
+         c1efield_q1gradH0_c1strain_bks(1,iband,iefipert,iq1grad,istrpert)=dotr
+         c1efield_q1gradH0_c1strain_bks(2,iband,iefipert,iq1grad,istrpert)=doti
 
        end do !iefipert
 
@@ -1555,10 +1555,10 @@ c0_VefielddQ_c1strain_bks=zero
            cprodi=dotr*cj_h1vstrain_ci(2,istrpert,jband,iband) + &
          &         doti*cj_h1vstrain_ci(1,istrpert,jband,iband)
 
-           c1efield_dQcalHstrain_c0_bks(iband,1,iefipert,iq1grad,istrpert)= &
-         & c1efield_dQcalHstrain_c0_bks(iband,1,iefipert,iq1grad,istrpert)-cprodr
-           c1efield_dQcalHstrain_c0_bks(iband,2,iefipert,iq1grad,istrpert)= &
-         & c1efield_dQcalHstrain_c0_bks(iband,2,iefipert,iq1grad,istrpert)-cprodi
+           c1efield_dQcalHstrain_c0_bks(1,iband,iefipert,iq1grad,istrpert)= &
+         & c1efield_dQcalHstrain_c0_bks(1,iband,iefipert,iq1grad,istrpert)-cprodr
+           c1efield_dQcalHstrain_c0_bks(2,iband,iefipert,iq1grad,istrpert)= &
+         & c1efield_dQcalHstrain_c0_bks(2,iband,iefipert,iq1grad,istrpert)-cprodi
 
          end do !istrpert
 
@@ -1606,10 +1606,10 @@ c0_VefielddQ_c1strain_bks=zero
            cprodi=dotr*ci_vefielddag_cj(2,iefipert,jband,iband) + &
          &        doti*ci_vefielddag_cj(1,iefipert,jband,iband)
 
-           c0_VefielddQ_c1strain_bks(iband,1,iefipert,iq1grad,istrpert)= &
-         & c0_VefielddQ_c1strain_bks(iband,1,iefipert,iq1grad,istrpert)-cprodr
-           c0_VefielddQ_c1strain_bks(iband,2,iefipert,iq1grad,istrpert)= &
-         & c0_VefielddQ_c1strain_bks(iband,2,iefipert,iq1grad,istrpert)-cprodi
+           c0_VefielddQ_c1strain_bks(1,iband,iefipert,iq1grad,istrpert)= &
+         & c0_VefielddQ_c1strain_bks(1,iband,iefipert,iq1grad,istrpert)-cprodr
+           c0_VefielddQ_c1strain_bks(2,iband,iefipert,iq1grad,istrpert)= &
+         & c0_VefielddQ_c1strain_bks(2,iband,iefipert,iq1grad,istrpert)-cprodi
 
          end do !iefipert
 
@@ -1635,8 +1635,8 @@ c0_VefielddQ_c1strain_bks=zero
 
        idirq1=q1q2grad(2,iq1q2grad)
        idirq2=q1q2grad(3,iq1q2grad)
-       c1dkdk_c1strain_bks(iband,1,idirq1,idirq2,istrpert)= half*doti
-       c1dkdk_c1strain_bks(iband,2,idirq1,idirq2,istrpert)=-half*dotr
+       c1dkdk_c1strain_bks(1,iband,idirq1,idirq2,istrpert)= half*doti
+       c1dkdk_c1strain_bks(2,iband,idirq1,idirq2,istrpert)=-half*dotr
 
      end do !iq1q2grad
 
@@ -1728,8 +1728,8 @@ c0_VefielddQ_c1strain_bks=zero
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_efield,gh1dqdqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1efield_Hmetricdqdq_c0_bks(iband,1,iefipert,iq1grad,istrpert)=half*dotr
-         c1efield_Hmetricdqdq_c0_bks(iband,2,iefipert,iq1grad,istrpert)=half*doti
+         c1efield_Hmetricdqdq_c0_bks(1,iband,iefipert,iq1grad,istrpert)=half*dotr
+         c1efield_Hmetricdqdq_c0_bks(2,iband,iefipert,iq1grad,istrpert)=half*doti
 
        end do !iefipert
 
@@ -1784,52 +1784,52 @@ c0_VefielddQ_c1strain_bks=zero
 
          !All terms toghether except T4 that needs further treatment
          elflexowf_k(1,iefipert,iq1grad,ka,kb)=elflexowf_k(1,iefipert,iq1grad,ka,kb) +        &
-      &  occ_k(iband) * ( c1efield_q1gradH0_c1strain_bks(iband,1,iefipert,iq1grad,istrpert) + & !T1
-      &  c1efield_dQcalHstrain_c0_bks(iband,1,iefipert,iq1grad,istrpert) +                    & !T2
-      &  c0_VefielddQ_c1strain_bks(iband,1,iefipert,iq1grad,istrpert) +                       & !T3
-      &  c1dkdk_c1strain_bks(iband,1,iefipert,iq1grad,istrpert) )                               !T5
+      &  occ_k(iband) * ( c1efield_q1gradH0_c1strain_bks(1,iband,iefipert,iq1grad,istrpert) + & !T1
+      &  c1efield_dQcalHstrain_c0_bks(1,iband,iefipert,iq1grad,istrpert) +                    & !T2
+      &  c0_VefielddQ_c1strain_bks(1,iband,iefipert,iq1grad,istrpert) +                       & !T3
+      &  c1dkdk_c1strain_bks(1,iband,iefipert,iq1grad,istrpert) )                               !T5
 
          elflexowf_k(2,iefipert,iq1grad,ka,kb)=elflexowf_k(2,iefipert,iq1grad,ka,kb) +        &
-      &  occ_k(iband) * ( c1efield_q1gradH0_c1strain_bks(iband,2,iefipert,iq1grad,istrpert) + & !T1
-      &  c1efield_dQcalHstrain_c0_bks(iband,2,iefipert,iq1grad,istrpert) +                    & !T2
-      &  c0_VefielddQ_c1strain_bks(iband,2,iefipert,iq1grad,istrpert) +                       & !T3
-      &  c1dkdk_c1strain_bks(iband,2,iefipert,iq1grad,istrpert) )                               !T5
+      &  occ_k(iband) * ( c1efield_q1gradH0_c1strain_bks(2,iband,iefipert,iq1grad,istrpert) + & !T1
+      &  c1efield_dQcalHstrain_c0_bks(2,iband,iefipert,iq1grad,istrpert) +                    & !T2
+      &  c0_VefielddQ_c1strain_bks(2,iband,iefipert,iq1grad,istrpert) +                       & !T3
+      &  c1dkdk_c1strain_bks(2,iband,iefipert,iq1grad,istrpert) )                               !T5
  
          !Separate them
          !T1
          elflexowf_t1_k(1,iefipert,iq1grad,ka,kb)=elflexowf_t1_k(1,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c1efield_q1gradH0_c1strain_bks(iband,1,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1efield_q1gradH0_c1strain_bks(1,iband,iefipert,iq1grad,istrpert)
 
          elflexowf_t1_k(2,iefipert,iq1grad,ka,kb)=elflexowf_t1_k(2,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c1efield_q1gradH0_c1strain_bks(iband,2,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1efield_q1gradH0_c1strain_bks(2,iband,iefipert,iq1grad,istrpert)
 
          !T2
          elflexowf_t2_k(1,iefipert,iq1grad,ka,kb)=elflexowf_t2_k(1,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c1efield_dQcalHstrain_c0_bks(iband,1,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1efield_dQcalHstrain_c0_bks(1,iband,iefipert,iq1grad,istrpert)
 
          elflexowf_t2_k(2,iefipert,iq1grad,ka,kb)=elflexowf_t2_k(2,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c1efield_dQcalHstrain_c0_bks(iband,2,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1efield_dQcalHstrain_c0_bks(2,iband,iefipert,iq1grad,istrpert)
 
          !T3
          elflexowf_t3_k(1,iefipert,iq1grad,ka,kb)=elflexowf_t3_k(1,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c0_VefielddQ_c1strain_bks(iband,1,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c0_VefielddQ_c1strain_bks(1,iband,iefipert,iq1grad,istrpert)
 
          elflexowf_t3_k(2,iefipert,iq1grad,ka,kb)=elflexowf_t3_k(2,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c0_VefielddQ_c1strain_bks(iband,2,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c0_VefielddQ_c1strain_bks(2,iband,iefipert,iq1grad,istrpert)
 
          !T4 has type-I ordering for the array indexes 
          elflexowf_t4_k(1,iefipert,ka,kb,iq1grad)=elflexowf_t4_k(1,iefipert,ka,kb,iq1grad) + &
-      &  occ_k(iband) * c1efield_Hmetricdqdq_c0_bks(iband,1,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1efield_Hmetricdqdq_c0_bks(1,iband,iefipert,iq1grad,istrpert)
 
          elflexowf_t4_k(2,iefipert,ka,kb,iq1grad)=elflexowf_t4_k(2,iefipert,ka,kb,iq1grad) + &
-      &  occ_k(iband) * c1efield_Hmetricdqdq_c0_bks(iband,2,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1efield_Hmetricdqdq_c0_bks(2,iband,iefipert,iq1grad,istrpert)
 
          !T5
          elflexowf_t5_k(1,iefipert,iq1grad,ka,kb)=elflexowf_t5_k(1,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c1dkdk_c1strain_bks(iband,1,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1dkdk_c1strain_bks(1,iband,iefipert,iq1grad,istrpert)
 
          elflexowf_t5_k(2,iefipert,iq1grad,ka,kb)=elflexowf_t5_k(2,iefipert,iq1grad,ka,kb) + &
-      &  occ_k(iband) * c1dkdk_c1strain_bks(iband,2,iefipert,iq1grad,istrpert)
+      &  occ_k(iband) * c1dkdk_c1strain_bks(2,iband,iefipert,iq1grad,istrpert)
 
       end do
     end do
@@ -1926,10 +1926,8 @@ end subroutine dfpt_flexowf
 !!  ddmdqwf_k(2,natpert,natpert,nq1grad)=wave function dependent part of the 
 !!          first q-gradient of the dynamical matrix for the k-point kpt.
 !!  ddmdqwf_t1_k(2,natpert,natpert,nq1grad)=t1 term (see notes) of ddmdqwf_k
-!!  ddmdqwf_t2_k(2,natpert,natpert,nq1grad)=t2 term (see notes) of ddmdqwf_k
-!!  ddmdqwf_t3_k(2,natpert,natpert,nq1grad)=t3 term (see notes) of ddmdqwf_k
-!!  ddmdqwf_t4_k(2,natpert,natpert,nq1grad)=t5 term (see notes) of ddmdqwf_k
-!!  ddmdqwf_t5_k(2,natpert,natpert,nq1grad)=t5 term (see notes) of ddmdqwf_k
+!!  ddmdqwf_t2_k(2,natpert,natpert,nq1grad)=t2 (cc of t4) term (see notes) of ddmdqwf_k
+!!  ddmdqwf_t3_k(2,natpert,natpert,nq1grad)=t3 (cc of t5) term (see notes) of ddmdqwf_k
 !!
 !! SIDE EFFECTS
 !!
@@ -1944,7 +1942,7 @@ end subroutine dfpt_flexowf
 !! SOURCE
 
 subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
-     &  ddmdqwf_t3_k,ddmdqwf_t4_k,ddmdqwf_t5_k,dtset, &
+     &  ddmdqwf_t3_k,dtset, &
      &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
      &  kg_k,kpt,mkmem,mk1mem, &
      &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
@@ -1984,8 +1982,6 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  real(dp),intent(out) :: ddmdqwf_t1_k(2,natpert,natpert,nq1grad)
  real(dp),intent(out) :: ddmdqwf_t2_k(2,natpert,natpert,nq1grad)
  real(dp),intent(out) :: ddmdqwf_t3_k(2,natpert,natpert,nq1grad)
- real(dp),intent(out) :: ddmdqwf_t4_k(2,natpert,natpert,nq1grad)
- real(dp),intent(out) :: ddmdqwf_t5_k(2,natpert,natpert,nq1grad)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft),rmet(3,3)
@@ -2133,9 +2129,9 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 ! Terms that involve first order response functions
 !----------------------------------------------------------------------------------------
 !Allocation of bks (band, k-point and spin) dependent terms 
- ABI_ALLOCATE(c1atdis_q1gradH0_c1atdis_bks,(2,natpert,nq1grad,natpert,nband_k))
- ABI_ALLOCATE(c1atdis_dQHatdis_c0_bks,(2,natpert,nq1grad,natpert,nband_k))
- ABI_ALLOCATE(c1atdis_Hatdisdq_c0_bks,(2,natpert,nq1grad,natpert,nband_k))
+ ABI_ALLOCATE(c1atdis_q1gradH0_c1atdis_bks,(2,nband_k,natpert,nq1grad,natpert))
+ ABI_ALLOCATE(c1atdis_dQHatdis_c0_bks,(2,nband_k,natpert,nq1grad,natpert))
+ ABI_ALLOCATE(c1atdis_Hatdisdq_c0_bks,(2,nband_k,natpert,nq1grad,natpert))
  c1atdis_dQHatdis_c0_bks=zero
 
 !Allocation of wf1s
@@ -2238,8 +2234,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_iatdis,gv1c, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1atdis_q1gradH0_c1atdis_bks(1,jatpert,iq1grad,iatpert,iband)= dotr
-         c1atdis_q1gradH0_c1atdis_bks(2,jatpert,iq1grad,iatpert,iband)= doti
+         c1atdis_q1gradH0_c1atdis_bks(1,iband,jatpert,iq1grad,iatpert)= dotr
+         c1atdis_q1gradH0_c1atdis_bks(2,iband,jatpert,iq1grad,iatpert)= doti
 
        end do !iatpert
 
@@ -2306,10 +2302,10 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
            cprodi=dotr*ci_h1vatdis_cj(2,jatpert,jband,iband) + &
          &        doti*ci_h1vatdis_cj(1,jatpert,jband,iband)
 
-           c1atdis_dQHatdis_c0_bks(1,jatpert,iq1grad,iatpert,iband)= &
-         & c1atdis_dQHatdis_c0_bks(1,jatpert,iq1grad,iatpert,iband)-cprodr
-           c1atdis_dQHatdis_c0_bks(2,jatpert,iq1grad,iatpert,iband)= &
-         & c1atdis_dQHatdis_c0_bks(2,jatpert,iq1grad,iatpert,iband)-cprodi
+           c1atdis_dQHatdis_c0_bks(1,iband,jatpert,iq1grad,iatpert)= &
+         & c1atdis_dQHatdis_c0_bks(1,iband,jatpert,iq1grad,iatpert)-cprodr
+           c1atdis_dQHatdis_c0_bks(2,iband,jatpert,iq1grad,iatpert)= &
+         & c1atdis_dQHatdis_c0_bks(2,iband,jatpert,iq1grad,iatpert)-cprodi
 
          end do !jatpert
 
@@ -2389,8 +2385,8 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
          call dotprod_g(dotr,doti,istwf_k,npw_k*dtset%nspinor,2,cg1_iatdis,gh1dqc, &
        & mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
-         c1atdis_Hatdisdq_c0_bks(1,jatpert,iq1grad,iatpert,iband)= dotr
-         c1atdis_Hatdisdq_c0_bks(2,jatpert,iq1grad,iatpert,iband)= doti
+         c1atdis_Hatdisdq_c0_bks(1,iband,jatpert,iq1grad,iatpert)= dotr
+         c1atdis_Hatdisdq_c0_bks(2,iband,jatpert,iq1grad,iatpert)= doti
 
        end do !iatpert
 
@@ -2422,6 +2418,13 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
  ABI_DEALLOCATE(dum_vpsp)
  ABI_DEALLOCATE(dum_vlocal)
 
+!--------------------------------------------------------------------------------------
+! Acumulates all the wf dependent terms of the quadrupole tensor
+!--------------------------------------------------------------------------------------
+ ddmdqwf_k=zero
+ ddmdqwf_t1_k=zero
+ ddmdqwf_t2_k=zero
+ ddmdqwf_t3_k=zero
 
 
 

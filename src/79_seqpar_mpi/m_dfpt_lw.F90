@@ -1668,8 +1668,6 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  real(dp),allocatable :: ddmdqwf_t1(:,:,:,:),ddmdqwf_t1_k(:,:,:,:)
  real(dp),allocatable :: ddmdqwf_t2(:,:,:,:),ddmdqwf_t2_k(:,:,:,:)
  real(dp),allocatable :: ddmdqwf_t3(:,:,:,:),ddmdqwf_t3_k(:,:,:,:)
- real(dp),allocatable :: ddmdqwf_t4(:,:,:,:),ddmdqwf_t4_k(:,:,:,:)
- real(dp),allocatable :: ddmdqwf_t5(:,:,:,:),ddmdqwf_t5_k(:,:,:,:)
  real(dp),allocatable :: eigen0(:)
  real(dp),allocatable :: elflexowf(:,:,:,:,:),elflexowf_k(:,:,:,:,:)
  real(dp),allocatable :: elflexowf_t1(:,:,:,:,:),elflexowf_t1_k(:,:,:,:,:)
@@ -2485,16 +2483,10 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_ALLOCATE(ddmdqwf_t2_k,(2,natpert,natpert,nq1grad))
    ABI_ALLOCATE(ddmdqwf_t3,(2,natpert,natpert,nq1grad))
    ABI_ALLOCATE(ddmdqwf_t3_k,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t4,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t4_k,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t5,(2,natpert,natpert,nq1grad))
-   ABI_ALLOCATE(ddmdqwf_t5_k,(2,natpert,natpert,nq1grad))
    ddmdqwf=zero
    ddmdqwf_t1=zero
    ddmdqwf_t2=zero
    ddmdqwf_t3=zero
-   ddmdqwf_t4=zero
-   ddmdqwf_t5=zero
  end if
 
 !LOOP OVER SPINS
@@ -2566,7 +2558,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !    Compute the wf contributions to the first q-gradient of the dynamical matrix
      if (lw_flexo==1.or.lw_flexo==3) then
        call dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k, &
-       &  ddmdqwf_t3_k,ddmdqwf_t4_k,ddmdqwf_t5_k,dtset, &
+       &  ddmdqwf_t3_k,dtset, &
        &  gs_hamkq,gsqcut,icg,icg1,ikpt,indkpt1,isppol,istwf_k, &
        &  kg_k,kpoint,mkmem_rbz,mk1mem_rbz, &
        &  mpi_enreg,mpw,natpert,nattyp,nband_k,nfft,ngfft,nkpt_rbz, &
@@ -2581,8 +2573,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        ddmdqwf_t1=ddmdqwf_t1 + ddmdqwf_t1_k
        ddmdqwf_t2=ddmdqwf_t2 + ddmdqwf_t2_k
        ddmdqwf_t3=ddmdqwf_t3 + ddmdqwf_t3_k
-       ddmdqwf_t4=ddmdqwf_t4 + ddmdqwf_t4_k
-       ddmdqwf_t5=ddmdqwf_t5 + ddmdqwf_t5_k
 
 !    Keep track of total number of bands
      bdtot_index=bdtot_index+nband_k
@@ -2687,10 +2677,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    ABI_DEALLOCATE(ddmdqwf_t2_k)
    ABI_DEALLOCATE(ddmdqwf_t3)
    ABI_DEALLOCATE(ddmdqwf_t3_k)
-   ABI_DEALLOCATE(ddmdqwf_t4)
-   ABI_DEALLOCATE(ddmdqwf_t4_k)
-   ABI_DEALLOCATE(ddmdqwf_t5)
-   ABI_DEALLOCATE(ddmdqwf_t5_k)
  end if 
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
    ABI_DEALLOCATE(pert_strain)
