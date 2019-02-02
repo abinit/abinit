@@ -696,12 +696,11 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
 
    ! If sigma_erange is set, get emin and emax
-   ncerr = get_gaps(ebands,gaps)
-   write(*,*) ncerr, ebands%occopt
-   if (ncerr/=0.and.ebands%occopt.eq.1) then
+   ierr = get_gaps(ebands,gaps)
+   if (ierr/=0.and.ebands%occopt.eq.1) then
      call ebands_copy(ebands,ebands_tmp)
      call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
-     ncerr = get_gaps(ebands_tmp,gaps)
+     ierr = get_gaps(ebands_tmp,gaps)
      call ebands_free(ebands_tmp)
    end if
    do spin=1,ebands%nsppol

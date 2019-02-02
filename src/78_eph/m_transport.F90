@@ -61,7 +61,7 @@ module m_transport
 
 !!****
 
-!!****t* m_sigmaph/sigmaph_t
+!!****t* m_transport/transport_rta_t
 !! NAME
 !! transport_rta_t
 !!
@@ -200,6 +200,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawa
  call transport_rta_free(transport_rta)
 
 end subroutine transport
+!***
 
 !----------------------------------------------------------------------
 
@@ -240,6 +241,7 @@ type(transport_rta_t) function transport_rta_new(sigmaph,cryst,ebands) result (n
  new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
 
 end function transport_rta_new
+!!***
 
 !----------------------------------------------------------------------
 
@@ -332,6 +334,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  ABI_FREE(vv_tens)
 
 end subroutine transport_rta_compute
+!!***
 
 !----------------------------------------------------------------------
 
@@ -370,6 +373,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau"),  self%vvdos(:,1,:,:,:,2:)))
 
 end subroutine transport_rta_ncwrite
+!!***
 
 !----------------------------------------------------------------------
 
@@ -402,7 +406,7 @@ subroutine transport_rta_free(transport_rta)
  ABI_SFREE(transport_rta%linewidth_serta)
 
 end subroutine transport_rta_free
-
+!!***
 
 end module m_transport
 !!***
