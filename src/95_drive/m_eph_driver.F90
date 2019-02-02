@@ -634,7 +634,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
    !call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
-   call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,cryst,pawfgr,pawang,pawrad,pawtab,psps,ebands,comm)
+   call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
 
  case (5, -5)
    ! Interpolate the phonon potential
@@ -647,7 +647,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (7)
    ! Compute phonon limited transport from WFK and a SIGEPH file
-   call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,cryst,pawfgr,pawang,pawrad,pawtab,psps,ebands,comm)
+   call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

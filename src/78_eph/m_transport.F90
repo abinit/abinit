@@ -58,8 +58,9 @@ module m_transport
 !!****
 
  public :: transport !! main entry point for transport calculations
-
 !!****
+
+!----------------------------------------------------------------------
 
 !!****t* m_transport/transport_rta_t
 !! NAME
@@ -118,6 +119,7 @@ type,public :: transport_rta_t
    ! (nw, 2, 0:nsppol, 3, 3, 1+ntemps)
 
  end type transport_rta_t
+!!***
 
 !----------------------------------------------------------------------
 
@@ -128,16 +130,26 @@ contains  !=====================================================
 
 !!****f* m_transport/transport
 !! NAME
-!! sigmaph_t
+!! transport
 !!
 !! FUNCTION
 !! General driver to compute transport properties
+!! wk0_path=String with the path to the GS unperturbed WFK file.
+!! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
+!! dtset<dataset_type>=All input variables for this dataset.
+!! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
+!! pawang<pawang_type)>=PAW angular mesh and related data.
+!! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
+!! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
+!! psps<pseudopotential_type>=Variables related to pseudopotentials.
+!! comm=MPI communicator.
 !!
 !! INPUTS
 !!
 !! SOURCE
 
-subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, cryst, pawfgr, pawang, pawrad, pawtab, psps, ebands, comm)
+subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawfgr, pawang, pawrad, pawtab, psps, comm)
 
 !Arguments ------------------------------------
 !scalars

@@ -2820,9 +2820,9 @@ end function sigmaph_read
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/sigmaph_read
+!!****f* m_sigmaph/sigmaph_ebands
 !! NAME
-!!  sigmaph_read
+!!  sigmaph_ebands
 !!
 !! FUNCTION
 !!  Read quantities from the sigmaph to a ebands structure and return mapping
