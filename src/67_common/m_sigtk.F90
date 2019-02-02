@@ -541,7 +541,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, pertcase0 = 0
+ integer,parameter :: master = 0, pertcase0 = 0, fform_kerange = 6001
  integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, ierr, onkpt, gap_err, unt, ncid, cnt, ncerr, image
  real(dp) :: ee, cmin, vmax
  character(len=500) :: msg
@@ -661,11 +661,11 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    write(unt, "(a, i0)")"nkpt ", onkpt
    write(unt, "(a)")"kpt"
    do ii=1,onkpt
-     write(unt, "(3(es16.6,1x))")fine_ebands%kptns(:, ok2ibz(ii))
+     write(unt, "(3(es16.8,1x))")fine_ebands%kptns(:, ok2ibz(ii))
    end do
    write(unt, "(a, i0)")"wtk"
    do ii=1,onkpt
-     write(unt, "(es16.6)")fine_ebands%wtk(ok2ibz(ii))
+     write(unt, "(es16.8)")fine_ebands%wtk(ok2ibz(ii))
    end do
    close(unt)
 
@@ -673,8 +673,8 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 #ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    ! Write crystalline structure and bands in fine k-mesh.
+   NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform_kerange, nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
-   !NCF_CHECK(hdr_ncwrite(fine_hdr, ncid, fform))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
    NCF_CHECK(nctk_set_datamode(ncid))
    ! Define extra arrays.

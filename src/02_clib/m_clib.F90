@@ -351,8 +351,6 @@ subroutine clib_rename(old_fname, new_fname, ierr)
  integer, optional, intent(out) :: ierr
  integer :: ier
 
-!Local variables-------------------------------
-
 ! *********************************************************************
 
  ier = rename(trim(old_fname)//c_null_char, trim(new_fname)//c_null_char)

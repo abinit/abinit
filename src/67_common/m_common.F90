@@ -186,7 +186,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !scalars
  integer,parameter :: master=0
  integer,save :: toldfe_ok,toldff_ok,tolrff_ok,ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank 
+ integer :: iatom,iband,iexit,ikpt,ii,ishift,isppol,my_rank
  integer :: nband_index,nband_k,nnsclohf
  integer :: openexit,option,tmagnet,usefock
 #if defined DEV_YP_VDWXC
@@ -1505,7 +1505,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
 !XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
-!      At present, there is still a problem with the variational formulation for the Fock term with PAW. 
+!      At present, there is still a problem with the variational formulation for the Fock term with PAW.
 !      So, for the time being, keep it inside.
        if(usepaw==1)exc_semilocal=exc_semilocal+energies%e_fock
        write(msg, '(3(a,es21.14,a),a,es21.14)' ) &

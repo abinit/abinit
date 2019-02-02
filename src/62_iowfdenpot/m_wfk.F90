@@ -4939,7 +4939,7 @@ end subroutine wfk_diff
 !!
 !! INPUTS
 !!  in_wfkpath = Input WFK file with k-point list.
-!!  in_wfkskw = WFK file with eigenvalues in the IBZ, used to interpolate energies with SKW.
+!!  kerange_path = KERANGE
 !!  dtset <dataset_type>=all input variables for this dataset
 !!  psps <pseudopotential_type>=all the information about psps
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -4959,11 +4959,11 @@ end subroutine wfk_diff
 !!
 !! SOURCE
 
-subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpath, comm)
+subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfkpath, comm)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: in_wfkpath, in_wfkskw, out_wfkpath
+ character(len=*),intent(in) :: in_wfkpath, kerange_path, out_wfkpath
  type(pseudopotential_type),intent(in) :: psps
  type(dataset_type),intent(in) :: dtset
  integer,intent(in) :: comm
@@ -4972,42 +4972,40 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: formeig0 = 0, master = 0
+ integer,parameter :: formeig0 = 0, master = 0, fform_kerange = 6001
  integer :: spin, ikf, ikin, nband_k, mpw, mband, nspinor, ierr, fine_mband
- integer :: nsppol, out_iomode, kf_rank, npw_k, ii, my_rank, nprocs, ncid, fform
+ integer :: nsppol, out_iomode, kf_rank, npw_k, ii, my_rank, ncid, fform
  real(dp) :: cpu, wall, gflops !, dksqmax
  character(len=500) :: msg
- character(len=fnlen) :: my_inpath, my_skwpath
+ character(len=fnlen) :: my_inpath
  type(wfk_t),target :: iwfk
  type(wfk_t) :: owfk
- type(crystal_t) :: cryst, cryst_skw
- type(hdr_type) :: fine_hdr, hdr_skw
+ type(crystal_t) :: cryst
+ type(hdr_type) :: fine_hdr
  type(hdr_type),pointer :: ihdr
- type(ebands_t) :: iwfk_ebands, skw_ebands, fine_ebands
+ type(ebands_t) :: iwfk_ebands, fine_ebands
  type(wvl_internal_type) :: dummy_wvl
  type(kptrank_type) :: kptrank
 !arrays
- integer :: fine_kptrlatt(3,3), band_block(2)
+ !integer :: fine_kptrlatt(3,3) !, band_block(2)
  integer,allocatable :: kf2kin(:), kg_k(:,:), kshe_mask(:,:,:)  ! ok2ibz(:)
- real(dp):: params(4)
  real(dp),allocatable :: cg_k(:,:), eig_k(:), occ_k(:), fine_eigen(:,:,:)
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
 
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- ! IO section executed by master.
- if (my_rank /= master) goto 100
+ ! IO section executed by master only, all other procs wait for new WFK.
+ my_rank = xmpi_comm_rank(comm); if (my_rank /= master) goto 100
 
  write(std_out, "(2a)")ch10, repeat("=", 92)
  write(std_out, "(a)")" Will produce WKF file with dense k-mesh:"
- write(std_out, "(a, 3(i0, 1x))")"   sigma_ngkpt:", dtset%sigma_ngkpt
+ write(std_out, "(a, 3(i0, 1x))")"   sigma_ngkpt: ", dtset%sigma_ngkpt
  do ii=1,dtset%sigma_nshiftk
-   write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk:", dtset%sigma_shiftk(:, ii)
+   write(std_out, "(a, 3(f5.2, 1x))")"   sigma_shiftk: ", dtset%sigma_shiftk(:, ii)
  end do
  write(std_out, "(2a)")" Take wavefunctions with k-point lists from: ", trim(in_wfkpath)
- write(std_out, "(2a)")" Take eigenvalues for SKW interpolation from: ", trim(in_wfkskw)
+ write(std_out, "(2a)")" Take eigenvalues and kpt tables from KERAGE file: ", trim(kerange_path)
  write(std_out, "(2a)")repeat("=", 92), ch10
  if (all(dtset%sigma_ngkpt == 0)) then
    write(msg,"(3a)") &
@@ -5016,42 +5014,23 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
    MSG_ERROR(msg)
  end if
 
- ! Read in_wfkskw and interpolate energies to the dense k-mesh.
- my_skwpath = in_wfkskw
- if (nctk_try_fort_or_ncfile(my_skwpath, msg) /= 0) then
-   MSG_ERROR(msg)
- end if
- call wrtout(std_out, sjoin(" Reading eigenvalues for star-function interpolation from WFK file:", my_skwpath))
- skw_ebands = wfk_read_ebands(my_skwpath, comm, out_hdr=hdr_skw)
- cryst_skw = hdr_get_crystal(hdr_skw, 2)
- call wrtout(std_out, " Interpolating band energies with star-functions")
- params = 0; params(1) = 1; params(2) = 5; if (nint(dtset%einterp(1)) == 1) params(1:3) = dtset%einterp(2:4)
- ! TODO: Recheck reading of sigma_shiftk at the level of the parser
- band_block = [1, skw_ebands%mband]
- fine_kptrlatt = 0
- do ii=1,3
-   fine_kptrlatt(ii,ii) = dtset%sigma_ngkpt(ii)
- end do
+ !fine_kptrlatt = 0
+ !do ii=1,3
+ !  fine_kptrlatt(ii,ii) = dtset%sigma_ngkpt(ii)
+ !end do
 
- fine_ebands = ebands_interp_kmesh(skw_ebands, cryst_skw, params, fine_kptrlatt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
-   band_block, comm) !, out_prefix=)
-
- call hdr_free(hdr_skw)
- call ebands_free(skw_ebands)
- call cryst_skw%free()
-
- ! Read SKW-interpolated ebands and kshe_mask from KERANGE file, build fine_ebands object.
+ ! Read interpolated ebands and kshe_mask from KERANGE file, build fine_ebands object.
 #ifdef HAVE_NETCDF
- !NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
+ NCF_CHECK(nctk_open_read(ncid, kerange_path, xmpi_comm_self))
  ! Read header
  call hdr_ncread(fine_hdr, ncid, fform)
- ABI_CHECK(fform /= 0, "Wrong fform")
+ ABI_CHECK(fform == fform_kerange, sjoin("Wrong fform. Got: ", itoa(fform), ", Expecting: ", itoa(fform_kerange)))
  ! Read eigenvalues and kmask
  fine_mband = maxval(fine_hdr%nband)
  ABI_MALLOC(fine_eigen, (fine_mband, fine_hdr%nkpt, fine_hdr%nsppol))
  ABI_MALLOC(kshe_mask, (fine_ebands%nkpt, fine_hdr%nsppol, 2))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "eigenvalues"), fine_eigen))
- NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
+ !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "kshe_mask"), kshe_mask))
  NCF_CHECK(nf90_close(ncid))
  ! Build fine_ebands
  fine_ebands = ebands_from_hdr(fine_hdr, fine_mband, fine_eigen)
@@ -5067,10 +5046,14 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
  if (nctk_try_fort_or_ncfile(my_inpath, msg) /= 0) then
    MSG_ERROR(msg)
  end if
- call wrtout(std_out, sjoin("Converting:", my_inpath, "to", out_wfkpath))
-
  iwfk_ebands = wfk_read_ebands(my_inpath, xmpi_comm_self)
  call wfk_open_read(iwfk, my_inpath, formeig0, iomode_from_fname(my_inpath), get_unit(), xmpi_comm_self)
+
+ fform = 0
+ write(std_out, "(a)")" Header of iwfk file"
+ call hdr_echo(iwfk%hdr, fform, 3, unit=std_out)
+ write(std_out, "(a)")" Header of fine_hdr"
+ call hdr_echo(fine_hdr, fform, 3, unit=std_out)
 
  ihdr => iwfk%hdr
  mband = iwfk%mband; nsppol = iwfk%nsppol; nspinor = iwfk%nspinor
@@ -5082,6 +5065,17 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
  ABI_MALLOC(kf2kin, (fine_ebands%nkpt))
  kf2kin = -1
 
+#if 1
+ do ikf=1,fine_ebands%nkpt
+   do ii=1,iwfk_ebands%nkpt
+     if (all(abs(fine_ebands%kptns(:, ikf) - iwfk_ebands%kptns(:, ii)) < tol12)) then
+       !write(std_out, *)trim(ktoa(fine_ebands%kptns(:, ikf))), " --> ", trim(ktoa(iwfk_ebands%kptns(:, ii)))
+       kf2kin(ikf) = ii; exit
+     end if
+   end do
+ end do
+
+#else
  call mkkptrank(iwfk_ebands%kptns, iwfk_ebands%nkpt, kptrank)
  do ikf=1,fine_ebands%nkpt
    call get_rank_1kpt(fine_ebands%kptns(:, ikf), kf_rank, kptrank)
@@ -5089,16 +5083,20 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
    if (ii > 0) then
      !write(std_out, *)trim(ktoa(fine_ebands%kptns(:, ikf))), " --> ", trim(ktoa(iwfk_ebands%kptns(:, ii)))
      ! FIXME This does not work as expected!
-     if (all(abs(fine_ebands%kptns(:, ikf)) - iwfk_ebands%kptns(:, ii) < tol12)) then
+     if (all(abs(fine_ebands%kptns(:, ikf) - iwfk_ebands%kptns(:, ii)) < tol12)) then
        kf2kin(ikf) = ii
      end if
    end if
+   !else
+   !  MSG_WARNING(sjoin("Cannot find kpt: ", ktoa(fine_ebands%kptns(:, ikf))))
+   !end if
  end do
  call destroy_kptrank(kptrank)
+#endif
 
  if (count(kf2kin /= -1) /= iwfk_ebands%nkpt) then
    write(msg, "(2a, 2(a,i0))")"Something wrong in the computation of fine_mesh --> input_mesh table.",ch10, &
-    "Expecting: ", iwfk_ebands%nkpt, " matches, got: ", count(kf2kin /= -1)
+    "Expecting: ", iwfk_ebands%nkpt, " matches, found: ", count(kf2kin /= -1)
    MSG_ERROR(msg)
  end if
 
@@ -5116,7 +5114,8 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
    write(msg, "(3a)") &
      "Mismatch between input k-weights and weigths associated to the fine mesh. ", ch10, &
      "Possible incosistency between k-mesh defined by sigma_nshiftk and the list of k-points found in file."
-   MSG_ERROR(msg)
+   !MSG_ERROR(msg)
+   MSG_WARNING(msg)
  end if
 
  ! Build new header for output WFK. This is the most delicate part since all the arrays in fine_hdr
@@ -5126,8 +5125,10 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
    if (ikin == -1) then
      ! Set npwarr to 1 if k-point is not in input set to reduce file size.
      fine_ebands%npwarr(ikf) = 1
+     fine_hdr%npwarr(ikf) = 1
    else
      fine_ebands%npwarr(ikf) = iwfk_ebands%npwarr(ikin)
+     fine_hdr%npwarr(ikf) = iwfk_ebands%npwarr(ikin)
      ! Insert ab-initio eigenvalues in the (SKW-interpolated) fine k-mesh.
      do spin=1,nsppol
        nband_k = iwfk_ebands%nband(ikin + (spin-1) * iwfk_ebands%nkpt)
@@ -5139,15 +5140,14 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
  !call ebands_update_occ(fine_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
 
  ! Build new header and update pawrhoij (Assume: fine_kptrlatt == kptrlatt_origin)
- call hdr_init_lowlvl(fine_hdr,fine_ebands,psps,pawtab,dummy_wvl,abinit_version,&
-   ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
-   ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
-   ihdr%qptn,cryst%rprimd,cryst%xred,ihdr%symrel,ihdr%tnons,ihdr%symafm,ihdr%typat,ihdr%amu,ihdr%icoulomb,&
-   ! TODO _origin
-   iwfk_ebands%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt,&
-   dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
-
- if (psps%usepaw == 1) call pawrhoij_copy(iwfk%hdr%pawrhoij, fine_hdr%pawrhoij)
+ !call hdr_init_lowlvl(fine_hdr,fine_ebands,psps,pawtab,dummy_wvl,abinit_version,&
+ !  ihdr%pertcase,ihdr%natom,ihdr%nsym,ihdr%nspden,ihdr%ecut,dtset%pawecutdg,ihdr%ecutsm,dtset%dilatmx,&
+ !  ihdr%intxc,ihdr%ixc,ihdr%stmbias,ihdr%usewvl,dtset%pawcpxocc,dtset%pawspnorb,dtset%ngfft,dtset%ngfftdg,ihdr%so_psp,&
+ !  ihdr%qptn,cryst%rprimd,cryst%xred,ihdr%symrel,ihdr%tnons,ihdr%symafm,ihdr%typat,ihdr%amu,ihdr%icoulomb,&
+ !  ! TODO _origin
+ !  iwfk_ebands%kptopt, dtset%nelect, dtset%charge, fine_kptrlatt, fine_kptrlatt,&
+ !  dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
+ !if (iwfk%hdr%usepaw == 1) call pawrhoij_copy(iwfk%hdr%pawrhoij, fine_hdr%pawrhoij)
 
  out_iomode = iomode_from_fname(out_wfkpath)
  call wfk_open_write(owfk, fine_hdr, out_wfkpath, iwfk%formeig, out_iomode, get_unit(), xmpi_comm_self)
@@ -5169,6 +5169,8 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
 
      if (ikin /= -1) then
        ! Read wavefunctions from input WFK.
+       ABI_CHECK(npw_k == iwfk%hdr%npwarr(ikin), "Mismatch in npw_k")
+       ABI_CHECK(nband_k == iwfk%nband(ikin, spin), "Mismatch in nband_k")
        call wfk_read_band_block(iwfk, [1, nband_k], ikin, spin, xmpio_single, kg_k=kg_k, cg_k=cg_k, eig_k=eig_k, occ_k=occ_k)
      else
        ! Fill wavefunctions with fake data (npw_k == 1)
@@ -5198,6 +5200,8 @@ subroutine wfk_klist2mesh(in_wfkpath, in_wfkskw, dtset, psps, pawtab, out_wfkpat
 
 100 call xmpi_barrier(comm)
  call cwtime_report(" WFK with fine k-mesh written to file.", cpu, wall, gflops)
+
+ !call clib_rename(filnam, trialnam, ioserr)
 
 end subroutine wfk_klist2mesh
 !!***

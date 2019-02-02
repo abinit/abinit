@@ -1870,15 +1870,11 @@ end subroutine invars1
 
 subroutine indefo(dtsets,ndtset_alloc,nprocs)
 
- use defs_basis
- use m_abicore
- use m_errors
  use m_gwdefs
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
 
- use defs_abitypes,  only : dataset_type
  use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
 
 !Arguments ------------------------------------

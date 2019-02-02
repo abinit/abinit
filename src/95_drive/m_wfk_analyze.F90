@@ -211,7 +211,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  ! Costruct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
- call hdr_vs_dtset(wfk0_hdr, dtset)
+ if (dtset%wfk_task /= WFK_TASK_KLIST2MESH) then
+   call hdr_vs_dtset(wfk0_hdr, dtset)
+ end if
 
  cryst = hdr_get_crystal(wfk0_hdr, timrev2)
  call crystal_print(cryst,header="crystal structure from WFK file")
@@ -371,8 +373,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ABI_FREE(l_size_atm)
 
    usexcnhat=maxval(pawtab(:)%usexcnhat)
-   !  * 0 if Vloc in atomic data is Vbare    (Blochl s formulation)
-   !  * 1 if Vloc in atomic data is VH(tnzc) (Kresse s formulation)
+   ! 0 if Vloc in atomic data is Vbare    (Blochl s formulation)
+   ! 1 if Vloc in atomic data is VH(tnzc) (Kresse s formulation)
    call wrtout(std_out,sjoin("using usexcnhat= ",itoa(usexcnhat)))
    !
    ! Identify parts of the rectangular grid where the density has to be calculated ===
@@ -414,7 +416,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  case (WFK_TASK_KLIST2MESH)
     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-    call wfk_klist2mesh(wfk0_path, dtfil%fnameabi_wfkfine, dtset, psps, pawtab, wfkfull_path, comm)
+    call wfk_klist2mesh(wfk0_path, "Tmp/o_DS2_KERANGE.nc", dtset, psps, pawtab, wfkfull_path, comm)
 
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
