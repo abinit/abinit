@@ -369,6 +369,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
 !Local variables --------------------------------
  integer :: ncerr
 
+#ifdef HAVE_NETCDF
 ! write to netcdf file
  ncerr = nctk_def_dims(ncid, [ nctkdim_t("ntemp", self%ntemp) ], defmode=.True.)
  NCF_CHECK(self%edos%ncwrite(ncid))
@@ -383,6 +384,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), self%vvdos_mesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), self%vvdos(:,1,:,:,:,1)))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau"),  self%vvdos(:,1,:,:,:,2:)))
+#endif
 
 end subroutine transport_rta_ncwrite
 !!***
