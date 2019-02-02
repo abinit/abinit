@@ -5194,9 +5194,9 @@ subroutine wfk_klist2mesh(in_wfkpath, kerange_path, dtset, psps, pawtab, out_wfk
 
  call cryst%free()
  call ebands_free(iwfk_ebands)
+ call ebands_free(fine_ebands)
  call wfk_close(iwfk)
  call wfk_close(owfk)
- call ebands_free(fine_ebands)
 
 100 call xmpi_barrier(comm)
  call cwtime_report(" WFK with fine k-mesh written to file.", cpu, wall, gflops)
