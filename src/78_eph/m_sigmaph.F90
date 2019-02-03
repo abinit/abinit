@@ -2944,6 +2944,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  ABI_FREE(indkk)
 
 end function sigmaph_ebands
+!!***
 
 !----------------------------------------------------------------------
 
