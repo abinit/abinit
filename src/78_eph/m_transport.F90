@@ -216,9 +216,9 @@ end subroutine transport
 
 !----------------------------------------------------------------------
 
-!!****f* m_transport/transport
+!!****f* m_transport/transport_rta_new
 !! NAME
-!! sigmaph_t
+!! transport_rta_new
 !!
 !! FUNCTION
 !! Compute transport quantities in the relaxation time approximation
@@ -259,6 +259,7 @@ end function transport_rta_new
 
 !!****f* m_transport/transport_rta_compute
 !! NAME
+!! transport_rta_compute
 !!
 !! FUNCTION
 !!
@@ -352,6 +353,7 @@ end subroutine transport_rta_compute
 
 !!****f* m_transport/transport_rta_ncwrite
 !! NAME
+!! transport_rta_ncwrite
 !!
 !! FUNCTION
 !!
@@ -393,6 +395,7 @@ end subroutine transport_rta_ncwrite
 
 !!****f* m_transport/transport_rta_free
 !! NAME
+!! transport_rta_free
 !!
 !! FUNCTION
 !!
