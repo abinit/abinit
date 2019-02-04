@@ -1182,7 +1182,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              alpha_mrta(ib_k) = zero
              if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
            end do
-           !ABI_FREE(alpha_mrta)
          end if
 
          do imyp=1,my_npert
@@ -1553,9 +1552,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
      call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, dtset%prtvol, comm)
 
-     if (sigma%calc_mrta) then
-       ABI_FREE(alpha_mrta)
-     end if
+     ABI_SFREE(alpha_mrta)
 
    end do ! spin
 
@@ -1596,7 +1593,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
- if (sigma%calc_mrta) call ddkop%free()
+ call ddkop%free()
 
 end subroutine sigmaph
 !!***
