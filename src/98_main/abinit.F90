@@ -118,7 +118,6 @@ program abinit
  use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1
  use m_outxml,      only : outxml_open, outxml_finalise
- use m_parser,      only : parsefile
  use m_out_acknowl, only : out_acknowl
  use m_timana,      only : timana
  use m_builtin_tests, only : testfi

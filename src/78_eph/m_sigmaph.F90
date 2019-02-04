@@ -46,13 +46,13 @@ module m_sigmaph
  use m_kptrank
  use m_lgroup
  use m_ephwg
- use m_nctk
  use m_hdr
  use m_sigtk
  use m_eph_double_grid
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+ use m_nctk
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime, cwtime_report, timab
@@ -4529,155 +4529,6 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
  !qselect = 0
 
 end subroutine qpoints_oracle
-!!***
-
-!!****f* m_sigmaph/find_kpoints
-!! NAME
-!!  find_kpoints
-!!
-!! FUNCTION
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine find_kpoints(dtset, cryst, ebands, comm)
-
-!Arguments ------------------------------------
-!scalars
- type(dataset_type),intent(in) :: dtset
- type(crystal_t),intent(in) :: cryst
- type(ebands_t),intent(in) :: ebands
- integer,intent(in) :: comm
-!arrays
- !real(dp), allocatable, intent(out) :: okpts(:,:)
-
-!Local variables ------------------------------
-!scalars
- integer,parameter :: master = 0
- integer :: ii, my_rank, nprocs, nkibz_fine, nkbz_fine, spin, ikf_ibz, cnt, band, ierr, skw_cplex !, onk
- integer :: gap_err
- real(dp) :: ee, cmin, vmax
- !character(len=500) :: msg
- type(skw_t) :: skw
- type(gaps_t) :: gaps
-!arrays
- integer :: kptrlatt_fine(3,3), skw_band_block(2)
- integer,allocatable :: kfine_imask(:), k2ibz(:)
- real(dp):: params(4)
- real(dp),allocatable :: wtk_fine(:), kibz_fine(:,:), kbz_fine(:,:)
-
-! *************************************************************************
-
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
-
- if (.not. any(dtset%sigma_erange > zero)) then
-   MSG_ERROR("sigma_erange must be specified in input")
- end if
-
- if (my_rank == master) then
-   write(std_out, "(a)") " Finding k-points "
-   write(std_out, "(2a)") " K-mesh divisions: ", trim(ltoa(dtset%sigma_ngkpt))
-   !write(std_out, "()") dtset%sigma_shiftk(:, 1:dtset%nshiftk)
-   !call ebands_print(ebands,header,unit,prtvol,mode_paral)
- end if
-
- ! Compute dense BZ and IBZ from sigma_ngkpt and other related variables.
- kptrlatt_fine = 0
- do ii=1,3
-   kptrlatt_fine(ii, ii) = dtset%sigma_ngkpt(ii)
- end do
- call kpts_ibz_from_kptrlatt(cryst, kptrlatt_fine, ebands%kptopt, dtset%sigma_nshiftk, dtset%sigma_shiftk, &
-   nkibz_fine, kibz_fine, wtk_fine, nkbz_fine, kbz_fine)
-
- ! Build star functions interpolator from input ebands.
- ! TODO: check band_block because I got weird results (don't remember if with AbiPy or Abinit)
- skw_cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) skw_cplex = 2
- skw_band_block = [1, ebands%nband]
- params = 0; params(1) = 1; params(2) = 5
- if (nint(dtset%einterp(1)) == 1) params = dtset%einterp
- write(std_out, "(a, 4(f5.2, 2x))")"SKW parameters used to interpolate e_{nk+q} in Frohlich self-energy:", params
- skw = skw_new(cryst, params, skw_cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
-   ebands%kptns, ebands%eig, skw_band_block, comm)
- call skw%print(std_out)
-
- ! Compute gaps.
- gap_err = get_gaps(ebands, gaps)
- if (gap_err /= 0) then
-   MSG_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
- end if
- call gaps%print(unit=std_out)
-
- ! Find k-points in energy region.
- ABI_ICALLOC(kfine_imask, (nkibz_fine))
-
- cnt = 0
- do spin=1,ebands%nsppol
-   ! Get cmb and vbm with some tolerance
-   vmax = gaps%vb_max(spin) + tol2 * eV_Ha
-   cmin = gaps%cb_min(spin) - tol2 * eV_Ha
-   do ikf_ibz=1,nkibz_fine
-     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-     do band=1,ebands%mband
-       call skw%eval_bks(band, kibz_fine(:, ikf_ibz), spin, ee)
-       ! Check whether the interpolated eigenvalue is inside the energy regions.
-       if (dtset%sigma_erange(1) > zero) then
-         if (ee <= vmax .and. vmax - ee <= dtset%sigma_erange(1)) then
-           kfine_imask(ikf_ibz) = kfine_imask(ikf_ibz)  + 1
-           exit
-         end if
-       end if
-       if (dtset%sigma_erange(2) > zero) then
-         if (ee >= cmin .and. ee - cmin <= dtset%sigma_erange(2)) then
-           kfine_imask(ikf_ibz) = kfine_imask(ikf_ibz)  + 1
-           exit
-         end if
-       end if
-     end do
-   end do
- end do
-
- call xmpi_sum(kfine_imask, comm, ierr)
-
- !onk = count(kfine_imask /= 0)
- !ABI_MALLOC(k2ibz, (onk))
- !ABI_MALLOC(okpts, (3, onk))
- !cnt = 0
- !do ikf_ibz=1,nkibz_fine
- !  if (kfine_imask(ikf_ibz) /= 0) then
- !    cnt = cnt + 1
- !    okpts(:, cnt) = kibz_fine(:, ikf_ibz)
- !    k2ibz(cnt) = ikf_ibz
- !  end do
- !end do
-
- if (my_rank == master) then
-   ! read directly nkpt, kpt, kptnrm and wtk.
-   !write(unt, "(a)")"kptopt 0"
-   !write(unt, "(a, i0)")"nkpt ", onkpt
-   !write(unt, "(a)")"kptnrm *1.0"
-   !write(unt, "(a)")"kpt"
-   !do ii=1,onkpt
-   !  write(unt, "(3(es16.6,1x)")kibz_fine(:, k2ibz(ii))
-   !end do
-   !write(unt, "(a, i0)")"wtk"
-   !do ii=1,onkpt
-   !  write(unt, "es16.6)")wtk_fine(k2ibz(ii))
-   !end do
- end if
-
- ABI_FREE(wtk_fine)
- ABI_FREE(kibz_fine)
- ABI_FREE(kbz_fine)
- ABI_FREE(kfine_imask)
- ABI_FREE(k2ibz)
-
- call skw%free()
- call gaps%free()
-
-end subroutine find_kpoints
 !!***
 
 end module m_sigmaph

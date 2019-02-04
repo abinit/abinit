@@ -734,8 +734,8 @@ type(ebands_t) function ebands_from_hdr(hdr, mband, ene3d, nelect) result(ebands
  call pack_eneocc(hdr%nkpt,hdr%nsppol,mband,hdr%nband,hdr%bantot,ene3d,ugly_ene)
 
  call ebands_init(hdr%bantot,ebands,my_nelect,ugly_doccde,ugly_ene,hdr%istwfk,hdr%kptns,hdr%nband,hdr%nkpt,&
-&  hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-&  hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+   hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 
  ! Copy the fermi level reported in the header
  ebands%fermie = hdr%fermie
@@ -2167,7 +2167,7 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
  stmbias_local=zero; if (PRESENT(stmbias)) stmbias_local=stmbias
 
  if (ebands_has_metal_scheme(ebands)) then
-   !  If occupation is metallic have to compute new occupation numbers.
+   ! If occupation is metallic have to compute new occupation numbers.
    if (my_prtvol > 10) then
      write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
      call wrtout(std_out,msg,'COLL')
@@ -2615,7 +2615,7 @@ subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
  val_idx(:,:) = get_valence_idx(ebands,tol_fermi)
  first=0
 
-!Initialize the return status for the gaps
+ ! Initialize the return status for the gaps
  if (PRESENT(gaps)) gaps(1:3,1:nsppol)=zero
 
  do spin=1,nsppol
@@ -2643,30 +2643,27 @@ subroutine ebands_report_gap(ebands,header,kmask,unit,mode_paral,gaps)
      top_valence(ikibz) = ebands%eig(ivb,ikibz,spin)
      if (icb>nband_k) then
        GOTO 10 ! Only occupied states are present, no output!
-     endif
+     end if
      bot_conduct(ikibz) = ebands%eig(icb,ikibz,spin)
    end do
 
-   ! === Get minimum of the direct Gap ===
+   ! Get minimum of the direct Gap
    ikopt= imin_loc(bot_conduct-top_valence,MASK=my_kmask)
    opt_gap=bot_conduct(ikopt)-top_valence(ikopt)
 
-   ! === Get fundamental Gap ===
+   ! Get fundamental Gap
    ick = imin_loc(bot_conduct,MASK=my_kmask)
    ivk = imax_loc(top_valence,MASK=my_kmask)
    fun_gap = ebands%eig(icb,ick,spin)-ebands%eig(ivb,ivk,spin)
 
    write(msg,'(a,i2,a,2(a,f8.4,a,3f8.4,a),33x,a,3f8.4)')&
-&    '  >>>> For spin ',spin,ch10,&
-&    '   Minimum direct gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',ebands%kptns(:,ikopt),ch10,&
-&    '   Fundamental gap    = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',ebands%kptns(:,ivk),ch10,  &
-&                                              '      Bottom of conduction at : ',ebands%kptns(:,ick)
+    '  >>>> For spin ',spin,ch10,&
+    '   Minimum direct gap = ',opt_gap*Ha_eV,' [eV], located at k-point      : ',ebands%kptns(:,ikopt),ch10,&
+    '   Fundamental gap    = ',fun_gap*Ha_eV,' [eV], Top of valence bands at : ',ebands%kptns(:,ivk),ch10,  &
+                                              '      Bottom of conduction at : ',ebands%kptns(:,ick)
    call wrtout(my_unt,msg,my_mode)
 
-   if (PRESENT(gaps)) then
-     gaps(:,spin) = (/fun_gap,opt_gap,one/)
-   end if
-
+   if (present(gaps)) gaps(:,spin) = [fun_gap, opt_gap, one]
  end do !spin
 
  return
@@ -2839,7 +2836,6 @@ integer function ebands_ncwrite(ebands,ncid) result(ncerr)
  NCF_CHECK(nf90_put_var(ncid, vid('shiftk'), ebands%shiftk))
 
  if (write_ngkpt) then
-   !write(std_out,*)"nshiftk_orig",nshiftk_orig,"shiftk_orig",shiftk_orig
    NCF_CHECK(nf90_put_var(ncid, vid('ngkpt_shiftk'), ebands%shiftk_orig))
  end if
 
@@ -4055,8 +4051,8 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  ABI_CALLOC(new_occ, (new_bantot))
  ABI_CALLOC(new_wtk, (new_nkibz))
 
- ! Needed by AbiPt to understand that we have a k-path instead of a mesh.
- new_kptopt = - kpath%nbounds
+ ! Needed by AbiPy to understand that we have a k-path instead of a mesh.
+ new_kptopt = -kpath%nbounds
 
  call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,kpath%points,&
    new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&

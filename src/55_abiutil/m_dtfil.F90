@@ -201,8 +201,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_WFK'
  end if
  stringvar='wfk'
- call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
  if(dtset%optdriver/=RUNL_RESPFN)ireadwf=will_read
  if(ndtset/=0 .and. dtset%optdriver==RUNL_RESPFN .and. will_read==0)then
@@ -220,53 +219,43 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 
 !  According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
-   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read)
 !  If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
    if(will_read==0)fnamewffq=fnamewffk
 
 !  According to get1wf and ird1wf, build _1WF file name, referred as fnamewff1
    stringfile='_1WF' ; stringvar='1wf'
-   call mkfilename(filnam,fnamewff1,dtset%get1wf,idtset,dtset%ird1wf,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewff1,dtset%get1wf,idtset,dtset%ird1wf,jdtset_,ndtset,stringfile,stringvar,will_read)
    ireadwf=will_read
 
 !  According to getddk and irdddk, build _1WF file name, referred as fnamewffddk
    stringfile='_1WF' ; stringvar='ddk'
-   call mkfilename(filnam,fnamewffddk,dtset%getddk,idtset,dtset%irdddk,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffddk,dtset%getddk,idtset,dtset%irdddk,jdtset_,ndtset,stringfile,stringvar,will_read)
 
 !  According to getdelfd, build _1WF file name, referred as fnamewffdelfd
    stringfile='_1WF' ; stringvar='delfd'
-   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,0,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdelfd,dtset%getdelfd,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
 
 !  According to getdkdk, build _1WF file name, referred as fnamewffdkdk
    stringfile='_1WF' ; stringvar='dkdk'
-   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,0,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkdk,dtset%getdkdk,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
 
 !  According to getdkde, build _1WF file name, referred as fnamewffdkde
    stringfile='_1WF' ; stringvar='dkde'
-   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,0,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,fnamewffdkde,dtset%getdkde,idtset,0,jdtset_,ndtset,stringfile,stringvar,will_read)
  end if
 
 !-------------------------------------------------------------------------------------------
 !Build name of files from dtfil%filnam_ds(3)
 
 ! According to getddb, build _DDB file name, referred as filddbsin
- stringfile='_DDB'
- stringvar='ddb'
- call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ stringfile='_DDB'; stringvar='ddb'
+ call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read)
 
 ! According to getdvdb, build _DVDB file name
 ! A default is available if getden is 0
- stringfile='_DVDB'
- stringvar='dvdb'
- call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ stringfile='_DVDB'; stringvar='dvdb'
+ call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read)
  !if (will_read == 0) dtfile%fildvdbin = trim(filnam_ds(3))//'_DVDB'
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
@@ -283,8 +272,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_DEN'
  end if
  stringvar='den'
- call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
 
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read
@@ -305,8 +293,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_PAWDEN'
  end if
  stringvar='pawden'
- call mkfilename(filnam,filpawdensin,dtset%getpawden,idtset,dtset%irdden,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filpawdensin,dtset%getpawden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filpawdensin=trim(filnam_ds(3))//'_PAWDEN'
 
 !According to getden and usekden, build _KDEN file name, referred as filkdensin
@@ -323,8 +310,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
      stringfile='_KDEN'
    end if
    stringvar='kden'
-   call mkfilename(filnam,filkdensin,dtset%getden,idtset,dtset%irdden,jdtset_,&
-&   ndtset,stringfile,stringvar,will_read)
+   call mkfilename(filnam,filkdensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
    if(will_read==0)filkdensin=trim(filnam_ds(3))//'_KDEN'
    ireadkden=will_read
    if ((dtset%optdriver==RUNL_GSTATE.or.dtset%optdriver==RUNL_GWLS).and.dtset%iscf<0) ireadkden=1
@@ -335,29 +321,25 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 !According to get1den, build _DEN file name, referred as fildens1in
 !A default is available if get1den is 0
  stringfile='_DEN' ; stringvar='1den'
- call mkfilename(filnam,fildens1in,dtset%get1den,idtset,dtset%ird1den,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fildens1in,dtset%get1den,idtset,dtset%ird1den,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)fildens1in=trim(filnam_ds(3))//'_DEN'
 
 !According to getefmas and irdefmas, build _EFMAS file name, referred as fil_efmas
 !A default is available if getefmas is 0
  stringfile='_EFMAS.nc' ; stringvar='efmas'
- call mkfilename(filnam,fil_efmas,dtset%getefmas,idtset,dtset%irdefmas,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,fil_efmas,dtset%getefmas,idtset,dtset%irdefmas,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)fil_efmas=trim(filnam_ds(3))//'_EFMAS.nc'
 
 !According to getscr and irdscr, build _SCR file name, referred as filscr
 !A default is available if getscr is 0
  stringfile='_SCR' ; stringvar='scr'
- call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filscr=trim(filnam_ds(3))//'_SCR'
 
 !According to getsuscep and irdsuscep, build _SUS file name, referred as filsus
 !A default is available if getsuscep is 0
  stringfile='_SUS' ; stringvar='sus'
- call mkfilename(filnam,filsus,dtset%getsuscep,idtset,dtset%irdsuscep,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filsus,dtset%getsuscep,idtset,dtset%irdsuscep,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filsus=TRIM(filnam_ds(3))//'_SUS'
 
 !According to getqps and irdqps, build _QPS file name, referred as filqps
@@ -394,8 +376,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 !According to getwfkfine and irdwfkfine, build _WFK file name, referred as filwfkfine
 !A default is avaible if getwfkfine is 0
  stringfile='_WFK' ; stringvar='wfkfine'
- call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,&
-& ndtset,stringfile,stringvar,will_read)
+ call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filwfkfine=trim(filnam_ds(3))//'_WFK'
 
  dtfil%ireadden      =ireadden

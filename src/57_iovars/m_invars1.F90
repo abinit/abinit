@@ -62,7 +62,7 @@ contains
 !! invars0
 !!
 !! FUNCTION
-!! Initialisation phase : prepare the main input subroutine call by
+!! Initialisation phase: prepare the main input subroutine call by
 !! reading most of the NO MULTI variables, as well as natom, nimage, and ntypat,
 !! needed for allocating some input arrays in abinit, and also useri
 !! and userr. The variable usewvl is also read here for later reading
@@ -71,13 +71,12 @@ contains
 !! INPUTS
 !!  lenstr=actual length of string
 !!  ndtset= number of datasets to be read; if 0, no multi-dataset mode
-!!  ndtset_alloc=number of datasets, corrected for allocation of at least
-!!               one data set.
+!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !!  string*(*)=string of characters containing all input variables and data
 !!
 !! OUTPUT
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
-!!   some of which are initialized here :
+!!   some of which are initialized here:
 !!   cpus,jdtset,natom,nimage,npsp,ntypat,useri*,userr*
 !!  istatr=repetition rate for status file
 !!  istatshft=shift of the repetition rate for status file
@@ -354,6 +353,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
 
+! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
    if(tread==1) dtsets(idtset)%useria=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'userib',tread,'INT')
@@ -490,7 +490,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  ABI_DEALLOCATE(intarr)
 
 !We allocate the internal array, depending on the computed values.
-!WARNING : do not forget to deallocate these arrays in the routine dtset_free
+!WARNING: do not forget to deallocate these arrays in the routine dtset_free
 !(should make a separate subroutine for allocating/deallocating these records)
  do idtset=0,ndtset_alloc
    ABI_ALLOCATE(dtsets(idtset)%acell_orig,(3,mxnimage))
@@ -614,8 +614,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  ABI_ALLOCATE(symrel,(3,3,msym))
  ABI_ALLOCATE(tnons,(3,msym))
 
-!Set up default values (note that the default acell, amu
-!mkmem, mkmem1,mkqmem, and nkpt must be overcome
+!Set up default values (note that the default acell, amu mkmem, mkmem1,mkqmem, and nkpt must be overcome
 
  do idtset=0,ndtset_alloc
    call indefo1(dtsets(idtset))
@@ -805,8 +804,7 @@ subroutine indefo1(dtset)
 !******************************************************************
 !
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be
-!chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
 
  DBG_ENTER("COLL")
 
@@ -1424,7 +1422,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
  if(tread==1) iscf=intarr(1)
 
-
  dtset%natsph=dtset%natom
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natsph',tread,'INT')
  if(tread==1) dtset%natsph=intarr(1)
@@ -1442,7 +1439,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkptgw',tread,'INT')
  if(tread==1) dtset%nkptgw=intarr(1)
  if (dtset%nkptgw<0) then
-   write(message, '(a,i0,a,a,a,a)' )&
+   write(message, '(a,i0,4a)' )&
 &   'Input nkptgw must be >= 0, but was ',dtset%nkptgw,ch10,&
 &   'This is not allowed.',ch10,'Action: check the input file.'
    MSG_ERROR(message)
@@ -1468,7 +1465,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  call chkint_ge(0,0,cond_string,cond_values,ierr,'nkpt',nkpt,0,iout)
  if(dtset%kptopt==0)then
-   cond_string(1)='kptopt' ; cond_values(1)=0
+   cond_string(1)='kptopt'; cond_values(1)=0
    call chkint_ge(1,1,cond_string,cond_values,ierr,'nkpt',nkpt,1,iout)
  end if
 
@@ -1497,7 +1494,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    chksymbreak=1
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chksymbreak',tread,'INT')
    if(tread==1) chksymbreak=intarr(1)
-
 
 !  Use the first image to predict k and/or q points,
 !  except if an intermediate image is available
@@ -1668,8 +1664,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end do
  end if
 
-
-
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
 !  Note : mband_upper is initialized, not nband
@@ -1706,7 +1700,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !    write(std_out,*)' invars1 : zion_max,natom,fband,mband_upper '
 !    write(std_out,*)zion_max,natom,fband,mband_upper
-
    end if
 
    nband(:)=mband_upper
@@ -1721,8 +1714,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
    ABI_DEALLOCATE(reaalloc)
  else
-   write(message, '(a,i0,3a)' )&
-&   'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
+   write(message, '(a,i0,3a)' )'occopt=',occopt,' is not an allowed value.',ch10,'Action: correct your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1796,20 +1788,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
  if (dtset%usepawu>0.or.dtset%usedmft>0) then
-
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usedmatpu',tread,'INT')
    if(tread==1) dtset%usedmatpu=intarr(1)
-
  end if
 
 !Some PAW+Exact exchange keywords
  dtset%useexexch=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useexexch',tread,'INT')
  if(tread==1) dtset%useexexch=intarr(1)
-
 
  dtset%lexexch(1:dtset%ntypat)=-1
 
@@ -1853,26 +1842,22 @@ end subroutine invars1
 !! indefo
 !!
 !! FUNCTION
-!! Initialisation phase : defaults values for most input variables
+!! Initialisation phase: default values for most input variables
 !! (some are initialized earlier, see indefo1 routine)
 !!
 !! INPUTS
-!!  ndtset_alloc=number of datasets, corrected for allocation of at
-!!               least one data set.
+!!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set.
 !!  nprocs=Number of MPI processors available.
 !!
 !! OUTPUT
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
 !!   some of which are given a default value here.
-!!   The dataset with number 0 should be the reference default value
-!!   in the remaining of the code.
+!!   The dataset with number 0 should be the reference default value in the remaining of the code.
 !!
 !! NOTES
 !! The outputs of this routine are the defaults values of input
-!! variables, stored at the index 0 of the last dimension of their
-!! multi-dataset representation.
+!! variables, stored at the index 0 of the last dimension of their multi-dataset representation.
 !!
-!! TODO
 !!  Scalars and static arrays can be initialized directly at the level of the datatype declaration
 !!  provided the value does not depend on runtime conditions.
 !!
@@ -1885,15 +1870,11 @@ end subroutine invars1
 
 subroutine indefo(dtsets,ndtset_alloc,nprocs)
 
- use defs_basis
- use m_abicore
- use m_errors
  use m_gwdefs
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
 
- use defs_abitypes,  only : dataset_type
  use m_fftcore,      only : get_cache_kb, fftalg_for_npfft
 
 !Arguments ------------------------------------
@@ -1915,8 +1896,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
  DBG_ENTER("COLL")
 
 !Set up default values. All variables to be output in outvars.f
-!should have a default, even if a nonsensible one can be
-!chosen to garantee print in that routine.
+!should have a default, even if a nonsensible one can be chosen to garantee print in that routine.
 
 !These variables have already been initialized, for idtset/=0
  dtsets(0)%istatr=0
@@ -1935,16 +1915,14 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
  paral_atom_default=0
  if (nprocs>1.and.maxval(dtsets(:)%usepaw)>0) paral_atom_default=1
 
-!WARNING : set default in all datasets, including idtset=0 !!!
+!WARNING: set default in all datasets, including idtset=0 !!!
 !Use alphabetic order
 
  do idtset=0,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset
 
    wvl_bigdft=.false.
-   if(dtsets(idtset)%usewvl==1 .and. dtsets(idtset)%wvl_bigdft_comp==1) then
-     wvl_bigdft=.true.
-   end if
+   if(dtsets(idtset)%usewvl==1 .and. dtsets(idtset)%wvl_bigdft_comp==1) wvl_bigdft=.true.
 !  Special case of use_gpu_cuda (can be undertermined at this point)
 !  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
    if (dtsets(idtset)%use_gpu_cuda==-1) then

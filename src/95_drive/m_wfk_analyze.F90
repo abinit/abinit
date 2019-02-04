@@ -54,8 +54,7 @@ module m_wfk_analyze
  use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init, pawfgrtab_print
- use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, &
-                               pawrhoij_inquire_dim
+ use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, pawrhoij_inquire_dim
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_sphharm,     only : setsym_ylm
@@ -66,6 +65,7 @@ module m_wfk_analyze
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_classify_bands,  only : classify_bands
  use m_pspini,          only : pspini
+ use m_sigtk,           only : sigtk_kpts_in_erange
 
  implicit none
 
@@ -204,14 +204,16 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      MSG_ERROR(sjoin("Cannot find GS WFK file:", ch10, msg))
    end if
  end if
- call xmpi_bcast(wfk0_path,master,comm,ierr)
+ call xmpi_bcast(wfk0_path, master, comm, ierr)
  call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path) )
 
  !call cwtime(cpu,wall,gflops,"start")
 
  ! Costruct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
- call hdr_vs_dtset(wfk0_hdr,dtset)
+ if (dtset%wfk_task /= WFK_TASK_KLIST2MESH) then
+   call hdr_vs_dtset(wfk0_hdr, dtset)
+ end if
 
  cryst = hdr_get_crystal(wfk0_hdr, timrev2)
  call crystal_print(cryst,header="crystal structure from WFK file")
@@ -300,8 +302,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  ! ===========================================
  ! === Open and read pseudopotential files ===
  ! ===========================================
- call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,&
-& pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ============================
  ! ==== PAW initialization ====
@@ -372,8 +373,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    ABI_FREE(l_size_atm)
 
    usexcnhat=maxval(pawtab(:)%usexcnhat)
-   !  * 0 if Vloc in atomic data is Vbare    (Blochl s formulation)
-   !  * 1 if Vloc in atomic data is VH(tnzc) (Kresse s formulation)
+   ! 0 if Vloc in atomic data is Vbare    (Blochl s formulation)
+   ! 1 if Vloc in atomic data is VH(tnzc) (Kresse s formulation)
    call wrtout(std_out,sjoin("using usexcnhat= ",itoa(usexcnhat)))
    !
    ! Identify parts of the rectangular grid where the density has to be calculated ===
@@ -397,8 +398,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  case (WFK_TASK_FULLBZ)
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
-     wfkfull_path = dtfil%fnameabo_wfk
-     if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
 
      ! Write tetrahedron tables.
@@ -414,9 +414,15 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    end if
    call xmpi_barrier(comm)
 
+ case (WFK_TASK_KLIST2MESH)
+    wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+    call wfk_klist2mesh(wfk0_path, "Tmp/o_DS2_KERANGE.nc", dtset, psps, pawtab, wfkfull_path, comm)
+
+ case (WFK_TASK_KPTS_ERANGE)
+   call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
+
  !case (WFK_TASK_EBANDS)
    !call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
-
  !case (WFK_TASK_PJDOS)
  !case (WFK_TASK_LDOS)
 

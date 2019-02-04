@@ -347,23 +347,23 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Construct crystal and ebands from the GS WFK file.
  if (use_wfk) then
-   call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm)
-   call hdr_vs_dtset(wfk0_hdr,dtset)
+   call wfk_read_eigenvalues(wfk0_path, gs_eigen, wfk0_hdr, comm)
+   call hdr_vs_dtset(wfk0_hdr, dtset)
 
    cryst = hdr_get_crystal(wfk0_hdr, timrev2)
    call crystal_print(cryst,header="crystal structure from WFK file")
 
-   ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
+   ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
    call hdr_free(wfk0_hdr)
    ABI_FREE(gs_eigen)
  end if
 
  ! Read WFQ and construct ebands on the shifted grid.
  if (use_wfq) then
-   call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm)
+   call wfk_read_eigenvalues(wfq_path, gs_eigen, wfq_hdr, comm)
    ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against file.
-   !call hdr_vs_dtset(wfq_hdr,dtset)
-   ebands_kq = ebands_from_hdr(wfq_hdr,maxval(wfq_hdr%nband),gs_eigen)
+   !call hdr_vs_dtset(wfq_hdr, dtset)
+   ebands_kq = ebands_from_hdr(wfq_hdr, maxval(wfq_hdr%nband), gs_eigen)
    call hdr_free(wfq_hdr)
    ABI_FREE(gs_eigen)
  end if
@@ -643,7 +643,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
-   call frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
+   call frohlichmodel(cryst, dtfil, dtset, ebands, efmasdeg, efmasval, ifc)
 
  case (7)
    ! Compute phonon limited transport from WFK and a SIGEPH file
