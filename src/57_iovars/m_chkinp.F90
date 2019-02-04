@@ -2159,10 +2159,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
   end if
-  ! only kptopt 4 and 3 are allowed
-  if(dt%orbmag .NE. 0) then
+  ! only kptopt 4 and 3 are allowed for Chern number
+  if((dt%orbmag.EQ.1).OR.(dt%orbmag.EQ.3)) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
+  end if
+  ! only kptopt 3 is allowed for orbmag
+  if(dt%orbmag.GT.1) then
+     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
   end if
   ! only kpt parallelism is allowed at present
   if(dt%orbmag .GT. 0) then

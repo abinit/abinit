@@ -171,8 +171,8 @@ module m_orbmag
   public :: destroy_orbmag
   public :: initorbmag
   public :: rho_norm_check
+  public :: original_chern_number
   public :: chern_number
-  public :: mpi_chern_number
   public :: make_dsdk
   public :: make_dsdk_FD
   public :: make_onsite_l_k
@@ -182,12 +182,12 @@ module m_orbmag
   public :: make_smat
   public :: make_CCIV_k
   public :: make_CCIV_k_FD
+  public :: original_orbmag
   public :: orbmag
-  public :: mpi_orbmag
+  public :: original_ctocprjb
   public :: ctocprjb
-  public :: mpi_ctocprjb
-  public :: mpi_eeig
-  public :: mpi_eeig123
+  public :: make_eeig
+  public :: make_eeig123
 
 CONTAINS  !========================================================================================
 !!***
@@ -1006,9 +1006,9 @@ end subroutine rho_norm_check
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/chern_number
+!!****f* ABINIT/original_chern_number
 !! NAME
-!! chern_number
+!! original_chern_number
 !!
 !! FUNCTION
 !! This routine computes the Chern number based on input wavefunctions.
@@ -1073,7 +1073,7 @@ end subroutine rho_norm_check
 !!
 !! SOURCE
 
-subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+subroutine original_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
      &            rprimd,symrec,usecprj,usepaw,xred)
 
@@ -1461,13 +1461,13 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
   ABI_DEALLOCATE(has_smat_indx)
   ABI_DEALLOCATE(smat_all_indx)
 
-end subroutine chern_number
+end subroutine original_chern_number
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/mpi_chern_number
+!!****f* ABINIT/chern_number
 !! NAME
-!! mpi_chern_number
+!! chern_number
 !!
 !! FUNCTION
 !! This routine computes the Chern number based on input wavefunctions.
@@ -1532,9 +1532,9 @@ end subroutine chern_number
 !!
 !! SOURCE
 
-subroutine mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-     &            mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     &            rprimd,symrec,usecprj,usepaw,xred)
+subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+     & mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
+     & rprimd,symrec,usecprj,usepaw,xred)
 
   implicit none
 
@@ -1690,7 +1690,7 @@ subroutine mpi_chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
   ABI_DEALLOCATE(smat_all_indx)
 
-end subroutine mpi_chern_number
+end subroutine chern_number
 !!***
 
 !{\src2tex{textfont=tt}}
@@ -2655,9 +2655,9 @@ end subroutine make_CCIV_k_FD
 
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/ctocprjb
+!!****f* ABINIT/original_ctocprjb
 !! NAME
-!! ctocprjb
+!! original_ctocprjb
 !!
 !! FUNCTION
 !! Compute <p_k+b|u_k> cprj's as needed by orbital magnetization,
@@ -2686,7 +2686,7 @@ end subroutine make_CCIV_k_FD
 !!
 !! SOURCE
 
-subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
+subroutine original_ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
      & istwf_k,kg,mcg,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
 
   implicit none
@@ -2900,11 +2900,11 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
   ABI_DEALLOCATE(phkxred)
   ABI_DEALLOCATE(ph1d)
 
-end subroutine ctocprjb
+end subroutine original_ctocprjb
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/mpi_ctocprjb
+!!****f* ABINIT/ctocprjb
 !! NAME
 !! ctocprjb
 !!
@@ -2935,7 +2935,7 @@ end subroutine ctocprjb
 !!
 !! SOURCE
 
-subroutine mpi_ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
+subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
      & istwf_k,kg,mcg,mcprj,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
 
   implicit none
@@ -3108,7 +3108,7 @@ subroutine mpi_ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
   ABI_DEALLOCATE(phkxred)
   ABI_DEALLOCATE(ph1d)
 
-end subroutine mpi_ctocprjb
+end subroutine ctocprjb
 !!***
 
 !{\src2tex{textfont=tt}}
@@ -3371,9 +3371,9 @@ end subroutine make_dsdk
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/orbmag
+!!****f* ABINIT/original_orbmag
 !! NAME
-!! orbmag
+!! original_orbmag
 !!
 !! FUNCTION
 !! This routine computes the orbital magnetization based on input wavefunctions.
@@ -3442,7 +3442,7 @@ end subroutine make_dsdk
 !!
 !! SOURCE
 
-subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+subroutine original_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
      &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
      &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
 
@@ -3650,7 +3650,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  !------- now local potential is attached to gs_hamk and gs_hamk123 -------------------------
 
  ! compute the shifted cprj's <p_k+b|u_k>
- call ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
+ call original_ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
       & istwf_k,kg,mcg,mpi_enreg,nattyp,ncpgr,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
 
  ! loop over kpts, assuming for now kptopt 3 or 4, nsppol = 1, nspinor = 1
@@ -4300,14 +4300,14 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  call destroy_hamiltonian(gs_hamk)
  call destroy_hamiltonian(gs_hamk123)
 
-end subroutine orbmag
+end subroutine original_orbmag
 !!***
 
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/mpi_eeig
+!!****f* ABINIT/make_eeig
 !! NAME
-!! mpi_eeig
+!! make_eeig
 !!
 !! FUNCTION
 !! Compute the energy eigenvalues at each k point
@@ -4324,7 +4324,7 @@ end subroutine orbmag
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! eeig_mat
+!! eeig
 !!
 !! TODO
 !!
@@ -4346,7 +4346,7 @@ end subroutine orbmag
 !!
 !! SOURCE
 
-subroutine mpi_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nattyp,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
      & vhartr,vpsp,vxc,ucvol,usecprj,xred,ylm,ylmgr)
@@ -4585,7 +4585,7 @@ subroutine mpi_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
  call pawcprj_free(cwaveprj)
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
 
-end subroutine mpi_eeig
+end subroutine make_eeig
 !!***
 
 
@@ -4694,7 +4694,7 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
                     klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
                     cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn))
                     cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn))
-                    S1trace=S1trace-half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+                    S1trace=S1trace+half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
                  end do ! end loop over jlmn
               end do ! end loop over ilmn
            end do ! end loop over atoms
@@ -4718,9 +4718,9 @@ end subroutine make_S1trace
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/mpi_eeig123
+!!****f* ABINIT/make_eeig123
 !! NAME
-!! mpi_eeig123
+!! make_eeig123
 !!
 !! FUNCTION
 !! Compute matrix elements <u_k+g|H_k|u_k+b>
@@ -4759,7 +4759,7 @@ end subroutine make_S1trace
 !!
 !! SOURCE
 
-subroutine mpi_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
+subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
      & gmet,kg,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,pwind,pwind_alloc,&
      & rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
@@ -5163,10 +5163,6 @@ subroutine mpi_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                          end do
                          eeig(1,n1,nn,ikpt,gdx,bdxstor) = dotr + real(cgdijcb)
                          eeig(2,n1,nn,ikpt,gdx,bdxstor) = doti + aimag(cgdijcb)
-                         ! eeig(1,n1,nn,ikpt,gdx,bdxstor) = dotr 
-                         ! eeig(2,n1,nn,ikpt,gdx,bdxstor) = doti 
-                         ! eeig(1,n1,nn,ikpt,gdx,bdxstor) = real(cgdijcb)
-                         ! eeig(2,n1,nn,ikpt,gdx,bdxstor) = aimag(cgdijcb)
                       end do ! end loop over n1
                    end do ! end loop over nn
 
@@ -5223,13 +5219,13 @@ subroutine mpi_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
 
  ABI_DEALLOCATE(pwind_bg)
 
-end subroutine mpi_eeig123
+end subroutine make_eeig123
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/mpi_orbmag
+!!****f* ABINIT/orbmag
 !! NAME
-!! mpi_orbmag
+!! orbmag
 !!
 !! FUNCTION
 !! This routine computes the orbital magnetization based on input wavefunctions.
@@ -5298,9 +5294,9 @@ end subroutine mpi_eeig123
 !!
 !! SOURCE
 
-subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
-     &            mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-     &            pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
+subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+     & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
+     & pwind,pwind_alloc,rprimd,symrec,usecprj,vhartr,vpsp,vxc,xred,ylm,ylmgr)
 
  implicit none
 
@@ -5334,6 +5330,7 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  real(dp) :: deltab,deltag,ENK,ucvol
  complex(dpc) :: CCI_k,CCIV_k,CCI,CCI_1,CCI_2,CCI_3
  complex(dpc) :: CCII,CCII_1,CCII_2,CCII_3,CCII_4,onsite_l_dir,s1trace_dir
+ complex(dpc) :: VVII,VVII_1,VVII_2,VVII_3
  character(len=500) :: message
 
  !arrays
@@ -5382,18 +5379,18 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     call pawcprj_alloc(cprj_kb_k(bdx,:,:),0,dimlmn)
  end do
  ncpgrb = 0 ! no gradients in <p_k+b|u_k>
- call mpi_ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
+ call ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
       & istwf_k,kg,mcg,mcprj,mpi_enreg,nattyp,ncpgrb,npwarr,pawtab,psps,rmet,rprimd,ucvol,xred)
 
  ! compute the energies at each k pt
  ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
- call mpi_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
+ call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
       & vhartr,vpsp,vxc,ucvol,usecprj,xred,ylm,ylmgr)
 
  ! compute the <u_kg|H_k|u_kb> matrix elements
  ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
- call mpi_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,kg,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
+ call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,kg,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
 
  do adir = 1, 3
@@ -5445,30 +5442,35 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
              do ikpt = 1, dtorbmag%fnkpt
                 ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
                 ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
-                CCII = czero
                 CCI = czero
+                CCII = czero
+                VVII = czero
                 do nn = 1, nband_k
                    ENK = eeig(nn,ikpt)
                    do n1 = 1, nband_k
                       CCI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0))
                       CCII_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
+                      VVII_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
                       do n2 = 1, nband_k
                          CCI_2 = cmplx(eeig123(1,n1,n2,ikpt,gdx,bdxstor),eeig123(2,n1,n2,ikpt,gdx,bdxstor))
                          CCI_3 = cmplx(smat_all_indx(1,n2,nn,ikptb,bdxc,0),smat_all_indx(2,n2,nn,ikptb,bdxc,0))
                          CCII_2 = cmplx(smat_all_indx(1,n1,n2,ikptb,bdxc,0),smat_all_indx(2,n1,n2,ikptb,bdxc,0))
+                         VVII_2 = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor))
+                         VVII_3 = cmplx(smat_all_indx(1,n2,nn,ikptg,gdxc,0),smat_all_indx(2,n2,nn,ikptg,gdxc,0))
                          do n3 = 1, nband_k
                             CCII_3 = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0))
                             CCII_4 = cmplx(smat_all_indx(1,n3,nn,ikptg,gdxc,0),smat_all_indx(2,n3,nn,ikptg,gdxc,0))
                             CCII = CCII - ENK*CCII_1*CCII_2*CCII_3*CCII_4
                          end do ! end n3
                          CCI = CCI + CCI_1*CCI_2*CCI_3
+                         VVII = VVII + ENK*VVII_1*VVII_2*VVII_3
                       end do ! end n2
                    end do ! end n1
                 end do ! end nn
-                CCIV(1,adir)=CCIV(1,adir)+real(half*j_dpc*epsabg*bsigma*gsigma*CCII/(2.0*deltab*2.0*deltag))
-                CCIV(2,adir)=CCIV(2,adir)+aimag(half*j_dpc*epsabg*bsigma*gsigma*CCII/(2.0*deltab*2.0*deltag))
-                CCVV(1,adir)=CCVV(1,adir)-real(half*j_dpc*epsabg*bsigma*gsigma*CCI/(2.0*deltab*2.0*deltag))
-                CCVV(2,adir)=CCVV(2,adir)-aimag(half*j_dpc*epsabg*bsigma*gsigma*CCI/(2.0*deltab*2.0*deltag))
+                ! CCIV(1,adir)=CCIV(1,adir)+real(half*j_dpc*epsabg*bsigma*gsigma*CCII/(2.0*deltab*2.0*deltag))
+                ! CCIV(2,adir)=CCIV(2,adir)+aimag(half*j_dpc*epsabg*bsigma*gsigma*CCII/(2.0*deltab*2.0*
+                CCVV(1,adir)=CCVV(1,adir)-real(half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII-VVII)/(2.0*deltab*2.0*deltag))
+                CCVV(2,adir)=CCVV(2,adir)-aimag(half*j_dpc*epsabg*bsigma*gsigma*(CCI+CCII-VVII)/(2.0*deltab*2.0*deltag))
                 ! CCIV_k = CCIV_k + half*j_dpc*epsabg*bsigma*gsigma*CCII/(2.0*deltab*2.0*deltag)
                 ! CCVV_k = CCVV_k - half*j_dpc*epsabg*bsigma*gsigma*(CCI-VVII)/(2.0*deltab*2.0*deltag) !
              end do ! end loop over ikpt
@@ -5486,8 +5488,8 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  s1trace(1,1:3) = ucvol*MATMUL(gprimd,s1trace(1,1:3))
  s1trace(2,1:3) = ucvol*MATMUL(gprimd,s1trace(2,1:3))
 
- CCIV(1,1:3) = ucvol*MATMUL(gprimd,CCIV(1,1:3))
- CCIV(2,1:3) = ucvol*MATMUL(gprimd,CCIV(2,1:3))
+ ! CCIV(1,1:3) = ucvol*MATMUL(gprimd,CCIV(1,1:3))
+ ! CCIV(2,1:3) = ucvol*MATMUL(gprimd,CCIV(2,1:3))
  CCVV(1,1:3) = ucvol*MATMUL(gprimd,CCVV(1,1:3))
  CCVV(2,1:3) = ucvol*MATMUL(gprimd,CCVV(2,1:3))
 
@@ -5495,9 +5497,9 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  ! accumulate in orbmagvec
 
- ! orbmagvec(1:2,1:3) = onsite_l(1:2,1:3) + s1trace(1:2,1:3)
+ orbmagvec(1:2,1:3) = onsite_l(1:2,1:3) - s1trace(1:2,1:3) + CCVV(1:2,1:3)
  ! orbmagvec(1:2,1:3) = CCIV(1:2,1:3)
- orbmagvec(1:2,1:3) = CCVV(1:2,1:3)
+ ! orbmagvec(1:2,1:3) = CCVV(1:2,1:3)
 
  ! pre factor is occ/ucvol*N_k
  ! factor of 2 in numerator is the band occupation (two electrons in normal insulator)
@@ -5532,7 +5534,7 @@ subroutine mpi_orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_DEALLOCATE(eeig)
  ABI_DEALLOCATE(eeig123)
 
-end subroutine mpi_orbmag
+end subroutine orbmag
 !!***
 
 end module m_orbmag
