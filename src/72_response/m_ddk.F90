@@ -369,7 +369,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  real(dp),allocatable :: dummy_vals(:,:,:),dummy_vecs(:,:,:,:),vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
- real(dp),allocatable :: vvdos_mesh(:), vvdos_vals(:,:,:,:)
+ real(dp),allocatable :: vvdos_mesh(:) !, vvdos_vals(:,:,:,:)
  complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -700,6 +700,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    if (ierr/=0.and.ebands%occopt.eq.1) then
      call ebands_copy(ebands,ebands_tmp)
      call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
+     call gaps%free()
      ierr = get_gaps(ebands_tmp,gaps)
      call ebands_free(ebands_tmp)
    end if
@@ -707,11 +708,15 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
      if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
      if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
    end do
+   call gaps%free()
 
    edos = ebands_get_dos_matrix_elements(ebands, cryst, &
                                          dummy_vals, 0, dummy_vecs, 0, vv_tens, 1, &
                                          edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
-                                         dummy_dosvals, dummy_dosvecs, vvdos_tens, emin, emax)
+                                         dummy_dosvals, dummy_dosvecs, vvdos_tens, &
+                                         emin=emin, emax=emax)
+   ABI_SFREE(dummy_dosvals)
+   ABI_SFREE(dummy_dosvecs)
    ABI_SFREE(vv_tens)
  end if
 
@@ -796,12 +801,10 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_SFREE(vdiago)
  ABI_SFREE(vmat)
 
- if (is_kmesh) then
-   ABI_SFREE(vvdos_mesh)
-   ABI_SFREE(vvdos_tens)
-   call edos%free()
-   !call jdos%free()
- end if
+ ABI_SFREE(vvdos_mesh)
+ ABI_SFREE(vvdos_tens)
+ call edos%free()
+ !call jdos%free()
  call wfd%free()
  call ebands_free(ebands)
  call cryst%free()

@@ -181,7 +181,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
 !Local variables ------------------------------
  type(sigmaph_t) :: sigmaph
  type(transport_rta_t) :: transport_rta
- type(wfd_t) :: wfd
+ !type(wfd_t) :: wfd
  real(dp) :: ecut
  integer :: ii, ierr, my_rank
  integer :: nsppol, nspinor, nkpt, nspden
@@ -190,11 +190,11 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
 #endif
  character(len=fnlen) :: path
  character(len=500) :: msg
- integer,allocatable :: nband(:,:), wfd_istwfk(:)
- logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+ !integer,allocatable :: nband(:,:), wfd_istwfk(:)
+ !logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
  my_rank = xmpi_comm_rank(comm)
- write(*,*) 'Transport computation driver'
+ write(std_out,*) 'Transport computation driver'
 
  sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr,keep_open=.true.)
  if (ierr/=0) MSG_ERROR(msg)
@@ -241,8 +241,8 @@ end subroutine transport
 type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) result (new)
 
 !Arguments -------------------------------------
- type(sigmaph_t) :: sigmaph
- type(crystal_t) :: cryst
+ type(sigmaph_t),intent(in) :: sigmaph
+ type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
 
@@ -252,7 +252,7 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  type(ebands_t) :: tmp_ebands
  character(len=500) :: msg
  integer :: itemp, ii, pm, ierr
- integer,allocatable :: indq2ebands(:)
+ !integer,allocatable :: indq2ebands(:)
  real(dp) :: extrael
 
  ! TODO: make this an input?
@@ -282,7 +282,7 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
    do ii=1,ndop
      extrael = 1d-24 * new%carrier_den(ii)
      call ebands_set_nelect(tmp_ebands, ebands%nelect + extrael, dtset%spinmagntarget, msg)
-     call wrtout(ab_out,msg)
+     call wrtout(std_out,msg)
      new%mu_carrier_den(itemp,ii) = tmp_ebands%fermie
    end do
  end do
@@ -318,7 +318,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  real(dp) :: emin, emax, edos_broad, edos_step
  real(dp) :: linewidth
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
- real(dp),allocatable :: vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:), vv_tens(:,:,:,:,:,:)
+ real(dp),allocatable :: vv_tens(:,:,:,:,:,:) !vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:),
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
 
  ! create alias for dimensions
@@ -377,9 +377,11 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
                                             dummy_vals, nvals, dummy_vecs, nvecs, vv_tens, ntens, &
                                             edos_intmeth, edos_step, edos_broad, comm, &
                                             self%vvdos_mesh, &
-                                            dummy_dosvals, dummy_dosvecs, self%vvdos, emin, emax)
+                                            dummy_dosvals, dummy_dosvecs, self%vvdos, emin=emin, emax=emax)
 
  ! Free memory
+ ABI_SFREE(dummy_dosvals)
+ ABI_SFREE(dummy_dosvecs)
  ABI_FREE(vv_tens)
 
 end subroutine transport_rta_compute
@@ -410,15 +412,16 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
 #ifdef HAVE_NETCDF
 ! write to netcdf file
  ncerr = nctk_def_dims(ncid, [ nctkdim_t("ntemp", self%ntemp), nctkdim_t("ndop", self%ndop) ], defmode=.True.)
+ NCF_CHECK(ncerr)
  NCF_CHECK(self%edos%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(self%ebands,ncid))
  NCF_CHECK(cryst%ncwrite(ncid))
- ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
- ncerr = nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")])
- ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")])
- ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp")], defmode=.True.)
- ncerr = nctk_def_arrays(ncid, [nctkarr_t('mu_carrier_den', "dp", "ntemp, ndop")], defmode=.True.)
- ncerr = nctk_def_arrays(ncid, [nctkarr_t('carrier_den', "dp", "ndop")], defmode=.True.)
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")]))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp")]))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('mu_carrier_den', "dp", "ntemp, ndop")]))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('carrier_den', "dp", "ndop")]))
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_carrier_den"), self%mu_carrier_den))
