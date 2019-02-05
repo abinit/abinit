@@ -45,6 +45,7 @@ module m_transport
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
+ use m_numeric_tools,  only : arth
  use m_fstrings,       only : strcat
  use m_io_tools,       only : iomode_from_fname, file_exists
  use m_pawang,         only : pawang_type, gauleg
@@ -80,8 +81,18 @@ type,public :: transport_rta_t
    integer :: ntemp
    ! number of temperatures
 
+   integer :: ndop
+   ! number of carrier concentrarions at which to evaluate Fermi energy
+
    real(dp),allocatable :: kTmesh(:)
    ! a list of temperatures at which to compute the transport
+
+   real(dp),allocatable :: carrier_den(:)
+   ! a list of carrier concentrarions (density)
+
+   real(dp),allocatable :: mu_carrier_den(:,:)
+   ! Fermi energy at this carrier concentrarion and temperature(density)
+   ! (ntemp, ndop)
 
    real(dp),allocatable :: eminmax_spin(:,:)
    ! min max energy of the of the original ebands object
@@ -172,7 +183,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
  type(transport_rta_t) :: transport_rta
  type(wfd_t) :: wfd
  real(dp) :: ecut
- integer :: ierr, my_rank
+ integer :: ii, ierr, my_rank
  integer :: nsppol, nspinor, nkpt, nspden
 #ifdef HAVE_NETCDF
  integer :: ncid
@@ -189,7 +200,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
  if (ierr/=0) MSG_ERROR(msg)
 
 ! intialize transport
- transport_rta = transport_rta_new(sigmaph,cryst,ebands)
+ transport_rta = transport_rta_new(dtset,sigmaph,cryst,ebands)
  sigmaph%ncid = nctk_noid
  call sigmaph_free(sigmaph)
 
@@ -227,20 +238,32 @@ end subroutine transport
 !!
 !! SOURCE
 
-type(transport_rta_t) function transport_rta_new(sigmaph,cryst,ebands) result (new)
+type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) result (new)
 
 !Arguments -------------------------------------
  type(sigmaph_t) :: sigmaph
  type(crystal_t) :: cryst
  type(ebands_t),intent(in) :: ebands
+ type(dataset_type),intent(in) :: dtset
 
 !Local variables ------------------------------
- integer :: ierr
+ integer,parameter :: occopt3=3, ndop=14
+ real(dp), parameter :: doplist(ndop) = [-1d22,-1d21,-1d20,-1d19,-1d18,-1d17,1d16,1d16,1d17,1d18,1d19,1d20,1d21,1d22]
+ type(ebands_t) :: tmp_ebands
+ character(len=500) :: msg
+ integer :: itemp, ii, pm, ierr
  integer,allocatable :: indq2ebands(:)
+ real(dp) :: extrael
+
+ ! TODO: make this an input?
+ new%ndop  = ndop !electron and hole doping
+ new%ntemp = sigmaph%ntemp
 
  ! Allocate important arrays
- ABI_MALLOC(new%kTmesh,(sigmaph%ntemp))
- new%ntemp = sigmaph%ntemp
+ ABI_MALLOC(new%kTmesh,(new%ntemp))
+ ABI_MALLOC(new%mu_carrier_den,(new%ntemp,new%ndop))
+ ABI_MALLOC(new%carrier_den,(new%ndop))
+ new%carrier_den = doplist
  new%kTmesh = sigmaph%kTmesh
 
  new%nsppol = ebands%nsppol
@@ -249,8 +272,21 @@ type(transport_rta_t) function transport_rta_new(sigmaph,cryst,ebands) result (n
 
  ierr = get_gaps(ebands,new%gaps)
 
-! read lifetimes to ebands object
+! Read lifetimes to ebands object
  new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+
+! Compute Fermi for different dopings
+ call ebands_copy(ebands, tmp_ebands)
+ do itemp=1,new%ntemp
+   call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(itemp), dtset%spinmagntarget, dtset%prtvol)
+   do ii=1,ndop
+     extrael = 1d-24 * new%carrier_den(ii)
+     call ebands_set_nelect(tmp_ebands, ebands%nelect + extrael, dtset%spinmagntarget, msg)
+     call wrtout(ab_out,msg)
+     new%mu_carrier_den(itemp,ii) = tmp_ebands%fermie
+   end do
+ end do
+ call ebands_free(tmp_ebands)
 
 end function transport_rta_new
 !!***
@@ -373,7 +409,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
 
 #ifdef HAVE_NETCDF
 ! write to netcdf file
- ncerr = nctk_def_dims(ncid, [ nctkdim_t("ntemp", self%ntemp) ], defmode=.True.)
+ ncerr = nctk_def_dims(ncid, [ nctkdim_t("ntemp", self%ntemp), nctkdim_t("ndop", self%ndop) ], defmode=.True.)
  NCF_CHECK(self%edos%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(self%ebands,ncid))
  NCF_CHECK(cryst%ncwrite(ncid))
@@ -381,8 +417,12 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  ncerr = nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")])
  ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")])
  ncerr = nctk_def_arrays(ncid, [nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp")], defmode=.True.)
+ ncerr = nctk_def_arrays(ncid, [nctkarr_t('mu_carrier_den', "dp", "ntemp, ndop")], defmode=.True.)
+ ncerr = nctk_def_arrays(ncid, [nctkarr_t('carrier_den', "dp", "ndop")], defmode=.True.)
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_carrier_den"), self%mu_carrier_den))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "carrier_den"),    self%carrier_den))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), self%vvdos_mesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), self%vvdos(:,1,:,:,:,1)))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau"),  self%vvdos(:,1,:,:,:,2:)))
@@ -417,7 +457,8 @@ subroutine transport_rta_free(transport_rta)
  ABI_SFREE(transport_rta%vvdos_mesh)
  ABI_SFREE(transport_rta%kTmesh)
  ABI_SFREE(transport_rta%eminmax_spin)
-
+ ABI_SFREE(transport_rta%carrier_den)
+ ABI_SFREE(transport_rta%mu_carrier_den)
  ABI_SFREE(transport_rta%velocity)
  ABI_SFREE(transport_rta%linewidth_mrta)
  ABI_SFREE(transport_rta%linewidth_serta)
