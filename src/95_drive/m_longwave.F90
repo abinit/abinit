@@ -153,9 +153,12 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
- integer,allocatable :: atindx(:),atindx1(:),indsym(:,:,:),irrzon(:,:,:),kg(:,:)
+ integer,allocatable :: atindx(:),atindx1(:)
+ integer,allocatable :: blkflg(:,:,:,:,:,:)
+ integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),rfpert(:),symrec(:,:,:) 
  real(dp),allocatable :: cg(:,:)
+ real(dp),allocatable :: d3etot(:,:,:,:,:,:,:)
  real(dp),allocatable :: doccde(:),eigen0(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
@@ -207,6 +210,12 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfft,ngfftf)
  nfftot=product(ngfft(1:3))
  nfftotf=product(ngfftf(1:3))
+
+!Define the set of admitted perturbations taking into account
+!the possible permutations
+ mpert=natom+8
+ ABI_ALLOCATE(blkflg,(6,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3etot,(2,6,mpert,3,mpert,3,mpert))
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
