@@ -634,7 +634,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
    !call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
-   call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
+   if (dtset%eph_task == -4) &
+     call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
 
  case (5, -5)
    ! Interpolate the phonon potential
