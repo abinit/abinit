@@ -53,6 +53,7 @@ module m_eph_driver
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_frohlichmodel,   only : frohlichmodel
+ use m_transport,       only : transport
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -633,6 +634,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
    !call ephwg_test(dtset, cryst, ebands, ifc, dtfil%filnam_ds(4), comm)
+   if (dtset%eph_task == -4) &
+     call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
 
  case (5, -5)
    ! Interpolate the phonon potential
@@ -642,6 +645,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (6)
    ! Compute ZPR and temperature-dependent electronic structure using the Frohlich model
    call frohlichmodel(cryst, dtfil, dtset, ebands, efmasdeg, efmasval, ifc)
+
+ case (7)
+   ! Compute phonon limited transport from WFK and a SIGEPH file
+   call transport(wfk0_path,ngfftc,ngfftf,dtfil,dtset,ebands,cryst,pawfgr,pawang,pawrad,pawtab,psps,comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

@@ -148,6 +148,7 @@ MODULE m_ddk
  public :: ddk_fs_average_veloc  ! find FS average of velocity squared
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
+ public :: ddk_red2car           ! Convert band velocities from cartesian to reduced coordinates
  public :: ddk_compute           ! Calculate ddk matrix elements. Save result on disk.
 !!***
 
@@ -349,9 +350,10 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  logical :: only_diago, is_kmesh
  type(wfd_t) :: wfd
  type(vkbr_t) :: vkbr
- type(ebands_t) :: ebands
- !type(edos_t)  :: edos
- !type(jdos_t)  :: jdos
+ type(ebands_t) :: ebands, ebands_tmp
+ type(edos_t)  :: edos
+ type(jdos_t)  :: jdos
+ type(gaps_t)  :: gaps
  type(crystal_t) :: cryst
  type(hdr_type) :: hdr_tmp, hdr
  type(ddkop_t) :: ddkop
@@ -360,9 +362,14 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:),nband(:,:), kg_k(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  real(dp) :: kpt(3), vv(2, 3)
+ real(dp) :: eminmax_spin(2,2)
+ real(dp) :: emin, emax
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
- real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:),vv_vals(:,:,:,:)
+ real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:), vvdos_tens(:,:,:,:,:,:)
+ real(dp),allocatable :: dummy_vals(:,:,:),dummy_vecs(:,:,:,:),vv_tens(:,:,:,:,:,:)
+ real(dp),allocatable :: vdiago(:,:,:,:),vmat(:,:,:,:,:,:)
  real(dp),allocatable :: cg_c(:,:), cg_v(:,:)
+ real(dp),allocatable :: vvdos_mesh(:), vvdos_vals(:,:,:,:)
  complex(dpc) :: vg(3), vr(3)
  complex(gwpc),allocatable :: ihrc(:,:), ug_c(:), ug_v(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -648,37 +655,64 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
 
  is_kmesh = hdr%kptopt > 0
 
- if (is_kmesh) then
+ if (is_kmesh .and. only_diago) then
    ! Compute electron DOS with tetra.
    edos_intmeth = 2
    if (dtset%prtdos == 1) edos_intmeth = 1
    if (dtset%prtdos == -2) edos_intmeth = 3
    edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+   if (edos_step == 0) edos_step = 0.001
    !edos = ebands_get_edos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm)
    !jdos = ebands_get_jdos(ebands, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
 
    ! Compute (v x v) DOS. Upper triangle in Voigt format.
-   !ABI_MALLOC(vv_vals, (6, mband, nkpt, nsppol))
-   !do spin=1,nsppol
-   !  do ik=1,nkpt
-   !    do ib_v=bandmin,bandmax
-   !      ! Go to cartesian coordinates.
-   !      vr = vdiago(:,ib_v,ik,spin)
-   !      do ivoigt=1,6
-   !        ii = voigt2ij(1, ivoigt)
-   !        jj = voigt2ij(2, ivoigt)
-   !        vv_vals(ivoigt, ib_v, ik, spin) = vr(ii) * vr(jj)
-   !      end do
-   !    end do
-   !  end do
-   !end do
-   !call ebands_get_dos_matrix_elements(ebands, cryst, vv_vals, 6, edos_intmeth, edos_step, edos_broad, &
-   !                                    vvdos__mesh, vv_dos, comm)
-   !ABI_SFREE(vv_vals)
-   !ABI_SFREE(vvdos_mesh)
-   !ABI_SFREE(vv_dos)
-   !call edos%free()
-   !call jdos%free()
+   ABI_MALLOC(vv_tens, (3, 3, 1, mband, nkpt, nsppol))
+   do spin=1,nsppol
+     do ik=1,nkpt
+       do ib_v=bandmin,bandmax
+         !vr = vdiago(:,ib_v,ik,spin)
+         ! Go to cartesian coordinates (same as pmat2cart routine).
+         vr = cryst%rprimd(:,1)*vdiago(1,ib_v,ik,spin) &
+             +cryst%rprimd(:,2)*vdiago(2,ib_v,ik,spin) &
+             +cryst%rprimd(:,3)*vdiago(3,ib_v,ik,spin)
+         vr = vr / two_pi
+         !do ivoigt=1,6
+         !  ii = voigt2ij(1, ivoigt)
+         !  jj = voigt2ij(2, ivoigt)
+         !  vv_vals(ivoigt, ib_v, ik, spin) = vr(ii) * vr(jj)
+         !end do
+         do ii=1,3
+           do jj=1,3
+             vv_tens(ii, jj, 1, ib_v, ik, spin) = vr(ii) * vr(jj)
+           end do
+         end do
+       end do
+     end do
+   end do
+
+   !set default erange
+   eminmax_spin(:,:ebands%nsppol) = get_minmax(ebands, "eig")
+   emin = minval(eminmax_spin(1,:)); emin = emin - 0.1_dp * abs(emin)
+   emax = maxval(eminmax_spin(2,:)); emax = emax + 0.1_dp * abs(emax)
+
+   ! If sigma_erange is set, get emin and emax
+   ierr = get_gaps(ebands,gaps)
+   if (ierr/=0.and.ebands%occopt.eq.1) then
+     call ebands_copy(ebands,ebands_tmp)
+     call ebands_set_scheme(ebands_tmp, ebands%occopt, ebands%tsmear, dtset%spinmagntarget, dtset%prtvol)
+     ierr = get_gaps(ebands_tmp,gaps)
+     call ebands_free(ebands_tmp)
+   end if
+   do spin=1,ebands%nsppol
+     if (dtset%sigma_erange(1) >= zero) emin = gaps%vb_max(spin) + tol2 * eV_Ha - dtset%sigma_erange(1)
+     if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
+   end do
+
+   edos = ebands_get_dos_matrix_elements(ebands, cryst, &
+                                         dummy_vals, 0, dummy_vecs, 0, vv_tens, 1, &
+                                         edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
+                                         dummy_dosvals, dummy_dosvecs, vvdos_tens, emin, emax)
+   ABI_SFREE(vv_tens)
  end if
 
  ! Write the matrix elements
@@ -710,9 +744,14 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
    else
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vred_matrix"), vmat))
    end if
-   if (is_kmesh) then
-     !NCF_CHECK(edos%ncwrite(ncid))
+   if (is_kmesh .and. only_diago) then
+     NCF_CHECK(edos%ncwrite(ncid))
      !NCF_CHECK(jdos%ncwrite(ncid))
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
+     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")], defmode=.True.)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_tens(:,1,:,:,:,1)))
    end if
    NCF_CHECK(nf90_close(ncid))
 
@@ -757,6 +796,12 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  ABI_SFREE(vdiago)
  ABI_SFREE(vmat)
 
+ if (is_kmesh) then
+   ABI_SFREE(vvdos_mesh)
+   ABI_SFREE(vvdos_tens)
+   call edos%free()
+   !call jdos%free()
+ end if
  call wfd%free()
  call ebands_free(ebands)
  call cryst%free()
@@ -1016,6 +1061,46 @@ subroutine ddk_free(ddk)
 
 end subroutine ddk_free
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddk/ddk_red2car
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ddk_red2car(rprimd, vred, vcar)
+
+!Arguments -------------------------------------
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: vred(2,3)
+ real(dp),intent(out) :: vcar(2,3)
+
+!Local variables -------------------------------
+ real(dp) :: vtmp(2,3)
+
+ ! Go to cartesian coordinates (same as pmat2cart routine)
+ vtmp(1,:) = rprimd(:,1)*vred(1,1) &
+            +rprimd(:,2)*vred(1,2) &
+            +rprimd(:,3)*vred(1,3)
+ vtmp(2,:) = rprimd(:,1)*vred(2,1) &
+            +rprimd(:,2)*vred(2,2) &
+            +rprimd(:,3)*vred(2,3)
+ vcar = vtmp / two_pi
+
+end subroutine ddk_red2car
+!!***
+
 
 !----------------------------------------------------------------------
 

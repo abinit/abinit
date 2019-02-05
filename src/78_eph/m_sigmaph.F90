@@ -81,6 +81,9 @@ module m_sigmaph
 !!***
 
  public :: sigmaph   ! Main entry point to compute self-energy matrix elements
+ public :: sigmaph_read    ! Read main dimensions and header of sigmaph from a netcdf file.
+ public :: sigmaph_ebands  ! Fill in values in ebands from the sigmaph structure and netcdf file
+ public :: sigmaph_free    ! Free sigmaph object
 !!***
 
  ! Tables for degenerated KS states.
@@ -109,7 +112,7 @@ module m_sigmaph
 !!
 !! SOURCE
 
- type,private :: sigmaph_t
+ type,public :: sigmaph_t
 
   integer :: nkcalc
    ! Number of k-points computed.
@@ -249,6 +252,9 @@ module m_sigmaph
   logical :: imag_only
    ! True if only the imaginary part of the self-energy must be computed
 
+  logical :: calc_mrta
+   ! True if the self-energy in the energy-momentum relaxation time approximation should be computed
+
   integer :: gmax(3)
 
   integer :: ngqpt(3)
@@ -332,13 +338,13 @@ module m_sigmaph
   ! KS energies where QP corrections are wantend
   ! This array is initialized inside the (ikcalc, spin) loop
 
-  real(dp),allocatable :: vred_calc(:,:,:,:)
+  real(dp),allocatable :: vcar_calc(:,:,:,:)
   ! (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
   ! Diagonal elements of velocity operator for all states in Sigma_nk.
 
-  !real(dp),allocatable :: tau_mrta(:,:)
-   ! tau_mrta(ntemp, max_nbcalc)
-   ! Lifetimes computed withing the momentum relaxation time approximation
+  real(dp),allocatable :: linewidth_mrta(:,:)
+   ! linewidth_mrta(ntemp, max_nbcalc)
+   ! Linewidths computed withing the momentum relaxation time approximation
    ! for fixed (kcalc, spin). Only if imag_only
 
   complex(dpc),allocatable :: cweights(:,:,:,:,:,:,:)
@@ -449,10 +455,8 @@ module m_sigmaph
 !!***
 
  private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
- private :: sigmaph_read              ! Read main dimensions and header of sigmaph from a netcdf file.
  private :: sigmaph_write             ! Write main dimensions and header of sigmaph on a netcdf file.
  private :: sigmaph_comp              ! Compare two instances of sigmaph raise error if different
- private :: sigmaph_free              ! Free memory.
  private :: sigmaph_setup_kcalc       ! Return tables used to perform the sum over q-points for given k-point.
  private :: sigmaph_gather_and_write  ! Compute the QP corrections.
  private :: sigmaph_print             ! Print results to main output file.
@@ -539,6 +543,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag
+ real(dp) :: vkk_norm2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -553,7 +558,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
- real(dp) :: vk(2, 3), tsec(2)
+ real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -566,7 +571,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
- real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:)
+ real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:),alpha_mrta(:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -600,7 +605,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
  restart = 0; ierr = 1
  if (my_rank == master .and. dtset%eph_restart == 1) then
-    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, ierr)
+ !if (my_rank == master .and. .not. file_exists("__EPH_NORESTART__")) then
+    sigma_restart = sigmaph_read(dtset, dtfil, xmpi_comm_self, msg, ierr)
  end if
 
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
@@ -723,7 +729,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
      msg=" Computing diagonal elements of velocity operator for all states in Sigma_nk...")
  ABI_MALLOC(cgwork,   (2, mpw*wfd%nspinor))
- ABI_CALLOC(sigma%vred_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
+ ABI_CALLOC(sigma%vcar_calc, (3, sigma%max_nbcalc, sigma%nkcalc, nsppol))
 
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
  !if (my_rank == master) call ddkop%print(ab_out)
@@ -743,29 +749,30 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call wfd%copy_cg(band_ks, ik_ibz, spin, cgwork)
        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
        call ddkop%apply(eig0nk, mpw, npw_k, wfd%nspinor, cgwork, cwaveprj0, wfd%mpi_enreg)
-       vk = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
-       sigma%vred_calc(:, ib_k, ikcalc, spin) = vk(1, :)
+       vk_red = ddkop%get_velocity(eig0nk, istwf_k, npw_k, wfd%nspinor, wfd%mpi_enreg%me_g0, cgwork)
+       call ddk_red2car(cryst%rprimd,vk_red,vk)
+       sigma%vcar_calc(:, ib_k, ikcalc, spin) = vk(1, :)
      end do
 
    end do
  end do
 
- call xmpi_sum(sigma%vred_calc, comm, ierr)
+ call xmpi_sum(sigma%vcar_calc, comm, ierr)
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 
  ! Write results to disk.
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nctk_set_defmode(sigma%ncid))
-   NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vred_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
+   NCF_CHECK(nctk_def_arrays(sigma%ncid, [nctkarr_t("vcar_calc", "dp", "three, max_nbcalc, nkcalc, nsppol")]))
    NCF_CHECK(nctk_set_datamode(sigma%ncid))
-   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vred_calc"), sigma%vred_calc))
+   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_calc"), sigma%vcar_calc))
  end if
 #endif
 
  ABI_FREE(cgwork)
 
- call ddkop%free()
+ if (.not.sigma%calc_mrta) call ddkop%free()
  !end if ! calc_velocity
 
  ! Prepare call to getgh1c
@@ -875,9 +882,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
-     !if (sigma%imag_only) then
-     !  sigma%tau_mrta = zero
-     !end if
+     if (sigma%calc_mrta) then
+       sigma%linewidth_mrta = zero
+       ABI_MALLOC(alpha_mrta, (nbcalc_ks))
+     end if
 
      ! Prepare computation of Sigma_{nk}(w) and spectral function.
      if (sigma%nwr > 0) then
@@ -1046,9 +1054,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !     [npw_kq],dtset%nsppol,optder,cryst%rprimd,ylm_kq,ylmgr_kq)
        !end if
 
-       !if (mrta) then
-       ! call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
-       !end if
+       if (sigma%calc_mrta) then
+        call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
+       end if
 
        ! Loop over all 3*natom perturbations (Each CPU prepares its own potentials)
        ! In the inner loop, I calculate H1 * psi_k, stored in h1kets_kq on the k+q sphere.
@@ -1163,18 +1171,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! q-weight for naive integration
          weight_q = sigma%wtq_k(iq_ibz)
 
-         !if (mrta) then
-         !  call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
-         !  vkq = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
-         !  ABI_MALLOC(alpha_mrta, (nbcalc_ks))
-         !  do ib_k=1,nbcalc_ks
-         !    vk = sigma%vred_calc(:, ib_k, ikcalc, spin)
-         !    vkk_norm2 = dot_product(vk, vk)
-         !    alpha_mrta(ib_k) = zero
-         !    if (vkk_norm2 > tol16) alpha_mrta(ib_k) = one - dot_product(vkq, vk) / vk_norm**2
-         !  end do
-         !  ABI_FREE(alpha_mrta)
-         !end if
+         if (sigma%calc_mrta) then
+           call ddkop%apply(eig0mkq, mpw, npw_kq, wfd%nspinor, bra_kq, cwaveprj0, wfd%mpi_enreg)
+           vkq_red = ddkop%get_velocity(eig0mkq, istwf_kq, npw_kq, wfd%nspinor, wfd%mpi_enreg%me_g0, bra_kq)
+           call ddk_red2car(cryst%rprimd,vkq_red,vkq)
+           do ib_k=1,nbcalc_ks
+             vk(1,:) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+             vkk_norm2 = dot_product(vk(1,:),vk(1,:))
+             !vkk_norm2 = norm2(vk(1,:))*norm2(vkq(1,:))
+             alpha_mrta(ib_k) = zero
+             if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
+           end do
+         end if
 
          do imyp=1,my_npert
            ! Ignore acoustic or unstable modes.
@@ -1259,7 +1267,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  if (sigma%imag_only) then
                    simag = gkq2 * aimag(cfact)
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                   !sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                   if (sigma%calc_mrta) &
+                     sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                  else
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * cfact
                  end if
@@ -1294,7 +1303,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                          (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
                          (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, jj) ) * weight
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                       !sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                       if (sigma%calc_mrta) &
+                         sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
                          (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
@@ -1309,7 +1319,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, 1) )
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                     !sigma%tau_mrta(it, ib_k) = sigma%tau_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                     if (sigma%calc_mrta) &
+                       sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
                    else
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
                        (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
@@ -1540,6 +1551,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
      call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, dtset%prtvol, comm)
+
+     ABI_SFREE(alpha_mrta)
+
    end do ! spin
 
    ABI_FREE(kg_k)
@@ -1579,6 +1593,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
+ call ddkop%free()
 
 end subroutine sigmaph
 !!***
@@ -1730,6 +1745,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Re-Im or Im only?
  new%imag_only = .False.; if (dtset%eph_task == -4) new%imag_only = .True.
+
+ ! Compute lifetimes in the MRTA approximation
+ new%calc_mrta = .False.; if (dtset%userib == 11) new%calc_mrta = .True.
 
  ! TODO: Remove qint_method, use eph_intmeth or perhaps dtset%qint_method dtset%kint_method
  ! FIXME: Tetra gives positive SIGE2 while zcut gives negative (retarded)
@@ -2367,9 +2385,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    end if
  end if
 
- !if (new%imag_only) then
- !  ABI_CALLOC(new%tau_mrta, (new%ntemp, new%max_nbcalc))
- !end if
+ if (new%calc_mrta) then
+   ABI_CALLOC(new%linewidth_mrta, (new%ntemp, new%max_nbcalc))
+ end if
 
  call cwtime_report("sigmaph_new: all", cpu_all, wall_all, gflops_all)
 
@@ -2527,12 +2545,12 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
    ])
    NCF_CHECK(ncerr)
 
-   !if (self%imag_only) then
-   !  ncerr = nctk_def_arrays(ncid, [ &
-   !    nctkarr_t("tau_mrta", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol") &
-   !  ])
-   !  NCF_CHECK(ncerr)
-   !end if
+   if (self%calc_mrta) then
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("linewidth_mrta", "dp", "ntemp, max_nbcalc, nkcalc, nsppol") &
+     ])
+     NCF_CHECK(ncerr)
+   end if
 
    if (self%frohl_model == 1) then
      ! Arrays storing the Frohlich self-energy.
@@ -2647,13 +2665,15 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
+type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  integer,intent(out) :: ierr
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
+ character(len=500),intent(out) :: msg
+ logical,optional :: keep_open
 
 !Local variables ------------------------------
 !scalars
@@ -2662,7 +2682,6 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  integer :: ncid,varid,ncerr
 #endif
  real(dp) :: eph_fermie, eph_fsewin, ph_wstep, ph_smear, eta, wr_step, eph_extrael, eph_fsmear
- !character(len=500) :: msg
  character(len=fnlen) :: path
 !arrays
  integer :: eph_task, symdynmat, ph_intmeth, eph_intmeth, eph_transport
@@ -2680,8 +2699,6 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
     ierr = 1; return
  end if
  NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
- ! so that the structure is properly freed
- new%ncid = nctk_noid
 
  !TODO?
  !NCF_CHECK(cryst%ncread(ncid))
@@ -2714,6 +2731,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
 
  ABI_MALLOC(new%kcalc, (3, new%nkcalc))
  ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
+ ABI_MALLOC(new%bstop_ks, (new%nkcalc, new%nsppol))
  ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
  ABI_MALLOC(new%mu_e, (new%ntemp))
  ABI_MALLOC(new%kTmesh, (new%ntemp))
@@ -2722,6 +2740,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  NCF_CHECK(nf90_get_var(ncid, vid("ngqpt"), new%ngqpt))
  NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), new%bstart_ks))
  NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
+ new%bstop_ks = new%bstart_ks + new%nbcalc_ks - 1
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), new%kcalc))
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), new%kcalc2ibz))
  NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), new%kTmesh))
@@ -2758,7 +2777,6 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"), ph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"), eph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"), eph_transport))
- ABI_CHECK(eph_task      == dtset%eph_task,     "netcdf eph_task != input file")
  ABI_CHECK(symdynmat     == dtset%symdynmat,    "netcdf symdynmat != input file")
  ABI_CHECK(ph_intmeth    == dtset%ph_intmeth,   "netcdf ph_intmeth != input file")
  ABI_CHECK(eph_intmeth   == dtset%eph_intmeth,  "netcdf eph_intmeth != input file")
@@ -2770,14 +2788,21 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, ierr) result(new)
  NCF_CHECK(nf90_get_var(ncid, vid("sigma_ngkpt"), sigma_ngkpt))
  NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
  NCF_CHECK(nf90_get_var(ncid, vid("sigma_erange"), sigma_erange))
- NCF_CHECK(nf90_close(ncid))
+
+ if (present(keep_open)) then
+   new%ncid = ncid
+ else
+   NCF_CHECK(nf90_close(ncid))
+   ! so that the structure is properly freed
+   new%ncid = nctk_noid
+ end if
 
  ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),"netcdf eph_ngqpt_fine != input file")
  ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     "netcdf ddb_ngqpt != input file")
  ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      "netcdf ph_ngqpt != input file")
  ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
  ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6), "netcdf frohl_params != input file")
- ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
+ !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
 
 contains
  integer function vid(vname)
@@ -2788,6 +2813,134 @@ end function vid
 #endif
 
 end function sigmaph_read
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/sigmaph_ebands
+!! NAME
+!!  sigmaph_ebands
+!!
+!! FUNCTION
+!!  Read quantities from the sigmaph to a ebands structure and return mapping
+!!
+!! INPUTS
+!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!!  opt=integer option selecting what to read on the ebands object. 1-only mapping, 10+n-read n temperature linewidths
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, linewidth_mrta, &
+                                       velocity, comm, ierr, indq2ebands) result(new)
+
+!Arguments -----------------------------------------------
+ integer,intent(in) :: comm
+ type(sigmaph_t),intent(in) :: self
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ integer, intent(out) :: ierr
+ real(dp), allocatable, intent(out) :: linewidth_serta(:,:,:,:), linewidth_mrta(:,:,:,:), velocity(:,:,:,:)
+ integer, allocatable, optional, intent(out) :: indq2ebands(:)
+ character(len=500) :: msg
+
+!Local variables -----------------------------------------
+ integer,parameter :: timrev1 = 1
+ integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
+ integer :: band_ks, bstart_ks, nbcalc_ks, mband
+ logical :: has_mrta, has_vel
+#ifdef HAVE_NETCDF
+ integer :: ncerr, ncid, varid
+#endif
+ character(len=fnlen) :: path
+ integer,allocatable :: indkk(:,:), nband(:)
+ real(dp) :: dksqmax
+
+ ! copy useful dimensions
+ nsppol = self%nsppol
+ nkcalc = self%nkcalc
+ nkpt = ebands%nkpt
+
+ ABI_MALLOC(indkk,(nkcalc,6))
+ ! map ebands kpoints to sigmaph
+ call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, nkcalc, cryst%nsym, &
+             1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
+
+ if (dksqmax > tol12) then
+    write(msg, '(3a,es16.6,a)' ) &
+     "Error mapping ebands to sigmaph",ch10,&
+     "the k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
+    MSG_ERROR(msg)
+ end if
+
+ ! store mapping to return
+ if (present(indq2ebands)) then
+   ABI_MALLOC(indq2ebands,(nkcalc))
+   indq2ebands(:) = indkk(:,1)
+ end if
+
+ ! Allocate using only the relevant bands for transport
+ ! includin valence states to allow to compute different doping
+ mband = maxval(self%bstop_ks)
+ new = ebands_chop(ebands, 1, mband)
+
+#ifdef HAVE_NETCDF
+ has_mrta = .true.
+ ierr = nf90_inq_varid(self%ncid, "vals_e0k", varid)
+ if (ierr /= nf90_noerr) has_mrta = .false.
+
+ has_vel = .true.
+ ierr = nf90_inq_varid(self%ncid, "vcar_calc", varid)
+ if (ierr /= nf90_noerr) has_vel = .false.
+
+ ! Read linewidths from sigmaph
+ ABI_CALLOC(linewidth_serta,(self%ntemp,mband,nkpt,nsppol))
+ if (has_mrta) then
+   ABI_CALLOC(linewidth_mrta,(self%ntemp,mband,nkpt,nsppol))
+ end if
+ if (has_vel) then
+   ABI_CALLOC(velocity,(3,mband,nkpt,nsppol))
+ end if
+
+ do spin=1,nsppol
+   do ikcalc=1,nkcalc
+     bstart_ks = self%bstart_ks(ikcalc,spin)
+     nbcalc_ks = self%nbcalc_ks(ikcalc,spin)
+     do iband=1,nbcalc_ks
+       band_ks = iband + bstart_ks - 1
+       ikpt = indkk(ikcalc,1)
+
+       do itemp=1,self%ntemp
+         ! Read SERTA lifetimes
+         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"),&
+                 linewidth_serta(itemp,band_ks,ikpt,spin), start=[2,itemp,iband,ikcalc,spin])
+         NCF_CHECK(ncerr)
+         ! Read MRTA lifetimes
+         if (has_mrta) then
+            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"),&
+                                 linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp,iband,ikcalc,spin])
+            NCF_CHECK(ncerr)
+         end if
+       end do
+
+       ! Read band velocities
+       if (has_vel) then
+         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"),&
+                              velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin])
+         NCF_CHECK(ncerr)
+       end if
+
+     end do
+   end do
+ end do
+#endif
+
+ ABI_FREE(indkk)
+
+end function sigmaph_ebands
 !!***
 
 !----------------------------------------------------------------------
@@ -2887,8 +3040,8 @@ subroutine sigmaph_free(self)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%mu_e)
  ABI_SFREE(self%e0vals)
- ABI_SFREE(self%vred_calc)
- !ABI_SFREE(self%tau_mrta)
+ ABI_SFREE(self%vcar_calc)
+ ABI_SFREE(self%linewidth_mrta)
  ABI_SFREE(self%cweights)
  ABI_SFREE(self%deltaw_pm)
  ABI_SFREE(self%wrmesh_b)
@@ -3333,9 +3486,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  call xmpi_sum_master(self%dvals_de0ks, master, comm, ierr)
  call xmpi_sum_master(self%dw_vals, master, comm, ierr)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
- !if (self%imag_only) then
- !  call xmpi_sum_master(self%tau_mrta, master, comm, ierr)
- !end if
+ if (self%calc_mrta) then
+   call xmpi_sum_master(self%linewidth_mrta, master, comm, ierr)
+ end if
  call cwtime_report(" Sigma_nk gather completed", cpu, wall, gflops, comm=comm)
  ! Only master writes
  if (my_rank /= master) return
@@ -3378,12 +3531,12 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
        end do
 
        ! Average TAU_MRTA
-       !if (self%imag_only) then
-       !  ravg = sum(self%tau_mrta(it, bids(:))) / nstates
-       !  do ii=1,nstates
-       !    self%tau_mrta(it, bids(ii)) = ravg
-       !  end do
-       !end if
+       if (self%calc_mrta) then
+         ravg = sum(self%linewidth_mrta(it, bids(:))) / nstates
+         do ii=1,nstates
+           self%linewidth_mrta(it, bids(ii)) = ravg
+         end do
+       end if
 
        if (self%nwr > 0) then
          ! Average Sigma(omega, T)
@@ -3605,9 +3758,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpoms_gaps"), qpoms_gaps, start=[1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), qp_gaps, start=[1,ikcalc,spin]))
 
- !if (self%imag_only) then
- !  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "tau_mrta"), self%tau_mrta, start=[1,1,1,ikcalc,spin]))
- !end if
+ if (self%calc_mrta) then
+   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"), self%linewidth_mrta, start=[1,1,ikcalc,spin]))
+ end if
 
  if (self%frohl_model == 1) then
    ! Write Frohlich self-energy to file.
