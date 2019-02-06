@@ -453,7 +453,7 @@ subroutine transport_rta_free(transport_rta)
 
  call ebands_free(transport_rta%ebands)
  call transport_rta%gaps%free()
- call edos_free(transport_rta%edos)
+ call transport_rta%edos%free()
 
  ! free the allocated arrays and datastructure
  ABI_SFREE(transport_rta%vvdos)
