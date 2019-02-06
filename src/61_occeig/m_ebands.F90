@@ -3911,7 +3911,9 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
                  ebands%kptns, ebands%eig, my_bblock, comm)
-   if (itype == 2) ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
+   if (itype == 2) then
+     ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
+   end if
  else
    MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end if
