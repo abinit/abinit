@@ -113,8 +113,6 @@ MODULE m_ebands
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
  public :: ebands_write               ! Driver routine to write bands in different (txt) formats.
-
- !public :: edos_free               ! Free DOS object
 !!***
 
 !----------------------------------------------------------------------
