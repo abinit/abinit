@@ -61,6 +61,9 @@ MODULE m_ddb
  public :: chkin9
  public :: carttransf       ! Transform a second-derivative matrix (EIG2D) from reduced
                             ! coordinates to cartesian coordinates.
+#ifdef MR_DEV
+ public :: dfpt_lw_doutput   ! Write the matrix of third-order derivatives to the output file and the DDB
+#endif
 
  integer,public,parameter :: DDB_VERSION=100401
  ! DDB Version number.
@@ -3957,6 +3960,121 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
 end subroutine mblktyp5
 !!***
+
+#ifdef MR_DEV
+!!****f* m_ddb/dfpt_lw_doutput
+!! NAME
+!! dfpt_lw_doutput
+!!
+!! FUNCTION
+!! Write the matrix of third-order derivatives from the long wave calculation 
+!! to the to the DDB
+!!
+!! INPUTS
+!!  blkflg(6,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!   has been calculated ; 0 otherwise )
+!!  d3(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  mpert =maximum number of ipert
+!!  natom=Number of atoms
+!!  ntypat=Number of type of atoms
+!!  unddb = unit number for DDB output
+!!
+!! NOTES
+!! - d3 holds the third-order derivatives before computing
+!!   the permutations of the perturbations.
+!! - the dimension 6 of the first argument in d3 is used to define
+!!   both up and down extradiagonal strain perturbations.                          
+!!   Necessary because their q-gradient is not symmetric. 
+!!
+!! PARENTS
+!!      longwave
+!!
+!! CHILDREN
+!!      ddb_free,ddb_malloc,ddb_write_blok,wrtout
+!!
+!! SOURCE
+
+subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,unddb,natom,ntypat
+!arrays
+ integer,intent(in) :: blkflg(6,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3(2,6,mpert,3,mpert,3,mpert)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2,idir3,ii,index,ipert1,ipert2,ipert3,msize,nelmts
+ character(len=500) :: message
+ type(ddb_type) :: ddb
+
+!*************************************************************************
+
+ msize = 54*mpert*mpert*mpert
+ call ddb_malloc(ddb,msize,1,natom,ntypat)
+
+ ddb%nrm = one
+ ddb%qpt = zero  
+
+ index=0
+ do ipert3=1,mpert
+   do idir3=1,3
+     do ipert2=1,mpert
+       do idir2=1,3
+         do ipert1=1,mpert
+           do idir1=1,6
+             index=index + 1
+             ddb%flg(index,1) = blkflg(idir1,ipert1,idir2,ipert2,idir3,ipert3)
+             ddb%val(:,index,1)= d3(:,idir1,ipert1,idir2,ipert2,idir3,ipert3)
+
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!########  Write blok of third-order derivatives to DDB
+
+!Count the number of elements
+ nelmts=0
+ do ii=1,msize
+   if(ddb%flg(ii,1)==1)nelmts=nelmts+1
+ end do
+
+!Write the block type and number of elements
+ write(unddb,*)' '
+ write(unddb, '(a,i8)' )' 3rd derivatives              - # elements :',nelmts
+
+!Write the phonon wavevectors
+ write(unddb, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,1),ii=1,3),ddb%nrm(1,1)
+ write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=4,6),ddb%nrm(2,1)
+ write(unddb, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,1),ii=7,9),ddb%nrm(3,1)
+
+!Write the matrix elements 
+ index=0
+ do ipert3=1,mpert
+   do idir3=1,3
+     do ipert2=1,mpert
+       do idir2=1,3
+         do ipert1=1,mpert
+           do idir1=1,6
+             index=index+1
+             if (ddb%flg(index,1)==1)then
+               write(unddb, '(6i4,2d22.14)' )&
+&              idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,index,1),ddb%val(2,index,1)
+             end if
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+end subroutine dfpt_lw_doutput
+!!***
+#endif
 
 end module m_ddb
 !!***

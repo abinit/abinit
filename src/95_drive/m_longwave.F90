@@ -59,6 +59,8 @@ module m_longwave
  use m_mkrho,       only : mkrho
  use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
  use m_fft,         only : fourdp
+ use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
+ use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
 
  implicit none
 
@@ -140,8 +142,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
+ character(len=fnlen) :: dscrpt
  character(len=500) :: msg
  type(ebands_t) :: bstruct
+ type(ddb_hdr_type) :: ddb_hdr
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(hdr_type) :: hdr,hdr_den
@@ -214,7 +218,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Define the set of admitted perturbations taking into account
 !the possible permutations
 !  -> natom+8 refers to ddq perturbation
-!  -> the dimension 6 of the first argument is used to defince
+!  -> the dimension 6 of the first argument is used to define
 !     both up and down extradiagonal strain perturbations. 
 !     Necessary because their q-gradient is not symmetric.
  mpert=natom+8
@@ -473,6 +477,25 @@ ecore=zero
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &   timrev,ucvol,xred)
  end if 
+
+!Open the formatted derivative database file, and write the
+!preliminary information
+ if (mpi_enreg%me == 0) then
+   dscrpt=' Note : temporary (transfer) database '
+
+   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,1,xred=xred,occ=occ)
+
+   call ddb_hdr_open_write(ddb_hdr, dtfil%fnameabo_ddb, dtfil%unddb)
+
+   call ddb_hdr_free(ddb_hdr)
+
+!  Call main output routine
+   call dfpt_lw_doutput(blkflg,d3etot,mpert,dtset%natom,dtset%ntypat,dtfil%unddb)
+
+!  Close DDB
+   close(dtfil%unddb)
+ end if
+
 
 !Deallocate arrays
  ABI_DEALLOCATE(atindx)

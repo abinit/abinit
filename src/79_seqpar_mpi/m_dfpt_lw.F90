@@ -531,8 +531,8 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
        eqgradhart(im,iatpert,iq2grad,iq1grad)=doti*half
        qdrflg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),q2grad(2,iq2grad),q1grad(2,iq1grad))=1
 
-!       blkflg(q2grad(2,iq2grad),q2grad(1,iq2grad),pert_atdis(2,iatpert),pert_atdis(1,iatpert),&
-!     &        q1grad(2,iq1grad),q1grad(1,iq1grad))=1           
+       blkflg(q2grad(2,iq2grad),q2grad(1,iq2grad),pert_atdis(2,iatpert),pert_atdis(1,iatpert),&
+     &        q1grad(2,iq1grad),matom+8)=1           
 
      end do
    end do
