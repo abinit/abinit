@@ -34,9 +34,9 @@ module m_transport
  use m_hide_blas
  use m_copy
  use m_ebands
- use m_wfk
- use m_ddk
- use m_wfd
+ !use m_wfk
+ !use m_ddk
+ !use m_wfd
  use m_nctk
  use m_sigmaph
 #ifdef HAVE_NETCDF
@@ -47,8 +47,7 @@ module m_transport
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : arth
  use m_fstrings,       only : strcat
- use m_io_tools,       only : iomode_from_fname, file_exists
- use m_pawang,         only : pawang_type, gauleg
+ use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
