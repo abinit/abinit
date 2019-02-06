@@ -1562,6 +1562,7 @@ end subroutine dfpt_qdrpout
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
+!!  mpert=maximum number of perturbations for output processing
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this proc)
@@ -1584,6 +1585,9 @@ end subroutine dfpt_qdrpout
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
+!!  blkflg(6,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!   has been calculated ; 0 otherwise )
+!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -1603,8 +1607,8 @@ end subroutine dfpt_qdrpout
 !!
 !! SOURCE
 
-subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
-&          gmet,gprimd,kxc,&
+subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
+&          gmet,gprimd,kxc,mpert,&
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
@@ -1620,7 +1624,9 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(in) :: mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(inout) :: blkflg(6,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1649,7 +1655,7 @@ subroutine dfpt_flexo(atindx,codvsn,doccde,dtfil,dtset,&
  integer :: iatpert,iatpert_cnt,iatpol,iatdir
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
  integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
- integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
+ integer :: ireadwf0,isppol,istrdir,istrcomp,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
  integer :: lw_flexo,master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mpw,my_nkpt_rbz
  integer :: natpert,nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
  integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
@@ -2106,6 +2112,12 @@ end if
          elqgradhart(re,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
          elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
          elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
+
+          istrcomp=pert_strain(6,istrpert)
+          if (pert_strain(1,istrpert)==matom+4) istrcomp=pert_strain(6,istrpert)-3
+
+          blkflg(istrcomp,pert_strain(1,istrpert),pert_efield(2,iefipert),pert_efield(1,iefipert),&
+        &        q1grad(2,iq1grad),matom+8)=1           
 
        end do
      end do
@@ -2651,9 +2663,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Gather the different terms in the flexoelectric tensor and print them out
  if (me==0) then
    if (lw_flexo==1.or.lw_flexo==2) then
-   call dfpt_flexoout(elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+   call dfpt_flexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
       & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-      & elqgradhart,gprimd,dtset%kptopt,lw_flexo,matom,nefipert, &
+      & elqgradhart,gprimd,dtset%kptopt,lw_flexo,matom,mpert,nefipert, &
       & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
    end if
  end if
@@ -2757,6 +2769,7 @@ end subroutine dfpt_flexo
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
 !!  lw_flexo= parameter that selects which lw magnitudes are calculated
 !!  matom=number of atoms 
+!!  mpert=maximum number of perturbations
 !!  nefipert=number of electric field perturbations
 !!  nstrpert=number of strain perturbations
 !!  nq1grad=number of q1 (q_{\gamma}) gradients
@@ -2768,6 +2781,7 @@ end subroutine dfpt_flexo
 !!  ucvol=unit cell volume in bohr**3.
 !!  
 !! OUTPUT
+!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -2783,9 +2797,9 @@ end subroutine dfpt_flexo
 !!
 !! SOURCE
 
- subroutine dfpt_flexoout(elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+ subroutine dfpt_flexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
     & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-    & elqgradhart,gprimd,kptopt,lw_flexo,matom,nefipert,&
+    & elqgradhart,gprimd,kptopt,lw_flexo,matom,mpert,nefipert,&
     & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
 
 
@@ -2799,7 +2813,8 @@ end subroutine dfpt_flexo
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,lw_flexo,matom,nefipert,nstrpert,nq1grad,prtvol
+ integer,intent(in) :: kptopt,lw_flexo,matom,mpert,nefipert,nstrpert,nq1grad,prtvol
+ real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
 
 !arrays
