@@ -103,6 +103,7 @@ contains
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
+!!  mpert=maximum number of perturbations for output processing
 !!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfft=(effective) number of FFT grid points (for this proc)
@@ -125,6 +126,9 @@ contains
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
+!!  blkflg(6,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!   has been calculated ; 0 otherwise )
+!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -145,8 +149,8 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
-&          gmet,gprimd,kxc,&
+subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
+&          gmet,gprimd,kxc,mpert,&
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
@@ -162,7 +166,9 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(in) :: mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
+ integer,intent(inout) :: blkflg(6,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -326,7 +332,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
  end do
  ABI_DEALLOCATE(q2grad_tmp)
 
- !The q1grad is related with the response to the ddk
+ !The q1grad is related with the response to the ddk 
  ABI_ALLOCATE(q1grad_tmp,(3,3))
  q1grad_tmp=0
  iq1grad_cnt=0
@@ -334,7 +340,7 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
    if (pertsy(iq1grad,dtset%natom+1)==1) then
      iq1grad_cnt=iq1grad_cnt+1
      q1grad_tmp(1,iq1grad_cnt)=dtset%natom+1                         !ddk perturbation
-     q1grad_tmp(2,iq1grad_cnt)=iq1grad                               !ddk direction
+     q1grad_tmp(2,iq1grad_cnt)=iq1grad                               !ddk or ddq direction
      q1grad_tmp(3,iq1grad_cnt)=matpert+iq1grad                       !like pertcase in dfpt_loopert.f90
    end if
  end do
@@ -524,6 +530,9 @@ subroutine dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
        eqgradhart(re,iatpert,iq2grad,iq1grad)=dotr*half
        eqgradhart(im,iatpert,iq2grad,iq1grad)=doti*half
        qdrflg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),q2grad(2,iq2grad),q1grad(2,iq1grad))=1
+
+!       blkflg(q2grad(2,iq2grad),q2grad(1,iq2grad),pert_atdis(2,iatpert),pert_atdis(1,iatpert),&
+!     &        q1grad(2,iq1grad),q1grad(1,iq1grad))=1           
 
      end do
    end do
@@ -961,7 +970,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Gather the different terms in the quadrupole tensor and print them out
  if (me==0) then
  filnam=dtfil%filnam_ds(4)
- call dfpt_qdrpout(eqgradhart,filnam,gprimd,dtset%kptopt,matom,natpert,& 
+ call dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,dtset%kptopt,matom,mpert,natpert,& 
     & nq1grad,nq2grad,pert_atdis,dtset%prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, &
     & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
  end if
@@ -1057,7 +1066,7 @@ end subroutine dfpt_qdrpole
 !!  ucvol=unit cell volume in bohr**3.
 !!  
 !! OUTPUT
-!!  argout(sizeout)=description
+!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -1073,7 +1082,7 @@ end subroutine dfpt_qdrpole
 !!
 !! SOURCE
 
-subroutine dfpt_qdrpout(eqgradhart,filnam,gprimd,kptopt,matom,natpert, & 
+subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpert, & 
          & nq1grad,nq2grad,pert_atdis,prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, & 
          & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
 
@@ -1088,7 +1097,8 @@ subroutine dfpt_qdrpout(eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,matom,natpert,nq1grad,nq2grad,prtvol
+ integer,intent(in) :: kptopt,matom,mpert,natpert,nq1grad,nq2grad,prtvol
+ real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -1111,6 +1121,7 @@ subroutine dfpt_qdrpout(eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
  integer :: alpha,beta,gamma
  integer :: iatpert,iatdir,iatom,ii,iiq1grad,iiq2grad
  integer :: iq1dir,iq1grad,iq2dir,iq2grad 
+ integer :: iq1pert,iq2pert
  integer, parameter :: re=1,im=2
  real(dp) :: piezore,piezoim,tmpre, tmpim
  character(len=500) :: msg
@@ -1157,19 +1168,25 @@ subroutine dfpt_qdrpout(eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
    !Write real and 'true' imaginary parts of quadrupole tensor and the 
    !q-gradient of the polarization response
+   iq1pert=matom+8
    do iq1grad=1,nq1grad
      iq1dir=q1grad(2,iq1grad)
      do iq2grad=1,nq2grad
+       iq2pert=q2grad(1,iq2grad)
        iq2dir=q2grad(2,iq2grad)
        do iatpert=1,natpert
          iatom=pert_atdis(1,iatpert)
          iatdir=pert_atdis(2,iatpert)
 
+         !Calculate ans save the third order energy derivative
+         tmpre=eqgradhart(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iq2grad,iq1grad)
+         tmpim=eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad)
+         d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpre
+         d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
+
          !Calculate and write the q-gradient of the polarization response
-         tmpre=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
-         tmpim=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
-         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim/ucvol
-         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=tmpre/ucvol
+         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
+         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=two*tmpre/ucvol
          write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,tmpre/ucvol
  
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
@@ -1235,17 +1252,23 @@ subroutine dfpt_qdrpout(eqgradhart,filnam,gprimd,kptopt,matom,natpert, &
 
    !Write real and zero imaginary parts of quadrupole tensor and the 
    !q-gradient of the polarization response
+   iq1pert=matom+8
    do iq1grad=1,nq1grad
      iq1dir=q1grad(2,iq1grad)
      do iq2grad=1,nq2grad
+       iq2pert=q2grad(1,iq2grad) 
        iq2dir=q2grad(2,iq2grad)
        do iatpert=1,natpert
          iatom=pert_atdis(1,iatpert)
          iatdir=pert_atdis(2,iatpert)
 
+         !Calculate ans save the third order energy derivative
+         tmpim=eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad)
+         d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=zero
+         d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
+
          !Calculate and write the q-gradient of the polarization response
-         tmpim=two*(eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad))
-         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-tmpim/ucvol
+         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
          dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
          write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,0.0_dp
 
@@ -2563,13 +2586,13 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
        &  pert_atdis,ph1d,psps,q1grad,rmet,ucvol,useylmgr, &
        &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk, &
        &  wtk_k,xred,ylm_k,ylmgr_k)
-     end if
 
 !      Add the contribution from each k-point
        ddmdqwf=ddmdqwf + ddmdqwf_k
        ddmdqwf_t1=ddmdqwf_t1 + ddmdqwf_t1_k
        ddmdqwf_t2=ddmdqwf_t2 + ddmdqwf_t2_k
        ddmdqwf_t3=ddmdqwf_t3 + ddmdqwf_t3_k
+     end if
 
 !    Keep track of total number of bands
      bdtot_index=bdtot_index+nband_k
@@ -2618,10 +2641,12 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
 
 !Anounce finalization of Flexoelectric tensor calculation
- write(msg, '(a,a,a)' ) ch10, &
-' Electronic flexoelectric tensor calculation completed ',ch10
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
+ if (lw_flexo==1.or.lw_flexo==2) then
+   write(msg, '(a,a,a)' ) ch10, &
+   ' Electronic flexoelectric tensor calculation completed ',ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if
 
 !Gather the different terms in the flexoelectric tensor and print them out
  if (me==0) then

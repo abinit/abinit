@@ -213,9 +213,15 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 
 !Define the set of admitted perturbations taking into account
 !the possible permutations
+!  -> natom+8 refers to ddq perturbation
+!  -> the dimension 6 of the first argument is used to defince
+!     both up and down extradiagonal strain perturbations. 
+!     Necessary because their q-gradient is not symmetric.
  mpert=natom+8
  ABI_ALLOCATE(blkflg,(6,mpert,3,mpert,3,mpert))
  ABI_ALLOCATE(d3etot,(2,6,mpert,3,mpert,3,mpert))
+ blkflg=0
+ d3etot=zero
 
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
@@ -452,8 +458,8 @@ ecore=zero
 
 !Calculate the quadrupole tensor
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-   call dfpt_qdrpole(atindx,codvsn,doccde,dtfil,dtset,&
-&   gmet,gprimd,kxc,&
+   call dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
+&   gmet,gprimd,kxc,mpert,&
 &   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &   timrev,ucvol,xred)
