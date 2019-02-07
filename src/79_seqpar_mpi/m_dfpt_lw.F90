@@ -2833,14 +2833,9 @@ end subroutine dfpt_flexo
    !Compute real and 'true' imaginary parts of flexoelectric tensor and independent terms
    !T4 term needs further treatment and it will be lately added to the cartesian coordinates
    !version of the flexoelectric tensor
-   iq1pert=matom+8
-   iefipert=matom+2
    do istrpert=1,nstrpert
-     istrpert=pert_strain(1,istrpert)
      istr1dir=pert_strain(3,istrpert)
      istr2dir=pert_strain(4,istrpert)
-     istrcomp=pert_strain(6,istrpert)
-     if (istrpert==matom+4) istrcomp=pert_strain(6,istrpert)-3
      do iq1grad=1,nq1grad
        iq1dir=q1grad(2,iq1grad)
        do iefipert=1,nefipert
@@ -2855,7 +2850,7 @@ end subroutine dfpt_flexo
          & ( elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir) +               &
          &   elflexowf(im,iefidir,iq1dir,istr1dir,istr2dir) ) 
 
-           !Multiply by the imaginary unit to get a real magnitude (see M.Royo and M.Stengel paper)
+           !Multiply by the imaginary unit that has been factorized out
            tmpre=elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)
            tmpim=elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)
            elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim
@@ -2868,7 +2863,7 @@ end subroutine dfpt_flexo
            elflexowf_t4(re,iefidir,istr1dir,istr2dir,iq1dir)=tmpim*2.0_dp*ucvolinv
            elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)=-tmpre*2.0_dp*ucvolinv
           
-           !Write out individual terms in mixed coordinates
+           !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
 
              tmpre=elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir)
@@ -2909,14 +2904,9 @@ end subroutine dfpt_flexo
    !Compute real part of flexoelectric tensor and independent terms
    !T4 term needs further treatment and it will be lately added to the cartesian coordinates
    !version of the flexoelectric tensor
-   iq1pert=matom+8
-   iefipert=matom+2
    do istrpert=1,nstrpert
-     istrpert=pert_strain(1,istrpert)
      istr1dir=pert_strain(3,istrpert)
      istr2dir=pert_strain(4,istrpert)
-     istrcomp=pert_strain(6,istrpert)
-     if (istrpert==matom+4) istrcomp=pert_strain(6,istrpert)-3
      do iq1grad=1,nq1grad
        iq1dir=q1grad(2,iq1grad)
        do iefipert=1,nefipert
@@ -2931,8 +2921,7 @@ end subroutine dfpt_flexo
          & ( elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir) +               &
          &   elflexowf(im,iefidir,iq1dir,istr1dir,istr2dir) ) 
 
-
-           !Multiply by the imaginary unit to get a real magnitude (see M. Stengel paper)
+           !Multiply by the imaginary unit that has been factorized out
            tmpim=elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)
            elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim
            elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)=0.0_dp
@@ -2943,6 +2932,7 @@ end subroutine dfpt_flexo
            elflexowf_t4(re,iefidir,istr1dir,istr2dir,iq1dir)=2.0_dp*tmpim*ucvolinv
            elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)=0.0_dp
 
+           !Compute and save individual terms in mixed coordinates
            if (prtvol==1) then
 
              tmpim=elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir)
