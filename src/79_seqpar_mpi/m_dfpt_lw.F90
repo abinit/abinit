@@ -2813,7 +2813,7 @@ end subroutine dfpt_flexo
  character(len=500) :: msg
 
 !arrays
- integer,allocatable :: cartflg(:,:,:,:)
+ integer,allocatable :: cartflg_t4(:,:,:,:),redflg(:,:,:,:)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
  real(dp),allocatable :: elec_flexotens_cart(:,:,:,:,:),elec_flexotens_red(:,:,:,:,:)
@@ -2970,10 +2970,10 @@ end subroutine dfpt_flexo
 !and separately the T4 term 
  ABI_ALLOCATE(elec_flexotens_cart,(2,3,3,3,3))
  ABI_ALLOCATE(elflexowf_t4_cart,(2,3,3,3,3))
- ABI_ALLOCATE(cartflg,(3,3,3,3))
+ ABI_ALLOCATE(cartflg_t4,(3,3,3,3))
  elec_flexotens_cart=elec_flexotens_red
  elflexowf_t4_cart=elflexowf_t4
- cartflg=0
+ cartflg_t4=0
 
 ! ABI_DEALLOCATE(elec_flexotens_red)
 
@@ -2998,7 +2998,6 @@ end subroutine dfpt_flexo
          call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
          do iefidir=1,3
            elec_flexotens_cart(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iefidir)
-           cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iefidir)
          end do
        end do
      end do
@@ -3017,7 +3016,7 @@ end subroutine dfpt_flexo
          call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
          do iefidir=1,3
            elflexowf_t4_cart(ii,iefidir,istr1dir,istr2dir,iq1dir)=vec2(iefidir)
-           cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iefidir)
+           cartflg_t4(iefidir,istr1dir,istr2dir,iq1dir)=flg2(iefidir)
          end do
        end do
      end do
@@ -3038,7 +3037,6 @@ end subroutine dfpt_flexo
              call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
              do iefidir=1,3
                elflexowf_buffer_cart(ibuf,ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iefidir)
-               cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iefidir)
              end do
            end do
          end do
@@ -3060,7 +3058,6 @@ end subroutine dfpt_flexo
          call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
          do iq1dir=1,3
            elec_flexotens_cart(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)
-           cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iq1dir)
          end do
        end do
      end do
@@ -3082,7 +3079,6 @@ end subroutine dfpt_flexo
              call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
              do iq1dir=1,3
                elflexowf_buffer_cart(ibuf,ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)
-               cartflg(iefidir,istr1dir,iq1dir,istr2dir)=flg2(iq1dir)
              end do
            end do
          end do
@@ -3114,8 +3110,8 @@ end subroutine dfpt_flexo
        do iefidir=1,3
          alpha=iefidir
 
-         if (cartflg(alpha,beta,delta,gamma)==1 .and. cartflg(alpha,delta,gamma,beta)==1 &
-         & .and. cartflg(alpha,gamma,beta,delta)==1) then
+         if (cartflg_t4(alpha,beta,delta,gamma)==1 .and. cartflg_t4(alpha,delta,gamma,beta)==1 &
+         & .and. cartflg_t4(alpha,gamma,beta,delta)==1) then
 
            !Converts the T4 term to type-II form
            tmpre= elflexowf_t4_cart(re,alpha,beta,delta,gamma) + &
@@ -3192,6 +3188,9 @@ end subroutine dfpt_flexo
  elec_flexotens_red=elec_flexotens_cart
  ABI_DEALLOCATE(elec_flexotens_cart)
  ABI_DEALLOCATE(elflexowf_t4_cart)
+ ABI_DEALLOCATE(cartflg_t4)
+ ABI_ALLOCATE(redflg,(3,3,3,3))
+ redflg=0
 
 !1st transform back coordinates of the electric field derivative of the flexoelectric tensor
  fac=two_pi ** 2
@@ -3206,6 +3205,7 @@ end subroutine dfpt_flexo
          call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
          do iefidir=1,3
            elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iefidir)*fac
+           redflg(iefidir,iq1dir,istr1dir,istr2dir)=flg2(iefidir)
          end do
        end do
      end do
@@ -3225,6 +3225,7 @@ end subroutine dfpt_flexo
          call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
          do iq1dir=1,3
            elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)*fac
+           redflg(iefidir,iq1dir,istr1dir,istr2dir)=flg2(iq1dir)
          end do
        end do
      end do
@@ -3244,18 +3245,21 @@ end subroutine dfpt_flexo
      iq1dir=q1grad(2,iq1grad)
      do iefipert=1,nefipert
        iefidir=pert_efield(2,iefipert)
- 
-       d3etot(re,iefidir,efipert,strcomp,strpert,iq1dir,q1pert)= &
-     & elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)*fac
-       d3etot(im,iefidir,efipert,strcomp,strpert,iq1dir,q1pert)= &
-     & -elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)*fac
+
+       if (redflg(iefidir,iq1dir,istr1dir,istr2dir)==1) then
+         d3etot(re,iefidir,efipert,strcomp,strpert,iq1dir,q1pert)= &
+       & elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)*fac
+         d3etot(im,iefidir,efipert,strcomp,strpert,iq1dir,q1pert)= &
+       & -elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)*fac
+       end if
        
      end do
    end do
  end do
 
+ ABI_DEALLOCATE(elec_flexotens_red)
+ ABI_DEALLOCATE(redflg)
 
- ABI_DEALLOCATE(cartflg)
 
  DBG_EXIT("COLL")
 
