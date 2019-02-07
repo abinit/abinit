@@ -126,9 +126,9 @@ contains
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  blkflg(6,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
 !!   has been calculated ; 0 otherwise )
-!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  d3etot(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -167,8 +167,8 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
- integer,intent(inout) :: blkflg(6,mpert,3,mpert,3,mpert)
- real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
+ integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -209,7 +209,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  real(dp) :: vres2, wtk_k
  logical :: t_exist 
  character(len=500) :: msg                   
- character(len=fnlen) :: filnam,fi1o,fiwfatdis,fiwfefield,fiwfddk,fiwfdkdk
+ character(len=fnlen) :: fi1o,fiwfatdis,fiwfefield,fiwfddk,fiwfdkdk
  type(ebands_t) :: bs_rbz
  type(hdr_type) :: hdr0
  type(wvl_data) :: wvl 
@@ -969,7 +969,6 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !Gather the different terms in the quadrupole tensor and print them out
  if (me==0) then
- filnam=dtfil%filnam_ds(4)
  call dfpt_qdrpout(d3etot,eqgradhart,gprimd,dtset%kptopt,matom,mpert,natpert,& 
     & nq1grad,nq2grad,pert_atdis,dtset%prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, &
     & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
@@ -1065,7 +1064,7 @@ end subroutine dfpt_qdrpole
 !!  ucvol=unit cell volume in bohr**3.
 !!  
 !! OUTPUT
-!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  d3etot(2,3,mpert,6,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -1097,7 +1096,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt,matom,mpert,natpert,nq1grad,nq2grad,prtvol
- real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -1559,9 +1558,9 @@ end subroutine dfpt_qdrpout
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!  blkflg(6,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
 !!   has been calculated ; 0 otherwise )
-!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  d3etot(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -1599,8 +1598,8 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
- integer,intent(inout) :: blkflg(6,mpert,3,mpert,3,mpert)
- real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
+ integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1629,7 +1628,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  integer :: iatpert,iatpert_cnt,iatpol,iatdir
  integer :: ii,iefipert,iefipert_cnt,ierr,ikg,ikpt,ikpt1,ilm
  integer :: iq1dir,iq2dir,iq1grad,iq1grad_cnt,iq1q2grad,iq1q2grad_var
- integer :: ireadwf0,isppol,istrdir,istrcomp,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
+ integer :: ireadwf0,isppol,istrdir,istrpert,istrtype,istrpert_cnt,istwf_k,jatpert,jj,ka,kb
  integer :: lw_flexo,master,matom,matpert,mcg,me,mgfft,mkmem_rbz,mpw,my_nkpt_rbz
  integer :: natpert,nband_k,nefipert,nfftot,nhat1grdim,nkpt_rbz
  integer :: npw_k,npw1_k,nq1grad,nq1q2grad,nstrpert,nsym1,n3xccc
@@ -1642,7 +1641,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  real(dp) :: vres2,wtk_k
  logical :: t_exist 
  character(len=500) :: msg                   
- character(len=fnlen) :: filnam,fi1o,fiwfatdis,fiwfstrain,fiwfefield,fiwfddk,fiwfdkdk
+ character(len=fnlen) :: fi1o,fiwfatdis,fiwfstrain,fiwfefield,fiwfddk,fiwfdkdk
  type(ebands_t) :: bs_rbz
  type(hdr_type) :: hdr0
  type(wvl_data) :: wvl 
@@ -2087,10 +2086,8 @@ end if
          elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
          elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
 
-          istrcomp=pert_strain(6,istrpert)
-          if (pert_strain(1,istrpert)==matom+4) istrcomp=pert_strain(6,istrpert)-3
 
-          blkflg(istrcomp,pert_strain(1,istrpert),pert_efield(2,iefipert),pert_efield(1,iefipert),&
+          blkflg(pert_efield(2,iefipert),pert_efield(1,iefipert),pert_strain(2,istrpert),pert_strain(1,istrpert),&
         &        q1grad(2,iq1grad),matom+8)=1           
 
        end do
@@ -2755,7 +2752,7 @@ end subroutine dfpt_flexo
 !!  ucvol=unit cell volume in bohr**3.
 !!  
 !! OUTPUT
-!!  d3etot(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  d3etot(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
 !!
 !! SIDE EFFECTS
 !!
@@ -2788,7 +2785,7 @@ end subroutine dfpt_flexo
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt,lw_flexo,matom,mpert,nefipert,nstrpert,nq1grad,prtvol
- real(dp),intent(inout) :: d3etot(2,6,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -2808,10 +2805,11 @@ end subroutine dfpt_flexo
  
 !Local variables-------------------------------
 !scalars
- integer :: alpha,beta,delta,gamma
- integer :: ibuf,iefidir,iefipert,ii,iq1dir,iq1pert,iq1grad,istrcomp,istr1dir,istr2dir,istrpert
+ integer :: alpha,beta,delta,efipert,gamma
+ integer :: ibuf,iefidir,iefipert,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
+ integer :: q1pert,strcomp,strpert
  integer, parameter :: re=1,im=2
- real(dp) :: tmpim,tmpre,ucvolinv
+ real(dp) :: fac,tmpim,tmpre,ucvolinv
  character(len=500) :: msg
 
 !arrays
@@ -2977,7 +2975,7 @@ end subroutine dfpt_flexo
  elflexowf_t4_cart=elflexowf_t4
  cartflg=0
 
- ABI_DEALLOCATE(elec_flexotens_red)
+! ABI_DEALLOCATE(elec_flexotens_red)
 
  if (prtvol==1) then
    ABI_ALLOCATE(elflexowf_buffer_cart,(5,2,3,3,3,3))
@@ -3190,8 +3188,73 @@ end subroutine dfpt_flexo
    ABI_DEALLOCATE(elflexowf_buffer_cart)
  end if
 
+!Calculate the contribution to the d3etot in mixed (reduced/cartesian) coordinates
+ elec_flexotens_red=elec_flexotens_cart
  ABI_DEALLOCATE(elec_flexotens_cart)
  ABI_DEALLOCATE(elflexowf_t4_cart)
+
+!1st transform back coordinates of the electric field derivative of the flexoelectric tensor
+ fac=two_pi ** 2
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iq1dir=1,3
+       do ii=1,2
+         do iefidir=1,3
+           vec1(iefidir)=elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)
+           flg1(iefidir)=elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)
+         end do
+         call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
+         do iefidir=1,3
+           elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iefidir)*fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!2nd transform back coordinates of the q-gradient (treat it as electric field)
+!of the flexoelectric tensor
+ do istr2dir=1,3
+   do istr1dir=1,3
+     do iefidir=1,3
+       do ii=1,2
+         do iq1dir=1,3
+           vec1(iq1dir)=elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)
+           flg1(iq1dir)=elflexoflg(iefidir,iq1dir,istr1dir,istr2dir)
+         end do
+         call cart39(flg1,flg2,transpose(rprimd),matom+2,matom,transpose(gprimd),vec1,vec2)
+         do iq1dir=1,3
+           elec_flexotens_red(ii,iefidir,iq1dir,istr1dir,istr2dir)=vec2(iq1dir)*fac
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Add contributions to d3etot
+ efipert=matom+2
+ q1pert=matom+8
+ fac=ucvol/two
+ do istrpert=1,nstrpert
+   strpert=pert_strain(1,istrpert)
+   strcomp=pert_strain(2,istrpert)
+   istr1dir=pert_strain(3,istrpert)
+   istr2dir=pert_strain(4,istrpert)
+   do iq1grad=1,nq1grad
+     iq1dir=q1grad(2,iq1grad)
+     do iefipert=1,nefipert
+       iefidir=pert_efield(2,iefipert)
+ 
+       d3etot(re,iefidir,efipert,strcomp,strpert,iq1dir,q1pert)= &
+     & elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)*fac
+       d3etot(im,iefidir,efipert,strcomp,strpert,iq1dir,q1pert)= &
+     & -elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)*fac
+       
+     end do
+   end do
+ end do
+
+
  ABI_DEALLOCATE(cartflg)
 
  DBG_EXIT("COLL")

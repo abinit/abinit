@@ -3971,9 +3971,9 @@ end subroutine mblktyp5
 !! to the to the DDB
 !!
 !! INPUTS
-!!  blkflg(6,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
+!!  blkflg(3,mpert,3,mpert,3,mpert)= ( 1 if the element of the 3dte
 !!   has been calculated ; 0 otherwise )
-!!  d3(2,6,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!  d3(2,3,mpert,6,mpert,3,mpert)= matrix of the 3DTE
 !!  mpert =maximum number of ipert
 !!  natom=Number of atoms
 !!  ntypat=Number of type of atoms
@@ -3982,7 +3982,7 @@ end subroutine mblktyp5
 !! NOTES
 !! - d3 holds the third-order derivatives before computing
 !!   the permutations of the perturbations.
-!! - the dimension 6 of the first argument in d3 is used to define
+!! - the dimension 6 of the 4th argument in d3 is used to define
 !!   both up and down extradiagonal strain perturbations.                          
 !!   Necessary because their q-gradient is not symmetric. 
 !!
@@ -4000,8 +4000,8 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
 !scalars
  integer,intent(in) :: mpert,unddb,natom,ntypat
 !arrays
- integer,intent(in) :: blkflg(6,mpert,3,mpert,3,mpert)
- real(dp),intent(in) :: d3(2,6,mpert,3,mpert,3,mpert)
+ integer,intent(in) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(in) :: d3(2,3,mpert,3,mpert,3,mpert)
 
 !Local variables -------------------------
 !scalars
@@ -4023,7 +4023,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
      do ipert2=1,mpert
        do idir2=1,3
          do ipert1=1,mpert
-           do idir1=1,6
+           do idir1=1,3
              index=index + 1
              ddb%flg(index,1) = blkflg(idir1,ipert1,idir2,ipert2,idir3,ipert3)
              ddb%val(:,index,1)= d3(:,idir1,ipert1,idir2,ipert2,idir3,ipert3)
@@ -4059,7 +4059,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
      do ipert2=1,mpert
        do idir2=1,3
          do ipert1=1,mpert
-           do idir1=1,6
+           do idir1=1,3
              index=index+1
              if (ddb%flg(index,1)==1)then
                write(unddb, '(6i4,2d22.14)' )&
