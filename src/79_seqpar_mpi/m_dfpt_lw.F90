@@ -970,7 +970,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Gather the different terms in the quadrupole tensor and print them out
  if (me==0) then
  filnam=dtfil%filnam_ds(4)
- call dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,dtset%kptopt,matom,mpert,natpert,& 
+ call dfpt_qdrpout(d3etot,eqgradhart,gprimd,dtset%kptopt,matom,mpert,natpert,& 
     & nq1grad,nq2grad,pert_atdis,dtset%prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, &
     & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
  end if
@@ -1043,7 +1043,6 @@ end subroutine dfpt_qdrpole
 !! INPUTS
 !!  eqgradhart(2,natpert,nq2grad,nq1grad)=electrostatic contribution from the 
 !!                                             q-gradient of the Hartree potential
-!!  filnam=name of the root for the output file
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
 !!  matom=maximum number of atoms to displace
@@ -1082,7 +1081,7 @@ end subroutine dfpt_qdrpole
 !!
 !! SOURCE
 
-subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpert, & 
+subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, & 
          & nq1grad,nq2grad,pert_atdis,prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, & 
          & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
 
@@ -1114,7 +1113,6 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
  real(dp),intent(in) :: qdrpwf_t4(2,natpert,nq2grad,nq1grad)
  real(dp),intent(in) :: qdrpwf_t5(2,natpert,nq2grad,nq1grad)
  real(dp),intent(in) :: rprimd(3,3)
- character(len=fnlen), intent(in) :: filnam
  
 !Local variables-------------------------------
 !scalars
@@ -1125,7 +1123,6 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
  integer, parameter :: re=1,im=2
  real(dp) :: piezore,piezoim,tmpre, tmpim
  character(len=500) :: msg
- character(len=fnlen) :: fiqdrpl,fidqpol
 !arrays
  integer,allocatable :: cartflg(:,:,:,:)
  integer :: flg1(3),flg2(3)
@@ -1147,32 +1144,19 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
    open(unit=76,file='qdrpl_elecstic.out',status='unknown',form='formatted',action='write')
  end if
 
- fiqdrpl=trim(filnam)//'_QDRPOLE'
- open(unit=77,file=fiqdrpl,status='unknown',form='formatted',action='write')
- write(77,*)' Quadrupole tensor, in reduced coordinates,'
- write(77,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
-
- fidqpol=trim(filnam)//'_DQPOL'
- open(unit=78,file=fidqpol,status='unknown',form='formatted',action='write')
- write(78,*)' q-gradient of the polarization response '
- write(78,*)' to an atomic displacementatom, in reduced coordinates,'
- write(78,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
-
 !Gather the different terms in the tensors and print the result
  ABI_ALLOCATE(qdrptens_red,(2,matom,3,3,3))
  ABI_ALLOCATE(dqpol_red,(2,matom,3,3,3))
-! qdrptens_red=zero
-! dqpol_red=zero
 
  if (kptopt==3) then
 
    !Write real and 'true' imaginary parts of quadrupole tensor and the 
    !q-gradient of the polarization response
    iq1pert=matom+8
+   iq2pert=matom+2
    do iq1grad=1,nq1grad
      iq1dir=q1grad(2,iq1grad)
      do iq2grad=1,nq2grad
-       iq2pert=q2grad(1,iq2grad)
        iq2dir=q2grad(2,iq2grad)
        do iatpert=1,natpert
          iatom=pert_atdis(1,iatpert)
@@ -1187,7 +1171,6 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
          !Calculate and write the q-gradient of the polarization response
          dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
          dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=two*tmpre/ucvol
-         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,tmpre/ucvol
  
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
@@ -1213,32 +1196,29 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
            qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
            qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-tmpre
 
-           !Write the whole Quadrupole tensor
-           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,tmpim,-tmpre
-
            if (prtvol==1) then
              !Write individual contributions 
-             write(71,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
            & -(qdrpwf_t1(re,iatpert,iq2grad,iq1grad)+qdrpwf_t1(re,iatpert,iiq2grad,iiq1grad))
 
-             write(72,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
            & -(qdrpwf_t2(re,iatpert,iq2grad,iq1grad)+qdrpwf_t2(re,iatpert,iiq2grad,iiq1grad))
 
-             write(73,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
            & -(qdrpwf_t3(re,iatpert,iq2grad,iq1grad)+qdrpwf_t3(re,iatpert,iiq2grad,iiq1grad))
 
-             write(74,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
            & -(qdrpwf_t4(re,iatpert,iq2grad,iq1grad)+qdrpwf_t4(re,iatpert,iiq2grad,iiq1grad))
 
-             write(75,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
            & -(qdrpwf_t5(re,iatpert,iq2grad,iq1grad)+qdrpwf_t5(re,iatpert,iiq2grad,iiq1grad))
 
-             write(76,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
            & -(eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad))
            end if
@@ -1253,10 +1233,10 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
    !Write real and zero imaginary parts of quadrupole tensor and the 
    !q-gradient of the polarization response
    iq1pert=matom+8
+   iq2pert=matom+2
    do iq1grad=1,nq1grad
      iq1dir=q1grad(2,iq1grad)
      do iq2grad=1,nq2grad
-       iq2pert=q2grad(1,iq2grad) 
        iq2dir=q2grad(2,iq2grad)
        do iatpert=1,natpert
          iatom=pert_atdis(1,iatpert)
@@ -1270,7 +1250,6 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
          !Calculate and write the q-gradient of the polarization response
          dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
          dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
-         write(78,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,-tmpim/ucvol,0.0_dp
 
          if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
@@ -1294,32 +1273,29 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
            qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
            qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
-           !Write the whole Quadrupole tensor
-           write(77,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,tmpim,0.0_dp
-
            if (prtvol==1) then
              !Write individual contributions 
-             write(71,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
            & 0.0_dp
 
-             write(72,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  & 
            & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
            & 0.0_dp
 
-             write(73,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
            & 0.0_dp
 
-             write(74,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
            & 0.0_dp
 
-             write(75,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
            & 0.0_dp
 
-             write(76,'(4(i2,2x),2(f18.10,2x))') iatom,iatdir,iq2dir,iq1dir,                  &
+             write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
            & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
            & 0.0_dp
            end if
@@ -1343,8 +1319,6 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
    close(75)
    close(76)
  end if
- close(77)
- close(78)
 
 !Transformation to cartesian coordinates of the quadrupole tensor
  ABI_ALLOCATE(qdrptens_cart,(2,matom,3,3,3))
@@ -1449,7 +1423,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
 !Write the Quadrupole tensor in cartesian coordinates
  write(ab_out,*)' '
  write(ab_out,*)' Quadrupole tensor, in cartesian coordinates,'
- write(ab_out,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
+ write(ab_out,*)' efidir   atom   atddir   qgrdir          real part        imaginary part'
  do iq1dir=1,3
    do iq2dir=1,3
      do iatdir=1,3
@@ -1457,7 +1431,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
         
          if (cartflg(iatom,iatdir,iq2dir,iq1dir)==1) then
 
-           write(ab_out,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
+           write(ab_out,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,                   &
          & qdrptens_cart(re,iatom,iatdir,iq2dir,iq1dir),qdrptens_cart(im,iatom,iatdir,iq2dir,iq1dir)
 
          end if
@@ -1471,7 +1445,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
 !Write the q-gradient of the Polarization response
  write(ab_out,*)' q-gradient of the polarization response '
  write(ab_out,*)' to an atomic displacementatom, in cartesian coordinates,'
- write(ab_out,*)' atom   atddir   efidir   qgrdir          real part        imaginary part'
+ write(ab_out,*)' efidir   atom   atddir   qgrdir          real part        imaginary part'
  do iq1dir=1,3
    do iq2dir=1,3
      do iatdir=1,3
@@ -1479,7 +1453,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,filnam,gprimd,kptopt,matom,mpert,natpe
         
          if (cartflg(iatom,iatdir,iq2dir,iq1dir)==1) then
 
-           write(ab_out,'(4(i5,3x),2(1x,f20.10))') iatom,iatdir,iq2dir,iq1dir,                   &
+           write(ab_out,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,                  &
          & dqpol_cart(re,iatom,iatdir,iq2dir,iq1dir),dqpol_cart(im,iatom,iatdir,iq2dir,iq1dir)
 
          end if
@@ -2835,7 +2809,7 @@ end subroutine dfpt_flexo
 !Local variables-------------------------------
 !scalars
  integer :: alpha,beta,delta,gamma
- integer :: ibuf,iefidir,iefipert,ii,iq1dir,iq1grad,istr1dir,istr2dir,istrpert
+ integer :: ibuf,iefidir,iefipert,ii,iq1dir,iq1pert,iq1grad,istrcomp,istr1dir,istr2dir,istrpert
  integer, parameter :: re=1,im=2
  real(dp) :: tmpim,tmpre,ucvolinv
  character(len=500) :: msg
@@ -2859,9 +2833,14 @@ end subroutine dfpt_flexo
    !Compute real and 'true' imaginary parts of flexoelectric tensor and independent terms
    !T4 term needs further treatment and it will be lately added to the cartesian coordinates
    !version of the flexoelectric tensor
+   iq1pert=matom+8
+   iefipert=matom+2
    do istrpert=1,nstrpert
+     istrpert=pert_strain(1,istrpert)
      istr1dir=pert_strain(3,istrpert)
      istr2dir=pert_strain(4,istrpert)
+     istrcomp=pert_strain(6,istrpert)
+     if (istrpert==matom+4) istrcomp=pert_strain(6,istrpert)-3
      do iq1grad=1,nq1grad
        iq1dir=q1grad(2,iq1grad)
        do iefipert=1,nefipert
@@ -2876,7 +2855,7 @@ end subroutine dfpt_flexo
          & ( elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir) +               &
          &   elflexowf(im,iefidir,iq1dir,istr1dir,istr2dir) ) 
 
-           !Multiply by the imaginary unit to get a real magnitude (see M. Stengel paper)
+           !Multiply by the imaginary unit to get a real magnitude (see M.Royo and M.Stengel paper)
            tmpre=elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)
            tmpim=elec_flexotens_red(im,iefidir,iq1dir,istr1dir,istr2dir)
            elec_flexotens_red(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim
@@ -2930,9 +2909,14 @@ end subroutine dfpt_flexo
    !Compute real part of flexoelectric tensor and independent terms
    !T4 term needs further treatment and it will be lately added to the cartesian coordinates
    !version of the flexoelectric tensor
+   iq1pert=matom+8
+   iefipert=matom+2
    do istrpert=1,nstrpert
+     istrpert=pert_strain(1,istrpert)
      istr1dir=pert_strain(3,istrpert)
      istr2dir=pert_strain(4,istrpert)
+     istrcomp=pert_strain(6,istrpert)
+     if (istrpert==matom+4) istrcomp=pert_strain(6,istrpert)-3
      do iq1grad=1,nq1grad
        iq1dir=q1grad(2,iq1grad)
        do iefipert=1,nefipert
