@@ -2596,37 +2596,61 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !END LOOP OVER SPINS
 
 !Close response function files
- do istrpert=1,nstrpert
-   ka=pert_strain(3,istrpert)
-   kb=pert_strain(4,istrpert)
-   call wfk_close(wfk_t_strain(ka,kb))
- end do
+ if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
+   do iatpert=1,natpert
+     call wfk_close(wfk_t_atdis(iatpert))
+   end do
+ end if
+ if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
+   do istrpert=1,nstrpert
+     ka=pert_strain(3,istrpert)
+     kb=pert_strain(4,istrpert)
+     call wfk_close(wfk_t_strain(ka,kb))
+   end do
+ end if
  do iq1grad=1,nq1grad
    call wfk_close(wfk_t_ddk(iq1grad))
  end do
- do iefipert=1,nefipert
-   call wfk_close(wfk_t_efield(iefipert))
- end do
- do iq1q2grad=1,nq1q2grad
-   call wfk_close(wfk_t_dkdk(iq1q2grad))
- end do
+ if (lw_flexo==1.or.lw_flexo==2) then
+   do iefipert=1,nefipert
+     call wfk_close(wfk_t_efield(iefipert))
+   end do
+   do iq1q2grad=1,nq1q2grad
+     call wfk_close(wfk_t_dkdk(iq1q2grad))
+   end do
+ end if
 
 !=== MPI communications ==================
  if (xmpi_paral==1) then
 
-   call xmpi_sum(elflexowf,spaceworld,ierr)
-   call xmpi_sum(elflexowf_t1,spaceworld,ierr)
-   call xmpi_sum(elflexowf_t2,spaceworld,ierr)
-   call xmpi_sum(elflexowf_t3,spaceworld,ierr)
-   call xmpi_sum(elflexowf_t4,spaceworld,ierr)
-   call xmpi_sum(elflexowf_t5,spaceworld,ierr)
+   if (lw_flexo==1.or.lw_flexo==2) then
+     call xmpi_sum(elflexowf,spaceworld,ierr)
+     call xmpi_sum(elflexowf_t1,spaceworld,ierr)
+     call xmpi_sum(elflexowf_t2,spaceworld,ierr)
+     call xmpi_sum(elflexowf_t3,spaceworld,ierr)
+     call xmpi_sum(elflexowf_t4,spaceworld,ierr)
+     call xmpi_sum(elflexowf_t5,spaceworld,ierr)
+   end if
+
+   if (lw_flexo==1.or.lw_flexo==3) then
+     call xmpi_sum(ddmdqwf,spaceworld,ierr)
+     call xmpi_sum(ddmdqwf_t1,spaceworld,ierr)
+     call xmpi_sum(ddmdqwf_t2,spaceworld,ierr)
+     call xmpi_sum(ddmdqwf_t3,spaceworld,ierr)
+   end if
 
  end if
 
-!Anounce finalization of Flexoelectric tensor calculation
+!Anounce finalization of calculations
  if (lw_flexo==1.or.lw_flexo==2) then
    write(msg, '(a,a,a)' ) ch10, &
    ' Electronic flexoelectric tensor calculation completed ',ch10
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if
+ if (lw_flexo==1.or.lw_flexo==3) then
+   write(msg, '(a,a,a)' ) ch10, &
+   ' Dynamical matrix 1st q-gradient calculation completed ',ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  end if
