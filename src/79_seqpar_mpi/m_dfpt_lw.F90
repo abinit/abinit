@@ -1161,67 +1161,71 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
          iatom=pert_atdis(1,iatpert)
          iatdir=pert_atdis(2,iatpert)
 
-         !Calculate ans save the third order energy derivative
-         tmpre=eqgradhart(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iq2grad,iq1grad)
-         tmpim=eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad)
-         d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpre
-         d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
+         if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1) then
 
-         !Calculate and write the q-gradient of the polarization response
-         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
-         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=two*tmpre/ucvol
+           !Calculate and save the third order energy derivative
+           tmpre=eqgradhart(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iq2grad,iq1grad)
+           tmpim=eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad)
+           d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpre
+           d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
+
+           !Calculate and write the q-gradient of the polarization response
+           dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
+           dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=two*tmpre/ucvol
  
-         if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
+           if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
-           !Avoid double counting when summing up unsymmetrized contributions
-           do iiq1grad=1,3
-             if (q2grad(2,iq2grad)==q1grad(2,iiq1grad)) exit
-           end do
+             !Avoid double counting when summing up unsymmetrized contributions
+             do iiq1grad=1,3
+               if (q2grad(2,iq2grad)==q1grad(2,iiq1grad)) exit
+             end do
 
-           do iiq2grad=1,3
-             if (q1grad(2,iq1grad)==q2grad(2,iiq2grad)) exit
-           end do
+             do iiq2grad=1,3
+               if (q1grad(2,iq1grad)==q2grad(2,iiq2grad)) exit
+             end do
 
-           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=-two* &
-         & ( eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad) &
-         & + qdrpwf(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iiq2grad,iiq1grad) ) 
-           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-two* &
-         & ( eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad) &
-         & + qdrpwf(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iiq2grad,iiq1grad) ) 
+             qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=-two* &
+           & ( eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad) &
+           & + qdrpwf(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iiq2grad,iiq1grad) ) 
+             qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-two* &
+           & ( eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad) &
+           & + qdrpwf(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iiq2grad,iiq1grad) ) 
 
-           !Divide by the imaginary unit to get a real magnitude (see M. Stengel paper)
-           tmpre=qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)
-           tmpim=qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
-           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
-           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-tmpre
+             !Divide by the imaginary unit to get the proper observable 
+             !(See M.Royo and M.Stengel paper)
+             tmpre=qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)
+             tmpim=qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+             qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
+             qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-tmpre
 
-           if (prtvol==1) then
-             !Write individual contributions 
-             write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
-           & -(qdrpwf_t1(re,iatpert,iq2grad,iq1grad)+qdrpwf_t1(re,iatpert,iiq2grad,iiq1grad))
+             if (prtvol==1) then
+               !Write individual contributions 
+               write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
+             & -(qdrpwf_t1(re,iatpert,iq2grad,iq1grad)+qdrpwf_t1(re,iatpert,iiq2grad,iiq1grad))
 
-             write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
-           & -(qdrpwf_t2(re,iatpert,iq2grad,iq1grad)+qdrpwf_t2(re,iatpert,iiq2grad,iiq1grad))
+               write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
+             & -(qdrpwf_t2(re,iatpert,iq2grad,iq1grad)+qdrpwf_t2(re,iatpert,iiq2grad,iiq1grad))
 
-             write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
-           & -(qdrpwf_t3(re,iatpert,iq2grad,iq1grad)+qdrpwf_t3(re,iatpert,iiq2grad,iiq1grad))
+               write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
+             & -(qdrpwf_t3(re,iatpert,iq2grad,iq1grad)+qdrpwf_t3(re,iatpert,iiq2grad,iiq1grad))
 
-             write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
-           & -(qdrpwf_t4(re,iatpert,iq2grad,iq1grad)+qdrpwf_t4(re,iatpert,iiq2grad,iiq1grad))
+               write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
+             & -(qdrpwf_t4(re,iatpert,iq2grad,iq1grad)+qdrpwf_t4(re,iatpert,iiq2grad,iiq1grad))
 
-             write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
-           & -(qdrpwf_t5(re,iatpert,iq2grad,iq1grad)+qdrpwf_t5(re,iatpert,iiq2grad,iiq1grad))
+               write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
+             & -(qdrpwf_t5(re,iatpert,iq2grad,iq1grad)+qdrpwf_t5(re,iatpert,iiq2grad,iiq1grad))
 
-             write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
-           & -(eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad))
+               write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
+             & -(eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad))
+             end if
+
            end if
-
          end if
        end do
      end do
@@ -1241,69 +1245,72 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
          iatom=pert_atdis(1,iatpert)
          iatdir=pert_atdis(2,iatpert)
 
-         !Calculate ans save the third order energy derivative
-         tmpim=eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad)
-         d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=zero
-         d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
+         if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1) then
 
-         !Calculate and write the q-gradient of the polarization response
-         dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
-         dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
+           !Calculate ans save the third order energy derivative
+           tmpim=eqgradhart(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iq2grad,iq1grad)
+           d3etot(1,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=zero
+           d3etot(2,iq2dir,iq2pert,iatdir,iatom,iq1dir,iq1pert)=tmpim
 
-         if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
+           !Calculate and write the q-gradient of the polarization response
+           dqpol_red(1,iatom,iatdir,iq2dir,iq1dir)=-two*tmpim/ucvol
+           dqpol_red(2,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
-           do iiq1grad=1,3
-             if (q2grad(2,iq2grad)==q1grad(2,iiq1grad)) exit
-           end do
+           if (qdrflg(iatom,iatdir,iq2dir,iq1dir)==1 .and. qdrflg(iatom,iatdir,iq1dir,iq2dir)==1 ) then
 
-           do iiq2grad=1,3
-             if (q1grad(2,iq1grad)==q2grad(2,iiq2grad)) exit
-           end do
+             do iiq1grad=1,3
+               if (q2grad(2,iq2grad)==q1grad(2,iiq1grad)) exit
+             end do
 
-           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=-two* &
-         & ( eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad) &
-         & + qdrpwf(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iiq2grad,iiq1grad) )
-           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-two* &
-         & ( eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad) &
-         & + qdrpwf(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iiq2grad,iiq1grad) )
+             do iiq2grad=1,3
+               if (q1grad(2,iq1grad)==q2grad(2,iiq2grad)) exit
+             end do
 
-           !Divide by the imaginary unit to get a real magnitude (see M. Stengel paper)
-           tmpim=qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
-           qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
-           qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
+             qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=-two* &
+           & ( eqgradhart(re,iatpert,iq2grad,iq1grad)+eqgradhart(re,iatpert,iiq2grad,iiq1grad) &
+           & + qdrpwf(re,iatpert,iq2grad,iq1grad)+qdrpwf(re,iatpert,iiq2grad,iiq1grad) )
+             qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-two* &
+           & ( eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad) &
+           & + qdrpwf(im,iatpert,iq2grad,iq1grad)+qdrpwf(im,iatpert,iiq2grad,iiq1grad) )
 
-           if (prtvol==1) then
-             !Write individual contributions 
-             write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
-           & 0.0_dp
+             !Divide by the imaginary unit to get the proper observable 
+             !(See M.Royo and M.Stengel paper)
+             tmpim=qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)
+             qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
+             qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
-             write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  & 
-           & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
-           & 0.0_dp
+             if (prtvol==1) then
+               !Write individual contributions 
+               write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
+             & 0.0_dp
 
-             write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
-           & 0.0_dp
+               write(72,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  & 
+             & qdrpwf_t2(im,iatpert,iq2grad,iq1grad)+qdrpwf_t2(im,iatpert,iiq2grad,iiq1grad),   &
+             & 0.0_dp
 
-             write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
-           & 0.0_dp
+               write(73,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t3(im,iatpert,iq2grad,iq1grad)+qdrpwf_t3(im,iatpert,iiq2grad,iiq1grad),   &
+             & 0.0_dp
 
-             write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
-           & 0.0_dp
+               write(74,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t4(im,iatpert,iq2grad,iq1grad)+qdrpwf_t4(im,iatpert,iiq2grad,iiq1grad),   &
+             & 0.0_dp
 
-             write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
-           & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
-           & 0.0_dp
+               write(75,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & qdrpwf_t5(im,iatpert,iq2grad,iq1grad)+qdrpwf_t5(im,iatpert,iiq2grad,iiq1grad),   &
+             & 0.0_dp
+
+               write(76,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
+             & eqgradhart(im,iatpert,iq2grad,iq1grad)+eqgradhart(im,iatpert,iiq2grad,iiq1grad), &
+             & 0.0_dp
+             end if
+
            end if
-
          end if
        end do
      end do
    end do
-
 
  else
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
@@ -2086,9 +2093,9 @@ end if
          elqgradhart(im,pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
          elflexoflg(pert_efield(2,iefipert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
 
-
-          blkflg(pert_efield(2,iefipert),pert_efield(1,iefipert),pert_strain(2,istrpert),pert_strain(1,istrpert),&
-        &        q1grad(2,iq1grad),matom+8)=1           
+         blkflg(pert_efield(2,iefipert),pert_efield(1,iefipert), &
+       &        pert_strain(2,istrpert),pert_strain(1,istrpert), &
+       &        q1grad(2,iq1grad),matom+8)=1           
 
        end do
      end do
@@ -2125,6 +2132,10 @@ end if
          ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)=doti*half
          ddmdq_flg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),&
                  & pert_atdis(1,jatpert),pert_atdis(2,jatpert),q1grad(2,iq1grad))=1
+
+         blkflg(pert_atdis(2,iatpert),pert_atdis(1,iatpert), &
+       &        pert_atdis(2,jatpert),pert_atdis(1,jatpert), &
+       &        q1grad(2,iq1grad),matom+8)=1           
 
        end do
      end do
@@ -2658,10 +2669,14 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !Gather the different terms in the flexoelectric tensor and print them out
  if (me==0) then
    if (lw_flexo==1.or.lw_flexo==2) then
-   call dfpt_flexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
-      & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-      & elqgradhart,gprimd,dtset%kptopt,lw_flexo,matom,mpert,nefipert, &
-      & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
+     call dfpt_flexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
+   & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
+   & elqgradhart,gprimd,dtset%kptopt,matom,mpert,nefipert, &
+   & nstrpert,nq1grad,pert_efield,pert_strain,dtset%prtvol,q1grad,rprimd,ucvol)
+   end if
+   if (lw_flexo==1.or.lw_flexo==3) then
+     call dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot,&
+   & gprimd,dtset%kptopt,matom,mpert,natpert,nq1grad,pert_atdis,dtset%prtvol,q1grad,rprimd)
    end if
  end if
 
@@ -2739,9 +2754,9 @@ end subroutine dfpt_flexo
 !!  dfpt_flexoout
 !!
 !! FUNCTION
-!!  This subroutine gathers the different terms entering the flexoelectric tensor,
+!!  This subroutine gathers the different terms entering the electrocic flexoelectric tensor,
 !!  perfofms the transformation from reduced to cartesian coordinates and 
-!!  writes out the tensor in external files
+!!  writes out the tensor in output files.
 !!  
 !! COPYRIGHT
 !!  Copyright (C) 2018 ABINIT group (MR,MS)
@@ -2762,14 +2777,13 @@ end subroutine dfpt_flexo
 !!  elflexowf_t5(2,3,3,3,3)=term 5 of the wave function contribution 
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
-!!  lw_flexo= parameter that selects which lw magnitudes are calculated
 !!  matom=number of atoms 
 !!  mpert=maximum number of perturbations
 !!  nefipert=number of electric field perturbations
 !!  nstrpert=number of strain perturbations
 !!  nq1grad=number of q1 (q_{\gamma}) gradients
-!!  pert_efield(3,natpert)=array with the info for the electric field perturbations
-!!  pert_strain(6,natpert)=array with the info for the strain perturbations
+!!  pert_efield(3,nefipert)=array with the info for the electric field perturbations
+!!  pert_strain(6,nstrpert)=array with the info for the strain perturbations
 !!  prtvol=volume of information to be printed. 1-> The different contributions to the quadrupole are printed.
 !!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
@@ -2784,7 +2798,7 @@ end subroutine dfpt_flexo
 !!
 !! PARENTS
 !!
-!!  dfpt_flexoelectrics
+!!  dfpt_flexo
 !!
 !! CHILDREN
 !!
@@ -2794,7 +2808,7 @@ end subroutine dfpt_flexo
 
  subroutine dfpt_flexoout(d3etot,elflexoflg,elflexowf,elflexowf_t1,elflexowf_t2, &
     & elflexowf_t3,elflexowf_t4,elflexowf_t5, &
-    & elqgradhart,gprimd,kptopt,lw_flexo,matom,mpert,nefipert,&
+    & elqgradhart,gprimd,kptopt,matom,mpert,nefipert,&
     & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
 
 
@@ -2808,7 +2822,7 @@ end subroutine dfpt_flexo
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: kptopt,lw_flexo,matom,mpert,nefipert,nstrpert,nq1grad,prtvol
+ integer,intent(in) :: kptopt,matom,mpert,nefipert,nstrpert,nq1grad,prtvol
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
 
@@ -3289,6 +3303,188 @@ end subroutine dfpt_flexo
 
 end subroutine dfpt_flexoout
 !!***
+
+
+!!****f* ABINIT/dfpt_ddmdqout
+!! NAME
+!!  dfpt_ddmdqout
+!!
+!! FUNCTION
+!!  This subroutine gathers the different terms entering the first q derivative of the dynamical 
+!!  matrix, perfofms the transformation from reduced to cartesian coordinates and 
+!!  writes out the tensor in output files.
+!!  
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  ddmdq_flg(natpert,natpert,nq1grad)=array that indicates which elements of the first q derivative
+!!                                             of dynamical matrix have been calculated
+!!  ddmdq_qgradhart(2,natpert,natpert,nq1grad)=electronic electrostatic contribution from the 
+!!                                             q-gradient of the Hartree potential
+!!  ddmdqwf(2,natpert,natpert,nq1grad)=total wave function contribution to the first q derivative of dynamical matrix
+!!  ddmdqwf_t1(2,natpert,natpert,nq1grad)=term 1 of the wave function contribution 
+!!  ddmdqwf_t2(2,natpert,natpert,nq1grad)=term 2 of the wave function contribution 
+!!  ddmdqwf_t3(2,natpert,natpert,nq1grad)=term 3 of the wave function contribution 
+!!  gprimd(3,3)=reciprocal space dimensional primitive translations
+!!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
+!!  matom=number of atoms 
+!!  mpert=maximum number of perturbations
+!!  natpert=number of atomic displacement perturbations
+!!  nq1grad=number of q1 (q_{\gamma}) gradients
+!!  pert_atdis(3,natpert)=array with the info for the electric field perturbations
+!!  prtvol=volume of information to be printed. 1-> The different contributions to the quadrupole are printed.
+!!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  
+!! OUTPUT
+!!  d3etot(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!!  dfpt_flexo
+!!
+!! CHILDREN
+!!
+!!  cart39 
+!!
+!! SOURCE
+
+ subroutine dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot, &
+ & gprimd,kptopt,matom,mpert,natpert,nq1grad,pert_atdis,prtvol,q1grad,rprimd)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_flexoout'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: kptopt,matom,mpert,natpert,nq1grad,prtvol
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
+
+!arrays
+ integer,intent(in) :: ddmdq_flg(natpert,natpert,nq1grad)
+ integer,intent(in) :: pert_atdis(3,natpert)
+ integer,intent(in) :: q1grad(3,nq1grad)
+ real(dp),intent(inout) :: ddmdq_qgradhart(2,natpert,natpert,nq1grad)
+ real(dp),intent(in) :: ddmdqwf(2,natpert,natpert,nq1grad)
+ real(dp),intent(inout) :: ddmdqwf_t1(2,natpert,natpert,nq1grad)
+ real(dp),intent(inout) :: ddmdqwf_t2(2,natpert,natpert,nq1grad)
+ real(dp),intent(inout) :: ddmdqwf_t3(2,natpert,natpert,nq1grad)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in) :: rprimd(3,3)
+ 
+!Local variables-------------------------------
+!scalars
+ integer :: iatdir,iatom,iatpert,iq1dir,iq1grad,iq1pert,jatdir,jatom,jatpert
+ integer, parameter :: im=2,re=1
+ real(dp) :: tmpim,tmpre
+ character(len=500) :: msg
+
+!arrays
+ real(dp), allocatable :: ddmdq_red(:,:,:,:)
+
+!****************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Open output files
+ if (prtvol==1) then
+   open(unit=71,file='ddmdq_wf_t1.out',status='unknown',form='formatted',action='write')
+   open(unit=72,file='ddmdq_wf_t2.out',status='unknown',form='formatted',action='write')
+   open(unit=73,file='ddmdq_wf_t3.out',status='unknown',form='formatted',action='write')
+   open(unit=76,file='ddmdq_elecstic.out',status='unknown',form='formatted',action='write')
+ end if
+
+!Gather the different terms in the tensors and print the result
+ ABI_ALLOCATE(ddmdq_red,(2,natpert,natpert,nq1grad))
+
+ if (kptopt==3) then
+
+   iq1pert=matom+8
+   do iq1grad=1,nq1grad
+     iq1dir=q1grad(2,iq1grad)
+     do jatpert=1,natpert
+       jatom=pert_atdis(1,jatpert)
+       jatdir=pert_atdis(2,jatpert)
+       do iatpert=1,natpert
+         iatom=pert_atdis(1,iatpert)
+         iatdir=pert_atdis(2,iatpert)
+  
+         if (ddmdq_flg(iatpert,jatpert,iq1grad)==1) then
+
+           !Calculate and save the third order energy derivative
+           tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)
+           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)
+           d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpre
+           d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
+
+           !Calculate and write the q-gradient of the dynamical matrix
+           ddmdq_red(re,iatpert,jatpert,iq1grad)=two*tmpre
+           ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpim
+
+         end if
+
+       end do
+     end do
+   end do
+
+ else if (kptopt==2) then
+
+   iq1pert=matom+8
+   do iq1grad=1,nq1grad
+     iq1dir=q1grad(2,iq1grad)
+     do jatpert=1,natpert
+       jatom=pert_atdis(1,jatpert)
+       jatdir=pert_atdis(2,jatpert)
+       do iatpert=1,natpert
+         iatom=pert_atdis(1,iatpert)
+         iatdir=pert_atdis(2,iatpert)
+  
+         if (ddmdq_flg(iatpert,jatpert,iq1grad)==1) then
+
+           !Calculate and save the third order energy derivative
+           tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)
+           d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpre
+           d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=zero
+
+           !Calculate and write the q-gradient of the dynamical matrix
+           ddmdq_red(re,iatpert,jatpert,iq1grad)=two*tmpre
+           ddmdq_red(im,iatpert,jatpert,iq1grad)=zero
+
+         end if
+
+       end do
+     end do
+   end do
+
+ else
+   write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
+   MSG_BUG(msg)
+
+ end if
+
+ if (prtvol==1) then
+   close(71)
+   close(72)
+   close(73)
+   close(76)
+ end if
+
+ DBG_EXIT("COLL")
+ end subroutine dfpt_ddmdqout
 
 end module m_dfpt_lw
 !!***
