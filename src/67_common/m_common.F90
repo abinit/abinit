@@ -1766,7 +1766,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  call neat_energies(e_components, iout)
  call pair_list_free(e_components)
- call pair_list_init(e_components)
 
 end subroutine prtene
 !!***
