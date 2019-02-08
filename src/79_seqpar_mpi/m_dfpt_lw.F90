@@ -1123,8 +1123,8 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  real(dp) :: piezore,piezoim,tmpre, tmpim
  character(len=500) :: msg
 !arrays
- integer,allocatable :: cartflg(:,:,:,:)
  integer :: flg1(3),flg2(3)
+ integer,allocatable :: cartflg(:,:,:,:)
  real(dp) :: vec1(3),vec2(3)
  real(dp),allocatable :: qdrptens_cart(:,:,:,:,:),qdrptens_red(:,:,:,:,:)
  real(dp),allocatable :: dqpol_cart(:,:,:,:,:),dqpol_red(:,:,:,:,:)
@@ -3388,13 +3388,16 @@ end subroutine dfpt_flexoout
  
 !Local variables-------------------------------
 !scalars
- integer :: iatdir,iatom,iatpert,iq1dir,iq1grad,iq1pert,jatdir,jatom,jatpert
+ integer :: iatdir,iatom,iatpert,ii,iq1dir,iq1grad,iq1pert,jatdir,jatom,jatpert
  integer, parameter :: im=2,re=1
  real(dp) :: tmpim,tmpre
  character(len=500) :: msg
 
 !arrays
- real(dp), allocatable :: ddmdq_red(:,:,:,:)
+ integer :: flg1(3),flg2(3)
+ integer, allocatable :: cartflg(:,:,:,:,:),ddmdq_cartflg(:,:,:,:,:)
+ real(dp) :: vec1(3),vec2(3)
+ real(dp), allocatable :: ddmdq_cart(:,:,:,:,:,:),ddmdq_red(:,:,:,:)
 
 !****************************************************************************
 
@@ -3402,7 +3405,7 @@ end subroutine dfpt_flexoout
 
 !Open output files
  if (prtvol==1) then
-   open(unit=71,file='ddmdq_wf_t1.out',status='unknown',form='formatted',action='write')
+  open(unit=71,file='ddmdq_wf_t1.out',status='unknown',form='formatted',action='write')
    open(unit=72,file='ddmdq_wf_t2.out',status='unknown',form='formatted',action='write')
    open(unit=73,file='ddmdq_wf_t3.out',status='unknown',form='formatted',action='write')
    open(unit=76,file='ddmdq_elecstic.out',status='unknown',form='formatted',action='write')
@@ -3435,6 +3438,21 @@ end subroutine dfpt_flexoout
            ddmdq_red(re,iatpert,jatpert,iq1grad)=two*tmpre
            ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpim
 
+           if (prtvol==1) then
+             !Write individual contributions 
+             write(71,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdqwf_t1(:,iatpert,jatpert,iq1grad)
+
+             write(72,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdqwf_t2(:,iatpert,jatpert,iq1grad)
+
+             write(73,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdqwf_t3(:,iatpert,jatpert,iq1grad)
+
+             write(76,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdq_qgradhart(:,iatpert,jatpert,iq1grad)
+           end if
+
          end if
 
        end do
@@ -3464,6 +3482,21 @@ end subroutine dfpt_flexoout
            ddmdq_red(re,iatpert,jatpert,iq1grad)=two*tmpre
            ddmdq_red(im,iatpert,jatpert,iq1grad)=zero
 
+           if (prtvol==1) then
+             !Write individual contributions 
+             write(71,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdqwf_t1(re,iatpert,jatpert,iq1grad), zero
+
+             write(72,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdqwf_t2(re,iatpert,jatpert,iq1grad), zero
+
+             write(73,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdqwf_t3(re,iatpert,jatpert,iq1grad), zero
+
+             write(76,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & two*ddmdq_qgradhart(re,iatpert,jatpert,iq1grad), zero
+           end if
+
          end if
 
        end do
@@ -3471,10 +3504,124 @@ end subroutine dfpt_flexoout
    end do
 
  else
+
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
    MSG_BUG(msg)
 
  end if
+
+!Transformation to cartesian coordinates of the ddmdq
+ ABI_ALLOCATE(ddmdq_cart,(2,matom,3,matom,3,3))
+ ABI_ALLOCATE(ddmdq_cartflg,(matom,3,matom,3,3))
+ ABI_ALLOCATE(cartflg,(matom,3,matom,3,3))
+ cartflg=0
+ do iq1grad=1,nq1grad
+   iq1dir=q1grad(2,iq1grad)
+   do jatpert=1,natpert
+     jatom=pert_atdis(1,jatpert)
+     jatdir=pert_atdis(2,jatpert)
+     do iatpert=1,natpert
+       iatom=pert_atdis(1,iatpert)
+       iatdir=pert_atdis(2,iatpert)
+       ddmdq_cartflg(iatom,iatdir,jatom,jatdir,iq1dir)=ddmdq_flg(iatpert,jatpert,iq1grad)
+       ddmdq_cart(:,iatom,iatdir,jatom,jatdir,iq1dir)=ddmdq_red(:,iatpert,jatpert,iq1grad)
+     end do
+   end do
+ end do
+ ABI_DEALLOCATE(ddmdq_red)
+ 
+!1st transform coordenates of the first atomic displacement derivative
+ do iq1dir=1,3
+   do jatdir=1,3
+     do jatom=1,matom
+       do ii=1,2
+         do iatom=1,matom
+
+           do iatdir=1,3
+             vec1(iatdir)=ddmdq_cart(ii,iatom,iatdir,jatom,jatdir,iq1dir)
+             flg1(iatdir)=ddmdq_cartflg(iatom,iatdir,jatom,jatdir,iq1dir)
+           end do 
+           call cart39(flg1,flg2,gprimd,iatom,matom,rprimd,vec1,vec2)
+           do iatdir=1,3
+             ddmdq_cart(ii,iatom,iatdir,jatom,jatdir,iq1dir)=vec2(iatdir)
+             cartflg(iatom,iatdir,jatom,jatdir,iq1dir)=flg2(iatdir)
+           end do
+
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!2nd transform coordenates of the second atomic displacement derivative
+ do iq1dir=1,3
+   do iatdir=1,3
+     do iatom=1,matom
+       do ii=1,2
+         do jatom=1,matom
+
+           do jatdir=1,3
+             vec1(jatdir)=ddmdq_cart(ii,iatom,iatdir,jatom,jatdir,iq1dir)
+             flg1(jatdir)=ddmdq_cartflg(iatom,iatdir,jatom,jatdir,iq1dir)
+           end do 
+           call cart39(flg1,flg2,gprimd,jatom,matom,rprimd,vec1,vec2)
+           do jatdir=1,3
+             ddmdq_cart(ii,iatom,iatdir,jatom,jatdir,iq1dir)=vec2(jatdir)
+           end do
+
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!3rd transform coordinates of the q-gradient (treat it as electric field)
+ do jatdir=1,3
+   do jatom=1,matom
+     do iatdir=1,3
+       do iatom=1,matom
+         do ii=1,2
+
+           do iq1dir=1,3
+             vec1(iq1dir)=ddmdq_cart(ii,iatom,iatdir,jatom,jatdir,iq1dir)
+             flg1(iq1dir)=ddmdq_cartflg(iatom,iatdir,jatom,jatdir,iq1dir)
+           end do 
+           call cart39(flg1,flg2,gprimd,matom+2,matom,rprimd,vec1,vec2)
+           do iq1dir=1,3
+             ddmdq_cart(ii,iatom,iatdir,jatom,jatdir,iq1dir)=vec2(iq1dir)
+           end do
+
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Write the tensor in cartesian coordinates
+ write(ab_out,*)' '
+ write(ab_out,*)' q-gradient of dynamical matrix, in cartesian coordinates,'
+ write(ab_out,*)' iatom   iatddir   jatom   jatddir   qgrdir           real part          imaginary part'
+ do iq1dir=1,3
+   do jatdir=1,3
+     do jatom=1,matom
+       do iatdir=1,3
+         do iatom=1,matom
+     
+           if (cartflg(iatom,iatdir,jatom,jatdir,iq1dir)==1) then
+             write(ab_out,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & ddmdq_cart(:,iatom,iatdir,jatom,jatdir,iq1dir)
+           end if
+
+         end do
+       end do
+     end do
+   end do
+   write(ab_out,*)' '
+ end do
+ write(ab_out,'(80a)')('=',ii=1,80)
+
+ ABI_DEALLOCATE(ddmdq_cart)
+ ABI_DEALLOCATE(cartflg)
 
  if (prtvol==1) then
    close(71)
