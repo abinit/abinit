@@ -135,7 +135,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t44.out, tolnlines=64, tolabs= 5.001e-2, tolrel= 1.0e-1, fld_options = -easy
+#%%   t44.out, tolnlines=64, tolabs= 6.0e-2, tolrel= 1.1e-0, fld_options = -easy
 #%% psp_files = C.psp8
 #%% [paral_info]
 #%% max_nprocs = 6

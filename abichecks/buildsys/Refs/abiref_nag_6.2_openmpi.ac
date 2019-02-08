@@ -953,11 +953,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I${FALLBACKS_PATH}/libxc/3.0.0/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.0/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
