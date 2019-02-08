@@ -3,12 +3,12 @@
     extending the possible operations on the extracted data.
 '''
 from __future__ import print_function, division, unicode_literals
-import numpy as np
 from .abinit_metadata import ITERATOR_RANKS
 from .register_tag import is_available
 
 if is_available:
     from .register_tag import yaml_map, yaml_seq, yaml_auto_map, yaml_implicit_scalar, yaml_scalar
+    import numpy as np
 
     @yaml_map
     class IterStart(object):

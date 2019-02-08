@@ -4,6 +4,7 @@
 from __future__ import print_function, division, unicode_literals
 try:
     import yaml
+    import numpy  # numpy is also required
 
     is_available = True
 
