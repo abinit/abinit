@@ -14,7 +14,7 @@ if is_available:
 
     class CorruptedDocument(object):
         def __init__(self, error):
-            self.error = self.error
+            self.error = error
 
         def why(self):
             return self.error.message

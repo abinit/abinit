@@ -15,8 +15,8 @@ else:
     def yaml_parse(x):
         pass
 
-doc_start_re = re.compile(r'--- (!.*)?')
-doc_end_re = re.compile(r'...')
+doc_start_re = re.compile(r'---( !.*)?\n?$')
+doc_end_re = re.compile(r'\.\.\.')
 
 
 def parse_doc(doc):
@@ -42,7 +42,7 @@ class DataExtractor:
             Return a metacharacter wich give the behaviour of the line independently from options.
         '''
         if not line or line[0].isspace():
-            c = ' '
+            c = '-'
             # dirty fix for compatibility
             # I think xml should not be compared with the basic algorithm
             if self.xml_mode and 'timeInfo' in line:
@@ -67,10 +67,9 @@ class DataExtractor:
         '''
         lines, documents, ignored = [], [], []
 
-        docmode = False
         current_document = None
         for i, line in enumerate(src_lines):
-            if docmode:
+            if current_document is not None:
                 current_document['lines'].append(line)  # accumulate source lines
                 if doc_end_re.match(line):  # reached the end of the document
                     current_document['end'] = i
@@ -86,6 +85,7 @@ class DataExtractor:
                         self.iterators_state[current_document['obj'].iterator] = current_document['obj'].iteration
 
                     documents.append(current_document)
+                    current_document = None  # go back to normal mode
             else:
                 if self.__get_metachar(line) == '-':
                     if doc_start_re.match(line):  # starting a yaml document

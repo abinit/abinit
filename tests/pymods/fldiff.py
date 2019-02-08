@@ -145,7 +145,7 @@ class LineCountDifference(LineDifference):
     '''
         Represent a difference between line counts.
     '''
-    def __init__(self, more, less):
+    def __init__(self, more, less, line_count=(0,0)):
         '''
             more: the name of the file with more lines
             less: the name of the file with less lines
@@ -153,8 +153,12 @@ class LineCountDifference(LineDifference):
         LineDifference.__init__(self, 0, 0, '', '')
         self.more = more
         self.less = less
+        self.line_count = line_count
 
     def __repr__(self):
+        if self.line_count != (0, 0):
+            return '{} have more significant lines than {} ({} > {}).\n'.format(self.more, self.less, *self.line_count)
+            
         return '{} have more significant lines than {}.\n'.format(self.more, self.less)
 
 
@@ -391,6 +395,7 @@ class Differ(object):
                              ignoreP=self.options['ignoreP'])
         lines1, documents1, ignored1 = dext.extract(lines1)
         lines2, documents2, ignored2 = dext.extract(lines2)
+        print(documents1, documents2)
         lines_differences = self.__diff_lines(lines1, lines2)
         return Result(lines_differences, label=self.options['label']), self.__test_doc(documents1, documents2)
 
@@ -408,9 +413,9 @@ class Differ(object):
         '''
         differences = []
         if len(lines1) > len(lines2):
-            return [LineCountDifference('file 1', 'file 2')]
+            return [LineCountDifference('file 1', 'file 2', (len(lines1), len(lines2)))]
         elif len(lines1) < len(lines2):
-            return [LineCountDifference('file 2', 'file 1')]
+            return [LineCountDifference('file 2', 'file 1', (len(lines2), len(lines1)))]
         else:
             for (i1, meta1, line1), (i2, meta2, line2) in zip(lines1, lines2):
                 if meta1 != meta2:
