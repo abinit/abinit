@@ -982,7 +982,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
  if (option/=1) then
    if (ipert==0) then
-write(77,*) iatom,eldaumdc,eldaumdcdc,eldaufll,e1t10;flush(77)
      epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+eldaumdc+eldaufll+eexex+espnorb+efock+enucdip
      epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+eldaumdcdc-eexex-efockdc
    else
