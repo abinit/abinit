@@ -120,7 +120,7 @@ subroutine sigtk_kcalc_from_nkptgw(dtset, mband, nkcalc, kcalc, bstart_ks, nbcal
    do ikcalc=1,nkcalc
      if (dtset%bdgw(2,ikcalc,spin) > mband) then
        ierr = ierr + 1
-       write(msg,'(a,2i0,2(a,i0))')&
+       write(msg,'(a,2(i0,1x),2(a,i0))')&
         "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband = ",mband
        MSG_WARNING(msg)
      end if
@@ -368,6 +368,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 
 !Local variables ------------------------------
 !scalars
+ integer,parameter :: master = 0
  integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz, my_rank
  logical :: found
  real(dp) :: cmin, vmax, ee, dksqmax
@@ -381,10 +382,10 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(comm) !; nprocs = xmpi_comm_size(comm)
- if (my_rank == 0) then
+ if (my_rank == master) then
    write(std_out, "(a)")" Selecting k-points and bands according to their position wrt band edges (sigma_erange)."
-   !call gaps%print()
    write(std_out, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+   call gaps%print(unit=std_out)
  end if
 
  ABI_CHECK(maxval(gaps%ierr) == 0, "erange 0 cannot be used because I cannot find the gap (gap_err !=0)")
@@ -497,7 +498,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    end do
  end do
 
- if (my_rank == 0) then
+ if (my_rank == master) then
    write(std_out, "(a, i0, a, 2(f6.3, 1x), a)") &
    " Found ", nkcalc, " k-points within erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
    write(std_out, "(2(a, i0))")" min(nbcalc_ks): ", minval(nbcalc_ks), " MAX(nbcalc_ks): ", maxval(nbcalc_ks)

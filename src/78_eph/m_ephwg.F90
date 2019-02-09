@@ -157,6 +157,9 @@ type, public :: ephwg_t
      procedure :: get_dweights => ephwg_get_dweights
      ! Compute weights for a set of frequencies.
 
+     procedure :: get_deltas_qibzk => ephwg_get_deltas_qibzk
+     ! Compute weights for $ \delta(\omega - \omega_{q\nu}} $ using IBZ(k) ordering
+
      procedure :: get_zinv_weights => ephwg_get_zinv_weights
      ! Compute weights for $ \int 1 / (\omega - \ee_{k+q, b} \pm \omega_{q\nu} $
 
@@ -894,6 +897,71 @@ subroutine ephwg_get_dweights(self, qlklist, nqlk, nw, wvals, spin, bcorr, nbsum
  ABI_FREE(mapping)
 
 end subroutine ephwg_get_dweights
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ephwg/ephwg_get_deltas_qibzk
+!! NAME
+!! ephwg_get_deltas_qibzk
+!!
+!! FUNCTION
+!! Compute weights for $ \delta(\omega - \omega_{q\nu} $ for given nu, using q-opints in the IBZ(k)
+!!
+!! INPUTS
+!! nu=Phonon branch.
+!! nene=number of energies for DOS
+!! eminmax=min and  energy in delta (linear mesh)
+!! bcorr=1 to include Blochl correction else 0.
+!! comm=MPI communicator
+!!
+!! OUTPUT
+!!  dt_weights(nene, nq_k, 2)  weights for BZ integration (delta and theta function)
+!   These arrays have the same order as the q-points in the little group of the k-point.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, comm)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nu, nene, bcorr, comm
+ class(ephwg_t),intent(in) :: self
+!arrays
+ real(dp),intent(in) :: eminmax(2)
+ real(dp),intent(out) :: dt_weights(nene, self%nq_k, 2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq,iq_ibz,ie !,ii
+ real(dp),parameter :: max_occ1 = one
+!arrays
+ real(dp) :: thetaw(nene, self%nq_k), eigen_in(self%nq_k)
+
+!----------------------------------------------------------------------
+
+ ! Fill eigen_in
+ do iq=1,self%nq_k
+   iq_ibz = self%lgk2ibz(iq)  ! IBZ_k --> IBZ
+   eigen_in(iq) = self%phfrq_ibz(iq_ibz, nu)
+ end do
+
+ call tetra_blochl_weights(self%tetra_k, eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
+   bcorr, dt_weights(:,:,2), dt_weights(:,:,1), comm)
+
+ !if (rescale_weights) then
+ !do ii=1,2
+ !  do ie=1,nene
+ !    dt_weights(ie, :, ii) = dt_weights(ie, :, ii) * self%lgk%weights
+ !  end do
+ !end do
+ !end if
+
+end subroutine ephwg_get_deltas_qibzk
 !!***
 
 !----------------------------------------------------------------------

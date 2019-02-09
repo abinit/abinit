@@ -193,7 +193,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
  !logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
  my_rank = xmpi_comm_rank(comm)
- write(std_out,*) 'Transport computation driver'
+ call wrtout(std_out, 'Transport computation driver')
 
  sigmaph = sigmaph_read(dtset,dtfil,xmpi_comm_self,msg,ierr,keep_open=.true.)
  if (ierr/=0) MSG_ERROR(msg)
@@ -250,7 +250,7 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  real(dp), parameter :: doplist(ndop) = [-1d22,-1d21,-1d20,-1d19,-1d18,-1d17,1d16,1d16,1d17,1d18,1d19,1d20,1d21,1d22]
  type(ebands_t) :: tmp_ebands
  character(len=500) :: msg
- integer :: itemp, ii, pm, ierr
+ integer :: itemp, ii, pm, ierr, spin
  !integer,allocatable :: indq2ebands(:)
  real(dp) :: extrael
 
@@ -270,6 +270,12 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  new%eminmax_spin = get_minmax(ebands, "eig")
 
  ierr = get_gaps(ebands,new%gaps)
+ if (ierr /= 0) then
+   do spin=1, ebands%nsppol
+     MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
+   end do
+   MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
+ end if
 
 ! Read lifetimes to ebands object
  new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
@@ -409,7 +415,7 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  integer :: ncerr
 
 #ifdef HAVE_NETCDF
-! write to netcdf file
+ ! Write to netcdf file
  ncerr = nctk_def_dims(ncid, [ nctkdim_t("ntemp", self%ntemp), nctkdim_t("ndop", self%ndop) ], defmode=.True.)
  NCF_CHECK(ncerr)
  NCF_CHECK(self%edos%ncwrite(ncid))
