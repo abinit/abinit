@@ -255,38 +255,48 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  integer,allocatable :: indq2ebands(:)
  real(dp) :: extrael
 
- ! TODO: make this an input?
- new%ndop  = ndop !electron and hole doping
- new%ntemp = sigmaph%ntemp
+ new%nsppol = ebands%nsppol
 
- ! Allocate important arrays
+ ! Allocate temperature arrays
+ new%ntemp = sigmaph%ntemp
  ABI_MALLOC(new%kTmesh,(new%ntemp))
+ new%kTmesh = sigmaph%kTmesh
+
+ ! Information about the Gaps
+ ABI_MALLOC(new%eminmax_spin,(2,ebands%nsppol))
+ new%eminmax_spin = get_minmax(ebands, "eig")
+ ierr = get_gaps(ebands,new%gaps)
+
+ ! Read lifetimes to ebands object
+ new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+
+ ! Compute Fermi for different dopings
+#if 0
+ new%ndop = ndop
  ABI_MALLOC(new%mu_carrier_den,(new%ntemp,new%ndop))
  ABI_MALLOC(new%carrier_den,(new%ndop))
  new%carrier_den = doplist
- new%kTmesh = sigmaph%kTmesh
-
- new%nsppol = ebands%nsppol
- ABI_MALLOC(new%eminmax_spin,(2,ebands%nsppol))
- new%eminmax_spin = get_minmax(ebands, "eig")
-
- ierr = get_gaps(ebands,new%gaps)
-
-! Read lifetimes to ebands object
- new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
-
-! Compute Fermi for different dopings
- call ebands_copy(ebands, tmp_ebands)
- do itemp=1,new%ntemp
-   call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(itemp), dtset%spinmagntarget, dtset%prtvol)
-   do ii=1,ndop
-     extrael = 1d-24 * new%carrier_den(ii)
-     call ebands_set_nelect(tmp_ebands, ebands%nelect + extrael, dtset%spinmagntarget, msg)
-     call wrtout(ab_out,msg)
-     new%mu_carrier_den(itemp,ii) = tmp_ebands%fermie
+ if (new%ndop > 1) then
+   call ebands_copy(ebands, tmp_ebands)
+   do itemp=1,new%ntemp
+     call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(itemp), dtset%spinmagntarget, dtset%prtvol)
+     do ii=1,new%ndop
+       extrael = 1d-24 * new%carrier_den(ii)
+       call ebands_set_nelect(tmp_ebands, ebands%nelect + extrael, dtset%spinmagntarget, msg)
+       call wrtout(ab_out,msg)
+       new%mu_carrier_den(itemp,ii) = tmp_ebands%fermie
+     end do
    end do
- end do
- call ebands_free(tmp_ebands)
+   call ebands_free(tmp_ebands)
+ end if
+#else
+ ! Same doping case as sigmaph
+ new%ndop = 1
+ ABI_MALLOC(new%mu_carrier_den,(new%ntemp,new%ndop))
+ ABI_MALLOC(new%carrier_den,(new%ndop))
+ new%carrier_den = [dtset%eph_extrael / 1d-24]
+ new%mu_carrier_den(:,1) = sigmaph%mu_e
+#endif
 
 end function transport_rta_new
 !!***
@@ -321,7 +331,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  real(dp),allocatable :: vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:), vv_tens(:,:,:,:,:,:)
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
 
- ! create alias for dimensions
+ ! Create alias for dimensions
  nsppol = self%ebands%nsppol
  nkpt   = self%ebands%nkpt
  mband  = self%ebands%mband
