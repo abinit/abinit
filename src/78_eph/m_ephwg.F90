@@ -914,6 +914,7 @@ end subroutine ephwg_get_dweights
 !! eminmax=min and  energy in delta (linear mesh)
 !! bcorr=1 to include Blochl correction else 0.
 !! comm=MPI communicator
+!! [with_qweights]= .False. if q-point weights should not be included in dt_weights
 !!
 !! OUTPUT
 !!  dt_weights(nene, nq_k, 2)  weights for BZ integration (delta and theta function)
@@ -925,19 +926,20 @@ end subroutine ephwg_get_dweights
 !!
 !! SOURCE
 
-subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, comm)
+subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, comm, with_qweights)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nu, nene, bcorr, comm
  class(ephwg_t),intent(in) :: self
+ logical,optional,intent(in) :: with_qweights
 !arrays
  real(dp),intent(in) :: eminmax(2)
  real(dp),intent(out) :: dt_weights(nene, self%nq_k, 2)
 
 !Local variables-------------------------------
 !scalars
- integer :: iq,iq_ibz,ie !,ii
+ integer :: iq, iq_ibz, ie, ii
  real(dp),parameter :: max_occ1 = one
 !arrays
  real(dp) :: thetaw(nene, self%nq_k), eigen_in(self%nq_k)
@@ -953,13 +955,15 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  call tetra_blochl_weights(self%tetra_k, eigen_in, eminmax(1), eminmax(2), max_occ1, nene, self%nq_k, &
    bcorr, dt_weights(:,:,2), dt_weights(:,:,1), comm)
 
- !if (rescale_weights) then
- !do ii=1,2
- !  do ie=1,nene
- !    dt_weights(ie, :, ii) = dt_weights(ie, :, ii) * self%lgk%weights
- !  end do
- !end do
- !end if
+ if (present(with_qweights)) then
+  if (.not. with_qweights) then
+    do ii=1,2
+      do ie=1,nene
+        dt_weights(ie, :, ii) = dt_weights(ie, :, ii) * self%lgk%weights
+      end do
+    end do
+   end if
+ end if
 
 end subroutine ephwg_get_deltas_qibzk
 !!***

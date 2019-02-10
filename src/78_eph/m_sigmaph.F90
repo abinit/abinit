@@ -1518,8 +1518,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call xmpi_sum(sigma%gf_nnuq, comm, ierr)
        sigma%gfw_vals = zero
 
+       ! NB: gf_nnuq does not include the q-weights from integration.
        ! TODO: Reintegrate with pert parallelism.
-       ! TODO: Use phfreqs in ephgw
 
        if (sigma%qint_method == 0 .or. sigma%symsigma == 0) then
          ! Gaussian method with ph_smear
@@ -1528,6 +1528,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          do iq_ibz=1,sigma%nqibz_k
            if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+           ! Recompute phonons (cannot use sigma%ephwg in this case)
            call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart)
            do nu=1,natom3
              dargs = sigma%gfw_mesh - phfrq(nu)
@@ -1535,7 +1536,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              do ib_k=1,nbcalc_ks
                do ii=1,3
                  sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
-                   sigma%wtq_k(iq_ibz) * sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dt_weights(:, 1)
+                   sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dt_weights(:, 1) * sigma%wtq_k(iq_ibz)
                end do
              end do
            end do
@@ -1549,7 +1550,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          eminmax = [sigma%gfw_mesh(1), sigma%gfw_mesh(sigma%gfw_nomega)]
          ABI_MALLOC(dt_tetra_weights, (sigma%gfw_nomega, sigma%nqibz_k, 2))
          do nu=1,natom3
-           call sigma%ephwg%get_deltas_qibzk(nu, sigma%gfw_nomega, eminmax, sigma%bcorr, dt_tetra_weights, comm)
+           call sigma%ephwg%get_deltas_qibzk(nu, sigma%gfw_nomega, eminmax, sigma%bcorr, dt_tetra_weights, comm, &
+                                             with_qweights=.True.)
            do iq_ibz=1,sigma%nqibz_k
              if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
              do ib_k=1,nbcalc_ks
@@ -1589,11 +1591,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do ! ikcalc
 
  nqeff = count(dvdb%count_qused /= 0)
- call wrtout(std_out, sjoin("Number of qpts in IBZ used by this rank:", itoa(nqeff), &
+ call wrtout(std_out, sjoin(" Number of qpts in IBZ used by this rank:", itoa(nqeff), &
     " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
  call xmpi_sum(dvdb%count_qused, comm, ierr)
  nqeff = count(dvdb%count_qused /= 0)
- call wrtout(std_out, sjoin("Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
+ call wrtout(std_out, sjoin(" Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
     " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
