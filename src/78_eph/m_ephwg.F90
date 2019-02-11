@@ -471,7 +471,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1
+ integer,parameter :: sppoldbl1=1,timrev0=0
  integer :: ierr,ii,ik_idx,ik_bz,isym
  real(dp) :: dksqmax
  character(len=80) :: errorstring
@@ -501,7 +501,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  !                            eph_doublegrid%bz2lgkibz, has_timrev=1)
  call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
                             self%lgk%symrec_lg, self%lgk%nsym_lg, &
-                            eph_doublegrid%bz2lgkibz, has_timrev=1, use_symrec=.true.)
+                            eph_doublegrid%bz2lgkibz, timrev0, use_symrec=.true.)
 
 #if 0
    ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
@@ -592,7 +592,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  !                            bz2lgkibzkq, has_timrev=1)
  call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
                             self%lgk%symrec_lg, self%lgk%nsym_lg, &
-                            bz2lgkibzkq, has_timrev=1, use_symrec=.true.)
+                            bz2lgkibzkq, timrev0, use_symrec=.true.)
 
  ! self%lgrp%ibz (k+q) --> dg%bz
  do ii=1,self%nbz
