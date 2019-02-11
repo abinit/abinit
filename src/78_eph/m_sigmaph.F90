@@ -2858,16 +2858,16 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  character(len=500) :: msg
 
 !Local variables -----------------------------------------
- integer,parameter :: timrev1 = 1
+ integer,parameter :: sppoldbl1 = 1, timrev1 = 1
  integer :: ii, spin, ikpt, ikcalc, iband, itemp, nkcalc, nsppol, nkpt
  integer :: band_ks, bstart_ks, nbcalc_ks, mband
- logical :: has_mrta, has_vel
+ logical :: has_mrta, has_vel, has_car_vel, has_red_vel
 #ifdef HAVE_NETCDF
  integer :: ncerr, ncid, varid
 #endif
  character(len=fnlen) :: path
  integer,allocatable :: indkk(:,:), nband(:)
- real(dp) :: dksqmax
+ real(dp) :: dksqmax, vk_red(2,3), vk_car(2,3)
 
  ! copy useful dimensions
  nsppol = self%nsppol
@@ -2877,7 +2877,7 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  ABI_MALLOC(indkk,(nkcalc,6))
  ! map ebands kpoints to sigmaph
  call listkk(dksqmax, cryst%gmet, indkk, ebands%kptns, self%kcalc, ebands%nkpt, nkcalc, cryst%nsym, &
-             1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
+             sppoldbl1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
 
  if (dksqmax > tol12) then
     write(msg, '(3a,es16.6,a)' ) &
@@ -2902,9 +2902,13 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
  ierr = nf90_inq_varid(self%ncid, "vals_e0k", varid)
  if (ierr /= nf90_noerr) has_mrta = .false.
 
- has_vel = .true.
+ has_car_vel = .false.
+ has_red_vel = .false.
  ierr = nf90_inq_varid(self%ncid, "vcar_calc", varid)
- if (ierr /= nf90_noerr) has_vel = .false.
+ if (ierr == nf90_noerr) has_car_vel = .true.
+ ierr = nf90_inq_varid(self%ncid, "vred_calc", varid)
+ if (ierr == nf90_noerr) has_red_vel = .true.
+ has_vel = (has_car_vel .or. has_red_vel)
 
  ! Read linewidths from sigmaph
  ABI_CALLOC(linewidth_serta,(self%ntemp,mband,nkpt,nsppol))
@@ -2938,9 +2942,17 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
 
        ! Read band velocities
        if (has_vel) then
-         ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"),&
-                              velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin])
-         NCF_CHECK(ncerr)
+         if (has_car_vel) then
+           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"),&
+                                velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin])
+           NCF_CHECK(ncerr)
+         end if
+         if (has_red_vel) then
+           ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"),&
+                                vk_red(1,:), start=[1,iband,ikcalc,spin])
+           call ddk_red2car(cryst%rprimd,vk_red,vk_car)
+           velocity(:,band_ks,ikpt,spin) = vk_car(1,:)
+         end if
        end if
 
      end do

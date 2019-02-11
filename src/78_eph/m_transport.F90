@@ -272,6 +272,7 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
 
  ! Read lifetimes to ebands object
  new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+ ABI_CHECK(allocated(new%velocity),'Could not read velocities from SIGEPH.nc file')
 
  ! Compute Fermi for different dopings
 #if 0
@@ -351,7 +352,6 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
        !    +cryst%rprimd(:,2)*self%ebands%velocity(2,ib,ik,spin) &
        !    +cryst%rprimd(:,3)*self%ebands%velocity(3,ib,ik,spin)
        vr(:) = self%velocity(:,ib,ik,spin)
-       vr = vr / two_pi
        ! Store in vv_tens
        do ii=1,3
          do jj=1,3
