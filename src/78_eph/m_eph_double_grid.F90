@@ -480,13 +480,14 @@ end function eph_double_grid_get_index
 !!
 !! SOURCE
 
-subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timrev,mapping)
+subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timrev,mapping,use_symrec)
 
  class(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: nibz, nsym
  real(dp),intent(in) :: kpt_ibz(3,nibz)
  integer,intent(in) :: symmat(3,3,nsym)
  integer,intent(out):: bz2ibz(self%dense_nbz)
+ logical,optional,intent(in) :: use_symrec
  integer,optional,intent(in) :: has_timrev
  integer,optional,intent(inout) :: mapping(self%dense_nbz,3)
 
@@ -494,11 +495,18 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timre
  integer :: isym, ii, ik_ibz, ik_bz
  real(dp) :: kpt(3), kpt_sym(3), wrap_kpt(3), shift
  integer :: itimrev, timrev, counter
+ logical :: do_use_symrec
 
 !************************************************************************
 
  timrev = 0
  if (present(has_timrev)) timrev=1
+ do_use_symrec=.False.
+ if (present(use_symrec)) then
+    if (use_symrec) then
+      do_use_symrec=.True.
+    end if
+ end if
 
  !call cwtime(cpu,wall,gflops,"start")
  bz2ibz = 0
@@ -510,7 +518,11 @@ subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timre
        ! get coordinates of k point
        kpt(:) = kpt_ibz(:,ik_ibz)
        ! Get the symmetric of q
-       kpt_sym(:) = (1-2*itimrev)*matmul(transpose(symmat(:,:,isym)),kpt)
+       if (do_use_symrec) then
+         kpt_sym(:) = (1-2*itimrev)*matmul(symmat(:,:,isym),kpt)
+       else
+         kpt_sym(:) = (1-2*itimrev)*matmul(transpose(symmat(:,:,isym)),kpt)
+       endif
        ! get the index of the ibz point in bz
        call wrap2_pmhalf(kpt_sym(1),wrap_kpt(1),shift)
        call wrap2_pmhalf(kpt_sym(2),wrap_kpt(2),shift)
