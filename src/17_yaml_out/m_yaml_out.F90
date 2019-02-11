@@ -14,7 +14,7 @@ module m_yaml_out
 
   integer,parameter :: dp=kind(1.0D0)
   character(len=1),parameter :: eol=char(10)
-  character(len=9),parameter :: default_rfmt='(ES24.18)'
+  character(len=9),parameter :: default_rfmt='(ES25.17)'
   character(len=4),parameter :: default_ifmt='(I8)'
   character(len=13),parameter :: default_kfmt="(A)"
   character(len=13),parameter :: default_sfmt="(A)"
@@ -723,14 +723,14 @@ module m_yaml_out
     end if
   end subroutine yaml_add_dictlist
 
-  subroutine yaml_single_dict(label, pl, key_size, string_size, file_d, comment, string, stream, tag, &
+  subroutine yaml_single_dict(label, comment, pl, key_size, string_size, file_d, string, stream, tag, &
 &                             key_width, int_fmt, real_fmt, string_fmt, newline)
     type(pair_list),intent(inout) :: pl
     character(len=*),intent(in) :: label
+    character(len=*),intent(in) :: comment
     integer,intent(in) :: key_size, string_size
     character(len=*),intent(in),optional :: tag, int_fmt, real_fmt, string_fmt
     integer,intent(in), optional :: file_d, key_width
-    character(len=*),intent(in),optional :: comment
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
