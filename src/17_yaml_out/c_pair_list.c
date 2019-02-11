@@ -50,7 +50,8 @@ bool str_eq(char* s1, char* s2){
 
 char* ftoc_str(char* fstr, int length){
   char* cstr = malloc((length+1)*sizeof(char));
-  for(int i = 0; i < length; i++){
+  int i;
+  for(i = 0; i < length; i++){
     cstr[i] = fstr[i];
   }
   cstr[length] = '\x00';
