@@ -1,4 +1,5 @@
 #include <stdlib.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -6,7 +7,7 @@
 #define FALSE 0
 #define TRUE 1
 
-// type codes
+/* type codes */
 #define TC_EMPTY -2
 #define TC_NOTFOUND -1
 #define TC_INT 0
@@ -49,8 +50,9 @@ bool str_eq(char* s1, char* s2){
 }
 
 char* ftoc_str(char* fstr, int length){
-  char* cstr = malloc((length+1)*sizeof(char));
   int i;
+  char* cstr;
+  cstr = malloc((length+1)*sizeof(char));
   for(i = 0; i < length; i++){
     cstr[i] = fstr[i];
   }
@@ -73,6 +75,7 @@ bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
   if(pl->first){
     pair_t* prev = NULL;
     pair_t* pair = pl->first;
+    pair_t* new_pair = malloc(sizeof(pair_t));
     while(pair){
       if(str_eq(ckey, pair->key)){
         *selected = pair;
@@ -82,13 +85,12 @@ bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
         pair = pair->next;
       }
     }
-    pair_t* new_pair = malloc(sizeof(pair_t));
     new_pair->key = ckey;
     new_pair->next = NULL;
     prev->next = new_pair;
     *selected = new_pair;
     return 1;
-  } else {  // first element of the list
+  } else {  /* first element of the list */
     pair_t* new_pair = malloc(sizeof(pair_t));
     new_pair->key = ckey;
     new_pair->next = NULL;
@@ -111,7 +113,7 @@ void pair_free(pair_t* p){
 }
 
 
-// Visible from fortran
+/* Visible from fortran */
 
 void pair_list_seti(pair_list* l, char* fkey, int* i, int* len){
   pair_t* pair = NULL;
@@ -163,37 +165,37 @@ void pair_list_sets(pair_list* l, char* fkey, char* s, int* len, int* len_s){
 
 void pair_list_get_(pair_list* l, char* fkey, int* type_code, int*i, double* r, char* s, int* len, int* len_s){
   if(!l->first){
-    // list is empty
+    /* list is empty */
     *type_code = TC_EMPTY;
     return;
-  }
-
-  char* ckey = ftoc_str(fkey, *len);
-  pair_t* pair = l->first;
-  while(pair){
-    if(str_eq(pair->key, ckey)){
-      *type_code = pair->type_code;
-      switch(pair->type_code){
-        case TC_REAL:
-          *r = pair->val.r;
-          break;
-        case TC_INT:
-          *i = pair->val.i;
-          break;
-        case TC_STRING:
-          ctof_str(s, pair->val.s, *len_s);
-          break;
+  } else {
+    char* ckey = ftoc_str(fkey, *len);
+    pair_t* pair = l->first;
+    while(pair){
+      if(str_eq(pair->key, ckey)){
+        *type_code = pair->type_code;
+        switch(pair->type_code){
+          case TC_REAL:
+            *r = pair->val.r;
+            break;
+          case TC_INT:
+            *i = pair->val.i;
+            break;
+          case TC_STRING:
+            ctof_str(s, pair->val.s, *len_s);
+            break;
+        }
+        break;
+      } else {
+        pair = pair->next;
       }
-      break;
-    } else {
-      pair = pair->next;
     }
+    if(!pair){
+      /* key not found */
+      *type_code = TC_NOTFOUND;
+    }
+    free(ckey);
   }
-  if(!pair){
-    // key not found
-    *type_code = TC_NOTFOUND;
-  }
-  free(ckey);
 }
 
 void pair_list_next(pair_list* pl){
@@ -224,7 +226,7 @@ void pair_list_look_(pair_list* pl, char* fkey, int* type_code, int* i, double* 
     }
     ctof_str(fkey, p->key, *len);
   } else {
-    // reached end of list
+    /* reached end of list */
     *type_code = TC_EMPTY;
   }
 }
