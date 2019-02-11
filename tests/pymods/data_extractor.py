@@ -10,7 +10,9 @@ if has_yaml:
     from .yaml_tools.structures import IterStart
     from .yaml_tools import yaml_parse
 else:
-    IterStart = object
+    class IterStart(object):
+        # dummy class
+        pass
 
     def yaml_parse(x):
         pass
