@@ -184,7 +184,6 @@ program mrgdv
    case ("downsample")
      call get_command_argument(2, db_path)
      call get_command_argument(3, dump_file)
-     !ngqpt = [2,2,2]
      read(arg, *, iostat=ierr, iomsg=msg)ngqpt
      ABI_CHECK(ierr == 0, msg)
      call dvdb_qdownsample(db_path, dump_file, ngqpt, comm)

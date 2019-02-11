@@ -2829,7 +2829,6 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
    do ispden=1,db%nspden
      do ifft=1,nfft
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
-
        do ir=1,db%nrpt
          wr = db%v1scf_rpt(1, ir,ifft,ispden,mu)
          wi = db%v1scf_rpt(2, ir,ifft,ispden,mu)
@@ -2842,19 +2841,19 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
          ov1r(1,ifft,ispden,mu) = ov1r(1,ifft,ispden,mu) + v1r_lr(1,ifft,mu)
          ov1r(2,ifft,ispden,mu) = ov1r(2,ifft,ispden,mu) + v1r_lr(2,ifft,mu)
        end if
-     end do
+     end do ! ifft
 
      ! Remove the phase.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:,:,ispden,mu))
-   end do
+   end do ! ispden
+
+   call xmpi_sum(ov1r(:,:,:,mu), comm, ierr)
 
    ! Be careful with gamma and cplex!
    if (db%symv1) then
      call v1phq_symmetrize(db%cryst,idir,ipert,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,ov1r(:,:,:,mu))
    end if
  end do ! mu
-
- call xmpi_sum(ov1r, comm, ierr)
 
  ABI_FREE(eiqr)
  ABI_FREE(v1r_lr)
@@ -3308,7 +3307,9 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
        v1scf_qpt(1,ifft,ispden) = v1scf_qpt(1,ifft,ispden) + v1r_lr(1,ifft)
        v1scf_qpt(2,ifft,ispden) = v1scf_qpt(2,ifft,ispden) + v1r_lr(2,ifft)
      end if
-   end do
+     end do ! ifft
+
+   call xmpi_sum(v1scf_qpt(:,:,ispden), comm, ierr)
 
    ! Remove the phase.
    call times_eikr(-qpt, ngfft, nfft, 1, v1scf_qpt(:,:,ispden))
@@ -3316,10 +3317,8 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
 
  ! Be careful with gamma and cplex!
  if (db%symv1) then
-   call v1phq_symmetrize(db%cryst,idir,iat,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,v1scf_qpt(:,:,:))
+   call v1phq_symmetrize(db%cryst,idir,iat,symq,ngfft,cplex2,nfft,db%nspden,db%nsppol,db%mpi_enreg,v1scf_qpt)
  end if
-
- call xmpi_sum(v1scf_qpt, comm, ierr)
 
  ABI_FREE(eiqr)
  ABI_FREE(v1r_lr)
@@ -3401,10 +3400,10 @@ subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
    ! FIXME I think this should be ngfftf and not ngfft
    !       Also, other calls to dvdb_ftinterp_setup should use ngfftf.
    call dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
-&                         db%nrpt, db%nspden, ipert, v1scf_rpt, comm)
+                           db%nrpt, db%nspden, ipert, v1scf_rpt, comm)
 
    call dvdb_get_v1scf_qpt(db, cryst, qpt, nfftf, ngfftf, db%nrpt, db%nspden, &
-&                          ipert, v1scf_rpt, v1scf(:,:,:,ipert), comm)
+                           ipert, v1scf_rpt, v1scf(:,:,:,ipert), comm)
 
    ABI_FREE(db%rpt)
  end do
@@ -5187,7 +5186,7 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
 
 !************************************************************************
 
- write(std_out,"(a)")sjoin("Downsampling Q-mesh with ngqpt:", ltoa(ngqpt))
+ write(std_out,"(a)")sjoin(" Downsampling Q-mesh with ngqpt:", ltoa(ngqpt))
  write(std_out,"(a)")trim(in_dvdb_fname), " --> ", trim(new_dvdb_fname)
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
@@ -5205,8 +5204,7 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  ! Setup fine q-point grid
  ! =======================
  ! Generate the list of irreducible q-points in the coarse grid
- qptrlatt = 0
- qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, 1, &
                              [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 
@@ -5260,9 +5258,9 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
    end do
  end do
 
- ! ================================================= !
+ ! =================================================
  ! Open the new DVDB file and write preliminary info
- ! ================================================= !
+ ! =================================================
  !nperts = nperts_read + nperts_interpolate
  if (open_file(new_dvdb_fname, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
    MSG_ERROR(msg)
@@ -5320,7 +5318,7 @@ subroutine dvdb_qdownsample(in_dvdb_fname, new_dvdb_fname, ngqpt, comm)
  call hdr_free(hdr_ref)
  call dvdb_free(dvdb)
 
- write(msg, '(2a)') "Downsampling of the electron-phonon coupling potential completed", ch10
+ write(msg, '(2a)') " Downsampling of the electron-phonon coupling potential completed", ch10
  call wrtout(std_out, msg, do_flush=.True.)
 
 20 continue

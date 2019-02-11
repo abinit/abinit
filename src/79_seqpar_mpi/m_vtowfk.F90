@@ -326,7 +326,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  call timab(39,1,tsec) ! "vtowfk (loop)"
 
  do inonsc=1,nnsclo_now
-   if (iscf < 0 .and. inonsc <= enough) call cwtime(cpu, wall, gflops, "start")
+   if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
 
    ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
    if(wfopta10 /= 1 .and. .not. newlobpcg) then
@@ -501,11 +501,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end if
 
      ! Print residual and wall-time required by NSCF iteration.
-     if (inonsc <= enough) then
+     if (inonsc <= enough .or. mod(inonsc, 10) == 0) then
        call cwtime(cpu, wall, gflops, "stop")
-       call wrtout(std_out, sjoin("max resid =", ftoa(residk, fmt="es13.5"), &
-         " (without nbdbuf). one NSCF iteration took cpu-time:", sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
-       if (inonsc == enough) call wrtout(std_out, "Stop printing residuals ...")
+       call wrtout(std_out, sjoin(" Max resid =", ftoa(residk, fmt="es13.5"), &
+         " (without nbdbuf buffer). One NSCF iteration required cpu-time:", &
+         sec2str(cpu), ", wall-time:", sec2str(wall)), do_flush=.True.)
+       if (inonsc == enough) call wrtout(std_out, " Printing residuals every mod(10) iteration ...")
      end if
    end if
 

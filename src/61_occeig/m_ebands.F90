@@ -113,8 +113,6 @@ MODULE m_ebands
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
  public :: ebands_write               ! Driver routine to write bands in different (txt) formats.
-
- public :: edos_free               ! Free DOS object
 !!***
 
 !----------------------------------------------------------------------
@@ -3913,7 +3911,9 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, &
                  ebands%kptns, ebands%eig, my_bblock, comm)
-   if (itype == 2) ABI_MALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
+   if (itype == 2) then
+     ABI_CALLOC(new%velocity,(3,new%mband,new%nkpt,new%nsppol))
+   end if
  else
    MSG_ERROR(sjoin("Wrong einterp params(1):", itoa(itype)))
  end if
@@ -3939,7 +3939,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
    end do
  end do
  call xmpi_sum(new%eig, comm, ierr)
-
+ if (itype == 2) call xmpi_sum(new%velocity, comm, ierr)
 
  if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
    ! Write ESKW file with crystal and (interpolated) band structure energies.
@@ -5620,11 +5620,15 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
      if (dtset%sigma_erange(2) >= zero) emax = gaps%cb_min(spin) - tol2 * eV_Ha + dtset%sigma_erange(2)
    end do
 
+   !MG: dummy_vals, vv_tens ... are not allocated!
    edos = ebands_get_dos_matrix_elements(ebands_kmesh, cryst, &
                                          dummy_vals, 0, dummy_vecs, 0, vv_tens, 1, &
                                          edos_intmeth, edos_step, edos_broad, comm, vvdos_mesh, &
                                          dummy_dosvals, dummy_dosvecs, vvdos_tens, emin, emax)
-   ABI_SFREE(vv_tens)
+   ABI_SFREE(dummy_dosvals)
+   ABI_SFREE(dummy_dosvecs)
+   call gaps%free()
+   call ebands_free(ebands_kmesh)
  end if
 
 
@@ -5652,12 +5656,13 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, co
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), dtset%einterp))
    if (dtset%useria == 9) then
      NCF_CHECK(edos%ncwrite(ncid))
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.)
-     ncerr = nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")], defmode=.True.)
+     NCF_CHECK(nctk_def_arrays(ncid, [ nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.))
+     NCF_CHECK(nctk_def_arrays(ncid, [ nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), vvdos_mesh))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), vvdos_tens(:,1,:,:,:,1)))
      ABI_SFREE(vvdos_tens)
+     call edos%free()
    end if
 
    NCF_CHECK(nf90_close(ncid))

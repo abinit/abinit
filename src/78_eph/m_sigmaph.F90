@@ -558,7 +558,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom)
- real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2)
+ real(dp) :: vk(2, 3), vk_red(2,3), vkq(2,3), vkq_red(2,3), tsec(2), eminmax(2)
  real(dp) :: wqnu,nqnu,gkq2,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -571,7 +571,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
- real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dargs(:),alpha_mrta(:)
+ real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dt_tetra_weights(:,:,:),dargs(:),alpha_mrta(:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -1120,8 +1120,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! TODO: Still under testing.
          if (sigma%imag_only .and. sigma%qint_method == 1) then
            if (.not. wfd%ihave_ug(ibsum_kq, ikq_ibz, spin)) then
-             !write(msg, "(a, 3(i0,1x))")"Ignoring wavefunction with band, ikq_ibz, spin: ", ibsum_kq, ikq_ibz, spin
-             !MSG_WARNING(msg)
              ignore_kq = ignore_kq + 1; cycle
            end if
          end if
@@ -1514,32 +1512,60 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
      if (sigma%gfw_nomega /= 0) then
        ! Compute Eliashberg function (useful but cost is not negligible).
-       call cwtime(cpu, wall, gflops, "start", msg=sjoin("Computing Eliashberg function with nomega: ", &
+       call cwtime(cpu, wall, gflops, "start", msg=sjoin(" Computing Eliashberg function with nomega: ", &
            itoa(sigma%gfw_nomega),". Use prteliash = 0 to disable this part"))
 
        call xmpi_sum(sigma%gf_nnuq, comm, ierr)
-       ABI_MALLOC(dargs, (sigma%gfw_nomega))
-       ABI_MALLOC(dt_weights, (sigma%gfw_nomega, 2))
        sigma%gfw_vals = zero
 
+       ! NB: gf_nnuq does not include the q-weights from integration.
        ! TODO: Reintegrate with pert parallelism.
-       do iq_ibz=1,sigma%nqibz_k
-         if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
-         call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart) ! TODO: Use phfreqs in ephgw
-         do nu=1,natom3
-           dargs = sigma%gfw_mesh - phfrq(nu)
-           dt_weights(:,1) = dirac_delta(dargs, dtset%ph_smear)
-           do ib_k=1,nbcalc_ks
-             do ii=1,3
-               sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
-                 sigma%wtq_k(iq_ibz) * sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dt_weights(:, 1)
+
+       if (sigma%qint_method == 0 .or. sigma%symsigma == 0) then
+         ! Gaussian method with ph_smear
+         ABI_MALLOC(dt_weights, (sigma%gfw_nomega, 2))
+         ABI_MALLOC(dargs, (sigma%gfw_nomega))
+
+         do iq_ibz=1,sigma%nqibz_k
+           if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+           ! Recompute phonons (cannot use sigma%ephwg in this case)
+           call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart)
+           do nu=1,natom3
+             dargs = sigma%gfw_mesh - phfrq(nu)
+             dt_weights(:,1) = dirac_delta(dargs, dtset%ph_smear)
+             do ib_k=1,nbcalc_ks
+               do ii=1,3
+                 sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
+                   sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dt_weights(:, 1) * sigma%wtq_k(iq_ibz)
+               end do
              end do
            end do
          end do
-       end do
 
-       ABI_FREE(dargs)
-       ABI_FREE(dt_weights)
+         ABI_FREE(dargs)
+         ABI_FREE(dt_weights)
+
+       else
+         ! Tetrahedron method
+         eminmax = [sigma%gfw_mesh(1), sigma%gfw_mesh(sigma%gfw_nomega)]
+         ABI_MALLOC(dt_tetra_weights, (sigma%gfw_nomega, sigma%nqibz_k, 2))
+         do nu=1,natom3
+           call sigma%ephwg%get_deltas_qibzk(nu, sigma%gfw_nomega, eminmax, sigma%bcorr, dt_tetra_weights, comm, &
+                                             with_qweights=.True.)
+           do iq_ibz=1,sigma%nqibz_k
+             if (mod(iq_ibz, nprocs) /= my_rank) cycle ! MPI parallelism
+             do ib_k=1,nbcalc_ks
+               do ii=1,3
+                 sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
+                   sigma%gf_nnuq(ib_k, nu, iq_ibz, ii) * dt_tetra_weights(:, iq_ibz, 1)
+               end do
+             end do
+           end do
+         end do
+         ABI_FREE(dt_tetra_weights)
+       end if
+
+       ! Collect final results.
        call xmpi_sum(sigma%gfw_vals, comm, ierr)
        call cwtime_report(" Eliashberg function", cpu, wall, gflops)
      end if
@@ -1553,7 +1579,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      call sigmaph_gather_and_write(sigma, ebands, ikcalc, spin, dtset%prtvol, comm)
 
      ABI_SFREE(alpha_mrta)
-
    end do ! spin
 
    ABI_FREE(kg_k)
@@ -1566,12 +1591,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  end do ! ikcalc
 
  nqeff = count(dvdb%count_qused /= 0)
- call wrtout(std_out, sjoin("Number of qpts in IBZ used by this rank:", itoa(nqeff), &
-           " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+ call wrtout(std_out, sjoin(" Number of qpts in IBZ used by this rank:", itoa(nqeff), &
+    " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
  call xmpi_sum(dvdb%count_qused, comm, ierr)
  nqeff = count(dvdb%count_qused /= 0)
- call wrtout(std_out, sjoin("Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
-           " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
+ call wrtout(std_out, sjoin(" Number of qpts in IBZ inside MPI comm:", itoa(nqeff), &
+    " (nq / nq_dvdb): ", ftoa((100.0_dp * nqeff) / dvdb%nqpt, fmt="f5.1"), " [%]"))
 
  call cwtime_report(" Sigma_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
@@ -2042,31 +2067,31 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    do i3=-1,1
      do i2=-1,1
        do i1=-1,1
-     !do iq_ibz=1,new%nqbz
-     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-     !kq = kk + new%qbz(:,iq_ibz)
-     kq = kk + half * [i1, i2, i3]
+         !do iq_ibz=1,new%nqbz
+         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
+         !kq = kk + new%qbz(:,iq_ibz)
+         kq = kk + half * [i1, i2, i3]
 
-     ! TODO: g0 umklapp here can enter into play!
-     ! gmax could not be large enough!
-     call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
-     new%mpw = max(new%mpw, onpw)
-     do ipw=1,onpw
-       do ii=1,3
-        new%gmax(ii) = max(new%gmax(ii), abs(gtmp(ii,ipw)))
+         ! TODO: g0 umklapp here can enter into play!
+         ! gmax could not be large enough!
+         call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
+         new%mpw = max(new%mpw, onpw)
+         do ipw=1,onpw
+           do ii=1,3
+            new%gmax(ii) = max(new%gmax(ii), abs(gtmp(ii,ipw)))
+           end do
+         end do
+         ABI_FREE(gtmp)
        end do
      end do
-     ABI_FREE(gtmp)
-   end do
-   end do
    end do
  end do
 
  my_mpw = new%mpw; call xmpi_max(my_mpw, new%mpw, comm, ierr)
  my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
 
- call wrtout(std_out, sjoin('Optimal value of mpw:', itoa(new%mpw), "gmax:", ltoa(new%gmax)))
- call cwtime_report("sigmaph_new: mpw", cpu, wall, gflops)
+ call wrtout(std_out, sjoin(' Optimal value of mpw:', itoa(new%mpw), "gmax:", ltoa(new%gmax)))
+ call cwtime_report(" sigmaph_new: mpw", cpu, wall, gflops)
 
  ! Define number of bands included in self-energy summation as well as band range.
  ! This value depends on the kind of calculation as imag_only can take advantage of
@@ -2136,18 +2161,18 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      new%bsum_stop = min(dtset%sigma_bsum_range(2), mband)
    end if
    new%nbsum = new%bsum_stop - new%bsum_start + 1
-   ! Split bands among the procs in comm_bq
+   ! Split bands among the procs inside comm_bq.
    call xmpi_split_work(new%nbsum, new%comm_bq, new%my_bstart, new%my_bstop, msg, ierr)
    if (new%my_bstart == new%nbsum + 1) then
-     MSG_ERROR("sigmaph with idle processes should be tested! Decrease ncpus or increase nband")
+     MSG_ERROR("sigmaph code does not support idle processes! Decrease ncpus or increase nband.")
    end if
    new%my_bstart = new%bsum_start + new%my_bstart - 1
    new%my_bstop = new%bsum_start + new%my_bstop - 1
  end if
 
- call wrtout(std_out, sjoin("Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
+ call wrtout(std_out, sjoin(" Global bands for self-energy sum, bsum_start: ", itoa(new%bsum_start), &
    " bsum_bstop:", itoa(new%bsum_stop)))
- call wrtout(std_out, sjoin("Allocating and treating bands from my_bstart: ", itoa(new%my_bstart), &
+ call wrtout(std_out, sjoin(" Allocating and treating bands from my_bstart: ", itoa(new%my_bstart), &
    " up to my_bstop:", itoa(new%my_bstop)))
 
  ! ================================================================
@@ -2164,7 +2189,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_CALLOC(new%wrmesh_b, (new%nwr, new%max_nbcalc))
  end if
 
- ! Prepare calculation of generalized Eliashberg functions.
+ ! Prepare calculation of generalized Eliashberg functions by setting gfw_nomega
  ! Allow users to deactivate this part with prteliash == 0
  new%gfw_nomega = 0
  if (dtset%prteliash /= 0) then
@@ -2286,8 +2311,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        ! in this case we print a warning
        write(msg,'(3(a,f10.6))')&
          'Calculated number of electrons nelect = ',nelect,&
-         ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,&
-         ' for T = ',new%kTmesh(it)
+         ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,' for T = ',new%kTmesh(it)
        if (new%kTmesh(it) == 0) then
          MSG_WARNING(msg)
        else
@@ -2352,20 +2376,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_FREE(th)
    ABI_FREE(wth)
 
-   !if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine == 0) .or.&
-   !    (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /= 0) )  then
-   !  wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)//'FINE'
-   !  if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then
-   !    MSG_ERROR(msg)
-   !  end if
-   !  call wrtout(std_out,"Will read energies from: "//trim(wfk_fname_dense))
-   !  ebands_dense = wfk_read_ebands(path, comm) result(ebands)
-   !  ebands_ptr => ebands_dense
-   !  call ebands_free(ebands_dense)
-   !else
-   !  ebands_ptr => ebands
-   !end if
-
    ! Build SKW object for all bands where QP corrections are wanted.
    ! TODO: check band_block because I got weird results (don't remember if with AbiPy or Abinit)
    skw_cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) skw_cplex = 2
@@ -2389,7 +2399,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_CALLOC(new%linewidth_mrta, (new%ntemp, new%max_nbcalc))
  end if
 
- call cwtime_report("sigmaph_new: all", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" sigmaph_new: all", cpu_all, wall_all, gflops_all)
 
 end function sigmaph_new
 !!***
