@@ -120,7 +120,7 @@ program multibinit
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(2)
 #endif
 
 !Initialisation of the timing
@@ -382,7 +382,14 @@ program multibinit
 !we need to use the molecular dynamics
    if(inp%bound_model>0.and.inp%bound_model<=2)then
      call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_model,comm,hist=hist)
+   !Marcus: New option for bound_model: use optimize routine for generting specific high order terms
+   elseif(inp%bound_model == 3)then
+    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,&
+&    'Bound Process 3: Generate equivalent high order terms',ch10            
+     call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,comm) 
    end if
+
+
 
 
 

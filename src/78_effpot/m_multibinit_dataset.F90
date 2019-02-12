@@ -1663,10 +1663,10 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%bound_model=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_model',tread,'INT')
  if(tread==1) multibinit_dtset%bound_model=intarr(1)
- if(multibinit_dtset%bound_model<0.and.multibinit_dtset%bound_model>1)then
+ if(multibinit_dtset%bound_model<0.and.multibinit_dtset%bound_model>3)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'bound_model is',multibinit_dtset%bound_model,', but the only allowed values',ch10,&
-&   'are 0 or 1 for multibinit.',ch10,&
+&   'are between 0 and 3 for multibinit.',ch10,&
 &   'Action: correct bound_model in your input file.'
    MSG_ERROR(message)
  end if

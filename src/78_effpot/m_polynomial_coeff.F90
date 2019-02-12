@@ -2003,6 +2003,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
    end do
  end do
 
+! TODO MS REWRITE UNTIL HERE IN m_opt_effpot with specific atoms and rpts
+
  if(need_verbose)then
    write(message,'(1a)')' Generation of the list of all the possible coefficients'
    call wrtout(std_out,message,'COLL')
@@ -2060,8 +2062,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 !TEST_AM
          end if
        end if
-     end do
-   end do
+     end do !end  icoeff 
+   end do !icoeff2
 
 
 !  Compute all the combination of coefficient up to the given order  (get the number)
