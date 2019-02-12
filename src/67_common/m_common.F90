@@ -43,7 +43,7 @@ module m_common
  use m_electronpositron,  only : electronpositron_type
  use m_energies,          only : energies_type, energies_eval_eint
 
- use m_pair_list,         only : pair_list, pair_list_set, pair_list_free, pair_list_init
+ use m_pair_list,         only : pair_list
  use m_neat,              only : neat_energies
 
 
@@ -1506,10 +1506,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
    if (directE_avail) then
      write(msg, '(2a)' ) ' Components of total free energy (in Hartree) :',ch10
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'comment', s='Components of total free energy (in Hartree)')
+     call e_components%set('comment', s='Components of total free energy (in Hartree)')
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Kinetic energy', r=energies%e_kinetic)
+     call e_components%set('Kinetic energy', r=energies%e_kinetic)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
 !XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
@@ -1522,37 +1522,37 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &       '    '//eneName//'  =',enevalue,ch10,&
 &       '    PspCore energy  = ',energies%e_corepsp
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, 'Hartree energy', r=energies%e_hartree)
-       call pair_list_set(e_components, 'XC energy', r=exc_semilocal)
-       call pair_list_set(e_components, eneName, r=enevalue)
-       call pair_list_set(e_components, 'PsPCore', r=energies%e_corepsp)
+       call e_components%set('Hartree energy', r=energies%e_hartree)
+       call e_components%set('XC energy', r=exc_semilocal)
+       call e_components%set(eneName, r=enevalue)
+       call e_components%set('PsPCore', r=energies%e_corepsp)
 #if defined DEV_YP_VDWXC
        if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) .and. (xc_vdw_status()) ) then
          write(msg, '(a,es21.14)' )'    vdW-DF energy   = ',energies%e_xc_vdw
          call wrtout(iout,msg,'COLL')
-         call pair_list_set(e_components, 'vdW-DF energy', r=energies%e_xc_vdw)
+         call e_components%set('vdW-DF energy', r=energies%e_xc_vdw)
        end if
 #endif
      end if
      write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Loc. psp. energy', r=energies%e_localpsp)
+     call e_components%set('Loc. psp. energy', r=energies%e_localpsp)
      if (usepaw==0) then
        if(abs(energies%e_fock0)<tol8)then
          write(msg, '(a,es21.14)' ) &
 &         '    NL   psp  energy= ',energies%e_nlpsp_vfock
-         call pair_list_set(e_components, 'NL psp energy', r=energies%e_nlpsp_vfock)
+         call e_components%set('NL psp energy', r=energies%e_nlpsp_vfock)
        else
          write(msg, '(a,es21.14)' ) &
 &         '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
-         call pair_list_set(e_components, 'NL(psp+X) energy', r=energies%e_nlpsp_vfock-energies%e_fock0)
+         call e_components%set('NL(psp+X) energy', r=energies%e_nlpsp_vfock-energies%e_fock0)
        endif
        call wrtout(iout,msg,'COLL')
      else
        write(msg, '(a,es21.14)' ) &
 &       '    Spherical terms = ',energies%e_paw
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, 'Spherical terms', r=energies%e_paw)
+       call e_components%set('Spherical terms', r=energies%e_paw)
 !XG20181025 Does not work (yet)...
 !       if(abs(energies%e_nlpsp_vfock)>tol8)then
 !         write(msg, '(a,es21.14)' ) &
@@ -1566,21 +1566,21 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, 'Vd Waals DFT-D', r=energies%e_vdw_dftd)
+       call e_components%set('Vd Waals DFT-D', r=energies%e_vdw_dftd)
      end if
      if (dtset%nzchempot>=1) then
        write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, 'Chem. potential', r=energies%e_chempot)
+       call e_components%set('Chem. potential', r=energies%e_chempot)
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
-       call pair_list_set(e_components, '>>>>> Internal E', r=etotal-eent)
+       call e_components%set('>>>>> Internal E', r=etotal-eent)
        if(.not.testdmft) then
          write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
 &         '    >>>>> Internal E= ',etotal-eent,ch10,ch10,&
 &         '    -kT*entropy     = ',eent
          call wrtout(iout,msg,'COLL')
-         call pair_list_set(e_components, '-kT*entropy', r=eent)
+         call e_components%set('-kT*entropy', r=eent)
        else
          write(msg, '(a,es21.14,a)' ) &
 &         '    >>>>> Internal E= ',etotal-eent,ch10
@@ -1590,20 +1590,20 @@ subroutine prtene(dtset,energies,iout,usepaw)
        if (dtset%occopt>=3.and.dtset%occopt<=8) then
          write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
          call wrtout(iout,msg,'COLL')
-         call pair_list_set(e_components, '-kT*entropy', r=eent)
+         call e_components%set('-kT*entropy', r=eent)
        end if
        write(msg, '(3a,es21.14,a)' ) &
 &       '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron &
 &       -energies%e_electronpositron,ch10
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, '>>> '//EPName(ipositron)//' E', r=etotal- &
+       call e_components%set('>>> '//EPName(ipositron)//' E', r=etotal- &
 &                                       energies%e0_electronpositron-energies%e_electronpositron)
        write(msg, '(3a,es21.14,2a,es21.14)' ) &
 &       '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
 &       '    EP interaction E= '             ,energies%e_electronpositron
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, EPName(3-ipositron)//' ener.', r=energies%e0_electronpositron)
-       call pair_list_set(e_components, 'EP interaction E', r=energies%e_electronpositron)
+       call e_components%set(EPName(3-ipositron)//' ener.', r=energies%e0_electronpositron)
+       call e_components%set('EP interaction E', r=energies%e_electronpositron)
      end if
      if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &     dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) .and.ipositron/=1) then
@@ -1611,12 +1611,12 @@ subroutine prtene(dtset,energies,iout,usepaw)
        call wrtout(iout,msg,'COLL')
        write(msg, '(a,es21.14)' ) '    Kohn-Sham energy= ',etotal-energies%e_elecfield
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, 'Electric energy', r=energies%e_elecfield)
-       call pair_list_set(e_components, 'Kohn-Sham energy', r=etotal-energies%e_elecfield)
+       call e_components%set('Electric energy', r=energies%e_elecfield)
+       call e_components%set('Kohn-Sham energy', r=etotal-energies%e_elecfield)
      end if
      write(msg, '(a,es21.14)' ) '    >>>>>>>>> Etotal= ',etotal
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, '>>>>> Etotal', r=etotal)
+     call e_components%set('>>>>> Etotal', r=etotal)
 
    else
      write(msg, '(9a)' ) &
@@ -1626,7 +1626,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     '  without the knowledge of imaginary part of Rhoij atomic occupancies',ch10,&
 &     '  (computed only when pawcpxocc=2).'
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'comment', s='"Direct" decomposition of total free energy cannot be printed out !!!'//ch10// &
+     call e_components%set('comment', s='"Direct" decomposition of total free energy cannot be printed out !!!'//ch10// &
 &                       'PAW contribution due to spin-orbit coupling cannot be evaluated'//ch10// &
 &                       'without the knowledge of imaginary part of Rhoij atomic occupancies'//ch10// &
 &                       '(computed only when pawcpxocc=2).')
@@ -1641,8 +1641,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &   ' "Double-counting" decomposition of free energy:',ch10,&
 &   '    Band energy     = ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call pair_list_set(e_components, 'comment', s='Double-counting" decomposition of free energy')
-   call pair_list_set(e_components, 'Band energy', r=energies%e_eigenvalues)
+   call e_components%set('comment', s='Double-counting" decomposition of free energy')
+   call e_components%set('Band energy', r=energies%e_eigenvalues)
    if (ipositron/=1) then
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
 &     '    '//eneName//'  =',enevalue,ch10,&
@@ -1651,30 +1651,30 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     -energies%e_fock0+&
 &     energies%e_hybcomp_E0-energies%e_hybcomp_v0
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, eneName, r=enevalue)
-     call pair_list_set(e_components, 'PspCore energy', r=energies%e_corepsp-energies%e_corepspdc)
-     call pair_list_set(e_components, 'Dble-C XC-energy', r=-energies%e_hartree+energies%e_xc-energies%e_xcdc)
+     call e_components%set(eneName, r=enevalue)
+     call e_components%set('PspCore energy', r=energies%e_corepsp-energies%e_corepspdc)
+     call e_components%set('Dble-C XC-energy', r=-energies%e_hartree+energies%e_xc-energies%e_xcdc)
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Electric field  = ',energies%e_elecfield
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Electric field', r=energies%e_elecfield)
+     call e_components%set('Electric field', r=energies%e_elecfield)
    end if
    if (usepaw==1) then
      write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_pawdc
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Spherical terms', r=energies%e_pawdc)
+     call e_components%set('Spherical terms', r=energies%e_pawdc)
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Vd Waals DFT-D', r=energies%e_vdw_dftd)
+     call e_components%set('Vd Waals DFT-D', r=energies%e_vdw_dftd)
    end if
    if (dtset%nzchempot>=1) then
      write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Chem. potential', r=energies%e_chempot)
+     call e_components%set('Chem. potential', r=energies%e_chempot)
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
      if(.not.testdmft) then
@@ -1682,18 +1682,18 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &       '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
 &       '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, '>>>>> Internal E', r=etotaldc-eent)
-       call pair_list_set(e_components, '-kT*entropy', r=eent)
+       call e_components%set('>>>>> Internal E', r=etotaldc-eent)
+       call e_components%set('-kT*entropy', r=eent)
      else
        write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotaldc-eent,ch10
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, '>>>>> Internal E', r=etotaldc-eent)
+       call e_components%set('>>>>> Internal E', r=etotaldc-eent)
      end if
    else if (ipositron/=0) then
      if (dtset%occopt>=3 .and. dtset%occopt<=8) then
        write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
-       call pair_list_set(e_components, '-kT*entropy', r=eent)
+       call e_components%set('-kT*entropy', r=eent)
      end if
      write(msg, '(a,es21.14,4a,es21.14,a)' ) &
 &     '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
@@ -1704,14 +1704,14 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
 &     '    EP interaction E= '            ,energies%e_electronpositron
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'EP dble-ct En.', r=-energies%edc_electronpositron)
-     call pair_list_set(e_components, '>>> '//EPName(ipositron)//' E', r=etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
-     call pair_list_set(e_components, EPName(3-ipositron)//' E', r=energies%e0_electronpositron)
-     call pair_list_set(e_components, 'EP interaction E', r=energies%e_electronpositron)
+     call e_components%set('EP dble-ct En.', r=-energies%edc_electronpositron)
+     call e_components%set('>>> '//EPName(ipositron)//' E', r=etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
+     call e_components%set(EPName(3-ipositron)//' E', r=energies%e0_electronpositron)
+     call e_components%set('EP interaction E', r=energies%e_electronpositron)
    end if
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    call wrtout(iout,msg,'COLL')
-   call pair_list_set(e_components, '>>>> Etotal (DC)', r=etotaldc)
+   call e_components%set('>>>> Etotal (DC)', r=etotaldc)
  end if
 
 !======= Additional printing for compatibility  ==========
@@ -1721,21 +1721,21 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &   ' Other information on the energy :',ch10,&
 &   '    Total energy(eV)= ',etotal*Ha_eV,' ; Band energy (Ha)= ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call pair_list_set(e_components, 'Band energy', r=energies%e_eigenvalues)
-   call pair_list_set(e_components, 'Total energy(eV)', r=etotal*Ha_eV)
+   call e_components%set('Band energy', r=energies%e_eigenvalues)
+   call e_components%set('Total energy(eV)', r=etotal*Ha_eV)
  end if
 
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
    write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call pair_list_set(e_components, 'Band energy', r=energies%e_eigenvalues)
+   call e_components%set('Band energy', r=energies%e_eigenvalues)
  end if
 
  if (usepaw==1) then
    if ((optdc==0.or.optdc==2).and.(directE_avail)) then
      write(msg, '(a,a,es21.14)' ) ch10,'  >Total energy in eV           = ',etotal*Ha_eV
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Total energy(eV)', r=etotal*Ha_eV)
+     call e_components%set('Total energy(eV)', r=etotal*Ha_eV)
    end if
    if (optdc>=1) then
      if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,&
@@ -1743,7 +1743,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (optdc==2) write(msg, '(a,es21.14)' ) &
 &     '  >Total DC energy in eV        = ',etotaldc*Ha_eV
      call wrtout(iout,msg,'COLL')
-     call pair_list_set(e_components, 'Total DC energy(eV)', r=etotal*Ha_eV)
+     call e_components%set('Total DC energy(eV)', r=etotal*Ha_eV)
    end if
  end if
 
@@ -1757,15 +1757,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
    call wrtout(iout,msg,'COLL')
    write(msg, '(a,es21.14)' ) '    Monopole correction (eV)=',energies%e_monopole*Ha_eV
    call wrtout(iout,msg,'COLL')
-   call pair_list_set(e_components, 'Monopole correction', r=energies%e_monopole)
-   call pair_list_set(e_components, 'Monopole correction (eV)', r=energies%e_monopole*Ha_eV)
+   call e_components%set('Monopole correction', r=energies%e_monopole)
+   call e_components%set('Monopole correction (eV)', r=energies%e_monopole*Ha_eV)
  end if
 
  write(msg,'(a,80a)')('-',mu=1,80)
  call wrtout(iout,msg,'COLL')
 
  call neat_energies(e_components, iout)
- call pair_list_free(e_components)
+ call e_components%free()
 
 end subroutine prtene
 !!***

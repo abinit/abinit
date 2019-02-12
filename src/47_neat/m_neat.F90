@@ -11,15 +11,6 @@ module m_neat
 
   private
   public :: neat_energies, neat_results_gs, neat_crystal
-! ! Expose pair list api
-!   public :: pair_list_init, pair_list_set, pair_list_get, pair_list_free
-!   public :: pair_list_next, pair_list_look, pair_list_iter, pair_list_restart
-!   public :: pair_list
-!   public :: TC_EMPTY, TC_NOTFOUND, TC_INT, TC_REAL, TC_STRING
-! ! Expose stream string api
-!   public :: stream_write, stream_get_chunk, stream_free, stream_string
-!   public :: stream_to_string, stream_copy, stream_transfer, stream_to_file
-!   public :: stream_debug
   contains
 
   subroutine wrtout_stream(stream, iout)
@@ -28,7 +19,7 @@ module m_neat
 
     character(len=stream%length) :: s
 
-    call stream_to_string(stream, s)
+    call stream%to_string(s)
     call wrtout(iout, s, 'COLL')
   end subroutine wrtout_stream
   
@@ -110,17 +101,17 @@ module m_neat
     call yaml_add_intfield('natom', results%natom, width=10, stream=stream)
     call yaml_add_intfield('nsppol', results%nsppol, width=10, stream=stream)
 
-    call pair_list_set(dict, 'ecut', r=ecut)
-    call pair_list_set(dict, 'pawecutdg', r=pawecutdg)
+    call dict%set('ecut', r=ecut)
+    call dict%set('pawecutdg', r=pawecutdg)
     call yaml_add_dict('cut', dict, width=10, stream=stream)
-    call pair_list_free(dict)
+    call dict%free()
 
-    call pair_list_set(dict, 'deltae', r=results%deltae)
-    call pair_list_set(dict, 'res2', r=results%res2)
-    call pair_list_set(dict, 'residm', r=results%residm)
-    call pair_list_set(dict, 'diffor', r=results%diffor)
+    call dict%set('deltae', r=results%deltae)
+    call dict%set('res2', r=results%res2)
+    call dict%set('residm', r=results%residm)
+    call dict%set('diffor', r=results%diffor)
     call yaml_add_dict('convergence', dict, width=10, multiline_trig=2, stream=stream)
-    call pair_list_free(dict)
+    call dict%free()
 
     call yaml_add_realfield('etotal', results%etotal, width=10, stream=stream)
     call yaml_add_realfield('entropy', results%entropy, width=10, stream=stream)

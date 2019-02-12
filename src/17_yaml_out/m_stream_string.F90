@@ -23,12 +23,21 @@ module m_stream_string
   type stream_string
     integer :: length = 0
     type(stream_chunk), pointer :: head => NULL()
+    contains
+      procedure :: free => stream_free
+      procedure :: copy => stream_copy
+      procedure :: write => stream_write
+      procedure :: get_chunk => stream_get_chunk
+      procedure :: to_string => stream_to_string
+      procedure :: to_file => stream_to_file
+      procedure :: transfer => stream_transfer
+      procedure :: debug => stream_debug
   end type stream_string
 
   contains
 
   subroutine stream_free(stream)
-    type(stream_string),intent(inout) :: stream
+    class(stream_string),intent(inout) :: stream
     type(stream_chunk), pointer :: cursor, prev
     cursor => stream%head
     do while (associated(cursor))
@@ -39,7 +48,7 @@ module m_stream_string
   end subroutine stream_free
 
   subroutine stream_copy(src, dest)
-    type(stream_string),intent(inout) :: src, dest
+    class(stream_string),intent(inout) :: src, dest
     type(stream_chunk), pointer :: cursor
     cursor => src%head
     do while (associated(cursor))
@@ -49,7 +58,7 @@ module m_stream_string
   end subroutine stream_copy
 
   subroutine stream_write(stream, string)
-    type(stream_string),intent(inout) :: stream
+    class(stream_string),intent(inout) :: stream
     character(len=*),intent(in) :: string
     integer :: offset, room_left, soffset
     type(stream_chunk), pointer :: cursor
@@ -84,7 +93,7 @@ module m_stream_string
   end subroutine stream_write
 
   subroutine stream_get_chunk(stream, string)
-    type(stream_string),intent(inout) :: stream
+    class(stream_string),intent(inout) :: stream
     character(len=chunk_size),intent(out) :: string
     type(stream_chunk),pointer :: cursor
 
@@ -105,7 +114,7 @@ module m_stream_string
   end subroutine stream_get_chunk
 
   subroutine stream_to_string(stream, string)
-    type(stream_string),intent(inout) :: stream
+    class(stream_string),intent(inout) :: stream
     character(len=*),intent(out) :: string
     character(len=chunk_size) :: stmp
     integer :: offset, length
@@ -121,7 +130,7 @@ module m_stream_string
   end subroutine stream_to_string
 
   subroutine stream_to_file(stream, file_d)
-    type(stream_string),intent(inout) :: stream
+    class(stream_string),intent(inout) :: stream
     integer,intent(in) :: file_d
     character(len=chunk_size) :: stmp
     integer :: offset, length
@@ -136,7 +145,7 @@ module m_stream_string
   end subroutine stream_to_file
 
   subroutine stream_transfer(src, dest)
-    type(stream_string),intent(inout) :: src, dest
+    class(stream_string),intent(inout) :: src, dest
     character(len=chunk_size) :: chunk
     integer :: length
     if(.not.associated(dest%head)) then
@@ -158,7 +167,7 @@ module m_stream_string
   end subroutine stream_transfer
 
   subroutine stream_debug(src)
-    type(stream_string),intent(inout) :: src
+    class(stream_string),intent(inout) :: src
     type(stream_chunk), pointer :: cursor
     integer :: c
     cursor => src%head

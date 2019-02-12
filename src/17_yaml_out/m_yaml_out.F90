@@ -85,15 +85,15 @@ module m_yaml_out
     quoted = yaml_quote_string(label)
     if(present(width)) then
       if(width > len_trim(label)) then
-        call stream_write(stream, trim(quoted)//repeat(' ', width-len_trim(quoted))//':')
+        call stream%write(trim(quoted)//repeat(' ', width-len_trim(quoted))//':')
       else
-        call stream_write(stream, trim(quoted)//':')
+        call stream%write(trim(quoted)//':')
       end if
     else
-      call stream_write(stream, trim(quoted)//':')
+      call stream%write(trim(quoted)//':')
     end if
     if (present(tag)) then
-      call stream_write(stream, ' !'//trim(tag))
+      call stream%write(' !'//trim(tag))
     end if
   end subroutine yaml_start_field
 
@@ -108,25 +108,25 @@ module m_yaml_out
     integer :: i
 
     if (length > vmax) then
-      call stream_write(stream, ' ['//eol//'    ')
+      call stream%write(' ['//eol//'    ')
     else
-      call stream_write(stream, ' [')
+      call stream%write(' [')
     end if
 
     do i=1,length
       call string_clear(tmp_r)
       write(tmp_r, rfmt) arr(i)
-      call stream_write(stream, trim(tmp_r))
+      call stream%write(trim(tmp_r))
       if (i > 0 .and. mod(i, vmax) == 0 .and. i /= length) then
-        call stream_write(stream, ', '//eol//'    ')
+        call stream%write(', '//eol//'    ')
       else
-        call stream_write(stream, ', ')
+        call stream%write(', ')
       end if
     end do
     if (length > vmax) then
-      call stream_write(stream, eol)
+      call stream%write(eol)
     end if
-    call stream_write(stream, ']')
+    call stream%write(']')
   end subroutine yaml_print_real1d
 
   subroutine yaml_print_int1d(stream, length, arr, ifmt, vmax)
@@ -140,25 +140,25 @@ module m_yaml_out
     integer :: i
 
     if (length > vmax) then
-      call stream_write(stream, ' ['//eol//'    ')
+      call stream%write(' ['//eol//'    ')
     else
-      call stream_write(stream, ' [')
+      call stream%write(' [')
     end if
 
     do i=1,length
       call string_clear(tmp_i)
       write(tmp_i, ifmt) arr(i)
-      call stream_write(stream, trim(tmp_i))
+      call stream%write(trim(tmp_i))
       if (i > 0 .and. mod(i, vmax) == 0 .and. i /= length) then
-        call stream_write(stream, ', '//eol//'    ')
+        call stream%write(', '//eol//'    ')
       else
-        call stream_write(stream, ', ')
+        call stream%write(', ')
       end if
     end do
     if (length > vmax) then
-      call stream_write(stream, eol)
+      call stream%write(eol)
     end if
-    call stream_write(stream, ']')
+    call stream%write(']')
   end subroutine yaml_print_int1d
 
   subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt, vmax)
@@ -177,43 +177,43 @@ module m_yaml_out
     real(kind=dp) :: vr
     character(len=s_size) :: vs
 
-    if (pl%length > vmax) then
-      call stream_write(stream, ' {'//eol//'    ')
+    if (pl%length() > vmax) then
+      call stream%write(' {'//eol//'    ')
     else
-      call stream_write(stream, ' {')
+      call stream%write(' {')
     end if
 
-    call pair_list_restart(pl)
-    do i=1,pl%length
-      call pair_list_iter(pl, key, type_code, vi, vr, vs)
+    call pl%restart()
+    do i=1,pl%length()
+      call pl%iter(key, type_code, vi, vr, vs)
 
       call string_clear(tmp_key)
       write(tmp_key, kfmt) '"'//trim(key)//'"'
-      call stream_write(stream, trim(tmp_key)//': ')
+      call stream%write(trim(tmp_key)//': ')
       if(type_code == TC_INT) then
         call string_clear(tmp_i)
         write(tmp_i, ifmt) vi
-        call stream_write(stream, trim(tmp_i))
+        call stream%write(trim(tmp_i))
       else if(type_code == TC_REAL) then
         call string_clear(tmp_r)
         write(tmp_r, rfmt) vr
-        call stream_write(stream, trim(tmp_r))
+        call stream%write(trim(tmp_r))
       else if(type_code == TC_STRING) then
         call string_clear(tmp_s)
         write(tmp_s, sfmt) vs
         call yaml_print_string(stream, trim(tmp_s), 100)
       end if
-      if (i > 0 .and. mod(i, vmax) == 0 .and. i /= pl%length) then
-        call stream_write(stream, ', '//eol//'    ')
+      if (i > 0 .and. mod(i, vmax) == 0 .and. i /= pl%length()) then
+        call stream%write(', '//eol//'    ')
       else
-        call stream_write(stream, ', ')
+        call stream%write(', ')
       end if
     end do
 
-    if (pl%length > vmax) then
-      call stream_write(stream, eol)
+    if (pl%length() > vmax) then
+      call stream%write(eol)
     end if
-    call stream_write(stream, '}')
+    call stream%write('}')
   end subroutine yaml_print_dict
 
   subroutine yaml_print_string(stream, string, vmax)
@@ -232,7 +232,7 @@ module m_yaml_out
 
 
     quoted = yaml_quote_string(string)
-    call stream_write(stream, trim(quoted))
+    call stream%write(trim(quoted))
   end subroutine yaml_print_string
 
 ! public
@@ -254,8 +254,8 @@ module m_yaml_out
     write(tmp_i, '(I6)') val
 
     if(present(stream)) then
-      call stream_write(stream, '--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
-      if(nl) call stream_write(stream, eol)
+      call stream%write('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
+      if(nl) call stream%write(eol)
     else if(present(string)) then
       if(nl) then
         write(string, '(A)') '--- !IterStart'//eol//label//':'//tmp_i//eol//'...'//eol
@@ -291,40 +291,40 @@ module m_yaml_out
     SET_DEFAULT(w, width, 0)
   
     if (doclock == 1) then
-     call stream_write(interm, '...')
+     call interm%write('...')
     end if
     doclock = 1
     
     if(present(tag)) then
-      call stream_write(interm, '---'//' !'//trim(tag)//eol//'label')
+      call interm%write('---'//' !'//trim(tag)//eol//'label')
     else
-      call stream_write(interm, '---'//eol//'label')
+      call interm%write('---'//eol//'label')
     end if
     if(present(width)) then
       if(width > 5) then
-        call stream_write(interm, repeat(' ', width - 5))
+        call interm%write(repeat(' ', width - 5))
       end if
     end if
-    call stream_write(interm, ': '//trim(label))
+    call interm%write(': '//trim(label))
 
     if (comment /= '') then
-      call stream_write(interm, eol//'comment')
+      call interm%write(eol//'comment')
       if(present(width)) then
         if(width > 7) then
-          call stream_write(interm, repeat(' ', width - 7))
+          call interm%write(repeat(' ', width - 7))
         end if
       end if
-      call stream_write(interm, ': ')
+      call interm%write(': ')
       call yaml_print_string(interm, comment, 70)
     end if
-    if(nl) call stream_write(interm, eol)
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -360,17 +360,17 @@ module m_yaml_out
       call yaml_start_field(interm, label, width=w)
     end if
 
-    call stream_write(interm, ' ')
+    call interm%write(' ')
     write(tmp_r, trim(rfmt)) val
-    call stream_write(interm, trim(tmp_r))
-    if(nl) call stream_write(interm, eol)
+    call interm%write(trim(tmp_r))
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -406,17 +406,17 @@ module m_yaml_out
       call yaml_start_field(interm, label, width=w)
     end if
 
-    call stream_write(interm, ' ')
+    call interm%write(' ')
     write(tmp_i, trim(ifmt)) val
-    call stream_write(interm, trim(tmp_i))
-    if(nl) call stream_write(interm, eol)
+    call interm%write(trim(tmp_i))
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -447,16 +447,16 @@ module m_yaml_out
       call yaml_start_field(interm, label, width=w)
     end if
 
-    call stream_write(interm, ' ')
+    call interm%write(' ')
     call yaml_print_string(interm, val, 70)
-    if(nl) call stream_write(interm, eol)
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -496,14 +496,14 @@ module m_yaml_out
     end if
 
     call yaml_print_real1d(interm, length, arr, trim(rfmt), vmax)
-    if(nl) call stream_write(interm, eol)
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -543,14 +543,14 @@ module m_yaml_out
     end if
 
     call yaml_print_int1d(interm, length, arr, trim(ifmt), vmax)
-    if(nl) call stream_write(interm, eol)
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -598,14 +598,14 @@ module m_yaml_out
     end if
 
     call yaml_print_dict(interm, pl, ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
-    if(nl) call stream_write(interm, eol)
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -645,18 +645,18 @@ module m_yaml_out
     end if
 
     do i=1,m
-      call stream_write(interm, eol//'-')
+      call interm%write(eol//'-')
       call yaml_print_real1d(interm, n, arr(i,:), rfmt, vmax)
     end do
 
-    if(nl) call stream_write(interm, eol)
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -696,18 +696,18 @@ module m_yaml_out
     end if
 
     do i=1,m
-      call stream_write(interm, eol//'-')
+      call interm%write(eol//'-')
       call yaml_print_int1d(interm, n, arr(i,:), ifmt, vmax)
     end do
 
-    if(nl) call stream_write(interm, eol)
+    if(nl) call interm%write(eol)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -754,23 +754,23 @@ module m_yaml_out
     else
       call yaml_start_field(interm, label, width=w)
     end if
-    call stream_write(interm, eol)
+    call interm%write(eol)
 
     do i=1,n
-      call stream_write(interm, '- ')
+      call interm%write('- ')
       call yaml_print_dict(interm, plarr(i), ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
       if(nl .or. i/=n) then
-        call stream_write(interm, eol)
+        call interm%write(eol)
       end if
     end do
 
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -808,58 +808,58 @@ module m_yaml_out
     SET_DEFAULT(w, width, 0)
 
     if (doclock == 1) then
-     call stream_write(interm, '...'//eol)
+     call interm%write('...'//eol)
     end if
     doclock = 1
     
-    call stream_write(interm, '---')
+    call interm%write('---')
     if(present(tag)) then
-      call stream_write(interm, ' !'//tag)
+      call interm%write(' !'//tag)
     end if
-    call stream_write(interm, eol)
+    call interm%write(eol)
     call yaml_start_field(interm, 'label', width=width)
-    call stream_write(interm, ' '//label)
+    call interm%write(' '//label)
 
     if (comment /= '') then
-      call stream_write(interm, eol)
+      call interm%write(eol)
       call yaml_start_field(interm, 'comment', width=width)
       call yaml_print_string(interm, comment, 70)
     end if
-    call stream_write(interm, eol)
+    call interm%write(eol)
 
-    call pair_list_restart(pl)
-    do k=1,pl%length
+    call pl%restart()
+    do k=1,pl%length()
       call string_clear(key)
       call string_clear(vs)
-      call pair_list_iter(pl, key, type_code, vi, vr, vs)
+      call pl%iter(key, type_code, vi, vr, vs)
       write(*,*) key, type_code
 
       call yaml_start_field(interm, trim(key), width=width)
-      call stream_write(interm, ' ')
+      call interm%write(' ')
       if(type_code == TC_INT) then
         call string_clear(tmp_i)
         write(tmp_i, ifmt) vi
-        call stream_write(interm, trim(tmp_i))
+        call interm%write(trim(tmp_i))
       else if(type_code == TC_REAL) then
         call string_clear(tmp_r)
         write(tmp_r, rfmt) vr
-        call stream_write(interm, trim(tmp_r))
+        call interm%write(trim(tmp_r))
       else if(type_code == TC_STRING) then
         call string_clear(tmp_s)
         write(tmp_s, sfmt) vs
         call yaml_print_string(interm, trim(tmp_s), 100)
       end if
-      call stream_write(interm, eol)
+      call interm%write(eol)
     end do
 
     call yaml_close_doc(stream=interm, newline=nl)
 
     if(present(stream)) then
-      call stream_transfer(interm, stream)
+      call interm%transfer(stream)
     else if(present(string)) then
-      call stream_to_string(interm, string)
+      call interm%to_string(string)
     else if(present(file_d)) then
-      call stream_to_file(interm, file_d)
+      call interm%to_file(file_d)
     else
       ERROR_NO_OUT
     end if
@@ -876,8 +876,8 @@ module m_yaml_out
 
     if (doclock == 1) then
       if(present(stream)) then
-        call stream_write(stream, '...')
-        if(nl) call stream_write(stream, eol)
+        call stream%write('...')
+        if(nl) call stream%write(eol)
       else if(present(string)) then
         if(nl) then
           write(string, '(A)') '...'//eol
