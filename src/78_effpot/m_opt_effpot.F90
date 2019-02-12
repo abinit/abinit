@@ -485,7 +485,7 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
      ! The start is estimed to not be larger then half the initial term's value
      ! This is because hihger order terms should have smaller coefficients 
      my_coeffs(nterm_inloop) = eff_pot%anharmonics_terms%coefficients(iterm)  
-     coeff_ini = my_coeffs(nterm_inloop)%coefficient / 2
+     coeff_ini = abs(my_coeffs(nterm_inloop)%coefficient / 2)
      my_coeffs(nterm_inloop)%coefficient = coeff_ini 
      !Get number of displacements and equivalent terms for this term
      !Chose term one to get ndisp. ndisp is equal for all terms of the term 
