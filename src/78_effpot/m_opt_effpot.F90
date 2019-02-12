@@ -359,12 +359,13 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
 !Local variables ------------------------------
 !scalars
  integer :: i,ii, info,natom_sc,ntime,iterm,nterm,iorder,idisp,ndisp
- integer :: nterm_of_term, nterm_inloop, iterm_of_term
+ integer :: jterm,nterm_of_term, nterm_inloop, iterm_of_term
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3)
- integer,allocatable :: terms(:) 
+ integer,allocatable :: terms(:)
+ logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
@@ -378,7 +379,17 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
  character(len=1000) :: frmt
  character(len=fnlen) :: fn_bf='before_opt_diff', fn_af='after_opt_diff'
 !*************************************************************************
- 
+  
+  ! Say hello to the world!
+  write(message, '(a,(80a),a)' ) ch10,&
+& ('=',ii=1,80),ch10
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+
+  write(message, '(3a)' )'-Start Bound optimization of Anharmonic Potential ',ch10
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+
   !Setting/Initializing Variables
   ntime = hist%mxhist
   natom_sc = size(hist%xred,2)
@@ -387,6 +398,7 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
   if(present(print_anh)) need_print_anh = print_anh
   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
   ABI_ALLOCATE(terms,(nterm))
+  ABI_ALLOCATE(exists,(nterm))
   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
  &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
  
@@ -460,7 +472,11 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
      ABI_DATATYPE_ALLOCATE(my_coeffs,(nterm_inloop)) 
      !Copy original terms to my_coeffs 
      my_coeffs(1:nterm_inloop-1) =  eff_pot%anharmonics_terms%coefficients(:)
-     !Message 
+     !Message
+     write(message, '(a,(80a),a)' ) ch10,&
+&    ('_',ii=1,80),ch10
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
       write(message,'(2a,I3,a,I3,3a)' )ch10,&
 &     ' Check term (',iterm,'/',nterm,'): ', trim(my_coeffs(iterm)%name),ch10 
       call wrtout(ab_out,message,'COLL')
@@ -477,7 +493,7 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
      nterm_of_term = my_coeffs(iterm)%nterm
      ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all terms of term
      if(my_coeffs(iterm)%coefficient > 0 .and. .not. any(mod(my_coeffs(iterm)%terms(1)%power_disp(:),2) /= 0))then 
-             ABI_DATATYPE_DEALLOCATE(my_coeffs)
+              ABI_DATATYPE_DEALLOCATE(my_coeffs)
               ! Message to Output 
               write(message,'(3a)' )ch10,&
 &             ' ==>No need for high order bounding term',ch10
@@ -505,35 +521,60 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
      ! Get new name of term and set new terms to potential 
      call polynomial_coeff_getName(name,my_coeffs(nterm_inloop),symbols,recompute=.TRUE.)
      call polynomial_coeff_SetName(name,my_coeffs(nterm_inloop))
-     call effective_potential_setCoeffs(my_coeffs,eff_pot,nterm_inloop)
-        
+    
      ! Message to Output 
       write(message,'(5a)' )ch10,&
 &     ' ==> high order term: ', trim(my_coeffs(nterm_inloop)%name),' created',ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
+     ! Check if generated term is not already contained in effpot 
+     do jterm=1,nterm 
+        exists(jterm) = coeffs_compare(my_coeffs(jterm),my_coeffs(nterm_inloop))
+     enddo !jterm 
+     if(any(exists))then 
+        write(message,'(3a)' )ch10,&
+&       ' ==> Term exists already. We cycle',ch10
+        call wrtout(ab_out,message,'COLL')
+        call wrtout(std_out,message,'COLL')
+        ABI_DATATYPE_DEALLOCATE(my_coeffs)
+        cycle 
+     endif 
 
-     ABI_DATATYPE_DEALLOCATE(my_coeffs)  
+     ! Set new term into effective potential 
+     call effective_potential_setCoeffs(my_coeffs,eff_pot,nterm_inloop)
      
+     ! Tell the world what we do, They want to know.     
+     write(message,'(3a)' )ch10,&
+&    ' ==> Optimizing coefficient',ch10
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
 
      call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                 natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                 compute_anharmonic=.TRUE.,print_file=.FALSE.)
+     ! Deallocation in loop 
+     ABI_DATATYPE_DEALLOCATE(my_coeffs)  
+    
      i = 0 
      do while(msef/msef_ini>=2)
         i = i + 1 
-        write(*,*) i
         eff_pot%anharmonics_terms%coefficients(nterm_inloop)%coefficient = coeff_ini / 2**i
         call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                     compute_anharmonic=.TRUE.,print_file=.FALSE.)
+
      enddo ! while mse/mse_ini>10  
    enddo !iterm
  !enddo ! order 
 
+ write(message, '(a,(80a),a)' ) ch10,&
+&('_',ii=1,80),ch10
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
  
- write(message,'(3a)' )ch10,&
-&     'Finished creating high-order terms',ch10
+ write(message,'(5a)' )ch10,&
+&     ' Finished creating high-order terms',ch10,&
+&     ' Optimize initial anharmonic terms',ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
@@ -542,6 +583,7 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
   !DEALLOCATION 
   ABI_DEALLOCATE(terms)
   ABI_DEALLOCATE(symbols)
+  ABI_DEALLOCATE(exists)
   call fit_data_free(fit_data)
 end subroutine opt_effpotbound
 
