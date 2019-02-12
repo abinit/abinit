@@ -496,11 +496,22 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
               ABI_DATATYPE_DEALLOCATE(my_coeffs)
               ! Message to Output 
               write(message,'(3a)' )ch10,&
-&             ' ==>No need for high order bounding term',ch10
+&             ' ==> No need for high order bounding term',ch10
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
              cycle 
-     end if 
+     end if
+     ! if term has-strain cycle...strain-phonon-terms have to be implemented 
+     if(my_coeffs(iterm)%terms(1)%nstrain /= 0)then
+              ABI_DATATYPE_DEALLOCATE(my_coeffs)
+              ! Message to Output 
+              write(message,'(5a)' )ch10,&
+&             ' ==> Term has strain compenent. Strain-Phonon terms are not yet implemented',ch10,&
+&             ' ==> We cycle',ch10
+              call wrtout(ab_out,message,'COLL')
+              call wrtout(std_out,message,'COLL')
+             cycle 
+     endif 
      ! Change all weights of equivalent terms of this term to 1 
      !(Even terms have allways a weight of 1...)
      ! Change all orders of the term to an even order
@@ -527,7 +538,8 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
 &     ' ==> high order term: ', trim(my_coeffs(nterm_inloop)%name),' created',ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
-     ! Check if generated term is not already contained in effpot 
+     ! Check if generated term is not already contained in effpot
+     ! If yes cycle 
      do jterm=1,nterm 
         exists(jterm) = coeffs_compare(my_coeffs(jterm),my_coeffs(nterm_inloop))
      enddo !jterm 
