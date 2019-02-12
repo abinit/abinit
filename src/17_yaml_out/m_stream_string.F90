@@ -26,21 +26,6 @@ module m_stream_string
   end type stream_string
 
   contains
-  subroutine stream_transfer(src, dest)
-    type(stream_string),intent(inout) :: src, dest
-    character(len=chunk_size) :: chunk
-    if(.not.associated(dest%head)) then
-      ! if possible just transfer the pointer
-      dest%head => src%head
-      dest%length = src%length
-      src%head => NULL()
-    else
-      do while (src%length > 0)
-        call stream_get_chunk(src, chunk)
-        call stream_write(dest, chunk)
-      end do
-    end if
-  end subroutine stream_transfer
 
   subroutine stream_free(stream)
     type(stream_string),intent(inout) :: stream
@@ -100,7 +85,7 @@ module m_stream_string
 
   subroutine stream_get_chunk(stream, string)
     type(stream_string),intent(inout) :: stream
-    character(len=*),intent(out) :: string
+    character(len=chunk_size),intent(out) :: string
     type(stream_chunk),pointer :: cursor
 
     string = stream%head%chunk
@@ -149,6 +134,28 @@ module m_stream_string
       offset = offset + chunk_size
     end do
   end subroutine stream_to_file
+
+  subroutine stream_transfer(src, dest)
+    type(stream_string),intent(inout) :: src, dest
+    character(len=chunk_size) :: chunk
+    integer :: length
+    if(.not.associated(dest%head)) then
+      ! if possible just transfer the pointer
+      dest%head => src%head
+      dest%length = src%length
+      src%head => NULL()
+    else
+      do while (src%length > 0)
+        length = src%length
+        call stream_get_chunk(src, chunk)
+        if(length > chunk_size) then
+          call stream_write(dest, chunk)
+        else
+          call stream_write(dest, chunk(1:length))
+        end if
+      end do
+    end if
+  end subroutine stream_transfer
 
   subroutine stream_debug(src)
     type(stream_string),intent(inout) :: src
