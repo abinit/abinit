@@ -19,6 +19,7 @@
 #endif
 
 #include "triqs_cthyb_qmc.hpp"
+#include "execute_python.hpp"
 
 using namespace std;
 #if defined HAVE_TRIQS_v2_0
@@ -33,6 +34,39 @@ using triqs::operators::c_dag;
 using triqs::operators::n;
 
 #include <mpi.h>
+
+
+// Function to invoke python and run the script
+void invoke_python_triqs(MPI_Fint *mpi_comm) {
+    MPI_Comm comm;
+    comm << MPI_Comm_f2c(*mpi_comm);
+
+    int ierr, rank;
+    ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if (rank == 0) fprintf(stdout, "invoke_python_triqs: beginning\n");
+
+    // Launch python
+    init_python_interpreter("");
+    if (rank == 0) fprintf(stdout, "invoke_python_triqs: interpreter initialized\n");
+
+    // Execute script
+    execute_python_file("");
+    if (rank == 0) fprintf(stdout, "invoke_python_triqs: script runned\n");
+
+    int final;
+    MPI_Finalized(&final);
+    if (final) {
+        fprintf(stderr, "MPI is finalized on node %i\n", rank);
+    }
+
+    // Close python
+    close_python_interpreter();
+    MPI_Barrier(MPI_COMM_WORLD);
+}
+
 
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
                      bool wrt_files, bool tot_not,                  /*boolean*/	      
