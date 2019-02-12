@@ -168,7 +168,7 @@ module m_yaml_out
     character(len=*),intent(in) :: ifmt, rfmt, kfmt, sfmt
     integer,intent(in) :: key_size, s_size
     character(len=key_size) :: key
-    character(len=100) :: tmp_key
+    character(len=key_size+5) :: tmp_key
     character(len=100) :: tmp_r
     character(len=100) :: tmp_i
     character(len=s_size) :: tmp_s
@@ -236,18 +236,21 @@ module m_yaml_out
   end subroutine yaml_print_string
 
 ! public
-  subroutine yaml_iterstart(label, val, file_d, string, stream, newline)
+  subroutine yaml_iterstart(label, val, file_d, string, stream, newline, width)
     integer,intent(in) :: val
     character(len=*),intent(in) :: label
     integer,intent(in), optional :: file_d
-    type(stream_string),intent(out),optional :: stream
+    type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
+    integer :: w
     character(len=6) :: tmp_i
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
     write(tmp_i, '(I6)') val
 
     if(present(stream)) then
@@ -270,27 +273,48 @@ module m_yaml_out
     end if
   end subroutine yaml_iterstart
 
-  subroutine yaml_open_doc(label, comment, file_d, string, stream, newline)
+  subroutine yaml_open_doc(label, comment, tag, file_d, string, stream, newline, width)
     character(len=*),intent(in) :: label
     character(len=*),intent(in) :: comment
+    character(len=*),intent(in),optional :: tag
     integer,intent(in), optional :: file_d
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
+    integer :: w
     type(stream_string) :: interm
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
   
     if (doclock == 1) then
      call stream_write(interm, '...')
     end if
     doclock = 1
     
-    call stream_write(interm, '---'//eol//'label: '//label)
+    if(present(tag)) then
+      call stream_write(interm, '---'//' !'//trim(tag)//eol//'label')
+    else
+      call stream_write(interm, '---'//eol//'label')
+    end if
+    if(present(width)) then
+      if(width > 5) then
+        call stream_write(interm, repeat(' ', width - 5))
+      end if
+    end if
+    call stream_write(interm, ': '//trim(label))
+
     if (comment /= '') then
-      call stream_write(interm, eol//'comment: ')
+      call stream_write(interm, eol//'comment')
+      if(present(width)) then
+        if(width > 7) then
+          call stream_write(interm, repeat(' ', width - 7))
+        end if
+      end if
+      call stream_write(interm, ': ')
       call yaml_print_string(interm, comment, 70)
     end if
     if(nl) call stream_write(interm, eol)
@@ -306,35 +330,39 @@ module m_yaml_out
     end if
   end subroutine yaml_open_doc
 
-  subroutine yaml_add_realfield(label, val, file_d, string, stream, tag, real_fmt, newline)
+  subroutine yaml_add_realfield(label, val, file_d, string, stream, tag, &
+&                               real_fmt, newline, width)
     real(kind=dp) :: val
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag, real_fmt
     character(len=30) :: rfmt
     integer,intent(in), optional :: file_d
-    type(stream_string),intent(out),optional :: stream
+    type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
+    integer :: w
     character(len=50) :: tmp_r
     type(stream_string) :: interm
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     ASSERT(doclock == 1, "No document is opened yet.")
 
     rfmt = '                              '
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     call stream_write(interm, ' ')
     write(tmp_r, trim(rfmt)) val
-    call stream_write(interm, tmp_r)
+    call stream_write(interm, trim(tmp_r))
     if(nl) call stream_write(interm, eol)
 
     if(present(stream)) then
@@ -348,7 +376,8 @@ module m_yaml_out
     end if
   end subroutine yaml_add_realfield
 
-  subroutine yaml_add_intfield(label, val, file_d, string, stream, tag, int_fmt, newline)
+  subroutine yaml_add_intfield(label, val, file_d, string, stream, tag, &
+&                              int_fmt, newline, width)
     integer :: val
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag, int_fmt
@@ -357,26 +386,29 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
+    integer :: w
     character(50) :: tmp_i
     type(stream_string) :: interm
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     ASSERT(doclock == 1, "No document is opened yet.")
 
     ifmt = '                              '
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     call stream_write(interm, ' ')
     write(tmp_i, trim(ifmt)) val
-    call stream_write(interm, tmp_i)
+    call stream_write(interm, trim(tmp_i))
     if(nl) call stream_write(interm, eol)
 
     if(present(stream)) then
@@ -390,7 +422,7 @@ module m_yaml_out
     end if
   end subroutine yaml_add_intfield
 
-  subroutine yaml_add_stringfield(label, val, file_d, string, stream, tag, newline)
+  subroutine yaml_add_stringfield(label, val, file_d, string, stream, tag, newline, width)
     character(len=*) :: val
     character(len=*),intent(in) :: label
     character(len=*),intent(in),optional :: tag
@@ -398,18 +430,21 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
+    integer :: w
     type(stream_string) :: interm
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     ASSERT(doclock == 1, "No document is opened yet.")
 
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     call stream_write(interm, ' ')
@@ -427,7 +462,7 @@ module m_yaml_out
     end if
   end subroutine yaml_add_stringfield
 
-  subroutine yaml_add_real1d(label, length, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline)
+  subroutine yaml_add_real1d(label, length, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
     integer,intent(in) :: length
     integer,intent(in),optional :: multiline_trig
     real(kind=dp),intent(in) :: arr(length)
@@ -437,13 +472,16 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
     type(stream_string) :: interm
+    integer :: w
     character(len=30) :: rfmt
     integer :: vmax
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     ASSERT(doclock == 1, "No document is opened yet.")
 
@@ -452,9 +490,9 @@ module m_yaml_out
     SET_DEFAULT(vmax, multiline_trig, 5)
 
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     call yaml_print_real1d(interm, length, arr, trim(rfmt), vmax)
@@ -471,7 +509,7 @@ module m_yaml_out
     end if
   end subroutine yaml_add_real1d
 
-  subroutine yaml_add_int1d(label, length, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline)
+  subroutine yaml_add_int1d(label, length, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
     integer,intent(in) :: length
     integer,intent(in),optional :: multiline_trig
     integer,intent(in) :: arr(length)
@@ -481,13 +519,16 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
     type(stream_string) :: interm
     character(len=30) :: ifmt
+    integer :: w
     integer :: vmax
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     ASSERT(doclock == 1, "No document is opened yet.")
 
@@ -496,9 +537,9 @@ module m_yaml_out
     SET_DEFAULT(vmax, multiline_trig, 5)
 
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     call yaml_print_int1d(interm, length, arr, trim(ifmt), vmax)
@@ -516,7 +557,7 @@ module m_yaml_out
   end subroutine yaml_add_int1d
 
   subroutine yaml_add_dict(label, pl, file_d, string, stream, tag, key_size, string_size, key_fmt, int_fmt, real_fmt, string_fmt, &
-&                          multiline_trig, newline)
+&                          multiline_trig, newline, width)
     type(pair_list),intent(inout) :: pl
     character(len=*),intent(in) :: label
     integer,intent(in),optional :: string_size, key_size, multiline_trig
@@ -525,13 +566,16 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
     type(stream_string) :: interm
+    integer :: w
     character(len=30) :: kfmt, ifmt, rfmt, sfmt
     integer :: vmax, ks, ss
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
     SET_DEFAULT(ks, key_size, default_keysize)
     SET_DEFAULT(ss, string_size, default_stringsize)
 
@@ -548,9 +592,9 @@ module m_yaml_out
     SET_DEFAULT(vmax, multiline_trig, 5)
 
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     call yaml_print_dict(interm, pl, ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
@@ -567,7 +611,7 @@ module m_yaml_out
     end if
   end subroutine yaml_add_dict
 
-  subroutine yaml_add_real2d(label, m, n, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline)
+  subroutine yaml_add_real2d(label, m, n, arr, file_d, string, stream, tag, real_fmt, multiline_trig, newline, width)
     integer,intent(in) :: m, n
     real(kind=dp),intent(in) :: arr(m, n)
     character(len=*),intent(in) :: label
@@ -577,13 +621,16 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
     type(stream_string) :: interm
+    integer :: w
     integer :: i, vmax
     character(len=30) :: rfmt
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     ASSERT(doclock == 1, "No document is opened yet.")
     
@@ -592,9 +639,9 @@ module m_yaml_out
     SET_DEFAULT(vmax, multiline_trig, 5)
 
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     do i=1,m
@@ -615,7 +662,7 @@ module m_yaml_out
     end if
   end subroutine yaml_add_real2d
 
-  subroutine yaml_add_int2d(interm, label, m, n, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline)
+  subroutine yaml_add_int2d(interm, label, m, n, arr, file_d, string, stream, tag, int_fmt, multiline_trig, newline, width)
     integer,intent(in) :: m, n
     integer,intent(in) :: arr(m, n)
     character(len=*),intent(in) :: label
@@ -625,13 +672,16 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
     type(stream_string) :: interm
+    integer :: w
     integer :: i, vmax
     character(len=30) :: ifmt
     logical :: nl
 
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     ASSERT(doclock == 1, "No document is opened yet.")
     
@@ -640,9 +690,9 @@ module m_yaml_out
     SET_DEFAULT(vmax, multiline_trig, 5)
 
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
 
     do i=1,m
@@ -664,7 +714,7 @@ module m_yaml_out
   end subroutine yaml_add_int2d
 
   subroutine yaml_add_dictlist(label, n, plarr, file_d, string, stream, tag, key_size, string_size, key_fmt, int_fmt, &
-&                              real_fmt, string_fmt, multiline_trig, newline)
+&                              real_fmt, string_fmt, multiline_trig, newline, width)
     integer,intent(in) :: n
     type(pair_list),intent(inout) :: plarr(n)
     character(len=*),intent(in) :: label
@@ -675,8 +725,10 @@ module m_yaml_out
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
+    integer,intent(in),optional :: width
 
     type(stream_string) :: interm
+    integer :: w
     character(len=30) :: kfmt, ifmt, rfmt, sfmt
     integer :: vmax, ks, i, ss
     logical :: nl
@@ -684,6 +736,7 @@ module m_yaml_out
     ASSERT(doclock == 1, "No document is opened yet.")
     
     SET_DEFAULT(nl, newline, .true.)
+    SET_DEFAULT(w, width, 0)
 
     kfmt = '                              '
     rfmt = '                              '
@@ -697,9 +750,9 @@ module m_yaml_out
     SET_DEFAULT(ss, string_size, default_keysize)
 
     if(present(tag)) then
-      call yaml_start_field(interm, label, tag)
+      call yaml_start_field(interm, label, width=w, tag=tag)
     else
-      call yaml_start_field(interm, label)
+      call yaml_start_field(interm, label, width=w)
     end if
     call stream_write(interm, eol)
 
@@ -724,13 +777,13 @@ module m_yaml_out
   end subroutine yaml_add_dictlist
 
   subroutine yaml_single_dict(label, comment, pl, key_size, string_size, file_d, string, stream, tag, &
-&                             key_width, int_fmt, real_fmt, string_fmt, newline)
+&                             int_fmt, real_fmt, string_fmt, newline, width)
     type(pair_list),intent(inout) :: pl
     character(len=*),intent(in) :: label
     character(len=*),intent(in) :: comment
     integer,intent(in) :: key_size, string_size
     character(len=*),intent(in),optional :: tag, int_fmt, real_fmt, string_fmt
-    integer,intent(in), optional :: file_d, key_width
+    integer,intent(in), optional :: file_d, width
     type(stream_string),intent(inout),optional :: stream
     character(len=*),intent(out),optional :: string
     logical,intent(in),optional :: newline
@@ -739,7 +792,7 @@ module m_yaml_out
     character(len=30) :: kfmt, ifmt, rfmt, sfmt
     character(len=string_size) :: vs, tmp_s
     character(len=key_size) :: key
-    integer :: vi, k, type_code, width
+    integer :: vi, k, type_code, w
     character(len=50) :: tmp_i, tmp_r
     real(kind=dp) :: vr
     logical :: nl
@@ -752,7 +805,7 @@ module m_yaml_out
     SET_DEFAULT(rfmt, real_fmt, default_rfmt)
     SET_DEFAULT(ifmt, int_fmt, default_ifmt)
     SET_DEFAULT(sfmt, string_fmt, default_sfmt)
-    SET_DEFAULT(width, key_width, 0)
+    SET_DEFAULT(w, width, 0)
 
     if (doclock == 1) then
      call stream_write(interm, '...'//eol)
@@ -761,7 +814,7 @@ module m_yaml_out
     
     call stream_write(interm, '---')
     if(present(tag)) then
-      call stream_write(interm, ' '//tag)
+      call stream_write(interm, ' !'//tag)
     end if
     call stream_write(interm, eol)
     call yaml_start_field(interm, 'label', width=width)
