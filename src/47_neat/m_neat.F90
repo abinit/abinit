@@ -90,7 +90,9 @@ module m_neat
 
     type(stream_string) :: stream
     type(pair_list) :: dict
-    real(dp) :: strten(2,3)
+    real(dp) :: strten(3,3)
+    real(dp) :: forces(results%natom, 3)
+    integer :: j
 
     if(present(comment)) then
       call yaml_open_doc('results_gs', comment, width=10, stream=stream)
@@ -117,10 +119,23 @@ module m_neat
     call yaml_add_realfield('entropy', results%entropy, width=10, stream=stream)
     call yaml_add_realfield('fermie', results%fermie, width=10, stream=stream)
 
-    strten(1,:) = results%strten(1:3)
-    strten(2,:) = results%strten(4:6)
-    call yaml_add_real2d('stress tensor', 2, 3, strten, width=10, stream=stream, tag='Tensor32')    
-    call yaml_add_real2d('cartesian forces', 3, results%natom, results%fcart, width=10, stream=stream, tag='CartForces')    
+    strten(1,1) = results%strten(1)
+    strten(2,2) = results%strten(2)
+    strten(3,3) = results%strten(3)
+
+    strten(2,3) = results%strten(4)
+    strten(3,2) = results%strten(4)
+    strten(1,3) = results%strten(5)
+    strten(3,1) = results%strten(5)
+    strten(1,2) = results%strten(6)
+    strten(2,1) = results%strten(6)
+    call yaml_add_real2d('stress tensor', 3, 3, strten, width=10, stream=stream, tag='Tensor')    
+    call stream%write(ch10)
+
+    do j=1,3
+      forces(:,j) = results%fcart(j,:)
+    end do
+    call yaml_add_real2d('cartesian forces', results%natom, 3, forces, width=10, stream=stream, tag='CartForces')    
 
     call yaml_close_doc(stream=stream)
 
