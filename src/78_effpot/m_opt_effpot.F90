@@ -342,7 +342,7 @@ end subroutine opt_effpot
 !!
 !! SOURCE
 
-subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
+subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 
  implicit none 
          
@@ -352,14 +352,15 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
 !arrays 
- integer,intent(in) :: order(2)
+ integer,intent(in) :: order_ran(2)
 !Logicals
  logical,optional,intent(in) :: print_anh 
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: i,ii, info,natom_sc,ntime,iterm,nterm,iorder,idisp,ndisp
+ integer :: i,ii, info,natom_sc,ntime,iterm,nterm,idisp,ndisp
  integer :: jterm,nterm_of_term, nterm_inloop, iterm_of_term
+ integer :: iorder, iorder1, iorder2, order,order_start, ncombinations
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
@@ -411,7 +412,7 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
 
  !Check if input of order is correct
  ! TODO write error message here  
-  if (any(mod(order,2) /= 0)) return 
+  if (any(mod(order_ran,2) /= 0)) return 
 
  !we get the size of the supercell in the hist file
   do ii=1,3
@@ -460,13 +461,74 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
- ! Loop over orders givin in input in steps of two !TODO CHECK IF STEPS ARE WRITTEN LIKE THIS IN FORTRAN      
+ !Loop over orders givin in input in steps of two !TODO CHECK IF STEPS ARE WRITTEN LIKE THIS IN FORTRAN      
  !For the moment order loop commented
  !do iorder=order(1),order(2),2 
    !Loop over all original terms
    do iterm =1,nterm
      terms(iterm) = iterm
      ! Get current number of terms
+     ! 1302 new implementation Get number of possible high order terms until order_range_end 
+     ! get number of displacements in this term 
+     ndisp = eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp
+     ! Get number of orders to create for this term 
+     order_start = 0 
+     i = 0 
+     do while(order_start == 0) 
+        i = i +1
+        iorder = order_ran(1) + (i-1)*2
+        if (iorder/ndisp >= 2)then 
+            order_start = iorder ! get lowest order for this term to generate
+        endif   
+     enddo !iorder
+     
+     ! Get number combinations
+     do order=order_start,order_ran(2),2
+        ncombinations = 0 
+        if(ndisp == 1)then
+           ncombinations = 1 
+        else 
+           do iorder1 = 2,order-2*(ndisp-1),2 
+              if(ndisp*iorder1 == order)then
+                 ncombinations = ncombinations + 1 
+                 cycle
+              endif
+              do iorder2=iorder1+2,order-2*(ndisp-1),2    
+                if( iorder1 + (ndisp-1)*iorder2 == order)then 
+                  ncombinations = ncombinations + ndisp
+                elseif(iorder1 * (ndisp-1) + iorder2 == order)then 
+                  ncombinations = ncombinations + ndisp 
+                endif
+              enddo !iorder2 
+           enddo !iorder1 !
+        endif
+        !We got the number of combinations 
+        !ABI_ALLOCATE(powers_term,(ndisp,ncombinations))
+        !do icombination=1,ncombination
+        !   if(ndisp == 1)then 
+        !        powers_term(1,icombination)  = order
+        !   else                        
+        !     do iorder1 = 2,order-2*(ndisp-1),2 
+        !        if(ndisp*iorder1 == order)then
+        !           do idisp =1,ndisp
+        !              powers_terms(idisp,icombination)=iorder1
+        !           enddo
+        !           cycle 
+        !        elseif                          
+        !        do iorder2=iorder1+2,order-2*(ndisp-1),2    
+        !           if( iorder1 + (ndisp-1)*iorder2 == order)then 
+        !              ncombinations = ncombinations + ndisp
+        !           elseif(iorder1 * (ndisp-1) + iorder2 == order)then 
+        !              ncombinations = ncombinations + ndisp 
+        !           endif
+        !        enddo !iorder2 
+        !        endif
+        !     enddo 
+        !   endif 
+        !enddo ! icombination
+        write(*,*) 'ncombinations for order ',order,' is:', ncombinations, 'are we happy?'
+     enddo !iorder
+
      ! Add one for new bounding term 
      nterm_inloop = eff_pot%anharmonics_terms%ncoeff + 1 
      ABI_DATATYPE_ALLOCATE(my_coeffs,(nterm_inloop)) 
@@ -489,7 +551,6 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
      my_coeffs(nterm_inloop)%coefficient = coeff_ini 
      !Get number of displacements and equivalent terms for this term
      !Chose term one to get ndisp. ndisp is equal for all terms of the term 
-     ndisp = eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp  
      nterm_of_term = my_coeffs(iterm)%nterm
      ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all terms of term
      if(my_coeffs(iterm)%coefficient > 0 .and. .not. any(mod(my_coeffs(iterm)%terms(1)%power_disp(:),2) /= 0))then 
@@ -522,7 +583,7 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
        my_coeffs(nterm_inloop)%terms(iterm_of_term)%weight = 1
        do idisp=1,ndisp
          if(mod(my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp),2) == 1)then 
-           my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 1 
+            my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 1 
           else
            my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 2 
          endif
@@ -568,7 +629,7 @@ subroutine opt_effpotbound(eff_pot,order,hist,comm,print_anh)
      ABI_DATATYPE_DEALLOCATE(my_coeffs)  
     
      i = 0 
-     do while(msef/msef_ini>=2)
+     do while(msef/msef_ini >= 1.2 )
         i = i + 1 
         eff_pot%anharmonics_terms%coefficients(nterm_inloop)%coefficient = coeff_ini / 2**i
         call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
