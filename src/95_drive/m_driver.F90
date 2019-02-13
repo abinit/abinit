@@ -282,7 +282,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
    write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
 
-   call neat_start_dataset(jdtset);
 
    if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
      write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
@@ -290,6 +289,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
+   call neat_start_dataset(jdtset, ab_out);
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)

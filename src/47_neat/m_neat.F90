@@ -29,14 +29,13 @@ module m_neat
     call wrtout(iout, s, 'COLL')
   end subroutine wrtout_stream
 
-  subroutine neat_write_dataset(n)
-    integer,intent(in) :: n
+  subroutine neat_start_dataset(n, iout)
+    integer,intent(in) :: n, iout
     type(stream_string) :: stream
 
-    call yaml_iterstart('dataset', n, stream=stream)
-    call wrtout_stream(stream)
-
-  end subroutine neat_write_dataset
+    call yaml_iterstart('dtset', n, stream=stream);
+    call wrtout_stream(stream, iout);
+  end subroutine neat_start_dataset
   
 !!****f* m_neat/neat_energies
 !!
