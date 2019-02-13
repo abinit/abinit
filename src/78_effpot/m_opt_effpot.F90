@@ -359,20 +359,23 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !Local variables ------------------------------
 !scalars
  integer :: i,ii, info,natom_sc,ntime,iterm,nterm,idisp,ndisp
- integer :: jterm,nterm_of_term, nterm_inloop, iterm_of_term
- integer :: iorder, iorder1, iorder2, order,order_start, ncombinations
+ integer :: jterm,nterm_of_term, nterm_inloop, iterm_of_term,iterm2
+ integer :: iorder, iorder1, iorder2, order,order_start, ncombi
+ integer :: power_tot,icombi,icombi_start,icombi_stop,jdisp
+ integer :: nterm_start,nterm_tot_tmp,nterm2,norder,jdisp1,jdisp2 
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
+ real(dp) :: to_divide,divided,divider1,divider2
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3)
- integer,allocatable :: terms(:)
+ integer,allocatable :: terms(:),ncombi_order(:)
  logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
- type(polynomial_coeff_type),allocatable :: my_coeffs(:)
+ type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:)
 !Logicals
- logical :: need_print_anh=.FALSE.,file_opened ! MARCUS FOR THE MOMENT PRINT NO FILES
+ logical :: need_print_anh=.FALSE.,file_opened,equal_term_done ! MARCUS FOR THE MOMENT PRINT NO FILES
 !Strings
  character(len=5),allocatable :: symbols(:)
  character(len=200):: name
@@ -396,10 +399,13 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
   nterm =eff_pot%anharmonics_terms%ncoeff
+  norder = abs(((order_ran(2)-order_ran(1))/2)) + 1 
   if(present(print_anh)) need_print_anh = print_anh
   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
   ABI_ALLOCATE(terms,(nterm))
   ABI_ALLOCATE(exists,(nterm))
+  ABI_ALLOCATE(ncombi_order,(norder))
+  ncombi_order = 0 
   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
  &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
  
@@ -461,16 +467,15 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
- !Loop over orders givin in input in steps of two !TODO CHECK IF STEPS ARE WRITTEN LIKE THIS IN FORTRAN      
  !For the moment order loop commented
- !do iorder=order(1),order(2),2 
+ !do iorder=order(1),order(2),2, Order will be done per term 
    !Loop over all original terms
-   do iterm =1,nterm
+  do iterm =1,nterm
      terms(iterm) = iterm
-     ! Get current number of terms
-     ! 1302 new implementation Get number of possible high order terms until order_range_end 
-     ! get number of displacements in this term 
+     !Get number of displacements and equivalent terms for this term
+     !Chose term one to get ndisp. ndisp is equal for all terms of the term
      ndisp = eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp
+     nterm_of_term = eff_pot%anharmonics_terms%coefficients(iterm)%nterm
      ! Get number of orders to create for this term 
      order_start = 0 
      i = 0 
@@ -483,57 +488,46 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      enddo !iorder
      
      ! Get number combinations
+     i = 0
+     ncombi = 0
+     ncombi_order = 0  
      do order=order_start,order_ran(2),2
-        ncombinations = 0 
+        i = i+1
         if(ndisp == 1)then
-           ncombinations = 1 
+           ncombi = 1 
+           ncombi_order(i) = 1
         else 
            do iorder1 = 2,order-2*(ndisp-1),2 
               if(ndisp*iorder1 == order)then
-                 ncombinations = ncombinations + 1 
+                 ncombi = ncombi + 1 
+                 ncombi_order(i) = ncombi_order(i) + 1
                  cycle
               endif
               do iorder2=iorder1+2,order-2*(ndisp-1),2    
                 if( iorder1 + (ndisp-1)*iorder2 == order)then 
-                  ncombinations = ncombinations + ndisp
+                  ncombi = ncombi + ndisp
+                  ncombi_order(i) = ncombi_order(i) + ndisp
                 elseif(iorder1 * (ndisp-1) + iorder2 == order)then 
-                  ncombinations = ncombinations + ndisp 
+                  ncombi = ncombi + ndisp 
+                  ncombi_order(i) = ncombi_order(i) + ndisp
                 endif
               enddo !iorder2 
            enddo !iorder1 !
-        endif
-        !We got the number of combinations 
-        !ABI_ALLOCATE(powers_term,(ndisp,ncombinations))
-        !do icombination=1,ncombination
-        !   if(ndisp == 1)then 
-        !        powers_term(1,icombination)  = order
-        !   else                        
-        !     do iorder1 = 2,order-2*(ndisp-1),2 
-        !        if(ndisp*iorder1 == order)then
-        !           do idisp =1,ndisp
-        !              powers_terms(idisp,icombination)=iorder1
-        !           enddo
-        !           cycle 
-        !        elseif                          
-        !        do iorder2=iorder1+2,order-2*(ndisp-1),2    
-        !           if( iorder1 + (ndisp-1)*iorder2 == order)then 
-        !              ncombinations = ncombinations + ndisp
-        !           elseif(iorder1 * (ndisp-1) + iorder2 == order)then 
-        !              ncombinations = ncombinations + ndisp 
-        !           endif
-        !        enddo !iorder2 
-        !        endif
-        !     enddo 
-        !   endif 
-        !enddo ! icombination
-        write(*,*) 'ncombinations for order ',order,' is:', ncombinations, 'are we happy?'
-     enddo !iorder
-
-     ! Add one for new bounding term 
-     nterm_inloop = eff_pot%anharmonics_terms%ncoeff + 1 
-     ABI_DATATYPE_ALLOCATE(my_coeffs,(nterm_inloop)) 
+        endif 
+        write(*,*) 'ncombi(',i,') for term ',iterm,' and order',order,' is:', ncombi_order(i), 'are we happy?'
+     enddo !order
+     
+     write(*,*) ncombi_order(:)
+     write(*,*) 'ncombi for term ',iterm,' is:', ncombi, 'are we happy?'
+     
+     ! Allocate my_coeffs with ncombi free space to work with 
+     nterm_start = eff_pot%anharmonics_terms%ncoeff
+     nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi 
+     ABI_DATATYPE_ALLOCATE(my_coeffs,(nterm_tot_tmp)) 
+     
      !Copy original terms to my_coeffs 
-     my_coeffs(1:nterm_inloop-1) =  eff_pot%anharmonics_terms%coefficients(:)
+     my_coeffs(1:nterm_start) =  eff_pot%anharmonics_terms%coefficients(:)
+     
      !Message
      write(message, '(a,(80a),a)' ) ch10,&
 &    ('_',ii=1,80),ch10
@@ -543,15 +537,26 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &     ' Check term (',iterm,'/',nterm,'): ', trim(my_coeffs(iterm)%name),ch10 
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
-     ! Copy current term to last in array change the value of its coefficient to a start value
+     
+     ! Copy current term to the ncombination elemenst a the end in array my_coeffs 
+     ! change the value of their coefficient to a start value
      ! The start is estimed to not be larger then half the initial term's value
      ! This is because hihger order terms should have smaller coefficients 
-     my_coeffs(nterm_inloop) = eff_pot%anharmonics_terms%coefficients(iterm)  
-     coeff_ini = abs(my_coeffs(nterm_inloop)%coefficient / 2)
-     my_coeffs(nterm_inloop)%coefficient = coeff_ini 
-     !Get number of displacements and equivalent terms for this term
-     !Chose term one to get ndisp. ndisp is equal for all terms of the term 
-     nterm_of_term = my_coeffs(iterm)%nterm
+     do icombi=1,ncombi
+         my_coeffs(nterm_start+icombi) = eff_pot%anharmonics_terms%coefficients(iterm)  
+         coeff_ini = abs(my_coeffs(iterm)%coefficient / 2)
+         my_coeffs(nterm_start+icombi)%coefficient = coeff_ini
+         ! Get Rid of all odd terms change weigth to one (Even terms allways have a weight of one...)
+         do iterm_of_term=1,nterm_of_term 
+           my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%weight = 1
+           do idisp=1,ndisp
+             if(mod(my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp),2) == 1)then 
+                my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(idisp) + 1
+             end if 
+           enddo !idisp
+         enddo !iterm_of_term 
+     enddo !icombi
+     !TODO Reimplement checking of terms  against terms in effective potential...will be complecated
      ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all terms of term
      if(my_coeffs(iterm)%coefficient > 0 .and. .not. any(mod(my_coeffs(iterm)%terms(1)%power_disp(:),2) /= 0))then 
               ABI_DATATYPE_DEALLOCATE(my_coeffs)
@@ -562,81 +567,172 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
               call wrtout(std_out,message,'COLL')
              cycle 
      end if
-     ! if term has-strain cycle...strain-phonon-terms have to be implemented 
+     !if term has-strain cycle...strain-phonon-terms have to be implemented 
      if(my_coeffs(iterm)%terms(1)%nstrain /= 0)then
               ABI_DATATYPE_DEALLOCATE(my_coeffs)
               ! Message to Output 
               write(message,'(5a)' )ch10,&
 &             ' ==> Term has strain compenent. Strain-Phonon terms are not yet implemented',ch10,&
-&             ' ==> We cycle',ch10
+&            ' ==> We cycle',ch10
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
              cycle 
      endif 
-     ! Change all weights of equivalent terms of this term to 1 
-     !(Even terms have allways a weight of 1...)
-     ! Change all orders of the term to an even order
-     ! TODO The sum of the orders may not be greater than the order specified in the input
-     ! TODO generate more flexible routine that does stuff like ^4*^2 and ^2*^4 etc... 
-     ! TODO compare generate term with terms already in potential, if already contained skip!
-     do iterm_of_term=1,nterm_of_term 
-       my_coeffs(nterm_inloop)%terms(iterm_of_term)%weight = 1
-       do idisp=1,ndisp
-         if(mod(my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp),2) == 1)then 
-            my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 1 
-          else
-           my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 2 
-         endif
-       enddo !idisp
-     enddo !iterm_of_term 
+     ! Create all possible combinaions for the specified orders
+     ! If anybody has ever, ever to read and understand this I'm terribly sorry 
+     ! ---this will be quite hell---
+     power_tot = 0
+     icombi_start = 1
+     i = 0
+     write(*,*) "order_start", order_start
+     write(*,*) "order_ran(2)", order_ran(2)
+     order = order_start
+     ! TODO work here icombi start and order conting does not work yet. 
+     do order=order_start,order_ran(2),2
+        write(*,*) 'Was I now here?!(order-loop)'
+        i = i + 1
+        icombi_stop = icombi_start + ncombi_order(i) - 1
+        equal_term_done = .FALSE.
+        write(*,*) 'order', order
+        write(*,*) 'icombi_start', icombi_start
+        write(*,*) 'icombi_stop', icombi_stop
+        icombi=icombi_start 
+        do while (icombi<=icombi_stop)
+           power_tot = 0 
+           do idisp=1,ndisp 
+              power_tot = power_tot + my_coeffs(nterm_start+icombi)%terms(1)%power_disp(idisp)
+           enddo
+           ! TODO augmentation of icombi start prohibits going to else 
+           ! Probably have to increase order at same time 
+           if(power_tot == order)then
+              icombi_start = icombi_start + 1
+              icombi = icombi + 1
+              write(*,*) 'icombi-start in if', icombi_start 
+              cycle
+           else        
+              write(*,*) 'I was here!'
+              to_divide = real(order)
+              divided = real(to_divide/ndisp)
+              divider1 = real(ndisp)
+              divider2 = real(2)
+              write(*,*) 'divided', divided, 'divider2', divider2
+              if(mod(divided,divider2) == 0 .and. .not. equal_term_done )then ! Don't get fooled we are doing integer stuff and
+                                                                               ! it's fortran
+                 write(*,*) "Sometimes I should be here sometimes I shouldn't" 
+                 do jdisp=1,ndisp
+                    do iterm_of_term=1,nterm_of_term
+                       my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                    enddo                     
+                 enddo !jdisp
+                 equal_term_done = .TRUE.
+                 icombi = icombi + 1
+                 icombi_start = icombi_start +1
+              endif
+              jdisp1 = 1 
+              write(*,*) 'what is ndisp actually', ndisp
+              do while(jdisp1<=ndisp)
+                 write(*,*) "I did at least one displacement" 
+                 do iterm_of_term=1,nterm_of_term
+                    my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp1) = my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
+                 enddo
+                 power_tot=0
+                 do jdisp2=1,ndisp 
+                    power_tot = power_tot + my_coeffs(nterm_start+icombi)%terms(1)%power_disp(jdisp2)
+                 enddo
+                 if(power_tot == order)then 
+                    icombi = icombi + 1
+                    icombi_start = icombi_start +1
+                    write(*,*) 'what is icombi_start here', icombi_start
+                    jdisp1 = jdisp1 + 1
+                    write(*,*) 'and what is jdisp1?', jdisp1 
+                 endif  
+               enddo!jdisp1
+            endif 
+        enddo !icombination
+      enddo !order
+ 
 
-     ! Get new name of term and set new terms to potential 
-     call polynomial_coeff_getName(name,my_coeffs(nterm_inloop),symbols,recompute=.TRUE.)
-     call polynomial_coeff_SetName(name,my_coeffs(nterm_inloop))
-    
-     ! Message to Output 
-      write(message,'(5a)' )ch10,&
-&     ' ==> high order term: ', trim(my_coeffs(nterm_inloop)%name),' created',ch10
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
-     ! Check if generated term is not already contained in effpot
-     ! If yes cycle 
-     do jterm=1,nterm 
-        exists(jterm) = coeffs_compare(my_coeffs(jterm),my_coeffs(nterm_inloop))
-     enddo !jterm 
-     if(any(exists))then 
-        write(message,'(3a)' )ch10,&
-&       ' ==> Term exists already. We cycle',ch10
-        call wrtout(ab_out,message,'COLL')
-        call wrtout(std_out,message,'COLL')
-        ABI_DATATYPE_DEALLOCATE(my_coeffs)
-        cycle 
-     endif 
+            ! Not needed anymore                    
+            ! do iterm_of_term=1,nterm_of_term 
+            !   my_coeffs(nterm_inloop)%terms(iterm_of_term)%weight = 1
+            !   do idisp=1,ndisp
+            !     if(mod(my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp),2) == 1)then 
+            !        my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 1 
+            !      else
+            !       my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 2 
+            !     endif
+            !   enddo !idisp
+            ! enddo !iterm_of_term 
+           
 
-     ! Set new term into effective potential 
-     call effective_potential_setCoeffs(my_coeffs,eff_pot,nterm_inloop)
-     
-     ! Tell the world what we do, They want to know.     
-     write(message,'(3a)' )ch10,&
-&    ' ==> Optimizing coefficient',ch10
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+      exists=.FALSE.
+      do icombi=1,ncombi
+             ! Copy all the terms in eff pot 
+             ! Get new name of term and set new terms to potential 
+             write(*,*) 'ndisp of term', my_coeffs(nterm_start+icombi)%nterm
+             write(*,*) 'and wath is nterm_start', nterm_start,'and icomb btw', icombi
+             call polynomial_coeff_getName(name,my_coeffs(nterm_start+icombi),symbols,recompute=.TRUE.)
+             call polynomial_coeff_SetName(name,my_coeffs(nterm_start+icombi))
+           
+             ! Set dimensions of temporary my_coeffs array 
+             nterm2 = eff_pot%anharmonics_terms%ncoeff
+             ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(nterm2+1))
+             ! Copy terms of previous cycle
+             do iterm2=1,nterm2
+                my_coeffs_tmp(iterm2) = eff_pot%anharmonics_terms%coefficients(iterm2) 
+             enddo
+             !Put new term to my_coeffs_tmp
+             my_coeffs_tmp(nterm2+1) = my_coeffs(nterm_start+icombi) 
 
-     call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
- &                                 natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                 compute_anharmonic=.TRUE.,print_file=.FALSE.)
-     ! Deallocation in loop 
-     ABI_DATATYPE_DEALLOCATE(my_coeffs)  
-    
-     i = 0 
-     do while(msef/msef_ini >= 1.2 )
-        i = i + 1 
-        eff_pot%anharmonics_terms%coefficients(nterm_inloop)%coefficient = coeff_ini / 2**i
-        call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
- &                                     natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                     compute_anharmonic=.TRUE.,print_file=.FALSE.)
+             ! Message to Output 
+              write(message,'(5a)' )ch10,&
+&             ' ==> high order term: ', trim(my_coeffs_tmp(nterm2+1)%name),' created',ch10
+              call wrtout(ab_out,message,'COLL')
+              call wrtout(std_out,message,'COLL')
+             ! Check if generated term is not already contained in effpot
+             ! If yes cycle 
+             do jterm=1,nterm
+                write(*,*) 'what is jterm here', jterm 
+                exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2+1))
+             enddo !jterm
+             write(*,*) 'exists?', exists 
+             if(any(exists))then 
+                write(message,'(3a)' )ch10,&
+&               ' ==> Term exists already. We cycle',ch10
+                call wrtout(ab_out,message,'COLL')
+                call wrtout(std_out,message,'COLL')
+                ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)
+                cycle 
+             endif 
+           
+             ! Set new term into effective potential 
+             call effective_potential_setCoeffs(my_coeffs_tmp,eff_pot,nterm2)
+             
+             ! Tell the world what we do, They want to know.     
+             write(message,'(3a)' )ch10,&
+&            ' ==> Optimizing coefficient',ch10
+             call wrtout(ab_out,message,'COLL')
+             call wrtout(std_out,message,'COLL')
+           
+             call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
+ &                                         natom_sc,ntime,fit_data%training_set%sqomega,&
+ &                                         compute_anharmonic=.TRUE.,print_file=.FALSE.)
+             ! Deallocation in loop 
+             ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)  
+             
+             !Optimizing coefficient  
+             i = 0 
+             do while(msef/msef_ini >= 1.2 )
+                i = i + 1 
+                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
+                call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
+ &                                             natom_sc,ntime,fit_data%training_set%sqomega,&
+ &                                             compute_anharmonic=.TRUE.,print_file=.FALSE.)
+           
+             enddo ! while mse/mse_ini>10  
+       enddo ! icombinations
 
-     enddo ! while mse/mse_ini>10  
+       ABI_DATATYPE_DEALLOCATE(my_coeffs)  
    enddo !iterm
  !enddo ! order 
 
@@ -657,6 +753,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   ABI_DEALLOCATE(terms)
   ABI_DEALLOCATE(symbols)
   ABI_DEALLOCATE(exists)
+  ABI_DEALLOCATE(ncombi_order)
+  ABI_DATATYPE_DEALLOCATE(my_coeffs)  
   call fit_data_free(fit_data)
 end subroutine opt_effpotbound
 
