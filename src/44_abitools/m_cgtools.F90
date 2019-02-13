@@ -51,6 +51,10 @@ MODULE m_cgtools
  use m_fstrings,   only : toupper
  use m_time,       only : timab
  use m_numeric_tools,   only : hermit
+ use iso_c_binding
+ !use m_xg 
+ 
+ !external c_loc
 
  implicit none
 
@@ -1328,7 +1332,8 @@ subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
  integer :: ierr
 !arrays
  real(dp) :: dotarr(2)
-
+ double precision,external :: ddot  !dummy
+ integer :: tmp
 ! *************************************************************************
 
  if (istwf_k==1) then ! General k-point
@@ -1342,7 +1347,7 @@ subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
    end if
 
  else if (istwf_k==2 .and. me_g0==1) then ! Gamma k-point and I have G=0
-
+    
    dotr=half*vect1(1,1)*vect2(1,1)
    dotr = dotr + cg_real_zdotc(npw-1,vect1(1,2),vect2(1,2))
    dotr = two*dotr
@@ -4512,8 +4517,8 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
 !scalars
  integer,intent(in) :: icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap
 !arrays
- real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
-
+ real(dp), target, intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
+    type(c_ptr) :: cptr
 !Local variables-------------------------------
 !scalars
  integer :: iband,ii,indx
@@ -4522,9 +4527,10 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
+ 
 
 ! *************************************************************************
-
+ 
 !The general case, where a complex phase indeterminacy is present
  if(istwfk==1)then
 
@@ -4656,7 +4662,7 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
 
 !  Storages that take into account the time-reversal symmetry : the freedom is only a sign freedom
  else  ! if istwfk/=1
-
+ 
    ABI_ALLOCATE(creb,(nband_k))
    creb(:)=zero
 !  Loop over bands
@@ -4678,25 +4684,28 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
      cre=creb(iband)
      if(cre<zero)then
        indx=icg+(iband-1)*npw_k
+       
        do ii=1+indx,npw_k+indx
-         cg(1,ii)=-cg(1,ii)
-         cg(2,ii)=-cg(2,ii)
+         print *, "II", ii
+!         cg(1,ii)=-cg(1,ii)  !OVDE JE
+!         cg(2,ii)=-cg(2,ii)
        end do
+!       
        if(useoverlap==1)then
-         indx=igsc+(iband-1)*npw_k
-         do ii=1+indx,npw_k+indx
-           gsc(1,ii)=-gsc(1,ii)
-           gsc(2,ii)=-gsc(2,ii)
-         end do
+!         stop
+!         indx=igsc+(iband-1)*npw_k
+!         do ii=1+indx,npw_k+indx
+!           gsc(1,ii)=-gsc(1,ii)
+!           gsc(2,ii)=-gsc(2,ii)
+!         end do
        end if
      end if
-
    end do ! iband
-
+      
    ABI_DEALLOCATE(creb)
-
  end if ! istwfk
-
+ print *, loc(cg)
+ 
 end subroutine fxphas_seq
 !!***
 

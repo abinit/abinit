@@ -136,7 +136,6 @@ module m_chebfiwf
   integer :: iband, shift
   real(dp) :: gsc_dummy(0,0)
   
- 
 ! *********************************************************************
 
 
@@ -195,6 +194,7 @@ module m_chebfiwf
  
   !For preconditionning 
   ABI_MALLOC(l_pcon,(1:l_icplx*npw))
+
   !$omp parallel do schedule(static), shared(l_pcon,kinpw)
   do ipw=1-1,l_icplx*npw-1
     if(kinpw(ipw/l_icplx+1)>huge(0.0_dp)*1.d-11) then
@@ -204,20 +204,22 @@ module m_chebfiwf
 &    / (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1))) + 16*kinpw(ipw/l_icplx+1)**4)
     end if
   end do
-    
+       
   
   !Local variables for chebfi
   !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
   call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft) 
+    
   if ( l_istwf == 2 ) then ! Real only
     ! Scale cg
     call xgBlock_scale(xgx0,sqrt2,1)
+   
     ! This is possible since the memory in cg and xgx0 is the same
     ! Don't know yet how to deal with this with xgBlock
     if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2 
+       
   end if
-  
- 
+     
   !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
   ! Trick with C is to change rank of arrays (:) to (:,:)
   cptr = c_loc(eig)			
@@ -232,23 +234,24 @@ module m_chebfiwf
  
   ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*l_nband_filter)) !*blockdim
  
-  call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0) !blockdim
+  call chebfi_init(chebfi, nband, l_icplx*l_npw*l_nspinor, dtset%tolwfr, dtset%ecut, nline, space, 1, l_gs_hamk%istwf_k, l_mpi_enreg%comm_bandspinorfft, l_mpi_enreg%me_g0, l_paw) !blockdim
  
   !###########################################################################
   !################    RUUUUUUUN    ##########################################
   !###########################################################################
-  
+     
   ! Run chebfi
   call chebfi_run(chebfi, xgx0, getghc_gsc1, getBm1X, precond1, xgeigen, xgresidu) 
  
   ! Free preconditionning since not needed anymore
   ABI_FREE(l_pcon)
     
+  !call xgBlock_print(xgx0, 6)   
   ! Scale back
-  if(l_istwf == 2) then
-    call xgBlock_scale(xgx0,inv_sqrt2,1)
-    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2 !not sure what this does exactly
-  end if
+!  if(l_istwf == 2) then
+!    call xgBlock_scale(xgx0,inv_sqrt2,1)
+!    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2 !not sure what this does exactly
+!  end if
     
   ! Compute enlout (nonlocal energy for each band if necessary) This is the best
   ! quick and dirty trick to compute this part in NC. gvnlc cannot be part of
@@ -337,6 +340,8 @@ module m_chebfiwf
     double precision, pointer :: cg(:,:)
     double precision, pointer :: ghc(:,:)
     double precision, pointer :: gsc(:,:)
+    
+    type(xgBlock_t) :: HELPER
   
     call xgBlock_getSize(X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
@@ -345,21 +350,20 @@ module m_chebfiwf
     call xgBlock_reverseMap(X,cg,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
-  
+    
     ! scale back cg
     if(l_istwf == 2) then
       !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
       call xgBlock_scale(X,inv_sqrt2,1)
       if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
     end if
-  
+      
     if ( size(l_gvnlc) < 2*blockdim*spacedim ) then
       ABI_FREE(l_gvnlc)
       ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
     end if
       
     if (l_mpi_enreg%paral_kgb==0) then
-
       call multithreaded_getghc(l_cpopt,cg(:,1:blockdim*spacedim),cprj_dum,ghc,gsc,& 
         l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0) 
 
@@ -384,7 +388,7 @@ module m_chebfiwf
         if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
       end if
     end if
-  
+    
     if ( .not. l_paw ) call xgBlock_copy(X,BX)
   
     !call xgBlock_set(AX,ghc,0,spacedim)
@@ -408,24 +412,50 @@ module m_chebfiwf
     double precision, pointer :: ghc_filter(:,:)
     double precision, pointer :: gsm1hc_filter(:,:)
     type(pawcprj_type), allocatable :: cwaveprj_next(:,:) !dummy
-    
+        
     call xgBlock_getSize(X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
     
     call xgBlock_reverseMap(X,ghc_filter,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(Bm1X,gsm1hc_filter,l_icplx,spacedim*blockdim)
     
+    ! scale back cg
+    if(l_istwf == 2) then 
+      !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
+      call xgBlock_scale(X,inv_sqrt2,1)
+      if(l_mpi_enreg%me_g0 == 1) ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      if(l_paw) then
+        !gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
+        call xgBlock_scale(Bm1X,inv_sqrt2,1)
+        if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
+      end if
+    end if
+       
     !cwaveprj dummy allocate
     if(l_paw) then
       ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
       call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj) 
-
       call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), & 
 &     spacedim, blockdim, l_mpi_enreg, l_nspinor)
     else
       gsm1hc_filter(:,:) = ghc_filter(:,:)
     end if
-  
+    
+    ! scale cg, ghc, gsc
+    if ( l_istwf == 2 ) then
+      !cg(:,1:spacedim*blockdim) = cg(:,precond1:spacedim*blockdim) * sqrt2
+      !ghc(:,1:spacedim*blockdim) = ghc(:,1:spacedim*blockdim) * sqrt2
+      call xgBlock_scale(X,sqrt2,1)
+      if(l_mpi_enreg%me_g0 == 1) then
+        ghc_filter(:, 1:spacedim*blockdim:l_npw) = ghc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+      endif
+      if(l_paw) then
+        !gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
+        call xgBlock_scale(Bm1X,sqrt2,1)
+        if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+      end if
+    end if
+
     if (l_paw) then
       call pawcprj_free(cwaveprj_next)
       ABI_DATATYPE_DEALLOCATE(cwaveprj_next)
@@ -445,7 +475,7 @@ module m_chebfiwf
     type(xgBlock_t), intent(inout) :: W
     integer :: ispinor
     !integer :: cplx
-
+    
     ! precondition resid_vec
     do ispinor = 1,l_nspinor
       !do cplx = 1, l_icplx

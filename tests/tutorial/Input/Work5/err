@@ -1,9 +1,0 @@
-
---- !ERROR
-src_file: abi_xhpgv.f90
-src_line: 72
-mpi_rank: 0
-message: |
-    [z,d]hpgv returned info !=0
-...
-

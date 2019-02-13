@@ -390,9 +390,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
  
- !DUMMY
- type(xgBlock_t) :: xgx0
-
 !Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
@@ -451,6 +448,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  end if
 
  iscf=dtset%iscf
+
  fixed_occ=(dtset%occopt<3.or.electronpositron_calctype(electronpositron)==1)
  if(.not. wvlbigdft) then
    energies%e_eigenvalues = zero
@@ -504,6 +502,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      rhowfr(:,:)=zero
    end if
  end if
+ 
 
 !Set max number of non-self-consistent loops nnsclo_now for use in vtowfk
  if(iscf<0)then
@@ -901,12 +900,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ffnl_k   =my_bandfft_kpt%ffnl_gather, &
          ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
-
+  
+   
 !      Build inverse of overlap matrix for chebfi
-       if(psps%usepaw == 1 .and. dtset%wfoptalg == 1 .and. istep <= 1) then
+       if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
        end if
-
+       
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
          !set the global variable indicating to gemm_nonlop where to get its data from

@@ -43,6 +43,7 @@ module m_chebfi
  use m_getghc,        only : getghc
  use m_prep_kgb,      only : prep_getghc, prep_index_wavef_bandpp
  
+ use m_xg
 
  implicit none
 
@@ -140,7 +141,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  real(dp) :: filter_low
  real(dp) :: filter_center, filter_radius
  real(dp), dimension(2, npw*nspinor*nband), target :: ghc, gvnlc
- real(dp), allocatable, dimension(:,:) :: cg_filter_next, cg_filter_prev, gsm1hc_filter, gsc_filter_prev, gsc_filter_next, gggg_dummy
+ real(dp), allocatable, dimension(:,:) :: cg_filter_next, cg_filter_prev, gsm1hc_filter, gsc_filter_prev, gsc_filter_next
  real(dp), allocatable, dimension(:,:), target :: cg_alltoall1,gsc_alltoall1,ghc_alltoall1,gvnlc_alltoall1
  real(dp), allocatable, dimension(:,:), target :: cg_alltoall2,gsc_alltoall2,ghc_alltoall2,gvnlc_alltoall2
  real(dp), pointer, dimension(:,:) :: cg_filter, gsc_filter, ghc_filter, gvnlc_filter
@@ -167,16 +168,12 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  integer :: sdisplsloc(mpi_enreg%nproc_band), sendcountsloc(mpi_enreg%nproc_band)
  integer :: ikpt_this_proc, npw_filter, nband_filter
  type(pawcprj_type), allocatable :: cwaveprj(:,:), cwaveprj_next(:,:), cwaveprj_prev(:,:)
- ! integer :: nline_total
- !DUMMY
- !double precision :: dummy_helper
- !integer :: dummy_counter
  
  ! timers
  integer, parameter :: timer_chebfi = 1600, timer_alltoall = 1601, timer_apply_inv_ovl = 1602, timer_rotation = 1603
  integer, parameter :: timer_subdiago = 1604, timer_subham = 1605, timer_ortho = 1606, timer_getghc = 1607
  integer, parameter :: timer_residuals = 1608, timer_update_eigen = 1609, timer_sync = 1610
-
+ 
 ! *************************************************************************
 
  !======================================================================================================
@@ -184,10 +181,12 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  !======================================================================================================
  call timab(timer_chebfi,1,tsec)
  
+
+  
  !Initializations
  paw = gs_hamk%usepaw == 1 
  mcg = npw*nspinor*nband
- 
+  
  ! Init pcon
  pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16*kinpw**4)
 !  do dummy_counter = 1, npw
@@ -195,6 +194,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 !      pcon(dummy_counter) = 0
 !    end if
 ! end do
+
 
  ghc=zero; gvnlc=zero
 
@@ -261,7 +261,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    gvnlc_filter => gvnlc
  end if
  
- 
  ! from here to the next alltoall, all computation is done on _filter variables, agnostic
  ! to whether it's nband x npw (paral_kgb == 0) or ndatarecv*bandpp (paral_kgb = 1)
 
@@ -271,8 +270,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  ABI_ALLOCATE(gsc_filter_prev, (2, npw_filter*nspinor*nband_filter))
  ABI_ALLOCATE(gsc_filter_next, (2, npw_filter*nspinor*nband_filter))
  ABI_ALLOCATE(gsm1hc_filter, (2, npw_filter*nspinor*nband_filter))
- ABI_ALLOCATE(gggg_dummy, (2, npw_filter*nspinor*nband_filter))
-
+ 
  ! PAW init
  if(paw) then
    ABI_DATATYPE_ALLOCATE(cwaveprj, (gs_hamk%natom,nspinor*nband_filter))
@@ -289,12 +287,12 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    cpopt = -1
  end if
  
+ 
  !======================================================================================================
  ! Data in npfft x npband distribution. First getghc, update eigenvalues and residuals
  !======================================================================================================
  !write(message, *) 'First getghc'
  ! get_ghc on cg
-
  call timab(timer_getghc, 1, tsec)
  if (dtset%paral_kgb == 0) then
    call getghc(cpopt,cg_filter,cwaveprj,ghc_filter,gsc_filter,gs_hamk,gvnlc_filter,&
@@ -303,7 +301,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    call prep_getghc(cg_filter,gs_hamk,gvnlc_filter,ghc_filter,gsc_filter,eval,nband,mpi_enreg,&
 &   prtvol,sij_opt,cpopt,cwaveprj,already_transposed=.true.)
  end if
- 
   
  call timab(timer_getghc, 2, tsec)
 
@@ -321,9 +318,10 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  ABI_ALLOCATE(nline_bands, (nband_filter))
  
  
- do iband=1, nband_filter
+ do iband=1, nband_filter !
    shift = npw_filter*nspinor*(iband-1)
    !dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
+   
    call dotprod_g(eig(iband),dprod_i,gs_hamk%istwf_k,npw_filter*nspinor,1,ghc_filter(:, shift+1:shift+npw_filter*nspinor),&
 &   cg_filter(:, shift+1:shift+npw_filter*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
    if(paw) then
@@ -342,16 +340,18 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    resids_filter(iband) = SUM(residvec_filter**2)
  end do
   
-  
  call xmpi_sum(resids_filter,mpi_enreg%comm_fft,ierr)
  call xmpi_max(MAXVAL(eig(1:nband_filter)),maxeig,mpi_enreg%comm_band,ierr)
  call xmpi_min(MINVAL(eig(1:nband_filter)),mineig,mpi_enreg%comm_band,ierr)
- filter_low = maxeig !filter low is lambda_minus!!!
+  
+ filter_low = maxeig 
+ 
  call timab(timer_update_eigen, 2, tsec)
  
  ! Decide how many iterations per band are needed
  ! don't go above this, or face bad conditioning of the Gram matrix.
  nline_max = cheb_oracle(mineig, filter_low, dtset%ecut, 1e-16_dp, 40)
+ 
  ! if(mpi_enreg%me == 0) write(0, *) nline_max
  do iband=1, nband_filter
    ! nline necessary to converge to tolwfr
@@ -376,11 +376,11 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  ABI_DEALLOCATE(resids_filter)
  ABI_DEALLOCATE(residvec_filter)
 
-
  !======================================================================================================
  ! Chebyshev polynomial application
  !======================================================================================================
  ! Filter by a chebyshev polynomial of degree nline
+ 
  do iline=1,dtset%nline
    ! Filter only on [iactive, iactive+nactive-1]
    iactive = nband_filter
@@ -394,16 +394,17 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 
    nactive = nband_filter - iactive + 1
    shift = npw_filter*nspinor*(iactive-1) + 1
+
    ! trick the legacy prep_getghc
    mpi_enreg%bandpp = nactive
 
    ! Define the filter position
    filter_center = (dtset%ecut+filter_low)/2
    filter_radius = (dtset%ecut-filter_low)/2
-   
+     
    ! write(message, *) 'Applying invovl, iteration', iline
    ! call wrtout(std_out,message,'COLL')
-
+      
    ! If paw, have to apply S^-1
    if(paw) then
      call timab(timer_apply_inv_ovl, 1, tsec)
@@ -413,8 +414,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    else
      gsm1hc_filter(:,shift:) = ghc_filter(:,shift:)
    end if
-
-
+ 
    ! Chebyshev iteration: UPDATE cg
    if(iline == 1) then     
      cg_filter_next(:,shift:) = one/filter_radius * (gsm1hc_filter(:,shift:) - filter_center*cg_filter(:,shift:)) 
@@ -461,7 +461,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 
    !write(message, *) 'Getghc, iteration', iline
    !call wrtout(std_out,message,'COLL')
-
    call timab(timer_getghc, 1, tsec)
    if (dtset%paral_kgb == 0) then
      call getghc(cpopt,cg_filter(:,shift:),cwaveprj(:,iactive:),ghc_filter(:,shift:),&
@@ -472,17 +471,16 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
 &     gsc_filter(:,shift:),eval,nband,mpi_enreg,prtvol,sij_opt,cpopt,&
 &     cwaveprj(:,iactive:),already_transposed=.true.)
    end if
-
+   
    ! end of the trick
    mpi_enreg%bandpp = nband_filter
 
    call timab(timer_getghc, 2, tsec)
  end do ! end loop on nline
-
+  
  ! normalize according to the previously computed rayleigh quotients (inaccurate, but cheap)
  do iband = 1, nband_filter
    ampfactor = cheb_poly(eig(iband), nline_bands(iband), filter_low, dtset%ecut) !OK
-
    if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 ! just in case, avoid amplifying too much
    shift = npw_filter*nspinor*(iband-1)
    cg_filter(:, shift+1:shift+npw_filter*nspinor) = cg_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
@@ -492,7 +490,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    else
      gvnlc_filter(:, shift+1:shift+npw_filter*nspinor) = gvnlc_filter(:, shift+1:shift+npw_filter*nspinor) / ampfactor
    end if
- end do
+ end do 
  
  ! Cleanup
  if(paw) then
@@ -509,7 +507,6 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  ABI_DEALLOCATE(gsc_filter_prev)
  ABI_DEALLOCATE(gsc_filter_next)
  ABI_DEALLOCATE(gsm1hc_filter)
- ABI_DEALLOCATE(gggg_dummy)
 
  !======================================================================================================
  ! Filtering done, tranpose back
@@ -571,7 +568,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  !======================================================================================================
 
  ! _subdiago might use less memory when using only one proc, should maybe call it, or just remove it
- ! and always call _distributed
+ ! and always call _distributed 
 #if defined HAVE_LINALG_SCALAPACK
  call rayleigh_ritz_distributed(cg,ghc,gsc,gvnlc,eig,gs_hamk%istwf_k,mpi_enreg,nband,npw,nspinor,gs_hamk%usepaw)
 #else
@@ -582,6 +579,7 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
  !  double precision function chebfi_computeResidue(chebfi, residu)
  call timab(timer_residuals, 1, tsec)
  
+
  do iband=1,nband
    shift = npw*nspinor*(iband-1)
    if(paw) then
@@ -589,17 +587,16 @@ subroutine chebfi(cg,dtset,eig,enl,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor
    else
      resid_vec = ghc(:, shift+1 : shift+npw*nspinor) - eig(iband)*cg (:, shift+1 : shift+npw*nspinor)
    end if
-   
+
    ! precondition resid_vec
    do ispinor = 1,nspinor
      resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(1, npw*(ispinor-1)+1:npw*ispinor) * pcon
      resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) = resid_vec(2, npw*(ispinor-1)+1:npw*ispinor) * pcon
    end do
-    
-  !subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
+      
    call dotprod_g(resid(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,resid_vec,&
 &   resid_vec,mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-
+   
    if(.not. paw) then
      call dotprod_g(enl(iband),dprod_i,gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
 &     gvnlc(:, shift+1:shift+npw_filter*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)

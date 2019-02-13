@@ -6,7 +6,7 @@
 bandpp 2
 
 #DATASETS
-ndtset 2
+ndtset 1
 
 #Dataset 1 - Ground state
 kptopt1 1
@@ -24,7 +24,7 @@ rfdir2 0 0 1
 nqpt2 1
 qpt2 0.0 0.375 0.0
 
-
+nline 6
 
 #Plane wave basis
 ecut 8.
@@ -64,7 +64,7 @@ typat 1   2   3   3   3   1   2   3   3   3
       1   2   3   3   3   1   2   3   3  !3
 chkprim 0
 
-istwfk 1
+istwfk 2
 wfoptalg 1
 
 

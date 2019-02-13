@@ -576,15 +576,6 @@ module m_xg
 
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
-      print *, "USAO OVDE NE ZNAM ZASTO"
-      print *, "SPACE_R", SPACE_R
-      print *, "SPACE_CR", SPACE_CR
-      print *, "xgBlock%space", xgBlock%space
-      print *, "xgBlock%rows", xgBlock%rows
-      print *, "xgBlock%cols", xgBlock%cols
-      print *, "xgBlock%Ldim", xgBlock%Ldim
-      print *, "rows", rows
-      print *, "cols", cols
       if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
           MSG_ERROR("Bad reverseMapping")
       end if
@@ -919,11 +910,17 @@ module m_xg
     size1 = xgBlock1%LDim*xgBlock1%cols/incx ; if ( size1 * incx < xgBlock1%LDim*xgBlock1%cols ) size1 = size1+1
     size2 = xgBlock2%LDim*xgBlock2%cols/incy ; if ( size2 * incy < xgBlock2%LDim*xgBlock2%cols ) size2 = size2+1
     size = min(size1,size2)
+    !print *, "COPY SIZE", size
+
 
     select case(xgBlock1%space)
     case (SPACE_R,SPACE_CR)
+      !print *, "SOURCE PTR", loc(xgBlock1%vecR)
+      !print *, "DESTINATION PTR", loc(xgBlock2%vecR)
       call dcopy(size,xgBlock1%vecR,incx,xgBlock2%vecR,incy)
     case(SPACE_C)
+      !print *, "SOURCE PTR", loc(xgBlock1%vecC)
+      !print *, "DESTINATION PTR", loc(xgBlock2%vecC)
       call zcopy(size,xgBlock1%vecC,incx,xgBlock2%vecC,incy)
     end select
     call timab(tim_copy,2,tsec)
@@ -2025,6 +2022,11 @@ module m_xg
       !$omp& schedule(static)
       do iblock = 1, xgBlock1%cols
         xgBlock1%vecR(:,iblock) = - da%vecR(iblock,1) * xgBlock2%vecR(:,iblock) + xgBlock3%vecR(:,iblock)
+!        if (iblock == 100) then
+!          print *, "IBAND", iblock
+!          print *, xgBlock1%vecR(1:6,iblock)
+!          stop
+!        end if
       end do
       !$omp end parallel do
     case (SPACE_C)
@@ -2060,15 +2062,34 @@ module m_xg
     integer :: iblock
 
     rows = size(vec,dim=1)
-
+    !print *, "OVDE USAO"
+    !stop
+    !print *, "SPACE:", xgBlock%space
+    !stop
+    !print *, "min(xgBlock%rows-shift,rows)", min(xgBlock%rows-shift,rows)
+    !print *, "min(xgBlock%rows,shift+rows)", min(xgBlock%rows,shift+rows)
+    !stop
+    !print *, "xgBlock%rows", xgBlock%rows
+    !print *, "rows", rows
+    !print *, "min(xgBlock%rows-shift,rows)", min(xgBlock%rows-shift,rows)
+    !stop
+    
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       !$omp parallel do shared(xgBlock,vec), &
       !$omp& schedule(static)
       do iblock = 1, xgBlock%cols
+        !print *, xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock)
+        !stop
         xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
         xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+!        if (iblock == 100) then
+!          print *, "SKALIRANO"
+!          print *, xgBlock%vecR(1:6,iblock)
+!          stop
+!        end if
       end do
+      !stop
     case (SPACE_C)
       !$omp parallel do shared(xgBlock,vec), &
       !$omp& schedule(static)
@@ -2292,19 +2313,22 @@ module m_xg
     double precision, intent(  out), optional :: min_val
     integer         , intent(  out), optional :: min_elt
     integer :: icol
+    double precision :: dotr
     double precision,external :: ddot
 
 
     if ( dot%space /= SPACE_R ) then
       MSG_ERROR("error space")
     end if
-
     select case(xgBlock%space)
     case(SPACE_R,SPACE_CR)
-      !$omp parallel do shared(dot,xgBlock), &
+      !$omp parallel do shared(dot,xgBlock), private(dotr), &
       !$omp& schedule(static)
       do icol = 1, xgBlock%cols
-        dot%vecR(icol,1) = ddot(xgBlock%rows,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
+        !dot%vecR(icol,1) = ddot(xgBlock%rows,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
+        !done as abinit dotprod_g for SPACE_CR
+        dotr = 0.5*xgBlock%vecR(1,icol)*xgBlock%vecR(1,icol)
+        dot%vecR(icol,1) = 2 * (dotr + ddot(xgBlock%rows-2,xgBlock%vecR(3,icol),1,xgBlock%vecR(3,icol),1))
       end do
       !$omp end parallel do
     case(SPACE_C)
@@ -2356,14 +2380,13 @@ module m_xg
     integer :: icol, irow
     double precision,external :: ddot
     double complex,external :: zdotc		!conjugated dot product
-    integer :: I, X
 
     select case(xgBlockA%space)
-    case(SPACE_R,SPACE_CR)
-      !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
+    case(SPACE_R,SPACE_CR)   
+      !$omp parallel do shared(dot,xgBlockA,xgBlockB) &
       !$omp& schedule(static)
       do icol = 1, xgBlockA%cols
-        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1) !OVDE JE PROBLEM
+        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1) 
       end do
       !$omp end parallel do
 
@@ -2879,6 +2902,7 @@ module m_xg
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
+      !print *, "PTR", loc(xgBlock%vecR)
       write(ccols,'(i4)') xgBlock%cols
       fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
       do i = 1, xgBlock%rows

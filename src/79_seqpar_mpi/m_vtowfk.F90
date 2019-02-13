@@ -50,6 +50,8 @@ module m_vtowfk
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
+ 
+ use m_xg !DUMMY
 
  implicit none
 
@@ -231,7 +233,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,message,'PERS')
  end if
 
-
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
 !=========================================================================
@@ -240,12 +241,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
- newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) !is 111 ok?
+ newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) 
+ 
  istwf_k=gs_hamk%istwf_k
+ 
  print *, "istwf_k", gs_hamk%istwf_k
- !print *, "wfoptalg", wfoptalg
- !print *, "wfopta10", wfopta10
- !print *, "newchebfi", newchebfi
  quit=0
 
 !Parallelization over spinors management
@@ -331,8 +331,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !nnsclo_now=number of non-self-consistent loops for the current vtrial
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
-
- !print *, "NON SELF", nnsclo_now
  do inonsc=1,nnsclo_now
 
 !  This initialisation is needed for the MPI-parallelisation (gathering using sum)
@@ -409,9 +407,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
          else
-           call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,mpi_enreg,&
-&           nband_k,npw_k,my_nspinor,prtvol,resid_k)
-         end if
+           call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,&
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k) 
+         end if    
        end if
 
 !      =========================================================================
@@ -454,7 +452,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
      call timab(585,2,tsec)
    end if
-   
+      
 
 !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
@@ -487,7 +485,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
-   if ((wfoptalg/=14 .and. wfoptalg /= 1).or.dtset%ortalg>0) then
+   !print *, "WFOPTALG", wfoptalg
+   !print *, "dtset%ortalg", dtset%ortalg
+   if ((wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11) .or. dtset%ortalg>0) then
      call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
@@ -497,16 +497,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
    if ((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)) then
-     if ( .not. newlobpcg ) then
+     if ( .not. newlobpcg .and. .not. newchebfi) then
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
      else
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calcultated in my lobpcg, we don't care about the phase of gsc !
+       
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
      end if
    end if
-
+   
    if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
+   
  end do !  End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
 
@@ -517,7 +519,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Compute kinetic energy and non-local energy for each band, and in the SCF
 !case, contribution to forces, and eventually accumulate rhoaug
-
+ 
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
    ABI_ALLOCATE(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
