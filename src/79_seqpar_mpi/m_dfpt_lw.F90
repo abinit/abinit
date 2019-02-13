@@ -60,9 +60,8 @@ module m_dfpt_lw
  use m_initylmg,   only : initylmg
  use m_inwffil,    only : inwffil
  use m_dfpt_lwwf
- use m_dynmat,         only : cart39
- use m_ddb_hdr,  only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
- use m_ddb,      only : DDB_VERSION
+ use m_dynmat,     only : cart39
+ use m_ddb,        only : DDB_VERSION
 
  implicit none
 
@@ -217,7 +216,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  type(wvl_data) :: wvl 
  type(wffile_type) :: wffgs,wfftgs
  type(gs_hamiltonian_type) :: gs_hamkq
- type(ddb_hdr_type) :: ddb_hdr
 
 !arrays
  integer,allocatable :: indkpt1(:), indkpt1_tmp(:),indsy1(:,:,:),irrzon1(:,:,:)
@@ -1065,7 +1063,6 @@ end subroutine dfpt_qdrpole
 !!  qdrpwf_t5_k(2,natpert,nq2grad,nq1grad)= t5 term (see notes) of qdrpwf_k
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  ucvol=unit cell volume in bohr**3.
-!!  unddb=unit number for DDB output
 !!  
 !! OUTPUT
 !!  d3etot(2,3,mpert,6,mpert,3,mpert)= matrix of the 3DTE
@@ -1086,7 +1083,7 @@ end subroutine dfpt_qdrpole
 
 subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, & 
          & nq1grad,nq2grad,pert_atdis,prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, & 
-         & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol,unddb)
+         & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
