@@ -23,7 +23,7 @@ module m_pair_list
       procedure :: iter => pair_list_iter
       procedure :: restart => pair_list_restart
       procedure :: length => pair_list_length
-  end type
+  end type pair_list
 
 ! -------------------------------------------------------------------------------
 ! -                                                                             -
@@ -41,6 +41,7 @@ module m_pair_list
       use m_type_pair_list
       type(c_pair_list),intent(inout) :: pl
     end subroutine pair_list_free_c
+
     subroutine pair_list_seti(pl, key, i, len) bind(C, name="pair_list_seti")
       use m_type_pair_list
       type(c_pair_list) :: pl
@@ -97,7 +98,7 @@ module m_pair_list
     class(pair_list),intent(in) :: pl
     integer :: length
     length = pl%plc%length
-  end function
+  end function pair_list_length
 
 ! pair_list_get
 ! arg
