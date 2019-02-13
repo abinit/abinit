@@ -12,7 +12,7 @@ module m_pair_list
   public :: pair_list
   public :: TC_EMPTY, TC_NOTFOUND, TC_INT, TC_REAL, TC_STRING
 
-  type,public :: pair_list
+  type :: pair_list
     type(c_pair_list) :: plc
     contains
       procedure :: set => pair_list_set
