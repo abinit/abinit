@@ -1,10 +1,10 @@
 from __future__ import print_function, division, unicode_literals
 ITERATORS = [
-    'idtset',
-    'itimimage',
-    'iimage',
-    'itime',
-    'istep'
+    'dtset',
+    'timimage',
+    'image',
+    'time',
+    'step'
 ]
 
 # associate an iterator with its deepness in the global computation
