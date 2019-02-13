@@ -1,3 +1,8 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
 #define SET_DEFAULT(v, optv, defv) v = defv; if(present(optv)) v = optv
 #define ERROR(msg) write(0,*) msg; stop
 #define ERROR_NO_OUT ERROR("No output medium have been provided.")

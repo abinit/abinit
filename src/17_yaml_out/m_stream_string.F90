@@ -1,3 +1,7 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 ! Provide tools to manipulate variable size strings in an incermental FIFO way
 ! Use write to incrementaly fill the string. The required memory space will be allocated
 ! automatically when needed.
