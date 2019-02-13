@@ -61,6 +61,7 @@ module m_longwave
  use m_fft,         only : fourdp
  use m_ddb,         only : DDB_VERSION,dfpt_lw_doutput
  use m_ddb_hdr,     only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
+ use m_dfpt_elt,    only : dfpt_ewalddq
 
  implicit none
 
@@ -137,8 +138,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,parameter :: cplex1=1,formeig=0,response=1
  integer :: ask_accurate,bantot,gscase,iatom,idir,ierr,indx,ipert,ireadwf0,iscf_eff,itypat
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim,mk1mem
- integer :: mpert,nkxc,nk3xc,ntypat,n3xccc
- integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho,usexcnhat
+ integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
+ integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,sumg0,timrev,tim_mkrho,usexcnhat
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
@@ -154,7 +155,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  type(wffile_type) :: wffgs,wfftgs
  !arrays
  integer :: ngfft(18),ngfftf(18)
- real(dp) :: gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
+ real(dp) :: gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),qphon(3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:)
@@ -162,8 +163,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),rfpert(:),symrec(:,:,:) 
  real(dp),allocatable :: cg(:,:)
- real(dp),allocatable :: d3etot(:,:,:,:,:,:,:)
- real(dp),allocatable :: doccde(:),eigen0(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
+ real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:),dyewdq(:,:,:,:,:,:)
+ real(dp),allocatable :: eigen0(:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
@@ -208,6 +209,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 
 !Init spaceworld
  spaceworld=mpi_enreg%comm_cell
+ my_natom=mpi_enreg%my_natom
+ 
 
 !Define FFT grid(s) sizes (be careful !)
 !See NOTES in the comments at the beginning of this file.
@@ -456,6 +459,16 @@ ecore=zero
  end if
 
 !#############  SPATIAL-DISPERSION POPERTIES CALCULATION  ###########################
+
+!Calculate the nonvariational terms
+!q-gradient of Ewald contribution to the dynamical matrix
+ ABI_ALLOCATE(dyewdq,(2,3,natom,3,natom,3))
+ dyewdq(:,:,:,:,:,:)=zero
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
+   sumg0=0;qphon(:)=zero
+   call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
+&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+ end if
 
 !Calculate the quadrupole tensor
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
