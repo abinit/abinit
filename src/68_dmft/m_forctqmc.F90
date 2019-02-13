@@ -69,7 +69,7 @@ contains
 !!
 !! SOURCE
 
-subroutine check(istatus)
+subroutine netcdf_check(istatus)
 use netcdf
 implicit none
 integer, intent (in) :: istatus
@@ -77,7 +77,7 @@ integer, intent (in) :: istatus
 if (istatus /= nf90_noerr) then
     write(*,*) trim(adjustl(nf90_strerror(istatus)))
 end if
-end subroutine
+end subroutine netcdf_check
 
 
 !!****f* m_forctqmc/qmc_prep_ctqmc
