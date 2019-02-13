@@ -754,7 +754,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   ABI_DEALLOCATE(symbols)
   ABI_DEALLOCATE(exists)
   ABI_DEALLOCATE(ncombi_order)
-  ABI_DATATYPE_DEALLOCATE(my_coeffs)  
+  !ABI_DATATYPE_DEALLOCATE(my_coeffs)  
   call fit_data_free(fit_data)
 end subroutine opt_effpotbound
 
