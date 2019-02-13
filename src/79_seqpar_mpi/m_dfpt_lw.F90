@@ -500,7 +500,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  ABI_ALLOCATE(eqgradhart,(2,natpert,nq2grad,nq1grad))
  ABI_ALLOCATE(qdrflg,(matom,3,3,3))
  qdrflg=0
- !rhor1_tmp=zero
+ rhor1_tmp=zero
  do iq1grad=1,nq1grad
    qdir=q1grad(2,iq1grad)
    do iatpert=1,natpert
@@ -2062,7 +2062,7 @@ end if
    ABI_ALLOCATE(elqgradhart,(2,3,3,3,3))
    ABI_ALLOCATE(elflexoflg,(3,3,3,3))
    elflexoflg=0
-   !rhor1_tmp=zero
+   rhor1_tmp=zero
    do iq1grad=1,nq1grad
      qdir=q1grad(2,iq1grad)
      do iefipert=1,nefipert
@@ -2107,6 +2107,7 @@ end if
    ABI_ALLOCATE(ddmdq_qgradhart,(2,natpert,natpert,nq1grad))
    ABI_ALLOCATE(ddmdq_flg,(matom,3,matom,3,3))
    ddmdq_flg=0
+   rhor1_tmp=zero
    do iq1grad=1,nq1grad
      qdir=q1grad(2,iq1grad)
      do jatpert=1,natpert
@@ -3474,27 +3475,28 @@ end subroutine dfpt_flexoout
          if (ddmdq_flg(iatpert,jatpert,iq1grad)==1) then
 
            !Calculate and save the third order energy derivative
-           tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)
-           d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpre
-           d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=zero
+           !tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)
+           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)
+           d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=zero
+           d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
 
            !Calculate and write the q-gradient of the dynamical matrix
-           ddmdq_red(re,iatpert,jatpert,iq1grad)=two*tmpre
-           ddmdq_red(im,iatpert,jatpert,iq1grad)=zero
+           ddmdq_red(re,iatpert,jatpert,iq1grad)=zero
+           ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpim
 
            if (prtvol==1) then
              !Write individual contributions 
              write(71,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdqwf_t1(re,iatpert,jatpert,iq1grad), zero
+           & zero, two*ddmdqwf_t1(im,iatpert,jatpert,iq1grad)
 
              write(72,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdqwf_t2(re,iatpert,jatpert,iq1grad), zero
+           & zero, two*ddmdqwf_t2(im,iatpert,jatpert,iq1grad)
 
              write(73,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdqwf_t3(re,iatpert,jatpert,iq1grad), zero
+           & zero, two*ddmdqwf_t3(im,iatpert,jatpert,iq1grad)
 
              write(76,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
-           & two*ddmdq_qgradhart(re,iatpert,jatpert,iq1grad), zero
+           & zero, two*ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)
            end if
 
          end if

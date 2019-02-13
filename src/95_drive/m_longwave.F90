@@ -218,12 +218,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Define the set of admitted perturbations taking into account
 !the possible permutations
 !  -> natom+8 refers to ddq perturbation
-!  -> the dimension 6 of the first argument is used to define
-!     both up and down extradiagonal strain perturbations. 
-!     Necessary because their q-gradient is not symmetric.
  mpert=natom+8
- ABI_ALLOCATE(blkflg,(6,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3etot,(2,6,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(blkflg,(3,mpert,3,mpert,3,mpert))
+ ABI_ALLOCATE(d3etot,(2,3,mpert,3,mpert,3,mpert))
  blkflg=0
  d3etot=zero
 

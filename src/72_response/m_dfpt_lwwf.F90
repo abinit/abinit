@@ -2429,7 +2429,9 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
          ddmdqwf_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_k(2,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                              &
-       &         c1atdis_q1gradH0_c1atdis_bks(2,iband,iatpert,jatpert,iq1grad)     
+       &       ( c1atdis_q1gradH0_c1atdis_bks(2,iband,iatpert,jatpert,iq1grad)     + &
+       &         two*c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad)      + &
+       &         two*c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)      )
 
          !Separate them
          !T1
@@ -2444,17 +2446,21 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
          !T2
          ddmdqwf_t2_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t2_k(1,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                                    &
-       &         two*c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
+       &         c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
 
-         ddmdqwf_t2_k(2,iatpert,jatpert,iq1grad)=zero
+         ddmdqwf_t2_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_t2_k(2,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                                    &
+       &         c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad)      
+ 
 
          !T3
          ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                                    &
-       &         two*c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
+       &         c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
 
-         ddmdqwf_t3_k(2,iatpert,jatpert,iq1grad)=zero
-
+         ddmdqwf_t3_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_t3_k(2,iatpert,jatpert,iq1grad) + & 
+       &         wtk_k * occ_k(iband) *                                                    &
+       &         c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)      
        end do
      end do
    end do
