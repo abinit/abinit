@@ -85,8 +85,9 @@ class DataExtractor:
                                 del self.iterators_state[iterator]
 
                         self.iterators_state[current_document['obj'].iterator] = current_document['obj'].iteration
+                    else:
+                        documents.append(current_document)
 
-                    documents.append(current_document)
                     current_document = None  # go back to normal mode
             else:
                 if self.__get_metachar(line) == '-':
