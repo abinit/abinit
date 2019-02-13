@@ -1,3 +1,9 @@
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+    
 module m_neat
   use defs_basis
   use m_abicore
@@ -10,7 +16,7 @@ module m_neat
   implicit none
 
   private
-  public :: neat_energies, neat_results_gs, neat_crystal
+  public :: neat_energies, neat_results_gs, neat_crystal, neat_start_dataset
   contains
 
   subroutine wrtout_stream(stream, iout)
@@ -22,6 +28,15 @@ module m_neat
     call stream%to_string(s)
     call wrtout(iout, s, 'COLL')
   end subroutine wrtout_stream
+
+  subroutine neat_write_dataset(n)
+    integer,intent(in) :: n
+    type(stream_string) :: stream
+
+    call yaml_iterstart('dataset', n, stream=stream)
+    call wrtout_stream(stream)
+
+  end subroutine neat_write_dataset
   
 !!****f* m_neat/neat_energies
 !!

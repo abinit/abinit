@@ -152,6 +152,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_gwls_sternheimer, only : gwls_sternheimer
  use m_nonlinear,        only : nonlinear
  use m_drivexc,          only : echo_xc_name
+ use m_neat,             only : neat_start_dataset
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
@@ -280,6 +281,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      write(message,'(2a,i2,67a)') trim(message),' ',jdtset,' ',('=',mu=1,66)
    end if
    write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
+
+   call neat_start_dataset(jdtset);
+
    if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
      write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
    end if
