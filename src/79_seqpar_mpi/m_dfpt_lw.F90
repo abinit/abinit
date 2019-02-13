@@ -61,7 +61,6 @@ module m_dfpt_lw
  use m_inwffil,    only : inwffil
  use m_dfpt_lwwf
  use m_dynmat,     only : cart39
- use m_ddb,        only : DDB_VERSION
 
  implicit none
 
