@@ -395,7 +395,6 @@ class Differ(object):
                              ignoreP=self.options['ignoreP'])
         lines1, documents1, ignored1 = dext.extract(lines1)
         lines2, documents2, ignored2 = dext.extract(lines2)
-        print(documents1, documents2)
         lines_differences = self.__diff_lines(lines1, lines2)
         return Result(lines_differences, label=self.options['label']), self.__test_doc(documents1, documents2)
 

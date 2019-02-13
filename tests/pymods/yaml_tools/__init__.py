@@ -14,17 +14,18 @@ except ImportError:
 if is_available:
 
     class CorruptedDocument(object):
-        def __init__(self, error):
+        def __init__(self, error, context=''):
             self.error = error
+            self.context = context
 
-        def why(self):
-            return self.error.message
+        def __repr__(self):
+            return "<Corrupted document {}: {}>".format(self.error.__name__, str(self.error))
 
-    def yaml_parse(*args, **kwargs):
+    def yaml_parse(content, *args, **kwargs):
         from . import structures
         try:
-            return yaml.load(*args, **kwargs)
-        except Exception as e:
-            return CorruptedDocument(e)
+            return yaml.load(content, *args, **kwargs)
+        except yaml.YAMLError as e:
+            return CorruptedDocument(e, context=content)
 
     yaml_print = yaml.dump

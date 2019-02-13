@@ -5,6 +5,7 @@
     and in writing YAML formated data.
 '''
 import re
+from inspect import ismethod
 
 try:
     import yaml
@@ -26,9 +27,9 @@ if is_available:
 
         def constructor(loader, node):
             map = dict(loader.construct_mapping(node, deep=True))
-            try:  # classmethod
+            if ismethod(Cls.from_map):
                 return Cls.from_map(map)
-            except TypeError:  # classic method
+            else:
                 return Cls().from_map(map)
 
         def representer(dumper, data):
@@ -52,9 +53,9 @@ if is_available:
 
         def constructor(loader, node):
             seq = list(loader.construct_sequence(node, deep=True))
-            try:  # classmethod
+            if ismethod(Cls.from_seq):
                 return Cls.from_seq(seq)
-            except TypeError:  # classic method
+            else:
                 return Cls().from_seq(seq)
 
         def representer(dumper, data):
@@ -78,9 +79,9 @@ if is_available:
 
         def constructor(loader, node):
             scalar = loader.construct_scalar(node)
-            try:  # classmethod
+            if ismethod(Cls.from_scalar):
                 return Cls.from_scalar(scalar)
-            except TypeError:  # classic method
+            else:
                 return Cls().from_seq(scalar)
 
         def representer(dumper, data):

@@ -21,10 +21,9 @@ if is_available:
 
         @classmethod
         def from_map(cls, d):
-            new = cls()
-            new.iterator = max(d.keys(), key=lambda x: ITERATOR_RANKS[x])
-            new.iteration = d[new.iterator]
-            return new
+            iterator = max(d.keys(), key=lambda x: ITERATOR_RANKS[x])
+            iteration = d[iterator]
+            return cls(iterator, iteration)
 
         def to_map(self):
             return {self.iterator: self.iteration}
@@ -34,6 +33,13 @@ if is_available:
 
     @yaml_auto_map
     class DataDoc(object):
+        def __init__(self, label='nothing', comment='no comment'):
+            self.label = label
+            self.comment = comment
+
+    @yaml_auto_map
+    class Etot(object):
+        Etot_yaml_tag = 'ETOT'
         def __init__(self, label='nothing', comment='no comment'):
             self.label = label
             self.comment = comment
@@ -61,6 +67,10 @@ if is_available:
             return to_list(self)
 
     @yaml_seq
+    class CartForces(AutoNumpy):
+        pass
+
+    @yaml_seq
     class Matrix33(AutoNumpy):
         '''
             Define a matrix of shape (3, 3) compatible with numpy arrays and
@@ -73,9 +83,13 @@ if is_available:
 
         @classmethod
         def from_seq(cls, s):
-            new = AutoNumpy.from_seq(cls, s)
+            new = AutoNumpy.from_seq(s)
             assert new.shape == (3, 3)
             return new
+
+    @yaml_seq
+    class Tensor(Matrix33):
+        pass
 
     @yaml_seq
     class Tensor32(Matrix33):
