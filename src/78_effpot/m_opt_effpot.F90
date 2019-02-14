@@ -563,33 +563,33 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
       do icombi=1,ncombi
              ! Copy all the terms in eff pot 
              ! Get new name of term and set new terms to potential 
-             write(*,*) 'ndisp of term', my_coeffs(nterm_start+icombi)%nterm
-             write(*,*) 'and wath is nterm_start', nterm_start,'and icomb btw', icombi
+             !write(*,*) 'ndisp of term', my_coeffs(nterm_start+icombi)%nterm
+             !write(*,*) 'and wath is nterm_start', nterm_start,'and icomb btw', icombi
              call polynomial_coeff_getName(name,my_coeffs(nterm_start+icombi),symbols,recompute=.TRUE.)
              call polynomial_coeff_SetName(name,my_coeffs(nterm_start+icombi))
            
              ! Set dimensions of temporary my_coeffs array 
-             nterm2 = eff_pot%anharmonics_terms%ncoeff
-             ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(nterm2+1))
+             nterm2 = eff_pot%anharmonics_terms%ncoeff + 1
+             ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(nterm2))
              ! Copy terms of previous cycle
-             do iterm2=1,nterm2
+             do iterm2=1,nterm2-1
                 my_coeffs_tmp(iterm2) = eff_pot%anharmonics_terms%coefficients(iterm2) 
              enddo
              !Put new term to my_coeffs_tmp
-             my_coeffs_tmp(nterm2+1) = my_coeffs(nterm_start+icombi) 
+             my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi) 
 
              ! Message to Output 
               write(message,'(5a)' )ch10,&
-&             ' ==> high order term: ', trim(my_coeffs_tmp(nterm2+1)%name),' created',ch10
+&             ' ==> high order term: ', trim(my_coeffs_tmp(nterm2)%name),' created',ch10
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
              ! Check if generated term is not already contained in effpot
              ! If yes cycle 
              do jterm=1,nterm
-                write(*,*) 'what is jterm here', jterm 
-                exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2+1))
+                !write(*,*) 'what is jterm here', jterm 
+                exists(jterm) = coeffs_compare(my_coeffs_tmp(jterm),my_coeffs_tmp(nterm2))
              enddo !jterm
-             write(*,*) 'exists?', exists 
+             !write(*,*) 'exists?', exists 
              if(any(exists))then 
                 write(message,'(3a)' )ch10,&
 &               ' ==> Term exists already. We cycle',ch10
@@ -835,11 +835,11 @@ do order=order_start,order_end,2
          enddo !iorder2 
       enddo !iorder1 !
    endif 
-   write(*,*) 'ncombi(',i,') for order',order,' is:', ncombi_order(i), 'are we happy?'
+   !write(*,*) 'ncombi(',i,') for order',order,' is:', ncombi_order(i), 'are we happy?'
 enddo !order
 
-write(*,*) ncombi_order(:)
-write(*,*) 'ncombi for term is:', ncombi, 'are we happy?'
+!write(*,*) ncombi_order(:)
+!write(*,*) 'ncombi for term is:', ncombi, 'are we happy?'
 
 end subroutine opt_getCombisforterm
 
@@ -889,7 +889,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: i,icombi,icombi_start,icombi_stop,idisp,nterm_of_term
+ integer :: i,icombi,icombi2,icombi_start,icombi_stop,idisp,nterm_of_term
  integer :: order,iorder1,iorder2,iterm_of_term,jdisp,power_tot
  integer :: jdisp1,jdisp2,sec
  real(sp) :: to_divide,divider1,divider2,divided
@@ -915,13 +915,13 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
      order = order_start
      ! TODO work here icombi start and order conting does not work yet. 
      do order=order_start,order_stop,2
-        write(*,*) 'Was I now here?!(order-loop)'
+        !write(*,*) 'Was I now here?!(order-loop)'
         i = i + 1
         icombi_stop = icombi_start + ncombi_order(i) - 1
         equal_term_done = .FALSE.
-        write(*,*) 'order', order
-        write(*,*) 'icombi_start', icombi_start
-        write(*,*) 'icombi_stop', icombi_stop
+        !write(*,*) 'order', order
+        !write(*,*) 'icombi_start', icombi_start
+        !write(*,*) 'icombi_stop', icombi_stop
         icombi=icombi_start 
         do while (icombi<=icombi_stop)
            power_tot = 0 
@@ -933,31 +933,16 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
            if(power_tot == order)then
               icombi_start = icombi_start + 1
               icombi = icombi + 1
-              write(*,*) 'icombi-start in if', icombi_start 
+              !write(*,*) 'icombi-start in if', icombi_start 
               cycle
            else        
-              write(*,*) 'I was here!'
-              to_divide = real(order)
-              divided = real(to_divide/ndisp)
-              divider1 = real(ndisp)
-              divider2 = real(2)
-              write(*,*) 'divided', divided, 'divider2', divider2
-              if(mod(divided,divider2) == 0 .and. .not. equal_term_done )then                                                              
-                 write(*,*) "Sometimes I should be here sometimes I shouldn't" 
-                 do jdisp=1,ndisp
-                    do iterm_of_term=1,nterm_of_term
-                       terms(icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
-                    enddo                     
-                 enddo !jdisp
-                 equal_term_done = .TRUE.
-                 icombi = icombi + 1
-                 icombi_start = icombi_start +1
-              endif
               jdisp1 = 1 
               sec = 1
-              write(*,*) 'what is ndisp actually', ndisp
+              !write(*,*) 'what is ndisp actually', ndisp
+              ! Treat single permutations from the bottom of the order 
+              ! so start from ^2^2^2 and get ^6^2^2,^2^6^2, and ^2^2^6 f.E.
               do while(jdisp1<=ndisp .and. sec < 100)                    
-                 write(*,*) "I did at least one displacement" 
+                 !write(*,*) "I did at least one displacement" 
                  do iterm_of_term=1,nterm_of_term
                     terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
                  enddo
@@ -968,11 +953,76 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                  if(power_tot == order)then 
                     icombi = icombi + 1
                     icombi_start = icombi_start +1
-                    write(*,*) 'what is icombi_start here', icombi_start
+                    !write(*,*) 'what is icombi_start here', icombi_start
                     jdisp1 = jdisp1 + 1
-                    write(*,*) 'and what is jdisp1?', jdisp1 
+                    !write(*,*) 'and what is jdisp1?', jdisp1
+
                  endif  
                enddo!jdisp1
+               !Treat permutations in terms ndisp > 2 and order >= 10 
+               !Start f.E. from ^4^4^4 and get ^4^2^4, ^2^4^4,^4^4^2
+               if(icombi_stop - icombi > 1 .and. ndisp >2 )then    
+                  do icombi2=icombi,icombi+ndisp-1
+                      do jdisp=1,ndisp
+                         do iterm_of_term=1,nterm_of_term
+                            terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) +2
+                            !write(*,*) "What's the power now?", terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp)
+                         enddo                     
+                      enddo !jdisp
+                  enddo 
+                  jdisp1 = 1                  
+                  do while(jdisp1<=ndisp .and. sec < 100) 
+                      sec = sec + 1  
+                      !write(*,*) "how often did I go here, hu ?"                  
+                     !write(*,*) "I did at least one displacement" 
+                     do iterm_of_term=1,nterm_of_term
+                        terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) - 2 
+                     enddo
+                     power_tot=0
+                     do jdisp2=1,ndisp 
+                        power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
+                     enddo
+                     if(power_tot == order)then 
+                        icombi = icombi + 1
+                        icombi_start = icombi_start +1
+                        !write(*,*) 'what is icombi_start here', icombi_start
+                        jdisp1 = jdisp1 + 1
+                        !write(*,*) 'and what is jdisp1?', jdisp1
+                     endif  
+                   enddo!jdisp1  
+                   ! Message to Output 
+                   if(sec>100)then 
+                      write(message,'(4a)' )ch10,&
+&                     "You're stuck in a while loop.",ch10,&
+&                     'Action: Contact Abinit Group',ch10 
+                      MSG_ERROR(message)   
+                   endif                      
+               endif
+               !write(*,*) 'I was here!'
+               to_divide = real(order)
+               divider1 = real(ndisp)
+               divided = real(to_divide/divider2)
+               divider2 = real(2)
+               !write(*,*) 'divided', divided, 'divider2', divider2
+               !Treat terms with even power f.E. ^2^2^2^2, ^4^4 etc...
+               if(mod(divided,divider2) == 0 .and. .not. equal_term_done )then                                                              
+                  write(*,*) "Sometimes I should be here sometimes I shouldn't" 
+                  do jdisp=1,ndisp
+                     do iterm_of_term=1,nterm_of_term
+                        terms(icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                     enddo                     
+                  enddo !jdisp
+                  do icombi2=icombi+1,icombi+ndisp
+                      do jdisp=1,ndisp
+                         do iterm_of_term=1,nterm_of_term
+                            terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                         enddo                     
+                      enddo !jdisp
+                  enddo 
+                  equal_term_done = .TRUE.
+                  icombi = icombi + 1
+                  icombi_start = icombi_start +1
+              endif
             endif 
         enddo !icombination
       enddo !order
