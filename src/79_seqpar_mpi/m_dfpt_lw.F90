@@ -1539,6 +1539,7 @@ end subroutine dfpt_qdrpout
 !!  doccde(mband*nkpt*nsppol)=derivative of occupancies wrt the energy
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the dynamical matrix
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2.
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
@@ -1587,7 +1588,7 @@ end subroutine dfpt_qdrpout
 !!
 !! SOURCE
 
-subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
+subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
 &          gmet,gprimd,kxc,mpert,&
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
@@ -1605,8 +1606,6 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
- integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
- real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
  character(len=6), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -1618,9 +1617,12 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  type(pawrhoij_type),intent(inout) :: pawrhoij(:)
 !arrays
  integer,intent(in) :: atindx(dtset%natom)
+ integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
  integer,intent(in) :: nattyp(dtset%ntypat),ngfft(18)
  integer,intent(in) :: pertsy(3,dtset%natom+6)
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: doccde(dtset%mband*nkpt*dtset%nsppol)
+ real(dp),intent(in) :: dyewdq(2,3,dtset%natom,3,dtset%natom,3)
  real(dp),intent(in) :: gmet(3,3), gprimd(3,3)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
@@ -2677,7 +2679,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    end if
    if (lw_flexo==1.or.lw_flexo==3) then
      call dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot,&
-   & gprimd,dtset%kptopt,matom,mpert,natpert,nq1grad,pert_atdis,dtset%prtvol,q1grad,rprimd)
+   & dyewdq,gprimd,dtset%kptopt,matom,mpert,natpert,nq1grad,pert_atdis,dtset%prtvol,q1grad,rprimd)
    end if
  end if
 
@@ -3330,6 +3332,7 @@ end subroutine dfpt_flexoout
 !!  ddmdqwf_t1(2,natpert,natpert,nq1grad)=term 1 of the wave function contribution 
 !!  ddmdqwf_t2(2,natpert,natpert,nq1grad)=term 2 of the wave function contribution 
 !!  ddmdqwf_t3(2,natpert,natpert,nq1grad)=term 3 of the wave function contribution 
+!!  dyewdq(2,3,natom,3,natom,3)= First q-gradient of Ewald part of the dynamical matrix
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  kptopt=2 time reversal symmetry is enforced, 3 trs is not enforced (for debugging purposes)
 !!  matom=number of atoms 
@@ -3359,7 +3362,7 @@ end subroutine dfpt_flexoout
 !! SOURCE
 
  subroutine dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot, &
- & gprimd,kptopt,matom,mpert,natpert,nq1grad,pert_atdis,prtvol,q1grad,rprimd)
+ & dyewdq,gprimd,kptopt,matom,mpert,natpert,nq1grad,pert_atdis,prtvol,q1grad,rprimd)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3384,6 +3387,7 @@ end subroutine dfpt_flexoout
  real(dp),intent(inout) :: ddmdqwf_t1(2,natpert,natpert,nq1grad)
  real(dp),intent(inout) :: ddmdqwf_t2(2,natpert,natpert,nq1grad)
  real(dp),intent(inout) :: ddmdqwf_t3(2,natpert,natpert,nq1grad)
+ real(dp),intent(in) :: dyewdq(2,3,matom,3,matom,3)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: rprimd(3,3)
  
@@ -3409,6 +3413,7 @@ end subroutine dfpt_flexoout
   open(unit=71,file='ddmdq_wf_t1.out',status='unknown',form='formatted',action='write')
    open(unit=72,file='ddmdq_wf_t2.out',status='unknown',form='formatted',action='write')
    open(unit=73,file='ddmdq_wf_t3.out',status='unknown',form='formatted',action='write')
+   open(unit=74,file='ddmdq_ewald.out',status='unknown',form='formatted',action='write')
    open(unit=76,file='ddmdq_elecstic.out',status='unknown',form='formatted',action='write')
  end if
 
@@ -3430,8 +3435,10 @@ end subroutine dfpt_flexoout
          if (ddmdq_flg(iatpert,jatpert,iq1grad)==1) then
 
            !Calculate and save the third order energy derivative
-           tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)
-           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)
+           tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)+&
+         & half*dyewdq(re,iatdir,iatom,jatdir,jatom,iq1dir)
+           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)+&
+         & half*dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
            d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpre
            d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
 
@@ -3449,6 +3456,9 @@ end subroutine dfpt_flexoout
 
              write(73,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
            & two*ddmdqwf_t3(:,iatpert,jatpert,iq1grad)
+
+             write(74,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & dyewdq(:,iatdir,iatom,jatdir,jatom,iq1dir)
 
              write(76,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
            & two*ddmdq_qgradhart(:,iatpert,jatpert,iq1grad)
@@ -3475,8 +3485,8 @@ end subroutine dfpt_flexoout
          if (ddmdq_flg(iatpert,jatpert,iq1grad)==1) then
 
            !Calculate and save the third order energy derivative
-           !tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)
-           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)
+           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)+&
+         & half*dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
            d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=zero
            d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
 
@@ -3495,6 +3505,9 @@ end subroutine dfpt_flexoout
              write(73,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
            & zero, two*ddmdqwf_t3(im,iatpert,jatpert,iq1grad)
 
+             write(74,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
+           & zero, dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
+
              write(76,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
            & zero, two*ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)
            end if
@@ -3510,6 +3523,14 @@ end subroutine dfpt_flexoout
    write(msg,"(1a)") 'kptopt must be 2 or 3 for the quadrupole calculation'
    MSG_BUG(msg)
 
+ end if
+
+ if (prtvol==1) then
+   close(71)
+   close(72)
+   close(73)
+   close(74)
+   close(76)
  end if
 
 !Transformation to cartesian coordinates of the ddmdq
@@ -3624,13 +3645,6 @@ end subroutine dfpt_flexoout
 
  ABI_DEALLOCATE(ddmdq_cart)
  ABI_DEALLOCATE(cartflg)
-
- if (prtvol==1) then
-   close(71)
-   close(72)
-   close(73)
-   close(76)
- end if
 
  DBG_EXIT("COLL")
  end subroutine dfpt_ddmdqout

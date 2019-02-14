@@ -481,7 +481,7 @@ ecore=zero
 
 !Calculate the flexoelectric tensor
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
-   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
+   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,&
 &   gmet,gprimd,kxc,mpert,&
 &   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
 &   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&

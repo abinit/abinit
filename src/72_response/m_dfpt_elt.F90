@@ -2651,12 +2651,14 @@ end subroutine dfpt_ewald
 !! dfpt_ewalddq
 !!
 !! FUNCTION
-!! Compute ewald contribution to the dynamical matrix, at a given q wavevector.
-!! Note: the q=0 part should be subtracted, by another call to
-!! the present routine, with q=0. The present routine correspond
-!! to the quantity C_bar defined in Eq.(24) or (27) in Phys. Rev. B 55, 10355 (1997) [[cite:Gonze1997a]].
-!! The two calls correspond to Eq.(23) of the same paper.
+!! Compute the first q-gradient of Ewald contribution to the dynamical matrix, at a given q wavevector.
 !! If q=0 is asked, sumg0 should be put to 0. Otherwise, it should be put to 1.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2019 ABINIT group (MR, MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! gmet(3,3)=metric tensor in reciprocal space (length units **-2)
@@ -2717,7 +2719,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 !arrays
  real(dp) :: tsec(2)
  integer,pointer :: my_atmtab(:)
- real(dp) :: gpq(3),rq(3)
+ real(dp) :: dakk(3),gpq(3),rq(3)
 
 ! *************************************************************************
 
@@ -2787,7 +2789,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                      term2=gpq(mu)*gpq(nu)*gpq(iq)
                      term3=fac2*term2
                      term2=two*term2/gsq
-                     gterms=term1-term2-term3
+                     gterms=(term1-term2)/two_pi-term3*two_pi
                      dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)+gterms*c1r
                      dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+gterms*c1i
                    end do
@@ -2822,7 +2824,6 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
    end do
  end do
 
-
 !Do sums over real space:
  reta=sqrt(eta)
  reta3m=-eta*reta
@@ -2840,6 +2841,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
            r1=dble(ir1)+xred(1,ia)-xred(1,ib)
            r2=dble(ir2)+xred(2,ia)-xred(2,ib)
            r3=dble(ir3)+xred(3,ia)-xred(3,ib)
+           dakk(:)=(/r1,r2,r3/)
            rdot12=rmet(2,1)*r1*r2
            rdot13=rmet(3,1)*r1*r3
            rdot23=rmet(3,2)*r2*r3
@@ -2870,9 +2872,9 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
                    do nu=1,3
 !                   do nu=1,mu
                      dyewdq(re,mu,ia,nu,ib,iq)=dyewdq(re,mu,ia,nu,ib,iq)-&
-&                     c1i*rq(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+&                     c1i*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
                      dyewdq(im,mu,ia,nu,ib,iq)=dyewdq(im,mu,ia,nu,ib,iq)+&
-&                     c1r*rq(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
+&                     c1r*dakk(iq)*(rq(mu)*rq(nu)*term3+rmet(mu,nu)*term2)
                    end do
                  end do
                end do
@@ -2915,7 +2917,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
              dyewdq(ii,mu,ia,nu,ib,iq)=dyewdq(ii,mu,ia,nu,ib,iq)*&
 &             zion(typat(ia))*zion(typat(ib))
            end do
-           !write(100,'(5i3,1x,2f14.8)') mu,ia,nu,ib,iq,dyewdq(:,mu,ia,nu,ib,iq)
+           write(100,'(5i3,1x,2f14.8)') mu,ia,nu,ib,iq,dyewdq(:,mu,ia,nu,ib,iq)
          end do
        end do
      end do
