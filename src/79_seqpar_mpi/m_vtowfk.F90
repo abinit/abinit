@@ -50,8 +50,6 @@ module m_vtowfk
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
- 
- use m_xg !DUMMY
 
  implicit none
 
@@ -143,7 +141,7 @@ contains
 !!      vtorho
 !!
 !! CHILDREN
-!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,chebfiwf2, meanvalue_g
+!!      build_h,cgwf,chebfi,dsymm,fourwf,fxphas,lobpcgwf,lobpcgwf2,meanvalue_g
 !!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
 !!      prep_nonlop,pw_orthon,subdiago,timab,wrtout,xmpi_sum,zhemm
 !!
@@ -218,12 +216,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
- 
 
 ! **********************************************************************
 
  DBG_ENTER("COLL")
-
 
  call timab(28,1,tsec) ! Keep track of total time spent in "vtowfk"
 
@@ -232,6 +228,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk : enter'
    call wrtout(std_out,message,'PERS')
  end if
+
 
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
@@ -242,10 +239,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
  newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) 
- 
  istwf_k=gs_hamk%istwf_k
- 
- print *, "istwf_k", gs_hamk%istwf_k
  quit=0
 
 !Parallelization over spinors management
@@ -286,7 +280,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_CHECK(ierr==0, "out of memory in gsc")
    gsc=zero
  end if
- 
+
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
@@ -331,6 +325,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !nnsclo_now=number of non-self-consistent loops for the current vtrial
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
+
  do inonsc=1,nnsclo_now
 
 !  This initialisation is needed for the MPI-parallelisation (gathering using sum)
@@ -402,7 +397,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
-       else if (wfopta10 == 1) then  
+       else if (wfopta10 == 1) then
          if ( .not. newchebfi) then
            call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
@@ -452,7 +447,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
      call timab(585,2,tsec)
    end if
-      
 
 !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
@@ -485,14 +479,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    call timab(583,1,tsec) ! "vtowfk(pw_orthon)"
    ortalgo=mpi_enreg%paral_kgb
-   !print *, "WFOPTALG", wfoptalg
-   !print *, "dtset%ortalg", dtset%ortalg
    if ((wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11) .or. dtset%ortalg>0) then
      call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &     mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
    end if
    call timab(583,2,tsec)
-   
 
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
@@ -502,15 +493,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      else
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calcultated in my lobpcg, we don't care about the phase of gsc !
-       
        call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
      end if
    end if
-   
-   if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
-   
- end do !  End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
+   if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
+ end do !  End loop over inonsc (NON SELF-CONSISTENT LOOP)
 
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
@@ -519,7 +507,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
 !Compute kinetic energy and non-local energy for each band, and in the SCF
 !case, contribution to forces, and eventually accumulate rhoaug
- 
+
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
    ABI_ALLOCATE(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
@@ -842,8 +830,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,message,'PERS')
  end if
 
-
-
 !Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
  if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
@@ -901,7 +887,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_DEALLOCATE(mat1)
    call timab(586,2,tsec)
  end if
- 
 
 !###################################################################
 
@@ -1290,3 +1275,4 @@ end subroutine fxphas
 
 end module m_vtowfk
 !!***
+

@@ -51,10 +51,6 @@ MODULE m_cgtools
  use m_fstrings,   only : toupper
  use m_time,       only : timab
  use m_numeric_tools,   only : hermit
- use iso_c_binding
- !use m_xg 
- 
- !external c_loc
 
  implicit none
 
@@ -148,6 +144,8 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -208,6 +206,8 @@ end subroutine cg_setval
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -263,6 +263,8 @@ end subroutine cg_tocplx
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -430,6 +432,8 @@ end subroutine cg_setaug_zero
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -478,6 +482,8 @@ end subroutine cg_to_reim
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -529,9 +535,11 @@ end subroutine cg_from_reim
 !!  y = In output, y contains a copy of the values of x.
 !!
 !! PARENTS
-!!      cgwf,corrmetalwf1,dfpt_cgwf,dfpt_mkrho,dfpt_vtowfk,lapackprof,m_iowf
+!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_mkrho,m_dfpt_vtowfk,m_iowf
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -577,9 +585,11 @@ end subroutine cg_zcopy
 !!  x = Updated vector.
 !!
 !! PARENTS
-!!      cgwf,m_cgtools
+!!      m_cgtools,m_cgwf
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -856,9 +866,11 @@ end function cg_zdotu
 !!  y = Array. In output, y contains the updated vector.
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf,lapackprof,rf2_init
+!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_rf2_init
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -918,6 +930,8 @@ end subroutine cg_zaxpy
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -977,6 +991,8 @@ end subroutine cg_zaxpby
 !!      lapackprof,m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1059,6 +1075,8 @@ end subroutine cg_zgemv
 !!      lapackprof,m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1212,9 +1230,11 @@ end function set_istwfk
 !!  dotr= <vect|vect>
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf,dfpt_vtowfk,m_epjdos,mkresi,rf2_init
+!!      m_cgwf,m_dfpt_cgwf,m_dfpt_vtowfk,m_dft_energy,m_epjdos,m_rf2_init
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1299,13 +1319,14 @@ end subroutine sqnorm_g
 !!  $dotr=\Re ( <vect1|vect2> )$
 !!
 !! PARENTS
-!!      cgwf,chebfi,corrmetalwf1,d2frnl,dfpt_cgwf,dfpt_nsteltwf,dfpt_nstpaw
-!!      dfpt_nstwf,dfpt_vtowfk,dfpt_wfkfermi,dfptnl_resp,dotprod_set_cgcprj
-!!      dotprodm_sumdiag_cgcprj,eig2stern,extrapwf,fock2ACE,fock_ACE_getghc
-!!      fock_getghc,m_efmas,m_gkk,m_phgamma,m_phpi,m_rf2,m_sigmaph,mkresi
-!!      nonlop_gpu,nonlop_test,rf2_init
+!!      m_cgcprj,m_cgwf,m_chebfi,m_d2frnl,m_dfpt_cgwf,m_dfpt_nstwf,m_dfpt_scfcv
+!!      m_dfpt_vtowfk,m_dfptnl_pert,m_dft_energy,m_efmas,m_eig2d,m_extraprho
+!!      m_fock_getghc,m_gkk,m_nonlop,m_nonlop_test,m_pead_nl_loop,m_phgamma
+!!      m_phpi,m_rf2,m_rf2_init,m_sigmaph
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1332,8 +1353,7 @@ subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
  integer :: ierr
 !arrays
  real(dp) :: dotarr(2)
- double precision,external :: ddot  !dummy
- integer :: tmp
+
 ! *************************************************************************
 
  if (istwf_k==1) then ! General k-point
@@ -1347,7 +1367,7 @@ subroutine dotprod_g(dotr,doti,istwf_k,npw,option,vect1,vect2,me_g0,comm)
    end if
 
  else if (istwf_k==2 .and. me_g0==1) then ! Gamma k-point and I have G=0
-    
+
    dotr=half*vect1(1,1)*vect2(1,1)
    dotr = dotr + cg_real_zdotc(npw-1,vect1(1,2),vect2(1,2))
    dotr = two*dotr
@@ -1401,9 +1421,11 @@ end subroutine dotprod_g
 !!  ar=real part of the matrix element
 !!
 !! PARENTS
-!!      dfpt_vtowfk
+!!      m_dfpt_vtowfk
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1569,6 +1591,8 @@ end subroutine matrixelmt_g
 !!      m_epjdos
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1678,11 +1702,13 @@ end subroutine dotprod_v
 !!     N is stored as : n, m_x, m_y, mz          (complex)
 !!
 !! PARENTS
-!!      dfpt_dyxc1,dfpt_eltfrxc,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhotov
-!!      dfptnl_loop,energy,newfermie1,odamix,prcrskerker2,rhotov,rhotoxc,setvtr
+!!      m_dfpt_elt,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_dfptnl_pert
+!!      m_dft_energy,m_odamix,m_pead_nl_loop,m_prcref,m_respfn_driver,m_rhotov
+!!      m_rhotoxc,m_setvtr
 !!
 !! CHILDREN
-!!      xmpi_sum
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -1932,9 +1958,11 @@ end subroutine dotprod_vn
 !!  norm2= value of the square of the norm
 !!
 !! PARENTS
-!!      dfpt_rhotov,dfpt_vtorho,rhotov,vtorho
+!!      m_dfpt_rhotov,m_dfpt_vtorho,m_rhotov,m_vtorho
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2027,10 +2055,12 @@ end subroutine sqnorm_v
 !!  meansp(nspden)=mean value for each nspden component
 !!
 !! PARENTS
-!!      fresid,newvtr,pawmknhat,prcref,prcref_PMA,psolver_rhohxc,rhohxcpositron
-!!      rhotov,rhotoxc
+!!      m_electronpositron,m_forces,m_newvtr,m_paw_nhat,m_prcref,m_psolver
+!!      m_rhotov,m_rhotoxc
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2099,9 +2129,11 @@ end subroutine mean_fftr
 !!  cgcmat = outer spin product of spinorial wf with itself
 !!
 !! PARENTS
-!!      m_cut3d,partial_dos_fractions
+!!      m_cut3d,m_epjdos
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2182,6 +2214,8 @@ end subroutine cg_getspin
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2348,9 +2382,11 @@ end subroutine cg_gsph2box
 !!  oarrsph(2,npw_k*ndat)=Data defined on the G-sphere.
 !!
 !! PARENTS
-!!      fourwf,m_dfti,m_fftw3
+!!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2462,9 +2498,11 @@ end subroutine cg_box2gsph
 !!                  modified in input with the contribution gived by ur.
 !!
 !! PARENTS
-!!      fourwf,m_dfti,m_fftw3
+!!      m_dfti,m_fft,m_fftw3
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2552,6 +2590,8 @@ end subroutine cg_addtorho
 !!      m_dfti,m_fftw3
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2671,9 +2711,11 @@ end subroutine cg_vlocpsi
 !!    output: Orthonormalized set.
 !!
 !! PARENTS
-!!      pw_orthon
+!!      m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2831,9 +2873,11 @@ end subroutine cgnc_cholesky
 !!   destroyed in output.
 !!
 !! PARENTS
-!!      pw_orthon
+!!      m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -2949,6 +2993,8 @@ end subroutine cgpaw_cholesky
 !!      m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3049,6 +3095,8 @@ end subroutine cgnc_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3217,6 +3265,8 @@ end subroutine cgnc_gramschmidt
 !!      m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3323,6 +3373,8 @@ end subroutine cgpaw_normalize
 !!      m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3523,9 +3575,11 @@ end subroutine cgpaw_gramschmidt
 !!  4) cg_zgemv wraps ZGEMM whose implementation is more efficient, especially in the threaded case.
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf,dfpt_nstpaw,getdc1,lapackprof
+!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_nstwf,m_getgh1c
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3670,9 +3724,11 @@ end subroutine projbd
 !!  cg(2,mcg)=revised values (not orthonormalized)
 !!
 !! PARENTS
-!!      wfconv
+!!      m_inwffil
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3770,9 +3826,11 @@ end subroutine cg_envlop
 !!  cg(2*npw,nband)=nband normalized eigenvectors
 !!
 !! PARENTS
-!!      subdiago
+!!      m_cgtools
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -3872,9 +3930,11 @@ end subroutine cg_normev
 !!  vect(2,npw*nspinor)=<G|(H-eval)|C_{n,k}>*(polynomial ratio)
 !!
 !! PARENTS
-!!      cgwf,dfpt_cgwf
+!!      m_cgwf,m_dfpt_cgwf
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4022,6 +4082,8 @@ end subroutine cg_precon
 !!      m_lobpcg
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4322,6 +4384,8 @@ end subroutine cg_precon_block
 !!      m_lobpcg
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4496,9 +4560,11 @@ end subroutine cg_zprecon_block
 !! This should be cleared up.
 !!
 !! PARENTS
-!!      m_dynmat,rayleigh_ritz
+!!      m_dynmat,m_rayleigh_ritz
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4517,8 +4583,8 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
 !scalars
  integer,intent(in) :: icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap
 !arrays
- real(dp), target, intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
-    type(c_ptr) :: cptr
+ real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
+
 !Local variables-------------------------------
 !scalars
  integer :: iband,ii,indx
@@ -4527,10 +4593,9 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
  character(len=500) :: message
 !arrays
  real(dp),allocatable :: cimb(:),creb(:),saab(:),sabb(:),sbbb(:) !,sarr(:,:)
- 
 
 ! *************************************************************************
- 
+
 !The general case, where a complex phase indeterminacy is present
  if(istwfk==1)then
 
@@ -4662,7 +4727,7 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
 
 !  Storages that take into account the time-reversal symmetry : the freedom is only a sign freedom
  else  ! if istwfk/=1
- 
+
    ABI_ALLOCATE(creb,(nband_k))
    creb(:)=zero
 !  Loop over bands
@@ -4684,28 +4749,25 @@ subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
      cre=creb(iband)
      if(cre<zero)then
        indx=icg+(iband-1)*npw_k
-       
        do ii=1+indx,npw_k+indx
-         print *, "II", ii
-!         cg(1,ii)=-cg(1,ii)  !OVDE JE
-!         cg(2,ii)=-cg(2,ii)
+         cg(1,ii)=-cg(1,ii)
+         cg(2,ii)=-cg(2,ii)
        end do
-!       
        if(useoverlap==1)then
-!         stop
-!         indx=igsc+(iband-1)*npw_k
-!         do ii=1+indx,npw_k+indx
-!           gsc(1,ii)=-gsc(1,ii)
-!           gsc(2,ii)=-gsc(2,ii)
-!         end do
+         indx=igsc+(iband-1)*npw_k
+         do ii=1+indx,npw_k+indx
+           gsc(1,ii)=-gsc(1,ii)
+           gsc(2,ii)=-gsc(2,ii)
+         end do
        end if
      end if
+
    end do ! iband
-      
+
    ABI_DEALLOCATE(creb)
+
  end if ! istwfk
- print *, loc(cg)
- 
+
 end subroutine fxphas_seq
 !!***
 
@@ -4739,10 +4801,11 @@ end subroutine fxphas_seq
 !! The current implementation if not compatible with TR-symmetry (i.e. istwfk/=1) !
 !!
 !! PARENTS
-!!      dfptff_bec,dfptff_die,dfptff_ebp,dfptff_edie,dfptff_gbefd
-!!      dfptff_gradberry,qmatrix,smatrix
+!!      m_berrytk,m_dfpt_fef
 !!
 !! CHILDREN
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4824,10 +4887,11 @@ end subroutine overlap_g
 !!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
 !!
 !! PARENTS
-!!      rayleigh_ritz,vtowfk
+!!      m_rayleigh_ritz,m_vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xgemm,abi_xhpev,abi_xhpgv,cg_normev,hermit
+!!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt
+!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -5100,7 +5164,7 @@ end subroutine subdiago
 !! WARNING: not yet suited for nspinor=2 with istwfk/=1
 !!
 !! PARENTS
-!!      lapackprof,vtowfk,wfconv
+!!      lapackprof,m_inwffil,m_vtowfk
 !!
 !! CHILDREN
 !!      abi_xcopy,abi_xorthonormalize,abi_xtrsm,cgnc_cholesky,cgnc_gramschmidt

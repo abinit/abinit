@@ -87,8 +87,6 @@ module m_vtorho
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
- use m_xg !DUMMY
-
  implicit none
 
  private
@@ -249,10 +247,10 @@ contains
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
 !!
 !! PARENTS
-!!      scfcv
+!!      m_scfcv_core
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! NOTES
 !!  Be careful to the meaning of nfft (size of FFT grids):
@@ -389,7 +387,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
- 
+
 !Variables for BigDFT
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
@@ -448,7 +446,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  end if
 
  iscf=dtset%iscf
-
  fixed_occ=(dtset%occopt<3.or.electronpositron_calctype(electronpositron)==1)
  if(.not. wvlbigdft) then
    energies%e_eigenvalues = zero
@@ -502,7 +499,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      rhowfr(:,:)=zero
    end if
  end if
- 
 
 !Set max number of non-self-consistent loops nnsclo_now for use in vtowfk
  if(iscf<0)then
@@ -900,13 +896,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ffnl_k   =my_bandfft_kpt%ffnl_gather, &
          ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
-  
-   
+
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
          call make_invovl(gs_hamk, dimffnl, ffnl, ph3d, mpi_enreg)
        end if
-       
+
        ! Setup gemm_nonlop
        if (gemm_nonlop_use_gemm) then
          !set the global variable indicating to gemm_nonlop where to get its data from
@@ -1599,7 +1594,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(enlnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
-   if(iscf<=0)then
+   if(iscf<=0 .and. me_distrb==0)then
      option=2 ; enunit=1 ; vxcavg_dum=zero
      call prteigrs(eigen,enunit,energies%e_fermie,dtfil%fnameabo_app_eig,&
 &     ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,dtset%nband,&
@@ -1836,10 +1831,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !! OUTPUT
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -1947,10 +1942,10 @@ subroutine wvl_nscf_loop()
 !!  argout(sizeout)=description
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2047,10 +2042,10 @@ subroutine wvl_nscf_loop_bigdft()
 !!  e_eigenvalues= eigenvalues energy
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2114,10 +2109,10 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2175,10 +2170,10 @@ subroutine wvl_occ()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2236,10 +2231,10 @@ subroutine wvl_occ_bigdft()
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
-!!      eigensystem_info,wvl_eigen_abi2big,xmpi_bcast
+!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2340,7 +2335,7 @@ end subroutine vtorho
 !! NOTES
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      timab,xmpi_recv,xmpi_send

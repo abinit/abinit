@@ -3,28 +3,29 @@
 
 #Process distribution (parallelism) - TO BE ADAPTED
 #autoparal 1
-bandpp 2
+bandpp 128
 
 #DATASETS
-ndtset 1
+#ndtset 1
 
 #Dataset 1 - Ground state
-kptopt1 1
-tolwfr1 1.d-12
-prtwf1 1
-paral_kgb1 1
+#kptopt1 1
+#tolwfr1 1.d-12
+#prtwf1 1
+#paral_kgb1 1
 
 #Dataset 2 - Response function
-kptopt2 3
-toldfe2 1.d-8
-rfphon2 1
-getwfk2 1
-rfatpol2 1 1
-rfdir2 0 0 1
-nqpt2 1
-qpt2 0.0 0.375 0.0
+#kptopt2 3
+#toldfe2 1.d-8
+#rfphon2 1
+#getwfk2 1
+#rfatpol2 1 1
+#rfdir2 0 0 1
+#nqpt2 1
+#qpt2 0.0 0.375 0.0
 
 nline 6
+nnsclo 1
 
 #Plane wave basis
 ecut 8.
@@ -41,9 +42,10 @@ nband 128
 occopt 1
 
 #SCF cycle
-nstep 50
+nstep 10
 diemac 30.
 nbdbuf 11
+tolvrs 1e-7
 
 #Activation/deactivation of I/O
 optforces 2
@@ -51,7 +53,7 @@ optstress 1
 prtwf 0
 prtden 0
 prteig 0
-timopt 0
+timopt -3
 
 #Simulation cell
 acell 12. 8. 4. angstrom
@@ -64,7 +66,7 @@ typat 1   2   3   3   3   1   2   3   3   3
       1   2   3   3   3   1   2   3   3  !3
 chkprim 0
 
-istwfk 2
+istwfk 1
 wfoptalg 1
 
 

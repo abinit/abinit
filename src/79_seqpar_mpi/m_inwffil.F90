@@ -168,12 +168,12 @@ contains
 !! NOT OUTPUT NOW !
 !!
 !! PARENTS
-!!      dfpt_looppert,dfptnl_loop,gstate,nonlinear,respfn
+!!      m_dfpt_looppert,m_dfptnl_loop,m_gstate,m_nonlinear,m_pead_nl_loop
+!!      m_respfn_driver
 !!
 !! CHILDREN
-!!      copy_mpi_enreg,destroy_mpi_enreg,hdr_check,hdr_free,hdr_io,hdr_ncread
-!!      kpgio,listkk,matr3inv,newkpt,pawrhoij_copy,timab,wffopen,wfsinp,wrtout
-!!      wvl_wfsinp_disk,wvl_wfsinp_scratch
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -233,7 +233,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  real(dp),allocatable :: cg_disk(:,:),kptns0(:,:)
  real(dp),pointer :: cg_eff(:,:),eigen_eff(:)
  type(MPI_type),pointer :: mpi_enreg0
- 
 
 ! *************************************************************************
 
@@ -964,7 +963,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
      MSG_BUG('unable to interchange nsppol and nspinor when mkmem=0')
    end if
  end if
- 
+
 !Clean hdr0
  !if (ireadwf==1)then
  !  if( restart==2 .or. localrdwf==1 .or. master==me)then
@@ -1118,11 +1117,11 @@ end subroutine inwffil
 !! THE DESCRIPTION IS TO BE COMPLETELY REVISED, AS THIS ONE COMES FROM inwffil.f
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      initwf,mpi_bcast,mpi_recv,mpi_send,pareigocc,timab,wfconv,wffreadskipk
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1853,11 +1852,11 @@ end subroutine wfsinp
 !! ikptsp_old=number of the previous spin-k point, or 0 if first call of present file
 !!
 !! PARENTS
-!!      wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      rwwf,timab,wffreadskipk,wfk_close,wfk_open_read,wfk_read_band_block
-!!      wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2095,10 +2094,11 @@ end subroutine initwf
 !! * In the present status of this routine, occ is not output.
 !!
 !! PARENTS
-!!      inwffil
+!!      m_inwffil
 !!
 !! CHILDREN
-!!      pareigocc,prmat,randac,rdnpw,rwwf,timab,wfconv,wffreadskipk,wrtout
+!!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
+!!      sphereboundary,timab,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -2155,7 +2155,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
  integer,allocatable :: kg1(:,:),kg2_k(:,:),kg_dum(:,:)
  real(dp) :: kpoint(3),tsec(2)
  real(dp),allocatable :: cg_aux(:,:),eig_k(:),occ_k(:)
- 
 
 ! *************************************************************************
 
@@ -2499,10 +2498,8 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 
 !    Note the use of mband2, while mband is used inside
 !    write(std_out,*) 'in newkpt,before wfconv,npw1,npw2',npw1,npw2
-
      inplace=1
      if(aux_stor==0)then
-       !print *,"AUX 1"
        call wfconv(ceksp2,cg,cg,debug,ecut1,ecut2,ecut2_eff,&
 &       eig_k,eig_k,exchn2n3d,formeig,gmet1,gmet2,icg,icg,&
 &       ikpt1,ikpt10,ikpt2,indkk,inplace,isppol2,istwfk1,istwfk2,&
@@ -2511,7 +2508,6 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
 &       ngfft1,ngfft2,nkpt1,nkpt2,npw1,npw2,nspinor1,nspinor2,nsym,&
 &       occ_k,occ_k,optorth,randalg,restart,rprimd,sppoldbl,symrel,tnons)
      else
-       !print *,"AUX 2"
        call wfconv(ceksp2,cg_aux,cg_aux,debug,ecut1,ecut2,ecut2_eff,&
 &       eig_k,eig_k,exchn2n3d,formeig,gmet1,gmet2,icg_aux,icg_aux,&
 &       ikpt1,ikpt10,ikpt2,indkk,inplace,isppol2,istwfk1,istwfk2,&
@@ -2702,7 +2698,7 @@ end subroutine newkpt
 !! When the two nspinor differ, one must have nbd1/nspinor1<nbd2/nspinor2
 !!
 !! PARENTS
-!!      newkpt,wfsinp
+!!      m_inwffil
 !!
 !! CHILDREN
 !!      cg_envlop,getph,getspinrot,kpgsph,mati3inv,ph1d3d,pw_orthon,sphere
@@ -2766,7 +2762,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  real(dp) :: kpoint1(3),kpoint2_sph(3),phktnons(2,1),spinrot(4),tnons_conv(3),tsec(2)
  real(dp),allocatable :: cfft(:,:,:,:),dum(:,:),phase1d(:,:),phase3d(:,:)
  real(dp),allocatable :: wavef1(:,:),wavef2(:,:),wavefspinor(:,:)
- 
 
 ! *************************************************************************
 
@@ -2981,7 +2976,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      do ispinor1=ispinor_first,ispinor_last,order
        ispinor=ispinor1
        if (mpi_enreg1%paral_spinor==1) then
-         !print *, "JEBEM TI MAMICU"
          if (ispinor1==nspinor_index) then
            ispinor=1
          else
@@ -3038,7 +3032,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
        call sphere(wavef2,1,npw2,cfft,n1,n2,n3,n4,n5,n6,kg2,istwf2_k,tosph,&
 &       mpi_enreg2%me_g0,shiftg,symm,one)
 
-
        if(nspinor2==1 )then
          i2=(ispinor-1)*npw2+(iband-1)*nspinor2_this_proc*npw2+icg2
          cg2(:,i2+1:i2+npw2)=wavef2(:,1:npw2)
@@ -3067,7 +3060,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
          end if
        end if
      end do ! ispinor=ispinor_first,ispinor_last,order
-     
 
      if(nspinor1==2.and.nspinor2==2)then
 !      Take care of possible parallelization over spinors
@@ -3165,7 +3157,9 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    if(nspinor1==2 .and. nspinor2==2) then
      ABI_DEALLOCATE(wavefspinor)
    end if
+
  else if(convert==0)then
+
    if(inplace==0)then
 !    Must copy cg, eig and occ if not in-place while convert==0
 !    Note that npw1=npw2, nspinor1=nspinor2
@@ -3173,8 +3167,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 &     cg1(:,1+icg1:npw1*nspinor1_this_proc*nbd1+icg1)
      eig_k2(:)=eig_k1(:)
 !    occ_k2(:)=occ_k1(:)
-
    end if
+
  end if ! End of if convert/=0
 
  if(conv_tnons==1) then
@@ -3223,7 +3217,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
            end if
 
            if(randalg == 0) then
-             !print *, "RNG 1"
 !            For portability, use only integer numbers
 !            The series of couples (fold1,fold2) is periodic with a period of
 !            3x5x7x11x13x17x19x23x29x31, that is, larger than 2**32, the largest integer*4
@@ -3238,7 +3231,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
              cg2(1,index+icg2)=dble(foldre)
              cg2(2,index+icg2)=dble(foldim)
            else
-             !print *, "RNG 2"
              ! (AL) Simple linear congruential generator from
              ! numerical recipes, modulo'ed and 64bit'ed to avoid
              ! overflows (NAG doesn't like overflows, even though

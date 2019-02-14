@@ -121,8 +121,6 @@ module m_gstate
  use defs_param_lotf,    only : lotfparam_init
 #endif
 
- use m_xg !DUMMY
-
  implicit none
 
  private
@@ -226,10 +224,11 @@ contains
 !! Not yet possible to use restartxf in parallel when localrdwf==0
 !!
 !! PARENTS
-!!      gstateimg
+!!      m_gstateimg
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -326,7 +325,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
  type(pawcprj_type),allocatable :: cprj(:,:)
- 
 
 ! ***********************************************************************
 
@@ -437,7 +435,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwarr(:) = 0
    npwtot(:) = 0
  end if
-
 
  if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1) then
    call init_invovl(dtset%nkpt)
@@ -719,7 +716,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_CHECK(ierr==0, "out of memory in cg")
    ABI_ALLOCATE(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
- 
 
  ABI_ALLOCATE(resid,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen(:)=zero ; resid(:)=zero
@@ -765,11 +761,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
-
 !Initialize wavefunctions.
  if(dtset%imgwfstor==1 .and. initialized==1)then
-   cg(:,:)=scf_history%cg(:,:,1) 
-   eigen(:)=scf_history%eigen(:,1) 
+   cg(:,:)=scf_history%cg(:,:,1)
+   eigen(:)=scf_history%eigen(:,1)
  else if(dtset%tfkinfunc /=2) then
 !if(dtset%tfkinfunc /=2) then
    wff1%unwff=dtfil%unwff1
@@ -785,7 +780,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtfil%fnamewffk,wvl)
    hdr%rprimd=rprimd
  end if
- 
+
  if (psps%usepaw==1.and.dtfil%ireadwf==1)then
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 !  Has to update header again (because pawrhoij has changed)  -  MT 2007-10-22: Why ?
@@ -1055,7 +1050,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ncpgr=0
    if (dtset%usefock==1) then
      if (dtset%optforces == 1) then
-       ncpgr = 3 
+       ncpgr = 3
      end if
 !       if (dtset%optstress /= 0) then
 !         ncpgr = 6 ; ctocprj_choice = 3
@@ -1311,7 +1306,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  call move, pawuj_drive or brdmin which in turn calls scfcv.
 
    call timab(35,3,tsec)
-   
+
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
 &   args_gs%dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
@@ -1616,8 +1611,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if(dtset%imgwfstor==1)then
-   scf_history%cg(:,:,1)=cg(:,:)  
-   scf_history%eigen(:,1)=eigen(:)  
+   scf_history%cg(:,:,1)=cg(:,:)
+   scf_history%eigen(:,1)=eigen(:)
  endif
 
 !Deallocate arrays
@@ -1637,7 +1632,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if(dtset%imgwfstor==0)then
    ABI_DEALLOCATE(cg)
    ABI_DEALLOCATE(eigen)
- else 
+ else
    nullify(cg,eigen)
  endif
 
@@ -1799,10 +1794,11 @@ end subroutine gstate
 !!  start(3,natom)=copy of starting xred
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -1942,10 +1938,11 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  (only print and write to disk)
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      getnel,metric,prteigrs,prtrhomxmn,prtxf,write_eig,wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2061,16 +2058,18 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  if(dtset%nstep==0)iscf_dum=-1
 
  if(dtset%tfkinfunc==0)then
-   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
-&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-&   vxcavg,dtset%wtk)
-   call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
-&   iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&   dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-&   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-&   vxcavg,dtset%wtk)
+   if (me == master) then
+     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
+&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&     vxcavg,dtset%wtk)
+     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
+&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
+&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
+&     vxcavg,dtset%wtk)
+   end if
 
 #if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
@@ -2078,7 +2077,6 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
      call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
 #endif
-
  end if
 
 !Compute and print location of maximal and minimal density
@@ -2142,10 +2140,11 @@ end subroutine clnup1
 !!  (data written to unit iout)
 !!
 !! PARENTS
-!!      clnup1
+!!      m_gstate
 !!
 !! CHILDREN
-!!      matr3inv,wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2317,10 +2316,11 @@ end subroutine prtxf
 !!  (only print)
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      wrtout
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2585,10 +2585,11 @@ end subroutine clnup2
 !!                     at output, current xred is transferred to xred_old
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
-!!      pawuj_det,pawuj_free,pawuj_ini,scfcv_run
+!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
+!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2723,7 +2724,7 @@ end subroutine pawuj_drive
 !!   rprim and stress
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend

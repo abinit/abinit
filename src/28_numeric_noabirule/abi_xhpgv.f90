@@ -60,6 +60,7 @@
 ! *********************************************************************
 
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
+
  !MG: FIXME This is clearly wrong but tests are OK!
  !if ( present(istwf_k) .and. istwf_k == 2 .and. present(rwork)) then
  if (istwf_k_ /= 2) then
@@ -207,6 +208,7 @@ end subroutine abi_dhpgv_alloc_1d
 ! *********************************************************************
 
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
+
  call  abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,n,eigen_d_work,info,&
 &         rwork=eigen_z_rwork,istwf_k=istwf_k_)
 
@@ -250,6 +252,7 @@ end subroutine abi_dhpgv_alloc_2d
  integer, intent(out) :: info
 
 ! *********************************************************************
+
  call chpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
 
 end subroutine abi_chpgv
@@ -291,6 +294,7 @@ end subroutine abi_chpgv
  integer :: info
 
 ! *********************************************************************
+
  call abi_chpgv(itype,jobz,uplo,n,a,b,w,z,n,eigen_c_work,eigen_c_rwork,info)
 
 end subroutine abi_chpgv_alloc
@@ -333,6 +337,7 @@ subroutine abi_zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
  integer, intent(out) :: info
 
  ! *********************************************************************
+
  call zhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,work,rwork,info)
 
 end subroutine abi_zhpgv

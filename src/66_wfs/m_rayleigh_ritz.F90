@@ -39,9 +39,6 @@ module m_rayleigh_ritz
 
  use m_time,          only : timab
  use m_numeric_tools, only : pack_matrix
- 
- !DUMMY
- use m_xg
 
  implicit none
 
@@ -82,7 +79,7 @@ contains
 !!  gvnlc(2,*)=updated gvnlc
 !!
 !! PARENTS
-!!      chebfi
+!!      m_chebfi
 !!
 !! CHILDREN
 !!
@@ -115,7 +112,7 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  integer :: ierr, cplx, vectsize
  real(dp) :: gtempc(2,npw*nspinor*nband), tsec(2)
  character :: blas_transpose
- 
+
  integer, parameter :: timer_chebfi = 1600, timer_alltoall = 1601, timer_apply_inv_ovl = 1602, timer_rotation = 1603
  integer, parameter :: timer_subdiago = 1604, timer_subham = 1605, timer_ortho = 1606, timer_getghc = 1607
  integer, parameter :: timer_residuals = 1608, timer_update_eigen = 1609, timer_sync = 1610
@@ -136,37 +133,30 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  call timab(timer_subham, 1, tsec)
 
  ! Transform cg, ghc and maybe gsc, according to istwf_k
-  
  if(istwf_k == 2) then
    cg = cg * sqrt2
    if(mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) / sqrt2
-   
    ghc = ghc * sqrt2
    if(mpi_enreg%me_g0 == 1) ghc(:, 1:npw*nspinor*nband:npw) = ghc(:, 1:npw*nspinor*nband:npw) / sqrt2
-   
    if(usepaw == 1) then
      gsc = gsc * sqrt2
      if(mpi_enreg%me_g0 == 1) gsc(:, 1:npw*nspinor*nband:npw) = gsc(:, 1:npw*nspinor*nband:npw) / sqrt2
    end if
  end if
- 
- 
+
  ! Build, pack and sum suham
  ABI_ALLOCATE(subham, (cplx*nband*(nband+1)/2))
  ABI_ALLOCATE(totham, (cplx, nband*nband))
- ! subroutine 
  call abi_xgemm(blas_transpose,'n',nband,nband,vectsize,cone,ghc,vectsize,&
 & cg,vectsize,czero,totham,nband, x_cplx=cplx)
-  
-
  call pack_matrix(totham, subham, nband, cplx)
  ABI_DEALLOCATE(totham)
- call xmpi_sum(subham,mpi_enreg%comm_bandspinorfft,ierr)  
+ call xmpi_sum(subham,mpi_enreg%comm_bandspinorfft,ierr)
+
 
  ! Same for subovl
  ABI_ALLOCATE(subovl, (cplx*nband*(nband+1)/2))
  ABI_ALLOCATE(totovl, (cplx, nband*nband))
-
  if(usepaw == 1) then
    call abi_xgemm(blas_transpose,'n',nband,nband,vectsize,cone,gsc,vectsize,&
 &   cg,vectsize,czero,totovl,nband, x_cplx=cplx)
@@ -174,16 +164,15 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
    call abi_xgemm(blas_transpose,'n',nband,nband,vectsize,cone,cg,vectsize,&
 &   cg,vectsize,czero,totovl,nband, x_cplx=cplx)
  end if
- 
- 
  call pack_matrix(totovl, subovl, nband, cplx)
  ABI_DEALLOCATE(totovl)
- call xmpi_sum(subovl,mpi_enreg%comm_bandspinorfft,ierr) 
+ call xmpi_sum(subovl,mpi_enreg%comm_bandspinorfft,ierr)
+
 
  ! Transform back
  if(istwf_k == 2) then
-   cg = cg / sqrt2   
-   if(mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2      
+   cg = cg / sqrt2
+   if(mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
    ghc = ghc / sqrt2
    if(mpi_enreg%me_g0 == 1) ghc(:, 1:npw*nspinor*nband:npw) = ghc(:, 1:npw*nspinor*nband:npw) * sqrt2
    if(usepaw == 1) then
@@ -193,31 +182,28 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
  end if
  call timab(timer_subham, 2, tsec)
 
+
  call timab(timer_subdiago, 1, tsec)
  ABI_ALLOCATE(evec, (cplx*nband, nband))
-  
- call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
 
+ call abi_xhpgv(1,'V','U',nband,subham,subovl,eig,evec,istwf_k=istwf_k,use_slk=mpi_enreg%paral_kgb)
 
  ABI_DEALLOCATE(subham)
  ABI_DEALLOCATE(subovl)
 
- 
 ! Fix the phase (this is because of the simultaneous diagonalisation of this
 ! matrix by different processors, allowing to get different unitary transforms, thus breaking the
 ! coherency of parts of cg stored on different processors).
 ! call cg_normev(evec,nband,nband)  ! Unfortunately, for cg_normev to work, one needs the vectors to be normalized, so uses fxphas_seq
+ ABI_ALLOCATE(edummy, (cplx*nband, nband))
+ call fxphas_seq(evec,edummy,0,0,1,nband*nband,nband*nband,nband,nband,0)
+ ABI_DEALLOCATE(edummy)
 
-! ABI_ALLOCATE(edummy, (cplx*nband, nband))
-! call fxphas_seq(evec,edummy,0,0,istwf_k,nband*nband,nband*nband,nband,nband,0) 
-! ABI_DEALLOCATE(edummy)
-! stop  
-   
+
+
  ! Rotate
- ! subroutine 
  call abi_xgemm('n','n',vectsize,nband, nband,cone,cg , vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
  cg = gtempc
-   
  call abi_xgemm('n','n',vectsize,nband, nband,cone,ghc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
  ghc = gtempc
  if(usepaw == 1) then
@@ -227,14 +213,10 @@ subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlc,eig,istwf_k,mpi_enreg,nband,n
    call abi_xgemm('n','n',vectsize,nband, nband,cone,gvnlc, vectsize, evec, nband, czero, gtempc, vectsize, x_cplx=cplx)
    gvnlc = gtempc
  end if
- !stop
-
  ABI_DEALLOCATE(evec)
- !stop
  call timab(timer_subdiago, 2, tsec)
- 
-  
-#else                      
+
+#else
  !! TODO non-functional, should be rewritten. Possibly faster (tests needed)
  write(message, *) 'Transposed, orthogonalizing'
  call wrtout(std_out,message,'COLL')
@@ -324,7 +306,7 @@ end subroutine rayleigh_ritz_subdiago
 !!  gvnlc(2,*)=updated gvnlc
 !!
 !! PARENTS
-!!      chebfi
+!!      m_chebfi
 !!
 !! CHILDREN
 !!
@@ -610,7 +592,7 @@ end subroutine rayleigh_ritz_distributed
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      rayleigh_ritz
+!!      m_rayleigh_ritz
 !!
 !! CHILDREN
 !!
@@ -673,7 +655,7 @@ end subroutine from_mat_to_block_cyclic
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      rayleigh_ritz
+!!      m_rayleigh_ritz
 !!
 !! CHILDREN
 !!

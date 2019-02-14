@@ -101,7 +101,7 @@ CONTAINS
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -121,7 +121,7 @@ CONTAINS
   integer :: ikpt
 
 ! *************************************************************************
- 
+
   ABI_DATATYPE_ALLOCATE(invovl_kpt, (nkpt))
   ! TODO add cycling if kpt parallelism
   do ikpt=1,nkpt
@@ -142,7 +142,7 @@ CONTAINS
 !! nkpt= number of k-points
 !!
 !! PARENTS
-!!      gstate
+!!      m_gstate
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -190,7 +190,7 @@ CONTAINS
 !! INPUTS
 !!
 !! PARENTS
-!!      vtorho
+!!      m_vtorho
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -250,11 +250,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    cplx = 1
    blas_transpose = 't'
  end if
- 
 
  ikpt_this_proc=bandfft_kpt_get_ikpt()
  invovl => invovl_kpt(ikpt_this_proc)
-
 
  if(invovl%nprojs /= -1) then
    ! We have been here before, cleanup before remaking
@@ -274,8 +272,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  do itypat=1,ham%ntypat
    invovl%nprojs = invovl%nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
  end do
- 
-
 
  ABI_ALLOCATE(projs, (2, ham%npw_k, invovl%nprojs))
  ABI_ALLOCATE(invovl%inv_sij, (cplx, ham%lmnmax, ham%lmnmax, ham%ntypat))
@@ -459,7 +455,7 @@ end subroutine make_invovl
 !! INPUTS
 !!
 !! PARENTS
-!!      chebfi
+!!      m_chebfi
 !!
 !! CHILDREN
 !!      dsymm,zhemm
@@ -516,7 +512,7 @@ end subroutine make_invovl
    cplx = 1
    blas_transpose = 't'
  end if
- 
+
  ABI_ALLOCATE(proj, (cplx,invovl%nprojs,nspinor*ndat))
  ABI_ALLOCATE(sm1proj, (cplx,invovl%nprojs,nspinor*ndat))
  ABI_ALLOCATE(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
@@ -532,7 +528,6 @@ end subroutine make_invovl
  choice = 0 ! only compute cprj, nothing else
  cpopt = 0 ! compute and save cprj
  paw_opt = 3 ! S nonlocal operator
- 
  if (mpi_enreg%paral_kgb==1) then
    call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
 &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc,already_transposed=.true.)
@@ -540,7 +535,6 @@ end subroutine make_invovl
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
 &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
  end if
- 
 
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
  call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
@@ -555,12 +549,11 @@ end subroutine make_invovl
    end do
  end do
 
-
  !multiply by S^1
  call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
  sm1proj = - sm1proj
  PtPsm1proj = - PtPsm1proj
- 
+
  ! copy sm1proj to cwaveprj(:,:)
  do idat=1, ndat*nspinor
    shift = 0
