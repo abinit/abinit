@@ -390,6 +390,9 @@ class Differ(object):
         with open(file2, 'rt') as f:
             lines2 = f.readlines()
 
+        return self.diff_lines(lines1, lines2)
+    
+    def diff_lines(self, lines1, lines2):
         dext = DataExtractor(xml_mode=self.xml_mode,
                              ignore=self.options['ignore'],
                              ignoreP=self.options['ignoreP'])
