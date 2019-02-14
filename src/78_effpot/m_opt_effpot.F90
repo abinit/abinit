@@ -910,8 +910,8 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
      power_tot = 0
      icombi_start = 1
      i = 0
-     write(*,*) "order_start", order_start
-     write(*,*) "order_stop", order_stop
+     !write(*,*) "order_start", order_start
+     !write(*,*) "order_stop", order_stop
      order = order_start
      ! TODO work here icombi start and order conting does not work yet. 
      do order=order_start,order_stop,2
