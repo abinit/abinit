@@ -360,17 +360,18 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !scalars
  integer :: i,ii, info,natom_sc,ntime,iterm,nterm,idisp,ndisp
  integer :: jterm,nterm_of_term, nterm_inloop, iterm_of_term,iterm2
- integer :: iorder, iorder1, iorder2, order,order_start, ncombi
- integer :: power_tot,icombi,icombi_start,icombi_stop,jdisp
+ integer :: iorder, iorder1, iorder2, order,order_start,order_stop, ncombi
+ integer :: power_tot,icombi,icombi_start,icombi_stop,jdisp,sec
  integer :: nterm_start,nterm_tot_tmp,nterm2,norder,jdisp1,jdisp2 
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
  real(dp) :: to_divide,divided,divider1,divider2
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
 !arrays 
  integer :: sc_size(3)
- integer,allocatable :: terms(:),ncombi_order(:)
+ integer,allocatable :: ncombi_order(:),terms(:)
  logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
+ type(polynomial_coeff_type) :: term
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
  type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:)
@@ -402,9 +403,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   norder = abs(((order_ran(2)-order_ran(1))/2)) + 1 
   if(present(print_anh)) need_print_anh = print_anh
   ABI_ALLOCATE(symbols,(eff_pot%crystal%natom))
-  ABI_ALLOCATE(terms,(nterm))
   ABI_ALLOCATE(exists,(nterm))
   ABI_ALLOCATE(ncombi_order,(norder))
+  ABI_ALLOCATE(terms,(nterm))
   ncombi_order = 0 
   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
  &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
@@ -472,53 +473,29 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
    !Loop over all original terms
   do iterm =1,nterm
      terms(iterm) = iterm
+     !Get this term (iterm) and infromations about it 
      !Get number of displacements and equivalent terms for this term
      !Chose term one to get ndisp. ndisp is equal for all terms of the term
-     ndisp = eff_pot%anharmonics_terms%coefficients(iterm)%terms(1)%ndisp
-     nterm_of_term = eff_pot%anharmonics_terms%coefficients(iterm)%nterm
-     ! Get number of orders to create for this term 
-     order_start = 0 
-     i = 0 
-     do while(order_start == 0) 
-        i = i +1
-        iorder = order_ran(1) + (i-1)*2
-        if (iorder/ndisp >= 2)then 
-            order_start = iorder ! get lowest order for this term to generate
-        endif   
-     enddo !iorder
+     !Get minimum oder for this term
+     term =  eff_pot%anharmonics_terms%coefficients(iterm)
+     ndisp = term%terms(1)%ndisp
+     nterm_of_term = term%nterm
      
-     ! Get number combinations
-     i = 0
-     ncombi = 0
-     ncombi_order = 0  
-     do order=order_start,order_ran(2),2
-        i = i+1
-        if(ndisp == 1)then
-           ncombi = 1 
-           ncombi_order(i) = 1
-        else 
-           do iorder1 = 2,order-2*(ndisp-1),2 
-              if(ndisp*iorder1 == order)then
-                 ncombi = ncombi + 1 
-                 ncombi_order(i) = ncombi_order(i) + 1
-                 cycle
-              endif
-              do iorder2=iorder1+2,order-2*(ndisp-1),2    
-                if( iorder1 + (ndisp-1)*iorder2 == order)then 
-                  ncombi = ncombi + ndisp
-                  ncombi_order(i) = ncombi_order(i) + ndisp
-                elseif(iorder1 * (ndisp-1) + iorder2 == order)then 
-                  ncombi = ncombi + ndisp 
-                  ncombi_order(i) = ncombi_order(i) + ndisp
-                endif
-              enddo !iorder2 
-           enddo !iorder1 !
-        endif 
-        write(*,*) 'ncombi(',i,') for term ',iterm,' and order',order,' is:', ncombi_order(i), 'are we happy?'
-     enddo !order
+     ! get start and stop order for this term 
+     call opt_getHOforterm(term,order_ran,order_start,order_stop,comm)
+     if(order_start == 0)then 
+              ABI_DATATYPE_DEALLOCATE(my_coeffs)
+              ! Message to Output 
+              write(message,'(2a,I2,a,I2,3a)' )ch10,&
+&             " ==> Term doesn't fit into specified order range from ", order_ran(1),'to ',order_ran(2),ch10,&        
+&             ' ==> No need for high order bounding term',ch10
+              call wrtout(ab_out,message,'COLL')
+              call wrtout(std_out,message,'COLL')
+             cycle 
+     end if
      
-     write(*,*) ncombi_order(:)
-     write(*,*) 'ncombi for term ',iterm,' is:', ncombi, 'are we happy?'
+     ! get total amount of combinations and combinations per order for the term
+     call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order,comm)
      
      ! Allocate my_coeffs with ncombi free space to work with 
      nterm_start = eff_pot%anharmonics_terms%ncoeff
@@ -629,8 +606,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                  icombi_start = icombi_start +1
               endif
               jdisp1 = 1 
+              sec = 1
               write(*,*) 'what is ndisp actually', ndisp
-              do while(jdisp1<=ndisp)
+              do while(jdisp1<=ndisp .and. sec < 100)                    
                  write(*,*) "I did at least one displacement" 
                  do iterm_of_term=1,nterm_of_term
                     my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp1) = my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
@@ -750,14 +728,204 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   
   call opt_effpot(eff_pot,nterm,terms,hist,comm,print_anh=.FALSE.)
   !DEALLOCATION 
-  ABI_DEALLOCATE(terms)
   ABI_DEALLOCATE(symbols)
   ABI_DEALLOCATE(exists)
+  ABI_DEALLOCATE(terms)
   ABI_DEALLOCATE(ncombi_order)
   !ABI_DATATYPE_DEALLOCATE(my_coeffs)  
   call fit_data_free(fit_data)
 end subroutine opt_effpotbound
 
+
+
+!!****f* m_opt_effpot/opt_getHOforterm
+!!
+!! NAME
+!! opt_effpotbound
+!!
+!! FUNCTION
+!! Compute possible high orders for a given anharmonic term. 
+!! In the range of order_start,order_stop 
+!!
+!!
+!! INPUTS
+!! eff_pot: existing effective potential 
+!! order: order for which bounding terms are generated
+!!
+!! 
+!! OUTPUT
+!! eff_pot new effective potential 
+!! 
+!!
+!! PARENTS
+!! multibinit
+!!
+!! CHILDREN
+!! opt_effpot 
+!!
+!! SOURCE
+
+subroutine opt_getHOforterm(term,order_range,order_start,order_stop,comm)
+
+ implicit none 
+         
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ type(polynomial_coeff_type),intent(in) :: term
+!arrays 
+ integer,intent(in) :: order_range(2)
+ integer,intent(out) :: order_start, order_stop 
+!Logicals
+!Strings 
+!Local variables ------------------------------
+!scalars
+ integer :: idisp,ndisp,nterm_of_term,power_tot 
+!arrays 
+ integer,allocatable :: powers(:) 
+!Logicals
+!Strings
+ character(len=1000) :: message
+ character(len=1000) :: frmt
+!*************************************************************************
+
+     !Get/Initialize variables
+     ndisp = term%terms(1)%ndisp
+     nterm_of_term = term%nterm
+
+     ABI_ALLOCATE(powers,(ndisp)) 
+     powers = term%terms(1)%power_disp
+
+     power_tot = 0 
+
+     !Get rid off odd displacements
+     do idisp=1,ndisp
+       if(mod(term%terms(1)%power_disp(idisp),2) == 1)then 
+          powers(idisp) = powers(idisp) + 1
+       end if 
+     enddo !idisp
+     ! Count order
+     do idisp=1,ndisp
+        power_tot = power_tot + powers(idisp)
+     enddo 
+
+     ! Get start and stop order for this term 
+     ! If term doesn't fit in order range give back order_start = ordre_stop = 0 
+     if(power_tot >= order_range(1) .and. power_tot <=order_range(2))then
+        order_start = power_tot 
+        order_stop  = order_range(2) 
+     elseif(power_tot < order_range(1))then 
+        order_start = order_range(1)
+        order_stop  = order_range(2)   
+     elseif(power_tot > order_range(2))then          
+        order_start = 0 
+        order_stop  = 0 
+     endif 
+
+     ABI_DEALLOCATE(powers) 
+
+end subroutine opt_getHOforterm
+
+
+
+!!****f* m_opt_effpot/opt_getHOforterm
+!!
+!! NAME
+!! opt_effpotbound
+!!
+!! FUNCTION
+!! For a given order range: order_start, order_stop 
+!! calculate number of total possible combinations ncombi
+!! and calculat combinations per order ncombi_order(i)
+!!
+!!
+!! INPUTS
+!! eff_pot: existing effective potential 
+!! order: order for which bounding terms are generated
+!!
+!! 
+!! OUTPUT
+!! eff_pot new effective potential 
+!! 
+!!
+!! PARENTS
+!! multibinit
+!!
+!! CHILDREN
+!! opt_effpot 
+!!
+!! SOURCE
+
+subroutine opt_getCombisforterm(order_start,order_end,ndisp,ncombi,ncombi_order,comm)
+
+ implicit none 
+         
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndisp,comm
+ integer,intent(in) :: order_start, order_end
+!arrays 
+ integer,intent(out) :: ncombi
+ integer,intent(out) :: ncombi_order(:)
+!Logicals
+!Strings 
+!Local variables ------------------------------
+!scalars
+ integer :: i,idisp,nterm_of_term,power_tot
+ integer :: order,iorder1,iorder2
+!arrays 
+!integer 
+!Logicals
+!Strings
+ character(len=1000) :: message
+ character(len=1000) :: frmt
+!*************************************************************************
+
+!Test 
+if(mod(order_start,2) /= 0 .or. mod(order_end,2) /= 0)then 
+   ! Message to Output 
+   write(message,'(4a)' )ch10,&
+&  'Either start or stop order are not even numbers',ch10,&
+&  'Action: change bound_range in input',ch10 
+   MSG_ERROR(message)
+endif 
+
+!Initialize Variables 
+i = 0
+ncombi = 0
+ncombi_order = 0  
+
+!Calculate Combinations 
+do order=order_start,order_end,2
+   i = i+1
+   if(ndisp == 1)then
+      ncombi = 1 
+      ncombi_order(i) = 1
+   else 
+      do iorder1 = 2,order-2*(ndisp-1),2 
+         if(ndisp*iorder1 == order)then
+            ncombi = ncombi + 1 
+            ncombi_order(i) = ncombi_order(i) + 1
+            cycle
+         endif
+         do iorder2=iorder1+2,order-2*(ndisp-1),2    
+           if( iorder1 + (ndisp-1)*iorder2 == order)then 
+             ncombi = ncombi + ndisp
+             ncombi_order(i) = ncombi_order(i) + ndisp
+           elseif(iorder1 * (ndisp-1) + iorder2 == order)then 
+             ncombi = ncombi + ndisp 
+             ncombi_order(i) = ncombi_order(i) + ndisp
+           endif
+         enddo !iorder2 
+      enddo !iorder1 !
+   endif 
+   write(*,*) 'ncombi(',i,') for order',order,' is:', ncombi_order(i), 'are we happy?'
+enddo !order
+
+write(*,*) ncombi_order(:)
+write(*,*) 'ncombi for term is:', ncombi, 'are we happy?'
+
+end subroutine opt_getCombisforterm
 end module m_opt_effpot
 
       
