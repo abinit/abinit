@@ -101,13 +101,15 @@ if is_available:
             @classmethod
             def from_map(cls, d):
                 new = cls()
-                for attr in new.__dict__:
-                    if attr in d:
-                        new.__dict__[attr] = d[attr]
+                for attr in d:
+                    new.__dict__[attr] = d[attr]
                 return new
 
             def to_map(self):
                 return self.__dict__
+
+            def __get_item__(self, key):
+                return self.__dict__[key]
 
             def __repr__(self):
                 r = Cls.__name__ + '('
