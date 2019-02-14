@@ -19,7 +19,7 @@ if is_available:
             self.context = context
 
         def __repr__(self):
-            return "<Corrupted document {}: {}>".format(self.error.__name__, str(self.error))
+            return "<Corrupted document {}: {}>".format(self.error.__class__.__name__, str(self.error))
 
     def yaml_parse(content, *args, **kwargs):
         from . import structures
