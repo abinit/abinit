@@ -1001,24 +1001,26 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                !write(*,*) 'I was here!'
                to_divide = real(order)
                divider1 = real(ndisp)
-               divided = real(to_divide/divider2)
+               divided = real(to_divide/divider1)
                divider2 = real(2)
                !write(*,*) 'divided', divided, 'divider2', divider2
                !Treat terms with even power f.E. ^2^2^2^2, ^4^4 etc...
                if(mod(divided,divider2) == 0 .and. .not. equal_term_done )then                                                              
-                  write(*,*) "Sometimes I should be here sometimes I shouldn't" 
+                  !write(*,*) "Sometimes I should be here sometimes I shouldn't" 
                   do jdisp=1,ndisp
                      do iterm_of_term=1,nterm_of_term
                         terms(icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
                      enddo                     
                   enddo !jdisp
-                  do icombi2=icombi+1,icombi+ndisp
-                      do jdisp=1,ndisp
-                         do iterm_of_term=1,nterm_of_term
-                            terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
-                         enddo                     
-                      enddo !jdisp
-                  enddo 
+                  if(order < order_stop)then
+                     do icombi2=icombi+1,icombi+ndisp
+                         do jdisp=1,ndisp
+                            do iterm_of_term=1,nterm_of_term
+                               terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                            enddo                     
+                         enddo !jdisp
+                     enddo
+                  endif 
                   equal_term_done = .TRUE.
                   icombi = icombi + 1
                   icombi_start = icombi_start +1
