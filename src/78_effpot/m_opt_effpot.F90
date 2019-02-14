@@ -926,6 +926,143 @@ write(*,*) ncombi_order(:)
 write(*,*) 'ncombi for term is:', ncombi, 'are we happy?'
 
 end subroutine opt_getCombisforterm
+
+
+!!****f* m_opt_effpot/opt_getHoTerms
+!!
+!! NAME
+!! opt_getOrdersforterm
+!!
+!! FUNCTION
+!! For a term give all possible high order terms 
+!! Attention order_start, order_stop, ncombi and 
+!! ncombi_order have to be calculated before! 
+!!
+!!
+!!
+!! INPUTS
+!! eff_pot: existing effective potential 
+!! order: order for which bounding terms are generated
+!!
+!! 
+!! OUTPUT
+!! eff_pot new effective potential 
+!! 
+!!
+!! PARENTS
+!! multibinit
+!!
+!! CHILDREN
+!! opt_effpot 
+!!
+!! SOURCE
+
+subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order,comm)
+
+ implicit none 
+         
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ndisp,comm
+ integer,intent(in) :: order_start, order_stop
+!arrays 
+ integer,intent(in) :: ncombi
+ integer,intent(in) :: ncombi_order(:)
+!Logicals
+ type(polynomial_coeff_type),target,intent(inout) :: terms(:)
+!Strings 
+!Local variables ------------------------------
+!scalars
+ integer :: i,icombi,icombi_start,icombi_stop,idisp,nterm_of_term
+ integer :: order,iorder1,iorder2,iterm_of_term,jdisp,power_tot
+ integer :: jdisp1,jdisp2,sec
+ real(sp) :: to_divide,divider1,divider2,divided
+!arrays 
+!integer 
+!Logicals
+ logical :: equal_term_done
+!Strings
+ character(len=1000) :: message
+ character(len=1000) :: frmt
+!*************************************************************************
+     !Get Variables 
+     nterm_of_term = terms(1)%nterm
+
+     ! Create all possible combinaions for the specified orders
+     ! If anybody has ever, ever to read and understand this I'm terribly sorry 
+     ! ---this will be quite hell---
+     power_tot = 0
+     icombi_start = 1
+     i = 0
+     write(*,*) "order_start", order_start
+     write(*,*) "order_stop", order_stop
+     order = order_start
+     ! TODO work here icombi start and order conting does not work yet. 
+     do order=order_start,order_stop,2
+        write(*,*) 'Was I now here?!(order-loop)'
+        i = i + 1
+        icombi_stop = icombi_start + ncombi_order(i) - 1
+        equal_term_done = .FALSE.
+        write(*,*) 'order', order
+        write(*,*) 'icombi_start', icombi_start
+        write(*,*) 'icombi_stop', icombi_stop
+        icombi=icombi_start 
+        do while (icombi<=icombi_stop)
+           power_tot = 0 
+           do idisp=1,ndisp 
+              power_tot = power_tot + terms(icombi)%terms(1)%power_disp(idisp)
+           enddo
+           ! TODO augmentation of icombi start prohibits going to else 
+           ! Probably have to increase order at same time 
+           if(power_tot == order)then
+              icombi_start = icombi_start + 1
+              icombi = icombi + 1
+              write(*,*) 'icombi-start in if', icombi_start 
+              cycle
+           else        
+              write(*,*) 'I was here!'
+              to_divide = real(order)
+              divided = real(to_divide/ndisp)
+              divider1 = real(ndisp)
+              divider2 = real(2)
+              write(*,*) 'divided', divided, 'divider2', divider2
+              if(mod(divided,divider2) == 0 .and. .not. equal_term_done )then                                                              
+                 write(*,*) "Sometimes I should be here sometimes I shouldn't" 
+                 do jdisp=1,ndisp
+                    do iterm_of_term=1,nterm_of_term
+                       terms(icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                    enddo                     
+                 enddo !jdisp
+                 equal_term_done = .TRUE.
+                 icombi = icombi + 1
+                 icombi_start = icombi_start +1
+              endif
+              jdisp1 = 1 
+              sec = 1
+              write(*,*) 'what is ndisp actually', ndisp
+              do while(jdisp1<=ndisp .and. sec < 100)                    
+                 write(*,*) "I did at least one displacement" 
+                 do iterm_of_term=1,nterm_of_term
+                    terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
+                 enddo
+                 power_tot=0
+                 do jdisp2=1,ndisp 
+                    power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
+                 enddo
+                 if(power_tot == order)then 
+                    icombi = icombi + 1
+                    icombi_start = icombi_start +1
+                    write(*,*) 'what is icombi_start here', icombi_start
+                    jdisp1 = jdisp1 + 1
+                    write(*,*) 'and what is jdisp1?', jdisp1 
+                 endif  
+               enddo!jdisp1
+            endif 
+        enddo !icombination
+      enddo !order
+
+end subroutine opt_getHoTerms
+
 end module m_opt_effpot
 
-      
+     
