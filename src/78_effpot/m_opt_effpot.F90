@@ -472,7 +472,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  !do iorder=order(1),order(2),2, Order will be done per term 
    !Loop over all original terms
   do iterm =1,nterm
-     terms(iterm) = iterm
+
      !Get this term (iterm) and infromations about it 
      !Get number of displacements and equivalent terms for this term
      !Chose term one to get ndisp. ndisp is equal for all terms of the term
@@ -480,11 +480,45 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      term =  eff_pot%anharmonics_terms%coefficients(iterm)
      ndisp = term%terms(1)%ndisp
      nterm_of_term = term%nterm
+
+     !Message: The world wants to know where we stand Batman
+     write(message, '(a,(80a),a)' ) ch10,&
+&    ('_',ii=1,80),ch10
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+      write(message,'(2a,I3,a,I3,3a)' )ch10,&
+&     ' Check term (',iterm,'/',nterm,'): ', trim(term%name),ch10 
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+
+     !Store for optimization
+     terms(iterm) = iterm
      
+     ! Let's check if we really want all this mess 
+     ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all terms of term
+     if(term%coefficient > 0 .and. .not. any(mod(term%terms(1)%power_disp(:),2) /= 0))then 
+              ! Message to Output 
+              write(message,'(3a)' )ch10,&
+&             ' ==> No need for high order bounding term',ch10
+              call wrtout(ab_out,message,'COLL')
+              call wrtout(std_out,message,'COLL')
+             cycle 
+     end if
+     !if term has-strain cycle...strain-phonon-terms have to be implemented 
+     if(term%terms(1)%nstrain /= 0)then
+              ! Message to Output 
+              write(message,'(5a)' )ch10,&
+&             ' ==> Term has strain compenent. Strain-Phonon terms are not yet implemented',ch10,&
+&            ' ==> We cycle',ch10
+              call wrtout(ab_out,message,'COLL')
+              call wrtout(std_out,message,'COLL')
+             cycle 
+     endif 
+     ! Ok we want it. Let's go. 
+
      ! get start and stop order for this term 
      call opt_getHOforterm(term,order_ran,order_start,order_stop,comm)
      if(order_start == 0)then 
-              ABI_DATATYPE_DEALLOCATE(my_coeffs)
               ! Message to Output 
               write(message,'(2a,I2,a,I2,3a)' )ch10,&
 &             " ==> Term doesn't fit into specified order range from ", order_ran(1),'to ',order_ran(2),ch10,&        
@@ -505,16 +539,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      !Copy original terms to my_coeffs 
      my_coeffs(1:nterm_start) =  eff_pot%anharmonics_terms%coefficients(:)
      
-     !Message
-     write(message, '(a,(80a),a)' ) ch10,&
-&    ('_',ii=1,80),ch10
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-      write(message,'(2a,I3,a,I3,3a)' )ch10,&
-&     ' Check term (',iterm,'/',nterm,'): ', trim(my_coeffs(iterm)%name),ch10 
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
-     
      ! Copy current term to the ncombination elemenst a the end in array my_coeffs 
      ! change the value of their coefficient to a start value
      ! The start is estimed to not be larger then half the initial term's value
@@ -523,126 +547,18 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
          my_coeffs(nterm_start+icombi) = eff_pot%anharmonics_terms%coefficients(iterm)  
          coeff_ini = abs(my_coeffs(iterm)%coefficient / 2)
          my_coeffs(nterm_start+icombi)%coefficient = coeff_ini
-         ! Get Rid of all odd terms change weigth to one (Even terms allways have a weight of one...)
+         ! Set the power of all terms we want to add to two. We find the correct power later
+         ! Change the weight of the term to 1 (even terms have allways weight=1)
          do iterm_of_term=1,nterm_of_term 
            my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%weight = 1
            do idisp=1,ndisp
-             if(mod(my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp),2) == 1)then 
-                my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(idisp) + 1
-             end if 
+              my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(idisp) = 2
            enddo !idisp
          enddo !iterm_of_term 
      enddo !icombi
-     !TODO Reimplement checking of terms  against terms in effective potential...will be complecated
-     ! If the term is even and its coefficient positive we skip it. Also here we take terms(1) as example for all terms of term
-     if(my_coeffs(iterm)%coefficient > 0 .and. .not. any(mod(my_coeffs(iterm)%terms(1)%power_disp(:),2) /= 0))then 
-              ABI_DATATYPE_DEALLOCATE(my_coeffs)
-              ! Message to Output 
-              write(message,'(3a)' )ch10,&
-&             ' ==> No need for high order bounding term',ch10
-              call wrtout(ab_out,message,'COLL')
-              call wrtout(std_out,message,'COLL')
-             cycle 
-     end if
-     !if term has-strain cycle...strain-phonon-terms have to be implemented 
-     if(my_coeffs(iterm)%terms(1)%nstrain /= 0)then
-              ABI_DATATYPE_DEALLOCATE(my_coeffs)
-              ! Message to Output 
-              write(message,'(5a)' )ch10,&
-&             ' ==> Term has strain compenent. Strain-Phonon terms are not yet implemented',ch10,&
-&            ' ==> We cycle',ch10
-              call wrtout(ab_out,message,'COLL')
-              call wrtout(std_out,message,'COLL')
-             cycle 
-     endif 
-     ! Create all possible combinaions for the specified orders
-     ! If anybody has ever, ever to read and understand this I'm terribly sorry 
-     ! ---this will be quite hell---
-     power_tot = 0
-     icombi_start = 1
-     i = 0
-     write(*,*) "order_start", order_start
-     write(*,*) "order_ran(2)", order_ran(2)
-     order = order_start
-     ! TODO work here icombi start and order conting does not work yet. 
-     do order=order_start,order_ran(2),2
-        write(*,*) 'Was I now here?!(order-loop)'
-        i = i + 1
-        icombi_stop = icombi_start + ncombi_order(i) - 1
-        equal_term_done = .FALSE.
-        write(*,*) 'order', order
-        write(*,*) 'icombi_start', icombi_start
-        write(*,*) 'icombi_stop', icombi_stop
-        icombi=icombi_start 
-        do while (icombi<=icombi_stop)
-           power_tot = 0 
-           do idisp=1,ndisp 
-              power_tot = power_tot + my_coeffs(nterm_start+icombi)%terms(1)%power_disp(idisp)
-           enddo
-           ! TODO augmentation of icombi start prohibits going to else 
-           ! Probably have to increase order at same time 
-           if(power_tot == order)then
-              icombi_start = icombi_start + 1
-              icombi = icombi + 1
-              write(*,*) 'icombi-start in if', icombi_start 
-              cycle
-           else        
-              write(*,*) 'I was here!'
-              to_divide = real(order)
-              divided = real(to_divide/ndisp)
-              divider1 = real(ndisp)
-              divider2 = real(2)
-              write(*,*) 'divided', divided, 'divider2', divider2
-              if(mod(divided,divider2) == 0 .and. .not. equal_term_done )then ! Don't get fooled we are doing integer stuff and
-                                                                               ! it's fortran
-                 write(*,*) "Sometimes I should be here sometimes I shouldn't" 
-                 do jdisp=1,ndisp
-                    do iterm_of_term=1,nterm_of_term
-                       my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
-                    enddo                     
-                 enddo !jdisp
-                 equal_term_done = .TRUE.
-                 icombi = icombi + 1
-                 icombi_start = icombi_start +1
-              endif
-              jdisp1 = 1 
-              sec = 1
-              write(*,*) 'what is ndisp actually', ndisp
-              do while(jdisp1<=ndisp .and. sec < 100)                    
-                 write(*,*) "I did at least one displacement" 
-                 do iterm_of_term=1,nterm_of_term
-                    my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp1) = my_coeffs(nterm_start+icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
-                 enddo
-                 power_tot=0
-                 do jdisp2=1,ndisp 
-                    power_tot = power_tot + my_coeffs(nterm_start+icombi)%terms(1)%power_disp(jdisp2)
-                 enddo
-                 if(power_tot == order)then 
-                    icombi = icombi + 1
-                    icombi_start = icombi_start +1
-                    write(*,*) 'what is icombi_start here', icombi_start
-                    jdisp1 = jdisp1 + 1
-                    write(*,*) 'and what is jdisp1?', jdisp1 
-                 endif  
-               enddo!jdisp1
-            endif 
-        enddo !icombination
-      enddo !order
- 
-
-            ! Not needed anymore                    
-            ! do iterm_of_term=1,nterm_of_term 
-            !   my_coeffs(nterm_inloop)%terms(iterm_of_term)%weight = 1
-            !   do idisp=1,ndisp
-            !     if(mod(my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp),2) == 1)then 
-            !        my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 1 
-            !      else
-            !       my_coeffs(nterm_inloop)%terms(iterm_of_term)%power_disp(idisp) = my_coeffs(iterm)%terms(iterm_of_term)%power_disp(idisp) + 2 
-            !     endif
-            !   enddo !idisp
-            ! enddo !iterm_of_term 
+      
+     call opt_getHoTerms(my_coeffs(nterm_start+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
            
-
       exists=.FALSE.
       do icombi=1,ncombi
              ! Copy all the terms in eff pot 
