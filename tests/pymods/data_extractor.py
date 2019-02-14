@@ -43,8 +43,10 @@ class DataExtractor:
         '''
             Return a metacharacter wich give the behaviour of the line independently from options.
         '''
-        if not line or line[0].isspace():
+        if not line or line.isspace():  # blank line
             c = '-'
+        elif line[0].isspace():
+            c = ' '
             # dirty fix for compatibility
             # I think xml should not be compared with the basic algorithm
             if self.xml_mode and 'timeInfo' in line:
