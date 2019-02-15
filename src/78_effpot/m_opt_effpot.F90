@@ -1005,7 +1005,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                divider2 = real(2)
                !write(*,*) 'divided', divided, 'divider2', divider2
                !Treat terms with even power f.E. ^2^2^2^2, ^4^4 etc...
-               if(mod(divided,divider2) == 0 .and. .not. equal_term_done )then                                                              
+               if(mod(divided,divider2) == 0 .and. .not. equal_term_done .and. icombi_stop - icombi >= 1)then                                                              
                   !write(*,*) "Sometimes I should be here sometimes I shouldn't" 
                   do jdisp=1,ndisp
                      do iterm_of_term=1,nterm_of_term
