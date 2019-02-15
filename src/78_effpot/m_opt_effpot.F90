@@ -625,7 +625,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              i = 0 
              do while(msef/msef_ini >= 2 )
                 i = i + 1 
-                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
+                eff_pot_tmp%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
                 call fit_polynomial_coeff_computeMSD(eff_pot_tmp,hist,mse,msef,mses,&
  &                                            natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                            compute_anharmonic=.TRUE.,print_file=.FALSE.)
