@@ -36,15 +36,15 @@ MODULE m_forctqmc
 
  private
 
- public :: netcdf_check
+ public :: nf_check
  public :: qmc_prep_ctqmc
  public :: testcode_ctqmc
 !!***
 
 contains
-!!****f* m_forctqmc/netcdf_check
+!!****f* m_forctqmc/nf_check
 !! NAME
-!! netcdf_check
+!! nf_check
 !!
 !! FUNCTION
 !! Used during writting the NETCDF file
@@ -69,7 +69,7 @@ contains
 !!
 !! SOURCE
 
-subroutine netcdf_check(istatus)
+subroutine nf_check(istatus)
 use netcdf
 implicit none
 integer, intent (in) :: istatus
@@ -77,7 +77,7 @@ integer, intent (in) :: istatus
 if (istatus /= nf90_noerr) then
     write(*,*) trim(adjustl(nf90_strerror(istatus)))
 end if
-end subroutine netcdf_check
+end subroutine nf_check
 
 
 !!****f* m_forctqmc/qmc_prep_ctqmc
@@ -117,7 +117,7 @@ end subroutine netcdf_check
 !!      destroy_green,destroy_matlu,destroy_oper,diag_matlu,diff_matlu
 !!      fac_matlu,flush_unit,fourier_green,hybridization_asymptotic_coefficient
 !!      identity_matlu,init_green,init_matlu,init_oper,int_fct,inverse_oper
-!!      jbessel,netcdf_check,occup_green_tau,print_green,print_matlu,printocc_green
+!!      jbessel,nf_check,occup_green_tau,print_green,print_matlu,printocc_green
 !!      printplot_matlu,prod_matlu,rotate_matlu,rotatevee_hu,sbf8,shift_matlu
 !!      slm2ylm_matlu,sym_matlu,testcode_ctqmc,vee_ndim2tndim_hu_r,wrtout,xginv
 !!      xmpi_barrier,xmpi_bcast
@@ -258,10 +258,10 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer(kind=4), dimension(3) :: dim_fw1_id, dim_g_iw_id, dim_gl_id, dim_gtau_id
  integer(kind=4), dimension(4) :: dim_u_mat_ijkl_id
  integer(kind=4) :: var_rot_inv_id, var_leg_measure_id, var_hist_id, var_wrt_files_id
- integer(kind=4) :: var_tot_not_id, var_n_orbitals_id, var_n_freq_id, var_n_tau_idn var_n_l_id, var_n_cycles_id
+ integer(kind=4) :: var_tot_not_id, var_n_orbitals_id, var_n_freq_id, var_n_tau_id, var_n_l_id, var_n_cycles_id
  integer(kind=4) :: var_cycle_length_id, var_ntherm_id, var_verbo_id, var_seed_id, var_beta_id
  integer(kind=4) :: var_levels_id, var_u_mat_ij_id, var_u_mat_ijkl_id, var_real_fw1_nd_id, var_imag_fw1_nd_id
- integer(kind=4) :: var_real_g_iw_id, var_imag_iw_id, var_gtau_id, var_gl_id, var_spacecomm_id
+ integer(kind=4) :: var_real_g_iw_id, var_imag_g_iw_id, var_gtau_id, var_gl_id, var_spacecomm_id
 
  integer(kind=4) :: varid
  complex :: i
@@ -1624,7 +1624,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
            u_mat_ijkl_ptr = C_LOC( u_mat_ijkl )
            levels_ptr     = C_LOC( levels_ctqmc )
 
-         !Calling interfaced TRIQS solver subroutine from src/01_triqs_ext package
+         !Calling interfaced TRIQS solver subroutine from src/67_triqs_ext package
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
         !----------
         ! Test for python invokation
@@ -1638,15 +1638,15 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
         ! Creating the NETCDF file
         print*, "    Creating NETCDF file: dft_for_triqs.nc"
-        call netcdf_check(nf90_create("dft_for_triqs.nc", NF90_CLOBBER, ncid))
+        call nf_check(nf90_create("dft_for_triqs.nc", NF90_CLOBBER, ncid))
 
         ! Defining the dimensions of the variables to write in the NETCDF file
-        call netcdf_check(nf90_def_dim(ncid, "one", 1, dim_one_id))
-        call netcdf_check(nf90_def_dim(ncid, "nflavor", nflavor, dim_nflavor_id))
-        call netcdf_check(nf90_def_dim(ncid, "nwlo", paw_dmft%dmft_nwlo, dim_nwlo_id))
-        call netcdf_check(nf90_def_dim(ncid, "nwli", paw_dmft%dmft_nwli, dim_nwli_id))
-        call netcdf_check(nf90_def_dim(ncid, "qmc_l", paw_dmft%dmftqmc_l, dim_qmc_l_id))
-        call netcdf_check(nf90_def_dim(ncid, "nleg", nleg, dim_nleg_id))
+        call nf_check(nf90_def_dim(ncid, "one", 1, dim_one_id))
+        call nf_check(nf90_def_dim(ncid, "nflavor", nflavor, dim_nflavor_id))
+        call nf_check(nf90_def_dim(ncid, "nwlo", paw_dmft%dmft_nwlo, dim_nwlo_id))
+        call nf_check(nf90_def_dim(ncid, "nwli", paw_dmft%dmft_nwli, dim_nwli_id))
+        call nf_check(nf90_def_dim(ncid, "qmc_l", paw_dmft%dmftqmc_l, dim_qmc_l_id))
+        call nf_check(nf90_def_dim(ncid, "nleg", nleg, dim_nleg_id))
 
         dim_u_mat_ij_id = (/ dim_nflavor_id, dim_nflavor_id /)
         dim_u_mat_ijkl_id = (/ dim_nflavor_id, dim_nflavor_id, dim_nflavor_id, dim_nflavor_id /)
@@ -1656,80 +1656,80 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
         dim_gl_id = (/ dim_nleg_id, dim_nflavor_id, dim_nflavor_id /)
 
         ! Defining the variables
-        call netcdf_check(nf90_def_var(ncid, "rot_inv",         NF90_INT, dim_one_id,           var_rot_inv_id))
-        call netcdf_check(nf90_def_var(ncid, "leg_measure",     NF90_INT, dim_one_id,           var_leg_measure_id))
-        call netcdf_check(nf90_def_var(ncid, "hist",            NF90_INT, dim_one_id,           var_hist_id))
-        call netcdf_check(nf90_def_var(ncid, "wrt_files",       NF90_INT, dim_one_id,           var_wrt_files_id))
-        call netcdf_check(nf90_def_var(ncid, "tot_not",         NF90_INT, dim_one_id,           var_tot_not_id))
-        call netcdf_check(nf90_def_var(ncid, "n_orbitals",      NF90_INT, dim_one_id,           var_n_orbitals_id))
-        call netcdf_check(nf90_def_var(ncid, "n_freq",          NF90_INT, dim_one_id,           var_n_freq_id))
-        call netcdf_check(nf90_def_var(ncid, "n_tau",           NF90_INT, dim_one_id,           var_n_tau_id))
-        call netcdf_check(nf90_def_var(ncid, "n_l",             NF90_INT, dim_one_id,           var_n_l_id))
-        call netcdf_check(nf90_def_var(ncid, "n_cycles",        NF90_INT, dim_one_id,           var_n_cycles_id))
-        call netcdf_check(nf90_def_var(ncid, "cycle_length",    NF90_INT, dim_one_id,           var_cycle_length_id))
-        call netcdf_check(nf90_def_var(ncid, "ntherm",          NF90_INT, dim_one_id,           var_ntherm_id))
-        call netcdf_check(nf90_def_var(ncid, "verbo",           NF90_INT, dim_one_id,           var_verbo_id))
-        call netcdf_check(nf90_def_var(ncid, "seed",            NF90_INT, dim_one_id,           var_seed_id))
-        call netcdf_check(nf90_def_var(ncid, "beta",            NF90_FLOAT, dim_one_id,         var_beta_id))
-        call netcdf_check(nf90_def_var(ncid, "levels",          NF90_DOUBLE, dim_nflavor_id,    var_levels_id))
-        call netcdf_check(nf90_def_var(ncid, "u_mat_ij",        NF90_DOUBLE, dim_u_mat_ij_id,   var_u_mat_ij_id))
-        call netcdf_check(nf90_def_var(ncid, "u_mat_ijkl",      NF90_DOUBLE, dim_u_mat_ijkl_id, var_u_mat_ijkl_id))
-        call netcdf_check(nf90_def_var(ncid, "real_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_real_fw1_nd_id))
-        call netcdf_check(nf90_def_var(ncid, "imag_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_imag_fw1_nd_id))
-        call netcdf_check(nf90_def_var(ncid, "real_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_real_g_iw_id))
-        call netcdf_check(nf90_def_var(ncid, "imag_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_imag_g_iw_id))
-        call netcdf_check(nf90_def_var(ncid, "gtau",            NF90_DOUBLE, dim_gtau_id,       var_gtau_id))
-        call netcdf_check(nf90_def_var(ncid, "gl",              NF90_DOUBLE, dim_gl_id,         var_gl_id))
-        call netcdf_check(nf90_def_var(ncid, "spacecomm",       NF90_INT, dim_one_id,           var_spacecomm_id))
-        call netcdf_check(nf90_enddef(ncid))
+        call nf_check(nf90_def_var(ncid, "rot_inv",         NF90_INT, dim_one_id,           var_rot_inv_id))
+        call nf_check(nf90_def_var(ncid, "leg_measure",     NF90_INT, dim_one_id,           var_leg_measure_id))
+        call nf_check(nf90_def_var(ncid, "hist",            NF90_INT, dim_one_id,           var_hist_id))
+        call nf_check(nf90_def_var(ncid, "wrt_files",       NF90_INT, dim_one_id,           var_wrt_files_id))
+        call nf_check(nf90_def_var(ncid, "tot_not",         NF90_INT, dim_one_id,           var_tot_not_id))
+        call nf_check(nf90_def_var(ncid, "n_orbitals",      NF90_INT, dim_one_id,           var_n_orbitals_id))
+        call nf_check(nf90_def_var(ncid, "n_freq",          NF90_INT, dim_one_id,           var_n_freq_id))
+        call nf_check(nf90_def_var(ncid, "n_tau",           NF90_INT, dim_one_id,           var_n_tau_id))
+        call nf_check(nf90_def_var(ncid, "n_l",             NF90_INT, dim_one_id,           var_n_l_id))
+        call nf_check(nf90_def_var(ncid, "n_cycles",        NF90_INT, dim_one_id,           var_n_cycles_id))
+        call nf_check(nf90_def_var(ncid, "cycle_length",    NF90_INT, dim_one_id,           var_cycle_length_id))
+        call nf_check(nf90_def_var(ncid, "ntherm",          NF90_INT, dim_one_id,           var_ntherm_id))
+        call nf_check(nf90_def_var(ncid, "verbo",           NF90_INT, dim_one_id,           var_verbo_id))
+        call nf_check(nf90_def_var(ncid, "seed",            NF90_INT, dim_one_id,           var_seed_id))
+        call nf_check(nf90_def_var(ncid, "beta",            NF90_FLOAT, dim_one_id,         var_beta_id))
+        call nf_check(nf90_def_var(ncid, "levels",          NF90_DOUBLE, dim_nflavor_id,    var_levels_id))
+        call nf_check(nf90_def_var(ncid, "u_mat_ij",        NF90_DOUBLE, dim_u_mat_ij_id,   var_u_mat_ij_id))
+        call nf_check(nf90_def_var(ncid, "u_mat_ijkl",      NF90_DOUBLE, dim_u_mat_ijkl_id, var_u_mat_ijkl_id))
+        call nf_check(nf90_def_var(ncid, "real_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_real_fw1_nd_id))
+        call nf_check(nf90_def_var(ncid, "imag_fw1_nd",     NF90_DOUBLE, dim_fw1_id,        var_imag_fw1_nd_id))
+        call nf_check(nf90_def_var(ncid, "real_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_real_g_iw_id))
+        call nf_check(nf90_def_var(ncid, "imag_g_iw",       NF90_DOUBLE, dim_g_iw_id,       var_imag_g_iw_id))
+        call nf_check(nf90_def_var(ncid, "gtau",            NF90_DOUBLE, dim_gtau_id,       var_gtau_id))
+        call nf_check(nf90_def_var(ncid, "gl",              NF90_DOUBLE, dim_gl_id,         var_gl_id))
+        call nf_check(nf90_def_var(ncid, "spacecomm",       NF90_INT, dim_one_id,           var_spacecomm_id))
+        call nf_check(nf90_enddef(ncid))
 
         ! Filling the variables with actual data
         if (rot_inv) then 
-             call netcdf_check(nf90_put_var(ncid, var_rot_inv_id,       1))  
+             call nf_check(nf90_put_var(ncid, var_rot_inv_id,       1))  
         else 
-             call netcdf_check(nf90_put_var(ncid, var_rot_inv_id,       0))  
+             call nf_check(nf90_put_var(ncid, var_rot_inv_id,       0))  
         end if
         if (leg_measure) then
-             call netcdf_check(nf90_put_var(ncid, var_leg_measure_id,   1))
+             call nf_check(nf90_put_var(ncid, var_leg_measure_id,   1))
         else
-             call netcdf_check(nf90_put_var(ncid, var_leg_measure_id,   0))
+             call nf_check(nf90_put_var(ncid, var_leg_measure_id,   0))
         end if
         if (hist) then
-             call netcdf_check(nf90_put_var(ncid, var_hist_id,          1))
+             call nf_check(nf90_put_var(ncid, var_hist_id,          1))
         else
-             call netcdf_check(nf90_put_var(ncid, var_hist_id,          0))
+             call nf_check(nf90_put_var(ncid, var_hist_id,          0))
         end if
         if (wrt_files) then
-             call netcdf_check(nf90_put_var(ncid, var_wrt_files_id,     1))
+             call nf_check(nf90_put_var(ncid, var_wrt_files_id,     1))
         else
-             call netcdf_check(nf90_put_var(ncid, var_wrt_files_id,     0))
+             call nf_check(nf90_put_var(ncid, var_wrt_files_id,     0))
         end if
         if (tot_not) then
-             call netcdf_check(nf90_put_var(ncid, var_tot_not_id,       1))
+             call nf_check(nf90_put_var(ncid, var_tot_not_id,       1))
         else
-             call netcdf_check(nf90_put_var(ncid, var_tot_not_id,       0))
+             call nf_check(nf90_put_var(ncid, var_tot_not_id,       0))
         end if
-        call netcdf_check(nf90_put_var(ncid, var_n_orbitals_id,         nflavor))
-        call netcdf_check(nf90_put_var(ncid, var_n_freq_id,             nfreq))
-        call netcdf_check(nf90_put_var(ncid, var_n_tau_id,              ntau))
-        call netcdf_check(nf90_put_var(ncid, var_n_l_id,                nleg))
-        call netcdf_check(nf90_put_var(ncid, var_n_cycles_id,           int(paw_dmft%dmftqmc_n/paw_dmft%nproc)))
-        call netcdf_check(nf90_put_var(ncid, var_cycle_length_id,       paw_dmft%dmftctqmc_meas*2*2*nflavor))
-        call netcdf_check(nf90_put_var(ncid, var_ntherm_id,             paw_dmft%dmftqmc_therm))
-        call netcdf_check(nf90_put_var(ncid, var_verbo_id,              verbosity_solver))
-        call netcdf_check(nf90_put_var(ncid, var_seed_id,               paw_dmft%dmftqmc_seed))
-        call netcdf_check(nf90_put_var(ncid, var_beta_id,               beta))
-        call netcdf_check(nf90_put_var(ncid, var_levels_id,             levels_ctqmc))
-        call netcdf_check(nf90_put_var(ncid, var_u_mat_ij_id,           u_mat_ij))
-        call netcdf_check(nf90_put_var(ncid, var_u_mat_ijkl_id,         u_mat_ijkl))
-        call netcdf_check(nf90_put_var(ncid, var_real_fw1_nd_id,        real(fw1_nd_tmp)))
-        call netcdf_check(nf90_put_var(ncid, var_imag_fw1_nd_id,        aimag(fw1_nd_tmp)))
-        call netcdf_check(nf90_put_var(ncid, var_real_g_iw_id,          real(gw_tmp_nd)))
-        call netcdf_check(nf90_put_var(ncid, var_imag_g_iw_id,          aimag(gw_tmp_nd)))
-        call netcdf_check(nf90_put_var(ncid, var_gtau_id,               gtmp_nd))
-        call netcdf_check(nf90_put_var(ncid, var_gl_id,                 gl_nd))
-        call netcdf_check(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
-        call netcdf_check(nf90_close(ncid))
+        call nf_check(nf90_put_var(ncid, var_n_orbitals_id,         nflavor))
+        call nf_check(nf90_put_var(ncid, var_n_freq_id,             nfreq))
+        call nf_check(nf90_put_var(ncid, var_n_tau_id,              ntau))
+        call nf_check(nf90_put_var(ncid, var_n_l_id,                nleg))
+        call nf_check(nf90_put_var(ncid, var_n_cycles_id,           int(paw_dmft%dmftqmc_n/paw_dmft%nproc)))
+        call nf_check(nf90_put_var(ncid, var_cycle_length_id,       paw_dmft%dmftctqmc_meas*2*2*nflavor))
+        call nf_check(nf90_put_var(ncid, var_ntherm_id,             paw_dmft%dmftqmc_therm))
+        call nf_check(nf90_put_var(ncid, var_verbo_id,              verbosity_solver))
+        call nf_check(nf90_put_var(ncid, var_seed_id,               paw_dmft%dmftqmc_seed))
+        call nf_check(nf90_put_var(ncid, var_beta_id,               beta))
+        call nf_check(nf90_put_var(ncid, var_levels_id,             levels_ctqmc))
+        call nf_check(nf90_put_var(ncid, var_u_mat_ij_id,           u_mat_ij))
+        call nf_check(nf90_put_var(ncid, var_u_mat_ijkl_id,         u_mat_ijkl))
+        call nf_check(nf90_put_var(ncid, var_real_fw1_nd_id,        real(fw1_nd_tmp)))
+        call nf_check(nf90_put_var(ncid, var_imag_fw1_nd_id,        aimag(fw1_nd_tmp)))
+        call nf_check(nf90_put_var(ncid, var_real_g_iw_id,          real(gw_tmp_nd)))
+        call nf_check(nf90_put_var(ncid, var_imag_g_iw_id,          aimag(gw_tmp_nd)))
+        call nf_check(nf90_put_var(ncid, var_gtau_id,               gtmp_nd))
+        call nf_check(nf90_put_var(ncid, var_gl_id,                 gl_nd))
+        call nf_check(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
+        call nf_check(nf90_close(ncid))
 
         ! Invoking python to execute the script
         call Invoke_python_triqs (paw_dmft%spacecomm)
@@ -1742,21 +1742,21 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
         i = (0, 1)
         
         ! Opening the NETCDF file
-        call netcdf_check(nf90_open("triqs_for_dft.nc", nf90_nowrite, ncid))
+        call nf_check(nf90_open("triqs_for_dft.nc", nf90_nowrite, ncid))
 
         ! Read from the file
         ! Re{G_iw}
-        call check(nf90_inq_varid(ncid, "re_g_iw", varid))
-        call check(nf90_get_var(ncid, varid, new_re_g_iw))
+        call nf_check(nf90_inq_varid(ncid, "re_g_iw", varid))
+        call nf_check(nf90_get_var(ncid, varid, new_re_g_iw))
         ! Im{G_iw}
-        call check(nf90_inq_varid(ncid, "im_g_iw", varid))
-        call check(nf90_get_var(ncid, varid, new_im_g_iw))
+        call nf_check(nf90_inq_varid(ncid, "im_g_iw", varid))
+        call nf_check(nf90_get_var(ncid, varid, new_im_g_iw))
         ! G_tau
-        call check(nf90_inq_varid(ncid, "g_tau", varid))
-        call check(nf90_get_var(ncid, varid, new_g_tau))
+        call nf_check(nf90_inq_varid(ncid, "g_tau", varid))
+        call nf_check(nf90_get_var(ncid, varid, new_g_tau))
         ! G_l
-        call check(nf90_inq_varid(ncid, "gl", varid))
-        call check(nf90_get_var(ncid, varid, new_gl))
+        call nf_check(nf90_inq_varid(ncid, "gl", varid))
+        call nf_check(nf90_get_var(ncid, varid, new_gl))
 
         ! Assigning data
         do iflavor1=1, nflavor

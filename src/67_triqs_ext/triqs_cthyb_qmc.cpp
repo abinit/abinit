@@ -49,11 +49,11 @@ void invoke_python_triqs(MPI_Fint *mpi_comm) {
     if (rank == 0) fprintf(stdout, "invoke_python_triqs: beginning\n");
 
     // Launch python
-    init_python_interpreter("");
+    init_python_interpreter("/home/gingras1/miniconda/envs/env2/lib/libpython2.7.so");
     if (rank == 0) fprintf(stdout, "invoke_python_triqs: interpreter initialized\n");
 
     // Execute script
-    execute_python_file("");
+    execute_python_file("/RQexec/gingras1/NetCDF+execute_python/DFT+DMFT/Python/impurity.py");
     if (rank == 0) fprintf(stdout, "invoke_python_triqs: script runned\n");
 
     int final;

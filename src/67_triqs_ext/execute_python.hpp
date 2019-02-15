@@ -9,7 +9,7 @@
 int init_python_interpreter_from_env(const char* env_var);
 
 // states the interpreter
-int python_interpreter(const char* python_so);
+int init_python_interpreter(const char* python_so);
 
 // executes code in the interpreter
 int execute_python_file(const char* filename);

@@ -736,7 +736,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
    sumwtk=sumwtk+paw_dmft%wtk(ikpt)
  enddo
  if(abs(sumwtk-1_dp)>tol13.and.dtset%iscf>=0) then
-   write(message, '(a,f15.10)' )' sum of k-point is incorrect',sumwtk
+   write(message, '(a,f15.13)' )' sum of k-point is incorrect',sumwtk
    MSG_ERROR(message)
  endif
  ABI_ALLOCATE(paw_dmft%lpawu,(paw_dmft%natom))
