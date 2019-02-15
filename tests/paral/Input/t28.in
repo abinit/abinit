@@ -47,7 +47,6 @@ prtden 0  prteig 0  prtwf 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = atlas_gnu_7.2_fb
 #%% [files]
 #%% psp_files = 83bi.paw
 #%% [paral_info]
