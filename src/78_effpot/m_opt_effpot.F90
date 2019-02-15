@@ -509,7 +509,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
               ! Message to Output 
               write(message,'(5a)' )ch10,&
 &             ' ==> Term has strain compenent. Strain-Phonon terms are not yet implemented',ch10,&
-&            ' ==> We cycle',ch10
+&             ' ==> We cycle',ch10
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
              cycle 
@@ -521,8 +521,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      if(order_start == 0)then 
               ! Message to Output 
               write(message,'(2a,I2,a,I2,3a)' )ch10,&
-&             " ==> Term doesn't fit into specified order range from ", order_ran(1),'to ',order_ran(2),ch10,&        
-&             ' ==> No need for high order bounding term',ch10
+&             " ==> Term doesn't fit into specified order range from ", order_ran(1),' to ',order_ran(2),ch10,&        
+&             ' ==> Can not construct high order bounding term',ch10
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
              cycle 
@@ -592,7 +592,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              !write(*,*) 'exists?', exists 
              if(any(exists))then 
                 write(message,'(3a)' )ch10,&
-&               ' ==> Term exists already. We cycle',ch10
+&               '   ==> Term exists already. We cycle',ch10
                 call wrtout(ab_out,message,'COLL')
                 call wrtout(std_out,message,'COLL')
                 ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)
@@ -604,7 +604,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              
              ! Tell the world what we do, They want to know.     
              write(message,'(3a)' )ch10,&
-&            ' ==> Optimizing coefficient',ch10
+&            '   ==> Optimizing coefficient',ch10
              call wrtout(ab_out,message,'COLL')
              call wrtout(std_out,message,'COLL')
            
@@ -616,12 +616,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              
              !Optimizing coefficient  
              i = 0 
-             do while(msef/msef_ini >= 1.2 )
+             do while(msef/msef_ini >= 1.5 )
                 i = i + 1 
                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
- &                                             natom_sc,ntime,fit_data%training_set%sqomega,&
- &                                             compute_anharmonic=.TRUE.,print_file=.FALSE.)
+ &                                            natom_sc,ntime,fit_data%training_set%sqomega,&
+ &                                            compute_anharmonic=.TRUE.,print_file=.FALSE.)
            
              enddo ! while mse/mse_ini>10  
        enddo ! icombinations
@@ -815,7 +815,7 @@ ncombi_order = 0
 do order=order_start,order_end,2
    i = i+1
    if(ndisp == 1)then
-      ncombi = 1 
+      ncombi = ncombi + 1 
       ncombi_order(i) = 1
    else 
       do iorder1 = 2,order-2*(ndisp-1),2 
@@ -910,6 +910,8 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
      power_tot = 0
      icombi_start = 1
      i = 0
+     !write(*,*) "what is ncombi?", ncombi
+     !write(*,*) "what is ncmobi_order", ncombi_order 
      !write(*,*) "order_start", order_start
      !write(*,*) "order_stop", order_stop
      order = order_start
@@ -925,31 +927,43 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
         icombi=icombi_start 
         do while (icombi<=icombi_stop)
            power_tot = 0 
-           do idisp=1,ndisp 
+           do idisp=1,ndisp
+              !write(*,*) "what is icombi here?", icombi 
+              !write(*,*) "what is icombi_stop here?", icombi_stop
               power_tot = power_tot + terms(icombi)%terms(1)%power_disp(idisp)
            enddo
-           ! TODO augmentation of icombi start prohibits going to else 
            ! Probably have to increase order at same time 
+           ! If the term already has the right order we cycle 
+           ! we increase icombi_start and icombi to go to the next term in the array
            if(power_tot == order)then
               icombi_start = icombi_start + 1
               icombi = icombi + 1
               !write(*,*) 'icombi-start in if', icombi_start 
               cycle
+           ! If the term is not already in the right order, we manipulate it until 
+           ! it is 
            else        
               jdisp1 = 1 
               sec = 1
               !write(*,*) 'what is ndisp actually', ndisp
               ! Treat single permutations from the bottom of the order 
               ! so start from ^2^2^2 and get ^6^2^2,^2^6^2, and ^2^2^6 f.E.
+              ! do loop over displacements 
               do while(jdisp1<=ndisp .and. sec < 100)                    
-                 !write(*,*) "I did at least one displacement" 
+                 !write(*,*) "what is jdisp1 here?", jdisp1
+                 !write(*,*) "what is icombi here?", icombi
+                 !write(*,*) "what is icombi_sotp?", icombi_stop
+                 ! Increase the order of the displacements 
                  do iterm_of_term=1,nterm_of_term
                     terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
                  enddo
+                 ! Check total order of term after increse
                  power_tot=0
                  do jdisp2=1,ndisp 
                     power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
                  enddo
+                 ! If the term is at the right order do next displacement 
+                 ! increase icombi and icombi_start to go to next term in array 
                  if(power_tot == order)then 
                     icombi = icombi + 1
                     icombi_start = icombi_start +1
@@ -997,7 +1011,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
 &                     'Action: Contact Abinit Group',ch10 
                       MSG_ERROR(message)   
                    endif                      
-               endif
+               endif! (icombi_stop - icombi)  
                !write(*,*) 'I was here!'
                to_divide = real(order)
                divider1 = real(ndisp)
@@ -1005,7 +1019,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                divider2 = real(2)
                !write(*,*) 'divided', divided, 'divider2', divider2
                !Treat terms with even power f.E. ^2^2^2^2, ^4^4 etc...
-               if(mod(divided,divider2) == 0 .and. .not. equal_term_done .and. icombi_stop - icombi >= 1)then                                                              
+               if(mod(divided,divider2) == 0 .and. .not. equal_term_done .and. ndisp > 1)then                                                              
                   !write(*,*) "Sometimes I should be here sometimes I shouldn't" 
                   do jdisp=1,ndisp
                      do iterm_of_term=1,nterm_of_term
@@ -1024,8 +1038,8 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
                   equal_term_done = .TRUE.
                   icombi = icombi + 1
                   icombi_start = icombi_start +1
-              endif
-            endif 
+               endif ! equal term if 
+           endif ! power_tot == order  
         enddo !icombination
       enddo !order
 
