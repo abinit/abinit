@@ -2831,17 +2831,17 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
  do ir3=-nr,nr
    do ir2=-nr,nr
      do ir1=-nr,nr
-       arg=-two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
+       arg=two_pi*(qphon(1)*ir1+qphon(2)*ir2+qphon(3)*ir3)
        c1r=cos(arg)*reta3m
        c1i=sin(arg)*reta3m
        do ia0=1,my_natom
          ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
 !         do ib=1,ia
          do ib=1,my_natom
-           r1=dble(ir1)+xred(1,ia)-xred(1,ib)
-           r2=dble(ir2)+xred(2,ia)-xred(2,ib)
-           r3=dble(ir3)+xred(3,ia)-xred(3,ib)
-           dakk(:)=(/r1,r2,r3/)
+           r1=dble(ir1)+xred(1,ib)-xred(1,ia)
+           r2=dble(ir2)+xred(2,ib)-xred(2,ia)
+           r3=dble(ir3)+xred(3,ib)-xred(3,ia)
+           dakk(:)=two_pi*(/r1,r2,r3/)
            rdot12=rmet(2,1)*r1*r2
            rdot13=rmet(3,1)*r1*r3
            rdot23=rmet(3,2)*r2*r3

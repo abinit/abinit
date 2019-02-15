@@ -1475,11 +1475,23 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_ALLOCATE(carflg,(3,mpert,3,mpert))
    ABI_ALLOCATE(d2matr,(2,3,mpert,3,mpert))
    outd2=1
+#ifdef MR_DEV
+!!!MR: Change of perturbation phase in the DM at finite q. This is just for checking 
+!!!    purposes and will be eventually deactivated.
+   call dfpt_gatherdy(becfrnl,dtset%berryopt,blkflg,carflg,&
+&   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
+&   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
+&   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
+&   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat,qphon,xred)
+#else
    call dfpt_gatherdy(becfrnl,dtset%berryopt,blkflg,carflg,&
 &   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
 &   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
+#endif
+
+
 
    dscrpt=' Note : temporary (transfer) database '
 
@@ -3441,7 +3453,8 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 & dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
-& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion)
+& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion,&
+& qphon,xred) !optional MR_DEV argument
 
 !Arguments -------------------------------
 !scalars
@@ -3465,12 +3478,16 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
  real(dp),intent(out) :: d2cart(2,3,mpert,3,mpert)
  real(dp),intent(out) :: d2cart_bbb(2,3,3,mpert,mband,mband*prtbbb)
  real(dp),intent(out) :: d2matr(2,3,mpert,3,mpert)
+ real(dp),optional,intent(in) :: qphon(3)
+ real(dp),optional,intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
  integer :: chneut,iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
  integer :: jj,nblok,selectz
  character(len=500) :: message
+!MR: tmp variables
+ real(dp) :: arga,argb,cre,cim,dmre,dmim
 !arrays
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
@@ -3712,6 +3729,26 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 !    Perhaps due to d/dk replacing id/dk ? !
      d2matr(:,:,natom+2,:,natom+2)=-d2matr(:,:,natom+2,:,natom+2)
    end if
+
+#ifdef MR_DEV
+!  tmp: adapt the perturbation phase of DM to the one in the longwave treatment 
+   do ipert1=1,natom
+     arga=two_pi*(qphon(1)*xred(1,ipert1)+qphon(2)*xred(2,ipert1)+qphon(3)*xred(3,ipert1))
+     do ipert2=1,natom
+       argb=two_pi*(qphon(1)*xred(1,ipert2)+qphon(2)*xred(2,ipert2)+qphon(3)*xred(3,ipert2))
+       do idir1=1,3
+         do idir2=1,3
+           cre=cos(argb-arga)
+           cim=sin(argb-arga)
+           dmre=d2matr(1,idir1,ipert1,idir2,ipert2)
+           dmim=d2matr(2,idir1,ipert1,idir2,ipert2)
+           d2matr(1,idir1,ipert1,idir2,ipert2)= cre*dmre - cim*dmim
+           d2matr(2,idir1,ipert1,idir2,ipert2)= cre*dmim + cim*dmre
+         end do
+       end do
+     end do
+   end do
+#endif 
 
    call cart29(blkflg,d2matr,carflg,d2cart,&
 &   gprimd,iblok,mpert,natom,nblok,ntypat,rprimd,typat,ucvol,zion)
