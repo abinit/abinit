@@ -59,7 +59,7 @@ module m_sigmaph
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, simpson
  use m_io_tools,       only : iomode_from_fname, file_exists
- use m_special_funcs,  only : dirac_delta
+ use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq
  use m_cgtk,           only : cgtk_rotate
  use m_cgtools,        only : cg_zdotc
@@ -1248,7 +1248,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! Optionally, accumulate contribution to Eliashberg functions
              if (sigma%gfw_nomega > 0 .and. abs(eig0nk - eig0mkq) > EPH_WTOL) then
                ! eph strength with delta(en - emkq)
-               rfact = dirac_delta(eig0nk - eig0mkq, dtset%tsmear)
+               rfact = gaussian(eig0nk - eig0mkq, dtset%tsmear)
                sigma%gf_nnuq(ib_k, nu, iq_ibz, 1) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 1) + &
                     rfact * (gkq_nu(1,ib_k,nu) ** 2 + gkq_nu(2,ib_k,nu) ** 2)
 
@@ -1579,7 +1579,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            call ifc_fourq(ifc, cryst, sigma%qibz_k(:,iq_ibz), phfrq, displ_cart)
            do nu=1,natom3
              dargs = sigma%gfw_mesh - phfrq(nu)
-             dt_weights(:,1) = dirac_delta(dargs, dtset%ph_smear)
+             dt_weights(:,1) = gaussian(dargs, dtset%ph_smear)
              do ib_k=1,nbcalc_ks
                do ii=1,3
                  sigma%gfw_vals(:, ii, ib_k) = sigma%gfw_vals(:, ii, ib_k) +  &
