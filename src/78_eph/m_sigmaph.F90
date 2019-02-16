@@ -80,7 +80,7 @@ module m_sigmaph
  private
 !!***
 
- public :: sigmaph   ! Main entry point to compute self-energy matrix elements
+ public :: sigmaph         ! Main entry point to compute self-energy matrix elements
  public :: sigmaph_read    ! Read main dimensions and header of sigmaph from a netcdf file.
  public :: sigmaph_ebands  ! Fill in values in ebands from the sigmaph structure and netcdf file
  public :: sigmaph_free    ! Free sigmaph object
@@ -99,7 +99,7 @@ module m_sigmaph
  integer,private,parameter :: DELTAW_KIND = dp
  !integer,private,parameter :: DELTAW_KIND = sp
 
- real(dp),private,parameter :: tol_enediff=0.001_dp * eV_Ha
+ real(dp),private,parameter :: tol_enediff = 0.001_dp * eV_Ha
 
 !----------------------------------------------------------------------
 
@@ -422,7 +422,7 @@ module m_sigmaph
   integer :: gfw_nomega
    ! Number of frequencies in Eliashberg function.
    ! Set to 0 to deactivate this part.
-   ! TODO: Integration in q-space is done according to eph_intmeth.
+   ! Integration in q-space is done according to eph_intmeth.
 
   real(dp),allocatable :: gfw_mesh(:)
    ! Frequency mesh for Eliashberg function (phonons)
@@ -543,7 +543,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
- real(dp) :: cpu_setk, wall_setk, gflops_setk
+ real(dp) :: cpu_setk, wall_setk, gflops_setk, gf_val
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag, qsph
  real(dp) :: vkk_norm2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum, sig_cplx
@@ -779,37 +779,63 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  if (.not.sigma%calc_mrta) call ddkop%free()
 
  ! Prepare treatment of Frohlich divergence with spherical integration in the microzone around Gamma.
+ qsph = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
  frohl_sphcorr = zero
  if (sigma%frohl_model == 1) then
    call wrtout(std_out, " Computing spherical average to treat Frohlich divergence.")
-   if (sigma%imag_only) then
-     NOT_IMPLEMENTED_ERROR()
-   end if
-   ! Compute Spherical average.
-   do iang=1,sigma%angl_size
-     if (mod(iang, nprocs) /= my_rank) cycle
-     qpt_cart = sigma%qvers_cart(:, iang)
-     inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
-     call ifc_fourq(ifc, cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
-     do nu=1,natom3
-       wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
-       cp3 = czero
-       do iatom=1, natom
-         cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
+   if (.not. sigma%imag_only) then
+     ! Compute spherical average.
+     do iang=1,sigma%angl_size
+       if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
+       qpt_cart = sigma%qvers_cart(:, iang)
+       inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+       call ifc_fourq(ifc, cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
+       ! Note that acoustic modes are ignored.
+       do nu=4,natom3
+         wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
+         cp3 = czero
+         do iatom=1, natom
+           cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
+         end do
+         cnum = dot_product(qpt_cart, cp3)
+         !write(*, *)"Computing:", sigma%angwgth(iang), abs(cnum), inv_qepsq, wqnu
+         frohl_sphcorr(nu) = frohl_sphcorr(nu) + sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
        end do
-       cnum = dot_product(qpt_cart, cp3)
-       write(*, *)"Computing:", sigma%angwgth(iang), abs(cnum), inv_qepsq, wqnu
-       frohl_sphcorr(nu) = frohl_sphcorr(nu) + sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
      end do
-   end do
-   call xmpi_sum(frohl_sphcorr, comm, ierr)
-   qsph = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
-   frohl_sphcorr = frohl_sphcorr * qsph * (four_pi / cryst%ucvol) ** 2 / two
-   if (my_rank == master) then
-     do nu=1,natom3
-       write(std_out, "(a, i0, a, f8.3, a)")" For phmode nu = ", nu, &
-         " Frohlich model, Gamma Sphere contribution: ", frohl_sphcorr(nu) * Ha_eV, " [eV]"
+     call xmpi_sum(frohl_sphcorr, comm, ierr)
+     !frohl_sphcorr = frohl_sphcorr * qsph * (four_pi / cryst%ucvol) ** 2 / two
+     frohl_sphcorr = frohl_sphcorr * two * pi**2 / cryst%ucvol * (three / (four_pi * cryst%ucvol)) ** third / sigma%nqbz ** third
+     if (my_rank == master) then
+       do nu=1,natom3
+         write(std_out, "(a, i0, a, f8.3, a)")" For phmode nu = ", nu, &
+           " Frohlich model, contribution of small sphere_Gamma : ", frohl_sphcorr(nu) * Ha_eV, " [eV]"
+       end do
+     end if
+
+   else
+     ! Integrate delta inside small sphere around gamma
+     NOT_IMPLEMENTED_ERROR()
+#if 0
+     !do spin=1,nsppol
+     !do ikcalc=1,sigma%nkcalc
+     kk = sigma%kcalc(:, ikcalc)
+     bstart_ks = sigma%bstart_ks(ikcalc, spin)
+     ik_ibz = sigma%kcalc2ibz(ikcalc,1)
+     do iang=1,sigma%angl_size
+       if (mod(iang, nprocs) /= my_rank) cycle
+       qpt_cart = sigma%qvers_cart(:, iang)
+       do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
+        !vk(1, :) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+        !cos_theta_qvnk = dot_product(qpt_cart, vk) / |q| |vk|
+        !qroot = wqnu / vnk_mod * cos_theta_qnvk
+        !if (abs(qroot) > qsph) cycle
+        !do ii=1,2
+        !  frohl_sphcorr(nu, ii) = frohl_sphcorr(nu, ii) + sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
+        !end do
+       end do
      end do
+     call xmpi_sum(frohl_sphcorr, comm, ierr)
+#endif
    end if
  end if
 
@@ -829,9 +855,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,natom,&
-&  dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
-&  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-&  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+  dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
+  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
+  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
  ! Allocate work space arrays. Note nvloc in vlocal.
  ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
@@ -998,11 +1024,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ignore_kq = ignore_kq + 1; cycle
        end if
 
+       ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
+       ! This call allocates v1scf(cplex, nfftf, nspden, my_npert))
        db_iqpt = sigma%indq2dvdb(1, iq_ibz)
-
        if (db_iqpt /= -1) then
-         ! Read and reconstruct the dvscf potentials for qpt and all 3*natom perturbations.
-         ! This call allocates v1scf(cplex, nfftf, nspden, my_npert))
          call dvdb%readsym_qbz(cryst, qpt, sigma%indq2dvdb(:,iq_ibz), cplex, nfftf, ngfftf, v1scf, sigma%comm_pert)
        else
          MSG_ERROR(sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB"))
@@ -1212,7 +1237,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            do ib_k=1,nbcalc_ks
              vk(1,:) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
              vkk_norm2 = dot_product(vk(1,:),vk(1,:))
-             !vkk_norm2 = norm2(vk(1,:))*norm2(vkq(1,:))
+             !vkk_norm2 = norm2(vk(1,:)) * norm2(vkq(1,:))
              alpha_mrta(ib_k) = zero
              if (vkk_norm2 > tol6) alpha_mrta(ib_k) = one - dot_product(vkq(1,:), vk(1,:)) / vkk_norm2**2
            end do
@@ -1232,36 +1257,31 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              ! Handle intra-band term in polar materials
              ! DFPT gkk for q == 0 should not diverge (should plot gkq2(q) though)
-             !if (sigma%frohl_model /= 0 .and. abs(ediff) < tol_enediff) then
-             !  select case (sigma%frohl_model)
-             !  case (1)
-             !    if (isqzero) then
-             !      !gkq2 =
-             !    end if
-             !  case (2)
-             !    gkq2 = gkq2 - weight_q * gkq2_lr(ib_k, nu)
-             !  case default
-             !    MSG_ERROR(sjoin("Wrong value of frohl_model: ", itoa(sigma%frohl_model)))
-             !  end select
+             !if (sigma%frohl_model == 2 .and. abs(ediff) < tol_enediff) then
+             !  gkq2 = gkq2 - weight_q * gkq2_lr(ib_k, nu)
              !end if
 
              ! Optionally, accumulate contribution to Eliashberg functions
              if (sigma%gfw_nomega > 0 .and. abs(eig0nk - eig0mkq) > EPH_WTOL) then
-               ! eph strength with delta(en - emkq)
+               ! EPH strength with delta(en - emkq)
                rfact = gaussian(eig0nk - eig0mkq, dtset%tsmear)
                sigma%gf_nnuq(ib_k, nu, iq_ibz, 1) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 1) + &
                     rfact * (gkq_nu(1,ib_k,nu) ** 2 + gkq_nu(2,ib_k,nu) ** 2)
 
-               ! Fan term.
+               ! Treat Fan term.
                if (ediff > wqnu) then
                   rfact = one / ediff
                else
                  ! Non adiabatic regime --> Add complex shift.
-                 ! Note however that the expression for the Eliashberg function relies on adiabaticity.
+                 ! Note however that the expression for this flavor of Eliashberg function relies on adiabaticity.
                  rfact = real(one/(ediff + sigma%ieta))
                end if
-               sigma%gf_nnuq(ib_k, nu, iq_ibz, 2) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 2) + &
-                  (gkq_nu(1,ib_k,nu) ** 2 + gkq_nu(2,ib_k,nu) ** 2) * rfact
+
+               gf_val = gkq_nu(1,ib_k,nu) ** 2 + gkq_nu(2,ib_k,nu) ** 2
+               if (sigma%frohl_model == 1 .and. isqzero .and. ibsum_kq == band_ks) then
+                 gf_val = frohl_sphcorr(nu) * (four_pi / three * qsph ** 3)
+               end if
+               sigma%gf_nnuq(ib_k, nu, iq_ibz, 2) = sigma%gf_nnuq(ib_k, nu, iq_ibz, 2) + gf_val * rfact
              end if
 
              do it=1,sigma%ntemp
@@ -1276,10 +1296,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !   use_doublegrid   .true. .false.
                !     imag_only      .true. .false.
                !
-               ! we will write this with nested conditionals using the order above
+               ! We will write this with nested conditionals using the order above
 
                if (sigma%qint_method == 0) then
+                 ! =========
                  ! zcut mode
+                 ! =========
                  if (sigma%use_doublegrid) then
                    cfact = zero
                    do jj=1,sigma%eph_doublegrid%ndiv
@@ -1318,11 +1340,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      ! Treat Frohlich divergence with spherical integration around Gamma point.
                      sig_cplx = frohl_sphcorr(nu) * (two * f_mkq - one)
                    end if
+
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + sig_cplx
                  end if
 
                else
+                 ! ===================
                  ! Tetrahedron method
+                 ! ===================
                  if (sigma%use_doublegrid) then
                    do jj=1,sigma%eph_doublegrid%ndiv
                      ! Double Grid shared points weights
@@ -1359,18 +1384,31 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                    end do
 
                  else
-                   ! Tetrahedron method without double grid
+                   ! Tetrahedron method WITHOUT double grid.
                    if (sigma%imag_only) then
                      simag = gkq2 * pi * ( &
                        (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, 1) )
+                     !if (sigma%frohl_model == 1 .and. isqzero .and. ibsum_kq == band_ks) then
+                     !  ! Treat Frohlich divergence with spherical integration around Gamma point.
+                     !  simag = frohl_sphcorr(nu) * (two * f_mkq - one)
+                     !end if
+
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                     if (sigma%calc_mrta) &
+                     if (sigma%calc_mrta) then
                        sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                     end if
+
                    else
-                     sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
+                     sig_cplx = gkq2 * ( &
                        (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, imyp, ibsum_kq, imyq, 1) )
+                     if (sigma%frohl_model == 1 .and. isqzero .and. ibsum_kq == band_ks) then
+                       ! Treat Frohlich divergence with spherical integration around Gamma point.
+                       sig_cplx = frohl_sphcorr(nu) * (two * f_mkq - one)
+                     end if
+
+                     sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + sig_cplx
                    endif
                  end if
                end if
@@ -1952,7 +1990,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ! to distribuite the calculations among processors.
  new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
- call cwtime_report("sigmaph_new: k-points", cpu, wall, gflops)
+ call cwtime_report(" sigmaph_new: k-points", cpu, wall, gflops)
 
  ! TODO: Rename variable
  if (dtset%nkptgw /= 0) then
@@ -2095,7 +2133,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_FREE(degblock_all)
  ABI_FREE(ndeg_all)
 
- call cwtime_report("sigmaph_new: kptgw", cpu, wall, gflops)
+ call cwtime_report(" sigmaph_new: kptgw", cpu, wall, gflops)
 
  ! Now we can finally compute max_nbcalc
  new%max_nbcalc = maxval(new%nbcalc_ks)
@@ -2326,7 +2364,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    endif
  end if
 
- call cwtime_report("sigmaph_new: doublegrid", cpu, wall, gflops)
+ call cwtime_report(" sigmaph_new: doublegrid", cpu, wall, gflops)
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
  ABI_MALLOC(new%mu_e, (new%ntemp))
@@ -2384,15 +2422,16 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    do ii=1,3
      new%qrad = min(new%qrad, sqrt(dot_product(cryst%gprimd(:, ii), cryst%gprimd(:, ii))))
    end do
+   ! Set angular mesh.
+   new%ntheta = int(dtset%frohl_params(2))
+   if (new%ntheta <= 0) new%ntheta = 10
+   new%nphi = 2 * new%ntheta
+   new%nqr = 10  !int(dtset%frohl_params(3))
    new%qrad = new%qrad !/ 2.0_dp  dtset%frohl_params(2)
    new%qdamp = new%qrad !/ four
-   new%nqr = 10  !int(dtset%frohl_params(3))
-   ! Set angular mesh.
-   new%ntheta = 10 ! !int(dtset%frohl_params(4))
-   new%nphi = 2 * new%ntheta
-   write(std_out,"(a)")"Activating computation of Frohlich self-energy:"
-   write(std_out,"(2(a,i0,1x))")"ntheta:", new%ntheta, "nphi:", new%nphi
-   write(std_out,"((a,i0,1x,a,f6.3,1x,a))")"nqr points:", new%nqr, "qrad:", new%qrad, "[Bohr^-1]"
+   write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
+   write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
+   write(std_out,"((a,i0,1x,a,f6.3,1x,a))")"nqr points: ", new%nqr, "qrad: ", new%qrad, " [Bohr^-1]"
 
    ! Initialize angular mesh qvers_cart and angwgth (inspired to initang in m_pawang)
    ABI_MALLOC(th, (new%ntheta))
@@ -2410,8 +2449,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      sin_theta = sqrt(one - cos_theta*cos_theta)
      do ip = 1, new%nphi
        ang = con * (ip-1)
-       cos_phi = cos(ang)
-       sin_phi = sin(ang)
+       cos_phi = cos(ang); sin_phi = sin(ang)
        npoints = npoints + 1
        new%qvers_cart(1, npoints) = sin_theta * cos_phi
        new%qvers_cart(2, npoints) = sin_theta * sin_phi
@@ -2420,6 +2458,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        new%angwgth(npoints) = wth(it) / (two * new%nphi)
      end do
    end do
+   write(std_out, *)"Sum angwgth: ", sum(new%angwgth)
 
    ABI_FREE(th)
    ABI_FREE(wth)
@@ -2524,7 +2563,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
      call edos%print(unit=std_out)
      !call edos%print(unit=ab_out)
    end if
-   call cwtime_report("sigmaph_new: ebands", cpu, wall, gflops)
+   call cwtime_report(" sigmaph_new: ebands", cpu, wall, gflops)
  end if
 
  ! Open netcdf file (only master works for the time being because I cannot assume HDF5 + MPI-IO)
@@ -2693,7 +2732,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
 
  call edos%free()
 
- call cwtime_report("sigmaph_new: netcdf", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" sigmaph_new: netcdf", cpu_all, wall_all, gflops_all)
 
 end subroutine sigmaph_write
 !!***
