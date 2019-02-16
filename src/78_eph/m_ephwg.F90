@@ -362,6 +362,9 @@ subroutine ephwg_setup_kpoint(self, kpoint, prtvol, comm)
 
  call cwtime_report(" lgroup_new", cpu, wall, gflops)
 
+ ! TODO: Use symrec conventions although this means that we cannot reuse these tables
+ ! to symmetrize wavefunctions and potentials that require S-1 i.e. the symrel convention.
+
  ! Get mapping IBZ_k --> initial IBZ (self%lgk%ibz --> self%ibz)
  ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
  call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&

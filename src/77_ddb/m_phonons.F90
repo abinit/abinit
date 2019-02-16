@@ -729,7 +729,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae, dossmear, dos_ngqpt, 
 
  ! Parameters defining the gaussian approximant.
  if (prtdos == 1) then
-   ! TODO: use dirac_delta and update reference files.
+   ! TODO: use gaussian and update reference files.
    gaussprefactor = one / (dossmear * sqrt(two_pi))
    gaussfactor = one / (sqrt2 * dossmear)
    write(msg, '(4a,f8.5,2a,f8.5)') ch10, &
