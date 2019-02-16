@@ -3773,11 +3773,11 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
  ! and if all the independent perturbations are available.
  !   `tot_miss` is the number of irreducible perturbations not found in the DVDB (critical)
  !   `tot_weird` is the number of redundant perturbations found in the DVDB (not critical)
- enough = 20; if (db%prtvol > 0) enough = nqibz + 1
+ enough = 5; if (db%prtvol > 0) enough = nqibz + 1
  tot_miss = 0; tot_weird = 0
  do iq_ibz=1,nqibz
    if (iq_ibz == enough)  then
-     call wrtout(unt,' More than 20 q-points. Only important messages will be printed...')
+     call wrtout(unt,' More than 20 q-points with prtvol == 0. Only important messages will be printed...')
    end if
    qq = qibz(:,iq_ibz)
    iq_file = dvdb_findq(db, qq)

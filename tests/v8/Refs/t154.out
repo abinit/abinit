@@ -346,37 +346,11 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
 
+ More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=symmetric, found=No
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=symmetric, found=No
-    3)  idir= 3, ipert=   1, type=independent, found=Yes
-    4)  idir= 1, ipert=   2, type=symmetric, found=No
-    5)  idir= 2, ipert=   2, type=symmetric, found=No
-    6)  idir= 3, ipert=   2, type=symmetric, found=No
-
-qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
- The list of irreducible perturbations for this q vector is:
-    1)  idir= 1, ipert=   1, type=independent, found=Yes
-    2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
