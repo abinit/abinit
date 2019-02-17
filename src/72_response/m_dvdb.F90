@@ -4713,7 +4713,7 @@ end subroutine dvdb_v1r_long_range
 !! SOURCE
 
 subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf, cryst, &
-&          ngqpt_coarse, nqshift_coarse, qshift_coarse, comm)
+&          ngqpt_coarse, nqshift_coarse, qshift_coarse, comm, custom_qpt)
 
 !Arguments ------------------------------------
 !scalars
@@ -4726,6 +4726,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  integer,intent(in) :: ngfft(18), ngfftf(18)
  integer,intent(in) :: ngqpt_coarse(3)
  real(dp),intent(in) :: qshift_coarse(3,nqshift_coarse)
+ real(dp),optional,intent(in) :: custom_qpt(:,:)
 
 !Local variables ------------------------------
 !scalars
@@ -4762,7 +4763,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  write(msg, '(2a)') " Interpolation of the electron-phonon coupling potential", ch10
  call wrtout(ab_out, msg, do_flush=.True.); call wrtout(std_out, msg, do_flush=.True.)
 
- if (dtset%eph_task == 5) then
+ if (dtset%eph_task == 5 .or. present(custom_qpt)) then
    msg = sjoin(" From coarse q-mesh:", ltoa(ngqpt_coarse), "to:", ltoa(dtset%eph_ngqpt_fine))
    call wrtout(ab_out, msg); call wrtout(std_out, msg)
    ! Setup fine q-point grid
@@ -4788,6 +4789,13 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  else
    MSG_ERROR(sjoin("Invalid eph_task", itoa(dtset%eph_task)))
+ end if
+
+ if (present(custom_qpt)) then
+  ABI_SFREE(qibz)
+  nqibz = size(custom_qpt,dim=2)
+  ABI_MALLOC(qibz, (3, nqibz))
+  qibz = custom_qpt
  end if
 
  ! =======================

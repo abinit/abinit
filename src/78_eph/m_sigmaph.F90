@@ -528,7 +528,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !scalars
  integer,parameter :: tim_getgh1c=1,berryopt0=0,timrev0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,sppoldbl1=1,timrev1=1
- integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert, nqeff
+ integer :: my_rank,nsppol,nkpt,iq_ibz,my_npert, nqeff
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
@@ -540,6 +540,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop,iatom
+ integer :: nqibz, nqbz
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag
@@ -554,6 +555,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  character(len=500) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3)
+ integer :: qptrlatt(3,3)
  integer :: work_ngfft(18),gmax(3) !g0ibz_kq(3),
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:)
  integer,allocatable :: wfd_istwfk(:)
@@ -572,6 +574,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:),nqnu_tlist(:),dt_weights(:,:),dt_tetra_weights(:,:,:),dargs(:),alpha_mrta(:)
+ real(dp),allocatable :: custom_qpt(:,:), wtq(:), qibz(:,:), qbz(:,:)
  complex(dpc),allocatable :: cfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
@@ -813,11 +816,43 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  !dvdb%symv1 = .False.
  if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
- ABI_CALLOC(qselect, (dvdb%nqpt))
- qselect = 1
- ! Try to predict the q-points required to compute tau.
- if (sigma%imag_only .and. sigma%qint_method == 1 .and. dtset%userie == 123) then
-   call qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
+ ! Hack to interpolate dvdb only in qpoints that will be used
+ if (dtset%useria == 1999) then
+   ! Calculate desired qpt mesh
+   qptrlatt = 0
+   qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+   write(*,*) nqibz, nqbz
+   ! Call qpoints_oracle with this desired qpoint mesh
+   ABI_CALLOC(qselect, (nqibz))
+   call qpoints_oracle(sigma, cryst, ebands, qibz, nqibz, nqbz, qbz, qselect, comm)
+   ! Select only needed qpoints
+   cnt = count(qselect /= 0)
+   ABI_MALLOC(custom_qpt,(3,cnt))
+   cnt = 1
+   do iq_ibz=1,nqibz
+     if (qselect(iq_ibz) == 0) cycle
+     custom_qpt(:,cnt) = qibz(:,iq_ibz)
+     cnt = cnt + 1
+   end do
+   ! Interpolate and write on those qpoints
+   call dvdb%close()
+   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfft, ngfftf, cryst, &
+                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm, custom_qpt)
+   dvdb = dvdb_new(dtfil%fnameabo_dvdb, comm)
+   call dvdb%open_read(ngfftf, xmpi_comm_self)
+   if (dtset%prtvol > 10) dvdb%debug = .True.
+   ! This to symmetrize the DFPT potentials.
+   if (dtset%symdynmat == 1) dvdb%symv1 = .True.
+   !dvdb%symv1 = .False.
+   if (sigma%nprocs_pert > 1) call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
+ else
+   ABI_CALLOC(qselect, (dvdb%nqpt))
+   qselect = 1
+   ! Try to predict the q-points required to compute tau.
+   if (sigma%imag_only .and. sigma%qint_method == 1 .and. dtset%userie == 123) then
+     call qpoints_oracle(sigma, cryst, ebands, dvdb%qpts, dvdb%nqpt, sigma%nqbz, sigma%qbz, qselect, comm)
+   end if
  end if
 
  ! Set cache in Mb for q-points.
@@ -2140,6 +2175,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      ! Select indices for energy window.
 
      call get_bands_from_erange(ebands, new%elow, new%ehigh, new%bsum_start, new%bsum_stop)
+     new%bsum_stop = min(new%bsum_stop,mband)
      ABI_CHECK(new%bsum_start <= new%bsum_stop, "bsum_start > bsum_bstop")
      new%nbsum = new%bsum_stop - new%bsum_start + 1
      new%my_bstart = new%bsum_start; new%my_bstop = new%bsum_stop
@@ -3237,13 +3273,16 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, dvdb, ebands, ikcalc, prtvol,
  !   * q --> -q symmetry is always used for phonons.
  !   * we use symrec instead of symrel (see also m_dvdb)
  ABI_MALLOC(iqk2dvdb, (self%nqibz_k, 6))
+ iqk2dvdb = -1
  call listkk(dksqmax, cryst%gmet, iqk2dvdb, dvdb%qpts, self%qibz_k, dvdb%nqpt, self%nqibz_k, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
- if (dksqmax > tol12) then
-   write(msg, '(a,es16.6,2a)' )&
-     "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
-     'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
-   MSG_ERROR(msg)
+ if (dtset%useria /= 1999) then
+   if (dksqmax > tol12) then
+     write(msg, '(a,es16.6,2a)' )&
+       "At least one of the q points could not be generated from a symmetrical one in the DVDB. dksqmax: ",dksqmax, ch10,&
+       'Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh.'
+     MSG_ERROR(msg)
+   end if
  end if
 
  call cwtime_report(" IBZ_k --> DVDB", cpu, wall, gflops)
@@ -4433,14 +4472,15 @@ end subroutine eval_sigfrohl
 !!
 !! SOURCE
 
-subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
+subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, comm)
 
 !Arguments ------------------------------------
  type(sigmaph_t),intent(in) :: sigma
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(dvdb_t),intent(in) :: dvdb
- integer,intent(out) :: qselect(dvdb%nqpt)
+ real(dp), intent(in) :: qpts(3,nqpt), qbz(3,nqbz)
+ integer,intent(in) :: nqpt, nqbz
+ integer,intent(out) :: qselect(nqpt)
  integer,intent(in) :: comm
 
 !Local variables ------------------------------
@@ -4484,16 +4524,16 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
  call mkkptrank(kbz, nkbz, kptrank)
  ABI_FREE(kbz)
 
- ABI_ICALLOC(qbz_count, (sigma%nqbz))
+ ABI_ICALLOC(qbz_count, (nqbz))
  cnt = 0
  do spin=1,sigma%nsppol
    do ikcalc=1,sigma%nkcalc
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism
      kk = sigma%kcalc(:, ikcalc)
      ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
-     do iq_bz=1,sigma%nqbz
+     do iq_bz=1,nqbz
        if (qbz_count(iq_bz) /= 0) cycle ! No need to check this q-point again.
-       kq = kk + sigma%qbz(:, iq_bz)
+       kq = kk + qbz(:, iq_bz)
        call get_rank_1kpt(kq, kq_rank, kptrank)
        ikq_bz = kptrank%invrank(kq_rank)
        if (ikq_bz < 1) then
@@ -4523,8 +4563,8 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
  call xmpi_sum(qbz_count, comm, ierr)
 
  ! Get mapping QBZ --> DVDB q-points.
- ABI_MALLOC(qbz2dvdb, (sigma%nqbz, 6))
- call listkk(dksqmax, cryst%gmet, qbz2dvdb, dvdb%qpts, sigma%qbz, dvdb%nqpt, sigma%nqbz, cryst%nsym, &
+ ABI_MALLOC(qbz2dvdb, (nqbz, 6))
+ call listkk(dksqmax, cryst%gmet, qbz2dvdb, qpts, qbz, nqpt, nqbz, cryst%nsym, &
       1, cryst%symafm, cryst%symrec, timrev1, comm, use_symrec=.True.)
  if (dksqmax > tol12) then
    write(msg, '(a,es16.6,2a)' )&
@@ -4535,7 +4575,7 @@ subroutine qpoints_oracle(sigma, cryst, ebands, dvdb, qselect, comm)
 
  ! Compute qselect using qbz2dvdb.
  qselect = 0
- do iq_bz=1,sigma%nqbz
+ do iq_bz=1,nqbz
    if (qbz_count(iq_bz) == 0) cycle
    db_iqpt = qbz2dvdb(iq_bz, 1)
    qselect(db_iqpt) = qselect(db_iqpt) + 1
