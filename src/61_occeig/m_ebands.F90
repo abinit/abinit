@@ -4366,8 +4366,13 @@ select case (intmeth)
 !   sec2str(wall_all)), do_flush=.True.)
 
  ! Compute total DOS and IDOS
- !max_occ = two / (ebands%nspinor*ebands%nsppol)
- !out_valsdos(:, :, 0,:) = max_occ * sum(out_valsdos(:,:,1:,:), dim=3)
+ max_occ = two/(ebands%nspinor*ebands%nsppol)
+ edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
+
+ do spin=1,edos%nsppol
+   call simpson_int(nw,edos%step,edos%dos(:,spin),edos%idos(:,spin))
+ end do
+ edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
  ! Use bisection to find fermi level.
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
