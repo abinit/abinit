@@ -546,7 +546,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, qmod, fqdamp, simag
  real(dp) :: vkk_norm2
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap,cplx_ediff, cnum
- logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
+ logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero,found
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -822,7 +822,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    qptrlatt = 0
    qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
    call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
-   write(*,*) nqibz, nqbz
    ! Call qpoints_oracle with this desired qpoint mesh
    ABI_CALLOC(qselect, (nqibz))
    call qpoints_oracle(sigma, cryst, ebands, qibz, nqibz, nqbz, qbz, qselect, comm)
@@ -835,11 +834,24 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      custom_qpt(:,cnt) = qibz(:,iq_ibz)
      cnt = cnt + 1
    end do
-   ! Interpolate and write on those qpoints
    call dvdb%close()
-   call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfft, ngfftf, cryst, &
-                                   ifc%ngqpt, ifc%nqshft, ifc%qshft, comm, custom_qpt)
+   ! Interpolate and write on those qpoints
+   if (.not.file_exists(dtfil%fnameabo_dvdb)) then
+     call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfft, ngfftf, cryst, &
+                                     ifc%ngqpt, ifc%nqshft, ifc%qshft, comm, custom_qpt)
+   end if
    dvdb = dvdb_new(dtfil%fnameabo_dvdb, comm)
+   ! Naive q-point check
+   do iq_ibz=1,cnt-1
+     found = .false.
+     do ik_ibz=1,dvdb%nqpt
+       if (sum(abs(custom_qpt(:,iq_ibz)-dvdb%qpts(:,ik_ibz))) < tol6) then
+         found = .true.
+         exit
+       end if
+     end do
+     ABI_CHECK(found,'Wrong q-points found in dvdb file')
+   end do
    call dvdb%open_read(ngfftf, xmpi_comm_self)
    if (dtset%prtvol > 10) dvdb%debug = .True.
    ! This to symmetrize the DFPT potentials.
