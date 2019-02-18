@@ -1454,7 +1454,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  ! Do not modify the length of these strings
  character(len=14) :: eneName
  character(len=500) :: msg
- type(pair_list) :: e_components
+ type(pair_list) :: e_components, e_components_dc
 !arrays
  character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
@@ -1574,7 +1574,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
        call e_components%set('Chem. potential', r=energies%e_chempot)
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
-       call e_components%set('>>>>> Internal E', r=etotal-eent)
+       call e_components%set('Internal E', r=etotal-eent)
        if(.not.testdmft) then
          write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
 &         '    >>>>> Internal E= ',etotal-eent,ch10,ch10,&
@@ -1596,7 +1596,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &       '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron &
 &       -energies%e_electronpositron,ch10
        call wrtout(iout,msg,'COLL')
-       call e_components%set('>>> '//EPName(ipositron)//' E', r=etotal- &
+       call e_components%set(EPName(ipositron)//' E', r=etotal- &
 &                                       energies%e0_electronpositron-energies%e_electronpositron)
        write(msg, '(3a,es21.14,2a,es21.14)' ) &
 &       '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
@@ -1616,7 +1616,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      end if
      write(msg, '(a,es21.14)' ) '    >>>>>>>>> Etotal= ',etotal
      call wrtout(iout,msg,'COLL')
-     call e_components%set('>>>>> Etotal', r=etotal)
+     call e_components%set('Etotal', r=etotal)
 
    else
      write(msg, '(9a)' ) &
@@ -1631,7 +1631,6 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &                       'without the knowledge of imaginary part of Rhoij atomic occupancies'//ch10// &
 &                       '(computed only when pawcpxocc=2).')
    end if
-
  end if
 !============= Printing of Etotal by double-counting scheme ===========
 
@@ -1641,8 +1640,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &   ' "Double-counting" decomposition of free energy:',ch10,&
 &   '    Band energy     = ',energies%e_eigenvalues
    call wrtout(iout,msg,'COLL')
-   call e_components%set('comment', s='Double-counting" decomposition of free energy')
-   call e_components%set('Band energy', r=energies%e_eigenvalues)
+   call e_components_dc%set('comment', s='"Double-counting" decomposition of free energy')
+   call e_components_dc%set('Band energy', r=energies%e_eigenvalues)
    if (ipositron/=1) then
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
 &     '    '//eneName//'  =',enevalue,ch10,&
@@ -1651,30 +1650,30 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     -energies%e_fock0+&
 &     energies%e_hybcomp_E0-energies%e_hybcomp_v0
      call wrtout(iout,msg,'COLL')
-     call e_components%set(eneName, r=enevalue)
-     call e_components%set('PspCore energy', r=energies%e_corepsp-energies%e_corepspdc)
-     call e_components%set('Dble-C XC-energy', r=-energies%e_hartree+energies%e_xc-energies%e_xcdc)
+     call e_components_dc%set(eneName, r=enevalue)
+     call e_components_dc%set('PspCore energy', r=energies%e_corepsp-energies%e_corepspdc)
+     call e_components_dc%set('Dble-C XC-energy', r=-energies%e_hartree+energies%e_xc-energies%e_xcdc)
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
 &   dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Electric field  = ',energies%e_elecfield
      call wrtout(iout,msg,'COLL')
-     call e_components%set('Electric field', r=energies%e_elecfield)
+     call e_components_dc%set('Electric field', r=energies%e_elecfield)
    end if
    if (usepaw==1) then
      write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_pawdc
      call wrtout(iout,msg,'COLL')
-     call e_components%set('Spherical terms', r=energies%e_pawdc)
+     call e_components_dc%set('Spherical terms', r=energies%e_pawdc)
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
      call wrtout(iout,msg,'COLL')
-     call e_components%set('Vd Waals DFT-D', r=energies%e_vdw_dftd)
+     call e_components_dc%set('Vd Waals DFT-D', r=energies%e_vdw_dftd)
    end if
    if (dtset%nzchempot>=1) then
      write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
      call wrtout(iout,msg,'COLL')
-     call e_components%set('Chem. potential', r=energies%e_chempot)
+     call e_components_dc%set('Chem. potential', r=energies%e_chempot)
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
      if(.not.testdmft) then
@@ -1682,18 +1681,18 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &       '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
 &       '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
-       call e_components%set('>>>>> Internal E', r=etotaldc-eent)
-       call e_components%set('-kT*entropy', r=eent)
+       call e_components_dc%set('Internal E', r=etotaldc-eent)
+       call e_components_dc%set('-kT*entropy', r=eent)
      else
        write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotaldc-eent,ch10
        call wrtout(iout,msg,'COLL')
-       call e_components%set('>>>>> Internal E', r=etotaldc-eent)
+       call e_components_dc%set('Internal E', r=etotaldc-eent)
      end if
    else if (ipositron/=0) then
      if (dtset%occopt>=3 .and. dtset%occopt<=8) then
        write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
        call wrtout(iout,msg,'COLL')
-       call e_components%set('-kT*entropy', r=eent)
+       call e_components_dc%set('-kT*entropy', r=eent)
      end if
      write(msg, '(a,es21.14,4a,es21.14,a)' ) &
 &     '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
@@ -1704,14 +1703,15 @@ subroutine prtene(dtset,energies,iout,usepaw)
 &     '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
 &     '    EP interaction E= '            ,energies%e_electronpositron
      call wrtout(iout,msg,'COLL')
-     call e_components%set('EP dble-ct En.', r=-energies%edc_electronpositron)
-     call e_components%set('>>> '//EPName(ipositron)//' E', r=etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
-     call e_components%set(EPName(3-ipositron)//' E', r=energies%e0_electronpositron)
-     call e_components%set('EP interaction E', r=energies%e_electronpositron)
+     call e_components_dc%set('EP dble-ct En.', r=-energies%edc_electronpositron)
+     call e_components_dc%set(EPName(ipositron)//' E', r=etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
+     call e_components_dc%set(EPName(3-ipositron)//' E', r=energies%e0_electronpositron)
+     call e_components_dc%set('EP interaction E', r=energies%e_electronpositron)
    end if
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    call wrtout(iout,msg,'COLL')
-   call e_components%set('>>>> Etotal (DC)', r=etotaldc)
+   call e_components_dc%set('Etotal (DC)', r=etotaldc)
+
  end if
 
 !======= Additional printing for compatibility  ==========
@@ -1766,6 +1766,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  call neat_energies(e_components, iout)
  call e_components%free()
+
+ if(e_components_dc%length() > 1) then
+   call neat_energies(e_components_dc, iout, label='Etot DC')
+   call e_components_dc%free()
+ end if
 
 end subroutine prtene
 !!***

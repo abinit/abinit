@@ -65,13 +65,18 @@ module m_neat
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine neat_energies(energies, iout)
+  subroutine neat_energies(energies, iout, label)
     type(pair_list),intent(inout) :: energies
     integer,intent(in) :: iout
+    character(len=*),intent(in),optional :: label
 !Local variables-------------------------------
     type(stream_string) :: stream
 
-    call yaml_single_dict('Etot', '', energies, 35, 500, tag='ETOT', width=20, stream=stream, real_fmt='(ES25.18)')
+    if(present(label)) then
+      call yaml_single_dict(label, '', energies, 35, 500, tag='ETOT', width=20, stream=stream, real_fmt='(ES25.18)')
+    else
+      call yaml_single_dict('Etot', '', energies, 35, 500, tag='ETOT', width=20, stream=stream, real_fmt='(ES25.18)')
+    end if
 
     call wrtout_stream(stream, iout)
   end subroutine neat_energies

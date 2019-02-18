@@ -44,7 +44,7 @@ if is_available:
             new.components = {
                 name: value for name, value in self.__dict__.items()
                             if name not in [
-                                '>>>>> Etotal',
+                                'Etotal',
                                 'label',
                                 'comment',
                                 'Band energy',
