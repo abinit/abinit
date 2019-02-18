@@ -2925,8 +2925,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     144.783     144.750
  NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.
 
 --- !WARNING
-efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.
----
+src_file: m_efmas.F90
+src_line: 0
+message: |
+    efmas_deg==0 is for debugging; the results for degenerate bands will be garbage.
+...
+
 
  K-point ( 0.000, 0.000, 0.000) | band =     1
  Effective mass tensor:
