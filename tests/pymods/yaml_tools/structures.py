@@ -32,17 +32,26 @@ if is_available:
             return 'IterStart({}={})'.format(self.iterator, self.iteration)
 
     @yaml_auto_map
-    class DataDoc(object):
-        def __init__(self, label='nothing', comment='no comment'):
-            self.label = label
-            self.comment = comment
-
-    @yaml_auto_map
     class Etot(object):
-        Etot_yaml_tag = 'ETOT'
+        __yaml_tag = 'ETOT'
+
         def __init__(self, label='nothing', comment='no comment'):
             self.label = label
             self.comment = comment
+        @classmethod
+        def from_map(cls, map):
+            new = super(Etot, cls).from_map(map)
+            new.components = {
+                name: value for name, value in self.__dict__.items()
+                            if name not in [
+                                '>>>>> Etotal',
+                                'label',
+                                'comment',
+                                'Band energy',
+                                'Total energy(eV)'
+                            ]
+            }
+
 
     @yaml_seq
     class AutoNumpy(np.ndarray):
@@ -51,6 +60,7 @@ if is_available:
             Can be used for converting any YAML array of number of any dimension into
             a numpy compatible array.
         '''
+        __yaml_tag = 'Array'
 
         @classmethod
         def from_seq(cls, s):
@@ -124,40 +134,32 @@ if is_available:
             return seq
 
     @yaml_implicit_scalar
-    class SelfTolerenced(float):
-        yaml_pattern = r'[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?~(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?'
+    class YAMLComplex(complex):
+        #                >             [1]                        <  [2]   >                     [3]                <
+        yaml_pattern = r'[+-]?(\d+(\.\d*)?|\.\d+)([eEdD][+-]?\d+)? *[+-] *[+-]?(\d+(\.\d*)?|\.\d+)([eEdD][+-]?\d+)?j'
+        # [1] and [3] float with optional sign and exponential notation, will
+        # also match integers and .1 like
+        # [2] + or minus with optional blanks around
 
-        def __new__(cls, value, tol):
-            return super().__new__(cls, value)
-
-        def __init__(self, value, tol):
-            self.tol = float(tol)
+        @staticmethod
+        def __new__(*args, **kwargs):
+            return complex.__new__(*args, **kwargs)
 
         @classmethod
         def from_scalar(cls, scal):
-            val, tol = scal.split('~')
-            return cls(val, tol)
+            return cls(scal
+                       .replace('d', 'e')  # python always use double and only recognise E and e
+                       .replace('D', 'e')
+                       .replace(' ', '')  # spaces have to be striped around the central + or -
+                       .replace('+-', '-')  # python expect only on + or - in string form
+                       .replace('-+', '-'))
 
         def to_scalar(self):
-            return str(self) + '~' + str(self.tol)
-
-        def __add__(self, other):
-            val = self.real + other.real
-            tol = self.tol
-            if hasattr(other, 'tol'):
-                tol += other.tol
-            return SelfTolerenced(val, tol)
-
-        def __radd__(self, other):
-            val = self.real + other.real
-            tol = self.tol
-            if hasattr(other, 'tol'):
-                tol += other.tol
-            return SelfTolerenced(val, tol)
+            return repr(self)[1:-1]  # remove paranthesis
 
     @yaml_scalar
     class WhiteSpaceSeparated(object):
-        WhiteSpaceSeparated_yaml_tag = 'WSS'
+        __yaml_tag = 'WSS'
 
         def __init__(self, column_labels, data):
             self.columns = column_labels
@@ -187,28 +189,49 @@ if is_available:
                 scal += line_fmt.format(*line) + '\n'
             return scal
 
-        def __getitem__(self, key):
-            if isinstance(key, int):
-                return WhiteSpaceSeparated(self.columns, self.data[slice(key, key + 1)])
-            if isinstance(key, str):
-                j = self.columns.index(str)
-                return [
-                    line[j] for line in self.data
-                ]
-            if isinstance(key, slice):
-                if isinstance(key.start, int):
-                    return WhiteSpaceSeparated(self.columns, self.data[key])
-                elif isinstance(key.start, str):
-                    j = self.columns.index(key.start)
-                    k = self.columns.index(key.stop)
-                    hview = self.columns[j:k]
-                    view = [
-                        line[j:k] for line in self.data
-                    ]
-                    return WhiteSpaceSeparated(hview, view)
+        # TODO create a practical interface compatible with python 2 and 3
+        # def __getitem__(self, key):
+        #     if isinstance(key, int):
+        #         return WhiteSpaceSeparated(self.columns, self.data[slice(key, key + 1)])
+        #     if isinstance(key, str):
+        #         j = self.columns.index(str)
+        #         return [
+        #             line[j] for line in self.data
+        #         ]
+        #     if isinstance(key, slice):
+        #         if isinstance(key.start, int):
+        #             return WhiteSpaceSeparated(self.columns, self.data[key])
+        #         elif isinstance(key.start, str):
+        #             j = self.columns.index(key.start)
+        #             k = self.columns.index(key.stop)
+        #             hview = self.columns[j:k]
+        #             view = [
+        #                 line[j:k] for line in self.data
+        #             ]
+        #             return WhiteSpaceSeparated(hview, view)
 
         def __iter__(self):
             for i, column in self.columns:
                 yield column, [
                     line[i] for line in self.data
                 ]
+
+    @yaml_auto_map
+    class AbinitError(object):
+        __yaml_tag = 'ERROR'
+        pass
+
+    @yaml_auto_map
+    class AbinitWarning(object):
+        __yaml_tag = 'WARNING'
+        pass
+
+    @yaml_auto_map
+    class AbinitInfo(object):
+        __yaml_tag = 'INFO'
+        pass
+
+    @yaml_auto_map
+    class AbinitComment(object):
+        __yaml_tag = 'COMMENT'
+        pass
