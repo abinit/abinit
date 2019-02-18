@@ -1688,12 +1688,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
  - Associated theta integrals calculated with ntheta=    100 points.
 
 --- !WARNING
+src_file: m_efmas.F90
+src_line: 0
+message: |
+    
+    Band(s)     7,     8,
+    are not band extrema, but saddle points;
+    the transport equivalent formalism breaks down in these conditions.
+    The associated tensor(s) will therefore not be printed.
+...
 
-Band(s)     7,     8,
-are not band extrema, but saddle points;
-the transport equivalent formalism breaks down in these conditions.
-The associated tensor(s) will therefore not be printed.
----
 
  K-point ( 0.000, 0.500, 0.500) | band =     7
  Transport equivalent effective mass tensor:
