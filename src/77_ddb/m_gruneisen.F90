@@ -764,7 +764,6 @@ subroutine gruns_anaddb(inp, prefix, comm)
  real(dp) :: cpu,wall,gflops
  type(gruns_t),target :: gruns
  type(kpath_t) :: qpath
- character(len=500) :: msg
 
 ! ************************************************************************
 

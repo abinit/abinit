@@ -715,6 +715,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(keep_ur)
  ABI_FREE(wfd_istwfk)
 
+ ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd%test_ortho(cryst, pawtab, unit=std_out, mode_paral="PERS")
 
@@ -778,11 +779,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  if (.not.sigma%calc_mrta) call ddkop%free()
 
- ! Prepare treatment of Frohlich divergence with spherical integration in the microzone around Gamma.
  qsph = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
  frohl_sphcorr = zero
  if (sigma%frohl_model == 1) then
-   call wrtout(std_out, " Computing spherical average to treat Frohlich divergence.")
+   ! Prepare treatment of Frohlich divergence with spherical integration in the microzone around Gamma.
+   ! Correction does not depend on (nk) so precompute values at this level.
+   call wrtout(std_out, " Computing spherical average to treat Frohlich divergence ...")
    if (.not. sigma%imag_only) then
      ! Compute spherical average.
      do iang=1,sigma%angl_size
@@ -798,7 +800,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
          end do
          cnum = dot_product(qpt_cart, cp3)
-         !write(*, *)"Computing:", sigma%angwgth(iang), abs(cnum), inv_qepsq, wqnu
          frohl_sphcorr(nu) = frohl_sphcorr(nu) + sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
        end do
      end do
@@ -806,9 +807,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      !frohl_sphcorr = frohl_sphcorr * qsph * (four_pi / cryst%ucvol) ** 2 / two
      frohl_sphcorr = frohl_sphcorr * two * pi**2 / cryst%ucvol * (three / (four_pi * cryst%ucvol)) ** third / sigma%nqbz ** third
      if (my_rank == master) then
+       write(std_out, "(a)")"  Contribution of Frohlich model integrated in small sphere around Gamma: "
        do nu=1,natom3
-         write(std_out, "(a, i0, a, f8.3, a)")" For phmode nu = ", nu, &
-           " Frohlich model, contribution of small sphere_Gamma : ", frohl_sphcorr(nu) * Ha_eV, " [eV]"
+         write(std_out, "(a, i0, a, f8.3, a)")" For phonon mode: ", nu, frohl_sphcorr(nu) * Ha_eV, " [eV]"
        end do
      end if
 
@@ -816,6 +817,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Integrate delta inside small sphere around gamma
      NOT_IMPLEMENTED_ERROR()
 #if 0
+     !qsph = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
+     !ABI_CALLOC(frohl_deltas_sphcorr, (sigma%ntemp, sigma%max_bcalc, natom3))
+     !ABI_FREE(frohl_deltas_sphcorr)
      !do spin=1,nsppol
      !do ikcalc=1,sigma%nkcalc
      kk = sigma%kcalc(:, ikcalc)
@@ -824,17 +828,33 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      do iang=1,sigma%angl_size
        if (mod(iang, nprocs) /= my_rank) cycle
        qpt_cart = sigma%qvers_cart(:, iang)
+       inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+       call ifc_fourq(ifc, cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
+       ! Note that acoustic modes are ignored.
+       !do nu=4,natom3
+       !wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
+       !cp3 = czero
+       !do iatom=1, natom
+       !  cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
+       !end do
        do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
-        !vk(1, :) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
-        !cos_theta_qvnk = dot_product(qpt_cart, vk) / |q| |vk|
-        !qroot = wqnu / vnk_mod * cos_theta_qnvk
-        !if (abs(qroot) > qsph) cycle
-        !do ii=1,2
-        !  frohl_sphcorr(nu, ii) = frohl_sphcorr(nu, ii) + sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
-        !end do
+         !band_ks = ib_k + sigma%bstart_ks(ikcalc, spin) - 1
+         !vk(1, :) = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+         !vkmod = sigma%vcar_calc(:, ib_k, ikcalc, spin)
+         !cos_theta_qvnk = dot_product(qpt_cart, vk) / |q| |vk|
+         !qroot = wqnu / (vnk_mod * cos_theta_qnvk)
+         !if (abs(qroot) > qsph) cycle
+         !do it=1,self%ntemp
+         ! f_{k+q} = df/dek vk.q
+         ! f_kq = docc_fd(ebands%eig(band_ks, ik_ibz, spin), sigma%kTmesh(it), sigma%mu_e(it)) * dot_product(vk, qpt_cart)
+         !do ii=1,2
+         ! frohl_deltas_sphcorr(it, ib_k, nu) = frohl_sphcorr(it, ib_k, nu) + &
+         !   sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
+         !end do
+         !end do
        end do
      end do
-     call xmpi_sum(frohl_sphcorr, comm, ierr)
+     !call xmpi_sum(frohl_deltas_sphcorr, comm, ierr)
 #endif
    end if
  end if
@@ -916,6 +936,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    kk_ibz = ebands%kptns(:,ik_ibz)
    npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
 
+
    ! Allocate PW-arrays. Note mpw in kg_kq
    ABI_MALLOC(kg_k, (3, npw_k))
    kg_k = wfd%kdata(ik_ibz)%kg_k
@@ -940,6 +961,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
      bsum_start = sigma%bsum_start; bsum_stop = sigma%bsum_stop
      nbsum = sigma%nbsum
+     !nband_k = ebands%nband(ik_ibz + (spin-1) * ebands%nkpt)
 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_e0ks = zero; sigma%dvals_de0ks = zero; sigma%dw_vals = zero
@@ -979,7 +1001,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Compute self-energy with Frohlich model for the gkq to handle divergence for q-->0
      ! and improve convergence with respect to nqpt.
      ABI_CALLOC(gkq2_lr, (nbcalc_ks, natom3))
-     if (sigma%frohl_model == 2) call eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
+     !if (sigma%frohl_model == 1 .and. sigma%imag_only) then
+     !   call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
+     !end if
+     if (sigma%frohl_model == 2) then
+       call eval_sigfrohl(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
+     end if
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! and save KS energies in sigma%e0vals
@@ -1006,6 +1033,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      do imyq=1,sigma%my_nqibz_k
        iq_ibz = sigma%myq2ibz_k(imyq)
 
+
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = sum(qpt**2) < tol14 !; if (isqzero) cycle
 
@@ -1019,7 +1047,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ikq_ibz = sigma%indkk_kq(1, iq_ibz); isym_kq = sigma%indkk_kq(2, iq_ibz)
        trev_kq = sigma%indkk_kq(6, iq_ibz); g0_kq = sigma%indkk_kq(3:5, iq_ibz)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
-       kq_ibz = ebands%kptns(:,ikq_ibz)
+       kq_ibz = ebands%kptns(:, ikq_ibz)
+       !nband_kq = ebands%nband(ikq_ibz + (spin-1) * ebands%nkpt)
        if (.not. ihave_ikibz_spin(ikq_ibz, spin)) then
          ignore_kq = ignore_kq + 1; cycle
        end if
@@ -1096,6 +1125,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call timab(1901, 2, tsec)
        call timab(1902, 1, tsec)
 
+       istwf_kqirr = wfd%istwfk(ikq_ibz); npw_kqirr = wfd%npwarr(ikq_ibz)
+       ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
+       ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
+
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
        ABI_STAT_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nbcalc_ks, my_npert), ierr)
        ABI_CHECK(ierr==0, "oom in h1kets_kq")
@@ -1151,6 +1184,57 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
 
+#if 0
+         ! Activate Sternheimer
+         !eph_sternheimer = 1
+         if (eph_sternheimer == 1 .and. .not. sigma%imag_only) then
+           !integer :: mcgq = npw_kq * nspinor * nband_kq
+           !integer :  mgscq = npw_kq * nspinor * nband_kq
+           !real(dp),intent(in) :: cgq(2, mcgq), gscq(2,mgscq), eig0_kq(nband)
+           !real(dp),intent(inout) :: eig1_k(2*nband_kq**2)
+           !real(dp),intent(in) :: grad_berry(2,mpw1*nspinor,nband) ! grad_berry is problematic
+           !real(dp),intent(inout) :: cwavef(2, npw_kq*nspinor, nbcalc_ks)
+           !real(dp),intent(out) :: out_resid
+
+           ! Build array with cg0_kq wavefunctions to prepare call to dfpt_cgwf.
+           cgq = zero
+           do ibsum_kq=sigma%my_bstart, sigma%my_bstop
+             if (isirr_kq) then
+                call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
+              else
+                ! Reconstruct u_kq(G) from the IBZ image.
+                call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
+                call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
+                                 npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
+                                 npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
+              end if
+              !cgq(2, :, ibsum) = bra_kq
+           end do
+           !call xmpi_sum(cgq, sigma%comm_bq, ierr)
+
+           do ib_k=1,nbcalc_ks
+             band_ks = ib_k + bstart_ks - 1
+             eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+             cwavef(:, :, ib_k) = zero ! output
+
+             call dfpt_cgwf(band_ks, berryopt0, cgq, cwavef(:,:,ib_k), kets_k(:,:,ib_k), cwaveprj, cwaveprj0, rf2, dcwavef, &
+               eig0nk, ebands%eig0(:, ikq_ibz, spin), eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
+               gs_hamkq, gvnlxc, gvnlx1, icgq0, idir, ipert, igscq0, &
+               mcgq, mgscq, mpi_enreg, mpw1, cryst%natom, nband_kq, nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
+               opt_gvnlx1, dtset%prtvol, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, dtset%tolrde, dtset%tolwfr, &
+               usedcwavef0, dtset%wfoptalg, nlines_done)
+
+             ! Compute contribution for M > sigma%nbsum using static approximation
+             ! and add term to self-energy results.
+             ! - <h1kets_kq(:,:,ib_k,imyp) | cwavef(:, :, ib_k) >
+
+             ! Handle DW term.
+             if (isqzero) then
+             end if
+           end do
+         end do
+#endif
+
          call destroy_rf_hamiltonian(rf_hamkq)
 
          ABI_FREE(kinpw1)
@@ -1171,10 +1255,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! ==============
        ! Sum over bands
        ! ==============
-       istwf_kqirr = wfd%istwfk(ikq_ibz); npw_kqirr = wfd%npwarr(ikq_ibz)
-       ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
-       ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
-
        call timab(1903, 1, tsec)
        do ibsum_kq=sigma%my_bstart, sigma%my_bstop
 
@@ -1194,8 +1274,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Use cgwork as workspace array, results stored in bra_kq
            !g0_kq =  g0ibz_kq + g0bz_kq
            call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
-           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
-                            npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
+           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
+                            npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
          end if
 
@@ -1331,13 +1411,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  if (sigma%imag_only) then
                    simag = gkq2 * aimag(cfact)
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                   if (sigma%calc_mrta) &
+                   if (sigma%calc_mrta) then
                      sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                   end if
 
                  else
                    sig_cplx = gkq2 * cfact
                    if (sigma%frohl_model == 1 .and. isqzero .and. ibsum_kq == band_ks) then
-                     ! Treat Frohlich divergence with spherical integration around Gamma point.
+                     ! Treat Frohlich divergence with spherical integration around the Gamma point.
                      sig_cplx = frohl_sphcorr(nu) * (two * f_mkq - one)
                    end if
 
@@ -1374,8 +1455,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                          (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
                          (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, jj) ) * weight
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
-                       if (sigma%calc_mrta) &
+                       if (sigma%calc_mrta) then
                          sigma%linewidth_mrta(it, ib_k) = sigma%linewidth_mrta(it, ib_k) + simag * alpha_mrta(ib_k)
+                       end if
                      else
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2 * ( &
                          (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
@@ -1390,8 +1472,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        (nqnu + f_mkq      ) * sigma%deltaw_pm(1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%deltaw_pm(2, ib_k, imyp, ibsum_kq, imyq, 1) )
                      !if (sigma%frohl_model == 1 .and. isqzero .and. ibsum_kq == band_ks) then
-                     !  ! Treat Frohlich divergence with spherical integration around Gamma point.
-                     !  simag = frohl_sphcorr(nu) * (two * f_mkq - one)
+                     !  ! Treat Frohlich divergence with spherical integration of deltas around the Gamma point.
+                     !  simag = frohl_deltas_sphcorr(itemp, ib_k, nu)
                      !end if
 
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
@@ -1404,7 +1486,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, imyp, ibsum_kq, imyq, 1) )
                      if (sigma%frohl_model == 1 .and. isqzero .and. ibsum_kq == band_ks) then
-                       ! Treat Frohlich divergence with spherical integration around Gamma point.
+                       ! Treat Frohlich divergence with spherical integration around the Gamma point.
                        sig_cplx = frohl_sphcorr(nu) * (two * f_mkq - one)
                      end if
 
