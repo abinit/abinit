@@ -740,7 +740,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
 
-   !Check that ddk file exists and open it
+   !Check that file exists and open it
    t_exist=file_exists(fiwfatdis)
    if (.not. t_exist) then
      write(msg,"(3a)")"- File: ",trim(fiwfatdis)," does not exist."
@@ -789,7 +789,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
 
-   !Check that ddk file exists and open it
+   !Check that file exists and open it
    t_exist=file_exists(fiwfefield)
    if (.not. t_exist) then
      write(msg,"(3a)")"- File: ",trim(fiwfefield)," does not exist."
@@ -813,7 +813,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
 
-   !Check that ddk file exists and open it
+   !Check that file exists and open it
    t_exist=file_exists(fiwfdkdk)
    if (.not. t_exist) then
      write(msg,"(3a)")"- File: ",trim(fiwfdkdk)," does not exist."

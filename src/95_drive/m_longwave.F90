@@ -197,10 +197,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end if
 
 !Not usable with core electron density corrections
- if (psps%n1xccc/=0) then
-   msg='This routine cannot be used for n1xccc/=0'
-   MSG_BUG(msg)
- end if
+! if (psps%n1xccc/=0) then
+!   msg='This routine cannot be used for n1xccc/=0'
+!   MSG_BUG(msg)
+! end if
 
 !Define some data 
  ntypat=psps%ntypat

@@ -2917,7 +2917,7 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
              dyewdq(ii,mu,ia,nu,ib,iq)=dyewdq(ii,mu,ia,nu,ib,iq)*&
 &             zion(typat(ia))*zion(typat(ib))
            end do
-           write(100,'(5i3,1x,2f14.8)') mu,ia,nu,ib,iq,dyewdq(:,mu,ia,nu,ib,iq)
+           !write(100,'(5i3,1x,2f14.8)') mu,ia,nu,ib,iq,dyewdq(:,mu,ia,nu,ib,iq)
          end do
        end do
      end do
