@@ -9,7 +9,7 @@
 !!  pawrhoij_type variables define rhoij occupancies matrixes used within PAW formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2018 ABINIT group (MT, FJ)
+!! Copyright (C) 2012-2019 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2610,7 +2610,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      if (PRESENT(natinc)) my_natinc = natinc ! user-defined increment.
      LIBPAW_ALLOCATE(ibuffer,(0))
      if (my_qphase==2) then
-       LIBPAW_ALLOCATE(rhoij_tmp,(2*nselect))
+       LIBPAW_DATATYPE_ALLOCATE(rhoij_tmp,(2*nselect))
      end if
      do iatom=1,my_natom,my_natinc
        iatom_tot=iatom;if(paral_atom)iatom_tot=my_atmtab(iatom)
@@ -2648,7 +2648,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
      end do
      LIBPAW_DEALLOCATE(ibuffer)
      if (my_qphase==2) then
-       LIBPAW_DEALLOCATE(rhoij_tmp)
+       LIBPAW_DATATYPE_DEALLOCATE(rhoij_tmp)
      end if
 
   case ("D","d") ! Debug
@@ -3435,14 +3435,14 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
  if (my_l_only<0) then
    l_index => idum
  else
-   LIBPAW_ALLOCATE(l_index,(my_lmn_size))
+   LIBPAW_POINTER_ALLOCATE(l_index,(my_lmn_size))
    do kk=1,my_lmn_size
      l_index(kk)=indlmn(1,kk)
    end do
  end if
 
  if (qphase==2) then
-   LIBPAW_ALLOCATE(rhoij_,(2*rhoij_size))
+   LIBPAW_DATATYPE_ALLOCATE(rhoij_,(2*rhoij_size))
  end if
 
 ! === Loop over Rho_ij components ===
@@ -3494,10 +3494,10 @@ subroutine pawrhoij_print_rhoij(rhoij,cplex,qphase,iatom,natom,&
   end do !irhoij
 
  if (qphase==2) then
-   LIBPAW_DEALLOCATE(rhoij_)
+   LIBPAW_DATATYPE_DEALLOCATE(rhoij_)
  end if
  if (my_l_only>=0) then
-   LIBPAW_DEALLOCATE(l_index)
+   LIBPAW_POINTER_DEALLOCATE(l_index)
  end if
 
 end subroutine pawrhoij_print_rhoij

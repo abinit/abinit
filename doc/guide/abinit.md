@@ -200,6 +200,28 @@ parsing, to remove case sensitivity.
 More than one parameter per line may be given. If a given parameter name is
 given more than once in the input file, an error message is printed, and the code stops.
 
+External input files can be included with the syntax:
+
+    include "geometry.inc"
+
+where geometry.inc gives the crystalline structure in the Abinit format:
+
+    cat geometry.in
+
+    # Si in diamond structure
+    acell 3*10.25
+    rprim   
+      0.0 0.5 0.5  
+      0.5 0.0 0.5  
+      0.5 0.5 0.0
+    natom  2
+    ntypat 1
+    typat  2*1
+    xred   0.00  0.00  0.00
+           0.25  0.25  0.25
+    znucl 14.0
+
+
 <a id="parameters"></a>
 ### 3.2 More about ABINIT input variables
   

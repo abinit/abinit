@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2018 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@ contains
 !! Solve the DMFT loop from PAW data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -551,7 +551,7 @@ end subroutine dmft_solve
 !! Solve the Impurity problem
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -843,7 +843,7 @@ end subroutine impurity_solve
 !! Use the Dyson Equation to compute self-energy from green function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -985,7 +985,7 @@ end subroutine dyson
 !! Print the spectral function computed from Green function in real frequency
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2018 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

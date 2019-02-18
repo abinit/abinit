@@ -860,7 +860,7 @@ with_linalg_incs="-I/usr/include/atlas"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/lib64 -llapack -lblas -L/usr/lib64/atlas -latlas"
+with_linalg_libs="-L/usr/lib64/atlas -ltatlas -lsatlas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -947,7 +947,7 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 

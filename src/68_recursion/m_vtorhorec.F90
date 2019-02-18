@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (SLeroux, MMancini).
+!!  Copyright (C) 2008-2019 ABINIT group (SLeroux, MMancini).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2170,7 +2170,7 @@ end subroutine nlenergyrec
 !! compute some quantities which are used in the rest of the calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2018 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2019 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

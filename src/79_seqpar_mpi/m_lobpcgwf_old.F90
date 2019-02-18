@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,7 +49,7 @@ contains
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2018 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! Copyright (C) 1998-2019 ABINIT group (FBottin,GZ,AR,MT,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
