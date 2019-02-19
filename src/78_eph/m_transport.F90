@@ -308,6 +308,8 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  if (ierr /= 0) then
    do spin=1, ebands%nsppol
      MSG_WARNING(trim(new%gaps%errmsg_spin(spin)))
+     new%gaps%vb_max(spin) = ebands%fermie - 1 * eV_Ha
+     new%gaps%cb_min(spin) = ebands%fermie + 1 * eV_Ha
    end do
    MSG_WARNING("get_gaps returned non-zero exit status. See above warning messages...")
  end if
@@ -446,6 +448,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  self%sigma = fact0 * self%l0
  self%pi(:,:,:,:,itemp) = (fact1 * self%l1(:,:,:,:,itemp)) / (fact0 * max(self%l0(:,:,:,:,itemp),tol12))
  do itemp=1,self%ntemp
+   if (kT < tol8) cycle
    kT = self%kTmesh(itemp) / kb_HaK
    self%seebeck(:,:,:,:,itemp) = 1/kT * (fact1 * self%l1(:,:,:,:,itemp))/ &
                                         (fact0 * max(self%l0(:,:,:,:,itemp),tol12))
@@ -486,7 +489,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      do ii=1,3
        do jj=1,3
          do iw=1,self%nw
-           if (abs(self%n(iw,itemp)) < tol8) cycle
+           if (abs(self%n(iw,itemp)) < tol12) cycle
            self%mobility(iw,ispin,ii,jj,itemp) = self%sigma(iw,ispin,ii,jj,itemp) / &
                                                  ( e_Cb * self%n(iw,itemp) ) * 100**2
          end do
