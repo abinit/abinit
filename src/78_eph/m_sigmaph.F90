@@ -4516,7 +4516,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
              fact_qvers * (nqnu + f_nk + dfde_nk * dot_product(vnk, qroot * qvers_cart))
          else
            sigma%frohl_deltas_sphcorr(2, it, ib_k, nu) = sigma%frohl_deltas_sphcorr(2, it, ib_k, nu) + &
-             fact_qvers * (nqnu + one - f_nk - dfde_nk * dot_product(vnk, qroot * qvers_cart))
+             fact_qvers * (nqnu + one - f_nk + dfde_nk * dot_product(vnk, qroot * qvers_cart))
          end if
        end do
 
