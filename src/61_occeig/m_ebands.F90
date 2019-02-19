@@ -4366,8 +4366,13 @@ select case (intmeth)
 !   sec2str(wall_all)), do_flush=.True.)
 
  ! Compute total DOS and IDOS
- !max_occ = two / (ebands%nspinor*ebands%nsppol)
- !out_valsdos(:, :, 0,:) = max_occ * sum(out_valsdos(:,:,1:,:), dim=3)
+ max_occ = two/(ebands%nspinor*ebands%nsppol)
+ edos%dos(:, 0) = max_occ * sum(edos%dos(:,1:), dim=2)
+
+ do spin=1,edos%nsppol
+   call simpson_int(nw,edos%step,edos%dos(:,spin),edos%idos(:,spin))
+ end do
+ edos%idos(:, 0) = max_occ * sum(edos%idos(:,1:), dim=2)
 
  ! Use bisection to find fermi level.
  ! Warning: this code assumes idos[i+1] >= idos[i]. This condition may not be
@@ -4379,7 +4384,8 @@ select case (intmeth)
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of electrons"
-   MSG_WARNING(msg)
+   !MSG_WARNING(msg)
+   ief = ebands%fermie
    return
  end if
 
@@ -4393,7 +4399,7 @@ contains
  function symmetrize_vector(cryst,v) result(vsum)
   integer :: isym
   type(crystal_t) :: cryst
-  real(dp) :: vsum(3), v(3)
+  real(dp) :: vsym(3), vsum(3), v(3)
 
   !symmetrize
   vsum = 0
@@ -4408,7 +4414,7 @@ contains
  function symmetrize_tensor(cryst,t) result(tsum)
   integer :: isym
   type(crystal_t) :: cryst
-  real(dp) :: tsum(3,3), t(3,3)
+  real(dp) :: tsym(3,3), tsum(3,3), t(3,3)
 
   !symmetrize
   tsum = 0

@@ -352,7 +352,7 @@ type (eph_double_grid_t) function eph_double_grid_new(cryst, ebands_dense, kptrl
  write(std_out,*) 'map bz -> ibz'
  ABI_MALLOC(eph_dg%bz2ibz_dense,(eph_dg%dense_nbz))
  call eph_double_grid_bz2ibz(eph_dg, eph_dg%kpts_dense_ibz, eph_dg%dense_nibz,&
-                             cryst%symrel, cryst%nsym, eph_dg%bz2ibz_dense, has_timrev=1)
+                             cryst%symrel, cryst%nsym, eph_dg%bz2ibz_dense, timrev1)
 
 #if 0
  ABI_MALLOC(indkk,(eph_dg%dense_nbz,6))
@@ -480,37 +480,49 @@ end function eph_double_grid_get_index
 !!
 !! SOURCE
 
-subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,has_timrev,mapping)
+subroutine eph_double_grid_bz2ibz(self,kpt_ibz,nibz,symmat,nsym,bz2ibz,timrev,mapping,use_symrec)
 
  class(eph_double_grid_t),intent(in) :: self
  integer,intent(in) :: nibz, nsym
  real(dp),intent(in) :: kpt_ibz(3,nibz)
  integer,intent(in) :: symmat(3,3,nsym)
  integer,intent(out):: bz2ibz(self%dense_nbz)
- integer,optional,intent(in) :: has_timrev
+ integer,intent(in) :: timrev
+ logical,optional,intent(in) :: use_symrec
  integer,optional,intent(inout) :: mapping(self%dense_nbz,3)
 
 !Local variables ------------------------
  integer :: isym, ii, ik_ibz, ik_bz
  real(dp) :: kpt(3), kpt_sym(3), wrap_kpt(3), shift
- integer :: itimrev, timrev, counter
+ integer :: itimrev, timrev_used, counter
+ logical :: do_use_symrec
 
 !************************************************************************
 
- timrev = 0
- if (present(has_timrev)) timrev=1
+ timrev_used=timrev
+
+ do_use_symrec=.False.
+ if (present(use_symrec)) then
+    if (use_symrec) then
+      do_use_symrec=.True.
+    end if
+ end if
 
  !call cwtime(cpu,wall,gflops,"start")
  bz2ibz = 0
  ! Loop over the star of q
  counter = 0
- outer: do itimrev=0,timrev
+ outer: do itimrev=0,timrev_used
    do isym=1,nsym
      do ik_ibz=1,nibz
        ! get coordinates of k point
        kpt(:) = kpt_ibz(:,ik_ibz)
        ! Get the symmetric of q
-       kpt_sym(:) = (1-2*itimrev)*matmul(transpose(symmat(:,:,isym)),kpt)
+       if (do_use_symrec) then
+         kpt_sym(:) = (1-2*itimrev)*matmul(symmat(:,:,isym),kpt)
+       else
+         kpt_sym(:) = (1-2*itimrev)*matmul(transpose(symmat(:,:,isym)),kpt)
+       endif
        ! get the index of the ibz point in bz
        call wrap2_pmhalf(kpt_sym(1),wrap_kpt(1),shift)
        call wrap2_pmhalf(kpt_sym(2),wrap_kpt(2),shift)

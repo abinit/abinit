@@ -361,7 +361,7 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
  integer,parameter :: voigt2ij(2, 6) = reshape([1, 1, 2, 2, 3, 3, 2, 3, 1, 3, 1, 2], [2, 6])
  integer,allocatable :: distrib_mat(:,:,:,:), distrib_diago(:,:,:),nband(:,:), kg_k(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
- real(dp) :: kpt(3), vv(2, 3)
+ real(dp) :: kpt(3), vv(2, 3), vred(2,3), vcar(2,3)
  real(dp) :: eminmax_spin(2,2)
  real(dp) :: emin, emax
  real(dp),allocatable :: dipoles(:,:,:,:,:,:)
@@ -672,15 +672,9 @@ subroutine ddk_compute(wfk_path, prefix, dtset, psps, pawtab, ngfftc, comm)
        do ib_v=bandmin,bandmax
          !vr = vdiago(:,ib_v,ik,spin)
          ! Go to cartesian coordinates (same as pmat2cart routine).
-         vr = cryst%rprimd(:,1)*vdiago(1,ib_v,ik,spin) &
-             +cryst%rprimd(:,2)*vdiago(2,ib_v,ik,spin) &
-             +cryst%rprimd(:,3)*vdiago(3,ib_v,ik,spin)
-         vr = vr / two_pi
-         !do ivoigt=1,6
-         !  ii = voigt2ij(1, ivoigt)
-         !  jj = voigt2ij(2, ivoigt)
-         !  vv_vals(ivoigt, ib_v, ik, spin) = vr(ii) * vr(jj)
-         !end do
+         vred(1,:) = vdiago(:,ib_v,ik,spin)
+         call ddk_red2car(cryst%rprimd,vred,vcar)
+         vr = vcar(1,:)
          do ii=1,3
            do jj=1,3
              vv_tens(ii, jj, 1, ib_v, ik, spin) = vr(ii) * vr(jj)

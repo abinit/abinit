@@ -206,6 +206,7 @@ module defs_basis
  real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree, in meV
  real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree, in Kelvin
  real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree, in THz
+ real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree, in s
  real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree, in J
  real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge, in Coulomb
  real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K

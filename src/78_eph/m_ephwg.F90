@@ -474,7 +474,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1
+ integer,parameter :: sppoldbl1=1,timrev0=0
  integer :: ierr,ii,ik_idx,ik_bz,isym
  real(dp) :: dksqmax
  character(len=80) :: errorstring
@@ -497,9 +497,14 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
  ! get dg%bz --> self%lgrp%ibz
  ABI_SFREE(eph_doublegrid%bz2lgkibz)
  ABI_MALLOC(eph_doublegrid%bz2lgkibz,(eph_doublegrid%dense_nbz))
+
+ ! Old version using all crystal symmetries
+ !call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
+ !                            cryst%symrel, cryst%nsym, &
+ !                            eph_doublegrid%bz2lgkibz, has_timrev=1)
  call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
-                             cryst%symrel, cryst%nsym, &
-                             eph_doublegrid%bz2lgkibz, has_timrev=1)
+                            self%lgk%symrec_lg, self%lgk%nsym_lg, &
+                            eph_doublegrid%bz2lgkibz, timrev0, use_symrec=.true.)
 
 #if 0
    ABI_MALLOC(indkk, (eph_doublegrid%dense_nbz * sppoldbl1, 6))
@@ -584,9 +589,13 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol)
 
  ! get dg%bz --> lgk%ibz (k+q)
  ABI_MALLOC(bz2lgkibzkq, (eph_doublegrid%dense_nbz))
+ ! Old version using all crystal symmetries
+ !call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
+ !                            cryst%symrel, cryst%nsym, &
+ !                            bz2lgkibzkq, has_timrev=1)
  call eph_doublegrid%bz2ibz(self%lgk%ibz, self%lgk%nibz,&
-                             cryst%symrel, cryst%nsym, &
-                             bz2lgkibzkq, has_timrev=1)
+                            self%lgk%symrec_lg, self%lgk%nsym_lg, &
+                            bz2lgkibzkq, timrev0, use_symrec=.true.)
 
  ! self%lgrp%ibz (k+q) --> dg%bz
  do ii=1,self%nbz
