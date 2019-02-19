@@ -137,8 +137,6 @@ CONTAINS  !=====================================================================
 subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 &                ngfft,cplex,nfft,pawrhoij,rdwr,rdwrpaw,wvl_den,single_proc)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: accessfil,cplex,nfft,rdwr,rdwrpaw
@@ -626,7 +624,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
      ABI_DEALLOCATE(my_density)
    end if
 
-   call wrtout(std_out,sjoin('data written to disk file:', fildata),'COLL')
+   call wrtout(std_out,sjoin(' Data written to disk file:', fildata),'COLL')
 
  else
    write(message,'(a,i0,a)')'Called with rdwr = ',rdwr,' not allowed.'
@@ -698,8 +696,6 @@ end subroutine ioarr
 !! SOURCE
 
 subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspden,datar,mpi_enreg,ebands)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -909,8 +905,6 @@ end subroutine fftdatar_write
 
 subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspden,datar,mpi_enreg,eigen)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iomode,cplex,nfft,nspden
@@ -1011,8 +1005,6 @@ end subroutine fftdatar_write_from_hdr
 
 subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
   check_hdr, allow_interp) ! Optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1278,8 +1270,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    ABI_DT_FREE(pawrhoij_file)
  end if
 
-!Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
-!  Add a small real to the magnetization
+! Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
+! Add a small real to the magnetization
  if (nspden==4) orhor(:,4)=orhor(:,4)+tol14
  if (ohdr%usepaw==1.and.size(pawrhoij)>0) then
    if (pawrhoij(1)%nspden==4) then
@@ -1323,8 +1315,6 @@ end subroutine read_rhor
 !! SOURCE
 
 integer function fort_denpot_skip(unit, msg) result(ierr)
-
- implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: unit
@@ -1391,8 +1381,6 @@ end function fort_denpot_skip
 
 subroutine denpot_spin_convert(denpot_in,nspden_in,denpot_out,nspden_out,fform,&
 &                              istart_in,istart_out,nelem) ! optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -183,8 +183,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
 &           wffnow,unwff1,wffnm,wvl)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: ask_accurate,exchn2n3d,formeig,ireadwf,localrdwf,mband,mcg,mkmem,mpw
  integer,intent(in) :: nkpt,nsppol,nsym,optorth,unkg,unwff1

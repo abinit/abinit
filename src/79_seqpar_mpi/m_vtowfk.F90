@@ -160,8 +160,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 & mpw,natom,nband_k,nkpt,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
 & pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: ibg,icg,ikpt,iscf,isppol,mband_cprj,mcg,mcgq,mcprj,mkgq,mpw
  integer, intent(in) :: natom,nband_k,nkpt,nnsclo_now,npw_k,optforces
@@ -1033,8 +1031,6 @@ end subroutine vtowfk
 !! SOURCE
 
 subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useoverlap)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
