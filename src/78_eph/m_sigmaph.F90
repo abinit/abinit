@@ -2947,10 +2947,10 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
 
  ! Allocate using only the relevant bands for transport
  ! includin valence states to allow to compute different doping
- !mband = maxval(self%bstop_ks)
- !new = ebands_chop(ebands, 1, mband)
- mband = ebands%mband
- call ebands_copy(ebands,new)
+ mband = maxval(self%bstop_ks)
+ new = ebands_chop(ebands, 1, mband)
+ !mband = ebands%mband
+ !call ebands_copy(ebands,new)
 
 #ifdef HAVE_NETCDF
  has_mrta = .true.

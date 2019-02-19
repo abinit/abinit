@@ -730,10 +730,6 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  NCF_CHECK(ebands_ncwrite(self%ebands,ncid))
  NCF_CHECK(cryst%ncwrite(ncid))
 
- ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_extrael", "eph_fermie", &
-                                   "transport_extrael", "transport_fermie"])
- NCF_CHECK(ncerr)
-
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_mesh', "dp", "edos_nw")], defmode=.True.))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
@@ -749,6 +745,9 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('pi',      "dp", "edos_nw, nsppol, three, three, ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('mobility',"dp", "edos_nw, nsppol, three, three, ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('mobility_mu',"dp", "two, nsppol, three, three, ntemp")]))
+ ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eph_extrael", "eph_fermie", &
+                                   "transport_extrael", "transport_fermie"])
+ NCF_CHECK(ncerr)
  NCF_CHECK(nctk_set_datamode(ncid))
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "eph_extrael", "eph_fermie", &
