@@ -44,6 +44,9 @@ module m_occ
 
  real(dp),parameter :: huge_tsmearinv = 1e50_dp
  real(dp),parameter :: maxFDarg=500.0_dp
+ real(dp),parameter :: maxDFDarg=200.0_dp
+ real(dp),parameter :: maxBEarg=600.0_dp
+ real(dp),parameter :: maxDBEarg=200.0_dp
 
  public :: getnel        ! Compute total number of electrons from efermi or DOS
  public :: newocc        ! Compute new occupation numbers at each k point,
@@ -1449,12 +1452,12 @@ elemental real(dp) function occ_dfd(ee, kT, mu)
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol6) then
    arg = ee_mu / kT
-   if (arg > maxFDarg) then
+   if (arg > maxDFDarg) then
      occ_dfd = zero
-   else if (arg < -maxFDarg) then
+   else if (arg < -maxDFDarg) then
      occ_dfd = zero
    else
-     occ_dfd = exp(arg) / (kT * (exp(arg) + one)**2)
+     occ_dfd = exp(arg) / (exp(arg) + one)**2 / kT
    end if
  else
    occ_dfd = zero
@@ -1498,7 +1501,7 @@ elemental real(dp) function occ_be(ee, kT, mu)
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol12) then
    arg = ee_mu / kT
-   if (arg > tol12 .and. arg < 600._dp) then
+   if (arg > tol12 .and. arg < maxBEarg) then
      occ_be = one / (exp(arg) - one)
    else
      occ_be = zero
@@ -1547,7 +1550,7 @@ elemental real(dp) function occ_dbe(ee, kT, mu)
  ! 1 kelvin [K] = 3.16680853419133E-06 Hartree
  if (kT > tol12) then
    arg = ee_mu / kT
-   if (arg > tol12 .and. arg < 600._dp) then
+   if (arg > tol12 .and. arg < maxDBEarg) then
      occ_dbe = exp(arg) / (kT * (exp(arg) - one)**2)
    else
      occ_dbe = zero

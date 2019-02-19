@@ -2723,7 +2723,7 @@ end subroutine sigmaph_write
 !!
 !! SOURCE
 
-type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open) result(new)
+type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open, extrael_fermie) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
@@ -2731,6 +2731,7 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open) 
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  character(len=500),intent(out) :: msg
+ real(dp), optional :: extrael_fermie(2)
  logical,optional :: keep_open
 
 !Local variables ------------------------------
@@ -2825,10 +2826,14 @@ type(sigmaph_t) function sigmaph_read(dtset, dtfil, comm, msg, ierr, keep_open) 
  NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"), ph_smear))
  ABI_CHECK(eph_fsewin  == dtset%eph_fsewin,  "netcdf eph_fsewin != input file")
  ABI_CHECK(eph_fsmear  == dtset%eph_fsmear,  "netcdf eph_fsmear != input file")
- ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
- ABI_CHECK(eph_fermie  == dtset%eph_fermie,  "netcdf eph_feremie != input file")
  ABI_CHECK(ph_wstep    == dtset%ph_wstep,    "netcdf ph_wstep != input file")
  ABI_CHECK(ph_smear    == dtset%ph_smear,    "netcdf ph_smear != input file")
+ if (present(extrael_fermie)) then
+   extrael_fermie = [eph_extrael,eph_fermie]
+ else
+   ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
+   ABI_CHECK(eph_fermie  == dtset%eph_fermie,  "netcdf eph_feremie != input file")
+ end if
 
  NCF_CHECK(nf90_get_var(ncid, vid("eph_task"), eph_task))
  NCF_CHECK(nf90_get_var(ncid, vid("symdynmat"), symdynmat))
@@ -2942,8 +2947,10 @@ type(ebands_t) function sigmaph_ebands(self, cryst, ebands, linewidth_serta, lin
 
  ! Allocate using only the relevant bands for transport
  ! includin valence states to allow to compute different doping
- mband = maxval(self%bstop_ks)
- new = ebands_chop(ebands, 1, mband)
+ !mband = maxval(self%bstop_ks)
+ !new = ebands_chop(ebands, 1, mband)
+ mband = ebands%mband
+ call ebands_copy(ebands,new)
 
 #ifdef HAVE_NETCDF
  has_mrta = .true.
@@ -4049,6 +4056,8 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
  natom3 = 3 * cryst%natom
  ndiv = 1; if (sigma%use_doublegrid) ndiv = sigma%eph_doublegrid%ndiv
 
+ ABI_CHECK(sigma%symsigma == 1, "symsigma 0 with tetra not implemented")
+
  if (sigma%imag_only) then
    ! Weights for Im (tethraedron, eta --> 0)
    ABI_REMALLOC(sigma%deltaw_pm, (2, nbcalc_ks, sigma%my_npert, bsum_start:bsum_stop, sigma%my_nqibz_k, ndiv))
@@ -4127,7 +4136,6 @@ subroutine sigmaph_get_all_qweights(sigma, cryst, ebands, spin, ikcalc, comm)
    ! Note that we still need a finite i.eta in the expression (hopefully smaller than default value).
    ! Besides we have to take into account the case in which the spectral function in wanted.
    ! Derivative wrt omega is still computed with finite i.eta.
-   ABI_CHECK(sigma%symsigma == 1, "symsigma 0 with tetra not implemented")
    ABI_CHECK(.not. sigma%use_doublegrid, "double grid for Re-Im not implemented")
 
    ! TODO: This part should be tested.

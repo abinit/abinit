@@ -4384,7 +4384,8 @@ select case (intmeth)
    write(msg,"(3a)")&
     "Bisection could not find an initial guess for the Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of electrons"
-   MSG_WARNING(msg)
+   !MSG_WARNING(msg)
+   ief = ebands%fermie
    return
  end if
 
@@ -4398,7 +4399,7 @@ contains
  function symmetrize_vector(cryst,v) result(vsum)
   integer :: isym
   type(crystal_t) :: cryst
-  real(dp) :: vsum(3), v(3)
+  real(dp) :: vsym(3), vsum(3), v(3)
 
   !symmetrize
   vsum = 0
@@ -4413,7 +4414,7 @@ contains
  function symmetrize_tensor(cryst,t) result(tsum)
   integer :: isym
   type(crystal_t) :: cryst
-  real(dp) :: tsum(3,3), t(3,3)
+  real(dp) :: tsym(3,3), tsum(3,3), t(3,3)
 
   !symmetrize
   tsum = 0
