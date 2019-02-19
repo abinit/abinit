@@ -2911,6 +2911,7 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 ! *************************************************************************
 
 !Check data consistency
+ lmn2_size=pawrhoij%lmn2_size
  if (size(diju,1)/=qphase*cplex_dij*lmn2_size.or.size(diju,2)/=ndij) then
    msg='invalid sizes for diju!'
    MSG_BUG(msg)
@@ -2926,7 +2927,6 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
 
 !Initialization
  diju=zero
- lmn2_size=pawrhoij%lmn2_size
  cplex_rhoij=pawrhoij%cplex_rhoij
  compute_im=(cplex_dij==2.and.cplex_rhoij==2)
 
@@ -2967,9 +2967,10 @@ subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab,diju_im)
              end if
 
            end do ! k,l
-         end do
+         end do ! i,j
 
-       end do ! i,j
+         jrhoij=jrhoij+cplex_rhoij
+       end do
 
      end do ! q phase
 
