@@ -66,7 +66,7 @@ module m_sigmaph
  use m_cgtools,        only : cg_zdotc
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, listkk
- use m_occ,            only : occ_fd, occ_be
+ use m_occ,            only : occ_fd, occ_dfd, occ_be
  use m_double_grid,    only : double_grid_t
  use m_fftcore,        only : get_kg
  use m_kg,             only : getph
@@ -1030,6 +1030,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        gkq0_atm = zero
      end if
 
+     ! Integrate delta functions inside miniBZ around Gamma.
      if (sigma%frohl_model == 1 .and. sigma%imag_only) then
        call eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
      end if
@@ -4443,10 +4444,8 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 ! real(dp) :: cpu, wall, gflops
  complex(dpc) :: cnum
 !arrays
- real(dp) :: qvers_cart(3), kk(3), vnk(3)
- real(dp) :: phfrq(cryst%natom*3)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: nqnu_tlist(sigma%ntemp)
+ real(dp) :: qvers_cart(3), kk(3), vnk(3), nqnu_tlist(sigma%ntemp)
+ real(dp) :: phfrq(cryst%natom*3), displ_cart(2,3,cryst%natom,3*cryst%natom)
  complex(dpc) :: cp3(3)
 
 ! *************************************************************************
@@ -4509,9 +4508,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
        do it=1,sigma%ntemp
          nqnu = nqnu_tlist(it)
          ! f_{k+q} = df/dek vk.q
-         ! TODO: Merge Henrique's branch
-         !dfde_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
-         dfde_nk = zero
+         dfde_nk = occ_dfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
 
          ! Different expressions for absorption and emission.
          if (qroot >= zero) then
