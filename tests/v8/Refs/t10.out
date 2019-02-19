@@ -69,14 +69,18 @@ dipdip_range         2         2         2
 -Opening the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t10_sys.xml
 -Reading the file /mnt/STORAGE/amartin/dev/abinit/tests/v8/Input/t10_sys.xml with LibXML library
 
+ Bound for ifc SR:
+
+ x=[  0  1], y=[  0  1] and z=[ -1  1]
+
 ================================================================================
  Generation of new ifc
 
  dipdip is set to one, the dipole-dipole interation is recompute.
 
- New bound for ifc (long+short):
+ Bound for ifc (LR):
 
- x=[  0  1], y=[  0  1] and z=[ -1  1]
+ x=[  0  1], y=[  0  1] and z=[  0  1]
 
  Computation of new dipole-dipole interaction.
 
@@ -88,7 +92,7 @@ dipdip_range         2         2         2
   - Reference energy:        -17.1451766217
   - Number of types of atoms:    2
   - Number of atoms:     4
-  - Number of cells:    12
+  - Number of cells:     9
   - Number of qpoints:    8
   - Primitive vectors (unit:Bohr):
     6.528935    3.769482    0.000000
