@@ -429,8 +429,6 @@ module m_sigmaph
    ! enk_KS corresponds to nwr/2 + 1.
    ! This array depends on (ikcalc, spin)
 
-
-
   integer :: gfw_nomega
    ! Number of frequencies in Eliashberg function.
    ! Set to 0 to deactivate this part.
@@ -446,7 +444,6 @@ module m_sigmaph
    ! This array depends on (ikcalc, spin)
    ! NB: q-weights for integration are not included.
 
-  ! TODO: Can be removed now.
   real(dp),allocatable :: gfw_vals(:,:,:)
    !gfw_vals(gfw_nomega, 3, max_nbcalc)
    ! Generalized Eliashberg function a2F_{n,k,spin}(w)
@@ -2523,7 +2520,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
        ! in this case we print a warning
        write(msg,'(3(a,f10.6))')&
-         'Calculated number of electrons nelect = ',nelect,&
+         'Calculated number of electrons nelect = ',nelect, &
          ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,' for T = ',new%kTmesh(it)
        if (new%kTmesh(it) == 0) then
          MSG_WARNING(msg)
@@ -2566,8 +2563,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    con = two_pi / new%nphi
    call gauleg(-one, one, th, wth, new%ntheta)
 
-   ! Initialize qvers_cart and angular weird angwgth
-   ! Summing with angwgth gives the spherical average 1/(4pi) \int domega f(omega)
+   ! Initialize qvers_cart and angular weights angwgth
+   ! NB: summing overt f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
    new%angl_size = new%ntheta * new%nphi
    ABI_MALLOC(new%qvers_cart, (3, new%angl_size))
    ABI_MALLOC(new%angwgth, (new%angl_size))
@@ -2783,7 +2780,7 @@ subroutine sigmaph_write(self, dtset, ecut, cryst, ebands, ifc, dtfil, restart, 
    if (self%frohl_model == 1) then
      if (self%imag_only) then
        ncerr = nctk_def_arrays(ncid, [ &
-         nctkarr_t("frohl_deltas_sphcorr", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol") &
+         nctkarr_t("frohl_deltas_sphcorr", "dp", "two, ntemp, max_nbcalc, natom3, nkcalc, nsppol") &
        ])
        NCF_CHECK(ncerr)
      end if
@@ -4005,7 +4002,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, prtvol, comm)
 
  if (self%frohl_model == 1 .and. self%imag_only) then
    ncerr = nf90_put_var(self%ncid, nctk_idname(self%ncid, "frohl_deltas_sphcorr"), &
-      self%frohl_deltas_sphcorr, start=[1,1,1,1,ikcalc, spin])
+      self%frohl_deltas_sphcorr, start=[1,1,1,1, ikcalc, spin])
    NCF_CHECK(ncerr)
  end if
 
@@ -4347,6 +4344,9 @@ end subroutine sigmaph_get_all_qweights
 !!  eval_sigfrohl_deltas
 !!
 !! FUNCTION
+!!  Compute frohl_deltas_sphcorr array with contributions to the imaginary part
+!!  of the Fan-Migdal self-energy due the Frohlich divergence.
+!!  Use Verdi's model, group velocities and radial integration.
 !!
 !! PARENTS
 !!
@@ -4367,14 +4367,15 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
 !scalars
  integer :: nu, nbcalc_ks, it, iatom, my_rank, nprocs
  integer :: ib_k, band_ks, ik_ibz, iang, ierr, bstart_ks
- real(dp) :: wqnu !, nqnu, eig0nk , eig0mkq, f_mkq, weight_q
- real(dp) :: inv_qepsq, q0rad, vnk_mod, cos_theta_qvnk, qroot
+ real(dp) :: wqnu, nqnu, eig0nk, f_nk, dfde_nk
+ real(dp) :: inv_qepsq, q0rad, vnk_mod, cos_theta_qvnk, qroot, fact_qvers, den
 ! real(dp) :: cpu, wall, gflops
  complex(dpc) :: cnum
 !arrays
- real(dp) :: qpt_cart(3), kk(3), vnk(3)
+ real(dp) :: qvers_cart(3), kk(3), vnk(3)
  real(dp) :: phfrq(cryst%natom*3)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp) :: nqnu_tlist(sigma%ntemp)
  complex(dpc) :: cp3(3)
 
 ! *************************************************************************
@@ -4390,42 +4391,64 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  kk = sigma%kcalc(:, ikcalc)
  bstart_ks = sigma%bstart_ks(ikcalc, spin)
  ik_ibz = sigma%kcalc2ibz(ikcalc, 1)
- do iang=1,sigma%angl_size
-   if (mod(iang, nprocs) /= my_rank) cycle
-   qpt_cart = sigma%qvers_cart(:, iang)
-   inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
 
-   call ifc_fourq(ifc, cryst, qpt_cart, phfrq, displ_cart, nanaqdir="cart")
+ do iang=1,sigma%angl_size
+   if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
+   qvers_cart = sigma%qvers_cart(:, iang)
+   inv_qepsq = one / dot_product(qvers_cart, matmul(ifc%dielt, qvers_cart))
+
+   ! Compute phonons with NA behaviour along qvers_cart.
+   call ifc_fourq(ifc, cryst, qvers_cart, phfrq, displ_cart, nanaqdir="cart")
 
    ! Note that acoustic modes are ignored.
    do nu=4,3*cryst%natom
      wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
+     ! Get phonon occupation for all temperatures.
+     nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
 
      cp3 = czero
      do iatom=1, cryst%natom
       cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
      end do
-     cnum = dot_product(qpt_cart, cp3)
+     cnum = dot_product(qvers_cart, cp3)
 
      do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
        band_ks = ib_k + sigma%bstart_ks(ikcalc, spin) - 1
        vnk = sigma%vcar_calc(:, ib_k, ikcalc, spin)
        vnk_mod = sqrt(dot_product(vnk, vnk))
        if (abs(vnk_mod) < tol12) cycle
-       cos_theta_qvnk = dot_product(qpt_cart, vnk) / vnk_mod
+       cos_theta_qvnk = dot_product(qvers_cart, vnk) / vnk_mod
        if (abs(cos_theta_qvnk) < tol12) cycle
+       ! The two possible roots (+-) must be inside the sphere.
        qroot = wqnu / (vnk_mod * cos_theta_qvnk)
        if (abs(qroot) > q0rad) cycle
 
+       ! Use group velocities to expand around (n, k)
+       ! NB: Don't know how to treat degeneracies correctly
+       ! Phonon quantities are not Taylor expanded, we just take into accout the angular dependence.
+       ! As a matter of fact, we have a non-analytical point and ph freqs are usually flat in this small region.
+       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+       f_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
+
+       ! Extract part of the integrand that does not depend on T.
+       den = wqnu * vnk_mod * cos_theta_qvnk
+       if (abs(den) < tol12) cycle
+       fact_qvers = sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / den
+
        do it=1,sigma%ntemp
+         nqnu = nqnu_tlist(it)
          ! f_{k+q} = df/dek vk.q
-         ! f_kq = occ_dfd(ebands%eig(band_ks, ik_ibz, spin), sigma%kTmesh(it), sigma%mu_e(it)) * dot_product(vnk, qpt_cart)
+         ! TODO: Merge Henrique's branch
+         !dfde_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
+         dfde_nk = zero
+
+         ! Different expressions for absorption and emission.
          if (qroot >= zero) then
            sigma%frohl_deltas_sphcorr(1, it, ib_k, nu) = sigma%frohl_deltas_sphcorr(1, it, ib_k, nu) + &
-             sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu
+             fact_qvers * (nqnu + f_nk + dfde_nk * dot_product(vnk, qroot * qvers_cart))
          else
            sigma%frohl_deltas_sphcorr(2, it, ib_k, nu) = sigma%frohl_deltas_sphcorr(2, it, ib_k, nu) + &
-             sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu
+             fact_qvers * (nqnu + one - f_nk - dfde_nk * dot_product(vnk, qroot * qvers_cart))
          end if
        end do
 
