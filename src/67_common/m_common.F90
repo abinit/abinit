@@ -1743,7 +1743,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      if (optdc==2) write(msg, '(a,es21.14)' ) &
 &     '  >Total DC energy in eV        = ',etotaldc*Ha_eV
      call wrtout(iout,msg,'COLL')
-     call e_components%set('Total DC energy(eV)', r=etotal*Ha_eV)
+     call e_components_dc%set('Total DC energy(eV)', r=etotal*Ha_eV)
    end if
  end if
 
