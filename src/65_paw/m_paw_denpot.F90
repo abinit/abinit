@@ -188,7 +188,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  logical :: paral_atom,pawu_new_algo,temp_vxc
  real(dp) :: e1t10,e1xc,e1xcdc,efock,efockdc,eexc,eexcdc,eexdctemp
  real(dp) :: eexc_val,eexcdc_val,eexex,eexexdc,eextemp,eh2
- real(dp) :: eldaumdc,eldaumdcdc,enucdip,etmp,espnorb,etild1xc,etild1xcdc
+ real(dp) :: eldaumdc,eldaumdcdc,eldaufll,enucdip,etmp,espnorb,etild1xc,etild1xcdc
  real(dp) :: exccore,exchmix,hyb_mixing_,hyb_mixing_sr_,rdum
  character(len=3) :: pertstrg
  character(len=500) :: msg
@@ -298,7 +298,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    e1xc=zero     ; e1xcdc=zero
    etild1xc=zero ; etild1xcdc=zero
    exccore=zero  ; eh2=zero ; e1t10=zero
-   eldaumdc=zero ; eldaumdcdc=zero
+   eldaumdc=zero ; eldaumdcdc=zero ; eldaufll=zero
    eexex=zero    ; eexexdc=zero
    eextemp=zero  ; eexdctemp=zero
    espnorb=zero  ; enucdip=zero
@@ -812,11 +812,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        if (option/=1) then
          etmp=zero
          call pawaccenergy(etmp,pawrhoij(iatom),paw_ij(iatom)%dijU,cplex_dij,qphase,ndij,pawtab(itypat))
-         eldaumdc=eldaumdc+etmp ; eldaumdcdc=eldaumdcdc-etmp
+         eldaumdc=eldaumdc+half*etmp ; eldaumdcdc=eldaumdcdc-half*etmp
          !Add FLL double-counting part
          if (ipert==0.and.pawu_new_algo.and.pawtab(itypat)%usepawu==5) then
            ABI_CHECK(qphase==1,'BUG in pawdenpot: qphase should be 1 for Dble-C FLL term!')
-           call pawaccenergy_nospin(eldaumdc,pawrhoij(iatom),pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
+           call pawaccenergy_nospin(eldaufll,pawrhoij(iatom),pawtab(itypat)%euij_fll,1,1,pawtab(itypat))
          end if
        end if
 
@@ -938,7 +938,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  ======================================================================
 
    if (option/=1.and.ipert<=0) then
-
      call pawaccenergy_nospin(e1t10,pawrhoij(iatom),pawtab(itypat)%dij0,1,1,pawtab(itypat))
 
 !    Positron special case (dij0 is opposite, except for kinetic term)
@@ -983,7 +982,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
  if (option/=1) then
    if (ipert==0) then
-     epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+eldaumdc+eexex+espnorb+efock+enucdip
+     epaw=e1xc+half*eh2+e1t10-exccore-etild1xc+eldaumdc+eldaufll+eexex+espnorb+efock+enucdip
      epawdc=e1xc-e1xcdc-half*eh2-exccore-etild1xc+etild1xcdc+eldaumdcdc-eexex-efockdc
    else
      epaw=e1xc-etild1xc+eh2+two*eldaumdc
