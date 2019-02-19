@@ -42,7 +42,7 @@ module m_transport
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : arth, simpson_int, polyn_interp
+ use m_numeric_tools,  only : bisect, arth, simpson_int, polyn_interp
  use m_fstrings,       only : strcat
  use m_occ,            only : occ_fd, occ_dfd
  use m_pawang,         only : pawang_type
@@ -470,19 +470,8 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      end do
 
      ! Compute carrier density at n0
-#if 0
-     ! TODO: This gives SIGFPE in the test farm (don't know why)
-     call polyn_interp(self%vvdos_mesh,self%n(:,itemp),self%ebands%fermie,n0,n0_dy)
-#else
-     min_diff = HUGE(min_diff)
-     do ii=1,self%nw
-       diff = abs(self%vvdos_mesh(ii)-self%ebands%fermie)
-       if (diff<min_diff) then
-         n0 = self%n(ii,itemp)
-         min_diff = diff
-       endif
-     end do
-#endif
+     iw = bisect(self%vvdos_mesh,self%ebands%fermie)
+     n0 = self%n(iw,itemp)
      self%n(:,itemp) = n0-self%n(:,itemp)
 
      ! Compute mobility

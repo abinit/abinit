@@ -4385,7 +4385,6 @@ select case (intmeth)
     "Bisection could not find an initial guess for the Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of electrons"
    !MSG_WARNING(msg)
-   ief = ebands%fermie
    return
  end if
 
