@@ -290,8 +290,10 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  type(dataset_type),intent(in) :: dtset
 
 !Local variables ------------------------------
+ type(ebands_t) :: tmp_ebands
  integer,parameter :: occopt3=3, ndop=10
  integer :: ierr, spin
+ integer :: kptrlatt(3,3)
 
  ! Allocate temperature arrays
  new%ntemp = sigmaph%ntemp
@@ -315,7 +317,19 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  end if
 
  ! Read lifetimes to ebands object
- new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+ if (any(dtset%sigma_ngkpt /= 0)) then
+   ! If we use sigma_ngkpt downsample ebands
+   kptrlatt = 0
+   kptrlatt(1,1) = dtset%sigma_ngkpt(1)
+   kptrlatt(2,2) = dtset%sigma_ngkpt(2)
+   kptrlatt(3,3) = dtset%sigma_ngkpt(3)
+   tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, 1, [zero,zero,zero])
+   new%ebands = sigmaph_ebands(sigmaph,cryst,tmp_ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+   call ebands_free(tmp_ebands)
+ else
+   new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+ end if
+
  ABI_CHECK(allocated(new%velocity),'Could not read velocities from SIGEPH.nc file')
 
  ! Same doping case as sigmaph
@@ -357,6 +371,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:) !vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:),
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
+ character(len=500) :: msg
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol
@@ -471,6 +486,15 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
      ! Compute carrier density at n0
      iw = bisect(self%vvdos_mesh,self%ebands%fermie)
+
+     ! Handle out of range condition.
+     if (iw == 0 .or. iw == self%nw) then
+       write(msg,"(a)")&
+        "Bisection could not find carrier density at Fermi level!"
+       !MSG_WARNING(msg)
+       return
+     end if
+
      n0 = self%n(iw,itemp)
      self%n(:,itemp) = n0-self%n(:,itemp)
 
