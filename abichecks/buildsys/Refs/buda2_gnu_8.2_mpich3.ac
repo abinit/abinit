@@ -705,17 +705,17 @@ with_mpi_prefix="${MPIHOME}"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-#with_psml_incs="-I/usr/local/include/psml"
+with_psml_incs="-I${FALLBACKS_PATH}/xmlf90/1.5.3.1/include -I${FALLBACKS_PATH}/libpsml/1.1.7/include"
 
 # Link flags for the psml library (default is unset)
 #
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+with_psml_libs="-L${FALLBACKS_PATH}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_PATH}/xmlf90/1.5.3.1/lib -lxmlf90"
 
                        # ------------------------------ #
 
@@ -929,15 +929,15 @@ with_dft_flavor="atompaw+libxc+wannier90"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="${FALLBACKS_PATH}/atompaw/4.0.1.0/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/4.1.0.5/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/4.0.1.0/include"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/4.1.0.5/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.0.1.0/lib -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.1.0.5/lib -latompaw"
 
                        # ------------------------------ #
 
@@ -953,11 +953,11 @@ with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/4.0.1.0/lib -latompaw"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I${FALLBACKS_PATH}/libxc/3.0.1/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/3.0.1/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
