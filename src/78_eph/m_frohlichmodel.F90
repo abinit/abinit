@@ -191,7 +191,7 @@ subroutine frohlichmodel(cryst,dtfil,dtset,ebands,efmasdeg,efmasval,ifc)
 &    weight_qdir(iqdir)*zpr_q0_phononfactor_qdir(iqdir)/dielt_qdir(iqdir)**2
  enddo
  zpr_q0_avg=zpr_q0_avg*quarter*piinv
- zpr_q0_fact=zpr_q0_avg*two*pi*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
+ zpr_q0_fact=zpr_q0_avg*eight*pi*(three*quarter*piinv)**third*cryst%ucvol**(-four*third)
 
 !DEBUG
 ! do iqdir=1,nqdir,513
