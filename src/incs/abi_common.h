@@ -179,7 +179,7 @@
  * Caveat: pointers must use ABI_PTR_FREE_IF
  *
 */
-#define ABI_MALLOC_IFNOT(ARR) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR) NEWLINE endif
+#define ABI_MALLOC_IFNOT(ARR, SIZE) if (.not. allocated(ARR)) then NEWLINE ABI_MALLOC(ARR, SIZE) NEWLINE endif
 #define ABI_SFREE(ARR) if (allocated(ARR)) then NEWLINE ABI_FREE(ARR) NEWLINE endif
 #define ABI_SFREE_PTR(PTR) if (associated(PTR)) then NEWLINE ABI_FREE(PTR) NEWLINE endif
 #define ABI_REMALLOC(ARR, SIZE) ABI_SFREE(ARR) NEWLINE ABI_MALLOC(ARR, SIZE)

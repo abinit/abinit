@@ -2647,7 +2647,7 @@ The ABINIT/CT Hyb implementation is discussed in [[cite:Gonze2016]].
 The TRIQS/CT Hyb implementation is described in [[cite:Seth2016]].
 Before using it, it has to be installed following instructions available [here](https://triqs.github.io/triqs/2.1.x).
 Until release 8.10 included, the
-interface was valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. It has then been upgraded to TRIQS 2.1 afterwards. 
+interface was valid only for TRIQS 1.4 and TRIQS/CTHYB 1.4. It has then been upgraded to TRIQS 2.1 afterwards.
 An example of a config.ac file to compile ABINIT with TRIQS can be found in [[ac:higgs_gnu_7.3_triqs2.ac]].
 See the useful variables for CT-QMC solver: [[dmftctqmc_basis]],
 [[dmftctqmc_check]], [[dmftctqmc_correl]], [[dmftctqmc_gmove]],
