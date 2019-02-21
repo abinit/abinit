@@ -470,6 +470,9 @@ ecore=zero
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  end if
 
+!MR:tmp!!!!!!!!! 
+!dyewdq(:,:,:,:,:,:)=zero
+
 !Calculate the quadrupole tensor
  if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
    call dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&

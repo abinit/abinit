@@ -3435,16 +3435,16 @@ end subroutine dfpt_flexoout
          if (ddmdq_flg(iatpert,jatpert,iq1grad)==1) then
 
            !Calculate and save the third order energy derivative
-           tmpre=ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad)+&
-         & half*dyewdq(re,iatdir,iatom,jatdir,jatom,iq1dir)
+           tmpre=two*(ddmdq_qgradhart(re,iatpert,jatpert,iq1grad)+ddmdqwf(re,iatpert,jatpert,iq1grad))+&
+         & dyewdq(re,iatdir,iatom,jatdir,jatom,iq1dir)
            tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)+&
-         & half*dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
+         & dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
            d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpre
            d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
 
            !Calculate and write the q-gradient of the dynamical matrix
-           ddmdq_red(re,iatpert,jatpert,iq1grad)=two*tmpre
-           ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpim
+           ddmdq_red(re,iatpert,jatpert,iq1grad)=tmpre
+           ddmdq_red(im,iatpert,jatpert,iq1grad)=tmpim
 
            if (prtvol==1) then
              !Write individual contributions 
@@ -3485,14 +3485,14 @@ end subroutine dfpt_flexoout
          if (ddmdq_flg(iatpert,jatpert,iq1grad)==1) then
 
            !Calculate and save the third order energy derivative
-           tmpim=ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad)+&
-         & half*dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
+           tmpim=two*(ddmdq_qgradhart(im,iatpert,jatpert,iq1grad)+ddmdqwf(im,iatpert,jatpert,iq1grad))+&
+         & dyewdq(im,iatdir,iatom,jatdir,jatom,iq1dir)
            d3etot(re,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=zero
            d3etot(im,iatdir,iatom,jatdir,jatom,iq1dir,iq1pert)=tmpim
 
            !Calculate and write the q-gradient of the dynamical matrix
            ddmdq_red(re,iatpert,jatpert,iq1grad)=zero
-           ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpim
+           ddmdq_red(im,iatpert,jatpert,iq1grad)=tmpim
 
            if (prtvol==1) then
              !Write individual contributions 

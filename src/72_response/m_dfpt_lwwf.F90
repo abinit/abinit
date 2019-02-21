@@ -2420,18 +2420,22 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 
          if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
 
-         !All terms toghether (Terms 4 and 5 are computed as cc of 2 and 3)
+         !All terms toghether (Terms 4 and 5 are computed as hermitian of 2 and 3)
          ddmdqwf_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_k(1,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                              &
        &       ( c1atdis_q1gradH0_c1atdis_bks(1,iband,iatpert,jatpert,iq1grad)     + &
-       &         two*c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)      + &
-       &         two*c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)      )
+       &         c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)          + &
+       &         c1atdis_dQHatdis_c0_bks(1,iband,jatpert,iatpert,iq1grad)          + & 
+       &         c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)          + &
+       &         c1atdis_Hatdisdq_c0_bks(1,iband,jatpert,iatpert,iq1grad)          )
 
          ddmdqwf_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_k(2,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                              &
        &       ( c1atdis_q1gradH0_c1atdis_bks(2,iband,iatpert,jatpert,iq1grad)     + &
-       &         two*c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad)      + &
-       &         two*c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)      )
+       &         c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad)          - &
+       &         c1atdis_dQHatdis_c0_bks(2,iband,jatpert,iatpert,iq1grad)          + &
+       &         c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)          - &
+       &         c1atdis_Hatdisdq_c0_bks(2,iband,jatpert,iatpert,iq1grad)          )
 
          !Separate them
          !T1
@@ -2443,24 +2447,28 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
        &         wtk_k * occ_k(iband) *                                                    &
        &         c1atdis_q1gradH0_c1atdis_bks(2,iband,iatpert,jatpert,iq1grad)     
 
-         !T2
+         !T2+T4
          ddmdqwf_t2_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t2_k(1,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                                    &
-       &         c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
+       &         (c1atdis_dQHatdis_c0_bks(1,iband,iatpert,jatpert,iq1grad) +               &     
+       &          c1atdis_dQHatdis_c0_bks(1,iband,jatpert,iatpert,iq1grad))
 
          ddmdqwf_t2_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_t2_k(2,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                                    &
-       &         c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad)      
+       &         (c1atdis_dQHatdis_c0_bks(2,iband,iatpert,jatpert,iq1grad) -               &
+       &          c1atdis_dQHatdis_c0_bks(2,iband,jatpert,iatpert,iq1grad))
  
 
-         !T3
+         !T3+T5
          ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad)=ddmdqwf_t3_k(1,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                                    &
-       &         c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad)      
+       &         (c1atdis_Hatdisdq_c0_bks(1,iband,iatpert,jatpert,iq1grad) +               &
+       &          c1atdis_Hatdisdq_c0_bks(1,iband,jatpert,iatpert,iq1grad))
 
          ddmdqwf_t3_k(2,iatpert,jatpert,iq1grad)=ddmdqwf_t3_k(2,iatpert,jatpert,iq1grad) + & 
        &         wtk_k * occ_k(iband) *                                                    &
-       &         c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad)      
+       &         (c1atdis_Hatdisdq_c0_bks(2,iband,iatpert,jatpert,iq1grad) -               &
+       &          c1atdis_Hatdisdq_c0_bks(2,iband,jatpert,iatpert,iq1grad)) 
        end do
      end do
    end do
