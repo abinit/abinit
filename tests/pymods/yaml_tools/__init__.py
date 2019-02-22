@@ -1,5 +1,6 @@
 '''
-    This package gather all tools used by the Abinit test suite for manipulating YAML formated data.
+    This package gather all tools used by the Abinit test suite for
+    manipulating YAML formated data.
 '''
 from __future__ import print_function, division, unicode_literals
 try:
@@ -19,7 +20,8 @@ if is_available:
             self.context = context
 
         def __repr__(self):
-            return "<Corrupted document {}: {}>".format(self.error.__class__.__name__, str(self.error))
+            return "<Corrupted document {}: {}>".format(
+                self.error.__class__.__name__, str(self.error))
 
     def yaml_parse(content, *args, **kwargs):
         from . import structures
