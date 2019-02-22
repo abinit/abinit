@@ -616,14 +616,18 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              
              !Optimizing coefficient  
              i = 0 
-             do while(msef/msef_ini >= 1.5 )
+             do while(msef/msef_ini >= 1.001 )
                 i = i + 1 
                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                            natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                            compute_anharmonic=.TRUE.,print_file=.FALSE.)
            
-             enddo ! while mse/mse_ini>10  
+             enddo ! while mse/mse_ini>10 
+
+             !Store new "inital precision for next coefficient
+             msef_ini = msef
+              
        enddo ! icombinations
 
        ABI_DATATYPE_DEALLOCATE(my_coeffs)  
@@ -637,12 +641,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  
  write(message,'(5a)' )ch10,&
 &     ' Finished creating high-order terms',ch10,&
-&     ' Optimize initial anharmonic terms',ch10
+&     ' Optimize initial anharmonic terms !NOT IS COMMENTED NOW!',ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
   
-  call opt_effpot(eff_pot,nterm,terms,hist,comm,print_anh=.FALSE.)
+ !  call opt_effpot(eff_pot,nterm,terms,hist,comm,print_anh=.FALSE.)
   !DEALLOCATION 
   ABI_DEALLOCATE(symbols)
   ABI_DEALLOCATE(exists)
