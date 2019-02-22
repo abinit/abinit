@@ -514,7 +514,14 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
               call opt_filterdisp(term,comm)
-             cycle 
+
+              ! Message to Output 
+              write(message,'(5a)' )ch10,&
+&             " ==> Let's get real and pass this thing",ch10,&
+&             ' ==> We cycle',ch10
+              call wrtout(ab_out,message,'COLL')
+              call wrtout(std_out,message,'COLL')
+             !cycle 
      endif 
      ! Ok we want it. Let's go. 
 
@@ -544,9 +551,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      ! Copy current term to the ncombination elemenst a the end in array my_coeffs 
      ! change the value of their coefficient to a start value
      ! The start is estimed to not be larger then half the initial term's value
-     ! This is because hihger order terms should have smaller coefficients 
+     ! This is because higher order terms should have smaller coefficients 
      do icombi=1,ncombi
-         my_coeffs(nterm_start+icombi) = eff_pot%anharmonics_terms%coefficients(iterm)  
+         my_coeffs(nterm_start+icombi) = term
          coeff_ini = abs(my_coeffs(iterm)%coefficient / 2)
          my_coeffs(nterm_start+icombi)%coefficient = coeff_ini
          ! Set the power of all terms we want to add to two. We find the correct power later
@@ -558,6 +565,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
            enddo !idisp
          enddo !iterm_of_term 
      enddo !icombi
+
       
      call opt_getHoTerms(my_coeffs(nterm_start+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
            
@@ -714,6 +722,10 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop,comm)
      !Get/Initialize variables
      ndisp = term%terms(1)%ndisp
      nterm_of_term = term%nterm
+
+     !Debug MS 
+     write(*,*) "ndisp ", ndisp 
+     write(*,*) "power_disp", term%terms(1)%power_disp
 
      ABI_ALLOCATE(powers,(ndisp)) 
      powers = term%terms(1)%power_disp
@@ -1059,7 +1071,7 @@ subroutine opt_filterdisp(term,comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- type(polynomial_coeff_type),intent(inout) :: term
+ type(polynomial_coeff_type),target,intent(inout) :: term
 !arrays 
 !Logicals
 !Strings 
@@ -1086,7 +1098,6 @@ nterm_of_term = term%nterm
 new_nterm_of_term = 0
 ABI_ALLOCATE(same,(nterm_of_term))
 same = .FALSE.
-term_tmp = term 
 
 ! Set strain to zero in terms 
 do iterm_of_term = 1, nterm_of_term 
@@ -1100,10 +1111,16 @@ do iterm_of_term = 1, nterm_of_term
   ABI_ALLOCATE(term%terms(iterm_of_term)%power_strain,(0))
 enddo ! iterm_of term 
 
+term_tmp = term 
+
+!Debug 
+write(*,*) "same?", same
+write(*,*) "Is there some strain", term%terms(1)%nstrain
+write(*,*) "Is there some strain", term%terms(1)%strain(:)
 !Compare all terms to find which are doubly contained 
 !now that the strain was deletet 
 do iterm_of_term1 = 1,nterm_of_term 
-   do iterm_of_term2 = iterm_of_term1,nterm_of_term 
+   do iterm_of_term2 = iterm_of_term1+1,nterm_of_term
       same(iterm_of_term2) = terms_compare(term%terms(iterm_of_term1),term%terms(iterm_of_term2))
    enddo ! iterm_of_term2 
 enddo !iterm_of_term1
@@ -1117,6 +1134,9 @@ do iterm_of_term = 1,nterm_of_term
       n_double = n_double + 1 
    endif
 enddo
+
+!Debug 
+write(*,*) "same?", same
 
 !new_nterm 
 new_nterm_of_term = nterm_of_term - n_double 
@@ -1150,11 +1170,12 @@ else
     call wrtout(std_out,message,'COLL')
 endif 
 
+write(*,*) "Is there some strain", term%terms(1)%nstrain
 !DEALLOCATION
 ABI_DEALLOCATE(same)
 ABI_DATATYPE_DEALLOCATE(terms)
 ABI_DATATYPE_DEALLOCATE(terms_tmp)
-
+call polynomial_coeff_free(term_tmp)
 end subroutine opt_filterdisp
 
 end module m_opt_effpot
