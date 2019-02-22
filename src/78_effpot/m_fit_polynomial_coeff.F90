@@ -2378,8 +2378,8 @@ integer :: ii,ia,mu,unit_energy,unit_stress,unit_anh,ifirst
     !call vel2hist(ab_mover%amass,hist,vel,vel_cell)
     !call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
     !call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
-!&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
-! &                    real(100,dp),(/real(100,dp),real(100,dp)/))
+ !&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
+ !&                    real(100,dp),(/real(100,dp),real(100,dp)/))
 
    mse  = mse  + abs(hist%etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
