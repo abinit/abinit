@@ -363,7 +363,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  integer :: iorder, iorder1, iorder2, order,order_start,order_stop, ncombi
  integer :: power_tot,icombi,icombi_start,icombi_stop,jdisp,sec
  integer :: nterm_start,nterm_tot_tmp,nterm2,norder,jdisp1,jdisp2 
- integer :: iterm_out,nterm_out
  real(dp) :: factor,mse_ini,msef_ini,mses_ini,mse,msef,mses,coeff_ini=0.0001
  real(dp) :: to_divide,divided,divider1,divider2
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
@@ -373,10 +372,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  logical,allocatable :: exists(:) 
  type(fit_data_type) :: fit_data
  type(polynomial_coeff_type) :: term
- type(effective_potential_type) :: eff_pot_init,eff_pot_tmp
  !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
  !real(dp), allocatable :: strten_coeffs(:,:,:)
- type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:),my_coeffs_out(:)
+ type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:)
 !Logicals
  logical :: need_print_anh=.FALSE.,file_opened,equal_term_done ! MARCUS FOR THE MOMENT PRINT NO FILES
 !Strings
@@ -412,10 +410,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
  &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
  
-  !Store initial effective potential in eff_pot init, which we keep untouched through the routine 
-  eff_pot_init = eff_pot 
-  !And store inital effective potential to eff_pot tmp, which we update during fitting 
-  eff_pot_tmp = eff_pot 
  
  !if the number of atoms in reference supercell into effpot is not correct,
  !wrt to the number of atom in the hist, we set map the hist and set the good supercell
@@ -575,11 +569,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              call polynomial_coeff_SetName(name,my_coeffs(nterm_start+icombi))
            
              ! Set dimensions of temporary my_coeffs array 
-             nterm2 = eff_pot_init%anharmonics_terms%ncoeff + 1
+             nterm2 = eff_pot%anharmonics_terms%ncoeff + 1
              ABI_DATATYPE_ALLOCATE(my_coeffs_tmp,(nterm2))
-             ! Copy terms of initial potential
+             ! Copy terms of previous cycle
              do iterm2=1,nterm2-1
-                my_coeffs_tmp(iterm2) = eff_pot_init%anharmonics_terms%coefficients(iterm2) 
+                my_coeffs_tmp(iterm2) = eff_pot%anharmonics_terms%coefficients(iterm2) 
              enddo
              !Put new term to my_coeffs_tmp
              my_coeffs_tmp(nterm2) = my_coeffs(nterm_start+icombi) 
@@ -604,10 +598,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                 ABI_DATATYPE_DEALLOCATE(my_coeffs_tmp)
                 cycle 
              endif 
-             
-              
+           
              ! Set new term into effective potential 
-             call effective_potential_setCoeffs(my_coeffs_tmp,eff_pot_tmp,nterm2)
+             call effective_potential_setCoeffs(my_coeffs_tmp,eff_pot,nterm2)
              
              ! Tell the world what we do, They want to know.     
              write(message,'(3a)' )ch10,&
@@ -615,7 +608,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              call wrtout(ab_out,message,'COLL')
              call wrtout(std_out,message,'COLL')
            
-             call fit_polynomial_coeff_computeMSD(eff_pot_tmp,hist,mse,msef,mses,&
+             call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                         natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                         compute_anharmonic=.TRUE.,print_file=.FALSE.)
              ! Deallocation in loop 
@@ -623,27 +616,20 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              
              !Optimizing coefficient  
              i = 0 
-             do while(msef/msef_ini >= 2 )
+             do while(msef/msef_ini >= 1.001 )
                 i = i + 1 
-                eff_pot_tmp%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
-                call fit_polynomial_coeff_computeMSD(eff_pot_tmp,hist,mse,msef,mses,&
+                eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
+                call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                            natom_sc,ntime,fit_data%training_set%sqomega,&
  &                                            compute_anharmonic=.TRUE.,print_file=.FALSE.)
            
-             enddo ! while mse/mse_ini>10  
-             
-             ! Transfer this coefficient to output eff_pot 
-             ! Here eff_pot contains already the higher order terms generated for 
-             ! the previous iterm cycles 
-             nterm_out = eff_pot%anharmonics_terms%ncoeff + 1
-             ABI_DATATYPE_ALLOCATE(my_coeffs_out,(nterm_out)) 
-             my_coeffs_out(:nterm_out-1) = eff_pot%anharmonics_terms%coefficients(:) 
-             my_coeffs_out(nterm_out) = eff_pot_tmp%anharmonics_terms%coefficients(nterm2)
-                
-             ! Set new term into output 
-             call effective_potential_setCoeffs(my_coeffs_out,eff_pot,nterm_out)
-             ABI_DATATYPE_DEALLOCATE(my_coeffs_out) 
+             enddo ! while mse/mse_ini>10 
+
+             !Store new "inital precision for next coefficient
+             msef_ini = msef
+              
        enddo ! icombinations
+
        ABI_DATATYPE_DEALLOCATE(my_coeffs)  
    enddo !iterm
  !enddo ! order 
@@ -655,12 +641,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  
  write(message,'(5a)' )ch10,&
 &     ' Finished creating high-order terms',ch10,&
-&     ' Optimize initial anharmonic terms',ch10
+&     ' Optimize initial anharmonic terms !NOT IS COMMENTED NOW!',ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
   
-  call opt_effpot(eff_pot,nterm,terms,hist,comm,print_anh=.FALSE.)
+ !  call opt_effpot(eff_pot,nterm,terms,hist,comm,print_anh=.FALSE.)
   !DEALLOCATION 
   ABI_DEALLOCATE(symbols)
   ABI_DEALLOCATE(exists)
@@ -668,8 +654,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
   ABI_DEALLOCATE(ncombi_order)
   !ABI_DATATYPE_DEALLOCATE(my_coeffs)  
   call fit_data_free(fit_data)
-  call effective_potential_free(eff_pot_tmp) 
-  call effective_potential_free(eff_pot_init) 
 end subroutine opt_effpotbound
 
 
