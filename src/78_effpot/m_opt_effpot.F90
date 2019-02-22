@@ -508,10 +508,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      if(term%terms(1)%nstrain /= 0)then
               ! Message to Output 
               write(message,'(5a)' )ch10,&
-&             ' ==> Term has strain compenent. Strain-Phonon terms are not yet implemented',ch10,&
-&             ' ==> We cycle',ch10
+&             ' ==> Term has strain compenent',ch10,&
+&             ' ==> Filter Displacement',ch10
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
+              call opt_filterdisp(term,comm)
              cycle 
      endif 
      ! Ok we want it. Let's go. 
@@ -1048,6 +1049,49 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
       enddo !order
 
 end subroutine opt_getHoTerms
+
+
+subroutine opt_filterdisp(term,comm)
+
+ implicit none 
+         
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ type(polynomial_coeff_type),intent(inout) :: term
+!arrays 
+ integer,intent(in) :: order_range(2)
+ integer,intent(out) :: order_start, order_stop 
+!Logicals
+!Strings 
+!Local variables ------------------------------
+!scalars
+ integer :: idisp,ndisp,nterm_of_term,power_tot 
+!arrays 
+ integer,allocatable :: powers(:) 
+!Logicals
+!Strings
+ character(len=1000) :: message
+ character(len=1000) :: frmt
+
+end subroutine opt_filterdisp
+
+!*************************************************************************
+
+!Initialize/Get Variables 
+nterm_of_term = term%nterm
+
+do iterm_of_term = 1, nterm_of_term 
+  !Set strain in all terms to zero 
+  term%terms(iterm_of_term)%nstrain = 0
+  !Free initial strain array 
+  ABI_DEALLOCATE(term%terms(iterm_of_term)%strain)
+  ABI_DEALLOCATE(term%terms(iterm_of_term)%power_strain)
+  !Reallocate them with size zero 
+  ABI_DEALLOCATE(term%terms(iterm_of_term)%strain,(0))
+  ABI_DEALLOCATE(term%terms(iterm_of_term)%power_strain,(0))
+enddo ! iterm_of term 
+
 
 end module m_opt_effpot
 
