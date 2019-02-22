@@ -1,0 +1,19 @@
+allow_nan: false
+tol_abs: 1.0e-10
+tol_rel: 1.0e-10
+
+Etot:
+    tol_abs: 1.0e-7
+    tol_eq: 1.0e-6
+    equation: 'etot - sum(components.values())'
+
+results_gs:
+    allow_nan: true
+    tol_rel: 1.0e-12
+    convergence:
+        ceil: 1.0e-6
+
+    tol_eq: 1.0e-10
+    equations:
+    - 'cartesian_forces.sum(axis=0)'
+    - 'stress_tensor - stress_tensor.transpose()'

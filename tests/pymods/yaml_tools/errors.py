@@ -1,0 +1,35 @@
+class ConfigContextError(Exception):
+    def __init__(self, path):
+        spath = '.'.join(path)
+        msg = ('Tried to enter a None context in the config tree at {}'
+               .format(spath))
+        super(ConfigContextError, self).__init__(msg)
+
+
+class ConfigParserError(Exception):
+    pass
+
+
+class UnknownParamError(ConfigParserError):
+    def __init__(self, cons, param):
+        msg = ('Encounterd an unknown parameter name "{}"'
+               ' when registering constraint "{}".')
+        super(UnknownParamError, self).__init__(msg.format(param, cons))
+
+
+class ConfigError(Exception):
+    pass
+
+
+class ValueTypeError(TypeError, ConfigError):
+    def __init__(self, name, exp, found):
+        msg = ('The value found in config does not match the type expected for'
+               ' {}. Expected {} and found {} of type {}.')
+        TypeError.__init__(self, msg.format(name, exp, found, type(found)))
+
+
+class InvalidNodeError(ConfigError):
+    def __init__(self, name, value):
+        msg = ('The node labeled {} is not a known parameter or constraint and'
+               ' have not the form of a specialisation. Value: {}')
+        ConfigError.__init__(self, msg.format(name, value))
