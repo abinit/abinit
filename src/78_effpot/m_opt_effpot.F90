@@ -44,8 +44,12 @@ module m_opt_effpot
 
  public :: opt_effpot 
  public :: opt_effpotbound
+ public :: opt_getHOforterm
+ public :: opt_getCombisforterm
+ public :: opt_getHoTerms
+ public :: opt_filterdisp
 
-!!****
+ !!****
 CONTAINS 
       
 !!****f* m_opt_effpot/opt_effpot 
@@ -378,6 +382,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  type(polynomial_coeff_type),allocatable :: my_coeffs(:),my_coeffs_tmp(:)
 !Logicals
  logical :: need_print_anh=.FALSE.,file_opened,equal_term_done ! MARCUS FOR THE MOMENT PRINT NO FILES
+ logical :: had_strain
 !Strings
  character(len=5),allocatable :: symbols(:)
  character(len=200):: name
@@ -478,7 +483,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
      !Get number of displacements and equivalent terms for this term
      !Chose term one to get ndisp. ndisp is equal for all terms of the term
      !Get minimum oder for this term
-     term =  eff_pot%anharmonics_terms%coefficients(iterm)
+     term = eff_pot%anharmonics_terms%coefficients(iterm)
      ndisp = term%terms(1)%ndisp
      nterm_of_term = term%nterm
 
@@ -506,21 +511,18 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              cycle 
      end if
      !if term has-strain cycle...strain-phonon-terms have to be implemented 
+     had_strain = .FALSE.
      if(term%terms(1)%nstrain /= 0)then
               ! Message to Output 
               write(message,'(5a)' )ch10,&
-&             ' ==> Term has strain compenent',ch10,&
-&             ' ==> Filter Displacement',ch10
+&             '- Term has strain compenent',ch10,&
+&             ' -> Filter Displacement',ch10
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
-              call opt_filterdisp(term,comm)
+              call opt_filterdisp(term,nterm_of_term,comm)
 
-              ! Message to Output 
-              write(message,'(5a)' )ch10,&
-&             " ==> Let's get real and pass this thing",ch10,&
-&             ' ==> We cycle',ch10
-              call wrtout(ab_out,message,'COLL')
-              call wrtout(std_out,message,'COLL')
+              !Remember if this term had strain
+              had_strain = .TRUE.
              !cycle 
      endif 
      ! Ok we want it. Let's go. 
@@ -565,8 +567,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
            enddo !idisp
          enddo !iterm_of_term 
      enddo !icombi
+     
+     !If term had strain we had to reinitialize it in the process 
+     !Refree memory
+     if(had_strain) call polynomial_coeff_free(term)  
 
-      
      call opt_getHoTerms(my_coeffs(nterm_start+1:),order_start,order_stop,ndisp,ncombi,ncombi_order,comm) 
            
       exists=.FALSE.
@@ -626,7 +631,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
              
              !Optimizing coefficient  
              i = 0 
-             do while(msef/msef_ini >= 1.001 )
+             do while(msef/msef_ini >= 1.001)
                 i = i + 1 
                 eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
@@ -722,10 +727,6 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop,comm)
      !Get/Initialize variables
      ndisp = term%terms(1)%ndisp
      nterm_of_term = term%nterm
-
-     !Debug MS 
-     write(*,*) "ndisp ", ndisp 
-     write(*,*) "power_disp", term%terms(1)%power_disp
 
      ABI_ALLOCATE(powers,(ndisp)) 
      powers = term%terms(1)%power_disp
@@ -1064,7 +1065,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi,ncombi_order
 end subroutine opt_getHoTerms
 
 
-subroutine opt_filterdisp(term,comm)
+subroutine opt_filterdisp(term,nterm_of_term,comm)
 
  implicit none 
          
@@ -1072,110 +1073,43 @@ subroutine opt_filterdisp(term,comm)
 !scalars
  integer,intent(in) :: comm
  type(polynomial_coeff_type),target,intent(inout) :: term
-!arrays 
+ integer,intent(in) :: nterm_of_term
+ !arrays 
 !Logicals
 !Strings 
 !Local variables ------------------------------
 !scalars
  integer :: iterm_of_term,iterm_of_term1,iterm_of_term2
- integer :: nterm_of_term, new_nterm_of_term,n_double
+ integer :: new_nterm_of_term,n_double
 !reals 
  real(dp) :: coeff
 !arrays 
- integer,allocatable :: powers(:)
- type(polynomial_term_type),allocatable :: terms(:),terms_tmp(:)
- type(polynomial_coeff_type) :: term_tmp
+ type(polynomial_term_type) :: terms(nterm_of_term)
 !Logicals
- logical,allocatable :: same(:)
- logical :: right 
 !Strings
- character(len=200) :: name
- character(len=1000) :: message
 !*************************************************************************
 
 !Initialize/Get Variables 
-nterm_of_term = term%nterm
-new_nterm_of_term = 0
-ABI_ALLOCATE(same,(nterm_of_term))
-same = .FALSE.
+!nterm_of_term = term%nterm
 
 ! Set strain to zero in terms 
 do iterm_of_term = 1, nterm_of_term 
   !Set strain in all terms to zero 
   term%terms(iterm_of_term)%nstrain = 0
   !Free initial strain array 
-  ABI_DEALLOCATE(term%terms(iterm_of_term)%strain)
-  ABI_DEALLOCATE(term%terms(iterm_of_term)%power_strain)
+  !ABI_DEALLOCATE(term%terms(iterm_of_term)%strain)
+  !ABI_DEALLOCATE(term%terms(iterm_of_term)%power_strain)
   !Reallocate them with size zero 
-  ABI_ALLOCATE(term%terms(iterm_of_term)%strain,(0))
-  ABI_ALLOCATE(term%terms(iterm_of_term)%power_strain,(0))
 enddo ! iterm_of term 
 
-term_tmp = term 
-
-!Debug 
-write(*,*) "same?", same
-write(*,*) "Is there some strain", term%terms(1)%nstrain
-write(*,*) "Is there some strain", term%terms(1)%strain(:)
-!Compare all terms to find which are doubly contained 
-!now that the strain was deletet 
-do iterm_of_term1 = 1,nterm_of_term 
-   do iterm_of_term2 = iterm_of_term1+1,nterm_of_term
-      same(iterm_of_term2) = terms_compare(term%terms(iterm_of_term1),term%terms(iterm_of_term2))
-   enddo ! iterm_of_term2 
-enddo !iterm_of_term1
-
-!Delete double terms from input term 
-!And count number of double terms n_double
-n_double = 0 
-do iterm_of_term = 1,nterm_of_term 
-   if(same(iterm_of_term))then 
-      call polynomial_term_free(term%terms(iterm_of_term))
-      n_double = n_double + 1 
-   endif
+do iterm_of_term=1,nterm_of_term
+   terms(iterm_of_term) = term%terms(iterm_of_term)
 enddo
 
-!Debug 
-write(*,*) "same?", same
-
-!new_nterm 
-new_nterm_of_term = nterm_of_term - n_double 
-ABI_DATATYPE_ALLOCATE(terms,(new_nterm_of_term))
-!Get other values to initialize new term 
-coeff = term%coefficient 
-name = term%name 
-terms = term%terms(:)
-
 !Reinitial term 
-call polynomial_coeff_init(coeff,new_nterm_of_term,term,terms,check=.FALSE.)
+!check=.TRUE. checks for duplicate terms
+call polynomial_coeff_init(coeff,nterm_of_term,term,terms,check=.TRUE.)
 
-!TEST AGAINST ALEX IMP 
-ABI_DATATYPE_ALLOCATE(terms_tmp,(nterm_of_term))
-terms_tmp = term_tmp%terms(:)
-call polynomiaL_coeff_init(coeff,nterm_of_term,term_tmp,terms_tmp,check=.TRUE.)
-
-right =coeffs_compare(term,term_tmp) 
-
-if(right)then  
-    ! Message to Output 
-    write(message,'(3a)' )ch10,&
-&   ' ==> Hooray Terms are consistent',ch10
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-else 
-    ! Message to Output 
-    write(message,'(3a)' )ch10,&
-&   ' ==> ooooh...to bad',ch10
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-endif 
-
-write(*,*) "Is there some strain", term%terms(1)%nstrain
-!DEALLOCATION
-ABI_DEALLOCATE(same)
-ABI_DATATYPE_DEALLOCATE(terms)
-ABI_DATATYPE_DEALLOCATE(terms_tmp)
-call polynomial_coeff_free(term_tmp)
 end subroutine opt_filterdisp
 
 end module m_opt_effpot
