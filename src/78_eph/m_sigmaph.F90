@@ -874,11 +874,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  eph_sternheimer = 0; if (dtset%useric == 666) eph_sternheimer = 1
  if (eph_sternheimer == 1) then
    ! Read vtrial from POT file (in principle one may store vtrial in the DVDB!)
-   call wrtout(std_out, " Reading vtrial from file.")
+   call wrtout(std_out, " Reading vtrial for Sternheimer solver from external file.")
    call read_rhor("foo_POT", cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
      allow_interp=.True.)
    call hdr_free(pot_hdr)
-   !call transgrid(1, mpi_enreg, nspden, -1, 0, 0, paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial_ptr)
+   !call transgrid(1, mpi_enreg, nspden, -1, 0, 0, paral_kgb, pawfgr, rhodum, rhodum, cgrvtrial, vtrial_ptr)
  end if
 
  if (sigma%nwr > 0) then
@@ -1204,6 +1204,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
            pawfgr,mpi_enreg,vtrial,v1scf(:,:,:,imyp),vlocal,vlocal1(:,:,:,:,imyp))
 
+         ! This is needed to call dfpt_cgwf (Sternheimer).
          !call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
 
          ! Prepare application of the NL part.
@@ -1233,13 +1234,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          if (eph_sternheimer == 1 .and. .not. sigma%imag_only) then
            mcgq = npw_kq * nspinor * nband_kq
            mgscq = npw_kq * nspinor * nband_kq
-           ABI_MALLOC(cgq, (2, npw_kq * nspinor, nband_kq))
+           ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_kq))
            ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_kq*psps%usepaw))
-           ABI_MALLOC(out_eig1_k, (2*nband_kq**2))
 
            ! Build global array with cg_kq wavefunctions to prepare call to dfpt_cgwf.
            ! Ideally, dfpt_cgwf should be modified so that we can pass cgq that is MPI distributed over nband_kq
-           cgq = zero
            do ibsum_kq=sigma%my_bstart, sigma%my_bstop
              if (isirr_kq) then
                 call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
@@ -1256,6 +1255,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! In principle, one can provide an improved initial guess if the WFK contains > nband states.
            ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, nbcalc_ks))
+           ABI_CALLOC(out_eig1_k, (2*nband_kq**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
            ABI_MALLOC(gh1c_n, (2, npw_kq*nspinor))
            ABI_MALLOC(ghc, (2, npw_kq*nspinor))
@@ -1282,6 +1282,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
              nlines_done = 0
+             cg1s_kq(:, :, ib_k) = zero
 
              call dfpt_cgwf(band_ks, berryopt0, cgq, cg1s_kq(:,:,ib_k), kets_k(:,:,ib_k), cwaveprj, cwaveprj0, rf2, dcwavef, &
                eig0nk, ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
@@ -1297,6 +1298,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  "Sternheimer didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
                  " after nline: ", nline_in, " iterations. Increase nline and/or decrease tolwfr"
                MSG_WARNING(msg)
+             else if (out_resid < zero) then
+               MSG_WARNING(sjoin(" out_resid: ", ftoa(out_resid)))
+             else
+               write(std_out, *)"Converged with out_resid: ", out_resid
              end if
 
              ! Compute contribution for M > sigma%nbsum using static approximation
@@ -1568,7 +1573,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        ! In principle one should rescale by the number of degenerate states but it's
                        ! easier to move all the weight to a single band
                        simag = zero
-                       if (ibsum_kq == band_ks) simag = sum(sigma%frohl_deltas_sphcorr(1:2, it, ib_k, nu), dim=1)
+                       ! TODO: Check the sign, use retarded convention.
+                       if (ibsum_kq == band_ks) simag = -pi * sum(sigma%frohl_deltas_sphcorr(1:2, it, ib_k, nu), dim=1)
                      end if
 
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
@@ -4519,7 +4525,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
          nqnu = nqnu_tlist(it)
          ! f_{k+q} = df/dek vk.q
          f_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
-         dfde_nk = occ_dfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
+         !dfde_nk = occ_dfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
          ! TODO: I got NAN for T --> 0
          !dfde_nk = zero
 
@@ -4543,7 +4549,7 @@ subroutine eval_sigfrohl_deltas(sigma, cryst, ifc, ebands, ikcalc, spin, comm)
  sigma%frohl_deltas_sphcorr = - four_pi * sigma%frohl_deltas_sphcorr / (two * pi ** 2 * cryst%ucvol)
  call xmpi_sum(sigma%frohl_deltas_sphcorr, comm, ierr)
 
- if (my_rank == 0) then
+ if (my_rank == 0) then !.and. prtvol > 10) then
    write(std_out, *)" eval_sigfrohl_deltas: f+d+, f-d-, sum(f+d+, f-d-) for nu in 4, ... 3natom"
    do ib_k=1,sigma%nbcalc_ks(ikcalc, spin)
      do nu=4,3*cryst%natom
