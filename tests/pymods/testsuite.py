@@ -295,6 +295,7 @@ class FileToTest(object):
         ("fldiff_fname","",str),
         ("hdiff_fname","",str),
         ("diff_fname","",str),
+        ("use_yaml","yes",str),
         #("pydiff_fname","",str),
     ]
 
@@ -321,7 +322,7 @@ class FileToTest(object):
     @lazy__str__
     def __str__(self): pass
 
-    def compare(self, fldiff_path, ref_dir, workdir, timebomb=None, outf=sys.stdout):
+    def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None, outf=sys.stdout):
         """
         Use fldiff_path to compare the reference file located in ref_dir with
         the output file located in workdir. Results are written to stream outf.
@@ -351,16 +352,32 @@ class FileToTest(object):
         if '-includeP' in self.fld_options:
             opts['ignoreP'] = False
 
-        differ = FlDiffer(**opts)
+        if self.use_yaml not in ("yes", "no", "only"):
+            # raise ParameterError
+            pass
+        if self.use_yaml == "yes":
+            opts['use_yaml'] = True
+            opts['use_fl'] = True
+        elif self.use_yaml == "only":
+            opts['use_yaml'] = True
+            opts['use_fl'] = False
+        else:  # self.use_yaml == "no":
+            opts['use_yaml'] = False
+            opts['use_fl'] = True
+
+        differ = FlDiffer(yaml_test, **opts)
 
         try:
             fld_result, doc_results = differ.diff(ref_fname, out_fname)
             fld_result.dump_details(outf)
-            isok, status, msg = fld_result.passed_within_tols(self.tolnlines, self.tolabs, self.tolrel)
+            isok, status, msg = fld_result.passed_within_tols(
+                self.tolnlines, self.tolabs, self.tolrel
+            )
             msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         except Exception as e:
-            warnings.warn('[{}] Something went wrong with this test:\n{}\n'.format(self.name, str(e)))
+            warnings.warn('[{}] Something went wrong with this test:\n{}\n'
+                          .format(self.name, str(e)))
             isok, status, msg = False, 'failed', 'internal error:\n' + str(e)
 
         # Save comparison results.
@@ -501,7 +518,7 @@ def doc_testcnf_format(fh=sys.stdout):
         for key in TESTCNF_KEYWORDS:
             tup = TESTCNF_KEYWORDS[key]
             if section == tup[2]:
-                line_parser = tup[0]
+                # line_parser = tup[0]
                 default = tup[1]
                 if default is None:
                     default = "Mandatory"
@@ -757,6 +774,9 @@ class AbinitTestInfoParser(object):
         # Add the name of the input file.
         info.inp_fname = self.inp_fname
 
+        # Add the section for yaml_test
+        d['yaml_test'] = self.yaml_test()
+
         return AbinitTestInfo(d)
 
     @property
@@ -790,6 +810,21 @@ class AbinitTestInfoParser(object):
 
         fnames = parse(self.parser.get(section, opt))
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
+
+    def yaml_test(self):
+        sec_name = 'yaml_test'
+        ytest = {
+            'file': '',
+            'test': '',
+        }
+
+        if self.parser.has_section(sec_name):
+            scalar_key = ['file', 'test']
+            for key in scalar_key:
+                if self.parser.has_option(sec_name, key):
+                    ytest[key] == self.parser.get(sec_name, key)
+
+        return ytest
 
     #@property
     #def is_parametrized_test(self):
@@ -914,7 +949,6 @@ class CPreProcessor(object):
         cmd = " ".join(cmd)
         if self.verbose: print(cmd)
 
-        from subprocess import Popen, PIPE
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
 
@@ -1077,9 +1111,9 @@ class BuildEnvironment(object):
                 bin_path = os.path.join(p, bin_name)
                 if os.path.isfile(bin_path): break
             else:
-                err_msg = ("Cannot find path of bin_name %s, neither in the build directory nor in PATH %s" %
-                           (bin_name, paths))
-                #warnings.warn(err_msg)
+                # err_msg = ("Cannot find path of bin_name %s, neither in the build directory nor in PATH %s" %
+                #           (bin_name, paths))
+                # warnings.warn(err_msg)
                 bin_path = ""
 
         return bin_path
@@ -1445,6 +1479,9 @@ class BaseTest(object):
                                   # 1 => Remove files but only if the test passes or succeeds
                                   # 2 => Remove files even when the test fail.
 
+        # get data about the structured tests
+        self.yaml_test = test_info.yaml_test
+
         # Incorporate the attributes of test_info in self.
         err_msg = ""
         for k in test_info.__dict__:
@@ -1594,16 +1631,16 @@ class BaseTest(object):
                 # Have new variable
                 if tok[-1].isdigit(): # and "?" not in tok:
                     # Handle dataset index.
-                    l = []
+                    # l = []
                     for i, c in enumerate(tok[::-1]):
                         if c.isalpha(): break
-                        #l.append(c)
+                        # l.append(c)
                     else:
                         raise ValueError("Cannot find dataset index in token: %s" % tok)
                     tok = tok[:len(tok) - i]
-                    #l.reverse()
-                    #print("tok", tok, l)
-                    #tok = l
+                    # l.reverse()
+                    # print("tok", tok, l)
+                    # tok = l
                 vnames.append(tok)
 
         #print(vnames)
@@ -1868,7 +1905,7 @@ class BaseTest(object):
         else:
             self.timebomb = TimeBomb(timeout, delay=0.05)
 
-        str_colorizer = StringColorizer(sys.stdout)
+        # str_colorizer = StringColorizer(sys.stdout)
 
         #status2txtcolor = {
         #    "succeeded": lambda string: str_colorizer(string, "green"),
@@ -1981,7 +2018,7 @@ class BaseTest(object):
                     f.fldiff_fname = fldiff_fname
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
-                                                  timebomb=self.timebomb, outf=fh)
+                                                  yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh)
 
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
@@ -2150,11 +2187,11 @@ class BaseTest(object):
         A default patcher is provided if patcher is None (use $PATCHER shell variable)
         """
         assert self._executed
+        from tests.pymods import Patcher
         for f in self.files_to_test:
             ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
             out_fname = os.path.abspath(os.path.join(self.workdir,f.name) )
             raise NotImplementedError("patcher should be tested")
-            from tests.pymods import Patcher
             Patcher(patcher).patch(out_fname, ref_fname)
 
     def make_html_diff_files(self):
