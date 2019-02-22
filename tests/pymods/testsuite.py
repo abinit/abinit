@@ -322,7 +322,8 @@ class FileToTest(object):
     @lazy__str__
     def __str__(self): pass
 
-    def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None, outf=sys.stdout):
+    def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None,
+                outf=sys.stdout):
         """
         Use fldiff_path to compare the reference file located in ref_dir with
         the output file located in workdir. Results are written to stream outf.
@@ -365,7 +366,7 @@ class FileToTest(object):
             opts['use_yaml'] = False
             opts['use_fl'] = True
 
-        differ = FlDiffer(yaml_test, **opts)
+        differ = FlDiffer(yaml_test=yaml_test, **opts)
 
         try:
             fld_result, doc_results = differ.diff(ref_fname, out_fname)

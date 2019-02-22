@@ -79,7 +79,7 @@ else:
         def __init__(self, failures, success=None, conf=None):
             pass
 
-        def report(self):
+        def report(self, label=''):
             return ''
 
 # Match floats. Minimal float is .0 for historical reasons.
@@ -397,7 +397,7 @@ class Result(object):
 
 
 class Differ(object):
-    def __init__(self, **options):
+    def __init__(self, yaml_test=None, **options):
         '''
             Init a differ with some parameters.
             Known parameters are:
@@ -417,14 +417,16 @@ class Differ(object):
             self.options['tolerance_rel'] = options['tolerance']
 
         self.use_fl = options['use_fl']
-        if has_yaml and 'yaml_test' in options:
+        if has_yaml and yaml_test:
             self.use_yaml = options['use_yaml']
             if self.use_yaml:
-                if 'file' in options['yaml_test']:
+                if 'file' in yaml_test and yaml_test['file']:
                     self.yaml_test = YTestConf.from_file(
-                        options['yaml_test']['file'])
-                elif 'test' in options['yaml_test']:
-                    self.yaml_test = YTestConf(options['yaml_test']['test'])
+                        yaml_test['file'])
+                elif 'test' in yaml_test and yaml_test['test']:
+                    self.yaml_test = YTestConf(yaml_test['test'])
+                else:
+                    self.use_yaml = False
         else:
             self.use_yaml = False
 
@@ -460,7 +462,7 @@ class Differ(object):
             doc_differences = self.__test_doc(documents1, documents2)
 
         return (Result(lines_differences, label=self.options['label']),
-                YResult(doc_differences, label=self.options['label']))
+                YResult(doc_differences))
 
     def __test_doc(self, docs1, docs2):
         '''
