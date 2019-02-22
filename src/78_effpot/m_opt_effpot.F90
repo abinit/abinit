@@ -37,6 +37,7 @@ module m_opt_effpot
  use m_fit_data
  use m_fit_polynomial_coeff
  use m_polynomial_coeff
+ use m_polynomial_term
  use m_crystal,only : symbols_crystal
 
  implicit none
@@ -1060,27 +1061,34 @@ subroutine opt_filterdisp(term,comm)
  integer,intent(in) :: comm
  type(polynomial_coeff_type),intent(inout) :: term
 !arrays 
- integer,intent(in) :: order_range(2)
- integer,intent(out) :: order_start, order_stop 
 !Logicals
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: idisp,ndisp,nterm_of_term,power_tot 
+ integer :: iterm_of_term,iterm_of_term1,iterm_of_term2
+ integer :: nterm_of_term, new_nterm_of_term,n_double
+!reals 
+ real(dp) :: coeff
 !arrays 
- integer,allocatable :: powers(:) 
+ integer,allocatable :: powers(:)
+ type(polynomial_term_type),allocatable :: terms(:),terms_tmp(:)
+ type(polynomial_coeff_type) :: term_tmp
 !Logicals
+ logical,allocatable :: same(:)
+ logical :: right 
 !Strings
+ character(len=200) :: name
  character(len=1000) :: message
- character(len=1000) :: frmt
-
-end subroutine opt_filterdisp
-
 !*************************************************************************
 
 !Initialize/Get Variables 
 nterm_of_term = term%nterm
+new_nterm_of_term = 0
+ABI_ALLOCATE(same,(nterm_of_term))
+same = .FALSE.
+term_tmp = term 
 
+! Set strain to zero in terms 
 do iterm_of_term = 1, nterm_of_term 
   !Set strain in all terms to zero 
   term%terms(iterm_of_term)%nstrain = 0
@@ -1088,10 +1096,66 @@ do iterm_of_term = 1, nterm_of_term
   ABI_DEALLOCATE(term%terms(iterm_of_term)%strain)
   ABI_DEALLOCATE(term%terms(iterm_of_term)%power_strain)
   !Reallocate them with size zero 
-  ABI_DEALLOCATE(term%terms(iterm_of_term)%strain,(0))
-  ABI_DEALLOCATE(term%terms(iterm_of_term)%power_strain,(0))
+  ABI_ALLOCATE(term%terms(iterm_of_term)%strain,(0))
+  ABI_ALLOCATE(term%terms(iterm_of_term)%power_strain,(0))
 enddo ! iterm_of term 
 
+!Compare all terms to find which are doubly contained 
+!now that the strain was deletet 
+do iterm_of_term1 = 1,nterm_of_term 
+   do iterm_of_term2 = iterm_of_term1,nterm_of_term 
+      same(iterm_of_term2) = terms_compare(term%terms(iterm_of_term1),term%terms(iterm_of_term2))
+   enddo ! iterm_of_term2 
+enddo !iterm_of_term1
+
+!Delete double terms from input term 
+!And count number of double terms n_double
+n_double = 0 
+do iterm_of_term = 1,nterm_of_term 
+   if(same(iterm_of_term))then 
+      call polynomial_term_free(term%terms(iterm_of_term))
+      n_double = n_double + 1 
+   endif
+enddo
+
+!new_nterm 
+new_nterm_of_term = nterm_of_term - n_double 
+ABI_DATATYPE_ALLOCATE(terms,(new_nterm_of_term))
+!Get other values to initialize new term 
+coeff = term%coefficient 
+name = term%name 
+terms = term%terms(:)
+
+!Reinitial term 
+call polynomial_coeff_init(coeff,new_nterm_of_term,term,terms,check=.FALSE.)
+
+!TEST AGAINST ALEX IMP 
+ABI_DATATYPE_ALLOCATE(terms_tmp,(nterm_of_term))
+terms_tmp = term_tmp%terms(:)
+call polynomiaL_coeff_init(coeff,nterm_of_term,term_tmp,terms_tmp,check=.TRUE.)
+
+right =coeffs_compare(term,term_tmp) 
+
+if(right)then  
+    ! Message to Output 
+    write(message,'(3a)' )ch10,&
+&   ' ==> Hooray Terms are consistent',ch10
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+else 
+    ! Message to Output 
+    write(message,'(3a)' )ch10,&
+&   ' ==> ooooh...to bad',ch10
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+endif 
+
+!DEALLOCATION
+ABI_DEALLOCATE(same)
+ABI_DATATYPE_DEALLOCATE(terms)
+ABI_DATATYPE_DEALLOCATE(terms_tmp)
+
+end subroutine opt_filterdisp
 
 end module m_opt_effpot
 
