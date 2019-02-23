@@ -583,7 +583,7 @@ end function cg_dznrm2
 !!
 !! SOURCE
 
-function cg_zdotc(n,x,y) result(res)
+function cg_zdotc(n, x, y) result(res)
 
 !Arguments ------------------------------------
 !scalars
