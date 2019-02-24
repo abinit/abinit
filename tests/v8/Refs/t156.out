@@ -616,8 +616,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
-Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
-New fermi level:     6.422151E-01, with nelect:     8.200000E+00
+ Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
+ New fermi level:     6.422151E-01, with nelect:     8.200000E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -745,8 +745,8 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
 
-Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
-New fermi level:     6.422151E-01, with nelect:     8.200000E+00
+ Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
+ New fermi level:     6.422151E-01, with nelect:     8.200000E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765

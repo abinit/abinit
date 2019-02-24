@@ -2490,8 +2490,8 @@ subroutine ebands_set_nelect(ebands, nelect, spinmagntarget, msg, prtvol)
  call ebands_update_occ(ebands,spinmagntarget,prtvol=my_prtvol)
 
  write(msg,"(2(a,es16.6),a,2(a,es16.6))")&
-   "Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10,&
-   "New fermi level: ",ebands%fermie,", with nelect: ",ebands%nelect
+   " Old fermi level: ",prev_fermie,", with nelect: ",prev_nelect,ch10,&
+   " New fermi level: ",ebands%fermie,", with nelect: ",ebands%nelect
  call wrtout(std_out, msg)
 
 end subroutine ebands_set_nelect

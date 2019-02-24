@@ -5123,7 +5123,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode)
       ABI_SFREE(work)
       ABI_SFREE(out_cg)
 
-      if (ik_ibz < 50 .or. (wfd%nkibz > 1000 .and. mod(ik_ibz, 200) == 0)) then
+      if (ik_ibz <= 20 .or. mod(ik_ibz, 50) == 0) then
         write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
