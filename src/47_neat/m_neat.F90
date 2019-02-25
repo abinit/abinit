@@ -40,20 +40,15 @@ module m_neat
 !!****f* m_neat/neat_energies
 !!
 !! NAME
-!! neat_write_energies
+!! neat_energies
 !!
 !! FUNCTION
 !! Write components of total energies in a structured way
 !!
 !! INPUTS
-!!  energies <type(energies_type)>=values of parts of total energy
-!!  dtset <type(dataset_type)>=all input variables in this dataset
-!!   | berryphase
-!!   | kptopt
-!!   | occopt
-!!   | positron=option for electron-positron calculation
-!!  usepaw= 0 for non paw calculation; =1 for paw calculation
+!!  energies <type(pair_list)>=values of parts of total energy
 !!  iout= unit of output file
+!!  label= optional label to distinct the main from Etot document from secondary Etot(DC) for example
 !!
 !! OUTPUT
 !!
@@ -80,6 +75,7 @@ module m_neat
 
     call wrtout_stream(stream, iout)
   end subroutine neat_energies
+!!*** m_neat/neat_energies
 
 !!****f* m_neat/neat_results_gs
 !!
@@ -90,6 +86,11 @@ module m_neat
 !! Write neat_results_gs
 !!
 !! INPUTS
+!!  results <type(results_gs_type)>=miscellaneous informations about the system after ground state computation
+!!  iout= unit of output file
+!!  ecut= cut energy
+!!  pawecutdg= PAW cut energy
+!!  comment= optional comment for the final docuemtn
 !!
 !! OUTPUT
 !!
@@ -160,6 +161,7 @@ module m_neat
 
     call wrtout_stream(stream, iout)
   end subroutine neat_results_gs
+!!*** m_neat/neat_results_gs
 
 !!****f* m_neat/neat_crystal
 !!
@@ -188,4 +190,5 @@ module m_neat
 
     
   end subroutine neat_crystal
+!!*** m_neat/neat_crystal
 end module m_neat
