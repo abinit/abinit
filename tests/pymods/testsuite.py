@@ -371,15 +371,26 @@ class FileToTest(object):
         try:
             fld_result, doc_results = differ.diff(ref_fname, out_fname)
             fld_result.dump_details(outf)
+
             isok, status, msg = fld_result.passed_within_tols(
                 self.tolnlines, self.tolabs, self.tolrel
             )
+
+            if opts['use_yaml']:
+                doc_results.dump_details(outf)
+                doc_ok = doc_results.passed()
+                if isok and not doc_ok:
+                    msg = 'Problems with YAML documents'
+                    isok = False
+                    status = 'failed'
+
             msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         except Exception as e:
             warnings.warn('[{}] Something went wrong with this test:\n{}\n'
                           .format(self.name, str(e)))
             isok, status, msg = False, 'failed', 'internal error:\n' + str(e)
+            raise e
 
         # Save comparison results.
         self.fld_isok = isok
@@ -824,6 +835,9 @@ class AbinitTestInfoParser(object):
             for key in scalar_key:
                 if self.parser.has_option(sec_name, key):
                     ytest[key] == self.parser.get(sec_name, key)
+
+        if not ytest['file'] and not ytest['test']:
+            return {}
 
         return ytest
 

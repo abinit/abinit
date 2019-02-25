@@ -51,15 +51,16 @@ class Tester(object):
     def run(self):
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
-            ref = [doc['obj'] for doc in self.ref]
-            tested = [doc['obj'] for doc in self.tested]
-            success = cons.check(ref, tested, self.conf)
-            if success:
-                msg = '{} ok'.format(cons.name)
-                self.success.append(Success(('top level',), msg))
-            else:
-                msg = '{} failed'.format(cons.name)
-                self.failures.append(Failure(('top level',), msg))
+            if top_cons[cons].apply_to == 'this':
+                ref = [doc['obj'] for doc in self.ref]
+                tested = [doc['obj'] for doc in self.tested]
+                success = top_cons[cons].check(ref, tested, self.conf)
+                if success:
+                    msg = '{} ok'.format(cons.name)
+                    self.success.append(Success(('top level',), msg))
+                else:
+                    msg = '{} failed'.format(cons.name)
+                    self.failures.append(Failure(('top level',), msg))
 
         if len(self.ref) != len(self.tested):
             msg = 'there is not the same number of documents in both side'
@@ -83,7 +84,20 @@ class Result(object):
         Analyse results and create a report.
     '''
     def __init__(self, failures, success=None, conf=None):
-        pass
+        self.failures = failures
+        self.success = success
+        self.conf = conf
 
     def report(self):
-        return ''
+        if self.failures:
+            return '\n'.join(repr(fail) for fail in self.failures)
+        else:
+            return 'success'
+
+    def passed(self):
+        if self.failures:
+            return False
+        return True
+
+    def dump_details(self, f):
+        f.write(self.report())
