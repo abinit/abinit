@@ -45,11 +45,11 @@ module  m_spin_terms
   use m_spmat_csr, only : CSR_mat_t
   use m_spmat_lil, only : LIL_mat_t
   use m_spmat_convert, only : LIL_to_CSR
-  use m_effpot_api, only : effpot_t
+  use m_abstract_potential, only : abstract_potential_t
   implicit none
   !!***
 
-  type, extends(effpot_t) :: spin_terms_t
+  type, extends(abstract_potential_t) :: spin_terms_t
      real(dp) :: etot
      ! ispin_prim: index in the spin model in primitive cell, which is used as the index of sublattice.
      ! rvec: supercell R vector.

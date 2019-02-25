@@ -10,8 +10,8 @@ module m_lattice_mover
   use m_errors
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_effpot_api, only: effpot_t
-  use m_mover_api, only: abstract_mover_t
+  use m_abstract_potential, only: abstract_potential_t
+  use m_abstract_mover, only: abstract_mover_t
 
   implicit none
   private
@@ -60,7 +60,7 @@ contains
     ! run one step. (For MC also?)
     class(lattice_mover_t), intent(inout) :: self
     ! array of effective potentials so that there can be multiple of them.
-    class(effpot_t), intent(inout) :: effpot
+    class(abstract_potential_t), intent(inout) :: effpot
   end subroutine run_one_step
 
   subroutine reset(self)

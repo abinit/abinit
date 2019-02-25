@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_effpot_api
+!!****m* ABINIT/m_abstract_potential
 !! NAME
-!! m_effpot_api
+!! m_abstract_potential
 !!
 !! FUNCTION
 !! This module contains the base type for all effective potentials. 
@@ -9,8 +9,8 @@
 !!
 !! Datatypes:
 !!
-!! * effpot_t: defines the base api of effective potentials.
-!! * effpot_list_t: list of effpot_t, which is essentially a list of pointer to effpot_t
+!! * abstract_potential_t: defines the base api of effective potentials.
+!! * effpot_list_t: list of abstract_potential_t, which is essentially a list of pointer to abstract_potential_t
 !!    itself is also a effpot type, and its energy, 1st derivative to energy are the sum of all items.
 !! Subroutines:
 !! TODO: add this when F2003 doc style is determined.
@@ -32,7 +32,7 @@
 
 #include "abi_common.h"
 
-module m_effpot_api
+module m_abstract_potential
   use defs_basis
   use m_abicore
   use m_errors
@@ -44,7 +44,7 @@ module m_effpot_api
   implicit none
 !!***
   private
-  type ,public :: effpot_t
+  type ,public :: abstract_potential_t
      ! This is the abstract class of effective potential.
      ! It do the following things:
      !  - read from file (which has the effective potential in primitive cell, corresponding to xml file)
@@ -65,7 +65,7 @@ module m_effpot_api
      procedure :: read_potential  ! read effpot from file (primtive cell) (e.g. DDB, xml)
      procedure :: make_supercell  ! build supercell potential
      procedure :: calculate       ! get energy and 1st derivative from input state
-     procedure :: get_delta_E=> effpot_t_get_delta_E ! calculate energy diffence if one component is changed for Monte carlo algorithm
+     procedure :: get_delta_E=> abstract_potential_t_get_delta_E ! calculate energy diffence if one component is changed for Monte carlo algorithm
 
      !procedure :: set_variables
      !procedure :: get_1st_deriv
@@ -76,13 +76,13 @@ module m_effpot_api
      !procedure :: get_force            ! force
      !procedure :: get_stress           ! stress
      !procedure :: get_effective_Bfield ! effective Bfield
-  end type effpot_t
+  end type abstract_potential_t
 
   type, public:: effpot_pointer_t ! pointer to effpot
-     class(effpot_t) , pointer :: obj
+     class(abstract_potential_t) , pointer :: obj
   end type effpot_pointer_t
 
-  type, public, extends(effpot_t) :: effpot_list_t
+  type, public, extends(abstract_potential_t) :: effpot_list_t
      integer :: size=0
      integer :: MAXSIZE=8  ! TODO: make it dynamic. This is only for demo version.
      type(effpot_pointer_t) :: effpots(8)  ! Maximum number of 8,TODO: make it dynamic.
@@ -98,20 +98,20 @@ module m_effpot_api
 contains
 
   subroutine read_potential(self, fnames)
-    class(effpot_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: self
     character(len=*), intent(in) :: fnames(:)  !  files file (xml, DDB, etc).
     ! TODO
   end subroutine read_potential
 
   subroutine set_params(self, params)
-    class(effpot_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
     ! TODO
   end subroutine set_params
 
 
   subroutine make_supercell(self, supercell)
-    class(effpot_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: self
     type(supercell_type), intent(in) :: supercell
     ! TODO 
     MSG_ERROR("make_supercell not implemented.")
@@ -130,13 +130,13 @@ contains
   !end subroutine get_1st_deriv
 
   subroutine set_distortion(self, displacement, strain)
-    class(effpot_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: self
     real(dp), optional, intent(in) :: displacement(:,:), strain(:,:)
     MSG_ERROR("set_distortion not implemented.")
   end subroutine set_distortion
 
   subroutine set_spin(self, spin)
-    class(effpot_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: self
     real(dp), optional, intent(in) :: spin
     MSG_ERROR("set_spin not implemented.")
   end subroutine set_spin
@@ -146,7 +146,7 @@ contains
     ! the inputs and outputs are optional so that each effpot can adapt to its
     ! own.
     ! In principle, the 1st derivatives are only calculated if asked to (present). However, they can be computed if it is simply convinient to do.
-    class(effpot_t), intent(inout) :: self  ! the effpot may save the states.
+    class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
@@ -155,34 +155,34 @@ contains
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 
-  subroutine effpot_t_get_delta_E(self, S, ispin, Snew, deltaE)
+  subroutine abstract_potential_t_get_delta_E(self, S, ispin, Snew, deltaE)
     ! for spin monte carlo
     ! calculate energy difference if one spin is moved.
-    class(effpot_t), intent(inout) :: self  ! the effpot may save the states.
+    class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), intent(inout) :: S(:,:),  Snew(:)
     integer, intent(in) :: ispin
     real(dp), intent(out) :: deltaE
     MSG_ERROR("get_delta_E not implemented for this effpot.")
-  end subroutine effpot_t_get_delta_E
+  end subroutine abstract_potential_t_get_delta_E
 
 !   subroutine get_energy(self, energy)
-!     class(effpot_t), intent(inout) :: self
+!     class(abstract_potential_t), intent(inout) :: self
 !     real(dp) , intent(inout) :: energy
 !   end subroutine get_energy
 
 
 !   subroutine get_force(self, force)
-!     class(effpot_t), intent(inout) :: self
+!     class(abstract_potential_t), intent(inout) :: self
 !     real(dp), intent(out) :: force(:,:)
 !   end subroutine get_force
 
 !   subroutine get_stress(self, stress)
-!     class(effpot_t), intent(inout) :: self
+!     class(abstract_potential_t), intent(inout) :: self
 !     real(dp), intent(out) :: stress(:,:)
 !   end subroutine get_stress
 
 !   subroutine get_effective_Bfield(self, spin,bfield)
-!     class(effpot_t), intent(in) :: self
+!     class(abstract_potential_t), intent(in) :: self
 !     real(dp), intent(in) :: spin(:,:)
 !     real(dp), intent(inout) :: bfield(:,:)
 !   end subroutine get_effective_Bfield
@@ -220,7 +220,7 @@ contains
   subroutine effpot_list_t_append(self, effpot)
     ! Add a pointer to an effpot term to list.
     class (effpot_list_t) :: self
-    class (effpot_t), target :: effpot
+    class (abstract_potential_t), target :: effpot
     self%size=self%size + 1
     if(self%size>self%MAXSIZE) then
        write(std_err, *) "Number of effpot larger than the maximum 8"
@@ -283,4 +283,4 @@ contains
 
   end subroutine effpot_list_t_calculate
 
-end module m_effpot_api
+end module m_abstract_potential

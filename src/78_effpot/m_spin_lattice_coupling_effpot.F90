@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! This module define the spin-lattice coupling terms.
-!! The terms are derived from the effpot_t type.
+!! The terms are derived from the abstract_potential_t type.
 !! It can calculate the energy, first derivative to spin or lattice.
 !!
 !! Datatypes:
@@ -39,14 +39,14 @@ module m_spin_lattice_coupling_effpot
   use m_xmpi
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_effpot_api, only: effpot_t
+  use m_abstract_potential, only: abstract_potential_t
   use m_supercell, only : supercell_type
 
   implicit none
 !!***
   private
 
-  type, public, extends(effpot_t) :: base_spin_lattice_coupling_effpot_t
+  type, public, extends(abstract_potential_t) :: base_spin_lattice_coupling_effpot_t
      ! things all spin_lattice_couplgin effpots share
   end type base_spin_lattice_coupling_effpot_t
 

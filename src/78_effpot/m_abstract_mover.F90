@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_mover_api
+!!****m* ABINIT/m_abstract_mover
 !! NAME
-!! m_mover_api
+!! m_abstract_mover
 !!
 !! FUNCTION
 !! This module contains the base type for all mover types.
@@ -31,13 +31,13 @@
 
 #include "abi_common.h"
 
-module m_mover_api
+module m_abstract_mover
   use defs_basis
   use m_abicore
   use m_errors
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_effpot_api, only: effpot_t
+  use m_abstract_potential, only: abstract_potential_t
 
   implicit none
 !!***
@@ -79,7 +79,7 @@ contains
     ! run one step. (For MC also?)
     class(abstract_mover_t), intent(inout) :: self
     ! should we use array of effective potentials so that there can be multiple of them?
-    class(effpot_t), intent(inout) :: effpot
+    class(abstract_potential_t), intent(inout) :: effpot
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 
@@ -112,4 +112,4 @@ contains
     MSG_ERROR("get_state not implemented for this mover")
   end subroutine get_state
 
-end module m_mover_api
+end module m_abstract_mover

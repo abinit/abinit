@@ -34,7 +34,7 @@
     module m_spin_mc_mover
     use defs_basis
     use m_abicore
-    use m_effpot_api, only: effpot_t
+    use m_abstract_potential, only: abstract_potential_t
     use m_random_xoroshiro128plus, only: rng_t
     implicit none
 !!***
@@ -92,7 +92,7 @@
    subroutine run_one_step(self, rng, effpot)
      class(spin_mc_t) :: self
      class(rng_t) :: rng
-     class(effpot_t), intent(inout) :: effpot
+     class(abstract_potential_t), intent(inout) :: effpot
      real(dp) :: S_out(3,self%nspins), etot, r
      integer :: i, j
      r=self%attempt(rng, effpot)
@@ -108,7 +108,7 @@
    subroutine run_MC(self, rng, effpot, S_in, S_out, etot)
      class(spin_mc_t), intent(inout) :: self
      type(rng_t) :: rng
-     class(effpot_t), intent(inout) :: effpot
+     class(abstract_potential_t), intent(inout) :: effpot
      real(dp), intent(inout) :: S_in(3,self%nspins)
      real(dp), intent(out) :: S_out(3,self%nspins), etot
      integer :: i
@@ -137,7 +137,7 @@
    function attempt(self,rng, effpot) result(r)
      class(spin_mc_t) :: self
      class(rng_t) :: rng
-     class(effpot_t), intent(inout) :: effpot
+     class(abstract_potential_t), intent(inout) :: effpot
      real(dp) :: r
      ! choose one site
      self%imove = rng%rand_choice(self%nspins)

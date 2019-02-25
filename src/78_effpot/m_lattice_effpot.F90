@@ -11,11 +11,11 @@ module m_lattice_effpot
   use m_xmpi
 
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_effpot_api, only : effpot_t
+  use m_abstract_potential, only : abstract_potential_t
 
   implicit none
   private
-  type ,public, extends(effpot_t) :: lattice_effpot_t
+  type ,public, extends(abstract_potential_t) :: lattice_effpot_t
    contains
      procedure :: initialize
      procedure :: finalize

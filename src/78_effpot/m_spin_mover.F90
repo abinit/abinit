@@ -47,8 +47,8 @@ module m_spin_mover
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
-  use m_effpot_api, only: effpot_t
-  use m_mover_api, only: abstract_mover_t
+  use m_abstract_potential, only: abstract_potential_t
+  use m_abstract_mover, only: abstract_mover_t
   use m_spin_mc_mover, only : spin_mc_t
   implicit none
   private
@@ -248,7 +248,7 @@ contains
   !! run one spin step using HeunP method
   !!
   !! INPUTS
-  !! effpot: effpot_t type.
+  !! effpot: abstract_potential_t type.
   !! S_in : input spin. (3*nspin)
   !!
   !! OUTPUT
@@ -264,7 +264,7 @@ contains
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
-    class(effpot_t), intent(inout) :: effpot
+    class(abstract_potential_t), intent(inout) :: effpot
     real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     integer :: i
@@ -334,7 +334,7 @@ contains
     ! Depondt & Mertens (2009) method, using a rotation matrix so length doesn't change.
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
-    class(effpot_t), intent(inout) :: effpot
+    class(abstract_potential_t), intent(inout) :: effpot
     real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     real(dp) :: Htmp(3)
@@ -369,7 +369,7 @@ contains
 
   subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot)
     class(spin_mover_t), intent(inout) :: self
-    class(effpot_t), intent(inout) :: effpot
+    class(abstract_potential_t), intent(inout) :: effpot
     real(dp), intent(inout) :: S_in(3,self%nspins)
     real(dp), intent(out) :: S_out(3,self%nspins), etot
     call self%spin_mc%run_MC(self%rng, effpot, S_in, S_out, etot)
@@ -377,7 +377,7 @@ contains
 
   subroutine spin_mover_t_run_one_step(self, effpot)
     class(spin_mover_t), intent(inout) :: self
-    class(effpot_t), intent(inout) :: effpot
+    class(abstract_potential_t), intent(inout) :: effpot
     real(dp) :: S_out(3,self%nspins), etot
     if(iam_master) self%Stmp=spin_hist_t_get_S(self%hist)
     if(self%method==1) then
@@ -416,7 +416,7 @@ contains
   subroutine spin_mover_t_run_time(self, calculator, hist, ncfile, ob)
 
     class(spin_mover_t), intent(inout):: self
-    class(effpot_t), intent(inout) :: calculator
+    class(abstract_potential_t), intent(inout) :: calculator
     type(spin_hist_t), intent(inout) :: hist
     type(spin_ncfile_t), intent(inout) :: ncfile
     type(spin_observable_t), intent(inout) :: ob
