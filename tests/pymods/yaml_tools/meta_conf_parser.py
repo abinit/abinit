@@ -60,7 +60,6 @@ class DictWrapper:
     def __init__(self, d):
         for attr in d:
             self[attr] = d[attr]
-        return self
 
     def __getitem__(self, key):
         return self.__dict__[normalize_attr(key)]

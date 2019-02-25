@@ -69,11 +69,7 @@ class Tester(object):
             # FIXME Use a non linear matching of documents ?
             # ref_doc['iterator'] could be of some use here
             for ref_doc, tested_doc in zip(self.ref, self.tested):
-                if self.conf.has_doc(ref_doc['obj'].label):
-                    self.check_this(ref_doc['obj'].label, ref_doc['obj'],
-                                    tested_doc['obj'])
-                else:
-                    # There is not specialization for this document
-                    pass
+                self.check_this(ref_doc['obj']['label'], ref_doc['obj'],
+                                tested_doc['obj'])
 
         return self.failures, self.success
