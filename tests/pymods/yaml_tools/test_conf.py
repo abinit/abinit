@@ -60,7 +60,7 @@ class TestConf:
         '''
         return self.tree.get_new_constraints_at(())
 
-    def get_constraint_for(self, obj):
+    def get_constraints_for(self, obj):
         '''
             Return a list of the constraints in the current scope that
             apply to obj.
