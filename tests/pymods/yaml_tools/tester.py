@@ -77,27 +77,3 @@ class Tester(object):
                     pass
 
         return self.failures, self.success
-
-
-class Result(object):
-    '''
-        Analyse results and create a report.
-    '''
-    def __init__(self, failures, success=None, conf=None):
-        self.failures = failures
-        self.success = success
-        self.conf = conf
-
-    def report(self):
-        if self.failures:
-            return '\n'.join(repr(fail) for fail in self.failures)
-        else:
-            return 'success'
-
-    def passed(self):
-        if self.failures:
-            return False
-        return True
-
-    def dump_details(self, f):
-        f.write(self.report())

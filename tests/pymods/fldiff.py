@@ -49,7 +49,7 @@ from .yaml_tools import is_available as has_yaml
 
 if has_yaml:
     from .yaml_tools.test_conf import TestConf as YTestConf
-    from .yaml_tools.tester import Tester as YTester, Result as YResult
+    from .yaml_tools.tester import Tester as YTester
 else:
     class YTestConf(object):
         '''
@@ -71,16 +71,6 @@ else:
 
         def run(self):
             return None
-
-    class YResult(object):
-        '''
-            Mock class when YAML not available
-        '''
-        def __init__(self, failures, success=None, conf=None):
-            pass
-
-        def report(self, label=''):
-            return ''
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
@@ -244,12 +234,14 @@ class Result(object):
     '''
         Analyse and summarize the set of differences found by a diff.
     '''
-    def __init__(self, differences, label=None):
+    def __init__(self, fl_differences, yaml_differences, label=None):
         '''
             differences is expected to be a list of Difference instances
         '''
-        self.differences = differences
+        self.fl_diff = fl_differences
+        self.yaml_diff = yaml_differences
         self.fatal_error = False
+        self.yaml_error = False
         self.success = True
         self.max_abs_err = 0.0
         self.max_rel_err = 0.0
@@ -277,7 +269,16 @@ class Result(object):
         details = []
         error_lines = set()
 
-        for diff in self.differences:
+        details.append('# Start YAML based comparision report\n')
+
+        for diff in self.yaml_diff:
+            self.success = False
+            self.yaml_error = True
+            self.details.append(repr(diff) + '\n')
+
+        details.append('# Start legacy fldiff comparision report\n')
+
+        for diff in self.fl_diff:
             if isinstance(diff, LineCountDifference) \
                or isinstance(diff, MetaCharDifference):
                 self.fatal_error = True
@@ -324,7 +325,9 @@ class Result(object):
         '''
             Return a textual summary of the diff.
         '''
-        if self.fatal_error:
+        if self.yaml_error:
+            summary = 'yaml errors. First one is:\n' + self.details[0]
+        elif self.fatal_error:
             summary = 'fldiff fatal error.\n'
         elif self.success:
             summary = 'no significant difference has been found'
@@ -360,7 +363,10 @@ class Result(object):
         '''
             Check the result of the diff against the given tolerances.
         '''
-        if self.fatal_error:
+        if self.yaml_error:
+            status = 'failed'
+            msg = 'yaml_test errors, see details for more infomations.'
+        elif self.fatal_error:
             status = 'failed'
             msg = 'fldiff fatal error:\n' + self.details
         elif self.success:
@@ -453,16 +459,18 @@ class Differ(object):
         lines1, documents1, _ = dext.extract(lines1)
         lines2, documents2, _ = dext.extract(lines2)
 
-        lines_differences = []
         if self.use_fl:
             lines_differences = self.__diff_lines(lines1, lines2)
+        else:
+            lines_differences = []
 
-        doc_differences = []
         if self.use_yaml:
             doc_differences = self.__test_doc(documents1, documents2)
+        else:
+            doc_differences = []
 
-        return (Result(lines_differences, label=self.options['label']),
-                YResult(doc_differences))
+        return Result(lines_differences, doc_differences,
+                      label=self.options['label'])
 
     def __test_doc(self, docs1, docs2):
         '''

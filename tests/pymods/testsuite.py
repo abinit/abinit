@@ -369,20 +369,12 @@ class FileToTest(object):
         differ = FlDiffer(yaml_test=yaml_test, **opts)
 
         try:
-            fld_result, doc_results = differ.diff(ref_fname, out_fname)
+            fld_result = differ.diff(ref_fname, out_fname)
             fld_result.dump_details(outf)
 
             isok, status, msg = fld_result.passed_within_tols(
                 self.tolnlines, self.tolabs, self.tolrel
             )
-
-            if opts['use_yaml']:
-                doc_results.dump_details(outf)
-                doc_ok = doc_results.passed()
-                if isok and not doc_ok:
-                    msg = 'Problems with YAML documents'
-                    isok = False
-                    status = 'failed'
 
             msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
