@@ -379,10 +379,9 @@ class FileToTest(object):
             msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         except Exception as e:
-            warnings.warn('[{}] Something went wrong with this test:\n{}\n'
-                          .format(self.name, str(e)))
+            warnings.warn('[{}] Something went wrong with this test:\n{}: {}\n'
+                          .format(self.name, e.__class__.__name__, str(e)))
             isok, status, msg = False, 'failed', 'internal error:\n' + str(e)
-            raise e
 
         # Save comparison results.
         self.fld_isok = isok
@@ -706,11 +705,9 @@ class AbinitTestInfoParser(object):
             line_parser = tup[0]
             section = tup[2]
 
-            if section in self.parser.sections():
-                try:
-                    d[key] = self.parser.get(section, key)
-                except NoOptionError:
-                    d[key] = tup[1] # Section exists but option is not specified. Use default value.
+            if (section in self.parser.sections()
+                and self.parser.has_option(section, key)):
+                d[key] = self.parser.get(section, key)
             else:
                 d[key] = tup[1] # Section does not exist. Use default value.
 
@@ -719,11 +716,9 @@ class AbinitTestInfoParser(object):
             try:
                 d[key] = line_parser(d[key])
             except Exception as exc:
-                try:
-                    err_msg = "Wrong line:\n key = %s, d[key] = %s\n in file: %s" % (key, d[key], self.inp_fname)
-                except:
-                    err_msg = "In file %s:\n%s" % (self.inp_fname, str(exc))
-
+                err_msg = ("In file: %s\nWrong line:\n key = %s, d[key] = %s\n"
+                           "%s: %s") % (self.inp_fname, key, d[key],
+                                        exc.__class__.__name__, str(exc))
                 raise self.Error(err_msg)
 
         # At this point info contains the parsed global values.
@@ -740,10 +735,10 @@ class AbinitTestInfoParser(object):
                 raise self.Error(err_msg)
 
             if nprocs > info.max_nprocs:
-                try:
+                if hasattr(self, 'max_nprocs'):
                     err_msg = "in file: %s. nprocs = %s > max_nprocs = %s" % (self.inp_fname, nprocs, self.max_nprocs)
-                except Exception as exc:
-                    err_msg = "in file: %s\n%s" % (self.inp_fname, str(exc))
+                else:
+                    err_msg = "in file: %s\nmax_nprocs is not defined" % self.inp_fname
 
                 raise self.Error(err_msg)
 
@@ -765,12 +760,16 @@ class AbinitTestInfoParser(object):
                 opt = self.parser.get(ncpu_section, key)
                 tup = TESTCNF_KEYWORDS[key]
                 line_parser = tup[0]
-                #
+
                 # Process the line and replace the global value.
                 try:
                     d[key] = line_parser(opt)
-                except:
-                    err_msg = "In file: %s. Wrong line: key: %s, value: %s" % (self.inp_fname, key, d[key])
+                except Exception as exc:
+                    err_msg = ("In file: %s\nWrong line:\n"
+                               " key = %s, d[key] = %s\n %s: %s") % (
+                                   self.inp_fname, key, d[key],
+                                   exc.__class__.__name__, str(exc)
+                               )
                     raise self.Error(err_msg)
 
                 #print(self.inp_fname, d["max_nprocs"])
