@@ -288,9 +288,9 @@ class FileToTest(object):
     #  atr_name,   default, conversion function. None designes mandatory attributes.
     _attrbs = [
         ("name",     None, str),
-        ("tolnlines",None, int),    # fldiff tolerances
-        ("tolabs",   None, float),
-        ("tolrel",   None, float),
+        ("tolnlines", 0, int),    # fldiff tolerances
+        ("tolabs",   0, float),
+        ("tolrel",   0, float),
         ("fld_options","",str) ,     # options passed to fldiff.
         ("fldiff_fname","",str),
         ("hdiff_fname","",str),
