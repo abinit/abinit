@@ -295,7 +295,7 @@ class FileToTest(object):
         ("fldiff_fname","",str),
         ("hdiff_fname","",str),
         ("diff_fname","",str),
-        ("use_yaml","yes",str),
+        ("use_yaml","no",str),
         #("pydiff_fname","",str),
     ]
 
