@@ -24,7 +24,7 @@ class TestConf:
         Interface to access parameters and constraints defined by the
         configuration file by following the traversal of the data tree.
     '''
-    def __init__(self, src):
+    def __init__(self, src=None):
         self.known_params = conf_parser.parameters.copy()
         self.param_stack = []
         self.constraints_stack = []
@@ -32,13 +32,14 @@ class TestConf:
         self.current_path = []
 
         self.tree = conf_parser.make_tree(get_default_conf())
-        try:
-            conf = yaml_parse(src)
-        except YAMLError:
-            conf = {}
 
-        new_tree = conf_parser.make_tree(conf)
-        self.tree.update(new_tree)
+        if src is not None:
+            try:
+                conf = yaml_parse(src)
+            except YAMLError:
+                conf = {}
+            new_tree = conf_parser.make_tree(conf)
+            self.tree.update(new_tree)
 
     @classmethod
     def from_file(cls, filename):

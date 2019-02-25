@@ -417,7 +417,7 @@ class Differ(object):
             self.options['tolerance_rel'] = options['tolerance']
 
         self.use_fl = options['use_fl']
-        if has_yaml and yaml_test:
+        if has_yaml:
             self.use_yaml = options['use_yaml']
             if self.use_yaml:
                 if 'file' in yaml_test and yaml_test['file']:
@@ -426,7 +426,7 @@ class Differ(object):
                 elif 'test' in yaml_test and yaml_test['test']:
                     self.yaml_test = YTestConf(yaml_test['test'])
                 else:
-                    self.use_yaml = False
+                    self.yaml_test = YTestConf()
         else:
             self.use_yaml = False
 
