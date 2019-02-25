@@ -1,7 +1,7 @@
 from inspect import isclass
 from numpy import ndarray
 from .errors import UnknownParamError, ValueTypeError, InvalidNodeError
-from .structures import normalize_attr
+from .register_tag import normalize_attr
 
 
 def empty_tree():
