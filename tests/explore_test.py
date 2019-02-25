@@ -1,30 +1,49 @@
 #!/usr/bin/env python
 '''\
+This is the explore_test shell. This tool let you inspect and explore YAML
+files defining a test for Abinit. It also provide documentation about the
+constraints and parameters available in test config files.
+'''
+
+from __future__ import print_function, division, unicode_literals
+from pymods.yaml_tools import is_available
+
+intro = '''\
 Welcome to the explore_test shell.
 This tool let you inspect and explore a YAML file defining a test for Abinit.
+You can also browse informations about parameters and constraints used to
+define tests with the command show.
 
 If your Python platform has readline support you can use TAB to auto-complete
 command and some arguments.
 
 Type help or ? to get the list of commands.
 '''
-from __future__ import print_function, division, unicode_literals
-from pymods.yaml_tools import is_available
+
 
 if __name__ != '__main__':
-    raise ImportError('testconf_explorer.py is not an importable module.')
+    raise ImportError('explore_test.py is not an importable module.')
 
 if not is_available:
     print("YAML or Numpy is not available. This script cannot run.")
     exit()
 else:
-    import sys
     import os
+    import glob
     import cmd
+    import argparse
     from subprocess import call
     from pymods.yaml_tools.test_conf import TestConf
     from pymods.yaml_tools.conf_parser import conf_parser
     from pymods.yaml_tools.errors import ConfigError
+
+try:
+    import readline
+    # remove / and ~ from delimiters to avoid problem with file path completion
+    # readline.set_completer_delims(' \t\n`!@#$%^&*()-=+[{]}\\|;:\'",<>?')
+    readline.set_completer_delims(' \n\t')
+except ImportError:
+    pass
 
 
 def show_cons(cons, used=False):
@@ -170,8 +189,9 @@ class ExtendedTestConf(TestConf):
 
 
 class Explorer(cmd.Cmd):
-    intro = __doc__
+    intro = intro
 
+    debug = False
     prompt = '() '
     tree = None
     filename = ''
@@ -203,7 +223,7 @@ class Explorer(cmd.Cmd):
         if line == 'EOF':
             line = 'exit'
         if not self.tree and line and line.split(' ')[0] not in [
-            'load',
+            'load', 'edit',
             'shell', '!', 'debug',
             'exit',
             'help', '?',
@@ -255,6 +275,18 @@ class Explorer(cmd.Cmd):
                     self.tree.go_up()
                 elif spec:
                     self.tree.go_down(spec)
+
+    def complete_file_path(self, text):
+        '''
+            Autocompletion for file path arguments.
+        '''
+        return glob.glob(os.path.expanduser(text)+'*')
+
+    def complete_load(self, text, line, begi, endi):
+        return self.complete_file_path(text)
+
+    def complete_edit(self, text, line, begi, endi):
+        return self.complete_file_path(text)
 
     def complete_rel_path(self, text):
         '''
@@ -318,12 +350,14 @@ class Explorer(cmd.Cmd):
         cons_known = self.tree.get_known_constraints()
         param_known = self.tree.get_known_parameters()
         if not name:
+            print('Current scope')
             print('Constraints:')
             print_iter(cons_scope)
             print('\nParameters:')
             print_iter(param_scope)
             print()
         elif name == '*':
+            print('Everything known')
             print('Constraints:')
             print_iter(cons_known)
             print('\nParameters:')
@@ -397,23 +431,34 @@ class Explorer(cmd.Cmd):
 
     def do_edit(self, arg):
         '''
-            Usage: edit
-            Open the current file in an editor and reload it once done.
-            If it doesn't work try running the following in a shell:
+            Usage: edit [FILE]
+            Open a file in an editor and load it once done. If no path is
+            provided the current file is used.  If it doesn't work try running
+            the following in a shell:
             $ export EDITOR='nano'
             Replace nano with any editor you like. Then restart
             testconf_explorer.
         '''
         ed = os.environ.get('EDITOR', 'nano')
+        if arg:
+            filepath = arg
+            path = ''
+        else:
+            if not self.tree:
+                print('No file have been loaded yet.',
+                      'Provide a file name to edit.')
+                return
+            filepath = self.full_path
+            path = '.'.join(self.tree.path)
+
         try:
-            call([ed, self.full_path])
+            call([ed, filepath])
         except FileNotFoundError:
             print('The editor command {} cannot be found.'.format(ed),
                   'You may want to set your EDITOR envrionment variable to',
                   'select a different command.')
         else:
-            path = '.'.join(self.tree.path)
-            self.do_load(self.full_path)
+            self.do_load(filepath)
             self.do_cd(path)
 
     def do_cat(self, arg):
@@ -424,9 +469,6 @@ class Explorer(cmd.Cmd):
         with open(self.full_path) as f:
             print(f.read())
 
-    def do_debug(self, arg):
-        print(eval(arg))
-
     def do_exit(self, arg):
         '''
             Usage: exit
@@ -436,9 +478,30 @@ class Explorer(cmd.Cmd):
         return True
 
 
-explorer = Explorer()
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
+class DebugExplorer(Explorer):
+    def do_debug(self, arg):
+        '''
+            Usage debug PYTHON_EXPR
+            Print the result of any arbitrary python expression.
+            self give access to the main Explorer instance.
+        '''
+        print(eval(arg))
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('file', metavar='FILE', nargs='?', default=None,
+                    help='YAML file defining a test.')
+parser.add_argument('--debug', '-d', action='store_true', default=False,
+                    help='Enable debug command.')
+args = parser.parse_args()
+
+if args.debug:
+    explorer = DebugExplorer()
+else:
+    explorer = Explorer()
+
+if args.file:
+    filename = args.file
     explorer.do_load(filename)
 
 explorer.cmdloop()
