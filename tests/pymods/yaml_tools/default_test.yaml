@@ -5,7 +5,7 @@ tol_rel: 1.0e-10
 Etot:
     tol_abs: 1.0e-7
     tol_eq: 1.0e-6
-    equation: 'etot - sum(components.values())'
+    equation: 'this.Etotal - sum(this.components.values())'
 
 results_gs:
     allow_nan: true
@@ -15,5 +15,5 @@ results_gs:
 
     tol_eq: 1.0e-10
     equations:
-    - 'cartesian_forces.sum(axis=0)'
-    - 'stress_tensor - stress_tensor.transpose()'
+    - 'this.cartesian_forces.sum(axis=0)'
+    - 'this.stress_tensor - this.stress_tensor.transpose()'
