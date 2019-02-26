@@ -274,7 +274,7 @@ class Result(object):
         for diff in self.yaml_diff:
             self.success = False
             self.yaml_error = True
-            self.details.append(repr(diff) + '\n')
+            details.append(repr(diff) + '\n')
 
         details.append('# Start legacy fldiff comparision report\n')
 
@@ -326,7 +326,7 @@ class Result(object):
             Return a textual summary of the diff.
         '''
         if self.yaml_error:
-            summary = 'yaml errors. First one is:\n' + self.details[0]
+            summary = 'yaml errors. First one is:\n' + self.details[1]
         elif self.fatal_error:
             summary = 'fldiff fatal error.\n'
         elif self.success:
@@ -465,7 +465,7 @@ class Differ(object):
             lines_differences = []
 
         if self.use_yaml:
-            doc_differences = self.__test_doc(documents1, documents2)
+            doc_differences, _ = self.__test_doc(documents1, documents2)
         else:
             doc_differences = []
 
