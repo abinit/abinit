@@ -1,7 +1,7 @@
 from inspect import isclass
 from numpy import ndarray
 from .errors import UnknownParamError, ValueTypeError, InvalidNodeError
-from .register_tag import normalize_attr
+from .register_tag import BaseDictWrapper
 
 
 def empty_tree():
@@ -52,28 +52,6 @@ def make_apply_to(type_):
     return apply_to
 
 
-class DictWrapper:
-    '''
-        Allow attribute access and key access to the values of of dictionary to
-        keep a consistent behaviour with AutoMap structures.
-    '''
-    def __init__(self, d):
-        for attr in d:
-            self[attr] = d[attr]
-
-    def __getitem__(self, key):
-        return self.__dict__[normalize_attr(key)]
-
-    def __setitem__(self, key, val):
-        self.__dict__[normalize_attr(key)] = val
-
-    def __repr__(self):
-        r = 'DictWrapper' + '('
-        for attr, val in self.__dict__.items():
-            r += '{}={}, '.format(attr, val)
-        return r[:-2] + ')'
-
-
 class Constraint(object):
     '''
         Represent a constraint to be applied to some piece of data.
@@ -95,11 +73,6 @@ class Constraint(object):
             Return True if the constraint is verified.
         '''
         params = [conf.get_param(p) for p in self.use_params]
-        if isinstance(ref, dict):
-            ref = DictWrapper(ref)
-        if isinstance(tested, dict):
-            tested = DictWrapper(tested)
-
         return self.test(self.value, ref, tested, *params)
 
     def apply_to(self, obj):

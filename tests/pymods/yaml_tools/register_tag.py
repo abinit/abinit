@@ -98,6 +98,58 @@ def yaml_scalar(Cls):
     return Cls
 
 
+class BaseDictWrapper(object):
+    '''
+        Allow attribute access and key access to the values of dictionary to
+        keep a consistent behaviour with AutoMap structures.
+    '''
+    def __init__(self, d={}):
+        for attr in d:
+            self[attr] = d[attr]
+
+    def get(self, key, default=None):
+        nkey = normalize_attr(key)
+        if nkey in self.__dict__:
+            elem = self.__dict__[nkey]
+        else:
+            elem = default
+        if type(elem) is dict:
+            return BaseDictWrapper(elem)
+        else:
+            return elem
+
+    def __getitem__(self, key):
+        nkey = normalize_attr(key)
+        if nkey not in self.__dict__:
+            raise KeyError(key)
+        elem = self.__dict__[nkey]
+        if type(elem) is dict:
+            return BaseDictWrapper(elem)
+        else:
+            return elem
+
+    def __setitem__(self, key, val):
+        if type(val) is dict:
+            val = BaseDictWrapper(val)
+        self.__dict__[normalize_attr(key)] = val
+
+    def __repr__(self):
+        r = self.__class__.__name__ + '('
+        for attr, val in self.__dict__.items():
+            r += '{}={}, '.format(attr, val)
+        return r[:-2] + ')'
+
+    def __iter__(self):
+        for key in self.__dict__:
+            yield key
+
+    def keys(self):
+        return self.__dict__.keys()
+
+    def items(self):
+        return self.__dict__.items()
+
+
 def auto_map(Cls):
     '''
         Automatically append methods from_map, to_map and __repr__ to a
@@ -122,7 +174,7 @@ def auto_map(Cls):
             >>> a['attr .w. --spaces']
             82
     '''
-    class AutoMap(Cls):
+    class AutoMap(Cls, BaseDictWrapper):
         @classmethod
         def from_map(cls, d):
             new = cls()
@@ -132,18 +184,6 @@ def auto_map(Cls):
 
         def to_map(self):
             return self.__dict__
-
-        def __getitem__(self, key):
-            return self.__dict__[normalize_attr(key)]
-
-        def __setitem__(self, key, val):
-            self.__dict__[normalize_attr(key)] = val
-
-        def __repr__(self):
-            r = Cls.__name__ + '('
-            for attr, val in self.__dict__.items():
-                r += '{}={}, '.format(attr, val)
-            return r[:-2] + ')'
 
     AutoMap.__name__ = Cls.__name__
     return AutoMap

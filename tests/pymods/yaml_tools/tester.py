@@ -1,4 +1,5 @@
 from __future__ import print_function, division, unicode_literals
+from .register_tag import BaseDictWrapper
 
 
 class Issue(object):
@@ -28,21 +29,33 @@ class Tester(object):
         self.success = []
 
     def check_this(self, name, ref, tested):
+        if type(ref) is dict:
+            ref = BaseDictWrapper(ref)
+        if type(tested) is dict:
+            tested = BaseDictWrapper(tested)
+
         with self.conf.go_down(name):
             constraints = self.conf.get_constraints_for(ref)
 
             for cons in constraints:
-                success = cons.check(ref, tested, self.conf)
-                if success:
-                    msg = '{} ok'.format(cons.name)
-                    self.success.append(Success(self.conf.path, msg))
-                else:
-                    msg = '{} failed'.format(cons.name)
+                try:
+                    success = cons.check(ref, tested, self.conf)
+                except Exception as e:
+                    msg = ('Exception while checking {}:\n'
+                           '{}: {}').format(cons.name, e.__class__.__name__,
+                                            str(e))
                     self.failures.append(Failure(self.conf.path, msg))
+                else:
+                    if success:
+                        msg = '{} ok'.format(cons.name)
+                        self.success.append(Success(self.conf.path, msg))
+                    else:
+                        msg = '{} failed'.format(cons.name)
+                        self.failures.append(Failure(self.conf.path, msg))
 
-            if hasattr(ref, '__getitem__'):
+            if isinstance(ref, BaseDictWrapper):  # have children
                 for child in ref:
-                    if child not in ref:
+                    if child not in tested:
                         msg = '{} was not present'.format(child)
                         self.failures.append(Failure(self.conf.path, msg))
                     else:
