@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''\
 This is the explore_test shell. This tool let you inspect and explore YAML
 files defining a test for Abinit. It also provide documentation about the
@@ -6,7 +5,13 @@ constraints and parameters available in test config files.
 '''
 
 from __future__ import print_function, division, unicode_literals
-from pymods.yaml_tools import is_available
+import os
+import glob
+import cmd
+from subprocess import call
+from pymods.yaml_tools.test_conf import TestConf
+from pymods.yaml_tools.conf_parser import conf_parser
+from pymods.yaml_tools.errors import ConfigError
 
 intro = '''\
 Welcome to the explore_test shell.
@@ -20,22 +25,6 @@ command and some arguments.
 Type help or ? to get the list of commands.
 '''
 
-
-if __name__ != '__main__':
-    raise ImportError('explore_test.py is not an importable module.')
-
-if not is_available:
-    print("YAML or Numpy is not available. This script cannot run.")
-    exit()
-else:
-    import os
-    import glob
-    import cmd
-    import argparse
-    from subprocess import call
-    from pymods.yaml_tools.test_conf import TestConf
-    from pymods.yaml_tools.conf_parser import conf_parser
-    from pymods.yaml_tools.errors import ConfigError
 
 try:
     import readline
@@ -486,22 +475,3 @@ class DebugExplorer(Explorer):
             self give access to the main Explorer instance.
         '''
         print(eval(arg))
-
-
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('file', metavar='FILE', nargs='?', default=None,
-                    help='YAML file defining a test.')
-parser.add_argument('--debug', '-d', action='store_true', default=False,
-                    help='Enable debug command.')
-args = parser.parse_args()
-
-if args.debug:
-    explorer = DebugExplorer()
-else:
-    explorer = Explorer()
-
-if args.file:
-    filename = args.file
-    explorer.do_load(filename)
-
-explorer.cmdloop()

@@ -416,6 +416,8 @@ class Differ(object):
                 - tolerance_abs: float (default 1.01e-10)
                 - tolerance_rel: float (default 1.01e-10)
                 - label: str (default None)
+                - use_yaml: bool (default True)
+                - use_fl: bool (default True)
         '''
         self.xml_mode = False  # this is the first dirty fix.
         self.options = default_options.get_dict()
@@ -569,37 +571,3 @@ class Differ(object):
                                 # match (here floats)
                                 is_float = not is_float
         return differences
-
-
-if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-
-    # Minimal command line interface for debugging
-
-    parser.add_argument('ref_file', metavar='REF', help='File reference')
-    parser.add_argument('test_file', metavar='TESTED',
-                        help='File to be compared')
-    parser.add_argument('-t', '--tolerance', metavar='TOL', type=float,
-                        default=1.01e-10)
-    parser.add_argument('--include', action='store_true')
-    parser.add_argument('--includeP', action='store_true')
-
-    args = parser.parse_args()
-
-    opts = {
-        'tolerance': args.tolerance,
-        'ignore': False if args.include else True,
-        'ignoreP': False if args.includeP else True
-    }
-
-    ref_name, test_name = args.ref_file, args.test_file
-
-    differ = Differ(**opts)
-    try:
-        fld_result = differ.diff(ref_name, test_name)
-        print(fld_result.dump_details())
-    except Exception as e:
-        print('Something went wrong with this test:\n{}\n'.format(str(e)))
