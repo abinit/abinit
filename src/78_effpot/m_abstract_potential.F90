@@ -57,8 +57,8 @@ module m_abstract_potential
      logical :: has_displacement=.False.
      logical :: has_strain=.False.
      logical :: has_spin=.False.
+     logical :: has_lwf = .False.
      logical :: is_null=.False.   ! if is_null, this term does not exist.
-     integer :: natoms=0, nspins=0
      real(dp), allocatable :: ms(:)
    contains
      procedure :: set_params      ! parameters from input file

@@ -53,7 +53,7 @@ module m_spin_model
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_terms, only: spin_terms_t,  spin_terms_t_finalize, &
        & spin_terms_t_set_external_hfield
-  use m_spin_model_primitive, only: spin_model_primitive_t
+  use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
   use m_spin_mover, only: spin_mover_t
@@ -82,7 +82,7 @@ module m_spin_model
   !! SOURCE
 
   type spin_model_t
-     type(spin_model_primitive_t) :: spin_primitive
+     type(spin_primitive_potential_t) :: spin_primitive
      type(spin_terms_t) :: spin_calculator
      type(spin_hist_t):: spin_hist
      type(spin_mover_t):: spin_mover
@@ -175,7 +175,7 @@ contains
        self%params=params
        call spin_model_t_unit_conversion(self)
        call self%spin_primitive%initialize()
-       !call spin_model_primitive_t_initialize(self%spin_primitive)
+       !call spin_primitive_potential_t_initialize(self%spin_primitive)
        !call self%read_xml(xml_fname)
        call self%read_xml(trim(self%xml_fname)//char(0))
 
@@ -379,7 +379,7 @@ contains
     class(spin_model_t), intent(inout) :: self
     integer , intent(in):: sc_mat(3, 3)
     call self%spin_primitive%make_supercell(sc_mat, self%spin_calculator)
-    !call spin_model_primitive_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
+    !call spin_primitive_potential_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
   end subroutine spin_model_t_make_supercell
   !!***
 

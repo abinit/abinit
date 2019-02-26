@@ -42,7 +42,7 @@ module m_spin_ncfile
   use m_xmpi
   use m_nctk
   use m_spin_hist , only: spin_hist_t
-  use m_spin_model_primitive, only: spin_model_primitive_t
+  use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_spin_terms , only: spin_terms_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_observables, only : spin_observable_t
@@ -232,7 +232,7 @@ end subroutine spin_ncfile_t_def_ob
   subroutine spin_ncfile_t_write_primitive_cell(self, prim)
 
     class(spin_ncfile_t), intent(inout) :: self
-    type(spin_model_primitive_t) :: prim
+    type(spin_primitive_potential_t) :: prim
     integer :: ncerr
 
 #if defined HAVE_NETCDF

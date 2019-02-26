@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_spin_model_primitive
+!!****m* ABINIT/m_spin_primitive_potential
 !! NAME
-!! m_spin_model_primitive
+!! m_spin_primitive_potential
 !!
 !! FUNCTION
 !! This module contains the atomic structures and the spin hamiltonian inside the primitive cell
@@ -9,14 +9,14 @@
 !! the hamiltonian in supercell. It is also used as input for the magnon band structure calculation.
 !!
 !! Datatypes:
-!!  spin_model_primitive_t
+!!  spin_primitive_potential_t
 !!
 !! Subroutines:
 !! 
-!!  * spin_model_primitive_t_initialize
-!!  * spin_model_primitive_t_read_xml
-!!  * spin_model_primitive_t_make_supercell
-!!  * spin_model_primitive_t_finalize
+!!  * spin_primitive_potential_t_initialize
+!!  * spin_primitive_potential_t_read_xml
+!!  * spin_primitive_potential_t_make_supercell
+!!  * spin_primitive_potential_t_finalize
 !!
 !!
 !! COPYRIGHT
@@ -34,13 +34,14 @@
 #endif
 #include "abi_common.h"
 
-module m_spin_model_primitive
+module m_spin_primitive_potential
   use iso_c_binding
   use m_dynmaic_array
   use m_mathfuncs
   use defs_basis
   use m_abicore
   use m_errors
+  use m_primitive_potential
   use m_supercell
   use m_multibinit_global
   use m_spin_terms
@@ -109,7 +110,7 @@ module m_spin_model_primitive
      end subroutine xml_free_spin
   end interface
 
-  type spin_model_primitive_t
+  type, public, extends(primitive_potential_t) :: spin_primitive_potential_t
      integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
      real (dp) :: ref_energy, unitcell(3,3)
      ! integer, allocatable :: masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
@@ -133,31 +134,31 @@ module m_spin_model_primitive
      type(real_array_type) :: total_val_list(3,3)
 
        contains
-         procedure:: initialize=> spin_model_primitive_t_initialize
-         procedure:: finalize=> spin_model_primitive_t_finalize
-         procedure:: set_atoms => spin_model_primitive_t_set_atoms
-         procedure:: set_bilinear => spin_model_primitive_t_set_bilinear
-         procedure:: set_exchange=> spin_model_primitive_t_set_exchange
-         procedure:: set_dmi => spin_model_primitive_t_set_dmi
-         procedure:: set_sia=> spin_model_primitive_t_set_sia
-         procedure :: add_input_sia => spin_model_primitive_t_add_input_sia
-         procedure:: read_xml => spin_model_primitive_t_read_xml
-         procedure:: make_supercell => spin_model_primitive_t_make_supercell
-         procedure :: print_terms => spin_model_primitive_t_print_terms
-  end type spin_model_primitive_t
+         procedure:: initialize=> spin_primitive_potential_t_initialize
+         procedure:: finalize=> spin_primitive_potential_t_finalize
+         procedure:: set_atoms => spin_primitive_potential_t_set_atoms
+         procedure:: set_bilinear => spin_primitive_potential_t_set_bilinear
+         procedure:: set_exchange=> spin_primitive_potential_t_set_exchange
+         procedure:: set_dmi => spin_primitive_potential_t_set_dmi
+         procedure:: set_sia=> spin_primitive_potential_t_set_sia
+         procedure :: add_input_sia => spin_primitive_potential_t_add_input_sia
+         procedure:: read_xml => spin_primitive_potential_t_read_xml
+         procedure:: make_supercell => spin_primitive_potential_t_make_supercell
+         procedure :: print_terms => spin_primitive_potential_t_print_terms
+  end type spin_primitive_potential_t
 
 contains
 
-  subroutine spin_model_primitive_t_initialize(self)
+  subroutine spin_primitive_potential_t_initialize(self)
 
-    class(spin_model_primitive_t), intent(inout) :: self
+    class(spin_primitive_potential_t), intent(inout) :: self
    !TODO should something  be done here?
-  end subroutine spin_model_primitive_t_initialize
+  end subroutine spin_primitive_potential_t_initialize
 
-  subroutine spin_model_primitive_t_set_atoms(self, natoms, unitcell, positions, &
+  subroutine spin_primitive_potential_t_set_atoms(self, natoms, unitcell, positions, &
        nspins, index_spin, spinat, gyroratios, damping_factors )
 
-    class(spin_model_primitive_t), intent(inout) :: self
+    class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in):: natoms, nspins, index_spin(:)
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
          spinat(3,natoms), gyroratios(nspins), damping_factors(nspins)
@@ -183,12 +184,12 @@ contains
     self%gyroratios(:)=gyroratios(:)
     self%damping_factors(:)=damping_factors(:)
 
-  end subroutine spin_model_primitive_t_set_atoms
+  end subroutine spin_primitive_potential_t_set_atoms
 
 
-  subroutine  spin_model_primitive_t_set_bilinear(self, n, ilist, jlist, Rlist, vallist)
+  subroutine  spin_primitive_potential_t_set_bilinear(self, n, ilist, jlist, Rlist, vallist)
 
-    class(spin_model_primitive_t), intent(inout) :: self
+    class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:, :,:)
     integer :: idx, ii, ix, iy
@@ -209,10 +210,10 @@ contains
           end do
        end do
     end do
-  end subroutine spin_model_primitive_t_set_bilinear
+  end subroutine spin_primitive_potential_t_set_bilinear
 
-  subroutine spin_model_primitive_t_set_exchange(self, n, ilist, jlist, Rlist, vallist)
-    class(spin_model_primitive_t), intent(inout) :: self
+  subroutine spin_primitive_potential_t_set_exchange(self, n, ilist, jlist, Rlist, vallist)
+    class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
     integer :: idx
@@ -224,12 +225,12 @@ contains
        bivallist(3,3,idx)=vallist(3, idx)
     end do
     call self%set_bilinear(n,ilist,jlist,Rlist,bivallist)
-  end subroutine spin_model_primitive_t_set_exchange
+  end subroutine spin_primitive_potential_t_set_exchange
 
 
-  subroutine spin_model_primitive_t_set_dmi(self, n, ilist, jlist, Rlist, vallist)
+  subroutine spin_primitive_potential_t_set_dmi(self, n, ilist, jlist, Rlist, vallist)
 
-    class(spin_model_primitive_t), intent(inout) :: self
+    class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
     integer :: idx
@@ -245,12 +246,12 @@ contains
             -D(2), D(1), 0.0d0 /),(/3,3/) )
     end do
     !call self%set_bilinear(n,ilist,jlist,Rlist,bivallist)
-    call  spin_model_primitive_t_set_bilinear(self,n,ilist,jlist,Rlist,bivallist)
-  end subroutine spin_model_primitive_t_set_dmi
+    call  spin_primitive_potential_t_set_bilinear(self,n,ilist,jlist,Rlist,bivallist)
+  end subroutine spin_primitive_potential_t_set_dmi
 
-  subroutine spin_model_primitive_t_set_sia(self, n, ilist, k1list, k1dirlist)
+  subroutine spin_primitive_potential_t_set_sia(self, n, ilist, k1list, k1dirlist)
 
-    class(spin_model_primitive_t), intent(inout) :: self
+    class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:)
     real(dp), intent(in) :: k1list(:), k1dirlist(:, :)
     integer :: idx, Rlist(3, n)
@@ -264,11 +265,11 @@ contains
             outer_product(k1dirlist(:,idx), k1dirlist(:, idx))
     end do
     call self%set_bilinear(n,ilist,ilist,Rlist,bivallist)
-    !call  spin_model_primitive_t_set_bilinear(self,n,ilist,ilist,Rlist,bivallist)
-  end subroutine spin_model_primitive_t_set_sia
+    !call  spin_primitive_potential_t_set_bilinear(self,n,ilist,ilist,Rlist,bivallist)
+  end subroutine spin_primitive_potential_t_set_sia
 
-  subroutine spin_model_primitive_t_add_input_sia(self,  input_sia_k1amp, input_sia_k1dir)
-    class(spin_model_primitive_t), intent(inout) :: self
+  subroutine spin_primitive_potential_t_add_input_sia(self,  input_sia_k1amp, input_sia_k1dir)
+    class(spin_primitive_potential_t), intent(inout) :: self
     real(dp), intent(in):: input_sia_k1amp, input_sia_k1dir(3)
     integer :: in_sia_ind(self%nspins)
     real(dp)::  in_sia_k1amp(self%nspins), in_sia_k1dir(3, self%nspins)
@@ -288,13 +289,13 @@ contains
      !ABI_DEALLOCATE(in_sia_ind)
      !ABI_DEALLOCATE(in_sia_k1amp)
      !ABI_DEALLOCATE(in_sia_k1dir)
-   end subroutine spin_model_primitive_t_add_input_sia
+   end subroutine spin_primitive_potential_t_add_input_sia
 
 
 
-  subroutine spin_model_primitive_t_read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
+  subroutine spin_primitive_potential_t_read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
 
-    class(spin_model_primitive_t), intent(inout) :: self
+    class(spin_primitive_potential_t), intent(inout) :: self
     character(kind=C_CHAR) :: xml_fname(*)
     integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
     logical, optional, intent(in) :: use_exchange, use_dmi, use_sia, use_bi
@@ -376,7 +377,7 @@ contains
     write(*,'(A21)') "Setting up spin model"
     write(*,'(A15)') "Setting system"
     uc(:,:)=transpose(reshape(unitcell, [3,3]))
-    call spin_model_primitive_t_set_atoms(self,natoms,uc, & 
+    call spin_primitive_potential_t_set_atoms(self,natoms,uc, & 
             & reshape(positions, [3, natoms]), &
             & nspins, &
             & index_spin, &
@@ -395,7 +396,7 @@ contains
 
     if(uexc) then
        write(*,'(A23)') "Setting exchange terms"
-       call spin_model_primitive_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
+       call spin_primitive_potential_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
             reshape(exc_Rlist, (/3, exc_nnz /)), &
             reshape(exc_vallist, (/3, exc_nnz/)))
     else
@@ -412,7 +413,7 @@ contains
        ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
        !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
        !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
-       call spin_model_primitive_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
+       call spin_primitive_potential_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
             Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
             vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
        write(*,'(A27)') " Setting uniaxial SIA terms"
@@ -427,7 +428,7 @@ contains
     end if
     if (usia) then
        write(*,'(A18)') "Setting SIA terms"
-       call spin_model_primitive_t_set_sia(self, uni_nnz, uni_ilist, uni_amplitude_list, &
+       call spin_primitive_potential_t_set_sia(self, uni_nnz, uni_ilist, uni_amplitude_list, &
             reshape(uni_direction_list, [3, uni_nnz]) )
     else
        print *, " SIA term in xml file not used"
@@ -441,7 +442,7 @@ contains
 
     if (ubi) then
        write(*,'(A23)') "Setting bilinear terms"
-       call spin_model_primitive_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
+       call spin_primitive_potential_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
             Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
             vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
     else
@@ -455,11 +456,11 @@ contains
          uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
          bi_nnz, p_bi_ilist, p_bi_jlist, p_bi_Rlist, p_bi_vallist)
 
-  end subroutine spin_model_primitive_t_read_xml
+  end subroutine spin_primitive_potential_t_read_xml
 
-  subroutine spin_model_primitive_t_finalize(self)
+  subroutine spin_primitive_potential_t_finalize(self)
 
-    class(spin_model_primitive_t), intent(inout) :: self
+    class(spin_primitive_potential_t), intent(inout) :: self
     integer :: i, j
 
 
@@ -560,11 +561,11 @@ contains
        end do
     end do
 
-  end subroutine spin_model_primitive_t_finalize
+  end subroutine spin_primitive_potential_t_finalize
 
   subroutine spin_ham_set_exchange(self, nnz,  ilist, jlist, Rlist, vallist)
 
-    class(spin_model_primitive_t) , intent(inout) :: self
+    class(spin_primitive_potential_t) , intent(inout) :: self
     integer, intent(in) :: nnz,  ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
     integer :: err
@@ -642,9 +643,9 @@ contains
     j1=find_supercell_index(scell, j0, R1)
   end subroutine find_supercell_ijR
 
-  subroutine spin_model_primitive_t_make_supercell(self, sc_matrix, sc_ham)
+  subroutine spin_primitive_potential_t_make_supercell(self, sc_matrix, sc_ham)
 
-    class(spin_model_primitive_t) , intent(inout) :: self
+    class(spin_primitive_potential_t) , intent(inout) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
     integer :: sc_matrix(3,3), iatoms(self%nspins)
 
@@ -770,11 +771,11 @@ contains
        ABI_DEALLOCATE(sc_spinat)
     endif
     call destroy_supercell(scell)
-  end subroutine spin_model_primitive_t_make_supercell
+  end subroutine spin_primitive_potential_t_make_supercell
 
-  subroutine spin_model_primitive_t_print_terms(self)
+  subroutine spin_primitive_potential_t_print_terms(self)
 
-    class(spin_model_primitive_t) :: self
+    class(spin_primitive_potential_t) :: self
     integer :: i, ii, jj,  R(3)
     character(len=80) :: msg
     real(dp) :: tmp(3, 3)
@@ -817,6 +818,6 @@ contains
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
     
-  end subroutine spin_model_primitive_t_print_terms
+  end subroutine spin_primitive_potential_t_print_terms
 
-end module m_spin_model_primitive
+end module m_spin_primitive_potential

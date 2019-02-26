@@ -61,7 +61,7 @@ contains
   !   real(dp), intent(out) :: stress(:,:)
   ! end subroutine get_stress
 
-   subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+  subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
     class(lattice_effpot_t), intent(inout) :: self  ! the effpot may save the states.
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
@@ -76,5 +76,5 @@ contains
     end if
     MSG_ERROR("calculate for lattice_effpot not yet implemented.")
   end subroutine calculate
- 
+
 end module m_lattice_effpot
