@@ -7,7 +7,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group ()
+!!  Copyright (C) 2008-2019 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -54,7 +54,7 @@ contains
 !! All terms are stored in a rf2_t object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2018 ABINIT group (LB,MT)
+!! Copyright (C) 2015-2019 ABINIT group (LB,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

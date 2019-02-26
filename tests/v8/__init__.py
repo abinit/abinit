@@ -11,6 +11,7 @@ keywords = [
 #: List of input files
 inp_files = [
 "t01.in",
+"t01_triqs2_0.in",
 "t02.in",
 "t03.in",
 "t04.in",
