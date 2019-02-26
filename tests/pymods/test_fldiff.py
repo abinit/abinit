@@ -83,13 +83,13 @@ class TestDiffer:
 
     def test_diff_lines_same(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines1)[0].differences
+        differences = diff.diff_lines(self.lines1, self.lines1)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], ForcedDifference)
 
     def test_diff_lines_float(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines2)[0].differences
+        differences = diff.diff_lines(self.lines1, self.lines2)[0]
         assert len(differences) == 5
         d3 = differences.pop(3)
 
@@ -98,7 +98,7 @@ class TestDiffer:
 
     def test_diff_lines_text(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines3)[0].differences
+        differences = diff.diff_lines(self.lines1, self.lines3)[0]
         assert len(differences) == 4
 
         d2 = differences.pop(1)
@@ -113,13 +113,13 @@ class TestDiffer:
 
     def test_diff_lines_number_not_significant(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines4)[0].differences
+        differences = diff.diff_lines(self.lines1, self.lines4)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], ForcedDifference)
 
     def test_diff_lines_number_significant(self):
         diff = Differ()
-        differences = diff.diff_lines(self.lines1, self.lines5)[0].differences
+        differences = diff.diff_lines(self.lines1, self.lines5)[0]
         assert len(differences) == 1
         assert isinstance(differences[0], LineCountDifference)
         assert differences[0].more == 'file 2'
@@ -129,7 +129,7 @@ class TestDiffer:
         differences = diff.diff_lines(
             [' .0007  564.5e-3  7000.0\n'],
             [' 7.0e-4  5.645D-1  7.0f3\n']
-        )[0].differences
+        )[0]
         assert len(differences) == 0
 
     def test_diff_ignore_blanks(self):
@@ -147,7 +147,7 @@ class TestDiffer:
                 ':A colon \t line.\n\r',
                 ' And a last line'
             ]
-        )[0].differences
+        )[0]
         assert len(differences) == 0
 
 

@@ -137,6 +137,8 @@ default_options = ConstDict({
     'tolerance_abs': 1.01e-10,
     'tolerance_rel': 1.01e-10,
     'label': None,
+    'use_fl': True,
+    'use_yaml': True
 })
 
 
@@ -422,14 +424,14 @@ class Differ(object):
             self.options['tolerance_abs'] = options['tolerance']
             self.options['tolerance_rel'] = options['tolerance']
 
-        self.use_fl = options['use_fl']
+        self.use_fl = self.options['use_fl']
         if has_yaml:
-            self.use_yaml = options['use_yaml']
+            self.use_yaml = self.options['use_yaml']
             if self.use_yaml:
-                if 'file' in yaml_test and yaml_test['file']:
+                if yaml_test and 'file' in yaml_test and yaml_test['file']:
                     self.yaml_test = YTestConf.from_file(
                         yaml_test['file'])
-                elif 'test' in yaml_test and yaml_test['test']:
+                elif yaml_test and 'test' in yaml_test and yaml_test['test']:
                     self.yaml_test = YTestConf(yaml_test['test'])
                 else:
                     self.yaml_test = YTestConf()
@@ -450,7 +452,8 @@ class Differ(object):
         with open(file2, 'rt') as f:
             lines2 = f.readlines()
 
-        return self.diff_lines(lines1, lines2)
+        return Result(*self.diff_lines(lines1, lines2),
+                      label=self.options['label'])
 
     def diff_lines(self, lines1, lines2):
         dext = DataExtractor(xml_mode=self.xml_mode,
@@ -469,8 +472,7 @@ class Differ(object):
         else:
             doc_differences = []
 
-        return Result(lines_differences, doc_differences,
-                      label=self.options['label'])
+        return lines_differences, doc_differences
 
     def __test_doc(self, docs1, docs2):
         '''
