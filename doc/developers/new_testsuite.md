@@ -87,8 +87,8 @@ parameters, constraints and specialization.
 The first level of specialisation match the documents label value from tested files.
 The next levels match the different attributes of the document.
 
-To know the list of constraints and parameters run the program
-_~abinit/tests/explore\_test.py_ and type `show *`. You can then type for
+To get the list of constraints and parameters run the program
+`~abinit/tests/testcli.py shell` and type `show *`. You can then type for
 example `show tol_eq` to learn more about a specific constraints or parameter.
 
 Constraints and parameters have several properties that define their behaviour.
@@ -188,4 +188,29 @@ On the python side:
   These classes may be used as examples for the creation of furter tags.
 - A parser for test configuration have been added and all facilities to do tests
   are in place.
-- A command line tool explore_test.py is available to inspect test configurations.
+- A command line tool testcli.py allow to do different manual actions (see Test CLI)
+
+## Test CLI
+
+A command line tool `~abinit/tests/testcli.py` provide tools to work on writing tests.
+It provide help if run without argument.
+The available sub commands are described here.
+
+### Diff
+
+The __diff__ subcommand provide a command line interface to the fldiff.py
+module. It may be usefull to compare output and reference file without running
+Abinit each time like runtest.py would do.
+
+It allow the user to provide the same parameters that are passed by the
+testsuite.py when runtest.py is used.
+
+Use `~abinit/tests/testcli.py diff --help` for more informations.
+
+### Shell
+
+This tool provide is helpful to explore a test configuration file. It provide a
+shell like interface where the user can move around the tree of the
+configuration file, seeing what constraints define the test.  It also provide
+documentation about contstraints.
+Run `~abinit/tests/testcli.py shell` to use it.
