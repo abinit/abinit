@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function, division, unicode_literals
 import argparse
-import sys
 from pymods.fldiff import Differ
 from pymods.yaml_tools import is_available as has_yaml
 
@@ -16,30 +15,35 @@ class ArgParser(object):
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            description='tool box for Abinit test',
-            usage='''testtools <command> [<args>]
-
-Available commands are
-   diff      make a diff between two output file like the test bot
-   shell     explore a YAML test config and browse the documentation
-''')
-        parser.add_argument('command', help='Subcommand to run')
-        # parse_args defaults to [1:] for args, but you need to
-        # exclude the rest of the args too, or validation will fail
-        args = parser.parse_args(sys.argv[1:2])
-        if not hasattr(self, args.command):
-            print('Unrecognized command')
-            parser.print_help()
-            exit(1)
-        # use dispatch pattern to invoke method with same name
-        getattr(self, args.command)()
-
-    def diff(self):
-        parser = argparse.ArgumentParser(
-            formatter_class=argparse.RawDescriptionHelpFormatter
+            description='tool box for Abinit test'
         )
+        parser.set_defaults(cmd='not a command')
+        sub = parser.add_subparsers()
 
-        # Minimal command line interface for debugging
+        # Diff
+        diff_parser = sub.add_parser('diff', help='make a diff between two'
+                                     ' output file like the test bot')
+        self.mk_diff(diff_parser)
+
+        # Shell
+        shell_parser = sub.add_parser('shell', help='explore a YAML test'
+                                      ' config and browse the documentation',
+                                      description=explore_test.__doc__)
+        self.mk_shell(shell_parser)
+
+        # Run
+        args = parser.parse_args()
+
+        if args.cmd == 'not a command':
+            parser.parse_args(['--help'])
+        else:
+            getattr(self, args.cmd)(args)
+
+    def mk_diff(self, parser):
+        '''
+            Create command line argument parser for the diff subcommand
+        '''
+        parser.set_defaults(cmd='diff')
 
         parser.add_argument('ref_file', metavar='REF', help='File reference')
         parser.add_argument('test_file', metavar='TESTED',
@@ -52,8 +56,10 @@ Available commands are
         parser.add_argument('--no_fl', action='store_true')
         parser.add_argument('--yaml-conf', metavar='YAML_CONF', nargs='?')
 
-        args = parser.parse_args()
-
+    def diff(self, args):
+        '''
+            diff subcommand, manual access to pymods.fldiff.Differ
+        '''
         opts = {
             'tolerance': args.tolerance,
             'ignore': False if args.include else True,
@@ -72,21 +78,34 @@ Available commands are
         try:
             fld_result = differ.diff(ref_name, test_name)
             print(fld_result.dump_details())
+            isok, _, _ = fld_result.passed_within_tols(0, 0.0, 0.0)
+            ecode = 0 if isok else 1
+            exit(ecode)
         except Exception as e:
             print('Something went wrong with this test:\n{}\n'.format(str(e)))
+            exit(1)
 
-    def shell(self):
-        if not has_yaml:
-            print('YAML or Numpy support is not available. That command cannot'
-                  ' run.')
-            return
-        parser = argparse.ArgumentParser(description=explore_test.__doc__)
+    def mk_shell(self, parser):
+        '''
+            Create command line argument parser for the shell subcommand
+        '''
+        parser.set_defaults(cmd='shell')
+
         parser.add_argument('file', metavar='FILE', nargs='?', default=None,
                             help='YAML file defining a test.')
         parser.add_argument('--debug', '-d', action='store_true',
                             default=False, help='Enable debug command.')
-        args = parser.parse_args()
 
+
+    def shell(self, args):
+        '''
+            shell subcommand, explore test config files and browse constraints
+            and parameters documentation.
+        '''
+        if not has_yaml:
+            print('YAML or Numpy support is not available. That command cannot'
+                  ' run.')
+            exit(1)
         if args.debug:
             explorer = explore_test.DebugExplorer()
         else:
@@ -97,6 +116,7 @@ Available commands are
             explorer.do_load(filename)
 
         explorer.cmdloop()
+        exit()
 
 
 ArgParser()
