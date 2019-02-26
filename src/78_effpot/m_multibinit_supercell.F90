@@ -27,14 +27,14 @@
 #endif
 #include "abi_common.h"
 
-module m_supercell
+module m_multibinit_supercell
   use defs_basis
   use m_abicore
   use m_errors
   use m_supercell
   implicit none
 
-  type ,public :: supercell_t
+  type ,public :: mb_supercell_t
      integer :: sc_matrix(3,3)
      integer :: ncell
      logical :: has_lattice=.False.
@@ -56,16 +56,16 @@ module m_supercell
    contains
      procedure:: initialize
      procedure :: finalize
-  end type supercell_t
+  end type mb_supercell_t
 contains
 
   subroutine initialize(self)
-    class(supercell_t), intent(inout) :: self
+    class(mb_supercell_t), intent(inout) :: self
   end subroutine initialize
 
 
   subroutine finalize(self)
-    class(supercell_t), intent(inout) :: self
+    class(mb_supercell_t), intent(inout) :: self
   end subroutine finalize
 
-end module m_supercell
+end module m_multibinit_supercell

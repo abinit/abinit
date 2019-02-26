@@ -28,8 +28,9 @@ module m_unitcell
   use defs_basis
   use m_abicore
   use m_errors
-  use m_supercell, only: supercell
-  use m_supercell_maker , only: supercell_maker
+  use m_multibinit_supercell, only: mb_supercell_t
+  use m_supercell_maker , only: supercell_maker_t
+  use m_multibinit_dataset, only : multibinit_dtset_type
 
   implicit none
 
@@ -53,11 +54,14 @@ module m_unitcell
    contains
      procedure:: initialize
      procedure :: finalize
+     procedure :: fill_supercell
   end type unitcell_t
 contains
 
-  subroutine initialize(self)
+  subroutine initialize(self, params, fnames)
     class(unitcell_t), intent(inout) :: self
+    type(multibinit_dtset_type), intent(in) :: params
+    character(len=fnlen), intent(in) :: fnames(17)
   end subroutine initialize
 
 
@@ -68,6 +72,7 @@ contains
   subroutine fill_supercell(self, supercell_maker, supercell)
     class(unitcell_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: supercell_maker
+    type(mb_supercell_t), intent(inout) :: supercell
   end subroutine fill_supercell
 
 end module m_unitcell

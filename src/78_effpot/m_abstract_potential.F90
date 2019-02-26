@@ -194,8 +194,6 @@ contains
   subroutine effpot_list_t_initialize(self, natoms, nspins)
     class (effpot_list_t), intent(inout) :: self
     integer, intent(in) :: natoms, nspins
-    self%natoms=natoms
-    self%nspins=nspins
     ABI_ALLOCATE(self%force_tmp, (3, natoms))
     ABI_ALLOCATE(self%bfield_tmp, (3, nspins))
   end subroutine effpot_list_t_initialize

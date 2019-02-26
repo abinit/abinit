@@ -53,6 +53,7 @@ module m_lwf_mover
      procedure :: run_one_step
   end type lwf_mover_t
 
+contains
   subroutine run_one_step(self, effpot)
     ! run one step. (For MC also?)
     class(lwf_mover_t), intent(inout) :: self

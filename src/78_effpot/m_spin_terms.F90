@@ -51,6 +51,7 @@ module  m_spin_terms
 
   type, extends(abstract_potential_t) :: spin_terms_t
      real(dp) :: etot
+     integer :: nspins
      ! ispin_prim: index in the spin model in primitive cell, which is used as the index of sublattice.
      ! rvec: supercell R vector.
      integer, allocatable :: ispin_prim(:), rvec(:,:)
@@ -174,7 +175,7 @@ contains
 
     ABI_ALLOCATE( self%ispin_prim, (nspins))
     ABI_ALLOCATE(self%rvec, (3, nspins))
-    
+
     if (iam_master) self%ispin_prim(:)=ispin_prim(:)
 
     call xmpi_bcast(self%ispin_prim, master, comm, ierr)
@@ -185,7 +186,7 @@ contains
     do i=1,nspins
        self%S(:,i)=self%spinat(:,i)/self%ms(i)
     end do
-    
+
     self%has_external_hfield=.False.
     !self%has_uniaxial_anistropy=.False.
     !self%has_exchange=.False.
@@ -196,7 +197,7 @@ contains
     ABI_ALLOCATE( self%gyro_ratio, (nspins))
     ABI_ALLOCATE( self%gilbert_damping, (nspins) )
     ! Defautl gyro_ratio
-   if(iam_master)  self%gyro_ratio(:)=gyro_ratio !gyromagnetic_ratio
+    if(iam_master)  self%gyro_ratio(:)=gyro_ratio !gyromagnetic_ratio
     call xmpi_bcast(self%gyro_ratio, master, comm, ierr)
     if(iam_master) self%gilbert_damping(:)=damping
     call xmpi_bcast(self%gilbert_damping, master, comm, ierr)
@@ -347,23 +348,23 @@ contains
     endif
 
     if(iam_master) then
-    if (self%has_dipdip) then
-       continue
-       ! TODO implement dipdip and add it
-    endif
+       if (self%has_dipdip) then
+          continue
+          ! TODO implement dipdip and add it
+       endif
 
-    ! calculate energy from bilinear terms (all the above ones)
-    do i=1, self%nspins
-       do j=1, 3
-          energy=energy-(Heff(j, i)*S(j,i)*self%ms(i))*0.5_dp
+       ! calculate energy from bilinear terms (all the above ones)
+       do i=1, self%nspins
+          do j=1, 3
+             energy=energy-(Heff(j, i)*S(j,i)*self%ms(i))*0.5_dp
+          end do
        end do
-    end do
 
-    if (self%has_external_hfield) then
-       call spin_terms_t_calc_external_Heff(self,self%Htmp)
-       Heff = Heff+self%Htmp
-       energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
-    endif
+       if (self%has_external_hfield) then
+          call spin_terms_t_calc_external_Heff(self,self%Htmp)
+          Heff = Heff+self%Htmp
+          energy= energy- self%Htmp(j, i)*S(j, i)*self%ms(i)
+       endif
     endif
 
   end subroutine spin_terms_t_total_Heff

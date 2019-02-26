@@ -12,6 +12,12 @@ module m_mathfuncs
   use m_random_xoroshiro128plus
   implicit none
 
+  interface mat33det
+     procedure  real_mat33det
+     procedure  int_mat33det
+  end interface mat33det
+
+
 contains
 
   ! vector cross production
@@ -63,6 +69,30 @@ contains
     !a(:,:)=1.0
     !a(:,1)=0.2
   end subroutine rand_normal_builtin
+
+
+  function real_mat33det(A) result(det)
+    real(dp), intent(in) :: A(3,3)
+    real(dp) :: det
+    DET =   A(1,1)*A(2,2)*A(3,3)  &
+         - A(1,1)*A(2,3)*A(3,2)  &
+         - A(1,2)*A(2,1)*A(3,3)  &
+         + A(1,2)*A(2,3)*A(3,1)  &
+         + A(1,3)*A(2,1)*A(3,2)  &
+         - A(1,3)*A(2,2)*A(3,1)
+  end function real_mat33det
+
+  function int_mat33det(A) result(det)
+    integer, intent(in) :: A(3,3)
+    integer :: det
+    DET =   A(1,1)*A(2,2)*A(3,3)  &
+         - A(1,1)*A(2,3)*A(3,2)  &
+         - A(1,2)*A(2,1)*A(3,3)  &
+         + A(1,2)*A(2,3)*A(3,1)  &
+         + A(1,3)*A(2,1)*A(3,2)  &
+         - A(1,3)*A(2,2)*A(3,1)
+  end function int_mat33det
+
 
   ! wrapper of  normal random number generator using ziggurat method.
   ! rnor implemented in ziggruat.F90
