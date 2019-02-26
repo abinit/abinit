@@ -1781,7 +1781,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  integer :: idir, iatom, pertcase
  integer :: ip,npoints,skw_cplex !, edos_intmeth
  logical :: downsample
- real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
+ real(dp),parameter :: tol_enediff=0.001_dp*eV_Ha
  character(len=fnlen) :: wfk_fname_dense
  character(len=500) :: msg
  real(dp) :: dksqmax,ang,con,cos_phi,cos_theta,sin_phi,sin_theta,nelect
@@ -2344,7 +2344,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    do it=1,new%ntemp
      if (mod(it, nprocs) /= my_rank) cycle ! MPI parallelism.
      ! Use Fermi-Dirac occopt
-     call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), spinmagntarget, dtset%prtvol)
+     call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(it), dtset%spinmagntarget, dtset%prtvol)
      call ebands_set_nelect(tmp_ebands, ebands%nelect, dtset%spinmagntarget, msg)
      new%mu_e(it) = tmp_ebands%fermie
      !
