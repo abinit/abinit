@@ -381,13 +381,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1 .and. mxhist >= 3)then   ! then .and. hist%mxhist > 3 
+ if(specs%nhist/=-1)then   ! then .and. hist%mxhist > 3 
   nhisttot = specs%nhist! We don't need to store all the history
- elseif(mxhist > 0 .and. mxhist  < 3)then
+ endif 
+ !MS if for less than three MD steps to restart from single snapshot .nc file
+ if(mxhist > 0 .and. mxhist  < 3)then
   nhisttot = mxhist ! Less than three MD-Steps
  end if
 
- write(*,*) "mxhist", mxhist
+ write(std_out,*) 'nhisttot: ', nhisttot
 
  call abihist_init(hist,ab_mover%natom,nhisttot,specs%isVused,specs%isARused)
  call abiforstr_ini(preconforstr,ab_mover%natom)
@@ -627,7 +629,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
 
 !          Check if the simulation did not diverge...
-           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E2)then
+           if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then
 !            We set to false the flag corresponding to the bound
              effective_potential%anharmonics_terms%bounded = .FALSE.
              if(need_verbose.and.me==master)then
@@ -874,7 +876,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      if (skipcycle) exit
 
 !DEBUG
-     write(std_out,*)' m_mover : will call precpred_1geo'
+!     write(std_out,*)' m_mover : will call precpred_1geo'
 !    call flush(std_out)
 !ENDDEBUG
 
