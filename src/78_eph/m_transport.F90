@@ -344,6 +344,7 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands,extr
  ! Same doping case as sigmaph
  new%ndop = 1
  ABI_MALLOC(new%eph_mu_e,(new%ntemp))
+ ABI_MALLOC(new%transport_mu_e,(new%ntemp))
  new%eph_extrael = extrael_fermie(1)
  new%eph_fermie = extrael_fermie(2)
  new%transport_fermie = dtset%eph_fermie
