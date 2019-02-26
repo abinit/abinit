@@ -30,6 +30,8 @@ def tol_rel(tol, ref, tested):
         Valid if the relative difference between the values is below the
         given tolerance.
     '''
+    if abs(ref) + abs(tested) == 0.0:
+        return True
     return abs(ref - tested) / (abs(ref) + abs(tested)) < tol
 
 
@@ -48,6 +50,8 @@ def tol(tolv, ref, tested):
         Valid if both relative and absolute differences between the values
         are below the given tolerance.
     '''
+    if abs(ref) + abs(tested) == 0.0:
+        return True
     return (abs(ref - tested) / (abs(ref) + abs(tested)) < tolv and
             abs(ref - tested) < tolv)
 
