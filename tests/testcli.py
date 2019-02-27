@@ -17,8 +17,7 @@ class ArgParser(object):
         parser = argparse.ArgumentParser(
             description='tool box for Abinit test'
         )
-        parser.set_defaults(cmd='not a command')
-        sub = parser.add_subparsers()
+        sub = parser.add_subparsers(dest='cmd')
 
         # Diff
         diff_parser = sub.add_parser('diff', help='make a diff between two'
@@ -34,17 +33,15 @@ class ArgParser(object):
         # Run
         args = parser.parse_args()
 
-        if args.cmd == 'not a command':
-            parser.parse_args(['--help'])
-        else:
+        if hasattr(self, args.cmd):
             getattr(self, args.cmd)(args)
+        else:
+            parser.parse_args(['--help'])
 
     def mk_diff(self, parser):
         '''
             Create command line argument parser for the diff subcommand
         '''
-        parser.set_defaults(cmd='diff')
-
         parser.add_argument('ref_file', metavar='REF', help='File reference')
         parser.add_argument('test_file', metavar='TESTED',
                             help='File to be compared')
@@ -89,8 +86,6 @@ class ArgParser(object):
         '''
             Create command line argument parser for the shell subcommand
         '''
-        parser.set_defaults(cmd='shell')
-
         parser.add_argument('file', metavar='FILE', nargs='?', default=None,
                             help='YAML file defining a test.')
         parser.add_argument('--debug', '-d', action='store_true',
