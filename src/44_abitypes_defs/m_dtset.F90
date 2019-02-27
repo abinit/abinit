@@ -488,6 +488,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_restart        = dtin%eph_restart
  dtout%eph_task           = dtin%eph_task
+ dtout%eph_stern          = dtin%eph_stern
  dtout%eph_transport      = dtin%eph_transport
 
  dtout%ph_wstep          = dtin%ph_wstep
@@ -2353,7 +2354,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit eshift'
  list_vars=trim(list_vars)//' esmear exchmix exchn2n3d extrapwf eph_frohlichm'
  list_vars=trim(list_vars)//' eph_tols_idelta eph_intmeth eph_extrael eph_fermie eph_frohlich eph_fsmear'
- list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_restart eph_task eph_transport'
+ list_vars=trim(list_vars)//' eph_fsewin eph_mustar eph_ngqpt_fine eph_restart eph_stern eph_task eph_transport'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'

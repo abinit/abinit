@@ -556,7 +556,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: my_rank,nsppol,nkpt,iq_ibz, my_npert, nqeff
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
- integer :: eph_sternheimer, mcgq, mgscq, nband_kq
+ integer :: mcgq, mgscq, nband_kq
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine,iq_bz_fine
@@ -763,6 +763,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_DT_MALLOC(cwaveprj, (natom, nspinor*usecprj))
  ABI_MALLOC(displ_cart, (2,3,cryst%natom,3*cryst%natom))
  ABI_MALLOC(displ_red, (2,3,cryst%natom,3*cryst%natom))
+ ABI_MALLOC(tpp_red, (natom3, natom3))
 
  !if (sigma%calc_velocity == 1) then
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
@@ -881,15 +882,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_CALLOC(vtrial, (nfftf, nspden))
  ABI_CALLOC(vlocal, (n4, n5, n6, gs_hamkq%nvloc))
 
- eph_sternheimer = 0; if (dtset%useric == 666) eph_sternheimer = 1
- if (eph_sternheimer == 1) then
+ if (dtset%eph_stern == 1) then
    ! Read vtrial from POT file (in principle one may store vtrial in the DVDB!)
    call wrtout(std_out, " Reading vtrial potential for Sternheimer from external file.")
    call read_rhor("foo_POT", cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
      allow_interp=.True.)
    call hdr_free(pot_hdr)
-   !vtrial = zero
-   !call transgrid(1, mpi_enreg, nspden, -1, 0, 0, paral_kgb, pawfgr, rhodum, rhodum, cgrvtrial, vtrial_ptr)
  end if
 
  if (sigma%nwr > 0) then
@@ -1214,7 +1212,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kq, istwf_kq, npw_kq, kg_kq)
        end if
 
-       if (eph_sternheimer == 1 .and. .not. sigma%imag_only) then
+       if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          ABI_CALLOC(cg1s_kq, (2, npw_kq*nspinor, natom3, nbcalc_ks))
        end if
 
@@ -1229,7 +1227,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            pawfgr,mpi_enreg,vtrial,v1scf(:,:,:,imyp),vlocal,vlocal1(:,:,:,:,imyp))
 
          ! This is needed to call dfpt_cgwf (Sternheimer).
-         !if (eph_sternheimer == 1 .and. .not. sigma%imag_only) then
+         !if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
          call load_spin_hamiltonian(gs_hamkq, spin, vlocal=vlocal, with_nonlocal=.true.)
          !end if
 
@@ -1238,10 +1236,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call load_spin_rf_hamiltonian(rf_hamkq, spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-         call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&  ! In
-           cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&          ! In
-           npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&         ! In
-           dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)     ! Out
+         call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert, &  ! In
+           cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k, &          ! In
+           npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq, &         ! In
+           dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)      ! Out
 
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
@@ -1255,9 +1253,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
 
-         ! Activate Sternheimer (we are still inside the loop over my_npert.
+         ! Activate Sternheimer (we are still inside the MPI loop over my_npert).
          ! NB: Assume adiabatic AHC expression to compute the contribution of states above nband_kq.
-         if (eph_sternheimer == 1 .and. .not. sigma%imag_only) then
+         if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
            mcgq = npw_kq * nspinor * nband_kq
            mgscq = npw_kq * nspinor * nband_kq * psps%usepaw
            ABI_CALLOC(cgq, (2, npw_kq * nspinor, nband_kq))
@@ -1301,7 +1299,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !
            grad_berry_size_mpw1 = 0
            do ib_k=1,nbcalc_ks
-             if (mod(ib_k, sigma%nprocs_bq) /= sigma%me_bq) cycle ! MPI parallelism
+             ! MPI parallelism inside comm_bq TODO: To be replaced by parallelsim in projbd inside dfpt_cgwf
+             if (mod(ib_k, sigma%nprocs_bq) /= sigma%me_bq) cycle
              band_ks = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band_ks, ik_ibz, spin)
 
@@ -1319,25 +1318,21 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                !opt_gvnlx1, -15, quit0, out_resid, rf_hamkq, dtset%dfpt_sciss, dtset%tolrde, dtset%tolwfr, &
                usedcwavef0, dtset%wfoptalg, nlines_done)
 
-             !rfact = cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
-             !write(std_out, *)"rfact", rfact
-             !if (rfact > tol12) cg1s_kq(:, :, ipc, ib_k) = cg1s_kq(:, :, ipc, ib_k) / sqrt(rfact)
-
              ! Handle possible convergence issue.
              if (out_resid > dtset%tolwfr) then
                write(msg, "(2(a, es13.5), a, i0, a)") &
-                 "Sternheimer didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
-                 " after nline: ", nlines_done, " iterations. Increase nline and/or decrease tolwfr"
+                 "Sternheimer solver didn't convergence: out_resid:", out_resid, " >= tolwfr: ", dtset%tolwfr, &
+                 " after nline: ", nlines_done, " iterations. Increase nline and/or decrease tolwfr."
                MSG_ERROR(msg)
              else if (out_resid < zero) then
                MSG_ERROR(sjoin(" out_resid: ", ftoa(out_resid), ", nlines_done:", itoa(nlines_done)))
              else
-               !write(std_out, *)"Converged with out_resid: ", out_resid, " after ", nlines_done, " iterations."
+               if (my_rank == master .and. dtset%prtvol > 10) then
+                 write(std_out, *)"Converged with out_resid: ", out_resid, " after ", nlines_done, " iterations."
+                 write(std_out,*)"|psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
+               end if
              end if
 
-             if (isqzero) then
-               ! Prepare DW contribution.
-             end if
            end do ! ib_k
 
            ABI_FREE(cgq)
@@ -1369,9 +1364,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(v1scf)
 
        ! Add contribution to Fan-Migdal self-energy stemming from Sternheimer.
-       if (eph_sternheimer == 1 .and. .not. sigma%imag_only) then
-         call xmpi_sum(cg1s_kq, sigma%comm_pert, ierr)
-         ! h1kets_kq are MPI distributed inside comm_pert but we need off-diagonal terms --> collect results.
+       if (dtset%eph_stern == 1 .and. .not. sigma%imag_only) then
+         call xmpi_sum(cg1s_kq, comm, ierr)
+         ! h1kets_kq are MPI distributed inside comm_pert but we need off-diagonal pp' terms --> collect results.
          ABI_CALLOC(h1kets_kq_allperts, (2, npw_kq*nspinor, natom3, nbcalc_ks))
          do imyp=1,my_npert
            ipc = sigma%my_pinfo(3, imyp)
@@ -1379,28 +1374,25 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          end do
          call xmpi_sum(h1kets_kq_allperts, sigma%comm_pert, ierr)
 
-         ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nkqp'}>
-         ABI_MALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
+         ! Compute S_pp' = <D_{qp} vscf u_nk|u'_{nk+qp'}>
+         ABI_CALLOC(stern_ppb, (2, natom3, natom3, nbcalc_ks))
          do ib_k=1,nbcalc_ks
            call cg_zgemm("C", "N", npw_kq*nspinor, natom3, natom3, &
              h1kets_kq_allperts(:,:,:,ib_k), cg1s_kq(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
              !cg1s_kq(:,:,:,ib_k), h1kets_kq_allperts(:,:,:,ib_k), stern_ppb(:,:,:,ib_k))
          end do
-         !stern_ppb = -stern_ppb
-         !stern_ppb(2, :, :, :) = zero
-         !do ib_k=1,nbcalc_ks
-         !  write(std_out, *) stern_ppb, (:, :, :, ib_k)
-         !end do
 
-         ! Compute contribution for M > sigma%nbsum using static approximation for self-energy.
+         ! Compute contribution for M > sigma%nbsum using static+adiabatic approximation for self-energy.
          do nu=1,natom3
            wqnu = phfrq(nu); if (wqnu < EPH_WTOL) cycle
            ! Get phonon occupation for all temperatures.
            nqnu_tlist = occ_be(wqnu, sigma%kTmesh(:), zero)
+
+           ! Compute T_pp'(q,nu) matrix in reduced coordinates.
+           !if (isqzero) call get_tpp(displ_red, nu, tpp_red)
+
            do ib_k=1,nbcalc_ks
-             ! sum_{pp'} d_p* Stern_{pp'} d_p'
-             !D = displ_red(:, :, :, nu), S = stern_ppb(:, :, :, ib_k)
-             !vec_natom3(2, natom3)
+             ! sum_{pp'} d_p* Stern_{pp'} d_p' with d = displ_red(:, :, :, nu), S = stern_ppb(:, :, :, ib_k)
              vec_natom3 = zero
              call cg_zgemm("N", "N", natom3, natom3, 1, stern_ppb(:,:,:,ib_k), displ_red(:,:,:,nu), vec_natom3)
              dotri = cg_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
@@ -1408,11 +1400,20 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              rfact = dotri(1)
              !rfact = cg_real_zdotc(natom3, displ_red(:,:,:,nu), vec_natom3)
              rfact = rfact * sigma%wtq_k(iq_ibz) / (two * wqnu)
-             frfact = rfact / sigma%nprocs_bq
-             !if (.not. isirr_kq) rfact = zero
+             ! Need to rescale by nprocs because for the time being all procs enter this part (DOH!)
+             rfact = rfact / nprocs
+
              do it=1,sigma%ntemp
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + (two * nqnu_tlist(it) + one) * rfact
                !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
+
+               ! Compute DW term for m > nband
+               !if (isqzero) then
+               !  sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
+               !  sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
+               !  !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
+               !end if
+
                ! TODO Eliashberg functions.
                !if (dtset%prteliash /= 0) then
                !end if
@@ -1760,7 +1761,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call xmpi_sum(gkq0_atm, sigma%comm_bq, ierr)
 
        ABI_MALLOC(gdw2_mn, (bsum_start:bsum_stop, nbcalc_ks))
-       ABI_MALLOC(tpp_red, (natom3, natom3))
 
        ! Integral over IBZ(k). Distributed inside comm_bz
        nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
@@ -1868,7 +1868,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end do ! iq_ibz
 
        ABI_FREE(gdw2_mn)
-       ABI_FREE(tpp_red)
        ABI_FREE(gkq0_atm)
 
        call cwtime_report(" DW completed", cpu_dw, wall_dw, gflops_dw)
@@ -1933,8 +1932,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      end if
 
      if (my_rank == master) then
-       if (ignore_kq /= 0) write(std_out, "(a, 1x, i0)")"Number of ignored kq points:", ignore_kq
-       if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")"Number of ignored kqb states:", ignore_ibsum_kq
+       if (ignore_kq /= 0) write(std_out, "(a, 1x, i0)")"Number of ignored k+q points:", ignore_kq
+       if (ignore_ibsum_kq /= 0) write(std_out, "(a, 1x, i0)")"Number of ignored (k+q, m) states:", ignore_ibsum_kq
      end if
 
      ! Collect results inside comm and write results for this (k-point, spin) to NETCDF file.
@@ -1972,6 +1971,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_FREE(nqnu_tlist)
  ABI_FREE(displ_cart)
  ABI_FREE(displ_red)
+ ABI_FREE(tpp_red)
  ABI_SFREE(cfact_wr)
  ABI_SFREE(dwargs)
  ABI_SFREE(dtw_weights)
@@ -2541,6 +2541,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    " bsum_bstop:", itoa(new%bsum_stop)))
  call wrtout(std_out, sjoin(" Allocating and treating bands from my_bstart: ", itoa(new%my_bstart), &
    " up to my_bstop:", itoa(new%my_bstop)))
+ !if (dtset%eph_stern == 1) call wrtout(" Treating high-energy bands with Sternheimer and static self-energy")
 
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
@@ -3779,9 +3780,7 @@ subroutine sigmaph_setup_qloop(self, dtset, cryst, ebands, dvdb, spin, ikcalc, n
    self%my_nqibz_k = self%nqibz_k
    ABI_REMALLOC(self%myq2ibz_k, (self%my_nqibz_k))
    self%myq2ibz_k = [(iq_ibz, iq_ibz=1, self%nqibz_k)]
-   if (self%qint_method == 1) then
-     call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
-   end if
+   if (self%qint_method == 1) call sigmaph_get_all_qweights(self, cryst, ebands, spin, ikcalc, comm)
 
  case (-4)
    ! Computation of imaginary part.

@@ -1526,9 +1526,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
    end do
    if (qcnt >= db%qcache_size) exit
 
-   if (db_iqpt < 100 .or. (db_iqpt > 1000 .and. mod(db_iqpt, 200) == 1)) then
-     call cwtime(cpu, wall, gflops, "start")
-   end if
+   call cwtime(cpu, wall, gflops, "start")
 
    ! Read all 3*natom potentials inside comm
    call dvdb_readsym_allv1(db, db_iqpt, cplex, nfft, ngfft, v1scf, comm)
@@ -1548,7 +1546,7 @@ subroutine dvdb_qcache_read(db, nfft, ngfft, qselect, comm)
    ABI_FREE(v1scf)
 
    ! Print progress.
-   if (db_iqpt < 100 .or. (db_iqpt > 1000 .and. mod(db_iqpt, 200) == 1)) then
+   if (db_iqpt <= 50 .or. mod(db_iqpt, 50) == 0) then
      call cwtime(cpu, wall, gflops, "stop")
      write(msg,'(2(a,i0),2(a,f8.2))') "Reading q-point [",db_iqpt,"/",db%nqpt, "] completed. cpu:",cpu,", wall:",wall
      call wrtout(std_out, msg)
