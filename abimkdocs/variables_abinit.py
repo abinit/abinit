@@ -6764,7 +6764,7 @@ you want to produce netcdf files in parallel with [[paral_kgb]] = 1 (i.e.
 netcdf4 + hdf5 + MPI-IO). At present, the internal fallbacks provided by
 Abinit do not support netcdf4 so you have to link against an external netcdf
 library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
-compile Abinit. See ~abinit/doc/build/config-examples/ubu_gnu_4.9_mpich.ac for a typical configuration file.
+compile Abinit. See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
 
 Additional note: The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
 The ETSF_IO library was indeed not maintained anymore.
