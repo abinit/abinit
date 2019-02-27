@@ -1403,12 +1403,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              ! Need to rescale by nprocs because for the time being all procs enter this part (DOH!)
              rfact = rfact / nprocs
 
+             ! Compute DW term for m > nband
+             !if (isqzero) then
+             !dw_stern = zero
+             !endif
+
              do it=1,sigma%ntemp
                sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + (two * nqnu_tlist(it) + one) * rfact
                !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkq2 * cfact_wr(:)
 
-               ! Compute DW term for m > nband
+               ! Add DW contribution for this T
                !if (isqzero) then
+               !  gdw2_mn(ibsum, ib_k) = - gdw2_mn(ibsum, ib_k) /  (four * two * wqnu)
                !  sigma%dw_vals(it, ib_k) = sigma%dw_vals(it, ib_k) + rfact
                !  sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + rfact
                !  !if (sigma%nwr > 0) sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + rfact
@@ -5011,13 +5017,15 @@ end subroutine eval_sigfrohl2
 subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, comm)
 
 !Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nqpt, nqbz
+ integer,intent(in) :: comm
  type(sigmaph_t),intent(in) :: sigma
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
+!arrays
  real(dp), intent(in) :: qpts(3,nqpt), qbz(3,nqbz)
- integer,intent(in) :: nqpt, nqbz
  integer,intent(out) :: qselect(nqpt)
- integer,intent(in) :: comm
 
 !Local variables ------------------------------
 !scalars
