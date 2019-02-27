@@ -381,9 +381,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  nhisttot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) nhisttot=nhisttot+1
 !AM_2017 New version of the hist, we just store the needed history step not all of them...
- if(specs%nhist/=-1 .and. mxhist >= 3)then   ! then .and. hist%mxhist > 3 
+ if(specs%nhist/=-1)then   ! then .and. hist%mxhist > 3 
   nhisttot = specs%nhist! We don't need to store all the history
- elseif(mxhist > 0 .and. mxhist  < 3)then
+ endif 
+ if(mxhist > 0 .and. mxhist  < 3)then
   nhisttot = mxhist ! Less than three MD-Steps
  end if
 
