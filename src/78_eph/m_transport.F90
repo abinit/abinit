@@ -42,7 +42,7 @@ module m_transport
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_crystal,        only : crystal_t
- use m_numeric_tools,  only : arth, simpson_int, polyn_interp
+ use m_numeric_tools,  only : bisect, arth, simpson_int, polyn_interp
  use m_fstrings,       only : strcat
  use m_occ,            only : occ_fd, occ_dfd
  use m_pawang,         only : pawang_type
@@ -102,7 +102,11 @@ type,public :: transport_rta_t
    real(dp),allocatable :: kTmesh(:)
    ! a list of temperatures at which to compute the transport
 
-   real(dp),allocatable :: mu_e(:)
+   real(dp),allocatable :: eph_mu_e(:)
+   ! Chemical potential at this carrier concentrarion and temperature from sigeph (lifetime)
+   ! (ntemp, ndop)
+
+   real(dp),allocatable :: transport_mu_e(:)
    ! Chemical potential at this carrier concentrarion and temperature
    ! (ntemp, ndop)
 
@@ -142,10 +146,10 @@ type,public :: transport_rta_t
    ! (nw, 2, 0:nsppol, 3, 3, 1+ntemp)
 
    real(dp),allocatable :: ne(:)
-   ! (ntemp) number of electrons at mu_e(ntemp)
+   ! (ntemp) number of electrons at transport_mu_e(ntemp)
 
    real(dp),allocatable :: nh(:)
-   ! (ntemp) number of holes at mu_e(ntemp)
+   ! (ntemp) number of holes at transport_mu_e(ntemp)
 
    real(dp),allocatable :: n(:,:)
    ! (nw,ntemp) carrier density (n/cm^3)
@@ -165,7 +169,7 @@ type,public :: transport_rta_t
    ! (nw, nsppol, 3, 3, ntemp)
 
    real(dp),allocatable :: mobility_mu(:,:,:,:,:)
-   ! mobility for electrons and holes (first dimension) at mu_e(ntemp)
+   ! mobility for electrons and holes (first dimension) at transport_mu_e(ntemp)
    ! (2, nsppol, 3, 3, ntemp)
  end type transport_rta_t
 !!***
@@ -235,9 +239,7 @@ subroutine transport(wfk0_path, ngfft, ngfftf, dtfil, dtset, ebands, cryst, pawf
  if (ierr/=0) MSG_ERROR(msg)
 
  ! Intialize transport
- transport_rta = transport_rta_new(dtset,sigmaph,cryst,ebands)
- transport_rta%eph_extrael = extrael_fermie(1)
- transport_rta%eph_fermie = extrael_fermie(2)
+ transport_rta = transport_rta_new(dtset,sigmaph,cryst,ebands,extrael_fermie,comm)
  sigmaph%ncid = nctk_noid
  call sigmaph_free(sigmaph)
 
@@ -281,17 +283,26 @@ end subroutine transport
 !!
 !! SOURCE
 
-type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) result (new)
+type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands,extrael_fermie,comm) result (new)
 
 !Arguments -------------------------------------
+ integer, intent(in) :: comm
  type(sigmaph_t),intent(in) :: sigmaph
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
+ real(dp),intent(in) :: extrael_fermie(2)
 
 !Local variables ------------------------------
+ type(ebands_t) :: tmp_ebands
  integer,parameter :: occopt3=3, ndop=10
- integer :: ierr, spin
+ integer :: ierr, itemp, spin
+ integer :: nprocs, my_rank
+ integer :: kptrlatt(3,3)
+ real(dp) :: nelect
+ character(len=500) :: msg
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! Allocate temperature arrays
  new%ntemp = sigmaph%ntemp
@@ -315,15 +326,77 @@ type(transport_rta_t) function transport_rta_new(dtset,sigmaph,cryst,ebands) res
  end if
 
  ! Read lifetimes to ebands object
- new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+ if (any(dtset%sigma_ngkpt /= 0)) then
+   ! If we use sigma_ngkpt downsample ebands
+   kptrlatt = 0
+   kptrlatt(1,1) = dtset%sigma_ngkpt(1)
+   kptrlatt(2,2) = dtset%sigma_ngkpt(2)
+   kptrlatt(3,3) = dtset%sigma_ngkpt(3)
+   tmp_ebands = ebands_downsample(ebands, cryst, kptrlatt, 1, [zero,zero,zero])
+   new%ebands = sigmaph_ebands(sigmaph,cryst,tmp_ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+   call ebands_free(tmp_ebands)
+ else
+   new%ebands = sigmaph_ebands(sigmaph,cryst,ebands,new%linewidth_serta,new%linewidth_mrta,new%velocity,xmpi_comm_self,ierr)
+ end if
+
  ABI_CHECK(allocated(new%velocity),'Could not read velocities from SIGEPH.nc file')
 
  ! Same doping case as sigmaph
  new%ndop = 1
- ABI_MALLOC(new%mu_e,(new%ntemp))
+ ABI_MALLOC(new%eph_mu_e,(new%ntemp))
+ ABI_MALLOC(new%transport_mu_e,(new%ntemp))
+ new%eph_extrael = extrael_fermie(1)
+ new%eph_fermie = extrael_fermie(2)
  new%transport_fermie = dtset%eph_fermie
  new%transport_extrael = dtset%eph_extrael
- new%mu_e = sigmaph%mu_e
+ new%eph_mu_e = sigmaph%mu_e
+ new%transport_mu_e = sigmaph%mu_e
+
+ if (new%transport_fermie/=zero) then
+   new%transport_mu_e = new%transport_fermie
+ end if
+
+ if (new%transport_fermie==zero .and. new%transport_extrael/=new%eph_extrael) then
+   if (new%transport_extrael/=new%eph_extrael) then
+     write(msg,'(a,e18.8,a,e18.8,a)') 'extrael from SIGEPH ',new%transport_extrael,&
+                                    ' and input file ',new%eph_extrael,&
+                                    ' differ. Will recompute the chemical potential'
+   endif
+   call wrtout(std_out, msg)
+   call ebands_copy(ebands, tmp_ebands)
+
+   ! We only need mu_e so MPI parallelize the T-loop.
+   new%transport_mu_e = zero
+   do itemp=1,new%ntemp
+     if (mod(itemp, nprocs) /= my_rank) cycle ! MPI parallelism.
+     ! Use Fermi-Dirac occopt
+     call ebands_set_scheme(tmp_ebands, occopt3, new%kTmesh(itemp), dtset%spinmagntarget, dtset%prtvol)
+     call ebands_set_nelect(tmp_ebands, tmp_ebands%nelect, dtset%spinmagntarget, msg)
+     new%transport_mu_e(itemp) = tmp_ebands%fermie
+     !
+     ! Check that the total number of electrons is correct
+     ! This is to trigger problems as the routines that calculate the occupations in ebands_set_nelect
+     ! are different from the occ_fd that will be used in the rest of the code.
+     nelect = ebands_calc_nelect(tmp_ebands, new%kTmesh(itemp), new%transport_mu_e(itemp))
+
+     if (abs(nelect - tmp_ebands%nelect) > tol6) then
+       ! For T = 0 the number of occupied states goes in discrete steps (according to the k-point sampling)
+       ! for finite doping its hard to find nelect that exactly matches ebands%nelect.
+       ! in this case we print a warning
+       write(msg,'(3(a,f10.6))')&
+         'Calculated number of electrons nelect = ',nelect,&
+         ' does not correspond with ebands%nelect = ',tmp_ebands%nelect,' for T = ',new%kTmesh(itemp)
+       if (new%kTmesh(itemp) == 0) then
+         MSG_WARNING(msg)
+       else
+         MSG_ERROR(msg)
+       end if
+     end if
+   end do ! it
+
+   call ebands_free(tmp_ebands)
+   call xmpi_sum(new%transport_mu_e, comm, ierr)
+ endif
 
 end function transport_rta_new
 !!***
@@ -357,6 +430,7 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
  real(dp) :: dummy_vals(1,1,1,1), dummy_vecs(1,1,1,1,1)
  real(dp),allocatable :: vv_tens(:,:,:,:,:,:) !vvdos_mesh(:), vvdos_tens(:,:,:,:,:,:),
  real(dp),allocatable :: dummy_dosvals(:,:,:,:), dummy_dosvecs(:,:,:,:,:)
+ character(len=500) :: msg
 
  ! create alias for dimensions
  nsppol = self%ebands%nsppol
@@ -470,19 +544,17 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
      end do
 
      ! Compute carrier density at n0
-#if 0
-     ! TODO: This gives SIGFPE in the test farm (don't know why)
-     call polyn_interp(self%vvdos_mesh,self%n(:,itemp),self%ebands%fermie,n0,n0_dy)
-#else
-     min_diff = HUGE(min_diff)
-     do ii=1,self%nw
-       diff = abs(self%vvdos_mesh(ii)-self%ebands%fermie)
-       if (diff<min_diff) then
-         n0 = self%n(ii,itemp)
-         min_diff = diff
-       endif
-     end do
-#endif
+     iw = bisect(self%vvdos_mesh,self%ebands%fermie)
+
+     ! Handle out of range condition.
+     if (iw == 0 .or. iw == self%nw) then
+       write(msg,"(a)")&
+        "Bisection could not find carrier density at Fermi level!"
+       !MSG_WARNING(msg)
+       return
+     end if
+
+     n0 = self%n(iw,itemp)
      self%n(:,itemp) = n0-self%n(:,itemp)
 
      ! Compute mobility
@@ -597,7 +669,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
 
  ! Compute index of valence band
  max_occ = two/(self%nspinor*self%nsppol)
- nelect = ebands_calc_nelect(self%ebands, kT, self%mu_e(1))
+ nelect = ebands_calc_nelect(self%ebands, kT, self%transport_mu_e(1))
  nvalence = nint(nelect - self%eph_extrael)/max_occ
 
  ABI_CALLOC(self%ne,(self%ntemp))
@@ -610,7 +682,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
        eig_nk = self%ebands%eig(ib, ik, ispin)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
-         mu_e = self%mu_e(itemp)
+         mu_e = self%transport_mu_e(itemp)
          self%nh(itemp) = self%nh(itemp) + wtk*(1-occ_fd(eig_nk,kT,mu_e))*max_occ
        end do
      end do
@@ -619,7 +691,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
        eig_nk = self%ebands%eig(ib, ik, ispin)
        do itemp=1,self%ntemp
          kT = self%kTmesh(itemp)
-         mu_e = self%mu_e(itemp)
+         mu_e = self%transport_mu_e(itemp)
          self%ne(itemp) = self%ne(itemp) + wtk*occ_fd(eig_nk,kT,mu_e)*max_occ
        end do
      end do
@@ -651,7 +723,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
        vv_tens = symmetrize_tensor(cryst,vv_tens)
        ! Multiply by the lifetime
        do itemp=1,self%ntemp
-         mu_e = self%mu_e(itemp)
+         mu_e = self%transport_mu_e(itemp)
          kT = self%kTmesh(itemp)
          linewidth = abs(self%linewidth_serta(itemp, ib, ik, ispin))
          if (linewidth < tol12) cycle
@@ -735,7 +807,8 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('kTmesh', "dp", "ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_vals', "dp", "edos_nw, nsppol_plus1, three, three")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('vvdos_tau', "dp", "edos_nw, nsppol_plus1, three, three, ntemp")]))
- NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('mu_e', "dp", "ntemp")]))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('eph_mu_e', "dp", "ntemp")]))
+ NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('transport_mu_e', "dp", "ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('N',  "dp", "edos_nw, ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('L0', "dp", "edos_nw, nsppol, three, three, ntemp")]))
  NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('L1', "dp", "edos_nw, nsppol, three, three, ntemp")]))
@@ -757,7 +830,8 @@ subroutine transport_rta_ncwrite(self, cryst, ncid)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mu_e"), self%mu_e))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eph_mu_e"), self%eph_mu_e))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_mu_e"), self%transport_mu_e))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_mesh"), self%vvdos_mesh))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_vals"), self%vvdos(:,1,:,:,:,1)))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vvdos_tau"),  self%vvdos(:,1,:,:,:,2:)))
@@ -839,7 +913,7 @@ subroutine transport_rta_free(self)
  ABI_SFREE(self%vvdos_mesh)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
- ABI_SFREE(self%mu_e)
+ ABI_SFREE(self%transport_mu_e)
  ABI_SFREE(self%velocity)
  ABI_SFREE(self%linewidth_mrta)
  ABI_SFREE(self%linewidth_serta)

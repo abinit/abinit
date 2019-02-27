@@ -3724,6 +3724,8 @@ type(ebands_t) function ebands_downsample(self, cryst, in_kptrlatt, in_nshiftk, 
    nband, new_nkibz, npwarr, self%nsppol, self%nspinor, self%tphysel, self%tsmear, self%occopt, occ, new_wtk, &
    self%charge, self%kptopt, in_kptrlatt, in_nshiftk, self%shiftk, new_kptrlatt, size(new_shiftk, dim=2), new_shiftk)
 
+ new%fermie = self%fermie
+
  ABI_FREE(istwfk)
  ABI_FREE(nband)
  ABI_FREE(npwarr)
@@ -4385,7 +4387,6 @@ select case (intmeth)
     "Bisection could not find an initial guess for the Fermi level!",ch10,&
     "Possible reasons: not enough bands or wrong number of electrons"
    !MSG_WARNING(msg)
-   ief = ebands%fermie
    return
  end if
 
