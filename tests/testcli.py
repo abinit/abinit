@@ -18,6 +18,7 @@ class ArgParser(object):
             description='tool box for Abinit test'
         )
         sub = parser.add_subparsers(dest='cmd')
+        parser.set_defaults(cmd='not a command')
 
         # Diff
         diff_parser = sub.add_parser('diff', help='make a diff between two'
