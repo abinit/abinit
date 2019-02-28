@@ -173,12 +173,14 @@ class ExtendedTesterConf(TesterConf):
             'cons': self.constraints_stack.copy(),
             'param': self.param_stack.copy(),
             'path': self.current_path,
+            'iter_state': self.current_state,
         }
 
     def restore_state(self, state):
         self.constraints_stack = state['con']
         self.param_stack = state['param']
         self.current_path = state['path']
+        self.use_filter(state['iter_state'])
 
     def use_filter(self, state):
         self.current_state = state
@@ -313,15 +315,16 @@ class Explorer(cmd.Cmd):
 
     def do_filter(self, arg):
         '''
-            Usage: filter [ITERATOR:VALUE]*
+            Usage: filter [ITERATOR:VALUE]...
         '''
-        state = {name: val for name, val in [pair.split(':')
-                                             for pair in arg.split()]}
+        state = {name: int(val) for name, val in [pair.split(':')
+                                                  for pair in arg.split()]}
         if state:
             self.tree.clean_filter()
             self.tree.use_filter(state)
         else:
-            print_iter(self.tree.current_state.items())
+            print_iter('{}:{}'.format(name, val)
+                       for name, val in self.tree.current_state.items())
 
     def do_path(self, arg):
         '''

@@ -148,7 +148,7 @@ class TesterConf:
         self.will_enter = True
         return self
 
-    def clean_filter(self, state):
+    def clean_filter(self):
         '''
             Restore default filter state
         '''
