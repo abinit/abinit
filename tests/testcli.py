@@ -92,7 +92,6 @@ class ArgParser(object):
         parser.add_argument('--debug', '-d', action='store_true',
                             default=False, help='Enable debug command.')
 
-
     def shell(self, args):
         '''
             shell subcommand, explore test config files and browse constraints

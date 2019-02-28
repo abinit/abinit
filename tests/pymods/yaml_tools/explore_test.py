@@ -231,7 +231,7 @@ class Explorer(cmd.Cmd):
         filename = os.path.realpath(os.path.expanduser(arg))
         try:
             self.tree = ExtendedTesterConf.from_file(filename)
-        except FileNotFoundError:
+        except IOError:
             print('File not found.')
         except ConfigError as e:
             print('Invalid yaml config:')
@@ -413,7 +413,7 @@ class Explorer(cmd.Cmd):
         sh = os.environ.get('SHELL', '/bin/sh')
         try:
             call([sh, '-c', arg])
-        except FileNotFoundError:
+        except IOError:
             print('The shell command {} cannot be found.'.format(sh),
                   'You may want to set your SHELL envrionment variable to',
                   'select a different command.')
@@ -442,7 +442,7 @@ class Explorer(cmd.Cmd):
 
         try:
             call([ed, filepath])
-        except FileNotFoundError:
+        except IOError:
             print('The editor command {} cannot be found.'.format(ed),
                   'You may want to set your EDITOR envrionment variable to',
                   'select a different command.')
