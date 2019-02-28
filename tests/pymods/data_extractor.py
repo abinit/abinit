@@ -5,7 +5,7 @@
 from __future__ import print_function, division, unicode_literals
 import re
 from .yaml_tools import is_available as has_yaml
-from .yaml_tools.abinit_metadata import ITERATOR_RANKS
+from .yaml_tools.abinit_iterators import ITERATOR_RANKS
 if has_yaml:
     from .yaml_tools.structures import IterStart
     from .yaml_tools import yaml_parse
