@@ -80,9 +80,9 @@ class Tester(object):
             self.failures.append(Failure(('top level',), msg))
         else:
             # FIXME Use a non linear matching of documents ?
-            # ref_doc['iterator'] could be of some use here
+            # ref_doc['iterators'] could be of some use here
             for ref_doc, tested_doc in zip(self.ref, self.tested):
-                with self.conf.use_filter(ref_doc['iterator']):
+                with self.conf.use_filter(ref_doc['iterators']):
                     self.check_this(ref_doc['obj']['label'], ref_doc['obj'],
                                     tested_doc['obj'])
 
