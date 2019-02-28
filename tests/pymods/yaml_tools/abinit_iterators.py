@@ -1,6 +1,7 @@
 from __future__ import print_function, division, unicode_literals
+import functools
 from .errors import EmptySetError, NotOrderedOverlappingSetError
-ITERATORS = [
+ITERATORS = [  # order matter
     'dtset',
     'timimage',
     'image',
@@ -30,6 +31,7 @@ class IntSet(object):
                 else:
                     return v == obj
         elif isinstance(obj, list):
+            self._type = 'finite'
             self.values = frozenset(obj)
 
             def test(v):
@@ -47,7 +49,6 @@ class IntSet(object):
                         return False
                 else:
                     return v in self.values
-            self._type = 'finite'
 
         elif isinstance(obj, dict):
             fr = obj.get('from', 1)
@@ -74,7 +75,7 @@ class IntSet(object):
             elif to <= fr:
                 raise EmptySetError(obj)
             else:
-                self._test = 'bounded'
+                self._type = 'bounded'
                 self.min = fr
                 self.max = to
 
@@ -85,6 +86,7 @@ class IntSet(object):
                         elif v._type == 'finite':
                             for val in v.values:
                                 if val not in self:
+                                    print(val)
                                     return False
                             return True
                         elif v._type == 'bounded':
@@ -95,9 +97,10 @@ class IntSet(object):
                         return v >= fr and v <= to
 
         elif obj == 'all':
+            self._type = 'natural'
+
             def test(v):
                 return True
-            self._type = 'natural'
 
         self.__test = test
 
@@ -118,10 +121,25 @@ class IntSet(object):
             return 'IntSet("all")'
 
 
+def iter_state_cmp(filt1, filt2):
+    '''
+        Return 1 or -1 if their is a relation of order between the two
+        members. Else raise an error.
+    '''
+    if filt1.include(filt2):
+        return -1
+    elif filt2.include(filt1):
+        return 1
+    else:
+        raise NotOrderedOverlappingSetError(filt1, filt2)
+
+
 class IterStateFilter(object):
     '''
         Represent a set of conditions on the iterator state of a document.
     '''
+    key = functools.cmp_to_key(iter_state_cmp)
+
     def __init__(self, d):
         self.filters = {}
         for it in ITERATORS:
@@ -152,16 +170,3 @@ class IterStateFilter(object):
                 + ', '.join('"{}": {}'.format(n, s)
                             for n, s in self.filters.items())
                 + '})')
-
-    @staticmethod
-    def cmp(filt1, filt2):
-        '''
-            Return 1 or -1 if their is a relation of order between the two
-            members. Else raise an error.
-        '''
-        if filt1.include(filt2):
-            return -1
-        elif filt2.include(filt1):
-            return 1
-        else:
-            raise NotOrderedOverlappingSetError(filt1, filt2)

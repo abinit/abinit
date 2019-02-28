@@ -1,6 +1,5 @@
 from __future__ import print_function, division, unicode_literals
 import os
-import functools
 from yaml import YAMLError
 from .conf_parser import conf_parser
 from . import yaml_parse
@@ -129,7 +128,7 @@ class TesterConf:
             # Order filters from the most general to the most specific
             filters = sorted(
                 [name for name, filt in self.filters if filt.match(state)],
-                key=functools.cmp_to_key(IterStateFilter.cmp)
+                key=IterStateFilter.key
             )
 
             # Apply filtered trees, filters may be []
