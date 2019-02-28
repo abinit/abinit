@@ -10,7 +10,7 @@ class Issue(object):
 
     def __repr__(self):
         spath = '.'.join(self.path)
-        sstate = ', '.join('='.join(item) for item in self.state.items())
+        sstate = ', '.join('{}={}'.format(*it) for it in self.state.items())
         return 'At {}({}): {}'.format(spath, sstate, self.message)
 
 
