@@ -2028,7 +2028,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                  ! if the current kpt is not on the current processor, cycle
                  if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
 
-                 if(has_cprj(ikpt,bdx,gdxstor)) cycle
+                 ! if(has_cprj(ikpt,bdx,gdxstor)) cycle !
                  
                  kpointb(:) = kptnsb(:,ikpt)
                  npw_k = npwarr(ikpt)
@@ -4021,9 +4021,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     ! VVI(1,adir) = real(VVI_dir)
     ! VVI(2,adir) = aimag(VVI_dir)
 
-    ! call make_VVIII(adir,dsdk,dtorbmag,eeig,nband_k,smat_all_indx,VVIII_dir)
-    ! VVIII(1,adir) = real(VVIII_dir)
-    ! VVIII(2,adir) = aimag(VVIII_dir)
+    call make_VVIII(adir,atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+     & pawtab,smat_all_indx,VVI_dir,VVIII_dir)
+    VVIII(1,adir) = real(VVIII_dir)
+    VVIII(2,adir) = aimag(VVIII_dir)
+    VVI(1,adir) = real(VVI_dir)
+    VVI(2,adir) = aimag(VVI_dir)
 
  end do ! end loop over adir
 
@@ -4044,27 +4047,30 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  VVII(1,1:3) = ucvol*MATMUL(gprimd,VVII(1,1:3))
  VVII(2,1:3) = ucvol*MATMUL(gprimd,VVII(2,1:3))
 
- ! VVI(1,1:3) = ucvol*MATMUL(gprimd,VVI(1,1:3))
- ! VVI(2,1:3) = ucvol*MATMUL(gprimd,VVI(2,1:3))
+ VVI(1,1:3) = ucvol*MATMUL(gprimd,VVI(1,1:3))
+ VVI(2,1:3) = ucvol*MATMUL(gprimd,VVI(2,1:3))
 
- ! VVIII(1,1:3) = ucvol*MATMUL(gprimd,VVIII(1,1:3))
- ! VVIII(2,1:3) = ucvol*MATMUL(gprimd,VVIII(2,1:3))
+ VVIII(1,1:3) = ucvol*MATMUL(gprimd,VVIII(1,1:3))
+ VVIII(2,1:3) = ucvol*MATMUL(gprimd,VVIII(2,1:3))
 
  ! CCVV(1,1:3) = ucvol*MATMUL(gprimd,CCVV(1,1:3))
  ! CCVV(2,1:3) = ucvol*MATMUL(gprimd,CCVV(2,1:3))
 
  ! accumulate in orbmagvec
 
- orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
-                  & - s1trace(1:2,1:3) &
-                  & + CCI(1:2,1:3) &
-                  & + VVII(1:2,1:3) &
-                  & - CCIV(1:2,1:3)
+ ! orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
+ !                  & - s1trace(1:2,1:3) &
+ !                  & + CCI(1:2,1:3) &
+ !                  & + VVII(1:2,1:3) &
+ !                  & - CCIV(1:2,1:3)
 
+ 
  ! orbmagvec(1:2,1:3) = VVI(1:2,1:3)
  ! orbmagvec(1:2,1:3) = VVI(1:2,1:3) + VVIII(1:2,1:3)
  ! orbmagvec(1:2,1:3) = CCVV(1:2,1:3)
  ! orbmagvec(1:2,1:3) = VVII(1:2,1:3)
+ ! orbmagvec(1:2,1:3) = VVIII(1:2,1:3)
+ orbmagvec(1:2,1:3) = VVI(1:2,1:3) + VVIII(1:2,1:3)
  ! orbmagvec(1:2,1:3) = CCI(1:2,1:3)
  ! orbmagvec(1:2,1:3) = CCIV(1:2,1:3)
 
@@ -4467,33 +4473,62 @@ end subroutine make_VVI
 !!
 !! SOURCE
 
-subroutine make_VVIII(adir,dsdk,dtorbmag,eeig,nband_k,smat_all_indx,VVIII_dir)
+subroutine make_VVIII(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+     & pawtab,smat_all_indx,VVI_dir,VVIII_dir)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: adir,nband_k
- complex(dpc),intent(out) :: VVIII_dir
+ integer,intent(in) :: adir,mcprj,nband_k
+ complex(dpc),intent(out) :: VVI_dir,VVIII_dir
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type), intent(inout) :: mpi_enreg
  type(orbmag_type), intent(inout) :: dtorbmag
 
  !arrays
+ integer,intent(in) :: atindx1(dtset%natom)
  real(dp),intent(in) :: dsdk(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4)
  real(dp),intent(in) :: eeig(nband_k,dtorbmag%fnkpt)
  real(dp),intent(in) :: smat_all_indx(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
+ type(pawcprj_type),intent(in) ::  cprj(6,0:4,dtset%natom,mcprj)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
  !Local variables -------------------------
  !scalars
- integer :: bdir,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
- integer :: ikpt,ikptg,nn,n1
- real(dp) :: deltag,ENK
+ integer :: bdir,bfor,bdx,bdxc,bdxstor,bsigma,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
+ integer :: iatom,icprji,icprjbi,icprjgi,ilmn
+ integer :: ikpt,ikpti,ikptb,ikptbi,ikptg,ikptgi,itypat,jlmn,klmn,nn,n1,isppol,my_nspinor,ncpgr
+ real(dp) :: deltab,deltag,ENK
+ complex(dpc) :: cpb,cpk,VVI,VVI_1,VVI_2
  complex(dpc) :: VVIII,VVIII_1,VVIII_2
 
  !arrays
- real(dp) :: dkg(3)
+ integer :: nattyp_dum(dtset%ntypat)
+ integer,allocatable :: dimlmn(:)
+ real(dp) :: dkb(3),dkg(3)
+ type(pawcprj_type),allocatable :: cprj_kb(:,:),cprj_kg(:,:),cprj_kbg(:,:),cprj_kgb(:,:)
+
 
  ! ***********************************************************************
 
+
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ isppol = 1
+ 
+ ncpgr = cprj(1,0,1,1)%ncpgr
+ ABI_ALLOCATE(dimlmn,(dtset%natom))
+ call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
+ ABI_DATATYPE_ALLOCATE(cprj_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+ call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
+ ABI_DATATYPE_ALLOCATE(cprj_kbg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+ call pawcprj_alloc(cprj_kbg,ncpgr,dimlmn)
+ ABI_DATATYPE_ALLOCATE(cprj_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+ call pawcprj_alloc(cprj_kg,ncpgr,dimlmn)
+ ABI_DATATYPE_ALLOCATE(cprj_kgb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
+ call pawcprj_alloc(cprj_kgb,ncpgr,dimlmn)
+
+ VVI_dir = czero
  VVIII_dir=czero
  do epsabg = 1, -1, -2
 
@@ -4505,29 +4540,101 @@ subroutine make_VVIII(adir,dsdk,dtorbmag,eeig,nband_k,smat_all_indx,VVIII_dir)
        gdir = modulo(adir,3)+1
     end if
 
-    do gfor = 1, 2
-       gsigma = -2*gfor+3
-       gdx = 2*gdir-2+gfor
-       gdxc = gdx+gsigma
-       gdxstor = mod(gdx+6-2*bdir,6)
-       dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
-       deltag = sqrt(DOT_PRODUCT(dkg,dkg))
+    do bfor = 1, 2
+       bsigma = 3-2*bfor
+       bdx= 2*bdir-2+bfor
+       bdxc= bdx+bsigma
+       bdxstor=mod(bdx+6-2*gdir,6)
+       dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
+       deltab = sqrt(DOT_PRODUCT(dkb,dkb))
+       
+       do gfor = 1, 2
+          gsigma = 3-2*gfor
+          gdx = 2*gdir-2+gfor
+          gdxc = gdx+gsigma
+          gdxstor = mod(gdx+6-2*bdir,6)
+          dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
+          deltag = sqrt(DOT_PRODUCT(dkg,dkg))
 
-       do ikpt = 1, dtorbmag%fnkpt
-          ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
-          VVIII = czero
-          do nn = 1, nband_k
-             ENK = eeig(nn,ikpt)
-             do n1 = 1, nband_k
-                VVIII_1 = cmplx(dsdk(1,n1,nn,ikpt,bdir,gdxstor),dsdk(2,n1,nn,ikpt,bdir,gdxstor))
-                VVIII_2 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0))
-                VVIII=VVIII+conjg(VVIII_1)*conjg(VVIII_2)*ENK
-             end do ! end n1
-          end do ! end nn
-          VVIII_dir = VVIII_dir - half*j_dpc*epsabg*gsigma*(-VVIII)/(2.0*deltag)
-       end do ! end loop over ikpt
+          do ikpt = 1, dtorbmag%fnkpt
+             ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
+             icprji = dtorbmag%cprjindex(ikpti,isppol)
+
+             ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
+             ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
+             icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
+
+             ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
+             ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
+             icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
+
+             call pawcprj_get(atindx1,cprj_kb,cprj(bdx,0,:,:),dtset%natom,1,icprji,ikpti,&
+                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                  & my_nspinor,dtset%nsppol,0)
+
+             call pawcprj_get(atindx1,cprj_kg,cprj(gdx,0,:,:),dtset%natom,1,icprji,ikpti,&
+                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                  & my_nspinor,dtset%nsppol,0)
+
+             call pawcprj_get(atindx1,cprj_kbg,cprj(gdxc,bdxstor,:,:),dtset%natom,1,icprjgi,ikptgi,&
+                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                  & my_nspinor,dtset%nsppol,0)
+
+             call pawcprj_get(atindx1,cprj_kgb,cprj(bdxc,gdxstor,:,:),dtset%natom,1,icprjbi,ikptbi,&
+                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
+                  & my_nspinor,dtset%nsppol,0)
+
+             VVIII = czero
+             VVI = czero
+             do nn = 1, nband_k
+                ENK = eeig(nn,ikpt)
+                do n1 = 1, nband_k
+
+                   VVI_2 = czero
+                   VVIII_1=czero
+                   do iatom=1,dtset%natom
+                      itypat=dtset%typat(iatom)
+                      do ilmn=1,pawtab(itypat)%lmn_size
+                         do jlmn=1,pawtab(itypat)%lmn_size
+                            klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
+
+                            cpb=cmplx(cprj_kb(iatom,nn)%cp(1,ilmn),cprj_kb(iatom,nn)%cp(2,ilmn))
+                            cpk=cmplx(cprj_kbg(iatom,n1)%cp(1,jlmn),cprj_kbg(iatom,n1)%cp(2,jlmn))
+                            VVIII_1=VVIII_1+conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+
+                            cpb = cmplx(cprj_kgb(iatom,n1)%cp(1,ilmn),cprj_kgb(iatom,n1)%cp(2,ilmn))
+                            cpk = cmplx(cprj_kg(iatom,nn)%cp(1,jlmn),cprj_kg(iatom,nn)%cp(2,jlmn))
+                            VVI_2 = VVI_2 + conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
+
+                         end do ! end loop over jlmn
+                      end do ! end loop over ilmn
+                   end do ! end loop over atoms
+
+                   VVIII_2 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0))
+                   VVI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
+
+                   VVI=VVI+VVI_1*VVI_2*ENK
+                   VVIII=VVIII+VVIII_1*conjg(VVIII_2)*ENK
+
+                end do ! end n1
+             end do ! end nn
+             VVI_dir = VVI_dir - half*j_dpc*epsabg*bsigma*gsigma*(-VVI)/(2.0*deltab*2.0*deltag)
+             VVIII_dir = VVIII_dir - half*j_dpc*epsabg*bsigma*gsigma*(-VVIII)/(2.0*deltab*2.0*deltag)
+          end do ! end loop over ikpt
+
+       end do ! end loop over gfor
     end do ! end loop over bfor
  end do ! end loop over epsabg
+
+ ABI_DEALLOCATE(dimlmn)
+ call pawcprj_free(cprj_kb)
+ ABI_DATATYPE_DEALLOCATE(cprj_kb)
+ call pawcprj_free(cprj_kbg)
+ ABI_DATATYPE_DEALLOCATE(cprj_kbg)
+ call pawcprj_free(cprj_kg)
+ ABI_DATATYPE_DEALLOCATE(cprj_kg)
+ call pawcprj_free(cprj_kgb)
+ ABI_DATATYPE_DEALLOCATE(cprj_kgb)
 
 end subroutine make_VVIII
 !!***
