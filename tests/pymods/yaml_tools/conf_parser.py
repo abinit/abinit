@@ -69,7 +69,8 @@ def ceil(ceil_val, ref, tested):
     return abs(tested) < ceil_val
 
 
-@conf_parser.constraint(exclude={'ceil', 'tol', 'tol_rel', 'tol_abs'})
+@conf_parser.constraint(value_type=bool, exclude={'ceil', 'tol', 'tol_rel',
+                                                  'tol_abs'})
 def ignore(yes, ref, tested):
     '''
         Override numbers tests and always return the same result.
