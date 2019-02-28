@@ -4,7 +4,7 @@ from yaml import YAMLError
 from .conf_parser import conf_parser
 from . import yaml_parse
 from .errors import ConfigContextError
-from .abinit_iterators import IterStateFilter
+from .abinit_iterators import ITERATORS, IterStateFilter
 
 
 def get_default_conf():
@@ -18,6 +18,14 @@ def get_default_conf():
             return yaml_parse(f.read())
         except YAMLError:
             return {}
+
+
+def state_hash(d):
+    st = []
+    for it in ITERATORS:
+        if it in d:
+            st.append(it + str(d[it]))
+    return hash(st)
 
 
 class TesterConf:
@@ -122,8 +130,8 @@ class TesterConf:
         '''
             Start using filtered configurations if available.
         '''
-        if state in self.__tree_cache:
-            self.tree = self.__tree_cache[state]
+        if state_hash(state) in self.__tree_cache:
+            self.tree = self.__tree_cache[state_hash(state)]
         else:
             # Order filters from the most general to the most specific
             filters = sorted(
@@ -135,7 +143,7 @@ class TesterConf:
             for name in filters:
                 self.tree.update(self.trees[name])
 
-            self.__tree_cache[state] = self.tree
+            self.__tree_cache[state_hash(state)] = self.tree
 
         self.will_enter = True
         return self
