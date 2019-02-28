@@ -25,7 +25,7 @@ def state_hash(d):
     for it in ITERATORS:
         if it in d:
             st.append(it + str(d[it]))
-    return hash(st)
+    return hash(''.join(st))
 
 
 class TesterConf:
