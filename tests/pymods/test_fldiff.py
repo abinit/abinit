@@ -1,3 +1,4 @@
+from __future__ import print_function, division, unicode_literals
 import pytest
 from .fldiff import Differ, Result
 from .fldiff import (

@@ -4,6 +4,7 @@
     classes witch will be used both in parsing YAML formated data
     and in writing YAML formated data.
 '''
+from __future__ import print_function, division, unicode_literals
 import re
 from inspect import ismethod
 import yaml
