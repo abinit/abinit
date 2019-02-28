@@ -9,9 +9,9 @@ import os
 import glob
 import cmd
 from subprocess import call
-from pymods.yaml_tools.test_conf import TestConf
-from pymods.yaml_tools.conf_parser import conf_parser
-from pymods.yaml_tools.errors import ConfigError
+from .yaml_tools.tester_conf import TesterConf
+from .yaml_tools.conf_parser import conf_parser
+from .yaml_tools.errors import ConfigError
 
 intro = '''\
 Welcome to the explore_test shell.
@@ -77,7 +77,7 @@ def print_iter(it):
         print()
 
 
-class ExtendedTestConf(TestConf):
+class ExtendedTesterConf(TesterConf):
     def get_spec(self):
         '''
             Return the list of the specializations known at the current path.
@@ -230,7 +230,7 @@ class Explorer(cmd.Cmd):
         '''
         filename = os.path.realpath(os.path.expanduser(arg))
         try:
-            self.tree = ExtendedTestConf.from_file(filename)
+            self.tree = ExtendedTesterConf.from_file(filename)
         except FileNotFoundError:
             print('File not found.')
         except ConfigError as e:

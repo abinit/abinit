@@ -48,10 +48,10 @@ from .data_extractor import DataExtractor
 from .yaml_tools import is_available as has_yaml
 
 if has_yaml:
-    from .yaml_tools.test_conf import TestConf as YTestConf
+    from .yaml_tools.tester_conf import TesterConf as YTesterConf
     from .yaml_tools.tester import Tester as YTester
 else:
-    class YTestConf(object):
+    class YTesterConf(object):
         '''
             Mock class when YAML not available
         '''
@@ -60,7 +60,7 @@ else:
 
         @classmethod
         def from_file(self, filename):
-            return YTestConf('')
+            return YTesterConf('')
 
     class YTester(object):
         '''
@@ -271,7 +271,7 @@ class Result(object):
         details = []
         error_lines = set()
 
-        details.append('# Start YAML based comparision report\n')
+        details.append('# Start YAML based comparison report\n')
 
         for diff in self.yaml_diff:
             self.success = False
@@ -431,12 +431,12 @@ class Differ(object):
             self.use_yaml = self.options['use_yaml']
             if self.use_yaml:
                 if yaml_test and 'file' in yaml_test and yaml_test['file']:
-                    self.yaml_test = YTestConf.from_file(
+                    self.yaml_test = YTesterConf.from_file(
                         yaml_test['file'])
                 elif yaml_test and 'test' in yaml_test and yaml_test['test']:
-                    self.yaml_test = YTestConf(yaml_test['test'])
+                    self.yaml_test = YTesterConf(yaml_test['test'])
                 else:
-                    self.yaml_test = YTestConf()
+                    self.yaml_test = YTesterConf()
         else:
             self.use_yaml = False
 

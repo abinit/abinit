@@ -1,9 +1,11 @@
 from __future__ import print_function, division, unicode_literals
 import os
+import functools
 from yaml import YAMLError
 from .conf_parser import conf_parser
 from . import yaml_parse
 from .errors import ConfigContextError
+from .abinit_iterators import IterStateFilter
 
 
 def get_default_conf():
@@ -19,7 +21,7 @@ def get_default_conf():
             return {}
 
 
-class TestConf:
+class TesterConf:
     '''
         Interface to access parameters and constraints defined by the
         configuration file by following the traversal of the data tree.
@@ -31,20 +33,28 @@ class TestConf:
 
         self.current_path = []
 
-        self.tree = conf_parser.make_tree(get_default_conf())
+        # defaut conf is not supposed to use filters
+        self.tree = conf_parser.make_trees(get_default_conf())[0]['__default']
 
+        self.current_filter = None
         if src is not None:
             try:
                 conf = yaml_parse(src)
             except YAMLError:
                 conf = {}
-            new_tree = conf_parser.make_tree(conf)
-            self.tree.update(new_tree)
+            self.trees, self.filters = conf_parser.make_trees(conf)
+            self.tree.update(self.trees['__default'])
+            self.trees['__default'] = self.tree.copy()
+        else:
+            self.trees = {}
+            self.filters = {}
+
+        self.__tree_cache = {}
 
     @classmethod
     def from_file(cls, filename):
         '''
-            Create a new instance of TestConf from a configuration file.
+            Create a new instance of TesterConf from a configuration file.
         '''
         with open(filename) as f:
             return cls(f.read())
@@ -92,9 +102,9 @@ class TestConf:
             Return the value of the asked parameter as defined in
             the nearest scope or its default value (depending on
             wether or not it can be inherited from another scope
-            and wether or not it effectvely has been defined)
+            and wether or not it effectively has been defined)
         '''
-        default = self.known_params[name]['default']
+        default = self.known_params[name]['__default']
         cursor = len(self.param_stack) - 1
 
         # browse scope from deeper to the top until param is
@@ -108,6 +118,28 @@ class TestConf:
                 cursor -= 1
 
         return default
+
+    def use_filter(self, state):
+        '''
+            Start using filtered configurations if available.
+        '''
+        if state in self.__tree_cache:
+            self.tree = self.__tree_cache[state]
+        else:
+            # Order filters from the most general to the most specific
+            filters = sorted(
+                [name for name, filt in self.filters if filt.match(state)],
+                key=functools.cmp_to_key(IterStateFilter.cmp)
+            )
+
+            # Apply filtered trees, filters may be []
+            for name in filters:
+                self.tree.update(self.trees[name])
+
+            self.__tree_cache[state] = self.tree
+
+        self.will_enter = True
+        return self
 
     def go_down(self, child):
         '''
@@ -125,23 +157,6 @@ class TestConf:
         self.will_enter = True
         return self
 
-    def __enter__(self):
-        '''
-            Act as a context manager.
-        '''
-        if not self.will_enter:  # Should always use go_down when using with
-            raise ConfigContextError(self.current_path)
-        self.will_enter = False
-        return self
-
-    def __exit__(self, type, value, traceback):
-        '''
-            Automatically go back when leaving with block.
-        '''
-        self.go_up()
-        # FIXME Is there error cases (type, value, traceback)
-        # where we should stop error from propating ?
-
     def go_up(self):
         '''
             Go back to a higher level of the tree.
@@ -152,3 +167,24 @@ class TestConf:
             self.constraints_stack.pop()
         except IndexError:
             pass
+
+    def __enter__(self):
+        '''
+            Act as a context manager.
+        '''
+        # Should always use go_down or apply_filter when using 'with' block
+        if not self.will_enter:
+            raise ConfigContextError(self.current_path)
+        self.will_enter = False
+        return self
+
+    def __exit__(self, type, value, traceback):
+        '''
+            Automatically go back when leaving with block.
+        '''
+        if not self.current_path:
+            # already on top level, their is only filtered config that can
+            # be cleaned
+            self.tree = self.trees['__default'].copy()
+        else:
+            self.go_up()

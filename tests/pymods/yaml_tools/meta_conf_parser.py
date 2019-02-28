@@ -1,7 +1,10 @@
+from __future__ import print_function, division, unicode_literals
 from inspect import isclass
+from copy import deepcopy
 from numpy import ndarray
-from .errors import UnknownParamError, ValueTypeError, InvalidNodeError
-from .register_tag import BaseDictWrapper
+from .errors import (UnknownParamError, ValueTypeError, InvalidNodeError,
+                     AlreadySetKeyError, IllegalFilterNameError)
+from .abinit_iterators import IterStateFilter
 
 
 def empty_tree():
@@ -107,6 +110,14 @@ class ConfTree(object):
     '''
     def __init__(self, dict_tree):
         self.dict = dict_tree
+
+    def add(self, key, d):
+        if key in self.dict:
+            raise AlreadySetKeyError(key)
+        self.dict[key] = d
+
+    def copy(self):
+        return ConfTree(deepcopy(self.dict))
 
     def update(self, tree):
         '''
@@ -238,8 +249,32 @@ class ConfParser(object):
                     raise InvalidNodeError(key, val)
         return tree
 
-    def make_tree(self, parsed_src):
+    def make_trees(self, parsed_src):
         '''
             Create a ConfTree instance from the yaml parser output.
         '''
-        return ConfTree(self.__make_tree(parsed_src))
+        filters = {}
+        trees = {}
+
+        if 'filters' in parsed_src:
+            # Get filters definitions
+            for name, filt in parsed_src['filters'].items():
+                if name == '__default' or name in self.constraints \
+                   or name in self.parameters:
+                    raise IllegalFilterNameError(name)
+                filters[name] = IterStateFilter(filt)
+
+                # Parse each filtered tree then remove it from the source tree
+                if name in parsed_src:
+                    trees[name] = ConfTree(self.__make_tree(parsed_src[name]))
+                    del parsed_src[name]
+                else:
+                    pass  # Should we raise an error ?
+
+            # Remove the filters field from the dict
+            del parsed_src['filters']
+
+        # Parse the fields remaining as the default tree
+        trees['__default'] = ConfTree(self.__make_tree(parsed_src))
+
+        return trees, filters

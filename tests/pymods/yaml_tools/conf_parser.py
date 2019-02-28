@@ -20,11 +20,15 @@ conf_parser = ConfParser()
 # Parameters
 conf_parser.parameter('tol_eq', default=1e-8, inherited=False)
 
+tol_group = {
+    'tol_rel', 'tol_abs', 'tol'
+}
+
 
 # Constraints
 # default parameters for constraints are:
 # value_type=float, inherited=True, apply_to='number' use_params=[], exclude={}
-@conf_parser.constraint(exclude={'tol', 'ceil'})
+@conf_parser.constraint(exclude={'tol', 'ceil', 'ignore'})
 def tol_rel(tol, ref, tested):
     '''
         Valid if the relative difference between the values is below the
@@ -35,7 +39,7 @@ def tol_rel(tol, ref, tested):
     return abs(ref - tested) / (abs(ref) + abs(tested)) < tol
 
 
-@conf_parser.constraint(exclude={'tol', 'ceil'})
+@conf_parser.constraint(exclude={'tol', 'ceil', 'ignore'})
 def tol_abs(tol, ref, tested):
     '''
         Valid if the absolute difference between the values is below the
@@ -44,7 +48,7 @@ def tol_abs(tol, ref, tested):
     return abs(ref - tested) < tol
 
 
-@conf_parser.constraint(exclude={'ceil', 'tol_abs', 'tol_rel'})
+@conf_parser.constraint(exclude={'ceil', 'tol_abs', 'tol_rel', 'ignore'})
 def tol(tolv, ref, tested):
     '''
         Valid if both relative and absolute differences between the values
@@ -56,13 +60,21 @@ def tol(tolv, ref, tested):
             abs(ref - tested) < tolv)
 
 
-@conf_parser.constraint(exclude={'tol', 'tol_abs', 'tol_rel'})
+@conf_parser.constraint(exclude={'tol', 'tol_abs', 'tol_rel', 'ignore'})
 def ceil(ceil_val, ref, tested):
     '''
         Valid if the absolute value of the tested file tested is below the
         given tolerance.
     '''
     return abs(tested) < ceil_val
+
+
+@conf_parser.constraint(exclude={'ceil', 'tol', 'tol_rel', 'tol_abs'})
+def ignore(yes, ref, tested):
+    '''
+        Override numbers tests and always return the same result.
+    '''
+    return yes
 
 
 @conf_parser.constraint(value_type=str, inherited=False, apply_to='this',
@@ -101,7 +113,7 @@ def allow_nan(yes, ref, tested):
     '''
         If value is true, fail if a NaN value is encountered.
     '''
-    return yes or isnan(tested)
+    return yes or not isnan(tested)
 
 
 @conf_parser.constraint(value_type=bool, inherited=False, apply_to=Tensor)
