@@ -88,7 +88,7 @@ class ExtendedTesterConf(TesterConf):
         '''
             Return the list of the specializations known at the current path.
         '''
-        new_path = self.current_path.copy()
+        new_path = list(self.current_path)
         for sp in path:
             if sp == 'TOP':
                 new_path = []
