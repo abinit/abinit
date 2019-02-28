@@ -39,6 +39,7 @@ class TesterConf:
         self.constraints_stack = []
 
         self.current_path = []
+        self.current_state = {}
 
         # defaut conf is not supposed to use filters
         self.tree = conf_parser.make_trees(get_default_conf())[0]['__default']
@@ -130,6 +131,7 @@ class TesterConf:
         '''
             Start using filtered configurations if available.
         '''
+        self.current_state = state
         if state_hash(state) in self.__tree_cache:
             self.tree = self.__tree_cache[state_hash(state)]
         else:
@@ -152,6 +154,7 @@ class TesterConf:
         '''
             Restore default filter state
         '''
+        self.current_state = {}
         self.tree = self.trees['__default'].copy()
 
     def go_down(self, child):

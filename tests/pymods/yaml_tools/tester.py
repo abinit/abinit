@@ -3,26 +3,27 @@ from .register_tag import BaseDictWrapper
 
 
 class Issue(object):
-    def __init__(self, path, msg):
-        self.path = path
+    def __init__(self, conf, msg):
+        self.path = conf.path if conf.path else ('top level',)
+        self.state = conf.current_state
         self.message = msg
 
     def __repr__(self):
         spath = '.'.join(self.path)
-        return 'At {}: {}'.format(spath, self.message)
+        sstate = ', '.join('='.join(item) for item in self.state.items())
+        return 'At {}({}): {}'.format(spath, sstate, self.message)
 
 
 class Failure(Issue):
-    def __init__(self, path, msg, ref=None, tested=None):
+    def __init__(self, conf, msg, ref=None, tested=None):
         self.ref = ref
         self.tested = tested
-        Issue.__init__(self, path, msg)
+        Issue.__init__(self, conf, msg)
 
     def __repr__(self):
-        spath = '.'.join(self.path)
         if self.ref:
-            return 'At {}: {}\nref: {}\ntested: {}'.format(
-                spath, self.message, self.ref, self.tested
+            return Issue.__repr__(self) + '\nref: {}\ntested: {}'.format(
+                self.ref, self.tested
             )
         else:
             return Issue.__repr__(self)
@@ -56,21 +57,21 @@ class Tester(object):
                     msg = ('Exception while checking {}:\n'
                            '{}: {}').format(cons.name, e.__class__.__name__,
                                             str(e))
-                    self.failures.append(Failure(self.conf.path, msg))
+                    self.failures.append(Failure(self.conf, msg))
                 else:
                     if success:
                         msg = '{} ok'.format(cons.name)
-                        self.success.append(Success(self.conf.path, msg))
+                        self.success.append(Success(self.conf, msg))
                     else:
                         msg = '{} failed'.format(cons.name)
-                        self.failures.append(Failure(self.conf.path, msg,
+                        self.failures.append(Failure(self.conf, msg,
                                                      ref, tested))
 
             if isinstance(ref, BaseDictWrapper):  # have children
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)
-                        self.failures.append(Failure(self.conf.path, msg))
+                        self.failures.append(Failure(self.conf, msg))
                     else:
                         self.check_this(child, ref[child], tested[child])
 
@@ -83,14 +84,14 @@ class Tester(object):
                 success = top_cons[cons].check(ref, tested, self.conf)
                 if success:
                     msg = '{} ok'.format(cons.name)
-                    self.success.append(Success(('top level',), msg))
+                    self.success.append(Success(self.conf, msg))
                 else:
                     msg = '{} failed'.format(cons.name)
-                    self.failures.append(Failure(('top level',), msg))
+                    self.failures.append(Failure(self.conf, msg))
 
         if len(self.ref) != len(self.tested):
             msg = 'there is not the same number of documents in both side'
-            self.failures.append(Failure(('top level',), msg))
+            self.failures.append(Failure(self.conf, msg))
         else:
             # FIXME Use a non linear matching of documents ?
             # ref_doc['iterators'] could be of some use here

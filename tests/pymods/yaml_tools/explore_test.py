@@ -80,7 +80,6 @@ def print_iter(it):
 class ExtendedTesterConf(TesterConf):
     def __init__(self, *args):
         TesterConf.__init__(self, *args)
-        self.current_state = {}
 
     def get_spec(self):
         '''
@@ -181,10 +180,6 @@ class ExtendedTesterConf(TesterConf):
         self.param_stack = state['param']
         self.current_path = state['path']
         self.use_filter(state['iter_state'])
-
-    def use_filter(self, state):
-        self.current_state = state
-        TesterConf.use_filter(self, state)
 
 
 class Explorer(cmd.Cmd):
