@@ -8,7 +8,7 @@ if __name__ != '__main__':
     raise ImportError('testcli.py is not an importable module.')
 
 if has_yaml:
-    import pymods.explore_test as explore_test
+    import pymods.yaml_tools.explore_test as explore_test
 
 
 class ArgParser(object):
