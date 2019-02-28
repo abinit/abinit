@@ -442,7 +442,7 @@ class Explorer(cmd.Cmd):
 
         try:
             call([ed, filepath])
-        except IOError:
+        except OSError:
             print('The editor command {} cannot be found.'.format(ed),
                   'You may want to set your EDITOR envrionment variable to',
                   'select a different command.')
