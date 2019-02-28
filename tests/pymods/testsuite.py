@@ -830,6 +830,10 @@ class AbinitTestInfoParser(object):
         if not ytest['file'] and not ytest['test']:
             return {}
 
+        if 'file' in ytest:
+            base = os.path.basename(self.inp_fname)
+            ytest = os.path.realpath(os.path.join(base, ytest))
+
         return ytest
 
     #@property
