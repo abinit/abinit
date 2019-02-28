@@ -111,7 +111,7 @@ class TesterConf:
             wether or not it can be inherited from another scope
             and wether or not it effectively has been defined)
         '''
-        default = self.known_params[name]['__default']
+        default = self.known_params[name]['default']
         cursor = len(self.param_stack) - 1
 
         # browse scope from deeper to the top until param is
@@ -135,8 +135,8 @@ class TesterConf:
         else:
             # Order filters from the most general to the most specific
             filters = sorted(
-                [name for name, filt in self.filters if filt.match(state)],
-                key=IterStateFilter.key
+                [name for name, filt in self.filters.items()
+                 if filt.match(state)], key=IterStateFilter.key
             )
 
             # Apply filtered trees, filters may be []
@@ -147,6 +147,12 @@ class TesterConf:
 
         self.will_enter = True
         return self
+
+    def clean_filter(self, state):
+        '''
+            Restore default filter state
+        '''
+        self.tree = self.trees['__default'].copy()
 
     def go_down(self, child):
         '''
@@ -192,6 +198,6 @@ class TesterConf:
         if not self.current_path:
             # already on top level, their is only filtered config that can
             # be cleaned
-            self.tree = self.trees['__default'].copy()
+            self.clean_filter()
         else:
             self.go_up()

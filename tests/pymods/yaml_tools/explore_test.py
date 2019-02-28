@@ -78,6 +78,10 @@ def print_iter(it):
 
 
 class ExtendedTesterConf(TesterConf):
+    def __init__(self, *args):
+        TesterConf.__init__(self, *args)
+        self.current_state = {}
+
     def get_spec(self):
         '''
             Return the list of the specializations known at the current path.
@@ -176,6 +180,10 @@ class ExtendedTesterConf(TesterConf):
         self.param_stack = state['param']
         self.current_path = state['path']
 
+    def use_filter(self, state):
+        self.current_state = state
+        TesterConf.use_filter(self, state)
+
 
 class Explorer(cmd.Cmd):
     intro = intro
@@ -189,7 +197,7 @@ class Explorer(cmd.Cmd):
     def update_prompt(self):
         template = '{filename}: {path}> '
         if self.tree is None:
-            self.prompt = '[no file loaded] > '
+            self.prompt = '[no file loaded]> '
         else:
             self.prompt = template.format(
                 filename=self.filename,
@@ -302,6 +310,18 @@ class Explorer(cmd.Cmd):
 
     def complete_cd(self, text, line, begi, endi):
         return self.complete_rel_path(text)
+
+    def do_filter(self, arg):
+        '''
+            Usage: filter [ITERATOR:VALUE]*
+        '''
+        state = {name: val for name, val in [pair.split(':')
+                                             for pair in arg.split()]}
+        if state:
+            self.tree.clean_filter()
+            self.tree.use_filter(state)
+        else:
+            print_iter(self.tree.current_state.items())
 
     def do_path(self, arg):
         '''
