@@ -9,9 +9,9 @@ import os
 import glob
 import cmd
 from subprocess import call
-from .yaml_tools.tester_conf import TesterConf
-from .yaml_tools.conf_parser import conf_parser
-from .yaml_tools.errors import ConfigError
+from .tester_conf import TesterConf
+from .conf_parser import conf_parser
+from .errors import ConfigError
 
 intro = '''\
 Welcome to the explore_test shell.
