@@ -389,7 +389,7 @@ contains
     end if
     ! do not inc until time is set to hist.
     if(iam_master) then
-       call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%ms, etot=etot, inc=.False.)
+       call spin_hist_t_set_vars(hist=self%hist, S=S_out, Snorm=effpot%supercell%ms, etot=etot, inc=.False.)
     end if
   end subroutine spin_mover_t_run_one_step
 

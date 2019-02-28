@@ -63,7 +63,6 @@ contains
     class(mb_supercell_t), intent(inout) :: self
   end subroutine initialize
 
-
   subroutine finalize(self)
     class(mb_supercell_t), intent(inout) :: self
   end subroutine finalize

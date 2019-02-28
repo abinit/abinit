@@ -46,7 +46,8 @@ module m_multibinit_manager
   use m_supercell_maker, only: supercell_maker_t
   use m_multibinit_supercell, only: mb_supercell_t
   use m_primitive_potential_list, only: primitive_potential_list_t
-  use m_abstract_potential, only: abstract_potential_t, effpot_list_t
+  use m_abstract_potential, only: abstract_potential_t
+  use m_potential_list, only: potential_list_t
   use m_abstract_mover, only: abstract_mover_t
   use m_lattice_effpot, only : lattice_effpot_t
   use m_spin_terms, only : spin_terms_t
@@ -65,7 +66,7 @@ module m_multibinit_manager
      type(unitcell_t) :: unitcell
      type(mb_supercell_t) :: supercell
      type(primitive_potential_list_t) :: prim_pots
-     type(effpot_list_t), pointer :: pots
+     type(potential_list_t), pointer :: pots
    contains
      procedure :: initialize
      procedure :: finalize

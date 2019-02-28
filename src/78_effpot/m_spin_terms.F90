@@ -56,6 +56,7 @@ module  m_spin_terms
      ! rvec: supercell R vector.
      integer, allocatable :: ispin_prim(:), rvec(:,:)
      real(dp), allocatable ::  pos(:,:),  spinat(:,:), S(:,:)
+     real(dp), allocatable :: ms(:)
      real(dp):: cell(3,3)
      ! index of atoms in the spin hamiltonian. -1 if the atom is not in the spin_hamiltonian.
      integer, allocatable :: iatoms(:)
@@ -279,7 +280,7 @@ contains
     class(spin_terms_t), intent(inout) :: self
     integer, intent(in) :: idx_i(:), idx_j(:)
     real(dp), intent(in) :: val(:,:,:)
-    integer :: i, j, ia, ib, nnz
+    integer :: i,  ia, ib, nnz
     self%has_bilinear=.True.
     nnz=size(idx_i)
     do i = 1, nnz, 1
@@ -298,7 +299,7 @@ contains
     class(spin_terms_t), intent(inout) :: self
     real(dp), intent(inout) :: S(:,:)
     real(dp), intent(out) :: Heff(3,self%nspins)
-    integer :: i, iatom, jatom
+    integer :: i
     call xmpi_bcast(self%csr_mat_ready, master, comm, ierr)
     if (.not. self%csr_mat_ready) then
        if(iam_master) then

@@ -301,7 +301,6 @@ contains
     logical, optional, intent(in) :: use_exchange, use_dmi, use_sia, use_bi
     logical :: uexc, udmi, usia, ubi
     real(dp) :: ref_energy
-    integer :: i
 
     type(c_ptr) ::  p_unitcell,         &
          p_masses,  p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
@@ -644,7 +643,6 @@ contains
   end subroutine find_supercell_ijR
 
   subroutine spin_primitive_potential_t_make_supercell(self, sc_matrix, sc_ham)
-
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(spin_terms_t) , intent(inout) :: sc_ham
     integer :: sc_matrix(3,3), iatoms(self%nspins)
@@ -774,7 +772,6 @@ contains
   end subroutine spin_primitive_potential_t_make_supercell
 
   subroutine spin_primitive_potential_t_print_terms(self)
-
     class(spin_primitive_potential_t) :: self
     integer :: i, ii, jj,  R(3)
     character(len=80) :: msg
@@ -813,11 +810,9 @@ contains
          call wrtout(ab_out, msg, 'COLL')
        end do
     end do
-    
     msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    
   end subroutine spin_primitive_potential_t_print_terms
 
 end module m_spin_primitive_potential

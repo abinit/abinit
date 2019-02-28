@@ -46,6 +46,7 @@ sources = [
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
     "m_polynomial_term.F90",
+    "m_potential_list.F90",
     "m_primitive_potential.F90",
     "m_primitive_potential_list.F90",
     "m_spin_hist.F90",

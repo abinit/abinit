@@ -37,7 +37,8 @@ module m_primitive_potential_list
   use m_multibinit_dataset , only: multibinit_dtset_type
   use m_unitcell, only: unitcell_t
   use m_supercell_maker, only: supercell_maker_t
-  use m_abstract_potential, only: abstract_potential_t, effpot_list_t
+  use m_abstract_potential, only: abstract_potential_t
+  use m_potential_list, only: potential_list_t
   use m_primitive_potential, only: primitive_potential_t
   implicit none
 
@@ -112,7 +113,7 @@ subroutine fill_supercell(self, sc_maker, sc_pot)
     class(abstract_potential_t), pointer, intent(inout) :: sc_pot
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
-    type(effpot_list_t), pointer :: tmp
+    type(potential_list_t), pointer :: tmp
     allocate(tmp)
     call self%fill_supercell_list( sc_maker, tmp)
     ! call tmp%initialize(....)
@@ -124,7 +125,7 @@ subroutine fill_supercell(self, sc_maker, sc_pot)
   subroutine fill_supercell_list(self, sc_maker, sc_pots)
     class(primitive_potential_list_t), intent(inout) :: self
     class(supercell_maker_t), intent(in) :: sc_maker
-    class(effpot_list_t), intent(inout) :: sc_pots
+    class(potential_list_t), intent(inout) :: sc_pots
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     class(abstract_potential_t), pointer :: tmp

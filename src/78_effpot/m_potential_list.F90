@@ -1,0 +1,150 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_potential_list
+!! NAME
+!! m_potential_list
+!!
+!! FUNCTION
+!! This module contains the potential_list potential. It is made of list of pointers to potentials,
+!! and has all the functionality of a potential
+!! It is to represent the equation H=\sum_i H_i
+!! with dH/dx = \sum_i dH_i/dx
+!!
+!! Datatypes:
+!!
+!! * potential_list_t: list of abstract_potential_t, which is essentially a list of pointer to abstract_potential_t
+!!    itself is also a effpot type, and its energy, 1st derivative to energy are the sum of all items.
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_potential_list
+  use defs_basis
+  use m_abicore
+  use m_errors
+  use m_xmpi
+
+  use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_abstract_potential, only: abstract_potential_t
+  use m_multibinit_supercell, only: mb_supercell_t
+
+
+  implicit none
+  !!***
+
+  !!****t* defs_abitypes/effpot_pointer_t
+  !! NAME
+  !! effpot_pointer_t
+  !!
+  !! FUNCTION
+  !! class pointer to abstract potentials. Only here because
+  !! Fortran does not allow array of pointers! So we must put
+  !! pointer to an type and make an array of this type.
+  !! It should only be used in potential_list_t.
+  !!
+  !! SOURCE
+  type, private:: effpot_pointer_t ! pointer to effpot
+     class(abstract_potential_t) , pointer :: obj
+  end type effpot_pointer_t
+  !!***
+
+  !!****t* defs_abitypes/potential_list_t
+  !! NAME
+  !! potential_list_t
+  !!
+  !! FUNCTION
+  !! A potential which is made of a list of potentials.
+  !! H=\sum_i H_i
+  !!
+  !! SOURCE
+  type, public, extends(abstract_potential_t) :: potential_list_t
+     integer :: size=0, capacity=0
+     type(effpot_pointer_t), allocatable :: data(:)  ! Maximum number of 8,TODO: make it dynamic.
+   contains
+     procedure :: initialize
+     procedure :: finalize
+     procedure :: append
+     procedure :: calculate
+  end type potential_list_t
+
+contains
+
+  subroutine initialize(self, supercell)
+    class (potential_list_t), intent(inout) :: self
+    type (mb_supercell_t), target :: supercell
+    self%supercell => supercell
+  end subroutine initialize
+
+  subroutine finalize(self)
+    class (potential_list_t) ,intent(inout) :: self
+    integer :: i
+    do i=1, self%size
+       call self%data(i)%obj%finalize()
+       nullify(self%data(i)%obj)
+    end do
+    self%size=0
+    self%is_null=.True.
+    self%has_displacement=.False.
+    self%has_strain=.False.
+    self%has_spin=.False.
+  end subroutine finalize
+
+
+  subroutine append(self, effpot)
+    ! Add a pointer to an effpot term to list.
+    class (potential_list_t) :: self
+    class (abstract_potential_t), target :: effpot
+    type(effpot_pointer_t), allocatable :: temp(:)
+    integer :: err
+    self%size=self%size + 1
+    if(self%size==1) then
+       self%capacity=8
+       ! use ALLOCATE instead of ABI_ALLOCATE because it is destoyed by move_alloc
+       ! which is not tracked.
+       ALLOCATE(self%data(self%capacity), stat=err)
+    else if ( self%size>self%capacity ) then
+       self%capacity = self%size + self%size / 4 + 8
+       !ABI_ALLOCATE(temp,(self%capacity))
+       ALLOCATE(temp(self%capacity), stat=err)
+       temp(:self%size-1) = self%data
+       call move_alloc(temp, self%data) !temp gets deallocated
+    end if
+    self%data(self%size)%obj=>effpot
+    self%is_null= (self%is_null .and. effpot%is_null)
+    self%has_spin= (self%has_spin .or. effpot%has_spin)
+    self%has_displacement= (self%has_displacement .or. effpot%has_displacement)
+    self%has_strain= (self%has_strain.or. effpot%has_strain)
+  end subroutine append
+
+  subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)
+    ! calculate energy and its first derivatives.
+    class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
+    ! inputs
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:)
+    ! outputs
+    real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
+    integer :: i
+    ! Note
+    ! calculate force and strain if asked to
+       do i=1, self%size
+          call self%data(i)%obj%calculate(displacement=displacement, strain=strain, &
+               & spin=spin, force=force, stress=stress, bfield=bfield, energy=energy)
+       end do
+  end subroutine calculate
+
+end module m_potential_list
