@@ -13,7 +13,19 @@ class Issue(object):
 
 
 class Failure(Issue):
-    pass
+    def __init__(self, path, msg, ref=None, tested=None):
+        self.ref = ref
+        self.tested = tested
+        Issue.__init__(self, path, msg)
+
+    def __repr__(self):
+        spath = '.'.join(self.path)
+        if self.ref:
+            return 'At {}: {}\nref: {}\ntested: {}'.format(
+                spath, self.message, self.ref, self.tested
+            )
+        else:
+            return Issue.__repr__(self)
 
 
 class Success(Issue):
@@ -51,7 +63,8 @@ class Tester(object):
                         self.success.append(Success(self.conf.path, msg))
                     else:
                         msg = '{} failed'.format(cons.name)
-                        self.failures.append(Failure(self.conf.path, msg))
+                        self.failures.append(Failure(self.conf.path, msg,
+                                                     ref, tested))
 
             if isinstance(ref, BaseDictWrapper):  # have children
                 for child in ref:
