@@ -5,7 +5,6 @@ tol_rel: 1.0e-10
 Etot:
     tol_abs: 1.0e-7
     tol_eq: 1.0e-6
-    equation: 'this.Etotal - sum(this.components.values())'
 
 results_gs:
     allow_nan: true
@@ -14,6 +13,6 @@ results_gs:
         ceil: 1.0e-6
 
     tol_eq: 1.0e-10
-    equations:
-    - 'this.cartesian_forces.sum(axis=0)'
-    - 'this.stress_tensor - this.stress_tensor.transpose()'
+    equation: 'this.cartesian_forces.sum(axis=0)'  # Newton's first
+    stress tensor:
+        tensor_is_symetric: true
