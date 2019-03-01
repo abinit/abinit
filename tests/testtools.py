@@ -13,6 +13,11 @@ if has_yaml:
 
 class ArgParser(object):
 
+    aliases = {
+        'fldiff': ['diff'],
+        'explore': ['exp', 'dig', 'sh']
+    }
+
     def __init__(self):
         parser = argparse.ArgumentParser(
             description='tool box for Abinit test'
@@ -23,40 +28,60 @@ class ArgParser(object):
         # Diff
         diff_parser = sub.add_parser('fldiff', help='make a diff between two'
                                      ' output file like the test bot',
-                                     aliases=['diff'])
-        self.mk_diff(diff_parser)
+                                     aliases=self.alias('fldiff'))
+        self.mk_fldiff(diff_parser)
 
         # Shell
-        shell_parser = sub.add_parser('explore', help='explore a YAML test'
-                                      ' config and browse the documentation',
-                                      description=explore_test.__doc__,
-                                      aliases=['exp', 'dig'])
-        self.mk_shell(shell_parser)
+        explore_parser = sub.add_parser('explore', help='explore a YAML test'
+                                        ' config and browse the documentation',
+                                        description=explore_test.__doc__,
+                                        aliases=self.alias('explore'))
+        self.mk_explore(explore_parser)
 
         # Run
         args = parser.parse_args()
+
+        self.unalias(args)
 
         if hasattr(self, args.cmd):
             getattr(self, args.cmd)(args)
         else:
             parser.parse_args(['--help'])
 
-    def mk_diff(self, parser):
+    def alias(self, cmd):
+        return self.aliases.get(cmd, [])
+
+    def unalias(self, args):
+        if args.cmd in self.aliases:
+            return
+        for cmd, aliases in self.aliases.items():
+            if args.cmd in aliases:
+                args.cmd = cmd
+                return
+
+    def mk_fldiff(self, parser):
         '''
             Create command line argument parser for the diff subcommand
         '''
         parser.add_argument('ref_file', metavar='REF', help='File reference')
-        parser.add_argument('test_file', metavar='TESTED',
-                            help='File to be compared')
+        parser.add_argument('test_file', metavar='TESTED', help='File to be'
+                            ' compared')
         parser.add_argument('-t', '--tolerance', metavar='TOL', type=float,
-                            default=1.01e-10)
-        parser.add_argument('--include', action='store_true')
-        parser.add_argument('--includeP', action='store_true')
-        parser.add_argument('--no-yaml', action='store_true')
-        parser.add_argument('--no-fl', action='store_true')
-        parser.add_argument('--yaml-conf', metavar='YAML_CONF', nargs='?')
+                            default=1.01e-10, help='Tolerance used to detect'
+                            ' differences')
+        parser.add_argument('-c', '--yaml-conf', metavar='YAML_CONF',
+                            help='Provide a YAML file to configure the'
+                            ' comparison')
+        parser.add_argument('--include', help='Use "," meta character as "+"'
+                            ' (default is "-")', action='store_true')
+        parser.add_argument('--includeP', help='Use "P" meta character as "+"'
+                            ' (default is "-")', action='store_true')
+        parser.add_argument('--no-yaml', help='Disable YAML based comparison',
+                            action='store_true')
+        parser.add_argument('--no-fl', help='Disable legacy fldiff comparison',
+                            action='store_true')
 
-    def diff(self, args):
+    def fldiff(self, args):
         '''
             diff subcommand, manual access to pymods.fldiff.Differ
         '''
@@ -85,19 +110,19 @@ class ArgParser(object):
             print('Something went wrong with this test:\n{}\n'.format(str(e)))
             exit(1)
 
-    def mk_shell(self, parser):
+    def mk_explore(self, parser):
         '''
-            Create command line argument parser for the shell subcommand
+            Create command line argument parser for the explore subcommand
         '''
         parser.add_argument('file', metavar='FILE', nargs='?', default=None,
                             help='YAML file defining a test.')
-        parser.add_argument('--debug', '-d', action='store_true',
-                            default=False, help='Enable debug command.')
+        parser.add_argument('-d', '--debug', action='store_true',
+                            help='Enable debug command.')
 
-    def shell(self, args):
+    def explore(self, args):
         '''
-            shell subcommand, explore test config files and browse constraints
-            and parameters documentation.
+            explore subcommand, explore test config files and browse
+            constraints and parameters documentation.
         '''
         if not has_yaml:
             print('YAML or Numpy support is not available. That command cannot'
