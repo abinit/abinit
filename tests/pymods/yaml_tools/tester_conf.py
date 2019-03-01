@@ -7,13 +7,15 @@ from .errors import ConfigContextError
 from .abinit_iterators import ITERATORS, IterStateFilter
 
 
+THIS_PATH = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_CONF_PATH = os.path.join(THIS_PATH, 'default_test.yaml')
+
+
 def get_default_conf():
     '''
         Load and parse default test config file.
     '''
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_path = os.path.join(dir_path, 'default_test.yaml')
-    with open(file_path) as f:
+    with open(DEFAULT_CONF_PATH) as f:
         try:
             return yaml_parse(f.read())
         except YAMLError:

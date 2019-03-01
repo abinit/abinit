@@ -9,7 +9,7 @@ import os
 import glob
 import cmd
 from subprocess import call
-from .tester_conf import TesterConf
+from .tester_conf import TesterConf, DEFAULT_CONF_PATH
 from .conf_parser import conf_parser
 from .errors import ConfigError
 
@@ -218,11 +218,12 @@ class Explorer(cmd.Cmd):
             line = 'exit'
         if not self.tree and line and line.split(' ')[0] not in [
             'load', 'edit',
+            'default', 'show',
             'shell', '!', 'debug',
             'exit',
             'help', '?',
         ]:
-            print('That command can only be used with an opened file.')
+            print('That command cannot be used until a file is opened.')
             return ''
         else:
             return line
@@ -352,10 +353,17 @@ class Explorer(cmd.Cmd):
             informations about ARG.
         '''
         name = arg
-        cons_scope = self.tree.get_all_constraints_here()
-        param_scope = self.tree.get_all_parameters_here()
-        cons_known = self.tree.get_known_constraints()
-        param_known = self.tree.get_known_parameters()
+        if self.tree:
+            cons_scope = self.tree.get_all_constraints_here()
+            param_scope = self.tree.get_all_parameters_here()
+            cons_known = self.tree.get_known_constraints()
+            param_known = self.tree.get_known_parameters()
+        else:
+            cons_scope = {}
+            param_scope = {}
+            cons_known = conf_parser.constraints.copy()
+            param_known = conf_parser.parameters.copy()
+
         if not name:
             print('Current scope')
             print('Constraints:')
@@ -413,15 +421,23 @@ class Explorer(cmd.Cmd):
         '''
         def show_rec(specs, indent=[]):
             for i, sp in enumerate(specs):
-                print(''.join('  ' if last else '| ' for last in indent)
-                      + '`--', sp, sep='')
+                print(''.join('   ' if last else '|  ' for last in indent)
+                      + ('`--' if i + 1 == len(specs) else '|--'), sp, sep='')
                 with self.tree.go_down(sp):
                     nspecs = self.tree.get_spec()
                     show_rec(nspecs, indent + [i + 1 == len(specs)])
 
         toplvl = self.tree.get_spec()
         print('.'.join(self.tree.path))
-        show_rec(toplvl, [True])
+        show_rec(toplvl, [])
+
+    def do_default(self, arg):
+        '''
+            Usage: default
+            Print the default configuration file
+        '''
+        with open(DEFAULT_CONF_PATH) as f:
+            print(f.read())
 
     def do_shell(self, arg):
         '''
