@@ -246,7 +246,6 @@ module m_chebfiwf
   ! Free preconditionning since not needed anymore
   ABI_FREE(l_pcon)
     
-  !call xgBlock_print(xgx0, 6)   
   ! Scale back
 !  if(l_istwf == 2) then
 !    call xgBlock_scale(xgx0,inv_sqrt2,1)
@@ -334,15 +333,14 @@ module m_chebfiwf
     type(xgBlock_t), intent(inout) :: BX
     integer         :: blockdim
     integer         :: spacedim
-    type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,l_nspinor*l_nband_filter)
+    type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,0) 
+    !l_nspinor*l_nband_filter
     double precision :: eval
     double precision, parameter :: inv_sqrt2 = 1/sqrt2
     double precision, pointer :: cg(:,:)
     double precision, pointer :: ghc(:,:)
     double precision, pointer :: gsc(:,:)
     
-    type(xgBlock_t) :: HELPER
-  
     call xgBlock_getSize(X,spacedim,blockdim)
     spacedim = spacedim/l_icplx
     
@@ -358,15 +356,16 @@ module m_chebfiwf
       if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
     end if
       
+
     if ( size(l_gvnlc) < 2*blockdim*spacedim ) then
       ABI_FREE(l_gvnlc)
       ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
     end if
       
     if (l_mpi_enreg%paral_kgb==0) then
-      call multithreaded_getghc(l_cpopt,cg(:,1:blockdim*spacedim),cprj_dum,ghc,gsc,& 
+      !l_cpopt = -1
+      call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,& 
         l_gs_hamk,l_gvnlc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0) 
-
     else
       call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),eval,blockdim,l_mpi_enreg,&
 &                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)

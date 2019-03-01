@@ -17,6 +17,7 @@ module m_chebfi2
   use m_cgtools
 #ifdef HAVE_OPENMP
   use omp_lib
+  !use mkl_service
 #endif
 
   use m_time, only : timab
@@ -93,7 +94,7 @@ module m_chebfi2
     integer         , intent(in   ) :: spacecom
     integer         , intent(in   ) :: me_g0
     logical         , intent(in   ) :: paw
-    integer :: nthread
+    !integer :: nthread
 
     chebfi%space = space
     chebfi%neigenpairs = neigenpairs
@@ -106,10 +107,6 @@ module m_chebfi2
     chebfi%istwf_k = istwf_k
     chebfi%me_g0 = me_g0
     chebfi%paw = paw
-
-    nthread = 16
-
-    !call OMP_SET_NUM_THREADS(nthread) !REMOVE THIS IN THE END
     
     !SHOULD HERE I DO ADVICE TARGET AND BLOCK CALCULATIONS???
 
@@ -245,7 +242,7 @@ module m_chebfi2
     double precision :: radius
     
     integer :: info
-    
+        
     interface
       subroutine getAX_BX(X,AX,BX)
         use m_xg, only : xgBlock_t
@@ -281,14 +278,14 @@ module m_chebfi2
     tolerance = chebfi%tolerance
     lambda_plus = chebfi%ecut
     chebfi%X = X0
-    
+        
     call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
-           
+               
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
     call chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults%self) !OK
         
     lambda_minus = maxeig
-    
+        
     nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
     
     call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
@@ -304,12 +301,14 @@ module m_chebfi2
 
     center = (lambda_plus + lambda_minus)*0.5  
     radius = (lambda_plus - lambda_minus)*0.5
-           
+               
     one_over_r = 1/radius
     two_over_r = 2/radius
         
+    print *, "NLINE", nline 
+        
     do iline = 0, nline - 1 
-
+    
       call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
       
       call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
@@ -318,12 +317,14 @@ module m_chebfi2
       call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self)
                  
     end do
-                 
+                     
     call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)    !ampfactor
-        
+            
     call chebfi_rayleightRitz(chebfi)
-    
+        
     maximum =  chebfi_computeResidue(chebfi, residu, pcond)
+        
+    call xgBlock_copy(chebfi%X,chebfi%X_prev, 1, 1)
             
     deallocate(nline_bands)
     
@@ -476,7 +477,7 @@ module m_chebfi2
     type(xgBlock_t) :: X_first_row
     type(xgBlock_t) :: AX_first_row
     type(xgBlock_t) :: BX_first_row
-        
+            
     double precision, pointer :: evec(:,:)
     double precision, allocatable :: edummy(:,:)
     
@@ -497,6 +498,7 @@ module m_chebfi2
     
     call xg_init(A_und_X,space,neigenpairs,neigenpairs)
     call xg_init(B_und_X,space,neigenpairs,neigenpairs)
+    
             
     call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self) 
             
@@ -505,7 +507,7 @@ module m_chebfi2
     else
       call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self) 
     end if
-      
+          
     if(chebfi%istwf_k == 2) then    
        call xgBlock_scale(chebfi%X, 1/sqrt2, 1)   
        if (me_g0 == 1)  then 
@@ -549,8 +551,8 @@ module m_chebfi2
                       chebfi%X, A_und_X%self, 0.d0, chebfi%X_next)    
                       
     call xgBlock_copy(chebfi%X_next,chebfi%X, 1, 1)  !X = X_next;      
-         
-                              
+        
+                               
     call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, & 
                       chebfi%AX%self, A_und_X%self, 0.d0, chebfi%X_prev)
                       
@@ -583,8 +585,6 @@ module m_chebfi2
     
     double precision :: maxResidu, minResidu
     integer :: eigResiduMax, eigResiduMin
-    
-    type(xgBlock_t)  :: HELPER
     
     interface
       subroutine pcond(W)

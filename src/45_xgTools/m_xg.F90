@@ -44,8 +44,8 @@ module m_xg
   use defs_basis, only : std_err, std_out
   use m_time,     only: timab
   use m_xmpi,     only : xmpi_sum
-
-
+  use omp_lib
+  
   implicit none
 
   private
@@ -2022,11 +2022,7 @@ module m_xg
       !$omp& schedule(static)
       do iblock = 1, xgBlock1%cols
         xgBlock1%vecR(:,iblock) = - da%vecR(iblock,1) * xgBlock2%vecR(:,iblock) + xgBlock3%vecR(:,iblock)
-!        if (iblock == 100) then
-!          print *, "IBAND", iblock
-!          print *, xgBlock1%vecR(1:6,iblock)
-!          stop
-!        end if
+        !print *, "hello from thread", omp_get_thread_num()
       end do
       !$omp end parallel do
     case (SPACE_C)
@@ -2034,6 +2030,7 @@ module m_xg
       !$omp& schedule(static)
       do iblock = 1, xgBlock1%cols
         xgBlock1%vecC(:,iblock) = - da%vecR(iblock,1) * xgBlock2%vecC(:,iblock) + xgBlock3%vecC(:,iblock)
+        !print *, "hello from thread", omp_get_thread_num() 
       end do
       !$omp end parallel do
     end select

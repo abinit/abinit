@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  8 Jan 2019.
-- ( at 14h19 )
+.Starting date : Wed 20 Feb 2019.
+- ( at 16h14 )
   
 - input  file    -> tbase4_1.in
 - output file    -> tbase4_x.out
@@ -52,6 +52,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
               amu      2.69815390E+01
+           bandpp           3
           dilatmx      1.05000000E+00
              ecut      6.00000000E+00 Hartree
 -          fftalg         112

@@ -3959,6 +3959,7 @@ subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
    irep=irep*now(l)
  end do
 
+ print *, "IREP, N", irep, n
  if (irep/=n) then
    write(message,'(a,i0,a,i0)')'  irep should equal n ; irep=',irep,' n=',n
    MSG_BUG(message)

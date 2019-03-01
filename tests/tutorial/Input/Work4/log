@@ -24,7 +24,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1181
 message: |
-    Renaming old tbase4_x.out to tbase4_x.out0528
+    Renaming old tbase4_x.out to tbase4_x.out0017
 ...
 
 
@@ -43,8 +43,8 @@ message: |
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Feb 2019.
-- ( at 11h52 )
+.Starting date : Wed 20 Feb 2019.
+- ( at 17h24 )
   
 
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -52,7 +52,7 @@ message: |
  === Build Information === 
   Version       : 8.9.4
   Build target  : x86_64_linux_gnu7.3
-  Build date    : 20190125
+  Build date    : 20190220
 
  === Compiler Suite === 
   C compiler       : gnu7.3
@@ -403,27 +403,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
  ITER STEP NUMBER     1
  vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 1
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.18E-02  2.59E-01  4.77E-01
- LOSE
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.02E-02  2.50E-01  4.35E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    3 non-SCF iterations with    4 CG line minimizations
   9.0194E-02  2.4997E-01  4.3533E-01
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.27E-02  4.16E-01  7.37E-01
- LOSE
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.29E-02  4.05E-01  7.03E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    3 non-SCF iterations with    4 CG line minimizations
  -7.2906E-02  4.0542E-01  7.0253E-01
@@ -447,32 +443,28 @@ mkrho: echo density (plane-wave part only)
  scprqt: <Vxc>= -3.4585145E-01 hartree
 
 Simple mixing update:
-  residual square of the potential :  0.26128400313205868
+  residual square of the potential :  0.26128400313205841
  scfcv_core: previous iteration took 00 [s]
 
  ITER STEP NUMBER     2
  vtorho : nnsclo_now=2, note that nnsclo,dbl_nnsclo,istep=0 0 2
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.02E-02  2.49E-01  4.25E-01
- LOSE
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.02E-02  2.49E-01  4.22E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    3 non-SCF iterations with    4 CG line minimizations
   9.0229E-02  2.4888E-01  4.2165E-01
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.28E-02  4.04E-01  6.91E-01
- LOSE
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.28E-02  4.04E-01  6.88E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    3 non-SCF iterations with    4 CG line minimizations
  -7.2787E-02  4.0393E-01  6.8844E-01
@@ -501,21 +493,17 @@ mkrho: echo density (plane-wave part only)
 
  ITER STEP NUMBER     3
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 3
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.01E-02  2.49E-01  4.19E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
   9.0145E-02  2.4873E-01  4.1945E-01
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.29E-02  4.04E-01  6.86E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
  -7.2869E-02  4.0373E-01  6.8646E-01
@@ -544,21 +532,17 @@ mkrho: echo density (plane-wave part only)
 
  ITER STEP NUMBER     4
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 4
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.02E-02  2.49E-01  4.18E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
   9.0159E-02  2.4874E-01  4.1820E-01
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.29E-02  4.04E-01  6.85E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
  -7.2854E-02  4.0374E-01  6.8548E-01
@@ -587,21 +571,17 @@ mkrho: echo density (plane-wave part only)
 
  ITER STEP NUMBER     5
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 5
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.02E-02  2.49E-01  4.17E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
   9.0158E-02  2.4874E-01  4.1730E-01
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.29E-02  4.04E-01  6.85E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
  -7.2855E-02  4.0374E-01  6.8471E-01
@@ -630,21 +610,17 @@ mkrho: echo density (plane-wave part only)
 
  ITER STEP NUMBER     6
  vtorho : nnsclo_now=1, note that nnsclo,dbl_nnsclo,istep=0 0 6
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     1  , k= ( -0.25000  0.50000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene:  9.02E-02  2.49E-01  4.17E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
   9.0159E-02  2.4874E-01  4.1663E-01
- USEPAW GENERAL:           0
- istwf_k           1
  non-scf iterations; kpt #     2  , k= ( -0.25000  0.00000  0.00000  ), band residuals:
+ NLINE           4
  res:       NaN       NaN       NaN
  ene: -7.29E-02  4.04E-01  6.84E-01
- LOSE
      eigenvalues (hartree) for    3  bands
               after    2 non-SCF iterations with    4 CG line minimizations
  -7.2854E-02  4.0374E-01  6.8410E-01
@@ -880,8 +856,8 @@ P           mkmem           2
 --- !FinalSummary
 program: abinit
 version: 8.9.4
-start_datetime: Mon Feb 04 11:52:40 2019
-end_datetime: Mon Feb 04 11:52:41 2019
+start_datetime: Wed Feb 20 17:24:07 2019
+end_datetime: Wed Feb 20 17:24:07 2019
 overall_cpu_time:           1.7
 overall_wall_time:           0.4
 exit_requested_by_user: no 

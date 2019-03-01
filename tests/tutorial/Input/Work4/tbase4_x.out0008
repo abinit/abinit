@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  9 Jan 2019.
-- ( at 11h46 )
+.Starting date : Wed 20 Feb 2019.
+- ( at 16h24 )
   
 - input  file    -> tbase4_1.in
 - output file    -> tbase4_x.out
@@ -240,15 +240,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  8.62021828963057E-01
-    Hartree energy  =  3.76988011212041E-03
+    Hartree energy  =  3.76988011212042E-03
     XC energy       = -8.04440188264481E-01
     Ewald energy    = -2.71472096493581E+00
     PspCore energy  =  3.72610088794072E-02
-    Loc. psp. energy=  7.55028274727802E-02
+    Loc. psp. energy=  7.55028274727804E-02
     NL   psp  energy=  4.50578315448593E-01
     >>>>> Internal E= -2.09002729232433E+00
 
-    -kT*entropy     = -7.99353006133616E-03
+    -kT*entropy     = -7.99353006133615E-03
     >>>>>>>>> Etotal= -2.09802082238567E+00
 
  Other information on the energy :
@@ -344,18 +344,18 @@ P           mkmem           2
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         0.599  35.7      0.196  47.7              1      -1.00        3.06       3.06
-- invars2                        0.313  18.7      0.029   7.1              1      -1.00       10.80      10.80
-- timing timab                   0.120   7.1      0.040   9.7              6      -1.00        2.99       2.99
-- abinit(2)                      0.096   5.7      0.009   2.2              1      -1.00       10.66      10.66
-- fourwf%(pot)                   0.063   3.7      0.026   6.3             80      -1.00        2.42       2.42
-- stress                         0.042   2.5      0.014   3.4              1      -1.00        2.98       2.98
-- ewald2 (+vdw_dftd)             0.041   2.4      0.013   3.2              1      -1.00        3.15       3.15
-- ewald                          0.013   0.7      0.012   2.9              1      -1.00        1.04       1.04
-- others (105)                   0.045   2.7      0.015   3.6             -1      -1.00        3.00       3.00
+- pspini                         0.669  40.2      0.195  44.7              1      -1.00        3.43       3.43
+- invars2                        0.278  16.7      0.029   6.7              1      -1.00        9.57       9.57
+- timing timab                   0.119   7.2      0.039   8.9              6      -1.00        3.05       3.05
+- abinit(2)                      0.068   4.1      0.009   2.1              1      -1.00        7.58       7.58
+- fourwf%(pot)                   0.062   3.7      0.026   6.0             80      -1.00        2.40       2.40
+- stress                         0.042   2.5      0.014   3.2              1      -1.00        2.97       2.97
+- ewald2 (+vdw_dftd)             0.041   2.4      0.014   3.2              1      -1.00        2.91       2.91
+- ewald                          0.012   0.7      0.012   2.8              1      -1.00        1.03       1.03
+- others (105)                   0.042   2.5      0.018   4.1             -1      -1.00        2.31       2.31
 -<END_TIMER>
 -
-- subtotal                       1.331  79.4      0.354  86.1                                  3.76       3.76
+- subtotal                       1.332  80.0      0.356  81.7                                  3.74       3.74
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -365,18 +365,18 @@ P           mkmem           2
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         0.599  35.7      0.196  47.7              1      -1.00        3.06       3.06
-- invars2                        0.313  18.7      0.029   7.1              1      -1.00       10.80      10.80
-- timing timab                   0.120   7.1      0.040   9.7              6      -1.00        2.99       2.99
-- abinit(2)                      0.096   5.7      0.009   2.2              1      -1.00       10.66      10.66
-- fourwf%(pot)                   0.063   3.7      0.026   6.3             80      -1.00        2.42       2.42
-- stress                         0.042   2.5      0.014   3.4              1      -1.00        2.98       2.98
-- ewald2 (+vdw_dftd)             0.041   2.4      0.013   3.2              1      -1.00        3.15       3.15
-- ewald                          0.013   0.7      0.012   2.9              1      -1.00        1.04       1.04
-- others (105)                   0.045   2.7      0.015   3.6             -1      -1.00        3.00       3.00
+- pspini                         0.669  40.2      0.195  44.7              1      -1.00        3.43       3.43
+- invars2                        0.278  16.7      0.029   6.7              1      -1.00        9.57       9.57
+- timing timab                   0.119   7.2      0.039   8.9              6      -1.00        3.05       3.05
+- abinit(2)                      0.068   4.1      0.009   2.1              1      -1.00        7.58       7.58
+- fourwf%(pot)                   0.062   3.7      0.026   6.0             80      -1.00        2.40       2.40
+- stress                         0.042   2.5      0.014   3.2              1      -1.00        2.97       2.97
+- ewald2 (+vdw_dftd)             0.041   2.4      0.014   3.2              1      -1.00        2.91       2.91
+- ewald                          0.012   0.7      0.012   2.8              1      -1.00        1.03       1.03
+- others (105)                   0.042   2.5      0.018   4.1             -1      -1.00        2.31       2.31
 -<END_TIMER>
 
-- subtotal                       1.331  79.4      0.354  86.1                                  3.76       3.76
+- subtotal                       1.332  80.0      0.356  81.7                                  3.74       3.74
 
 ================================================================================
 

@@ -43,6 +43,7 @@ module m_lobpcgwf
  use m_fstrings
  use m_xg
  use m_lobpcg2
+ ! use m_xmpi
 
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
@@ -151,7 +152,9 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Variables
  nline=dtset%nline
  blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
-
+ 
+ !change blockdim for testing...
+ 
 !Depends on istwfk
  if ( l_istwf == 2 ) then ! Real only
    ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
@@ -224,7 +227,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
 !###########################################################################
-
  ! Run lobpcg
  call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu,prtvol)
 
@@ -329,6 +331,7 @@ end subroutine lobpcgwf2
   double precision, pointer :: gsc(:,:)
 
   call xgBlock_getSize(X,spacedim,blockdim)
+
   spacedim = spacedim/l_icplx
 
 
@@ -350,10 +353,8 @@ end subroutine lobpcgwf2
  end if
 
   if (l_mpi_enreg%paral_kgb==0) then
-
     call multithreaded_getghc(l_cpopt,cg(:,1:blockdim*spacedim),cprj_dum,ghc,gsc(:,1:blockdim*spacedim),&
       l_gs_hamk,l_gvnlc,dum, l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
-
   else
     call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),dum,blockdim,l_mpi_enreg,&
 &                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)

@@ -182,6 +182,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+ 
 
 !Keep track of total time spent in getghc:
  call timab(200+tim_getghc,1,tsec)
@@ -282,7 +283,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
    nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
    nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
  end if
-
+  !print *, "LOCAL POTENTIAL"
 !============================================================
 ! Application of the local potential
 !============================================================
@@ -370,6 +371,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 &         npw_fft,npw_fft,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
 &         weight,weight,use_gpu_cuda=gs_ham%use_gpu_cuda)
        else
+         !OVDE JE PROBLEM ALI NE ZNAM STA
+         !print *, "PROBLEM POCINJE"
          call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,2,mpi_enreg%paral_kgb,tim_fourwf,&
@@ -1357,6 +1360,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambd
  nthreads = 1
 #endif
  chunk = ndat/nthreads ! Divide by 2 to construct chunk of even number of bands
+
  residuchunk = ndat - nthreads*chunk
  if ( ithread < nthreads-residuchunk ) then
    firstband = ithread*chunk+1
@@ -1365,7 +1369,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambd
    firstband = (nthreads-residuchunk)*chunk + ( ithread -(nthreads-residuchunk) )*(chunk+1) +1
    lastband = firstband+chunk
  end if
-
+ 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1
    lastelt = lastband*spacedim
@@ -1381,6 +1385,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambd
        select_k=select_k_default,kg_fft_k=kg_fft_k)
      end if
    else
+     !stop
      if (present(kg_fft_kp)) then
        call getghc(cpopt,cwavef(:,firstelt:lastelt),cwaveprj,ghc(:,firstelt:lastelt),gsc(:,firstelt:lastelt*gs_ham%usepaw),&
        gs_ham,gvnlc(:,firstelt:lastelt),lambda, mpi_enreg,lastband-firstband+1,prtvol,sij_opt,tim_getghc,type_calc,&
@@ -1399,7 +1404,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambd
 #endif
 #endif
     !$omp end parallel
-
+  !stop
 end subroutine multithreaded_getghc
 !!***
 

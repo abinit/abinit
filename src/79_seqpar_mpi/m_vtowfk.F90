@@ -50,7 +50,7 @@ module m_vtowfk
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop, prep_fourwf
  use m_fft,         only : fourwf
-
+ 
  implicit none
 
  private
@@ -216,7 +216,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
-
+ 
+ 
 ! **********************************************************************
 
  DBG_ENTER("COLL")
@@ -228,8 +229,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    write(message,'(80a,a,a)') ('=',ii=1,80),ch10,'vtowfk : enter'
    call wrtout(std_out,message,'PERS')
  end if
-
-
+ 
 !=========================================================================
 !============= INITIALIZATIONS AND ALLOCATIONS ===========================
 !=========================================================================
@@ -406,7 +406,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k) 
          end if    
        end if
-
+       
 !      =========================================================================
 !      ======== MINIMIZATION OF BANDS: CONJUGATE GRADIENT (Teter et al.) =======
 !      =========================================================================
