@@ -54,11 +54,11 @@ class TesterConf:
                 conf = {}
             self.trees, self.filters = conf_parser.make_trees(conf)
             self.tree.update(self.trees['__default'])
-            self.trees['__default'] = self.tree.copy()
         else:
             self.trees = {}
             self.filters = {}
 
+        self.trees['__default'] = self.tree.copy()
         self.__tree_cache = {}
 
     @classmethod
