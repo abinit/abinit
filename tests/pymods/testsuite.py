@@ -832,7 +832,7 @@ class AbinitTestInfoParser(object):
 
             if 'file' in ytest:
                 val = ytest['file']
-                base = os.path.realpath(os.path.basename(self.inp_fname))
+                base = os.path.realpath(os.path.dirname(self.inp_fname))
                 ytest['file'] = os.path.join(base, val)
 
         return ytest
