@@ -329,7 +329,7 @@ class Result(object):
             Return a textual summary of the diff.
         '''
         if self.yaml_error:
-            summary = 'yaml errors. First one is:\n' + self.details[1]
+            summary = 'yaml errors.'
         elif self.fatal_error:
             summary = 'fldiff fatal error.\n'
         elif self.success:
@@ -369,7 +369,7 @@ class Result(object):
         '''
         if self.yaml_error:
             status = 'failed'
-            msg = 'yaml_test errors, see details for more infomations.'
+            msg = 'yaml_test errors. First is:\n' + self.details[0]
         elif self.fatal_error:
             status = 'failed'
             msg = 'fldiff fatal error:\n' + self.details
