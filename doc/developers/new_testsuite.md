@@ -88,7 +88,7 @@ The first level of specialisation match the documents label value from tested fi
 The next levels match the different attributes of the document.
 
 To get the list of constraints and parameters run the program
-`~abinit/tests/testcli.py shell` and type `show *`. You can then type for
+`~abinit/tests/testtools.py explore` and type `show *`. You can then type for
 example `show tol_eq` to learn more about a specific constraints or parameter.
 
 Constraints and parameters have several properties that define their behaviour.
@@ -135,6 +135,83 @@ results_gs:
     etotal:
         tol: 1.0e-8
 ```
+
+In some cases it is important to define different behaviour depending on the
+state of iterations (dtset, image...).  This is possible thanks to a tool
+called __filters__. Filters allow user to add special constraints and
+parameters when treating documents matching a given set of dtset, image etc. To
+define a filter user use the special node _filters_, each children of this node
+is a filter.  The label of the child define the name of the filter and its
+children define the set it match. See the example below use two filters that
+simply match one specific dataset.
+
+```yaml
+lda:
+    results_gs:
+        tol_abs: 1.0e-6
+
+dmft:
+    results_gs:
+        cartesian forces:
+            ignore
+
+filters:
+    lda:
+        dtset: 1
+    dmft:
+        dtset: 2
+```
+
+A filter can specify all currently known iterators: dtset, timimage, image, and
+time. For each iterator a set of integers can be defined with three methods:
+
+- a single integer value
+- a YAML list of value
+- a mapping with optional members "from" and "to" giving the boundaries (both
+  included) of the integer interval If "from" is omited the default is 1. If
+  "to" is omited the default is no upper boundary.
+
+Several filters can be used for the same document if they overlap. However it
+is fundamental that an order of specificity can be determined which means that
+overlapping filters must absolutly be included in each other. Though the first
+example below is fine because _f2_ is included in _f1_ but the second example
+will raise an error because _f4_ is not included in _f3_.
+
+```yaml
+# this is fine
+filters:
+    f1:
+        dtset:
+            from: 2
+            to: 7
+        image:
+            from: 4
+
+    f2:
+        dtset: 7
+        image:
+        - 4
+        - 5
+        - 6
+```
+
+```yaml
+# this will raise an error
+filters:
+    f3:
+        dtset:
+            from: 2
+            to: 7
+        image:
+            from: 4
+
+    f4:
+        dtset: 7
+        image:
+            from: 1
+            to: 5
+```
+
 
 ## Proof of concept implementation
 
@@ -188,11 +265,11 @@ On the python side:
   These classes may be used as examples for the creation of furter tags.
 - A parser for test configuration have been added and all facilities to do tests
   are in place.
-- A command line tool testcli.py allow to do different manual actions (see Test CLI)
+- A command line tool testtools.py allow to do different manual actions (see Test CLI)
 
-## Test CLI
+## Test tools
 
-A command line tool `~abinit/tests/testcli.py` provide tools to work on writing tests.
+A command line tool `~abinit/tests/testtools.py` provide tools to work on writing tests.
 It provide help if run without argument.
 The available sub commands are described here.
 
@@ -205,12 +282,12 @@ Abinit each time like runtest.py would do.
 It allow the user to provide the same parameters that are passed by the
 testsuite.py when runtest.py is used.
 
-Use `~abinit/tests/testcli.py diff --help` for more informations.
+Use `~abinit/tests/testtools.py diff --help` for more informations.
 
-### Shell
+### Explore
 
 This tool provide is helpful to explore a test configuration file. It provide a
 shell like interface where the user can move around the tree of the
 configuration file, seeing what constraints define the test.  It also provide
 documentation about contstraints.
-Run `~abinit/tests/testcli.py shell` to use it.
+Run `~abinit/tests/testtools.py explore` to use it.
