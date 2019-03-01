@@ -274,9 +274,10 @@ class Result(object):
 
         details.append('# Start YAML based comparison report\n')
 
+        if self.yaml_diff:
+            self.yaml_error = True
         for diff in self.yaml_diff:
             self.success = False
-            self.yaml_error = True
             details.append(repr(diff) + '\n\n')
 
         details.append('# Start legacy fldiff comparision report\n')
@@ -331,9 +332,9 @@ class Result(object):
         if self.yaml_error:
             summary = 'yaml errors.'
         elif self.fatal_error:
-            summary = 'fldiff fatal error.\n'
+            summary = 'fldiff fatal error.'
         elif self.success:
-            summary = 'no significant difference has been found'
+            summary = 'no significant difference has been found.'
         else:
             summary = ('different lines={}, max abs_diff={:.3e} (l.{}),'
                        ' max rel_diff={:.3e} (l.{}).').format(
@@ -356,11 +357,12 @@ class Result(object):
             or write it into the given file (expected to be a writable stream).
         '''
         if file is None:
-            return ('\n'.join(self.extra_info) + ''.join(self.details)
+            return ('\n'.join(self.extra_info) + '\n' + ''.join(self.details)
                     + self.get_summary())
         else:
+            file.write('\n'.join(self.extra_info) + '\n')
             file.writelines(self.details)
-            file.write(self.get_summary())
+            file.write(self.get_summary() + '\n')
             return None
 
     def passed_within_tols(self, tolnlines, tolabs, tolrel):
@@ -369,7 +371,7 @@ class Result(object):
         '''
         if self.yaml_error:
             status = 'failed'
-            msg = 'yaml_test errors. First is:\n' + self.details[0]
+            msg = 'yaml_test errors. First is:\n{}\n'.format(self.yaml_diff[0])
         elif self.fatal_error:
             status = 'failed'
             msg = 'fldiff fatal error:\n' + self.details
@@ -433,8 +435,7 @@ class Differ(object):
             self.use_yaml = self.options['use_yaml']
             if self.use_yaml:
                 if yaml_test and 'file' in yaml_test and yaml_test['file']:
-                    self.yaml_test = YTesterConf.from_file(
-                        yaml_test['file'])
+                    self.yaml_test = YTesterConf.from_file(yaml_test['file'])
                 elif yaml_test and 'test' in yaml_test and yaml_test['test']:
                     self.yaml_test = YTesterConf(yaml_test['test'])
                 else:
