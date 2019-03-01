@@ -436,8 +436,8 @@ class Differ(object):
             if self.use_yaml:
                 if yaml_test and 'file' in yaml_test and yaml_test['file']:
                     self.yaml_test = YTesterConf.from_file(yaml_test['file'])
-                elif yaml_test and 'test' in yaml_test and yaml_test['test']:
-                    self.yaml_test = YTesterConf(yaml_test['test'])
+                elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
+                    self.yaml_test = YTesterConf(yaml_test['yaml'])
                 else:
                     self.yaml_test = YTesterConf()
         else:

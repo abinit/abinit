@@ -476,7 +476,7 @@ TESTCNF_KEYWORDS = {
 "topics"         : (_str2list, "",  "extra_info", "Topics associated to the test"),
 "references"     : (_str2list, "",  "extra_info", "List of references to papers or other articles"),
 "file"           : (str, "", "yaml_test", "File path to the YAML config file relative to the input file."),
-"text"           : (str, "", "yaml_test", "Raw YAML config for quick config."),
+"yaml"           : (str, "", "yaml_test", "Raw YAML config for quick config."),
 }
 
 #TESTCNF_SECTIONS = set( [ TESTCNF_KEYWORDS[k][2] for k in TESTCNF_KEYWORDS ] )
@@ -703,7 +703,7 @@ class AbinitTestInfoParser(object):
         info = Record()
         d = info.__dict__
 
-        d['yaml_test'] = {}
+        d['yaml_test'] = self.yaml_test()
 
         # First read and parse the global options.
         for key in TESTCNF_KEYWORDS:
@@ -712,18 +712,8 @@ class AbinitTestInfoParser(object):
             section = tup[2]
 
             if section == 'yaml_test':
-                # special case, keep the structure, do not use default value
-                if (section in self.parser.sections()
-                   and self.parser.has_option(section, key)):
-                    val = self.parser.get('yaml_test', key)
-                    if key == 'file':
-                        # resolve path relative to input file
-                        base = os.path.realpath(os.path.basename(
-                            self.inp_fname
-                        ))
-                        val = os.path.join(base, val)
-                    d['yaml_test'][key] = val
-
+                # special case: handle this separatly
+                continue
             elif (section in self.parser.sections()
                   and self.parser.has_option(section, key)):
                 d[key] = self.parser.get(section, key)
@@ -829,6 +819,23 @@ class AbinitTestInfoParser(object):
 
         fnames = parse(self.parser.get(section, opt))
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
+
+    def yaml_test(self):
+        sec_name = 'yaml_test'
+        ytest = {}
+
+        if self.parser.has_section(sec_name):
+            scalar_key = ['file', 'yaml']
+            for key in scalar_key:
+                if self.parser.has_option(sec_name, key):
+                    ytest[key] == self.parser.get(sec_name, key)
+
+            if 'file' in ytest:
+                val = ytest['file']
+                base = os.path.realpath(os.path.basename(self.inp_fname))
+                ytest['file'] = os.join(base, val)
+
+        return ytest
 
     #@property
     #def is_parametrized_test(self):
