@@ -236,7 +236,7 @@ class Result(object):
     '''
         Analyse and summarize the set of differences found by a diff.
     '''
-    def __init__(self, fl_diff, yaml_diff, extra_info, label=None):
+    def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None):
         '''
             differences is expected to be a list of Difference instances
         '''
@@ -277,7 +277,7 @@ class Result(object):
         for diff in self.yaml_diff:
             self.success = False
             self.yaml_error = True
-            details.append(repr(diff) + '\n')
+            details.append(repr(diff) + '\n\n')
 
         details.append('# Start legacy fldiff comparision report\n')
 
@@ -457,7 +457,7 @@ class Differ(object):
             lines2 = f.readlines()
 
         return Result(*self.diff_lines(lines1, lines2),
-                      self.yaml_test.extra_info(),
+                      extra_info=self.yaml_test.extra_info(),
                       label=self.options['label'])
 
     def diff_lines(self, lines1, lines2):
