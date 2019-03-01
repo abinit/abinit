@@ -236,12 +236,13 @@ class Result(object):
     '''
         Analyse and summarize the set of differences found by a diff.
     '''
-    def __init__(self, fl_differences, yaml_differences, label=None):
+    def __init__(self, fl_diff, yaml_diff, extra_info, label=None):
         '''
             differences is expected to be a list of Difference instances
         '''
-        self.fl_diff = fl_differences
-        self.yaml_diff = yaml_differences
+        self.fl_diff = fl_diff
+        self.yaml_diff = yaml_diff
+        self.extra_info = extra_info
         self.fatal_error = False
         self.yaml_error = False
         self.success = True
@@ -355,7 +356,8 @@ class Result(object):
             or write it into the given file (expected to be a writable stream).
         '''
         if file is None:
-            return ''.join(self.details) + self.get_summary()
+            return ('\n'.join(self.extra_info) + ''.join(self.details)
+                    + self.get_summary())
         else:
             file.writelines(self.details)
             file.write(self.get_summary())
@@ -455,6 +457,7 @@ class Differ(object):
             lines2 = f.readlines()
 
         return Result(*self.diff_lines(lines1, lines2),
+                      self.yaml_test.extra_info(),
                       label=self.options['label'])
 
     def diff_lines(self, lines1, lines2):

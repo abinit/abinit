@@ -43,6 +43,8 @@ class TesterConf:
         self.current_path = []
         self.current_state = {}
 
+        self.infos = []
+
         # defaut conf is not supposed to use filters
         self.tree = conf_parser.make_trees(get_default_conf())[0]['__default']
 
@@ -52,9 +54,14 @@ class TesterConf:
                 conf = yaml_parse(src)
             except YAMLError:
                 conf = {}
+                self.warning('The provided YAML source was corrupted. The'
+                             ' configuration used will only be the default'
+                             ' one.')
             self.trees, self.filters = conf_parser.make_trees(conf)
             self.tree.update(self.trees['__default'])
         else:
+            self.infos('No source have been provided apart from default'
+                       ' config.')
             self.trees = {}
             self.filters = {}
 
@@ -68,6 +75,15 @@ class TesterConf:
         '''
         with open(filename) as f:
             return cls(f.read())
+
+    def extra_infos(self):
+        return ['# ' + inf for inf in self.infos]
+
+    def info(self, msg):
+        self.infos.append('[INFO] ' + msg)
+
+    def warning(self, msg):
+        self.infos.append('[WARNING] ' + msg)
 
     @property
     def path(self):
