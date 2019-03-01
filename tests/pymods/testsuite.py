@@ -828,12 +828,12 @@ class AbinitTestInfoParser(object):
             scalar_key = ['file', 'yaml']
             for key in scalar_key:
                 if self.parser.has_option(sec_name, key):
-                    ytest[key] == self.parser.get(sec_name, key)
+                    ytest[key] = self.parser.get(sec_name, key)
 
             if 'file' in ytest:
                 val = ytest['file']
                 base = os.path.realpath(os.path.basename(self.inp_fname))
-                ytest['file'] = os.join(base, val)
+                ytest['file'] = os.path.join(base, val)
 
         return ytest
 
