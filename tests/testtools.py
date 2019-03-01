@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 from __future__ import print_function, division, unicode_literals
 import argparse
+from sys import version_info
 from pymods.fldiff import Differ
 from pymods.yaml_tools import is_available as has_yaml
 
 if __name__ != '__main__':
     raise ImportError('testcli.py is not an importable module.')
+
+PY3 = version_info.major >= 3
 
 if has_yaml:
     import pymods.yaml_tools.explore_test as explore_test
@@ -13,9 +16,16 @@ if has_yaml:
 
 class ArgParser(object):
 
-    aliases = {
-        'fldiff': ['diff'],
-        'explore': ['exp', 'dig', 'sh']
+    cmds = {
+        'fldiff': {
+            'help': 'make a diff between two output file like the test bot',
+            'aliases': ['diff'],
+        },
+        'explore': {
+            'help': 'explore a YAML test config and browse the documentation',
+            'description': explore_test.__doc__,
+            'aliases': ['exp', 'dig', 'sh'],
+        }
     }
 
     def __init__(self):
@@ -25,41 +35,34 @@ class ArgParser(object):
         sub = parser.add_subparsers(dest='cmd')
         parser.set_defaults(cmd='not a command')
 
-        # Diff
-        diff_parser = sub.add_parser('fldiff', help='make a diff between two'
-                                     ' output file like the test bot',
-                                     aliases=self.alias('fldiff'))
-        self.mk_fldiff(diff_parser)
-
-        # Shell
-        explore_parser = sub.add_parser('explore', help='explore a YAML test'
-                                        ' config and browse the documentation',
-                                        description=explore_test.__doc__,
-                                        aliases=self.alias('explore'))
-        self.mk_explore(explore_parser)
+        for cmd in self.cmds:
+            if not PY3:  # unfortunatly aliases are only available in Python 3
+                del self.cmds[cmd]['aliases']
+            cmd_parser = sub.add_parser(cmd, **self.cmds[cmd])
+            getattr(self, 'parse_'+cmd)(cmd_parser)
 
         # Run
         args = parser.parse_args()
 
         self.unalias(args)
 
-        if hasattr(self, args.cmd):
-            getattr(self, args.cmd)(args)
-        else:
+        if args.cmd == 'not a command':
             parser.parse_args(['--help'])
+        else:
+            getattr(self, args.cmd)(args)
 
     def alias(self, cmd):
-        return self.aliases.get(cmd, [])
+        return self.aliases.get(cmd, {'aliases': []})['aliases']
 
     def unalias(self, args):
-        if args.cmd in self.aliases:
+        if args.cmd in self.cmds:
             return
-        for cmd, aliases in self.aliases.items():
-            if args.cmd in aliases:
+        for cmd, opts in self.cmds.items():
+            if args.cmd in opts['aliases']:
                 args.cmd = cmd
                 return
 
-    def mk_fldiff(self, parser):
+    def parse_fldiff(self, parser):
         '''
             Create command line argument parser for the diff subcommand
         '''
@@ -110,7 +113,7 @@ class ArgParser(object):
             print('Something went wrong with this test:\n{}\n'.format(str(e)))
             exit(1)
 
-    def mk_explore(self, parser):
+    def parse_explore(self, parser):
         '''
             Create command line argument parser for the explore subcommand
         '''
