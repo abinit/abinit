@@ -52,8 +52,8 @@ class ArgParser(object):
                             default=1.01e-10)
         parser.add_argument('--include', action='store_true')
         parser.add_argument('--includeP', action='store_true')
-        parser.add_argument('--no_yaml', action='store_true')
-        parser.add_argument('--no_fl', action='store_true')
+        parser.add_argument('--no-yaml', action='store_true')
+        parser.add_argument('--no-fl', action='store_true')
         parser.add_argument('--yaml-conf', metavar='YAML_CONF', nargs='?')
 
     def diff(self, args):
