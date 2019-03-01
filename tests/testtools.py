@@ -26,7 +26,7 @@ class ArgParser(object):
         self.mk_diff(diff_parser)
 
         # Shell
-        shell_parser = sub.add_parser('shell', help='explore a YAML test'
+        shell_parser = sub.add_parser('explore', help='explore a YAML test'
                                       ' config and browse the documentation',
                                       description=explore_test.__doc__)
         self.mk_shell(shell_parser)
