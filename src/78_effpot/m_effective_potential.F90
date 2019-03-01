@@ -46,6 +46,9 @@ module m_effective_potential
 #if defined HAVE_NETCDF
  use netcdf
 #endif
+#if defined DEV_MS_SCALEUP 
+ use scup_global, only : global_calculate_energy, global_calculate_forces  
+#endif 
 
  use m_fstrings,       only : replace, ftoa, itoa, int2char4
  use m_io_tools,       only : open_file,get_unit
@@ -2300,6 +2303,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   real(dp):: energy_part,ucvol
   logical :: has_strain = .FALSE.,need_verbose
   logical :: iam_master,need_anharmonic
+  logical :: err_eng, err_for
   integer, parameter:: master = 0
 !array
   type(strain_type) :: strain_t
@@ -2643,8 +2647,27 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
     end if
   end if
 
+
+!-------------------------------------------
+! 8 - Compute electronic Part with SCALE-UP
+!------------------------------------------
+
+err_eng = .FALSE. 
+err_for = .FALSE.
+
+energy_part = 0 
+fcart_part = 0 
+
+#if defined DEV_MS_SCALEUP
+   err_eng = global_calculate_energy(energy_part,strain_tmp,disp_tmp,eff_pot%supercell%natom)
+   err_for = global_calculate_forces(fcart_part,strain_tmp,disp_tmp,eff_pot%supercell%natom,update_dens=.TRUE.)
+#endif 
+
+energy = energy + energy_part 
+fcart = fcart + fcart_part 
+
 !-----------------------------------
-! 8 - Add variation of the atomic
+! 9 - Add variation of the atomic
 !     displacement due to the strain
 !-----------------------------------
   if (has_strain) then
@@ -2660,7 +2683,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   end if
 
 !---------------------------------
-! 8 - Apply factors
+! 10 - Apply factors
 !---------------------------------
 
 ! divide stess tensor by ucvol
@@ -2675,7 +2698,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,energy_harm_tot,energy_ha
   call fcart2fred(fcart,fred,rprimd,natom)
 
 !------------------------------------
-! 9 - Final Print:
+! 11 - Final Print:
 !------------------------------------
 
   if(need_verbose)then

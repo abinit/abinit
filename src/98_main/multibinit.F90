@@ -67,6 +67,9 @@ program multibinit
  use m_dtset,      only : chkvars
  use m_dtfil,      only : isfile
  use m_mover_effpot, only : mover_effpot
+#if defined DEV_MS_SCALEUP 
+ use scup_global, only : global_init_model
+#endif 
  !use m_generate_training_set, only : generate_training_set
  use m_compute_anharmonics, only : compute_anharmonics
  use m_init10,              only : init10
@@ -82,6 +85,7 @@ program multibinit
  integer :: option
  logical :: iam_master
  logical :: need_analyze_anh_pot
+ logical :: err_init_elec
  real(dp) :: tcpu,tcpui,twall,twalli
  real(dp) :: tsec(2)
  character(len=24) :: codename,start_datetime
@@ -249,6 +253,11 @@ program multibinit
      end if
    end if
  end if
+
+ !Initialized the electronic model (If scale-up is available)
+#if defined DEV_MS_SCALEUP 
+  err_init_elec = global_init_model(filnam(4),inp%ncell,needlattice=.FALSE.,needelectrons=.TRUE.,didi=.FALSE.,harm_der=.FALSE.,tcharge=0,ismagnetic=.FALSE.,istddft=.FALSE.) 
+#endif 
 
 !****************************************************************************************
 
