@@ -21,14 +21,16 @@ class ArgParser(object):
         parser.set_defaults(cmd='not a command')
 
         # Diff
-        diff_parser = sub.add_parser('diff', help='make a diff between two'
-                                     ' output file like the test bot')
+        diff_parser = sub.add_parser('fldiff', help='make a diff between two'
+                                     ' output file like the test bot',
+                                     aliases=['diff'])
         self.mk_diff(diff_parser)
 
         # Shell
         shell_parser = sub.add_parser('explore', help='explore a YAML test'
                                       ' config and browse the documentation',
-                                      description=explore_test.__doc__)
+                                      description=explore_test.__doc__,
+                                      aliases=['exp', 'dig'])
         self.mk_shell(shell_parser)
 
         # Run
