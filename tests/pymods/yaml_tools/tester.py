@@ -63,7 +63,7 @@ class Tester(object):
                         msg = '{} ok'.format(cons.name)
                         self.success.append(Success(self.conf, msg))
                     else:
-                        msg = '{} failed'.format(cons.name)
+                        msg = '{} ({}) failed'.format(cons.name, cons.value)
                         self.failures.append(Failure(self.conf, msg,
                                                      ref, tested))
 
@@ -86,7 +86,7 @@ class Tester(object):
                     msg = '{} ok'.format(cons.name)
                     self.success.append(Success(self.conf, msg))
                 else:
-                    msg = '{} failed'.format(cons.name)
+                    msg = '{} ({}) failed'.format(cons.name, cons.value)
                     self.failures.append(Failure(self.conf, msg))
 
         if len(self.ref) != len(self.tested):
