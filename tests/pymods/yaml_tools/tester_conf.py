@@ -76,7 +76,7 @@ class TesterConf:
         with open(filename) as f:
             return cls(f.read())
 
-    def extra_infos(self):
+    def extra_info(self):
         return ['# ' + inf for inf in self._infos]
 
     def info(self, msg):
