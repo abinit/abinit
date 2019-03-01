@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''
 Object: compare 2 output files from ABINIT line by line with arithmetic
 comparisons of floating point substrings
@@ -70,7 +69,7 @@ else:
             pass
 
         def run(self):
-            return None
+            return None, None
 
 # Match floats. Minimal float is .0 for historical reasons.
 # In consequence integers will be compared as strings
@@ -272,16 +271,16 @@ class Result(object):
         details = []
         error_lines = set()
 
-        details.append('# Start YAML based comparison report\n')
 
         if self.yaml_diff:
+            details.append('# Start YAML based comparison report\n')
             self.yaml_error = True
         for diff in self.yaml_diff:
             self.success = False
             details.append(repr(diff) + '\n\n')
 
-        details.append('# Start legacy fldiff comparision report\n')
-
+        if self.fl_diff:
+            details.append('# Start legacy fldiff comparision report\n')
         for diff in self.fl_diff:
             if isinstance(diff, LineCountDifference) \
                or isinstance(diff, MetaCharDifference):
@@ -330,7 +329,7 @@ class Result(object):
             Return a textual summary of the diff.
         '''
         if self.yaml_error:
-            summary = 'yaml errors.'
+            summary = 'yaml_test errors.'
         elif self.fatal_error:
             summary = 'fldiff fatal error.'
         elif self.success:
