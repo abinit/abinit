@@ -431,6 +431,7 @@ def _str2bool(string):
     if string == "yes": return True
     return False
 
+
 # TEST_INFO specifications
 TESTCNF_KEYWORDS = {
 # keyword        : (parser, default, section, description)
@@ -474,6 +475,8 @@ TESTCNF_KEYWORDS = {
 "description"    : (str      , "No description available",  "extra_info", "String containing extra information on the test"),
 "topics"         : (_str2list, "",  "extra_info", "Topics associated to the test"),
 "references"     : (_str2list, "",  "extra_info", "List of references to papers or other articles"),
+"file"           : (str, "", "yaml_test", "File path to the YAML config file relative to the input file."),
+"text"           : (str, "", "yaml_test", "Raw YAML config for quick config."),
 }
 
 #TESTCNF_SECTIONS = set( [ TESTCNF_KEYWORDS[k][2] for k in TESTCNF_KEYWORDS ] )
@@ -486,6 +489,7 @@ TESTCNF_SECTIONS = [
   "shell",
   "paral_info",
   "extra_info",
+  "yaml_test",
 ]
 
 # consistency check.
@@ -699,17 +703,32 @@ class AbinitTestInfoParser(object):
         info = Record()
         d = info.__dict__
 
+        d['yaml_test'] = {}
+
         # First read and parse the global options.
         for key in TESTCNF_KEYWORDS:
             tup = TESTCNF_KEYWORDS[key]
             line_parser = tup[0]
             section = tup[2]
 
-            if (section in self.parser.sections()
-                and self.parser.has_option(section, key)):
+            if section == 'yaml_test':
+                # special case, keep the structure, do not use default value
+                if (section in self.parser.sections()
+                   and self.parser.has_option(section, key)):
+                    val = self.parser.get('yaml_test', key)
+                    if key == 'file':
+                        # resolve path relative to input file
+                        base = os.path.realpath(os.path.basename(
+                            self.inp_fname
+                        ))
+                        val = os.path.join(base, val)
+                    d['yaml_test'][key] = val
+
+            elif (section in self.parser.sections()
+                  and self.parser.has_option(section, key)):
                 d[key] = self.parser.get(section, key)
             else:
-                d[key] = tup[1] # Section does not exist. Use default value.
+                d[key] = tup[1]  # Section does not exist. Use default value.
 
             # Process the line
             #if key == "files_to_test": print("hello files", d[key], "bye files")
@@ -777,9 +796,6 @@ class AbinitTestInfoParser(object):
         # Add the name of the input file.
         info.inp_fname = self.inp_fname
 
-        # Add the section for yaml_test
-        d['yaml_test'] = self.yaml_test()
-
         return AbinitTestInfo(d)
 
     @property
@@ -813,28 +829,6 @@ class AbinitTestInfoParser(object):
 
         fnames = parse(self.parser.get(section, opt))
         return [os.path.join(self.inp_dir, fname) for fname in fnames]
-
-    def yaml_test(self):
-        sec_name = 'yaml_test'
-        ytest = {
-            'file': '',
-            'test': '',
-        }
-
-        if self.parser.has_section(sec_name):
-            scalar_key = ['file', 'test']
-            for key in scalar_key:
-                if self.parser.has_option(sec_name, key):
-                    ytest[key] == self.parser.get(sec_name, key)
-
-        if not ytest['file'] and not ytest['test']:
-            return {}
-
-        if 'file' in ytest:
-            base = os.path.basename(self.inp_fname)
-            ytest = os.path.realpath(os.path.join(base, ytest))
-
-        return ytest
 
     #@property
     #def is_parametrized_test(self):
@@ -1488,9 +1482,6 @@ class BaseTest(object):
         self.erase_files = 2      # 0 => Keep all files.
                                   # 1 => Remove files but only if the test passes or succeeds
                                   # 2 => Remove files even when the test fail.
-
-        # get data about the structured tests
-        self.yaml_test = test_info.yaml_test
 
         # Incorporate the attributes of test_info in self.
         err_msg = ""
