@@ -396,11 +396,11 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    if (open_file(strcat(prefix, "_GRUNS_QPATH"), msg, newunit=unt, form="formatted", action="write") /= 0) then
      MSG_ERROR(msg)
    end if
-   write(unt,'(a)')'# Phonon band structure, Gruneseinen parameters and group velocity'
+   write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
    call kpath_print(qpath, unit=unt, pre="#")
    write(unt,'(5a)')&
-     "# phfreq(mode=1) grunesein(mode=1) velocity(mode=1) phfreq(mode=2) grunesein(mode=2) velocity(mode=2)"
+     "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts
      do nu=1,gruns%natom3
        write(unt, "(3es17.8)", advance="no") &
@@ -602,7 +602,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, c
    write(unt,'(5a)') &
      "# omega PH_DOS Gruns_DOS Gruns**2_DOS Vel_DOS  Vel**2_DOS  PH_IDOS Gruns_IDOS Gruns**2_IDOS Vel_IDOS Vel**2_IDOS"
    do io=1,nomega
-     write(unt, "(11es17.8)")omega_mesh, &
+     write(unt, "(11es17.8)")omega_mesh(io), &
        wdos(io,1), grdos(io,1), gr2dos(io,1), vdos(io,1), v2dos(io,1), &
        wdos(io,2), grdos(io,2), gr2dos(io,2), vdos(io,2), v2dos(io,2)
    end do
