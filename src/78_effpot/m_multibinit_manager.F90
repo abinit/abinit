@@ -40,6 +40,7 @@ module m_multibinit_manager
   use m_xmpi
 
   use m_init10, only: init10
+  use m_mathfuncs, only: diag
   use m_multibinit_global
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_unitcell, only : unitcell_t
@@ -88,11 +89,13 @@ contains
     ! read params
     call self%read_params()
     call self%read_potentials()
-    call self%sc_maker%initialize(self%params%ncell)
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%fill_supercell()
     ! read potentials from
   end subroutine initialize
 
 
+  
   !----------------------------------------------------------------------------------------------------
   ! finalize
   subroutine finalize(self)
@@ -107,7 +110,7 @@ contains
 
   !----------------------------------------------------------------------------------------------------
   ! read parameters from input file
-  subroutine read_params(self )
+  subroutine read_params(self)
     class(mb_manager_t), intent(inout) :: self
     character(len=500) :: message
     integer :: filetype,ii,lenstr
@@ -156,7 +159,7 @@ contains
   ! Read potentials from file
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
-    call self%unitcell%initialize(self%params, self%filenames)
+    !call self%unitcell%initialize(self%params, self%filenames)
     call self%prim_pots%load_from_files(self%params, self%filenames)
   end subroutine read_potentials
 

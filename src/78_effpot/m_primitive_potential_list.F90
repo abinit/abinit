@@ -50,7 +50,6 @@ module m_primitive_potential_list
 
   type, public, extends(primitive_potential_t):: primitive_potential_list_t
      type(primitive_potential_pointer_t), allocatable :: pots(:)
-     type(unitcell_t), pointer :: primcell
      integer :: size=0
      integer :: capacity=0
    contains

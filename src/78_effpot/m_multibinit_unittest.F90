@@ -45,7 +45,14 @@ module m_multibinit_unittest
 contains
 
   subroutine mb_test_main()
+    ! test 1
+    print*, "Unit test1: Supercell maker"
     call mb_test1()
+    print*, "End Unit test1: Supercell maker"
+    print*, "================================="
+
+    ! test2
+
   end subroutine mb_test_main
   !-------------------------------------------------
 

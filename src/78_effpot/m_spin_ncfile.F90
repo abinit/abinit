@@ -54,6 +54,7 @@ module m_spin_ncfile
   !!***
 
   type spin_ncfile_t
+     logical :: isopen=.False.
      ! dimensions
      integer :: three, nspins, natoms, ntime, ntypat, nsublatt
      ! file id
@@ -92,6 +93,7 @@ contains
     write(std_out,*) "Write iteration in spin history file "//trim(self%filename)//"."
     !  Create netCDF file
     ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=self%ncid)
+    self%isopen=.True.
     !NCF_CHECK_MSG(ncerr, "create netcdf history file")
 #endif
   end subroutine spin_ncfile_t_init
@@ -352,8 +354,10 @@ end subroutine spin_ncfile_t_def_ob
     class(spin_ncfile_t), intent(inout) :: self
     integer :: ncerr
 #if defined HAVE_NETCDF
-    write(std_out, *) "Closing spin history file "//trim(self%filename)//"."
-    ncerr=nf90_close(self%ncid)
+    if (self%isopen) then
+       write(std_out, *) "Closing spin history file "//trim(self%filename)//"."
+       ncerr=nf90_close(self%ncid)
+    end if
     !NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
 #endif
   end subroutine spin_ncfile_t_close

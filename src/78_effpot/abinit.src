@@ -43,6 +43,7 @@ sources = [
     "m_multibinit_main.F90",
     "m_multibinit_manager.F90",
     "m_multibinit_supercell.F90",
+    "m_multibinit_unittest.F90",
     "m_polynomial_coeff.F90",
     "m_polynomial_conf.F90",
     "m_polynomial_term.F90",

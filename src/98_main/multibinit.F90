@@ -407,6 +407,7 @@ program multibinit
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
   use m_init10,              only : init10
+  use m_multibinit_unittest, only: mb_test_main
   use m_multibinit_main
   implicit none
 
@@ -438,7 +439,24 @@ program multibinit
   call init_multibinit_global()
 
   ! Parse command line arguments.
-  args = args_parser(); if (args%exit /= 0) goto 100
+  !args = args_parser(); if (args%exit /= 0) goto 100
+
+  
+  nargs = command_argument_count()
+  do iarg=1,nargs
+     call get_command_argument(ii, arg)
+     if (arg == "-v" .or. arg == "--version") then
+        write(std_out,"(a)") trim(abinit_version); goto 100
+
+     else if (arg == "--unittest") then
+        unittest=.True.
+     endif
+  end do
+
+  if(unittest) then
+     call mb_test_main()
+     goto 100
+  end if
 
   !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
   !set the argument of abimem_init to "2" instead of "0"
@@ -498,23 +516,7 @@ program multibinit
 
   !***************************************************************************************
   !***************************************************************************************
-
-  nargs = command_argument_count()
-  do iarg=1,nargs
-     call get_command_argument(ii, arg)
-     if (arg == "-v" .or. arg == "--version") then
-        write(std_out,"(a)") trim(abinit_version); goto 100
-
-     else if (arg == "--unittest") then
-        unittest=.True.
-     endif
-  end do
-
-     if(unittest) then
-        call multibinit_unittest()
-     else
-        call multibinit_main(filnam)
-     endif
+  call multibinit_main(filnam)
   ! Final message
   !****************************************************************************************
 
