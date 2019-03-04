@@ -4793,6 +4793,8 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
 
  if (present(custom_qpt)) then
   ABI_SFREE(qibz)
+  ABI_SFREE(wtq)
+  ABI_SFREE(qbz)
   nqibz = size(custom_qpt,dim=2)
   ABI_MALLOC(qibz, (3, nqibz))
   qibz = custom_qpt
