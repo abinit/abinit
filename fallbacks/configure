@@ -646,22 +646,6 @@ enable_bigdft
 bigdft_pkg_string
 bigdft_pkg_inst
 bigdft_pkg_name
-afb_libpsml_tarball
-afb_libpsml_ok
-DO_TEST_LIBPSML_FALSE
-DO_TEST_LIBPSML_TRUE
-DO_BUILD_LIBPSML_FALSE
-DO_BUILD_LIBPSML_TRUE
-ARFLAGS_LIBPSML
-LIBS_LIBPSML
-LDFLAGS_LIBPSML
-FCFLAGS_LIBPSML
-FPPFLAGS_LIBPSML
-CFGFLAGS_LIBPSML
-enable_libpsml
-libpsml_pkg_string
-libpsml_pkg_inst
-libpsml_pkg_name
 afb_yaml_libs
 afb_yaml_incs
 afb_yaml_tarball
@@ -682,6 +666,22 @@ enable_yaml
 yaml_pkg_string
 yaml_pkg_inst
 yaml_pkg_name
+afb_libpsml_tarball
+afb_libpsml_ok
+DO_TEST_LIBPSML_FALSE
+DO_TEST_LIBPSML_TRUE
+DO_BUILD_LIBPSML_FALSE
+DO_BUILD_LIBPSML_TRUE
+ARFLAGS_LIBPSML
+LIBS_LIBPSML
+LDFLAGS_LIBPSML
+FCFLAGS_LIBPSML
+FPPFLAGS_LIBPSML
+CFGFLAGS_LIBPSML
+enable_libpsml
+libpsml_pkg_string
+libpsml_pkg_inst
+libpsml_pkg_name
 afb_xmlf90_libs
 afb_xmlf90_incs
 afb_xmlf90_tarball
@@ -740,6 +740,22 @@ enable_netcdf4_fortran
 netcdf4_fortran_pkg_string
 netcdf4_fortran_pkg_inst
 netcdf4_fortran_pkg_name
+afb_atompaw_tarball
+afb_atompaw_ok
+DO_TEST_ATOMPAW_FALSE
+DO_TEST_ATOMPAW_TRUE
+DO_BUILD_ATOMPAW_FALSE
+DO_BUILD_ATOMPAW_TRUE
+ARFLAGS_ATOMPAW
+LIBS_ATOMPAW
+LDFLAGS_ATOMPAW
+FCFLAGS_ATOMPAW
+FPPFLAGS_ATOMPAW
+CFGFLAGS_ATOMPAW
+enable_atompaw
+atompaw_pkg_string
+atompaw_pkg_inst
+atompaw_pkg_name
 afb_netcdf4_libs
 afb_netcdf4_incs
 afb_netcdf4_bins
@@ -771,22 +787,6 @@ enable_netcdf4
 netcdf4_pkg_string
 netcdf4_pkg_inst
 netcdf4_pkg_name
-afb_atompaw_tarball
-afb_atompaw_ok
-DO_TEST_ATOMPAW_FALSE
-DO_TEST_ATOMPAW_TRUE
-DO_BUILD_ATOMPAW_FALSE
-DO_BUILD_ATOMPAW_TRUE
-ARFLAGS_ATOMPAW
-LIBS_ATOMPAW
-LDFLAGS_ATOMPAW
-FCFLAGS_ATOMPAW
-FPPFLAGS_ATOMPAW
-CFGFLAGS_ATOMPAW
-enable_atompaw
-atompaw_pkg_string
-atompaw_pkg_inst
-atompaw_pkg_name
 afb_linalg_libs
 afb_linalg_incs
 afb_linalg_tarball
@@ -1015,12 +1015,12 @@ with_libxc_libs
 enable_linalg
 with_linalg_incs
 with_linalg_libs
-enable_atompaw
 enable_netcdf4
 with_netcdf4_bins
 with_netcdf4_incs
 with_netcdf4_libs
 with_netcdf4
+enable_atompaw
 enable_netcdf4_fortran
 with_netcdf4_fortran_incs
 with_netcdf4_fortran_libs
@@ -1028,10 +1028,10 @@ enable_wannier90
 enable_xmlf90
 with_xmlf90_incs
 with_xmlf90_libs
+enable_libpsml
 enable_yaml
 with_yaml_incs
 with_yaml_libs
-enable_libpsml
 enable_bigdft
 '
       ac_precious_vars='build_alias
@@ -1084,18 +1084,18 @@ FCFLAGS_LINALG
 LDFLAGS_LINALG
 LIBS_LINALG
 ARFLAGS_LINALG
-CFGFLAGS_ATOMPAW
-FPPFLAGS_ATOMPAW
-FCFLAGS_ATOMPAW
-LDFLAGS_ATOMPAW
-LIBS_ATOMPAW
-ARFLAGS_ATOMPAW
 CFGFLAGS_NETCDF4
 CPPFLAGS_NETCDF4
 CFLAGS_NETCDF4
 LDFLAGS_NETCDF4
 LIBS_NETCDF4
 ARFLAGS_NETCDF4
+CFGFLAGS_ATOMPAW
+FPPFLAGS_ATOMPAW
+FCFLAGS_ATOMPAW
+LDFLAGS_ATOMPAW
+LIBS_ATOMPAW
+ARFLAGS_ATOMPAW
 CFGFLAGS_NETCDF4_FORTRAN
 CPPFLAGS_NETCDF4_FORTRAN
 CFLAGS_NETCDF4_FORTRAN
@@ -1116,18 +1116,18 @@ FCFLAGS_XMLF90
 LDFLAGS_XMLF90
 LIBS_XMLF90
 ARFLAGS_XMLF90
-CFGFLAGS_YAML
-CPPFLAGS_YAML
-CFLAGS_YAML
-LDFLAGS_YAML
-LIBS_YAML
-ARFLAGS_YAML
 CFGFLAGS_LIBPSML
 FPPFLAGS_LIBPSML
 FCFLAGS_LIBPSML
 LDFLAGS_LIBPSML
 LIBS_LIBPSML
 ARFLAGS_LIBPSML
+CFGFLAGS_YAML
+CPPFLAGS_YAML
+CFLAGS_YAML
+LDFLAGS_YAML
+LIBS_YAML
+ARFLAGS_YAML
 CFGFLAGS_BIGDFT
 CPPFLAGS_BIGDFT
 CFLAGS_BIGDFT
@@ -1780,9 +1780,9 @@ Optional Features:
                           support
   --disable-linalg        Disable Oldish BLAS/LAPACK implementation customized
                           for Abinit support
-  --disable-atompaw       Disable AtomPAW version 4.1.0.5 (upstream release)
-                          support
   --disable-netcdf4       Disable NetCDF library 4.4.1.1 (upstream release)
+                          support
+  --disable-atompaw       Disable AtomPAW version 4.1.0.5 (upstream release)
                           support
   --disable-netcdf4-fortran
                           Disable NetCDF Fortran library 4.4.4 (upstream
@@ -1791,10 +1791,10 @@ Optional Features:
                           hacked by YP+MT) support
   --disable-xmlf90        Disable XML Fortran library 1.5.3.1 (portability
                           special edition by YP) support
-  --disable-yaml          Disable YAML Ain't Markup Language Library 0.1.6
-                          (upstream release) support
   --disable-libpsml       Disable PSML library 1.1.7 (upstream release)
                           support
+  --disable-yaml          Disable YAML Ain't Markup Language Library 0.1.6
+                          (upstream release) support
   --disable-bigdft        Disable BigDFT abinit-designed library 1.7.1.28
                           support
 
@@ -1899,18 +1899,6 @@ Some influential environment variables:
   LIBS_LINALG Additional linker libraries of linalg
   ARFLAGS_LINALG
               Library archiver flags of linalg
-  CFGFLAGS_ATOMPAW
-              Options to the configure script of atompaw
-  FPPFLAGS_ATOMPAW
-              Fortran preprocessor flags of atompaw
-  FCFLAGS_ATOMPAW
-              Fortran flags of atompaw
-  LDFLAGS_ATOMPAW
-              Link flags of atompaw
-  LIBS_ATOMPAW
-              Additional linker libraries of atompaw
-  ARFLAGS_ATOMPAW
-              Library archiver flags of atompaw
   CFGFLAGS_NETCDF4
               Options to the configure script of netcdf4
   CPPFLAGS_NETCDF4
@@ -1923,6 +1911,18 @@ Some influential environment variables:
               Additional linker libraries of netcdf4
   ARFLAGS_NETCDF4
               Library archiver flags of netcdf4
+  CFGFLAGS_ATOMPAW
+              Options to the configure script of atompaw
+  FPPFLAGS_ATOMPAW
+              Fortran preprocessor flags of atompaw
+  FCFLAGS_ATOMPAW
+              Fortran flags of atompaw
+  LDFLAGS_ATOMPAW
+              Link flags of atompaw
+  LIBS_ATOMPAW
+              Additional linker libraries of atompaw
+  ARFLAGS_ATOMPAW
+              Library archiver flags of atompaw
   CFGFLAGS_NETCDF4_FORTRAN
               Options to the configure script of netcdf4_fortran
   CPPFLAGS_NETCDF4_FORTRAN
@@ -1962,16 +1962,6 @@ Some influential environment variables:
   LIBS_XMLF90 Additional linker libraries of xmlf90
   ARFLAGS_XMLF90
               Library archiver flags of xmlf90
-  CFGFLAGS_YAML
-              Options to the configure script of yaml
-  CPPFLAGS_YAML
-              C preprocessor flags of yaml
-  CFLAGS_YAML C flags of yaml
-  LDFLAGS_YAML
-              Link flags of yaml
-  LIBS_YAML   Additional linker libraries of yaml
-  ARFLAGS_YAML
-              Library archiver flags of yaml
   CFGFLAGS_LIBPSML
               Options to the configure script of libpsml
   FPPFLAGS_LIBPSML
@@ -1984,6 +1974,16 @@ Some influential environment variables:
               Additional linker libraries of libpsml
   ARFLAGS_LIBPSML
               Library archiver flags of libpsml
+  CFGFLAGS_YAML
+              Options to the configure script of yaml
+  CPPFLAGS_YAML
+              C preprocessor flags of yaml
+  CFLAGS_YAML C flags of yaml
+  LDFLAGS_YAML
+              Link flags of yaml
+  LIBS_YAML   Additional linker libraries of yaml
+  ARFLAGS_YAML
+              Library archiver flags of yaml
   CFGFLAGS_BIGDFT
               Options to the configure script of bigdft
   CPPFLAGS_BIGDFT
@@ -9769,281 +9769,6 @@ fi
 
 
 
-    afb_atompaw_bins=""
-  afb_atompaw_incs=""
-  afb_atompaw_libs=""
-  afb_atompaw_custom="no"
-  afb_atompaw_tricks="unknown"
-  afb_atompaw_ok="unknown"
-  afb_atompaw_tarball="${abinit_tardir}/atompaw-4.1.0.5.tar.gz"
-  tmp_tarball_ok="no"
-  unset with_atompaw_incs
-
-    atompaw_pkg_name="atompaw-4.1.0.5"
-
-  atompaw_pkg_inst="atompaw/4.1.0.5"
-
-  atompaw_pkg_string="AtomPAW version 4.1.0.5 (upstream release)"
-
-
-    # Check whether --enable-atompaw was given.
-if test "${enable_atompaw+set}" = set; then :
-  enableval=$enable_atompaw;
-fi
-
-
-
-    if test "${enable_atompaw}" = ""; then
-    enable_atompaw="yes"
-  fi
-
-
-
-  if test -z "${CFGFLAGS_ATOMPAW}"; then
-    CFGFLAGS_ATOMPAW="${CFGFLAGS}"
-    afb_atompaw_cfgflags_custom="no"
-  else
-    afb_atompaw_custom="yes"
-    afb_atompaw_cfgflags_custom="yes"
-  fi
-  unset CPPFLAGS_ATOMPAW
-  unset CFLAGS_ATOMPAW
-  unset XPPFLAGS_ATOMPAW
-  unset CXXFLAGS_ATOMPAW
-
-
-  if test -z "${FPPFLAGS_ATOMPAW}"; then
-    FPPFLAGS_ATOMPAW="${FPPFLAGS}"
-    afb_atompaw_fppflags_custom="no"
-  else
-    afb_atompaw_custom="yes"
-    afb_atompaw_fppflags_custom="yes"
-  fi
-
-
-  if test -z "${FCFLAGS_ATOMPAW}"; then
-    FCFLAGS_ATOMPAW="${FCFLAGS}"
-    afb_atompaw_fcflags_custom="no"
-  else
-    afb_atompaw_custom="yes"
-    afb_atompaw_fcflags_custom="yes"
-  fi
-
-
-  if test -z "${LDFLAGS_ATOMPAW}"; then
-    LDFLAGS_ATOMPAW="${LDFLAGS}"
-    afb_atompaw_ldflags_custom="no"
-  else
-    afb_atompaw_custom="yes"
-    afb_atompaw_ldflags_custom="yes"
-  fi
-
-
-  if test -z "${LIBS_ATOMPAW}"; then
-    LIBS_ATOMPAW="${LIBS}"
-    afb_atompaw_libs_custom="no"
-  else
-    afb_atompaw_custom="yes"
-    afb_atompaw_libs_custom="yes"
-  fi
-
-
-  if test -z "${ARFLAGS_ATOMPAW}"; then
-    ARFLAGS_ATOMPAW="${ARFLAGS}"
-    afb_atompaw_arflags_custom="no"
-  else
-    afb_atompaw_custom="yes"
-    afb_atompaw_arflags_custom="yes"
-  fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable the ATOMPAW fallback" >&5
-$as_echo_n "checking whether to enable the ATOMPAW fallback... " >&6; }
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${enable_atompaw}" >&5
-$as_echo "${enable_atompaw}" >&6; }
-  if test "${enable_atompaw}" = "yes"; then
-
-        if test "${afb_linalg_ok}" = "no"; then
-      as_fn_error $? "ATOMPAW depends on broken LINALG
-        Solution: disable ATOMPAW or fix LINALG" "$LINENO" 5
-    fi
-    if test "${afb_libxc_ok}" = "no"; then
-      as_fn_error $? "ATOMPAW depends on broken LIBXC
-        Solution: disable ATOMPAW or fix LIBXC" "$LINENO" 5
-    fi
-
-        LIBS_ATOMPAW="${afb_linalg_libs} ${LIBS_ATOMPAW}"
-    LIBS_ATOMPAW="${afb_libxc_libs} ${LIBS_ATOMPAW}"
-
-        for dl_url in LOCAL "http://www.wfu.edu/~natalie/papers/pwpaw/atompaw-4.1.0.5.tar.gz" "http://forge.abinit.org/fallbacks/atompaw-4.1.0.5.tar.gz"; do
-      if test "${tmp_tarball_ok}" = "no"; then
-        if test "${dl_url}" != "LOCAL"; then
-          rm -f "${afb_atompaw_tarball}"
-          { $as_echo "$as_me:${as_lineno-$LINENO}: downloading ATOMPAW - this may take a while" >&5
-$as_echo "$as_me: downloading ATOMPAW - this may take a while" >&6;}
-          ${afb_downloader} ${afb_dlopts} \
-            "${afb_atompaw_tarball}" \
-            "${dl_url}"
-        fi
-        if test -s "${afb_atompaw_tarball}"; then
-
-    if test "${MD5SUM}" = ""; then
-    for ac_prog in md5sum md5
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_MD5SUM+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$MD5SUM"; then
-  ac_cv_prog_MD5SUM="$MD5SUM" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_MD5SUM="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-MD5SUM=$ac_cv_prog_MD5SUM
-if test -n "$MD5SUM"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MD5SUM" >&5
-$as_echo "$MD5SUM" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$MD5SUM" && break
-done
-
-  fi
-  afb_md5_ok="unknown"
-
-    if test "${MD5SUM}" = ""; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no MD5 sum checker available" >&5
-$as_echo "$as_me: WARNING: no MD5 sum checker available" >&2;}
-    tmp_md5_file=""
-  else
-    tmp_md5_file=`${MD5SUM} ${afb_atompaw_tarball} | sed -e 's/.*= //' | awk '{print $1}'`
-  fi
-  tmp_md5_ref="17f56afdbdd00c8dda4a4945e50f65f5"
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking file '${afb_atompaw_tarball}'" >&5
-$as_echo_n "checking file '${afb_atompaw_tarball}'... " >&6; }
-  if test "${tmp_md5_file}" = "${tmp_md5_ref}"; then
-    afb_md5_ok="yes"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 ok" >&5
-$as_echo "md5 ok" >&6; }
-  else
-    if test "${tmp_md5_file}" = ""; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 unknown" >&5
-$as_echo "md5 unknown" >&6; }
-    else
-      afb_md5_ok="no"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 failed" >&5
-$as_echo "md5 failed" >&6; }
-    fi
-  fi
-
-          case "${afb_md5_ok}" in
-            yes)
-              tmp_tarball_ok="yes"
-            ;;
-            unknown)
-              tmp_tarball_ok="yes"
-              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not check integrity of atompaw-4.1.0.5 tarball" >&5
-$as_echo "$as_me: WARNING: could not check integrity of atompaw-4.1.0.5 tarball" >&2;}
-              ;;
-            no)
-              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: atompaw-4.1.0.5 tarball MD5 check failed" >&5
-$as_echo "$as_me: WARNING: atompaw-4.1.0.5 tarball MD5 check failed" >&2;}
-              ;;
-          esac
-        fi
-      fi
-    done
-
-        if test "${tmp_tarball_ok}" = "yes"; then
-      afb_atompaw_ok="yes"
-
-
-    afb_atompaw_tricks="no"
-  afb_atompaw_tricky_vars=""
-
-    if test "${afb_atompaw_cfgflags_custom}" = "no"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: applying AtomPAW tricks (vendor: ${afb_fc_vendor}, version: ${afb_fc_version}, flags: config)" >&5
-$as_echo "$as_me: applying AtomPAW tricks (vendor: ${afb_fc_vendor}, version: ${afb_fc_version}, flags: config)" >&6;}
-
-        tmpflags_atompaw='--with-linalg-libs="$(afb_linalg_libs)"'
-    CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} ${tmpflags_atompaw}"
-
-        CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} --enable-libxc"
-    tmpflags_atompaw='--with-libxc-incs="$(afb_libxc_incs)"'
-    CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} ${tmpflags_atompaw}"
-    tmpflags_atompaw='--with-libxc-libs="$(afb_libxc_libs)"'
-    CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} ${tmpflags_atompaw}"
-
-        CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} --enable-static --disable-shared"
-
-        test "${afb_atompaw_tricks}" = "no" && afb_atompaw_tricks="yes"
-    afb_atompaw_tricky_vars="${afb_atompaw_tricky_vars} CFGFLAGS"
-    unset tmpflags_atompaw
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: CFGFLAGS_ATOMPAW set => skipping AtomPAW config tricks" >&5
-$as_echo "$as_me: CFGFLAGS_ATOMPAW set => skipping AtomPAW config tricks" >&6;}
-    test "${afb_atompaw_tricks}" = "yes" && afb_atompaw_tricks="partial"
-  fi
-
-    else
-      afb_atompaw_ok="no"
-      as_fn_error $? "could not download ATOMPAW fallback tarball
-    Solution: disable support for ATOMPAW or download the tarball
-    manually to ${abinit_tardir}" "$LINENO" 5
-    fi
-
-        if test "${afb_atompaw_ok}" != "yes"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: ATOMPAW is broken, which will prevent the build of all
-                      its possible dependencies" >&5
-$as_echo "$as_me: WARNING: ATOMPAW is broken, which will prevent the build of all
-                      its possible dependencies" >&2;}
-    fi
-
-  fi
-
-     if test "${enable_atompaw}" = "yes" -a "${afb_atompaw_ok}" = "yes"; then
-  DO_BUILD_ATOMPAW_TRUE=
-  DO_BUILD_ATOMPAW_FALSE='#'
-else
-  DO_BUILD_ATOMPAW_TRUE='#'
-  DO_BUILD_ATOMPAW_FALSE=
-fi
-
-   if test "${enable_atompaw}" = "yes" -a "${afb_atompaw_ok}" = "yes"; then
-  DO_TEST_ATOMPAW_TRUE=
-  DO_TEST_ATOMPAW_FALSE='#'
-else
-  DO_TEST_ATOMPAW_TRUE='#'
-  DO_TEST_ATOMPAW_FALSE=
-fi
-
-
-
-
-
-
     afb_netcdf4_bins=""
   afb_netcdf4_incs=""
   afb_netcdf4_libs=""
@@ -11293,6 +11018,281 @@ fi
 
 
 
+    afb_atompaw_bins=""
+  afb_atompaw_incs=""
+  afb_atompaw_libs=""
+  afb_atompaw_custom="no"
+  afb_atompaw_tricks="unknown"
+  afb_atompaw_ok="unknown"
+  afb_atompaw_tarball="${abinit_tardir}/atompaw-4.1.0.5.tar.gz"
+  tmp_tarball_ok="no"
+  unset with_atompaw_incs
+
+    atompaw_pkg_name="atompaw-4.1.0.5"
+
+  atompaw_pkg_inst="atompaw/4.1.0.5"
+
+  atompaw_pkg_string="AtomPAW version 4.1.0.5 (upstream release)"
+
+
+    # Check whether --enable-atompaw was given.
+if test "${enable_atompaw+set}" = set; then :
+  enableval=$enable_atompaw;
+fi
+
+
+
+    if test "${enable_atompaw}" = ""; then
+    enable_atompaw="yes"
+  fi
+
+
+
+  if test -z "${CFGFLAGS_ATOMPAW}"; then
+    CFGFLAGS_ATOMPAW="${CFGFLAGS}"
+    afb_atompaw_cfgflags_custom="no"
+  else
+    afb_atompaw_custom="yes"
+    afb_atompaw_cfgflags_custom="yes"
+  fi
+  unset CPPFLAGS_ATOMPAW
+  unset CFLAGS_ATOMPAW
+  unset XPPFLAGS_ATOMPAW
+  unset CXXFLAGS_ATOMPAW
+
+
+  if test -z "${FPPFLAGS_ATOMPAW}"; then
+    FPPFLAGS_ATOMPAW="${FPPFLAGS}"
+    afb_atompaw_fppflags_custom="no"
+  else
+    afb_atompaw_custom="yes"
+    afb_atompaw_fppflags_custom="yes"
+  fi
+
+
+  if test -z "${FCFLAGS_ATOMPAW}"; then
+    FCFLAGS_ATOMPAW="${FCFLAGS}"
+    afb_atompaw_fcflags_custom="no"
+  else
+    afb_atompaw_custom="yes"
+    afb_atompaw_fcflags_custom="yes"
+  fi
+
+
+  if test -z "${LDFLAGS_ATOMPAW}"; then
+    LDFLAGS_ATOMPAW="${LDFLAGS}"
+    afb_atompaw_ldflags_custom="no"
+  else
+    afb_atompaw_custom="yes"
+    afb_atompaw_ldflags_custom="yes"
+  fi
+
+
+  if test -z "${LIBS_ATOMPAW}"; then
+    LIBS_ATOMPAW="${LIBS}"
+    afb_atompaw_libs_custom="no"
+  else
+    afb_atompaw_custom="yes"
+    afb_atompaw_libs_custom="yes"
+  fi
+
+
+  if test -z "${ARFLAGS_ATOMPAW}"; then
+    ARFLAGS_ATOMPAW="${ARFLAGS}"
+    afb_atompaw_arflags_custom="no"
+  else
+    afb_atompaw_custom="yes"
+    afb_atompaw_arflags_custom="yes"
+  fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable the ATOMPAW fallback" >&5
+$as_echo_n "checking whether to enable the ATOMPAW fallback... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${enable_atompaw}" >&5
+$as_echo "${enable_atompaw}" >&6; }
+  if test "${enable_atompaw}" = "yes"; then
+
+        if test "${afb_linalg_ok}" = "no"; then
+      as_fn_error $? "ATOMPAW depends on broken LINALG
+        Solution: disable ATOMPAW or fix LINALG" "$LINENO" 5
+    fi
+    if test "${afb_libxc_ok}" = "no"; then
+      as_fn_error $? "ATOMPAW depends on broken LIBXC
+        Solution: disable ATOMPAW or fix LIBXC" "$LINENO" 5
+    fi
+
+        LIBS_ATOMPAW="${afb_linalg_libs} ${LIBS_ATOMPAW}"
+    LIBS_ATOMPAW="${afb_libxc_libs} ${LIBS_ATOMPAW}"
+
+        for dl_url in LOCAL "http://www.wfu.edu/~natalie/papers/pwpaw/atompaw-4.1.0.5.tar.gz" "http://forge.abinit.org/fallbacks/atompaw-4.1.0.5.tar.gz"; do
+      if test "${tmp_tarball_ok}" = "no"; then
+        if test "${dl_url}" != "LOCAL"; then
+          rm -f "${afb_atompaw_tarball}"
+          { $as_echo "$as_me:${as_lineno-$LINENO}: downloading ATOMPAW - this may take a while" >&5
+$as_echo "$as_me: downloading ATOMPAW - this may take a while" >&6;}
+          ${afb_downloader} ${afb_dlopts} \
+            "${afb_atompaw_tarball}" \
+            "${dl_url}"
+        fi
+        if test -s "${afb_atompaw_tarball}"; then
+
+    if test "${MD5SUM}" = ""; then
+    for ac_prog in md5sum md5
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_MD5SUM+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$MD5SUM"; then
+  ac_cv_prog_MD5SUM="$MD5SUM" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_MD5SUM="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+MD5SUM=$ac_cv_prog_MD5SUM
+if test -n "$MD5SUM"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MD5SUM" >&5
+$as_echo "$MD5SUM" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MD5SUM" && break
+done
+
+  fi
+  afb_md5_ok="unknown"
+
+    if test "${MD5SUM}" = ""; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no MD5 sum checker available" >&5
+$as_echo "$as_me: WARNING: no MD5 sum checker available" >&2;}
+    tmp_md5_file=""
+  else
+    tmp_md5_file=`${MD5SUM} ${afb_atompaw_tarball} | sed -e 's/.*= //' | awk '{print $1}'`
+  fi
+  tmp_md5_ref="17f56afdbdd00c8dda4a4945e50f65f5"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking file '${afb_atompaw_tarball}'" >&5
+$as_echo_n "checking file '${afb_atompaw_tarball}'... " >&6; }
+  if test "${tmp_md5_file}" = "${tmp_md5_ref}"; then
+    afb_md5_ok="yes"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 ok" >&5
+$as_echo "md5 ok" >&6; }
+  else
+    if test "${tmp_md5_file}" = ""; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 unknown" >&5
+$as_echo "md5 unknown" >&6; }
+    else
+      afb_md5_ok="no"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 failed" >&5
+$as_echo "md5 failed" >&6; }
+    fi
+  fi
+
+          case "${afb_md5_ok}" in
+            yes)
+              tmp_tarball_ok="yes"
+            ;;
+            unknown)
+              tmp_tarball_ok="yes"
+              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not check integrity of atompaw-4.1.0.5 tarball" >&5
+$as_echo "$as_me: WARNING: could not check integrity of atompaw-4.1.0.5 tarball" >&2;}
+              ;;
+            no)
+              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: atompaw-4.1.0.5 tarball MD5 check failed" >&5
+$as_echo "$as_me: WARNING: atompaw-4.1.0.5 tarball MD5 check failed" >&2;}
+              ;;
+          esac
+        fi
+      fi
+    done
+
+        if test "${tmp_tarball_ok}" = "yes"; then
+      afb_atompaw_ok="yes"
+
+
+    afb_atompaw_tricks="no"
+  afb_atompaw_tricky_vars=""
+
+    if test "${afb_atompaw_cfgflags_custom}" = "no"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: applying AtomPAW tricks (vendor: ${afb_fc_vendor}, version: ${afb_fc_version}, flags: config)" >&5
+$as_echo "$as_me: applying AtomPAW tricks (vendor: ${afb_fc_vendor}, version: ${afb_fc_version}, flags: config)" >&6;}
+
+        tmpflags_atompaw='--with-linalg-libs="$(afb_linalg_libs)"'
+    CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} ${tmpflags_atompaw}"
+
+        CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} --enable-libxc"
+    tmpflags_atompaw='--with-libxc-incs="$(afb_libxc_incs)"'
+    CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} ${tmpflags_atompaw}"
+    tmpflags_atompaw='--with-libxc-libs="$(afb_libxc_libs)"'
+    CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} ${tmpflags_atompaw}"
+
+        CFGFLAGS_ATOMPAW="${CFGFLAGS_ATOMPAW} --enable-static --disable-shared"
+
+        test "${afb_atompaw_tricks}" = "no" && afb_atompaw_tricks="yes"
+    afb_atompaw_tricky_vars="${afb_atompaw_tricky_vars} CFGFLAGS"
+    unset tmpflags_atompaw
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: CFGFLAGS_ATOMPAW set => skipping AtomPAW config tricks" >&5
+$as_echo "$as_me: CFGFLAGS_ATOMPAW set => skipping AtomPAW config tricks" >&6;}
+    test "${afb_atompaw_tricks}" = "yes" && afb_atompaw_tricks="partial"
+  fi
+
+    else
+      afb_atompaw_ok="no"
+      as_fn_error $? "could not download ATOMPAW fallback tarball
+    Solution: disable support for ATOMPAW or download the tarball
+    manually to ${abinit_tardir}" "$LINENO" 5
+    fi
+
+        if test "${afb_atompaw_ok}" != "yes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: ATOMPAW is broken, which will prevent the build of all
+                      its possible dependencies" >&5
+$as_echo "$as_me: WARNING: ATOMPAW is broken, which will prevent the build of all
+                      its possible dependencies" >&2;}
+    fi
+
+  fi
+
+     if test "${enable_atompaw}" = "yes" -a "${afb_atompaw_ok}" = "yes"; then
+  DO_BUILD_ATOMPAW_TRUE=
+  DO_BUILD_ATOMPAW_FALSE='#'
+else
+  DO_BUILD_ATOMPAW_TRUE='#'
+  DO_BUILD_ATOMPAW_FALSE=
+fi
+
+   if test "${enable_atompaw}" = "yes" -a "${afb_atompaw_ok}" = "yes"; then
+  DO_TEST_ATOMPAW_TRUE=
+  DO_TEST_ATOMPAW_FALSE='#'
+else
+  DO_TEST_ATOMPAW_TRUE='#'
+  DO_TEST_ATOMPAW_FALSE=
+fi
+
+
+
+
+
+
     afb_netcdf4_fortran_bins=""
   afb_netcdf4_fortran_incs=""
   afb_netcdf4_fortran_libs=""
@@ -12433,6 +12433,274 @@ fi
 
 
 
+    afb_libpsml_bins=""
+  afb_libpsml_incs=""
+  afb_libpsml_libs=""
+  afb_libpsml_custom="no"
+  afb_libpsml_tricks="unknown"
+  afb_libpsml_ok="unknown"
+  afb_libpsml_tarball="${abinit_tardir}/libpsml-1.1.7.tar.gz"
+  tmp_tarball_ok="no"
+  unset with_libpsml_bins
+
+    libpsml_pkg_name="libpsml-1.1.7"
+
+  libpsml_pkg_inst="libpsml/1.1.7"
+
+  libpsml_pkg_string="PSML library 1.1.7 (upstream release)"
+
+
+    # Check whether --enable-libpsml was given.
+if test "${enable_libpsml+set}" = set; then :
+  enableval=$enable_libpsml;
+fi
+
+
+
+    if test "${enable_libpsml}" = ""; then
+    enable_libpsml="yes"
+  fi
+
+
+
+  if test -z "${CFGFLAGS_LIBPSML}"; then
+    CFGFLAGS_LIBPSML="${CFGFLAGS}"
+    afb_libpsml_cfgflags_custom="no"
+  else
+    afb_libpsml_custom="yes"
+    afb_libpsml_cfgflags_custom="yes"
+  fi
+  unset CPPFLAGS_LIBPSML
+  unset CFLAGS_LIBPSML
+  unset XPPFLAGS_LIBPSML
+  unset CXXFLAGS_LIBPSML
+
+
+  if test -z "${FPPFLAGS_LIBPSML}"; then
+    FPPFLAGS_LIBPSML="${FPPFLAGS}"
+    afb_libpsml_fppflags_custom="no"
+  else
+    afb_libpsml_custom="yes"
+    afb_libpsml_fppflags_custom="yes"
+  fi
+
+
+  if test -z "${FCFLAGS_LIBPSML}"; then
+    FCFLAGS_LIBPSML="${FCFLAGS}"
+    afb_libpsml_fcflags_custom="no"
+  else
+    afb_libpsml_custom="yes"
+    afb_libpsml_fcflags_custom="yes"
+  fi
+
+
+  if test -z "${LDFLAGS_LIBPSML}"; then
+    LDFLAGS_LIBPSML="${LDFLAGS}"
+    afb_libpsml_ldflags_custom="no"
+  else
+    afb_libpsml_custom="yes"
+    afb_libpsml_ldflags_custom="yes"
+  fi
+
+
+  if test -z "${LIBS_LIBPSML}"; then
+    LIBS_LIBPSML="${LIBS}"
+    afb_libpsml_libs_custom="no"
+  else
+    afb_libpsml_custom="yes"
+    afb_libpsml_libs_custom="yes"
+  fi
+
+
+  if test -z "${ARFLAGS_LIBPSML}"; then
+    ARFLAGS_LIBPSML="${ARFLAGS}"
+    afb_libpsml_arflags_custom="no"
+  else
+    afb_libpsml_custom="yes"
+    afb_libpsml_arflags_custom="yes"
+  fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable the LIBPSML fallback" >&5
+$as_echo_n "checking whether to enable the LIBPSML fallback... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${enable_libpsml}" >&5
+$as_echo "${enable_libpsml}" >&6; }
+  if test "${enable_libpsml}" = "yes"; then
+
+        if test "${afb_libxc_ok}" = "no"; then
+      as_fn_error $? "LIBPSML depends on broken LIBXC
+        Solution: disable LIBPSML or fix LIBXC" "$LINENO" 5
+    fi
+    if test "${afb_xmlf90_ok}" = "no"; then
+      as_fn_error $? "LIBPSML depends on broken XMLF90
+        Solution: disable LIBPSML or fix XMLF90" "$LINENO" 5
+    fi
+
+
+        for dl_url in LOCAL "https://launchpad.net/libpsml/trunk/1.1/+download/libpsml-1.1.7.tar.gz"; do
+      if test "${tmp_tarball_ok}" = "no"; then
+        if test "${dl_url}" != "LOCAL"; then
+          rm -f "${afb_libpsml_tarball}"
+          { $as_echo "$as_me:${as_lineno-$LINENO}: downloading LIBPSML - this may take a while" >&5
+$as_echo "$as_me: downloading LIBPSML - this may take a while" >&6;}
+          ${afb_downloader} ${afb_dlopts} \
+            "${afb_libpsml_tarball}" \
+            "${dl_url}"
+        fi
+        if test -s "${afb_libpsml_tarball}"; then
+
+    if test "${MD5SUM}" = ""; then
+    for ac_prog in md5sum md5
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_MD5SUM+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$MD5SUM"; then
+  ac_cv_prog_MD5SUM="$MD5SUM" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_MD5SUM="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+MD5SUM=$ac_cv_prog_MD5SUM
+if test -n "$MD5SUM"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MD5SUM" >&5
+$as_echo "$MD5SUM" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$MD5SUM" && break
+done
+
+  fi
+  afb_md5_ok="unknown"
+
+    if test "${MD5SUM}" = ""; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no MD5 sum checker available" >&5
+$as_echo "$as_me: WARNING: no MD5 sum checker available" >&2;}
+    tmp_md5_file=""
+  else
+    tmp_md5_file=`${MD5SUM} ${afb_libpsml_tarball} | sed -e 's/.*= //' | awk '{print $1}'`
+  fi
+  tmp_md5_ref="3f3189d71ec1ce83e00e477ebbf6c516"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking file '${afb_libpsml_tarball}'" >&5
+$as_echo_n "checking file '${afb_libpsml_tarball}'... " >&6; }
+  if test "${tmp_md5_file}" = "${tmp_md5_ref}"; then
+    afb_md5_ok="yes"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 ok" >&5
+$as_echo "md5 ok" >&6; }
+  else
+    if test "${tmp_md5_file}" = ""; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 unknown" >&5
+$as_echo "md5 unknown" >&6; }
+    else
+      afb_md5_ok="no"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 failed" >&5
+$as_echo "md5 failed" >&6; }
+    fi
+  fi
+
+          case "${afb_md5_ok}" in
+            yes)
+              tmp_tarball_ok="yes"
+            ;;
+            unknown)
+              tmp_tarball_ok="yes"
+              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not check integrity of libpsml-1.1.7 tarball" >&5
+$as_echo "$as_me: WARNING: could not check integrity of libpsml-1.1.7 tarball" >&2;}
+              ;;
+            no)
+              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: libpsml-1.1.7 tarball MD5 check failed" >&5
+$as_echo "$as_me: WARNING: libpsml-1.1.7 tarball MD5 check failed" >&2;}
+              ;;
+          esac
+        fi
+      fi
+    done
+
+        if test "${tmp_tarball_ok}" = "yes"; then
+      afb_libpsml_ok="yes"
+
+
+    afb_libpsml_tricks="no"
+  afb_libpsml_tricky_vars=""
+  tmp_libpsml_num_tricks=0
+  tmp_libpsml_cnt_tricks=0
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: no tricks to apply for LibPSML" >&5
+$as_echo "$as_me: no tricks to apply for LibPSML" >&6;}
+
+    case "${tmp_libpsml_cnt_tricks}" in
+    0)
+      afb_libpsml_tricks="no"
+      ;;
+    ${tmp_libpsml_num_tricks})
+      afb_libpsml_tricks="yes"
+      ;;
+    *)
+      afb_libpsml_tricks="partial"
+      ;;
+  esac
+  unset tmp_libpsml_cnt_tricks
+  unset tmp_libpsml_num_tricks
+
+    else
+      afb_libpsml_ok="no"
+      as_fn_error $? "could not download LIBPSML fallback tarball
+    Solution: disable support for LIBPSML or download the tarball
+    manually to ${abinit_tardir}" "$LINENO" 5
+    fi
+
+        if test "${afb_libpsml_ok}" != "yes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: LIBPSML is broken, which will prevent the build of all
+                      its possible dependencies" >&5
+$as_echo "$as_me: WARNING: LIBPSML is broken, which will prevent the build of all
+                      its possible dependencies" >&2;}
+    fi
+
+  fi
+
+     if test "${enable_libpsml}" = "yes" -a "${afb_libpsml_ok}" = "yes"; then
+  DO_BUILD_LIBPSML_TRUE=
+  DO_BUILD_LIBPSML_FALSE='#'
+else
+  DO_BUILD_LIBPSML_TRUE='#'
+  DO_BUILD_LIBPSML_FALSE=
+fi
+
+   if test "${enable_libpsml}" = "yes" -a "${afb_libpsml_ok}" = "yes"; then
+  DO_TEST_LIBPSML_TRUE=
+  DO_TEST_LIBPSML_FALSE='#'
+else
+  DO_TEST_LIBPSML_TRUE='#'
+  DO_TEST_LIBPSML_FALSE=
+fi
+
+
+
+
+
+
     afb_yaml_bins=""
   afb_yaml_incs=""
   afb_yaml_libs=""
@@ -12848,274 +13116,6 @@ else
 fi
 
 
-
-
-
-
-
-
-    afb_libpsml_bins=""
-  afb_libpsml_incs=""
-  afb_libpsml_libs=""
-  afb_libpsml_custom="no"
-  afb_libpsml_tricks="unknown"
-  afb_libpsml_ok="unknown"
-  afb_libpsml_tarball="${abinit_tardir}/libpsml-1.1.7.tar.gz"
-  tmp_tarball_ok="no"
-  unset with_libpsml_bins
-
-    libpsml_pkg_name="libpsml-1.1.7"
-
-  libpsml_pkg_inst="libpsml/1.1.7"
-
-  libpsml_pkg_string="PSML library 1.1.7 (upstream release)"
-
-
-    # Check whether --enable-libpsml was given.
-if test "${enable_libpsml+set}" = set; then :
-  enableval=$enable_libpsml;
-fi
-
-
-
-    if test "${enable_libpsml}" = ""; then
-    enable_libpsml="yes"
-  fi
-
-
-
-  if test -z "${CFGFLAGS_LIBPSML}"; then
-    CFGFLAGS_LIBPSML="${CFGFLAGS}"
-    afb_libpsml_cfgflags_custom="no"
-  else
-    afb_libpsml_custom="yes"
-    afb_libpsml_cfgflags_custom="yes"
-  fi
-  unset CPPFLAGS_LIBPSML
-  unset CFLAGS_LIBPSML
-  unset XPPFLAGS_LIBPSML
-  unset CXXFLAGS_LIBPSML
-
-
-  if test -z "${FPPFLAGS_LIBPSML}"; then
-    FPPFLAGS_LIBPSML="${FPPFLAGS}"
-    afb_libpsml_fppflags_custom="no"
-  else
-    afb_libpsml_custom="yes"
-    afb_libpsml_fppflags_custom="yes"
-  fi
-
-
-  if test -z "${FCFLAGS_LIBPSML}"; then
-    FCFLAGS_LIBPSML="${FCFLAGS}"
-    afb_libpsml_fcflags_custom="no"
-  else
-    afb_libpsml_custom="yes"
-    afb_libpsml_fcflags_custom="yes"
-  fi
-
-
-  if test -z "${LDFLAGS_LIBPSML}"; then
-    LDFLAGS_LIBPSML="${LDFLAGS}"
-    afb_libpsml_ldflags_custom="no"
-  else
-    afb_libpsml_custom="yes"
-    afb_libpsml_ldflags_custom="yes"
-  fi
-
-
-  if test -z "${LIBS_LIBPSML}"; then
-    LIBS_LIBPSML="${LIBS}"
-    afb_libpsml_libs_custom="no"
-  else
-    afb_libpsml_custom="yes"
-    afb_libpsml_libs_custom="yes"
-  fi
-
-
-  if test -z "${ARFLAGS_LIBPSML}"; then
-    ARFLAGS_LIBPSML="${ARFLAGS}"
-    afb_libpsml_arflags_custom="no"
-  else
-    afb_libpsml_custom="yes"
-    afb_libpsml_arflags_custom="yes"
-  fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable the LIBPSML fallback" >&5
-$as_echo_n "checking whether to enable the LIBPSML fallback... " >&6; }
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${enable_libpsml}" >&5
-$as_echo "${enable_libpsml}" >&6; }
-  if test "${enable_libpsml}" = "yes"; then
-
-        if test "${afb_libxc_ok}" = "no"; then
-      as_fn_error $? "LIBPSML depends on broken LIBXC
-        Solution: disable LIBPSML or fix LIBXC" "$LINENO" 5
-    fi
-    if test "${afb_xmlf90_ok}" = "no"; then
-      as_fn_error $? "LIBPSML depends on broken XMLF90
-        Solution: disable LIBPSML or fix XMLF90" "$LINENO" 5
-    fi
-
-
-        for dl_url in LOCAL "https://launchpad.net/libpsml/trunk/1.1/+download/libpsml-1.1.7.tar.gz"; do
-      if test "${tmp_tarball_ok}" = "no"; then
-        if test "${dl_url}" != "LOCAL"; then
-          rm -f "${afb_libpsml_tarball}"
-          { $as_echo "$as_me:${as_lineno-$LINENO}: downloading LIBPSML - this may take a while" >&5
-$as_echo "$as_me: downloading LIBPSML - this may take a while" >&6;}
-          ${afb_downloader} ${afb_dlopts} \
-            "${afb_libpsml_tarball}" \
-            "${dl_url}"
-        fi
-        if test -s "${afb_libpsml_tarball}"; then
-
-    if test "${MD5SUM}" = ""; then
-    for ac_prog in md5sum md5
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_MD5SUM+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$MD5SUM"; then
-  ac_cv_prog_MD5SUM="$MD5SUM" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_MD5SUM="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-MD5SUM=$ac_cv_prog_MD5SUM
-if test -n "$MD5SUM"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MD5SUM" >&5
-$as_echo "$MD5SUM" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$MD5SUM" && break
-done
-
-  fi
-  afb_md5_ok="unknown"
-
-    if test "${MD5SUM}" = ""; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no MD5 sum checker available" >&5
-$as_echo "$as_me: WARNING: no MD5 sum checker available" >&2;}
-    tmp_md5_file=""
-  else
-    tmp_md5_file=`${MD5SUM} ${afb_libpsml_tarball} | sed -e 's/.*= //' | awk '{print $1}'`
-  fi
-  tmp_md5_ref="3f3189d71ec1ce83e00e477ebbf6c516"
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking file '${afb_libpsml_tarball}'" >&5
-$as_echo_n "checking file '${afb_libpsml_tarball}'... " >&6; }
-  if test "${tmp_md5_file}" = "${tmp_md5_ref}"; then
-    afb_md5_ok="yes"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 ok" >&5
-$as_echo "md5 ok" >&6; }
-  else
-    if test "${tmp_md5_file}" = ""; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 unknown" >&5
-$as_echo "md5 unknown" >&6; }
-    else
-      afb_md5_ok="no"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: md5 failed" >&5
-$as_echo "md5 failed" >&6; }
-    fi
-  fi
-
-          case "${afb_md5_ok}" in
-            yes)
-              tmp_tarball_ok="yes"
-            ;;
-            unknown)
-              tmp_tarball_ok="yes"
-              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not check integrity of libpsml-1.1.7 tarball" >&5
-$as_echo "$as_me: WARNING: could not check integrity of libpsml-1.1.7 tarball" >&2;}
-              ;;
-            no)
-              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: libpsml-1.1.7 tarball MD5 check failed" >&5
-$as_echo "$as_me: WARNING: libpsml-1.1.7 tarball MD5 check failed" >&2;}
-              ;;
-          esac
-        fi
-      fi
-    done
-
-        if test "${tmp_tarball_ok}" = "yes"; then
-      afb_libpsml_ok="yes"
-
-
-    afb_libpsml_tricks="no"
-  afb_libpsml_tricky_vars=""
-  tmp_libpsml_num_tricks=0
-  tmp_libpsml_cnt_tricks=0
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: no tricks to apply for LibPSML" >&5
-$as_echo "$as_me: no tricks to apply for LibPSML" >&6;}
-
-    case "${tmp_libpsml_cnt_tricks}" in
-    0)
-      afb_libpsml_tricks="no"
-      ;;
-    ${tmp_libpsml_num_tricks})
-      afb_libpsml_tricks="yes"
-      ;;
-    *)
-      afb_libpsml_tricks="partial"
-      ;;
-  esac
-  unset tmp_libpsml_cnt_tricks
-  unset tmp_libpsml_num_tricks
-
-    else
-      afb_libpsml_ok="no"
-      as_fn_error $? "could not download LIBPSML fallback tarball
-    Solution: disable support for LIBPSML or download the tarball
-    manually to ${abinit_tardir}" "$LINENO" 5
-    fi
-
-        if test "${afb_libpsml_ok}" != "yes"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: LIBPSML is broken, which will prevent the build of all
-                      its possible dependencies" >&5
-$as_echo "$as_me: WARNING: LIBPSML is broken, which will prevent the build of all
-                      its possible dependencies" >&2;}
-    fi
-
-  fi
-
-     if test "${enable_libpsml}" = "yes" -a "${afb_libpsml_ok}" = "yes"; then
-  DO_BUILD_LIBPSML_TRUE=
-  DO_BUILD_LIBPSML_FALSE='#'
-else
-  DO_BUILD_LIBPSML_TRUE='#'
-  DO_BUILD_LIBPSML_FALSE=
-fi
-
-   if test "${enable_libpsml}" = "yes" -a "${afb_libpsml_ok}" = "yes"; then
-  DO_TEST_LIBPSML_TRUE=
-  DO_TEST_LIBPSML_FALSE='#'
-else
-  DO_TEST_LIBPSML_TRUE='#'
-  DO_TEST_LIBPSML_FALSE=
-fi
 
 
 
@@ -13664,20 +13664,20 @@ if test -z "${DO_TEST_LINALG_TRUE}" && test -z "${DO_TEST_LINALG_FALSE}"; then
   as_fn_error $? "conditional \"DO_TEST_LINALG\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${DO_BUILD_ATOMPAW_TRUE}" && test -z "${DO_BUILD_ATOMPAW_FALSE}"; then
-  as_fn_error $? "conditional \"DO_BUILD_ATOMPAW\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${DO_TEST_ATOMPAW_TRUE}" && test -z "${DO_TEST_ATOMPAW_FALSE}"; then
-  as_fn_error $? "conditional \"DO_TEST_ATOMPAW\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${DO_BUILD_NETCDF4_TRUE}" && test -z "${DO_BUILD_NETCDF4_FALSE}"; then
   as_fn_error $? "conditional \"DO_BUILD_NETCDF4\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DO_TEST_NETCDF4_TRUE}" && test -z "${DO_TEST_NETCDF4_FALSE}"; then
   as_fn_error $? "conditional \"DO_TEST_NETCDF4\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DO_BUILD_ATOMPAW_TRUE}" && test -z "${DO_BUILD_ATOMPAW_FALSE}"; then
+  as_fn_error $? "conditional \"DO_BUILD_ATOMPAW\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DO_TEST_ATOMPAW_TRUE}" && test -z "${DO_TEST_ATOMPAW_FALSE}"; then
+  as_fn_error $? "conditional \"DO_TEST_ATOMPAW\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DO_BUILD_NETCDF4_FORTRAN_TRUE}" && test -z "${DO_BUILD_NETCDF4_FORTRAN_FALSE}"; then
@@ -13704,20 +13704,20 @@ if test -z "${DO_TEST_XMLF90_TRUE}" && test -z "${DO_TEST_XMLF90_FALSE}"; then
   as_fn_error $? "conditional \"DO_TEST_XMLF90\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${DO_BUILD_YAML_TRUE}" && test -z "${DO_BUILD_YAML_FALSE}"; then
-  as_fn_error $? "conditional \"DO_BUILD_YAML\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${DO_TEST_YAML_TRUE}" && test -z "${DO_TEST_YAML_FALSE}"; then
-  as_fn_error $? "conditional \"DO_TEST_YAML\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${DO_BUILD_LIBPSML_TRUE}" && test -z "${DO_BUILD_LIBPSML_FALSE}"; then
   as_fn_error $? "conditional \"DO_BUILD_LIBPSML\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DO_TEST_LIBPSML_TRUE}" && test -z "${DO_TEST_LIBPSML_FALSE}"; then
   as_fn_error $? "conditional \"DO_TEST_LIBPSML\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DO_BUILD_YAML_TRUE}" && test -z "${DO_BUILD_YAML_FALSE}"; then
+  as_fn_error $? "conditional \"DO_BUILD_YAML\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DO_TEST_YAML_TRUE}" && test -z "${DO_TEST_YAML_FALSE}"; then
+  as_fn_error $? "conditional \"DO_TEST_YAML\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DO_BUILD_BIGDFT_TRUE}" && test -z "${DO_BUILD_BIGDFT_FALSE}"; then

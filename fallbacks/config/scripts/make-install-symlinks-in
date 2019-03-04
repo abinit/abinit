@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2017 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+try:
+    from configparser import ConfigParser,NoOptionError
+except ImportError:
+    from ConfigParser import ConfigParser,NoOptionError
+
+from time import gmtime,strftime
+
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Script template
+#
+
+sym_cmds = """\
+#!/bin/sh
+
+@CMDS@
+"""
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name   = "make-install-symlinks-in"
+my_config = "config/specs/fallbacks.cfg"
+my_output = "src/install-symlinks.sh.in"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("config/specs/fallbacks.conf") ):
+  print("%s: You must be in the top of an ABINIT Fallbacks source tree." % my_name)
+  print("%s: Aborting now." % my_name)
+  sys.exit(1)
+
+# Read config file(s)
+for cnf_file in [my_config]:
+  if ( os.path.exists(cnf_file) ):
+    if ( re.search("\.cf$",cnf_file) ):
+      exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
+  else:
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
+    sys.exit(2)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init fallbacks
+cnf = MyConfigParser()
+cnf.read(my_config)
+ver_list = cnf.sections()
+ver_list.sort()
+ver_list.reverse()
+fbk_list = cnf.options(ver_list[0])
+
+# Process each package
+pkg_links = ""
+for pkg in fbk_list:
+  pkg_ver = cnf.get(ver_list[0], pkg)
+  pkg_links += "@MKDIR_P@ '@prefix@/%s/%s'\n" % (pkg, pkg_ver)
+  pkg_links += "@LN_S@ '%s' '@prefix@/%s/default'\n" % \
+    (pkg_ver, pkg)
+sym_cmds = re.sub("@CMDS@", pkg_links, sym_cmds)
+
+open(my_output,"w").write(sym_cmds)
