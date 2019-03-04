@@ -236,7 +236,7 @@ end function gruns_new
 !!
 !! NOTES
 !!
-!!  The Grunesein parameter is given by:
+!!  The Gruneisen parameter is given by:
 !!
 !!     gamma(q,nu) = - (V / w(q,nu)) dw(q,nu)/dV
 !!
