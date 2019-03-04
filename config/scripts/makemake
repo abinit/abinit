@@ -467,8 +467,6 @@ if ( opts.run_buildsys ):
     "./config/scripts/make-macros-dirflags")
   run_script(my_name, "Generating macros for core libraries",
     "./config/scripts/make-macros-corelibs")
-  run_script(my_name, "Generating macros for fallback linking",
-    "./config/scripts/make-macros-linking")
   run_script(my_name, "Generating macros for configure output",
     "./config/scripts/make-macros-output")
   run_script(my_name, "Generating macros for include flags",
