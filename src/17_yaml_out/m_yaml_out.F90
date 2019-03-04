@@ -631,7 +631,7 @@ module m_yaml_out
     type(stream_string) :: interm
     integer :: w
     integer :: i, vmax
-    real(kind=dp),intent(in) :: line(n)
+    real(kind=dp) :: line(n)
     character(len=30) :: rfmt
     logical :: nl
 
