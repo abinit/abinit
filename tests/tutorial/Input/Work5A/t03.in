@@ -25,7 +25,7 @@ nsym 0
 chksymbreak 0
 
 #Electronic configuration
-nband 192
+nband 384 #192
 occopt 3
 tsmear 0.002 hartree
 

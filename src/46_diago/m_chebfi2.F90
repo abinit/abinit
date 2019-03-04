@@ -278,12 +278,13 @@ module m_chebfi2
     tolerance = chebfi%tolerance
     lambda_plus = chebfi%ecut
     chebfi%X = X0
+    
         
     call getAX_BX(chebfi%X,chebfi%AX%self,chebfi%BX%self) 
                
     !********************* Compute Rayleigh quotients for every band, and set λ − equal to the largest one *****!
     call chebfi_rayleighRitzQuotiens(chebfi, neigenpairs, maxeig, mineig, DivResults%self) !OK
-        
+                
     lambda_minus = maxeig
         
     nline_max = cheb_oracle1(mineig, lambda_minus, lambda_plus, 1D-16, 40)
@@ -304,8 +305,6 @@ module m_chebfi2
                
     one_over_r = 1/radius
     two_over_r = 2/radius
-        
-    print *, "NLINE", nline 
         
     do iline = 0, nline - 1 
     
@@ -419,7 +418,7 @@ module m_chebfi2
     else
       call xgBlock_copy(chebfi%AX%self,chebfi%X_next, 1, 1)
     end if   
-        
+            
     !ψi-1 = c * ψi-1   
     call xgBlock_scale(chebfi%X, center, 1) !scale by c
             

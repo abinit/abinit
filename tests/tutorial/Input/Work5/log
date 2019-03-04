@@ -24,7 +24,7 @@ message: |
 src_file: m_dtfil.F90
 src_line: 1181
 message: |
-    Renaming old t03_x.out to t03_x.out0001
+    Renaming old t03_x.out to t03_x.out0002
 ...
  
 
@@ -44,7 +44,7 @@ message: |
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri  1 Mar 2019.
-- ( at 11h32 )
+- ( at 14h55 )
   
  
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1159,7 +1159,7 @@ Simple mixing update:
   residual square of the potential :   2.52992212594416
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 15 [s]
+ scfcv_core: previous iteration took 12 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -2159,7 +2159,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=  0.735      0.395     -0.129
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 07 [s]
+ scfcv_core: previous iteration took 06 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -3296,7 +3296,7 @@ mkrho: echo density (plane-wave part only)
  mixing of old trial potential : alpha(m:m-4)=   1.38     -0.285     -0.943E-01 -0.165E-01  0.158E-01
   rhotov : is_hybrid_ncpp= F
   rhotov : n3xccc=       91125
- scfcv_core: previous iteration took 07 [s]
+ scfcv_core: previous iteration took 06 [s]
  average electrostatic smooth potential [Ha] , [eV]      0.000000        0.000000
  
  ****** Psp strength Dij in Ha (atom      1) *****
@@ -4915,10 +4915,10 @@ P           mkmem           1
 --- !FinalSummary
 program: abinit
 version: 8.9.4
-start_datetime: Fri Mar 01 11:32:34 2019
-end_datetime: Fri Mar 01 11:33:54 2019
-overall_cpu_time:         923.9
-overall_wall_time:          80.0
+start_datetime: Fri Mar 01 14:55:08 2019
+end_datetime: Fri Mar 01 14:56:21 2019
+overall_cpu_time:         854.9
+overall_wall_time:          72.9
 exit_requested_by_user: no 
 timelimit: 0
 pseudos: 

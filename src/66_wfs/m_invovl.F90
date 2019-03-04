@@ -519,11 +519,11 @@ end subroutine make_invovl
  proj = zero
  sm1proj = zero
  PtPsm1proj = zero
-
+ 
  call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
  call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
-
+ 
  ! get the cprj
  choice = 0 ! only compute cprj, nothing else
  cpopt = 0 ! compute and save cprj
@@ -535,7 +535,8 @@ end subroutine make_invovl
    call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,&
 &              paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlc)
  end if
-
+ 
+ 
  call timab(timer_apply_inv_ovl_opernla, 2, tsec)
  call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
 
@@ -548,12 +549,12 @@ end subroutine make_invovl
      shift = shift + nlmn
    end do
  end do
-
+  
  !multiply by S^1
  call solve_inner(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj)
  sm1proj = - sm1proj
  PtPsm1proj = - PtPsm1proj
-
+ 
  ! copy sm1proj to cwaveprj(:,:)
  do idat=1, ndat*nspinor
    shift = 0

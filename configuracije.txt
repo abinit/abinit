@@ -2,4 +2,4 @@
 
 
 #WORKIIIIIIIIIIIIIIIIIIIIIIIIING
-../configure FC=ifort FCFLAGS="-qopenmp" FCFLAGS_OPENMP="-qopenmp" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"
+../configure FC=ifort FCFLAGS="-qopenmp -heap-arrays 1000000" FCFLAGS_OPENMP="-qopenmp" --enable-openmp="yes" --with-linalg-flavor="mkl" --with-linalg-incs="-I${MKLROOT}/include/" --with-linalg-libs="-L${MKLROOT}/lib/intel64/ -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm" --with-fft-flavor="fftw3" --with-fft-libs="-L${MKLROOT}/lib/intel64/ -Wl,--start-group -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -Wl,--end-group"

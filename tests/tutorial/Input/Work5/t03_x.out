@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri  1 Mar 2019.
-- ( at 11h32 )
+- ( at 14h55 )
   
 - input  file    -> t03.in
 - output file    -> t03_x.out
@@ -977,10 +977,10 @@ P           mkmem           1
 - Comment : the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=        923.9  wall=         80.0
+- Proc.   0 individual time (sec): cpu=        854.9  wall=         72.9
  
 ================================================================================
  
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        923.9  wall=         80.0
++Overall time at end (sec) : cpu=        854.9  wall=         72.9

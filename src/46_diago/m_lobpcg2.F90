@@ -410,7 +410,6 @@ module m_lobpcg2
     
     !! Start big loop over blocks
     do iblock = 1, nblock
-      print *, "IBLOCK", iblock
       if ( prtvol == 4 ) write(std_out,*) "  -- Block ", iblock
       nrestart = 0
 

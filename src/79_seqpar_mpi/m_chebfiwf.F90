@@ -417,7 +417,7 @@ module m_chebfiwf
     
     call xgBlock_reverseMap(X,ghc_filter,l_icplx,spacedim*blockdim)
     call xgBlock_reverseMap(Bm1X,gsm1hc_filter,l_icplx,spacedim*blockdim)
-    
+        
     ! scale back cg
     if(l_istwf == 2) then 
       !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
@@ -429,7 +429,7 @@ module m_chebfiwf
         if(l_mpi_enreg%me_g0 == 1) gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) = gsm1hc_filter(:, 1:spacedim*blockdim:l_npw) * sqrt2
       end if
     end if
-       
+    
     !cwaveprj dummy allocate
     if(l_paw) then
       ABI_DATATYPE_ALLOCATE(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim)) !nband_filter
