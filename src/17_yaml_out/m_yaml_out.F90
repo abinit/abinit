@@ -631,6 +631,7 @@ module m_yaml_out
     type(stream_string) :: interm
     integer :: w
     integer :: i, vmax
+    real(kind=dp),intent(in) :: line(n)
     character(len=30) :: rfmt
     logical :: nl
 
@@ -651,7 +652,8 @@ module m_yaml_out
 
     do i=1,m
       call interm%write(eol//'-')
-      call yaml_print_real1d(interm, n, arr(i,:), rfmt, vmax)
+      line = arr(i,:)
+      call yaml_print_real1d(interm, n, line, rfmt, vmax)
     end do
 
     if(nl) call interm%write(eol)
@@ -682,6 +684,7 @@ module m_yaml_out
     type(stream_string) :: interm
     integer :: w
     integer :: i, vmax
+    integer :: line(n)
     character(len=30) :: ifmt
     logical :: nl
 
@@ -702,7 +705,8 @@ module m_yaml_out
 
     do i=1,m
       call interm%write(eol//'-')
-      call yaml_print_int1d(interm, n, arr(i,:), ifmt, vmax)
+      line = arr(i,:)
+      call yaml_print_int1d(interm, n, line, ifmt, vmax)
     end do
 
     if(nl) call interm%write(eol)
