@@ -38,7 +38,6 @@ fbk_dist_files = [
   "config/scripts/make-config-dumper",
   "config/scripts/make-fallbacks-config-in",
   "config/scripts/make-install-symlinks-in",
-  "config/scripts/make-install-symlinks-in.orig",
   "config/scripts/make-macros-environment",
   "config/scripts/make-macros-fallbacks",
   "config/scripts/make-macros-info",
