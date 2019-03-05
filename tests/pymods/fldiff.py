@@ -47,10 +47,10 @@ from .data_extractor import DataExtractor
 from .yaml_tools import is_available as has_yaml
 
 if has_yaml:
-    from .yaml_tools.tester_conf import TesterConf as YTesterConf
+    from .yaml_tools.driver_test_conf import DriverTestConf as YDriverConf
     from .yaml_tools.tester import Tester as YTester
 else:
-    class YTesterConf(object):
+    class YDriverConf(object):
         '''
             Mock class when YAML not available
         '''
@@ -59,7 +59,7 @@ else:
 
         @classmethod
         def from_file(self, filename):
-            return YTesterConf('')
+            return YDriverConf('')
 
     class YTester(object):
         '''
@@ -434,11 +434,11 @@ class Differ(object):
             self.use_yaml = self.options['use_yaml']
             if self.use_yaml:
                 if yaml_test and 'file' in yaml_test and yaml_test['file']:
-                    self.yaml_test = YTesterConf.from_file(yaml_test['file'])
+                    self.yaml_test = YDriverConf.from_file(yaml_test['file'])
                 elif yaml_test and 'yaml' in yaml_test and yaml_test['yaml']:
-                    self.yaml_test = YTesterConf(yaml_test['yaml'])
+                    self.yaml_test = YDriverConf(yaml_test['yaml'])
                 else:
-                    self.yaml_test = YTesterConf()
+                    self.yaml_test = YDriverConf()
         else:
             self.use_yaml = False
 

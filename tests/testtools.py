@@ -119,8 +119,11 @@ class ArgParser(object):
         '''
         parser.add_argument('file', metavar='FILE', nargs='?', default=None,
                             help='YAML file defining a test.')
-        parser.add_argument('-d', '--debug', action='store_true',
+        parser.add_argument('-D', '--debug', action='store_true',
                             help='Enable debug command.')
+        parser.add_argument('-d', '--default', metavar='DEFAULT_CONF', nargs=1,
+                            help='YAML alternative default config for debug.',
+                            default=None)
 
     def explore(self, args):
         '''
@@ -132,7 +135,8 @@ class ArgParser(object):
                   ' run.')
             exit(1)
         if args.debug:
-            explorer = explore_test.DebugExplorer()
+            default = args.default
+            explorer = explore_test.DebugExplorer(default=default)
         else:
             explorer = explore_test.Explorer()
 

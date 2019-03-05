@@ -9,7 +9,7 @@ import os
 import glob
 import cmd
 from subprocess import call
-from .tester_conf import TesterConf, DEFAULT_CONF_PATH
+from .driver_test_conf import DriverTestConf, DEFAULT_CONF_PATH
 from .conf_parser import conf_parser
 from .errors import ConfigError
 
@@ -46,6 +46,11 @@ def show_cons(cons, used=False):
     for name in cons.exclude:
         print(' -', name)
     print(' Current value:', cons.value if used else 'not defined here')
+    if cons.metadata:
+        if 'file name' in cons.metadata:
+            print(' Defined in file:', cons.metadata['file name'])
+        if 'tree' in cons.metadata:
+            print(' Defined in tree:', cons.metadata['tree'])
     print(' Description:')
     print(cons.test.__doc__)
 
@@ -77,9 +82,9 @@ def print_iter(it):
         print()
 
 
-class ExtendedTesterConf(TesterConf):
+class ExtendedTestConf(DriverTestConf):
     def __init__(self, *args):
-        TesterConf.__init__(self, *args)
+        DriverTestConf.__init__(self, *args)
 
     def get_spec(self):
         '''
@@ -236,7 +241,7 @@ class Explorer(cmd.Cmd):
         '''
         filename = os.path.realpath(os.path.expanduser(arg))
         try:
-            self.tree = ExtendedTesterConf.from_file(filename)
+            self.tree = ExtendedTestConf.from_file(filename)
         except IOError:
             print('File not found.')
         except ConfigError as e:
@@ -502,6 +507,7 @@ class Explorer(cmd.Cmd):
 
 
 class DebugExplorer(Explorer):
+    default_file = None
     def do_debug(self, arg):
         '''
             Usage debug PYTHON_EXPR

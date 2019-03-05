@@ -60,16 +60,29 @@ class Constraint(object):
         Represent a constraint to be applied to some piece of data.
     '''
     def __init__(self, name, test, val_type, inherited, use_params, exclude,
-                 apply_to):
+                 apply_to, value=None, metadata={}):
         self.name = name
         self.test = test
         self.type = val_type
         self.inherited = inherited
         self.use_params = use_params
         self.exclude = exclude
-        self.value = None
+        self.value = value
+        self.metadata = metadata
 
         self.__apply_to = make_apply_to(apply_to)
+
+    def __repr__(self):
+        return 'Constraint({})'.format(', '.join((
+            str(self.name),
+            str(self.test),
+            str(self.type),
+            str(self.inherited),
+            str(self.use_params),
+            str(self.exclude),
+            str(self.value),
+            str(self.metadata),
+        )))
 
     def check(self, ref, tested, conf):
         '''
@@ -93,7 +106,7 @@ class Constraint(object):
         cp.__apply_to = self.__apply_to
         return cp
 
-    def with_value(self, val):
+    def with_value(self, val, metadata={}):
         '''
             Create a copy of self with the value attribute set.
         '''
@@ -101,7 +114,18 @@ class Constraint(object):
             raise ValueTypeError(self.name, self.type, val)
         cp = self.copy()
         cp.value = val
+        cp.metadata = metadata
         return cp
+
+    def __eq__(self, other):
+        return (
+            self.name == other.name
+            and self.type == other.type
+            and self.inherited == other.inherited
+            and self.use_params == other.use_params
+            and self.exclude == other.exclude
+            and self.value == other.value
+        )
 
 
 class ConfTree(object):
@@ -179,6 +203,12 @@ class ConfTree(object):
                 return {}
         return d['constraints']
 
+    def __repr__(self):
+        return 'ConfTree({})'.format(self.dict)
+
+    def __eq__(self, other):
+        return self.dict == other.dict
+
 
 class ConfParser(object):
     '''
@@ -188,6 +218,7 @@ class ConfParser(object):
     def __init__(self):
         self.parameters = {}
         self.constraints = {}
+        self.metadata = {}
 
     def import_parser(self, conf_parser):
         '''
@@ -228,6 +259,9 @@ class ConfParser(object):
             return fun
         return register
 
+    def ctx(self):
+        return self.metadata.copy()
+
     def __make_tree(self, parsed_src):
         '''
             Recursively build the configuration tree
@@ -237,7 +271,7 @@ class ConfParser(object):
             for key, val in parsed_src.items():
                 if key in self.constraints:
                     tree['constraints'][key] = \
-                            self.constraints[key].with_value(val)
+                            self.constraints[key].with_value(val, self.ctx())
                 elif key in self.parameters:
                     if not isinstance(val, self.parameters[key]['type']):
                         raise ValueTypeError(key, self.parameters[key]['type'],
@@ -249,12 +283,15 @@ class ConfParser(object):
                     raise InvalidNodeError(key, val)
         return tree
 
-    def make_trees(self, parsed_src):
+    def make_trees(self, parsed_src, metadata={}):
         '''
             Create a ConfTree instance from the yaml parser output.
         '''
+        assert isinstance(parsed_src, dict), ('parsed_src have to be derivated'
+                                              'from a dictionary.')
         filters = {}
         trees = {}
+        self.metadata = metadata.copy()
 
         if 'filters' in parsed_src:
             # Get filters definitions
@@ -266,6 +303,7 @@ class ConfParser(object):
 
                 # Parse each filtered tree then remove it from the source tree
                 if name in parsed_src:
+                    self.metadata['tree'] = name
                     trees[name] = ConfTree(self.__make_tree(parsed_src[name]))
                     del parsed_src[name]
                 else:
@@ -275,6 +313,7 @@ class ConfParser(object):
             del parsed_src['filters']
 
         # Parse the fields remaining as the default tree
+        self.metadata['tree'] = 'default tree'
         trees['__default'] = ConfTree(self.__make_tree(parsed_src))
 
         return trees, filters

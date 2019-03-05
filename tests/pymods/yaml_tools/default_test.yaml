@@ -1,17 +1,17 @@
-allow_nan: false
-tol_abs: 1.0e-10
-tol_rel: 1.0e-10
-
-Etot:
-    tol_abs: 1.0e-7
-
-results_gs:
-    allow_nan: true
-    tol_rel: 1.0e-12
-    convergence:
-        ceil: 1.0e-6
-
-    tol_eq: 1.0e-10
-    equation: 'this.cartesian_forces.sum(axis=0)'  # Newton's first
-    stress tensor:
-        tensor_is_symetric: true
+# allow_nan: false
+# tol_abs: 1.0e-10
+# tol_rel: 1.0e-10
+# 
+# Etot:
+#     tol_abs: 1.0e-7
+# 
+# results_gs:
+#     allow_nan: true
+#     tol_rel: 1.0e-12
+#     convergence:
+#         ceil: 1.0e-6
+# 
+#     tol_eq: 1.0e-10
+#     equation: 'this.cartesian_forces.sum(axis=0)'  # Newton's first
+#     stress tensor:
+#         tensor_is_symetric: true

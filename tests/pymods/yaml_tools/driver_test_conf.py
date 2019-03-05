@@ -17,7 +17,7 @@ def get_default_conf():
     '''
     with open(DEFAULT_CONF_PATH) as f:
         try:
-            return yaml_parse(f.read())
+            return yaml_parse(f.read()) or {}
         except YAMLError:
             return {}
 
@@ -30,12 +30,12 @@ def state_hash(d):
     return hash(''.join(st))
 
 
-class TesterConf:
+class DriverTestConf:
     '''
         Interface to access parameters and constraints defined by the
         configuration file by following the traversal of the data tree.
     '''
-    def __init__(self, src=None):
+    def __init__(self, src=None, metadata={}):
         self.known_params = conf_parser.parameters.copy()
         self.param_stack = []
         self.constraints_stack = []
@@ -46,7 +46,10 @@ class TesterConf:
         self._infos = []
 
         # defaut conf is not supposed to use filters
-        self.tree = conf_parser.make_trees(get_default_conf())[0]['__default']
+        self.tree = conf_parser.make_trees(
+            get_default_conf(),
+            {'file name': 'default file'}
+        )[0]['__default']
 
         self.current_filter = None
         if src is not None:
@@ -57,7 +60,7 @@ class TesterConf:
                 self.warning('The provided YAML source was corrupted. The'
                              ' configuration used will only be the default'
                              ' one.')
-            self.trees, self.filters = conf_parser.make_trees(conf)
+            self.trees, self.filters = conf_parser.make_trees(conf, metadata)
             self.tree.update(self.trees['__default'])
         else:
             self.info('No source have been provided apart from default'
@@ -71,10 +74,10 @@ class TesterConf:
     @classmethod
     def from_file(cls, filename):
         '''
-            Create a new instance of TesterConf from a configuration file.
+            Create a new instance of DriverTestConf from a configuration file.
         '''
         with open(filename) as f:
-            return cls(f.read())
+            return cls(f.read(), {'file name': filename})
 
     def extra_info(self):
         return ['# ' + inf for inf in self._infos]
