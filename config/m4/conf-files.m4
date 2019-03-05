@@ -87,7 +87,7 @@ AC_DEFUN([ABI_LOAD_OPTIONS],[
   fi
 
   dnl Propagate information to "make distcheck"
-  abi_ac_distcheck=`${REALPATH} -f "${abi_cfg_options}"`
+  abi_ac_distcheck=`${REALPATH} "${abi_cfg_options}"`
   if test "${abi_ac_distcheck}" != ""; then
     abi_ac_distcheck="--with-config-file=\"${abi_ac_distcheck}\""
   fi
