@@ -1250,33 +1250,44 @@ AC_DEFUN([ABI_FC_MOD_INCS],[
 
     dnl Prepare environment
     tmp_saved_FCFLAGS="${FCFLAGS}"
-    AC_LANG_PUSH([Fortran])
 
     dnl Look for module without includes
+    AC_LANG_PUSH([Fortran])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
       [[
         use $1
-      ]])], [abi_fc_mod_incs_ok="none required"], [abi_fc_mod_incs_ok="unknown"])
+      ]])], [abi_fc_mod_incs_ok="yes"], [abi_fc_mod_incs_ok="unknown"])
+    AC_LANG_POP([Fortran])
 
     dnl Look for module with includes
     if test "${abi_fc_mod_incs_ok}" = "unknown"; then
       FCFLAGS="${FCFLAGS} -I/usr/include"
+      AC_LANG_PUSH([Fortran])
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
         [[
           use $1
         ]])],
-        [abi_fc_mod_incs_ok="-I/usr/include"; fc_mod_incs="-I/usr/include"],
+        [abi_fc_mod_incs_ok="yes"; fc_mod_incs="-I/usr/include"],
         [abi_fc_mod_incs_ok="unknown"])
+      AC_LANG_POP([Fortran])
     fi
-    AC_MSG_RESULT([${abi_fc_mod_incs_ok}])
+    if test "${abi_fc_mod_incs_ok}" = "yes" -a "${fc_mod_incs}" = ""; then
+      AC_MSG_RESULT([none required])
+    else
+      AC_MSG_RESULT([${fc_mod_incs}])
+    fi
 
     dnl Restore environment
-    AC_LANG_POP([Fortran])
     FCFLAGS="${tmp_saved_FCFLAGS}"
+    unset tmp_saved_FCFLAGS
 
   else
 
-    AC_MSG_RESULT([${abi_fc_mod_incs_ok} (cached)])
+    if test "${abi_fc_mod_incs_ok}" = "yes" -a "${fc_mod_incs}" = ""; then
+      AC_MSG_RESULT([none required (cached)])
+    else
+      AC_MSG_RESULT([${fc_mod_incs} (cached)])
+    fi
 
   fi
 

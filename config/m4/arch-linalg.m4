@@ -1,0 +1,1104 @@
+# -*- Autoconf -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon, Marc Torrent)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Support for external linear algebra libraries
+#
+
+
+# _ABI_LINALG_CHECK_LIBS()
+# ------------------------
+#
+# Check whether the specified libraries are BLAS and LAPACK
+# implementations.
+#
+AC_DEFUN([_ABI_LINALG_CHECK_LIBS], [
+  dnl Init
+  abi_linalg_has_blas="no"
+  abi_linalg_has_lapack="no"
+  abi_linalg_has_lapacke="no"
+  abi_linalg_has_scalapack="no"
+  abi_linalg_has_elpa="no"
+  abi_linalg_has_elpa_2013="no"
+  abi_linalg_has_elpa_2014="no"
+  abi_linalg_has_elpa_2015="no"
+  abi_linalg_has_elpa_2016="no"
+  abi_linalg_has_plasma="no"
+  abi_linalg_has_magma="no"
+
+  dnl Prepare environment
+  tmp_saved_CPPFLAGS="${CPPFLAGS}"
+  tmp_saved_FCFLAGS="${FCFLAGS}"
+  tmp_saved_LIBS="${LIBS}"
+  CPPFLAGS="${CPPFLAGS} ${with_linalg_incs}"
+  FCFLAGS="${FCFLAGS} ${with_linalg_incs}"
+  LIBS="${abi_linalg_libs} ${abi_gpu_libs} ${abi_mpi_libs} ${LIBS}"
+  AC_LANG_PUSH([Fortran])
+
+  dnl BLAS?
+  AC_MSG_CHECKING([for BLAS support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call zgemm
+    ]])], [abi_linalg_has_blas="yes"], [abi_linalg_has_blas="no"])
+  AC_MSG_RESULT([${abi_linalg_has_blas}])
+
+  dnl BLAS extension?
+  _ABI_LINALG_CHECK_BLAS_EXTS()
+
+  dnl MKL BLAS extensions?
+  _ABI_LINALG_CHECK_BLAS_MKL_EXTS()
+
+  dnl LAPACK?
+  AC_MSG_CHECKING([for LAPACK support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call zhpev
+    ]])], [abi_linalg_has_lapack="yes"], [abi_linalg_has_lapack="no"])
+  AC_MSG_RESULT([${abi_linalg_has_lapack}])
+
+  dnl LAPACKE?
+  AC_MSG_CHECKING([for LAPACKE C API support in specified libraries])
+  AC_LANG_PUSH([C])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
+    [#include <lapacke.h>],
+    [[
+      zhpev_;
+    ]])],[abi_linalg_has_lapacke="yes"], [abi_linalg_has_lapacke="no"])
+  AC_LANG_POP([C])
+  AC_MSG_RESULT([${abi_linalg_has_lapacke}])
+
+  dnl BLACS?
+  AC_MSG_CHECKING([for BLACS support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call blacs_gridinit
+    ]])], [abi_linalg_has_blacs="yes"], [abi_linalg_has_blacs="no"])
+  AC_MSG_RESULT([${abi_linalg_has_blacs}])
+
+  dnl ScaLAPACK?
+  AC_MSG_CHECKING([for ScaLAPACK support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call pzheevx
+    ]])], [abi_linalg_has_scalapack="yes"], [abi_linalg_has_scalapack="no"])
+  AC_MSG_RESULT([${abi_linalg_has_scalapack}])
+
+  dnl ELPA
+  AC_MSG_CHECKING([for ELPA support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      integer,parameter :: n=1, comm=1
+      integer :: comm1, comm2, success
+      success = get_elpa_communicators(comm, n, n, comm1, comm2)
+    ]])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  AC_MSG_RESULT([${abi_linalg_has_elpa}])
+  if test "${abi_linalg_has_elpa}" = "yes"; then
+    _ABI_LINALG_CHECK_ELPA_2016()
+    _ABI_LINALG_CHECK_ELPA_2015()
+    _ABI_LINALG_CHECK_ELPA_2014()
+    _ABI_LINALG_CHECK_ELPA_2013()
+  fi
+
+  dnl PLASMA?
+  AC_MSG_CHECKING([for PLASMA support in specified libraries])
+  abi_linalg_chk_plasma="${abi_linalg_has_lapacke}"
+  if test "${abi_linalg_chk_plasma}" = "yes"; then
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use plasma
+        call plasma_zhegv
+      ]])], [abi_linalg_has_plasma="yes"], [abi_linalg_has_plasma="no"])
+  fi
+  AC_MSG_RESULT([${abi_linalg_has_plasma}])
+
+  dnl MAGMA?
+  AC_MSG_CHECKING([for MAGMA (version>=1.1.0) support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call magmaf_zhegvd
+    ]])], [abi_linalg_has_magma="yes"], [abi_linalg_has_magma="no"])
+  AC_MSG_RESULT([${abi_linalg_has_magma}])
+  if test "${abi_linalg_has_magma}" = "yes"; then
+    _ABI_LINALG_CHECK_MAGMA_15()
+  fi
+
+  dnl Restore environment
+  AC_LANG_POP([Fortran])
+  CPPFLAGS="${tmp_saved_CPPFLAGS}"
+  FCFLAGS="${tmp_saved_FCFLAGS}"
+  LIBS="${tmp_saved_LIBS}"
+]) # _ABI_LINALG_CHECK_LIBS
+
+
+                    # ------------------------------------ #
+
+
+# _ABI_LINALG_CHECK_BLAS_EXTS()
+# -----------------------------
+#
+# Check whether the specified BLAS implementation provides useful extensions.
+#
+
+AC_DEFUN([_ABI_LINALG_CHECK_BLAS_EXTS], [
+  dnl AXPBY family?
+  AC_MSG_CHECKING([for AXPBY support in specified BLAS libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call saxpby
+      call daxpby
+      call caxpby
+      call zaxpby
+    ]])], [abi_linalg_has_axpby="yes"], [abi_linalg_has_axpby="no"])
+  AC_MSG_RESULT([${abi_linalg_has_axpby}])
+
+  if test "${abi_linalg_has_axpby}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_AXPBY], 1,
+      [Define to 1 if you have an AXPBY BLAS1 extensions.])
+  fi
+
+  dnl gemm3m family
+  AC_MSG_CHECKING([for gemm3m in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call cgemm3m
+      call zgemm3m
+    ]])], [abi_linalg_has_gemm3m="yes"], [abi_linalg_has_gemm3m="no"])
+  AC_MSG_RESULT([${abi_linalg_has_gemm3m}])
+
+  if test "${abi_linalg_has_gemm3m}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_GEMM3M], 1,
+      [Define to 1 if you have ?GEMM3M BLAS3 extensions.])
+  fi
+]) # _ABI_LINALG_CHECK_BLAS_EXTS
+
+
+# _ABI_LINALG_CHECK_BLAS_MKL_EXTS()
+# ---------------------------------
+#
+# Check whether the specified MKL implementation provides BLAS extensions.
+#
+AC_DEFUN([_ABI_LINALG_CHECK_BLAS_MKL_EXTS], [
+  dnl mkl_imatcopy family
+  AC_MSG_CHECKING([for mkl_imatcopy in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call mkl_simatcopy
+      call mkl_dimatcopy
+      call mkl_cimatcopy
+      call mkl_zimatcopy
+    ]])], [abi_linalg_mkl_has_imatcopy="yes"], [abi_linalg_mkl_has_imatcopy="no"])
+  AC_MSG_RESULT([${abi_linalg_mkl_has_imatcopy}])
+
+  if test "${abi_linalg_mkl_has_imatcopy}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MKL_IMATCOPY], 1,
+      [Define to 1 if you have mkl_?imatcopy extensions.])
+  fi
+
+  dnl mkl_omatcopy family
+  AC_MSG_CHECKING([for mkl_omatcopy in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call mkl_somatcopy
+      call mkl_domatcopy
+      call mkl_comatcopy
+      call mkl_zomatcopy
+    ]])], [abi_linalg_mkl_has_omatcopy="yes"], [abi_linalg_mkl_has_omatcopy="no"])
+  AC_MSG_RESULT([${abi_linalg_mkl_has_omatcopy}])
+
+  if test "${abi_linalg_mkl_has_omatcopy}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MKL_OMATCOPY], 1,
+      [Define to 1 if you have mkl_?omatcopy extensions.])
+  fi
+
+  dnl mkl_omatadd family
+  AC_MSG_CHECKING([for mkl_omatadd in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call mkl_somatadd
+      call mkl_comatadd
+      call mkl_domatadd
+      call mkl_zomatadd
+    ]])], [abi_linalg_mkl_has_omatadd="yes"], [abi_linalg_mkl_has_omatadd="no"])
+  AC_MSG_RESULT([${abi_linalg_mkl_has_omatadd}])
+
+  if test "${abi_linalg_mkl_has_omatadd}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MKL_OMATADD], 1,
+      [Define to 1 if you have mkl_?omatadd extensions.])
+  fi
+
+  dnl mkl_threads support functions
+  AC_MSG_CHECKING([for mkl_set/get_threads in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: a
+      a = mkl_get_max_threads()
+      call mkl_set_num_threads
+    ]])], [abi_linalg_mkl_has_threads="yes"], [abi_linalg_mkl_has_threads="no"])
+  AC_MSG_RESULT([${abi_linalg_mkl_has_threads}])
+
+  if test "${abi_linalg_mkl_has_threads}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MKL_THREADS], 1,
+      [Define to 1 if you have mkl_*threads extensions.])
+  fi
+]) # _ABI_LINALG_CHECK_BLAS_MKL_EXTS
+
+
+# _ABI_LINALG_CHECK_ELPA_2013()
+# -----------------------------
+#
+# Look for a ELPA 2013 API.
+#
+AC_DEFUN([_ABI_LINALG_CHECK_ELPA_2013], [
+  dnl Init
+  abi_linalg_has_elpa_2013="no"
+
+  AC_MSG_CHECKING([for ELPA 2013 API support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1
+      integer, parameter :: comm_r=1, comm_c=1
+      real*8 :: a(lda,na), ev(na), q(ldq,na)
+      complex*16 :: ac(lda,na)
+      call solve_evp_real(na, nev, a, lda, ev, q, ldq, nblk, comm_r, comm_c)
+      call invert_trm_complex(na, ac, lda, nblk, comm_r, comm_c)
+    ]])], [abi_linalg_has_elpa_2013="yes"], [abi_linalg_has_elpa_2013="no"])
+  AC_MSG_RESULT([${abi_linalg_has_elpa_2013}])
+
+  if test "${abi_linalg_has_elpa_2013}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2013], 1,
+      [Define to 1 if you have ELPA 2013 API support.])
+  fi
+]) # _ABI_LINALG_CHECK_ELPA_2013
+
+
+# _ABI_LINALG_CHECK_ELPA_2014()
+# -----------------------------
+#
+# Look for a ELPA 2014 API.
+#
+AC_DEFUN([_ABI_LINALG_CHECK_ELPA_2014], [
+  dnl Init
+  abi_linalg_has_elpa_2014="no"
+
+  AC_MSG_CHECKING([for ELPA 2014 API support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      logical :: success
+      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1
+      integer, parameter :: comm_r=1, comm_c=1
+      real*8 :: a(lda,na), ev(na), q(ldq,na)
+      complex*16 :: ac(lda,na)
+      success = solve_evp_real(na, nev, a, lda, ev, q, ldq, nblk, &
+&       comm_r, comm_c)
+      call invert_trm_complex(na, ac, lda, nblk, comm_r, comm_c, success)
+    ]])], [abi_linalg_has_elpa_2014="yes"], [abi_linalg_has_elpa_2014="no"])
+  AC_MSG_RESULT([${abi_linalg_has_elpa_2014}])
+
+  if test "${abi_linalg_has_elpa_2014}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2014], 1,
+      [Define to 1 if you have ELPA 2014 API support.])
+  fi
+]) # _ABI_LINALG_CHECK_ELPA_2014
+
+
+# _ABI_LINALG_CHECK_ELPA_2015()
+# -----------------------------
+#
+# Look for a ELPA 2015 API.
+#
+AC_DEFUN([_ABI_LINALG_CHECK_ELPA_2015], [
+  dnl Init
+  abi_linalg_has_elpa_2015="no"
+
+  AC_MSG_CHECKING([for ELPA 2015 API support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      logical :: success1, debug
+      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1
+      integer :: comm_g=1, comm_r=1, comm_c=1, success2
+      real*8 :: a(lda,na), ev(na), q(ldq,na)
+      complex*16 :: ac(lda,na)
+      success1 = solve_evp_real(na, nev, a, lda, ev, q, ldq, nblk, &
+&       comm_r, comm_c)
+      call cholesky_complex(na, ac, lda, nblk, comm_r, comm_c, debug, success1)
+      success2 = get_elpa_row_col_comms(comm_g, na, na, comm_r, comm_c)
+    ]])], [abi_linalg_has_elpa_2015="yes"], [abi_linalg_has_elpa_2015="no"])
+  AC_MSG_RESULT([${abi_linalg_has_elpa_2015}])
+
+  if test "${abi_linalg_has_elpa_2015}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2015], 1,
+      [Define to 1 if you have ELPA 2015 API support.])
+  fi
+]) # _ABI_LINALG_CHECK_ELPA_2015
+
+
+# _ABI_LINALG_CHECK_ELPA_2016()
+# -----------------------------
+#
+# Look for a ELPA 2016 API.
+#
+AC_DEFUN([_ABI_LINALG_CHECK_ELPA_2016], [
+  dnl Init
+  abi_linalg_has_elpa_2016="no"
+
+  AC_MSG_CHECKING([for ELPA 2016 API support in specified libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      logical :: success1, debug
+      integer, parameter :: na=1, lda=1, ldq=1, nev=1, nblk=1, nrow=1
+      integer :: comm_g=1, comm_r=1, comm_c=1, success2
+      real*8 :: a(lda,nrow), ev(na), q(ldq,nrow)
+      complex*16 :: ac(lda,nrow)
+      success1 = solve_evp_real_1stage(na, nev, a, lda, ev, q, ldq, &
+&       nblk, nrow, comm_r, comm_c)
+      success1 = cholesky_complex(na, ac, lda, nblk, nrow, &
+&       comm_r, comm_c, debug)
+      success2 = get_elpa_communicators(comm_g, na, na, comm_r, comm_c)
+    ]])], [abi_linalg_has_elpa_2016="yes"], [abi_linalg_has_elpa_2016="no"])
+  AC_MSG_RESULT([${abi_linalg_has_elpa_2016}])
+
+  if test "${abi_linalg_has_elpa_2016}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_ELPA_2016], 1,
+      [Define to 1 if you have ELPA 2016 API support.])
+  fi
+]) # _ABI_LINALG_CHECK_ELPA_2016
+
+
+# _ABI_LINALG_CHECK_MAGMA_15()
+# ----------------------------
+#
+# Look for MAGMA >=1.5 (requires magma_init and magma_finalize).
+#
+AC_DEFUN([_ABI_LINALG_CHECK_MAGMA_15], [
+  dnl Init
+  abi_linalg_has_magma_15="no"
+
+  AC_MSG_CHECKING([for magma_init/magma_finalize support in specified MAGMA libraries])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      call magmaf_init
+      call magma_finalize
+    ]])], [abi_linalg_has_magma_15="yes"], [abi_linalg_has_magma_15="no"])
+  AC_MSG_RESULT([${abi_linalg_has_magma_15}])
+
+  if test "${abi_linalg_has_magma_15}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MAGMA_15], 1,
+      [Define to 1 if you have MAGMA >=1.5 API support])
+  fi
+]) # _ABI_LINALG_CHECK_MAGMA_15
+
+
+                    # ------------------------------------ #
+
+
+# _ABI_LINALG_SEARCH_BLACS(BLACS, EXTRA_LIBS)
+# -------------------------------------------
+#
+# Look for a BLACS implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_BLACS], [
+  dnl Init
+  abi_linalg_has_blacs="no"
+
+  dnl Look for libraries and routines
+  AC_SEARCH_LIBS([blacs_gridinit], $1,
+    [abi_linalg_has_blacs="yes"], [abi_linalg_has_blacs="no"],
+    [$2 ${abi_linalg_libs}])
+  if test "${abi_linalg_has_blacs}" = "yes"; then
+    if test "${ac_cv_search_blacs_gridinit}" != "none required"; then
+      abi_linalg_libs="${ac_cv_search_blacs_gridinit} $2 ${abi_linalg_libs}"
+    fi
+  fi
+]) # _ABI_LINALG_SEARCH_BLACS
+
+
+# _ABI_LINALG_SEARCH_BLAS(BLAS, EXTRA_LIBS)
+# -----------------------------------------
+#
+# Look for a BLAS implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_BLAS], [
+  dnl Init
+  abi_linalg_has_blas="no"
+
+  dnl Look for libraries and routines
+  AC_SEARCH_LIBS([zgemm], $1,
+    [abi_linalg_has_blas="yes"], [abi_linalg_has_blas="no"],
+    [$2 ${abi_linalg_libs}])
+  if test "${abi_linalg_has_blas}" = "yes"; then
+    if test "${ac_cv_search_zgemm}" != "none required"; then
+      abi_linalg_libs="${ac_cv_search_zgemm} $2 ${abi_linalg_libs}"
+    fi
+  fi
+]) # _ABI_LINALG_SEARCH_BLAS
+
+
+# _ABI_LINALG_SEARCH_ELPA(ELPA, EXTRA_LIBS)
+# -----------------------------------------
+#
+# Look for a ELPA implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_ELPA], [
+  dnl Init
+  abi_linalg_has_elpa="no"
+
+  dnl Look for libraries and routines
+  dnl Has to rewrite AC_SEARCH_LIBS because of mandatory F90 module
+  AC_MSG_CHECKING([for the ELPA library])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      use elpa1
+      integer, parameter :: n=1, comm=1
+      integer :: comm1, comm2, success
+      success = get_elpa_communicators(comm, n, n, comm1, comm2)
+    ]])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+  if test "${abi_linalg_has_elpa}" = "no"; then
+    tmp_saved_LIBS="${LIBS}"
+    for test_lib in $1; do
+      LIBS="-l${test_lib} $2 ${tmp_saved_LIBS}"
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [[
+          use elpa1
+          integer, parameter :: n=1, comm=1
+          integer :: comm1, comm2, success
+          success = get_elpa_communicators(comm, n, n, comm1, comm2)
+        ]])], [abi_linalg_has_elpa="yes"], [abi_linalg_has_elpa="no"])
+      if test "${abi_linalg_has_elpa}" = "yes"; then
+        abi_linalg_libs="-l${test_lib} $2 ${abi_linalg_libs}"
+        break
+      fi
+      LIBS="${tmp_saved_LIBS}"
+    done
+  fi
+  AC_MSG_RESULT([${abi_linalg_has_elpa}])
+
+  if test "${abi_linalg_has_elpa}" = "yes"; then
+    _ABI_LINALG_CHECK_ELPA_2016()
+    _ABI_LINALG_CHECK_ELPA_2015()
+    _ABI_LINALG_CHECK_ELPA_2014()
+    _ABI_LINALG_CHECK_ELPA_2013()
+  fi
+]) # _ABI_LINALG_SEARCH_ELPA
+
+
+# _ABI_LINALG_SEARCH_LAPACK(LAPACK, EXTRA_LIBS)
+# ---------------------------------------------
+#
+# Look for a LAPACK implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_LAPACK], [
+  dnl Init
+  abi_linalg_has_lapack="no"
+
+  dnl Look for libraries and routines
+  AC_SEARCH_LIBS([zhpev], $1,
+    [abi_linalg_has_lapack="yes"], [abi_linalg_has_lapack="no"],
+    [$2 ${abi_linalg_libs}])
+  if test "${abi_linalg_has_lapack}" = "yes"; then
+    if test "${ac_cv_search_zhpev}" != "none required"; then
+      abi_linalg_libs="${ac_cv_search_zhpev} $2 ${abi_linalg_libs}"
+    fi
+  fi
+]) # _ABI_LINALG_SEARCH_LAPACK
+
+
+# _ABI_LINALG_SEARCH_LAPACKE(LAPACKE, EXTRA_LIBS)
+# -----------------------------------------------
+#
+# Look for a LAPACKE C API implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_LAPACKE], [
+  dnl Init
+  abi_linalg_has_lapacke="no"
+
+  dnl Look for libraries and routines
+  AC_MSG_CHECKING([for library containing zhpev_ C API])
+  AC_LANG_PUSH([C])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM(
+    [#include <lapacke.h>],
+    [[
+      zhpev_;
+    ]])], [abi_linalg_has_lapacke="yes"], [abi_linalg_has_lapacke="no"])
+  if test "${abi_linalg_has_lapacke}" = "no"; then
+    tmp_saved_LIBS="${LIBS}"
+    for test_lib in $1; do
+      LIBS="-l${test_lib} $2 ${tmp_saved_LIBS}"
+      AC_LINK_IFELSE([AC_LANG_PROGRAM(
+        [#include <lapacke.h>],
+        [[
+          zhpev_;
+        ]])], [abi_linalg_has_lapacke="yes"], [abi_linalg_has_lapacke="no"])
+      if test "${abi_linalg_has_lapacke}" = "yes"; then
+        abi_linalg_libs="-l${test_lib} $2 ${abi_linalg_libs}"
+        break
+      fi  
+    done
+    if test "${abi_linalg_has_lapacke}" = "no"; then
+      LIBS="${tmp_saved_LIBS}"
+    fi
+  fi
+  AC_LANG_POP([C])
+  AC_MSG_RESULT([${abi_linalg_has_lapacke}])
+]) # _ABI_LINALG_SEARCH_LAPACKE
+
+
+# _ABI_LINALG_SEARCH_MAGMA(MAGMA, EXTRA_LIBS)
+# -------------------------------------------
+#
+# Look for a MAGMA implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_MAGMA], [
+  dnl Init
+  abi_linalg_has_magma="no"
+
+  dnl Look for libraries and routines
+  AC_SEARCH_LIBS([magmaf_zheevd], $1,
+    [abi_linalg_has_magma="yes"], [abi_linalg_has_magma="no"],
+    [$2 ${abi_linalg_libs}])
+  if test "${abi_linalg_has_magma}" = "yes"; then
+    if test "${ac_cv_search_magmaf_zheevd}" != "none required"; then
+      abi_linalg_libs="${ac_cv_search_magmaf_zheevd} $2 ${abi_linalg_libs}"
+    fi
+    _ABI_LINALG_CHECK_MAGMA_15()
+  fi
+]) # _ABI_LINALG_SEARCH_MAGMA
+
+
+# _ABI_LINALG_SEARCH_PLASMA(PLASMA, EXTRA_LIBS)
+# ---------------------------------------------
+#
+# Look for a PLASMA implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_PLASMA], [
+  dnl Init
+  abi_linalg_has_plasma="no"
+
+  dnl Look for libraries and routines
+  AC_SEARCH_LIBS([plasma_zhegv], $1,
+    [abi_linalg_has_plasma="yes"], [abi_linalg_has_plasma="no"],
+    [$2 ${abi_linalg_libs}])
+  if test "${abi_linalg_has_plasma}" = "yes"; then
+    if test "${ac_cv_search_plasma_zhegv}" != "none required"; then
+      abi_linalg_libs="${ac_cv_search_plasma_zhegv} $2 ${abi_linalg_libs}"
+    fi
+  fi
+]) # _ABI_LINALG_SEARCH_PLASMA
+
+
+# _ABI_LINALG_SEARCH_SCALAPACK(SCALAPACK, EXTRA_LIBS)
+# ---------------------------------------------------
+#
+# Look for a ScaLAPACK implementation.
+#
+AC_DEFUN([_ABI_LINALG_SEARCH_SCALAPACK], [
+  dnl Init
+  abi_linalg_has_scalapack="no"
+
+  dnl Look for libraries and routines
+  AC_SEARCH_LIBS([pzheevx], $1,
+    [abi_linalg_has_scalapack="yes"], [abi_linalg_has_scalapack="no"],
+    [$2 ${abi_linalg_libs}])
+  if test "${abi_linalg_has_scalapack}" = "yes"; then
+    if test "${ac_cv_search_pzheevx}" != "none required"; then
+      abi_linalg_libs="${ac_cv_search_pzheevx} $2 ${abi_linalg_libs}"
+    fi
+  fi
+]) # _ABI_LINALG_SEARCH_SCALAPACK
+
+
+                    # ------------------------------------ #
+
+
+# _ABI_LINALG_SET_LIBS(FLAVOR)
+# ----------------------------
+#
+# Set libraries to look for depending on the specified flavor.
+#
+AC_DEFUN([_ABI_LINALG_SET_LIBS], [
+  dnl Reset components
+  abi_linalg_provided=""
+  abi_linalg_fcflags=""
+  abi_linalg_ldflags=""
+  abi_linalg_blas_libs=""
+  abi_linalg_blas_prqs=""
+  abi_linalg_lapack_libs=""
+  abi_linalg_lapack_prqs=""
+  abi_linalg_lapacke_libs=""
+  abi_linalg_lapacke_prqs=""
+  abi_linalg_scalapack_libs=""
+  abi_linalg_scalapack_prqs="${abi_mpi_libs}"
+  abi_linalg_elpa_libs=""
+  abi_linalg_elpa_prqs=""
+  abi_linalg_magma_libs=""
+  abi_linalg_magma_prqs=""
+  abi_linalg_plasma_libs=""
+  abi_linalg_plasma_prqs=""
+
+  dnl Update components according to specified flavor
+  case "$1" in
+
+    acml)
+      abi_linalg_provided="blas lapack lapacke scalapack"
+      abi_linalg_blas_libs="-lacml"
+      abi_linalg_blas_prqs="-lacml_mv"
+      abi_linalg_scalapack_prqs="${abi_mpi_libs}"
+      ;;
+
+    atlas)
+      abi_linalg_provided="blas"
+      abi_linalg_blas_libs="-lf77blas"
+      abi_linalg_blas_prqs="-lcblas -latlas"
+      ;;
+
+    easybuild)
+      abi_linalg_provided="blas lapack scalapack"
+      abi_linalg_blas_libs="-lacml"
+      abi_linalg_blas_prqs="-lacml_mv"
+      abi_linalg_scalapack_prqs="${abi_mpi_libs}"
+      ;;
+
+    elpa)
+      abi_linalg_provided="elpa"
+      abi_linalg_elpa_libs="-lelpa"
+      ;;
+
+    essl)
+      abi_linalg_provided="blas lapack lapacke scalapack"
+      abi_linalg_fcflags="-qessl"
+      abi_linalg_ldflags="-qessl"
+      abi_linalg_blas_libs="-lessl"
+      abi_linalg_scalapack_prqs="${abi_mpi_libs}"
+      ;;
+
+    magma)
+      abi_linalg_provided="elpa"
+      abi_linalg_magma_libs="-lmagma"
+      abi_linalg_magma_prqs="${abi_gpu_libs}"
+      ;;
+
+    mkl)
+      abi_linalg_provided="blas lapack scalapack"
+      if test "${MKLROOT}" != ""; then
+        if test -x "${MKLROOT}/tools/mkl_link_tool"; then
+          AC_MSG_NOTICE([using mkl_link_tool to set libraries])
+          abi_linalg_libs=`${MKLROOT}/tools/mkl_link_tool -c intel_f -libs`
+          abi_linalg_fcflags=`${MKLROOT}/tools/mkl_link_tool -c intel_f -opts`
+        fi
+      fi
+      ;;
+
+    netlib)
+      abi_linalg_provided="blas lapack lapacke scalapack"
+      abi_linalg_blas_libs="-lblas"
+      abi_linalg_lapack_libs="-llapack"
+      abi_linalg_lapacke_libs="-llapacke"
+      abi_linalg_scalapack_libs="-lscalapack"
+      abi_linalg_scalapack_prqs="${abi_mpi_libs}"
+      ;;
+
+    openblas)
+      abi_linalg_provided="blas"
+      abi_linalg_openblas_libs="-lopenblas"
+      ;;
+
+    plasma)
+      abi_linalg_provided="plasma"
+      abi_linalg_plasma_libs="-lplasma"
+      abi_linalg_plasma_prqs="-lcoreblas -lcorelapack"
+      ;;
+
+    *)
+      AC_MSG_ERROR([no library settings for linear algebra flavor '$1'])
+      ;;
+
+  esac
+]) # _ABI_LINALG_SET_LIBS
+
+
+                    # ------------------------------------ #
+
+
+# ABI_LINALG_DETECT()
+# -------------------
+#
+# Sets all variables needed to handle the optimized linear algebra
+# libraries.
+#
+AC_DEFUN([ABI_LINALG_DETECT], [
+  dnl Prepare environment
+  ABI_ENV_BACKUP
+  LDFLAGS="${FC_LDFLAGS}"
+  abi_saved_FCFLAGS="${FCFLAGS}"
+  abi_saved_LDFLAGS="${LDFLAGS}"
+  abi_saved_LIBS="${LIBS}"
+  CPPFLAGS="${with_linalg_incs} ${CPPFLAGS}"
+  LIBS="${with_linalg_libs} ${LIBS}"
+
+  dnl Reformat flavor
+  abi_linalg_iter=`echo "${abi_linalg_flavor}" | tr '+' '\n' | sort -u | awk '{printf " %s",[$]1}'`
+
+  dnl Check serial and parallel flavor unicity
+  for tmp_linalg_flavor in ${abi_linalg_iter}; do
+    case "${tmp_linalg_flavor}" in
+      magma)
+        if test "${abi_linalg_chk_gpu}" != ""; then
+          AC_MSG_ERROR([only one GPU linear algebra flavor is permitted])
+        fi
+        abi_linalg_chk_gpu="${tmp_linalg_flavor}"
+        ;;
+      scalapack|plasma)
+        if test "${abi_linalg_chk_mpi}" != ""; then
+          AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
+        fi
+        abi_linalg_chk_mpi="${tmp_linalg_flavor}"
+        ;;
+      elpa)
+        abi_linalg_chk_mpiext="${tmp_linalg_flavor}"
+        ;;
+      *)
+        if test "${abi_linalg_chk_serial}" != ""; then
+          AC_MSG_ERROR([only one serial linear algebra flavor is permitted])
+        fi
+        abi_linalg_chk_serial="${tmp_linalg_flavor}"
+        ;;
+    esac
+    _ABI_LINALG_SET_LIBS([${tmp_linalg_flavor}])
+  done
+  if test "${abi_linalg_chk_serial}" = ""; then
+    AC_MSG_ERROR([you must choose a serial linear algebra flavor])
+  fi
+
+  dnl Look for linear algebra libraries
+  if test "${with_linalg_libs}" != "" -o \
+          "${abi_linalg_flavor}" = "custom"; then
+
+    _ABI_LINALG_CHECK_LIBS
+
+  elif test "${abi_linalg_flavor}" != "none"; then
+
+    dnl BLAS extension?
+    _ABI_LINALG_CHECK_BLAS_EXTS()
+
+    dnl MKL extensions?
+    if test "${abi_linalg_chk_serial}" = "mkl"; then
+      _ABI_LINALG_CHECK_BLAS_MKL_EXTS()
+    fi
+
+    dnl Look for the selected libraries
+    if test "${abi_linalg_fallback}" = "no"; then
+      FCFLAGS="${abi_saved_FCFLAGS} ${abi_linalg_fcflags}"
+      LDFLAGS="${abi_saved_LDFLAGS} ${abi_linalg_ldflags}"
+      _ABI_LINALG_SEARCH_BLAS([${abi_linalg_blas_libs}],
+        [${abi_linalg_blas_prqs}])
+      _ABI_LINALG_SEARCH_LAPACK([${abi_linalg_lapack_libs}],
+        [${abi_linalg_lapack_prqs}])
+
+      dnl MPI libraries
+      case "${abi_linalg_chk_mpi}" in
+        scalapack)
+          if test "${enable_mpi}" != "yes"; then
+            AC_MSG_ERROR([ScaLAPACK support requires MPI])
+          fi
+          _ABI_LINALG_SEARCH_BLACS([${abi_linalg_blacs_libs}],
+            [${abi_linalg_blacs_prqs}])
+          _ABI_LINALG_SEARCH_SCALAPACK([${abi_linalg_scalapack_libs}],
+            [${abi_linalg_scalapack_prqs}])
+          ;;
+        plasma)
+          if test "${enable_mpi}" != "yes"; then
+            AC_MSG_ERROR([PLASMA support requires MPI])
+          fi
+          if test "${enable_openmp}" != "yes"; then
+            AC_MSG_ERROR([PLASMA support requires openMP])
+          fi
+          if test "${fc_has_iso_c_binding}" != "yes"; then
+            AC_MSG_ERROR([PLASMA support requires Fortran 2003 ISO C bindings])
+          fi
+          _ABI_LINALG_SEARCH_LAPACKE([${abi_linalg_lapacke_libs}],[${abi_linalg_lapacke_prqs}])
+          if test "${abi_linalg_has_lapacke}" != ""; then
+            _ABI_LINALG_SEARCH_PLASMA([${abi_linalg_plasma_libs}],[${abi_linalg_plasma_prqs}])
+          fi
+          ;;
+        *)
+          if test "${abi_linalg_chk_mpi}" != ""; then
+            AC_MSG_ERROR([library search for ${abi_linalg_chk_mpi} not implemented])
+          fi
+          ;;
+      esac
+
+      dnl MPI extension libraries
+      case "${abi_linalg_chk_mpiext}" in
+        elpa)
+          if test "${enable_mpi}" != "yes"; then
+            AC_MSG_ERROR([ELPA support requires MPI])
+          fi
+          if test "${abi_linalg_has_scalapack}" != "yes"; then
+            AC_MSG_ERROR([ELPA support requires ScaLAPACK])
+          fi
+          _ABI_LINALG_SEARCH_ELPA([${abi_linalg_elpa_libs}],
+            [${abi_linalg_elpa_prqs}])
+          ;;
+        *)
+          if test "${abi_linalg_chk_mpiext}" != ""; then
+            AC_MSG_ERROR([library search for ${abi_linalg_chk_mpiext} not implemented])
+          fi
+          ;;
+      esac
+
+      dnl GPU extension libraries
+      case "${abi_linalg_chk_gpu}" in
+        magma)
+          if test "${enable_gpu}" != "yes"; then
+            AC_MSG_ERROR([MAGMA requires GPU support])
+          fi
+          _ABI_LINALG_SEARCH_MAGMA([${abi_linalg_magma_libs}],
+            [${abi_linalg_magma_prqs}])
+          ;;
+        *)
+          if test "${abi_linalg_chk_gpu}" != ""; then
+            AC_MSG_ERROR([library search for ${abi_linalg_chk_gpu} not implemented])
+          fi
+          ;;
+      esac
+    fi
+  fi
+
+  dnl Set serial, MPI and GPU status
+  if test "${abi_linalg_has_blas}" = "yes" -a \
+          "${abi_linalg_has_lapack}" = "yes"; then
+    abi_linalg_serial="yes"
+    if test "${abi_linalg_has_blacs}" = "yes" -a \
+            "${abi_linalg_has_scalapack}" = "yes"; then
+      abi_linalg_mpi="yes"
+    fi
+    if test "${abi_linalg_has_plasma}" = "yes"; then
+      abi_linalg_mpi="yes"
+    fi
+    if test "${abi_linalg_has_magma}" = "yes"; then
+      abi_linalg_gpu="yes"
+    fi
+  fi
+
+  dnl Transmit serial status to the source code
+  AC_MSG_CHECKING([whether we have a serial linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_serial}])
+  if test "${abi_linalg_serial}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG], 1,
+      [Define to 1 if you have an optimized linear algebra library.])
+    AC_DEFINE([HAVE_LINALG_SERIAL], 1,
+      [Define to 1 if you have an optimized serial linear algebra library.])
+
+    case "${abi_linalg_chk_serial}" in
+      asl)
+        AC_DEFINE([HAVE_LINALG_ASL], 1,
+          [Define to 1 if you have the ASL linear algebra library.])
+        ;;
+      essl)
+        AC_DEFINE([HAVE_LINALG_ESSL], 1,
+          [Define to 1 if you have the ESSL linear algebra library.])
+        ;;
+    esac
+  else
+    abi_linalg_flavor="broken"
+    AC_MSG_WARN([falling back to internal linear algebra libraries])
+    abi_fallbacks="${abi_fallbacks} linalg"
+    abi_linalg_flavor="netlib-fallback"
+    abi_dft_linalg_fallback="yes"
+  fi
+
+  dnl Transmit MPI status to the source code
+  AC_MSG_CHECKING([whether we have a MPI linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_mpi}])
+  if test "${abi_linalg_mpi}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_MPI], 1,
+      [Define to 1 if you have an optimized MPI-parallel linear algebra library.])
+    case "${abi_linalg_chk_mpi}" in
+      plasma)
+        AC_DEFINE([HAVE_LINALG_PLASMA], 1,
+          [Define to 1 if you have an optimized PLASMA linear algebra library.])
+        ;;
+      scalapack)
+        AC_DEFINE([HAVE_LINALG_SCALAPACK], 1,
+          [Define to 1 if you have an optimized ScaLAPACK linear algebra library.])
+        ;;
+    esac
+    case "${abi_linalg_chk_mpiext}" in
+      elpa)
+        AC_DEFINE([HAVE_LINALG_ELPA], 1,
+          [Define to 1 if you have an optimized ELPA linear algebra library.])
+        ;;
+    esac
+  elif test "${abi_linalg_chk_mpi}" != ""; then
+    abi_linalg_flavor="broken"
+  fi
+
+  dnl Transmit GPU status to the source code
+  AC_MSG_CHECKING([whether we have a GPU linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_gpu}])
+  if test "${abi_linalg_gpu}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_GPU], 1,
+      [Define to 1 if you have an optimized GPU-compatible linear algebra library.])
+    case "${abi_linalg_chk_gpu}" in
+      magma)
+        AC_DEFINE([HAVE_LINALG_MAGMA], 1,
+          [Define to 1 if you have the MAGMA linear algebra library.])
+        ;;
+    esac
+  elif test "${abi_linalg_chk_gpu}" != ""; then
+    abi_linalg_flavor="broken"
+  fi
+
+  dnl Restore build environment
+  FCFLAGS="${abi_saved_FCFLAGS}"
+  LDFLAGS="${abi_saved_LDFLAGS}"
+  LIBS="${abi_saved_LIBS}"
+  ABI_ENV_RESTORE
+
+  dnl Output final flavor
+  AC_MSG_CHECKING([for the actual linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_flavor}])
+  if test "${abi_linalg_flavor}" = "broken"; then
+    ABI_MSG_NOTICE([connectors-failure],[Linear algebra detection failure])
+    AC_MSG_ERROR([the requested ${with_linalg_flavor} linear algebra flavor is not supported on this architecture])
+  fi
+
+  dnl Set parameters to build fallbacks depending on linear algebra
+  if test "${abi_linalg_serial}" = "yes"; then
+    abi_linalg_fbk="no"
+    afb_linalg_incs="${abi_linalg_incs}"
+    afb_linalg_libs="${abi_linalg_libs}"
+  else
+    abi_linalg_fbk="yes"
+  fi
+]) # ABI_LINALG_DETECT
+
+
+# ABI_LINALG_INIT()
+# -----------------
+#
+# Select a linear algebra flavor according to the available system information.
+#
+AC_DEFUN([ABI_LINALG_INIT],[
+  dnl Init internal variables
+  abi_linalg_chk_gpu=""
+  abi_linalg_chk_mpi=""
+  abi_linalg_chk_mpiext=""
+  abi_linalg_chk_serial=""
+  abi_linalg_has_blas="unknown"
+  abi_linalg_has_lapack="unknown"
+  abi_linalg_has_lapacke="unknown"
+  abi_linalg_has_scalapack="unknown"
+  abi_linalg_has_elpa="unknown"
+  abi_linalg_has_elpa_2013="unknown"
+  abi_linalg_has_elpa_2014="unknown"
+  abi_linalg_has_elpa_2015="unknown"
+  abi_linalg_has_elpa_2016="unknown"
+  abi_linalg_has_plasma="unknown"
+  abi_linalg_has_magma="unknown"
+  abi_linalg_gpu="unknown"
+  abi_linalg_mpi="unknown"
+  abi_linalg_serial="unknown"
+
+  dnl Init build flags
+  abi_linalg_incs="${with_linalg_incs}"
+  abi_linalg_libs="${with_linalg_libs}"
+  abi_linalg_fcflags=""
+  abi_linalg_ldflags=""
+  afb_linalg_incs=""
+  afb_linalg_libs=""
+
+  dnl Make sure a flavor is selected
+  if test "${abi_linalg_flavor}" = ""; then
+    abi_linalg_flavor="auto"
+  fi
+
+  dnl Init specific flavors
+  AC_MSG_CHECKING([for the requested linear algebra support])
+  AC_MSG_RESULT([${abi_linalg_flavor}])
+  case "${abi_linalg_flavor}" in
+
+    auto)
+      dnl Set generic flavors first
+      abi_linalg_chk_serial="netlib"
+      if test "${abi_mpi_enable}" = "yes"; then
+        abi_linalg_chk_mpi="elpa scalapack"
+      fi
+      if test "${abi_gpu_enable}" = "yes"; then
+        abi_linalg_chk_gpu="magma"
+      fi
+
+      dnl Refine with vendor-specific flavors
+      case "${abi_fc_vendor}" in
+        gnu)
+          abi_linalg_chk_serial="atlas netlib"
+          ;;
+        intel)
+          abi_linalg_chk_serial="mkl atlas netlib"
+          ;;
+        *)
+          abi_linalg_chk_serial="netlib"
+          ;;
+      esac
+      ;;
+
+    netlib-fallback)
+      abi_fbk_required="${abi_fbk_required} linalg"
+      abi_linalg_has_blas="yes"
+      abi_linalg_has_lapack="yes"
+      abi_linalg_serial="yes"
+      abi_linalg_mpi="no"
+      abi_linalg_gpu="no"
+      ;;
+
+    none)
+      AC_MSG_WARN([bypassing linear algebra tests])
+      abi_linalg_has_blas="yes"
+      abi_linalg_has_lapack="yes"
+      abi_linalg_serial="yes"
+      abi_linalg_mpi="no"
+      abi_linalg_gpu="no"
+      ;;
+
+  esac
+
+  dnl Display detection sequences
+  AC_MSG_CHECKING([for the serial linear algebra detection sequence])
+  if test "${abi_linalg_chk_serial}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${abi_linalg_chk_serial}])
+  fi
+  AC_MSG_CHECKING([for the MPI linear algebra detection sequence])
+  if test "${abi_linalg_chk_mpi}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${abi_linalg_chk_mpi}])
+  fi
+  AC_MSG_CHECKING([for the GPU linear algebra detection sequence])
+  if test "${abi_linalg_chk_gpu}" = ""; then
+    AC_MSG_RESULT([none])
+  else
+    AC_MSG_RESULT([${abi_linalg_chk_gpu}])
+  fi
+
+  dnl Substitute variables needed for the use of the library
+  AC_SUBST(abi_linalg_flavor)
+  AC_SUBST(abi_linalg_fcflags)
+  AC_SUBST(abi_linalg_ldflags)
+  AC_SUBST(abi_linalg_incs)
+  AC_SUBST(abi_linalg_libs)
+  AC_SUBST(afb_linalg_incs)
+  AC_SUBST(afb_linalg_libs)
+]) # ABI_LINALG_INIT

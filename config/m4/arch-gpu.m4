@@ -277,11 +277,11 @@ AC_DEFUN([ABI_GPU_INIT],[
   abi_gpu_has_libs="no"
   abi_gpu_has_linalg="no"
   abi_gpu_usable="no"
-  lib_gpu_fcflags=""
-  lib_gpu_ldflags=""
-  lib_gpu_flavor="none"
-  lib_gpu_incs=""
-  lib_gpu_libs=""
+  abi_gpu_fcflags=""
+  abi_gpu_ldflags=""
+  abi_gpu_flavor="none"
+  abi_gpu_incs=""
+  abi_gpu_libs=""
 
   if test "${enable_gpu}" = "yes"; then
 
@@ -329,11 +329,11 @@ AC_DEFUN([ABI_GPU_INIT],[
   fi dnl enable_gpu
 
   dnl Enable substitution
-  AC_SUBST(lib_gpu_fcflags)
-  AC_SUBST(lib_gpu_ldflags)
-  AC_SUBST(lib_gpu_flavor)
-  AC_SUBST(lib_gpu_incs)
-  AC_SUBST(lib_gpu_libs)
+  AC_SUBST(abi_gpu_fcflags)
+  AC_SUBST(abi_gpu_ldflags)
+  AC_SUBST(abi_gpu_flavor)
+  AC_SUBST(abi_gpu_incs)
+  AC_SUBST(abi_gpu_libs)
 ]) # ABI_GPU_INIT
 
 
@@ -386,10 +386,10 @@ AC_DEFUN([ABI_GPU_DETECT],[
               AC_DEFINE(HAVE_GPU_CUDA_DP,1,[Define to 1 if you want to perform double-precision Cuda calculations.])
               ;;
           esac
-          lib_gpu_fcflags="${abi_gpu_cuda_fcflags}"
-          lib_gpu_ldflags="${abi_gpu_cuda_ldflags}"
-          lib_gpu_incs="${abi_gpu_cuda_incs}"
-          lib_gpu_libs="${abi_gpu_cuda_libs}"
+          abi_gpu_fcflags="${abi_gpu_cuda_fcflags}"
+          abi_gpu_ldflags="${abi_gpu_cuda_ldflags}"
+          abi_gpu_incs="${abi_gpu_cuda_incs}"
+          abi_gpu_libs="${abi_gpu_cuda_libs}"
         fi
         ;;
 
@@ -405,7 +405,7 @@ AC_DEFUN([ABI_GPU_DETECT],[
   if test "${abi_gpu_serial}" = "yes"; then
     AC_DEFINE([HAVE_GPU],1,[Define to 1 if you have a GPU library.])
     AC_DEFINE([HAVE_GPU_SERIAL],1,[Define to 1 if you have a serial GPU library.])
-    lib_gpu_flavor="${with_gpu_flavor}"
+    abi_gpu_flavor="${with_gpu_flavor}"
   fi
 
   dnl Transmit MPI status to the source code
@@ -416,10 +416,10 @@ AC_DEFUN([ABI_GPU_DETECT],[
   dnl Output final flavor
   if test "${enable_gpu}" = "yes"; then
     AC_MSG_CHECKING([for the actual GPU support])
-    AC_MSG_RESULT([${lib_gpu_flavor}])
+    AC_MSG_RESULT([${abi_gpu_flavor}])
   fi
 
   dnl Inform Automake
-  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${lib_gpu_flavor}" != "none"])
-  AM_CONDITIONAL(DO_BUILD_52_MANAGE_CUDA,[test "${lib_gpu_flavor}" = "cuda-double" -o "${lib_gpu_flavor}" = "cuda-single"])
+  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none"])
+  AM_CONDITIONAL(DO_BUILD_52_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
 ]) # ABI_GPU_DETECT

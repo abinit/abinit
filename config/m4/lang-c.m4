@@ -174,25 +174,22 @@ AC_DEFUN([_ABI_CHECK_CC_PGI],[
 # Checks for header files.
 #
 AC_DEFUN([_ABI_CHECK_CC_HEADERS],[
-  dnl Init AC_MSG_CHECKING([for C header files])
-  
-  dnl The following line causes trouble to aclocal
-  dnl AC_HEADER_STDC
-  AC_CHECK_HEADERS([stddef.h stdarg.h])
-  dnl AC_CHECK_HEADERS([stdlib.h])
-  AC_CHECK_HEADERS([stdio.h math.h termios.h])
+  dnl Look for standard headers
+  AC_HEADER_ASSERT
+  AC_CHECK_HEADERS([stdio.h string.h termios.h unistd.h])
   AC_CHECK_HEADERS([errno.h])
-  AC_CHECK_HEADERS([malloc.h sys/malloc.h])
-  AC_CHECK_HEADERS([mcheck.h])
-  AC_CHECK_HEADERS([sys/time.h])
-  AC_CHECK_HEADERS([sys/resource.h])
-  dnl AC_CHECK_HEADERS([sys/ioctl.h sys/sysctl.h])
-  dnl AC_CHECK_HEADERS([sys/stat.h])
-  dnl AC_CHECK_HEADERS([string.h])
-  dnl AC_CHECK_HEADERS([strings.h])
-  dnl AC_CHECK_HEADERS([unistd.h])
-  dnl AC_CHECK_HEADERS([limits.h])
+  AC_CHECK_HEADERS([inttypes.h math.h stddef.h stdint.h])
+  AC_CHECK_HEADERS([mcheck.h time.h])
+  AC_CHECK_HEADERS([sys/ioctl.h sys/resource.h sys/stat.h sys/time.h sys/types.h])
 
+  dnl Look for malloc.h
+  CPPFLAGS_MALLOC=""
+  AC_CHECK_HEADERS([sys/malloc.h])
+  AC_CHECK_HEADERS([malloc.h], [abi_hdr_malloc="yes"], [abi_hdr_malloc="no"])
+  if test "${abi_hdr_malloc}" = "no"; then
+    AC_CHECK_HEADERS([malloc/malloc.h],
+      [abi_hdr_malloc="yes"], [abi_hdr_malloc="no"])
+  fi
 ]) # _ABI_CHECK_CC_HEADERS
 
 
@@ -237,6 +234,7 @@ AC_DEFUN([_ABI_CHECK_CC_FEATURES],[
 
   AC_C_CONST
   AC_TYPE_SIZE_T
+  AC_C_BIGENDIAN
   dnl AC_TYPE_PID_T
 
 ]) # _ABI_CHECK_CC_FEATURES
@@ -270,6 +268,37 @@ AC_DEFUN([ABI_PROG_CC],[
   dnl Init
   if test "${abi_cc_vendor}" = ""; then
     abi_cc_vendor="unknown"
+  fi
+
+  dnl Look for the C compiler
+  if test "${CC}" != "" -a ! -x "${CC}"; then
+    abi_cc_probe=`echo "${CC}" | sed -e 's/ .*//'`
+    if test ! -x "${abi_cc_probe}"; then
+      AC_PATH_PROG([abi_cc_path], [${abi_cc_probe}])
+      if test "${abi_cc_path}" = ""; then
+        AC_MSG_ERROR([could not run C compiler "${CC}"])
+      fi
+    fi
+  fi
+  AC_PROG_CC
+
+  dnl Fail if no C compiler is available
+  if test "${CC}" = ""; then
+    AC_MSG_ERROR([no C compiler available])
+  fi
+
+  dnl Look for the C preprocessor
+  if test "${CPP}" != "" -a ! -x "${CPP}"; then
+    AC_PATH_PROG([abi_cpp_path], [${CPP}])
+    if test "${abi_cpp_path}" = ""; then
+      AC_MSG_ERROR([could not run C preprocessor "${CPP}"])
+    fi
+  fi
+  AC_PROG_CPP
+
+  dnl Fail if no C preprocessor is available
+  if test "${CPP}" = ""; then
+    AC_MSG_ERROR([no C preprocessor available])
   fi
 
   dnl Determine C compiler type (the order is important)
