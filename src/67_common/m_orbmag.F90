@@ -168,26 +168,27 @@ module m_orbmag
   end type orbmag_type
 
   ! Bound methods:
+  public :: chern_number
   public :: destroy_orbmag
   public :: initorbmag
-  public :: rho_norm_check
-  public :: chern_number
-  public :: make_dsdk_nonlop
-  public :: make_dsdk_FD
-  public :: make_dsdk_cprj
-  public :: make_onsite_l_k
-  public :: make_onsite_l
-  public :: make_S1trace
-  public :: make_smat
-  public :: make_CCIV_dsdk
   public :: orbmag
-  public :: ctocprjb
-  public :: make_eeig
-  public :: make_eeig123
-  public :: make_CCI
-  public :: make_VVII
-  public :: make_VVI
-  public :: make_VVIII_mpi
+  public :: rho_norm_check
+
+  private :: ctocprjb
+  private :: make_CCI
+  private :: make_CCIV_dsdk
+  private :: make_dsdk_cprj
+  private :: make_dsdk_FD
+  private :: make_dsdk_nonlop
+  private :: make_eeig
+  private :: make_eeig123
+  private :: make_onsite_l
+  private :: make_onsite_l_k
+  private :: make_S1trace
+  private :: make_smat
+  private :: make_VVI
+  private :: make_VVII
+  private :: make_VVIII
   
 CONTAINS  !========================================================================================
 !!***
@@ -982,8 +983,8 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
            do klmn=1,pawtab(itypat)%lmn2_size
               ilmn=pawtab(itypat)%indklmn(7,klmn)
               jlmn=pawtab(itypat)%indklmn(8,klmn)
-              cpb=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn))
-              cpk=cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn))
+              cpb=cmplx(cprj_k(iatom,iband)%cp(1,ilmn),cprj_k(iatom,iband)%cp(2,ilmn),KIND=dpc)
+              cpk=cmplx(cprj_k(iatom,iband)%cp(1,jlmn),cprj_k(iatom,iband)%cp(2,jlmn),KIND=dpc)
               consite=conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk*pawtab(itypat)%dltij(klmn)
               dotr=dotr+real(consite)
            end do
@@ -1073,7 +1074,7 @@ end subroutine rho_norm_check
 !!
 !! SOURCE
 
-subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
      & mcg,mcprj,mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
      & rprimd,symrec,usecprj,usepaw,xred)
 
@@ -1089,7 +1090,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
   type(pseudopotential_type),intent(in) :: psps
 
   !arrays
-  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
+  integer,intent(in) :: atindx1(dtset%natom)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
   real(dp), intent(in) :: cg(2,mcg),rprimd(3,3),xred(3,dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
@@ -1136,7 +1137,7 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
   ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
   ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
   ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
-  call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
+  call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
 
   cnum(:,:) = zero
@@ -1178,15 +1179,15 @@ subroutine chern_number(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                  IB=czero
                  do nn = 1, nband_k
                     do n1 = 1, nband_k
-                       t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
+                       t1A = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
                        t1B = t1A
                        do n2 = 1, nband_k
-                          t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor))
-                          t3A = conjg(cmplx(smat_all_indx(1,nn,n2,ikpt,gdx,0),smat_all_indx(2,nn,n2,ikpt,gdx,0)))
-                          t2B = conjg(cmplx(smat_all_indx(1,n2,n1,ikpt,bdx,0),smat_all_indx(2,n2,n1,ikpt,bdx,0)))
+                          t2A = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor),KIND=dpc)
+                          t3A = conjg(cmplx(smat_all_indx(1,nn,n2,ikpt,gdx,0),smat_all_indx(2,nn,n2,ikpt,gdx,0),KIND=dpc))
+                          t2B = conjg(cmplx(smat_all_indx(1,n2,n1,ikpt,bdx,0),smat_all_indx(2,n2,n1,ikpt,bdx,0),KIND=dpc))
                           do n3 = 1, nband_k
-                             t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0))
-                             t4B=conjg(cmplx(smat_all_indx(1,nn,n3,ikpt,gdx,0),smat_all_indx(2,nn,n3,ikpt,gdx,0)))
+                             t3B = cmplx(smat_all_indx(1,n2,n3,ikpt,gdx,0),smat_all_indx(2,n2,n3,ikpt,gdx,0),KIND=dpc)
+                             t4B=conjg(cmplx(smat_all_indx(1,nn,n3,ikpt,gdx,0),smat_all_indx(2,nn,n3,ikpt,gdx,0),KIND=dpc))
                              IB = IB + t1B*t2B*t3B*t4B
                           end do ! end loop over n3
                           IA = IA + t1A*t2A*t3A
@@ -1267,7 +1268,7 @@ end subroutine chern_number
 !!
 !! SOURCE
 
-subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
+subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all,symrec,xred)
 
   implicit none
@@ -1283,7 +1284,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
   type(pseudopotential_type),intent(in) :: psps
 
   !arrays
-  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
+  integer,intent(in) :: atindx1(dtset%natom)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
   real(dp),intent(out) :: smat_all(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
@@ -1296,7 +1297,7 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi
   integer :: icg,icgb,icgg,icprjbi,icprjgi,icprji,ierr,ikg,ikpt,ikpt_loc
   integer :: ikptb,ikptbi,ikptg,ikptgi,ikpti,isppol,itrs
   integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jsppol
-  integer :: job,mcg1_k,me,my_nspinor,n2dim,ncpgr,nproc,nproc0,npw_k,npw_kb,npw_kg,ntotcp,nn,n1
+  integer :: job,mcg1_k,me,my_nspinor,n2dim,ncpgr,nproc,nproc0,npw_k,npw_kb,npw_kg,ntotcp
   integer :: shiftbd,sourceb,sourceg,spaceComm,tagb,tagg,usepaw
 
   !arrays
@@ -1775,8 +1776,8 @@ subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
               call pawrad_deducer0(ff,mesh_size,pawrad(itypat))
               call simp_gen(intg,ff,pawrad(itypat))
               do nn = 1, nband_k
-                 cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn))
-                 cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
+                 cpb=cmplx(cprj_k(iatom,nn)%cp(1,ilmn),cprj_k(iatom,nn)%cp(2,ilmn),KIND=dpc)
+                 cpk=cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
                  onsite_l_k=onsite_l_k+conjg(cpb)*half*orbl_me*intg*cpk
               end do ! end loop over nn
            end if ! end check that |L_dir| > 0, otherwise ignore term
@@ -1958,7 +1959,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
 
   !arrays
   integer,allocatable :: dimlmn(:),kg_k(:,:),nband_dum(:)
-  real(dp) :: dkb(3),dkg(3),kpoint(3),kpointb(3),kptns(3,1)
+  real(dp) :: dkb(3),dkg(3),kpointb(3)
   real(dp),allocatable :: cwavef(:,:),ffnl(:,:,:,:),kpg_k(:,:),kptnsb(:,:)
   real(dp),allocatable :: ph1d(:,:),ph3d(:,:,:),phkxred(:,:)
   real(dp),allocatable :: ylmb(:,:),ylmgrb(:,:,:),ylm_k(:,:),ylmgr_k(:,:,:)
@@ -2285,9 +2286,9 @@ subroutine make_dsdk_FD(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k
                              do jlmn=1,pawtab(itypat)%lmn_size
                                 klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
                                 ! <pj|u_nk>
-                                pjme = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
+                                pjme = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
                                 ! <pi|u_n1 kgb>
-                                pime = cmplx(cprj_kgb(iatom,n1)%cp(1,ilmn),cprj_kgb(iatom,n1)%cp(2,ilmn))
+                                pime = cmplx(cprj_kgb(iatom,n1)%cp(1,ilmn),cprj_kgb(iatom,n1)%cp(2,ilmn),KIND=dpc)
                                 dsme = dsme + pjme*conjg(pime)*pawtab(itypat)%sij(klmn)*bsigma/(two*deltab)
                              end do ! end loop over jlmn
                           end do ! end loop over ilmn
@@ -2369,23 +2370,21 @@ end subroutine make_dsdk_FD
 !! SOURCE
 
 subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
-     & mcg,mpi_enreg,nattyp,nband_k,nfftf,npwarr,pawfgr,paw_ij,pawtab,psps,pwind,pwind_alloc,&
-     & rmet,rprimd,ucvol,xred,ylm,ylmgr)
+     & mcg,mpi_enreg,nband_k,npwarr,paw_ij,pawtab,psps,pwind,pwind_alloc,&
+     & rmet,rprimd,xred,ylm,ylmgr)
 
   implicit none
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: nband_k,nfftf,mcg,pwind_alloc
-  real(dp),intent(in) :: ucvol
+  integer,intent(in) :: nband_k,mcg,pwind_alloc
   type(dataset_type),intent(in) :: dtset
   type(orbmag_type), intent(inout) :: dtorbmag
   type(MPI_type), intent(inout) :: mpi_enreg
-  type(pawfgr_type),intent(in) :: pawfgr
   type(pseudopotential_type),intent(in) :: psps
 
   !arrays
-  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%ntypat)
+  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
   real(dp),intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),xred(3,dtset%natom)
   real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -2397,11 +2396,11 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
   !Local variables -------------------------
   !scalars
   integer :: bdir,countg,countjg,dest,dimph1d,exchn2n3d,gdir,gdx,gdxc,gdxstor,gfor,gg,gsigma,dimffnl
-  integer :: ia,icg,icgg,ider,idir,ierr,ikg,ikg1,ikpt,ikptg,ikptgi,ikpti,ikpt_loc
-  integer :: ilm,ipw,ir,isppol,istwf_k,jcgg,jkpt,jkptg,jkptgi,jsppol
+  integer :: ia,icg,icgg,ider,idir,ierr,ikg,ikg1,ikpt,ikptg,ikptgi,ikpt_loc
+  integer :: ilm,isppol,istwf_k,jcgg,jkpt,jkptg,jkptgi,jsppol
   integer :: me,my_nspinor,n1,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn
   integer :: nonlop_choice,nonlop_cpopt,nonlop_ndat,nonlop_nnlout,nonlop_paw_opt,nonlop_signs
-  integer :: nproc,npw_k,npw_kg,optder,spaceComm,sourceg,tagg,tim_nonlop
+  integer :: nproc,npw_k,npw_kg,spaceComm,sourceg,tagg,tim_nonlop
   real(dp) :: arg,doti,dotr,ecut_eff
   logical :: has_self_k
   type(gs_hamiltonian_type) :: gs_hamk
@@ -2409,12 +2408,12 @@ subroutine make_dsdk_nonlop(atindx1,cg,dsdk,dtorbmag,dtset,gmet,gprimd,kg,&
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
   integer,allocatable :: dimlmn(:),kg_k(:,:),pwind_kg(:)
-  real(dp) :: dsdk_red(3),kpoint(3),nonlop_lambda(1),rhodum(1)
-  real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqg(:,:),cgrvtrial(:,:),cwavef(:,:),ffnl_k(:,:,:,:)
+  real(dp) :: kpoint(3),nonlop_lambda(1)
+  real(dp),allocatable :: buffer(:,:),buffer1(:),buffer2(:),cgqg(:,:),cwavef(:,:),ffnl_k(:,:,:,:)
   real(dp),allocatable :: ket(:,:),kpg_k(:,:),nonlop_enlout(:),phkxred(:,:),ph1d(:,:),ph3d(:,:,:),svectout(:,:)
-  real(dp),allocatable :: vect1(:,:),vect2(:,:),vectout(:,:),vlocal(:,:,:,:),vtrial(:,:)
+  real(dp),allocatable :: vect1(:,:),vect2(:,:),vectout(:,:)
   real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
-  type(pawcprj_type),allocatable :: cprj_k(:,:),cwaveprj(:,:)
+  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 
   !--------------------------------------------------------------------  
@@ -2750,8 +2749,8 @@ subroutine make_dsdk_cprj(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband
 
   !Local variables -------------------------
   !scalars
-  integer :: bdir,gdir,gdx,gdxc,gdxstor,gfor,gg,gsigma,countg
-  integer :: iatom,icprji,icprjgi,ierr,ikpt,ikptg,ikptgi,ikpti,ikpt_loc,ilmn,isppol,itypat
+  integer :: bdir,countg
+  integer :: iatom,icprji,ierr,ikpt,ikpti,ilmn,isppol,itypat
   integer :: jlmn,klmn,me,my_nspinor,n1,ncpgr,nn,nproc,spaceComm
   complex(dpc) :: dbpime,dbpjme,dsme,pime,pjme
 
@@ -2798,13 +2797,13 @@ subroutine make_dsdk_cprj(atindx1,cprj,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband
                     do jlmn=1,pawtab(itypat)%lmn_size
                        klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
                        ! <db pj|u nk>
-                       dbpjme = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn))
+                       dbpjme = cmplx(cprj_k(iatom,nn)%dcp(1,bdir,jlmn),cprj_k(iatom,nn)%dcp(2,bdir,jlmn),KIND=dpc)
                        ! <pj|u_nk>
-                       pjme = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn))
+                       pjme = cmplx(cprj_k(iatom,nn)%cp(1,jlmn),cprj_k(iatom,nn)%cp(2,jlmn),KIND=dpc)
                        ! <db pi|u n1 k>
-                       dbpime = cmplx(cprj_k(iatom,n1)%dcp(1,bdir,ilmn),cprj_k(iatom,n1)%dcp(2,bdir,ilmn))
+                       dbpime = cmplx(cprj_k(iatom,n1)%dcp(1,bdir,ilmn),cprj_k(iatom,n1)%dcp(2,bdir,ilmn),KIND=dpc)
                        ! <pi|u_n1 k>
-                       pime = cmplx(cprj_k(iatom,n1)%cp(1,ilmn),cprj_k(iatom,n1)%cp(2,ilmn))
+                       pime = cmplx(cprj_k(iatom,n1)%cp(1,ilmn),cprj_k(iatom,n1)%cp(2,ilmn),KIND=dpc)
                        dsme = dsme + (conjg(dbpime)*pjme + conjg(pime)*dbpjme)*pawtab(itypat)%sij(klmn)
                     end do ! end loop over jlmn
                  end do ! end loop over ilmn
@@ -2882,13 +2881,13 @@ end subroutine make_dsdk_cprj
 subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nattyp,nband_k,nfftf,npwarr,&
      & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-     & vhartr,vpsp,vxc,ucvol,usecprj,xred,ylm,ylmgr)
+     & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcg,mcprj,nband_k,nfftf,usecprj
+ integer,intent(in) :: mcg,mcprj,nband_k,nfftf
  real(dp),intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -2908,20 +2907,19 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
 
  !Local variables -------------------------
  !scalars
- integer :: bdir,cpopt,dimffnl,eeig_size,exchn2n3d
+ integer :: cpopt,dimffnl,eeig_size,exchn2n3d
  integer :: ierr,icg,icprj,ider,idir,ikg,ikg1,ikpt,ilm,isppol,istwf_k
- integer :: me,my_nspinor,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,n1
- integer :: nonlop_choice,nonlop_cpopt,nonlop_paw_opt,nonlop_signs,nonlop_nnlout
- integer :: nproc,npw_k,npw_k_,prtvol,sij_opt,spaceComm,tim_getghc,tim_nonlop,type_calc
+ integer :: me,my_nspinor,ncpgr,ndat,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn
+ integer :: nproc,npw_k,npw_k_,prtvol,sij_opt,spaceComm,tim_getghc,type_calc
  real(dp) :: ecut_eff,lambda
  type(gs_hamiltonian_type) :: gs_hamk
 
  !arrays
  integer,allocatable :: dimlmn(:),kg_k(:,:)
  real(dp) :: kpoint(3),lambdarr(1),rhodum(1)
- real(dp),allocatable :: bra(:,:),buffer1(:),buffer2(:),cgrvtrial(:,:),cwavef(:,:)
+ real(dp),allocatable :: buffer1(:),buffer2(:),cgrvtrial(:,:),cwavef(:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:),ghc(:,:),gsc(:,:),gvnlc(:,:)
- real(dp),allocatable :: kinpw(:),kpg_k(:,:),nonlop_enlout(:)
+ real(dp),allocatable :: kinpw(:),kpg_k(:,:)
  real(dp),allocatable :: ph3d(:,:,:),vlocal(:,:,:,:),vtrial(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  complex(dpc),allocatable :: nucdipmom_k(:)
@@ -3156,7 +3154,7 @@ end subroutine make_eeig
 !! SOURCE
 
 subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
-     & mcprj,mpi_enreg,nattyp,nband_k,pawrad,pawtab,S1trace)
+     & mcprj,mpi_enreg,nattyp,nband_k,pawtab,S1trace)
 
   implicit none
 
@@ -3171,7 +3169,6 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
   integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
   real(dp),intent(in) :: eeig(nband_k,dtset%nkpt)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
-  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
@@ -3227,8 +3224,8 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
               do ilmn=1,pawtab(itypat)%lmn_size
                  do jlmn=1,pawtab(itypat)%lmn_size
                     klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
-                    cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn))
-                    cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn))
+                    cpb=cmplx(cprj_k(iatom,nn)%dcp(1,bdir,ilmn),cprj_k(iatom,nn)%dcp(2,bdir,ilmn),KIND=dpc)
+                    cpk=cmplx(cprj_k(iatom,nn)%dcp(1,gdir,jlmn),cprj_k(iatom,nn)%dcp(2,gdir,jlmn),KIND=dpc)
                     S1trace=S1trace+half*j_dpc*epsabg*ENK*conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
                  end do ! end loop over jlmn
               end do ! end loop over ilmn
@@ -3335,8 +3332,8 @@ subroutine make_CCIV_dsdk(adir,CCIV,dsdk,dtorbmag,dtset,eeig,mpi_enreg,nband_k)
         do nn = 1, nband_k
            ENK = eeig(nn,ikpt)
            do n1 = 1, nband_k
-              bme=cmplx(dsdk(1,nn,n1,ikpt,bdir,0),dsdk(2,nn,n1,ikpt,bdir,0))
-              gme=cmplx(dsdk(1,n1,nn,ikpt,gdir,0),dsdk(2,n1,nn,ikpt,gdir,0))
+              bme=cmplx(dsdk(1,nn,n1,ikpt,bdir,0),dsdk(2,nn,n1,ikpt,bdir,0),KIND=dpc)
+              gme=cmplx(dsdk(1,n1,nn,ikpt,gdir,0),dsdk(2,n1,nn,ikpt,gdir,0),KIND=dpc)
               CCIV=CCIV+half*j_dpc*epsabg*ENK*bme*gme
            end do ! end loop over n1
         end do ! end loop over nn
@@ -3396,15 +3393,15 @@ end subroutine make_CCIV_dsdk
 !! SOURCE
 
 subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
-     & gmet,kg,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
-     & paw_ij,pawfgr,pawtab,psps,pwind,pwind_alloc,&
+     & gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
+     & paw_ij,pawfgr,pawtab,psps,&
      & rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: mcg,mcprj,nband_k,nfftf,pwind_alloc
+ integer,intent(in) :: mcg,mcprj,nband_k,nfftf
  real(dp),intent(in) :: ucvol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -3413,8 +3410,8 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  type(pseudopotential_type),intent(in) :: psps
 
  !arrays
- integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
- integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
+ integer,intent(in) :: atindx1(dtset%natom)
+ integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
  real(dp),intent(in) :: cg(2,mcg),gmet(3,3),rprimd(3,3),vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden)
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(out) :: eeig(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4)
@@ -3426,12 +3423,12 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
  !scalars
  integer :: bdir,bdx,bdxstor,bdxc,bfor,bsigma,countb,countg,countjb,countjg,cpopt
  integer :: dest,exchn2n3d,gdir,gdx,gdxc,gdxstor,gfor,gg,gsigma
- integer :: iatom,icg,icgb,icgg,icprji,icprjbi,icprjgi,ierr
- integer :: ikg,ikg1,ikgb,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ikpti,ilmn,jlmn,klmn
+ integer :: iatom,icgb,icgg,icprjbi,icprjgi,ierr
+ integer :: ikg1,ikgb,ikgg,ikpt,ikptb,ikptbi,ikptg,ikptgi,ilmn,jlmn,klmn
  integer :: ikpt_loc,ipw,isppol,istwf_k,itypat
  integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jpw,jsppol
  integer :: me,my_nspinor,n1,n2dim,ncpgr,ndat
- integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,nproc,npw_k,npw_kb,npw_kg,ntotcp
+ integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,nn,nproc,npw_kb,npw_kg,ntotcp
  integer :: prtvol,sij_opt,sourceb,sourceg,spaceComm,tagb,tagg,tim_getghc,type_calc
  real(dp) :: dkg2,dotr,doti,ecut_eff,htpisq,keg,lambda
  complex(dpc) :: cdij,cgdijcb,cpb,cpg
@@ -3779,19 +3776,19 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
                          do iatom = 1, dtset%natom
                             itypat = dtset%typat(iatom)
                             do ilmn = 1, pawtab(itypat)%lmn_size
-                               cpg=cmplx(cprj_kg(iatom,n1)%cp(1,ilmn),cprj_kg(iatom,n1)%cp(2,ilmn))
+                               cpg=cmplx(cprj_kg(iatom,n1)%cp(1,ilmn),cprj_kg(iatom,n1)%cp(2,ilmn),KIND=dpc)
                                do jlmn = 1, pawtab(itypat)%lmn_size
-                                  cpb=cmplx(cprj_kb(iatom,nn)%cp(1,jlmn),cprj_kb(iatom,nn)%cp(2,jlmn))
+                                  cpb=cmplx(cprj_kb(iatom,nn)%cp(1,jlmn),cprj_kb(iatom,nn)%cp(2,jlmn),KIND=dpc)
                                   if (jlmn .LE. ilmn) then
                                      klmn = (ilmn-1)*ilmn/2 + jlmn
                                   else
                                      klmn = (jlmn-1)*jlmn/2 + ilmn
                                   end if
                                   if (paw_ij(iatom)%cplex_dij .EQ. 2) then
-                                     cdij=cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1))
+                                     cdij=cmplx(paw_ij(iatom)%dij(2*klmn-1,1),paw_ij(iatom)%dij(2*klmn,1),KIND=dpc)
                                      if (jlmn .GT. ilmn) cdij=conjg(cdij)
                                   else
-                                     cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero)
+                                     cdij=cmplx(paw_ij(iatom)%dij(klmn,1),zero,KIND=dpc)
                                   end if
                                   cgdijcb = cgdijcb + conjg(cpg)*cdij*cpb
                                end do
@@ -3966,20 +3963,19 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdir,bdx,bdxc,bdxstor,bfor,bsigma,epsabg,gdir,gdx,gdxstor,gdxc,gfor,gsigma
- integer :: ikpt,ikptb,ikptg,isppol,istwf_k,my_nspinor
- integer :: nband_k,ncpgr,ncpgrb,nn,n1,n2,n3
- real(dp) :: deltab,deltag,ENK,ucvol
- real(dp) :: rcerr,icerr,re_cprj_err,im_cprj_err,re_FD_err,im_FD_err
+ integer :: adir,bdx,gdxstor
+ integer :: isppol,istwf_k,my_nspinor
+ integer :: nband_k,ncpgr,ncpgrb
+ real(dp) :: ucvol
  complex(dpc) :: CCI_dir,VVI_dir,VVII_dir,VVIII_dir
  complex(dpc) :: CCIV_dir,onsite_l_dir,s1trace_dir
  character(len=500) :: message
 
  !arrays
  integer,allocatable :: dimlmn(:)
- real(dp) :: CCI(2,3),CCIV(2,3),CCIV_FD(2,3),dkb(3),dkg(3),gmet(3,3),gprimd(3,3)
+ real(dp) :: CCI(2,3),CCIV(2,3),gmet(3,3),gprimd(3,3)
  real(dp) :: onsite_l(2,3),orbmagvec(2,3),rmet(3,3),s1trace(2,3),VVI(2,3),VVII(2,3),VVIII(2,3)
- real(dp),allocatable :: dsdk(:,:,:,:,:,:),dsdk_(:,:,:,:,:),dsdkFD(:,:,:,:,:,:)
+ real(dp),allocatable :: dsdk(:,:,:,:,:,:)
  real(dp),allocatable :: eeig(:,:),eeig123(:,:,:,:,:,:),smat_all_indx(:,:,:,:,:,:)
  type(pawcprj_type),allocatable :: cprj_kb_k(:,:,:,:)
  
@@ -4012,7 +4008,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! if bdir = 3, gdir = 1 or 2, gdx = 1,2,3,4.
  ! This storage is mapped as gdxstor = mod(gdx+6-2*bdir,6)
  ABI_ALLOCATE(smat_all_indx,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4))
- call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
+ call make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,smat_all_indx,symrec,xred)
 
  ! compute the shifted cprj's <p_k+b|u_k>
@@ -4030,15 +4026,15 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_ALLOCATE(eeig,(nband_k,dtset%nkpt))
  call make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,nattyp,nband_k,nfftf,npwarr,&
       & paw_ij,pawfgr,pawtab,psps,rmet,rprimd,&
-      & vhartr,vpsp,vxc,ucvol,usecprj,xred,ylm,ylmgr)
+      & vhartr,vpsp,vxc,ucvol,xred,ylm,ylmgr)
 
  ! compute the <u_kg|H_k|u_kb> matrix elements
  ABI_ALLOCATE(eeig123,(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,1:4))
- call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,kg,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
-      & paw_ij,pawfgr,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
+ call make_eeig123(atindx1,cg,cprj_kb_k,dtorbmag,dtset,eeig123,gmet,mcg,mcprj,mpi_enreg,nband_k,nfftf,npwarr,&
+      & paw_ij,pawfgr,pawtab,psps,rprimd,symrec,ucvol,vhartr,vpsp,vxc,xred)
 
  ! compute the <u_kg|dS/dk_b|u_k> matrix elements
- ABI_ALLOCATE(dsdk_,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3))
+ ! ABI_ALLOCATE(dsdk_,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3))
  ABI_ALLOCATE(dsdk,(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4))
  ! call make_dsdk_cprj(atindx1,cprj,dsdk_,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
  call make_dsdk_FD(atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,mcprj,mpi_enreg,nband_k,pawtab)
@@ -4052,7 +4048,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     onsite_l(1,adir) = real(onsite_l_dir)
     onsite_l(2,adir) = aimag(onsite_l_dir)
 
-    call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,pawrad,pawtab,s1trace_dir)
+    call make_S1trace(adir,atindx1,cprj,dtset,eeig,mcprj,mpi_enreg,nattyp,nband_k,pawtab,s1trace_dir)
     s1trace(1,adir) = real(s1trace_dir)
     s1trace(2,adir) = aimag(s1trace_dir)
 
@@ -4068,17 +4064,12 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     VVII(1,adir) = real(VVII_dir)
     VVII(2,adir) = aimag(VVII_dir)
 
-    ! call make_VVI(adir,dsdk,dtorbmag,eeig,nband_k,smat_all_indx,VVI_dir)
-    ! VVI(1,adir) = real(VVI_dir)
-    ! VVI(2,adir) = aimag(VVI_dir)
-
-    ! call make_VVIII(adir,atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
-    !  & pawtab,smat_all_indx,VVI_dir,VVIII_dir)
-    call make_VVIII_mpi(adir,atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+    call make_VVIII(adir,atindx1,cprj_kb_k,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
          & pawtab,smat_all_indx,VVIII_dir)
     VVIII(1,adir) = real(VVIII_dir)
     VVIII(2,adir) = aimag(VVIII_dir)
-    call make_VVI_mpi(adir,atindx1,cprj_kb_k,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+
+    call make_VVI(adir,atindx1,cprj_kb_k,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
          & pawtab,smat_all_indx,VVI_dir)
     VVI(1,adir) = real(VVI_dir)
     VVI(2,adir) = aimag(VVI_dir)
@@ -4108,9 +4099,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  VVIII(1,1:3) = ucvol*MATMUL(gprimd,VVIII(1,1:3))
  VVIII(2,1:3) = ucvol*MATMUL(gprimd,VVIII(2,1:3))
 
- ! CCVV(1,1:3) = ucvol*MATMUL(gprimd,CCVV(1,1:3))
- ! CCVV(2,1:3) = ucvol*MATMUL(gprimd,CCVV(2,1:3))
-
  ! accumulate in orbmagvec
 
  orbmagvec(1:2,1:3) = onsite_l(1:2,1:3)  &
@@ -4121,7 +4109,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
                   & + VVIII(1:2,1:3) &
                   & - CCIV(1:2,1:3)
 
- 
  ! orbmagvec(1:2,1:3) = VVI(1:2,1:3)
  ! orbmagvec(1:2,1:3) = VVI(1:2,1:3) + VVIII(1:2,1:3)
  ! orbmagvec(1:2,1:3) = CCVV(1:2,1:3)
@@ -4166,7 +4153,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ABI_DEALLOCATE(eeig)
  ABI_DEALLOCATE(eeig123)
  ABI_DEALLOCATE(dsdk)
- ABI_DEALLOCATE(dsdk_)
+ ! ABI_DEALLOCATE(dsdk_)
 
 end subroutine orbmag
 !!***
@@ -4268,10 +4255,10 @@ subroutine make_CCI(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
              CCI = czero
              do nn = 1, nband_k
                 do n1 = 1, nband_k
-                   CCI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0))
+                   CCI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0),KIND=dpc)
                    do n2 = 1, nband_k
-                      CCI_2 = cmplx(eeig123(1,n1,n2,ikpt,gdx,bdxstor),eeig123(2,n1,n2,ikpt,gdx,bdxstor))
-                      CCI_3 = cmplx(smat_all_indx(1,n2,nn,ikptb,bdxc,0),smat_all_indx(2,n2,nn,ikptb,bdxc,0))
+                      CCI_2 = cmplx(eeig123(1,n1,n2,ikpt,gdx,bdxstor),eeig123(2,n1,n2,ikpt,gdx,bdxstor),KIND=dpc)
+                      CCI_3 = cmplx(smat_all_indx(1,n2,nn,ikptb,bdxc,0),smat_all_indx(2,n2,nn,ikptb,bdxc,0),KIND=dpc)
                       CCI = CCI + CCI_1*CCI_2*CCI_3
                    end do ! end n2
                 end do ! end n1
@@ -4383,10 +4370,10 @@ subroutine make_VVII(adir,dtorbmag,eeig,nband_k,smat_all_indx,VVII_dir)
              do nn = 1, nband_k
                 ENK = eeig(nn,ikpt)
                 do n1 = 1, nband_k
-                   VVII_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
+                   VVII_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
                    do n2 = 1, nband_k
-                      VVII_2 = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor))
-                      VVII_3 = cmplx(smat_all_indx(1,n2,nn,ikptg,gdxc,0),smat_all_indx(2,n2,nn,ikptg,gdxc,0))
+                      VVII_2 = cmplx(smat_all_indx(1,n1,n2,ikpt,bdx,gdxstor),smat_all_indx(2,n1,n2,ikpt,bdx,gdxstor),KIND=dpc)
+                      VVII_3 = cmplx(smat_all_indx(1,n2,nn,ikptg,gdxc,0),smat_all_indx(2,n2,nn,ikptg,gdxc,0),KIND=dpc)
                       VVII = VVII + ENK*VVII_1*VVII_2*VVII_3
                    end do ! end n2
                 end do ! end n1
@@ -4401,305 +4388,9 @@ end subroutine make_VVII
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/make_VVI
-!! NAME
-!! make_VVI
-!!
-!! FUNCTION
-!! This routine computes term VVI for orbital magnetization
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine make_VVI(adir,dsdk,dtorbmag,eeig,nband_k,smat_all_indx,VVI_dir)
-
- implicit none
-
- !Arguments ------------------------------------
- !scalars
- integer,intent(in) :: adir,nband_k
- complex(dpc),intent(out) :: VVI_dir
- type(orbmag_type), intent(inout) :: dtorbmag
-
- !arrays
- real(dp),intent(in) :: dsdk(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4)
- real(dp),intent(in) :: eeig(nband_k,dtorbmag%fnkpt)
- real(dp),intent(in) :: smat_all_indx(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
-
- !Local variables -------------------------
- !scalars
- integer :: bdir,bdx,bdxc,bdxstor,bfor,bsigma,epsabg,gdir
- integer :: ikpt,ikptb,nn,n1
- real(dp) :: deltab,ENK
- complex(dpc) :: VVI,VVI_1,VVI_2
-
- !arrays
- real(dp) :: dkb(3)
-
- ! ***********************************************************************
-
- VVI_dir=czero
- do epsabg = 1, -1, -2
-
-    if (epsabg .EQ. 1) then
-       bdir = modulo(adir,3)+1
-       gdir = modulo(adir+1,3)+1
-    else
-       bdir = modulo(adir+1,3)+1
-       gdir = modulo(adir,3)+1
-    end if
-
-    do bfor = 1, 2
-       ! bsigma = 1 for bfor = 1, bsigma = -1 for bfor = 2
-       bsigma = -2*bfor+3
-       ! index of neighbor 1..6
-       bdx = 2*bdir-2+bfor
-       ! index of ikpt viewed from neighbor
-       bdxc = 2*bdir-2+bfor+bsigma
-       bdxstor = mod(bdx+6-2*gdir,6)
-       dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
-       deltab = sqrt(DOT_PRODUCT(dkb,dkb))
-
-       do ikpt = 1, dtorbmag%fnkpt
-          ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
-          VVI = czero
-          do nn = 1, nband_k
-             ENK = eeig(nn,ikpt)
-             do n1 = 1, nband_k
-                VVI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
-                VVI_2 = cmplx(dsdk(1,n1,nn,ikpt,gdir,bdxstor),dsdk(2,n1,nn,ikpt,gdir,bdxstor))
-                VVI=VVI+VVI_1*VVI_2*ENK
-             end do ! end n1
-          end do ! end nn
-          VVI_dir = VVI_dir - half*j_dpc*epsabg*bsigma*(-VVI)/(2.0*deltab)
-       end do ! end loop over ikpt
-    end do ! end loop over bfor
- end do ! end loop over epsabg
-
-end subroutine make_VVI
-!!***
-
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_VVIII
 !! NAME
 !! make_VVIII
-!!
-!! FUNCTION
-!! This routine computes term VVIII for orbital magnetization
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine make_VVIII(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
-     & pawtab,smat_all_indx,VVI_dir,VVIII_dir)
-
- implicit none
-
- !Arguments ------------------------------------
- !scalars
- integer,intent(in) :: adir,mcprj,nband_k
- complex(dpc),intent(out) :: VVI_dir,VVIII_dir
- type(dataset_type),intent(in) :: dtset
- type(MPI_type), intent(inout) :: mpi_enreg
- type(orbmag_type), intent(inout) :: dtorbmag
-
- !arrays
- integer,intent(in) :: atindx1(dtset%natom)
- real(dp),intent(in) :: dsdk(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4)
- real(dp),intent(in) :: eeig(nband_k,dtorbmag%fnkpt)
- real(dp),intent(in) :: smat_all_indx(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
- type(pawcprj_type),intent(in) ::  cprj(6,0:4,dtset%natom,mcprj)
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
-
- !Local variables -------------------------
- !scalars
- integer :: bdir,bfor,bdx,bdxc,bdxstor,bsigma,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
- integer :: iatom,icprji,icprjbi,icprjgi,ilmn
- integer :: ikpt,ikpti,ikptb,ikptbi,ikptg,ikptgi,itypat,jlmn,klmn,nn,n1,isppol,my_nspinor,ncpgr
- real(dp) :: deltab,deltag,ENK
- complex(dpc) :: cpb,cpk,VVI,VVI_1,VVI_2
- complex(dpc) :: VVIII,VVIII_1,VVIII_2
-
- !arrays
- integer :: nattyp_dum(dtset%ntypat)
- integer,allocatable :: dimlmn(:)
- real(dp) :: dkb(3),dkg(3)
- type(pawcprj_type),allocatable :: cprj_kb(:,:),cprj_kg(:,:),cprj_kbg(:,:),cprj_kgb(:,:)
-
-
- ! ***********************************************************************
-
-
- my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- isppol = 1
- 
- ncpgr = cprj(1,0,1,1)%ncpgr
- ABI_ALLOCATE(dimlmn,(dtset%natom))
- call pawcprj_getdim(dimlmn,dtset%natom,nattyp_dum,dtset%ntypat,dtset%typat,pawtab,'R')
- ABI_DATATYPE_ALLOCATE(cprj_kb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
- call pawcprj_alloc(cprj_kb,ncpgr,dimlmn)
- ABI_DATATYPE_ALLOCATE(cprj_kbg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
- call pawcprj_alloc(cprj_kbg,ncpgr,dimlmn)
- ABI_DATATYPE_ALLOCATE(cprj_kg,(dtset%natom,dtorbmag%nspinor*dtset%mband))
- call pawcprj_alloc(cprj_kg,ncpgr,dimlmn)
- ABI_DATATYPE_ALLOCATE(cprj_kgb,(dtset%natom,dtorbmag%nspinor*dtset%mband))
- call pawcprj_alloc(cprj_kgb,ncpgr,dimlmn)
-
- VVI_dir = czero
- VVIII_dir=czero
- do epsabg = 1, -1, -2
-
-    if (epsabg .EQ. 1) then
-       bdir = modulo(adir,3)+1
-       gdir = modulo(adir+1,3)+1
-    else
-       bdir = modulo(adir+1,3)+1
-       gdir = modulo(adir,3)+1
-    end if
-
-    do bfor = 1, 2
-       bsigma = 3-2*bfor
-       bdx= 2*bdir-2+bfor
-       bdxc= bdx+bsigma
-       bdxstor=mod(bdx+6-2*gdir,6)
-       dkb(1:3) = bsigma*dtorbmag%dkvecs(1:3,bdir)
-       deltab = sqrt(DOT_PRODUCT(dkb,dkb))
-       
-       do gfor = 1, 2
-          gsigma = 3-2*gfor
-          gdx = 2*gdir-2+gfor
-          gdxc = gdx+gsigma
-          gdxstor = mod(gdx+6-2*bdir,6)
-          dkg(1:3) = gsigma*dtorbmag%dkvecs(1:3,gdir)
-          deltag = sqrt(DOT_PRODUCT(dkg,dkg))
-
-          do ikpt = 1, dtorbmag%fnkpt
-             ikpti = dtorbmag%indkk_f2ibz(ikpt,1)
-             icprji = dtorbmag%cprjindex(ikpti,isppol)
-
-             ikptb = dtorbmag%ikpt_dk(ikpt,bfor,bdir)
-             ikptbi = dtorbmag%indkk_f2ibz(ikptb,1)
-             icprjbi = dtorbmag%cprjindex(ikptbi,isppol)
-
-             ikptg = dtorbmag%ikpt_dk(ikpt,gfor,gdir)
-             ikptgi = dtorbmag%indkk_f2ibz(ikptg,1)
-             icprjgi = dtorbmag%cprjindex(ikptgi,isppol)
-
-             call pawcprj_get(atindx1,cprj_kb,cprj(bdx,0,:,:),dtset%natom,1,icprji,ikpti,&
-                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                  & my_nspinor,dtset%nsppol,0)
-
-             call pawcprj_get(atindx1,cprj_kg,cprj(gdx,0,:,:),dtset%natom,1,icprji,ikpti,&
-                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                  & my_nspinor,dtset%nsppol,0)
-
-             call pawcprj_get(atindx1,cprj_kbg,cprj(gdxc,bdxstor,:,:),dtset%natom,1,icprjgi,ikptgi,&
-                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                  & my_nspinor,dtset%nsppol,0)
-
-             call pawcprj_get(atindx1,cprj_kgb,cprj(bdxc,gdxstor,:,:),dtset%natom,1,icprjbi,ikptbi,&
-                  & 0,isppol,dtset%mband,dtset%mkmem,dtset%natom,nband_k,nband_k,&
-                  & my_nspinor,dtset%nsppol,0)
-
-             VVIII = czero
-             VVI = czero
-             do nn = 1, nband_k
-                ENK = eeig(nn,ikpt)
-                do n1 = 1, nband_k
-
-                   VVI_2 = czero
-                   VVIII_1=czero
-                   do iatom=1,dtset%natom
-                      itypat=dtset%typat(iatom)
-                      do ilmn=1,pawtab(itypat)%lmn_size
-                         do jlmn=1,pawtab(itypat)%lmn_size
-                            klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
-
-                            cpb=cmplx(cprj_kb(iatom,nn)%cp(1,ilmn),cprj_kb(iatom,nn)%cp(2,ilmn))
-                            cpk=cmplx(cprj_kbg(iatom,n1)%cp(1,jlmn),cprj_kbg(iatom,n1)%cp(2,jlmn))
-                            VVIII_1=VVIII_1+conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
-
-                            cpb = cmplx(cprj_kgb(iatom,n1)%cp(1,ilmn),cprj_kgb(iatom,n1)%cp(2,ilmn))
-                            cpk = cmplx(cprj_kg(iatom,nn)%cp(1,jlmn),cprj_kg(iatom,nn)%cp(2,jlmn))
-                            VVI_2 = VVI_2 + conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
-
-                         end do ! end loop over jlmn
-                      end do ! end loop over ilmn
-                   end do ! end loop over atoms
-
-                   VVIII_2 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0))
-                   VVI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
-
-                   VVI=VVI+VVI_1*VVI_2*ENK
-                   VVIII=VVIII+VVIII_1*conjg(VVIII_2)*ENK
-
-                end do ! end n1
-             end do ! end nn
-             VVI_dir = VVI_dir - half*j_dpc*epsabg*bsigma*gsigma*(-VVI)/(2.0*deltab*2.0*deltag)
-             VVIII_dir = VVIII_dir - half*j_dpc*epsabg*bsigma*gsigma*(-VVIII)/(2.0*deltab*2.0*deltag)
-          end do ! end loop over ikpt
-
-       end do ! end loop over gfor
-    end do ! end loop over bfor
- end do ! end loop over epsabg
-
- ABI_DEALLOCATE(dimlmn)
- call pawcprj_free(cprj_kb)
- ABI_DATATYPE_DEALLOCATE(cprj_kb)
- call pawcprj_free(cprj_kbg)
- ABI_DATATYPE_DEALLOCATE(cprj_kbg)
- call pawcprj_free(cprj_kg)
- ABI_DATATYPE_DEALLOCATE(cprj_kg)
- call pawcprj_free(cprj_kgb)
- ABI_DATATYPE_DEALLOCATE(cprj_kgb)
-
-end subroutine make_VVIII
-!!***
-
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/make_VVIII_mpi
-!! NAME
-!! make_VVIII_mpi
 !!
 !! FUNCTION
 !! This routine computes term VVIII for orbital magnetization using
@@ -4727,7 +4418,7 @@ end subroutine make_VVIII
 !!
 !! SOURCE
 
-subroutine make_VVIII_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+subroutine make_VVIII(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
      & pawtab,smat_all_indx,VVIII_dir)
 
  implicit none
@@ -4742,7 +4433,6 @@ subroutine make_VVIII_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_e
 
  !arrays
  integer,intent(in) :: atindx1(dtset%natom)
- real(dp),intent(in) :: dsdk(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4)
  real(dp),intent(in) :: eeig(nband_k,dtorbmag%fnkpt)
  real(dp),intent(in) :: smat_all_indx(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
  type(pawcprj_type),intent(in) ::  cprj(6,0:4,dtset%natom,mcprj)
@@ -4751,8 +4441,8 @@ subroutine make_VVIII_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_e
  !Local variables -------------------------
  !scalars
  integer :: bdir,bfor,bdx,bdxc,bdxstor,bsigma,dest,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
- integer :: iatom,icprji,icprjbi,icprjgi,ierr,ilmn
- integer :: ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi,isppol,itypat
+ integer :: iatom,icprji,icprjgi,ierr,ilmn
+ integer :: ikpt,ikpt_loc,ikpti,ikptg,ikptgi,isppol,itypat
  integer :: jcprjgi,jkpt,jkptg,jkptgi,jsppol,jlmn,klmn,me,n2dim,nn,n1,my_nspinor,ncpgr
  integer :: nproc,ntotcp,spaceComm,sourceg,tagg
  real(dp) :: deltab,deltag,ENK
@@ -4894,15 +4584,15 @@ subroutine make_VVIII_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_e
                             do jlmn=1,pawtab(itypat)%lmn_size
                                klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
 
-                               cpb=cmplx(cprj_kb(iatom,nn)%cp(1,ilmn),cprj_kb(iatom,nn)%cp(2,ilmn))
-                               cpk=cmplx(cprj_kbg(iatom,n1)%cp(1,jlmn),cprj_kbg(iatom,n1)%cp(2,jlmn))
+                               cpb=cmplx(cprj_kb(iatom,nn)%cp(1,ilmn),cprj_kb(iatom,nn)%cp(2,ilmn),KIND=dpc)
+                               cpk=cmplx(cprj_kbg(iatom,n1)%cp(1,jlmn),cprj_kbg(iatom,n1)%cp(2,jlmn),KIND=dpc)
                                VVIII_1=VVIII_1+conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
 
                             end do ! end loop over jlmn
                          end do ! end loop over ilmn
                       end do ! end loop over atoms
 
-                      VVIII_2 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0))
+                      VVIII_2 = cmplx(smat_all_indx(1,nn,n1,ikpt,gdx,0),smat_all_indx(2,nn,n1,ikpt,gdx,0),KIND=dpc)
                       VVIII=VVIII+VVIII_1*conjg(VVIII_2)*ENK
 
                    end do ! end n1
@@ -4931,13 +4621,13 @@ subroutine make_VVIII_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_e
     ABI_DATATYPE_DEALLOCATE(cprj_buf)
  end if
 
-end subroutine make_VVIII_mpi
+end subroutine make_VVIII
 !!***
 
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/make_VVI_mpi
+!!****f* ABINIT/make_VVI
 !! NAME
-!! make_VVI_mpi
+!! make_VVI
 !!
 !! FUNCTION
 !! This routine computes term VVI for orbital magnetization
@@ -4965,7 +4655,7 @@ end subroutine make_VVIII_mpi
 !!
 !! SOURCE
 
-subroutine make_VVI_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
+subroutine make_VVI(adir,atindx1,cprj,dtorbmag,dtset,eeig,mcprj,mpi_enreg,nband_k,&
      & pawtab,smat_all_indx,VVI_dir)
 
  implicit none
@@ -4980,7 +4670,6 @@ subroutine make_VVI_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enr
 
  !arrays
  integer,intent(in) :: atindx1(dtset%natom)
- real(dp),intent(in) :: dsdk(2,nband_k,nband_k,dtorbmag%fnkpt,1:3,0:4)
  real(dp),intent(in) :: eeig(nband_k,dtorbmag%fnkpt)
  real(dp),intent(in) :: smat_all_indx(2,nband_k,nband_k,dtorbmag%fnkpt,1:6,0:4)
  type(pawcprj_type),intent(in) ::  cprj(6,0:4,dtset%natom,mcprj)
@@ -4989,8 +4678,8 @@ subroutine make_VVI_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enr
  !Local variables -------------------------
  !scalars
  integer :: bdir,bfor,bdx,bdxc,bdxstor,bsigma,dest,epsabg,gdir,gdx,gdxc,gdxstor,gfor,gsigma
- integer :: iatom,icprji,icprjbi,icprjgi,ierr,ilmn
- integer :: ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi,isppol,itypat
+ integer :: iatom,icprji,icprjbi,ierr,ilmn
+ integer :: ikpt,ikpt_loc,ikpti,ikptb,ikptbi,isppol,itypat
  integer :: jkpt,jkptb,jkptbi,jcprjbi,jsppol,jlmn,klmn
  integer :: me,my_nspinor,nn,nproc,n1,ncpgr,n2dim,ntotcp
  integer :: spaceComm,sourceb,tagb
@@ -5132,15 +4821,15 @@ subroutine make_VVI_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enr
                             do jlmn=1,pawtab(itypat)%lmn_size
                                klmn=max(jlmn,ilmn)*(max(jlmn,ilmn)-1)/2 + min(jlmn,ilmn)
                                
-                               cpb = cmplx(cprj_kgb(iatom,n1)%cp(1,ilmn),cprj_kgb(iatom,n1)%cp(2,ilmn))
-                               cpk = cmplx(cprj_kg(iatom,nn)%cp(1,jlmn),cprj_kg(iatom,nn)%cp(2,jlmn))
+                               cpb = cmplx(cprj_kgb(iatom,n1)%cp(1,ilmn),cprj_kgb(iatom,n1)%cp(2,ilmn),KIND=dpc)
+                               cpk = cmplx(cprj_kg(iatom,nn)%cp(1,jlmn),cprj_kg(iatom,nn)%cp(2,jlmn),KIND=dpc)
                                VVI_2 = VVI_2 + conjg(cpb)*pawtab(itypat)%sij(klmn)*cpk
 
                             end do ! end loop over jlmn
                          end do ! end loop over ilmn
                       end do ! end loop over atoms
                       
-                      VVI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0))
+                      VVI_1 = cmplx(smat_all_indx(1,nn,n1,ikpt,bdx,0),smat_all_indx(2,nn,n1,ikpt,bdx,0),KIND=dpc)
 
                       VVI=VVI+VVI_1*VVI_2*ENK
                       
@@ -5169,7 +4858,7 @@ subroutine make_VVI_mpi(adir,atindx1,cprj,dsdk,dtorbmag,dtset,eeig,mcprj,mpi_enr
     ABI_DATATYPE_DEALLOCATE(cprj_buf)
  end if
 
-end subroutine make_VVI_mpi
+end subroutine make_VVI
 !!***
 
 
