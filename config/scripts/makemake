@@ -81,8 +81,7 @@ def run_script(name, title, cmdline, stop_on_error=True,
       indent_output=True):
 
   print("[%s]   %s" % (name, title))
-
-  (ret, msg) = getstatusoutput(cmdline)
+  (ret, msg) = getstatusoutput(cmdline + " 2>&1")
   if ( msg != "" ):
     if ( indent_output ):
       sys.stderr.write("    " + re.sub("\n", "\n    ", msg) + "\n")
@@ -90,7 +89,7 @@ def run_script(name, title, cmdline, stop_on_error=True,
       sys.stderr.write(msg + "\n")
   if ( (ret != 0) and stop_on_error ):
     sys.stderr.write("cmdline: %s\n" % cmdline)
-    sys.stderr.write("[%s] Aborting now!\n" % (name))
+    sys.stderr.write("[%s] Aborting now! (ret = %d)\n" % (name, ret))
     sys.exit(1)
 
   return ret
@@ -250,6 +249,10 @@ if ( opts.run_clean ):
     "find . -depth -name 'tmp-*' -exec rm -rf {} \;")
   run_script(my_name, "Removing old files",
     "find src -name '*.old' -exec rm -f {} \;")
+  run_script(my_name, "Removing compiled Python files",
+    "find . -name '*.pyc' -o -name '*.pyo' -exec rm -f {} \;")
+  run_script(my_name, "Removing compiled Python cache directories",
+    "find . -depth -name '__pycache__' -exec rm -rf {} \;")
   run_script(my_name, "Removing symbolic links in common",
     "find shared/common/src -type l -exec rm -f {} \;")
   run_script(my_name, "Removing symbolic links in core",
@@ -257,7 +260,7 @@ if ( opts.run_clean ):
 
   print_header(my_name, "Abinit scripts outputs")
   run_script(my_name, "Removing file lists",
-    "rm -f config/dist/*.lst")
+    "rm -f config/dist/auto-*.lst")
   run_script(my_name, "Removing M4 macros",
     "rm -f config/m4/auto-*.m4")
   #run_script(my_name, "Removing abilint outputs ",
@@ -467,10 +470,10 @@ if ( opts.run_buildsys ):
     "./config/scripts/make-macros-dirflags")
   run_script(my_name, "Generating macros for core libraries",
     "./config/scripts/make-macros-corelibs")
+  run_script(my_name, "Generating macros for feature triggers",
+    "./config/scripts/make-macros-triggers")
   run_script(my_name, "Generating macros for configure output",
     "./config/scripts/make-macros-output")
-  run_script(my_name, "Generating macros for include flags",
-    "./config/scripts/make-macros-incflags")
   run_script(my_name, "Generating source split symlink maker",
     "./config/scripts/make-symlink-maker")
 else:
@@ -538,7 +541,7 @@ print_header(my_name, "Synchronization of subsystems")
 
 if ( opts.run_subsystems ):
   run_script(my_name, "Wiping out former file lists for subsystems",
-    "rm -f config/dist/*.lst")
+    "rm -f config/dist/auto-*.lst")
 
   sub_togls = []
   togl_mode = {"attached":"detached", "detached":"attached"}

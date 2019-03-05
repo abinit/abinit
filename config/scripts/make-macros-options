@@ -65,6 +65,9 @@ def macro_define_header():
 # Declares command-line arguments for the "configure" script.
 #
 AC_DEFUN([ABI_OPTIONS_DEFINE],[
+  dnl Count use of deprecated options
+  abi_opt_deprecated_count=0
+
 """
 
 
@@ -151,16 +154,15 @@ def macro_changed_template():
   return """
 
 
-dnl ABI_OPTIONS_CHANGED()
+dnl ABI_INFO_OPTIONS_CHANGED()
 dnl ---------------------
 dnl
 dnl Display changes of user interface between versions and warns about
 dnl obsolete uses.
 dnl
-AC_DEFUN([ABI_OPTIONS_CHANGED],[
-  AC_MSG_NOTICE([reporting user interface changes:])
+AC_DEFUN([ABI_INFO_OPTIONS_CHANGED],[
 @MACRO@
-]) dnl ABI_OPTIONS_CHANGED
+]) dnl ABI_INFO_OPTIONS_CHANGED
 """
 
 
@@ -191,16 +193,16 @@ def macro_triggers_template():
   return """
 
 
-dnl ABI_OPTIONS_TRIGGERS()
-dnl ----------------------
+dnl ABI_OPTIONS_DEFINES()
+dnl ---------------------
 dnl
-dnl Set triggers associated to 'enable_*' options (AC_DEFINE and
+dnl Set switches associated to 'enable_*' options (AC_DEFINE and
 dnl AM_CONDTIONAL).
 dnl
-AC_DEFUN([ABI_OPTIONS_TRIGGERS],[
-  AC_MSG_NOTICE([setting triggers associated to command-line options])
+AC_DEFUN([ABI_OPTIONS_DEFINES],[
+  AC_MSG_NOTICE([setting build switches associated to command-line options])
 @MACRO@
-]) dnl ABI_OPTIONS_TRIGGERS
+]) dnl ABI_OPTIONS_DEFINES
 """
 
 
@@ -259,6 +261,18 @@ def parse_opt(opt,values):
   fi
 """ % (opt,opt,opt)
 
+    elif ( values == "@install" ):
+      ret += """ if test "${%s}" != ""; then
+    opt_ok="yes"
+    if test "${%s}" != "no" -a "${%s}" != "yes"; then
+      if test \! -d "${%s}" -o \! -r "${%s}"; then
+        opt_ok="no"
+        break
+      fi
+    fi
+  fi
+""" % (opt,opt,opt,opt,opt)
+
     elif ( values == "@integer" ):
       ret += """ if test "${%s}" != ""; then
     opt_ok="yes"
@@ -275,7 +289,13 @@ def parse_opt(opt,values):
     for v in ${%s}; do
       if test "`echo "${v}" | grep '^-[[LloW]]'`" = ""; then
         opt_ok="no"
-        break
+      fi
+      if test "${opt_ok}" = "no"; then
+        if test -s "${v}"; then
+          opt_ok="yes"
+        else
+          break
+        fi
       fi
     done
     if test "${opt_ok}" = "no"; then
@@ -284,9 +304,33 @@ def parse_opt(opt,values):
   fi
 """ % (opt,opt,opt)
 
+    elif ( re.match("@profile", values) ):
+      arg = " ".join(values.split()[1:])
+      arg = re.sub("@VALUE@", "${%s}" % opt, arg)
+      ret += """ if test "${%s}" != ""; then
+    opt_ok="no"
+    test -s "${%s}" && opt_ok="yes"
+    if test "${opt_ok}" = "no"; then
+      AC_MSG_ERROR([file for option %s not found:
+                  %s])
+    fi
+  fi
+""" % (opt,arg,opt,arg)
+
+    elif ( values == "@readabledir" ):
+      ret += """ if test "${%s}" != ""; then
+    opt_ok="yes"
+    if test \! -d "${%s}" -o \! -r "${%s}"; then
+      opt_ok="no"
+      break
+    fi
+  fi
+""" % (opt,opt,opt)
+
     else:
 
-      ret += "  dnl FIXME: NOT IMPLEMENTED!\n"
+      ret += """  dnl FIXME: NOT IMPLEMENTED!\n
+  AC_MSG_WARN([parsing not implemented for value type '%s'])\n""" % values
 
   return ret
 
@@ -368,14 +412,7 @@ for arg in ("enable","with"):
       opt_vals = cnf.get(opt,"values")
     except:
       opt_vals = None
-    if ( (opt_stat == "hidden") and (not opt_dflt is None) ):
-      parse += """
-  dnl Hidden option: %s
-  dnl ac_configure_args="${ac_configure_args} --%s=\\\"${%s}\\\""
-  %s="%s"
-""" % \
-        (opt,re.sub("_","-",opt),opt,opt,opt_dflt)
-    else:
+
       m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
         + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
           (arg,opt_name,opt_desc,opt_dflt))
@@ -456,6 +493,11 @@ m4.write(macro_recall_footer())
 
 # Build changed macro
 changed = ""
+chg_dep = ""
+chg_mod = ""
+chg_new = ""
+chg_rem = ""
+chg_ren = ""
 
 for arg in all_args:
 
@@ -469,13 +511,13 @@ for arg in all_args:
   # Removed options
   if ( (arg_stat == "removed") or (arg_stat == "dropped") ):
     arg1 = re.sub("_","-",arg)
-    changed += "\n  dnl Removed --%s option" % (arg1)
+    chg_rem += "\n  dnl Removed --%s option" % (arg1)
     if ( arg_stat == "removed" ):
-      changed += "\n  AC_MSG_NOTICE([ * --%s removed])" % (arg1)
+      chg_rem += "\n  AC_MSG_NOTICE([  * removed option --%s])" % (arg1)
       if ( arg_repl != "" ):
-        changed += "\n  AC_MSG_NOTICE([   === please use --%s instead ===])" % \
+        chg_rem += "\n  AC_MSG_NOTICE([    >>> use --%s instead])" % \
           (re.sub("_","-",arg_repl))
-    changed += """
+    chg_rem += """
   if test "${%s}" != ""; then
     AC_MSG_ERROR([removed option --%s has been used])
   fi
@@ -484,15 +526,15 @@ for arg in all_args:
   # New options
   elif ( arg_stat == "new" ):
     arg2 = re.sub("_","-",arg)
-    changed += "\n  dnl New --%s option\n" % (arg2)
-    changed += "  AC_MSG_NOTICE([ * new option --%s is available])\n" % (arg2)
+    chg_new += "\n  dnl New --%s option\n" % (arg2)
+    chg_new += "  AC_MSG_NOTICE([  * new option --%s is available])\n" % (arg2)
 
   # Changed UIs
   elif ( re.match("changed",arg_stat) ):
     arg1 = re.sub("_","-",arg)
-    changed += """
+    chg_mod += """
   dnl UI change for --%s option
-  AC_MSG_NOTICE([ * --%s has been modified])
+  AC_MSG_NOTICE([  * modified option --%s])
   AC_MSG_NOTICE([   (%s)])
   AC_MSG_NOTICE([   please check that --%s="${%s}" is OK for you])
 """ % (arg1,arg1,arg_stat,arg1,re.sub("-","_",arg1))
@@ -501,13 +543,33 @@ for arg in all_args:
   elif ( re.match("renamed",arg_stat) ):
     arg1 = re.sub("_","-",arg_stat.split()[1])
     arg2 = re.sub("_","-",arg)
-    changed += """
+    chg_ren += """
   dnl --%s > --%s
-  AC_MSG_NOTICE([ * --%s renamed --%s])
+  AC_MSG_NOTICE([  * renamed option --%s >>> --%s])
   if test "${%s}" != ""; then
     AC_MSG_ERROR([renamed option --%s has been used])
   fi
 """ % (arg1,arg2,arg1,arg2,re.sub("-","_",arg1),arg1)
+
+  # Deprecated options
+  elif ( re.match("deprecated",arg_stat) ):
+    arg2 = re.sub("_","-",arg)
+    chg_dep += """
+  dnl --%s deprecated
+  if test "${%s}" != ""; then
+    AC_MSG_WARN([  * deprecated option --%s - please cross-check when configuration is completed])
+    abi_opt_deprecated_count=`expr ${abi_opt_deprecated_count} + 1`
+  fi
+""" % (arg2,arg2,arg2)
+
+changed = chg_rem + chg_new + chg_mod + chg_ren + chg_dep
+if ( changed == "" ):
+  changed = "AC_MSG_NOTICE([no change in user interface to report])"
+else:
+  changed = """\
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([reporting user interface changes:])
+  AC_MSG_NOTICE([])\n""" + changed + "  AC_MSG_NOTICE([])"
 
 # Write changed macro
 m4.write(re.sub("@MACRO@",changed,macro_changed_template()))
@@ -580,8 +642,7 @@ dumper = open("config.dump.in","a")
 dumper.write("# Command-line options (script: %s)\n" % (my_name))
 for arg in all_args:
   arg_stat = cnf.get(arg,"status")
-  if ( (arg_stat != "hidden") and \
-       (arg_stat != "removed") and \
+  if ( (arg_stat != "removed") and \
        (arg_stat != "dropped") and \
        (not re.match("group", arg)) ):
     var = re.sub("-","_",opt_name)

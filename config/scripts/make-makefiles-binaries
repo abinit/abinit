@@ -44,7 +44,7 @@ def makefile_header(name,stamp):
 #
 
 AM_CFLAGS  = @ABI_CPPFLAGS@
-AM_FCFLAGS = @FPPFLAGS@ @FCFLAGS_FREEFORM@ @FCFLAGS_MODDIR@ @abi_extra_incs@ @fc_mod_incs@ @fcflags_opt_98_main@
+AM_FCFLAGS = @FPPFLAGS@ @FCFLAGS_FREEFORM@ @FCFLAGS_MODDIR@ @fc_mod_incs@ @fcflags_opt_98_main@
 AM_LDFLAGS = @FC_LDFLAGS@
 
 """ % (name,stamp,name)
@@ -112,9 +112,6 @@ include_dirs = ["common", "core"]
 
 for tmp in include_dirs:
   inc_list += " \\\n\t@src_%s_incs@" % (tmp)
-
-# FIXME: hard-coded include for fallbacks
-inc_list += " \\\n\t@fallbacks_incs@"
 
 # Core libraries
 for lib in abinit_corelibs:
@@ -195,10 +192,10 @@ for bin in main_bins:
 
   # Check whether the binary may use external libraries
   for dep in bin_deps:
-    bin_cppflags += " @lib_%s_incs@" % (dep)
-    bin_fcflags += " @lib_%s_fcflags@" % (dep)
-    bin_ldflags += " @lib_%s_ldflags@" % (dep)
-    bin_libs += " @lib_%s_libs@" % (dep)
+    bin_cppflags += " @abi_%s_incs@" % (dep)
+    bin_fcflags += " @abi_%s_fcflags@" % (dep)
+    bin_ldflags += " @abi_%s_ldflags@" % (dep)
+    bin_libs += " @abi_%s_libs@" % (dep)
 
   # Finish setting build-time parameters
   if ( bin_cppflags != "" ):

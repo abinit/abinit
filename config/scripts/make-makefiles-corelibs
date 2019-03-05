@@ -175,13 +175,7 @@ for lib in abinit_corelibs:
   # Dependencies
   if ( cnf.has_option(lib,"dependencies") ):
     for dep in cnf.get(lib,"dependencies").split():
-      inc += " \\\n\t@lib_%s_incs@" % (dep)
-
-  # FIXME: hard-coded include for fallbacks
-  inc += " \\\n\t@fallbacks_incs@"
-
-  # FIXME: hard-coded extra includes
-  inc += " \\\n\t@abi_extra_incs@"
+      inc += " \\\n\t@abi_%s_incs@" % (dep)
 
   # Required basic Fortran includes (must be last!)
   inc += " \\\n\t@fc_mod_incs@"
@@ -287,13 +281,13 @@ for lib in abinit_corelibs:
     for chk in checkers:
       # FIXME: hard-coded for now
       makefile += "\n%s_SOURCES = %s.F90" % (chk,chk)
-      makefile += "\n%s_CPPFLAGS = @lib_netcdf_incs@ @lib_etsf_io_incs@ @lib_linalg_incs@ -I$(top_srcdir)/shared/common/src/incs -I$(top_srcdir)/src/incs" % \
+      makefile += "\n%s_CPPFLAGS = @abi_netcdf_incs@ @abi_linalg_incs@ -I$(top_srcdir)/src/incs" % \
        (chk)
       makefile += "\n%s_LDADD = \\\n\tlib%s.a" % (chk,lib)
       for elc in checkers[chk] + hard_chklibs:
         makefile += " \\\n\t../%s/lib%s.a" % (elc,elc)
       makefile += " \\\n\t@%s@\n" % \
-        ("@ \\\n\t@".join(["lib_etsf_io_libs","lib_netcdf_libs","lib_linalg_libs"]))
+        ("@ \\\n\t@".join(["abi_netcdf_libs","abi_linalg_libs"]))
     makefile += "\ncheck-local:\n"
     for chk in checkers:
       makefile += "\t./%s >%s.log 2>&1; grep '^TEST FAILED' %s.log && echo 'Unit test %s FAILED' || echo 'Unit test %s OK'\n" % \

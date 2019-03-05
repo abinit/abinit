@@ -137,8 +137,12 @@ clean += "DISTCLEANFILES = .abilint abilint.out abilint.log\n\n"
 # Generate list of extra files
 ext = "EXTRA_DIST =\n"
 for subdir in abinit_other_dirs:
-  sub_files = "config/dist/%s.lst" % subdir
+  sub_files = "config/dist/auto-%s.lst" % subdir
   ext += open(sub_files, "rt").read()
+for xtrafile in os.listdir("./config/dist"):
+  print(xtrafile)
+  if ( re.match("xtra-.*\\.lst", xtrafile) ):
+    ext += file(os.path.join("config","dist",xtrafile),"r").read()
 ext = re.sub("\n"," \\\n\t",ext[:-1])
 ext += "\n\n"
 
