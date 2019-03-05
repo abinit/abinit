@@ -1,0 +1,16 @@
+Memo for the build system rewrite
+=================================
+
+Feature triggers
+----------------
+
+1. Extract detection code, taking care of prerequisites.
+2. Remove detection code from connector.
+3. Update options.conf.
+4. Update testfarm.conf.
+5. Update CPP options.
+6. Update configure.ac.
+7. Update doc/build/config-template.ac.
+8. Update build examples.
+9. Have the new file versioned.
+
