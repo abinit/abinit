@@ -1990,7 +1990,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
 
   ABI_ALLOCATE(kptnsb,(3,dtset%nkpt))
   ABI_ALLOCATE(ylmb,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang))
-  optder=1 ! ylm and d ylm/dk
+  optder=0 ! ylm only, no d ylm/dk
   ABI_ALLOCATE(ylmgrb,(dtset%mpw*dtset%mkmem,3+6*(optder/2),psps%mpsang*psps%mpsang))
   ABI_ALLOCATE(nband_dum,(dtset%nkpt*dtset%nsppol))
   nband_dum(:)=nband_k
@@ -2020,7 +2020,7 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
               do ikpt=1, dtset%nkpt
                  kptnsb(:,ikpt) = dtset%kptns(:,ikpt)+dkb(:)+dkg(:)
               end do
-              ! set up all ylm's and ylmgr's at k+dkb. Notice that this kpt might differ by a periodic wrap-around
+              ! set up all ylm's at k+dkb. Notice that this kpt might differ by a periodic wrap-around
               ! from the one determined from dtorbmag%ikpt_dk(ikpt,bfor,bdir)
               call initylmg(gprimd,kg,kptnsb,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
                    & nband_dum,dtset%nkpt,npwarr,dtset%nsppol,optder,rprimd,ylmb,ylmgrb)
@@ -2066,19 +2066,20 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
                  call mkkpg(kg_k,kpg_k,kpointb,nkpg,npw_k)
 
                  !      Compute nonlocal form factors ffnl at all (k+b+G_k):
-                 dimffnl=4 ! 1 + number of derivatives
+                 dimffnl=1 ! 1 + number of derivatives
                  ABI_ALLOCATE(ffnl,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
-                 ider=1 ! need also 1st derivs
-                 idir=4 ! derivs in all directions of cart
+                 ider=0 ! no derivs
+                 idir=4 ! derivs in all directions of cart (not used if ider = 0)
                  call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,&
                       & gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpointb,psps%lmnmax,&
                       & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
                       & npw_k,dtset%ntypat,psps%pspso,psps%qgrid_ff,rmet,&
                       & psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
 
-                 choice=5 ! cprj  and d cprj/dk
-                 cpopt=0 ! compute both cprj and derivs
-                 idir=0 ! derivs in all directions
+                 ! choice=5 ! cprj  and d cprj/dk
+                 choice = 1 ! only cprj
+                 cpopt=0 ! compute all
+                 idir=0 ! derivs in all directions, not used if choice = 1
                  do iband = 1, nband_k
                     cwavef(1,1:npw_k) = cg(1,icg+(iband-1)*npw_k+1:icg+iband*npw_k)
                     cwavef(2,1:npw_k) = cg(2,icg+(iband-1)*npw_k+1:icg+iband*npw_k)
@@ -3022,9 +3023,9 @@ subroutine make_eeig(atindx1,cg,cprj,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,
     call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
     
     ! Compute nonlocal form factors ffnl at all (k+G):
-    ider=1 ! want ffnl and 1st derivative
+    ider=0 ! want ffnl and 1st derivative
     idir=4 ! d ffnl/ dk_red in all 3 directions
-    dimffnl=4 ! 1 + number of derivatives
+    dimffnl=1 ! 1 + number of derivatives
     ABI_ALLOCATE(ffnl_k,(npw_k,dimffnl,psps%lmnmax,dtset%ntypat))
     call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl_k,psps%ffspl,&
          &         gmet,gprimd,ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
@@ -4013,7 +4014,7 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  ! compute the shifted cprj's <p_k+b|u_k>
  ABI_DATATYPE_ALLOCATE(cprj_kb_k,(6,0:4,dtset%natom,mcprj))
- ncpgrb = 3 ! k gradients in <p_k+b|u_k>
+ ncpgrb = 0 ! no k gradients in <p_k+b|u_k>
  do bdx=1, 6
     do gdxstor=0,4
        call pawcprj_alloc(cprj_kb_k(bdx,gdxstor,:,:),ncpgrb,dimlmn)
