@@ -193,6 +193,21 @@ class TestMetaConfParser(object):
         }
     }
 
+    src4 = {
+        'filters': {
+            'f1': {
+                'dtset': 5,
+                'image': [2, 5, 7]
+            },
+            'f2': {
+                'dtset': {'from': 7},
+                'image': {'to': 8}
+            }
+        },
+        'f1': {},
+        'f2': {}
+    }
+
     def test_make_tree_empty(self):
         cp = ConfParser()
         trees, _ = cp.make_trees({})
@@ -322,6 +337,35 @@ class TestMetaConfParser(object):
             'parameters': {}
         })
         assert trees['__default'] == ref
+
+    def test_make_tree_filters(self):
+        cp = ConfParser()
+
+        trees, filters = cp.make_trees(self.src4)
+
+        assert filters == {
+            'f1': IterStateFilter({'dtset': 5, 'image': [2, 5, 7]}),
+            'f2': IterStateFilter({'dtset': {'from': 7},
+                                   'image': {'from': 1, 'to': 8}})
+        }
+
+        assert trees == {
+            '__default': ConfTree({
+                'spec': {},
+                'constraints': {},
+                'parameters': {}
+            }),
+            'f1': ConfTree({
+                'spec': {},
+                'constraints': {},
+                'parameters': {}
+            }),
+            'f2': ConfTree({
+                'spec': {},
+                'constraints': {},
+                'parameters': {}
+            })
+        }
 
     def test_update_tree(self):
         cp = ConfParser()

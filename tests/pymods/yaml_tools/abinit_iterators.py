@@ -86,7 +86,6 @@ class IntSet(object):
                         elif v._type == 'finite':
                             for val in v.values:
                                 if val not in self:
-                                    print(val)
                                     return False
                             return True
                         elif v._type == 'bounded':
@@ -102,16 +101,24 @@ class IntSet(object):
             def test(v):
                 return True
 
+        else:
+            raise TypeError('Unknown input for IntSet: {}'.format(obj))
+
         self.__test = test
 
     def __contains__(self, v):
         return self.__test(v)
 
+    def __eq__(self, other):
+        return isinstance(other, IntSet) and self in other and other in self
+
     def __repr__(self):
         if self._type == 'singleton':
             return 'IntSet({})'.format(self.value)
         elif self._type == 'finite':
-            return 'IntSet({})'.format(', '.join(str(i) for i in self.values))
+            return 'IntSet([{}])'.format(
+                ', '.join(str(i) for i in self.values)
+            )
         elif self._type == 'bounded':
             return 'IntSet({{"from": {}, "to": {} }})'.format(self.min,
                                                               self.max)
@@ -170,3 +177,19 @@ class IterStateFilter(object):
                 + ', '.join('"{}": {}'.format(n, s)
                             for n, s in self.filters.items())
                 + '})')
+
+    def __eq__(self, other):
+        if not isinstance(other, IterStateFilter):
+            return False
+        for it in ITERATORS:
+            if it in self.filters:
+                if it in other.filters:
+                    if self.filters[it] != other.filters[it]:
+                        return False
+                else:
+                    return False
+            else:
+                if it in other.filters:
+                    return False
+
+        return True

@@ -83,9 +83,6 @@ def print_iter(it):
 
 
 class ExtendedTestConf(DriverTestConf):
-    def __init__(self, *args):
-        DriverTestConf.__init__(self, *args)
-
     def get_spec(self):
         '''
             Return the list of the specializations known at the current path.
@@ -316,11 +313,13 @@ class Explorer(cmd.Cmd):
 
     def do_filter(self, arg):
         '''
-            Usage: filter [ITERATOR:VALUE]...
+            Usage: filter [reset|(ITERATOR:VALUE)...]
         '''
         state = {name: int(val) for name, val in [pair.split(':')
                                                   for pair in arg.split()]}
-        if state:
+        if state == 'reset':
+            self.tree.clean_filter()
+        elif state:
             self.tree.clean_filter()
             self.tree.use_filter(state)
         else:
@@ -507,7 +506,6 @@ class Explorer(cmd.Cmd):
 
 
 class DebugExplorer(Explorer):
-    default_file = None
     def do_debug(self, arg):
         '''
             Usage debug PYTHON_EXPR

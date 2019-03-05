@@ -11,11 +11,11 @@ THIS_PATH = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_CONF_PATH = os.path.join(THIS_PATH, 'default_test.yaml')
 
 
-def get_default_conf():
+def get_default_conf(filename):
     '''
         Load and parse default test config file.
     '''
-    with open(DEFAULT_CONF_PATH) as f:
+    with open(filename) as f:
         try:
             return yaml_parse(f.read()) or {}
         except YAMLError:
@@ -35,6 +35,8 @@ class DriverTestConf:
         Interface to access parameters and constraints defined by the
         configuration file by following the traversal of the data tree.
     '''
+    default_conf = DEFAULT_CONF_PATH
+
     def __init__(self, src=None, metadata={}):
         self.known_params = conf_parser.parameters.copy()
         self.param_stack = []
@@ -47,7 +49,7 @@ class DriverTestConf:
 
         # defaut conf is not supposed to use filters
         self.tree = conf_parser.make_trees(
-            get_default_conf(),
+            get_default_conf(self.default_conf),
             {'file name': 'default file'}
         )[0]['__default']
 
@@ -57,9 +59,6 @@ class DriverTestConf:
                 conf = yaml_parse(src)
             except YAMLError:
                 conf = {}
-                self.warning('The provided YAML source was corrupted. The'
-                             ' configuration used will only be the default'
-                             ' one.')
             self.trees, self.filters = conf_parser.make_trees(conf, metadata)
             self.tree.update(self.trees['__default'])
         else:
@@ -168,6 +167,9 @@ class DriverTestConf:
 
             self.__tree_cache[state_hash(state)] = self.tree
 
+        # Rebuild stacks with the new tree
+        self.rebuild_stacks()
+
         self.will_enter = True
         return self
 
@@ -177,6 +179,17 @@ class DriverTestConf:
         '''
         self.current_state = {}
         self.tree = self.trees['__default'].copy()
+
+    def rebuild_stacks(self):
+        '''
+            Rebuild parameters and constraints stacks.
+        '''
+        path = self.current_path.copy()
+        self.current_path = []
+        self.param_stack = []
+        self.constraints_stack = []
+        for sp in path:
+            self.go_down(sp)
 
     def go_down(self, child):
         '''

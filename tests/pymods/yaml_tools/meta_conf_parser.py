@@ -207,7 +207,7 @@ class ConfTree(object):
         return 'ConfTree({})'.format(self.dict)
 
     def __eq__(self, other):
-        return self.dict == other.dict
+        return isinstance(other, ConfTree) and self.dict == other.dict
 
 
 class ConfParser(object):

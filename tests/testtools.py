@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function, division, unicode_literals
 import argparse
+from os import path
 from sys import version_info
 from pymods.fldiff import Differ
 from pymods.yaml_tools import is_available as has_yaml
@@ -135,8 +136,10 @@ class ArgParser(object):
                   ' run.')
             exit(1)
         if args.debug:
-            default = args.default
-            explorer = explore_test.DebugExplorer(default=default)
+            if args.default:
+                explore_test.ExtendedTestConf.default_conf = \
+                        path.expanduser(args.default[0])
+            explorer = explore_test.DebugExplorer()
         else:
             explorer = explore_test.Explorer()
 
