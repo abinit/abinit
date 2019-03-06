@@ -220,13 +220,14 @@ if test "${abi_gpu_enable}" = "yes" -a "${abi_mpi_enable}" != "yes"; then
   AC_MSG_ERROR([GPU support requires MPI])
 fi
 
-# Prepare GPU support
-ABI_GPU_INIT
-
 # ScaLAPACK support requires MPI
 if test "${abi_scalapack_enable}" = "yes" -a "${abi_mpi_enable}" != "yes"; then
   AC_MSG_ERROR([ScaLAPACK support requires MPI])
 fi
+
+# Prepare GPU support
+# Note: must be done after MPI
+ABI_GPU_INIT
 
 # ---------------------------------------------------------------------------- #
 
