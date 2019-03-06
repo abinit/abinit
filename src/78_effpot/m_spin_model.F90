@@ -51,7 +51,7 @@ module m_spin_model
   use m_multibinit_global
   use m_io_tools, only : get_unit, open_file, close_unit
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spin_terms, only: spin_terms_t
+  use m_spin_potential, only: spin_potential_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
@@ -82,7 +82,7 @@ module m_spin_model
 
   type spin_model_t
      type(spin_primitive_potential_t) :: spin_primitive
-     type(spin_terms_t) :: spin_calculator
+     type(spin_potential_t) :: spin_calculator
      type(spin_hist_t):: spin_hist
      type(spin_mover_t):: spin_mover
      type(multibinit_dtset_type) :: params
@@ -298,7 +298,7 @@ contains
     call self%spin_calculator%set_external_hfield(mfield)
 
     !if (self%params%spin_sia_add /= 0 ) then
-    !   call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
+    !   call spin_potential_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
     !        &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
     !end if
 
@@ -344,7 +344,7 @@ contains
          & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
 
     if (self%params%spin_sia_add /= 0 ) then
-       !call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
+       !call spin_potential_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
        !     &  self%params%spin_sia_k1amp, self%params%spin_sia_k1dir)
        call self%spin_primitive%add_input_sia(self%params%spin_sia_k1amp, &
             & self%params%spin_sia_k1dir)

@@ -34,7 +34,7 @@ module m_spin_observables
   use m_abicore
   use m_errors
   use m_xmpi
-  use m_spin_terms, only: spin_terms_t
+  use m_spin_potential, only: spin_potential_t
   !use m_spin_supercell, only: spin_supercell_t
   use m_multibinit_supercell, only: mb_supercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type

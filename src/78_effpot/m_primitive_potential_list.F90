@@ -41,33 +41,42 @@ module m_primitive_potential_list
   use m_potential_list, only: potential_list_t
   use m_primitive_potential, only: primitive_potential_t
   implicit none
+  private
 
-
+  !-------------------------------------------------------------------!
+  ! primitve_potential_pointer_t
+  !-------------------------------------------------------------------!
   type, public:: primitive_potential_pointer_t ! pointer to effpot
      class(primitive_potential_t), pointer :: obj
   end type primitive_potential_pointer_t
 
 
+  !-------------------------------------------------------------------!
+  ! primitive_potential_list_t
+  ! abstract type for primitive potential list
+  !-------------------------------------------------------------------!
   type, public, extends(primitive_potential_t):: primitive_potential_list_t
-     type(primitive_potential_pointer_t), allocatable :: pots(:)
+     type(primitive_potential_pointer_t), allocatable :: data(:)
      integer :: size=0
      integer :: capacity=0
    contains
      procedure :: initialize => initialize
-     procedure :: finalize => finalize
      procedure :: append => append
      procedure :: load_from_files
      procedure :: fill_supercell
      procedure :: fill_supercell_list
+     final:: finalize
   end type primitive_potential_list_t
 contains
 
-subroutine fill_supercell(self, scmaker, scpot)
+  !-------------------------------------------------------------------!
+  ! fill supercell: 
+  !-------------------------------------------------------------------!
+  subroutine fill_supercell(self, scmaker, scpot)
     class(primitive_potential_list_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: scmaker
     class(abstract_potential_t), pointer, intent(inout) :: scpot
     ! Note that sc_pot is a pointer
-
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     type(abstract_potential_t), pointer :: tmp
@@ -77,34 +86,78 @@ subroutine fill_supercell(self, scmaker, scpot)
     nullify(tmp)
   end subroutine fill_supercell
 
+  !-------------------------------------------------------------------!
+  ! load primitive potential from file
+  !-------------------------------------------------------------------!
   subroutine load_from_files(self, params,  fnames)
     class(primitive_potential_list_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
   end subroutine load_from_files
 
-
+  !-------------------------------------------------------------------!
+  ! save primitive potential to file
+  !-------------------------------------------------------------------!
   subroutine save_to_file(self, fname)
     class(primitive_potential_list_t), intent(inout) :: self
     character(*), intent(in) :: fname
   end subroutine save_to_file
 
 
+  !-------------------------------------------------------------------!
+  ! Initialize
+  !-------------------------------------------------------------------!
   subroutine initialize(self)
     class(primitive_potential_list_t), intent(inout):: self
-    self%size=0
   end subroutine initialize
 
   subroutine finalize(self)
-    class(primitive_potential_list_t), intent(inout):: self
+    type(primitive_potential_list_t), intent(inout):: self
+    integer :: i
+    do i=1, self%size
+       call self%data(i)%obj%finalize()
+       nullify(self%data(i)%obj)
+    end do
+    nullify(self%primcell)
     self%size=0
+    self%capacity=0
+    self%has_displacement=.False.
+    self%has_strain=.False.
+    self%has_spin=.False.
+    self%has_lwf=.False.
   end subroutine finalize
 
+  !-------------------------------------------------------------------!
+  ! append
+  !-------------------------------------------------------------------!
   subroutine append(self, pot)
     class(primitive_potential_list_t), intent(inout):: self
-    class(primitive_potential_t), intent(inout) :: pot
+    class(primitive_potential_t), target, optional, intent(inout) :: pot
+    type(primitive_potential_pointer_t), allocatable :: temp(:)
+    integer :: err
+    self%size=self%size + 1
+    if(self%size==1) then
+       self%capacity=8
+       ALLOCATE(self%data(self%capacity), stat=err)
+    else if ( self%size>self%capacity ) then
+       self%capacity = self%size + self%size / 4 + 8
+       ALLOCATE(temp(self%capacity), stat=err)
+       temp(:self%size-1) = self%data
+       call move_alloc(temp, self%data) !temp gets deallocated
+    end if
+    if(present(pot)) then
+       self%data(self%size)%obj=>pot
+       self%has_spin= (self%has_spin .or. pot%has_spin)
+       self%has_displacement= (self%has_displacement .or. pot%has_displacement)
+       self%has_strain= (self%has_strain.or. pot%has_strain)
+       self%has_lwf= (self%has_lwf.or. pot%has_lwf)
+    end if
   end subroutine append
 
+
+  !-------------------------------------------------------------------!
+  ! fill_supercell_ptr
+  !-------------------------------------------------------------------!
   subroutine fill_supercell_ptr(self, sc_maker, sc_pot)
     class(primitive_potential_list_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: sc_maker
@@ -120,6 +173,9 @@ subroutine fill_supercell(self, scmaker, scpot)
     nullify(tmp)
   end subroutine fill_supercell_ptr
 
+  !-------------------------------------------------------------------!
+  ! fill_supercell_list
+  !-------------------------------------------------------------------!
   subroutine fill_supercell_list(self, sc_maker, sc_pots)
     class(primitive_potential_list_t), intent(inout) :: self
     class(supercell_maker_t), intent(inout) :: sc_maker
@@ -129,10 +185,11 @@ subroutine fill_supercell(self, scmaker, scpot)
     class(abstract_potential_t), pointer :: tmp
     integer i
     do i =1, self%size
-      call self%pots(i)%obj%fill_supercell(sc_maker, tmp)
+      call self%data(i)%obj%fill_supercell(sc_maker, tmp)
     end do
     call sc_pots%append(tmp)
     nullify(tmp)
   end subroutine fill_supercell_list
 
 end module m_primitive_potential_list
+

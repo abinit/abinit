@@ -5,7 +5,7 @@
 !!
 !! FUNCTION
 !! This module contains the wrapper for writting spin hist netcdf file.
-!! Unlike the m_spin_terms, inside netcdf, there should be not only the
+!! Unlike the m_spin_potential, inside netcdf, there should be not only the
 !! data of magnetic atoms, but also the whole lattice (which do not move).
 !!
 !! Datatypes:
@@ -43,7 +43,7 @@ module m_spin_ncfile
   use m_nctk
   use m_spin_hist , only: spin_hist_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
-  use m_spin_terms , only: spin_terms_t
+  use m_spin_potential , only: spin_potential_t
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spin_observables, only : spin_observable_t
 #if defined HAVE_NETCDF
@@ -268,7 +268,7 @@ end subroutine spin_ncfile_t_def_ob
   subroutine spin_ncfile_t_write_supercell(self, scell)
 
     class(spin_ncfile_t), intent(inout) :: self
-    type(spin_terms_t), intent(in) :: scell
+    type(spin_potential_t), intent(in) :: scell
     integer :: rprimd_id, pos_id, ispin_prim_id, rvec_id, iatoms_id, ncerr
     ! sc_matric
 

@@ -42,7 +42,7 @@ module m_spin_mover
   use m_mpi_scheduler, only: mpi_scheduler_t
   use m_mathfuncs, only : cross
   use m_spin_observables , only : spin_observable_t, ob_calc_observables, ob_reset
-  use m_spin_terms, only:  spin_terms_t
+  use m_spin_potential, only:  spin_potential_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_get_s, spin_hist_t_reset
   use m_spin_ncfile, only: spin_ncfile_t, spin_ncfile_t_write_one_step
   use m_multibinit_dataset, only: multibinit_dtset_type

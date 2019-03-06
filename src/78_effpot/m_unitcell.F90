@@ -46,9 +46,9 @@ module m_unitcell
   type, public :: unitcell_spin_t
      integer :: nspin
      real(dp), allocatable :: ms(:)
-     real(dp), allocatable :: gyroratios(:)
-     real(dp), allocatable :: damping_factors(:)
-     real(dp), allocatable :: positions(:,:)
+     real(dp), allocatable :: gyro_ratio(:)
+     real(dp), allocatable :: damping_factor(:)
+     real(dp), allocatable :: spin_positions(:,:)
    contains
      procedure :: initialize => spin_initialize
      procedure :: finalize => spin_finalize
@@ -93,12 +93,12 @@ contains
   end subroutine set_lattice
 
 
-  subroutine set_spin(self,nspin, ms, positions, gyroratios, damping_factors)
+  subroutine set_spin(self,nspin, ms, spin_positions, gyro_ratio, damping_factor)
     class(unitcell_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), positions(3, nspin), gyroratios(nspin), damping_factors(nspin)
+    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
     self%has_spin=.True.
-    call self%spin%initialize(nspin, ms, positions, gyroratios, damping_factors)
+    call self%spin%initialize(nspin, ms, spin_positions, gyro_ratio, damping_factor)
   end subroutine set_spin
 
   subroutine set_lwf(self)
@@ -158,21 +158,21 @@ contains
   !========================= SPIN =================================
 
 
-  Subroutine spin_initialize(self, nspin, ms, positions, gyroratios, damping_factors)
+  Subroutine spin_initialize(self, nspin, ms, spin_positions, gyro_ratio, damping_factor)
     class(unitcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin
-    real(dp), intent(in) :: ms(nspin), positions(3, nspin), gyroratios(nspin), damping_factors(nspin)
+    real(dp), intent(in) :: ms(nspin), spin_positions(3, nspin), gyro_ratio(nspin), damping_factor(nspin)
 
     self%nspin=nspin
-    ABI_ALLOCATE(self%positions, (3, nspin))
+    ABI_ALLOCATE(self%spin_positions, (3, nspin))
     ABI_ALLOCATE(self%ms, (nspin))
-    ABI_ALLOCATE(self%gyroratios, (nspin))
-    ABI_ALLOCATE(self%damping_factors, (nspin))
+    ABI_ALLOCATE(self%gyro_ratio, (nspin))
+    ABI_ALLOCATE(self%damping_factor, (nspin))
 
     self%ms(:) = ms(:)
-    self%positions(:,:)=positions(:,:)
-    self%gyroratios(:)=gyroratios(:)
-    self%damping_factors(:)=damping_factors(:)
+    self%spin_positions(:,:)=spin_positions(:,:)
+    self%gyro_ratio(:)=gyro_ratio(:)
+    self%damping_factor(:)=damping_factor(:)
   end subroutine spin_initialize
 
   subroutine spin_finalize(self)
@@ -181,14 +181,14 @@ contains
     if (allocated(self%ms)) then
        ABI_DEALLOCATE(self%ms)
     end if
-    if (allocated(self%positions)) then
-       ABI_DEALLOCATE(self%positions)
+    if (allocated(self%spin_positions)) then
+       ABI_DEALLOCATE(self%spin_positions)
     end if
-    if (allocated(self%gyroratios)) then
-       ABI_DEALLOCATE(self%gyroratios)
+    if (allocated(self%gyro_ratio)) then
+       ABI_DEALLOCATE(self%gyro_ratio)
     end if
-    if (allocated(self%damping_factors)) then
-       ABI_DEALLOCATE(self%damping_factors)
+    if (allocated(self%damping_factor)) then
+       ABI_DEALLOCATE(self%damping_factor)
     end if
   end subroutine spin_finalize
 
@@ -196,10 +196,16 @@ contains
     class(unitcell_spin_t) :: self
     type(supercell_maker_t):: sc_maker
     type(mb_supercell_t) :: supercell
-    integer:: sc_nspin
-    sc_nspin=sc_maker%ncells*self%nspin
-
+    integer :: i
+    supercell%nspin=sc_maker%ncells*self%nspin
+    call sc_maker%repeat(self%ms, supercell%ms)
+    call sc_maker%repeat(self%gyro_ratio, supercell%gyro_ratio)
+    call sc_maker%repeat(self%damping_factor, supercell%gilbert_damping)
+    call sc_maker%repeat([(i ,i=1, self%nspin)], supercell%ispin_prim)
+    call sc_maker%trans_xred(self%spin_positions, supercell%spin_positions)
+    call sc_maker%rvec_for_each(self%nspin, supercell%rvec)
   end subroutine spin_fill_supercell
+
 
 
 

@@ -47,15 +47,28 @@ module m_primitive_potential
      ! It do the following things:
      type(unitcell_t), pointer :: primcell
      character(len=200) :: label
+     logical::has_displacement=.False.
+     logical::has_strain=.False.
+     logical::has_spin=.False.
+     logical::has_lwf=.False.
    contains
      !procedure:: initialize       ! perhaps each effpot type should have own 
-     !procedure :: finalize
+     procedure :: finalize
      procedure :: fill_supercell
      procedure :: load_from_files
   end type primitive_potential_t
 
-
 contains
+
+subroutine finalize(self)
+  class(primitive_potential_t), intent(inout) :: self
+  nullify(self%primcell)
+  self%label="Destroyed primitive potential"
+  self%has_displacement=.False.
+  self%has_strain=.False.
+  self%has_spin=.False.
+  self%has_lwf=.False.
+end subroutine finalize
 
 subroutine fill_supercell(self, scmaker, scpot)
     class(primitive_potential_t), intent(inout) :: self

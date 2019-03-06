@@ -55,9 +55,10 @@ module m_supercell_maker
 
      ! Translations: from one primitive cell element to ncell supercell elements
      ! with values unchanged (therefore just repeat ncells times)
-     generic :: repeat => repeat_int1d, repeat_real1d, repeat_realmat
+     generic :: repeat => repeat_int1d, repeat_real1d, repeat_real2d, repeat_realmat
      procedure :: repeat_int1d
      procedure :: repeat_real1d
+     procedure :: repeat_real2d
      procedure :: repeat_realmat
 
      ! Translations: from one primitive cell element to ncell supercell elements
@@ -68,6 +69,7 @@ module m_supercell_maker
      procedure :: trans_ilist
      procedure :: trans_j_and_Rj
      procedure :: trans_jlist_and_Rj
+     procedure :: rvec_for_each
   end type supercell_maker_t
 
   public :: scmaker_unittest
@@ -274,6 +276,23 @@ contains
     end do
   end subroutine repeat_real1d
 
+  subroutine repeat_real2d(self, a, ret)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: a(:,:)
+    real(dp), allocatable:: ret(:, :)
+    integer :: n1, n2, i
+    n1=size(a, dim=1)
+    n2=size(a,dim=2)
+    if (.not. allocated(ret)) then
+       ABI_ALLOCATE(ret, (n1, n2*self%ncells))
+    end if
+    do i =1, self%ncells
+       ret(:,(i-1)*n2+1: i*n2) = a(:,:)
+    end do
+  end subroutine repeat_real2d
+
+
+
   subroutine repeat_realmat(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: a(:,:,:)
@@ -287,6 +306,23 @@ contains
        ret(:,:,(i-1)*n+1: i*n)=a(:, :, :)
     end do
   end subroutine repeat_realmat
+
+  subroutine rvec_for_each(self, nbasis, ret)
+    class(supercell_maker_t), intent(inout) :: self
+    integer, intent(in) :: nbasis
+    integer, allocatable, intent(inout) :: ret(:,:)
+    integer :: icell, ibasis
+    if (.not. allocated(ret)) then
+       ABI_ALLOCATE(ret, (3, nbasis*self%ncells))
+    end if
+    do icell=1, self%ncells
+       do ibasis=1, nbasis
+          ret(:, (icell-1)*nbasis+ibasis)= self%rvecs(:, icell)
+       end do
+    end do
+  end subroutine rvec_for_each
+
+  !============================Unit test=====================================
 
   function test1() result(err)
     type(supercell_maker_t) :: maker

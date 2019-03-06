@@ -33,6 +33,7 @@ module m_spmat_csr
   use m_abicore
   use m_xmpi
   use m_spmat_base, only: base_mat2d_t
+  use m_multibinit_global
   use m_mpi_scheduler
   implicit none
 !!***
@@ -81,9 +82,8 @@ contains
     ! val(irow, irow+1) are the values of entries in row irow.
     integer , intent(in), optional :: icol(:), row_shift(:)
     real(dp), intent(in), optional :: val(:)
-    integer :: ierr, iproc
+    integer :: iproc
 
-    !call MPI_COMM_RANK(MPI_COMM_WORLD, iproc,ierr)
     iproc=xmpi_comm_rank(xmpi_world)
     if (iproc/=0) then
        print *, "This function should be only used on root node"
@@ -101,7 +101,7 @@ contains
     if(.not. allocated(self%val)) then
        ABI_ALLOCATE(self%val, (self%nnz))
     endif
-    
+
     if (present(icol)) then
        self%icol(:)=icol(:)
     end if
@@ -176,13 +176,13 @@ contains
   end subroutine CSR_mat_t_finalize
 
 
+  ! b=Ax+b
   subroutine CSR_mat_t_mv(self, x, b)
-
     class(CSR_mat_t), intent(in):: self
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: b(self%nrow)
     integer::irow, i1, i2, i
-    b(:)=0.0d0
+    !!b(:)=0.0d0
     !!$OMP PARALLEL DO private(i, i1, i2)
     do irow=1, self%nrow
         i1=self%row_shift(irow)
@@ -203,9 +203,9 @@ contains
     integer :: ierr, irow,  i1, i2, i
     !call mpi_bcast(x, self%ncol, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ierr)
     call xmpi_bcast(x, 0, xmpi_world, ierr)
+    if (.not. iam_master) b(:)=0.0_dp
     !my_b(:)=0.0_dp
-    b(:)=0.0_dp
-
+    !b(:)=0.0_dp
     do irow= self%mps%istart, self%mps%iend
        i1=self%row_shift(irow)
        i2=self%row_shift(irow+1)-1

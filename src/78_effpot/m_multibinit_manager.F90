@@ -51,7 +51,7 @@ module m_multibinit_manager
   use m_potential_list, only: potential_list_t
   use m_abstract_mover, only: abstract_mover_t
   use m_lattice_effpot, only : lattice_effpot_t
-  use m_spin_terms, only : spin_terms_t
+  use m_spin_potential, only : spin_potential_t
   use m_lattice_mover, only : lattice_mover_t
   use m_spin_mover, only : spin_mover_t
   use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
@@ -60,6 +60,9 @@ module m_multibinit_manager
 
   !!***
 
+!-------------------------------------------------------------------!
+! Multibinit manager
+!-------------------------------------------------------------------!
   type, public :: mb_manager_t
      character(len=fnlen) :: filenames(17)
      type(multibinit_dtset_type) :: params
@@ -68,36 +71,41 @@ module m_multibinit_manager
      type(mb_supercell_t) :: supercell
      type(primitive_potential_list_t) :: prim_pots
      type(potential_list_t), pointer :: pots
+
+     type(lattice_mover_t) :: lattice_mover
+     type(spin_mover_t) :: spin_mover
+     ! type(lwf_mover_t) :: lwf_mover
+
    contains
      procedure :: initialize
      procedure :: finalize
-     procedure :: read_params
-     procedure :: read_potentials
+     procedure :: read_params    ! parse input file
+     procedure :: prepare_params ! process the parameters. e.g. convert unit, set some flags, etc.
+     procedure :: read_potentials ! read primitve cell and potential
      procedure :: fill_supercell
+     procedure :: set_movers
+     procedure :: run_dynamics
      procedure :: run
      procedure :: run_all
   end type mb_manager_t
 
 contains
-  !----------------------------------------------------------------------------------------------------
-  ! intialize
+  !-------------------------------------------------------------------!
+  ! initialize
+  !-------------------------------------------------------------------!
   subroutine initialize(self, filenames)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
-
     self%filenames=filenames
-    ! read params
     call self%read_params()
-    call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%fill_supercell()
+    call self%prepare_params()
     ! read potentials from
   end subroutine initialize
 
 
-  
-  !----------------------------------------------------------------------------------------------------
-  ! finalize
+  !-------------------------------------------------------------------!
+  ! Finalize
+  !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(mb_manager_t), intent(inout) :: self
     !call self%params%finalize()
@@ -108,8 +116,9 @@ contains
     call self%pots%finalize()
   end subroutine finalize
 
-  !----------------------------------------------------------------------------------------------------
-  ! read parameters from input file
+  !-------------------------------------------------------------------!
+  ! read_params: read parameters from input file
+  !-------------------------------------------------------------------!
   subroutine read_params(self)
     class(mb_manager_t), intent(inout) :: self
     character(len=500) :: message
@@ -154,17 +163,38 @@ contains
     end if
   end subroutine read_params
 
+  !-------------------------------------------------------------------!
+  ! prepare_params: after read, something has to be done:
+  ! e.g. unit conversion
+  !-------------------------------------------------------------------!
+  subroutine prepare_params(self)
+    class(mb_manager_t), intent(inout) :: self
+    ! Kelvin to Hartree (In input file, the spin temperature is in K.
+    ! convert to a.u.)
+    self%params%spin_temperature = self%params%spin_temperature/Ha_K
+    self%params%spin_temperature_start=self%params%spin_temperature_start/Ha_K
+    self%params%spin_temperature_end=self%params%spin_temperature_end/Ha_K
+  end subroutine prepare_params
 
-  !----------------------------------------------------------------------------------------------------
-  ! Read potentials from file
+
+  !-------------------------------------------------------------------!
+  ! Read potentials from file, if needed by dynamics
+  !-------------------------------------------------------------------!
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
-    !call self%unitcell%initialize(self%params, self%filenames)
-    call self%prim_pots%load_from_files(self%params, self%filenames)
+    !TODO: unitcell.
+    if(params%spin_dynamics>0) then
+       call spin_pot%read_from_files(self%params, fnames)
+    end if
+    if(params%dynamics>0) then
+       !TODO: LATT
+    endif
+    !TODO: LWF
   end subroutine read_potentials
 
-  !----------------------------------------------------------------------------------------------------
-  ! fill supercell
+  !-------------------------------------------------------------------!
+  ! fill supercell. Both primitive cell and potential
+  !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
     ! unitcell
@@ -172,13 +202,57 @@ contains
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
   end subroutine fill_supercell
 
-  !----------------------------------------------------------------------------------------------------
-  ! Run dynamics or Monte carlo
+  !-------------------------------------------------------------------!
+  ! Fit lattic model
+  !-------------------------------------------------------------------!
+  subroutine fit_lattice_model(self)
+    class(mb_manager_t), intent(inout) :: self
+    !TODO:
+  end subroutine fit_lattice_model
+
+
+  !-------------------------------------------------------------------!
+  ! initialize movers needed.
+  !-------------------------------------------------------------------!
+  subroutine set_movers(self)
+    class(mb_manager_t), intent(inout) :: self
+    if (self%params%spin_dynamics>0) then
+       call self%spin_mover%initialize(self%params, nspin=self%supercell%nspin)
+    end if
+
+    if (self%params%dynamics>0) then
+       call self%lattice_mover%initialize(self%params, self%filenames)
+    end if
+
+    ! TODO: LWF MOVER
+  end subroutine set_movers
+
+
+  !-------------------------------------------------------------------!
+  ! Run dynamics
+  !-------------------------------------------------------------------!
+  subroutine run_dynamics(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%sc_maker%initialize(diag(self%params%ncell))
+    ! read params
+    call self%read_potentials()
+    call self%fill_supercell()
+
+    call self%set_movers()
+  end subroutine run_dynamics
+
+  !-------------------------------------------------------------------!
+  ! Run all jobs
+  !-------------------------------------------------------------------!
   subroutine run(self)
     class(mb_manager_t), intent(inout) :: self
+    ! if ... fit lattice model
+    ! if ... fit lwf model
+    ! if ... run dynamics...
+    ! if ...
   end subroutine run
-
-  !----------------------------------------------------------------------------------------------------
+ !----------------------------------------------------------------------------------------------------
   ! This does everything from initialize to finalize
   subroutine run_all(self, filenames)
     class(mb_manager_t), intent(inout) :: self

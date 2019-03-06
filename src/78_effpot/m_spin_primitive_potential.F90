@@ -35,6 +35,7 @@ module m_spin_primitive_potential
   use defs_basis
   use m_abicore
   use m_errors
+  use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_io_xml, only: xml_read_spin, xml_free_spin
   use m_unitcell, only: unitcell_t
   use m_primitive_potential, only: primitive_potential_t
@@ -43,7 +44,7 @@ module m_spin_primitive_potential
   use m_supercell_maker, only: supercell_maker_t
   use m_spmat_ndcoo, only: ndcoo_mat_t
   use m_multibinit_global
-  use m_spin_terms
+  use m_spin_potential, only: spin_potential_t
   implicit none
   private
   !!*** 
@@ -116,6 +117,44 @@ contains
        call self%primcell%set_spin(nspin, ms, spin_positions, gyroratios, damping_factors)
     end do
   end subroutine set_spin_primcell
+
+
+  subroutine load_from_files(self, params, fnames)
+    class(spin_primitive_potential_t), intent(inout) :: self
+    type(multibinit_dtset_type), intent(inout) :: params
+    character(len=fnlen), intent(in) :: fnames(:)
+    character(len=fnlen) :: xml_fname
+    character(len=500) :: message
+    integer :: ii
+    type(spin_primitive_potential_t), pointer:: spin_pot
+    logical:: use_sia, use_exchange, use_dmi, use_bi
+
+    xml_fname=fnames(3)
+    !call self%prim_pots%load_from_files(self%params, self%filenames)
+       if (iam_master) then
+          write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+               &     'reading spin terms.'
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
+       end if
+       allocate(spin_primitive_potential_t::spin_pot)
+       call self%initialize()
+
+       use_exchange=.True.
+       use_sia=.True.
+       use_dmi=.True.
+       use_bi=.True.
+       call spin_pot%read_xml(trim(xml_fname)//char(0))
+       !call spin_model%initialize( filnam, inp )
+       ! Do not use sia term in xml if spin_sia_add is set to 1.
+       if(params%spin_sia_add == 1) use_sia=.False.
+       call self%read_xml( xml_fname, &
+            & use_exchange=use_exchange,  use_sia=use_sia, use_dmi=use_dmi, use_bi=use_bi)
+       if (params%spin_sia_add /= 0 ) then
+          call spin_pot%add_input_sia(params%spin_sia_k1amp, &
+               & params%spin_sia_k1dir)
+       end if
+  end subroutine load_from_files
 
   subroutine set_bilinear_1term(self, i, j, R, val)
     class(spin_primitive_potential_t), intent(inout) :: self
@@ -371,7 +410,7 @@ contains
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t), intent(inout):: scmaker
     class(abstract_potential_t), pointer, intent(inout) :: scpot
-    type(spin_terms_t),pointer :: tpot
+    type(spin_potential_t),pointer :: tpot
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
     integer :: i_sc(scmaker%ncells), j_sc(scmaker%ncells), R_sc(scmaker%ncells)
     real(dp) :: val_sc(scmaker%ncells)
@@ -379,7 +418,7 @@ contains
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
 
-    allocate(spin_terms_t::scpot)
+    allocate(spin_potential_t::scpot)
     call tpot%initialize(sc_nspin)
     scpot=>tpot
 
@@ -405,7 +444,7 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! subroutine make_supercell(self, sc_matrix, sc_ham)                                                       !
   !   class(spin_primitive_potential_t) , intent(inout) :: self                                              !
-  !   type(spin_terms_t) , intent(inout) :: sc_ham                                                           !
+  !   type(spin_potential_t) , intent(inout) :: sc_ham                                                           !
   !   integer :: sc_matrix(3,3), iatoms(self%nspin)                                                         !
   !                                                                                                          !
   !   integer ::  typat_primcell(self%natoms), sc_nspin,  i, counter, icell                                 !
@@ -477,7 +516,7 @@ contains
   !   endif                                                                                                  !
   !                                                                                                          !
   !                                                                                                          !
-  !   call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &                              !
+  !   call spin_potential_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &                              !
   !        & spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, &                                 !
   !        & rvec=sc_rvec, gyro_ratio=sc_gyroratios, damping=sc_damping_factors)                             !
   !                                                                                                          !
@@ -499,7 +538,7 @@ contains
   !                  tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)                                  !
   !               end do                                                                                     !
   !            end do                                                                                        !
-  !            call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp) !
+  !            call spin_potential_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp) !
   !         endif                                                                                            !
   !      enddo                                                                                               !
   !   enddo                                                                                                  !

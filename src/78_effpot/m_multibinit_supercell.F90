@@ -50,7 +50,7 @@ module m_multibinit_supercell
      ! spin related
      integer :: nspin
      real(dp), allocatable :: ms(:), spin_positions(:, :), gyro_ratio(:), gilbert_damping(:)
-     integer, allocatable :: iatoms(:), ispin_prim(:), rvec(:,:)
+     integer, allocatable ::  ispin_prim(:), rvec(:,:)
 
      ! lwf related
      integer :: nlwf
