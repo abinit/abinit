@@ -70,15 +70,15 @@ module m_spin_hist
   !! * ihist                   : index of history
 
   !! natoms : number of atoms
-  !! nspins: number of magnetic atoms
+  !! nspin: number of magnetic atoms
   !! * acell(3)         : Acell (acell , rprimd, xred: only initial value kept if there is!!  no lattice dynamics. Other wise for each step, the corresponding lattice step number is kept)
   !! * rprimd(3,3)      : Rprimd
   !! * xred(3,natoms)    : Xred
   !! * index_spin     : the index of atom in spin model, -1 if it is not in the spin model 
-  !! * heff(3,nspins,mxhist)   : effective magnetic field (cartesian)
-  !! * snorm(nspins, mxhist) : magnetitude of spin.
-  !! * S(3,nspins,mxhist)   : spin orientation of atoms (cartesian)
-  !! * dSdt(3, nspins, mxhist) : dS/dt (cartesian)
+  !! * heff(3,nspin,mxhist)   : effective magnetic field (cartesian)
+  !! * snorm(nspin, mxhist) : magnetitude of spin.
+  !! * S(3,nspin,mxhist)   : spin orientation of atoms (cartesian)
+  !! * dSdt(3, nspin, mxhist) : dS/dt (cartesian)
   !! * etot(mxhist)            : Electronic total Energy
   !! * entropy(mxhist)         : Entropy
   !! * itime(mxhist)           : index of spin dynamics step.
@@ -96,7 +96,7 @@ module m_spin_hist
      ! Maximun size of the historical records
      integer :: mxhist = 0
 
-     integer :: nspins, nspins_prim
+     integer :: nspin, nspin_prim
      ! whether lattice dynamics is also present
      integer, allocatable :: ihist_latt(:)
      logical :: has_latt
@@ -113,14 +113,14 @@ module m_spin_hist
      integer, allocatable :: spin_index(:)
 
      ! spin
-     !heff(3, nspins, mxhist)
+     !heff(3, nspin, mxhist)
      real(dp), allocatable :: heff(:, :, :)
-     !snorm(nspins, mxhist)
+     !snorm(nspin, mxhist)
      real(dp), allocatable :: snorm(:, :)
 
-     !S(3, nspins, mxhist)
+     !S(3, nspin, mxhist)
      real(dp), allocatable :: S(:, :, :)
-     !dSdt(3, nspins, mxhist)
+     !dSdt(3, nspin, mxhist)
      ! TODO hexu: is it useful?
      real(dp), allocatable :: dSdt(:, :, :)
 
@@ -180,7 +180,7 @@ contains
 !! initialize spin hist
 !!
 !! INPUTS
-!! nspins = number of magnetic atoms
+!! nspin = number of magnetic atoms
 !! mxhist = maximum number of hist steps
 !! has_latt = whether spin dynamics in with lattice dynamics
 !!
@@ -193,15 +193,15 @@ contains
 !!
 !! SOURCE
 
-  subroutine spin_hist_t_init(hist, nspins, mxhist, has_latt)
+  subroutine spin_hist_t_init(hist, nspin, mxhist, has_latt)
 
     implicit none
     class(spin_hist_t), intent(inout) :: hist
-    integer, intent(in) :: nspins, mxhist
+    integer, intent(in) :: nspin, mxhist
     logical, intent(in) :: has_latt
     !integer, optional,  intent(in) :: calc_traj_obs, calc_thermo_obs, calc_correlation_obs
 
-    hist%nspins=nspins
+    hist%nspin=nspin
     hist%ntypat=0
     hist%ihist=1
     hist%ihist_prev=0
@@ -210,10 +210,10 @@ contains
     hist%has_latt=has_latt
 
     !print *, "initialize HIST spin"
-    ABI_ALLOCATE(hist%heff, (3, nspins, mxhist))
-    ABI_ALLOCATE(hist%snorm, (nspins, mxhist))
-    ABI_ALLOCATE(hist%S, (3, nspins, mxhist))
-    ABI_ALLOCATE(hist%dSdt, (3, nspins, mxhist))
+    ABI_ALLOCATE(hist%heff, (3, nspin, mxhist))
+    ABI_ALLOCATE(hist%snorm, (nspin, mxhist))
+    ABI_ALLOCATE(hist%S, (3, nspin, mxhist))
+    ABI_ALLOCATE(hist%dSdt, (3, nspin, mxhist))
 
     ABI_ALLOCATE(hist%etot, (mxhist))
     ABI_ALLOCATE(hist%entropy, (mxhist))
@@ -429,7 +429,7 @@ contains
   !! hist <type(spin_hist_t)()> = spin hist type
   !! step = index of step. current step is 0. last step is -1. 
   !! OUTPUT
-  !! S(3, nspins)=spin orientations at step
+  !! S(3, nspin)=spin orientations at step
   !! PARENTS
   !!      m_spin_hist
   !!
@@ -440,7 +440,7 @@ contains
 
     class(spin_hist_t), intent(inout) :: hist
     integer, intent(in), optional:: step
-    real(dp) :: S(3, hist%nspins)
+    real(dp) :: S(3, hist%nspin)
     integer :: i, j
     if (.not. present(step)) then
        j=0
@@ -534,10 +534,10 @@ contains
   !! FUNCTION
   !! put the data into hist
   !! INPUTS
-  !! S(3, nspins)=spin orientation
-  !! Snorm(nspins)=spin amplitude
-  !! dSdt(3,nspins)= dS/dt
-  !! Heff(3, nspins) = effective magnetic field
+  !! S(3, nspin)=spin orientation
+  !! Snorm(nspin)=spin amplitude
+  !! dSdt(3,nspin)= dS/dt
+  !! Heff(3, nspin) = effective magnetic field
   !! etot = total energy
   !! entropy = entropy
   !! time = time (note: not index of time)
@@ -554,8 +554,8 @@ contains
   subroutine spin_hist_t_set_vars(hist, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
 
     class(spin_hist_t), intent(inout) :: hist
-    real(dp), optional, intent(in) :: S(3, hist%nspins), Snorm(hist%nspins), dSdt(3, hist%nspins), &
-        &  Heff(3, hist%nspins), etot, entropy, time
+    real(dp), optional, intent(in) :: S(3, hist%nspin), Snorm(hist%nspin), dSdt(3, hist%nspin), &
+        &  Heff(3, hist%nspin), etot, entropy, time
     integer, optional :: ihist_latt
     logical, intent(in), optional :: inc
     integer :: ihist

@@ -66,12 +66,12 @@ module m_spin_mover
   !! dt: time step
   !! total_time
   !! temperature.
-  !! nspins number of magnetic atoms
+  !! nspin number of magnetic atoms
   !! SOURCE
 
 
   type, public, extends(abstract_mover_t) :: spin_mover_t
-     integer :: nspins, method
+     integer :: nspin, method
      real(dp) :: dt, total_time, temperature, pre_time
      real(dp), allocatable :: gyro_ratio(:), damping(:), gamma_L(:), H_lang_coeff(:), ms(:), Stmp(:,:)
      real(dp), allocatable :: Heff_tmp(:,:), Htmp(:,:), Hrotate(:,:), H_lang(:,:)
@@ -116,12 +116,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine spin_mover_t_initialize(self, params, nspins)
+  subroutine spin_mover_t_initialize(self, params, nspin)
     class(spin_mover_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
-    integer, intent(inout) :: nspins
+    integer, intent(inout) :: nspin
     integer ::  i
-    self%nspins=nspins
+    self%nspin=nspin
     self%dt= params%spin_dt
     self%pre_time= params%spin_ntime_pre * self%dt
     self%total_time= params%spin_ntime * self%dt
@@ -130,9 +130,9 @@ contains
        self%method=params%spin_dynamics
     endif
     if(params%spin_dynamics==3) then ! Monte carlo
-       call self%spin_mc%initialize(nspins=nspins, angle=1.0_dp, temperature=params%spin_temperature)
+       call self%spin_mc%initialize(nspin=nspin, angle=1.0_dp, temperature=params%spin_temperature)
     end if
-    call xmpi_bcast(self%nspins, master, comm, ierr)
+    call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%dt, master, comm, ierr)
     call xmpi_bcast(self%pre_time, master, comm, ierr)
     call xmpi_bcast(self%total_time, master, comm, ierr)
@@ -145,21 +145,21 @@ contains
        end do
     end if
 
-    ABI_ALLOCATE(self%ms, (self%nspins) )
-    ABI_ALLOCATE(self%gyro_ratio, (self%nspins) )
-    ABI_ALLOCATE(self%damping, (self%nspins) )
-    ABI_ALLOCATE(self%gamma_l, (self%nspins) )
-    ABI_ALLOCATE(self%H_lang_coeff, (self%nspins) )
+    ABI_ALLOCATE(self%ms, (self%nspin) )
+    ABI_ALLOCATE(self%gyro_ratio, (self%nspin) )
+    ABI_ALLOCATE(self%damping, (self%nspin) )
+    ABI_ALLOCATE(self%gamma_l, (self%nspin) )
+    ABI_ALLOCATE(self%H_lang_coeff, (self%nspin) )
 
-    ABI_ALLOCATE(self%Heff_tmp, (3,self%nspins) )
-    ABI_ALLOCATE(self%Htmp, (3,self%nspins) )
-    ABI_ALLOCATE(self%Hrotate, (3,self%nspins) )
-    ABI_ALLOCATE(self%Stmp, (3,self%nspins) )
-    ABI_ALLOCATE(self%H_lang, (3,self%nspins) )
+    ABI_ALLOCATE(self%Heff_tmp, (3,self%nspin) )
+    ABI_ALLOCATE(self%Htmp, (3,self%nspin) )
+    ABI_ALLOCATE(self%Hrotate, (3,self%nspin) )
+    ABI_ALLOCATE(self%Stmp, (3,self%nspin) )
+    ABI_ALLOCATE(self%H_lang, (3,self%nspin) )
 
     self%gamma_l_calculated=.False.
 
-    call self%mps%initialize(nspins, comm)
+    call self%mps%initialize(nspin, comm)
   end subroutine spin_mover_t_initialize
   !!***
 
@@ -173,8 +173,8 @@ contains
 
   subroutine set_Langevin_params(self, gyro_ratio, damping, temperature, ms)
     class(spin_mover_t), intent(inout) :: self
-    real(dp), optional, intent(in) :: damping(self%nspins), temperature, &
-         &    gyro_ratio(self%nspins), ms(self%nspins)
+    real(dp), optional, intent(in) :: damping(self%nspin), temperature, &
+         &    gyro_ratio(self%nspin), ms(self%nspin)
 
     if(present(damping)) then
        self%damping(:)=damping(:)
@@ -212,7 +212,7 @@ contains
 
   subroutine get_Langevin_Heff(self, H_lang)
     class(spin_mover_t), intent(inout) :: self
-    real(dp), intent(inout):: H_lang(3,self%nspins)
+    real(dp), intent(inout):: H_lang(3,self%nspin)
     integer :: i, istart, iend, ntask
     if ( self%temperature .gt. 1d-7) then
        call rand_normal_array(self%rng, H_lang(:, self%mps%istart:self%mps%iend), 3*self%mps%ntask)
@@ -226,12 +226,12 @@ contains
 
   subroutine get_dSdt(self, S, Heff, dSdt)
     class(spin_mover_t), intent(inout) :: self
-    real(dp), intent(in) :: Heff(3,self%nspins), S(3,self%nspins)
-    real(dp), intent(out) :: dSdt(3, self%nspins)
+    real(dp), intent(in) :: Heff(3,self%nspin), S(3,self%nspin)
+    real(dp), intent(out) :: dSdt(3, self%nspin)
     integer :: i
     real(dp) :: Ri(3)
     !$OMP PARALLEL DO private(Ri, i)
-    do i=1,self%nspins
+    do i=1,self%nspin
        Ri = cross(S(:,i),Heff(:,i))
        dSdt(:,i) = -self%gamma_L(i)*(Ri+self%damping(i)* cross(S(:,i), Ri))
     end do
@@ -265,8 +265,8 @@ contains
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: effpot
-    real(dp), intent(inout) :: S_in(3,self%nspins)
-    real(dp), intent(out) :: S_out(3,self%nspins), etot
+    real(dp), intent(inout) :: S_in(3,self%nspin)
+    real(dp), intent(out) :: S_out(3,self%nspin), etot
     integer :: i
     real(dp) :: dSdt(3), Htmp(3), Ri(3)
 
@@ -335,8 +335,8 @@ contains
     !class (spin_mover_t), intent(inout):: self
     class(spin_mover_t), intent(inout):: self
     class(abstract_potential_t), intent(inout) :: effpot
-    real(dp), intent(inout) :: S_in(3,self%nspins)
-    real(dp), intent(out) :: S_out(3,self%nspins), etot
+    real(dp), intent(inout) :: S_in(3,self%nspin)
+    real(dp), intent(out) :: S_out(3,self%nspin), etot
     real(dp) :: Htmp(3)
     integer :: i
 
@@ -370,15 +370,15 @@ contains
   subroutine spin_mover_t_run_one_step_MC(self, effpot, S_in, S_out, etot)
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
-    real(dp), intent(inout) :: S_in(3,self%nspins)
-    real(dp), intent(out) :: S_out(3,self%nspins), etot
+    real(dp), intent(inout) :: S_in(3,self%nspin)
+    real(dp), intent(out) :: S_out(3,self%nspin), etot
     call self%spin_mc%run_MC(self%rng, effpot, S_in, S_out, etot)
   end subroutine spin_mover_t_run_one_step_MC
 
   subroutine spin_mover_t_run_one_step(self, effpot)
     class(spin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
-    real(dp) :: S_out(3,self%nspins), etot
+    real(dp) :: S_out(3,self%nspin), etot
     if(iam_master) self%Stmp=spin_hist_t_get_S(self%hist)
     if(self%method==1) then
        call self%run_one_step_HeunP(effpot, self%Stmp, S_out, etot)
@@ -420,7 +420,7 @@ contains
     type(spin_hist_t), intent(inout) :: hist
     type(spin_ncfile_t), intent(inout) :: ncfile
     type(spin_observable_t), intent(inout) :: ob
-    !real(dp) ::  S(3, self%nspins)
+    !real(dp) ::  S(3, self%nspin)
     real(dp):: t
     integer :: counter, i, ii
     character(len=80) :: msg, msg_empty
@@ -525,8 +525,8 @@ contains
        call wrtout(ab_out, msg, 'COLL')
 
        do i =1, ob%nsublatt
-          write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspins_sub(i)/mu_B , ii=1, 3), &
-               sqrt(sum((ob%Mst_sub(:, i)/ob%nspins_sub(i)/mu_B)**2))
+          write(msg, "(A1, 5X, 2X, I5.4, 8X, 4F10.5)") '-', i, (ob%Mst_sub(ii,i)/ob%nspin_sub(i)/mu_B , ii=1, 3), &
+               sqrt(sum((ob%Mst_sub(:, i)/ob%nspin_sub(i)/mu_B)**2))
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
        end do

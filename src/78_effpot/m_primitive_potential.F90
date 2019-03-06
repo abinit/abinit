@@ -41,11 +41,12 @@ module m_primitive_potential
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
   implicit none
-
+  private
   type ,public :: primitive_potential_t
      ! This is the abstract class of primitive potential
      ! It do the following things:
      type(unitcell_t), pointer :: primcell
+     character(len=200) :: label
    contains
      !procedure:: initialize       ! perhaps each effpot type should have own 
      !procedure :: finalize
@@ -56,20 +57,16 @@ module m_primitive_potential
 
 contains
 
-subroutine fill_supercell(self, sc_maker, sc_pot)
+subroutine fill_supercell(self, scmaker, scpot)
     class(primitive_potential_t), intent(inout) :: self
-    class(supercell_maker_t), intent(in) :: sc_maker
-    class(abstract_potential_t), pointer, intent(inout) :: sc_pot
+    type(supercell_maker_t), intent(inout) :: scmaker
+    class(abstract_potential_t), pointer, intent(inout) :: scpot
     ! Note that sc_pot is a pointer
 
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
-    type(abstract_potential_t), pointer :: tmp
-    allocate(abstract_potential_t:: tmp)
     ! call tmp%initialize(....)
     ! set tmp
-    sc_pot=>tmp
-    nullify(tmp)
   end subroutine fill_supercell
 
   subroutine load_from_files(self, params,  fnames)
@@ -83,6 +80,5 @@ subroutine fill_supercell(self, sc_maker, sc_pot)
     class(primitive_potential_t), intent(inout) :: self
     character(*), intent(in) :: fname
   end subroutine save_to_file
-
 
 end module m_primitive_potential

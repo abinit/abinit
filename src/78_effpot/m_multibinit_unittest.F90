@@ -36,8 +36,11 @@ module m_multibinit_unittest
   use m_abicore
   use m_errors
 
+  use m_dynamic_array, only: dynamic_array_unittest
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
+  use m_spmat_ndcoo, only: test_ndcoo
+  use m_spmat_convert, only: spmat_convert_unittest
 
   implicit none
   !!***
@@ -52,8 +55,24 @@ contains
     print*, "================================="
 
     ! test2
+    print *, "Unit test2: Dynamic array"
+    call dynamic_array_unittest()
+    print *, "End Unit test2"
+    print*, "================================="
 
+    ! test4
+    print *, "ndcoo matrix test"
+    call test_ndcoo()
+    print *, "End ndcoo matrix test"
+    print*, "================================="
+
+
+    print *, "spmat convert test"
+    call spmat_convert_unittest()
+    print *, "End spmat convert test"
+    print*, "================================="
   end subroutine mb_test_main
+
   !-------------------------------------------------
 
   subroutine mb_test1()

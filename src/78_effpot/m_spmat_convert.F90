@@ -47,7 +47,7 @@ contains
     type(LIL_mat_t), intent(inout) :: ll
     integer :: s(2), irow, icol
     s=shape(mat)
-    call ll%initialize(nrow=s(1), ncol=s(2))
+    call ll%initialize(s)
     do icol=1, ll%ncol, 1
        do irow=1, ll%nrow, 1
           call ll%insert(irow,icol,mat(irow, icol),0)
@@ -76,15 +76,11 @@ contains
     class(LIL_mat_t) , intent(inout):: ll
     class(COO_mat_t), intent(out):: COO
     integer ::  counter, irow
-    call  COO%initialize(ll%nrow, ll%ncol, ll%get_nnz())
-    counter=0
+    call  COO%initialize(shape=ll%shape)
     do irow=1, ll%nrow
        call llist_iter_restart(ll%rows(irow))
        do while(associated(ll%rows(irow)%iter))
-          counter=counter+1
-          COO%i(counter)=irow
-          COO%j(counter)=ll%rows(irow)%iter%i
-          COO%val(counter)= ll%rows(irow)%iter%val 
+          call coo%add_entry([irow, ll%rows(irow)%iter%i], ll%rows(irow)%iter%val)
           ll%rows(irow)%iter=>ll%rows(irow)%iter%next
        enddo
     end do
@@ -96,7 +92,8 @@ contains
     type(CSR_mat_t), intent(inout):: csrmat
     integer:: irow, icol, i, nzrow, nnz
     real(dp):: val
-    call  csrmat%initialize(ll%nrow, ll%ncol, ll%get_nnz())
+    call  csrmat%initialize([ll%nrow, ll%ncol])
+    call csrmat%set(nnz=ll%get_nnz())
     i=0
     csrmat%row_shift(1)=1
     do irow=1, ll%nrow
@@ -105,8 +102,6 @@ contains
        do while(associated(ll%rows(irow)%iter))
           nzrow=nzrow+1
           i=i+1
-          !mat(irow, ll%rows(irow)%iter%i)=ll%rows(irow)%iter%val
-          !ll%rows(irow)%iter=>ll%rows(irow)%iter%next
           csrmat%icol(i)=ll%rows(irow)%iter%i
           csrmat%val(i)=ll%rows(irow)%iter%val
           ll%rows(irow)%iter=>ll%rows(irow)%iter%next
@@ -126,8 +121,8 @@ contains
     nnz=count(mat /= 0.0_dp)
     nrow=size(mat, 1)
     ncol=size(mat, 2)
-    call  csrmat%initialize(nrow, ncol, nnz)
-
+    call  csrmat%initialize([nrow, ncol])
+    call csrmat%set(nnz=nnz)
     csrmat%row_shift(1)=1
     inz=0
     do i=1, nrow
@@ -142,8 +137,78 @@ contains
        end do
        csrmat%row_shift(i+1)=csrmat%row_shift(i)+nzrow
     end do
-
-
   end subroutine dense_to_CSR
+
+  subroutine dense_to_coo(mat, coo)
+    real(dp), intent(in) :: mat(:,:)
+    type(coo_mat_t), intent(inout) :: coo
+    integer:: i, j, ncol, nrow
+    call coo%initialize(shape(mat))
+    do j=1, size(mat, dim=2)
+       do i=1, size(mat, dim=1)
+          if (abs(mat(i, j)) >tiny(1.0d0) ) then
+             call coo%add_entry(ind=[i,j], val=mat(i,j))
+          end if
+       end do
+    end do
+  end subroutine dense_to_coo
+
+
+  subroutine COO_to_CSR(coo, csr)
+    type(COO_mat_t), intent(inout) :: coo
+    type(CSR_mat_t), intent(inout) :: csr
+    integer :: ngroup
+    integer, allocatable :: i1_list(:), istartend(:)
+    integer :: row_nz(coo%shape(1))
+    integer :: i, irow
+    call coo%group_by_1dim(ngroup, i1_list, istartend)
+    call csr%initialize(coo%shape)
+    call csr%set(nnz=coo%nnz)
+    csr%icol(:)=coo%ind%data(2,1:coo%nnz)
+    csr%val(:) = coo%val%data(1:coo%nnz)
+    csr%row_shift(:)=0
+    row_nz(:)=0
+    do i=1, ngroup
+       irow=i1_list(i)
+       !csr%row_shift(irow)=istartend(i)
+       row_nz(irow) = istartend(i+1)-istartend(i)
+    end do
+
+    csr%row_shift(1)=1
+    do i=2, csr%nrow+1
+       csr%row_shift(i)= csr%row_shift(i-1)+row_nz(i-1)
+    end do
+  end subroutine COO_to_CSR
+
+
+  subroutine spmat_convert_unittest()
+    real(dp) ::mat(4,4)
+    type(coo_mat_t) :: coo
+    type(csr_mat_t) :: csr, csr2
+    integer :: ngroup
+    integer, allocatable :: i1list(:), ise(:)
+    mat=reshape([1,2,0,0, 8, 3, 0,0, 0,0,0,0, 0,0,0,9], [4,4])*1.0d0
+    call dense_to_coo(mat, coo)
+    call coo%sum_duplicates()
+    call coo%print()
+    call dense_to_csr(mat, csr)
+    call csr%print()
+    call coo%group_by_1dim(ngroup, i1list, ise)
+    print *,  "ngroup: ", ngroup
+    print *, "i1list: ", i1list
+    print *, "ise: ", ise
+    if(allocated(i1list)) ABI_DEALLOCATE(i1list)
+    if(allocated(ise)) ABI_DEALLOCATE(ise)
+
+    call coo_to_csr(coo, csr2)
+    print *, "Csr2:"
+    call csr2%print()
+
+    call coo%finalize()
+    call csr%finalize()
+    call csr2%finalize()
+ 
+  end subroutine spmat_convert_unittest
+
 
 end module m_spmat_convert

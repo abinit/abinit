@@ -27,13 +27,15 @@
 #endif
 #include "abi_common.h"
 
-module m_dynmaic_array
+module m_dynamic_array
 
   use defs_basis
   use m_abicore
   use m_errors
+  use m_mathfuncs, only: array_morethan, binsearch_left_integerlist
 
   implicit none
+  private
 !!***
 
 !!****t* defs_abitypes/real_array_type
@@ -44,13 +46,15 @@ module m_dynmaic_array
 !! datatype of real(dp) array which can be dynamically allocated
 !!
 !! SOURCE
-  type real_array_type
+  type, public:: real_array_type
     integer:: size=0, capacity=0
     real(dp), allocatable :: data(:)
-  !CONTAINS
-  !  procedure :: push => real_array_type_push
-  !  procedure :: finalize => real_array_type_finalize
+  CONTAINS
+    procedure :: push => real_array_type_push
+    procedure :: finalize => real_array_type_finalize
   end type real_array_type
+
+
 !!***
 
 !!****t* defs_abitypes/int_array_type
@@ -61,14 +65,38 @@ module m_dynmaic_array
 !! datatype of real(dp) array which can be dynamically allocated
 !!
 !! SOURCE
-  type int_array_type
+  type , public::int_array_type
     integer:: size=0, capacity=0
     integer, allocatable :: data(:)
-  !CONTAINS
-  !  procedure :: push => int_array_type_push
-  !  procedure :: finalize => int_array_type_finalize
+  CONTAINS
+    procedure :: push => int_array_type_push
+    procedure :: finalize => int_array_type_finalize
+    procedure :: sort => int_array_type_sort
   end type int_array_type
 !!***
+
+  !!****t* defs_abitypes/int_array_type
+  !! NAME
+  !! int_array_type
+  !!
+  !! FUNCTION
+  !! datatype of integer array which the dim=2 can be dynamically allocated
+  !!
+  !! SOURCE
+  type , public::int2d_array_type
+     integer:: size=0, capacity=0
+     logical :: sorted=.False.
+     integer, allocatable :: data(:,:)
+   CONTAINS
+     procedure :: push => int2d_array_type_push
+     procedure :: push_unique => int2d_array_type_push_unique
+     procedure :: sort => int2d_array_type_sort
+     procedure :: binsearch =>int2d_array_type_binsearch
+     procedure :: finalize => int2d_array_type_finalize
+  end type int2d_array_type
+  !!***
+
+  public::  dynamic_array_unittest
 CONTAINS
 
 
@@ -187,6 +215,55 @@ subroutine int_array_type_push(self, val)
 end subroutine int_array_type_push
 !!***
 
+
+subroutine insertion_sort_int(a, order)
+  integer, intent(inout) :: a(:)
+  integer, optional, intent(inout):: order(size(a))
+  integer :: n,i,j, v
+  n=size(a)
+  if (present(order)) then
+     do i = 1,n
+        order(i)=i
+     end do
+  end if
+  do i = 2,n
+     v=a(i)
+     j=i-1
+     do while(j>=1 .and. a(j)>v)
+        a(j+1)=a(j)
+        if(present(order)) order(j+1)=order(j)
+        j=j-1
+     end do
+     a(j+1)=v
+     if(present(order)) order(j+1)=i
+  end do
+
+end subroutine insertion_sort_int
+
+! insertion sort
+subroutine int_array_type_sort(self, order)
+  class(int_array_type), intent(inout):: self
+  integer, optional, intent(inout):: order(self%size)
+  integer :: i,j, v
+  if (present(order)) then
+     do i = 1, self%size
+        order(i)=i
+     end do
+  end if
+  do i = 2, self%size
+     v=self%data(i)
+     j=i-1
+     do while(j>=1 .and. self%data(j)>v)
+        self%data(j+1)=self%data(j)
+        if(present(order)) order(j+1)=order(j)
+        j=j-1
+     end do
+     self%data(j+1)=v
+     if(present(order)) order(j+1)=i
+  end do
+end subroutine int_array_type_sort
+
+
 !****f* m_dynarray/int_array_type_finalize
 !!
 !! NAME
@@ -218,5 +295,189 @@ subroutine int_array_type_finalize(self)
 
 end subroutine int_array_type_finalize
 
-end module m_dynmaic_array
+
+!==================================================================
+
+!****f* m_dynarray/int2d_array_type_push
+!!
+!! NAME
+!! int2d_array_type_push
+!!
+!! FUNCTION
+!! push data to a int2d_array_type
+!!
+!! INPUTS
+!! self = int2d_array_type object
+!! val= data to be pushed
+!! OUTPUT
+!! int_array<type(real_array_type)()> = int2d_array_type data
+!! PARENTS
+!!      m_dynarray
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine int2d_array_type_push(self, val)
+
+    class(int2d_array_type), intent(inout):: self
+    integer :: val(:), err
+    integer, allocatable :: temp(:,:)
+    self%size=self%size+1
+    if(self%size==1) then
+      self%capacity=8
+      ALLOCATE(self%data(size(val), self%capacity), stat=err)
+    else if ( self%size>self%capacity ) then
+      self%capacity = self%size + self%size / 4 + 8
+      !ABI_ALLOCATE(temp,(self%capacity))
+      ALLOCATE(temp(size(val), self%capacity), stat=err)
+      temp(:,:self%size-1) = self%data
+      call move_alloc(temp, self%data) !temp gets deallocated
+    end if
+    self%data(:,self%size)=val
+end subroutine int2d_array_type_push
+!!***
+
+
+
+!****f* m_dynarray/int2d_array_type_push
+!!
+!! NAME
+!! int2d_array_type_push
+!!
+!! FUNCTION
+!! push data to a int2d_array_type
+!!
+!! INPUTS
+!! self = int2d_array_type object
+!! val= data to be pushed
+!! OUTPUT
+!! int_array<type(real_array_type)()> = int2d_array_type data
+!! PARENTS
+!!      m_dynarray
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine int2d_array_type_push_unique(self, val, position)
+
+    class(int2d_array_type), intent(inout):: self
+    integer, intent(in) :: val(:)
+    integer, optional, intent(out) :: position
+    integer :: i
+    logical :: inside
+    inside=.False.
+    do i=1, self%size
+       if(all(self%data(:,i)==val)) then
+          inside=.True.
+          if (present(position)) position=i
+          exit
+       endif
+    enddo
+    if(.not. inside) then
+       call self%push(val)
+       if (present(position)) position=self%size
+    end if
+  end subroutine int2d_array_type_push_unique
+!!***
+
+
+
+!****f* m_dynarray/int2d_array_type_finalize
+!!
+!! NAME
+!! int2d_array_type_finalize
+!!
+!! FUNCTION
+!! destroy int2d_array_type
+!!
+!! INPUTS
+!! self= int2d_array_type object
+!! OUTPUT
+!! int_array<type(int2d_array_type)()> = int2d_array_type data
+!! PARENTS
+!!      m_dynarray
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine int2d_array_type_finalize(self)
+
+  class(int2d_array_type), intent(inout):: self
+  integer:: err
+  if ( allocated(self%data) ) then
+      !ABI_DEALLOCATE(self%data)
+      DEALLOCATE(self%data, stat=err)
+  end if
+  self%size=0
+  self%capacity=0
+
+end subroutine int2d_array_type_finalize
+
+subroutine int2d_array_type_sort(self, order)
+  class(int2d_array_type), intent(inout):: self
+  integer, optional, intent(inout):: order(self%size)
+  integer :: i,j, v(size(self%data, dim=1))
+  if (present(order)) then
+     do i = 1, self%size
+        order(i)=i
+     end do
+  end if
+  do i = 2, self%size
+     v=self%data(:,i)
+     j=i-1
+     do while(j>=1 .and. array_morethan(self%data(:,j),v, size(self%data, dim=1)))
+        self%data(:,j+1)=self%data(:,j)
+        if(present(order)) order(j+1)=order(j)
+        j=j-1
+     end do
+     self%data(:,j+1)=v
+     if(present(order)) order(j+1)=i
+  end do
+  self%sorted=.True.
+end subroutine int2d_array_type_sort
+
+function int2d_array_type_binsearch(self, val) result(i)
+  class(int2d_array_type), intent(inout):: self
+  integer, intent(inout) :: val(:)
+  integer :: i
+  i=binsearch_left_integerlist(self%data(:,1:self%size), val)
+end function int2d_array_type_binsearch
+
+
+
+!====================== Unit tests======================
+
+subroutine insertion_sort_int_test()
+  integer :: a(4), order(4), b(4)
+  a=[1,5,3,4]
+  b=a
+  call insertion_sort_int(a, order)
+  print *, a
+  print *, "order", order
+  print *, "by order", b(order)
+  a=[3,6,2,4]
+  call insertion_sort_int(a, order)
+  print *, a
+end subroutine insertion_sort_int_test
+
+subroutine int2d_array_test()
+  type(int2d_array_type) :: t
+  integer :: i
+  call t%push_unique([1,1,2])
+  call t%push_unique([1,2,2])
+  call t%push_unique([1,1,2])
+  call t%push_unique([1,1,1])
+  call t%push_unique([-1, 3, 3])
+  call t%sort()
+  do i=1, t%size
+     print *, t%data(:, i)
+  end do
+end subroutine int2d_array_test
+
+subroutine dynamic_array_unittest()
+  call insertion_sort_int_test()
+  call int2d_array_test()
+end subroutine dynamic_array_unittest
+
+end module m_dynamic_array
 !!***

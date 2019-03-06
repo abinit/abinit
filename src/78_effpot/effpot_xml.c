@@ -1097,7 +1097,7 @@ void effpot_xml_getAttribute(char *filename,char*name_key,char*name_attributes,c
 /****************************************************/
 
 int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
-                         int *natoms, double *masses[], int *nspins,
+                         int *natoms, double *masses[], int *nspin,
                          int *index_spin[], double *gyroratios[],
                          double *damping_factors[],
                          double *positions[], double *spinat[]) {
@@ -1115,7 +1115,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   initArray(&spinat_array, 3);
 
   *natoms = 0;
-  *nspins = 0;
+  *nspin = 0;
 
   size_t size, i;
   if (file_exists(fname)==0){
@@ -1206,7 +1206,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
         }
         xmlFree(key);
 
-        (*nspins)++;
+        (*nspin)++;
       }
       insertIntArray(&index_spin_array, ind_spin);
 
@@ -1261,17 +1261,17 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
   }
   copyArraytoCArray(&spinat_array, spinat, &size);
 
-  //if ((int)size / 3 != *nspins) {
+  //if ((int)size / 3 != *nspin) {
   //  fprintf(stderr, "Number of spinat not equal to number of magnetic atoms.\n");
   //}
   copyArraytoCArray(&gyroratio_array, gyroratios, &size);
-  //if ((int)size != *nspins) {
+  //if ((int)size != *nspin) {
   //  fprintf(stderr,
   //          "Number of gyroratios not equal to number of magnetic atoms");
   //}
 
   copyArraytoCArray(&damping_factor_array, damping_factors, &size);
-  //if ((int)size != *nspins) {
+  //if ((int)size != *nspin) {
   //  fprintf(stderr,
   //          "Number of damping_factors not equal to number of magnetic atoms");
   //}
@@ -1625,7 +1625,7 @@ int xml_read_spin_bilinear( char * fname, int *bi_nnz, int *bi_ilist[],
 
 
 void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
-                   int *natoms, double *masses[], int *nspins,
+                   int *natoms, double *masses[], int *nspin,
                    int *index_spin[], double *gyroratios[], double *damping_factors[],
                    double *positions[], double *spinat[],
                    // exchange
@@ -1646,7 +1646,7 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
                    double *bi_vallist[]){
   printf("Reading xml file\n");
   printf(" System:");
-  xml_read_spin_system(fname, ref_energy, unitcell, natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat);
+  xml_read_spin_system(fname, ref_energy, unitcell, natoms, masses, nspin, index_spin, gyroratios, damping_factors, positions, spinat);
 
   printf(" Exchange:    ");
   xml_read_spin_exchange(fname, exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist);
@@ -1670,7 +1670,7 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
 }
 
 void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
-                   int *natoms, double *masses[], int *nspins,
+                   int *natoms, double *masses[], int *nspin,
                    int *index_spin[], double *gyroratios[], double *damping_factors[],
                    double *positions[], double *spinat[],
                    // exchange
@@ -1757,10 +1757,10 @@ int test_read_xml() {
   char * fname="test_f.xml";
   double ref_energy;
   double *unitcell, *masses, *gyroratios, *damping_factors, *positions, *spinat;
-  int natoms, nspins, *index_spin;
+  int natoms, nspin, *index_spin;
   int i, j;
   xml_read_spin_system("test_f.xml", &ref_energy, &unitcell, &natoms, &masses,
-                       &nspins, &index_spin, &gyroratios, &damping_factors, &positions, &spinat);
+                       &nspin, &index_spin, &gyroratios, &damping_factors, &positions, &spinat);
 
   // exchange
   printf("======Exchange Terms========\n");
@@ -1820,7 +1820,7 @@ int test_read_xml() {
 
 #else    // If abinit is not installed with libxml
 int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
-                         int *natoms, double *masses[], int *nspins,
+                         int *natoms, double *masses[], int *nspin,
                          int *index_spin[], double *gyroratios[],
                          double *damping_factors[],
                          double *positions[], double *spinat[]) 
@@ -1833,7 +1833,7 @@ int xml_read_spin_system(char *fname, double *ref_energy, double *unitcell[],
 
 
 void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
-                   int *natoms, double *masses[], int *nspins,
+                   int *natoms, double *masses[], int *nspin,
                    int *index_spin[], double *gyroratios[], double *damping_factors[],
                    double *positions[], double *spinat[],
                    // exchange
@@ -1859,7 +1859,7 @@ void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
 
 
 void xml_free_spin(char *fname, double *ref_energy, double *unitcell[9],
-                   int *natoms, double *masses[], int *nspins,
+                   int *natoms, double *masses[], int *nspin,
                    int *index_spin[], double *gyroratios[], double *damping_factors[],
                    double *positions[], double *spinat[],
                    // exchange

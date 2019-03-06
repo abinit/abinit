@@ -30,8 +30,9 @@
 
 module m_spmat_csr
   use defs_basis  
+  use m_abicore
   use m_xmpi
-  use m_spmat_base
+  use m_spmat_base, only: base_mat2d_t
   use m_mpi_scheduler
   implicit none
 !!***
@@ -44,26 +45,37 @@ module m_spmat_csr
   !            of column and values for entries. size : nrow+1
   ! val: values of non-zero entries. size(nnz)
   !type, public, extends(base_mat_t) :: CSR_mat_t
-     type, public, extends(base_mat_t) :: CSR_mat_t
+  type, public, extends(base_mat2d_t) :: CSR_mat_t
      integer :: nnz
      integer, allocatable :: icol(:), row_shift(:)
      real(dp), allocatable:: val(:)
      type(mpi_scheduler_t) :: mps
    contains
-     procedure :: initialize => csr_mat_t_initialize
+     procedure :: initialize
+     procedure :: set
      procedure :: finalize=> csr_mat_t_finalize
      procedure :: mv => csr_mat_t_mv ! mat vec multiplication serial version
-     procedure :: sync => csr_mat_t_sync ! sync data to all mpi ranks
+     procedure :: sync ! sync data to all mpi ranks
      procedure :: mv_mpi => csr_mat_t_mv_mpi ! mpi version of mv
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
+     procedure :: print
   end type CSR_mat_t
 contains
 
+  subroutine initialize(self, shape)
+    class(csr_mat_t), intent(inout) :: self
+    integer, intent(in) :: shape(:)
+    if (size(shape)/=2) stop "shape should be size 2"
+    call self%base_mat_t%initialize(shape)
+    self%nrow=shape(1)
+    self%ncol=shape(2)
+  end subroutine initialize
+
   ! COO matrix
-  subroutine CSR_mat_t_initialize(self, nrow, ncol, nnz, icol, row_shift, val)
+  subroutine set(self,  nnz, icol, row_shift, val)
 
     class(CSR_mat_t), intent(inout) :: self
-    integer, intent(in) :: nnz, nrow, ncol
+    integer, intent(in) :: nnz 
     ! i: col number of each entry
     ! j: first 0, n1, n1+n2, ...
     ! val(irow, irow+1) are the values of entries in row irow.
@@ -77,8 +89,6 @@ contains
        print *, "This function should be only used on root node"
     end if
 
-    self%nrow=nrow
-    self%ncol=ncol
     self%nnz=nnz
     if(.not. allocated(self%icol)) then
        ABI_ALLOCATE(self%icol, (self%nnz))
@@ -102,9 +112,9 @@ contains
        self%val(:)=val(:)
     end if
 
-  end subroutine CSR_mat_t_initialize
+  end subroutine set
 
-  subroutine CSR_mat_t_sync(self)
+  subroutine sync(self)
     class (csr_mat_t), intent(inout) :: self
     integer :: ierr, iproc
     !call mpi_comm_rank(MPI_COMM_WORLD, iproc, ierr)
@@ -144,7 +154,7 @@ contains
     call xmpi_bcast(self%row_shift, 0, xmpi_world, ierr)
     call xmpi_bcast(self%val, 0, xmpi_world, ierr)
 
-  end subroutine CSR_mat_t_sync
+  end subroutine sync
 
 
   subroutine CSR_mat_t_finalize(self)
@@ -152,6 +162,7 @@ contains
     self%ncol=0
     self%nrow=0
     self%nnz=0
+    self%ndim=0
     if(allocated(self%icol)) then
        ABI_DEALLOCATE(self%icol)
     endif
@@ -161,8 +172,8 @@ contains
     if(allocated(self%val)) then
        ABI_DEALLOCATE(self%val)
     endif
+    if(allocated(self%shape)) ABI_DEALLOCATE(self%shape)
   end subroutine CSR_mat_t_finalize
-
 
 
   subroutine CSR_mat_t_mv(self, x, b)
@@ -223,5 +234,12 @@ contains
        end do
     end do
   end subroutine CSR_mat_t_mv_select_row
+
+  subroutine print(self)
+    class(CSR_mat_t), intent(in) :: self
+    print *, "icol:", self%icol
+    print *, "row_shift:", self%row_shift
+    print *, "val:", self%val
+  end subroutine print
 
 end module m_spmat_csr

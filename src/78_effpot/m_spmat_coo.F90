@@ -31,80 +31,44 @@ module m_spmat_COO
   use defs_basis  
   use m_xmpi
   use m_spmat_base
+  use m_spmat_ndcoo, only: ndcoo_mat_t
   implicit none
+  private
 !!***
 
   !!----------- COO ------------------------
   ! COO sparse matrix.
   ! i, j, val are the row index, col index and value of each entry.
   ! nnz: number of non-zeros.
-  type, public, extends(base_mat_t) :: COO_mat_t
-     integer :: nnz
-     integer, allocatable :: i(:), j(:)
-     real(dp), allocatable:: val(:)
+  type, public, extends(ndcoo_mat_t) :: COO_mat_t
    contains
-     procedure :: initialize => coo_mat_t_initialize
-     procedure :: finalize => coo_mat_t_finalize
-     procedure :: mv => coo_mat_t_mv
+     procedure :: initialize
+     procedure :: mv
   end type COO_mat_t
+
 
 contains
 
-  ! COO matrix
-  subroutine COO_mat_t_initialize(self, nrow, ncol, nnz, i, j, val)
-    class(COO_mat_t), intent(inout) :: self
-    integer, intent(in) :: nnz, nrow, ncol
-    integer , intent(in), optional :: i(:), j(:)
-    real(dp), intent(in), optional:: val(:)
-    integer :: err
-    allocate(self%i(nnz), stat=err)
-    allocate(self%j(nnz), stat=err)
-    allocate(self%val(nnz), stat=err)
-    self%nrow=nrow
-    self%ncol=ncol
-    self%nnz=nnz
-    if(present(i)) then
-       self%i(:)=i(:)
-    end if
- 
-    if(present(j)) then
-       self%j(:)=j(:)
-    end if
-    if(present(val)) then
-       self%val(:)=val(:)
-    endif
-  end subroutine COO_mat_t_initialize
-
-  subroutine COO_mat_t_finalize(self)
-    class(COO_mat_t), intent(inout) :: self
-    self%nrow=0
-    self%ncol=0
-    self%nnz=0
-    if(allocated(self%i)) then
-       ABI_DEALLOCATE(self%i)
-    end if
-    if(allocated(self%j)) then
-       ABI_DEALLOCATE(self%j)
-    end if
-    if(allocated(self%val)) then
-       ABI_DEALLOCATE(self%val)
-    end if
-
-  end subroutine COO_mat_t_finalize
+  subroutine initialize(self, shape)
+    class(coo_mat_t), intent(inout) :: self
+    integer, intent(in) :: shape(:)
+    if (size(shape)/=2) stop 1
+    call self%ndcoo_mat_t%initialize(shape)
+  end subroutine initialize
 
   ! COO sparse matrix-vector multiplication. naive implementation.
-  subroutine COO_mat_t_mv(self, x, b)
+  subroutine mv(self, x, b)
     class(COO_mat_t), intent(in) :: self
-    real(dp), intent(in):: x(self%ncol)
-    real(dp), intent(out):: b(self%nrow)
+    real(dp), intent(in):: x(self%shape(1))
+    real(dp), intent(out):: b(self%shape(2))
     integer:: ind, ind_i, ind_j
     b(:)=0.0D0
     do ind = 1, self%nnz, 1
-       ind_i=self%i(ind)
-       ind_j=self%j(ind)
-       b(ind_i)=b(ind_i)+self%val(ind)*x(ind_j)
+       ind_i=self%ind%data(1, ind)
+       ind_j=self%ind%data(2, ind)
+       b(ind_i)=b(ind_i)+self%val%data(ind)*x(ind_j)
     end do
-  end subroutine  COO_mat_t_mv
+  end subroutine  mv
 
   subroutine COO_mat_t_mv_mpi(self, x ,b)
     class(coo_mat_t), intent(in) :: self
@@ -124,6 +88,7 @@ contains
 
     call xmpi_sum_master(b, 0, xmpi_world, ierr )
   end subroutine COO_mat_t_mv_mpi
+
 
 
 end module m_spmat_COO

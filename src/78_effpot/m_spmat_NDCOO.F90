@@ -1,0 +1,235 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_spmat_ndcoo
+!! NAME
+!! m_spmat_ndcoo
+!!
+!! FUNCTION
+!! This module contains the a NDCOO (n-dimensional coordinate) format of sparse matrix.
+!! Datatypes:
+!!  NDCOO_mat_t: ND COO matrix
+!!
+!! Subroutines:
+!! TODO: add this when F2003 doc style is determined.
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "abi_common.h"
+
+module m_spmat_NDCOO
+  use defs_basis
+  use m_xmpi
+  use m_spmat_base
+  use m_dynamic_array, only: int2d_array_type, real_array_type, int_array_type
+  implicit none
+  !!***
+  private
+
+  type, public :: ndcoo_mat_t
+     integer :: ndim=0
+     integer :: nnz=0
+     integer, allocatable :: shape(:)
+     type(int2d_array_type) :: ind
+     type(real_array_type) :: val
+     logical :: is_sorted = .False.
+     logical :: is_unique = .False.
+   contains
+     procedure :: initialize
+     procedure :: finalize
+     procedure :: add_entry
+     procedure :: sort_indices
+     procedure :: sum_duplicates
+     procedure :: get_val_inz
+     procedure :: get_ind_inz
+     procedure :: get_ind
+     procedure :: group_by_1dim
+     procedure :: print
+  end type ndcoo_mat_t
+
+  public:: test_ndcoo
+contains
+
+  subroutine initialize(self, shape)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer, intent(in) :: shape(:)
+    self%shape=shape
+    self%ndim=size(shape)
+    self%nnz=0
+    self%is_sorted=.False.
+    self%is_unique=.False.
+  end subroutine initialize
+
+  subroutine finalize(self)
+    class(ndcoo_mat_t), intent(inout) :: self
+    self%ndim=0
+    self%nnz=0
+    self%is_sorted=.False.
+    self%is_unique=.False.
+    if (allocated(self%shape)) then
+       ABI_DEALLOCATE(self%shape)
+    endif
+    call self%ind%finalize()
+    call self%val%finalize()
+  end subroutine finalize
+
+  subroutine add_entry(self, ind, val)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer, intent(in) :: ind(self%ndim)
+    real(dp), intent(in) :: val
+    self%nnz=self%nnz+1
+    call self%ind%push(ind)
+    call self%val%push(val)
+  end subroutine add_entry
+
+
+  subroutine sort_indices(self)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp) :: tmp(self%nnz)
+    integer :: reorder(self%nnz)
+    if(self%is_sorted .or. self%nnz==0) return
+    call self%ind%sort(order=reorder)
+    tmp(:)=self%val%data(1:self%nnz)
+    self%val%data(1:self%nnz)=tmp(reorder)
+    self%is_sorted=.True.
+  end subroutine sort_indices
+
+  subroutine sum_duplicates(self)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer :: new_ind(self%ndim, self%nnz), i, counter
+    real(dp) :: new_val(self%nnz)
+    if (.not. self%is_sorted) then
+       call self%sort_indices()
+    end if
+    if (self%nnz==0) then
+       self%is_unique=.True.
+       return 
+    end if
+    counter=1
+    new_ind(:, counter)= self%ind%data(:, 1)
+    new_val(counter)=self%val%data(1)
+    do i=2, self%nnz
+       if (all(self%ind%data(:, i)==self%ind%data(:, i-1))) then
+          new_val(counter)=new_val(counter)+self%val%data(i)
+       else
+          counter=counter+1
+          new_ind(:, counter)= self%ind%data(:, i)
+          new_val(counter)=self%val%data(i)
+       end if
+    end do
+    self%nnz=counter
+    self%ind%data(:,1:counter)=new_ind(:,1:counter)
+    self%val%data(1:counter)=new_val(1:counter)
+    self%is_unique=.True.
+  end subroutine sum_duplicates
+
+  function get_val_inz(self, i) result(v)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer, intent(in) :: i
+    real(dp) :: v
+    v= self%val%data(i)
+  end function get_val_inz
+
+
+  function get_ind_inz(self, i) result(ind)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer, intent(in) :: i
+    integer :: ind(self%ndim)
+    ind(:)=self%ind%data(:,i)
+  end function get_ind_inz
+
+  subroutine group_by_1dim(self, ngroup, i1_list, istartend)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer, intent(inout) :: ngroup
+    integer, allocatable, intent(inout) :: i1_list(:), istartend(:)
+    integer :: i, ii
+    type(int_array_type) :: j1, jstartend
+    if (.not. (self%is_unique))  then
+       call self%sum_duplicates()
+    end if
+    if (self%nnz<1) then
+       ngroup=0
+    else if (self%nnz==1) then
+       i=1
+       ii=self%ind%data(1,i)
+       call j1%push(ii)
+       call jstartend%push(1)
+       call jstartend%push(2)
+    else
+       i=1
+       ii=self%ind%data(1,i)
+       call j1%push(ii)
+       call jstartend%push(i)
+       do i=2, self%nnz
+          ii=self%ind%data(1,i)
+          if(ii == self%ind%data(1, i-1)) then
+             cycle
+          else
+             call j1%push(ii)
+             call jstartend%push(i)
+          end if
+       end do
+       call jstartend%push(self%nnz+1)
+    end if
+    ngroup=j1%size
+    if(ngroup>0) then
+       ABI_ALLOCATE(i1_list, (ngroup))
+       ABI_ALLOCATE(istartend, (ngroup+1))
+       i1_list(:)=j1%data(1: j1%size)
+       istartend(:)=jstartend%data(1: jstartend%size)
+    end if
+    call j1%finalize()
+    call jstartend%finalize()
+  end subroutine group_by_1dim
+
+  function get_ind(self, dim) result(ilist)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer, intent(in) :: dim
+    integer :: ilist(self%nnz)
+    ilist(:)=self%ind%data(dim, 1:self%nnz)
+  end function get_ind
+
+  subroutine print(self)
+    class(ndcoo_mat_t), intent(inout) :: self
+    integer :: i
+    do i=1, self%nnz
+       print *, self%ind%data(:, i), ":  ", self%val%data(i)
+    end do
+
+  end subroutine print
+
+  subroutine test_ndcoo()
+    type(ndcoo_mat_t) :: m
+    integer :: ngroup
+    integer, allocatable :: i1list(:), ise(:)
+    call m%initialize(shape=[3,3,3])
+    call m%add_entry(ind=[3, 2,1], val=0.3d0)
+    call m%add_entry(ind=[1, 2,1], val=0.3d0)
+    call m%add_entry(ind=[1, 2,1], val=0.4d0)
+    call m%add_entry(ind=[3, 2,1], val=0.5d0)
+    call m%add_entry(ind=[1, 1,2], val=0.5d0)
+    call m%sort_indices()
+    call m%print()
+    call m%sum_duplicates()
+    print *, "After sum"
+    call m%print()
+    print *, "Grouping"
+    call m%group_by_1dim(ngroup, i1list, ise)
+    print *,  "ngroup: ", ngroup
+    print *, "i1list: ", i1list
+    print *, "ise: ", ise
+    if(allocated(i1list)) ABI_DEALLOCATE(i1list)
+    if(allocated(ise)) ABI_DEALLOCATE(ise)
+  end subroutine test_ndcoo
+
+end module m_spmat_NDCOO
+

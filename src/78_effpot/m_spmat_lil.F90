@@ -30,7 +30,8 @@
 
 module m_spmat_lil
   use defs_basis
-  use m_spmat_base
+  use m_spmat_base, only: base_mat2d_t
+  use m_abicore
   use m_linked_list
   implicit none
 !!***
@@ -40,7 +41,7 @@ module m_spmat_lil
   ! linked list type sparse matrix
   ! a array of rows, each row is a linked list.
   ! used for constructing sparse matrix. Not to do calculations.
-  type,public, extends(base_mat_t):: LIL_mat_t
+  type,public, extends(base_mat2d_t):: LIL_mat_t
      type(llist), allocatable :: rows(:)
    contains
      procedure :: initialize => lil_mat_t_initialize
@@ -52,25 +53,28 @@ module m_spmat_lil
 
   contains
   !------------------ LIL ---------------------
-  subroutine LIL_mat_t_initialize(self, nrow, ncol)
+  subroutine LIL_mat_t_initialize(self, shape)
     class(LIL_mat_t) , intent(inout):: self
-    integer, intent(in):: nrow, ncol
-    self%nrow=nrow
-    self%ncol=ncol
-    ABI_ALLOCATE(self%rows, (nrow))
+    integer, intent(in):: shape(:)
+    if (size(shape)/=2) stop 1
+    self%ndim=2
+    self%nrow=shape(1)
+    self%ncol=shape(2)
+    ABI_ALLOCATE(self%rows, (self%nrow))
   end subroutine LIL_mat_t_initialize
 
   subroutine LIL_mat_t_finalize(self)
     class(LIL_mat_t) , intent(inout):: self
     integer :: i
     if (allocated(self%rows)) then
-    do i=1, self%nrow, 1
+       do i=1, self%nrow, 1
           call llist_finalize(self%rows(i))
-    end do
-    ABI_DEALLOCATE(self%rows)
+       end do
+       ABI_DEALLOCATE(self%rows)
     endif
     self%ncol=0
     self%nrow=0
+    if(allocated(self%shape)) ABI_DEALLOCATE(self%shape)
   end subroutine LIL_mat_t_finalize
 
   subroutine LIL_mat_t_insert(self, irow, icol, val, mode)

@@ -33,18 +33,57 @@ module m_spmat_base
   implicit none
   private
 !!***
-
-  type, public ::  base_mat_t
-     integer :: nrow, ncol
+  type, public :: base_mat_t
+     integer :: ndim
+     integer, allocatable:: shape(:)
    contains
-     procedure :: mv => base_mat_t_mv
+     procedure :: initialize
+     procedure :: finalize
+     procedure :: add_entry
   end type base_mat_t
 
+  type, public, extends(base_mat_t) ::  base_mat2d_t
+     integer :: nrow, ncol
+   contains
+     procedure :: initialize => base_mat2d_t_initialize
+     procedure :: mv => base_mat2d_t_mv
+  end type base_mat2d_t
+
 contains
-  subroutine base_mat_t_mv(self, x, b)
-    class(base_mat_t), intent(in) :: self
+
+  subroutine initialize(self, shape)
+    class(base_mat_t), intent(inout) :: self
+    integer, intent(in) :: shape(:)
+    self%shape=shape
+    self%ndim=size(shape)
+  end subroutine initialize
+
+  subroutine finalize(self)
+    class(base_mat_t), intent(inout) :: self
+    self%ndim=0
+    if (allocated(self%shape)) then
+       ABI_DEALLOCATE(self%shape)
+    endif
+  end subroutine finalize
+
+  subroutine add_entry(self, ind, val)
+    class(base_mat_t), intent(inout) :: self
+    integer, intent(in) :: ind(self%ndim)
+    real(dp), intent(in) :: val
+  end subroutine add_entry
+
+  subroutine base_mat2d_t_initialize(self,shape)
+    class(base_mat2d_t), intent(inout) :: self
+    integer, intent(in) :: shape(:)
+    call self%base_mat_t%initialize(shape)
+    self%nrow=shape(1)
+    self%ncol=shape(2)
+  end subroutine base_mat2d_t_initialize
+
+  subroutine base_mat2d_t_mv(self, x, b)
+    class(base_mat2d_t), intent(in) :: self
     real(dp), intent(in) :: x(self%ncol)
     real(dp), intent(out) :: b(self%nrow)
-  end subroutine base_mat_t_mv
+  end subroutine base_mat2d_t_mv
 
 end module m_spmat_base

@@ -36,7 +36,7 @@ module m_supercell_maker
   use m_errors
   use m_symtk,    only : matr3inv
   use m_mathfuncs , only: mat33det, binsearch_left_integerlist
-
+  use m_supercell
   implicit none
   private
 
@@ -55,15 +55,17 @@ module m_supercell_maker
 
      ! Translations: from one primitive cell element to ncell supercell elements
      ! with values unchanged (therefore just repeat ncells times)
-     generic :: repeat => repeat_int1d, repeat_real1d
+     generic :: repeat => repeat_int1d, repeat_real1d, repeat_realmat
      procedure :: repeat_int1d
      procedure :: repeat_real1d
+     procedure :: repeat_realmat
 
      ! Translations: from one primitive cell element to ncell supercell elements
      ! with values changed (different from repeat)
      procedure :: trans_xred
      procedure :: trans_xcart
      procedure :: trans_i
+     procedure :: trans_ilist
      procedure :: trans_j_and_Rj
      procedure :: trans_jlist_and_Rj
   end type supercell_maker_t
@@ -195,13 +197,13 @@ contains
 
   ! ind: index in primitive cell
   ! ind_sc: indices (PLURAL) in supercell
-  subroutine trans_i(self, nbasis, i, ind_sc)
+  subroutine trans_i(self, nbasis, i, i_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: i, nbasis
-    integer, intent(out) :: ind_sc(self%ncells)
+    integer, intent(out) :: i_sc(self%ncells)
     integer :: icell
     do icell =1, self%ncells
-       ind_sc(icell)=nbasis*(icell-1)+i
+       i_sc(icell)=nbasis*(icell-1)+i
     end do
   end subroutine trans_i
 
@@ -216,14 +218,14 @@ contains
   end subroutine trans_ilist
 
 
-  subroutine trans_j_and_Rj(self, nbasis, j, Rj, ind_sc, R_sc)
+  subroutine trans_j_and_Rj(self, nbasis, j, Rj, j_sc, Rj_sc)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: j, Rj(3), nbasis
-    integer, intent(out) :: ind_sc(self%ncells), R_sc(3, self%ncells)
+    integer, intent(out) :: j_sc(self%ncells), Rj_sc(3, self%ncells)
     integer :: i,jj
     do i =1, self%ncells
-       call self%R_to_sc(Rj + self%rvecs(:,i), R_sc(:,i), jj)
-       ind_sc(i)=nbasis*(jj-1)+j
+       call self%R_to_sc(Rj + self%rvecs(:,i), Rj_sc(:,i), jj)
+       j_sc(i)=nbasis*(jj-1)+j
     end do
   end subroutine trans_j_and_Rj
 
@@ -247,9 +249,12 @@ contains
   subroutine repeat_int1d(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     integer, intent(in) :: a(:)
-    integer :: ret(size(a)*self%ncells)
+    integer, allocatable :: ret(:)
     integer :: n, i
     n=size(a)
+    if (.not. allocated(ret)) then
+       ABI_ALLOCATE(ret, (n*self%ncells))
+    end if
     do i =1, self%ncells
        ret((i-1)*n+1: i*n) = a(:)
     end do
@@ -258,13 +263,30 @@ contains
   subroutine repeat_real1d(self, a, ret)
     class(supercell_maker_t), intent(inout) :: self
     real(dp), intent(in) :: a(:)
-    real(dp):: ret(size(a)*self%ncells)
+    real(dp), allocatable:: ret(:)
     integer :: n, i
     n=size(a)
+    if (.not. allocated(ret)) then
+       ABI_ALLOCATE(ret, (n*self%ncells))
+    end if
     do i =1, self%ncells
        ret((i-1)*n+1: i*n) = a(:)
     end do
   end subroutine repeat_real1d
+
+  subroutine repeat_realmat(self, a, ret)
+    class(supercell_maker_t), intent(inout) :: self
+    real(dp), intent(in) :: a(:,:,:)
+    real(dp), allocatable, intent(inout) :: ret(:,:,:)
+    integer :: n,  i
+    n=size(a, 3)
+    if (.not. allocated(ret)) then
+       ABI_ALLOCATE(ret, (size(a, dim=1), size(a, dim=2), n*self%ncells))
+    end if
+    do i=1, self%ncells
+       ret(:,:,(i-1)*n+1: i*n)=a(:, :, :)
+    end do
+  end subroutine repeat_realmat
 
   function test1() result(err)
     type(supercell_maker_t) :: maker
@@ -276,7 +298,7 @@ contains
     scmat=reshape([2,0, 0, 0,2, 0, 0,0,2], [3,3])
     call maker%initialize(scmat)
     err=0
-    call maker%trans_i(nbasis=3, i=1, ind_sc=ind_sc)
+    call maker%trans_i(nbasis=3, i=1, i_sc=ind_sc)
 
     R=[0,0,3]
     call maker%R_to_sc(R, R_sc, ind_sc2)
@@ -285,7 +307,7 @@ contains
        err=1
     end if
 
-    call maker%trans_j_and_Rj(nbasis=3, j=1, Rj=R, ind_sc=j_sc, R_sc=R_sc3  )
+    call maker%trans_j_and_Rj(nbasis=3, j=1, Rj=R, j_sc=j_sc, Rj_sc=R_sc3  )
     if (.not. (  all(j_sc(1:3)==[4,1,10]) &
          .and. all(R_sc3(:,1)==[0,0,1]) &
          .and. all(R_sc3(:,3)==[0,0,1]) ) ) then
@@ -300,8 +322,8 @@ contains
     integer :: scmat(3,3)
     real(dp) :: sccell(3,3)
     real(dp) :: scxred(3, 2*9)
-    integer :: rep1(18)
-    real(dp) :: rep2(18)
+    integer, allocatable :: rep1(:)
+    real(dp), allocatable :: rep2(:)
     scmat=transpose(reshape([1,2, 3, 4,5,6,7,8,6], [3,3]))
     !scmat=reshape([1,2, 3, 4,5,6,7,8,6], [3,3])
     call maker%initialize(scmat)
@@ -344,12 +366,74 @@ contains
 
   end function test2
 
-
-
-
   subroutine scmaker_unittest()
     if (test1()/=0) print *, "Supercell maker: Test1 Failed"
     if (test2()/=0) print *, "Supercell maker: Test2 Failed"
   end subroutine scmaker_unittest
+
+
+!===================================================================================
+  ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
+  subroutine find_R_PBC(scell, R, R_sc, R_prim)
+    type(supercell_type) , intent(in):: scell
+    integer, intent(in):: R(3)
+    integer, intent(out):: R_sc(3), R_prim(3)
+    real(dp) :: R_sc_d(3), sc_mat(3,3)
+
+    integer:: ipriv(3), info
+    !call dgesv( n, nrhs, a, lda, ipiv, b, ldb, info )
+    sc_mat(:,:)=scell%rlatt
+    R_sc_d(:)=R(:)
+    !print *, sc_mat
+    !print *, R_sc_d
+    call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
+    if ( info/=0 ) then
+       print *, "Failed to find R_sc"
+    end if
+
+    ! if only diagonal of rlatt works.
+    !R_sc_d(1)= real(R(1))/real(scell%rlatt(1,1))
+    !R_sc_d(2)= real(R(2))/real(scell%rlatt(2,2))
+    !R_sc_d(3)= real(R(3))/real(scell%rlatt(3,3))
+    ! TODO hexu: R_prim should be non-negative, which is assumed in m_supercell.
+    ! But should we make it more general?
+    R_sc(1)=floor(R_sc_d(1))
+    R_sc(2)=floor(R_sc_d(2))
+    R_sc(3)=floor(R_sc_d(3))
+    R_prim(1)=(R(1)-R_sc(1)*scell%rlatt(1,1))
+    R_prim(2)=(R(2)-R_sc(2)*scell%rlatt(2,2))
+    R_prim(3)=(R(3)-R_sc(3)*scell%rlatt(3,3))
+  end subroutine find_R_PBC
+
+  ! TODO hexu: move this to m_supercell?
+  ! find the spercelll atom index from index of atom in primitive cell and R vector
+  function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
+    type(supercell_type) , intent(in):: scell
+    integer, intent(in) :: iatom_prim, rvec(3)
+    integer  :: iatom_supercell
+    integer :: i
+    iatom_supercell=-1
+    do i=1, scell%natom, 1
+       if ( scell%atom_indexing(i) == iatom_prim .and. &
+            all(scell%uc_indexing(:,i)==rvec) ) then
+          iatom_supercell=i
+          return
+       end if
+    end do
+    print *, "cannot find iatom_prim, rvec pair", iatom_prim, rvec, "in supercell"
+  end function find_supercell_index
+
+  !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
+  subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
+
+    type(supercell_type) , intent(in):: scell
+    integer, intent(in) :: i0, j0, R0(3), R(3)
+    integer, intent(out) :: i1, j1, R1(3), R_sc(3)
+    i1=find_supercell_index(scell,i0,R)
+    call find_R_PBC(scell,R0+R,R_sc,R1)
+    j1=find_supercell_index(scell, j0, R1)
+  end subroutine find_supercell_ijR
+
+
 
 end module m_supercell_maker

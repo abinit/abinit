@@ -35,6 +35,8 @@ module m_spin_observables
   use m_errors
   use m_xmpi
   use m_spin_terms, only: spin_terms_t
+  !use m_spin_supercell, only: spin_supercell_t
+  use m_multibinit_supercell, only: mb_supercell_t
   use m_multibinit_dataset, only: multibinit_dtset_type
 
   implicit none
@@ -42,9 +44,9 @@ module m_spin_observables
   !!***
   type, public :: spin_observable_t
      logical :: calc_thermo_obs, calc_correlation_obs, calc_traj_obs
-     integer :: nspins, nsublatt, ntime, nscell
+     integer :: nspin, nsublatt, ntime, nscell
      real(dp) :: temperature
-     integer, allocatable :: isublatt(:), nspins_sub(:)
+     integer, allocatable :: isublatt(:), nspin_sub(:)
      real(dp) :: energy
      ! Ms_coeff: coefficient to calcualte staggered Mst
      ! Mst_sub: M staggered for sublattice
@@ -80,10 +82,10 @@ module m_spin_observables
 contains
 
 
-  subroutine ob_initialize(self, supercell, params)
+  subroutine ob_initialize(self, supercell , params)
 
     class(spin_observable_t) :: self
-    type(spin_terms_t) :: supercell
+    type(mb_supercell_t) :: supercell
     type(multibinit_dtset_type) :: params
     integer i
     complex(dp) :: i2pi = (0.0, two_pi)
@@ -92,29 +94,29 @@ contains
     self%calc_traj_obs= (params%spin_calc_traj_obs ==1)
     self%calc_correlation_obs=(params%spin_calc_correlation_obs ==1)
 
-    self%nspins=supercell%nspins
+    self%nspin=supercell%nspin
     self%nsublatt=maxval(supercell%ispin_prim)
 
 
-    ABI_ALLOCATE(self%S, (3, self%nspins))
-    ABI_ALLOCATE(self%Snorm, (self%nspins))
+    ABI_ALLOCATE(self%S, (3, self%nspin))
+    ABI_ALLOCATE(self%Snorm, (self%nspin))
 
-    ABI_ALLOCATE(self%isublatt,(self%nspins) )
+    ABI_ALLOCATE(self%isublatt,(self%nspin) )
     self%isublatt(:)=supercell%ispin_prim(:)
 
-    ABI_ALLOCATE(self%nspins_sub, (self%nsublatt))
-    self%nspins_sub(:)=0
-    do i =1, self%nspins
-       self%nspins_sub(self%isublatt(i)) = self%nspins_sub(self%isublatt(i)) + 1
+    ABI_ALLOCATE(self%nspin_sub, (self%nsublatt))
+    self%nspin_sub(:)=0
+    do i =1, self%nspin
+       self%nspin_sub(self%isublatt(i)) = self%nspin_sub(self%isublatt(i)) + 1
     end do
 
-    ABI_ALLOCATE(self%Ms_coeff,(self%nspins) )
+    ABI_ALLOCATE(self%Ms_coeff,(self%nspin) )
     ABI_ALLOCATE(self%Mst_sub,(3, self%nsublatt) )
     ABI_ALLOCATE(self%Mst_sub_norm, (self%nsublatt))
 
     ABI_ALLOCATE(self%Avg_Mst_sub_norm, (self%nsublatt))
 
-    do i =1, self%nspins
+    do i =1, self%nspin
        self%Ms_coeff(i) = real(exp(i2pi * dot_product(params%spin_qpoint, supercell%Rvec(:,i))))
     end do
 
@@ -153,8 +155,8 @@ contains
        ABI_DEALLOCATE(self%isublatt)
     endif
 
-    if (allocated(self%nspins_sub)) then
-       ABI_DEALLOCATE(self%nspins_sub)
+    if (allocated(self%nspin_sub)) then
+       ABI_DEALLOCATE(self%nspin_sub)
     endif
 
     if(allocated(self%S)) then
@@ -183,7 +185,7 @@ contains
 
   subroutine ob_update(self, S, Snorm, energy)
     class(spin_observable_t), intent(inout) :: self
-    real(dp), intent(in):: S(3,self%nspins), Snorm(self%nspins), energy
+    real(dp), intent(in):: S(3,self%nspin), Snorm(self%nspin), energy
     self%S=S
     self%Snorm=Snorm
     self%energy=energy
@@ -195,7 +197,7 @@ contains
     integer :: i, isub
     self%Mst_sub(:,:)=0.0
     self%M_total(:)=0.0
-    do i = 1, self%nspins
+    do i = 1, self%nspin
        isub=self%isublatt(i)
        self%Mst_sub(:, isub) = self%Mst_sub(:, isub) +  self%S(:, i)* self%Ms_coeff(i) * self%Snorm(i)
        self%M_total(:) = self%M_total + self%S(:, i)*self%Snorm(i)
@@ -253,7 +255,7 @@ contains
   subroutine ob_calc_observables(self, S, Snorm, energy)
 
     class(spin_observable_t) :: self
-    real(dp), intent(in) :: S(3,self%nspins), Snorm(self%nspins), energy
+    real(dp), intent(in) :: S(3,self%nspin), Snorm(self%nspin), energy
     call ob_update(self, S, Snorm, energy)
     call ob_calc_staggered_M(self)
     if(self%calc_traj_obs) then

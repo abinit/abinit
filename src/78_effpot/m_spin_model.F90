@@ -51,8 +51,7 @@ module m_spin_model
   use m_multibinit_global
   use m_io_tools, only : get_unit, open_file, close_unit
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_spin_terms, only: spin_terms_t,  spin_terms_t_finalize, &
-       & spin_terms_t_set_external_hfield
+  use m_spin_terms, only: spin_terms_t
   use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_spin_hist, only: spin_hist_t, spin_hist_t_set_vars, spin_hist_t_init, spin_hist_t_get_s, spin_hist_t_free, &
        & spin_hist_t_set_params, spin_hist_t_reset, spin_hist_t_inc
@@ -78,7 +77,7 @@ module m_spin_model
   !! spin_mover = include information for how to run spin dynamics
   !! params = parameters from input file
   !! spin_ncfile = wrapper for spin hist netcdf file.
-  !! nspins= number of magnetic atoms
+  !! nspin= number of magnetic atoms
   !! SOURCE
 
   type spin_model_t
@@ -89,7 +88,7 @@ module m_spin_model
      type(multibinit_dtset_type) :: params
      type(spin_ncfile_t) :: spin_ncfile
      type(spin_observable_t) :: spin_ob
-     integer :: nspins
+     integer :: nspin
      character(len=fnlen) :: in_fname, out_fname, xml_fname
        CONTAINS
          procedure :: run => spin_model_t_run
@@ -192,13 +191,13 @@ contains
        call self%make_supercell(sc_matrix)
 
        ! set parameters to hamiltonian and mover
-       self%nspins= self%spin_calculator%nspins
+       self%nspin= self%spin_calculator%nspin
 
-       call self%spin_mover%initialize(self%params, self%nspins )
+       call self%spin_mover%initialize(self%params, self%nspin )
        call self%set_params()
 
     if(iam_master) then
-       call spin_hist_t_init(hist=self%spin_hist, nspins=self%nspins, &
+       call spin_hist_t_init(hist=self%spin_hist, nspin=self%nspin, &
             &   mxhist=3, has_latt=.False.)
 
        call spin_hist_t_set_params(self%spin_hist, spin_nctime=self%params%spin_nctime, &
@@ -209,11 +208,11 @@ contains
      endif
        call self%set_initial_spin()
 
-       call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%gyro_ratio, &
-            & damping=self%spin_calculator%gilbert_damping, ms=self%spin_calculator%ms )
+       call self%spin_mover%set_langevin_params(gyro_ratio=self%spin_calculator%supercell%gyro_ratio, &
+            & damping=self%spin_calculator%supercell%gilbert_damping, ms=self%spin_calculator%supercell%ms )
 
     if(iam_master) then
-       call ob_initialize(self%spin_ob, self%spin_calculator, self%params)
+       call ob_initialize(self%spin_ob, self%spin_calculator%supercell, self%params)
 
        call spin_model_t_prepare_ncfile(self, self%spin_ncfile, trim(self%out_fname)//'_spinhist.nc')
 
@@ -280,7 +279,7 @@ contains
   subroutine spin_model_t_set_params(self)
 
     class(spin_model_t), intent(inout) :: self
-    real(dp):: mfield(3, self%nspins), damping(self%nspins)
+    real(dp):: mfield(3, self%nspin), damping(self%nspin)
     integer ::  i
     ! params -> mover
     ! params -> calculator
@@ -291,12 +290,12 @@ contains
        damping(:)= self%params%spin_damping
     end if
     call self%spin_mover%set_langevin_params(temperature=self%params%spin_temperature, &
-         & damping=damping, ms=self%spin_calculator%ms, gyro_ratio=self%spin_calculator%gyro_ratio)
+         & damping=damping, ms=self%spin_calculator%supercell%ms, gyro_ratio=self%spin_calculator%supercell%gyro_ratio)
 
-    do i=1, self%nspins
+    do i=1, self%nspin
        mfield(:, i)=self%params%spin_mag_field(:)
     end do
-    call spin_terms_t_set_external_hfield(self%spin_calculator, mfield)
+    call self%spin_calculator%set_external_hfield(mfield)
 
     !if (self%params%spin_sia_add /= 0 ) then
     !   call spin_terms_t_add_SIA(self%spin_calculator, self%params%spin_sia_add, &
@@ -378,7 +377,7 @@ contains
 
     class(spin_model_t), intent(inout) :: self
     integer , intent(in):: sc_mat(3, 3)
-    call self%spin_primitive%make_supercell(sc_mat, self%spin_calculator)
+    !call self%spin_primitive%_supercell(sc_mat, self%spin_calculator)
     !call spin_primitive_potential_t_make_supercell(self%spin_primitive, sc_mat, self%spin_calculator)
   end subroutine spin_model_t_make_supercell
   !!***
@@ -440,7 +439,7 @@ contains
     class(spin_model_t), intent(inout) :: self
     integer :: mode
     integer :: i
-    real(dp) :: S(3, self%nspins)
+    real(dp) :: S(3, self%nspin)
     character(len=500) :: msg
     if(iam_master) then
     mode=self%params%spin_init_state
@@ -457,7 +456,7 @@ contains
        call wrtout(std_out,msg,'COLL')
        call random_number(S)
        S=S-0.5
-       do i=1, self%nspins
+       do i=1, self%nspin
           S(:,i)=S(:,i)/sqrt(sum(S(:, i)**2))
        end do
     else
@@ -467,7 +466,7 @@ contains
 
     end if
 
-    call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%ms, &
+    call spin_hist_t_set_vars(self%spin_hist, S=S, Snorm=self%spin_calculator%supercell%ms, &
          &  time=0.0_dp, ihist_latt=0, inc=.True.)
 
    endif

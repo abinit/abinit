@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_spin_primitive_potential
+!!****m* ABINIT/m_sspin_primitive_potential
 !! NAME
 !! m_spin_primitive_potential
 !!
@@ -12,12 +12,6 @@
 !!  spin_primitive_potential_t
 !!
 !! Subroutines:
-!! 
-!!  * spin_primitive_potential_t_initialize
-!!  * spin_primitive_potential_t_read_xml
-!!  * spin_primitive_potential_t_make_supercell
-!!  * spin_primitive_potential_t_finalize
-!!
 !!
 !! COPYRIGHT
 !! Copyright (C) 2001-2019 ABINIT group (hexu)
@@ -36,183 +30,119 @@
 
 module m_spin_primitive_potential
   use iso_c_binding
-  use m_dynmaic_array
+  use m_dynamic_array, only: int_array_type, real_array_type, int2d_array_type
   use m_mathfuncs
   use defs_basis
   use m_abicore
   use m_errors
-  use m_primitive_potential
-  use m_supercell
+  use m_multibinit_io_xml, only: xml_read_spin, xml_free_spin
+  use m_unitcell, only: unitcell_t
+  use m_primitive_potential, only: primitive_potential_t
+  use m_abstract_potential, only: abstract_potential_t
+  use m_dynamic_array, only: int2d_array_type
+  use m_supercell_maker, only: supercell_maker_t
+  use m_spmat_ndcoo, only: ndcoo_mat_t
   use m_multibinit_global
   use m_spin_terms
   implicit none
-
-!!*** 
-  interface
-     ! C function:
-     ! void xml_read_spin(char *fname, double *ref_energy, double *unitcell[9],
-     ! int *natoms, double *masses[], int *nspins,
-     ! int *index_spin[], double *gyroratios[], double *damping_factors[],
-     ! double *positions[], double *spinat[],
-     ! // exchange
-     ! int *exc_nnz, int *exc_ilist[],
-     ! int *exc_jlist[], int *exc_Rlist[],
-     ! double *exc_vallist[],
-     ! //dmi
-     ! int *dmi_nnz, int *dmi_ilist[],
-     ! int *dmi_jlist[], int *dmi_Rlist[],
-     ! double *dmi_vallist[],
-     ! //uniaxial SIA
-     ! int *uni_nnz, int *uni_ilist[],
-     ! double *uni_amplitude_list[],
-     ! double *uni_direction_list[],
-     ! //bilinear
-     ! int *bi_nnz, int *bi_ilist[],
-     ! int *bi_jlist[], int *bi_Rlist[],
-     ! double *bi_vallist[])
-
-     subroutine xml_read_spin(xml_fname, ref_energy, unitcell,                 &
-          natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat, &
-          exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
-          dmi_nnz, dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
-          uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list, &
-          bi_nnz, bi_ilist, bi_jilst, bi_Rlist, bi_vallist) bind(C, name="xml_read_spin")
-       import
-       character(c_char), intent(in) :: xml_fname(*)
-       integer (c_int), intent(out):: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
-       real  (c_double), intent(out) :: ref_energy
-       type(c_ptr)::  unitcell,  &
-            masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
-            exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
-            dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
-            uni_ilist, uni_amplitude_list, uni_direction_list, &
-            bi_ilist, bi_jilst, bi_Rlist, bi_vallist
-     end subroutine xml_read_spin
- end interface
-
- interface
-     subroutine xml_free_spin(xml_fname, ref_energy, unitcell,                 &
-          natoms, masses, nspins, index_spin, gyroratios, damping_factors, positions, spinat, &
-          exc_nnz, exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
-          dmi_nnz, dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
-          uni_nnz, uni_ilist, uni_amplitude_list, uni_direction_list, &
-          bi_nnz, bi_ilist, bi_jilst, bi_Rlist, bi_vallist) bind(C, name="xml_free_spin")
-       import
-       character(c_char), intent(in) :: xml_fname(*)
-       integer (c_int), intent(out):: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
-       real  (c_double), intent(out) :: ref_energy
-       type(c_ptr)::  unitcell,  &
-            masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
-            exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
-            dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
-            uni_ilist, uni_amplitude_list, uni_direction_list, &
-            bi_ilist, bi_jilst, bi_Rlist, bi_vallist
-     end subroutine xml_free_spin
-  end interface
-
+  private
+  !!*** 
   type, public, extends(primitive_potential_t) :: spin_primitive_potential_t
-     integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
-     real (dp) :: ref_energy, unitcell(3,3)
-     ! integer, allocatable :: masses,  index_spin, gyroratios, damping_factors, positions, spinat, &
-     !exc_ilist, exc_jlist, exc_Rlist, exc_vallist, &
-     !dmi_ilist, dmi_jlist, dmi_Rlist, dmi_vallist, &
-     !uni_ilist, uni_amplitude_list, uni_direction_list, &
-     !bi_ilist, bi_jilst, bi_Rlist, bi_vallist
-     integer, allocatable :: index_spin(:), &
-          exc_ilist(:), exc_jlist(:), exc_Rlist(:,:), &
-          dmi_ilist(:), dmi_jlist(:), dmi_Rlist(:,:), &
-          uni_ilist(:), &
-          bi_ilist(:) ,bi_jlist(:), bi_Rlist(:,:)
-     real(dp), allocatable ::gyroratios(:), damping_factors(:), &
-          positions(:,:), spinat(:,:), &
-          exc_vallist(:,:), dmi_vallist(:,:), &
-          uni_amplitude_list(:), uni_direction_list(:,:), &
-          bi_vallist(:,:,:)
+     integer :: natoms, nspin
+     integer, allocatable :: index_spin(:)
      ! TOTAL
-     integer :: total_nnz=0
-     type(int_array_type):: total_ilist, total_jlist, total_Rlist(3)
-     type(real_array_type) :: total_val_list(3,3)
-
-       contains
-         procedure:: initialize=> spin_primitive_potential_t_initialize
-         procedure:: finalize=> spin_primitive_potential_t_finalize
-         procedure:: set_atoms => spin_primitive_potential_t_set_atoms
-         procedure:: set_bilinear => spin_primitive_potential_t_set_bilinear
-         procedure:: set_exchange=> spin_primitive_potential_t_set_exchange
-         procedure:: set_dmi => spin_primitive_potential_t_set_dmi
-         procedure:: set_sia=> spin_primitive_potential_t_set_sia
-         procedure :: add_input_sia => spin_primitive_potential_t_add_input_sia
-         procedure:: read_xml => spin_primitive_potential_t_read_xml
-         procedure:: make_supercell => spin_primitive_potential_t_make_supercell
-         procedure :: print_terms => spin_primitive_potential_t_print_terms
+     !integer :: total_nnz=0
+     !type(int_array_type):: total_ilist, total_jlist, total_Rlist(3)
+     !type(real_array_type) :: total_val_list(3,3)
+     type(ndcoo_mat_t) :: coeff
+     type(int2d_array_type) :: Rlist
+   contains
+     procedure:: initialize
+     procedure:: finalize
+     procedure:: set_atoms
+     procedure :: set_spin_primcell
+     procedure :: set_bilinear_1term
+     procedure:: set_bilinear
+     procedure:: set_exchange
+     procedure:: set_dmi
+     procedure:: set_sia
+     procedure :: add_input_sia
+     procedure:: read_xml
+     procedure:: fill_supercell
+     procedure :: print_terms
   end type spin_primitive_potential_t
 
 contains
 
-  subroutine spin_primitive_potential_t_initialize(self)
-
+  subroutine initialize(self)
     class(spin_primitive_potential_t), intent(inout) :: self
-   !TODO should something  be done here?
-  end subroutine spin_primitive_potential_t_initialize
+    !integer, intent(in) :: nspin
+    self%label="Spin_primitive_potential"
+  end subroutine initialize
 
-  subroutine spin_primitive_potential_t_set_atoms(self, natoms, unitcell, positions, &
-       nspins, index_spin, spinat, gyroratios, damping_factors )
 
+  subroutine finalize(self)
     class(spin_primitive_potential_t), intent(inout) :: self
-    integer, intent(in):: natoms, nspins, index_spin(:)
+    call self%coeff%finalize()
+    call self%Rlist%finalize()
+    nullify(self%primcell)
+    self%nspin=0
+    self%natoms=0
+    self%label="Destroyed Spin_primitive_potential"
+  end subroutine finalize
+
+  subroutine set_atoms(self, primcell)
+    class(spin_primitive_potential_t), intent(inout) :: self
+    class(unitcell_t), target, intent(inout) :: primcell
+    self%primcell=>primcell
+  end subroutine set_atoms
+
+
+  subroutine set_spin_primcell(self, natoms, unitcell, positions, &
+       nspin, index_spin, spinat, gyroratios, damping_factors )
+    class(spin_primitive_potential_t), intent(inout) :: self
+    integer, intent(in):: natoms, nspin, index_spin(:)
     real(dp), intent(in):: unitcell(3, 3),  positions(3,natoms), &
-         spinat(3,natoms), gyroratios(nspins), damping_factors(nspins)
+         spinat(3,natoms), gyroratios(nspin), damping_factors(nspin)
+    integer :: iatom, ispin
+    real(dp) :: ms(nspin), spin_positions(3, nspin)
+    call self%coeff%initialize(shape=[-1, nspin*3, nspin*3])
+    do iatom=1, natoms
+       ispin=index_spin(iatom)
+       if(iatom>0) then
+          spin_positions(:,ispin)= positions(:, iatom)
+          ms(ispin) = sqrt(sum(spinat(:,iatom)**2, dim=1))* mu_B
+       end if
+       call self%primcell%set_spin(nspin, ms, spin_positions, gyroratios, damping_factors)
+    end do
+  end subroutine set_spin_primcell
 
-    !print *, "natoms",natoms
-    !print *, "nspins", nspins
-    !print *, "positions", positions
-    !print *, "spinat", spinat
-    !print *, "gyroratios", gyroratios
-    !print *, "damping_factors", damping_factors
-    ABI_ALLOCATE(self%positions, (3, natoms))
-    ABI_ALLOCATE(self%index_spin, (natoms))
-    ABI_ALLOCATE(self%spinat, (3, natoms))
-    ABI_ALLOCATE(self%gyroratios, (nspins))
-    ABI_ALLOCATE(self%damping_factors, (nspins))
-
-    self%natoms=natoms
-    self%unitcell(:,:)=unitcell(:,:)
-    self%positions(:,:)=positions(:,:)
-    self%nspins=nspins
-    self%index_spin(:)=index_spin(:)
-    self%spinat(:,:)=spinat(:,:)
-    self%gyroratios(:)=gyroratios(:)
-    self%damping_factors(:)=damping_factors(:)
-
-  end subroutine spin_primitive_potential_t_set_atoms
-
-
-  subroutine  spin_primitive_potential_t_set_bilinear(self, n, ilist, jlist, Rlist, vallist)
-
+  subroutine set_bilinear_1term(self, i, j, R, val)
     class(spin_primitive_potential_t), intent(inout) :: self
-    integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
-    real(dp), intent(in) :: vallist(:, :,:)
-    integer :: idx, ii, ix, iy
-    self%total_nnz=self%total_nnz+n
-    do idx = 1, n, 1
-       !call self%total_ilist%push(ilist(idx))
-       !call self%total_jlist%push(jlist(idx))
-       call int_array_type_push(self%total_ilist, ilist(idx))
-       call int_array_type_push(self%total_jlist, jlist(idx))
-       do ii = 1, 3, 1
-          !call self%total_Rlist(ii)%push(Rlist(ii, idx))
-          call int_array_type_push(self%total_Rlist(ii), Rlist(ii, idx))
-       end do
-       do iy = 1, 3, 1
-          do ix = 1, 3, 1
-             !call self%total_val_list(ix, iy)%push(vallist(ix, iy, idx))
-             call real_array_type_push( self%total_val_list(ix, iy), vallist(ix, iy, idx))
-          end do
+    integer, intent(in) :: i, j, R(3)
+    real(dp), intent(in) :: val(3,3)
+    real(dp) :: v
+    integer :: indR, iv, jv
+    call self%Rlist%push_unique(R, position=indR)
+    do jv=1,3
+       do iv=1,3
+          v=val(iv,jv)
+          call self%coeff%add_entry(ind=[indR, (i-1)*3+iv, (j-1)*3+jv ], val=v)
        end do
     end do
-  end subroutine spin_primitive_potential_t_set_bilinear
+  end subroutine set_bilinear_1term
 
-  subroutine spin_primitive_potential_t_set_exchange(self, n, ilist, jlist, Rlist, vallist)
+  subroutine  set_bilinear(self, n, ilist, jlist, Rlist, vallist)
+    class(spin_primitive_potential_t), intent(inout) :: self
+    integer, intent(in) :: n, ilist(n), jlist(n), Rlist(3,n)
+    real(dp), intent(in) :: vallist(3, 3,n)
+    integer :: idx
+    do idx = 1, n
+       call self%set_bilinear_1term(ilist(idx), jlist(idx), Rlist(:,idx), vallist(:,:, idx))
+    end do
+  end subroutine set_bilinear
+
+  subroutine set_exchange(self, n, ilist, jlist, Rlist, vallist)
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
@@ -225,11 +155,10 @@ contains
        bivallist(3,3,idx)=vallist(3, idx)
     end do
     call self%set_bilinear(n,ilist,jlist,Rlist,bivallist)
-  end subroutine spin_primitive_potential_t_set_exchange
+  end subroutine set_exchange
 
 
-  subroutine spin_primitive_potential_t_set_dmi(self, n, ilist, jlist, Rlist, vallist)
-
+  subroutine set_dmi(self, n, ilist, jlist, Rlist, vallist)
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:), jlist(:), Rlist(:,:)
     real(dp), intent(in) :: vallist(:,:)
@@ -245,11 +174,10 @@ contains
             D(3), 0.0d0, -D(1),  &
             -D(2), D(1), 0.0d0 /),(/3,3/) )
     end do
-    !call self%set_bilinear(n,ilist,jlist,Rlist,bivallist)
-    call  spin_primitive_potential_t_set_bilinear(self,n,ilist,jlist,Rlist,bivallist)
-  end subroutine spin_primitive_potential_t_set_dmi
+    call self%set_bilinear(n,ilist,jlist,Rlist,bivallist)
+  end subroutine set_dmi
 
-  subroutine spin_primitive_potential_t_set_sia(self, n, ilist, k1list, k1dirlist)
+  subroutine set_sia(self, n, ilist, k1list, k1dirlist)
 
     class(spin_primitive_potential_t), intent(inout) :: self
     integer, intent(in) :: n, ilist(:)
@@ -258,46 +186,36 @@ contains
     real(dp) :: bivallist(3,3, n)
     bivallist(:,:,:)=0.0d0
     Rlist(:, :)=0.0d0
-    ! at
-    ! - self.Ku[i] * np.outer(self.e[i], self.e[i]
     do idx=1,n, 1
        bivallist(:,:, idx)= (- k1list(idx))*  &
             outer_product(k1dirlist(:,idx), k1dirlist(:, idx))
     end do
     call self%set_bilinear(n,ilist,ilist,Rlist,bivallist)
-    !call  spin_primitive_potential_t_set_bilinear(self,n,ilist,ilist,Rlist,bivallist)
-  end subroutine spin_primitive_potential_t_set_sia
+  end subroutine set_sia
 
-  subroutine spin_primitive_potential_t_add_input_sia(self,  input_sia_k1amp, input_sia_k1dir)
+  ! add user inputed SIA.
+  subroutine add_input_sia(self,  input_sia_k1amp, input_sia_k1dir)
     class(spin_primitive_potential_t), intent(inout) :: self
     real(dp), intent(in):: input_sia_k1amp, input_sia_k1dir(3)
-    integer :: in_sia_ind(self%nspins)
-    real(dp)::  in_sia_k1amp(self%nspins), in_sia_k1dir(3, self%nspins)
+    integer :: in_sia_ind(self%nspin)
+    real(dp)::  in_sia_k1amp(self%nspin), in_sia_k1dir(3, self%nspin)
 
     integer :: i
 
-     write(*,'(A28)') "Adding SIA terms from input"
-     !ABI_ALLOCATE(in_sia_ind,(self%nspins))
-     !ABI_ALLOCATE(in_sia_k1amp,(self%nspins))
-     !ABI_ALLOCATE(in_sia_k1dir,(3, nspins))
-     do i =1, self%nspins
-        in_sia_ind=i
-        in_sia_k1amp(i)=input_sia_k1amp
-        in_sia_k1dir(:,i)=input_sia_k1dir
-     end do
-     call self%set_sia(self%nspins, in_sia_ind, in_sia_k1amp, in_sia_k1dir )
-     !ABI_DEALLOCATE(in_sia_ind)
-     !ABI_DEALLOCATE(in_sia_k1amp)
-     !ABI_DEALLOCATE(in_sia_k1dir)
-   end subroutine spin_primitive_potential_t_add_input_sia
+    write(*,'(A28)') "Adding SIA terms from input"
+    do i =1, self%nspin
+       in_sia_ind=i
+       in_sia_k1amp(i)=input_sia_k1amp
+       in_sia_k1dir(:,i)=input_sia_k1dir
+    end do
+    call self%set_sia(self%nspin, in_sia_ind, in_sia_k1amp, in_sia_k1dir )
+  end subroutine add_input_sia
 
 
-
-  subroutine spin_primitive_potential_t_read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
-
+  subroutine read_xml(self, xml_fname, use_exchange, use_dmi, use_sia, use_bi)
     class(spin_primitive_potential_t), intent(inout) :: self
     character(kind=C_CHAR) :: xml_fname(*)
-    integer :: natoms, nspins, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
+    integer :: natoms, nspin, exc_nnz, dmi_nnz, uni_nnz, bi_nnz
     logical, optional, intent(in) :: use_exchange, use_dmi, use_sia, use_bi
     logical :: uexc, udmi, usia, ubi
     real(dp) :: ref_energy
@@ -328,7 +246,7 @@ contains
     write(*,'(A80)') " "
 
     call xml_read_spin(xml_fname, ref_energy, p_unitcell,                 &
-         natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
+         natoms, p_masses, nspin, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
          dmi_nnz, p_dmi_ilist, p_dmi_jlist, p_dmi_Rlist, p_dmi_vallist, &
          uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
@@ -337,8 +255,8 @@ contains
     call c_f_pointer(p_unitcell, unitcell, [9])
     call c_f_pointer(p_masses, masses, [natoms])
     call c_f_pointer(p_index_spin, index_spin, [natoms])
-    call c_f_pointer(p_gyroratios, gyroratios, [nspins])
-    call c_f_pointer(p_damping_factors, damping_factors, [nspins])
+    call c_f_pointer(p_gyroratios, gyroratios, [nspin])
+    call c_f_pointer(p_damping_factors, damping_factors, [nspin])
     call c_f_pointer(p_positions, positions, [natoms*3])
     call c_f_pointer(p_spinat, spinat, [natoms*3])
     call c_f_pointer(p_exc_ilist, exc_ilist, [exc_nnz])
@@ -356,7 +274,6 @@ contains
     call c_f_pointer(p_bi_jlist, bi_jlist, [bi_nnz])
     call c_f_pointer(p_bi_Rlist, bi_Rlist, [bi_nnz*3])
     call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
-
 
     ! change of units to a.u.
 
@@ -376,16 +293,11 @@ contains
     write(*,'(A21)') "Setting up spin model"
     write(*,'(A15)') "Setting system"
     uc(:,:)=transpose(reshape(unitcell, [3,3]))
-    call spin_primitive_potential_t_set_atoms(self,natoms,uc, & 
-            & reshape(positions, [3, natoms]), &
-            & nspins, &
-            & index_spin, &
-            & reshape(spinat, [3, natoms]), &
-            & gyroratios,damping_factors)
+    !call set_atoms(self,)
+    
+    call self%set_spin_primcell(natoms, unitcell, positions, &
+         nspin, index_spin, spinat, gyroratios, damping_factors )
 
-    ! call self%set_exchange(exc_nnz,exc_ilist,exc_jlist,&
-    !      reshape(exc_Rlist, (/3, exc_nnz /)), &
-    !      reshape(exc_vallist, (/3, exc_nnz/)) )
 
     if(.not. present(use_exchange))  then
        uexc=.True.
@@ -395,7 +307,7 @@ contains
 
     if(uexc) then
        write(*,'(A23)') "Setting exchange terms"
-       call spin_primitive_potential_t_set_exchange(self, exc_nnz,exc_ilist,exc_jlist,&
+       call self%set_exchange(exc_nnz,exc_ilist,exc_jlist,&
             reshape(exc_Rlist, (/3, exc_nnz /)), &
             reshape(exc_vallist, (/3, exc_nnz/)))
     else
@@ -409,10 +321,7 @@ contains
     end if
     if (udmi) then
        write(*,'(A18)') "Setting DMI terms"
-       ! call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
-       !    Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
-       !     vallist = reshape(dmi_vallist, (/3, dmi_nnz/)) )
-       call spin_primitive_potential_t_set_dmi(self, n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
+       call self%set_dmi( n=dmi_nnz, ilist=dmi_ilist, jlist=dmi_jlist, &
             Rlist=reshape(dmi_Rlist, (/3, dmi_nnz /)), &
             vallist = reshape(dmi_vallist, (/3, dmi_nnz/)))
        write(*,'(A27)') " Setting uniaxial SIA terms"
@@ -427,7 +336,7 @@ contains
     end if
     if (usia) then
        write(*,'(A18)') "Setting SIA terms"
-       call spin_primitive_potential_t_set_sia(self, uni_nnz, uni_ilist, uni_amplitude_list, &
+       call self%set_sia(uni_nnz, uni_ilist, uni_amplitude_list, &
             reshape(uni_direction_list, [3, uni_nnz]) )
     else
        print *, " SIA term in xml file not used"
@@ -441,7 +350,7 @@ contains
 
     if (ubi) then
        write(*,'(A23)') "Setting bilinear terms"
-       call spin_primitive_potential_t_set_bilinear(self, bi_nnz, bi_ilist, bi_jlist,  &
+       call self%set_bilinear(bi_nnz, bi_ilist, bi_jlist,  &
             Rlist=reshape(bi_Rlist, (/3, bi_nnz /)), &
             vallist = reshape(bi_vallist, (/3,3, bi_nnz/)))
     else
@@ -449,370 +358,220 @@ contains
     endif
 
     call xml_free_spin(xml_fname, ref_energy, p_unitcell,                 &
-         natoms, p_masses, nspins, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
+         natoms, p_masses, nspin, p_index_spin, p_gyroratios, p_damping_factors, p_positions, p_spinat, &
          exc_nnz, p_exc_ilist, p_exc_jlist, p_exc_Rlist, p_exc_vallist, &
          dmi_nnz, p_dmi_ilist, p_dmi_jlist, p_dmi_Rlist, p_dmi_vallist, &
          uni_nnz, p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
          bi_nnz, p_bi_ilist, p_bi_jlist, p_bi_Rlist, p_bi_vallist)
 
-  end subroutine spin_primitive_potential_t_read_xml
-
-  subroutine spin_primitive_potential_t_finalize(self)
-
-    class(spin_primitive_potential_t), intent(inout) :: self
-    integer :: i, j
+  end subroutine read_xml
 
 
-    if(allocated(self%index_spin))  then
-       ABI_DEALLOCATE(self%index_spin)
-    end if
+  subroutine fill_supercell(self, scmaker, scpot)
+    class(spin_primitive_potential_t) , intent(inout) :: self
+    type(supercell_maker_t), intent(inout):: scmaker
+    class(abstract_potential_t), pointer, intent(inout) :: scpot
+    type(spin_terms_t),pointer :: tpot
+    integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
+    integer :: i_sc(scmaker%ncells), j_sc(scmaker%ncells), R_sc(scmaker%ncells)
+    real(dp) :: val_sc(scmaker%ncells)
 
-    if(allocated(self%gyroratios))  then
-       ABI_DEALLOCATE(self%gyroratios)
-    end if
+    nspin=self%nspin
+    sc_nspin= nspin * scmaker%ncells
 
-    if(allocated(self%damping_factors))  then
-       ABI_DEALLOCATE(self%damping_factors)
-    end if
+    allocate(spin_terms_t::scpot)
+    call tpot%initialize(sc_nspin)
+    scpot=>tpot
 
-    if(allocated(self%positions))  then
-       ABI_DEALLOCATE(self%positions)
-    end if
-
-    if(allocated(self%spinat))  then
-       ABI_DEALLOCATE(self%spinat)
-    end if
-
-    if(allocated(self%exc_ilist))  then
-       ABI_DEALLOCATE(self%exc_ilist)
-    end if
-
-    if(allocated(self%exc_jlist))  then
-       ABI_DEALLOCATE(self%exc_jlist)
-    end if
-
-    if(allocated(self%exc_Rlist))  then
-       ABI_DEALLOCATE(self%exc_Rlist)
-    end if
-
-    if(allocated(self%exc_vallist))  then
-       ABI_DEALLOCATE(self%exc_vallist)
-    end if
-
-    if(allocated(self%dmi_ilist))  then
-       ABI_DEALLOCATE(self%dmi_ilist)
-    end if
-
-    if(allocated(self%dmi_jlist))  then
-       ABI_DEALLOCATE(self%dmi_jlist)
-    end if
-
-    if(allocated(self%dmi_Rlist))  then
-       ABI_DEALLOCATE(self%dmi_Rlist)
-    end if
-
-    if(allocated(self%dmi_vallist))  then
-       ABI_DEALLOCATE(self%dmi_vallist)
-    end if
-
-    if(allocated(self%uni_ilist))  then
-       ABI_DEALLOCATE(self%uni_ilist)
-    end if
-
-    if(allocated(self%uni_amplitude_list))  then
-       ABI_DEALLOCATE(self%uni_amplitude_list)
-    end if
-
-    if(allocated(self%uni_direction_list))  then
-       ABI_DEALLOCATE(self%uni_direction_list)
-    end if
-
-    if(allocated(self%bi_ilist))  then
-       ABI_DEALLOCATE(self%bi_ilist)
-    end if
-
-    if(allocated(self%bi_jlist))  then
-       ABI_DEALLOCATE(self%bi_jlist)
-    end if
-
-    if(allocated(self%bi_Rlist))  then
-       ABI_DEALLOCATE(self%bi_Rlist)
-    end if
-
-    if(allocated(self%bi_vallist))  then
-       ABI_DEALLOCATE(self%bi_vallist)
-    end if
-
-    !call self%total_ilist%finalize()
-    !call self%total_jlist%finalize()
-    call int_array_type_finalize(self%total_ilist)
-    call int_array_type_finalize(self%total_jlist)
-
-    do i=1, 3, 1
-       !call self%total_Rlist(i)%finalize()
-       call int_array_type_finalize(self%total_Rlist(i))
-    enddo
-
-    do i=1, 3, 1
-       do j=1, 3, 1
-          !call self%total_val_list(i, j)%finalize()
-          call real_array_type_finalize(self%total_val_list(j, i))
+    call self%coeff%sum_duplicates()
+    do inz=1, self%coeff%nnz
+       ind_Rij=self%coeff%get_ind_inz(inz)
+       iR=ind_Rij(1)
+       ii=ind_Rij(2)
+       ij=ind_Rij(3)
+       R=self%Rlist%data(:,iR)
+       call scmaker%trans_i(nbasis=nspin*3, i=ii, i_sc=i_sc)
+       call scmaker%trans_j_and_Rj(nbasis=nspin*3, j=ij, Rj=R, j_sc=j_sc, Rj_sc=R_sc)
+       val_sc(:)= self%coeff%val%data(inz)
+       do i=1, scmaker%ncells
+          call tpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
        end do
     end do
+    scpot=>tpot
+  end subroutine fill_supercell
 
-  end subroutine spin_primitive_potential_t_finalize
 
-  subroutine spin_ham_set_exchange(self, nnz,  ilist, jlist, Rlist, vallist)
 
-    class(spin_primitive_potential_t) , intent(inout) :: self
-    integer, intent(in) :: nnz,  ilist(:), jlist(:), Rlist(:,:)
-    real(dp), intent(in) :: vallist(:,:)
-    integer :: err
-    allocate(self%exc_ilist(nnz), stat=err)
-    allocate(self%exc_jlist(nnz), stat=err)
-    allocate(self%exc_Rlist(3,nnz), stat=err)
-    allocate(self%exc_vallist(3,nnz), stat=err)
-    self%exc_nnz=nnz
-    self%exc_ilist=ilist
-    self%exc_jlist=jlist
-    self%exc_Rlist=Rlist
-    self%exc_vallist=vallist
-  end subroutine spin_ham_set_exchange
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! subroutine make_supercell(self, sc_matrix, sc_ham)                                                       !
+  !   class(spin_primitive_potential_t) , intent(inout) :: self                                              !
+  !   type(spin_terms_t) , intent(inout) :: sc_ham                                                           !
+  !   integer :: sc_matrix(3,3), iatoms(self%nspin)                                                         !
+  !                                                                                                          !
+  !   integer ::  typat_primcell(self%natoms), sc_nspin,  i, counter, icell                                 !
+  !   real(dp) :: znucl(self%natoms), tmp(3,3)                                                               !
+  !   integer, allocatable ::sc_index_spin(:), sc_znucl(:), sc_iatoms(:)                                     !
+  !   integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)                                                !
+  !   real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)       !
+  !   integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom                                                   !
+  !                                                                                                          !
+  !   if(iam_master) then                                                                                    !
+  !      typat_primcell(:)=1                                                                                 !
+  !      ! TODO hexu:should use supercell generate with lattice model                                        !
+  !      !init_supercell(natom_primcell, sc_matrix, rprimd_primcell,                                         !
+  !      !             typat_primcell, xcart_primcell, znucl, scell)                                         !
+  !                                                                                                          !
+  !      znucl(:)=0                                                                                          !
+  !                                                                                                          !
+  !      counter=0                                                                                           !
+  !      do i=1, self%natoms                                                                                 !
+  !         if(self%index_spin(i)>0) then                                                                    !
+  !            counter=counter+1                                                                             !
+  !            iatoms(counter)=i                                                                             !
+  !         endif                                                                                            !
+  !      enddo                                                                                               !
+  !                                                                                                          !
+  !      call init_supercell(self%natoms, sc_matrix, self%unitcell, typat_primcell, &                        !
+  !           self%positions, znucl, scell)                                                                  !
+  !      ! cell, positions                                                                                   !
+  !      !scell%rprimd                                                                                       !
+  !      !scell%xcart                                                                                        !
+  !      !nspin                                                                                             !
+  !      sc_nspin=scell%ncells*self%nspin                                                                  !
+  !      ABI_ALLOCATE(sc_index_spin, (self%natoms*scell%ncells))                                             !
+  !      ABI_ALLOCATE(sc_ispin_prim, (sc_nspin) )                                                           !
+  !      ABI_ALLOCATE(sc_rvec, (3, sc_nspin) )                                                              !
+  !      ABI_ALLOCATE(sc_spinat, (3, sc_nspin) )                                                            !
+  !      ABI_ALLOCATE(sc_spinpos, (3, sc_nspin) )                                                           !
+  !      ABI_ALLOCATE(sc_gyroratios, (sc_nspin))                                                            !
+  !      ABI_ALLOCATE(sc_damping_factors, (sc_nspin))                                                       !
+  !      !ABI_ALLOCATE(sc_znucl, (sc_nspin))                                                                !
+  !      ABI_ALLOCATE(sc_iatoms, (sc_nspin))                                                                !
+  !      ! sc_index_spin                                                                                     !
+  !      counter=0                                                                                           !
+  !      do i = 1, scell%natom, 1                                                                            !
+  !         iatom=scell%atom_indexing(i)                                                                     !
+  !         !if(scell%atom_indexing(i)>0) then                                                               !
+  !         if(self%index_spin(iatom)>0) then                                                                !
+  !            counter=counter+1                                                                             !
+  !            !map from spin to atom and atom to spin.                                                      !
+  !            sc_index_spin(i)=counter                                                                      !
+  !            ! variables which every atom have in primitive cell                                           !
+  !            sc_iatoms(counter)=iatom                                                                      !
+  !            sc_spinpos(:, counter)=scell%xcart(:,i)                                                       !
+  !            sc_spinat(:, counter)=self%spinat(:,iatom)                                                    !
+  !                                                                                                          !
+  !            sc_ispin_prim(counter) = self%index_spin(iatom)                                               !
+  !                                                                                                          !
+  !            ! variables only atoms with spin have.                                                        !
+  !            sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))                               !
+  !            sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))                     !
+  !                                                                                                          !
+  !            ! Rvec                                                                                        !
+  !            sc_rvec(:,counter)=scell%uc_indexing(:,i)                                                     !
+  !         else                                                                                             !
+  !            sc_index_spin(i)=-1                                                                           !
+  !         endif                                                                                            !
+  !      end do                                                                                              !
+  !                                                                                                          !
+  !   endif                                                                                                  !
+  !                                                                                                          !
+  !                                                                                                          !
+  !   call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &                              !
+  !        & spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, &                                 !
+  !        & rvec=sc_rvec, gyro_ratio=sc_gyroratios, damping=sc_damping_factors)                             !
+  !                                                                                                          !
+  !   call  xmpi_bcast(self%total_nnz, master, comm, ierr)                                                   !
+  !   call  xmpi_bcast(scell%ncells, master, comm, ierr)                                                     !
+  !   do i =1, self%total_nnz, 1                                                                             !
+  !      do icell=1, scell%ncells, 1                                                                         !
+  !         if(iam_master) then                                                                              !
+  !            ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index               !
+  !            call find_supercell_ijR(scell=scell, i0=iatoms(self%total_ilist%data(i)), &                   !
+  !                 j0=iatoms(self%total_jlist%data(i)), &                                                   !
+  !                 R0=[self%total_Rlist(1)%data(i),  &                                                      !
+  !                 self%total_Rlist(2)%data(i),  &                                                          !
+  !                 self%total_Rlist(3)%data(i)], &                                                          !
+  !                 R=scell%rvecs(:,icell), &                                                                !
+  !                 i1=ii,j1=jj,R1=rr,R_sc=R_sc)                                                             !
+  !            do irow = 1, 3                                                                                !
+  !               do icol=1, 3                                                                               !
+  !                  tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)                                  !
+  !               end do                                                                                     !
+  !            end do                                                                                        !
+  !            call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp) !
+  !         endif                                                                                            !
+  !      enddo                                                                                               !
+  !   enddo                                                                                                  !
+  !   if (allocated(sc_ispin_prim)) then                                                                     !
+  !      ABI_DEALLOCATE(sc_ispin_prim)                                                                       !
+  !   endif                                                                                                  !
+  !   if (allocated(sc_iatoms)) then                                                                         !
+  !      ABI_DEALLOCATE(sc_iatoms)                                                                           !
+  !   endif                                                                                                  !
+  !   if (allocated(sc_spinpos)) then                                                                        !
+  !      ABI_DEALLOCATE(sc_spinpos)                                                                          !
+  !   endif                                                                                                  !
+  !   if (allocated(sc_rvec)) then                                                                           !
+  !      ABI_DEALLOCATE(sc_rvec)                                                                             !
+  !   endif                                                                                                  !
+  !   if (allocated(sc_index_spin)) then                                                                     !
+  !      ABI_DEALLOCATE(sc_index_spin)                                                                       !
+  !   endif                                                                                                  !
+  !                                                                                                          !
+  !   if (allocated(sc_gyroratios)) then                                                                     !
+  !      ABI_DEALLOCATE(sc_gyroratios)                                                                       !
+  !   endif                                                                                                  !
+  !   if (allocated(sc_damping_factors)) then                                                                !
+  !      ABI_DEALLOCATE(sc_damping_factors)                                                                  !
+  !  end if                                                                                                  !
+  !   if (allocated(sc_spinat)) then                                                                         !
+  !      ABI_DEALLOCATE(sc_spinat)                                                                           !
+  !   endif                                                                                                  !
+  ! end subroutine make_supercell                                                                            !
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  ! R (in term of primitive cell) to R_sc(in term of supercell) + R_prim
-  subroutine find_R_PBC(scell, R, R_sc, R_prim)
-
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in):: R(3)
-    integer, intent(out):: R_sc(3), R_prim(3)
-    real(dp) :: R_sc_d(3), sc_mat(3,3)
-
-    integer:: ipriv(3), info
-    !call dgesv( n, nrhs, a, lda, ipiv, b, ldb, info )
-    sc_mat(:,:)=scell%rlatt
-    R_sc_d(:)=R(:)
-    !print *, sc_mat
-    !print *, R_sc_d
-    call dgesv(3, 1, sc_mat, 3, ipriv, R_sc_d, 3, info)
-    if ( info/=0 ) then
-       print *, "Failed to find R_sc"
-    end if
-
-    ! if only diagonal of rlatt works.
-    !R_sc_d(1)= real(R(1))/real(scell%rlatt(1,1))
-    !R_sc_d(2)= real(R(2))/real(scell%rlatt(2,2))
-    !R_sc_d(3)= real(R(3))/real(scell%rlatt(3,3))
-    ! TODO hexu: R_prim should be non-negative, which is assumed in m_supercell.
-    ! But should we make it more general?
-    R_sc(1)=floor(R_sc_d(1))
-    R_sc(2)=floor(R_sc_d(2))
-    R_sc(3)=floor(R_sc_d(3))
-    R_prim(1)=(R(1)-R_sc(1)*scell%rlatt(1,1))
-    R_prim(2)=(R(2)-R_sc(2)*scell%rlatt(2,2))
-    R_prim(3)=(R(3)-R_sc(3)*scell%rlatt(3,3))
-  end subroutine find_R_PBC
-
-  ! TODO hexu: move this to m_supercell?
-  ! find the spercelll atom index from index of atom in primitive cell and R vector
-  function find_supercell_index(scell, iatom_prim, rvec) result(iatom_supercell)
-
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in) :: iatom_prim, rvec(3)
-    integer  :: iatom_supercell
-    integer :: i
-    iatom_supercell=-1
-    do i=1, scell%natom, 1
-       if ( scell%atom_indexing(i) == iatom_prim .and. &
-            all(scell%uc_indexing(:,i)==rvec) ) then
-          iatom_supercell=i
-          return
-       end if
-    end do
-    print *, "cannot find iatom_prim, rvec pair", iatom_prim, rvec, "in supercell"
-  end function find_supercell_index
-
-  !i0, j0+R0 shifted by R to i1=i0+0+R->periodic, j1=j0+R0+R->periodic
-  subroutine find_supercell_ijR(scell, i0, j0, R0, R, i1, j1, R1, R_sc)
-
-    type(supercell_type) , intent(in):: scell
-    integer, intent(in) :: i0, j0, R0(3), R(3)
-    integer, intent(out) :: i1, j1, R1(3), R_sc(3)
-    i1=find_supercell_index(scell,i0,R)
-    call find_R_PBC(scell,R0+R,R_sc,R1)
-    j1=find_supercell_index(scell, j0, R1)
-  end subroutine find_supercell_ijR
-
-  subroutine spin_primitive_potential_t_make_supercell(self, sc_matrix, sc_ham)
-    class(spin_primitive_potential_t) , intent(inout) :: self
-    type(spin_terms_t) , intent(inout) :: sc_ham
-    integer :: sc_matrix(3,3), iatoms(self%nspins)
-
-    integer ::  typat_primcell(self%natoms), sc_nspins,  i, counter, icell
-    real(dp) :: znucl(self%natoms), tmp(3,3)
-    type(supercell_type) :: scell
-    integer, allocatable ::sc_index_spin(:), sc_znucl(:), sc_iatoms(:)
-    integer, allocatable :: sc_ispin_prim(:), sc_rvec(:, :)
-    real(dp), allocatable ::sc_spinat(:,:), sc_gyroratios(:), sc_damping_factors(:), sc_spinpos(:,:)
-    integer :: ii, jj, icol, irow, rr(3), R_sc(3), iatom
-
-    if(iam_master) then
-    typat_primcell(:)=1
-    ! TODO hexu:should use supercell generate with lattice model
-    !init_supercell(natom_primcell, sc_matrix, rprimd_primcell,
-    !             typat_primcell, xcart_primcell, znucl, scell)
-
-    znucl(:)=0
-
-    counter=0
-    do i=1, self%natoms
-      if(self%index_spin(i)>0) then
-          counter=counter+1
-          iatoms(counter)=i
-      endif
-    enddo 
-
-    call init_supercell(self%natoms, sc_matrix, self%unitcell, typat_primcell, &
-         self%positions, znucl, scell)
-    ! cell, positions
-    !scell%rprimd
-    !scell%xcart
-    !nspins
-    sc_nspins=scell%ncells*self%nspins
-    ABI_ALLOCATE(sc_index_spin, (self%natoms*scell%ncells))
-    ABI_ALLOCATE(sc_ispin_prim, (sc_nspins) )
-    ABI_ALLOCATE(sc_rvec, (3, sc_nspins) )
-    ABI_ALLOCATE(sc_spinat, (3, sc_nspins) )
-    ABI_ALLOCATE(sc_spinpos, (3, sc_nspins) )
-    ABI_ALLOCATE(sc_gyroratios, (sc_nspins))
-    ABI_ALLOCATE(sc_damping_factors, (sc_nspins))
-    !ABI_ALLOCATE(sc_znucl, (sc_nspins))
-    ABI_ALLOCATE(sc_iatoms, (sc_nspins))
-    ! sc_index_spin
-    counter=0
-    do i = 1, scell%natom, 1
-       iatom=scell%atom_indexing(i)
-       !if(scell%atom_indexing(i)>0) then
-       if(self%index_spin(iatom)>0) then
-          counter=counter+1
-          !map from spin to atom and atom to spin.
-          sc_index_spin(i)=counter
-          ! variables which every atom have in primitive cell
-          sc_iatoms(counter)=iatom
-          sc_spinpos(:, counter)=scell%xcart(:,i)
-          sc_spinat(:, counter)=self%spinat(:,iatom)
-
-          sc_ispin_prim(counter) = self%index_spin(iatom)
-
-          ! variables only atoms with spin have.
-          sc_gyroratios( counter)=self%gyroratios(self%index_spin(iatom))
-          sc_damping_factors( counter)=self%damping_factors(self%index_spin(iatom))
-
-          ! Rvec
-          sc_rvec(:,counter)=scell%uc_indexing(:,i)
-       else
-          sc_index_spin(i)=-1
-       endif
-    end do
-
-    endif
-
-    
-    call spin_terms_t_initialize(sc_ham, cell=scell%rprimd, pos=sc_spinpos, &
-         & spinat=sc_spinat, iatoms=sc_iatoms, ispin_prim=sc_ispin_prim, &
-         & rvec=sc_rvec, gyro_ratio=sc_gyroratios, damping=sc_damping_factors)
-
-    call  xmpi_bcast(self%total_nnz, master, comm, ierr)
-    call  xmpi_bcast(scell%ncells, master, comm, ierr)
-    do i =1, self%total_nnz, 1
-       do icell=1, scell%ncells, 1
-        if(iam_master) then
-          ! Note i0 and j0 are in spin index, while find_supercell_ijR work in atom index
-          call find_supercell_ijR(scell=scell, i0=iatoms(self%total_ilist%data(i)), &
-               j0=iatoms(self%total_jlist%data(i)), &
-               R0=[self%total_Rlist(1)%data(i),  &
-               self%total_Rlist(2)%data(i),  &
-               self%total_Rlist(3)%data(i)], &
-               R=scell%rvecs(:,icell), &
-               i1=ii,j1=jj,R1=rr,R_sc=R_sc)
-          do irow = 1, 3
-             do icol=1, 3
-                tmp(icol, irow)=self%total_val_list(icol,irow)%data(i)
-             end do
-          end do
-          call spin_terms_t_set_bilinear_term_single(sc_ham, sc_index_spin(ii), sc_index_spin(jj), tmp)
-         endif
-       enddo
-    enddo
-    if (allocated(sc_ispin_prim)) then
-       ABI_DEALLOCATE(sc_ispin_prim)
-    endif
-    if (allocated(sc_iatoms)) then
-        ABI_DEALLOCATE(sc_iatoms)
-    endif
-    if (allocated(sc_spinpos)) then
-        ABI_DEALLOCATE(sc_spinpos)
-    endif
-    if (allocated(sc_rvec)) then
-       ABI_DEALLOCATE(sc_rvec)
-    endif
-    if (allocated(sc_index_spin)) then
-       ABI_DEALLOCATE(sc_index_spin)
-    endif
-
-    if (allocated(sc_gyroratios)) then
-       ABI_DEALLOCATE(sc_gyroratios)
-    endif
-    if (allocated(sc_damping_factors)) then
-       ABI_DEALLOCATE(sc_damping_factors)
-    end if
-    if (allocated(sc_spinat)) then
-       ABI_DEALLOCATE(sc_spinat)
-    endif
-    call destroy_supercell(scell)
-  end subroutine spin_primitive_potential_t_make_supercell
-
-  subroutine spin_primitive_potential_t_print_terms(self)
+  subroutine print_terms(self)
     class(spin_primitive_potential_t) :: self
     integer :: i, ii, jj,  R(3)
     character(len=80) :: msg
     real(dp) :: tmp(3, 3)
+  !   msg=repeat("=", 34)
+  !   write(msg, '(A34, 1X, A10, 1x, A34)') msg, 'spin terms', msg
+  !   call wrtout(std_out,msg,'COLL')
 
-    msg=repeat("=", 34)
-    write(msg, '(A34, 1X, A10, 1x, A34)') msg, 'spin terms', msg
-    call wrtout(std_out,msg,'COLL')
+  !   write(msg, '(1X, A16, 2X, I5.3)') 'Number of terms:',  self%coeff
+  !   call wrtout(std_out,msg,'COLL')
 
-    write(msg, '(1X, A16, 2X, I5.3)') 'Number of terms:',  self%total_nnz
-    call wrtout(std_out,msg,'COLL')
+  !   do i=1, self%total_nnz
+  !      do ii=1,3
+  !         R(ii)=self%total_Rlist(ii)%data(i)
+  !         do jj=1, 3
+  !            tmp(jj, ii)=self%total_val_list(jj, ii)%data(i)
+  !         enddo
+  !      enddo
 
-    do i=1, self%total_nnz
-       do ii=1,3
-          R(ii)=self%total_Rlist(ii)%data(i)
-          do jj=1, 3
-             tmp(jj, ii)=self%total_val_list(jj, ii)%data(i)
-          enddo
-       enddo
+  !      msg=repeat("-", 64)
+  !      write(msg, '(1X, A64)') msg
+  !      call wrtout(std_out,msg,'COLL')
+  !      call wrtout(ab_out, msg, 'COLL')
 
-       msg=repeat("-", 64)
-       write(msg, '(1X, A64)') msg
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-
-       write(msg, "(2X, A3, I5.4, 2X, A3, I5.4, 5X, A3, I4.2, I5.2, I5.2)")  & 
-            'i =', self%total_ilist%data(i), 'j =', self%total_jlist%data(i), 'R =', R
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-       write(msg, "(2X, A16)") 'Matrix Form (Ha)'
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-       do ii=1, 3
-         write(msg, "(3ES21.12)") tmp(ii, :)
-         call wrtout(std_out,msg,'COLL')
-         call wrtout(ab_out, msg, 'COLL')
-       end do
-    end do
-    msg=repeat("=", 80)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-  end subroutine spin_primitive_potential_t_print_terms
+  !      write(msg, "(2X, A3, I5.4, 2X, A3, I5.4, 5X, A3, I4.2, I5.2, I5.2)")  & 
+  !           'i =', self%total_ilist%data(i), 'j =', self%total_jlist%data(i), 'R =', R
+  !      call wrtout(std_out,msg,'COLL')
+  !      call wrtout(ab_out, msg, 'COLL')
+  !      write(msg, "(2X, A16)") 'Matrix Form (Ha)'
+  !      call wrtout(std_out,msg,'COLL')
+  !      call wrtout(ab_out, msg, 'COLL')
+  !      do ii=1, 3
+  !         write(msg, "(3ES21.12)") tmp(ii, :)
+  !         call wrtout(std_out,msg,'COLL')
+  !         call wrtout(ab_out, msg, 'COLL')
+  !      end do
+  !   end do
+  !   msg=repeat("=", 80)
+  !   call wrtout(std_out,msg,'COLL')
+  !   call wrtout(ab_out, msg, 'COLL')
+  end subroutine print_terms
 
 end module m_spin_primitive_potential

@@ -12,7 +12,7 @@ module m_multibinit_main2
   use m_xomp
   use m_abicore
   use m_errors
- 
+
   use m_effective_potential
   use m_fit_polynomial_coeff
   use m_multibinit_dataset

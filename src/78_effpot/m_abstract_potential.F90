@@ -56,7 +56,7 @@ module m_abstract_potential
      logical :: is_null=.True.   ! if is_null, this term does not exist.
      type(mb_supercell_t) ,pointer :: supercell => null()
      !real(dp), allocatable :: ms(:)
-     character (len=190) :: label="Abstract Potential"
+     character (len=200) :: label="Abstract Potential"
    contains
      procedure :: finalize        ! finalize
      procedure :: set_params      ! parameters from input file

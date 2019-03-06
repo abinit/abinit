@@ -47,7 +47,7 @@
        real(dp) :: energy, deltaE
        real(dp) :: temperature
        real(dp) :: beta  ! 1/(kb T)
-       integer :: nspins
+       integer :: nspin
        integer :: nstep
        integer :: imove ! index of spin to be moved
        integer :: naccept
@@ -63,13 +63,13 @@
 
 
   contains
-    subroutine initialize(self, nspins, angle, temperature)
+    subroutine initialize(self, nspin, angle, temperature)
       class(spin_mc_t), intent(inout) :: self
-      integer, intent(in) :: nspins
+      integer, intent(in) :: nspin
       real(dp), intent(in) :: angle, temperature
-      self%nspins=nspins
-      self%nstep=self%nspins
-      ABI_ALLOCATE(self%S, (3, self%nspins))
+      self%nspin=nspin
+      self%nstep=self%nspin
+      ABI_ALLOCATE(self%S, (3, self%nspin))
       self%angle=angle
       self%temperature=temperature
       self%beta=1.0/temperature ! Kb in a.u. is 1.
@@ -84,7 +84,7 @@
       end if
       self%Sold=zero
       self%Snew=zero
-      self%nspins=0
+      self%nspin=0
       self%nstep=0
     end subroutine finalize
 
@@ -93,7 +93,7 @@
      class(spin_mc_t) :: self
      class(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
-     real(dp) :: S_out(3,self%nspins), etot, r
+     real(dp) :: S_out(3,self%nspin), etot, r
      integer :: i, j
      r=self%attempt(rng, effpot)
      !print *, "r", r
@@ -109,8 +109,8 @@
      class(spin_mc_t), intent(inout) :: self
      type(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
-     real(dp), intent(inout) :: S_in(3,self%nspins)
-     real(dp), intent(out) :: S_out(3,self%nspins), etot
+     real(dp), intent(inout) :: S_in(3,self%nspin)
+     real(dp), intent(out) :: S_out(3,self%nspin), etot
      integer :: i
      self%S(:,:)=S_in(:,:)
      !print*, "S_in", S_in
@@ -140,7 +140,7 @@
      class(abstract_potential_t), intent(inout) :: effpot
      real(dp) :: r
      ! choose one site
-     self%imove = rng%rand_choice(self%nspins)
+     self%imove = rng%rand_choice(self%nspin)
      self%Sold(:)= self%S(:,self%imove)
      call move_hinzke_nowak(rng, self%Sold, self%Snew, self%angle)
      call effpot%get_delta_E( self%S, self%imove, self%Snew, self%deltaE)

@@ -68,7 +68,6 @@ module m_unitcell
      logical :: has_spin=.False.
      logical :: has_lwf=.False.
      logical :: has_electron=.False.
-     integer :: nlwf
      type(unitcell_lattice_t) :: lattice
      type(unitcell_spin_t) :: spin
      type(unitcell_lwf_t) :: lwf
@@ -76,6 +75,7 @@ module m_unitcell
      procedure:: initialize
      procedure :: finalize
      procedure :: set_lattice
+     procedure :: set_spin
      procedure :: fill_supercell
   end type unitcell_t
 
@@ -88,7 +88,24 @@ contains
   !TODO: Implement
   subroutine set_lattice(self)
     class(unitcell_t), intent(inout) :: self
+    self%has_lattice=.True.
+    call self%lattice%initialize()
   end subroutine set_lattice
+
+
+  subroutine set_spin(self,nspin, ms, positions, gyroratios, damping_factors)
+    class(unitcell_t) , intent(inout):: self
+    integer, intent(in) :: nspin
+    real(dp), intent(in) :: ms(nspin), positions(3, nspin), gyroratios(nspin), damping_factors(nspin)
+    self%has_spin=.True.
+    call self%spin%initialize(nspin, ms, positions, gyroratios, damping_factors)
+  end subroutine set_spin
+
+  subroutine set_lwf(self)
+    class(unitcell_t) , intent(inout):: self
+    self%has_lwf=.True.
+    call self%lwf%initialize()
+  end subroutine set_lwf
 
   subroutine read_from_file(self, params, fnames)
     class(unitcell_t), intent(inout) :: self
@@ -108,7 +125,6 @@ contains
     class(unitcell_t), intent(inout) :: self
     type(supercell_maker_t), intent(inout) :: sc_maker
     type(mb_supercell_t), intent(inout) :: supercell
-    integer :: sc_natom
     call supercell%initialize()
     if (self%has_lattice) then
        call self%lattice%fill_supercell(sc_maker, supercell)
@@ -140,6 +156,8 @@ contains
 
 
   !========================= SPIN =================================
+
+
   Subroutine spin_initialize(self, nspin, ms, positions, gyroratios, damping_factors)
     class(unitcell_spin_t) , intent(inout):: self
     integer, intent(in) :: nspin

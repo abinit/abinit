@@ -441,22 +441,18 @@ program multibinit
   ! Parse command line arguments.
   !args = args_parser(); if (args%exit /= 0) goto 100
 
-  
   nargs = command_argument_count()
   do iarg=1,nargs
-     call get_command_argument(ii, arg)
+     call get_command_argument(number=iarg, value=arg)
      if (arg == "-v" .or. arg == "--version") then
         write(std_out,"(a)") trim(abinit_version); goto 100
-
+        goto 100
      else if (arg == "--unittest") then
         unittest=.True.
+        call mb_test_main()
+        goto 100
      endif
   end do
-
-  if(unittest) then
-     call mb_test_main()
-     goto 100
-  end if
 
   !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
   !set the argument of abimem_init to "2" instead of "0"

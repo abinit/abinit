@@ -64,6 +64,21 @@ contains
     end do
   end function array_lessthan
 
+  function array_morethan(a, b, N) result (y)
+    integer, intent(in)  :: a(:), b(:), N
+    logical :: y
+    integer :: i
+    y=.False.
+    do i =1, N
+       if (a(i)>b(i)) then
+          y=.True.
+          exit
+       end if
+    end do
+  end function array_morethan
+
+
+
   function binsearch_left_integer(a, x) result(ix)
     integer, intent(in):: a(:), x
     integer :: n,ix, ub, lb

@@ -61,7 +61,7 @@ contains
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
     integer, intent(in) :: order
     integer, intent(in) :: nature(order)
-    ABI_ALLOCATE(nature, order)
+    ABI_ALLOCATE(self%nature, (order))
     self%nature(:)=nature(:)
     self%order=order
   end subroutine initialize
@@ -72,6 +72,7 @@ contains
        ABI_DEALLOCATE(self%nature)
     end if
     self%order=-1
-  end subroutine initialize
+  end subroutine finalize
+
 
 end module m_polynomail_potential

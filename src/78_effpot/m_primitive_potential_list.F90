@@ -62,19 +62,18 @@ module m_primitive_potential_list
   end type primitive_potential_list_t
 contains
 
-subroutine fill_supercell(self, sc_maker, sc_pot)
+subroutine fill_supercell(self, scmaker, scpot)
     class(primitive_potential_list_t), intent(inout) :: self
-    class(supercell_maker_t), intent(in) :: sc_maker
-    class(abstract_potential_t), pointer, intent(inout) :: sc_pot
+    type(supercell_maker_t), intent(inout) :: scmaker
+    class(abstract_potential_t), pointer, intent(inout) :: scpot
     ! Note that sc_pot is a pointer
 
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     type(abstract_potential_t), pointer :: tmp
     allocate(abstract_potential_t:: tmp)
-    ! call tmp%initialize(....)
+    !call tmp%initialize(....)
     ! set tmp
-    sc_pot=>tmp
     nullify(tmp)
   end subroutine fill_supercell
 
@@ -108,7 +107,7 @@ subroutine fill_supercell(self, sc_maker, sc_pot)
 
   subroutine fill_supercell_ptr(self, sc_maker, sc_pot)
     class(primitive_potential_list_t), intent(inout) :: self
-    class(supercell_maker_t), intent(in) :: sc_maker
+    type(supercell_maker_t), intent(inout) :: sc_maker
     class(abstract_potential_t), pointer, intent(inout) :: sc_pot
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
@@ -123,7 +122,7 @@ subroutine fill_supercell(self, sc_maker, sc_pot)
 
   subroutine fill_supercell_list(self, sc_maker, sc_pots)
     class(primitive_potential_list_t), intent(inout) :: self
-    class(supercell_maker_t), intent(in) :: sc_maker
+    class(supercell_maker_t), intent(inout) :: sc_maker
     class(potential_list_t), intent(inout) :: sc_pots
     ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
