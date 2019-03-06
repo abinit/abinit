@@ -48,7 +48,7 @@ AC_CONFIG_HEADERS([config.h])
 # Startup
 #
 
-ABI_MSG_SECTION([Basic initialisation])
+ABI_MSG_SECTION([Basic initialization])
 
 # Initial setup
 AC_CANONICAL_TARGET
@@ -89,6 +89,9 @@ ABI_PROG_MKDIR_P
 # Look for a command that provide absolute paths
 AC_CHECK_PROGS(REALPATH, [realpath readlink], [/bin/true])
 test "${REALPATH}" = "readlink" && REALPATH="${REALPATH} -f"
+
+# We might need a Python interpreter early on
+ABI_PROG_PYTHON
 
 # Define command-line arguments
 ABI_OPTIONS_DEFINE
@@ -232,18 +235,9 @@ fi
 
 ABI_MSG_SECTION([C support])
 
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Set Abinit C parameters
+# Set basic Abinit C parameters
+# Note: advanced fetaures are set later on
 ABI_PROG_CC
-
-# Restore back CPPFLAGS and CFLAGS
-CPPFLAGS="${abi_env_CPPFLAGS}"
-CFLAGS="${abi_env_CFLAGS}"
-
-# Check for system peculiarities
-ABI_CC_FEATURES
 
 # ---------------------------------------------------------------------------- #
 
@@ -253,33 +247,9 @@ ABI_CC_FEATURES
 
 ABI_MSG_SECTION([C++ support])
 
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Look for the C++ compiler
-if test "${CXX}" != "" -a ! -x "${CXX}"; then
-  abi_cxx_probe=`echo "${CXX}" | sed -e 's/ .*//'`
-  if test ! -x "${abi_cxx_probe}"; then
-    AC_PATH_PROG([abi_cxx_path],[${abi_cxx_probe}])
-    if test "${abi_cxx_path}" = ""; then
-      AC_MSG_ERROR([could not run C++ compiler "${CXX}"])
-    fi
-  fi
-fi
-AC_PROG_CXX
-
-# Warn if no C++ compiler is available
-if test "${CXX}" = ""; then
-  AC_MSG_WARN([no C++ compiler available])
-fi
-
-# Set Abinit C++ parameters
-if test "${CXX}" != ""; then
-  ABI_PROG_CXX
-fi
-
-# Restore back CXXFLAGS
-CXXFLAGS="${abi_env_CXXFLAGS}"
+# Set basic Abinit C++ parameters
+# Note: advanced fetaures are set later on
+ABI_PROG_CXX
 
 # ---------------------------------------------------------------------------- #
 
@@ -289,36 +259,8 @@ CXXFLAGS="${abi_env_CXXFLAGS}"
 
 ABI_MSG_SECTION([Fortran support])
 
-# Preserve environment
-ABI_ENV_BACKUP
-
-# Look for the Fortran compiler
-if test "${FC}" != "" -a ! -x "${FC}"; then
-  abi_fc_probe=`echo "${FC}" | sed -e 's/ .*//'`
-  if test ! -x "${abi_fc_probe}"; then
-    AC_PATH_PROG([abi_fc_path],[${abi_fc_probe}])
-    if test "${abi_fc_path}" = ""; then
-      AC_MSG_ERROR([could not run Fortran compiler "${FC}"])
-    fi
-  fi
-fi
-AC_PROG_FC
-
-# Fail if no Fortran compiler is available
-if test "${FC}" = ""; then
-  AC_MSG_ERROR([no Fortran compiler available])
-fi
-
-# Look for the Fortran preprocessor
-if test "${FPP}" != "" -a ! -x "${FPP}"; then
-  AC_PATH_PROG([abi_fpp_path],[${FPP}])
-  if test "${abi_fpp_path}" = ""; then
-    AC_MSG_ERROR([could not run Fortran preprocessor "${FPP}"])
-  fi
-fi
-#AC_PROG_FPP
-
-# Set Abinit Fortran parameters
+# Set basic Abinit Fortran parameters
+# Note: advanced fetaures are set later on
 ABI_PROG_FC
 
 # Set default file extensions
@@ -327,16 +269,8 @@ ABI_FC_EXTENSIONS
 # Get module file case
 ABI_FC_MOD_CASE
 
-# Restore back FCFLAGS
-FCFLAGS="${abi_env_FCFLAGS}"
-
-# Wrap Fortran compiler calls if needed or requested
-if test "${enable_fc_wrapper}" = "yes"; then
-  abi_fc_wrap="yes"
-fi
-
 # Determine Fortran-C name mangling scheme
-AC_FC_WRAPPERS
+#AC_FC_WRAPPERS
 
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
@@ -346,16 +280,11 @@ if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
     [Define to 1 if you are using XLF.])
 fi
 
-# ---------------------------------------------------------------------------- #
-
-#
-# Python support
-#
-
-ABI_MSG_SECTION([Python support])
-
-# Look for a working Python environment
-ABI_CHECK_PYTHON
+# Wrap Fortran compiler calls if needed or requested
+# Note: must be the last step of basic Fortran configuration
+if test "${enable_fc_wrapper}" = "yes"; then
+  abi_fc_wrap="yes"
+fi
 
 # ---------------------------------------------------------------------------- #
 
@@ -642,16 +571,22 @@ test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
 # ---------------------------------------------------------------------------- #
 
 #
-# Advanced compiler features
+# Advanced language features
 #
 
 # Note: these tests have to be performed after the flags have been
 #       saved.
 
-ABI_MSG_SECTION([Advanced compiler features])
+ABI_MSG_SECTION([Advanced language features])
 
+# Look for desired C features
 ABI_CC_FEATURES
+
+# Look for desired Fortran features
 ABI_FC_FEATURES
+
+# Look for desired Python features
+ABI_PY_FEATURES
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -723,29 +658,6 @@ ABI_LINALG_DETECT
 #
 # Optimized FFT support
 #
-
-# XML support
-abi_xml_fcflags=""
-abi_xml_incs=""
-abi_xml_ldflags=""
-abi_xml_libs=""
-if test "${enable_xml}" = "yes" -o "${enable_xml}" = "auto"; then
-  AC_LANG_PUSH([C])
-  AM_PATH_XML2([2.7.6], [abi_xml_ok="yes"], [abi_xml_ok="no"])
-  AC_LANG_POP([C])
-  if test "${abi_xml_ok}" = "yes"; then
-    AC_DEFINE([HAVE_XML], 1, [Define to 1 if you want XML support.])
-    abi_xml_incs="${XML_CPPFLAGS}"
-    abi_xml_libs="${XML_LIBS}"
-  else
-    AC_MSG_WARN([could not find a usable XML library => disabling XML support])
-    enable_xml="no"
-  fi
-fi
-AC_SUBST(abi_xml_fcflags)
-AC_SUBST(abi_xml_incs)
-AC_SUBST(abi_xml_ldflags)
-AC_SUBST(abi_xml_libs)
 
 ABI_MSG_SECTION([Optimized FFT support])
 
