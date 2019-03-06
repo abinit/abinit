@@ -837,7 +837,7 @@ AC_MSG_RESULT([${abi_triqs_enable}])
 if test "${abi_triqs_enable}" = "yes"; then
   ABI_TRIGGER_TRIQS
 fi
-AM_CONDITIONAL([DO_BUILD_01_TRIQS_EXT], [test "${abi_triqs_enable}" = "yes"])
+AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT], [test "${abi_triqs_enable}" = "yes"])
 
 # Wannier90 library support
 AC_MSG_CHECKING([whether to enable Wannier90 support])

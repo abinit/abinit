@@ -73,8 +73,9 @@ Core build parameters
   * LINALG flavor    : ${abi_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
 
 
-${abi_opt_deprecated_count} deprecated options have been used.
+  * XML    enabled  : ${enable_xml}
 
+${abi_opt_deprecated_count} deprecated options have been used.
 
 Configuration complete.
 You may now type "make" to build Abinit.

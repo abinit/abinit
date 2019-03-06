@@ -520,6 +520,61 @@ AC_DEFUN([_ABI_MPI_CHECK_IALLTOALLV], [
                     # ------------------------------------ #
 
 
+# _ABI_MPI_CHECK_IGATHERV()
+# -----------------------------------
+#
+# Checks whether the MPI library supports MPI_IGATHERV (MPI3)
+#
+AC_DEFUN([_ABI_MPI_CHECK_IGATHERV],[
+  dnl Set default values
+  abi_mpi_igatherv_ok="no"
+
+  dnl Try to compile a Fortran program
+  AC_MSG_CHECKING([whether the MPI library supports MPI_IGATHERV (MPI3)])
+
+  dnl We assume a MPI implementation that provides the mpi module
+
+  dnl Back-up build environment
+  ABI_ENV_BACKUP
+                                                                                            
+  dnl Prepare build environment
+  CPPFLAGS="${CPPFLAGS} ${lib_mpi_incs}"
+  LDFLAGS="${FC_LDFLAGS}"
+  LIBS="${FC_LIBS} ${lib_mpi_libs}"
+
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[  
+      use mpi
+
+      integer,parameter :: siz=5,group_size=3
+      integer :: SENDBUF(siz), RECVBUF(siz)
+      integer :: SENDCOUNTS(group_size),  SDISPLS(group_size), RECVCOUNTS(group_size),RDISPLS(group_size)
+      integer :: SENDTYPE, RECVTYPE
+      integer :: COMM, REQUEST, IERROR
+
+      call MPI_IGATHERV(SENDBUF,SENDCOUNTS,SENDTYPE,&
+        RECVBUF,RECVCOUNTS,RDISPLS,RECVTYPE,0,COMM,REQUEST,IERR)
+
+    ]])], [abi_mpi_igatherv_ok="yes"], [abi_mpi_igatherv_ok="no"])
+  AC_LANG_POP
+                                                                                            
+  dnl Restore build environment
+  ABI_ENV_RESTORE
+
+  AC_MSG_RESULT([${abi_mpi_igatherv_ok}])
+
+  if test "${abi_mpi_igatherv_ok}" = "yes"; then
+    AC_DEFINE([HAVE_MPI_IGATHERV],1,
+      [Define to 1 if your MPI library supports MPI_IGATHERV.])
+  fi
+
+]) # _ABI_MPI_CHECK_IGATHERV
+
+
+                    ########################################
+
+
 # _ABI_MPI_CHECK_IALLREDUCE()
 # -----------------------------------
 #
@@ -974,6 +1029,7 @@ AC_DEFUN([ABI_MPI_DETECT], [
       _ABI_MPI_CHECK_IBCAST()
       _ABI_MPI_CHECK_IALLTOALL()
       _ABI_MPI_CHECK_IALLTOALLV()
+      _ABI_MPI_CHECK_IGATHERV()
       _ABI_MPI_CHECK_IALLREDUCE()
 
     fi dnl mpi_usable

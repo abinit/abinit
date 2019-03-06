@@ -27,14 +27,14 @@ AC_DEFUN([ABI_TRIGGER_TRIQS], [
   abi_triqs_incs="${with_triqs_incs}"
   abi_triqs_libs="${with_triqs_libs}"
 
-  if test "${enable_triqs}" = "yes"; then
+  if test "${enable_triqs_v2_0}" = "yes" || test "${enable_triqs_v1_4}" = "yes"; then
 
     AC_MSG_WARN([TRIQS detection is not implemented - FIXME])
 
   fi
 
   dnl Inform Automake
-  AM_CONDITIONAL([DO_BUILD_01_TRIQS_EXT], [test "${enable_triqs}" = "yes"])
+  AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT], [test "${enable_triqs_v2_0}" = "yes" || test "${enable_triqs_v1_4}" = "yes"])
 
   dnl Substitute variables
   AC_SUBST(abi_triqs_fcflags)
