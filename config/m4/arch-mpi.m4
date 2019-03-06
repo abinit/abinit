@@ -694,18 +694,18 @@ AC_DEFUN([ABI_MPI_INIT], [
   abi_mpi_libs=""
 
   # Init ABINIT MPI build parameters
-  if test "${sd_mpi_cc_set}" != "yes" -o "${sd_mpi_fc_set}" != "yes"; then
-    abi_mpi_cppflags="${sd_mpi_cppflags}"
-    abi_mpi_cflags="${sd_mpi_cflags}"
-    abi_mpi_fcflags="${sd_mpi_fcflags}"
-    abi_mpi_ldflags="${sd_mpi_ldflags}"
-    abi_mpi_libs="${sd_mpi_libs}"
-  fi
-
   if test "${abi_mpi_enable}" = "yes" -o "${abi_mpi_enable}" = "auto"; then
 
     if test "${abi_mpi_level}" != ""; then
       AC_MSG_WARN([forcing MPI level to ${abi_mpi_level} might make the build fail])
+    fi
+
+    if test "${sd_mpi_cc_set}" != "yes" -o "${sd_mpi_fc_set}" != "yes"; then
+      abi_mpi_cppflags="${sd_mpi_cppflags}"
+      abi_mpi_cflags="${sd_mpi_cflags}"
+      abi_mpi_fcflags="${sd_mpi_fcflags}"
+      abi_mpi_ldflags="${sd_mpi_ldflags}"
+      abi_mpi_libs="${sd_mpi_libs}"
     fi
 
   else
@@ -845,12 +845,15 @@ AC_DEFUN([ABI_MPI_DUMP], [
   AC_MSG_NOTICE([Internal parameters])
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([  * MPI enabled (required)                       : ${abi_mpi_enable}])
-  AC_MSG_NOTICE([  * MPI in-place enabled (optional)              : ${abi_mpi_inplace_enable}])
-  AC_MSG_NOTICE([  * MPI-IO enabled (optional)                    : ${abi_mpi_io_enable}])
-  AC_MSG_NOTICE([  * MPI C compiler works (required)              : ${abi_mpi_cc_ok}])
-  AC_MSG_NOTICE([  * MPI C++ compiler works (optional)            : ${abi_mpi_cxx_ok}])
-  AC_MSG_NOTICE([  * MPI Fortran compiler works (required)        : ${abi_mpi_fc_ok}])
+  AC_MSG_NOTICE([  * MPI C compiler is set (required)             : ${sd_mpi_cc_set}])
+  AC_MSG_NOTICE([  * MPI C compiler works (required)              : ${sd_mpi_cc_ok}])
+  AC_MSG_NOTICE([  * MPI Fortran compiler is set (required)       : ${sd_mpi_fc_set}])
+  AC_MSG_NOTICE([  * MPI Fortran compiler works (required)        : ${sd_mpi_fc_ok}])
   AC_MSG_NOTICE([  * MPI environment usable (required)            : ${abi_mpi_ok}])
+  AC_MSG_NOTICE([  * MPI C++ compiler is set (optional)           : ${sd_mpi_cxx_set}])
+  AC_MSG_NOTICE([  * MPI C++ compiler works (optional)            : ${sd_mpi_cxx_ok}])
+  AC_MSG_NOTICE([  * MPI-in-place enabled (optional)              : ${abi_mpi_inplace_enable}])
+  AC_MSG_NOTICE([  * MPI-IO enabled (optional)                    : ${abi_mpi_io_enable}])
   AC_MSG_NOTICE([  * MPI configuration type (computed)            : ${abi_mpi_init}])
   AC_MSG_NOTICE([  * MPI Fortran level supported (detected)       : ${abi_mpi_fc_level}])
   AC_MSG_NOTICE([  * MPI_Get_library_version available (detected) : ${abi_mpi_get_library_version}])
