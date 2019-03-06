@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -746,38 +746,42 @@ AC_DEFUN([ABI_LINALG_DETECT], [
   CPPFLAGS="${with_linalg_incs} ${CPPFLAGS}"
   LIBS="${with_linalg_libs} ${LIBS}"
 
-  dnl Reformat flavor
-  abi_linalg_iter=`echo "${abi_linalg_flavor}" | tr '+' '\n' | sort -u | awk '{printf " %s",[$]1}'`
+  if test "${abi_linalg_flavor}" != "auto"; then
 
-  dnl Check serial and parallel flavor unicity
-  for tmp_linalg_flavor in ${abi_linalg_iter}; do
-    case "${tmp_linalg_flavor}" in
-      magma)
-        if test "${abi_linalg_chk_gpu}" != ""; then
-          AC_MSG_ERROR([only one GPU linear algebra flavor is permitted])
-        fi
-        abi_linalg_chk_gpu="${tmp_linalg_flavor}"
-        ;;
-      scalapack|plasma)
-        if test "${abi_linalg_chk_mpi}" != ""; then
-          AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
-        fi
-        abi_linalg_chk_mpi="${tmp_linalg_flavor}"
-        ;;
-      elpa)
-        abi_linalg_chk_mpiext="${tmp_linalg_flavor}"
-        ;;
-      *)
-        if test "${abi_linalg_chk_serial}" != ""; then
-          AC_MSG_ERROR([only one serial linear algebra flavor is permitted])
-        fi
-        abi_linalg_chk_serial="${tmp_linalg_flavor}"
-        ;;
-    esac
-    _ABI_LINALG_SET_LIBS([${tmp_linalg_flavor}])
-  done
-  if test "${abi_linalg_chk_serial}" = ""; then
-    AC_MSG_ERROR([you must choose a serial linear algebra flavor])
+    dnl Reformat flavor
+    abi_linalg_iter=`echo "${abi_linalg_flavor}" | tr '+' '\n' | sort -u | awk '{printf " %s",[$]1}'`
+
+    dnl Check serial and parallel flavor unicity
+    for tmp_linalg_flavor in ${abi_linalg_iter}; do
+      case "${tmp_linalg_flavor}" in
+        magma)
+          if test "${abi_linalg_chk_gpu}" != ""; then
+            AC_MSG_ERROR([only one GPU linear algebra flavor is permitted])
+          fi
+          abi_linalg_chk_gpu="${tmp_linalg_flavor}"
+          ;;
+        scalapack|plasma)
+          if test "${abi_linalg_chk_mpi}" != ""; then
+            AC_MSG_ERROR([only one MPI linear algebra flavor is permitted])
+          fi
+          abi_linalg_chk_mpi="${tmp_linalg_flavor}"
+          ;;
+        elpa)
+          abi_linalg_chk_mpiext="${tmp_linalg_flavor}"
+          ;;
+        *)
+          if test "${abi_linalg_chk_serial}" != ""; then
+            AC_MSG_ERROR([only one serial linear algebra flavor is permitted])
+          fi
+          abi_linalg_chk_serial="${tmp_linalg_flavor}"
+          ;;
+      esac
+      _ABI_LINALG_SET_LIBS([${tmp_linalg_flavor}])
+    done
+    if test "${abi_linalg_chk_serial}" = ""; then
+      AC_MSG_ERROR([you must choose a serial linear algebra flavor])
+    fi
+
   fi
 
   dnl Look for linear algebra libraries

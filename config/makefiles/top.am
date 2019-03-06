@@ -7,8 +7,6 @@ EXTRA_DIST += \
 	README_xlf.md \
 	RELNOTES \
 	autogen.sh \
-	post_configure_nag.sh \
-	pre_configure_nag.sh \
 	wipeout.sh
 
 # Additional files to clean

@@ -569,6 +569,8 @@ ABI_OPTIM_INIT([${abi_optim_flavor}])
 if test "${abi_optim_flavor}" != "none"; then
   AC_MSG_NOTICE([disabling optimisations for src/20_datashare/])
   fcflags_opt_20_datashare="-O0"
+  AC_MSG_NOTICE([disabling optimisations for src/43_ptgroups/])
+  fcflags_opt_43_ptgroups="-O0"
 fi
 
 # Set per-directory Fortran optimizations
@@ -721,6 +723,29 @@ ABI_LINALG_DETECT
 #
 # Optimized FFT support
 #
+
+# XML support
+abi_xml_fcflags=""
+abi_xml_incs=""
+abi_xml_ldflags=""
+abi_xml_libs=""
+if test "${enable_xml}" = "yes" -o "${enable_xml}" = "auto"; then
+  AC_LANG_PUSH([C])
+  AM_PATH_XML2([2.7.6], [abi_xml_ok="yes"], [abi_xml_ok="no"])
+  AC_LANG_POP([C])
+  if test "${abi_xml_ok}" = "yes"; then
+    AC_DEFINE([HAVE_XML], 1, [Define to 1 if you want XML support.])
+    abi_xml_incs="${XML_CPPFLAGS}"
+    abi_xml_libs="${XML_LIBS}"
+  else
+    AC_MSG_WARN([could not find a usable XML library => disabling XML support])
+    enable_xml="no"
+  fi
+fi
+AC_SUBST(abi_xml_fcflags)
+AC_SUBST(abi_xml_incs)
+AC_SUBST(abi_xml_ldflags)
+AC_SUBST(abi_xml_libs)
 
 ABI_MSG_SECTION([Optimized FFT support])
 
@@ -951,6 +976,21 @@ ABI_OPTIONS_DEFINES
 # ---------------------------------------------------------------------------- #
 
 #
+# Configure subsystems
+#
+
+# Note: options must have been processed, in order to take proper
+# decisions
+
+ABI_MSG_SECTION([Subsystems])
+
+# Init all subsystems
+ABI_SUBSYSTEMS_INIT
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+#
 # Buggy Fortran compilers
 #
 
@@ -985,6 +1025,8 @@ CPPFLAGS=""
 #
 
 ABI_MSG_SECTION([Output])
+
+ac_configure_args="${ac_configure_args} --enable-atompaw=${enable_atompaw} --enable-bigdft=${enable_bigdft} --enable-etsf-io=${enable_etsf_io} --enable-libxc=${enable_libxc} --enable-linalg=${enable_linalg} --enable-netcdf=${enable_netcdf} --enable-wannier90=${enable_wannier90} --with-fc-vendor=${abi_fc_vendor} --with-fc-version=${abi_fc_version} --with-tardir='${abinit_tardir}'"
 
 # Output files
 # Note: later, add tests/atconfig and tests/atlocal for test suite
