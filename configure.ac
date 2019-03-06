@@ -171,7 +171,7 @@ AC_MSG_NOTICE([checking consistency of command-line options])
 # C-CLOCK requires the building of 02_clib
 if test "${enable_cclock}" = "yes"; then
   if test "${enable_clib}" = "" -o "${enable_clib}" = "no"; then
-    AC_MSG_NOTICE([ |---> enabling CLib (required by CClock, experimental!)])
+    AC_MSG_NOTICE([|---> enabling CLib (required by CClock, experimental!)])
     enable_clib="yes"
     abi_optchk_ok="no"
   fi
@@ -179,14 +179,14 @@ fi
 
 # LibPAW must always be on for now
 if test "${enable_libpaw}" != "yes"; then
-  AC_MSG_NOTICE([ |---> forcing internal LibPAW support to 'yes'])
+  AC_MSG_NOTICE([|---> forcing internal LibPAW support to 'yes'])
   enable_libpaw="yes"
   abi_optchk_ok="no"
 fi
 
 # Closing remarks
 if test "${abi_optchk_ok}" = "yes"; then
-  AC_MSG_NOTICE([ |---> all OK])
+  AC_MSG_NOTICE([|---> all OK])
 fi
 AC_MSG_NOTICE([])
 
@@ -195,6 +195,7 @@ AC_MSG_NOTICE([])
 # ------------------- #
 
 ABI_OPTIONS_PARSE
+AC_MSG_NOTICE([|---> all OK])
 
 # ---------------------------------------------------------------------------- #
 

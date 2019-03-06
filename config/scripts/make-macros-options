@@ -155,7 +155,7 @@ def macro_changed_template():
 
 
 dnl ABI_INFO_OPTIONS_CHANGED()
-dnl ---------------------
+dnl --------------------------
 dnl
 dnl Display changes of user interface between versions and warns about
 dnl obsolete uses.
@@ -524,10 +524,12 @@ for arg in all_args:
 """ % (re.sub("-","_",arg1),arg1)
 
   # New options
-  elif ( arg_stat == "new" ):
-    arg2 = re.sub("_","-",arg)
+  elif ( arg_stat.startswith("new") ):
+    arg2 = re.sub("_","-",arg.split()[0])
     chg_new += "\n  dnl New --%s option\n" % (arg2)
     chg_new += "  AC_MSG_NOTICE([  * new option --%s is available])\n" % (arg2)
+    if ( len(arg.split()) > 1 ):
+      chg_new += "  AC_MSG_NOTICE([    (%s)])\n" % (" ".join(arg.split()[1:]))
 
   # Changed UIs
   elif ( re.match("changed",arg_stat) ):
@@ -535,32 +537,21 @@ for arg in all_args:
     chg_mod += """
   dnl UI change for --%s option
   AC_MSG_NOTICE([  * modified option --%s])
-  AC_MSG_NOTICE([   (%s)])
-  AC_MSG_NOTICE([   please check that --%s="${%s}" is OK for you])
+  AC_MSG_NOTICE([    (%s)])
+  AC_MSG_NOTICE([    please check that --%s="${%s}" is OK for you])
 """ % (arg1,arg1,arg_stat,arg1,re.sub("-","_",arg1))
-
-  # Renamed options
-  elif ( re.match("renamed",arg_stat) ):
-    arg1 = re.sub("_","-",arg_stat.split()[1])
-    arg2 = re.sub("_","-",arg)
-    chg_ren += """
-  dnl --%s > --%s
-  AC_MSG_NOTICE([  * renamed option --%s >>> --%s])
-  if test "${%s}" != ""; then
-    AC_MSG_ERROR([renamed option --%s has been used])
-  fi
-""" % (arg1,arg2,arg1,arg2,re.sub("-","_",arg1),arg1)
 
   # Deprecated options
   elif ( re.match("deprecated",arg_stat) ):
     arg2 = re.sub("_","-",arg)
     chg_dep += """
   dnl --%s deprecated
+  AC_MSG_NOTICE([  * deprecated option --%s])
   if test "${%s}" != ""; then
-    AC_MSG_WARN([  * deprecated option --%s - please cross-check when configuration is completed])
+    AC_MSG_NOTICE([    >>> --%s = '${%s}' will soon be forbidden!])
     abi_opt_deprecated_count=`expr ${abi_opt_deprecated_count} + 1`
   fi
-""" % (arg2,arg2,arg2)
+""" % (arg2,arg2,arg,arg2,arg)
 
 changed = chg_rem + chg_new + chg_mod + chg_ren + chg_dep
 if ( changed == "" ):
@@ -569,7 +560,7 @@ else:
   changed = """\
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([reporting user interface changes:])
-  AC_MSG_NOTICE([])\n""" + changed + "  AC_MSG_NOTICE([])"
+  AC_MSG_NOTICE([])\n""" + changed
 
 # Write changed macro
 m4.write(re.sub("@MACRO@",changed,macro_changed_template()))

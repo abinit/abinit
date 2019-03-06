@@ -107,7 +107,7 @@ AC_DEFUN([ABI_INFO_TRIGGERS_CHANGED],[
       trig_chgs = """\
   AC_MSG_NOTICE([])
   AC_MSG_NOTICE([reporting changes in feature triggers:])
-  AC_MSG_NOTICE([])\n""" + trig_chgs + "  AC_MSG_NOTICE([])"
+  AC_MSG_NOTICE([])\n""" + trig_chgs
 
     ret = re.sub("@CHANGES@",trig_chgs,ret)
 
