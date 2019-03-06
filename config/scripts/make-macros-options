@@ -515,8 +515,11 @@ for arg in all_args:
     if ( arg_stat == "removed" ):
       chg_rem += "\n  AC_MSG_NOTICE([  * removed option --%s])" % (arg1)
       if ( arg_repl != "" ):
-        chg_rem += "\n  AC_MSG_NOTICE([    >>> use --%s instead])" % \
-          (re.sub("_","-",arg_repl))
+        if ( arg_repl.upper() == arg_repl ):
+          chg_rem += "\n  AC_MSG_NOTICE([    >>> use %s instead])" % arg_repl
+        else:
+          chg_rem += "\n  AC_MSG_NOTICE([    >>> use --%s instead])" % \
+            (re.sub("_","-",arg_repl))
     chg_rem += """
   if test "${%s}" != ""; then
     AC_MSG_ERROR([removed option --%s has been used])
