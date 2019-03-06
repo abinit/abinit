@@ -343,12 +343,11 @@ class TestMetaConfParser(object):
 
         trees, filters = cp.make_trees(self.src4)
 
-        assert filters == {
-            'f1': IterStateFilter({'dtset': 5, 'image': [2, 5, 7]}),
-            'f2': IterStateFilter({'dtset': {'from': 7},
-                                   'image': {'from': 1, 'to': 8}})
-        }
+        ref1 = IterStateFilter({'dtset': 5, 'image': [2, 5, 7]})
+        ref2 = IterStateFilter({'dtset': {'from': 7},
+                                'image': {'from': 1, 'to': 8}})
 
+        assert filters == {'f1': ref1, 'f2': ref2}
         assert trees == {
             '__default': ConfTree({
                 'spec': {},

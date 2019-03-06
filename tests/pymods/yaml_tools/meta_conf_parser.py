@@ -127,6 +127,9 @@ class Constraint(object):
             and self.value == other.value
         )
 
+    def __ne__(self, other):
+        return not (self == other)
+
 
 class ConfTree(object):
     '''
@@ -208,6 +211,9 @@ class ConfTree(object):
 
     def __eq__(self, other):
         return isinstance(other, ConfTree) and self.dict == other.dict
+
+    def __ne__(self, other):
+        return not (self == other)
 
 
 class ConfParser(object):

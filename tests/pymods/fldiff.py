@@ -157,6 +157,9 @@ class LineDifference(object):
         '''
         return self.lines == other.lines and self.content == other.content
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __repr__(self):
         '''
             Default representation of difference is inspired by gnu diff tool.

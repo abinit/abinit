@@ -112,6 +112,9 @@ class IntSet(object):
     def __eq__(self, other):
         return isinstance(other, IntSet) and self in other and other in self
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __repr__(self):
         if self._type == 'singleton':
             return 'IntSet({})'.format(self.value)
