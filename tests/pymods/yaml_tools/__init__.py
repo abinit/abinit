@@ -3,6 +3,7 @@
     manipulating YAML formated data.
 '''
 from __future__ import print_function, division, unicode_literals
+
 try:
     import yaml
     import numpy  # numpy is also required
@@ -11,6 +12,36 @@ try:
 
 except ImportError:
     is_available = False
+
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __bool__(self):  # falsiness
+        return False
+
+    def __getattr__(self, a):  # class instance
+        return Mock()
+
+    def __setattr__(self, a, v):  # class instance
+        pass
+
+    def __getitem__(self, a):  # dictionary, list, etc
+        return Mock()
+
+    def __setitem__(self):  # dictionary, list, etc
+        pass
+
+    def __iter__(self):  # iterable
+        return Mock()
+
+    def __next__(self):  # iterator
+        raise StopIteration()
+
+    def __call__(self, *args, **kwargs):  # function
+        return Mock()
+
 
 if is_available:
 
