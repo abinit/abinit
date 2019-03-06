@@ -748,6 +748,7 @@ AC_DEFUN([ABI_MPI_INIT], [
 AC_DEFUN([ABI_MPI_DETECT], [
   # Delegate the actual detection to Steredeg
   SD_MPI_DETECT
+  abi_mpi_ok="${sd_mpi_ok}"
 
   if test "${sd_mpi_enable}" = "yes"; then
 
