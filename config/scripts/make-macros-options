@@ -375,9 +375,9 @@ ac_args = { "enable":list(), "with":list() }
 for arg in all_args:
   arg_stat = cnf.get(arg,"status")
   if ( (arg_stat != "removed") and (arg_stat != "dropped") ):
-    if ( re_en.match(arg) ):
+    if ( arg.startswith("enable_") ):
       ac_args["enable"].append(arg)
-    if ( re_wi.match(arg) ):
+    if ( arg.startswith("with_") ):
       ac_args["with"].append(arg)
 ac_args["enable"].sort()
 ac_args["with"].sort()
@@ -413,24 +413,24 @@ for arg in ("enable","with"):
     except:
       opt_vals = None
 
-      m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
-        + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
-          (arg,opt_name,opt_desc,opt_dflt))
+    m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
+      + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
+        (arg,opt_name,opt_desc,opt_dflt))
 
-      if ( opt_dflt is not None ):
-        defaults += "  if test \"${%s_%s}\" = \"\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
-          (arg,var,arg,var,opt_dflt)
+    if ( opt_dflt is not None ):
+      defaults += "  if test \"${%s_%s}\" = \"\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
+        (arg,var,arg,var,opt_dflt)
 
-      if ( arg == "with" ):
-        defaults += "  if test \"${%s_%s}\" = \"no\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
-          (arg,var,arg,var,opt_nega)
+    if ( arg == "with" ):
+      defaults += "  if test \"${%s_%s}\" = \"no\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
+        (arg,var,arg,var,opt_nega)
 
-      if ( opt_vals is not None ):
-        parse += "\n"+parse_opt(opt,opt_vals)
-      elif ( arg == "enable" ):
-        parse += "\n"+parse_opt(opt,"no yes")
+    if ( opt_vals is not None ):
+      parse += "\n"+parse_opt(opt,opt_vals)
+    elif ( arg == "enable" ):
+      parse += "\n"+parse_opt(opt,"no yes")
 
-      m4.write("  AC_SUBST(%s_%s)\n" % (arg,var))
+    m4.write("  AC_SUBST(%s_%s)\n" % (arg,var))
 
 # Finish writing define macro
 m4.write(macro_define_footer())
