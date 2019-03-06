@@ -1,5 +1,6 @@
 from __future__ import print_function, division, unicode_literals
 import os
+from copy import copy
 from yaml import YAMLError
 from .conf_parser import conf_parser
 from . import yaml_parse
@@ -184,7 +185,7 @@ class DriverTestConf:
         '''
             Rebuild parameters and constraints stacks.
         '''
-        path = self.current_path.copy()
+        path = copy(self.current_path)
         self.current_path = []
         self.param_stack = []
         self.constraints_stack = []
