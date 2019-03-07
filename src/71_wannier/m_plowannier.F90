@@ -40,6 +40,7 @@ MODULE m_plowannier
  public :: copy_orbital
  public :: compute_coeff_plowannier
  public :: destroy_plowannier
+ public :: print_plowannier
  public :: initialize_operwan
  public :: destroy_operwan
  public :: compute_oper_ks2wan
@@ -2136,6 +2137,84 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 end subroutine compute_coeff_plowannier
 !!***
+
+!!****f* m_plowannier/print_plowannier
+!! NAME
+!!  print_plowannier
+!!
+!! FUNCTION
+!!  print the wannier weight (psichi) on a forlb.ovlp file
+!!
+!! INPUTS
+!!  wan
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!! outscfcv
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+
+
+ subroutine print_plowannier(wan)
+
+ use m_abicore
+ use m_io_tools,  only : open_file
+ use m_specialmsg, only : wrtout
+ implicit none
+
+ !Arguments-------------------------
+ type(plowannier_type),intent(in) :: wan
+ !Local variables-------------------
+ character(len=500) :: msg
+ integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im
+
+ !Creation of the forlb.ovlp file
+ if (open_file('forlb.ovlp',msg,newunit=unt,form='formatted',status='unknown') /= 0) then
+  MSG_ERROR(msg)
+ end if
+ rewind(unt)
+ 
+
+
+ 
+ !Header of the file forlb.ovlp
+ write(unt,'(a,2x,i2)') "Total number of orbitals =", sum(wan%nbl_atom_wan(:))
+ write(unt,'(a,2i6)')"Bands =",wan%bandi_wan,wan%bandf_wan
+ do spin=1,wan%nsppol
+	do iatom=1,wan%natom_wan
+	 !Header for each atom
+	 write(unt,'(a)')"*****************************************************************"
+	 write(unt,'(2x,a,2x,i2,3x,a,3x,i2)')"Atom : ",iatom,"type =",wan%iatom_wan(iatom)
+	 write(unt,*)"orbital(s) to consider on this atom",wan%latom_wan(iatom)%lcalc(:)
+	 do il=1,wan%nbl_atom_wan(iatom)
+		!Header for each orbital
+		write(unt,'(a)')"-----------------------------------------------------------------"
+		write(unt,'(4x,a,2x,i2)')"l=",wan%latom_wan(iatom)%lcalc(il)
+		do ikpt=1,wan%nkpt
+		 write(unt,'(6x,a,2x,i3)')"ikpt=",ikpt
+		 do iband=wan%bandi_wan,wan%bandf_wan
+			ibandc=iband-wan%bandi_wan+1
+			 write(unt,'(8x,a,2x,i3)')"iband=",iband
+			 do ispinor=1,wan%nspinor
+				do im=1,2*wan%latom_wan(iatom)%lcalc(il)+1
+				 write(unt,'(12x,3i6,2x,2f23.15)')spin,ispinor,im,&
+				 &real(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))&
+				 &,aimag(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
+				enddo!m
+			 enddo!spinor
+		 enddo!bands
+		enddo!k points
+	 enddo!orbitals
+	enddo!atom
+ enddo!spin
+ close(unt)
+ end subroutine print_plowannier
+!!***
+
 
 
 !!****f* m_plowannier/destroy_plowannier
