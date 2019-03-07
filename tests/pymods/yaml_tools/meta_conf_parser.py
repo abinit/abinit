@@ -131,6 +131,33 @@ class Constraint(object):
         return not (self == other)
 
 
+class SpecKey(object):
+    def __init__(self, name, hardreset=False):
+        self.name = name
+        self.hardreset = hardreset
+
+    @classmethod
+    def parse(cls, name):
+        hardr = False
+        if name.endswith('!'):
+            hardr = True
+            name = name[:-1]
+
+        return cls(name, hardreset=hardr)
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __neq__(self, other):
+        return self.name != other.name
+
+    def __repr__(self):
+        return self.name + '!' if self.hardreset else ''
+
+
 class ConfTree(object):
     '''
         Configuration tree accessor. The actual tree is a dictionary.
@@ -138,10 +165,12 @@ class ConfTree(object):
     def __init__(self, dict_tree):
         self.dict = dict_tree
 
-    def add(self, key, d):
+    def add_spec(self, key, d):
+        if not isinstance(key, SpecKey):
+            key = SpecKey.parse(key)
         if key in self.dict:
             raise AlreadySetKeyError(key)
-        self.dict[key] = d
+        self.dict['spec'][key] = d
 
     def copy(self):
         return ConfTree(deepcopy(self.dict))
@@ -165,7 +194,10 @@ class ConfTree(object):
         for spec, spec_d in new_d['spec'].items():
             if spec not in old_d['spec']:
                 old_d['spec'][spec] = empty_tree()
-            self.__update(old_d['spec'][spec], spec_d)
+            if spec.hardreset:
+                old_d['spec'][spec] == spec_d[spec].copy()
+            else:
+                self.__update(old_d['spec'][spec], spec_d)
 
     def get_spec_at(self, path):
         '''
@@ -174,11 +206,12 @@ class ConfTree(object):
         '''
         d = self.dict
         for spec in path:
+            spec = SpecKey.parse(spec)
             if spec in d['spec']:
                 d = d['spec'][spec]
             else:
                 return {}
-        return d['spec']
+        return [repr(sp) for sp in d['spec']]
 
     def get_new_params_at(self, path):
         '''
@@ -187,6 +220,7 @@ class ConfTree(object):
         '''
         d = self.dict
         for spec in path:
+            spec = SpecKey.parse(spec)
             if spec in d['spec']:
                 d = d['spec'][spec]
             else:
@@ -200,6 +234,7 @@ class ConfTree(object):
         '''
         d = self.dict
         for spec in path:
+            spec = SpecKey.parse(spec)
             if spec in d['spec']:
                 d = d['spec'][spec]
             else:
@@ -275,17 +310,17 @@ class ConfParser(object):
         tree = empty_tree()
         if parsed_src:
             for key, val in parsed_src.items():
-                if key in self.constraints:
+                if key in self.constraints:  # add constraint
                     tree['constraints'][key] = \
                             self.constraints[key].with_value(val, self.ctx())
-                elif key in self.parameters:
+                elif key in self.parameters:  # add parameter
                     if not isinstance(val, self.parameters[key]['type']):
                         raise ValueTypeError(key, self.parameters[key]['type'],
                                              val)
                     tree['parameters'][key] = val
-                elif isinstance(val, dict):
-                    tree['spec'][key] = self.__make_tree(val)
-                else:
+                elif isinstance(val, dict):  # add specialization
+                    tree['spec'][SpecKey.parse(key)] = self.__make_tree(val)
+                else:  # unknown key
                     raise InvalidNodeError(key, val)
         return tree
 

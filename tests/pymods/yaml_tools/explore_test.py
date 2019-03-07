@@ -87,7 +87,7 @@ class ExtendedTestConf(DriverTestConf):
         '''
             Return the list of the specializations known at the current path.
         '''
-        return self.tree.get_spec_at(self.current_path).keys()
+        return self.tree.get_spec_at(self.current_path)
 
     def get_spec_at(self, path):
         '''
@@ -101,7 +101,7 @@ class ExtendedTestConf(DriverTestConf):
                 new_path.pop()
             else:
                 new_path.append(sp)
-        return self.tree.get_spec_at(new_path).keys()
+        return self.tree.get_spec_at(new_path)
 
     def go_root(self):
         '''
