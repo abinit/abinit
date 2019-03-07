@@ -28,6 +28,7 @@ module m_multibinit_main
   use m_abihist
 
   use m_multibinit_manager, only: mb_manager_t
+  use m_multibinit_main2, only: multibinit_main2
 
   use m_mover_effpot, only : mover_effpot
   !use m_generate_training_set, only : generate_training_set
@@ -422,7 +423,7 @@ program multibinit
   character(len=500) :: message, arg
   type(args_t) :: args
   integer :: ii, nargs, iarg
-  logical :: unittest
+  logical :: unittest=.False. , use_f03=.False.
   !TEST_AM
   ! integer :: natom_sp
   ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -451,6 +452,8 @@ program multibinit
         unittest=.True.
         call mb_test_main()
         goto 100
+     else if(arg== "-F03") then
+        use_f03=.True.
      endif
   end do
 
@@ -512,7 +515,11 @@ program multibinit
 
   !***************************************************************************************
   !***************************************************************************************
-  call multibinit_main(filnam)
+  if(use_f03) then
+     call multibinit_main2(filnam)
+  else
+     call multibinit_main(filnam)
+  end if
   ! Final message
   !****************************************************************************************
 

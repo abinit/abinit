@@ -418,11 +418,17 @@ contains
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
 
-    allocate(spin_potential_t::scpot)
+    print *, "allocate tpot"
+    allocate(spin_potential_t::tpot)
+
+    print *, "init tpot"
     call tpot%initialize(sc_nspin)
     scpot=>tpot
 
+    print *, "prim coeff sum"
     call self%coeff%sum_duplicates()
+
+    print *, "make suprecell coeff"
     do inz=1, self%coeff%nnz
        ind_Rij=self%coeff%get_ind_inz(inz)
        iR=ind_Rij(1)
@@ -436,7 +442,8 @@ contains
           call tpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
        end do
     end do
-    scpot=>tpot
+    print *, "suprecell terms finished"
+
   end subroutine fill_supercell
 
 

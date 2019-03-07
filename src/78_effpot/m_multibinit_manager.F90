@@ -26,7 +26,6 @@
 !! SOURCE
 
 
-
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -35,18 +34,19 @@
 
 module m_multibinit_manager
   use defs_basis
-  use m_abicore
+  !use m_abicore
   use m_errors
   use m_xmpi
 
   use m_init10, only: init10
   use m_mathfuncs, only: diag
   use m_multibinit_global
-  use m_multibinit_dataset, only: multibinit_dtset_type
+  use m_multibinit_dataset, only: multibinit_dtset_type, invars10, outvars_multibinit
   use m_unitcell, only : unitcell_t
   use m_supercell_maker, only: supercell_maker_t
   use m_multibinit_supercell, only: mb_supercell_t
   use m_primitive_potential_list, only: primitive_potential_list_t
+  use m_spin_primitive_potential, only: spin_primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_potential_list, only: potential_list_t
   use m_abstract_mover, only: abstract_mover_t
@@ -70,7 +70,7 @@ module m_multibinit_manager
      type(unitcell_t) :: unitcell
      type(mb_supercell_t) :: supercell
      type(primitive_potential_list_t) :: prim_pots
-     type(potential_list_t), pointer :: pots
+     type(potential_list_t) :: pots
 
      type(lattice_mover_t) :: lattice_mover
      type(spin_mover_t) :: spin_mover
@@ -120,9 +120,14 @@ contains
   ! read_params: read parameters from input file
   !-------------------------------------------------------------------!
   subroutine read_params(self)
+    use m_fstrings,   only : replace, inupper
+    use m_parser, only: instrng
+    use m_dtset,      only : chkvars
+    use m_effective_potential_file
+    use m_effective_potential
     class(mb_manager_t), intent(inout) :: self
     character(len=500) :: message
-    integer :: filetype,ii,lenstr
+    integer :: lenstr
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
     character(len=strlen) :: string
@@ -177,19 +182,31 @@ contains
   end subroutine prepare_params
 
 
+
   !-------------------------------------------------------------------!
   ! Read potentials from file, if needed by dynamics
   !-------------------------------------------------------------------!
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
-    !TODO: unitcell.
-    if(params%spin_dynamics>0) then
-       call spin_pot%read_from_files(self%params, fnames)
+    type(spin_primitive_potential_t), pointer :: spin_pot
+    call self%unitcell%initialize()
+
+    ! latt : TODO
+
+    ! spin
+    if(self%params%spin_dynamics>0) then
+       allocate(spin_pot)
+       print *, "spin_pot allocated"
+       call spin_pot%load_from_files(self%params, self%filenames)
+       print *, "spin pot loaded"
+       call self%prim_pots%append(spin_pot)
+       print *, "spin appended"
     end if
-    if(params%dynamics>0) then
+    if(self%params%dynamics>0) then
        !TODO: LATT
     endif
-    !TODO: LWF
+
+    !LWF : TODO
   end subroutine read_potentials
 
   !-------------------------------------------------------------------!
@@ -198,8 +215,15 @@ contains
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
     ! unitcell
+
+    print *, "build supercell"
     call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
+    print *, "initialize supercell potential"
+    call self%pots%initialize(self%supercell)
+    print *, "fill spin potential to supercell"
+    print *, "allocated:", allocated(self%pots%data)
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
+    print *, "supercell pots filled"
   end subroutine fill_supercell
 
   !-------------------------------------------------------------------!
@@ -233,12 +257,19 @@ contains
   !-------------------------------------------------------------------!
   subroutine run_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
+
+    print *, "allocated1:", allocated(self%pots%data)
     call self%prim_pots%initialize()
+    print *, "allocated2:", allocated(self%pots%data)
     call self%sc_maker%initialize(diag(self%params%ncell))
+    print *, "allocated3:", allocated(self%pots%data)
     ! read params
     call self%read_potentials()
+
+    print *, "allocated4:", allocated(self%pots%data)
     call self%fill_supercell()
 
+    print *, "allocated5:", allocated(self%pots%data)
     call self%set_movers()
   end subroutine run_dynamics
 
@@ -250,13 +281,22 @@ contains
     ! if ... fit lattice model
     ! if ... fit lwf model
     ! if ... run dynamics...
+    call self%run_dynamics()
     ! if ...
   end subroutine run
- !----------------------------------------------------------------------------------------------------
-  ! This does everything from initialize to finalize
+
+
+  !-------------------------------------------------------------------!
+  !run_all: THE function which does everything
+  !         from the very begining to end.
+  !-------------------------------------------------------------------!
   subroutine run_all(self, filenames)
     class(mb_manager_t), intent(inout) :: self
     character(len=fnlen), intent(inout) :: filenames(17)
+    print *, "allocated0:", allocated(self%pots%data)
+    call self%initialize(filenames)
+    call self%run()
+    call self%finalize()
   end subroutine run_all
 
 end module m_multibinit_manager

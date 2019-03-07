@@ -118,6 +118,9 @@ contains
        call self%data(i)%obj%finalize()
        nullify(self%data(i)%obj)
     end do
+    if(allocated(self%data)) then
+      ABI_DEALLOCATE(self%data)
+     end if
     nullify(self%primcell)
     self%size=0
     self%capacity=0
@@ -132,26 +135,24 @@ contains
   !-------------------------------------------------------------------!
   subroutine append(self, pot)
     class(primitive_potential_list_t), intent(inout):: self
-    class(primitive_potential_t), target, optional, intent(inout) :: pot
+    class(primitive_potential_t), target, intent(inout) :: pot
     type(primitive_potential_pointer_t), allocatable :: temp(:)
     integer :: err
     self%size=self%size + 1
     if(self%size==1) then
        self%capacity=8
-       ALLOCATE(self%data(self%capacity), stat=err)
+       ABI_ALLOCATE(self%data, (self%capacity))
     else if ( self%size>self%capacity ) then
        self%capacity = self%size + self%size / 4 + 8
        ALLOCATE(temp(self%capacity), stat=err)
-       temp(:self%size-1) = self%data
+       temp(1:self%size-1) = self%data(:)
        call move_alloc(temp, self%data) !temp gets deallocated
     end if
-    if(present(pot)) then
-       self%data(self%size)%obj=>pot
-       self%has_spin= (self%has_spin .or. pot%has_spin)
-       self%has_displacement= (self%has_displacement .or. pot%has_displacement)
-       self%has_strain= (self%has_strain.or. pot%has_strain)
-       self%has_lwf= (self%has_lwf.or. pot%has_lwf)
-    end if
+    self%data(self%size)%obj=>pot
+    self%has_spin= (self%has_spin .or. pot%has_spin)
+    self%has_displacement= (self%has_displacement .or. pot%has_displacement)
+    self%has_strain= (self%has_strain.or. pot%has_strain)
+    self%has_lwf= (self%has_lwf.or. pot%has_lwf)
   end subroutine append
 
 
@@ -187,8 +188,9 @@ contains
     do i =1, self%size
       call self%data(i)%obj%fill_supercell(sc_maker, tmp)
     end do
+    print *, "appending to scpot"
     call sc_pots%append(tmp)
-    nullify(tmp)
+    print *, "appended"
   end subroutine fill_supercell_list
 
 end module m_primitive_potential_list

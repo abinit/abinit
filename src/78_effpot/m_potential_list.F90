@@ -59,7 +59,7 @@ module m_potential_list
   !!
   !! SOURCE
   type, private:: effpot_pointer_t ! pointer to effpot
-     class(abstract_potential_t) , pointer :: obj
+     class(abstract_potential_t) , pointer :: obj=>null()
   end type effpot_pointer_t
   !!***
 
@@ -73,8 +73,8 @@ module m_potential_list
   !!
   !! SOURCE
   type, public, extends(abstract_potential_t) :: potential_list_t
-     integer :: size=0, capacity=0
-     type(effpot_pointer_t), allocatable :: data(:)  ! Maximum number of 8,TODO: make it dynamic.
+     integer :: size, capacity
+     type(effpot_pointer_t), allocatable :: data(:)
    contains
      procedure :: initialize
      procedure :: finalize
@@ -87,6 +87,8 @@ contains
   subroutine initialize(self, supercell)
     class (potential_list_t), intent(inout) :: self
     type (mb_supercell_t), target :: supercell
+    self%size=0
+    self%capacity=0
     self%supercell => supercell
   end subroutine initialize
 
@@ -97,7 +99,11 @@ contains
        call self%data(i)%obj%finalize()
        nullify(self%data(i)%obj)
     end do
+    if (allocated(self%data)) then
+       deallocate(self%data)
+    end if
     self%size=0
+    self%capacity=0
     self%is_null=.True.
     self%has_displacement=.False.
     self%has_strain=.False.
@@ -111,24 +117,32 @@ contains
     class (abstract_potential_t), target :: effpot
     type(effpot_pointer_t), allocatable :: temp(:)
     integer :: err
+    print *, "Here1"
     self%size=self%size + 1
     if(self%size==1) then
+       print *, "Here2"
        self%capacity=8
-       ! use ALLOCATE instead of ABI_ALLOCATE because it is destoyed by move_alloc
-       ! which is not tracked.
-       ALLOCATE(self%data(self%capacity), stat=err)
+       if(allocated(self%data)) then
+          print *, "size",  size(self%data)
+       endif
+       ABI_ALLOCATE(self%data, (self%capacity))
+       print *, "Here3"
     else if ( self%size>self%capacity ) then
+       print *, "Here4"
        self%capacity = self%size + self%size / 4 + 8
-       !ABI_ALLOCATE(temp,(self%capacity))
        ALLOCATE(temp(self%capacity), stat=err)
-       temp(:self%size-1) = self%data
+       temp(:self%size-1) = self%data(:)
        call move_alloc(temp, self%data) !temp gets deallocated
+       print *, "Here5"
     end if
+    print *, "Here6"
     self%data(self%size)%obj=>effpot
+    print *, "Here7"
     self%is_null= (self%is_null .and. effpot%is_null)
     self%has_spin= (self%has_spin .or. effpot%has_spin)
     self%has_displacement= (self%has_displacement .or. effpot%has_displacement)
     self%has_strain= (self%has_strain.or. effpot%has_strain)
+    print *, "Here7"
   end subroutine append
 
   subroutine calculate(self, displacement, strain, spin, force, stress, bfield, energy)

@@ -30,9 +30,12 @@ module m_multibinit_main2
 
   implicit none
 contains
+
 subroutine multibinit_main2(filnam)
   character(len=fnlen), intent(inout) :: filnam(17)
   type(mb_manager_t) :: manager
+  print *, "allocated-1:", allocated(manager%pots%data)
+  print *, "allocated-1:", allocated(manager%prim_pots%data)
   call manager%run_all(filnam)
 end subroutine multibinit_main2
 

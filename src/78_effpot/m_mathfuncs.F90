@@ -157,6 +157,7 @@ contains
     integer, intent(in) :: a(:)
     integer:: ret(size(a), size(a))
     integer :: i
+    ret(:,:)=0
     do i=1, size(a)
        ret(i, i)=a(i)
     end do
@@ -166,6 +167,7 @@ contains
     real(dp), intent(in) :: a(:)
     real(dp):: ret(size(a), size(a))
     integer :: i
+    ret(:,:)=0.0_dp
     do i=1, size(a)
        ret(i, i)=a(i)
     end do

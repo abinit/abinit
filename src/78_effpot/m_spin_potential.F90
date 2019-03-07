@@ -42,6 +42,7 @@ module  m_spin_potential
   use m_abicore
   use m_xmpi
   use m_multibinit_global
+  use m_multibinit_dataset, only: multibinit_dtset_type
   use m_spmat_coo, only: coo_mat_t
   use m_spmat_csr, only : CSR_mat_t
   use m_spmat_convert, only : coo_to_csr
@@ -71,6 +72,7 @@ module  m_spin_potential
    CONTAINS
      procedure, non_overridable :: initialize
      procedure, non_overridable :: finalize
+     procedure :: set_params
      procedure, non_overridable :: get_Heff => spin_potential_t_total_Heff
      procedure :: set_external_hfield
      procedure, non_overridable :: calc_bilinear_term_Heff
@@ -135,6 +137,21 @@ contains
     endif
 
   end subroutine set_terms
+
+  !-------------------------------------------------------------------!
+  !set_params :
+  !-------------------------------------------------------------------!
+  subroutine set_params(self, params)
+    class(spin_potential_t), intent(inout) :: self
+    type(multibinit_dtset_type) :: params
+    real(dp) :: tmp(3, self%nspin)
+    integer :: i
+    do i=1, self%nspin
+       tmp(:, i)=params%spin_mag_field(:)
+    end do
+    call self%set_external_hfield(tmp)
+  end subroutine set_params
+
 
   subroutine set_external_hfield(self, external_hfield)
     class(spin_potential_t), intent(inout) :: self
