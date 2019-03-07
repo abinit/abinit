@@ -314,6 +314,9 @@ class Explorer(cmd.Cmd):
     def do_filter(self, arg):
         '''
             Usage: filter [reset|(ITERATOR:VALUE)...]
+            Set a virtual iterator state to access filtered trees.
+            Example:
+                filter dtset:2 image:5
         '''
         state = {name: int(val) for name, val in [pair.split(':')
                                                   for pair in arg.split()]}
