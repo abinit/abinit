@@ -54,11 +54,14 @@ if is_available:
             return "<Corrupted document {}: {}>".format(
                 self.error.__class__.__name__, str(self.error))
 
-    def yaml_parse(content, *args, **kwargs):
+    def yaml_parse(content, catch=True, *args, **kwargs):
         from . import structures
-        try:
+        if catch:
+            try:
+                return yaml.load(content, *args, **kwargs)
+            except yaml.YAMLError as e:
+                return CorruptedDocument(e, context=content)
+        else:
             return yaml.load(content, *args, **kwargs)
-        except yaml.YAMLError as e:
-            return CorruptedDocument(e, context=content)
 
     yaml_print = yaml.dump
