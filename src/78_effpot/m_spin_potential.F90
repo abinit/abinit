@@ -184,6 +184,7 @@ contains
     do i = 1, size(ilist)
        call self%coeff_coo%add_entry(ind=[ilist(i),jlist(i)],val=vallist(i))
     end do
+    self%has_bilinear=.True.
   end subroutine set_bilinear_term
 
 
@@ -229,10 +230,7 @@ contains
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), energy
     ! if present in input
     ! calculate if required
-    if (present(displacement) .or. present(strain) .or. present(force) .or. present(stress)) then
-       write(std_err, *) "spin terms cannot accept atomic input and output"
-    end if
-    if (present(bfield)) then
+    if (present(bfield) .and. present(energy)) then
        call self%get_Heff(spin, bfield, energy)
     else
        call self%get_energy(spin, energy)
@@ -251,11 +249,13 @@ contains
     energy=0.0_dp
 
     call xmpi_bcast(self%has_bilinear, master, comm, ierr)
+    print *, "has_bilinear", self%has_bilinear
     if(self%has_bilinear) then
        call self%calc_bilinear_term_Heff(S,self%Htmp)
        Heff=Heff+self%Htmp
     endif
 
+    print *, "Heff", Heff
     if(iam_master) then
        if (self%has_dipdip) then
           continue

@@ -248,6 +248,7 @@ contains
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
     call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
+    call self%pots%set_supercell(self%supercell)
 
     do i=1, self%pots%size
        q=>self%pots%data(i)%obj
