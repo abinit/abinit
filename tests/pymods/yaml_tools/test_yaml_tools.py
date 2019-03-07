@@ -3,7 +3,7 @@ import pytest
 from .errors import (EmptySetError, NotOrderedOverlappingSetError)
 from .abinit_iterators import IterStateFilter, iter_state_cmp
 from .conf_parser import conf_parser
-from .meta_conf_parser import ConfTree, ConfParser
+from .meta_conf_parser import ConfTree, ConfParser, SpecKey
 
 
 class TestStateFilter(object):
@@ -134,6 +134,69 @@ class TestMetaConfParser(object):
         }
     }
 
+    tree1 = {
+        'spec': {
+            SpecKey('doc1'): {
+                'spec': {
+                    SpecKey('sp1'): {
+                        'spec': {},
+                        'constraints': {},
+                        'parameters': {}
+                    },
+                    SpecKey('sp2'): {
+                        'spec': {
+                            SpecKey('subsp'): {
+                                'spec': {},
+                                'constraints': {},
+                                'parameters': {}
+                            }
+                        },
+                        'constraints': {},
+                        'parameters': {}
+                    },
+                },
+                'constraints': {},
+                'parameters': {}
+            },
+            SpecKey('doc2'): {
+                'spec': {
+                    SpecKey('sp1'): {
+                        'spec': {
+                            SpecKey('subsp'): {
+                                'spec': {
+                                    SpecKey('subsubsp'): {
+                                        'spec': {},
+                                        'constraints': {},
+                                        'parameters': {}
+                                    }
+                                },
+                                'constraints': {},
+                                'parameters': {}
+                            }
+                        },
+                        'constraints': {},
+                        'parameters': {}
+                    },
+                    SpecKey('sp2'): {
+                        'spec': {
+                            SpecKey('subsp'): {
+                                'spec': {},
+                                'constraints': {},
+                                'parameters': {}
+                            }
+                        },
+                        'constraints': {},
+                        'parameters': {}
+                    },
+                },
+                'constraints': {},
+                'parameters': {}
+            }
+        },
+        'constraints': {},
+        'parameters': {}
+    }
+
     src2 = {
         'doc1': {
             'tol_abs': 3.0,
@@ -208,6 +271,29 @@ class TestMetaConfParser(object):
         'f2': {}
     }
 
+    src5 = {
+        'doc1': {
+            'sp1!': {
+                'tol_abs': 2.22
+            },
+            'sp2!': {
+                'tol_abs': 1.11
+            }
+        }
+    }
+
+    src25 = {
+        'doc1': {
+            'tol_abs': 3.0,
+            'sp1': {
+                'tol_abs': 2.22
+            },
+            'sp2': {
+                'tol_abs': 1.11
+            }
+        },
+    }
+
     def test_make_tree_empty(self):
         cp = ConfParser()
         trees, _ = cp.make_trees({})
@@ -217,68 +303,7 @@ class TestMetaConfParser(object):
     def test_make_tree_specs(self):
         cp = ConfParser()
         trees, _ = cp.make_trees(self.src1)
-        assert trees['__default'] == ConfTree({
-            'spec': {
-                'doc1': {
-                    'spec': {
-                        'sp1': {
-                            'spec': {},
-                            'constraints': {},
-                            'parameters': {}
-                        },
-                        'sp2': {
-                            'spec': {
-                                'subsp': {
-                                    'spec': {},
-                                    'constraints': {},
-                                    'parameters': {}
-                                }
-                            },
-                            'constraints': {},
-                            'parameters': {}
-                        },
-                    },
-                    'constraints': {},
-                    'parameters': {}
-                },
-                'doc2': {
-                    'spec': {
-                        'sp1': {
-                            'spec': {
-                                'subsp': {
-                                    'spec': {
-                                        'subsubsp': {
-                                            'spec': {},
-                                            'constraints': {},
-                                            'parameters': {}
-                                        }
-                                    },
-                                    'constraints': {},
-                                    'parameters': {}
-                                }
-                            },
-                            'constraints': {},
-                            'parameters': {}
-                        },
-                        'sp2': {
-                            'spec': {
-                                'subsp': {
-                                    'spec': {},
-                                    'constraints': {},
-                                    'parameters': {}
-                                }
-                            },
-                            'constraints': {},
-                            'parameters': {}
-                        },
-                    },
-                    'constraints': {},
-                    'parameters': {}
-                }
-            },
-            'constraints': {},
-            'parameters': {}
-        })
+        assert trees['__default'] == ConfTree(self.tree1)
 
     def test_make_tree_constraints(self):
         cp = ConfParser()
@@ -298,9 +323,9 @@ class TestMetaConfParser(object):
         trees, _ = cp.make_trees(self.src2)
         ref = ConfTree({
             'spec': {
-                'doc1': {
+                SpecKey('doc1'): {
                     'spec': {
-                        'sp1': {
+                        SpecKey('sp1'): {
                             'spec': {},
                             'constraints': {
                                 'tol_abs':
@@ -310,9 +335,9 @@ class TestMetaConfParser(object):
                             },
                             'parameters': {}
                         },
-                        'sp2': {
+                        SpecKey('sp2'): {
                             'spec': {
-                                'subsp': {
+                                SpecKey('subsp'): {
                                     'spec': {},
                                     'constraints': {
                                         'ceil': (cp.constraints['ceil']
@@ -385,6 +410,28 @@ class TestMetaConfParser(object):
 
         test = cp.make_trees(self.src2)[0]['__default']
         test.update(cp.make_trees(self.src3)[0]['__default'])
+
+        assert test == ref
+
+    def test_update_tree_hardreset(self):
+        cp = ConfParser()
+
+        @cp.constraint()
+        def tol_abs(tol, ref, test):
+            pass
+
+        @cp.constraint()
+        def tol_rel(tol, ref, test):
+            pass
+
+        @cp.constraint()
+        def ceil(tol, ref, test):
+            pass
+
+        ref = cp.make_trees(self.src25)[0]['__default']
+
+        test = cp.make_trees(self.src2)[0]['__default']
+        test.update(cp.make_trees(self.src5)[0]['__default'])
 
         assert test == ref
 
